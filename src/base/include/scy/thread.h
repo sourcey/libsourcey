@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Thread_H
@@ -28,44 +20,44 @@
 
 
 namespace scy {
-	
 
+
+/// This class implements a platform-independent
+/// wrapper around an operating system thread.
 class Thread: public async::Runner
-    /// This class implements a platform-independent
-    /// wrapper around an operating system thread.
 {
-public:    
+public:
     typedef std::shared_ptr<Thread> ptr;
 
     Thread();
-    Thread(async::Runnable& target);    
-    Thread(std::function<void()> target);    
+    Thread(async::Runnable& target);
+    Thread(std::function<void()> target);
     Thread(std::function<void(void*)> target, void* arg);
     virtual ~Thread();
-    
+
+    /// Waits until the thread exits.
     void join();
-        // Waits until the thread exits.
-    
+
+    /// Waits until the thread exits.
+    /// The thread should be cancelled beore calling this method.
+    /// This method must be called from outside the current thread
+    /// context or deadlock will ensue.
     bool waitForExit(int timeout = 5000);
-        // Waits until the thread exits.
-        // The thread should be cancelled beore calling this method.
-        // This method must be called from outside the current thread
-        // context or deadlock will ensue.
-     
+
+    /// Returns the native thread handle.
     uv_thread_t id() const;
-        // Returns the native thread handle.
-    
+
+    /// Returns the native thread ID of the current thread.
     static uv_thread_t currentID();
-         // Returns the native thread ID of the current thread.
 
     static const uv_thread_t mainID;
 
 protected:
     Thread(const Thread&);
     Thread& operator = (const Thread&);
-    
+
     virtual bool async() const;
-    virtual void startAsync(); 
+    virtual void startAsync();
 
     uv_thread_t _handle;
 };
@@ -75,12 +67,11 @@ protected:
 // Runner Startable
 //
 
-
+/// Depreciated: This class is an invisible wrapper around a TStartable instance,
+/// which provides asynchronous access to the TStartable start() and
+/// stop() methods. TStartable is an instance of async::Startable.
 template <class TStartable>
 class AsyncStartable: public TStartable
-    /// Depreciated: This class is an invisible wrapper around a TStartable instance,
-    /// which provides asynchronous access to the TStartable start() and
-    /// stop() methods. TStartable is an instance of async::Startable.
 {
 public:
     AsyncStartable() {};
@@ -99,12 +90,12 @@ public:
         }
     }
 
-    virtual bool start() 
+    virtual bool start()
     {
         _thread.start(*this);
         return true;
     }
-    
+
     virtual void stop()
     {
         TStartable::stop();
@@ -120,3 +111,5 @@ protected:
 
 
 #endif
+
+/// @\}

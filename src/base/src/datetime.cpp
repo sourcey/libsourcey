@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
@@ -42,10 +34,10 @@ namespace scy {
 
 
 //
-// Poco DateTime
+// Date Time
 //
 
-    
+
 inline double DateTime::toJulianDay(Timestamp::UtcTimeVal utcTime)
 {
     double utcDays = double(utcTime)/864000000000.0;
@@ -75,7 +67,7 @@ DateTime::DateTime(const Timestamp& timestamp):
     computeDaytime();
 }
 
-    
+
 DateTime::DateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond):
     _year(year),
     _month(month),
@@ -94,7 +86,7 @@ DateTime::DateTime(int year, int month, int day, int hour, int minute, int secon
     assert(second >= 0 && second <= 59);
     assert(millisecond >= 0 && millisecond <= 999);
     assert(microsecond >= 0 && microsecond <= 999);
-    
+
     _utcTime = toUtcTime(toJulianDay(year, month, day)) + 10*(hour*Timespan::HOURS + minute*Timespan::MINUTES + second*Timespan::SECONDS + millisecond*Timespan::MILLISECONDS + microsecond);
 }
 
@@ -150,7 +142,7 @@ DateTime& DateTime::operator = (const DateTime& dateTime)
     return *this;
 }
 
-    
+
 DateTime& DateTime::operator = (const Timestamp& timestamp)
 {
     _utcTime = timestamp.utcTime();
@@ -188,7 +180,7 @@ DateTime& DateTime::assign(int year, int month, int day, int hour, int minute, i
     _second      = second;
     _millisecond = millisecond;
     _microsecond = microsecond;
-    
+
     return *this;
 }
 
@@ -228,7 +220,7 @@ int DateTime::daysOfMonth(int year, int month)
     assert(month >= 1 && month <= 12);
 
     static int daysOfMonthTable[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    
+
     if (month == 2 && isLeapYear(year))
         return 29;
     else
@@ -259,7 +251,7 @@ int DateTime::week(int firstDayOfWeek) const
     while (DateTime(_year, 1, baseDay).dayOfWeek() != firstDayOfWeek) ++baseDay;
 
     int doy  = dayOfYear();
-    int offs = baseDay <= 4 ? 0 : 1; 
+    int offs = baseDay <= 4 ? 0 : 1;
     if (doy < baseDay)
         return offs;
     else
@@ -314,7 +306,7 @@ void DateTime::makeUTC(int tzd)
     operator -= (Timespan(((Timestamp::TimeDiff) tzd)*Timespan::SECONDS));
 }
 
-    
+
 void DateTime::makeLocal(int tzd)
 {
     operator += (Timespan(((Timestamp::TimeDiff) tzd)*Timespan::SECONDS));
@@ -325,7 +317,7 @@ double DateTime::toJulianDay(int year, int month, int day, int hour, int minute,
 {
     // lookup table for (153*month - 457)/5 - note that 3 <= month <= 14.
     static int lookup[] = {-91, -60, -30, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337};
- 
+
     // day to double
     double dday = double(day) + ((double((hour*60 + minute)*60 + second)*1000 + millisecond)*1000 + microsecond)/86400000000.0;
     if (month < 3)
@@ -501,7 +493,7 @@ LocalDateTime::LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff 
     adjustForTzd();
 }
 
-    
+
 LocalDateTime::~LocalDateTime()
 {
 }
@@ -581,31 +573,31 @@ bool LocalDateTime::operator == (const LocalDateTime& dateTime) const
 }
 
 
-bool LocalDateTime::operator != (const LocalDateTime& dateTime) const    
+bool LocalDateTime::operator != (const LocalDateTime& dateTime) const
 {
     return utcTime() != dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator <  (const LocalDateTime& dateTime) const    
+bool LocalDateTime::operator <  (const LocalDateTime& dateTime) const
 {
     return utcTime() < dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator <= (const LocalDateTime& dateTime) const    
+bool LocalDateTime::operator <= (const LocalDateTime& dateTime) const
 {
     return utcTime() <= dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator >  (const LocalDateTime& dateTime) const    
+bool LocalDateTime::operator >  (const LocalDateTime& dateTime) const
 {
     return utcTime() > dateTime.utcTime();
 }
 
 
-bool LocalDateTime::operator >= (const LocalDateTime& dateTime) const    
+bool LocalDateTime::operator >= (const LocalDateTime& dateTime) const
 {
     return utcTime() >= dateTime.utcTime();
 }
@@ -704,7 +696,7 @@ std::time_t LocalDateTime::dstOffset(int& dstOffset) const
 #else
     local = std::mktime(&broken);
 #endif
-    
+
     dstOffset = (broken.tm_isdst == 1) ? 3600 : 0;
     return local;
 }
@@ -736,7 +728,7 @@ int Timezone::utcOffset()
     return -tzInfo.Bias*60;
 }
 
-    
+
 int Timezone::dst()
 {
     TIME_ZONE_INFORMATION tzInfo;
@@ -753,7 +745,7 @@ bool Timezone::isDst(const Timestamp& timestamp)
     return tms->tm_isdst > 0;
 }
 
-    
+
 std::string Timezone::name()
 {
     std::string result;
@@ -770,7 +762,7 @@ std::string Timezone::name()
     return result;
 }
 
-    
+
 std::string Timezone::standardName()
 {
     std::string result;
@@ -787,7 +779,7 @@ std::string Timezone::standardName()
     return result;
 }
 
-    
+
 std::string Timezone::dstName()
 {
     std::string result;
@@ -819,7 +811,7 @@ public:
     {
         tzset();
     }
-    
+
     int timeZone()
     {
     #if defined(__APPLE__)  || defined(__FreeBSD__) || defined(POCO_ANDROID) // no timezone global var
@@ -834,7 +826,7 @@ public:
         return -timezone;
     #endif
     }
-    
+
     const char* name(bool dst)
     {
         return tzname[dst ? 1 : 0];
@@ -850,7 +842,7 @@ int Timezone::utcOffset()
     return tzInfo.timeZone();
 }
 
-    
+
 int Timezone::dst()
 {
     std::time_t now = std::time(nullptr);
@@ -869,19 +861,19 @@ bool Timezone::isDst(const Timestamp& timestamp)
     return tms->tm_isdst > 0;
 }
 
-    
+
 std::string Timezone::name()
 {
     return std::string(tzInfo.name(dst() != 0));
 }
 
-    
+
 std::string Timezone::standardName()
 {
     return std::string(tzInfo.name(false));
 }
 
-    
+
 std::string Timezone::dstName()
 {
     return std::string(tzInfo.name(true));
@@ -977,9 +969,9 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime, const
                 case 'A': str.append(dateTime.isAM() ? "AM" : "PM"); break;
                 case 'M': scy::numeric::format0(str, dateTime.minute(), 2); break;
                 case 'S': scy::numeric::format0(str, dateTime.second(), 2); break;
-                case 's': scy::numeric::format0(str, dateTime.second(), 2); 
-                          str += '.'; 
-                          scy::numeric::format0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6); 
+                case 's': scy::numeric::format0(str, dateTime.second(), 2);
+                          str += '.';
+                          scy::numeric::format0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6);
                           break;
                 case 'i': scy::numeric::format0(str, dateTime.millisecond(), 3); break;
                 case 'c': scy::numeric::format(str, dateTime.millisecond()/100); break;
@@ -1066,7 +1058,7 @@ void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
             str += '-';
             scy::numeric::format0(str, -timeZoneDifferential/3600, 2);
             scy::numeric::format0(str, (-timeZoneDifferential%3600)/60, 2);
-        }        
+        }
     }
     else str += "GMT";
 }
@@ -1142,11 +1134,11 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str, DateT
                 case 'o':
                     SKIP_JUNK();
                     PARSE_NUMBER_N(month, 2);
-                    break;                     
+                    break;
                 case 'y':
                     SKIP_JUNK();
                     PARSE_NUMBER_N(year, 2);
-                    if (year >= 69) 
+                    if (year >= 69)
                         year += 1900;
                     else
                         year += 2000;
@@ -1160,7 +1152,7 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str, DateT
                     PARSE_NUMBER(year);
                     if (year < 1000)
                     {
-                        if (year >= 69) 
+                        if (year >= 69)
                             year += 1900;
                         else
                             year += 2000;
@@ -1223,7 +1215,7 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str, DateT
     if (day == 0) day = 1;
     if (DateTime::isValid(year, month, day, hour, minute, second, millis, micros))
         dateTime.assign(year, month, day, hour, minute, second, millis, micros);
-    else 
+    else
         throw std::runtime_error("Syntax error: date/time component out of range");
     timeZoneDifferential = tzd;
 }
@@ -1236,7 +1228,7 @@ DateTime DateTimeParser::parse(const std::string& fmt, const std::string& str, i
     return result;
 }
 
-    
+
 bool DateTimeParser::tryParse(const std::string& fmt, const std::string& str, DateTime& dateTime, int& timeZoneDifferential)
 {
     try
@@ -1257,7 +1249,7 @@ void DateTimeParser::parse(const std::string& str, DateTime& dateTime, int& time
         throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
-    
+
 DateTime DateTimeParser::parse(const std::string& str, int& timeZoneDifferential)
 {
     DateTime result;
@@ -1267,11 +1259,11 @@ DateTime DateTimeParser::parse(const std::string& str, int& timeZoneDifferential
         throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
-    
+
 bool DateTimeParser::tryParse(const std::string& str, DateTime& dateTime, int& timeZoneDifferential)
 {
     if (str.length() < 4) return false;
-    
+
     if (str[3] == ',')
         return tryParse("%w, %e %b %r %H:%M:%S %Z", str, dateTime, timeZoneDifferential);
     else if (str[3] == ' ')
@@ -1378,14 +1370,14 @@ int DateTimeParser::parseMonth(std::string::const_iterator& it, const std::strin
     std::string month;
     while (it != end && (::isspace(*it) || ::ispunct(*it))) ++it;
     bool isFirst = true;
-    while (it != end && ::isalpha(*it)) 
+    while (it != end && ::isalpha(*it))
     {
         char ch = (*it++);
         if (isFirst) { month += static_cast<char>(::toupper(ch)); isFirst = false; }
         else month += static_cast<char>(::tolower(ch));
     }
     if (month.length() < 3) throw std::runtime_error("Syntax error: Month name must be at least three characters long: " + month);
-    for (int i = 0; i < 12; ++i) 
+    for (int i = 0; i < 12; ++i)
     {
         if (DateTimeFormat::MONTH_NAMES[i].find(month) == 0)
             return i + 1;
@@ -1399,14 +1391,14 @@ int DateTimeParser::parseDayOfWeek(std::string::const_iterator& it, const std::s
     std::string dow;
     while (it != end && (::isspace(*it) || ::ispunct(*it))) ++it;
     bool isFirst = true;
-    while (it != end && ::isalpha(*it)) 
+    while (it != end && ::isalpha(*it))
     {
         char ch = (*it++);
         if (isFirst) { dow += static_cast<char>(::toupper(ch)); isFirst = false; }
         else dow += static_cast<char>(::tolower(ch));
     }
     if (dow.length() < 3) throw std::runtime_error("Syntax error: Weekday name must be at least three characters long: " + dow);
-    for (int i = 0; i < 7; ++i) 
+    for (int i = 0; i < 7; ++i)
     {
         if (DateTimeFormat::WEEKDAY_NAMES[i].find(dow) == 0)
             return i;
@@ -1419,7 +1411,7 @@ int DateTimeParser::parseAMPM(std::string::const_iterator& it, const std::string
 {
     std::string ampm;
     while (it != end && (::isspace(*it) || ::ispunct(*it))) ++it;
-    while (it != end && ::isalpha(*it)) 
+    while (it != end && ::isalpha(*it))
     {
         char ch = (*it++);
         ampm += static_cast<char>(::toupper(ch));
@@ -1532,7 +1524,7 @@ void Timestamp::update()
     if (gettimeofday(&tv, nullptr))
         throw std::runtime_error("System error: Cannot get time of day");
     _ts = TimeVal(tv.tv_sec)*resolution() + tv.tv_usec;
-    
+
 #endif
 }
 
@@ -1554,7 +1546,7 @@ Timespan::Timespan():
 {
 }
 
-    
+
 Timespan::Timespan(TimeDiff microseconds):
     _span(microseconds)
 {
@@ -1566,7 +1558,7 @@ Timespan::Timespan(long seconds, long microseconds):
 {
 }
 
-    
+
 Timespan::Timespan(int days, int hours, int minutes, int seconds, int microseconds):
     _span(TimeDiff(microseconds) + TimeDiff(seconds)*SECONDS + TimeDiff(minutes)*MINUTES + TimeDiff(hours)*HOURS + TimeDiff(days)*DAYS)
 {
@@ -1676,7 +1668,7 @@ Timespan& Timespan::operator -= (TimeDiff microseconds)
 
 
 Timeout::Timeout(long delay, bool autoStart) :
-    _startAt(0), _delay(delay) 
+    _startAt(0), _delay(delay)
 {
     if (autoStart)
         start();
@@ -1684,12 +1676,12 @@ Timeout::Timeout(long delay, bool autoStart) :
 
 
 Timeout::Timeout(const Timeout& src) :
-    _startAt(src._startAt), _delay(src._delay) 
+    _startAt(src._startAt), _delay(src._delay)
 {
 }
 
 
-Timeout& Timeout::operator = (const Timeout& src) 
+Timeout& Timeout::operator = (const Timeout& src)
 {
     _startAt = src._startAt;
     _delay = src._delay;
@@ -1697,49 +1689,49 @@ Timeout& Timeout::operator = (const Timeout& src)
 }
 
 
-Timeout::~Timeout() 
+Timeout::~Timeout()
 {
 }
 
 
-bool Timeout::running() const 
+bool Timeout::running() const
 {
     return _startAt != 0;
 }
 
 
-void Timeout::start() 
+void Timeout::start()
 {
     //_startAt = time::ticks();
     _startAt = clock();
 }
 
 
-void Timeout::stop() 
+void Timeout::stop()
 {
     _startAt = 0;
 }
 
 
-void Timeout::reset() 
+void Timeout::reset()
 {
     //_startAt = time::ticks();
     _startAt = clock();
 }
 
 
-long Timeout::remaining() const 
+long Timeout::remaining() const
 {
-    //time_t current = time::ticks();    
-    clock_t current = clock();    
+    //time_t current = time::ticks();
+    clock_t current = clock();
     long remaining = static_cast<long>(_delay - (current - _startAt));
     return remaining > 0 ? remaining : 0;
 }
 
 
-bool Timeout::expired() const 
+bool Timeout::expired() const
 {
-    if (_delay == 0) // _startAt == 0 || 
+    if (_delay == 0) // _startAt == 0 ||
         return false;
 
     return remaining() == 0;
@@ -1751,7 +1743,7 @@ bool Timeout::expired() const
 //
 
 
-Stopwatch::Stopwatch() : 
+Stopwatch::Stopwatch() :
     _elapsed(0), _running(false)
 {
 }
@@ -1831,19 +1823,21 @@ void Stopwatch::restart()
 //
 
 
-TimedToken::TimedToken(long duration) : 
-    Timeout(duration), _id(util::randomString(32)) 
+TimedToken::TimedToken(long duration) :
+    Timeout(duration), _id(util::randomString(32))
 {
 }
 
 
-TimedToken::TimedToken(const std::string& id, long duration) : 
-    Timeout(duration), _id(id) 
+TimedToken::TimedToken(const std::string& id, long duration) :
+    Timeout(duration), _id(id)
 {
 }
 
 
 } // namespace scy
+
+/// @\}
 
 
 //
@@ -1856,14 +1850,14 @@ TimedToken::TimedToken(const std::string& id, long duration) :
 // execute, and transmit the Software, and to prepare derivative works of the
 // Software, and to permit third-parties to whom the Software is furnished to
 // do so, all subject to the following:
-// 
+//
 // The copyright notices in the Software and this entire statement, including
 // the above license grant, this restriction and the following disclaimer,
 // must be included in all copies of the Software, in whole or in part, and
 // all derivative works of the Software, unless such copies or derivative
 // works are solely in the form of machine-executable object code generated by
 // a source language processor.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT

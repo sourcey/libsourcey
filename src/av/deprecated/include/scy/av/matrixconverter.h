@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_MatrixConverter_H
@@ -36,17 +28,16 @@ extern "C" {
 namespace scy { 
 namespace av {
 
-
+/// This class provides the ability to convert decoded
+/// video stream frames to OpenCV matrix images.
+/// Input packets must pass a VideoDecoder pointer
+/// as client data.
 class MatrixConverter: public IPacketizer
-    /// This class provides the ability to convert decoded
-    /// video stream frames to OpenCV matrix images.
-    /// Input packets must pass a VideoDecoder pointer
-    /// as client data.
 {
 public:
-    MatrixConverter() : 
         _convCtx(nullptr),
         _oframe(nullptr)
+    MatrixConverter() : 
     {
     }
 
@@ -73,8 +64,7 @@ public:
         VideoDecoder* video = reinterpret_cast<VideoDecoder*>(packet.opaque);    
         if (video == nullptr)
             throw std::runtime_error("Matrix Converter: Video packets must contain a VideoDecoder pointer.");    
-        
-        // Create and allocate the conversion frame.
+            // Create and allocate the conversion frame.
         if (_oframe == nullptr) {
             _oframe = av_frame_alloc();    
             if (_oframe == nullptr)
@@ -83,7 +73,6 @@ public:
             avpicture_alloc(reinterpret_cast<AVPicture*>(_oframe), 
                 AV_PIX_FMT_BGR24, video->ctx->width, video->ctx->height);
         }
-    
         // Convert the image from its native format to BGR.
         if (_convCtx == nullptr) {
             _convCtx = sws_getContext(
@@ -94,14 +83,11 @@ public:
         }
         if (_convCtx == nullptr)
             throw std::runtime_error("Matrix Converter: Unable to initialize the conversion context.");    
-            
-        // Scales the source data according to our SwsContext settings.
+                // Scales the source data according to our SwsContext settings.
         if (sws_scale(_convCtx,
             video->frame->data, video->frame->linesize, 0, video->ctx->height,
             _oframe->data, _oframe->linesize) < 0)
-            throw std::runtime_error("Matrix Converter: Pixel format conversion not supported.");
-
-        // Populate the OpenCV Matrix.
+            throw std::runtime_error("Matrix Converter: Pixel format conversion not supported.");    /// Populate the OpenCV Matrix.
         for (int y = 0; y < video->ctx->height; y++) {
             for (int x = 0; x < video->ctx->width; x++) {
                 _mat.at<cv::Vec3b>(y,x)[0] = _oframe->data[0][y * _oframe->linesize[0] + x * 3 + 0];

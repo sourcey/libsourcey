@@ -2,7 +2,7 @@
 #include "scy/packetstream.h"
 #include "scy/av/iencoder.h"
 #include "scy/av/multiplexpacketencoder.h"
-#include "scy/net/network.h"
+#include "scy/net/dns.h"
 #include "scy/http/server.h"
 #include "scy/http/packetizers.h"
 

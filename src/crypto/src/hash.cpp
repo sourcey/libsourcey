@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup crypto
+/// @{
 
 
 #include "scy/crypto/hash.h"
@@ -23,14 +15,14 @@
 #include <iostream>
 
 
-using std::endl; 
+using std::endl;
 
 
 namespace scy {
 namespace crypto {
-    
 
-Hash::Hash(const std::string& algorithm) :    
+
+Hash::Hash(const std::string& algorithm) :
     _algorithm(algorithm)
 {
     crypto::initializeEngine();
@@ -43,7 +35,7 @@ Hash::Hash(const std::string& algorithm) :
 }
 
 
-Hash::~Hash() 
+Hash::~Hash()
 {
     crypto::uninitializeEngine();
 
@@ -59,7 +51,7 @@ void Hash::reset()
 }
 
 
-void Hash::update(const void* data, unsigned length) 
+void Hash::update(const void* data, unsigned length)
 {
     internal::api(EVP_DigestUpdate(&_ctx, data, length));
 }
@@ -77,12 +69,12 @@ void Hash::update(char data)
 }
 
 
-const ByteVec& Hash::digest() 
+const ByteVec& Hash::digest()
 {
     // Compute the first time
     if (_digest.size() == 0) {
         _digest.resize(EVP_MAX_MD_SIZE); // TODO: Get actual algorithm size
-        unsigned int len = 0;    
+        unsigned int len = 0;
         internal::api(EVP_DigestFinal(&_ctx, &_digest[0], &len));
         _digest.resize(len);
     }
@@ -105,3 +97,5 @@ const std::string& Hash::algorithm(void) const
 
 
 } } // namespace scy::crypto
+
+/// @\}

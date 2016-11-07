@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #ifndef SCY_HTTP_ServerConnection_H
@@ -52,8 +44,9 @@ public:
 
     void update(int nread)
     {
-        current += nread;
         // assert(current <= total);
+        current += nread;
+
         emit(sender ? sender : this, progress());
     }
 };
@@ -66,25 +59,25 @@ public:
     Connection(const net::Socket::Ptr& socket);
     virtual ~Connection();
 
+    /// Send raw data to the peer.
     virtual int send(const char* data, std::size_t len, int flags = 0);
-        // Send raw data to the peer.
 
+    /// Send the outdoing HTTP header.
     virtual int sendHeader();
-        // Send the outdoing HTTP header.
 
+    /// Close the connection and schedule the object for
+    /// deferred deletion.
     virtual void close();
-        // Close the connection and schedule the object for
-        // deferred deletion.
 
+    /// Return true if the connection is closed.
     bool closed() const;
-        // Return true if the connection is closed.
 
+    /// Return the error object if any.
     scy::Error error() const;
-        // Return the error object if any.
 
-    // bool expired() const;
-        // Return true if the server did not give us
-        // a proper response within the allotted time.
+    /// Return true if the server did not give us
+    /// a proper response within the allotted time.
+    /// bool expired() const;
 
     virtual void onHeaders() = 0;
     virtual void onPayload(const MutableBuffer&) {};
@@ -92,35 +85,36 @@ public:
     virtual void onClose(); // not virtual
 
     bool shouldSendHeader() const;
+
+    /// Set true to prevent auto-sending HTTP headers.
     void shouldSendHeader(bool flag);
-        // Set true to prevent auto-sending HTTP headers.
 
+    /// Assign the new ConnectionAdapter and setup the chain
+    /// The flow is: Connection <-> ConnectionAdapter <-> Socket
     void replaceAdapter(net::SocketAdapter* adapter);
-        // Assign the new ConnectionAdapter and setup the chain
-        // The flow is: Connection <-> ConnectionAdapter <-> Socket
 
+    /// Return the underlying socket pointer.
     net::Socket::Ptr& socket();
-        // Return the underlying socket pointer.
 
+    /// The HTTP request headers.
     Request& request();
-        // The HTTP request headers.
 
+    /// The HTTP response headers.
     Response& response();
-        // The HTTP response headers.
 
+    /// The Outgoing stream is responsible for packetizing
+    /// raw application data into the agreed upon HTTP
+    /// format and sending it to the peer.
     PacketStream Outgoing;
-        // The Outgoing stream is responsible for packetizing
-        // raw application data into the agreed upon HTTP
-        // format and sending it to the peer.
 
+    /// The Incoming stream emits incoming HTTP packets
+    /// for processing by the application.
+    ///
+    /// This is useful for example when writing incoming data to a file.
     PacketStream Incoming;
-        // The Incoming stream emits incoming HTTP packets
-        // for processing by the application.
-        //
-        // This is useful for example when writing incoming data to a file.
 
-    ProgressSignal IncomingProgress;        // Fired on download progress
-    ProgressSignal OutgoingProgress;        // Fired on upload progress
+    ProgressSignal IncomingProgress;        ///< Fired on download progress
+    ProgressSignal OutgoingProgress;        ///< Fired on upload progress
 
     virtual http::Message* incomingHeader() = 0;
     virtual http::Message* outgoingHeader() = 0;
@@ -131,8 +125,8 @@ protected:
     virtual void onSocketError(const scy::Error& error);
     virtual void onSocketClose();
 
+    /// Set the internal error.
     virtual void setError(const scy::Error& err);
-        // Set the internal error.
 
 protected:
     net::Socket::Ptr _socket;
@@ -153,9 +147,8 @@ protected:
 // Connection Adapter
 //
 
-
+/// Default HTTP socket adapter for reading and writing HTTP messages
 class ConnectionAdapter: public ParserObserver, public net::SocketAdapter
-    // Default HTTP socket adapter for reading and writing HTTP messages
 {
 public:
     ConnectionAdapter(Connection& connection, http_parser_type type);
@@ -168,15 +161,13 @@ public:
 
 protected:
 
-    //
-    /// SocketAdapter callbacks
+    ///// SocketAdapter callbacks
 
     virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
     //virtual void onSocketError(const Error& error);
     //virtual void onSocketClose();
 
-    //
-    /// HTTPParser callbacks
+    ///// HTTPParser callbacks
 
     virtual void onParserHeader(const std::string& name, const std::string& value);
     virtual void onParserHeadersEnd();
@@ -200,3 +191,5 @@ inline bool isExplicitKeepAlive(http::Message* message)
 
 
 #endif
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #ifndef SCY_Symple_Message_H
@@ -61,14 +53,16 @@ public:
     void setFrom(const Address& from);
     void setFrom(const std::string& from);
 
+    /// HTTP status codes are used to describe the message response.
+    /// @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
     void setStatus(int code);
-        // HTTP status codes are used to describe the message response.
-        // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
     json::Value& notes();
+
+    /// Set a note for the application
+    /// Possible "type" values: `info`, `warn`, `error`
     void setNote(const std::string& type, const std::string& text);
     void addNote(const std::string& type, const std::string& text);
-        // Possible "type" values: info, warn, error
 
     json::Value data(const std::string& name) const;
     json::Value& data(const std::string& name);
@@ -93,8 +87,9 @@ public:
 };
 
 
-} // namespace symple
-} // namespace scy
+} } // namespace scy::smpl
 
 
 #endif // SCY_Symple_Message_H
+
+/// @\}

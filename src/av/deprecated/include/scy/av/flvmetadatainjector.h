@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_FLVMetadataInjector_H
@@ -33,14 +25,13 @@
 namespace scy {
 namespace av {
 
-
+/// This class implements a packetizer which appends correct
+/// stream headers and modifies the timestamp of FLV packets
+/// so Adobe's Flash Player will play our videos mid-stream.
+///
+/// This adapter is useful for multicast situations where we
+/// don't have the option of restarting the encoder stream.
 class FLVMetadataInjector: public IPacketizer
-    /// This class implements a packetizer which appends correct
-    /// stream headers and modifies the timestamp of FLV packets
-    /// so Adobe's Flash Player will play our videos mid-stream.
-    ///
-    /// This adapter is useful for multicast situations where we
-    /// don't have the option of restarting the encoder stream.
 {
 public:
     enum AMFDataType {
@@ -71,20 +62,18 @@ public:
         FLV_FRAME_DISP_INTER = 3 << 4,
     };
 
-    FLVMetadataInjector(const Format& format)  :
         IPacketizer(this->emitter),
         _format(format),
         _initial(true),
         _modifyingStream(false),
         _waitingForKeyframe(false),
         _timestampOffset(0)
+    FLVMetadataInjector(const Format& format)  :
     {
         traceL("FLVMetadataInjector", this) << "Create" << std::endl;
-    }
-
+    }    /// This method is called by the Packet Stream
+    /// whenever the stream is restarted.
     virtual void onStreamStateChange(const PacketStreamState& state)
-        // This method is called by the Packet Stream
-        // whenever the stream is restarted.
     {
         traceL("FLVMetadataInjector", this) << "Stream state change: " << state << std::endl;
 
@@ -164,38 +153,29 @@ public:
                 emit(*mpacket);
                 return;
             }
-        }
-
-        // Just proxy the packet if no modification is required.
+        }    /// Just proxy the packet if no modification is required.
         traceL("FLVMetadataInjector", this) << "Proxy packet" << std::endl;
         emit(packet);
-    }
-
+    }    /// Updates the timestamp in the given FLV tag buffer.
+    /// No more need to copy data with this method.
+    /// Caution: this method does not check buffer size.
     virtual void fastUpdateTimestamp(char* buf, std::uint32_t timestamp)
-        // Updates the timestamp in the given FLV tag buffer.
-        // No more need to copy data with this method.
-        // Caution: this method does not check buffer size.
     {
         std::uint32_t val = hostToNetwork32(timestamp);
 
-        //traceL("FLVMetadataInjector", this) << "Updating timestamp: "
-        //    << "\n\tTimestamp: " << timestamp
-        //    << "\n\tTimestamp Val: " << val
-        //    << "\n\tFrame Number: " << _fpsCounter.frames
-        //    << "\n\tFrame Rate: " << _fpsCounter.fps
-        //    << std::endl;
+        //traceL("FLVMetadataInjector", this) << "Updating timestamp: "    //    << "\n\tTimestamp: " << timestamp
+    ///    << "\n\tTimestamp Val: " << val
+    ///    << "\n\tFrame Number: " << _fpsCounter.frames
+    ///    << "\n\tFrame Rate: " << _fpsCounter.fps
+    ///    << std::endl;
 
         std::memcpy(buf + 4, reinterpret_cast<const char*>(&val) + 1, 3);
-    }
-
+    }    /// Caution: this method does not check buffer size.
     virtual bool fastIsFLVHeader(char* buf)
-        // Caution: this method does not check buffer size.
     {
         return strncmp(buf, "FLV", 3) == 0;
-    }
-
+    }    /// Caution: this method does not check buffer size.
     virtual bool fastIsFLVKeyFrame(char* buf)
-        // Caution: this method does not check buffer size.
     {
         std::uint8_t flags = buf[11];
         return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
@@ -203,8 +183,8 @@ public:
 
     virtual void writeFLVHeader(BitWriter& writer)
     {
-        //
-        // FLV Header
+    ///
+    /// FLV Header
         writer.put("FLV", 3);
         writer.putU8(0x01);
         writer.putU8(
@@ -214,8 +194,8 @@ public:
 
         writer.putU32(0);     // previous tag size
 
-        //
-        // FLV Metadata Object
+    ///
+    /// FLV Metadata Object
         writer.putU8(FLV_TAG_TYPE_SCRIPT);
         int dataSizePos = writer.position(); // - offset;
         writer.putU24(0);    // size of data part (sum of all parts below)
@@ -275,13 +255,9 @@ public:
         writeAMFDouble(writer, 0);    // delayed write
 
         writer.put("", 1);
-        writer.putU8(AMF_DATA_TYPE_OBJECT_END);
-
-        // Write data size
+        writer.putU8(AMF_DATA_TYPE_OBJECT_END);    /// Write data size
         int dataSize = writer.position() - dataStartPos;
-        writer.updateU24(dataSize, dataSizePos);
-
-        // Write tag size
+        writer.updateU24(dataSize, dataSizePos);    /// Write tag size
         writer.putU32(dataSize + 11);
 
         traceL("FLVMetadataInjector", this) << "FLV Header:"
@@ -392,8 +368,8 @@ public:
     }
 
 
-    //
-    // AMF Helpers
+    ///
+    /// AMF Helpers
     //
 
     virtual void writeAMFSring(BitWriter& writer, const char* val)
@@ -405,8 +381,7 @@ public:
 
     virtual void writeAMFDouble(BitWriter& writer, double val)
     {
-#if WIN32
-        // The implementation is not perfect, but it's sufficient for our needs.
+#if WIN32    // The implementation is not perfect, but it's sufficient for our needs.
         if ((val > double(_I64_MAX)) || (val < double(_I64_MIN))) {
             traceL("FLVMetadataInjector") << "Double to int truncated" << std::endl;
             assert(0);
@@ -445,9 +420,9 @@ protected:
 
     /*
     virtual void updateTimestamp(Buffer& buf, std::uint32_t timestamp)
-    {
-        // Note: The buffer must be positioned at
-        // the start of the tag.
+    {    
+    /// Note: The buffer must be positioned at
+    /// the start of the tag.
         int offset = buf.position();
         if (buf.available() < offset + 4) {
             errorL("FLVMetadataInjector", this) << "The FLV tag buffer is too small." << std::endl;
@@ -477,10 +452,10 @@ protected:
 
         int offset = buf.position();
 
-        //std::uint8_t tagType;
         //buf.getU8(tagType);
-        //if (tagType != FLV_TAG_TYPE_VIDEO)
-        //    return false;
+        //if (tagType != FLV_TAG_TYPE_VIDEO)    //    return false;
+        //std::uint8_t tagType;
+
 
         std::uint8_t flags;
         buf.position(11);

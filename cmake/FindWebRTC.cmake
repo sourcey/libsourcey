@@ -47,7 +47,7 @@ find_path(WEBRTC_INCLUDE_DIR
 if(WEBRTC_INCLUDE_DIR)
 
   # Attempt to find our own monolithic library
-  sourcey_find_library(WEBRTC
+  find_library_extended(WEBRTC
     NAMES webrtc_full
     PATHS_DEBUG ${WEBRTC_INCLUDE_DIR}/${_WEBRTC_SUFFIX_DEBUG} #${WEBRTC_LIBRARY_DIR_DEBUG}
     PATHS_RELEASE ${WEBRTC_INCLUDE_DIR}/${_WEBRTC_SUFFIX_RELEASE} #${WEBRTC_LIBRARY_DIR_RELEASE}
@@ -78,7 +78,7 @@ if(WEBRTC_INCLUDE_DIR)
   #   endif()
   #
   #   # Attempt to find our library again...
-  #   sourcey_find_library(WEBRTC
+  #   find_library_extended(WEBRTC
   #     NAMES webrtc_scy
   #     PATHS_DEBUG ${WEBRTC_LIBRARY_DIR_DEBUG}
   #     PATHS_RELEASE ${WEBRTC_LIBRARY_DIR_RELEASE}

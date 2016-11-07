@@ -1,20 +1,13 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup socketio
+/// @{
+
 
 #ifndef SCY_SocketIO_Packet_H
 #define SCY_SocketIO_Packet_H
@@ -57,6 +50,7 @@ public:
         Unknown           = -1
     };
 
+    /// Default contructor
     Packet(Frame frame = Frame::Message,
            Type type = Type::Event,
            int id = -1,
@@ -64,30 +58,29 @@ public:
            const std::string& event = "",
            const std::string& message = "",
            bool ack = false);
-        // Default contructor
 
+    /// General contructor
     Packet(Type type,
            const std::string& message = "",
            bool ack = false);
-        // General contructor
 
+    /// Message contructor
     Packet(const std::string& message,
            bool ack = false);
-        // Message contructor
 
+    /// JSON contructor
     Packet(const json::Value& message,
            bool ack = false);
-        // JSON contructor
 
+    /// Event contructor
     Packet(const std::string& event,
            const std::string& message,
            bool ack = false);
-        // Event contructor
 
+    /// Event JSON contructor
     Packet(const std::string& event,
            const json::Value& message,
            bool ack = false);
-        // Event JSON contructor
 
     Packet(const Packet& r);
     Packet& operator = (const Packet& r);
@@ -136,4 +129,6 @@ protected:
 } } // namespace scy::sockio
 
 
-#endif //  SCY_SocketIO_Packet_H
+#endif // SCY_SocketIO_Packet_H
+
+/// @\}

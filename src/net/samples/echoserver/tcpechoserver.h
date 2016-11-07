@@ -6,10 +6,9 @@ namespace scy {
 namespace net {
 
 
-template <class SocketT>
+template <class SocketT>/// The TCP echo server accepts a template argument
+/// of either a TCPSocket or a SSLSocket.
 class EchoServer
-    /// The TCP echo server accepts a template argument
-    /// of either a TCPSocket or a SSLSocket.
 {
 public:
     typename SocketT::Ptr socket;
@@ -43,8 +42,8 @@ public:
     }
 
     void onAcceptConnection(const TCPSocket::Ptr& sock)
-    {
-        // std::static_pointer_cast<SocketT>(ptr)
+    {    
+    /// std::static_pointer_cast<SocketT>(ptr)
         sockets.push_back(sock);
         auto& socket = sockets.back();
         DebugL << "On accept: " << socket << std::endl;
@@ -57,9 +56,7 @@ public:
     {
         auto socket = reinterpret_cast<net::Socket*>(sender);
         DebugL << "On recv: " << socket << ": "
-            << buffer.str() << std::endl;
-
-        // Echo it back
+            << buffer.str() << std::endl;    /// Echo it back
         socket->send(bufferCast<const char*>(buffer), buffer.size());
     }
 

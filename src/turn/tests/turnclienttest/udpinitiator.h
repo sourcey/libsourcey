@@ -24,7 +24,7 @@ public:
     UDPClient client;
     Timer timer;
 
-    // The responder local socket address for Send indications
+    /// The responder local socket address for Send indications
     net::Address responderAddress;
     
     //Client::Options    opts;
@@ -71,9 +71,9 @@ protected:
 #endif
             break;
         case ClientState::Failed:                
+        //case ClientState::Terminated:                    //    break;
             break;
-        //case ClientState::Terminated:                
-        //    break;
+
         }
     }
 
@@ -83,9 +83,7 @@ protected:
         std::string payload(createLatencyCheck(1024));
         client.sendData(payload.c_str(), payload.length(), responderAddress);
 
-        //socket.send(payload.c_str(), payload.length());    
-
-        // Echo back to peer
+        //socket.send(payload.c_str(), payload.length());    /// Echo back to peer
         //client.sendData(data, size, peerAddr);
     }
     
@@ -113,9 +111,7 @@ protected:
         }
         else
             DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
-        */
-
-        // Echo back to peer
+        */    /// Echo back to peer
         //client.sendData(data, size, peerAddr);
 #else //if TEST_INITIATOR_TO_RESPONDER
         DebugS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;

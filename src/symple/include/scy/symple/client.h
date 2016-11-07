@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #ifndef SCY_Symple_Client_H
@@ -55,12 +47,12 @@ public:
         std::string host;
         std::uint16_t port;
 
+        /// Weather or not to reconnect if disconnected from the server.
         bool reconnection;
-            // Weather or not to reconnect if disconnected from the server.
 
+        /// The number of times to attempt to reconnect if disconnected
+        /// from the server. (0 = unlimited)
         int reconnectAttempts;
-            // The number of times to attempt to reconnect if disconnected
-            // from the server. (0 = unlimited)
 
         std::string user;
         std::string name;
@@ -88,102 +80,101 @@ public:
     void connect();
     void close();
 
+    /// Send a message.
+    /// May be a polymorphic Command, Presence, Event or other ...
     virtual int send(Message& message, bool ack = false);
-        // Send a message.
-        // May be a polymorphic Command, Presence, Event or other ...
 
+    /// Send a string message.
+    /// The message must be a valid Symple message otherwise it will
+    /// not be delivered.
     virtual int send(const std::string& message, bool ack = false);
-        // Send a string message.
-        // The message must be a valid Symple message otherwise it will
-        // not be delivered.
 
+    /// Create a Transaction object with the given message which will
+    /// notify on Ack response from the server.
     sockio::Transaction* createTransaction(Message& message);
-        // Create a Transaction object with the given message which will
-        // notify on Ack response from the server.
 
+    /// Swap the 'to' and 'from' fields and send the given message.
     virtual int respond(Message& message, bool ack = false);
-        // Swap the 'to' and 'from' fields and send the given message.
 
+    /// Broadcast presence to the user group scope.
+    /// The outgoing Presence object may be modified via
+    /// the CreatePresence signal.
     virtual int sendPresence(bool probe = false);
-        // Broadcast presence to the user group scope.
-        // The outgoing Presence object may be modified via
-        // the CreatePresence signal.
 
+    /// Send directed presence to the given peer.
     virtual int sendPresence(const Address& to, bool probe = false);
-        // Send directed presence to the given peer.
 
+    /// Join the given room.
     virtual int joinRoom(const std::string& room);
-        // Join the given room.
 
+    /// Leave the given room.
     virtual int leaveRoom(const std::string& room);
-        // Leave the given room.
 
+    /// Return the session ID of our current peer object.
+    /// Return an empty string when offline.
     virtual std::string ourID() const;
-        // Return the session ID of our current peer object.
-        // Return an empty string when offline.
 
+    /// Return a list of rooms the client has joined.
     StringVec rooms() const;
-        // Return a list of rooms the client has joined.
 
+    /// Return the peer object for the current session,
+    /// or throws an exception when offline.
     virtual Peer* ourPeer();
-        // Return the peer object for the current session,
-        // or throws an exception when offline.
 
+    /// Return the roster which stores all online peers.
     virtual Roster& roster();
-        // Return the roster which stores all online peers.
 
+    /// Return the persistence manager which stores
+    /// long lived messages.
     virtual PersistenceT& persistence();
-        // Return the persistence manager which stores
-        // long lived messages.
 
+    /// Return a reference to the client options object.
     Client::Options& options();
-        // Return a reference to the client options object.
 
-
+    /// Stream operator alias for send().
     virtual Client& operator >> (Message& message);
-        // Stream operator alias for send().
 
+    /// Update the roster from the given client object.
     virtual void onPresenceData(const json::Value& data, bool whiny = false);
-        // Update the roster from the given client object.
 
-    //
-    // Signals
-    //
+    ///
+    /// Signals
+    ///
 
+    /// Notifies the outside application about the
+    /// response status code of our announce() call.
+    /// Possible status codes are:    //   - 200: Authentication success
+    ///   - 401: Authentication failed
+    ///   - 400: Bad request data
+    ///   - 500: Server not found
     Signal<const int&> Announce;
-        // Notifies the outside application about the
-        // response status code of our announce() call.
-        // Possible status codes are:
-        //   - 200: Authentication success
-        //   - 401: Authentication failed
-        //   - 400: Bad request data
-        //   - 500: Server not found
 
+    /// Signals when a peer connects.
     Signal<Peer&> PeerConnected;
-        // Signals when a peer connects.
 
+    /// Signals when a peer disconnects.
     Signal<Peer&> PeerDisconnected;
-        // Signals when a peer disconnects.
 
+    /// Called by createPresence() so outside classes
+    /// can modify the outgoing Peer JSON object.
     Signal<Peer&> CreatePresence;
-        // Called by createPresence() so outside classes
-        // can modify the outgoing Peer JSON object.
+
 
 protected:
+    /// Called when a new connection is established
+    /// to announce and authenticate the peer on the
+    /// server.
     virtual int announce();
-        // Called when a new connection is established
-        // to announce and authenticate the peer on the
-        // server.
 
+    /// Resets variables and data at the beginning
+    /// and end of each session.
     virtual void reset();
-        // Resets variables and data at the beginning
-        // and end of each session.
 
+    /// Creates a Presence object.
     virtual void createPresence(Presence& p);
-        // Creates a Presence object.
 
+    /// Override PacketSignal::emit
     virtual void emit(void* sender, IPacket& packet);
-        // Override PacketSignal::emit
 
     virtual void onOnline();
     virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);
@@ -341,4 +332,6 @@ DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 } } // namespace scy::smpl
 
 
-#endif //  SCY_Symple_Client_H
+#endif // SCY_Symple_Client_H
+
+/// @\}

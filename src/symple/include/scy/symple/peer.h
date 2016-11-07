@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #ifndef SCY_Symple_Peer_H
@@ -29,11 +21,11 @@ namespace scy {
 namespace smpl {
 
 
+/// This class represents a peer on the network.
+/// A Peer object may also contain arbitrary data set by
+/// the client to share with other peers on the network.
+/// @see Address for further methods and basic accessors.
 class Peer: public json::Value
-    /// This class represents a peer on the network.
-    /// A Peer object may also contain arbitrary data set by
-    /// the client to share with other peers on the network.
-    /// @see Address for further methods and basic accessors.
 {
 public:
     Peer();
@@ -57,8 +49,8 @@ public:
     void setType(const std::string& type);
     void setHost(const std::string& host);
 
+    /// Updates the peer from the given data object.
     //virtual void update(const json::Value& data, bool whiny = false);
-        // Updates the peer from the given data object.
 
     virtual bool valid();
 
@@ -74,8 +66,9 @@ public:
 };
 
 
-} // namespace symple
-} // namespace scy
+} } // namespace scy::smpl
 
 
 #endif // SCY_Symple_Peer_H
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #include "scy/symple/roster.h"
@@ -29,12 +21,12 @@ namespace smpl {
 
 
 Roster::Roster()
-{    
+{
     //TraceS(this) << "Create" << endl;
 }
-    
 
-Roster::~Roster() 
+
+Roster::~Roster()
 {
     //TraceS(this) << "Destroy" << endl;
 }
@@ -43,7 +35,7 @@ Roster::~Roster()
 Peer* Roster::getByHost(const std::string& host)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it = _map.begin(); it != _map.end(); ++it) {    
+    for (auto it = _map.begin(); it != _map.end(); ++it) {
         if (it->second->host() == host)
             return it->second;
     }
@@ -51,10 +43,10 @@ Peer* Roster::getByHost(const std::string& host)
 }
 
 
-Roster::PeerMap Roster::peers() const 
-{ 
+Roster::PeerMap Roster::peers() const
+{
     Mutex::ScopedLock lock(_mutex);
-    return _map; 
+    return _map;
 }
 
 
@@ -63,7 +55,7 @@ void Roster::print(std::ostream& os) const
     Mutex::ScopedLock lock(_mutex);
 
     os << "Roster[";
-    for (auto it = _map.begin(); it != _map.end(); ++it) {    
+    for (auto it = _map.begin(); it != _map.end(); ++it) {
         os << "\n\t" << it->second << ": " << it->first;
     }
     os << "\n]";
@@ -74,9 +66,9 @@ void Roster::print(std::ostream& os) const
 void Roster::update(const json::Value& data, bool whiny)
 {
     if (data.isObject() &&
-        data.isMember("id") && 
-        data.isMember("user") && 
-        data.isMember("name") //&& 
+        data.isMember("id") &&
+        data.isMember("user") &&
+        data.isMember("name") //&&
         //data.isMember("type")
         ) {
         TraceS(this) << "Updating: " << json::stringify(data, true) << endl;
@@ -90,12 +82,12 @@ void Roster::update(const json::Value& data, bool whiny)
     }
     else if (data.isArray()) {
         for (auto it = data.begin(); it != data.end(); it++) {
-            update(*it, whiny);    
+            update(*it, whiny);
         }
     }
     else {
         std::string error("Bad presence data: " + json::stringify(data));
-        ErrorS(this) << error << endl;    
+        ErrorS(this) << error << endl;
         if (whiny)
             throw std::runtime_error(error);
     }
@@ -104,3 +96,5 @@ void Roster::update(const json::Value& data, bool whiny)
 
 
 } } // namespace scy::smpl
+
+/// @\}

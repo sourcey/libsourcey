@@ -28,12 +28,14 @@ public:
     UDPResponder(int id) : 
         id(id)
     {
-        DebugS(this) << id << ": Creating" << endl;
         //net::SocketAdapter::socket = &socket;
+        DebugS(this) << id << ": Creating" << endl;
+
         socket.addReceiver(this);
 
-        socket.bind(net::Address("0.0.0.0", 0));
         //socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
+        socket.bind(net::Address("0.0.0.0", 0));
+
         
         DebugS(this) << id << ": Listening on: " << socket.address() << endl;
     }
@@ -86,9 +88,7 @@ public:
     void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
-
-        // Echo back to client
+        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;    /// Echo back to client
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
     }
 
@@ -116,20 +116,14 @@ public:
     void sendLatencyCheck()
     {        
         std::string payload;
-        
-        // Send the unix ticks milisecond for checking latency
-        payload.append(util::itostr(time::ticks()));
-
-        // Send large packets to test throttling
-        payload.append(30000, 'x'); // 1024 // 65536
-
-        // Send it
+            // Send the unix ticks milisecond for checking latency
+        payload.append(util::itostr(time::ticks()));    /// Send large packets to test throttling
+        payload.append(30000, 'x'); // 1024 // 65536    /// Send it
         socket.send(payload.c_str(), payload.length());
     }
     */
     
-    /*
-        // Send some early media to client
+    /*    // Send some early media to client
         sendLatencyCheck();
 
     int id;
@@ -177,9 +171,7 @@ protected:
 
     void onRelayConnectionDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
     {
-        debugL() << "UDPInitiator: " << id << ": Received Data: " << std::string(data, size) << endl;
-
-        // echo it back...
+        debugL() << "UDPInitiator: " << id << ": Received Data: " << std::string(data, size) << endl;    /// echo it back...
         client.sendData(data, size, peerAddr);
     }
     
@@ -196,8 +188,8 @@ protected:
     }
     
     void onRawPacketReceived(void* sender, RawPacket& packet)
-    {
-        // echoed from client...
+    {    
+    /// echoed from client...
         debugL() << "UDPResponder: " << id << ": Data Packet Received: " << packet.size() << endl;
     }
 
@@ -208,8 +200,9 @@ protected:
     }
     */
 
-    /* //,  // << remoteAddr << endl;
         //const net::Address& localAddr, const net::Address& remoteAddr) 
+    /* //,  // << remoteAddr << endl;
+
      //,  // << remoteAddr << endl;//: public scy::turn::ClientObserver
         //const net::Address& localAddr, const net::Address& remoteAddr) 
 protected:    

@@ -39,11 +39,12 @@ MediaServer::MediaServer(std::uint16_t port) :
 
     // Register the media formats we will be using
     FormatRegistry& formats = MediaFactory::instance().formats();
+
+    // Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
+    // Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
+    // NOTE: 128000 works fine for 44100, but 64000 is borked!
     formats.registerFormat(Format("MP3", "mp3",
         AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));
-        // Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
-        // Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
-        // NOTE: 128000 works fine for 44100, but 64000 is borked!
 
     formats.registerFormat(Format("FLV", "flv",
         VideoCodec("FLV", "flv", 320, 240)));

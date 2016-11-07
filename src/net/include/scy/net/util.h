@@ -1,32 +1,52 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #ifndef SCY_Net_Util_H
 #define SCY_Net_Util_H
 
 
+#include "scy/uv/uvpp.h"
+#include "scy/net/address.h"
+#include <vector>
+
+
 namespace scy {
-namespace util {
+namespace net {
 
 
-} // namespace util
-} // namespace scy
+//
+// Network Interfaces
+//
+
+
+inline void getNetworkInterfaces(std::vector<net::Address>& hosts)
+{
+    uv_interface_address_t *info;
+    int count, i;
+
+    uv_interface_addresses(&info, &count);
+    i = count;
+
+    while (i--) {
+        uv_interface_address_t iface = info[i];
+        hosts.push_back(net::Address(reinterpret_cast<const sockaddr*>(&iface.address.address4), 16));
+    }
+
+    uv_free_interface_addresses(info, count);
+}
+
+
+} } // namespace scy::net
 
 
 #endif // SCY_Net_Util_H
+
+/// @\}

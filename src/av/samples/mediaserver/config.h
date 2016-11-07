@@ -22,3 +22,5 @@ const std::string kRelayServerIP = "127.0.0.1";        // TURN server IP
 
 
 #endif // SCY_MediaServer_Config_H
+
+/// @\}

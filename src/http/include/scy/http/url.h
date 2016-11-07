@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #ifndef SCY_HTTP_URL_H
@@ -30,11 +22,11 @@ namespace scy {
 namespace http {
 
 
+/// An RFC 3986 based URL which uses an external c
+/// library to do the heavy lifting.
+/// Constructors and assignment operators will throw
+/// a SyntaxException if the URL is invalid.
 class URL
-    /// An RFC 3986 based URL which uses an external c
-    /// library to do the heavy lifting.
-    /// Constructors and assignment operators will throw
-    /// a SyntaxException if the URL is invalid.
 {
 public:
     URL();
@@ -49,17 +41,17 @@ public:
     URL& operator = (const std::string& uri);
     URL& operator = (const char* uri);
 
-    // Parses and assigns an URI from the given std::string.
-    // Throws a SyntaxException if whiny is set and the
-    // given url is invalid.
+    /// Parses and assigns an URI from the given std::string.
+    /// Throws a SyntaxException if whiny is set and the
+    /// given url is invalid.
     bool parse(const std::string& url, bool whiny = true);
 
-    // RFC 3986 based URL encoding based on JavaScript's
-    // encodeURIComponent()
+    /// RFC 3986 based URL encoding based on JavaScript's
+    /// encodeURIComponent()
     static std::string encode(const std::string &str);
 
-    // RFC 3986 based URL decoding based on JavaScript's
-    // decodeURIComponent()
+    /// RFC 3986 based URL decoding based on JavaScript's
+    /// decodeURIComponent()
     static std::string decode(const std::string& str);
 
 public:
@@ -102,3 +94,5 @@ protected:
 
 
 #endif // SCY_HTTP_URL_H
+
+/// @\}

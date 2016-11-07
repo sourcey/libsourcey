@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #ifndef SCY_Net_SocketAdapter_H
@@ -27,99 +19,98 @@
 #include "scy/packetstream.h"
 #include "scy/net/types.h"
 #include "scy/net/address.h"
-#include "scy/net/network.h"
+#include "scy/net/dns.h"
 
 
 namespace scy {
 namespace net {
 
 
+/// SocketAdapter is the abstract interface for all socket classes.
+/// A SocketAdapter can also be attached to a Socket in order to
+/// override default Socket callbacks and behaviour, while still
+/// maintaining the default Socket interface (see Socket::setAdapter).
+///
+/// This class also be extended to implement custom processing
+/// for received socket data before it is dispatched to the application
+/// (see PacketSocketAdapter and Transaction classes).
 class SocketAdapter
-    /// SocketAdapter is the abstract interface for all socket classes.
-    /// A SocketAdapter can also be attached to a Socket in order to
-    /// override default Socket callbacks and behaviour, while still
-    /// maintaining the default Socket interface (see Socket::setAdapter).
-    ///
-    /// This class also be extended to implement custom processing
-    /// for received socket data before it is dispatched to the application
-    /// (see PacketSocketAdapter and Transaction classes).
 {
 public:
+    /// Creates the SocketAdapter.
     SocketAdapter(SocketAdapter* sender = nullptr, SocketAdapter* receiver = nullptr);
-        // Creates the SocketAdapter.
 
+    /// Destroys the SocketAdapter.
     virtual ~SocketAdapter();
-        // Destroys the SocketAdapter.
 
+    /// Sends the given data buffer to the connected peer.
+    /// Returns the number of bytes sent or -1 on error.
+    /// No exception will be thrown.
+    /// For TCP sockets the given peer address must match the
+    /// connected peer address.
     virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len, const Address& peerAddress, int flags = 0);
-        // Sends the given data buffer to the connected peer.
-        // Returns the number of bytes sent or -1 on error.
-        // No exception will be thrown.
-        // For TCP sockets the given peer address must match the
-        // connected peer address.
 
+    /// Sends the given packet to the connected peer.
+    /// Returns the number of bytes sent or -1 on error.
+    /// No exception will be thrown.
+    /// For TCP sockets the given peer address must match the
+    /// connected peer address.
     virtual int sendPacket(const IPacket& packet, int flags = 0);
     virtual int sendPacket(const IPacket& packet, const Address& peerAddress, int flags = 0);
-        // Sends the given packet to the connected peer.
-        // Returns the number of bytes sent or -1 on error.
-        // No exception will be thrown.
-        // For TCP sockets the given peer address must match the
-        // connected peer address.
 
+    /// Sends the given packet to the connected peer.
+    /// This method provides delegate compatability, and unlike
+    /// other send methods throws an exception if the underlying
+    /// socket is closed.
     virtual void sendPacket(IPacket& packet);
-        // Sends the given packet to the connected peer.
-        // This method provides delegate compatability, and unlike
-        // other send methods throws an exception if the underlying
-        // socket is closed.
 
+    /// These virtual methods can be overridden as necessary
+    /// to intercept socket events before they hit the application.
     virtual void onSocketConnect();
     virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
     virtual void onSocketError(const Error& error);
     virtual void onSocketClose();
-        // These virtual methods can be overridden as necessary
-        // to intercept socket events before they hit the application.
 
+    /// A pointer to the adapter for handling outgoing data.
+    /// Send methods proxy data to this adapter by default.
+    /// Note that we only keep a simple pointer so
+    /// as to avoid circular references preventing destruction.
     void setSender(SocketAdapter* adapter, bool freeExisting = false);
-        // A pointer to the adapter for handling outgoing data.
-        // Send methods proxy data to this adapter by default.
-        // Note that we only keep a simple pointer so
-        // as to avoid circular references preventing destruction.
 
+    /// Returns the output SocketAdapter pointer
     SocketAdapter* sender();
-        // Returns the output SocketAdapter pointer
 
+    /// Adds an input SocketAdapter for receiving socket callbacks.
     void addReceiver(SocketAdapter* adapter, int priority = 0);
-        // Adds an input SocketAdapter for receiving socket callbacks.
 
+    /// Removes an input SocketAdapter.
     void removeReceiver(SocketAdapter* adapter);
-        // Removes an input SocketAdapter.
 
+    /// Optional client data pointer.
+    ///
+    /// The pointer is not initialized or managed
+    /// by the socket base.
     void* opaque;
-        // Optional client data pointer.
-        //
-        // The pointer is not initialized or managed
-        // by the socket base.
 
+    /// Signals that the socket is connected.
     NullSignal Connect;
-        // Signals that the socket is connected.
 
-    Signal2<const MutableBuffer&, const Address&> Recv; //SocketPacket&
-        // Signals when data is received by the socket.
-
+    /// Signals when data is received by the socket.
+    Signal2<const MutableBuffer&, const Address&> Recv;
+    
+    /// Signals that the socket is closed in error.
+    /// This signal will be sent just before the
+    /// Closed signal.
     Signal<const scy::Error&> Error;
-        // Signals that the socket is closed in error.
-        // This signal will be sent just before the
-        // Closed signal.
 
+    /// Signals that the underlying socket is closed.
     NullSignal Close;
-        // Signals that the underlying socket is closed,
-        // maybe in error.
 
 protected:
+    /// Returns the polymorphic instance pointer
+    /// for signal delegate callbacks.
     virtual void* self() { return this; };
-        // Returns the polymorphic instance pointer
-        // for signal delegate callbacks.
 
     virtual void emitSocketConnect();
     virtual void emitSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
@@ -134,3 +125,5 @@ protected:
 
 
 #endif // SCY_Net_SocketAdapter_H
+
+/// @\}

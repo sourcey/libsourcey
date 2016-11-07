@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #include "scy/http/util.h"
@@ -26,9 +18,9 @@
 
 namespace scy {
 namespace http {
-    
 
-std::string parseURI(const std::string& request) 
+
+std::string parseURI(const std::string& request)
 {
     std::string req = request;
     std::string value = "";
@@ -47,7 +39,7 @@ std::string parseURI(const std::string& request)
 }
 
 
-bool matchURL(const std::string& uri, const std::string& expression) 
+bool matchURL(const std::string& uri, const std::string& expression)
 {
     std::string::size_type index = uri.find("?");
     return util::matchNodes(uri.substr(0, index), expression, "/");
@@ -73,18 +65,18 @@ bool splitURIParameters(const std::string& uri, NVCollection& out)
     std::size_t i = 0;
 
     // Parse REST parameters
-    while (i < len && uri[i] != '?') {    
-        i++; 
+    while (i < len && uri[i] != '?') {
+        i++;
 
-        std::string value = "";    
+        std::string value = "";
         while (uri[i] != '/' && uri[i] != '?' && i < len)
             value += uri[i++];
 
         // REST parameters are referenced by index
         if (!value.empty())
-            out.set(util::itostr(out.size()), value);        
+            out.set(util::itostr(out.size()), value);
     }
-    
+
     // Parse query parameters
     if (uri[i] == '?') i++;
     while (i < len)
@@ -161,7 +153,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 
 
 #if 0
-string parseHeader(const std::string& request, const std::string& name) 
+string parseHeader(const std::string& request, const std::string& name)
 {
     std::string req = request;
     toLower(req);
@@ -185,3 +177,5 @@ string parseHeader(const std::string& request, const std::string& name)
 
 } // namespace http
 } // namespace scy
+
+/// @\}

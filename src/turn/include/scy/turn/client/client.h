@@ -1,30 +1,23 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #ifndef SCY_TURN_Client_H
 #define SCY_TURN_Client_H
 
 
-#include "scy/turn/fivetuple.h"
-#include "scy/turn/util.h"
-#include "scy/turn/iallocation.h"
+#include "scy/turn/turn.h"
 #include "scy/turn/types.h"
+#include "scy/turn/fivetuple.h"
+#include "scy/turn/iallocation.h"
+#include "scy/turn/turn.h"
 #include "scy/stun/transaction.h"
 #include "scy/stateful.h"
 #include "scy/net/udpsocket.h"
@@ -36,29 +29,30 @@ namespace scy {
 namespace turn {
 
 
-struct ClientState: public State  
+struct ClientState: public State
 {
-    enum Type 
+    enum Type
     {
-        None                    = 0x00, 
-        Allocating                = 0x02, 
-        Authorizing                = 0x04, 
-        Success                    = 0x08, 
-        //Terminated                = 0x10, 
-        Failed                    = 0x10
+        None            = 0x00,
+        Allocating      = 0x02,
+        Authorizing     = 0x04,
+        Success         = 0x08,
+        //Terminated      = 0x10,
+        Failed          = 0x10
     };
 
-    std::string toString() const 
-    { 
+    std::string toString() const
+    {
         switch(id()) {
         case None:            return "None";
-        case Allocating:        return "Allocating";
-        case Authorizing:        return "Authorizing";
-        case Success:            return "Success";
-        //case Terminated:        return "Terminated";
-        case Failed:            return "Failed";
+        case Allocating:      return "Allocating";
+        case Authorizing:     return "Authorizing";
+        //case Terminated:      return "Terminated";
+        case Success:         return "Success";
+
+        case Failed:          return "Failed";
         }
-        return "undefined"; 
+        return "undefined";
     };
 };
 
@@ -66,10 +60,10 @@ struct ClientState: public State
 class Client;
 
 
-struct ClientObserver 
+struct ClientObserver
 {
     virtual void onClientStateChange(Client& client, ClientState& state, const ClientState& oldState) = 0;
-    
+
     virtual void onRelayDataReceived(Client& client, const char* data, std::size_t size, const net::Address& peerAddress) = 0;
 
     virtual void onAllocationCreated(Client& client, const stun::Transaction& transaction) {};
@@ -77,25 +71,26 @@ struct ClientObserver
     virtual void onAllocationDeleted(Client& client, const stun::Transaction& transaction) {};
     virtual void onAllocationPermissionsCreated(Client& client, const PermissionList& permissions) {};
 
+    /// All received transaction responses will be routed here after local
+    /// processing so the observer can easily implement extra functionality.
     virtual void onTransactionResponse(Client& client, const stun::Transaction& transaction) {};
-        // All received transaction responses will be routed here after local
-        // processing so the observer can easily implement extra functionality.
 
+    /// Fires after the client's internal timer callback.
+    /// Handy for performing extra async cleanup tasks.
     virtual void onTimer(Client& client) {};
-        // Fires after the client's internal timer callback.
-        // Handy for performing extra async cleanup tasks.
 };
 
 
 class Client: public Stateful<ClientState>, protected IAllocation
 {
 public:
-    struct Options 
+    struct Options
     {
         std::string software;
         std::string username;
-        std::string password;
         //std::string realm;
+        std::string password;
+
         long timeout;
         std::int64_t lifetime;
         std::int64_t timerInterval;
@@ -106,40 +101,42 @@ public:
             password                = util::randomString(22);
             //realm                    = "sourcey.com";
             lifetime                = 5 * 60 * 1000; // 5 minutes
-            timeout                    = 10 * 1000;
-            timerInterval            = 30 * 1000; // 30 seconds
-            serverAddr                = net::Address("127.0.0.1", 3478);
+            timeout                 = 10 * 1000;
+            timerInterval           = 30 * 1000; // 30 seconds
+            serverAddr              = net::Address("127.0.0.1", 3478);
         }
     };
-    
+
 public:
-    Client(ClientObserver& observer, const Options& options = Options()); //net::Socket* socket, 
+    Client(ClientObserver& observer, const Options& options = Options()); //net::Socket* socket,
     virtual ~Client();
 
+    /// Initiates the allocation sequence.
     virtual void initiate();
-        // Initiates the allocation sequence.
 
+    /// Shutdown the client and destroy the active allocation.
     virtual void shutdown();
-        // Shutdown the client and destroy the active allocation.
 
+    /// Sends the allocation request.
     virtual void sendAllocate();
-        // Sends the allocation request.
-    
-    virtual void addPermission(const IPList& peerIPs);    
-    virtual void addPermission(const std::string& ip);
-        // Peer permissions should be added/created before we kick
-        // off the allocation sequence, but may be added later.
 
+    virtual void addPermission(const IPList& peerIPs);
+
+    /// Peer permissions should be added/created before we kick
+    /// off the allocation sequence, but may be added later.
+    virtual void addPermission(const std::string& ip);
+
+    /// Sends a CreatePermission request including all hosts
+    // added via addPermission();
+
+    /// A CreatePermission request will be sent as soon as the
+    /// Allocation is created, and at timer x intervals.
     virtual void sendCreatePermission();
-        // Sends a CreatePermission request including all hosts
-        // added via addPermission();
-        // A CreatePermission request will be sent as soon as the 
-        // Allocation is created, and at timer x intervals.
 
     virtual void sendChannelBind(const std::string& peerIP);
     virtual void sendRefresh();
-    virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);    
-    
+    virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);
+
     virtual bool handleResponse(const stun::Message& response);
     virtual void handleAllocateResponse(const stun::Message& response);
     virtual void handleAllocateErrorResponse(const stun::Message& response);
@@ -147,7 +144,7 @@ public:
     virtual void handleCreatePermissionErrorResponse(const stun::Message& response);
     virtual void handleRefreshResponse(const stun::Message& response);
     virtual void handleDataIndication(const stun::Message& response);
-    
+
     virtual int transportProtocol();
     virtual stun::Transaction* createTransaction(const net::Socket::Ptr& socket = nullptr);
     virtual void authenticateRequest(stun::Message& request);
@@ -157,19 +154,20 @@ public:
     net::Address mappedAddress() const;
     net::Address relayedAddress() const;
 
-    bool closed() const;    
-    
+    bool closed() const;
+
     ClientObserver& observer();
-    Options& options();    
-    
+    Options& options();
+
     virtual void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
     virtual void onSocketConnect(void* sender);
     virtual void onSocketClose(void* sender);
-    virtual void onTransactionProgress(void* sender, TransactionState& state, const TransactionState&);    
+    virtual void onTransactionProgress(void* sender, TransactionState& state, const TransactionState&);
     virtual void onStateChange(ClientState& state, const ClientState& oldState);
     virtual void onTimer(void*);
 
 protected:
+    //mutable Mutex _mutex;
     ClientObserver&    _observer;
     Options _options;
     net::Socket::Ptr _socket;
@@ -180,14 +178,12 @@ protected:
 
     std::string _realm;
     std::string _nonce;
-    
+
+    /// A list of queued Send indication packets awaiting server permissions
     std::deque<stun::Message> _pendingIndications;
-        // A list of queued Send indication packets awaiting server permissions
 
+    /// A list containing currently active transactions
     std::vector<stun::Transaction*> _transactions;
-        // A list containing currently active transactions
-
-    //mutable Mutex _mutex;
 };
 
 
@@ -195,3 +191,5 @@ protected:
 
 
 #endif // SCY_TURN_Client_H
+
+/// @\}

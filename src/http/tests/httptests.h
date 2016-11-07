@@ -1,22 +1,3 @@
-//
-// LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
-//
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-//
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
-
-
 #ifndef SCY_HTTP_Tests_H
 #define SCY_HTTP_Tests_H
 
@@ -62,17 +43,16 @@ namespace scy {
 struct CallbackContext
 {
     void onClientConnectionComplete(void* sender, const http::Response& response)
-    {
-        // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-
+    {    
+    /// auto conn = reinterpret_cast<http::ClientConnection*>(sender);    /// << conn->readStream<std::stringstream>()->str()
         TraceL << "Server response: " << response  << endl;
-        // << conn->readStream<std::stringstream>()->str()
+
     }
 
 
     void onClientConnectionDownloadComplete(void* sender, const http::Response& response)
-    {
-        // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
+    {    
+    /// auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 
         TraceL << "Server response: " << response << endl;
     }
@@ -89,11 +69,10 @@ struct CallbackContext
 
     void onStandaloneHTTPClientConnectionComplete(void* sender, const http::Response& response)
     {
-        auto self = reinterpret_cast<http::ClientConnection*>(sender);
+        auto self = reinterpret_cast<http::ClientConnection*>(sender);    // << self->readStream<std::stringstream>()->str()
         DebugL << "On response complete: " << response << endl;
-        // << self->readStream<std::stringstream>()->str()
 
-        // Force the connection closure if the other side hasn't already
+    /// Force the connection closure if the other side hasn't already
         self->close();
     }
 
@@ -121,10 +100,9 @@ struct CallbackContext
 /// HTTP Client Tests
 //
 
-
+/// Initializes a polymorphic HTTP client connection for
+/// testing callbacks, and also optionally raises the server.
 struct HTTPEchoTest
-    /// Initializes a polymorphic HTTP client connection for
-    /// testing callbacks, and also optionally raises the server.
 {
     http::Server server;
     http::Client client;
@@ -151,9 +129,9 @@ struct HTTPEchoTest
         url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << endl;
         conn = client.createConnection(url.str());
         conn->Connect += delegate(this, &HTTPEchoTest::onConnect);
-        conn->Headers += delegate(this, &HTTPEchoTest::onHeaders);
+        conn->Headers += delegate(this, &HTTPEchoTest::onHeaders);    // conn->Payload += delegate(this, &HTTPEchoTest::onPayload);
         conn->Incoming.emitter += packetDelegate(this, &HTTPEchoTest::onPayload);
-        // conn->Payload += delegate(this, &HTTPEchoTest::onPayload);
+
         conn->Complete += delegate(this, &HTTPEchoTest::onComplete);
         conn->Close += delegate(this, &HTTPEchoTest::onClose);
         return conn;
@@ -165,8 +143,8 @@ struct HTTPEchoTest
     }
 
     void shutdown()
-    {
-        // Stop the client and server to release the loop
+    {    
+    /// Stop the client and server to release the loop
         server.shutdown();
         client.shutdown();
 
@@ -175,19 +153,15 @@ struct HTTPEchoTest
 
     void onConnect()
     {
-        DebugL << "On connect" <<  endl;
-
-        // Bounce backwards and forwards
-        // conn->send("PING", 4);
+        DebugL << "On connect" <<  endl;    /// Bounce backwards and forwards
+    /// conn->send("PING", 4);
     }
 
     void onHeaders(http::Response& res)
     {
-        DebugL << "On headers" <<  endl;
+        DebugL << "On headers" <<  endl;    /// Start the output stream when the socket connects.
+    /// dataSource.start();    // dataSource.conn = this->conn;
 
-        // Start the output stream when the socket connects.
-        // dataSource.conn = this->conn;
-        // dataSource.start();
     }
 
     void onComplete(const http::Response& res)
@@ -225,3 +199,5 @@ struct HTTPEchoTest
 
 
 #endif // SCY_HTTP_Tests_H
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup util
+/// @{
 
 
 #include "scy/util/diagnosticmanager.h"
@@ -24,8 +16,8 @@ using std::endl;
 
 
 namespace scy {
-    
-    
+
+
 IDiagnostic::IDiagnostic()
 {
 }
@@ -34,19 +26,19 @@ IDiagnostic::IDiagnostic()
 IDiagnostic::~IDiagnostic()
 {
 }
-    
 
-void IDiagnostic::reset() 
-{ 
+
+void IDiagnostic::reset()
+{
     summary.clear();
-    setState(this, DiagnosticState::None); 
+    setState(this, DiagnosticState::None);
 }
 
 
-void IDiagnostic::check() 
-{ 
-    reset(); 
-    run(); 
+void IDiagnostic::check()
+{
+    reset();
+    run();
 }
 
 
@@ -56,48 +48,48 @@ void IDiagnostic::addSummary(const std::string& text)
     SummaryUpdated.emit(this, text);
 }
 
-    
-bool IDiagnostic::pass() 
-{ 
-    return setState(this, DiagnosticState::Passed); 
+
+bool IDiagnostic::pass()
+{
+    return setState(this, DiagnosticState::Passed);
 }
 
-    
-bool IDiagnostic::fail() 
-{ 
-    return setState(this, DiagnosticState::Failed); 
+
+bool IDiagnostic::fail()
+{
+    return setState(this, DiagnosticState::Failed);
 }
 
-    
-bool IDiagnostic::complete() const 
-{ 
+
+bool IDiagnostic::complete() const
+{
     return stateEquals(DiagnosticState::Passed)
-        || stateEquals(DiagnosticState::Failed); 
+        || stateEquals(DiagnosticState::Failed);
 }
 
-    
-bool IDiagnostic::passed() const 
-{ 
+
+bool IDiagnostic::passed() const
+{
     return stateEquals(DiagnosticState::Passed)
-        || stateEquals(DiagnosticState::Failed); 
+        || stateEquals(DiagnosticState::Failed);
 }
 
-    
-bool IDiagnostic::failed() const 
-{ 
-    return stateEquals(DiagnosticState::Failed); 
+
+bool IDiagnostic::failed() const
+{
+    return stateEquals(DiagnosticState::Failed);
 }
 
 
 // ---------------------------------------------------------------------
-//    
+//
 DiagnosticManager::DiagnosticManager()
-{    
+{
     TraceL << "Create" << endl;
 }
 
 
-DiagnosticManager::~DiagnosticManager() 
+DiagnosticManager::~DiagnosticManager()
 {
     TraceL << "Destroy" << endl;
 }
@@ -105,7 +97,7 @@ DiagnosticManager::~DiagnosticManager()
 void DiagnosticManager::resetAll()
 {
     Map tests = map();
-    for (auto& test : tests) {    
+    for (auto& test : tests) {
         test.second->reset();
     }
 }
@@ -114,16 +106,16 @@ void DiagnosticManager::resetAll()
 void DiagnosticManager::checkAll()
 {
     Map tests = map();
-    for (auto& test : tests) {    
+    for (auto& test : tests) {
         test.second->check();
     }
 }
-    
+
 
 bool DiagnosticManager::allComplete()
 {
     Map tests = map();
-    for (auto& test : tests) {    
+    for (auto& test : tests) {
         if (!test.second->complete())
             return false;
     }
@@ -131,25 +123,25 @@ bool DiagnosticManager::allComplete()
 }
 
 
-bool DiagnosticManager::addDiagnostic(IDiagnostic* test) 
+bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 {
     assert(test);
     assert(!test->name.empty());
-    
-    TraceL << "Adding Diagnostic: " << test->name << endl;    
+
+    TraceL << "Adding Diagnostic: " << test->name << endl;
     //test->StateChange += sdelegate(this, &DiagnosticManager::onDiagnosticStateChange);
     return DiagnosticStore::add(test->name, test);
 }
 
 
-bool DiagnosticManager::freeDiagnostic(const std::string& name) 
+bool DiagnosticManager::freeDiagnostic(const std::string& name)
 {
     assert(!name.empty());
 
-    TraceL << "Removing Diagnostic: " << name << endl;    
+    TraceL << "Removing Diagnostic: " << name << endl;
     IDiagnostic* test = DiagnosticStore::remove(name);
     if (test) {
-        // TODO: 
+        // TODO:
         //test->StateChange -= sdelegate(this, &DiagnosticManager::onDiagnosticStateChange);
         delete test;
         return true;
@@ -158,7 +150,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 }
 
 
-IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name) 
+IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name)
 {
     return DiagnosticStore::get(name, true);
 }

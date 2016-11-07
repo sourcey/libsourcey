@@ -1,22 +1,15 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 // This file uses functions from POCO C++ Libraries (license below)
 //
+
 
 #ifndef SCY_Net_SSLManager_H
 #define SCY_Net_SSLManager_H
@@ -37,84 +30,84 @@ namespace net {
 class VerificationErrorDetails;
 
 
+/// SSLManager is a singleton for holding the default server/client
+/// Context and handling callbacks for certificate verification errors
+/// and private key passphrases.
 class SSLManager
-    /// SSLManager is a singleton for holding the default server/client
-    /// Context and handling callbacks for certificate verification errors
-    /// and private key passphrases.
 {
 public:
+    /// Initializes the server side of the SSLManager server-side SSLContext.
     void initializeServer(SSLContext::Ptr ptrContext);
-        // Initializes the server side of the SSLManager server-side SSLContext.
 
+    /// Initializes the client side of the SSLManager with a default client-side SSLContext.
     void initializeClient(SSLContext::Ptr ptrContext);
-        // Initializes the client side of the SSLManager with a default client-side SSLContext.
 
+    /// Returns the default Context used by the server if initialized.
     SSLContext::Ptr defaultServerContext();
-        // Returns the default Context used by the server if initialized.
 
+    /// Returns the default Context used by the client if initialized.
     SSLContext::Ptr defaultClientContext();
-        // Returns the default Context used by the client if initialized.
 
+    /// Fired whenever a certificate verification error is detected by the server during a handshake.
     Signal<VerificationErrorDetails&> ServerVerificationError;
-        // Fired whenever a certificate verification error is detected by the server during a handshake.
 
+    /// Fired whenever a certificate verification error is detected by the client during a handshake.
     Signal<VerificationErrorDetails&> ClientVerificationError;
-        // Fired whenever a certificate verification error is detected by the client during a handshake.
 
+    /// Fired when a encrypted certificate is loaded. Not setting the password
+    /// in the event parameter will result in a failure to load the certificate.
     Signal<std::string&> PrivateKeyPassphraseRequired;
-        // Fired when a encrypted certificate is loaded. Not setting the password
-        // in the event parameter will result in a failure to load the certificate.
 
+    /// Shuts down the SSLManager and releases the default Context
+    /// objects. After a call to shutdown(), the SSLManager can no
+    /// longer be used.
+    ///
+    /// Normally, it's not necessary to call this method directly, as this
+    /// will be called either by uninitializeSSL(), or when
+    /// the SSLManager instance is destroyed.
     void shutdown();
-        // Shuts down the SSLManager and releases the default Context
-        // objects. After a call to shutdown(), the SSLManager can no
-        // longer be used.
-        //
-        // Normally, it's not necessary to call this method directly, as this
-        // will be called either by uninitializeSSL(), or when
-        // the SSLManager instance is destroyed.
 
+    /// Returns the instance of the SSLManager singleton.
     static SSLManager& instance();
-        // Returns the instance of the SSLManager singleton.
 
+    /// Shuts down and destroys the SSLManager singleton instance.
     static void destroy();
-        // Shuts down and destroys the SSLManager singleton instance.
 
+    /// Initializes a default no verify client context that's useful for testing.
     static void initNoVerifyClient();
-        // Initializes a default no verify client context that's useful for testing.
 
+    /// Initializes a default no verify server context that's useful for testing.
     static void initNoVerifyServer(
         const std::string& privateKeyFile = "",
         const std::string& certificateFile = "");
-        // Initializes a default no verify server context that's useful for testing.
 
 protected:
+    /// The return value of this method defines how errors in
+    /// verification are handled. Return 0 to terminate the handshake,
+    /// or 1 to continue despite the error.
     static int verifyClientCallback(int ok, X509_STORE_CTX* pStore);
-        // The return value of this method defines how errors in
-        // verification are handled. Return 0 to terminate the handshake,
-        // or 1 to continue despite the error.
 
+    /// The return value of this method defines how errors in
+    /// verification are handled. Return 0 to terminate the handshake,    '
+    /// or 1 to continue despite the error.
     static int verifyServerCallback(int ok, X509_STORE_CTX* pStore);
-        // The return value of this method defines how errors in
-        // verification are handled. Return 0 to terminate the handshake,
-        // or 1 to continue despite the error.
 
+    /// Method is invoked by OpenSSL to retrieve a passwd for an encrypted certificate.
+    /// The request is delegated to the PrivatekeyPassword event. This method returns the
+    /// length of the password.
     static int privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData);
-        // Method is invoked by OpenSSL to retrieve a passwd for an encrypted certificate.
-        // The request is delegated to the PrivatekeyPassword event. This method returns the
-        // length of the password.
 
 private:
+    /// Creates the SSLManager.
     SSLManager();
-        // Creates the SSLManager.
 
+    /// Destroys the SSLManager.
     ~SSLManager();
-        // Destroys the SSLManager.
 
+    /// The return value of this method defines how errors in
+    /// verification are handled. Return 0 to terminate the handshake,
+    /// or 1 to continue despite the error.
     static int verifyCallback(bool server, int ok, X509_STORE_CTX* pStore);
-        // The return value of this method defines how errors in
-        // verification are handled. Return 0 to terminate the handshake,
-        // or 1 to continue despite the error.
 
     SSLContext::Ptr _defaultServerContext;
     SSLContext::Ptr _defaultClientContext;
@@ -129,40 +122,39 @@ private:
 // Verification Error Details
 //
 
-
+/// A utility class for certificate error handling.
 class VerificationErrorDetails
-    /// A utility class for certificate error handling.
 {
 public:
+    /// Creates the VerificationErrorDetails. _ignoreError is per default set to false.
     VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
-        // Creates the VerificationErrorDetails. _ignoreError is per default set to false.
 
+    /// Destroys the VerificationErrorDetails.
     ~VerificationErrorDetails();
-        // Destroys the VerificationErrorDetails.
 
+    /// Returns the certificate that caused the error.
     const crypto::X509Certificate& certificate() const;
-        // Returns the certificate that caused the error.
 
+    /// Returns the position of the certificate in the certificate chain.
     int errorDepth() const;
-        // Returns the position of the certificate in the certificate chain.
 
+    /// Returns the id of the error
     int errorNumber() const;
-        // Returns the id of the error
 
+    /// Returns the textual presentation of the errorNumber.
     const std::string& errorMessage() const;
-        // Returns the textual presentation of the errorNumber.
 
+    /// setIgnoreError to true, if a verification error is judged non-fatal by the user.
     void setIgnoreError(bool ignoreError);
-        // setIgnoreError to true, if a verification error is judged non-fatal by the user.
 
+    /// returns the value of _ignoreError
     bool getIgnoreError() const;
-        // returns the value of _ignoreError
 
 private:
     crypto::X509Certificate    _cert;
     int _errorDepth;
     int _errorNumber;
-    std::string _errorMessage; // Textual representation of the _errorNumber
+    std::string _errorMessage; // Textual representation of the `_errorNumber`
     bool _ignoreError;
 };
 
@@ -207,6 +199,8 @@ inline bool VerificationErrorDetails::getIgnoreError() const
 
 
 #endif // SCY_Net_SSLManager_H
+
+/// @\}
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

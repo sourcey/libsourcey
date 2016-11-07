@@ -8,11 +8,10 @@ using std::endl;
 
 
 namespace scy {
-// namespace http {
 
 
+/// Basic server responder (make echo?)
 class BasicResponder: public http::ServerResponder
-    /// Basic server responder (make echo?)
 {
 public:
     BasicResponder(http::ServerConnection& conn) :
@@ -25,16 +24,17 @@ public:
     {
         DebugL << "On complete" << endl;
 
-        response.setContentLength(14);  // headers will be auto flushed
+        response.setContentLength(14);
 
+        // headers will be auto flushed
         connection().send("hello universe", 14);
         connection().close();
     }
 };
 
 
+/// Basic echo server responder
 class BasicEchoResponder: public http::ServerResponder
-    /// Basic echo server responder
 {
 public:
     BasicEchoResponder(http::ServerConnection& conn) :
@@ -46,8 +46,6 @@ public:
     virtual void onPayload(const MutableBuffer& body)
     {
         DebugL << "On payload: " << body.size() << endl;
-
-        // gotPayload = true;
 
         // Echo the request back to the client
         connection().send(body.cstr(), body.size());
@@ -72,8 +70,8 @@ struct RandomDataSource: public Idler
 };
 
 
+/// Chunked responder that broadcasts random data to the client.
 class ChunkedResponder: public http::ServerResponder
-    /// Chunked responder that broadcasts random data to the client.
 {
 public:
     RandomDataSource dataSource;
@@ -87,9 +85,9 @@ public:
         gotRequest(false),
         gotClose(false)
     {
-        //conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
-        //conn.Outgoing.attachSource(&dataSource.signal, false);
-        //dataSource.signal += sdelegate(&conn.socket(), &Socket::send);
+        // conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
+        // dataSource.signal += sdelegate(&conn.socket(), &Socket::send);
+        // conn.Outgoing.attachSource(&dataSource.signal, false);
     }
 
     ~ChunkedResponder()
@@ -117,7 +115,6 @@ public:
 
         // Start shooting data at the client
         dataSource.init();
-        // assert(0 && "fixme");
     }
 
     void onClose()
@@ -168,8 +165,8 @@ public:
 };
 
 
+/// A Server Responder Factory for testing the HTTP server
 class OurServerResponderFactory: public http::ServerResponderFactory
-    /// A Server Responder Factory for testing the HTTP server
 {
 public:
     http::ServerResponder* createResponder(http::ServerConnection& conn)
@@ -177,7 +174,7 @@ public:
         std::ostringstream os;
         conn.request().write(os);
         std::string headers(os.str().data(), os.str().length());
-        DebugL << "Incoming Request: " << headers << endl; // remove me
+        DebugL << "Incoming Request: " << headers << endl;
 
         std::string uri(conn.request().getURI());
 
@@ -193,4 +190,4 @@ public:
 };
 
 
-} // } // namespace scy::http
+} // namespace scy

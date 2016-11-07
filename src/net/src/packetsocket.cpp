@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 #include "scy/net/packetsocket.h"
 
@@ -24,23 +16,23 @@ using std::endl;
 namespace scy {
 namespace net {
 
-    
+
 //
 // Packet Socket Adapter
 //
 
 
-PacketSocketAdapter::PacketSocketAdapter(const net::Socket::Ptr& socket) : 
+PacketSocketAdapter::PacketSocketAdapter(const net::Socket::Ptr& socket) :
     SocketAdapter(socket.get()), socket(socket)
 {
     TraceS(this) << "Create: " << socket << endl;
 }
 
-        
+
 void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
-{    
+{
     TraceS(this) << "Recv: " << buffer.size() << endl;
-    
+
     IPacket* pkt = nullptr;
     const char* buf = bufferCast<const char*>(buffer);
     std::size_t len = buffer.size();
@@ -56,20 +48,20 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 }
 
 
-void PacketSocketAdapter::onPacket(IPacket& pkt) 
-{        
+void PacketSocketAdapter::onPacket(IPacket& pkt)
+{
     //TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
     PacketSignal::emit(socket.get(), pkt);
 }
 
-    
+
 #if 0
 //
 // Packet Socket
 //
-    
 
-PacketSocket::PacketSocket(const Socket& socket) : 
+
+PacketSocket::PacketSocket(const Socket& socket) :
     Socket(socket)
 {
     addReceiver(new PacketSocketAdapter);
@@ -77,15 +69,15 @@ PacketSocket::PacketSocket(const Socket& socket) :
 }
 
 
-PacketSocket::PacketSocket(Socket* base, bool shared) : 
+PacketSocket::PacketSocket(Socket* base, bool shared) :
     Socket(base, shared)
-{        
+{
     addReceiver(new PacketSocketAdapter);
     //assert(!shared || Socket::base().refCount() >= 2);
 }
 
 
-PacketSocket::~PacketSocket() 
+PacketSocket::~PacketSocket()
 {
 }
 
@@ -96,7 +88,7 @@ PacketSocket::~PacketSocket()
 
 
 PacketStreamSocketAdapter::PacketStreamSocketAdapter(Socket& socket) :
-    PacketProcessor(PacketStreamSocketAdapter::emitter), 
+    PacketProcessor(PacketStreamSocketAdapter::emitter),
     _socket(socket)
 {
 }
@@ -108,7 +100,7 @@ PacketStreamSocketAdapter::~PacketStreamSocketAdapter()
 
 
 void PacketStreamSocketAdapter::process(IPacket& packet)
-{    
+{
     TraceS(this) << "Process: " << packet.className() << endl;
 
     //Mutex::ScopedLock lock(_mutex);
@@ -118,16 +110,16 @@ void PacketStreamSocketAdapter::process(IPacket& packet)
 }
 
 
-bool PacketStreamSocketAdapter::accepts(IPacket& packet) 
-{ 
-    return dynamic_cast<RawPacket*>(&packet) != 0; 
+bool PacketStreamSocketAdapter::accepts(IPacket& packet)
+{
+    return dynamic_cast<RawPacket*>(&packet) != 0;
 }
 
-                    
-void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& state) 
-{ 
+
+void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& state)
+{
     TraceS(this) << "Stream state change: " << state << endl;
-    
+
     // TODO: Sync socket with stream?
 
     //Mutex::ScopedLock lock(_mutex);
@@ -135,7 +127,7 @@ void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& sta
     switch (state.id()) {
     case PacketStreamState::Running:
         break;
-        
+
     case PacketStreamState::Stopped:
     case PacketStreamState::Error:
     case PacketStreamState::Resetting:
@@ -149,3 +141,5 @@ void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& sta
 
 
 } } // namespace scy::net
+
+/// @\}

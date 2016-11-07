@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #include "scy/net/socket.h"
@@ -34,17 +26,17 @@ namespace net {
 
 Socket::Socket()
 {
-    TraceS(this) << "Create" << endl;    
+    TraceS(this) << "Create" << endl;
 }
 
 
 Socket::~Socket()
 {
-    TraceS(this) << "Destroy" << endl;    
+    TraceS(this) << "Destroy" << endl;
 }
 
-    
-void Socket::connect(const std::string& host, std::uint16_t port) 
+
+void Socket::connect(const std::string& host, std::uint16_t port)
 {
     TraceS(this) << "Connect to host: " << host << ":" << port << endl;
     if (Address::validateIP(host))
@@ -52,13 +44,13 @@ void Socket::connect(const std::string& host, std::uint16_t port)
     else {
         init();
         assert(!closed());
-        net::resolveDNS(host, port, [](const net::DNSResult& dns) 
-        {    
+        net::resolveDNS(host, port, [](const net::DNSResult& dns)
+        {
             auto* sock = reinterpret_cast<Socket*>(dns.opaque);
             TraceL << "DNS resolved: " << dns.success() << endl;
 
             // Return if the socket was closed while resolving
-            if (sock->closed()) {            
+            if (sock->closed()) {
                 WarnL << "DNS resolved but socket closed" << endl;
                 return;
             }
@@ -69,17 +61,19 @@ void Socket::connect(const std::string& host, std::uint16_t port)
                 return;
             }
 
-            try {    
+            try {
                 // Connect to resolved host
                 sock->connect(dns.addr);
             }
             catch (...) {
                 // Swallow errors
                 // Can be handled by Socket::Error signal
-            }    
-        }, this); 
+            }
+        }, this);
     }
 }
 
 
 } } // namespace scy::net
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup util
+/// @{
 
 
 #ifndef SCY_DiagnosticManager_H
@@ -27,11 +19,14 @@
 
 
 namespace scy {
-    
-    
-struct DiagnosticState: public State 
+
+
+/// @addtogroup util
+/// @{///
+
+struct DiagnosticState: public State
 {
-    enum Type 
+    enum Type
     {
         None = 0,
         Checking,
@@ -39,8 +34,8 @@ struct DiagnosticState: public State
         Failed
     };
 
-    std::string str(unsigned int id) const 
-    { 
+    std::string str(unsigned int id) const
+    {
         switch(id) {
         case None:            return "None";
         case Checking:        return "Checking";
@@ -48,7 +43,7 @@ struct DiagnosticState: public State
         case Failed:        return "Failed";
         default:            assert(false);
         }
-        return "undefined"; 
+        return "undefined";
     }
 };
 
@@ -64,11 +59,11 @@ public:
     IDiagnostic();
     virtual ~IDiagnostic();
 
-    std::string name;        /// The name of the diagnostic.
-    std::string description; /// The diagnostic description.
-    std::vector<std::string> summary;         /// The diagnostic summary, maybe including 
-                             /// troubleshooting information on failure.
-    
+    std::string name;    ///< The name of the diagnostic.
+    std::string description; ///< The diagnostic description.
+    std::vector<std::string> summary;     ///< The diagnostic summary, maybe including
+                                          ///< troubleshooting information on failure.
+
     virtual void check();
     virtual void reset();
 
@@ -76,24 +71,24 @@ public:
     virtual bool passed() const;
     virtual bool failed() const;
 
+    /// Signals when a new text item is added
+    /// to the summary.
     Signal<const std::string&> SummaryUpdated;
-        // Fires when a new text item is added 
-        // to the summary.
 
     /// The StateChange signal will dispatch
     /// diagnostic test results to delegates.
 
 protected:
-    virtual void run() = 0;    
-        // Override to implement diagnostic logic.
-    
+    /// Override to implement diagnostic logic.
+    virtual void run() = 0;
+
     virtual bool pass();
     virtual bool fail();
     virtual void addSummary(const std::string& text);
 };
 
 
-typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;    
+typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
 
 
 //
@@ -120,29 +115,29 @@ protected:
 // Diagnostic Manager
 //
 
-    
+
 class DiagnosticManager: public DiagnosticStore
 {
 public:
     DiagnosticManager();
     virtual ~DiagnosticManager();
-    
-    bool freeDiagnostic(const std::string& name);
-    
-    bool addDiagnostic(IDiagnostic* test);
-        // Adds a IDiagnostic test instance.
 
+    bool freeDiagnostic(const std::string& name);
+
+    /// Adds a IDiagnostic test instance.
+    bool addDiagnostic(IDiagnostic* test);
+
+    /// Returns the IDiagnostic instance or throws
+    /// a NotFoundException exception.
     virtual IDiagnostic* getDiagnostic(const std::string& name);
-        // Returns the IDiagnostic instance or throws
-        // a NotFoundException exception.
 
     virtual void resetAll();
 
+    /// Runs all managed IDiagnostic tests.
+    /// DiagnosticsComplete will be dispatched on
+    /// completion.
     virtual void checkAll();
-        // Runs all managed IDiagnostic tests.
-        // DiagnosticsComplete will be dispatched on
-        // completion.
-    
+
     virtual bool allComplete();
 
     NullSignal DiagnosticsComplete;
@@ -150,8 +145,12 @@ public:
     virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
 };
 
+/// @\}
+
 
 } // namespace scy
 
 
 #endif // SCY_DiagnosticManager_H
+
+/// @\}

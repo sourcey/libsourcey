@@ -7,8 +7,8 @@ namespace scy {
 class SnapshotRequestHandler: public http::ServerResponder
 {
 public:
-    SnapshotRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
         http::ServerResponder(connection), options(options)
+    SnapshotRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
     {
     }
 
@@ -41,13 +41,15 @@ public:
             << "\n\tOutput Size: " << buffer.size()
             << std::endl;
 
-        //unsigned char* data = new unsigned char[buffer.size()];
         //std::copy(buffer.begin(), buffer.end(), data);
         //connection().sendData((const char*)data, buffer.size());
         //delete data;
+        //unsigned char* data = new unsigned char[buffer.size()];
 
-        connection().response().set("Access-Control-Allow-Origin", "*");
+
         //connection().sendData((const char*)&buffer[0], buffer.size());
+        connection().response().set("Access-Control-Allow-Origin", "*");
+
         connection().socket()->send((const char*)&buffer[0], buffer.size());
         connection().close();
     }

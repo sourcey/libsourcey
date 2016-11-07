@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Delegate_H
@@ -201,10 +193,10 @@ struct DelegateCallback<C, 4, false, P, P2, P3, P4>
 //
 
 
+/// The abstract base for all instantiations of the
+/// Delegate template classes.
 template <DelegateDefaultArgs>
 struct DelegateBase
-    // The abstract base for all instantiations of the
-    // Delegate template classes.
 {
     typedef void* DataT;
     void* data;
@@ -224,10 +216,10 @@ struct DelegateBase
 //
 
 
+/// This template class implements an adapter that sits between
+/// an DelegateBase and an object receiving notifications from it.
 template <class C, class BaseT, class CallbackT, DelegateDefaultArgs>
 class Delegate: public BaseT, public CallbackT
-    // This template class implements an adapter that sits between
-    // an DelegateBase and an object receiving notifications from it.
 {
 public:
     typedef DelegateBase<P, P2, P3, P4> DerivedT;
@@ -430,3 +422,5 @@ static Delegate<C,
 
 
 #endif // SCY_Delegate_H
+
+/// @\}

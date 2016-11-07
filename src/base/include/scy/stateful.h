@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Stateful_H
@@ -28,13 +20,13 @@
 
 
 namespace scy {
-    
 
-class State 
-{ 
+
+class State
+{
 public:
     typedef unsigned int ID;
-    
+
     State(ID id = 0, const std::string& message = "");
     virtual ~State() {};
 
@@ -42,33 +34,33 @@ public:
     virtual void set(ID id);
     virtual std::string message() const;
     virtual void setMessage(const std::string& message);
-    
+
     virtual std::string str(ID id) const;
     virtual std::string toString() const;
 
     virtual bool between(ID lid, ID rid) const
-    {     
+    {
         ID id = this->id();
-        return id >= lid 
+        return id >= lid
             && id <= rid;
     }
-        
+
     virtual bool equals(ID id) const
-    {     
+    {
         return this->id() == id;
     }
 
-    bool operator == (const State& r) 
-    { 
+    bool operator == (const State& r)
+    {
         return id() == r.id();
     }
 
-    bool operator == (const State::ID& r) 
-    { 
+    bool operator == (const State::ID& r)
+    {
         return id() == r;
-    }    
-    
-    friend std::ostream& operator << (std::ostream& os, const State& state) 
+    }
+
+    friend std::ostream& operator << (std::ostream& os, const State& state)
     {
         os << state.toString();
         return os;
@@ -84,10 +76,9 @@ protected:
 // Mutex State
 //
 
-
+// TODO: Use atomics
 class MutexState: public State
-    /// TODO: Use atomics
-{ 
+{
 public:
     MutexState(ID id = 0);
     MutexState(const MutexState& r) : State(r) {}
@@ -109,21 +100,21 @@ protected:
 
 
 class StateSignal: public MutexState
-{ 
+{
 public:
     StateSignal(ID id = 0);
     StateSignal(const StateSignal& r);
     virtual ~StateSignal() {};
-        
-    virtual bool change(ID id);
-    virtual bool canChange(ID id);    
-    virtual void onChange(ID id, ID prev);
-    
-    //Signal2<const ID&, const ID&> Change;
-        // Fired when the state changes to signal 
-        // the new and previous states.
 
-protected:    
+    virtual bool change(ID id);
+    virtual bool canChange(ID id);
+    virtual void onChange(ID id, ID prev);
+
+    /// Fired when the state changes to signal
+    /// the new and previous states.
+    //Signal2<const ID&, const ID&> Change;
+
+protected:
     virtual void set(ID id);
 };
 
@@ -133,31 +124,31 @@ protected:
 //
 
 
+/// This class implements a simple state machine.
+/// T should be a derived State type.
 template<typename T>
 class Stateful
-    /// This class implements a simple state machine.
-    /// T should be a derived State type.
 {
-public:    
+public:
     Stateful()
-    {     
+    {
     }
-    
+
     virtual ~Stateful()
-    {     
+    {
     }
-    
+
+    /// Signals when the state changes.
     Signal2<T&, const T&> StateChange;
-        // Fires when the state changes.
-    
+
     virtual bool stateEquals(unsigned int id) const
-    {     
+    {
         return _state.id() == id;
     }
 
     virtual bool stateBetween(unsigned int lid, unsigned int rid) const
-    {     
-        return _state.id() >= lid 
+    {
+        return _state.id() >= lid
             && _state.id() <= rid;
     }
 
@@ -165,50 +156,51 @@ public:
     virtual const T state() const { return _state; }
 
 protected:
-    virtual bool beforeStateChange(const T& state) 
-        // Override to handle pre state change logic.
-        // Return false to prevent state change.
+
+    /// Override to handle pre state change logic.
+    /// Return false to prevent state change.
+    virtual bool beforeStateChange(const T& state)
     {
-        if (_state == state) 
+        if (_state == state)
             return false;
         return true;
     }
-    
-    virtual void onStateChange(T& /*state*/, const T& /*oldState*/) 
-        // Override to handle post state change logic.
+
+    /// Override to handle post state change logic.
+    virtual void onStateChange(T& /*state*/, const T& /*oldState*/)
     {
-    }    
-    
-    virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
-        // Sets the state and sends the state signal if
-        // the state change was successful.
-    { 
+    }
+
+    /// Sets the state and sends the state signal if
+    /// the state change was successful.
+    virtual bool setState(void* sender, unsigned int id, const std::string& message = "")
+    {
         T state;
-        state.set(id);    
+        state.set(id);
         state.setMessage(message);
         return setState(sender, state);
     }
 
-    virtual bool setState(void* sender, const T& state) 
-        // Sets the state and sends the state signal if
-        // the state change was successful.
-    { 
+    /// Sets the state and sends the state signal if
+    /// the state change was successful.
+    virtual bool setState(void* sender, const T& state)
+    {
         if (beforeStateChange(state)) {
             T oldState = _state;
             _state = state;
-            //_state.set(id);    
+            //_state.set(id);
             //_state.setMessage(message);
             onStateChange(_state, oldState);
             if (sender)
-                StateChange.emit(sender, _state, oldState); //self(), 
+                StateChange.emit(sender, _state, oldState); //self(),
             return true;
         }
         return false;
     }
 
-    virtual void setStateMessage(const std::string& message) 
-    { 
-        _state.setMessage(message);    
+    virtual void setStateMessage(const std::string& message)
+    {
+        _state.setMessage(message);
     }
 
 protected:
@@ -220,3 +212,5 @@ protected:
 
 
 #endif // SCY_Stateful_H
+
+/// @\}

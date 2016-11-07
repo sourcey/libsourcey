@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_MultiplexPacketEncoder_H
@@ -30,15 +22,14 @@
 namespace scy {
 namespace av {
 
-
+/// Encodes and multiplexes a realtime video stream form
+/// audio / video capture sources.
+/// FFmpeg is used for encoding.
 class MultiplexPacketEncoder: public MultiplexEncoder, public PacketProcessor
-    /// Encodes and multiplexes a realtime video stream form
-    /// audio / video capture sources.
-    /// FFmpeg is used for encoding.
 {
 public:
     MultiplexPacketEncoder(const EncoderOptions& options = EncoderOptions()); //, bool muxLiveStreams = false
-    // MultiplexPacketEncoder(bool muxLiveStreams = false);
+    /// MultiplexPacketEncoder(bool muxLiveStreams = false);
     virtual ~MultiplexPacketEncoder();
 
     virtual void encode(VideoPacket& packet);
@@ -52,9 +43,7 @@ protected:
 
     friend class PacketStream;
 
-    mutable Mutex _mutex;
-    // bool _muxLiveStreams;
-    // VideoPacket* _lastVideoPacket;
+    mutable Mutex _mutex;    /// bool _muxLiveStreams;    /// VideoPacket* _lastVideoPacket;
 };
 
 
@@ -63,9 +52,8 @@ protected:
 // PTS Calculator
 //
 
-
+/// Helper class which calculates PTS values for a live source
 struct PTSCalculator
-    /// Helper class which calculates PTS values for a live source
 {
     AVRational timeBase;
     clock_t frameTime;
@@ -99,15 +87,13 @@ struct PTSCalculator
             << std::endl;
     }
 
-    std::int64_t tick() {
-        // Initializing
+    std::int64_t tick() {    
+    /// Initializing
         if (frameTime == 0) {
             assert(!frameDuration);
             frameTime = clock();
             currentPTS = 1;
-        }
-
-        // Updating
+        }    /// Updating
         else {
             frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
             frameTime = clock();

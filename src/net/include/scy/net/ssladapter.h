@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #ifndef SCY_Net_SSLAdapter_H
@@ -36,39 +28,40 @@ namespace scy {
 namespace net {
 
 
+/// TODO: Decouple from SSLSocket implementation
+
+/// A wrapper for the OpenSSL SSL connection context
 class SSLSocket;
 class SSLAdapter
-    /// A wrapper for the OpenSSL SSL connection context
-    /// TODO: Decouple from SSLSocket implementation
 {
 public:
     SSLAdapter(net::SSLSocket* socket);
     ~SSLAdapter();
 
+    /// Initializes the SSL context as a client.
     void initClient(); //SSL* ssl = nullptr);
-        // Initializes the SSL context as a client.
 
+    /// Initializes the SSL context as a server.
     void initServer(); //SSL* ssl = nullptr);
-        // Initializes the SSL context as a server.
 
+    /// Returns true when SSL context has been initialized.
     bool initialized() const;
-        // Returns true when SSL context has been initialized.
 
+    /// Returns true when the handshake is complete.
     bool ready() const;
-        // Returns true when the handshake is complete.
 
+    /// Start/continue the SSL handshake process.
     void handshake();
-        // Start/continue the SSL handshake process.
 
+    /// Returns the number of bytes available in
+    /// the SSL buffer for immediate reading.
     int available() const;
-        // Returns the number of bytes available in
-        // the SSL buffer for immediate reading.
 
+    /// Issues an orderly SSL shutdown.
     void shutdown();
-        // Issues an orderly SSL shutdown.
 
+    /// Flushes the SSL read/write buffers.
     void flush();
-        // Flushes the SSL read/write buffers.
 
     void addIncomingData(const char* data, std::size_t len);
     void addOutgoingData(const std::string& data);
@@ -85,9 +78,9 @@ protected:
 
     net::SSLSocket* _socket;
     SSL* _ssl;
-    BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
-    BIO* _writeBIO; // The outgoing buffer we write to the socket
-    std::vector<char> _bufferOut; // The outgoing payload to be encrypted and sent
+    BIO* _readBIO; ///< The incoming buffer we write encrypted SSL data into
+    BIO* _writeBIO; ///<  The outgoing buffer we write to the socket
+    std::vector<char> _bufferOut; ///<  The outgoing payload to be encrypted and sent
 };
 
 
@@ -95,3 +88,5 @@ protected:
 
 
 #endif // SCY_Net_SSLAdapter_H
+
+/// @\}

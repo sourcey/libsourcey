@@ -1,20 +1,16 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @defgroup uv UV module
+///
+/// The `uv` module contains C++ wrappers for `libuv`.
+///
+/// @addtogroup uv
+/// @{
 
 
 #ifndef SCY_UV_UVPP_H
@@ -49,8 +45,9 @@ inline std::string formatError(const std::string& message, int errorno = 0)
     std::string m(message); // prefix the message, since libuv errors are very brisk
     if (errorno != UV_UNKNOWN &&
         errorno != 0) {
-        //uv_err_s err;
         //err.code = (uv_err_code)errorno;
+        //uv_err_s err;
+
         if (!m.empty())
             m.append(": ");
         m.append(uv_strerror(errorno));
@@ -99,80 +96,79 @@ inline void stopDefaultLoop()
 //
 
 
+/// A base class for managing a libuv handle during it's lifecycle and
+/// safely handling its asynchronous destruction mechanism.
 class Handle
-    /// A base class for managing a libuv handle during it's lifecycle and
-    /// safely handling its asynchronous destruction mechanism.
 {
 public:
     Handle(uv_loop_t* loop = nullptr, void* handle = nullptr);
     virtual ~Handle();
 
+    /// The event loop may be set before the handle is initialized.
     virtual void setLoop(uv_loop_t* loop);
-        // The event loop may be set before the handle is initialized.
 
+    /// Returns a cast pointer to the managed libuv handle.
     virtual uv_loop_t* loop() const;
-
     template <class T>
     T* ptr() const
-        // Returns a cast pointer to the managed libuv handle.
     {
         assertThread(); // conflict with uv_async_send in SyncContext
         return reinterpret_cast<T*>(_ptr);
     }
 
+    /// Returns a pointer to the managed libuv handle.
     virtual uv_handle_t* ptr() const;
-        // Returns a pointer to the managed libuv handle.
 
+    /// Returns true when the handle is active.
+    /// This method should be used instead of closed() to determine
+    /// the veracity of the libuv handle for stream io operations.
     virtual bool active() const;
-        // Returns true when the handle is active.
-        // This method should be used instead of closed() to determine
-        // the veracity of the libuv handle for stream io operations.
 
+    /// Returns true after close() has been called.
     virtual bool closed() const;
-        // Returns true after close() has been called.
 
+    /// Reference main loop again, once unref'd.
     bool ref();
-        // Reference main loop again, once unref'd.
 
+    /// Unreference the main loop after initialized.
     bool unref();
-        // Unreference the main loop after initialized.
 
+    /// Returns the parent thread ID.
     uv_thread_t tid() const;
-        // Returns the parent thread ID.
 
+    /// Returns the error context if any.
     const scy::Error& error() const;
-        // Returns the error context if any.]
 
+    /// Sets and throws the last error.
+    /// Should never be called inside libuv callbacks.
     virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0);
-        // Sets and throws the last error.
-        // Should never be called inside libuv callbacks.
 
+    /// Throws the last error.
+    /// This function is const so it can be used for
+    /// invalid getter operations on closed handles.
+    /// The actual error would be set on the next iteraton.
     virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const;
-        // Throws the last error.
-        // This function is const so it can be used for
-        // invalid getter operations on closed handles.
-        // The actual error would be set on the next iteraton.
 
+    /// Sets the last error and sends relevant callbacks.
+    /// This method can be called inside libuv callbacks.
     virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0);
-        // Sets the last error and sends relevant callbacks.
-        // This method can be called inside libuv callbacks.
 
+    /// Sets the error content and triggers callbacks.
     virtual void setError(const scy::Error& err);
-        // Sets the error content and triggers callbacks.
 
+    /// Closes and destroys the associated libuv handle.
     virtual void close();
-        // Closes and destroys the associated libuv handle.
 
+    /// Make sure we are calling from the event loop thread.
     void assertThread() const;
-        // Make sure we are calling from the event loop thread.
 
 protected:
+    /// Override to handle errors.
+    /// The error may be a UV error, or a custom error.
     virtual void onError(const scy::Error& /* error */);
-        // Override to handle errors.
-        // The error may be a UV error, or a custom error.
 
+    /// Override to handle closure.
     virtual void onClose();
-        // Override to handle closure.
 
  protected:
     Handle(const Handle&); // = delete;
@@ -266,3 +262,5 @@ inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = 
 
 
 #endif // SCY_UV_UVPP_H
+
+/// @\}

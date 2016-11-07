@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 #ifndef SCY_Logger_H
 #define SCY_Logger_H
@@ -98,8 +90,8 @@ public:
     LogWriter();
     virtual ~LogWriter();
 
+    /// Writes the given log message stream.
     virtual void write(LogStream* stream);
-        // Writes the given log message stream.
 };
 
 
@@ -114,17 +106,17 @@ public:
     AsyncLogWriter();
     virtual ~AsyncLogWriter();
 
+    /// Queues the given log message stream.
     virtual void write(LogStream* stream);
-        // Queues the given log message stream.
 
+    /// Flushes queued messages.
     void flush();
-        // Flushes queued messages.
 
+    /// Writes queued messages asynchronously.
     void run();
-        // Writes queued messages asynchronously.
 
+    /// Clears all queued messages.
     void clear();
-        // Clears all queued messages.
 
 protected:
     bool writeNext();
@@ -146,52 +138,52 @@ public:
     Logger();
     ~Logger();
 
+    /// Returns the default logger singleton.
+    /// Logger instances may be created separately as needed.
     static Logger& instance();
-        // Returns the default logger singleton.
-        // Logger instances may be created separately as needed.
 
+    /// Sets the default logger singleton instance.
     static void setInstance(Logger* logger, bool freeExisting = true);
-        // Sets the default logger singleton instance.
 
+    /// Destroys the default logger singleton instance.
     static void destroy();
-        // Destroys the default logger singleton instance.
 
+    /// Adds the given log channel.
     void add(LogChannel* channel);
-        // Adds the given log channel.
 
+    /// Removes the given log channel by name,
+    /// and optionally frees the pointer.
     void remove(const std::string& name, bool freePointer = true);
-        // Removes the given log channel by name,
-        // and optionally frees the pointer.
 
+    /// Returns the specified log channel.
+    /// Throws an exception if the channel doesn't exist.
     LogChannel* get(const std::string& name, bool whiny = true) const;
-        // Returns the specified log channel.
-        // Throws an exception if the channel doesn't exist.
 
+    /// Sets the default log to the specified log channel.
     void setDefault(const std::string& name);
-        // Sets the default log to the specified log channel.
 
+    /// Sets the log writer instance.
     void setWriter(LogWriter* writer);
-        // Sets the log writer instance.
 
+    /// Returns the default log channel, or the nullptr channel
+    /// if no default channel has been set.
     LogChannel* getDefault() const;
-        // Returns the default log channel, or the nullptr channel
-        // if no default channel has been set.
 
+    /// Writes the given message to the default log channel.
+    /// The message will be copied.
     void write(const LogStream& stream);
-        // Writes the given message to the default log channel.
-        // The message will be copied.
 
+    /// Writes the given message to the default log channel.
+    /// The stream pointer will be deleted when appropriate.
     void write(LogStream* stream);
-        // Writes the given message to the default log channel.
-        // The stream pointer will be deleted when appropriate.
 
+    /// Sends to the default log using the given class instance.
+    /// Recommend using write(LogStream&) to avoid copying data.
     LogStream& send(const char* level = "debug", const char* realm = "",
         const void* ptr = nullptr, const char* channel = nullptr) const;
-        // Sends to the default log using the given class instance.
-        // Recommend using write(LogStream&) to avoid copying data.
 
 protected:
-    // Non-copyable and non-movable
+    /// Non-copyable and non-movable
     Logger(const Logger&); // = delete;
     Logger(Logger&&); // = delete;
     Logger& operator=(const Logger&); // = delete;
@@ -251,20 +243,20 @@ struct LogStream
         return *this;
     }
 
+    /// Handle std::endl flags.
+    /// This method flushes the log message and queues it for write.
+    /// WARNING: After using std::endl to flush the message pointer
+    /// should not be accessed.
     LogStream& operator << (std::ostream&(*f)(std::ostream&))
-        // Handle std::endl flags.
-        // This method flushes the log message and queues it for write.
-        // WARNING: After using std::endl to flush the message pointer
-        // should not be accessed.
     {
 #ifndef SCY_DISABLE_LOGGING
         message << f;
 
-        // Send to default channel
-        // Channel flag or stream operation
+        /// Send to default channel
+        /// Channel flag or stream operation
         Logger::instance().write(this);
 #else
-        // Free the pointer
+        /// Free the pointer
         delete this;
 #endif
         return *this;
@@ -474,8 +466,8 @@ protected:
     std::string    _dir;
     std::string    _filename;
     std::string    _extension;
-    int            _rotationInterval;    // The log rotation interval in seconds
-    time_t         _rotatedAt;           // The time the log was last rotated
+    int            _rotationInterval;    ///< The log rotation interval in seconds
+    time_t         _rotatedAt;           ///< The time the log was last rotated
 };
 
 
@@ -505,3 +497,5 @@ public:
 
 
 #endif
+
+/// @\}

@@ -1,26 +1,19 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #ifndef SCY_TURN_SERVER_UDPAllocation_H
 #define SCY_TURN_SERVER_UDPAllocation_H
 
 
+#include "scy/turn/types.h"
 #include "scy/turn/server/serverallocation.h"
 #include "scy/net/packetsocket.h"
 #include "scy/net/udpsocket.h"
@@ -39,19 +32,19 @@ class UDPAllocation: public ServerAllocation
 public:
     UDPAllocation(
         Server& server,
-        const FiveTuple& tuple, 
-        const std::string& username, 
+        const FiveTuple& tuple,
+        const std::string& username,
         const std::uint32_t& lifetime);
     virtual ~UDPAllocation();
 
     //void onPacketReceived(void* sender, RawPacket& packet);
     void onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
-        
-    bool handleRequest(Request& request);    
+
+    bool handleRequest(Request& request);
     void handleSendIndication(Request& request);
 
     int send(const char* data, std::size_t size, const net::Address& peerAddress);
-    
+
     net::Address relayedAddress() const;
 
 private:
@@ -63,3 +56,5 @@ private:
 
 
 #endif // SCY_TURN_SERVER_UDPAllocation_H
+
+/// @\}

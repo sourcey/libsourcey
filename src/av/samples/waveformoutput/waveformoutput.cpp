@@ -260,7 +260,8 @@ public:
                 for (int i = 0; i != packet.size; ++i)
                     outBuf[i] = (data8 [i] - 128) * 64;
             }
-            else {    // stereo            
+            else {    
+    /// stereo            
                 for (int i = 0; i != packet.size; ++i)
                     outBuf[i] = (data8[2*i] + data8[2*i+1] - 2 * 128) * 128;
             }

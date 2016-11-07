@@ -1,3 +1,4 @@
+///
 //
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
@@ -43,7 +44,7 @@ public:
     OpenCVVideoCapturer(int deviceId);
     virtual ~OpenCVVideoCapturer();
 
-    // cricket::VideoCapturer implementation.
+    /// cricket::VideoCapturer implementation.
     virtual cricket::CaptureState Start(
         const cricket::VideoFormat& capture_format);
     virtual void Stop();

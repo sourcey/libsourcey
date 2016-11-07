@@ -196,6 +196,7 @@ macro(define_libsourcey_test name)
   # Add ctest support
   if(NOT ${name}_EXCLUDE_CTEST)
     add_test(${name} ${name})
+    #message(STATUS "Adding test ${name}")
   endif()
 
   if(ENABLE_SOLUTION_FOLDERS)

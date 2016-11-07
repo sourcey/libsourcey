@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_VideoAnalyzer_H
@@ -43,17 +35,15 @@ extern "C" {
 namespace scy {
 namespace av {
 
-
+/// This class provides basic AV spectrum analysis on a
+/// video using the Fourier Transform algorithm.
+/// Data is outputted in CSV format.
+///
+/// TODO:///        - Pluggable algorithms and processors
+///        - Normalization (scaling) for output values
+///        - Process multiple audio channels properly
+///        - Inherit from PacketProcessor
 class VideoAnalyzer //: public PacketProcessor
-    /// This class provides basic AV spectrum analysis on a
-    /// video using the Fourier Transform algorithm.
-    /// Data is outputted in CSV format.
-    ///
-    /// TODO:
-    ///        - Pluggable algorithms and processors
-    ///        - Normalization (scaling) for output values
-    ///        - Process multiple audio channels properly
-    ///        - Inherit from PacketProcessor
 {
 public:
     struct Options
@@ -91,34 +81,34 @@ public:
     struct Packet
     {
         double time;
-        double value;
         //double min;
         //double max;
+        double value;
+
         Packet(double time = 0.0, double value = 0.0); //, double min = 99999.9, double max = -99999.9
     };
 
 public:
     VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
-    virtual ~VideoAnalyzer();
-
+    virtual ~VideoAnalyzer();    /// Set everything up, and open the input file.
     virtual void initialize();
-        // Set everything up, and open the input file.
 
+    /// Stop processing and free everything.
     virtual void uninitialize();
-        // Stop processing and free everything.
 
+    /// Begin processing.
     virtual void start();
-        // Begin processing.
 
+    /// Stop processing.
     virtual void stop();
-        // Stop processing.
 
+    /// Signals on VideoAnalyzer::Packet output
+    /// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
     Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
-        // Signals on VideoAnalyzer::Packet output
-        // Raw FFT data is available via VideoAnalyzer::Stream->rdftData
 
+    /// Signals on analysis complete
     NullSignal Complete;
-        // Signals on analysis complete
+
 
     virtual MediaCapture& reader();
     virtual Options& options();

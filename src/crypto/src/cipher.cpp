@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup crypto
+/// @{
 
 
 #include "scy/crypto/cipher.h"
@@ -29,15 +21,15 @@
 #include <assert.h>
 
 
-using std::endl; 
+using std::endl;
 
 
 namespace scy {
 namespace crypto {
-    
 
-Cipher::Cipher(const std::string& name, 
-    const std::string& passphrase, 
+
+Cipher::Cipher(const std::string& name,
+    const std::string& passphrase,
     const std::string& salt,
     int iterationCount) :
     _initialized(false),
@@ -59,8 +51,8 @@ Cipher::Cipher(const std::string& name,
 }
 
 
-Cipher::Cipher(const std::string& name, 
-    const ByteVec& key, 
+Cipher::Cipher(const std::string& name,
+    const ByteVec& key,
     const ByteVec& iv) :
     _initialized(false),
     _encrypt(false),
@@ -76,7 +68,7 @@ Cipher::Cipher(const std::string& name,
         throw std::invalid_argument("Not found: Cipher " + name + " is unavailable");
 }
 
-    
+
 Cipher::Cipher(const std::string& name) :
     _initialized(false),
     _encrypt(false),
@@ -127,11 +119,11 @@ void Cipher::initialize(bool encrypt)
     EVP_CipherInit(&_ctx, _cipher,
         &_key[0], _iv.empty() ? 0 : &_iv[0],
         encrypt ? 1 : 0);
-    
+
     _encrypt = encrypt;
     _initialized = true;
 }
-    
+
 
 int Cipher::update(const unsigned char* input, int inputLength, unsigned char* output, int outputLength)
 {
@@ -144,7 +136,7 @@ int Cipher::update(const unsigned char* input, int inputLength, unsigned char* o
 
 int Cipher::final(unsigned char* output, int length)
 {
-    assert(length >= blockSize());        
+    assert(length >= blockSize());
     int len;
     internal::api(EVP_CipherFinal_ex(&_ctx, output, &len));
     return len;
@@ -152,13 +144,13 @@ int Cipher::final(unsigned char* output, int length)
 
 
 inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
-{        
+{
     switch (encoding)
     {
     case Cipher::Binary:
         return nullptr;
 
-    case Cipher::Base64: 
+    case Cipher::Base64:
         return new base64::Encoder();
 
     case Cipher::Base64_NoLF:
@@ -167,7 +159,7 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
             benc->setLineLength(0);
             return benc;
         }
-    case Cipher::BinHex: 
+    case Cipher::BinHex:
         return new hex::Encoder();
 
     case Cipher::BinHex_NoLF:
@@ -183,17 +175,17 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 
 
 int Cipher::encrypt(
-    const unsigned char* inbuf, std::size_t inlen, 
-    unsigned char* outbuf, std::size_t outlen, 
+    const unsigned char* inbuf, std::size_t inlen,
+    unsigned char* outbuf, std::size_t outlen,
     Encoding encoding)
-{    
+{
     initEncryptor();
 
     int reslen = 0;
     int nwrite = 0;
     std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
     std::unique_ptr<unsigned char[]> cryptbuf(encoder ? new unsigned char[outlen] : nullptr);
-        
+
     // Encrypt and then encode to outbuf
     if (encoder) {
         reslen = update(inbuf, inlen, cryptbuf.get(), outlen);
@@ -205,10 +197,10 @@ int Cipher::encrypt(
         reslen = update(inbuf, inlen, outbuf + nwrite, outlen);
         nwrite += reslen;
     }
-    
+
     // Finalize
     if (encoder) {
-        reslen = final(cryptbuf.get(), outlen);    
+        reslen = final(cryptbuf.get(), outlen);
         nwrite += encoder.get()->encode((const char*)cryptbuf.get(), reslen, (char*)outbuf + nwrite);
         nwrite += encoder.get()->finalize((char*)outbuf + nwrite);
     }
@@ -223,18 +215,18 @@ int Cipher::encrypt(
 
 std::string Cipher::encryptString(const std::string& str, Encoding encoding)
 {
-#if 0 // fixme for faster encoding 
+#if 0 // fixme for faster encoding
     const int N = std::max<int>(str.length() + blockSize(), str.length() * 2);
     assert(N >= (str.length() + blockSize() - 1));
 
     std::unique_ptr<char[]> outbuf(new char[N]);
-    int len = encrypt(        
-        reinterpret_cast<const unsigned char*>(&str[0]), str.length(), 
-        reinterpret_cast<unsigned char*>(outbuf.get()), N, 
+    int len = encrypt(
+        reinterpret_cast<const unsigned char*>(&str[0]), str.length(),
+        reinterpret_cast<unsigned char*>(outbuf.get()), N,
         encoding);
     return std::string(outbuf.get(), len);
 #endif
-    
+
     std::string res;
     std::istringstream source(str);
     std::ostringstream sink;
@@ -247,7 +239,7 @@ std::string Cipher::decryptString(const std::string& str, Encoding encoding)
 {
     std::istringstream source(str);
     std::ostringstream sink;
-    
+
     decryptStream(source, sink, encoding);
 
     return sink.str();
@@ -262,8 +254,8 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
     int cryptsize = N * 2;
     int nread = N;
     int reslen = 0;
-    int enclen = 0;    
-    
+    int enclen = 0;
+
     std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
     std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
     std::unique_ptr<unsigned char[]> cryptbuf(new unsigned char[cryptsize]);
@@ -285,7 +277,7 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
     }
     while (source.good() && nread > 0);
 
-    reslen = final(cryptbuf.get(), cryptsize);    
+    reslen = final(cryptbuf.get(), cryptsize);
     if (encoder) {
         enclen = encoder.get()->encode((const char*)cryptbuf.get(), reslen, encbuf.get());
         sink.write((const char*)encbuf.get(), enclen);
@@ -299,17 +291,17 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
 
 
 inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
-{        
+{
     switch (encoding)
     {
     case Cipher::Binary:
         return nullptr;
 
-    case Cipher::Base64: 
+    case Cipher::Base64:
     case Cipher::Base64_NoLF:
         return new base64::Decoder();
 
-    case Cipher::BinHex: 
+    case Cipher::BinHex:
     case Cipher::BinHex_NoLF:
         return new hex::Decoder();
 
@@ -320,7 +312,7 @@ inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
 
 
 void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding encoding)
-{    
+{
     initDecryptor();
 
     const int N = blockSize() * 128;
@@ -328,17 +320,17 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding en
     int reslen = 0;
     int cryptsize = N * 2; // must be bigger than N, see update()
     int declen = 0;
-    
+
     std::unique_ptr<basic::Decoder> decoder(createDecoder(encoding));
     std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
     std::unique_ptr<unsigned char[]> cryptbuf(new unsigned char[cryptsize]);
     std::unique_ptr<char[]> decbuf(decoder ? new char[cryptsize * 2] : nullptr);
-        
+
     do
-    {        
+    {
         source.read((char*)readbuf.get(), nread);
         nread = static_cast<int>(source.gcount());
-            
+
         if (decoder) {
             declen = decoder->decode((const char*)readbuf.get(), nread, decbuf.get());
             if (declen == 0)
@@ -352,22 +344,22 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding en
         }
     }
     while (source.good() && nread > 0);
-    
+
     if (decoder) {
         declen = decoder->finalize(decbuf.get());
         if (declen) {
             reslen = update((const unsigned char*)decbuf.get(), declen, cryptbuf.get(), cryptsize);
             if (reslen)
-                sink.write((const char*)cryptbuf.get(), reslen);    
+                sink.write((const char*)cryptbuf.get(), reslen);
         }
     }
-    
+
     reslen = final(cryptbuf.get(), cryptsize);
     if (reslen)
         sink.write((const char*)cryptbuf.get(), reslen);
 }
 
-    
+
 int Cipher::setPadding(int padding)
 {
     return EVP_CIPHER_CTX_set_padding(&_ctx, padding);
@@ -408,7 +400,7 @@ inline void getRandomBytes(ByteVec& vec, std::size_t count)
 {
     Random rnd;
     rnd.seed();
-    
+
     vec.clear();
     vec.reserve(count);
 
@@ -468,3 +460,5 @@ void Cipher::generateKey(const std::string& password, const std::string& salt, i
 
 
 } } // namespace scy::crypto
+
+/// @\}

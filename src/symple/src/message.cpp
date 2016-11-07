@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #include "scy/symple/message.h"
@@ -58,7 +50,7 @@ Message::Message(const json::Value& root) :
 }
 
 
-Message::~Message() 
+Message::~Message()
 {
 }
 
@@ -69,7 +61,7 @@ IPacket* Message::clone() const
 }
 
 
-std::size_t Message::read(const ConstBuffer& buf) 
+std::size_t Message::read(const ConstBuffer& buf)
 {
     return read(buf.str()); // refactor
 }
@@ -82,10 +74,10 @@ std::size_t Message::read(const std::string& root)
 }
 
 
-void Message::write(Buffer& buf) const 
+void Message::write(Buffer& buf) const
 {
     std::string data(json::stringify(*this));
-    
+
     //buf.append(data.c_str(), data.size());
     buf.insert(buf.end(), data.begin(), data.end());
 }
@@ -97,7 +89,7 @@ std::size_t Message::size() const
     return json::stringify(*this).size();
 }
 
-    
+
 void Message::print(std::ostream& os) const
 {
     os << json::stringify(*this, true);
@@ -106,26 +98,26 @@ void Message::print(std::ostream& os) const
 
 bool Message::valid() const
 {
-    return isMember("type") 
-        && isMember("id") 
-        && isMember("from") 
+    return isMember("type")
+        && isMember("id")
+        && isMember("from")
         && (*this)["from"].isString();
 }
 
 
-void Message::clear() 
+void Message::clear()
 {
     json::Value::clear();
 }
 
 
-void Message::clearData() 
+void Message::clearData()
 {
     (*this)["data"].clear();
 }
 
 
-void Message::clearNotes() 
+void Message::clearNotes()
 {
     (*this)["notes"].clear();
 }
@@ -137,31 +129,31 @@ std::string Message::type() const
 }
 
 
-std::string Message::id() const 
+std::string Message::id() const
 {
     return get("id", "").asString();
 }
 
 
-Address Message::to() const 
+Address Message::to() const
 {
     return Address(get("to", "").asString());
 }
 
 
-Address Message::from() const 
+Address Message::from() const
 {
     return Address(get("from", "").asString());
 }
 
 
-int Message::status() const 
+int Message::status() const
 {
     return isMember("status") ? (*this)["status"].asInt() : -1;
 }
 
 
-bool Message::isRequest() const 
+bool Message::isRequest() const
 {
     return status() == -1;
 }
@@ -179,55 +171,55 @@ json::Value Message::data(const std::string& name) const
 }
 
 
-json::Value& Message::data(const std::string& name) 
+json::Value& Message::data(const std::string& name)
 {
     return (*this)["data"][name];
 }
 
 
-void Message::setType(const std::string& type) 
+void Message::setType(const std::string& type)
 {
     (*this)["type"] = type;
 }
-    
-    
-void Message::setTo(const Peer& to) 
+
+
+void Message::setTo(const Peer& to)
 {
     (*this)["to"] = to.address().toString();
 }
 
-    
-void Message::setTo(const Address& to) 
+
+void Message::setTo(const Address& to)
 {
     (*this)["to"] = to.toString();
 }
-    
 
-void Message::setTo(const std::string& to) 
+
+void Message::setTo(const std::string& to)
 {
     (*this)["to"] = to;
 }
 
-        
-void Message::setFrom(const Peer& from) 
+
+void Message::setFrom(const Peer& from)
 {
     (*this)["from"] = from.address().toString();
 }
 
 
-void Message::setFrom(const Address& from) 
+void Message::setFrom(const Address& from)
 {
     (*this)["from"] = from.toString();
 }
 
 
-void Message::setFrom(const std::string& from) 
+void Message::setFrom(const std::string& from)
 {
     (*this)["from"] = from;
 }
 
 
-void Message::setStatus(int code) 
+void Message::setStatus(int code)
 {
     assert(code > 100 && code < 505);
     (*this)["status"] = code;
@@ -240,7 +232,7 @@ void Message::setNote(const std::string& type, const std::string& text)
     addNote(type, text);
 }
 
-void Message::addNote(const std::string& type, const std::string& text) 
+void Message::addNote(const std::string& type, const std::string& text)
 {
     assert(
         type == "info" ||
@@ -255,37 +247,37 @@ void Message::addNote(const std::string& type, const std::string& text)
 }
 
 
-json::Value& Message::setData(const std::string& name) 
+json::Value& Message::setData(const std::string& name)
 {
     return (*this)["data"][name] = name;
 }
 
 
-void Message::setData(const std::string& name, const char* data) 
+void Message::setData(const std::string& name, const char* data)
 {
     (*this)["data"][name] = data;
 }
 
 
-void Message::setData(const std::string& name, const std::string& data) 
+void Message::setData(const std::string& name, const std::string& data)
 {
     (*this)["data"][name] = data;
 }
 
 
-void Message::setData(const std::string& name, const json::Value& data) 
+void Message::setData(const std::string& name, const json::Value& data)
 {
     (*this)["data"][name] = data;
 }
 
 
-void Message::setData(const std::string& name, int data) 
+void Message::setData(const std::string& name, int data)
 {
     (*this)["data"][name] = data;
 }
 
 
-void Message::removeData(const std::string& name) 
+void Message::removeData(const std::string& name)
 {
     (*this)["data"].removeMember(name);
 }
@@ -297,5 +289,6 @@ bool Message::hasData(const std::string& name)
 }
 
 
-} // namespace symple 
-} // namespace scy
+} } // namespace scy::smpl
+
+/// @\}

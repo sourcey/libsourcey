@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Packet_H
@@ -34,9 +26,9 @@
 namespace scy {
 
 
+/// An abstract interface for packet sources to
+/// provide extra information about packets.
 struct IPacketInfo
-    // An abstract interface for packet sources to
-    // provide extra information about packets.
 {
     IPacketInfo() {};
     virtual ~IPacketInfo() {};
@@ -45,10 +37,10 @@ struct IPacketInfo
 };
 
 
+/// The basic packet type which is passed around the LibSourcey system.
+/// IPacket can be extended for each protocol to enable polymorphic
+/// processing and callbacks using PacketStream and friends.
 class IPacket: public basic::Polymorphic
-    // The basic packet type which is passed around the LibSourcey system.
-    // IPacket can be extended for each protocol to enable polymorphic
-    // processing and callbacks using PacketStream and friends.
 {
 public:
     IPacket(void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr, unsigned flags = 0) :
@@ -78,50 +70,50 @@ public:
         if (info) delete info;
     }
 
+    /// Packet source pointer reference which enables processors
+    /// along the signal chain can determine the packet origin.
+    /// Often a subclass of PacketStreamSource.
     void* source;
-        // Packet source pointer reference which enables processors
-        // along the signal chain can determine the packet origin.
-        // Often a subclass of PacketStreamSource.
 
+    /// Optional client data pointer.
+    /// This pointer is not managed by the packet.
     void* opaque;
-        // Optional client data pointer.
-        // This pointer is not managed by the packet.
 
+    /// Optional extra information about the packet.
+    /// This pointer is managed by the packet.
     IPacketInfo* info;
-        // Optional extra information about the packet.
-        // This pointer is managed by the packet.
 
+    /// Provides basic information about the packet.
     Bitwise flags;
-        // Provides basic information about the packet.
 
+    /// Read/parse to the packet from the given input buffer.
+    /// The number of bytes read is returned.
     virtual std::size_t read(const ConstBuffer&) = 0;
-        // Read/parse to the packet from the given input buffer.
-        // The number of bytes read is returned.
 
+    /// Copy/generate to the packet given output buffer.
+    /// The number of bytes written can be obtained from the buffer.
+    ///
+    /// Todo: It may be prefferable to use our pod types here
+    /// instead of buffer input, but the current codebase requires
+    /// that the buffer be dynamically resizable for some protocols...
+    ///
+    /// virtual std::size_t write(MutableBuffer&) const = 0;
     virtual void write(Buffer&) const = 0;
-        // Copy/generate to the packet given output buffer.
-        // The number of bytes written can be obtained from the buffer.
-        //
-        // Todo: It may be prefferable to use our pod types here
-        // instead of buffer input, but the current codebase requires
-        // that the buffer be dynamically resizable for some protocols...
-        //
-        // virtual std::size_t write(MutableBuffer&) const = 0;
 
+    /// The size of the packet in bytes.
+    ///
+    /// This is the nember of bytes that will be written on a call
+    /// to write(), but may not be the number of bytes that will be
+    /// consumed by read().
     virtual std::size_t size() const { return 0; };
-        // The size of the packet in bytes.
-        //
-        // This is the nember of bytes that will be written on a call
-        // to write(), but may not be the number of bytes that will be
-        // consumed by read().
 
     virtual bool hasData() const { return data() != nullptr; }
+
+    /// The packet data pointer for buffered packets.
     virtual char* data() const { return nullptr; }
-        // The packet data pointer for buffered packets.
 
+    /// The const packet data pointer for buffered packets.
     virtual const char* constData() const { return data(); }
-        // The const packet data pointer for buffered packets.
-
     virtual const char* className() const = 0;
     virtual void print(std::ostream& os) const { os << className() << std::endl; }
 
@@ -133,8 +125,8 @@ public:
 };
 
 
+/// A simple flag packet for sending state flags along the packet stream.
 class FlagPacket: public IPacket
-    // A simple flag packet for sending state flags along the packet stream.
 {
 public:
     FlagPacket(unsigned flags = 0) :
@@ -170,9 +162,9 @@ public:
 };
 
 
+/// RawPacket is the default data packet type which consists
+/// of an optionally managed char pointer and a size value.
 class RawPacket: public IPacket
-    /// RawPacket is the default data packet type which consists
-    /// of an optionally managed char pointer and a size value.
 {
 public:
     RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr) :
@@ -210,13 +202,9 @@ public:
     virtual void setData(char* data, std::size_t size)
     {
         assert(size > 0);
-
-        // Copy data if reuqests
-        if (_free)
+        if (_free) // Copy data if reuqests
             copyData(data, size);
-
-        // Otherwise just assign the pointer
-        else {
+        else { // Otherwise just assign the pointer
             _data = data;
             _size = size;
         }
@@ -225,17 +213,16 @@ public:
     virtual void copyData(const char* data, std::size_t size)
     {
         //traceL("RawPacket", this) << "Cloning: " << size << std::endl;
-
         // assert(_free);
-        assert(size > 0);
         // if (data && size > 0) {
-            if (_data && _free)
-                delete [] _data;
-            _size = size;
-            _data = new char[size];
-            _free = true;
-            std::memcpy(_data, data, size);
+        assert(size > 0);
+        if (_data && _free)
+            delete [] _data;
+        _size = size;
+        _data = new char[size];
+        _free = true;
         // }
+        std::memcpy(_data, data, size);
     }
 
     virtual std::size_t read(const ConstBuffer& buf)
@@ -243,6 +230,7 @@ public:
         copyData(bufferCast<const char*>(buf), buf.size());
         return buf.size();
     }
+
 
     // Old Read API
     //
@@ -253,9 +241,10 @@ public:
 
     virtual void write(Buffer& buf) const
     {
-        buf.insert(buf.end(), _data, _data + _size);
         //buf.insert(a.end(), b.begin(), b.end());
         //buf.append(_data, _size);
+        buf.insert(buf.end(), _data, _data + _size);
+
     }
 
     // Future Write API
@@ -322,3 +311,5 @@ inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0, uns
 
 
 #endif // SCY_Packet_H
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_VideoContext_H
@@ -48,42 +40,45 @@ namespace scy {
 namespace av {
 
 
+/// Base video context from which all video encoders and decoders derive.
 struct VideoContext
-    /// Base video context from which all video encoders and decoders derive.
 {
     VideoContext();
     virtual ~VideoContext();
 
+    /// Create the `AVCodecContext` using default values
     virtual void create();
-        // Create the AVCodecContext using default values
 
+    /// Open the `AVCodecContext`
     virtual void open();
-        // Open the AVCodecContext
 
+    /// Close the `AVCodecContext`
     virtual void close();
-        // Close the AVCodecContext
 
-    virtual AVFrame* convert(AVFrame* iframe); //, VideoCodec& cparams
-        // Convert the video frame and return the result
-        // If the given conversion params does not match the current
-        // conversion context
+    /// Convert the video frame and return the result.
+    ///
+    /// The input frame will only be converted if it doesn't match the output
+    /// format. If the frame is not converted the input frame will be returned.
+    /// If the input frame format does not match the `VideoConverter` context
+    /// then the `VideoConverter` will be recreated with the input frame params.
+    virtual AVFrame* convert(AVFrame* iframe);
 
     virtual bool recreateConverter();
 
     PacketSignal emitter;
 
-    VideoCodec iparams;      // input parameters
-    VideoCodec oparams;      // output parameters
-    AVStream* stream;        // encoder or decoder stream
-    AVCodecContext* ctx;     // encoder or decoder context
-    AVCodec* codec;          // encoder or decoder codec
-    AVFrame* frame;          // encoder or decoder frame
-    VideoConverter* conv;    // video conversion context
-    // FPSCounter fps;          // encoder or decoder fps rate
-    // double pts;              // pts in decimal seconds
-    std::int64_t time;       // stream time in nanoseconds
-    std::int64_t pts;        // last packet pts value
-    std::string error;       // error message
+    VideoCodec iparams;      ///< input parameters
+    VideoCodec oparams;      ///< output parameters
+    AVStream* stream;        ///< encoder or decoder stream
+    AVCodecContext* ctx;     ///< encoder or decoder context
+    AVCodec* codec;          ///< encoder or decoder codec
+    AVFrame* frame;          ///< encoder or decoder frame
+    VideoConverter* conv;    ///< video conversion context
+    /// FPSCounter fps;          ///< encoder or decoder fps rate
+    /// double pts;              ///< pts in decimal seconds
+    std::int64_t time;       ///< stream time in nanoseconds
+    std::int64_t pts;        ///< last packet pts value
+    std::string error;       ///< error message
 };
 
 
@@ -101,3 +96,5 @@ void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx
 
 #endif
 #endif // SCY_AV_VideoContext_H
+
+/// @\}

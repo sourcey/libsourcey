@@ -7,8 +7,8 @@ namespace scy {
 class StreamingRequestHandler: public http::ServerResponder
 {
 public:
-    StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
         http::ServerResponder(connection), options(options)
+    StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
     {    
         DebugS(this) << "Create" << std::endl;
     }
@@ -24,15 +24,9 @@ public:
             //<< "\n\tOutput Format: " << options.oformat.name
             << "\n\tOutput Encoding: " << options.encoding
             << "\n\tOutput Packetizer: " << options.framing
-            << std::endl;
-
-        // We will be sending our own headers
-        connection().shouldSendHeader(false);    
-
-        // Create the packet stream
-        MediaServer::setupPacketStream(stream, options, true, true);
-
-        // Start the stream
+            << std::endl;    /// We will be sending our own headers
+        connection().shouldSendHeader(false);    /// Create the packet stream
+        MediaServer::setupPacketStream(stream, options, true, true);    /// Start the stream
         stream.emitter += packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
         stream.start();
     }
@@ -47,8 +41,9 @@ public:
     void onVideoEncoded(void* sender, RawPacket& packet)
     {
         DebugS(this) << "Send packet: " 
-            << packet.size() << ": " << fpsCounter.fps << std::endl;
         //assert(!connection().socket()->closed());
+            << packet.size() << ": " << fpsCounter.fps << std::endl;
+
 
         try {    
             connection().socket()->send((const char*)packet.data(), packet.size());

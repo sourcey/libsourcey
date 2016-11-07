@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Signal_H
@@ -29,9 +21,9 @@
 #include <assert.h>
 
 #if defined(__GNUC__)
-   // We're all grown up and we know that simulating
-   // reinterpret_cast<> may cause strict aliasing problems
-   // at runtime.
+// We're all grown up and we know that simulating
+// reinterpret_cast<> may cause strict aliasing problems
+// at runtime.
 #  pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
@@ -39,58 +31,58 @@
 namespace scy {
 
 
+/// This exception is used to break out of a Signal callback scope.
 class StopPropagation: public std::exception
-    /// This exception is used to break out of a Signal callback scope.
 {
 public:
     virtual ~StopPropagation() throw() {};
 };
 
 
+/// This class implements a thread-safe signal which
+/// broadcasts arbitrary data to multiple receiver delegates.
 template <class DelegateT, DelegateDefaultArgs>
-class SignalBase 
-    /// This class implements a thread-safe signal which
-    /// broadcasts arbitrary data to multiple receiver delegates.
+class SignalBase
 {
 public:
     typedef std::list<DelegateT*>                  DelegateList;
     typedef typename DelegateList::iterator       Iterator;
     typedef typename DelegateList::const_iterator ConstIterator;
 
-    SignalBase() : 
-        _enabled(true), 
-        _dirty(false), 
+    SignalBase() :
+        _enabled(true),
+        _dirty(false),
         _count(0)
     {
-    }    
+    }
 
-    virtual ~SignalBase() 
-    { 
+    virtual ~SignalBase()
+    {
         clear();
     }
 
-    void operator += (const DelegateT& delegate) { attach(delegate); }    
-    void operator -= (const DelegateT& delegate) { detach(delegate); }    
+    void operator += (const DelegateT& delegate) { attach(delegate); }
+    void operator -= (const DelegateT& delegate) { detach(delegate); }
     void operator -= (const void* klass) { detach(klass); }
 
-    void attach(const DelegateT& delegate) 
-        // Attaches a delegate to the signal. If the delegate 
-        // already exists it will overwrite the previous delegate.
+    /// Attaches a delegate to the signal. If the delegate
+    /// already exists it will overwrite the previous delegate.
+    void attach(const DelegateT& delegate)
     {
         detach(delegate);
         Mutex::ScopedLock lock(_mutex);
         _delegates.push_back(delegate.clone());
-        _delegates.sort(DelegateT::ComparePrioroty); 
+        _delegates.sort(DelegateT::ComparePrioroty);
         _count++;
     }
 
-    bool detach(const DelegateT& delegate) 
-        // Detaches a delegate from the signal.
-        // Returns true if the delegate was detached, false otherwise.
+    /// Detaches a delegate from the signal.
+    /// Returns true if the delegate was detached, false otherwise.
+    bool detach(const DelegateT& delegate)
     {
         Mutex::ScopedLock lock(_mutex);
         for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
-            if (delegate.equals(*it) && !(*it)->cancelled()) {    
+            if (delegate.equals(*it) && !(*it)->cancelled()) {
                 (*it)->cancel();
                 _dirty = true;
                 _count--;
@@ -100,31 +92,30 @@ public:
         return false;
     }
 
-    void detach(const void* klass) 
-        // Detaches all delegates associated with the given class instance.
+    /// Detaches all delegates associated with the given class instance.
+    void detach(const void* klass)
     {
         {
             Mutex::ScopedLock lock(_mutex);
             for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
-                if (klass == (*it)->object() && !(*it)->cancelled()) {    
+                if (klass == (*it)->object() && !(*it)->cancelled()) {
                     (*it)->cancel();
                     _dirty = true;
                     _count--;
                 }
             }
         }
-
         // Call cleanup after detaching a class
         cleanup();
     }
 
-    void cleanup() 
-        // Deletes cancelled delegates.
+    /// Deletes cancelled delegates.
+    void cleanup()
     {
         Mutex::ScopedLock lock(_mutex);
         if (_dirty) {
             _dirty = false;
-            Iterator it = _delegates.begin(); 
+            Iterator it = _delegates.begin();
             while (it != _delegates.end()) {
                 DelegateT* delegate = *it;
                 if (delegate->cancelled()) {
@@ -137,14 +128,14 @@ public:
         }
     }
 
-    void obtain(DelegateList& active) 
-        // Retrieves a list of active delegates while 
-        // simultaneously deleting any redundant delegates.
+    /// Retrieves a list of active delegates while
+    /// simultaneously deleting any redundant delegates.
+    void obtain(DelegateList& active)
     {
         Mutex::ScopedLock lock(_mutex);
         if (!_enabled) // skip if disabled
             return;
-        Iterator it = _delegates.begin(); 
+        Iterator it = _delegates.begin();
         while (it != _delegates.end()) {
             DelegateT* delegate = *it;
             if (delegate->cancelled()) {
@@ -152,7 +143,7 @@ public:
                 delete delegate;
                 it = _delegates.erase(it);
             }
-            else {  
+            else {
                 active.push_back(delegate);
                 ++it;
             }
@@ -161,52 +152,52 @@ public:
         _dirty = false;
     }
 
-    virtual void emit(void* sender) 
+    virtual void emit(void* sender)
     {
         void* empty = nullptr;
         emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
     }
 
-    virtual void emit(void* sender, P arg) 
+    virtual void emit(void* sender, P arg)
     {
         void* empty = nullptr;
         emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
     }
 
-    virtual void emit(void* sender, P arg, P2 arg2) 
+    virtual void emit(void* sender, P arg, P2 arg2)
     {
         void* empty = nullptr;
         emit(sender, arg, arg2, (P3)empty, (P4)empty);
-    }    
+    }
 
-    virtual void emit(void* sender, P arg, P2 arg2, P3 arg3) 
+    virtual void emit(void* sender, P arg, P2 arg2, P3 arg3)
     {
         void* empty = nullptr;
         emit(sender, arg, arg2, arg3, (P4)empty);
     }
 
-    virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
+    virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4)
     {
         DelegateList toNotify;
         obtain(toNotify);
         try {
             for (ConstIterator it = toNotify.begin(); it != toNotify.end(); ++it) {
                 if ((*it)->accepts(sender, arg, arg2, arg3, arg4))
-                    (*it)->emit(sender, arg, arg2, arg3, arg4); 
+                    (*it)->emit(sender, arg, arg2, arg3, arg4);
             }
         }
         catch (StopPropagation&) {
         }
     }
 
-    void clear() 
+    void clear()
     {
         Mutex::ScopedLock lock(_mutex);
         util::clearList(_delegates);
         _count = 0;
     }
 
-    void enable(bool flag = true) 
+    void enable(bool flag = true)
     {
         Mutex::ScopedLock lock(_mutex);
         _enabled = flag;
@@ -218,24 +209,24 @@ public:
         return _enabled;
     }
 
-    DelegateList delegates() const 
+    DelegateList delegates() const
     {
         Mutex::ScopedLock lock(_mutex);
         return _delegates;
     }
-    
-    int ndelegates() const 
-        // Returns the number of delegates connected to the signal.
-        // Use this instead of delegates().size() since the container
-        // is not updated in real time.
+
+    /// Returns the number of delegates connected to the signal.
+    /// Use this instead of delegates().size() since the container
+    /// is not updated in real time.
+    int ndelegates() const
     {
         Mutex::ScopedLock lock(_mutex);
         return _count;
     }
-        
+
 protected:
     DelegateList _delegates;
-    bool _enabled;    
+    bool _enabled;
     bool _dirty;
     int _count;
 
@@ -271,3 +262,5 @@ class Signal4: public SignalBase<DelegateBase<P, P2, P3, P4>, P, P2, P3, P4> {};
 
 
 #endif // SCY_Signal_H
+
+/// @\}

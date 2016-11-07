@@ -1,24 +1,16 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup stun
+/// @{
 
 
-#ifndef SCY_STUN_MESSAGE_H
-#define SCY_STUN_MESSAGE_H
+#ifndef SCY_STUN_Message_H
+#define SCY_STUN_Message_H
 
 
 #include "scy/stun/stun.h"
@@ -38,60 +30,60 @@ class Message: public IPacket
 public:
     enum MethodType
     {
-        Undefined                = 0x0000,   // default error type
+        Undefined                = 0x0000,   ///< default error type
 
         /// STUN
-        Binding                    = 0x0001, 
+        Binding                    = 0x0001,
 
         /// TURN
-        Allocate                = 0x0003,    // (only request/response semantics defined)
+        Allocate                = 0x0003,    ///< (only request/response semantics defined)
         Refresh                    = 0x0004,
-        SendIndication            = 0x0006,    // (only indication semantics defined)
-        DataIndication            = 0x0007,    // (only indication semantics defined)
-        CreatePermission        = 0x0008,    // (only request/response semantics defined)
-        ChannelBind                = 0x0009,    // (only request/response semantics defined)
+        SendIndication            = 0x0006,    ///< (only indication semantics defined)
+        DataIndication            = 0x0007,    ///< (only indication semantics defined)
+        CreatePermission        = 0x0008,    ///< (only request/response semantics defined)
+        ChannelBind                = 0x0009,    ///< (only request/response semantics defined)
 
         /// TURN TCP RFC 6062
-        Connect                    = 0x000a, 
-        ConnectionBind            = 0x000b, 
+        Connect                    = 0x000a,
+        ConnectionBind            = 0x000b,
         ConnectionAttempt        = 0x000c
     };
 
-    enum ClassType     
+    enum ClassType
     {
         Request                    = 0x0000,
         Indication                = 0x0010,
         SuccessResponse            = 0x0100,
         ErrorResponse            = 0x0110
-    };    
+    };
 
-    enum ErrorCodes 
+    enum ErrorCodes
     {
-        BadRequest                = 400, 
-        NotAuthorized            = 401, 
-        UnknownAttribute        = 420, 
-        StaleCredentials        = 430, 
-        IntegrityCheckFailure    = 431, 
-        MissingUsername            = 432, 
-        UseTLS                    = 433, 
+        BadRequest                = 400,
+        NotAuthorized            = 401,
+        UnknownAttribute        = 420,
+        StaleCredentials        = 430,
+        IntegrityCheckFailure    = 431,
+        MissingUsername            = 432,
+        UseTLS                    = 433,
         RoleConflict            = 487,
-        ServerError                = 500, 
-        GlobalFailure            = 600, 
+        ServerError                = 500,
+        GlobalFailure            = 600,
 
         /// TURN TCP
-        ConnectionAlreadyExists        = 446, 
+        ConnectionAlreadyExists        = 446,
         ConnectionTimeoutOrFailure    = 447
     };
 
 public:
     Message();
     Message(ClassType clss, MethodType meth);
-    Message(const Message& that);    
+    Message(const Message& that);
     Message& operator = (const Message& that);
     virtual ~Message();
-    
+
     virtual IPacket* clone() const;
-    
+
     void setClass(ClassType type);
     void setMethod(MethodType type);
     void setTransactionID(const std::string& id);
@@ -105,9 +97,9 @@ public:
     std::string methodString() const;
     std::string classString() const;
     std::string errorString(std::uint16_t errorCode) const;
-    
+
     void add(Attribute* attr);
-    Attribute* get(Attribute::Type type, int index = 0) const;    
+    Attribute* get(Attribute::Type type, int index = 0) const;
 
     template<typename T>
     T* get(int index = 0) const {
@@ -115,19 +107,19 @@ public:
             get(static_cast<Attribute::Type>(T::TypeID), index));
     }
 
+    /// Parses the STUN/TURN packet from the given buffer.
+    /// The return value indicates the number of bytes read.
     std::size_t read(const ConstBuffer& buf);
-        // Parses the STUN/TURN packet from the given buffer.
-        // The return value indicates the number of bytes read.
 
+    /// Writes this object into a STUN/TURN packet.
     void write(Buffer& buf) const;
-        // Writes this object into a STUN/TURN packet.
 
     std::string toString() const;
     void print(std::ostream& os) const;
 
     virtual const char* className() const { return "StunMessage"; }
 
-protected:    
+protected:
     std::uint16_t _class;
     std::uint16_t _method;
     std::uint16_t _size;
@@ -136,7 +128,7 @@ protected:
 };
 
 
-inline bool isValidMethod(std::uint16_t methodType) 
+inline bool isValidMethod(std::uint16_t methodType)
 {
     switch (methodType) {
     case Message::Binding:
@@ -147,7 +139,7 @@ inline bool isValidMethod(std::uint16_t methodType)
     case Message::CreatePermission:
     case Message::ChannelBind:
     case Message::Connect:
-    case Message::ConnectionBind:    
+    case Message::ConnectionBind:
     case Message::ConnectionAttempt:
         return true;
     }
@@ -158,4 +150,6 @@ inline bool isValidMethod(std::uint16_t methodType)
 } } // namespace scy:stun
 
 
-#endif //  SCY_STUN_MESSAGE_H
+#endif // SCY_STUN_Message_H
+
+/// @\}

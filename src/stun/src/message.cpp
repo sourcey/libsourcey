@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup stun
+/// @{
 
 
 #include "scy/stun/message.h"
@@ -28,30 +20,30 @@ namespace scy {
 namespace stun {
 
 
-Message::Message() : 
-    _class(Request), 
-    _method(Undefined), 
-    _size(0), 
-    _transactionID(util::randomString(kTransactionIdLength)) 
+Message::Message() :
+    _class(Request),
+    _method(Undefined),
+    _size(0),
+    _transactionID(util::randomString(kTransactionIdLength))
 {
     assert(_transactionID.size() == kTransactionIdLength);
 }
 
 
-Message::Message(ClassType clss, MethodType meth) : 
-    _class(clss), 
+Message::Message(ClassType clss, MethodType meth) :
+    _class(clss),
     _method(meth),
-    _size(0), 
-    _transactionID(util::randomString(kTransactionIdLength)) 
+    _size(0),
+    _transactionID(util::randomString(kTransactionIdLength))
 {
 }
 
 
-Message::Message(const Message& that) : 
-    _class(that._class), 
-    _method(that._method), 
-    _size(that._size), 
-    _transactionID(that._transactionID) 
+Message::Message(const Message& that) :
+    _class(that._class),
+    _method(that._method),
+    _size(that._size),
+    _transactionID(that._transactionID)
 {
     assert(_method);
     assert(_transactionID.size() == kTransactionIdLength);
@@ -62,7 +54,7 @@ Message::Message(const Message& that) :
 }
 
 
-Message& Message::operator = (const Message& that) 
+Message& Message::operator = (const Message& that)
 {
     if (&that != this) {
         _method = that._method;
@@ -70,7 +62,7 @@ Message& Message::operator = (const Message& that)
         _size = that._size;
         _transactionID = that._transactionID;
         assert(_method);
-        assert(_transactionID.size() == kTransactionIdLength);    
+        assert(_transactionID.size() == kTransactionIdLength);
 
         // Clear current attributes
         for (unsigned i = 0; i < _attrs.size(); i++)
@@ -86,34 +78,34 @@ Message& Message::operator = (const Message& that)
 }
 
 
-Message::~Message() 
+Message::~Message()
 {
     for (unsigned i = 0; i < _attrs.size(); i++)
         delete _attrs[i];
 }
 
-    
+
 IPacket* Message::clone() const
 {
     return new Message(*this);
 }
 
 
-void Message::add(Attribute* attr) 
+void Message::add(Attribute* attr)
 {
-    _attrs.push_back(attr);    
+    _attrs.push_back(attr);
     std::size_t attrLength = attr->size();
     if (attrLength % 4 != 0)
         attrLength += (4 - (attrLength % 4));
     _size += attrLength + kAttributeHeaderSize;
-    //_size += attr->size() + kAttributeHeaderSize;    
+    //_size += attr->size() + kAttributeHeaderSize;
 }
 
 
-Attribute* Message::get(Attribute::Type type, int index) const 
+Attribute* Message::get(Attribute::Type type, int index) const
 {
     for (unsigned i = 0; i < _attrs.size(); i++) {
-        if (_attrs[i]->type() == type) {            
+        if (_attrs[i]->type() == type) {
             if (index == 0)
                 return _attrs[i];
             else index--;
@@ -124,9 +116,9 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 
 std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
-{    
+{
     TraceL << "Parse STUN packet: " << buf.size() << endl;
-    
+
     try {
         BitReader reader(buf);
 
@@ -134,15 +126,15 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
         std::uint16_t type;
         reader.getU16(type);
         if (type & 0x8000) {
-            // RTP and RTCP set MSB of first byte, since first two bits are version, 
+            // RTP and RTCP set MSB of first byte, since first two bits are version,
             // and version is always 2 (10). If set, this is not a STUN packet.
             WarnL << "Not STUN packet" << endl;
             return 0;
         }
 
-        //std::uint16_t method = (type & 0x000F) | ((type & 0x00E0)>>1) | 
+        //std::uint16_t method = (type & 0x000F) | ((type & 0x00E0)>>1) |
         //    ((type & 0x0E00)>>2) | ((type & 0x3000)>>2);
-        
+
         std::uint16_t classType = type & 0x0110;
         std::uint16_t methodType = type & 0x000F;
 
@@ -150,10 +142,10 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
             WarnL << "STUN message unknown method: " << methodType << endl;
             return 0;
         }
-        
+
         _class = classType; // static_cast<std::uint16_t>(type & 0x0110);
         _method = methodType; // static_cast<std::uint16_t>(type & 0x000F);
-                
+
         // Message length
         reader.getU16(_size);
         if (_size > buf.size()) {
@@ -168,18 +160,18 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
         reader.skip(kMagicCookieLength);
         //std::string magicCookie;
         //reader.get(magicCookie, kMagicCookieLength);
-        
+
         // Transaction ID
         std::string transactionID;
         reader.get(transactionID, kTransactionIdLength);
         assert(transactionID.size() == kTransactionIdLength);
         _transactionID = transactionID;
-    
+
         // Attributes
-        _attrs.clear();    
+        _attrs.clear();
         //int errors = 0;
         int rest = _size;
-        std::uint16_t attrType, attrLength, padLength;        
+        std::uint16_t attrType, attrLength, padLength;
         assert(int(reader.available()) >= rest);
         while (rest > 0) {
             reader.getU16(attrType);
@@ -187,15 +179,15 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
             padLength =  attrLength % 4 == 0 ? 0 : 4 - (attrLength % 4);
 
             auto attr = Attribute::create(attrType, attrLength);
-            if (attr) {        
+            if (attr) {
                 attr->read(reader); // parse or throw
                 _attrs.push_back(attr);
 
                 // TraceL << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl; //  << ": " << rest
-            }    
+            }
             else
                 WarnL << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
-                
+
             rest -= (attrLength + kAttributeHeaderSize + padLength);
         }
 
@@ -207,12 +199,12 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
     catch (std::exception& exc) {
         DebugL << "Parse error: " << exc.what() << endl;
     }
-    
+
     return 0;
 }
 
 
-void Message::write(Buffer& buf) const 
+void Message::write(Buffer& buf) const
 {
     //assert(_method);
     //assert(_size);
@@ -227,19 +219,19 @@ void Message::write(Buffer& buf) const
 
     for (unsigned i = 0; i < _attrs.size(); i++) {
         writer.putU16(_attrs[i]->type());
-        writer.putU16(_attrs[i]->size()); 
+        writer.putU16(_attrs[i]->size());
         _attrs[i]->write(writer);
     }
 }
 
 
-std::string Message::classString() const 
+std::string Message::classString() const
 {
     switch (_class) {
     case Request:                    return "Request";
     case Indication:                return "Indication";
     case SuccessResponse:            return "SuccessResponse";
-    case ErrorResponse:                return "ErrorResponse";    
+    case ErrorResponse:                return "ErrorResponse";
     default:                        return "UnknownState";
     }
 }
@@ -254,18 +246,18 @@ std::string Message::errorString(std::uint16_t errorCode) const
     case StaleCredentials:            return "STALE CREDENTIALS";
     case IntegrityCheckFailure:        return "INTEGRITY CHECK FAILURE";
     case MissingUsername:            return "MISSING USERNAME";
-    case UseTLS:                    return "USE TLS";        
+    case UseTLS:                    return "USE TLS";
     case RoleConflict:                return "Role Conflict"; // (487) rfc5245
-    case ServerError:                return "SERVER ERROR";        
-    case GlobalFailure:                return "GLOBAL FAILURE";    
-    case ConnectionAlreadyExists:    return "Connection Already Exists";        
-    case ConnectionTimeoutOrFailure:    return "Connection Timeout or Failure";            
+    case ServerError:                return "SERVER ERROR";
+    case GlobalFailure:                return "GLOBAL FAILURE";
+    case ConnectionAlreadyExists:    return "Connection Already Exists";
+    case ConnectionTimeoutOrFailure:    return "Connection Timeout or Failure";
     default:                        return "UnknownError";
     }
 }
 
 
-std::string Message::methodString() const 
+std::string Message::methodString() const
 {
     switch (_method) {
     case Binding:                    return "BINDING";
@@ -274,16 +266,16 @@ std::string Message::methodString() const
     case SendIndication:            return "SEND-INDICATION";
     case DataIndication:            return "DATA-INDICATION";
     case CreatePermission:            return "CREATE-PERMISSION";
-    case ChannelBind:                return "CHANNEL-BIND";        
-    case Connect:                    return "CONNECT";        
-    case ConnectionBind:            return "CONNECTION-BIND";        
-    case ConnectionAttempt:            return "CONNECTION-ATTEMPT";            
+    case ChannelBind:                return "CHANNEL-BIND";
+    case Connect:                    return "CONNECT";
+    case ConnectionBind:            return "CONNECTION-BIND";
+    case ConnectionAttempt:            return "CONNECTION-ATTEMPT";
     default:                        return "UnknownMethod";
     }
 }
 
 
-std::string Message::toString() const 
+std::string Message::toString() const
 {
     std::ostringstream os;
     os << "STUN[" << methodString() << ":" << transactionID();
@@ -303,34 +295,36 @@ void Message::print(std::ostream& os) const
 }
 
 
-void Message::setTransactionID(const std::string& id) 
+void Message::setTransactionID(const std::string& id)
 {
     assert(id.size() == kTransactionIdLength);
     _transactionID = id;
 }
 
 
-Message::ClassType Message::classType() const 
-{ 
-    return static_cast<ClassType>(_class); 
+Message::ClassType Message::classType() const
+{
+    return static_cast<ClassType>(_class);
 }
 
-    
-Message::MethodType Message::methodType() const 
-{ 
+
+Message::MethodType Message::methodType() const
+{
     return static_cast<MethodType>(_method);
 }
 
 
 void Message::setClass(ClassType type)
-{ 
+{
     _class = type;
 }
 
-void Message::setMethod(MethodType type) 
-{ 
-    _method = type; 
+void Message::setMethod(MethodType type)
+{
+    _method = type;
 }
 
 
 } } // namespace scy:stun
+
+/// @\}

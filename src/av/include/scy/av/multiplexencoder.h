@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_MultiplexEncoder_H
@@ -45,9 +37,8 @@ extern "C" {
 namespace scy {
 namespace av {
 
-
+/// This class implements a multiplex audio and video encoder.
 class MultiplexEncoder: public IEncoder
-    /// This class implements a multiplex audio and video encoder.
 {
 public:
     MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
@@ -59,23 +50,22 @@ public:
 
     virtual void createVideo();
     virtual void freeVideo();
-    virtual bool encodeVideo(AVFrame* frame);
+    virtual bool encodeVideo(AVFrame* frame);    // Encode a single video frame
+    /// If the time is specified it should be the nanosecond offset since
+    /// the start of the input stream. The value will be converted to the
+    /// stream time base internally.
+    /// If no time is specified a realtime time value will be assigned to
+    /// the frame.
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time = AV_NOPTS_VALUE);
-        // Encode a single video frame
-        // If the time is specified it should be the nanosecond offset since
-        // the start of the input stream. The value will be converted to the
-        // stream time base internally.
-        // If no time is specified a realtime time value will be assigned to
-        // the frame.
+
 
     virtual void createAudio();
-    virtual void freeAudio();
-    // virtual bool encodeAudio(AVFrame* frame);
+    virtual void freeAudio();    /// virtual bool encodeAudio(AVFrame* frame);    // Encode a single audio frame
     virtual bool encodeAudio(std::uint8_t* buffer, int numSamples, std::int64_t time = AV_NOPTS_VALUE);
-        // Encode a single audio frame
 
+    /// Flush and beffered or queued packets.
     virtual void flush();
-        // Flush and beffered or queued packets.
+
 
     EncoderOptions& options();
     VideoEncoder* video();
@@ -111,3 +101,5 @@ protected:
 
 #endif
 #endif // SCY_AV_MultiplexEncoder_H
+
+/// @\}

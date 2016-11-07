@@ -51,8 +51,7 @@ public:
                 << std::endl;
         }
 #endif
-
-        // Echo back to client
+    /// Echo back to client
         socket->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
     }
 

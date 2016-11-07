@@ -1,113 +1,106 @@
-# Try to find LibSourcey library installation
-# See http://sourcey.com/libsourcey
+# - Try to find the required LibSourcey components (default: base uv crypto net util)
 #
-# The following variables are optionally searched for defaults
-#  LIBSOURCEY_FIND_COMPONENTS : find_package(LIBSOURCEY COMPONENTS ..)
-#    compatible interface. typically archo base crypto http .. etc.
+# Once done this will define
+#  LibSourcey_FOUND         - System has the all required components.
+#  LibSourcey_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
+#  LibSourcey_LIBRARY_DIRS  - Library directories necessary for using the required components.
+#  LibSourcey_LIBRARIES     - Link these to use the required components.
+#  LibSourcey_DEFINITIONS   - Compiler switches required for using the required components.
 #
-# The following are set after configuration is done:
-#  LIBSOURCEY_FOUND
-#  LIBSOURCEY_INCLUDE_DIRS
-#  LIBSOURCEY_LIBRARIES
-#  LIBSOURCEY_LIBRARY_DIRS
-# ----------------------------------------------------------------------
+# For each of the components it will additionally set.
+#   - base
+#   - CppParser
+#   - CppUnit
+#   - Net
+#   - NetSSL
+#   - Crypto
+#   - Util
+#   - XML
+#   - Zip
+#   - Data
+#   - PageCompiler
+#
+# the following variables will be defined
+#  LibSourcey_<component>_FOUND        - System has <component>
+#  LibSourcey_<component>_INCLUDE_DIRS - Include directories necessary for using the <component> headers
+#  LibSourcey_<component>_LIBRARY_DIRS - Library directories necessary for using the <component>
+#  LibSourcey_<component>_LIBRARIES    - Link these to use <component>
+#  LibSourcey_<component>_DEFINITIONS  - Compiler switches required for using <component>
+#  LibSourcey_<component>_VERSION      - The components version
 
-# ----------------------------------------------------------------------
-# Default LibSourcey components to include if COMPONENTS is undefined
-# ----------------------------------------------------------------------
-if(NOT LIBSOURCEY_FIND_COMPONENTS)
-  set(LIBSOURCEY_FIND_COMPONENTS archo base crypto http json media net sked socketio stun symple turn util uv)
+# Set required variables
+set(LibSourcey_ROOT_DIR "" CACHE STRING "Where is the LibSourcey root directory located?")
+set(LibSourcey_INCLUDE_DIR "${LibSourcey_ROOT_DIR}/src" CACHE STRING "Where are the LibSourcey headers (.h) located?")
+set(LibSourcey_LIBRARY_DIR "${LibSourcey_ROOT_DIR}/build/src" CACHE STRING "Where are the LibSourcey libraries (.dll/.so) located?")
+
+# Include the LibSourcey cmake helpers (if included from third party library)
+# if (LibSourcey_ROOT_DIR AND EXISTS ${LibSourcey_ROOT_DIR})
+#   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LibSourcey_ROOT_DIR}/cmake)
+#   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${LibSourcey_ROOT_DIR}/cmake)
+#
+#   include(CMakeHelpers REQUIRED)
+#   include(CMakeFindExtensions REQUIRED)
+# endif()
+
+include(CMakeHelpers REQUIRED)
+include(CMakeFindExtensions REQUIRED)
+
+# The default components to find
+if (NOT LibSourcey_FIND_COMPONENTS)
+  set(LibSourcey_FIND_COMPONENTS base uv crypto net util)
 endif()
 
-# ----------------------------------------------------------------------
-# Options
-# ----------------------------------------------------------------------
-set(LIBSOURCEY_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include CACHE PATH   "The LibSourcey include directory." FORCE)
-set(LIBSOURCEY_LIBRARY_DIRS ${CMAKE_INSTALL_PREFIX}/lib     CACHE PATH   "The LibSourcey library directories." FORCE)
-set(LIBSOURCEY_LIBRARIES    ""                              CACHE STRING "The LibSourcey libraries." FORCE)
-set(LIBSOURCEY_LINK_SHARED_LIBS TRUE                        CACHE BOOL   "Link with shared LibSourcey libraries (.dll/.so) instead of static ones (.lib/.a)")
+# Set a list of all available modules
+set(LibSourcey_ALL_MODULES
+  archo
+  av
+  base
+  crypto
+  http
+  json
+  net
+  pacm
+  pluga
+  sked
+  socketio
+  stun
+  symple
+  turn
+  util
+  uv
+  webrtc
+)
 
-# ----------------------------------------------------------------------
-# Find component libraries
-# ----------------------------------------------------------------------
-find_package(PkgConfig QUIET)
-if (PKG_CONFIG_FOUND)
-  # Use pkg-config to find LibSourcey if available
-  pkg_search_module(LIBSOURCEY libsourcey)
-else()
+# Check for cached results. If there are then skip the costly part.
+# set_module_notfound(LibSourcey)
+if (NOT LibSourcey_FOUND)
 
-  # Find LibSourcey library directory
-  # set(LIBSOURCEY_LIBRARY_DIR LIBSOURCEY_LIBRARY_DIR-NOTFOUND)
-  find_path(LIBSOURCEY_LIBRARY_DIR
-    NAMES
-      scy_base
-    PATHS
-      /usr/local/lib
-      /usr/lib
-    DOC
-      "LibSourcey Library Directory")
-
-  # Find LibSourcey include directory
-  # set(LIBSOURCEY_INCLUDE_DIR LIBSOURCEY_INCLUDE_DIR-NOTFOUND)
-  find_path(LIBSOURCEY_INCLUDE_DIR
-    NAMES
-      scy/base.h
-    PATHS
-      /usr/local/include
-      /usr/include
-    DOC
-      "LibSourcey Include Directory")
-
-  # Include LibSourcey component libraries
-  foreach(component ${LIBSOURCEY_FIND_COMPONENTS})
-    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-      list(APPEND LIBSOURCEY_LIBRARIES debug scy_${component})
-      list(APPEND LIBSOURCEY_LIBRARIES optimized scy_${component})
-    else()
-      list(APPEND LIBSOURCEY_LIBRARIES scy_${component})
-    endif()
+  # Set search path suffixes
+  foreach(component ${LibSourcey_FIND_COMPONENTS})
+    list(APPEND LibSourcey_INCLUDE_SUFFIXES ${component}/include)
+    list(APPEND LibSourcey_LIBRARY_SUFFIXES ${component})
   endforeach()
+
+  # Check for all available components
+  find_component(LibSourcey archo    archo    scy_archo    scy/archo/zipfile.h)
+  find_component(LibSourcey av       av       scy_av       scy/av/ffmpeg.h)
+  find_component(LibSourcey base     base     scy_base     scy/base.h)
+  find_component(LibSourcey crypto   crypto   scy_crypto   scy/crypto/crypto.h)
+  find_component(LibSourcey http     http     scy_http     scy/http/server.h)
+  find_component(LibSourcey json     json     scy_json     scy/json/json.h)
+  find_component(LibSourcey net      net      scy_net      scy/net/socket.h)
+  find_component(LibSourcey pacm     pacm     scy_pacm     scy/pacm/config.h)
+  find_component(LibSourcey pluga    pluga    scy_pluga    scy/pluga/config.h)
+  find_component(LibSourcey sked     sked     scy_sked     scy/sked/scheduler.h)
+  find_component(LibSourcey socketio socketio scy_socketio scy/socketio/client.h)
+  find_component(LibSourcey stun     stun     scy_stun     scy/stun/stun.h)
+  find_component(LibSourcey symple   symple   scy_symple   scy/symple/client.h)
+  find_component(LibSourcey turn     turn     scy_turn     scy/turn/turn.h)
+  find_component(LibSourcey util     util     scy_util     scy/util/ratelimiter.h)
+  find_component(LibSourcey uv       uv       scy_uv       scy/uv/uvpp.h)
+  find_component(LibSourcey webrtc   webrtc   scy_webrtc   scy/webrtc/webrtc.h)
+
+  # Set LibSourcey as found or not
+  # print_module_variables(LibSourcey)
+  set_module_found(LibSourcey)
 endif()
-
-# Include LibSourcey vendor libraries and includes
-if(LIBSOURCEY_LIBRARY_DIRS)
-  set(LIBSOURCEY_VENDOR_LIBRARY_DIR ${LIBSOURCEY_LIBRARY_DIR}/../share/scy/vendor/lib)
-  set(LIBSOURCEY_VENDOR_INCLUDE_DIR ${LIBSOURCEY_INCLUDE_DIR}/../share/scy/vendor/include)
-
-  if (WIN32)
-    file(GLOB_RECURSE libraries "${LIBSOURCEY_VENDOR_LIBRARY_DIR}/*.lib")
-  else()
-    if (LIBSOURCEY_LINK_SHARED_LIBS)
-      file(GLOB_RECURSE libraries "${LIBSOURCEY_VENDOR_LIBRARY_DIR}/*.so")
-    else()
-      file(GLOB_RECURSE libraries "${LIBSOURCEY_VENDOR_LIBRARY_DIR}/*.a")
-    endif()
-  endif()
-
-  # Include LibSourcey vendor libraries
-  set(LIBSOURCEY_LIBRARIES "")
-  foreach(lib ${libraries})
-    get_filename_component(filename ${lib} NAME)
-    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-      list(APPEND LIBSOURCEY_LIBRARIES debug ${filename})
-      list(APPEND LIBSOURCEY_LIBRARIES optimized ${filename})
-    else()
-      list(APPEND LIBSOURCEY_LIBRARIES ${filename})
-    endif()
-  endforeach()
-endif()
-
-# message("LIBSOURCEY_FOUND=${LIBSOURCEY_FOUND}")
-# message("LIBSOURCEY_LIBRARIES=${LIBSOURCEY_LIBRARIES}")
-# message("LIBSOURCEY_STATIC_LIBRARIES=${LIBSOURCEY_STATIC_LIBRARIES}")
-# message("LIBSOURCEY_INCLUDE_DIRS=${LIBSOURCEY_INCLUDE_DIRS}")
-# message("LIBSOURCEY_LIBRARY_DIRS=${LIBSOURCEY_LIBRARY_DIRS}")
-# message("LIBSOURCEY_DEFINITIONS=${LIBSOURCEY_DEFINITIONS}")
-# message("LIBSOURCEY_VERSION=${LIBSOURCEY_VERSION}")
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LIBSOURCEY DEFAULT_MSG
-                                  LIBSOURCEY_FOUND
-                                  LIBSOURCEY_LIBRARIES
-                                  LIBSOURCEY_INCLUDE_DIRS
-                                  LIBSOURCEY_LIBRARY_DIRS)

@@ -80,3 +80,5 @@ private:
 
 
 #endif // SCY_TURNServer_H
+
+/// @\}

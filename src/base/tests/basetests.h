@@ -1,19 +1,9 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-//
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
 
 
@@ -58,8 +48,8 @@ class IpcTest: public Test
     int want_x_ipc_callbacks;
     int num_ipc_callbacks;
 
-    void run() {
-        // std::cout << "Test IPC" << std::endl;
+    void run() {    
+    /// std::cout << "Test IPC" << std::endl;
 
         want_x_ipc_callbacks = 5;
         num_ipc_callbacks = 0;
@@ -69,17 +59,16 @@ class IpcTest: public Test
         ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test2"));
         ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test3"));
         ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test4"));
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test5"));
-
+        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test5"));    /// std::cout << "Test IPC: OK" << std::endl;
         uv::runDefaultLoop();
-        // std::cout << "Test IPC: OK" << std::endl;
+
 
         expect(num_ipc_callbacks == want_x_ipc_callbacks);
     }
 
     void ipcCallback(const ipc::Action& action)
-    {
-        // std::cout << "Got IPC callback: " << action.data << std::endl;
+    {    
+    /// std::cout << "Got IPC callback: " << action.data << std::endl;
         if (++num_ipc_callbacks == want_x_ipc_callbacks)
             reinterpret_cast<ipc::Queue<>*>(action.arg)->close();
     }
@@ -106,18 +95,18 @@ class TimerTest: public Test
         Timer timer;
         timer.Timeout += sdelegate(this, &TimerTest::timerCallback);
         timer.start(10, 10);
-        timer.handle().ref();
-
+        timer.handle().ref();    /// std::cout << "Ending" << std::endl;
         uv::runDefaultLoop();
-        // std::cout << "Ending" << std::endl;
+
 
         expect(numTimerTicks == wantTimerTicks);
     }
 
     void timerCallback(void* sender)
-    {
+    {    
+    /// std::cout << "On timeout: " << timer->count() << std::endl;
         auto timer = reinterpret_cast<Timer*>(sender);
-        // std::cout << "On timeout: " << timer->count() << std::endl;
+
         numTimerTicks++;
         if (timer->count() == wantTimerTicks / 2) {
             if (!timerRestarted) {
@@ -156,8 +145,8 @@ class IdlerTest: public Test
     }
 
     void idlerCallback()
-    {
-        // std::cout << "On idle" << std::endl;
+    {    
+    /// std::cout << "On idle" << std::endl;
         if (++numIdlerTicks == wantIdlerTicks) {
             idler.handle().unref();
             idler.cancel(); // event loop will be released
@@ -282,11 +271,10 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
     }
 
     void stop()
-    {
-        // std::cout << "Stop" << std::endl;
+    {    
+    /// std::cout << "Stop" << std::endl;    // runner.close();    // std::cout << "Stop: OK" << std::endl;
         runner.cancel();
-        // runner.close();
-        // std::cout << "Stop: OK" << std::endl;
+
     }
 };
 
@@ -300,8 +288,8 @@ struct MockPacketProcessor: public PacketProcessor
     }
 
     void process(IPacket& packet)
-    {
-        // std::cout << "Process: " << packet.className() << std::endl;
+    {    
+    /// std::cout << "Process: " << packet.className() << std::endl;
         emit(packet);
     }
 };
@@ -311,27 +299,21 @@ class PacketStreamTest: public Test
     int numPackets;
 
     void onPacketStreamOutput(void* sender, IPacket& packet)
-    {
-        // std::cout << "On packet: " << packet.className() << std::endl;
+    {    
+    /// std::cout << "On packet: " << packet.className() << std::endl;
         numPackets++;
     }
 
     void run()
     {
-        numPackets = 0;
-        PacketStream stream;
-        // stream.setRunner(std::make_shared<Thread>());
-        stream.attachSource(new MockThreadedPacketSource, true, true);
-        // stream.attach(new AsyncPacketQueue, 0, true);
+        numPackets = 0;    // stream.setRunner(std::make_shared<Thread>());
+        PacketStream stream;    /// stream.attach(new AsyncPacketQueue, 0, true);
+        stream.attachSource(new MockThreadedPacketSource, true, true);    /// stream.attach(new SyncPacketQueue, 2, true);    // stream.synchronizeOutput(uv::defaultLoop());
         stream.attach(new MockPacketProcessor, 1, true);
-        // stream.attach(new SyncPacketQueue, 2, true);
-        // stream.synchronizeOutput(uv::defaultLoop());
+
         stream.emitter += packetDelegate(this, &PacketStreamTest::onPacketStreamOutput);
-        stream.start();
-
-        // TODO: Test pause/resume functionality
-
-        // Run the thread for 100ms
+        stream.start();    /// TODO: Test pause/resume functionality
+    /// Run the thread for 100ms
         scy::sleep(100);
 
         stream.close();
@@ -364,14 +346,10 @@ struct PacketStreamIOTest: public Test
         PacketStream stream;
         stream.attachSource(new ThreadedStreamReader(new std::ifstream("input.txt")), true, true);
         stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1, true);
-        stream.start();
-
-        // Run the thread for 100ms
+        stream.start();    /// Run the thread for 100ms
         scy::sleep(100);
 
-        stream.close();
-
-        // Verify result
+        stream.close();    /// Verify result
         std::string result;
         std::ifstream ofile("output.txt");
         util::copyToString(ofile, result);
@@ -382,8 +360,8 @@ struct PacketStreamIOTest: public Test
 class MultiPacketStreamTest: public Test
 {
     void onChildPacketStreamOutput(void* sender, IPacket& packet)
-    {
-        // std::cout << "On child packet: " << packet.className() << std::endl;
+    {    
+    /// std::cout << "On child packet: " << packet.className() << std::endl;
     }
 
     struct ChildStreams
@@ -394,54 +372,25 @@ class MultiPacketStreamTest: public Test
     };
 
     void run()
-    {
-        // PacketStream stream;
-        // //stream.setRunner(std::make_shared<Thread>());
-        // stream.attachSource(new MockThreadedPacketSource, true, true);
-        // //stream.attach(new AsyncPacketQueue, 0, true);
-        // stream.attach(new MockPacketProcessor, 1, true);
-        // //stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);
-        // stream.start();
-        //
-        // // The second PacketStream receives packets from the first one
-        // // and synchronizes output packets with the default event loop.
-        // ChildStreams children;
-        // children.s1 = new PacketStream;
-        // //children.s1->setRunner(std::make_shared<Idler>()); // Use Idler
-        // children.s1->attachSource(stream.emitter);
-        // children.s1->attach(new AsyncPacketQueue, 0, true);
-        // children.s1->attach(new SyncPacketQueue, 1, true);
-        // children.s1->synchronizeOutput(uv::defaultLoop());
-        // children.s1->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
-        // children.s1->start();
-        //
-        // children.s2 = new PacketStream;
-        // children.s2->attachSource(stream.emitter);
-        // children.s2->attach(new AsyncPacketQueue, 0, true);
-        // children.s2->synchronizeOutput(uv::defaultLoop());
-        // children.s2->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
-        // children.s2->start();
-        //
-        // children.s3 = new PacketStream;
-        // children.s3->attachSource(stream.emitter);
-        // children.s3->attach(new AsyncPacketQueue, 0, true);
-        // children.s3->synchronizeOutput(uv::defaultLoop());
-        // children.s3->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
-        // children.s3->start();
-        //
-        // // app.waitForShutdown([](void* arg) {
-        // //     auto streams = reinterpret_cast<ChildStreams*>(arg);
-        // //     //streams->s1->attachSource(stream.emitter);
-        // //     if (streams->s1) delete streams->s1;
-        // //     if (streams->s2) delete streams->s2;
-        // //     if (streams->s3) delete streams->s3;
-        // // }, &children);
-        //
-        // uv::runDefaultLoop();
-        //
-        // if (children.s1) delete children.s1;
-        // if (children.s2) delete children.s2;
-        // if (children.s3) delete children.s3;
+    {    
+    /// //stream.setRunner(std::make_shared<Thread>());    // stream.attachSource(new MockThreadedPacketSource, true, true);    // //stream.attach(new AsyncPacketQueue, 0, true);    // stream.attach(new MockPacketProcessor, 1, true);    // //stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);    // stream.start();
+    ///
+    /// // The second PacketStream receives packets from the first one
+    /// // and synchronizes output packets with the default event loop.
+    /// ChildStreams children;    // children.s1 = new PacketStream;    // //children.s1->setRunner(std::make_shared<Idler>()); // Use Idler
+    /// children.s1->attachSource(stream.emitter);    // children.s1->attach(new AsyncPacketQueue, 0, true);    // children.s1->attach(new SyncPacketQueue, 1, true);    // children.s1->synchronizeOutput(uv::defaultLoop());    // children.s1->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);    // children.s1->start();
+    ///
+    /// children.s2 = new PacketStream;    // children.s2->attachSource(stream.emitter);    // children.s2->attach(new AsyncPacketQueue, 0, true);    // children.s2->synchronizeOutput(uv::defaultLoop());    // children.s2->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);    // children.s2->start();
+    ///
+    /// children.s3 = new PacketStream;    // children.s3->attachSource(stream.emitter);    // children.s3->attach(new AsyncPacketQueue, 0, true);    // children.s3->synchronizeOutput(uv::defaultLoop());    // children.s3->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);    // children.s3->start();
+    ///
+    /// // app.waitForShutdown([](void* arg) {    
+    /// //     auto streams = reinterpret_cast<ChildStreams*>(arg);    // //     //streams->s1->attachSource(stream.emitter);    // //     if (streams->s1) delete streams->s1;    // //     if (streams->s2) delete streams->s2;    // //     if (streams->s3) delete streams->s3;    // // }, &children);
+    ///
+    /// uv::runDefaultLoop();
+    ///
+    /// if (children.s1) delete children.s1;    // if (children.s2) delete children.s2;    // if (children.s3) delete children.s3;    // PacketStream stream;
+
     }
 };
 
@@ -450,3 +399,5 @@ class MultiPacketStreamTest: public Test
 
 
 #endif // SCY_Base_Tests_H
+
+/// @\}

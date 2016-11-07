@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup sked
+/// @{
 
 
 #include "scy/sked/trigger.h"
@@ -23,7 +15,7 @@
 #include "scy/datetime.h"
 
 
-using namespace std; 
+using namespace std;
 
 
 namespace scy {
@@ -37,22 +29,22 @@ Trigger::Trigger(const std::string& type, const std::string& name) :
 {
 }
 
-    
-std::int64_t Trigger::remaining() 
+
+std::int64_t Trigger::remaining()
 {
     DateTime now;
     Timespan ts = scheduleAt - now;
     return ts.totalMilliseconds();
 }
 
-    
+
 bool Trigger::timeout()
 {
     DateTime now;
     return now >= scheduleAt;
 }
 
-    
+
 bool Trigger::expired()
 {
     return false;
@@ -61,8 +53,8 @@ bool Trigger::expired()
 
 void Trigger::serialize(json::Value& root)
 {
-    TraceL << "Serializing" << endl;    
-    
+    TraceL << "Serializing" << endl;
+
     root["type"] = type;
     root["name"] = name;
     root["createdAt"] = DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
@@ -75,14 +67,14 @@ void Trigger::serialize(json::Value& root)
 void Trigger::deserialize(json::Value& root)
 {
     TraceL << "Deserializing" << endl;
-    
+
     json::assertMember(root, "type");
     json::assertMember(root, "name");
     json::assertMember(root, "createdAt");
     json::assertMember(root, "scheduleAt");
     json::assertMember(root, "lastRunAt");
     json::assertMember(root, "timesRun");
-    
+
     int tzd;
     type = root["type"].asString();
     name = root["name"].asString();
@@ -102,8 +94,8 @@ OnceOnlyTrigger::OnceOnlyTrigger() :
 
 
 bool OnceOnlyTrigger::expired()
-{ 
-    return timesRun > 0; 
+{
+    return timesRun > 0;
 }
 
 
@@ -123,17 +115,17 @@ void IntervalTrigger::update()
 
 
 bool IntervalTrigger::expired()
-{ 
-    return maxTimes > 0 && timesRun >= maxTimes; 
+{
+    return maxTimes > 0 && timesRun >= maxTimes;
 }
 
 
 void IntervalTrigger::serialize(json::Value& root)
 {
-    TraceL << "Serializing" << endl;    
+    TraceL << "Serializing" << endl;
 
     Trigger::serialize(root);
-    
+
     root["interval"]["days"] = interval.days();
     root["interval"]["hours"] = interval.hours();
     root["interval"]["minutes"] = interval.minutes();
@@ -144,7 +136,7 @@ void IntervalTrigger::serialize(json::Value& root)
 void IntervalTrigger::deserialize(json::Value& root)
 {
     TraceL << "[IntervalTrigger] Deserializing" << endl;
-    
+
     json::assertMember(root, "interval");
     json::assertMember(root["interval"], "days");
     json::assertMember(root["interval"], "hours");
@@ -154,15 +146,15 @@ void IntervalTrigger::deserialize(json::Value& root)
     Trigger::deserialize(root);
 
     interval.assign(
-        root["interval"]["days"].asInt(), 
-        root["interval"]["hours"].asInt(), 
-        root["interval"]["minutes"].asInt(), 
+        root["interval"]["days"].asInt(),
+        root["interval"]["hours"].asInt(),
+        root["interval"]["minutes"].asInt(),
         root["interval"]["seconds"].asInt(), 0);
-    
+
     if (!interval.totalSeconds())
         throw std::runtime_error("Interval trigger must have non zero interval.");
-    
-    DateTime now;    
+
+    DateTime now;
     scheduleAt = now;
     scheduleAt += interval;
 }
@@ -176,19 +168,19 @@ DailyTrigger::DailyTrigger() :
 }
 
 
-void DailyTrigger::update() 
+void DailyTrigger::update()
 {
     DateTime now;
     DateTime next;
     DateTime prev(scheduleAt);
     Timespan day(1, 0, 0, 0, 0);
     bool initial = createdAt == scheduleAt;
-        
-    // Set next date as tomorrow if the schedule 
+
+    // Set next date as tomorrow if the schedule
     // timeout is expired, or if we are setting up.
     if (!initial && now > scheduleAt)
         next += day;
-        
+
     // Get the next day the task can run
     bool match = false;
     for (unsigned i = 0; i < 6; i++) {
@@ -215,7 +207,7 @@ void DailyTrigger::update()
         timeOfDay.second(),
         timeOfDay.millisecond(),
         timeOfDay.microsecond());
-    
+
     /*
     TraceL << "[DailyTrigger] Updating: "
             << "\n\tDayOfWeek: " << next.dayOfWeek()
@@ -229,3 +221,5 @@ void DailyTrigger::update()
 
 
 } } // namespace scy::sked
+
+/// @\}

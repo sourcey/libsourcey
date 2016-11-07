@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup symple
+/// @{
 
 
 #include "scy/symple/form.h"
@@ -49,12 +41,12 @@ Form::Form(json::Value& root) :
 }
 
 
-Form::~Form() 
+Form::~Form()
 {
 }
 
 
-std::string Form::action() const 
+std::string Form::action() const
 {
     return root().get("action", "form").asString();
 }
@@ -67,17 +59,17 @@ bool Form::partial() const
 
 
 void Form::setPartial(bool flag)
-{    
+{
     root()["partial"] = flag;
 }
 
-    
-void Form::setAction(const std::string& action) 
+
+void Form::setAction(const std::string& action)
 {
     assert(
         action == "form" ||
         action == "submit" ||
-        action == "cancel" ||        
+        action == "cancel" ||
         action == "result"
     );
     root()["action"] = action;
@@ -86,8 +78,8 @@ void Form::setAction(const std::string& action)
 
 bool Form::valid()
 {
-    return FormElement::valid() 
-        && root().size() > 0 
+    return FormElement::valid()
+        && root().size() > 0
         && !hasErrors();
 }
 
@@ -111,7 +103,7 @@ FormElement::FormElement(json::Value& root, const std::string& type, const std::
     if (!label.empty())
         root["label"] = label;
 }
-    
+
 
 FormElement::FormElement(const FormElement& r) :
     _root(r._root)
@@ -124,9 +116,9 @@ FormElement& FormElement::operator = (const FormElement& r)
     _root = r._root;
     return *this;
 }
-    
 
-FormElement::~FormElement() 
+
+FormElement::~FormElement()
 {
 }
 
@@ -168,7 +160,7 @@ void FormElement::setLabel(const std::string& text)
 
 
 void FormElement::setHint(const std::string& text)
-{    
+{
     root()["hint"] = text;
 }
 
@@ -179,13 +171,13 @@ void FormElement::setError(const std::string& error)
 }
 
 
-FormElement FormElement::addPage(const std::string& id, const std::string& label) 
+FormElement FormElement::addPage(const std::string& id, const std::string& label)
 {
     return FormElement(root()["elements"][root()["elements"].size()], "page", id, label);
 }
 
 
-FormElement FormElement::addSection(const std::string& id, const std::string& label) 
+FormElement FormElement::addSection(const std::string& id, const std::string& label)
 {
     return FormElement(root()["elements"][root()["elements"].size()], "section", id, label);
 }
@@ -220,7 +212,7 @@ void FormElement::clear()
 
 bool FormElement::valid() const
 {
-    return _root != NULL; 
+    return _root != NULL;
 }
 
 
@@ -229,7 +221,7 @@ int FormElement::numElements()
     return root()["elements"].size();
 }
 
-    
+
 bool FormElement::hasErrors()
 {
     return json::hasNestedKey(root(), "error");
@@ -243,29 +235,29 @@ bool FormElement::live() const
 
 
 void FormElement::setLive(bool flag)
-{    
+{
     root()["live"] = flag;
 }
 
 
 
 bool FormElement::clearElements(const std::string& id, bool partial)
-{    
+{
     //json::Value& root() = section.root()();
     bool match = false;
-    json::Value result;                
+    json::Value result;
     json::Value::Members members = root().getMemberNames();
     for (unsigned i = 0; i < members.size(); i++) {
 
-        // Filter elements    
+        // Filter elements
         if (members[i] == "elements") {
             for (unsigned i = 0; i < root()["elements"].size(); i++) {
                 json::Value& element =  root()["elements"][i];
                 std::string curID = element["id"].asString();
-                if (//element.isObject() && 
-                    //element.isMember("id") && 
-                    partial ? 
-                        curID.find(id) != std::string::npos : 
+                if (//element.isObject() &&
+                    //element.isMember("id") &&
+                    partial ?
+                        curID.find(id) != std::string::npos :
                         curID == id) {
                     TraceL << "Symple form: Removing redundant: " << curID << endl;
                     match = true;
@@ -281,14 +273,14 @@ bool FormElement::clearElements(const std::string& id, bool partial)
         else
             result[members[i]] = root()[members[i]];
     }
-                
+
     *_root = result;
     return match;
 }
 
 
 bool FormElement::getField(const std::string& id, FormField& field, bool partial)
-{    
+{
     return json::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
 }
 
@@ -315,7 +307,7 @@ bool FormElement::hasPages()
 }
 
 
-json::Value& FormElement::root() const 
+json::Value& FormElement::root() const
 {
     if (_root == NULL)
         throw std::runtime_error("Form root is unassigned");
@@ -341,31 +333,31 @@ FormField::~FormField()
 {
 }
 
-    
+
 json::Value& FormField::values()
 {
     return root()["values"];
 }
 
-    
+
 std::string FormField::value() const
 {
     return root()["values"][(unsigned)0].asString();
 }
 
-    
+
 int FormField::intValue() const
 {
     return util::strtoi<std::uint32_t>(value());
 }
 
-    
+
 double FormField::doubleValue() const
 {
     return util::strtoi<double>(value());
 }
 
-    
+
 bool FormField::boolValue() const
 {
     std::string val = value();
@@ -434,5 +426,6 @@ void FormField::addValue(bool value)
 }
 
 
-} // namespace symple 
-} // namespace scy
+} } // namespace scy::smpl
+
+/// @\}

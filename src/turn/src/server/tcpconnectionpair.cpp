@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #include "scy/turn/server/tcpconnectionpair.h"
@@ -29,21 +21,21 @@ using namespace std;
 namespace scy {
 namespace turn {
 
-    
+
 TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation) :
     allocation(allocation), client(nullptr), peer(nullptr), earlyPeerData(0),
     connectionID(util::randomNumber()), isDataConnection(false)
-{        
+{
     while (!allocation.pairs().add(connectionID, this, false)) {
         connectionID = util::randomNumber();
     }
-    TraceS(this) << "Create: " << connectionID << endl;    
+    TraceS(this) << "Create: " << connectionID << endl;
 }
 
 
-TCPConnectionPair::~TCPConnectionPair() 
-{        
-    TraceS(this) << "Destroy: " << connectionID << endl;    
+TCPConnectionPair::~TCPConnectionPair()
+{
+    TraceS(this) << "Destroy: " << connectionID << endl;
 
     if (client) {
         //assert(client->base().refCount() == 2);
@@ -51,7 +43,7 @@ TCPConnectionPair::~TCPConnectionPair()
         client->Close -= sdelegate(this, &TCPConnectionPair::onConnectionClosed);
         client->close();
     }
-    if (peer) {        
+    if (peer) {
         //assert(peer->base().refCount() == 1);
         peer->Recv -= sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
         peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
@@ -66,7 +58,7 @@ TCPConnectionPair::~TCPConnectionPair()
 
 
 bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
-{    
+{
     try {
         assert(!transactionID.empty());
         peer = std::make_shared<net::TCPSocket>();
@@ -79,9 +71,9 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
         // Connect request specific events
         peer->Connect += sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
         peer->Error += sdelegate(this, &TCPConnectionPair::onPeerConnectError);
-    
+
         client->connect(peerAddr);
-    } 
+    }
     catch (std::exception& exc) {
         ErrorS(this) << "Peer connect error: " << exc.what() << endl;
         assert(0);
@@ -92,18 +84,18 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 
 
 void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
-{    
-    TraceS(this) << "Set peer socket: " 
-        << connectionID << ": " << socket->peerAddress() << endl;    
-        //<< ": " << socket./*base().*/refCount() 
+{
+    TraceS(this) << "Set peer socket: "
+        << connectionID << ": " << socket->peerAddress() << endl;
+        //<< ": " << socket./*base().*/refCount()
 
     assert(peer == nullptr);
     //assert(socket./*base().*/refCount() == 1);
     peer = socket;
     peer->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
-    
+
     // Receive and buffer early media from peer
-    peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);    
+    peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
     net::setServerSocketRecvBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
@@ -111,7 +103,7 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set client socket: "
-        << connectionID << ": " << socket->peerAddress()  << endl;    
+        << connectionID << ": " << socket->peerAddress()  << endl;
         //<< ": " << socket./*base().*/refCount()
     assert(client == nullptr);
     //assert(socket./*base().*/refCount() == 2);
@@ -123,21 +115,21 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 
 bool TCPConnectionPair::makeDataConnection()
 {
-    TraceS(this) << "Make data connection: " << connectionID << endl;    
+    TraceS(this) << "Make data connection: " << connectionID << endl;
     if (!peer || !client)
         return false;
 
     peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
-    client->Recv += sdelegate(this, &TCPConnectionPair::onClientDataReceived);    
-    
+    client->Recv += sdelegate(this, &TCPConnectionPair::onClientDataReceived);
+
     // Relase and unbind the client socket from the server.
     // The client socket instance, events and data will be
     // managed by the TCPConnectionPair from now on.
     allocation.server().releaseTCPSocket(client.get());
-            
+
     // Send early data from peer to client
     if (earlyPeerData.size()) {
-        TraceS(this) << "Flushing early media: " << earlyPeerData.size() << endl;    
+        TraceS(this) << "Flushing early media: " << earlyPeerData.size() << endl;
         client->send(earlyPeerData.data(), earlyPeerData.size());
         earlyPeerData.clear();
     }
@@ -148,18 +140,18 @@ bool TCPConnectionPair::makeDataConnection()
 
 void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceS(this) << "Peer => Client: " << buffer.size() << endl;    
+    TraceS(this) << "Peer => Client: " << buffer.size() << endl;
     //assert(pkt.buffer.position() == 0);
     //if (pkt.buffer.available() < 300)
-    //    TraceS(this) << "Peer => Client: " << pkt.buffer << endl;    
-    //auto socket = reinterpret_cast<net::Socket*>(sender);        
+    //    TraceS(this) << "Peer => Client: " << pkt.buffer << endl;
+    //auto socket = reinterpret_cast<net::Socket*>(sender);
     //char* buf = bufferCast<char*>(buf);
-    
+
     //Buffer& buf = pkt.buffer;
     const char* buf = bufferCast<const char*>(buffer);
     std::size_t len = buffer.size();
-    if (client) {    
-        
+    if (client) {
+
         allocation.updateUsage(len);
         if (allocation.deleted())
             return;
@@ -177,7 +169,7 @@ void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, c
         peer->send(policy.c_str(), policy.length() + 1);
         peer->close();
     }
-    
+
     // Buffer early media
     // TODO: Make buffer size server option
     else {
@@ -192,17 +184,17 @@ void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, c
             WarnL << "Dropping early media: Buffer at capacity >= " << maxSize << endl;
 
         //earlyPeerData.append(static_cast<const char*>(pkt.data()), len);
-        earlyPeerData.insert(earlyPeerData.end(), buf, buf + len); 
+        earlyPeerData.insert(earlyPeerData.end(), buf, buf + len);
     }
 }
 
 
 void TCPConnectionPair::onClientDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceS(this) << "Client => Peer: " << buffer.size() << endl;    
+    TraceS(this) << "Client => Peer: " << buffer.size() << endl;
     //assert(packet.buffer.position() == 0);
     //if (packet.size() < 300)
-    //    TraceS(this) << "Client => Peer: " << packet.buffer << endl;    
+    //    TraceS(this) << "Client => Peer: " << packet.buffer << endl;
 
     if (peer) {
         allocation.updateUsage(buffer.size());
@@ -216,11 +208,11 @@ void TCPConnectionPair::onClientDataReceived(void*, const MutableBuffer& buffer,
 
 void TCPConnectionPair::onPeerConnectSuccess(void* sender)
 {
-    TraceS(this) << "Peer Connect request success" << endl;    
+    TraceS(this) << "Peer Connect request success" << endl;
     assert(sender == &peer);
     peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
     peer->Error -= sdelegate(this, &TCPConnectionPair::onPeerConnectError);
-        
+
     // If no ConnectionBind request associated with this peer data
     // connection is received after 30 seconds, the peer data connection
     // MUST be closed.
@@ -234,13 +226,13 @@ void TCPConnectionPair::onPeerConnectSuccess(void* sender)
 
 void TCPConnectionPair::onPeerConnectError(void* sender, const Error& error)
 {
-    TraceS(this) << "Peer Connect request error: " << error.message << endl;    
+    TraceS(this) << "Peer Connect request error: " << error.message << endl;
     assert(sender == &peer);
     allocation.sendPeerConnectResponse(this, false);
 
     // The TCPConnectionPair will be deleted on next call to onConnectionClosed
 }
-    
+
 
 void TCPConnectionPair::onConnectionClosed(void* sender)
 {
@@ -259,9 +251,11 @@ void TCPConnectionPair::startTimeout()
 bool TCPConnectionPair::expired() const
 {
     //Mutex::ScopedLock lock(_mutex);
-    return timeout.running() 
+    return timeout.running()
         && timeout.expired();
 }
 
 
 } } // namespace scy::turn
+
+/// @\}

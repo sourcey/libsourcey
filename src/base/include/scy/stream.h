@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Stream_H
@@ -41,13 +33,13 @@ class Stream: public uv::Handle
     {
     }
 
+    /// Closes and resets the stream handle.
+    /// This will close the active socket/pipe
+    /// and destroy the uv_stream_t handle.
+    ///
+    /// If the stream is already closed this call
+    /// will have no side-effects.
     void close()
-        // Closes and resets the stream handle.
-        // This will close the active socket/pipe
-        // and destroy the uv_stream_t handle.
-        //
-        // If the stream is already closed this call
-        // will have no side-effects.
     {
         TraceL << "Close: " << ptr() << std::endl;
         if (active())
@@ -55,9 +47,9 @@ class Stream: public uv::Handle
         uv::Handle::close();
     }
 
+    /// Sends a shutdown packet to the connected peer.
+    /// Returns true if the shutdown packet was sent.
     bool shutdown()
-        // Sends a shutdown packet to the connected peer.
-        // Returns true if the shutdown packet was sent.
     {
         assertThread();
 
@@ -66,7 +58,6 @@ class Stream: public uv::Handle
             WarnL << "Attempted shutdown on closed stream" << std::endl;
             return false;
         }
-
         // XXX: Sending shutdown causes an eof error to be
         // returned via handleRead() which sets the stream
         // to error state. This is not really an error,
@@ -78,11 +69,11 @@ class Stream: public uv::Handle
         return r == 0;
     }
 
+    /// Writes data to the stream.
+    ///
+    /// Returns false if the underlying socket is closed.
+    /// This method does not throw an exception.
     bool write(const char* data, std::size_t len)
-        // Writes data to the stream.
-        //
-        // Returns false if the underlying socket is closed.
-        // This method does not throw an exception.
     {
         assertThread();
 
@@ -116,21 +107,20 @@ class Stream: public uv::Handle
         return r == 0;
     }
 
-    Buffer& buffer()
-        // Returns the read buffer.
+    Buffer& buffer()    // Returns the read buffer.
     {
         assertThread();
         return _buffer;
     }
 
+    /// Returns true if the native socket handle is closed.
     virtual bool closed() const
-        // Returns true if the native socket handle is closed.
     {
         return uv::Handle::closed();
     }
 
+    /// Signals when data can be read from the stream.
     Signal2<const char*, const int&> Read;
-        // Signals when data can be read from the stream.
 
  protected:
     virtual bool readStart()
@@ -157,8 +147,9 @@ class Stream: public uv::Handle
 
     static void handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
     {
-        auto self = reinterpret_cast<Stream*>(handle->data);
         //TraceL << "Handle read: " << nread << std::endl;
+        auto self = reinterpret_cast<Stream*>(handle->data);
+
 
         if (nread >= 0) {
             self->onRead(buf->base, nread);
@@ -181,8 +172,8 @@ class Stream: public uv::Handle
     }
 
 
-    //
-    // UV callbacks
+    ///
+    /// UV callbacks
     //
 
     static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
@@ -197,14 +188,9 @@ class Stream: public uv::Handle
 
     static void allocReadBuffer(uv_handle_t *handle, std::size_t suggested_size, uv_buf_t* buf)
     {
-        auto self = reinterpret_cast<Stream*>(handle->data);
-
-        // Reserve the recommended buffer size
-        //if (suggested_size > self->_buffer.capacity())
-        //    self->_buffer.capacity(suggested_size);
-        assert(self->_buffer.size() >= suggested_size);
-
-        // Reset the buffer position on each read
+        auto self = reinterpret_cast<Stream*>(handle->data);    // Reserve the recommended buffer size
+        //if (suggested_size > self->_buffer.capacity())    //    self->_buffer.capacity(suggested_size);
+        assert(self->_buffer.size() >= suggested_size);    /// Reset the buffer position on each read
         buf->base = self->_buffer.data();
         buf->len = self->_buffer.size();
     }
@@ -217,3 +203,5 @@ class Stream: public uv::Handle
 
 
 #endif // SCY_Stream_H
+
+/// @\}

@@ -1,20 +1,13 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @defgroup base Base module
+///
+/// The `base` module contains reusable cross platform tools and utilities.
 
 
 #ifndef SCY_H
@@ -42,32 +35,25 @@
 /// Platform and compiler definitions
 //
 
-#ifdef _WIN32
-    // Windows (x64 and x86)
+#ifdef _WIN32   /// Windows (x64 and x86)
     #define SCY_WIN
 #endif
-#if __unix__
-    // Unix
+#if __unix__    /// Unix
     #define SCY_UNIX
 #endif
-#if __posix__
-    // POSIX
+#if __posix__    /// POSIX
     #define SCY_POSIX
 #endif
-#if __linux__
-    // Linux
+#if __linux__    /// Linux
     #define SCY_LINUX
 #endif
-#if __APPLE__
-    // Mac OS
+#if __APPLE__    /// Mac OS
     #define SCY_APPLE
 #endif
-#if __GNUC__
-    // GCC compiler
+#if __GNUC__    /// GCC compiler
     #define SCY_GNUC
 #endif
-#if defined(__MINGW32__) || defined(__MINGW64__)
-    // MinGW
+#if defined(__MINGW32__) || defined(__MINGW64__)    /// MinGW
     #define SCY_MINGW
 #endif
 

@@ -1,27 +1,19 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup util
+/// @{
 
 
 #include "scy/util/streammanager.h"
 #include "scy/logger.h"
 
 
-using namespace std; 
+using namespace std;
 
 
 namespace scy {
@@ -29,11 +21,11 @@ namespace scy {
 
 StreamManager::StreamManager(bool freeClosedStreams) :
     _freeClosedStreams(freeClosedStreams)
-{    
+{
 }
 
 
-StreamManager::~StreamManager() 
+StreamManager::~StreamManager()
 {
     DebugL << "Destroy" << endl;
     closeAll();
@@ -43,8 +35,8 @@ StreamManager::~StreamManager()
 void StreamManager::closeAll()
 {
     Mutex::ScopedLock lock(_mutex);
-    
-    DebugL << "Close all streams: " << _map.size() << endl;    
+
+    DebugL << "Close all streams: " << _map.size() << endl;
     StreamManager::Map::iterator it = _map.begin();
     StreamManager::Map::iterator it2;
     while (it != _map.end()) {
@@ -60,7 +52,7 @@ void StreamManager::closeAll()
 }
 
 
-bool StreamManager::addStream(PacketStream* stream, bool whiny) 
+bool StreamManager::addStream(PacketStream* stream, bool whiny)
 {
     assert(stream);
     assert(!stream->name().empty());
@@ -68,13 +60,13 @@ bool StreamManager::addStream(PacketStream* stream, bool whiny)
 }
 
 
-PacketStream* StreamManager::getStream(const std::string& name, bool whiny) 
+PacketStream* StreamManager::getStream(const std::string& name, bool whiny)
 {
     return Manager::get(name, whiny);
 }
 
 
-bool StreamManager::closeStream(const std::string& name, bool whiny) 
+bool StreamManager::closeStream(const std::string& name, bool whiny)
 {
     assert(!name.empty());
 
@@ -107,7 +99,7 @@ void StreamManager::onAdd(PacketStream* stream)
     // Stream name can't be empty
     assert(!stream->name().empty());
 
-    // Receive callbacks after all other listeners 
+    // Receive callbacks after all other listeners
     // so we can delete the stream when it closes.
     DebugL << "stream added: " << stream->name() << endl;
     stream->StateChange += sdelegate(this, &StreamManager::onStreamStateChange, -1);
@@ -124,7 +116,7 @@ void StreamManager::onRemove(PacketStream* stream)
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&)
 {
     DebugL << "Stream state change: " << state << endl;
-    
+
     // Cantch stream closed state and free it if necessary
     if (state.equals(PacketStreamState::Closed)) {
         PacketStream* stream = reinterpret_cast<PacketStream*>(sender);
@@ -145,10 +137,10 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 }
 
 
-StreamManager::Map StreamManager::streams() const 
-{ 
+StreamManager::Map StreamManager::streams() const
+{
     Mutex::ScopedLock lock(_mutex);
-    return _map; 
+    return _map;
 }
 
 
@@ -157,7 +149,7 @@ void StreamManager::print(std::ostream& os) const
     Mutex::ScopedLock lock(_mutex);
 
     os << "StreamManager[";
-    for (StreamManager::Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {    
+    for (StreamManager::Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {
         os << "\n\t" << it->second << ": " << it->first;
     }
     os << "\n]";

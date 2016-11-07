@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_VideoCapture_H
@@ -47,51 +39,46 @@ namespace av {
 // Video Capture
 //
 
-
+/// Class for capturing video from cameras and files using OpenCV.
+/// Do not use this class directly, use VideoCapture instead.
+///
+/// To handle output packets listen in on the ICapture::emitter signal.
+///
+/// Limitations:/// OpenCV doesn't support multi-thread capturing so VideoCapture
+/// instances should be created in the main thread.
+/// File captures do not have this limitation.
+/// Also avoid creating multiple instances using the same device.
+/// Instead reuse the same instance, preferably using the
+/// MediaFactory interface.
+///
+/// Windows:/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
+/// defined otherwise capture there will be CoInitialize conflicts
+/// with the DeviceManager.
 class VideoCapture: public ICapture, public async::Runnable
-    /// Class for capturing video from cameras and files using OpenCV.
-    /// Do not use this class directly, use VideoCapture instead.
-    ///
-    /// To handle output packets listen in on the ICapture::emitter signal.
-    ///
-    /// Limitations:
-    /// OpenCV doesn't support multi-thread capturing so VideoCapture
-    /// instances should be created in the main thread.
-    /// File captures do not have this limitation.
-    /// Also avoid creating multiple instances using the same device.
-    /// Instead reuse the same instance, preferably using the
-    /// MediaFactory interface.
-    ///
-    /// Windows:
-    /// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
-    /// defined otherwise capture there will be CoInitialize conflicts
-    /// with the DeviceManager.
 {
 public:
-    typedef std::shared_ptr<VideoCapture> Ptr;
-
+    typedef std::shared_ptr<VideoCapture> Ptr;    /// Creates and opens the given device.
+    /// Should be created in the main thread.
     VideoCapture(int deviceId);
-        // Creates and opens the given device.
-        // Should be created in the main thread.
 
+    /// Creates and opens the given video file.
+    /// Can be created in any thread.
     VideoCapture(const std::string& filename);
-        // Creates and opens the given video file.
-        // Can be created in any thread.
 
+    /// Destroys the VideoCapture.
     virtual ~VideoCapture();
-        // Destroys the VideoCapture.
 
+    /// Opens the VideoCapture.
     bool open(bool whiny = true);
-        // Opens the VideoCapture.
+
 
     virtual void start();
-    virtual void stop();
-
+    virtual void stop();    /// True when the system device is open.
     bool opened() const;
-        // True when the system device is open.
 
+    /// True when the internal thread is running.
     bool running() const;
-        // True when the internal thread is running.
+
 
     void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
@@ -105,10 +92,9 @@ public:
     int width();
     int height();
     cv::Mat lastFrame() const;
-    cv::VideoCapture& capture();
-
+    cv::VideoCapture& capture();    /// Signals that the capture is closed in error.
     Signal<const scy::Error&> Error;
-        // Signals that the capture is closed in error.
+
 
 protected:
     cv::Mat grab();
@@ -175,3 +161,5 @@ public:
 
 #endif
 #endif // SCY_AV_VideoCapture_H
+
+/// @\}

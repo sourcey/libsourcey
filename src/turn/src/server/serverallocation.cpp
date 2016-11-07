@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #include "scy/turn/server/server.h"
@@ -31,7 +23,7 @@ namespace scy {
 namespace turn {
 
 
-ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const std::string& username, std::int64_t lifetime) : 
+ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const std::string& username, std::int64_t lifetime) :
     IAllocation(tuple, username, lifetime),
     _maxLifetime(server.options().allocationMaxLifetime / 1000),
     _server(server)
@@ -40,33 +32,33 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const
 }
 
 
-ServerAllocation::~ServerAllocation() 
+ServerAllocation::~ServerAllocation()
 {
-    _server.removeAllocation(this);    
+    _server.removeAllocation(this);
 }
 
 
-bool ServerAllocation::handleRequest(Request& request) 
-{    
-    TraceL << "Handle Request" << endl;    
-    
+bool ServerAllocation::handleRequest(Request& request)
+{
+    TraceL << "Handle Request" << endl;
+
     if (IAllocation::deleted()) {
-        WarnL << "Dropping request for deleted allocation" << endl;            
+        WarnL << "Dropping request for deleted allocation" << endl;
         return false;
     }
 
     if (request.methodType() == stun::Message::CreatePermission)
         handleCreatePermission(request);
-    else if (request.methodType() == stun::Message::Refresh)    
+    else if (request.methodType() == stun::Message::Refresh)
         handleRefreshRequest(request);
     else
         return false; //respondError(request, 600, "Operation Not Supported");
-    
-    return true; 
+
+    return true;
 }
 
 
-void ServerAllocation::handleRefreshRequest(Request& request) 
+void ServerAllocation::handleRefreshRequest(Request& request)
 {
     TraceL << "Handle Refresh Request" << endl;
     assert(request.methodType() == stun::Message::Refresh);
@@ -84,13 +76,13 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     // of the client's requested lifetime and the server's maximum allowed
     // lifetime.  If this computed value is greater than the default
     // lifetime, then the "desired lifetime" is the computed value.
-    // Otherwise, the "desired lifetime" is the default lifetime.    
+    // Otherwise, the "desired lifetime" is the default lifetime.
 
     // Compute the appropriate LIFETIME for this allocation.
     auto lifetimeAttr = request.get<stun::Lifetime>();
     if (!lifetimeAttr) {
         return;
-    }    
+    }
     std::uint32_t desiredLifetime = std::min<std::uint32_t>(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
     //lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 
@@ -123,28 +115,28 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     //    cause a 437 (Allocation Mismatch) response if the allocation has
     //    already been deleted, but the client will treat this as equivalent
     //    to a success response (see below).
-    
+
     stun::Message response(stun::Message::SuccessResponse, stun::Message::Refresh);
     response.setTransactionID(request.transactionID());
 
     auto resLifetimeAttr = new stun::Lifetime;
     resLifetimeAttr->setValue(desiredLifetime);
     response.add(resLifetimeAttr);
-    
+
     _server.respond(request, response);
     //request.socket->send(response, request.remoteAddress);
 }
 
 
-void ServerAllocation::handleCreatePermission(Request& request) 
-{    
+void ServerAllocation::handleCreatePermission(Request& request)
+{
     TraceL << "Handle Create Permission" << endl;
 
     // 9.2. Receiving a CreatePermission Request
-    // 
+    //
     // When the server receives the CreatePermission request, it processes
     // as per Section 4 plus the specific rules mentioned here.
-    // 
+    //
     // The message is checked for validity.  The CreatePermission request
     // MUST contain at least one XOR-PEER-ADDRESS attribute and MAY contain
     // multiple such attributes.  If no such attribute exists, or if any of
@@ -152,24 +144,24 @@ void ServerAllocation::handleCreatePermission(Request& request)
     // returned.  If the request is valid, but the server is unable to
     // satisfy the request due to some capacity limit or similar, then a 508
     // (Insufficient Capacity) error is returned.
-    // 
+    //
     // The server MAY impose restrictions on the IP address allowed in the
     // XOR-PEER-ADDRESS attribute -- if a value is not allowed, the server
     // rejects the request with a 403 (Forbidden) error.
-    // 
+    //
     // If the message is valid and the server is capable of carrying out the
     // request, then the server installs or refreshes a permission for the
     // IP address contained in each XOR-PEER-ADDRESS attribute as described
     // in Section 8.  The port portion of each attribute is ignored and may
     // be any arbitrary value.
-    // 
+    //
     // The server then responds with a CreatePermission success response.
     // There are no mandatory attributes in the success response.
-    // 
+    //
     //   NOTE: A server need not do anything special to implement
     //   idempotency of CreatePermission requests over UDP using the
     //   "stateless stack approach".  Retransmitted CreatePermission
-    //   requests will simply refresh the permissions.            
+    //   requests will simply refresh the permissions.
     //
     for (int i = 0; i < _server.options().allocationMaxPermissions; i++) {
         auto peerAttr = request.get<stun::XorPeerAddress>(i);
@@ -179,14 +171,14 @@ void ServerAllocation::handleCreatePermission(Request& request)
                 return;
             }
             else
-                break;    
+                break;
         }
         addPermission(std::string(peerAttr->address().host()));
     }
-    
+
     stun::Message response(stun::Message::SuccessResponse, stun::Message::CreatePermission);
     response.setTransactionID(request.transactionID());
-  
+
     _server.respond(request, response);
     //request.socket->send(response, request.remoteAddress);
 }
@@ -197,7 +189,7 @@ bool ServerAllocation::onTimer()
     TraceL << "ServerAllocation: On timer: " << IAllocation::deleted() << endl;
     if (IAllocation::deleted())
         return false; // bye bye
-    
+
     removeExpiredPermissions();
     return true;
 }
@@ -212,7 +204,7 @@ std::int64_t ServerAllocation::maxTimeRemaining() const
 
 std::int64_t ServerAllocation::timeRemaining() const
 {
-    //Mutex::ScopedLock lock(_mutex);    
+    //Mutex::ScopedLock lock(_mutex);
     return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
@@ -225,8 +217,8 @@ Server& ServerAllocation::server()
 
 
 void ServerAllocation::print(std::ostream& os) const
-{ 
-    os << "ServerAllocation[" 
+{
+    os << "ServerAllocation["
         << "\r\tTuple=" << _tuple
         << "\r\tUsername=" << username()
         << "\n\tBandwidth Limit=" << bandwidthLimit()
@@ -243,3 +235,5 @@ void ServerAllocation::print(std::ostream& os) const
 
 
 } } // namespace scy::turn
+
+/// @\}

@@ -1,19 +1,9 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-//
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
 
 
@@ -25,14 +15,9 @@
 #include "scy/test.h"
 #include "scy/logger.h"
 #include "scy/av/devicemanager.h"
-// #include "scy/av/flvmetadatainjector.h"
-// #include "scy/av/formatregistry.h"
-// #include "scy/av/mediafactory.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/multiplexpacketencoder.h"
 #include "scy/av/realtimepacketqueue.h"
-// #include "scy/av/thumbnailer.h"
-// #include "scy/av/iencoder.h"
 #include "scy/av/videocapture.h"
 #include "scy/av/audiocapture.h"
 #include "scy/av/audioencoder.h"
@@ -189,9 +174,7 @@ class AudioEncoderTest: public Test
         encoder.flush();
         encoder.close();
         output.close();
-        util::clearVector<>(testSamples);
-
-        // TODO: verify data integrity
+        util::clearVector<>(testSamples);    /// TODO: verify data integrity
         expect(numFramesEncoded > 0);
     }
 
@@ -236,9 +219,7 @@ class AudioResamplerTest: public Test
 
         resampler.close();
         output.close();
-        util::clearVector<>(testSamples);
-
-        // TODO: verify data integrity
+        util::clearVector<>(testSamples);    /// TODO: verify data integrity
     }
 };
 
@@ -303,8 +284,7 @@ class VideoFileTranscoderTest: public Test
         while(!capture->stopping()) {
             cout << "Waiting for completion" << endl;
             scy::sleep(10);
-        }
-        // TODO: verify data integrity
+        }    // TODO: verify data integrity
     }
 };
 
@@ -332,9 +312,10 @@ class AudioCaptureTest: public Test
         }
 
         // Create a media capture to read and decode the input file
-        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
         // av::MediaCapture capture;
         // capture.openFile("test.mp4");
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
+
         capture.emitter.attach(packetDelegate(this, &AudioCaptureTest::onAudioCaptured));
         capture.start();
 
@@ -387,9 +368,11 @@ class AudioCaptureEncoderTest: public Test
         }
 
         // Create a media capture to read and decode the input file
-        av::AudioCapture capture(device.id, inNbChannels, inSampleRate); //(std::make_shared<av::AudioCapture>(device.id, inNbChannels, inSampleRate));
         // av::MediaCapture::Ptr capture;
         // capture.openFile("test.mp4");
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
+        //(std::make_shared<av::AudioCapture>(device.id, inNbChannels, inSampleRate));
+
         capture.getEncoderAudioCodec(iparams);
         capture.start();
 
@@ -419,13 +402,13 @@ class AudioCaptureEncoderTest: public Test
         }
 
         // while(!capture.stopping()) {
-        //     cout << "Waiting for completion" << endl;
         //     scy::sleep(10);
         // }
+        // cout << "Waiting for completion" << endl;
 
         cout << "Number samples remaining: " << encoder.fifo.available() << endl;
-        expect(encoder.fifo.available() < 1024);
         // assert(encoder.fifo.available() == 0);
+        expect(encoder.fifo.available() < 1024);
 
         capture.stop();
         encoder.close();
@@ -482,9 +465,10 @@ class AudioCaptureResamplerTest: public Test
             return;
         }
 
-        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
         // av::MediaCapture::Ptr capture;
         // capture.openFile("test.mp4");
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
+
         capture.getEncoderAudioCodec(iparams);
         capture.start();
 
@@ -585,7 +569,7 @@ class RealtimeMediaQueueTest: public Test
 
     void run()
     {
-        // Create the multiplex encoder
+        /// Create the multiplex encoder
         // auto queue(std::make_shared<av::RealtimePacketQueue<>());
 
         stream.attachSource(new MockMediaPacketSource, true, true);
@@ -1631,3 +1615,5 @@ class RealtimeMediaQueueTest: public Test
 
 
 #endif // SCY_AV_Tests_H
+
+/// @\}

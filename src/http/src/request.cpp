@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #include "scy/http/request.h"
@@ -26,7 +18,7 @@
 using std::endl;
 
 
-namespace scy { 
+namespace scy {
 namespace http {
 
 
@@ -46,7 +38,7 @@ Request::Request() :
 {
 }
 
-    
+
 Request::Request(const std::string& version) :
     http::Message(version),
     _method(Method::Get),
@@ -54,7 +46,7 @@ Request::Request(const std::string& version) :
 {
 }
 
-    
+
 Request::Request(const std::string& method, const std::string& uri) :
     _method(method),
     _uri(uri)
@@ -92,7 +84,7 @@ void Request::setHost(const std::string& host)
     set("Host", host);
 }
 
-    
+
 void Request::setHost(const std::string& host, std::uint16_t port)
 {
     std::string value(host);
@@ -103,7 +95,7 @@ void Request::setHost(const std::string& host, std::uint16_t port)
     setHost(value);
 }
 
-    
+
 const std::string& Request::getHost() const
 {
     return get("Host");
@@ -134,7 +126,7 @@ void Request::setCookies(const NVCollection& cookies)
     add("Cookie", cookie);
 }
 
-    
+
 void Request::getCookies(NVCollection& cookies) const
 {
     NVCollection::ConstIterator it = find("Cookie");
@@ -144,9 +136,9 @@ void Request::getCookies(NVCollection& cookies) const
     }
 }
 
-    
+
 void Request::getURIParameters(NVCollection& params) const
-{    
+{
     http::splitURIParameters(getURI(), params);
 }
 
@@ -156,13 +148,13 @@ bool Request::hasCredentials() const
     return has("Authorization");
 }
 
-    
+
 void Request::getCredentials(std::string& scheme, std::string& authInfo) const
 {
     getCredentials("Authorization", scheme, authInfo);
 }
 
-    
+
 void Request::setCredentials(const std::string& scheme, const std::string& authInfo)
 {
     setCredentials("Authorization", scheme, authInfo);
@@ -174,13 +166,13 @@ bool Request::hasProxyCredentials() const
     return has("Proxy-Authorization");
 }
 
-    
+
 void Request::getProxyCredentials(std::string& scheme, std::string& authInfo) const
 {
     getCredentials("Proxy-Authorization", scheme, authInfo);
 }
 
-    
+
 void Request::setProxyCredentials(const std::string& scheme, const std::string& authInfo)
 {
     setCredentials("Proxy-Authorization", scheme, authInfo);
@@ -211,7 +203,7 @@ void Request::getCredentials(const std::string& header, std::string& scheme, std
     else throw std::runtime_error("Request is not authenticated");
 }
 
-    
+
 void Request::setCredentials(const std::string& header, const std::string& scheme, const std::string& authInfo)
 {
     std::string auth(scheme);
@@ -222,3 +214,5 @@ void Request::setCredentials(const std::string& header, const std::string& schem
 
 
 } } // namespace scy::http
+
+/// @\}

@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
 
@@ -108,32 +100,38 @@ public:
 
     void setMicrophones(const std::vector<Device>& devices) 
     {
-        //input_devices_.clear();
-        //for (std::size_t i = 0; i < devices.size(); ++i) {
-        //    input_devices_.push_back(Device(devices[i], i));
+        //for (std::size_t i = 0; i < devices.size(); ++i) {    
+    ///    input_devices_.push_back(Device(devices[i], i));
         //}
-        input_devices_ = devices;
+        //input_devices_.clear();
+
         //DevicesChanged();
+        input_devices_ = devices;
+
     }
 
     void setSpeakers(const std::vector<Device>& devices) 
     {
-        //output_devices_.clear();
-        //for (std::size_t i = 0; i < devices.size(); ++i) {
-        //    output_devices_.push_back(Device(devices[i], i));
+        //for (std::size_t i = 0; i < devices.size(); ++i) {    
+    ///    output_devices_.push_back(Device(devices[i], i));
         //}        
-        output_devices_ = devices;
+        //output_devices_.clear();
+
         //DevicesChanged();
+        output_devices_ = devices;
+
     }
 
     void setCameras(const std::vector<Device>& devices) 
     {
-        //vidcap_devices_.clear();
-        //for (std::size_t i = 0; i < devices.size(); ++i) {
-        //    vidcap_devices_.push_back(Device(devices[i], i));
+        //for (std::size_t i = 0; i < devices.size(); ++i) {    
+    ///    vidcap_devices_.push_back(Device(devices[i], i));
         //}        
-        vidcap_devices_ = devices;
+        //vidcap_devices_.clear();
+
         //DevicesChanged();
+        vidcap_devices_ = devices;
+
     }
 
 

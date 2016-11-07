@@ -3,7 +3,7 @@
 #include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/util.h"
-#include "scy/archo/zip.h"
+#include "scy/archo/zipfile.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -15,7 +15,7 @@ using namespace scy;
 
 
 namespace scy {
-namespace arc {
+namespace archo {
 
 
 class Tests
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("Test", LTrace));
     {
-        arc::Tests app;
+        archo::Tests app;
     }
     Logger::destroy();
     return 0;

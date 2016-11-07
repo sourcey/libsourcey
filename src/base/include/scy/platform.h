@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Platform_H
@@ -26,30 +18,29 @@
 
 
 namespace scy {
-    
-        
+
+
 //
 /// Cross-platform utilities
 //
-    
+
+/// Returns the current executable path.
 std::string getExePath();
-    // Returns the current executable path.
 
+/// Return the current working directory.
 std::string getCwd();
-    // Return the current working directory.
 
+/// Returns the current amount of free memory.
 std::uint64_t getFreeMemory();
-    // Returns the current amount of free memory.
 
+/// Returns the current amount of used memory.
 std::uint64_t getTotalMemory();
-    // Returns the current amount of used memory.
 
+/// Pause the current thread for the given ms duration.
 void sleep(int ms);
-    // Pause the current thread for the given ms duration.
 
+/// Pause the current thread until enter is pressed.
 void pause();
-    // Pause the current thread until enter is pressed.
-
 
 
 //
@@ -74,3 +65,5 @@ std::string toUtf8(const std::wstring& wstr);
 
 
 #endif // SCY_Platform_H
+
+/// @\}

@@ -280,7 +280,8 @@ Symple.Client = Symple.Dispatcher.extend({
             this.listeners[event].push({
                 fn: fn,             // data callback function
                 after: after,       // after data callback function
-                filters: filters    // event filter object for matching response
+                filters: filters
+    // event filter object for matching response
             });
     },
 

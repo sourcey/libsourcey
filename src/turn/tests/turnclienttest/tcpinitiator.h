@@ -21,16 +21,16 @@ struct TCPInitiator: public TCPClientObserver
 {
     int id;
     int frames;
-    bool success;
     TCPClient client;
     net::Address lastPeerAddr;
-    
+    bool success;
+
     NullSignal AllocationCreated;
-    Signal<const net::Address&>    ConnectionCreated;
+    Signal<const net::Address&> ConnectionCreated;
     Signal<bool> TestComplete;
 
-    TCPInitiator(int id, const Client::Options opts) : 
-        id(id), client(*this, opts), success(false) 
+    TCPInitiator(int id, const Client::Options opts) :
+        id(id), client(*this, opts), success(false)
     {
         DebugS(this) << id << ": Creating" << endl;
     }
@@ -40,28 +40,28 @@ struct TCPInitiator: public TCPClientObserver
         DebugS(this) << id << ": Destroying" << endl;
     }
 
-    void initiate(const std::string& peerIP) 
+    void initiate(const std::string& peerIP)
     {
         DebugS(this) << id << ": Initializing" << endl;
         try    {
             client.addPermission(peerIP);
-            client.addPermission("127.0.0.1");        
-            client.addPermission("192.168.1.1");            
+            client.addPermission("127.0.0.1");
+            client.addPermission("192.168.1.1");
             client.initiate();
-        } 
+        }
         catch (std::exception& exc) {
             ErrorS(this) << id << ": Error: " << exc.what() << std::endl;
         }
     }
 
-    void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
+    void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch(state.id()) {
-        case ClientState::None:                
+        case ClientState::None:
             break;
-        case ClientState::Allocating:                
+        case ClientState::Allocating:
             break;
         case ClientState::Authorizing:
             //success = true;
@@ -78,33 +78,30 @@ struct TCPInitiator: public TCPClientObserver
             //assert(false);
             success = false;
             TestComplete.emit(this, success);
+        //case ClientState::Terminated:                    //    break;
             break;
-        //case ClientState::Terminated:                
-        //    break;
+
         }
     }
-    
-    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //std::uint32_t connectionID, 
+
+    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //std::uint32_t connectionID,
     {
         DebugS(this) << id << ": Connection Created: " << peerAddr << endl;
-                
-        // Send the intial data packet to peer
-        //client.sendData("hello peer", 10, peerAddr);
-
-        // Remember the last peer
+                    // Send the intial data packet to peer
+        //client.sendData("hello peer", 10, peerAddr);    /// Remember the last peer
         lastPeerAddr = peerAddr;
         ConnectionCreated.emit(this, peerAddr);
     }
 
-    void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) 
+    void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr)
     {
         DebugS(this) << id << ": Connection Closed" << endl;
     }
 
     void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
-    {        
+    {
         std::string payload(data, size);
-        
+
         /*
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() == 8) {
@@ -127,12 +124,12 @@ struct TCPInitiator: public TCPClientObserver
         else
             DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
         */
-        
+            // Echo back to peer
         DebugS(this) << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
-        // Echo back to peer
+
         client.sendData(data, size, peerAddr);
     }
-    
+
     void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;
@@ -147,13 +144,13 @@ struct TCPInitiator: public TCPClientObserver
 
 
 
-    
+
 
     /*
-    bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const net::Address& peerAddr) 
-    { 
+    bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const net::Address& peerAddr)
+    {
         DebugS(this) << "TCPInitiator: " << id << ": Connection Attempt: " << peerAddr << endl;
-        return true; 
+        return true;
     };
     */
 
@@ -167,7 +164,7 @@ struct TCPInitiator: public TCPClientObserver
             _dataSocket = NULL;
         }
     }
-        
+
     void onRawPacketReceived(void* sender, RawPacket& packet)
     {
         //DebugS(this) << "TCPInitiator: " << id << ": Data Packet Received: " << std::string(packet.data, packet.size) << endl;
@@ -176,11 +173,11 @@ struct TCPInitiator: public TCPClientObserver
 
     void onDataSocketStateChange(void* sender, Net::ClientState& state, const Net::ClientState&)
     {
-        DebugS(this) << "Connection state change: " << state.toString() << endl;    
-    
+        DebugS(this) << "Connection state change: " << state.toString() << endl;
+
         switch (state.id()) {
-        case Net::ClientState::Disconnected: 
-        //case Net::ClientState::Error: 
+        case Net::ClientState::Disconnected:
+        //case Net::ClientState::Error:
             _dataSocket = NULL;
             break;
         }

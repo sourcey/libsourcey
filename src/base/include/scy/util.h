@@ -1,21 +1,13 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
-// This file uses functions from POCO C++ Libraries (license below)
+/// @addtogroup base
+/// @{
+// This file uses some functions from POCO C++ Libraries (license below)
 //
 
 
@@ -39,62 +31,62 @@ namespace scy {
 namespace util {
 
 
+/// Printf style string formatting for POD types.
 std::string format(const char* fmt, ...);
-    // Printf style string formatting for POD types.
 
+/// Replaces special characters in the given string with
+/// underscores and transform to lowercase.
 void toUnderscore(std::string& str);
-    // Replaces special characters in the given string with
-    // underscores and transform to lowercase.
 
+/// Checks if the string is a number
 bool isNumber(const std::string& str);
-    // Checks if the string is a number
 
+/// Returns true if the string ends with the given substring.
 bool endsWith(const std::string& str, const std::string& suffix);
-    // Returns true if the string ends with the given substring.
 
+/// Replaces non-alphanumeric characters.
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
-    // Replaces non-alphanumeric characters.
 
+/// String to hex value.
 bool tryParseHex(const std::string& s, unsigned& value);
 unsigned parseHex(const std::string& s);
-    // String to hex value.
 
+/// Dumps the binary representation of the
+/// given buffer to the output string.
 std::string dumpbin(const char* data, std::size_t len);
-    // Dumps the binary representation of the
-    // given buffer to the output string.
 
+/// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
+/// If L (local) is greater than R (remote) the function returns true.
+/// If L is equal or less than R the function returns false.
 bool compareVersion(const std::string& l, const std::string& r);
-    // Compares two version strings ie. 3.7.8.0 > 3.2.1.0
-    // If L (local) is greater than R (remote) the function returns true.
-    // If L is equal or less than R the function returns false.
 
+/// Matches two node lists against each other.
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
 bool matchNodes(const std::vector<std::string>& params, const std::vector<std::string>& xparams);
-    // Matches two node lists against each other.
 
+/// Returns the pointer memory address as a string.
 std::string memAddress(const void* ptr);
-    // Returns the pointer memory address as a string.
 
 
 //
 // Type converters
 //
 
+/// Converts integer T to string.
 template<typename T>
 std::string itostr(const T& t)
-    // Converts integer T to string.
 {
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
 
+/// Converts string to integer T.
+/// Ensure the integer type has
+/// sufficient storage capacity.
 template<typename T>
 T strtoi(const std::string& s)
-    // Converts string to integer T.
-    // Ensure the integer type has
-    // sufficient storage capacity.
 {
     std::istringstream iss(s);
     T x;
@@ -104,14 +96,14 @@ T strtoi(const std::string& s)
 }
 
 #if 0
+/// Interger to double
 double intToDouble(std::int64_t v);
-    // Interger to double
 
+/// Interger to float
 float intToFloat(std::int32_t v);
-    // Interger to float
 
+/// Double to interger
 std::int64_t doubleToInt(double d);
-    // Double to interger
 #endif
 
 
@@ -119,27 +111,27 @@ std::int64_t doubleToInt(double d);
 // Random generators
 //
 
+/// Generates a 31-bit pseudo random number.
 std::uint32_t randomNumber();
-    // Generates a 31-bit pseudo random number.
 
+/// Generates a random string.
 std::string randomString(int size);
-    // Generates a random string.
 
+/// Generates a random (optionally base64 encoded) binary key.
 std::string randomBinaryString(int size, bool doBase64 = false);
-    // Generates a random (optionally base64 encoded) binary key.
 
 
 //
 // String splitters
 //
 
+/// Splits the given string at the delimiter string.
 void split(const std::string& str, const std::string& delim, std::vector<std::string>& elems, int limit = -1);
 std::vector<std::string> split(const std::string& str, const std::string& delim, int limit = -1);
-    // Splits the given string at the delimiter string.
 
+/// Splits the given string at the delimiter character.
 void split(const std::string& str, char delim, std::vector<std::string>& elems, int limit = -1);
 std::vector<std::string> split(const std::string& str, char delim, int limit = -1);
-    // Splits the given string at the delimiter character.
 
 
 //
@@ -193,10 +185,10 @@ S& replaceInPlace(S& str, const typename S::value_type* from, const typename S::
     return str;
 }
 
+/// Replace all occurences of from (which must not be the empty string)
+/// in str with to, starting at position start.
 template <class S>
 S replace(const S& str, const S& from, const S& to, typename S::size_type start = 0)
-    /// Replace all occurences of from (which must not be the empty string)
-    /// in str with to, starting at position start.
 {
     S result(str);
     replaceInPlace(result, from, to, start);
@@ -216,10 +208,10 @@ S replace(const S& str, const typename S::value_type* from, const typename S::va
 // String trimming
 //
 
+/// Returns a copy of str with all leading
+/// whitespace removed.
 template <class S>
 S trimLeft(const S& str)
-    /// Returns a copy of str with all leading
-    /// whitespace removed.
 {
     typename S::const_iterator it  = str.begin();
     typename S::const_iterator end = str.end();
@@ -228,9 +220,9 @@ S trimLeft(const S& str)
     return S(it, end);
 }
 
+/// Removes all leading whitespace in str.
 template <class S>
 S& trimLeftInPlace(S& str)
-    /// Removes all leading whitespace in str.
 {
     typename S::iterator it  = str.begin();
     typename S::iterator end = str.end();
@@ -240,10 +232,10 @@ S& trimLeftInPlace(S& str)
     return str;
 }
 
+/// Returns a copy of str with all trailing
+/// whitespace removed.
 template <class S>
 S trimRight(const S& str)
-    /// Returns a copy of str with all trailing
-    /// whitespace removed.
 {
     int pos = int(str.size()) - 1;
 
@@ -251,9 +243,9 @@ S trimRight(const S& str)
     return S(str, 0, pos + 1);
 }
 
+/// Removes all trailing whitespace in str.
 template <class S>
 S& trimRightInPlace(S& str)
-    /// Removes all trailing whitespace in str.
 {
     int pos = int(str.size()) - 1;
 
@@ -263,10 +255,10 @@ S& trimRightInPlace(S& str)
     return str;
 }
 
+/// Returns a copy of str with all leading and
+/// trailing whitespace removed.
 template <class S>
 S trim(const S& str)
-    /// Returns a copy of str with all leading and
-    /// trailing whitespace removed.
 {
     int first = 0;
     int last  = int(str.size()) - 1;
@@ -277,9 +269,9 @@ S trim(const S& str)
     return S(str, first, last - first + 1);
 }
 
+/// Removes all leading and trailing whitespace in str.
 template <class S>
 S& trimInPlace(S& str)
-    /// Removes all leading and trailing whitespace in str.
 {
     int first = 0;
     int last  = int(str.size()) - 1;
@@ -298,9 +290,9 @@ S& trimInPlace(S& str)
 // String case conversion
 //
 
+/// Returns a copy of str containing all upper-case characters.
 template <class S>
 S toUpper(const S& str)
-    /// Returns a copy of str containing all upper-case characters.
 {
     typename S::const_iterator it  = str.begin();
     typename S::const_iterator end = str.end();
@@ -311,9 +303,9 @@ S toUpper(const S& str)
     return result;
 }
 
+/// Replaces all characters in str with their upper-case counterparts.
 template <class S>
 S& toUpperInPlace(S& str)
-    /// Replaces all characters in str with their upper-case counterparts.
 {
     typename S::iterator it  = str.begin();
     typename S::iterator end = str.end();
@@ -322,9 +314,9 @@ S& toUpperInPlace(S& str)
     return str;
 }
 
+/// Returns a copy of str containing all lower-case characters.
 template <class S>
 S toLower(const S& str)
-    /// Returns a copy of str containing all lower-case characters.
 {
     typename S::const_iterator it  = str.begin();
     typename S::const_iterator end = str.end();
@@ -335,9 +327,9 @@ S toLower(const S& str)
     return result;
 }
 
+/// Replaces all characters in str with their lower-case counterparts.
 template <class S>
 S& toLowerInPlace(S& str)
-    /// Replaces all characters in str with their lower-case counterparts.
 {
     typename S::iterator it  = str.begin();
     typename S::iterator end = str.end();
@@ -351,6 +343,7 @@ S& toLowerInPlace(S& str)
 // String case-insensative comparators (POCO)
 //
 
+/// Case-insensitive string comparison
 template <class S, class It>
 int icompare(
     const S& str,
@@ -358,7 +351,6 @@ int icompare(
     typename S::size_type n,
     It it2,
     It end2)
-    /// Case-insensitive string comparison
 {
     typename S::size_type sz = str.size();
     if (pos > sz) pos = sz;
@@ -504,7 +496,7 @@ int icompare(
 
 
 //
-// Stream copiers (POCO)
+// Stream copiers
 //
 
 std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
@@ -568,10 +560,10 @@ struct Version
 // Container helpers
 //
 
+/// Delete all elements from a list of pointers.
+/// @param L List of pointers to delete.
 template<typename Val>
 inline void clearList(std::list<Val*>& L)
-    // Delete all elements from a list of pointers.
-    // @param L List of pointers to delete.
 {
     typename std::list<Val*>::iterator it = L.begin();
     while (it != L.end()) {
@@ -580,10 +572,10 @@ inline void clearList(std::list<Val*>& L)
     }
 }
 
+/// Delete all elements from a list of pointers.
+/// @param D List of pointers to delete.
 template<typename Val>
 inline void clearDeque(std::deque<Val*>& D)
-    // Delete all elements from a list of pointers.
-    // @param D List of pointers to delete.
 {
     typename std::deque<Val*>::iterator it = D.begin();
     while (it != D.end()) {
@@ -592,10 +584,10 @@ inline void clearDeque(std::deque<Val*>& D)
     }
 }
 
+// /// Delete all elements from a list of pointers.
+// /// @param D List of pointers to delete.
 // template<typename Val>
 // inline void clearPriorityDeque(std::priority_queue<Val*>& D)
-//     // Delete all elements from a list of pointers.
-//     // @param D List of pointers to delete.
 // {
 //     while (!D.empty()) {
 //         delete D.top();
@@ -603,23 +595,24 @@ inline void clearDeque(std::deque<Val*>& D)
 //     }
 // }
 
+/// Delete all elements from a vector of pointers.
+/// @param V Vector of pointers to delete.
 template<typename Val>
 inline void clearVector(std::vector<Val*>& V)
-    // Delete all elements from a vector of pointers.
-    // @param V Vector of pointers to delete.
 {
     typename std::vector<Val*>::iterator it = V.begin();
     while (it != V.end()) {
-        delete *it;
         //Deleter::func(*it);
+        delete *it;
+
         it = V.erase(it);
     }
 }
 
+/// Delete all associated values from a map (not the key elements).
+/// @param M Map of pointer values to delete.
 template<typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
-    // Delete all associated values from a map (not the key elements).
-    // @param M Map of pointer values to delete.
 {
     typename std::map<Key, Val*>::iterator it = M.begin();
     typename std::map<Key, Val*>::iterator it2;
@@ -630,11 +623,11 @@ inline void clearMap(std::map<Key, Val*>& M)
     }
 }
 
+/// Delete all associated values from a map (not the key elements)
+/// using the given deleter method.
+/// @param M Map of pointer values to delete.
 template<typename Deleter, typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
-    // Delete all associated values from a map (not the key elements)
-    // using the given deleter method.
-    // @param M Map of pointer values to delete.
 {
     typename std::map<Key, Val*>::iterator it = M.begin();
     typename std::map<Key, Val*>::iterator it2;
@@ -646,11 +639,11 @@ inline void clearMap(std::map<Key, Val*>& M)
     }
 }
 
+/// Delete all associated values from a map (not the key elements).
+/// Const key type version.
+/// @param M Map of pointer values to delete.
 template<typename Key, typename Val>
 inline void clearMap(std::map<const Key, Val*>& M)
-    // Delete all associated values from a map (not the key elements).
-    // Const key type version.
-    // @param M Map of pointer values to delete.
 {
     typename std::map<const Key, Val*>::iterator it = M.begin();
     typename std::map<const Key, Val*>::iterator it2;
@@ -667,6 +660,8 @@ inline void clearMap(std::map<const Key, Val*>& M)
 
 
 #endif // SCY_Util_H
+
+/// @\}
 
 
 //

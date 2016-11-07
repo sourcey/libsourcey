@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #ifndef SCY_HTTP_Client_H
@@ -24,7 +16,7 @@
 #include "scy/net/socket.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/sslsocket.h"
-#include "scy/net/network.h"
+#include "scy/net/dns.h"
 #include "scy/http/connection.h"
 #include "scy/http/websocket.h"
 #include "scy/timer.h"
@@ -41,47 +33,47 @@ class ClientConnection: public Connection
 public:
     typedef std::shared_ptr<ClientConnection> Ptr;
 
+    /// Create a standalone connection with the given host.
     ClientConnection(const URL& url, const net::Socket::Ptr& socket = nullptr);
-        // Create a standalone connection with the given host.
 
     virtual ~ClientConnection();
 
+    /// Send the HTTP request.
+    ///
+    /// Calls connect() internally if the socket is not
+    /// already connecting or connected. The actual request
+    /// will be sent when the socket is connected.
     virtual void send();
-        // Send the HTTP request.
-        //
-        // Calls connect() internally if the socket is not
-        // already connecting or connected. The actual request
-        // will be sent when the socket is connected.
 
+    /// Send the given HTTP request.
+    /// The given request will overwrite the internal HTTP
+    /// request object.
+    ///
+    /// Calls connect() internally if the socket is not
+    /// already connecting or connected. The actual request
+    /// will be sent when the socket is connected.
     virtual void send(http::Request& req);
-        // Send the given HTTP request.
-        // The given request will overwrite the internal HTTP
-        // request object.
-        //
-        // Calls connect() internally if the socket is not
-        // already connecting or connected. The actual request
-        // will be sent when the socket is connected.
 
     virtual int send(const char* data, std::size_t len, int flags = 0);
     //virtual int send(const std::string& buf, int flags = 0);
     //virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
     //virtual void sendData(const std::string& buf); //, int flags = 0
-        // Send raw data to the peer.
-        // Calls send() internally.
-        //
-        // Throws an exception if the socket is not already or connected.
+    // Send raw data to the peer.
+    // Calls send() internally.
+    //
+    // Throws an exception if the socket is not already or connected.
 
+    /// Forcefully closes the HTTP connection.
     virtual void close();
-        // Forcefully closes the HTTP connection.
 
+    /// Set the output stream for writing response data to.
+    /// The stream pointer is managed internally,
+    /// and will be freed along with the connection.
     virtual void setReadStream(std::ostream* os);
-        // Set the output stream for writing response data to.
-        // The stream pointer is managed internally,
-        // and will be freed along with the connection.
 
+    /// Return the cast read stream pointer or nullptr.
     template<class StreamT>
     StreamT& readStream()
-        // Return the cast read stream pointer or nullptr.
     {
         auto adapter = Incoming.getProcessor<StreamWriter>();
         if (!adapter)
@@ -90,11 +82,10 @@ public:
         return adapter->stream<StreamT>();
     }
 
+    /// Optional unmanaged client data pointer.
     void* opaque;
-        // Optional unmanaged client data pointer.
 
-    //
-    /// Internal callbacks
+    ///// Internal callbacks
 
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
@@ -102,18 +93,17 @@ public:
     virtual void onComplete();
     virtual void onClose();
 
-    //
-    /// Status signals
+    ///// Status signals
 
-    NullSignal Connect;                     // Signal when the client socket is connected and data can flow
-    Signal<Response&> Headers;              // Signal when the response HTTP header has been received
-    Signal<const MutableBuffer&> Payload;   // Signal when raw data is received
-    Signal<const Response&> Complete;       // Signal when the HTTP transaction is complete
+    NullSignal Connect;                     ///< Signal when the client socket is connected and data can flow
+    Signal<Response&> Headers;              ///<  Signal when the response HTTP header has been received
+    Signal<const MutableBuffer&> Payload;   ///<  Signal when raw data is received
+    Signal<const Response&> Complete;       ///<  Signal when the HTTP transaction is complete
 
 protected:
+    /// Connects to the server endpoint.
+    /// All sent data is buffered until the connection is made.
     virtual void connect();
-        // Connects to the server endpoint.
-        // All sent data is buffered until the connection is made.
 
     http::Client* client();
     http::Message* incomingHeader();
@@ -124,7 +114,6 @@ protected:
 
 protected:
     URL _url;
-    // std::ostream* _readStream;
     std::vector<std::string> _outgoingBuffer;
     bool _connect;
     bool _active;
@@ -177,8 +166,9 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = 
         conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
                 deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
         //replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
+        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
+
     }
     else if (url.scheme() == "wss") {
         //conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
@@ -205,14 +195,14 @@ public:
     Client();
     virtual ~Client();
 
+    /// Return the default HTTP Client singleton.
     static Client& instance();
-        // Return the default HTTP Client singleton.
 
+    /// Destroys the default HTTP Client singleton.
     static void destroy();
-        // Destroys the default HTTP Client singleton.
 
+    /// Shutdown the Client and close all connections.
     void shutdown();
-        // Shutdown the Client and close all connections.
 
     template<class ConnectionT>
     ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
@@ -308,3 +298,5 @@ public:
 
 
 #endif
+
+/// @\}

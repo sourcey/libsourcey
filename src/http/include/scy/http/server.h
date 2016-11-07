@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup http
+/// @{
 
 
 #ifndef SCY_HTTP_Server_H
@@ -45,11 +37,12 @@ public:
     ServerConnection(Server& server, net::Socket::Ptr socket);
     virtual ~ServerConnection();
 
-    //virtual bool send();
-        /// Sends the HTTP response
+    /// Sends the HTTP response
+    // virtual bool send();
 
+    /// Closes the HTTP connection
     virtual void close();
-        // Closes the HTTP connection
+
 
 protected:
     virtual void onHeaders();
@@ -62,8 +55,7 @@ protected:
     http::Message* incomingHeader();
     http::Message* outgoingHeader();
 
-    //
-    /// Server callbacks
+    ///// Server callbacks
     //void onServerShutdown(void*);
 
 protected:
@@ -91,15 +83,16 @@ public:
 
 // -------------------------------------------------------------------
 //
+
+/// The abstract base class for HTTP ServerResponders
+/// created by HTTP Server.
+///
+/// Derived classes must override the handleRequest() method.
+///
+/// A new HTTPServerResponder object will be created for
+/// each new HTTP request that is received by the HTTP Server.
+///
 class ServerResponder
-    /// The abstract base class for HTTP ServerResponders
-    /// created by HTTP Server.
-    ///
-    /// Derived classes must override the handleRequest() method.
-    ///
-    /// A new HTTPServerResponder object will be created for
-    /// each new HTTP request that is received by the HTTP Server.
-    ///
 {
 public:
     ServerResponder(ServerConnection& connection) :
@@ -140,33 +133,35 @@ private:
 };
 
 
-// -------------------------------------------------------------------
-//
+/// -------------------------------------------------------------------
+///
+
+/// This implementation of a ServerResponderFactory
+/// is used by HTTPServer to create ServerResponder objects.
 class ServerResponderFactory
-    /// This implementation of a ServerResponderFactory
-    /// is used by HTTPServer to create ServerResponder objects.
 {
 public:
     ServerResponderFactory() {};
     virtual ~ServerResponderFactory() {};
 
+    /// Factory method for instantiating the ServerResponder
+    /// instance using the given ServerConnection.
     virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
-        /// Factory method for instantiating the ServerResponder
-        /// instance using the given ServerConnection.
+
 };
 
 
 // -------------------------------------------------------------------
 //
+
+/// DISCLAIMER: This HTTP server is not standards compliant.
+/// It was created to be a fast (nocopy where possible)
+/// solution for streaming video to web browsers.
+///
+/// TODO:
+/// - SSL Server
+/// - Enable responders (controllers?) to be instantiated via registered routes.
 class Server
-    /// DISCLAIMER: This HTTP server is not intended to be standards
-    /// compliant. It was created to be a fast (nocopy where possible)
-    /// solution for streaming video to web browsers.
-    ///
-    /// TODO:
-    /// - SSL Server
-    /// - Enable responders (controllers?) to be instantiated via
-    ///    registered routes.
 {
 public:
     net::TCPSocket::Ptr socket;
@@ -224,49 +219,4 @@ public:
 
 #endif
 
-
-
-
-/*
-// ---------------------------------------------------------------------
-//
-class FlashPolicyConnectionHook: public ServerResponder
-{
-public:
-    Poco::Net::TCPServerConnection* createConnection(const Poco::Net::StreamSocket& socket, const std::string& rawRequest)
-    {
-        try
-        {
-            if (rawRequest.find("policy-file-request") != std::string::npos) {
-                traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain XMLSocket Policy" << std::endl;
-                return new Net::FlashPolicyRequestHandler(socket, false);
-            }
-            else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
-                traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain HTTP Policy" << std::endl;
-                return new Net::FlashPolicyRequestHandler(socket, true);
-            }
-        }
-        catch (std::exception&Exception& exc)
-        {
-            LogError("ServerConnectionHook") << "Bad Request: " << exc.what()/message()/ << std::endl;
-        }
-        return nullptr;
-    };
-};
-*/
-
-    /*
-    void onTimer(void*)
-    {
-        ServerConnectionList conns = ServerConnectionList(connections);
-        for (ServerConnectionList::iterator it = conns.begin(); it != conns.end();) {
-            if ((*it)->closed()) {
-                traceL("Server", this) << "Deleting connection: " << (*it) << std::endl;
-                //delete *it;
-                it = connections.erase(it);
-            }
-            else
-                ++it;
-        }
-    }
-    */
+/// @\}

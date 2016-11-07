@@ -5,3 +5,6 @@
 node_modules
 bak
 build*
+private
+doxygen2md
+_book

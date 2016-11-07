@@ -1,0 +1,7 @@
+{
+  "gitbook": "3.2.x",
+  "title": "LibSourcey",
+  "styles": {
+    "website": "styles/website.css"
+  }
+}

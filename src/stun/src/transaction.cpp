@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup stun
+/// @{
 
 
 #include "scy/stun/transaction.h"
@@ -34,12 +26,12 @@ namespace scy {
 namespace stun {
 
 
-Transaction::Transaction(const net::Socket::Ptr& socket, 
+Transaction::Transaction(const net::Socket::Ptr& socket,
                          const net::Address& peerAddress,
-                         long timeout, 
-                         int retries, 
-                         uv::Loop* loop) : 
-    net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
+                         long timeout,
+                         int retries,
+                         uv::Loop* loop) :
+    net::Transaction<Message>(socket, peerAddress, timeout, retries, loop)
 {
     DebugS(this) << "Create" << std::endl;
 
@@ -48,22 +40,22 @@ Transaction::Transaction(const net::Socket::Ptr& socket,
 }
 
 
-Transaction::~Transaction() 
+Transaction::~Transaction()
 {
-    DebugS(this) << "Destroy" << std::endl;    
+    DebugS(this) << "Destroy" << std::endl;
 }
 
 
-bool Transaction::checkResponse(const Message& message) 
+bool Transaction::checkResponse(const Message& message)
 {
-    return net::Transaction<Message>::checkResponse(message) 
+    return net::Transaction<Message>::checkResponse(message)
         && _request.transactionID() == message.transactionID();
 }
 
 
 void Transaction::onResponse()
 {
-    DebugS(this) << "On response" << std::endl;    
+    DebugS(this) << "On response" << std::endl;
 
     _response.setMethod(_request.methodType());
     _response.setClass(Message::SuccessResponse);
@@ -77,5 +69,6 @@ void Transaction::onResponse()
 }
 
 
-
 } } // namespace scy:stun
+
+/// @\}

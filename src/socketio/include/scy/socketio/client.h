@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup socketio
+/// @{
 
 
 #ifndef SCY_SocketIO_Client_H
@@ -69,13 +61,12 @@ class Client:
           std::string host;
           std::uint16_t port;
 
+          /// Weather or not to reconnect if disconnected from the server.
           bool reconnection;
-              // Weather or not to reconnect if disconnected from the server.
 
+          /// The number of times to attempt to reconnect if disconnected
+          /// from the server. (0 = unlimited)
           int reconnectAttempts;
-              // The number of times to attempt to reconnect if disconnected
-              // from the server. (0 = unlimited)
-
           int reconnectDelay;
 
           Options() {
@@ -89,59 +80,59 @@ class Client:
       };
 
 public:
-    // Client(const net::Socket::Ptr& socket);
+    /// Client(const net::Socket::Ptr& socket);
     Client(const net::Socket::Ptr& socket,
         const Options& options = Options()); //, const std::string& host, std::uint16_t port
     virtual ~Client();
 
-    // virtual void connect(const std::string& host, std::uint16_t port);
+    /// virtual void connect(const std::string& host, std::uint16_t port);
     virtual void connect();
     virtual void close();
 
+    /// Send a default message packet.
     virtual int send(const std::string& message, bool ack = false);
     virtual int send(const json::Value& message, bool ack = false);
-        // Send a default message packet.
 
+    /// Send an event packet.
     virtual int send(const std::string& event, const char* message, bool ack = false);
     virtual int send(const std::string& event, const std::string& message, bool ack = false);
     virtual int send(const std::string& event, const json::Value& message, bool ack = false);
-        // Send an event packet.
 
+    /// Send the given packet.
     virtual int send(const sockio::Packet& packet);
-        // Send the given packet.
 
+    /// Create a packet transaction.
     Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
-        // Create a packet transaction.
 
+    /// Return a reference to the client options object.
     Client::Options& options();
-        // Return a reference to the client options object.
 
+    /// Return the underlying WebSocket instance.
     http::ws::WebSocket& ws();
-        // Return the underlying WebSocket instance.
 
+    /// Return the current session ID assigned by the server.
     std::string sessionID() const;
-        // Return the current session ID assigned by the server.
 
+    /// Return the error object (if any).
     scy::Error error() const;
-        // Return the error object (if any).
 
+    /// Return true if the client is is Online state.
     bool isOnline() const;
-        // Return true if the client is is Online state.
 
+    /// Return true if currently reconnecting.
     bool reconnecting() const;
-        // Return true if currently reconnecting.
 
+    /// Return true if the client was previously in the Online state.
+    /// Useful for delegates handling the Error state.
     bool wasOnline() const;
-        // Return true if the client was previously in the Online state.
-        // Useful for delegates handling the Error state.
 
     virtual const char* className() const { return "SocketIO::Client"; }
 
 protected:
     virtual void setError(const scy::Error& error);
 
+    /// Reset variables and timers at the beginning and end of each session.
     virtual void reset();
-        // Reset variables and timers at the beginning and end of each session.
 
     virtual void onConnect();
     virtual void onOnline();
@@ -215,4 +206,6 @@ public:
 } } // namespace scy::sockio
 
 
-#endif //  SCY_SocketIO_Client_H
+#endif // SCY_SocketIO_Client_H
+
+/// @\}

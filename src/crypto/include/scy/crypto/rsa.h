@@ -1,3 +1,14 @@
+///
+//
+// LibSourcey
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
+//
+// SPDX-License-Identifier:	LGPL-2.1+
+//
+/// @addtogroup crypto
+/// @{
+
+
 #ifndef SCY_Crypto_RSA_H
 #define SCY_Crypto_RSA_H
 
@@ -10,12 +21,14 @@ namespace scy {
 namespace crypto {
 
 
+/// Forward the OpenSSL type to our namespace.
+/// This may become a class/wrapper in the future.
 typedef ::RSA RSAKey;
-    /// Forward the OpenSSL type to our namespace.
-    /// This may become a class/wrapper in the future.
-    
-    
+
+
 } } // namespace scy::crypto
 
 
 #endif // SCY_Crypto_RSA_H
+
+/// @\}

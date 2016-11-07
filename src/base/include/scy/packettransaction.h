@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_PacketTransaction_H
@@ -55,12 +47,12 @@ struct TransactionState: public State
 };
 
 
+/// This class provides request/response functionality for IPacket types.
+///
+/// PacketTransactions are fire and forget. The object will be deleted
+/// after a successful response or a timeout.
 template <class PacketT>
 class PacketTransaction: public async::Sendable, public Stateful<TransactionState>
-    /// This class provides request/response functionality for IPacket types.
-    ///
-    /// PacketTransactions are fire and forget. The object will be deleted
-    /// after a successful response or a timeout.
 {
 public:
     PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
@@ -82,9 +74,9 @@ public:
     {
     }
 
+    /// Starts the transaction timer and sends the request.
+    /// Overriding classes should implement send logic here.
     virtual bool send()
-        // Starts the transaction timer and sends the request.
-        // Overriding classes should implement send logic here.
     {
         if (!canResend())
             return false;
@@ -98,22 +90,22 @@ public:
         return setState(this, TransactionState::Running);
     }
 
+    /// Cancellation means that the agent will not retransmit
+    /// the request, will not treat the lack of response to be
+    /// a failure, but will wait the duration of the transaction
+    /// timeout for a response.
     void cancel();
     bool cancelled() const;
-        // Cancellation means that the agent will not retransmit
-        // the request, will not treat the lack of response to be
-        // a failure, but will wait the duration of the transaction
-        // timeout for a response.
 
+    /// Schedules the transaction for deferred deletion.
+    ///
+    /// It is safe to call this function while the transaction
+    /// is still active, providing the call is made from the same
+    /// loop thread which the timer is running on.
+    ///
+    /// Protected by the base implementation as this is called
+    /// by the internal state machine.
     virtual void dispose()
-        // Schedules the transaction for deferred deletion.
-        //
-        // It is safe to call this function while the transaction
-        // is still active, providing the call is made from the same
-        // loop thread which the timer is running on.
-        //
-        // Protected by the base implementation as this is called
-        // by the internal state machine.
     {
         traceL("PacketTransaction", this) << "Dispose" << std::endl;
 
@@ -142,8 +134,8 @@ protected:
         //assert(!stateEquals(TransactionState::Running));
     }
 
+    /// Override to handle post state change logic.
     virtual void onStateChange(TransactionState& state, const TransactionState&)
-        // Override to handle post state change logic.
     {
         traceL("PacketTransaction", this) << "On state change: "
             << state.toString() << std::endl;
@@ -153,9 +145,9 @@ protected:
             dispose();
     }
 
+    /// Processes a potential response candidate
+    /// and updates the state accordingly.
     virtual bool handlePotentialResponse(const PacketT& packet)
-        // Processes a potential response candidate
-        // and updates the state accordingly.
     {
         if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
             _response = packet;
@@ -166,12 +158,12 @@ protected:
         return false;
     }
 
+    /// Checks a potential response candidate and
+    /// returns true on successful match.
     virtual bool checkResponse(const PacketT& packet) = 0;
-        // Checks a potential response candidate and
-        // returns true on successful match.
 
+    /// Called when a successful response is received.
     virtual void onResponse()
-        // Called when a successful response is received.
     {
         traceL("PacketTransaction", this) << "Success: "
             << _response.toString() << std::endl;
@@ -196,9 +188,9 @@ protected:
     PacketT _request;
     PacketT _response;
     Timer _timer;
-    int _timeout;        // The request timeout in milliseconds.
-    int _retries;        // The maximum number of attempts before the transaction is considered failed.
-    int _attempts;        // The number of times the transaction has been sent.
+    int _timeout;         ///< The request timeout in milliseconds.
+    int _retries;         ///< The maximum number of attempts before the transaction is considered failed.
+    int _attempts;        ///< The number of times the transaction has been sent.
     bool _destroyed;
 };
 
@@ -220,3 +212,5 @@ template <class T> inline T PacketTransaction<T>::response() const { return _res
 
 
 #endif // SCY_IDepacketizerR_H
+
+/// @\}

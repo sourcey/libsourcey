@@ -1,24 +1,16 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup stun
+/// @{
 
 
-#ifndef SCY_STUN_ATTRIBUTES_H
-#define SCY_STUN_ATTRIBUTES_H
+#ifndef SCY_STUN_Attributes_H
+#define SCY_STUN_Attributes_H
 
 
 #include "scy/stun/stun.h"
@@ -37,8 +29,8 @@ namespace scy {
 namespace stun {
 
 
+/// The virtual base class for all STUN/TURN attributes.
 class Attribute
-    /// The virtual base class for all STUN/TURN attributes.
 {
 public:
     enum Type
@@ -65,25 +57,22 @@ public:
         Software                = 0x8022,
         Options                    = 0x8001, // Not implemented
         AlternateServer            = 0x000e,
-        Fingerprint                = 0x8028,
-
-        // TURN
+        Fingerprint                = 0x8028, /// TURN
         ChannelNumber            = 0x000c,
-        Lifetime                = 0x000d,
-        // 0x0010: Reserved (was BANDWIDTH)
+        Lifetime                = 0x000d, // 0x0010: Reserved (was BANDWIDTH)
         XorPeerAddress            = 0x0012,
         Data                    = 0x0013,
         XorRelayedAddress        = 0x0016,
         EventPort                = 0x0018, // Not implemented
         RequestedTransport        = 0x0019,
         DontFragment            = 0x001A, // Not implemented
-        // 0x0021: Reserved (was TIMER-VAL)
+        /// 0x0021: Reserved (was TIMER-VAL)
         ReservationToken        = 0x0022, // 8 bytes token value
 
-        // TURN TCP
+        /// TURN TCP
         ConnectionID            = 0x002a,
 
-        // ICE
+        /// ICE
         ICEControlled            = 0x8029,
         ICEControlling            = 0x802A,
         ICEPriority                = 0x0024,
@@ -93,20 +82,20 @@ public:
     virtual ~Attribute() {}
     virtual Attribute* clone() = 0;
 
+    /// Reads the body (not the type or size) for this
+    /// type of attribute from  the given buffer. Return
+    /// value is true if successful.
     virtual void read(BitReader& reader) = 0;
-        // Reads the body (not the type or size) for this
-        // type of attribute from  the given buffer. Return
-        // value is true if successful.
 
+    /// Writes the body (not the type or size) to the
+    /// given buffer. Return value is true if successful.
     virtual void write(BitWriter& writer) const = 0;
-        // Writes the body (not the type or size) to the
-        // given buffer. Return value is true if successful.
 
+    /// Creates an attribute object with the given type
+    /// and size.
     static Attribute* create(std::uint16_t type, std::uint16_t size = 0);
-        // Creates an attribute object with the given type
-        // and size.
 
-    std::uint16_t type() const; //Type
+    std::uint16_t type() const;
     std::uint16_t size() const;
 
     void consumePadding(BitReader& reader) const;
@@ -126,10 +115,9 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements a STUN/TURN attribute that contains a socket address.
 class AddressAttribute: public Attribute
-    /// Implements a STUN/TURN attribute that contains a socket address.
 {
 public:
     AddressAttribute(std::uint16_t type, bool ipv4 = true); //bool xor,
@@ -178,10 +166,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt8Attribute: public Attribute
-    /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
     UInt8Attribute(std::uint16_t type);
@@ -205,10 +192,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt32Attribute: public Attribute
-    /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
     UInt32Attribute(std::uint16_t type);
@@ -232,10 +218,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects a 64-bit integer.
 class UInt64Attribute: public Attribute
-    /// Implements STUN/TURN attribute that reflects a 64-bit integer.
 {
 public:
     UInt64Attribute(std::uint16_t type);
@@ -258,9 +243,8 @@ private:
     std::uint64_t _bits;
 };
 
-
+/// Implements STUN/TURN attribute representing a 0 size flag.
 class FlagAttribute: public Attribute
-    /// Implements STUN/TURN attribute representing a 0 size flag.
 {
 public:
     FlagAttribute(std::uint16_t type);
@@ -274,10 +258,9 @@ public:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects an arbitrary byte string
 class StringAttribute: public Attribute
-    /// Implements STUN/TURN attribute that reflects an arbitrary byte string
 {
 public:
     StringAttribute(std::uint16_t type, std::uint16_t size = 0);
@@ -304,10 +287,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects a list of attribute names.
 class UInt16ListAttribute: public Attribute
-    /// Implements STUN/TURN attribute that reflects a list of attribute names.
 {
 public:
     UInt16ListAttribute(std::uint16_t type, std::uint16_t size);
@@ -329,10 +311,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attributes that reflects an internet address.
 class MessageIntegrity: public Attribute
-    /// Implements STUN/TURN attributes that reflects an internet address.
 {
 public:
     MessageIntegrity();
@@ -364,10 +345,9 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
-//
+///
+/// Implements STUN/TURN attribute that reflects an error code.
 class ErrorCode: public Attribute
-    /// Implements STUN/TURN attribute that reflects an error code.
 {
 public:
     ErrorCode(std::uint16_t size = MinSize);
@@ -399,8 +379,10 @@ private:
 };
 
 
-// ---------------------------------------------------------------------------
 //
+/// Attribute macros
+//
+
 #define DECLARE_FIXLEN_STUN_ATTRIBUTE(Name, Type, Derives)    \
                                                             \
     class Name: public Derives                                \
@@ -423,9 +405,11 @@ private:
     };                                                        \
 
 
-// ---------------------------------------------------------------------------
 //
-// Address attributes
+/// Attribute declarations
+//
+
+/// Address attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(MappedAddress, 0x0001, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ResponseAddress, 0x0002, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ChangedAddress, 0x0005, AddressAttribute)
@@ -437,7 +421,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(XorMappedAddress, 0x0020, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorPeerAddress, 0x0012, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorRelayedAddress, 0x0016, AddressAttribute)
 
-// std::uint32_t attributes
+/// std::uint32_t attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(Fingerprint, 0x8028, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(RequestedTransport, 0x0019, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ChangeRequest, 0x0003, UInt32Attribute)
@@ -448,13 +432,13 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(ChannelNumber, 0x000c, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEPriority, 0x0024, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ConnectionID, 0x002a, UInt32Attribute)
 
-// std::uint8_t attributes
+/// UInt8 attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(EventPort, 0x0018, UInt8Attribute)
 
-// std::uint32_t list attributes
+/// UInt32 list attributes
 DECLARE_STUN_ATTRIBUTE(UnknownAttributes, 0x000a, UInt16ListAttribute, 0)
 
-// String attributes
+/// String attributes
 DECLARE_STUN_ATTRIBUTE(Username, 0x0006, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(Password, 0x0007, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(MagicCookie, 0x000f, StringAttribute, 4)
@@ -464,11 +448,11 @@ DECLARE_STUN_ATTRIBUTE(Nonce, 0x0015, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(Software, 0x8022, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(ReservationToken, 0x0022, StringAttribute, 8)
 
-// std::uint64_t attributes
+/// UInt64 attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEControlling, 0x802A, UInt64Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEControlled, 0x8029, UInt64Attribute)
 
-// Flag attributes
+/// Flag attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEUseCandidate, 0x0025, FlagAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 
@@ -476,4 +460,6 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 } } // namespace scy:stun
 
 
-#endif // SCY_STUN_ATTRIBUTES_H
+#endif // SCY_STUN_Attributes_H
+
+/// @\}

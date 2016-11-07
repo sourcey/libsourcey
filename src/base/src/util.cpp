@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #include "scy/util.h"
@@ -38,7 +30,7 @@ namespace scy {
 namespace util {
 
 
-std::string string_vprintf(const char* fmt, va_list args) 
+std::string string_vprintf(const char* fmt, va_list args)
 {
     std::size_t size = 500;
     char* buf = (char*)malloc(size);
@@ -52,7 +44,7 @@ std::string string_vprintf(const char* fmt, va_list args)
         va_copy(args_copy, args);
         std::size_t nwritten = vsnprintf(buf, size-1, fmt, args_copy);
 #endif
-        // Some c libraries return -1 for overflow, 
+        // Some c libraries return -1 for overflow,
         // some return a number larger than size-1
         if (nwritten < size-2) {
             buf[nwritten+1] = 0;
@@ -66,7 +58,7 @@ std::string string_vprintf(const char* fmt, va_list args)
 }
 
 
-std::string format(const char* fmt, ...) 
+std::string format(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -141,7 +133,7 @@ std::uint32_t randomNumber()
 }
 
 
-void split(const std::string& s, const std::string& delim, std::vector<std::string>& elems, int limit) 
+void split(const std::string& s, const std::string& delim, std::vector<std::string>& elems, int limit)
 {
     bool final = false;
     std::string::size_type prev = 0, pos = 0;
@@ -157,7 +149,7 @@ void split(const std::string& s, const std::string& delim, std::vector<std::stri
 }
 
 
-std::vector<std::string> split(const std::string& s, const std::string& delim, int limit) 
+std::vector<std::string> split(const std::string& s, const std::string& delim, int limit)
 {
     std::vector<std::string> elems;
     split(s, delim, elems, limit);
@@ -165,7 +157,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim, i
 }
 
 
-void split(const std::string& s, char delim, std::vector<std::string>& elems, int limit) 
+void split(const std::string& s, char delim, std::vector<std::string>& elems, int limit)
 {
     std::stringstream ss(s);
     std::string item;
@@ -176,12 +168,12 @@ void split(const std::string& s, char delim, std::vector<std::string>& elems, in
     }
     if (ss.tellg() > 0)
         elems.push_back(ss.str().substr(
-        static_cast<unsigned int>(ss.tellg()), 
+        static_cast<unsigned int>(ss.tellg()),
         static_cast<unsigned int>(s.size() - ss.tellg())));
 }
 
 
-std::vector<std::string> split(const std::string& s, char delim, int limit) 
+std::vector<std::string> split(const std::string& s, char delim, int limit)
 {
     std::vector<std::string> elems;
     split(s, (char)delim, elems, limit);
@@ -196,7 +188,7 @@ bool endsWith(const std::string& str, const std::string& suffix)
 
 
 #if 0
-double intToDouble(std::int64_t v) 
+double intToDouble(std::int64_t v)
 {
     if (v+v > 0xFFEULL<<52)
         return 0;
@@ -212,7 +204,7 @@ float intToFloat(std::int32_t v)
 }
 
 
-std::int64_t doubleToInt(double d) 
+std::int64_t doubleToInt(double d)
 {
     int e;
     if     ( !d) return 0;
@@ -240,7 +232,7 @@ std::string dumpbin(const char* data, std::size_t len)
 }
 
 
-bool compareVersion(const std::string& l, const std::string& r) 
+bool compareVersion(const std::string& l, const std::string& r)
 {
     if (l.empty())
         return false;
@@ -251,9 +243,9 @@ bool compareVersion(const std::string& l, const std::string& r)
     std::vector<std::string> lnums, rnums;
     util::split(l, ".", lnums);
     util::split(r, ".", rnums);
-    for (unsigned i = 0; i < lnums.size(); i++) {            
+    for (unsigned i = 0; i < lnums.size(); i++) {
         if (rnums.size() < i + 1)
-            break;        
+            break;
         int ln = util::strtoi<int>(lnums[i]);
         int rn = util::strtoi<int>(rnums[i]);
         if (ln < rn)
@@ -265,25 +257,25 @@ bool compareVersion(const std::string& l, const std::string& r)
 }
 
 
-void removeSpecialCharacters(std::string& str, bool allowSpaces) 
-{    
+void removeSpecialCharacters(std::string& str, bool allowSpaces)
+{
     for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
             str.erase(i, 1);
 }
 
 
-void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces) 
-{    
+void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
+{
     for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
             str[i] = with;
 }
 
 
-void toUnderscore(std::string& str) 
+void toUnderscore(std::string& str)
 {
-    replaceSpecialCharacters(str, '_', false);    
+    replaceSpecialCharacters(str, '_', false);
     toLower(str);
 }
 
@@ -304,19 +296,19 @@ bool matchNodes(const std::vector<std::string>& params, const std::vector<std::s
     // No match if xparams are greater than the params.
     if (xparams.size() > params.size())
         return false;
-    
+
     // If params is longer the last xparam the last xparam
     // must be a *.
-    if (params.size() > xparams.size() && 
+    if (params.size() > xparams.size() &&
         xparams[xparams.size() - 1] != "*")
         return false;
 
     for (std::size_t i = 0; i < xparams.size(); ++i) {
 
         // Wildcard * matches anything.
-        if (xparams[i] == "*") 
+        if (xparams[i] == "*")
             continue;
-        
+
         if (xparams[i] != params[i])
             return false;
     }
@@ -328,7 +320,7 @@ bool matchNodes(const std::vector<std::string>& params, const std::vector<std::s
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::size_t bufferSize)
 {
     assert(bufferSize > 0);
-    
+
     std::unique_ptr<char[]> buffer(new char[bufferSize]);
     std::streamsize len = 0;
     istr.read(buffer.get(), bufferSize);
@@ -363,7 +355,7 @@ std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
 std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t bufferSize)
 {
     assert(bufferSize > 0);
-    
+
     std::unique_ptr<char[]> buffer(new char[bufferSize]);
     std::streamsize len = 0;
     istr.read(buffer.get(), bufferSize);
@@ -383,3 +375,5 @@ std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t b
 
 } // namespace util
 } // namespace scy
+
+/// @\}

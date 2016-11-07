@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_PacketFactory_H
@@ -27,13 +19,13 @@
 
 namespace scy {
 
-    
+
 class IPacketCreationStrategy
-{    
+{
 public:
     IPacketCreationStrategy() {}
     virtual ~IPacketCreationStrategy() {};
-    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;    
+    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;
     virtual int priority() const = 0; // 0 - 100
 
     static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
@@ -45,12 +37,12 @@ public:
 typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 
 
+/// This template class implements an adapter that sits between
+/// an SignalBase and an object receiving notifications from it.
 template <class PacketT>
 struct PacketCreationStrategy: public IPacketCreationStrategy
-    /// This template class implements an adapter that sits between
-    /// an SignalBase and an object receiving notifications from it.
 {
-    PacketCreationStrategy(int priority = 0) : 
+    PacketCreationStrategy(int priority = 0) :
         _priority(priority) {
         assert(_priority <= 100);
     }
@@ -64,7 +56,7 @@ struct PacketCreationStrategy: public IPacketCreationStrategy
         return nullptr;
     };
 
-    virtual int priority() const { return _priority; };    
+    virtual int priority() const { return _priority; };
 
 protected:
     int _priority;
@@ -72,7 +64,7 @@ protected:
 
 
 //
-// Packet Registry
+// Packet Factory
 //
 
 
@@ -94,7 +86,7 @@ public:
 
     template <class PacketT>
     void unregisterPacketType() {
-        //Mutex::ScopedLock lock(_mutex);        
+        //Mutex::ScopedLock lock(_mutex);
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
                 delete *it;
@@ -114,7 +106,7 @@ public:
 
     template <class StrategyT>
     void unregisterStrategy() {
-        //Mutex::ScopedLock lock(_mutex);        
+        //Mutex::ScopedLock lock(_mutex);
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<StrategyT*>(*it) != 0) {
                 delete *it;
@@ -125,24 +117,25 @@ public:
     }
 
     PacketCreationStrategyList& types() {
-        //Mutex::ScopedLock lock(_mutex);        
+        //Mutex::ScopedLock lock(_mutex);
         return _types;
     }
 
     PacketCreationStrategyList types() const {
-        //Mutex::ScopedLock lock(_mutex);        
+        //Mutex::ScopedLock lock(_mutex);
         return _types;
     }
 
+    /// returning false will stop packet propagation
     virtual bool onPacketCreated(IPacket*) {
-        // returning false will stop packet propagation
         return true;
     }
 
     virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
         //Mutex::ScopedLock lock(_mutex);
-        assert(!_types.empty() && "no packet types registered");
         //std::size_t offset = reader.position();
+        assert(!_types.empty() && "no packet types registered");
+
         for (unsigned i = 0; i < _types.size(); i++) {
             IPacket* packet = _types[i]->create(buffer, nread);
             if (packet) {
@@ -167,3 +160,5 @@ protected:
 
 
 #endif // SCY_PacketFactory_H
+
+/// @\}

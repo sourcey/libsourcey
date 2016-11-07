@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_DeviceManager_H
@@ -25,26 +17,19 @@
 
 #include "scy/base.h"
 #include "scy/signal.h"
+
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/ffmpeg.h"
 
-
-#ifdef HAVE_FFMPEG_AVDEVICE
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#ifdef HAVE_FFMPEG_AVDEVICE
 #include <libavdevice/avdevice.h>
-}
-#else
-typedef struct {
-} AVInputFormat;
-typedef struct {
-  const char *name;
-} AVOutputFormat;
-typedef struct {
-} AVFormatContext;
-#define av_find_input_format(ANY) (nullptr)
-#define av_oformat_next(ANY) (nullptr)
 #endif
+}
 
 
 namespace scy {
@@ -58,9 +43,8 @@ class DeviceManager;
 // Device
 //
 
-
+/// Represents a system audio, video or render device.
 struct Device
-    /// Represents a system audio, video or render device.
 {
     enum Type {
         Unknown,
@@ -124,66 +108,55 @@ public:
     DeviceManager();
     ~DeviceManager();
 
-    // Device enumeration
+    /// Device enumeration
     bool getCameras(std::vector<Device>& devices);
     bool getMicrophones(std::vector<Device>& devices);
     bool getSpeakers(std::vector<Device>& devices);
 
-    // Default devices
+    /// Default devices
     bool getDefaultMicrophone(Device& device);
     bool getDefaultSpeaker(Device& device);
     bool getDefaultCamera(Device& device);
 
-    // Find device by name or id
+    /// Find device by name or id
     bool findCamera(const std::string& name, Device& device);
     bool findMicrophone(const std::string& name, Device& device);
     bool findSpeaker(const std::string& name, Device& device);
 
-    // Base device list
+    /// Base device list
     bool getDeviceList(Device::Type type, std::vector<av::Device>& devices);
 
-    // Capabilities
+    /// Capabilities
     int getCapabilities();
 
     void setWatcher(DeviceWatcher* watcher);
     DeviceWatcher* watcher();
 
+    /// Print all devices to the output stream.
     void print(std::ostream& ost);
-        // Print all devices to the output stream.
 
+    /// Returns the default `DeviceManager` singleton.
     static DeviceManager& instance();
-        // Returns the default DeviceManager singleton.
 
+    /// Shuts down the `MediaFactory` and deletes the singleton instance.
     static void shutdown();
-        // Shuts down the MediaFactory and deletes the singleton instance.
 
-    // Signal<> DevicesChanged;
-        // Signals when a system device is connecetd or removed.
-        // This signal is emitted by the platform specific DeviceWatcher.
+    /// Signals when a system device is connecetd or removed.
+    /// This signal is emitted by the platform specific `DeviceWatcher`.
+    NullSignal DevicesChanged;
 
-    // Find base FFmpeg formats
+    /// Find base FFmpeg formats
     AVInputFormat* findVideoInputFormat();
     AVInputFormat* findAudioInputFormat();
-
-    // Default platform input formats
-    // std::vector<std::string> cameraInputs;
-    // std::vector<std::string> screenInputs;
-    // std::vector<std::string> microphoneInputs;
-    // std::vector<std::string> speakerOutputs;
 
 protected:
     std::unique_ptr<DeviceWatcher> _watcher;
 };
 
 
-//
-// Helpers
-//
-
-
-
-
 } } // namespace scy::av
 
 
-#endif  // SCY_AV_DeviceManager_H
+#endif // HAVE_FFMPEG
+
+#endif // SCY_AV_DeviceManager_H

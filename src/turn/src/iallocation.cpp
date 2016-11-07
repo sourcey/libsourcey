@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #include "scy/turn/server/server.h"
@@ -37,24 +29,24 @@ namespace turn {
 #define ENABLE_LOCAL_IPS 1
 
 
-IAllocation::IAllocation(const FiveTuple& tuple, 
-                         const std::string& username, 
-                         std::int64_t lifetime) : 
+IAllocation::IAllocation(const FiveTuple& tuple,
+                         const std::string& username,
+                         std::int64_t lifetime) :
     _tuple(tuple),
-    _username(username), 
-    _lifetime(lifetime), 
+    _username(username),
+    _lifetime(lifetime),
     _bandwidthLimit(0),
     _bandwidthUsed(0),
-    _createdAt(static_cast<std::int64_t>(time(0))), 
-    _updatedAt(static_cast<std::int64_t>(time(0))), 
+    _createdAt(static_cast<std::int64_t>(time(0))),
+    _updatedAt(static_cast<std::int64_t>(time(0))),
     _deleted(false)
-{    
+{
 }
 
 
-IAllocation::~IAllocation() 
+IAllocation::~IAllocation()
 {
-    TraceL << "Destroy" << endl;    
+    TraceL << "Destroy" << endl;
     _permissions.clear();
 }
 
@@ -62,7 +54,7 @@ IAllocation::~IAllocation()
 void IAllocation::updateUsage(std::int64_t numBytes)
 {
     //Mutex::ScopedLock lock(_mutex);
-    TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;    
+    TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;
     _updatedAt = time(0);
     _bandwidthUsed += numBytes;
 }
@@ -71,7 +63,7 @@ void IAllocation::updateUsage(std::int64_t numBytes)
 std::int64_t IAllocation::timeRemaining() const
 {
     //Mutex::ScopedLock lock(_mutex);
-    //std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));    
+    //std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));
     std::int64_t remaining = _lifetime - static_cast<std::int64_t>(time(0) - _updatedAt);
     return remaining > 0 ? remaining : 0;
 }
@@ -124,40 +116,40 @@ std::int64_t IAllocation::bandwidthRemaining() const
 {
     //Mutex::ScopedLock lock(_mutex);
     return _bandwidthLimit > 0
-        ? (_bandwidthLimit > _bandwidthUsed 
+        ? (_bandwidthLimit > _bandwidthUsed
             ? _bandwidthLimit - _bandwidthUsed : 0) : 99999999;
 }
 
 
-FiveTuple& IAllocation::tuple() 
-{ 
+FiveTuple& IAllocation::tuple()
+{
     //Mutex::ScopedLock lock(_mutex);
-    return _tuple; 
+    return _tuple;
 }
 
 
-std::string IAllocation::username() const 
-{ 
+std::string IAllocation::username() const
+{
     //Mutex::ScopedLock lock(_mutex);
-    return _username; 
+    return _username;
 }
 
 
-std::int64_t IAllocation::lifetime() const 
-{ 
+std::int64_t IAllocation::lifetime() const
+{
     //Mutex::ScopedLock lock(_mutex);
-    return _lifetime; 
+    return _lifetime;
 }
 
 
-PermissionList IAllocation::permissions() const 
-{ 
+PermissionList IAllocation::permissions() const
+{
     //Mutex::ScopedLock lock(_mutex);
-    return _permissions; 
+    return _permissions;
 }
 
 
-void IAllocation::addPermission(const std::string& ip) 
+void IAllocation::addPermission(const std::string& ip)
 {
     //Mutex::ScopedLock lock(_mutex);
 
@@ -184,7 +176,7 @@ void IAllocation::addPermissions(const IPList& ips)
 }
 
 
-void IAllocation::removePermission(const std::string& ip) 
+void IAllocation::removePermission(const std::string& ip)
 {
     //Mutex::ScopedLock lock(_mutex);
 
@@ -192,9 +184,9 @@ void IAllocation::removePermission(const std::string& ip)
         if ((*it).ip == ip) {
             it = _permissions.erase(it);
             return;
-        } else 
+        } else
             ++it;
-    }    
+    }
 }
 
 
@@ -205,20 +197,20 @@ void IAllocation::removeAllPermissions()
 }
 
 
-void IAllocation::removeExpiredPermissions() 
+void IAllocation::removeExpiredPermissions()
 {
     //Mutex::ScopedLock lock(_mutex);
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).timeout.expired()) {
             InfoL << "Removing Expired Permission: " << (*it).ip << endl;
             it = _permissions.erase(it);
-        } else 
+        } else
             ++it;
     }
 }
 
 
-bool IAllocation::hasPermission(const std::string& peerIP) 
+bool IAllocation::hasPermission(const std::string& peerIP)
 {
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
         if (*it == peerIP)
@@ -238,3 +230,5 @@ bool IAllocation::hasPermission(const std::string& peerIP)
 
 
 } } // namespace scy::turn
+
+/// @\}

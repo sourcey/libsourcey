@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_MediaFactory_H
@@ -50,68 +42,66 @@
 namespace scy {
 namespace av {
 
-
+/// The MediaFactory class is a singleton manager for audio/video
+/// captures, device enumeration and encoder media formats.
 class MediaFactory
-    /// The MediaFactory class is a singleton manager for audio/video
-    /// captures, device enumeration and encoder media formats.
 {
-public:
+public:    
+    /// Creates a VideoCapture instance for given device ID.
+    ///
+    /// If the VideoCapture already exists for this camera then this method
+    /// can be used to create VideoCaptures in any thread.
+    ///
+    /// If the VideoCapture has not been created for this camera yet it will
+    /// be created now, but take case since VideoCapture instances should
+    /// only be initialized from the main thread (OpenCV limitation).
+    /// You can also lazy load video cameras using loadVideoCaptures()
     VideoCapture::Ptr createVideoCapture(int deviceId);
-        // Creates a VideoCapture instance for given device ID.
-        //
-        // If the VideoCapture already exists for this camera then this method
-        // can be used to create VideoCaptures in any thread.
-        //
-        // If the VideoCapture has not been created for this camera yet it will
-        // be created now, but take case since VideoCapture instances should
-        // only be initialized from the main thread (OpenCV limitation).
-        // You can also lazy load video cameras using loadVideoCaptures()
 
+    /// Creates a VideoCapture from given source file.
+    /// File captures can be created in any thread.
     VideoCapture::Ptr createFileCapture(const std::string& file);
-        // Creates a VideoCapture from given source file.
-        // File captures can be created in any thread.
+
 
     AudioCapture::Ptr createAudioCapture(int deviceId,
         int channels = DEFAULT_AUDIO_CHANNELS,
-        int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE,
+        int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE,    // Creates an AudioCapture from given options.
         RtAudioFormat format = RTAUDIO_SINT16);
-        // Creates an AudioCapture from given options.
 
+    /// Preloads a VideoCapture instance for each available camera.
+    /// This method MUST be called from the main thread.
+    /// This method can be called from the main thread to lazy load
+    /// video device captures. Alternatively you can call createVideoCapture()    // This will ensure captures are always available to the
+    /// application using createVideoCapture(), from any thread.
     void loadVideoCaptures();
-        // Preloads a VideoCapture instance for each available camera.
-        // This method MUST be called from the main thread.
-        // This method can be called from the main thread to lazy load
-        // video device captures. Alternatively you can call createVideoCapture()
-        // This will ensure captures are always available to the
-        // application using createVideoCapture(), from any thread.
 
+    /// Destroys all managed VideoCapture instances.
     void unloadVideoCaptures();
-        // Destroys all managed VideoCapture instances.
 
+    /// Reloads video captures that may have failed or been unplugged.
+    /// The original VideoCapture instance is not deleted, just reused.
+    /// This method MUST be called from the main thread.
     void reloadFailedVideoCaptures();
-        // Reloads video captures that may have failed or been unplugged.
-        // The original VideoCapture instance is not deleted, just reused.
-        // This method MUST be called from the main thread.
 
+    /// Siganls when a video capture is loaded.
     Signal<const VideoCapture::Ptr&> VideoCaptureLoaded;
-        // Siganls when a video capture is loaded.
 
+    /// Siganls when a video capture fails, or is unplugged.
     Signal<const VideoCapture::Ptr&> VideoCaptureError;
-        // Siganls when a video capture fails, or is unplugged.
 
-    std::map<int, VideoCapture::Ptr> videoCaptures() const;
 
+    std::map<int, VideoCapture::Ptr> videoCaptures() const;    /// Returns the device manager instance.
     IDeviceManager& devices();
-        // Returns the device manager instance.
 
+    /// Returns all registered media formats.
     FormatRegistry& formats();
-        // Returns all registered media formats.
 
+    /// Returns the default MediaFactory singleton.
     static MediaFactory& instance();
-        // Returns the default MediaFactory singleton.
 
+    /// Shuts down the MediaFactory and deletes the singleton instance.
     static void shutdown();
-        // Shuts down the MediaFactory and deletes the singleton instance.
+
 
 protected:
     MediaFactory();

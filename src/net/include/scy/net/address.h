@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #ifndef SCY_Net_Address_H
@@ -26,93 +18,93 @@
 
 namespace scy {
 namespace net {
-    
 
+
+/// This class represents an internet (IP) endpoint/socket
+/// address. The address can belong either to the
+/// IPv4 or the IPv6 address family and consists of a
+/// host address and a port number.
 class AddressBase;
 class Address
-    /// This class represents an internet (IP) endpoint/socket
-    /// address. The address can belong either to the
-    /// IPv4 or the IPv6 address family and consists of a
-    /// host address and a port number.
 {
 public:
+    /// Possible address families for IP addresses.
     enum Family
-        /// Possible address families for IP addresses.
     {
         IPv4,
         IPv6
     };
 
+    /// Creates a wildcard (all zero) IPv4 Address.
     Address();
-        /// Creates a wildcard (all zero) IPv4 Address.
 
+    /// Creates a Address from an IP address and a port number.
+    ///
+    /// The IP address must either be a domain name, or it must
+    /// be in dotted decimal (IPv4) or hex string (IPv6) format.
     Address(const std::string& host, std::uint16_t port);
-        /// Creates a Address from an IP address and a port number.
-        ///
-        /// The IP address must either be a domain name, or it must
-        /// be in dotted decimal (IPv4) or hex string (IPv6) format.
 
+    /// Creates a Address by copying another one.
     Address(const Address& addr);
-        /// Creates a Address by copying another one.
 
+    /// Creates a Address from a native socket address.
     Address(const struct sockaddr* addr, socklen_t length);
-        /// Creates a Address from a native socket address.
-    
+
+    /// Creates a Address from an IP address and a
+    /// service name or port number.
+    ///
+    /// The IP address must either be a domain name, or it must
+    /// be in dotted decimal (IPv4) or hex string (IPv6) format.
+    ///
+    /// The given port must either be a decimal port number, or
+    /// a service name.
     Address(const std::string& host, const std::string& port);
-        /// Creates a Address from an IP address and a 
-        /// service name or port number.
-        ///
-        /// The IP address must either be a domain name, or it must
-        /// be in dotted decimal (IPv4) or hex string (IPv6) format.
-        ///
-        /// The given port must either be a decimal port number, or 
-        /// a service name.
 
+    /// Creates a Address from an IP address or host name and a
+    /// port number/service name. Host name/address and port number must
+    /// be separated by a colon. In case of an IPv6 address,
+    /// the address part must be enclosed in brackets.
+    ///
+    /// Examples:
+    ///     192.168.1.10:80
+    ///     [::ffff:192.168.1.120]:2040
+    ///     www.sourcey.com:8080
     explicit Address(const std::string& hostAndPort);
-        /// Creates a Address from an IP address or host name and a
-        /// port number/service name. Host name/address and port number must
-        /// be separated by a colon. In case of an IPv6 address,
-        /// the address part must be enclosed in brackets.
-        ///
-        /// Examples:
-        ///     192.168.1.10:80
-        ///     [::ffff:192.168.1.120]:2040
-        ///     www.sourcey.com:8080
 
+    /// Destroys the Address.
     ~Address();
-        /// Destroys the Address.
 
+    /// Assigns another Address.
     Address& operator = (const Address& addr);
-        /// Assigns another Address.
 
+    /// Swaps the Address with another one.
     void swap(Address& addr);
-        /// Swaps the Address with another one.
 
+    /// Returns the host IP address.
     std::string host() const;
-        /// Returns the host IP address.
 
+    /// Returns the port number.
     std::uint16_t port() const;
-        /// Returns the port number.
 
+    /// Returns the length of the internal native socket address.
     socklen_t length() const;
-        /// Returns the length of the internal native socket address.
 
+    /// Returns a pointer to the internal native socket address.
     const struct sockaddr* addr() const;
-        /// Returns a pointer to the internal native socket address.
 
+    /// Returns the address family (AF_INET or AF_INET6) of the address.
     int af() const;
-        /// Returns the address family (AF_INET or AF_INET6) of the address.
 
+    /// Returns a string representation of the address.
     std::string toString() const;
-        /// Returns a string representation of the address.
 
+    /// Returns the address family of the host's address.
     Address::Family family() const;
-        /// Returns the address family of the host's address.
 
+    /// Returns true when the port is set and the address is valid
+    /// ie. not wildcard.
     bool valid() const;
-        /// Returns true when the port is set and the address is valid
-        /// ie. not wildcard.
-        
+
     static std::uint16_t resolveService(const std::string& service);
 
     static bool validateIP(const std::string& address);
@@ -120,22 +112,22 @@ public:
     bool operator < (const Address& addr) const;
     bool operator == (const Address& addr) const;
     bool operator != (const Address& addr) const;
-    
-    friend std::ostream& operator << (std::ostream& stream, const Address& addr) 
+
+    friend std::ostream& operator << (std::ostream& stream, const Address& addr)
     {
         stream << addr.toString();
         return stream;
     }
 
+    /// Maximum length in bytes of a socket address.
     enum
     {
-        MAX_ADDRESS_LENGTH = 
+        MAX_ADDRESS_LENGTH =
 #if defined(LibSourcey_HAVE_IPv6)
             sizeof(struct sockaddr_in6)
 #else
             sizeof(struct sockaddr_in)
 #endif
-            /// Maximum length in bytes of a socket address.
     };
 
 protected:
@@ -151,6 +143,7 @@ private:
 
 #endif // SCY_Net_Address_H
 
+/// @\}
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

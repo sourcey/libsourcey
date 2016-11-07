@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #ifndef SCY_Net_SSLSession_H
@@ -30,32 +22,32 @@
 namespace scy {
 namespace net {
 
-    
+
+/// This class encapsulates a SSL session object
+/// used with session caching on the client side.
+///
+/// For session caching to work, a client must
+/// save the session object from an existing connection,
+/// if it wants to reuse it with a future connection.
 class SSLSession : public SharedObject
-    /// This class encapsulates a SSL session object
-    /// used with session caching on the client side.
-    ///
-    /// For session caching to work, a client must
-    /// save the session object from an existing connection,
-    /// if it wants to reuse it with a future connection.
 {
 public:
     typedef std::shared_ptr<SSLSession> Ptr;
 
+    /// Returns the stored OpenSSL SSL_SESSION object.
     SSL_SESSION* sslSession() const;
-        /// Returns the stored OpenSSL SSL_SESSION object.
 
+    /// Creates a new Session object, using the given
+    /// SSL_SESSION object.
+    ///
+    /// The SSL_SESSION's reference count is not changed.
     SSLSession(SSL_SESSION* ptr);
-        /// Creates a new Session object, using the given
-        /// SSL_SESSION object. 
-        /// 
-        /// The SSL_SESSION's reference count is not changed.
 
+    /// Destroys the Session.
+    ///
+    /// Calls SSL_SESSION_free() on the stored
+    /// SSL_SESSION object.
     ~SSLSession();
-        /// Destroys the Session.
-        ///
-        /// Calls SSL_SESSION_free() on the stored
-        /// SSL_SESSION object.
 
     SSLSession();
 
@@ -68,6 +60,8 @@ protected:
 
 
 #endif // SCY_Net_SSLSession_H
+
+/// @\}
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

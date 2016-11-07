@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup net
+/// @{
 
 
 #include "scy/net/address.h"
@@ -40,7 +32,7 @@ namespace net {
 class AddressBase: public SharedObject
 {
 public:
-    virtual std::string host() const = 0;    
+    virtual std::string host() const = 0;
     virtual std::uint16_t port() const = 0;
     virtual Address::Family family() const = 0;
     virtual socklen_t length() const = 0;
@@ -160,7 +152,7 @@ public:
         _addr.sin6_port = port;
         _addr.sin6_scope_id = scope;
     }
-    
+
     std::string host() const
     {
         char dest[46];
@@ -173,7 +165,7 @@ public:
     {
         return _addr.sin6_port;
     }
-    
+
     Address::Family family() const
     {
         return Address::IPv6;
@@ -337,7 +329,7 @@ int Address::af() const
 }
 
 
-bool Address::valid() const 
+bool Address::valid() const
 {
     return host() != "0.0.0.0" && port() != 0;
 }
@@ -422,6 +414,7 @@ std::uint16_t Address::resolveService(const std::string& service)
 
 } } // namespace scy::net
 
+/// @\}
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

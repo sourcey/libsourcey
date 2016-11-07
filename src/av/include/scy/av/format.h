@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_Format_H
@@ -31,52 +23,51 @@
 namespace scy {
 namespace av {
 
-
+/// Defines a media container format which is available through the
+/// Format Registry for encoding/decoding. A format defined preferred
+/// default values for each codec.
 struct Format
-    /// Defines a media container format which is available through the
-    /// Format Registry for encoding/decoding. A format defined preferred
-    /// default values for each codec.
 {
     enum Type
     {
         None        = 0,
-        Video       = 1,    /// video only
-        Audio       = 2,    /// audio only
-        Multiplex   = 3     /// both video & audio
+        Video       = 1,    ///< video only
+        Audio       = 2,    ///< audio only
+        Multiplex   = 3     ///< both video & audio
     };
 
+    ///
+    /// Base Format Variables
     //
-    // Base Format Variables
-    //
-    std::string name;        // The display name of this format.
-    std::string id;          // The short name of this format.
+    std::string name;        ///< The display name of this format.
+    std::string id;          ///< The short name of this format.
 
-    VideoCodec video;        // The video codec.
-    AudioCodec audio;        // The audio codec.
+    VideoCodec video;        ///< The video codec.
+    AudioCodec audio;        ///< The audio codec.
 
-    int priority;            // The priority this format will be displayed on the list.
+    int priority;            ///< The priority this format will be displayed on the list.
 
-    //
-    // Ctors/Dtors
+    ///
+    /// Ctors/Dtors
     //
     Format();
 
-    Format(const std::string& name, const std::string& id,
+    Format(const std::string& name, const std::string& id,    // Multiplex format constructor
         const VideoCodec& video, const AudioCodec& audio, int priority = 0);
-        // Multiplex format constructor
 
-    Format(const std::string& name, const std::string& id,
+
+    Format(const std::string& name, const std::string& id,    // Video only format constructor
         const VideoCodec& video, int priority = 0);
-        // Video only format constructor
 
-    Format(const std::string& name, const std::string& id,
+
+    Format(const std::string& name, const std::string& id,    // Audio only format constructor
         const AudioCodec& audio, int priority = 0);
-        // Audio only format constructor
+
 
     Format(const Format& r);
 
+    /// The format type.
     Type type() const;
-        // The format type.
 
     virtual std::string toString() const;
     virtual void print(std::ostream& ost);

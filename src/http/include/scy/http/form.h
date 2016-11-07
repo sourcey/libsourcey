@@ -1,3 +1,14 @@
+///
+//
+// LibSourcey
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
+//
+// SPDX-License-Identifier:	LGPL-2.1+
+//
+/// @addtogroup http
+/// @{
+
+
 #ifndef SCY_HTTP_Form_H
 #define SCY_HTTP_Form_H
 
@@ -21,139 +32,137 @@ class FormPart;
 // HTML Form Writer
 //
 
-
+/// FormWriter is a HTTP client connection adapter for writing HTML forms.
+///
+/// This class runs in its own thread so as not to block the event loop
+/// while uploading big files. Class members are not synchronized hence
+/// they should not be accessed while the form is sending, not that there
+/// would be any reason to do so.
 class FormWriter: public NVCollection, public PacketSource, public async::Startable
-    /// FormWriter is a HTTP client connection adapter for writing HTML forms.
-    ///
-    /// This class runs in its own thread so as not to block the event loop
-    /// while uploading big files. Class members are not synchronized hence 
-    /// they should not be accessed while the form is sending, not that there
-    /// would be any reason to do so.
 {
 public:
+    /// Creates the FormWriter that uses the given connection and
+    /// encoding type.
+    ///
+    /// Encoding must be either "application/x-www-form-urlencoded"
+    /// (which is the default) or "multipart/form-data".
     static FormWriter* create(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
-        // Creates the FormWriter that uses the given connection and
-        // encoding type.
-        //
-        // Encoding must be either "application/x-www-form-urlencoded"
-        // (which is the default) or "multipart/form-data".
-        
+
+    /// Destroys the FormWriter.
     virtual ~FormWriter();
-        // Destroys the FormWriter.
 
+    /// Adds an part/attachment (file upload) to the form.
+    ///
+    /// The form takes ownership of the FilePart and deletes it when it
+    /// is no longer needed. The part will only be sent if the encoding
+    /// set for the form is "multipart/form-data"
     void addPart(const std::string& name, FormPart* part);
-        // Adds an part/attachment (file upload) to the form.
-        //
-        // The form takes ownership of the FilePart and deletes it when it
-        // is no longer needed. The part will only be sent if the encoding
-        // set for the form is "multipart/form-data"
-        
+
+    /// Starts the sending thread.
     void start();
-        // Starts the sending thread.
-        
+
+    /// Stops the sending thread.
     void stop();
-        // Stops the sending thread.
 
+    /// Returns true if the request is complete.
     bool complete() const;
-        // Returns true if the request is complete.
 
+    /// Returns true if the request is cancelled.
     bool cancelled() const;
-        // Returns true if the request is cancelled.
-        
-    void prepareSubmit();
-        // Prepares the outgoing HTTP request object for submitting the form.
-        //
-        // If the request method is GET, the encoded form is appended to the
-        // request URI as query std::string. Otherwise (the method is
-        // POST), the form's content type is set to the form's encoding.
-        // The form's parameters must be written to the
-        // request body separately, with a call to write.
-        // If the request's HTTP version is HTTP/1.0:
-        //    - persistent connections are disabled
-        //    - the content transfer encoding is set to identity encoding
-        // Otherwise, if the request's HTTP version is HTTP/1.1:
-        //    - the request's persistent connection state is left unchanged
-        //    - the content transfer encoding is set to chunked
-        
-    std::uint64_t calculateMultipartContentLength();
-        // Processes the entire stream and calculates the content length.
-        // Not used for chunked encoding.
 
+    /// Prepares the outgoing HTTP request object for submitting the form.
+    ///
+    /// If the request method is GET, the encoded form is appended to the
+    /// request URI as query std::string. Otherwise (the method is
+    /// POST), the form's content type is set to the form's encoding.
+    /// The form's parameters must be written to the
+    /// request body separately, with a call to write.
+    /// If the request's HTTP version is HTTP/1.0:
+    ///    - persistent connections are disabled
+    ///    - the content transfer encoding is set to identity encoding
+    /// Otherwise, if the request's HTTP version is HTTP/1.1:
+    ///    - the request's persistent connection state is left unchanged
+    ///    - the content transfer encoding is set to chunked
+    void prepareSubmit();
+
+    /// Processes the entire stream and calculates the content length.
+    /// Not used for chunked encoding.
+    std::uint64_t calculateMultipartContentLength();
+
+    /// Writes "application/x-www-form-urlencoded" encoded data to
+    /// the client connection.
     void writeUrl(std::ostream& ostr);
-        // Writes "application/x-www-form-urlencoded" encoded data to
-        // the client connection.
-    
+
+
 #if 0
+    /// Writes the complete "multipart/form-data" request to the
+    /// client connection. This method is blocking, and should be
+    /// called from a thread, especially when sending large files.
     void writeMultipart();
-        // Writes the complete "multipart/form-data" request to the 
-        // client connection. This method is blocking, and should be 
-        // called from a thread, especially when sending large files.
 #endif
 
+    /// Writes the next multipart "multipart/form-data" encoded
+    /// to the client connection. This method is non-blocking,    // and is suitable for use with the event loop.
     void writeMultipartChunk();
-        // Writes the next multipart "multipart/form-data" encoded
-        // to the client connection. This method is non-blocking,
-        // and is suitable for use with the event loop.
 
+    /// Called asynchronously by the Runner to write the next message chunk.
+    /// If "multipart/form-data" the next multipart chunk will be written.
+    /// If "application/x-www-form-urlencoded" the entire message will be written.
+    /// The complete flag will be set when the entire request has been written.
     void writeAsync();
-        // Called asynchronously by the Runner to write the next message chunk.
-        // If "multipart/form-data" the next multipart chunk will be written.
-        // If "application/x-www-form-urlencoded" the entire message will be written.
-        // The complete flag will be set when the entire request has been written.
 
+    /// Sets the encoding used for posting the form.
+    ///
+    /// Encoding must be either "application/x-www-form-urlencoded"
+    /// (which is the default) or "multipart/form-data".
     void setEncoding(const std::string& encoding);
-        // Sets the encoding used for posting the form.
-        //
-        // Encoding must be either "application/x-www-form-urlencoded"
-        // (which is the default) or "multipart/form-data".
-        
+
+    /// Returns the encoding used for posting the form.
     const std::string& encoding() const;
-        // Returns the encoding used for posting the form.
 
+    /// Sets the boundary to use for separating form parts.
+    /// Must be set before prepareSubmit() is called.
     void setBoundary(const std::string& boundary);
-        // Sets the boundary to use for separating form parts.
-        // Must be set before prepareSubmit() is called.
 
+    /// Returns the MIME boundary used for writing multipart form data.
     const std::string& boundary() const;
-        // Returns the MIME boundary used for writing multipart form data.
 
+    /// The associated HTTP client connection.
     ClientConnection& connection();
-        // The associated HTTP client connection.
-            
+
+    /// The outgoing packet emitter.
     PacketSignal emitter;
-        // The outgoing packet emitter.
 
-    static const char* ENCODING_URL;               /// "application/x-www-form-urlencoded"
-    static const char* ENCODING_MULTIPART_FORM;    /// "multipart/form-data"
-    static const char* ENCODING_MULTIPART_RELATED; /// "multipart/related" http://tools.ietf.org/html/rfc2387
-    
+    static const char* ENCODING_URL;                ///< "application/x-www-form-urlencoded"
+    static const char* ENCODING_MULTIPART_FORM;     ///< "multipart/form-data"
+    static const char* ENCODING_MULTIPART_RELATED;  ///< "multipart/related" http://tools.ietf.org/html/rfc2387
+
 protected:
+    /// Creates the FormWriter that uses the given encoding.
+    ///
+    /// Encoding must be either "application/x-www-form-urlencoded"
+    /// (which is the default) or "multipart/form-data".
     FormWriter(ClientConnection& conn, async::Runner::Ptr runner, const std::string& encoding = FormWriter::ENCODING_URL);
-        // Creates the FormWriter that uses the given encoding.
-        //
-        // Encoding must be either "application/x-www-form-urlencoded"
-        // (which is the default) or "multipart/form-data".
-
     FormWriter(const FormWriter&);
     FormWriter& operator = (const FormWriter&);
-        
+
+    /// Writes the message boundary std::string, followed
+    /// by the message header to the output stream.
     void writePartHeader(const NVCollection& header, std::ostream& ostr);
-        // Writes the message boundary std::string, followed
-        // by the message header to the output stream.
-        
+
+    /// Writes the final boundary std::string to the output stream.
     void writeEnd(std::ostream& ostr);
-        // Writes the final boundary std::string to the output stream.
 
+    /// Creates a random boundary std::string.
+    ///
+    /// The std::string always has the form boundary-XXXXXXXXXXXX,
+    /// where XXXXXXXXXXXX is a randomly generate number.
     static std::string createBoundary();
-        // Creates a random boundary std::string.
-        //
-        // The std::string always has the form boundary-XXXXXXXXXXXX, 
-        // where XXXXXXXXXXXX is a randomly generate number.
 
+    /// Updates the upload progress via the associated
+    /// ClientConnection object.
     virtual void updateProgress(int nread);
-        // Updates the upload progress via the associated 
-        // ClientConnection object.
-    
+
     friend class FormPart;
     friend class FilePart;
     friend class StringPart;
@@ -163,9 +172,9 @@ protected:
         std::string name;
         FormPart* part;
     };
-    
+
     typedef std::deque<Part> PartQueue;
-    
+
     ClientConnection& _connection;
     async::Runner::Ptr _runner;
     std::string _encoding;
@@ -182,42 +191,41 @@ protected:
 // Form Part
 //
 
-
+/// An implementation of FormPart.
 class FormPart
-    /// An implementation of FormPart.
 {
-public:    
+public:
+    /// Creates the FormPart with the given MIME type.
     FormPart(const std::string& contentType = "application/octet-stream");
-        // Creates the FormPart with the given MIME type.
 
+    /// Destroys the FormPart.
     virtual ~FormPart();
-        // Destroys the FormPart.
-        
+
+    /// Reset the internal state and write position to the start.
     virtual void reset();
-        // Reset the internal state and write position to the start.
 
+    /// Writes a form data chunk to the given HTTP client connection.
+    /// Returns true if there is more data to be written.
     virtual bool writeChunk(FormWriter& writer) = 0;
-        // Writes a form data chunk to the given HTTP client connection.
-        // Returns true if there is more data to be written.
 
+    /// Writes the form data to the given HTTP client connection.
     virtual void write(FormWriter& writer) = 0;
-        // Writes the form data to the given HTTP client connection.
 
+    /// Writes the form data to the given output stream.
     virtual void write(std::ostream& ostr) = 0;
-        // Writes the form data to the given output stream.    
-                
+
+    /// Returns a NVCollection containing additional header
+    /// fields for the part.
     NVCollection& headers();
-        // Returns a NVCollection containing additional header 
-        // fields for the part.    
-        
+
+    /// Returns true if this is the initial write.
     virtual bool initialWrite() const;
-        // Returns true if this is the initial write.
-    
+
+    /// Returns the MIME type for this part or attachment.
     const std::string& contentType() const;
-        // Returns the MIME type for this part or attachment.
-        
+
+    /// Returns the length of the current part.
     virtual std::uint64_t length() const = 0;
-        // Returns the length of the current part.
 
 protected:
     std::string _contentType;
@@ -231,72 +239,69 @@ protected:
 // File Part
 //
 
-
+/// An implementation of FilePart for plain files.
 class FilePart: public FormPart
-    /// An implementation of FilePart for plain files.
 {
 public:
+    /// Creates the FilePart for the given path.
+    ///
+    /// The MIME type is set to application/octet-stream.
+    ///
+    /// Throws an FileException if the file cannot be opened.
     FilePart(const std::string& path);
-        // Creates the FilePart for the given path.
-        //
-        // The MIME type is set to application/octet-stream.
-        //
-        // Throws an FileException if the file cannot be opened.
-    
+
+    /// Creates the FilePart for the given
+    /// path and MIME type.
+    ///
+    /// Throws an FileException if the file cannot be opened.
     FilePart(const std::string& path, const std::string& contentType);
-        // Creates the FilePart for the given
-        // path and MIME type.
-        //
-        // Throws an FileException if the file cannot be opened.
 
+    /// Creates the FilePart for the given
+    /// path and MIME type. The given filename is
+    /// used as part filename (see filename()) only.
+    ///
+    /// Throws an FileException if the file cannot be opened.
     FilePart(const std::string& path, const std::string& filename, const std::string& contentType);
-        // Creates the FilePart for the given
-        // path and MIME type. The given filename is 
-        // used as part filename (see filename()) only.
-        //
-        // Throws an FileException if the file cannot be opened.
 
+    /// Destroys the FilePart.
     virtual ~FilePart();
-        // Destroys the FilePart.
 
+    /// Opens the file.
+    ///
+    /// Throws an FileException if the file cannot be opened.
     virtual void open();
-        // Opens the file.
-        //
-        // Throws an FileException if the file cannot be opened.
-        
+
+    /// Reset the internal state and write position to the start.
     virtual void reset();
-        // Reset the internal state and write position to the start.
 
+    /// Writes a form data chunk to the given HTTP client connection.
+    /// Returns true if there is more data to be written.
     virtual bool writeChunk(FormWriter& writer);
-        // Writes a form data chunk to the given HTTP client connection.
-        // Returns true if there is more data to be written.
 
+    /// Writes the form data to the given HTTP client connection.
     virtual void write(FormWriter& writer);
-        // Writes the form data to the given HTTP client connection.
 
+    /// Writes the form data to the given output stream.
     virtual void write(std::ostream& ostr);
-        // Writes the form data to the given output stream.    
-        
-    const std::string& filename() const;
-        // Returns the filename portion of the path.
-        
-    std::ifstream& stream();
-        // Returns the file input stream.
-        
-    virtual std::uint64_t length() const;
-        // Returns the length of the current part.
 
-    /*                
-    NVCollection& headers();
-        // Returns a NVCollection containing additional header 
-        // fields for the part.    
-    
-    const std::string& contentType() const;
-        // Returns the MIME type for this part or attachment.
-        
-    std::uint64_t fileSize() const;
-        // Returns the file size.
-        */
+    /// Returns the filename portion of the path.
+    const std::string& filename() const;
+
+    /// Returns the file input stream.
+    std::ifstream& stream();
+
+    /// Returns the length of the current part.
+    virtual std::uint64_t length() const;
+
+    // /// Returns a NVCollection containing additional header
+    // /// fields for the part.
+    // NVCollection& headers();
+    //
+    // /// Returns the MIME type for this part or attachment.
+    // const std::string& contentType() const;
+    //
+    // /// Returns the file size.
+    // std::uint64_t fileSize() const;
 
 protected:
     //std::string _contentType;
@@ -305,7 +310,7 @@ protected:
     std::ifstream _istr;
     std::uint64_t _fileSize;
     //std::uint64_t _nWritten;
-    //NVCollection _headers;    
+    //NVCollection _headers;
 };
 
 
@@ -313,32 +318,31 @@ protected:
 // String Part
 //
 
-
+/// An implementation of StringPart for plain files.
 class StringPart: public FormPart
-    /// An implementation of StringPart for plain files.
 {
 public:
+    /// Creates the StringPart for the given string.
     StringPart(const std::string& path);
-        // Creates the StringPart for the given string.
-    
+
+    /// Creates the StringPart for the given string and MIME type.
     StringPart(const std::string& data, const std::string& contentType);
-        // Creates the StringPart for the given string and MIME type.
 
+    /// Destroys the StringPart.
     virtual ~StringPart();
-        // Destroys the StringPart.
 
+    /// Writes a form data chunk to the given HTTP client connection.
+    /// Returns true if there is more data to be written.
     virtual bool writeChunk(FormWriter& writer);
-        // Writes a form data chunk to the given HTTP client connection.
-        // Returns true if there is more data to be written.
 
+    /// Writes the form data to the given HTTP client connection.
     virtual void write(FormWriter& writer);
-        // Writes the form data to the given HTTP client connection.
 
+    /// Writes the form data to the given output stream.
     virtual void write(std::ostream& ostr);
-        // Writes the form data to the given output stream.    
-        
+
+    /// Returns the length of the current part.
     virtual std::uint64_t length() const;
-        // Returns the length of the current part.
 
 protected:
     std::string _data;
@@ -350,6 +354,8 @@ protected:
 
 #endif // SCY_HTTP_Form_H
 
+/// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
@@ -360,14 +366,14 @@ protected:
 // execute, and transmit the Software, and to prepare derivative works of the
 // Software, and to permit third-parties to whom the Software is furnished to
 // do so, all subject to the following:
-// 
+//
 // The copyright notices in the Software and this entire statement, including
 // the above license grant, this restriction and the following disclaimer,
 // must be included in all copies of the Software, in whole or in part, and
 // all derivative works of the Software, unless such copies or derivative
 // works are solely in the form of machine-executable object code generated by
 // a source language processor.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT

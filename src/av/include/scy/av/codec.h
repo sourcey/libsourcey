@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup av
+/// @{
 
 
 #ifndef SCY_AV_Codec_H
@@ -34,27 +26,25 @@ namespace av {
 
 
 // ---------------------------------------------------------------------
-//
+///// Defines a codec for encoding/decoding media.
 struct Codec
-    /// Defines a codec for encoding/decoding media.
 {
     //
     // Base Codec Variables
 
-    std::string name;       // The display name for this codec.
-    std::string encoder;    // The encoder name for FFmpeg.
-    int sampleRate;         // The sampling rate or RTP clock rate.
-    int bitRate;            // The bit rate to encode at.
-    int quality;            // Optional quality value, variable range depending on codec.
-    bool enabled;           // Weather or not the codec is available for use.
+    std::string name;       ///< The display name for this codec.
+    std::string encoder;    ///< The encoder name for FFmpeg.
+    int sampleRate;         ///< The sampling rate or RTP clock rate.
+    int bitRate;            ///< The bit rate to encode at.
+    int quality;            ///< Optional quality value, variable range depending on codec.
+    bool enabled;           ///< Weather or not the codec is available for use.
 
     //
     // Ctors/Dtors
 
     Codec();
     Codec(const std::string& name, int sampleRate = 0, int bitRate = 0, bool enabled = true);
-    Codec(const std::string& name, const std::string& encoder, int sampleRate = 0, int bitRate = 0, bool enabled = true);
-    // Codec(const Codec& r);
+    Codec(const std::string& name, const std::string& encoder, int sampleRate = 0, int bitRate = 0, bool enabled = true);    /// Codec(const Codec& r);
     virtual ~Codec();
 
     //
@@ -65,7 +55,6 @@ struct Codec
 
     //
     // Operators
-
     // Codec& operator=(const Codec& r);
 };
 
@@ -81,9 +70,8 @@ struct Codec
 struct AudioCodec: public Codec
 {
     int channels;
-    std::string sampleFmt; // One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
-    // int frameSize;  // Frame size (optional value set by encoder/decoder)
-    // int bufferSize; // Buffer size (optional value set by encoder/decoder)
+    std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
+    /// int frameSize;  // Frame size (optional value set by encoder/decoder)    /// int bufferSize; // Buffer size (optional value set by encoder/decoder)
 
     AudioCodec();
     AudioCodec(const std::string& name,
@@ -97,13 +85,13 @@ struct AudioCodec: public Codec
         int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
         int bitRate = 0, // = DEFAULT_AUDIO_BIT_RATE
         const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
-    // AudioCodec(const AudioCodec& r);
+    /// AudioCodec(const AudioCodec& r);
     virtual ~AudioCodec();
 
     virtual std::string toString() const;
     virtual void print(std::ostream& ost);
 
-    // AudioCodec& operator==(const AudioCodec& that);
+    /// AudioCodec& operator==(const AudioCodec& that);
 };
 
 
@@ -150,43 +138,3 @@ typedef std::list<Codec*> CodecPList;
 
 
 #endif
-
-
-
-    /*
-    enum ID
-        // The codec ID values match their constituent
-        // AV_AV_CODEC_ID_XXX values in the FFmpeg library.
-    {
-        Unknown        = 0,
-
-        // Video
-        Raw            = 14,
-        H263        = 5,
-        H263p        = 20,
-        H264        = 28,
-        MPEG1        = 1,
-        MPEG2        = 2,
-        MPEG4        = 13,
-        MJPEG        = 8,
-        FLV            = 22,
-
-        // Audio
-        PCM            = 65536,
-        MP2            = 86016,
-        MP3            = 86017,
-        AAC            = 86018,
-        AC3            = 86019,
-        Vorbis        = 86021,
-        FLAC        = 86028,
-        NellyMoser    = 86050,
-        Speex        = 86052
-    };
-    */
-    //bool matches(const std::string& name) const;
-    //virtual std::string toSDP() const;
-
-    //static std::uint32_t toID(const std::string& type);
-    //static std::string idString(std::uint32_t id);
-
-    //std::uint32_t id;            // The codec ID. Unsigned integer for easy casting.

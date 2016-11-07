@@ -7,7 +7,6 @@
 using std::endl;
 using namespace scy;
 using namespace scy::net;
-using namespace scy::http;
 
 
 const std::uint16_t HttpPort = 1337;
@@ -21,7 +20,7 @@ int main(int argc, char** argv)
     {
         http::Server srv(HttpPort, new OurServerResponderFactory);
         srv.start();
-        
+
         uv::waitForShutdown([](void* opaque) {
             auto srv = reinterpret_cast<http::Server*>(opaque);
             srv->shutdown();

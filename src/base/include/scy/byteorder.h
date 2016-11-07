@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_ByteOrder_H
@@ -34,12 +26,12 @@
 
 
 namespace scy {
-    
-    
+
+
 enum class ByteOrder
 {
-    Network = 0,  // Default, use network byte order (big endian).
-    Host,         // Use the native order of the host.
+    Network = 0,  ///< Default, use network byte order (big endian).
+    Host,         ///< Use the native order of the host.
 };
 
 
@@ -184,3 +176,5 @@ inline std::uint64_t networkToHost64(std::uint64_t n) {
 
 
 #endif // SCY_ByteOrder_H
+
+/// @\}

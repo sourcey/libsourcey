@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup turn
+/// @{
 
 
 #ifndef SCY_TURN_SERVER_TCPAllocation_H
@@ -30,8 +22,9 @@
 namespace scy {
 namespace turn {
 
-    
+
 class Server;
+
 
 typedef PointerCollection<std::uint32_t, TCPConnectionPair> TCPConnectionPairMap;
 
@@ -39,34 +32,34 @@ typedef PointerCollection<std::uint32_t, TCPConnectionPair> TCPConnectionPairMap
 class TCPAllocation: public ServerAllocation
 {
 public:
-    TCPAllocation(Server& server, 
-                  const net::Socket::Ptr& control, 
-                  const FiveTuple& tuple, 
-                  const std::string& username, 
+    TCPAllocation(Server& server,
+                  const net::Socket::Ptr& control,
+                  const FiveTuple& tuple,
+                  const std::string& username,
                   const std::uint32_t& lifetime);
     virtual ~TCPAllocation();
-    
-    bool handleRequest(Request& request);    
+
+    bool handleRequest(Request& request);
     void handleConnectRequest(Request& request);
     void handleConnectionBindRequest(Request& request);
 
+    /// Sends a Connect request response to control.
     void sendPeerConnectResponse(TCPConnectionPair* pair, bool success);
-        // Send a Connect request response to control.
 
     int sendToControl(stun::Message& message);
 
     net::TCPSocket& control();
     net::Address relayedAddress() const;
     TCPConnectionPairMap& pairs();
-    
+
     bool onTimer();
 
+    /// Accepts incoming peer sockets for ConnectionBind requests.
     void onPeerAccept(void* sender, const net::TCPSocket::Ptr& sock);
-        // Accepts incoming peer sockets for ConnectionBind requests.
 
+    /// Callback for handling controll connection destruction.
+    /// The allocation will be deleted.
     void onControlClosed(void* sender);
-        // Callback for handling controll connection destruction.
-        // The allocation will be deleted.
 
 protected:
     net::TCPSocket::Ptr _control;
@@ -79,3 +72,5 @@ protected:
 
 
 #endif // SCY_TURN_SERVER_TCPAllocation_H
+
+/// @\}

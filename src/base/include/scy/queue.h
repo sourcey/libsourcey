@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Queue_H
@@ -32,10 +24,10 @@
 namespace scy {
 
 
+/// Implements a thread-safe queue container.
+// TODO: Iterators
 template<typename T>
 class Queue
-    /// Implements a thread-safe queue container.
-    /// TODO: Iterators
 {
 private:
     std::deque<T> _queue;
@@ -91,12 +83,6 @@ public:
         return std::sort(_queue.begin(), _queue.end(), Compare());
     }
 
-    // void popFront()
-    // {
-    //     Mutex::ScopedLock lock(_mutex);
-    //     _queue.pop_front();
-    // }
-
     std::size_t size()
     {
         Mutex::ScopedLock lock(_mutex);
@@ -120,11 +106,10 @@ template<class T>
 class RunnableQueue: public Queue<T*>, public async::Runnable
 {
 public:
-    typedef Queue<T*> queue_t;
-
+    typedef Queue<T*> queue_t;    /// The default dispatch function.
+    /// Must be set before the queue is running.
     std::function<void(T&)> ondispatch;
-        // The default dispatch function.
-        // Must be set before the queue is running.
+
 
     RunnableQueue(int limit = 2048, int timeout = 0) :
         _limit(limit),
@@ -137,9 +122,8 @@ public:
         clear();
     }
 
-    virtual void push(T* item)
-        // Push an item onto the queue.
-        // The queue takes ownership of the item pointer.
+    virtual void push(T* item)    // Push an item onto the queue.
+    /// The queue takes ownership of the item pointer.
     {
         Mutex::ScopedLock lock(_mutex);
 
@@ -152,13 +136,11 @@ public:
         queue_t::push(reinterpret_cast<T*>(item));
     }
 
-    virtual void flush()
-        // Flushes all outgoing items.
+    virtual void flush()    // Flushes all outgoing items.
     {
-        // do {
-        //     // scy::sleep(1);
-        // }
-        // while (dispatchNext());
+    /// do {
+    /// }    // while (dispatchNext());    //     // scy::sleep(1);
+
 
         while (!queue_t::empty()) {
             auto next = queue_t::front();
@@ -168,8 +150,7 @@ public:
         }
     }
 
-    void clear()
-        // Clears all queued items.
+    void clear()    // Clears all queued items.
     {
         Mutex::ScopedLock lock(_mutex);
         while (!queue_t::empty()) {
@@ -177,19 +158,12 @@ public:
             queue_t::pop();
         }
     }
+    /// bool empty()    /// {    ///     // Disabling mutex lock for bool check.
+    ///     //Mutex::ScopedLock lock(_mutex);    ///     return empty();    /// }
 
-    // bool empty()
-    // {
-    //     // Disabling mutex lock for bool check.
-    //     //Mutex::ScopedLock lock(_mutex);
-    //     return empty();
-    // }
-
-    virtual void run()
-        // Called asynchronously to dispatch queued items.
-        // If not timeout is set this method blocks until cancel()
-        // is called, otherwise runTimeout() will be called.
-        // Pseudo protected for std::bind compatability.
+    virtual void run()    // Called asynchronously to dispatch queued items.
+    /// If not timeout is set this method blocks until cancel()    // is called, otherwise runTimeout() will be called.
+    /// Pseudo protected for std::bind compatability.
     {
         if (_timeout) {
             runTimeout();
@@ -203,10 +177,9 @@ public:
         }
     }
 
-    virtual void runTimeout()
-        // Called asynchronously to dispatch queued items
-        // until the queue is empty or the timeout expires.
-        // Pseudo protected for std::bind compatability.
+    virtual void runTimeout()    // Called asynchronously to dispatch queued items
+    /// until the queue is empty or the timeout expires.
+    /// Pseudo protected for std::bind compatability.
     {
         Stopwatch sw;
         sw.start();
@@ -216,18 +189,12 @@ public:
         while (!cancelled() && sw.elapsedMilliseconds() < _timeout && dispatchNext());
     }
 
-    virtual void dispatch(T& item)
-        // Dispatch a single item to listeners.
+    virtual void dispatch(T& item)    // Dispatch a single item to listeners.
     {
         if (ondispatch)
             ondispatch(item);
     }
-
-    // int timeout()
-    // {
-    //     Mutex::ScopedLock lock(_mutex);
-    //     return _timeout;
-    // }
+    /// int timeout()    /// {    ///     Mutex::ScopedLock lock(_mutex);    ///     return _timeout;    /// }
 
     void setTimeout(int milliseconds)
     {
@@ -240,8 +207,7 @@ protected:
     RunnableQueue(const RunnableQueue&);
     RunnableQueue& operator = (const RunnableQueue&);
 
-    virtual T* popNext()
-        // Pops the next waiting item.
+    virtual T* popNext()    // Pops the next waiting item.
     {
         T* next;
         {
@@ -255,8 +221,7 @@ protected:
         return next;
     }
 
-    virtual bool dispatchNext()
-        // Pops and dispatches the next waiting item.
+    virtual bool dispatchNext()    // Pops and dispatches the next waiting item.
     {
         T* next = popNext();
         if (next) {
@@ -268,8 +233,7 @@ protected:
     }
 
     int _limit;
-    int _timeout;
-    // queue_t _queue;
+    int _timeout;    /// queue_t _queue;
     mutable Mutex _mutex;
 };
 
@@ -280,31 +244,29 @@ protected:
 
 
 template<class T>
+
+    /// SyncQueue extends SyncContext to implement a synchronized FIFO
+    /// queue which receives T objects from any thread and synchronizes
+    /// them for safe consumption by the associated event loop.
 class SyncQueue: public RunnableQueue<T>
-    // SyncQueue extends SyncContext to implement a synchronized FIFO
-    // queue which receives T objects from any thread and synchronizes
-    // them for safe consumption by the associated event loop.
 {
 public:
     typedef RunnableQueue<T> base_t;
 
     SyncQueue(uv::Loop* loop, int limit = 2048, int timeout = 20) :
-        base_t(limit, timeout),
-        // Note: The SyncQueue instance must not be destroyed
-        // while the RunnableQueue is still dispatching items.
+        base_t(limit, timeout),    // Note: The SyncQueue instance must not be destroyed
+    /// while the RunnableQueue is still dispatching items.
         _sync(loop, std::bind(&base_t::run, this))
     {
     }
 
-    virtual ~SyncQueue()
-        // Destruction is deferred to allow enough
-        // time for all callbacks to return.
+    virtual ~SyncQueue()    // Destruction is deferred to allow enough
+    /// time for all callbacks to return.
     {
     }
 
-    virtual void push(T* item)
-        // Pushes an item onto the queue.
-        // Item pointers are now managed by the SyncQueue.
+    virtual void push(T* item)    // Pushes an item onto the queue.
+    /// Item pointers are now managed by the SyncQueue.
     {
         base_t::push(item);
         _sync.post();
@@ -313,10 +275,8 @@ public:
     virtual void cancel()
     {
         base_t::cancel();
-        _sync.cancel();
-
-        // Call uv_close on the handle if calling from
-        // the event loop thread or we deadlock.
+        _sync.cancel();    /// Call uv_close on the handle if calling from
+    /// the event loop thread or we deadlock.
         if (_sync.tid() == Thread::currentID())
             _sync.close();
     }
@@ -337,15 +297,16 @@ protected:
 
 
 template<class T>
+
+    /// AsyncQueue is a thread-based queue which receives packets
+    /// from any thread source and dispatches them asynchronously.
+    ///
+    /// This queue is useful for deferring load from operation
+    /// critical system devices before performing long running tasks.
+    ///
+    /// The thread will call the RunnableQueue's run() method to
+    /// constantly flush outgoing packets until cancel() is called.
 class AsyncQueue: public RunnableQueue<T>
-    // AsyncQueue is a thread-based queue which receives packets
-    // from any thread source and dispatches them asynchronously.
-    //
-    // This queue is useful for deferring load from operation
-    // critical system devices before performing long running tasks.
-    //
-    // The thread will call the RunnableQueue's run() method to
-    // constantly flush outgoing packets until cancel() is called.
 {
 public:
     typedef RunnableQueue<T> base_t;
@@ -379,9 +340,9 @@ protected:
 //
 
 template<typename T>
+
+    /// Implements a simple thread-safe multiple producer,    /// multiple consumer queue.
 class ConcurrentQueue
-    // Implements a simple thread-safe multiple producer,
-    // multiple consumer queue.
 {
 private:
     std::queue<T> _queue;
@@ -432,3 +393,5 @@ public:
 
 
 #endif // SCY_Queue_H
+
+/// @\}

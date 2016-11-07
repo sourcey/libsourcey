@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #include "scy/platform.h"
@@ -33,9 +25,9 @@
 
 namespace scy {
 
-    
-std::string getExePath() 
-{    
+
+std::string getExePath()
+{
     char buf[PATHMAX];
     std::size_t size = PATHMAX;
     if (uv_exepath(buf, &size) != 0)
@@ -44,8 +36,8 @@ std::string getExePath()
 }
 
 
-std::string getCwd() 
-{    
+std::string getCwd()
+{
     char buf[PATHMAX];
     std::size_t size = PATHMAX;
     if (uv_cwd(buf, &size) != 0)
@@ -70,7 +62,7 @@ void sleep(int ms)
 {
 #ifdef SCY_WIN
     Sleep(ms);
-#else    
+#else
     usleep(ms * 1000);
 #endif
 }
@@ -90,14 +82,14 @@ void pause()
 
 #ifdef SCY_WIN
 
-enum WindowsMajorVersions 
+enum WindowsMajorVersions
 {
     kWindows2000 = 5,
     kWindowsVista = 6,
 };
 
 
-bool getOsVersion(int* major, int* minor, int* build) 
+bool getOsVersion(int* major, int* minor, int* build)
 {
     OSVERSIONINFO info = {0};
     info.dwOSVersionInfoSize = sizeof(info);
@@ -110,13 +102,13 @@ bool getOsVersion(int* major, int* minor, int* build)
     return false;
 }
 
-bool isWindowsVistaOrLater() 
+bool isWindowsVistaOrLater()
 {
     int major;
     return (getOsVersion(&major, nullptr, nullptr) && major >= kWindowsVista);
 }
 
-bool isWindowsXpOrLater() 
+bool isWindowsXpOrLater()
 {
     int major, minor;
     return (getOsVersion(&major, &minor, nullptr) &&
@@ -136,12 +128,12 @@ std::wstring toUtf16(const char* utf8, std::size_t len)
     return std::wstring(ws, len16);
 }
 
-std::wstring toUtf16(const std::string& str) 
+std::wstring toUtf16(const std::string& str)
 {
     return toUtf16(str.data(), str.length());
 }
 
-std::string toUtf8(const wchar_t* wide, std::size_t len) 
+std::string toUtf8(const wchar_t* wide, std::size_t len)
 {
     int len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
     char* ns = STACK_ARRAY(char, len8);
@@ -149,7 +141,7 @@ std::string toUtf8(const wchar_t* wide, std::size_t len)
     return std::string(ns, len8);
 }
 
-std::string toUtf8(const std::wstring& wstr) 
+std::string toUtf8(const std::wstring& wstr)
 {
     return toUtf8(wstr.data(), wstr.length());
 }
@@ -157,4 +149,6 @@ std::string toUtf8(const std::wstring& wstr)
 #endif
 
 
-} // namespace scy::uv
+} // namespace scy
+
+/// @\}

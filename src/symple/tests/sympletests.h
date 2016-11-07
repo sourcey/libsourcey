@@ -1,22 +1,3 @@
-//
-// LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
-//
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-//
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
-
-
 #ifndef SCY_Symple_Tests_H
 #define SCY_Symple_Tests_H
 
@@ -56,9 +37,9 @@ public:
         gotOnline(false),
         gotRemotePresence(false)
     {
-        user = options.user;
+        user = options.user;    // client += messageDelegate(this, &TestClient::onRecvMessage);
         client.options() = options;
-        // client += messageDelegate(this, &TestClient::onRecvMessage);
+
         client += presenceDelegate(this, &TestClient::onRecvPresence);
         client.Announce += delegate(this, &TestClient::onClientAnnounce);
         client.StateChange += delegate(this, &TestClient::onClientStateChange);
@@ -98,21 +79,16 @@ public:
         expect(gotOnline);
         expect(gotRemotePresence);
     }
-
-    // void onRecvMessage(void* sender, smpl::Message& message)
-    // {
-    //     InfoL << user << ": ############################### On message: " << message.toStyledString() << endl;
-    //
-    //     // Handle incoming Symple messages here
-    // }
+    /// void onRecvMessage(void* sender, smpl::Message& message)    /// {    ///     InfoL << user << ": ############################### On message: " << message.toStyledString() << endl;
+    ///
+    ///     // Handle incoming Symple messages here
+    /// }
 
     void onRecvPresence(void* sender, smpl::Presence& presence)
     {
         InfoL << user << ": On presence: " << presence.toStyledString() << endl;
 
-        expect(presence.data("version").asString() == "1.0.1");
-
-        // Handle incoming Symple messages here
+        expect(presence.data("version").asString() == "1.0.1");    /// Handle incoming Symple messages here
         if (user == "l") {
             expect(presence.from().user == "r");
         }
@@ -161,10 +137,8 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        InfoL << user << ": Updating Client Data" << endl;
-
-        // Update the peer object to be broadcast with presence.
-        // Any arbitrary data can be broadcast with presence.
+        InfoL << user << ": Updating Client Data" << endl;    /// Update the peer object to be broadcast with presence.
+    /// Any arbitrary data can be broadcast with presence.
         peer["agent"] = "Spot";
         peer["version"] = "1.0.1";
     }
@@ -175,3 +149,5 @@ public:
 
 
 #endif // SCY_Symple_Tests_H
+
+/// @\}

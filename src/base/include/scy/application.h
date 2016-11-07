@@ -1,20 +1,12 @@
+///
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// SPDX-License-Identifier:	LGPL-2.1+
 //
-// LibSourcey is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-//
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Application_H
@@ -31,25 +23,26 @@
 namespace scy {
 
 
+/// A simple event based application which runs until the
+/// internal event loop is terminated.
+///
+/// The Application class provides shutdown handling (Ctrl-C).
+///
+// TODO: Cross platform getopts
+///
 class Application
-    /// A simple event based application which runs until the
-    /// internal event loop is terminated.
-    ///
-    /// The Application class provides shutdown handling (Ctrl-C).
-    ///
-    /// TODO: Cross platform getopts
 {
 public:
+    /// Returns the default Application singleton, although
+    /// Application instances may be initialized individually.
+    /// The default runner should be kept for short running
+    /// tasks such as timers in order to maintain performance.
     static Application& getDefault();
-        // Returns the default Application singleton, although
-        // Application instances may be initialized individually.
-        // The default runner should be kept for short running
-        // tasks such as timers in order to maintain performance.
 
+    /// The active event loop.
+    /// May be assigned at construction, otherwise the default
+    /// event loop is used.
     uv::Loop* loop;
-        // The active event loop.
-        // May be assigned at construction, otherwise the default
-        // event loop is used.
 
     Application(uv::Loop* loop = uv::defaultLoop());
     ~Application();
@@ -58,16 +51,15 @@ public:
     void stop();
     void finalize();
 
+    ///
+    /// Shutdown handling
+    ///
 
-    //
-    // Shutdown handling
-    //
-
+    /// Bind the shutdown signal.
     void bindShutdownSignal(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
-        // Bind the shutdown signal.
 
+    /// Bind the shutdown signal and run the main event loop.
     void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
-        // Bind the shutdown signal and run the main event loop.
 
     static void onShutdownSignal(uv_signal_t *req, int signum);
     static void onPrintHandle(uv_handle_t* handle, void* arg);
@@ -83,6 +75,7 @@ protected:
 //
 // Command Line Option Parser
 //
+
 
 typedef std::map<std::string, std::string> OptionMap;
 
@@ -117,3 +110,5 @@ struct OptionParser
 
 
 #endif // SCY_Application_H
+
+/// @\}
