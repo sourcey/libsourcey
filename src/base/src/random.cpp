@@ -224,7 +224,7 @@ void Random::getSeed(char* seed, unsigned length)
 {
     int n = 0;
 
-#if SCY_WIN
+#ifdef SCY_WIN
     HCRYPTPROV hProvider = 0;
     CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
     CryptGenRandom(hProvider, (DWORD) length, (BYTE*) seed);
