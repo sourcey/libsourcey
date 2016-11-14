@@ -29,17 +29,6 @@ node ./doxygen2md/bin/doxygen2md.js --verbose ./biuld/doxygen/xml
 node ./doxygen2md/bin/doxygen2md.js --verbose --groups --output=./doc ./build/doxygen/xml
 node ./doxygen2md/bin/doxygen2md.js --verbose --groups --output ./doc/api.md ./build/doxygen/xml
 
-
-TODO:
-- split into namespaces
-  - remove namespace list from beginning
-- skip assertions
-- disable Summary or Members
-  - namespace heading h1
-  - namespaces not generating preoprtly - linear + links broken
-  - classes h1 to h2
-  - members h3 to h4
-
 npm install gitbook-cli
 ./node_modules/gitbook-cli/bin/gitbook.js init
 

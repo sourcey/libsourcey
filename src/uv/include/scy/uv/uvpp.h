@@ -92,11 +92,11 @@ inline void stopDefaultLoop()
 
 
 //
-// UV Handle
+/// UV Handle
 //
 
 
-/// A base class for managing a libuv handle during it's lifecycle and
+/// A base class for managing a `libuv` handle during it's lifecycle and
 /// safely handling its asynchronous destruction mechanism.
 class Handle
 {
@@ -107,8 +107,10 @@ public:
     /// The event loop may be set before the handle is initialized.
     virtual void setLoop(uv_loop_t* loop);
 
-    /// Returns a cast pointer to the managed libuv handle.
+    /// Returns a cast pointer to the managed `libuv` handle.
     virtual uv_loop_t* loop() const;
+
+    /// Returns a typecasted pointer to the managed `libuv` handle.
     template <class T>
     T* ptr() const
     {
@@ -116,12 +118,12 @@ public:
         return reinterpret_cast<T*>(_ptr);
     }
 
-    /// Returns a pointer to the managed libuv handle.
+    /// Returns a pointer to the managed `libuv` handle.
     virtual uv_handle_t* ptr() const;
 
     /// Returns true when the handle is active.
     /// This method should be used instead of closed() to determine
-    /// the veracity of the libuv handle for stream io operations.
+    /// the veracity of the `libuv` handle for stream io operations.
     virtual bool active() const;
 
     /// Returns true after close() has been called.
@@ -140,7 +142,7 @@ public:
     const scy::Error& error() const;
 
     /// Sets and throws the last error.
-    /// Should never be called inside libuv callbacks.
+    /// Should never be called inside `libuv` callbacks.
     virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0);
 
     /// Throws the last error.
@@ -150,13 +152,13 @@ public:
     virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const;
 
     /// Sets the last error and sends relevant callbacks.
-    /// This method can be called inside libuv callbacks.
+    /// This method can be called inside `libuv` callbacks.
     virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0);
 
     /// Sets the error content and triggers callbacks.
     virtual void setError(const scy::Error& err);
 
-    /// Closes and destroys the associated libuv handle.
+    /// Closes and destroys the associated `libuv` handle.
     virtual void close();
 
     /// Make sure we are calling from the event loop thread.

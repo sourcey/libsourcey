@@ -8,7 +8,7 @@
 
 
 #include "filepeerconnection.h"
-#include "videopacketsource.h"
+#include "scy/webrtc/videopacketsource.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/logger.h"
 

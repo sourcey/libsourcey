@@ -13,9 +13,9 @@
 
 #include "signaler.h"
 #include "filepeerconnection.h"
-#include "videopacketsource.h"
-#include "audiopacketmodule.h"
-#include "multiplexmediacapturer.h"
+#include "scy/webrtc/videopacketsource.h"
+#include "scy/webrtc/audiopacketmodule.h"
+#include "scy/webrtc/multiplexmediacapturer.h"
 
 #include "webrtc/api/peerconnectionfactory.h"
 #include "webrtc/api/mediastreamtrackproxy.h"

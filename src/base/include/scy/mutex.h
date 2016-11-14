@@ -7,8 +7,6 @@
 //
 /// @addtogroup base
 /// @{
-// This file uses functions from POCO C++ Libraries (license below)
-//
 
 
 #ifndef SCY_Mutex_H
@@ -23,7 +21,8 @@ namespace scy {
 
 /// ScopedLock simplifies thread synchronization
 /// with a Mutex or similar lockable object.
-/// The given Mutex is locked in the constructor,    /// and unlocked it in the destructor.
+/// The given Mutex is locked in the constructor,
+/// and unlocked it in the destructor.
 /// T can be any class with lock() and unlock() functions.
 template <class T>
 class ScopedLock
@@ -76,7 +75,6 @@ public:
     /// Unlocks the mutex so that it can be acquired by
     /// other threads.
     void unlock();
-
 
 private:
     Mutex(const Mutex&);
