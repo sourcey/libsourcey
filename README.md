@@ -20,7 +20,9 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 
 * **Modular libraries** — Libraries are modular for easy integration into your existing projects, so you can just "include what you need" without incurring extra incumbent bloat.
 
-* **Clean and readable code** — Modern C++ design principles have been adhered to throughout for clear and readable code.
+* **Well tested** — Core modules are well tested with unit tests and stress tested daily in production.
+
+* **Clean and readable code** — Modern C++ design principles have been adhered to throughout for clean and readable code.
 
 * **Networking layer** — A solid network layer is absolutely essential. The networking layer contains TCP, SSL and UDP socket implementations that combine `libuv` under the hood for blazing fast networking, and `openssl` for security and encryption.
 
