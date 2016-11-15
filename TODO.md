@@ -8,5 +8,3 @@ Test data folders should be installed relative to compiled test binaries
 Work towards a no-rtti build
 Describe how to build WebRTC for use with LibSourcey in README
 Video encoder test changing input resolution
-
-document getting started with building external cmake file

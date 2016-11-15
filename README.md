@@ -120,6 +120,8 @@ Pull Requests are always welcome, so if you make any improvements please feel fr
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-<!-- ## Issues
+<!--
+## Issues
 
-For bugs and issues please use the [Github issue tracker](https://github.com/sourcey/libsourcey/issues). -->
+For bugs and issues please use the [Github issue tracker](https://github.com/sourcey/libsourcey/issues).
+-->

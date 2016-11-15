@@ -62,7 +62,6 @@ protected:
 };
 
 
-
 // SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
 //     SyncQueue<IPacket>(loop, maxSize),
 //     PacketProcessor(this->emitter)
