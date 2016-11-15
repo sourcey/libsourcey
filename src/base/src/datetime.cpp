@@ -14,6 +14,7 @@
 #include "scy/datetime.h"
 #include "scy/platform.h"
 #include "scy/time.h"
+#include "scy/util.h"
 #include "scy/numeric.h"
 
 #include <cmath>

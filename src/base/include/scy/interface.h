@@ -23,7 +23,7 @@
 namespace scy {
 
 
-/// Forward the LogStream for Logger.h
+/// Forward the LogStream for logger.h
 struct LogStream;
 
 
@@ -51,6 +51,7 @@ public:
 
 
 /// A base module class for C++ callback polymorphism.
+/// @deprecated
 class Polymorphic
 {
 public:
@@ -69,7 +70,7 @@ public:
         return self;
     };
 
-    scy::LogStream& log(const char* level = "debug") const; // depreciated
+    scy::LogStream& log(const char* level = "debug") const;
 
     virtual const char* className() const = 0;
 };

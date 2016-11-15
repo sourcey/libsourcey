@@ -16,10 +16,13 @@
 #include <cstdint>
 #include "scy/packet.h"
 #include "scy/polymorphicsignal.h"
+#include "scy/signal2.h"
 
 
 namespace scy {
 
+
+// typedef v2::Signal<void(IPacket&)> PacketSignal; //void*, 
 
 typedef DelegateBase<IPacket&> PacketDelegateBase;
 typedef SignalBase<PacketDelegateBase, IPacket&> PacketSignal;

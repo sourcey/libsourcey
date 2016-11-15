@@ -213,229 +213,229 @@ class SignalTest: public Test
 // =============================================================================
 // Signal V2 Test
 //
-class PolymorphicSignalTests: public Test {
-    int numPackets = 0;
-
-    void onPacket(IPacket& packet)
-    {
-        std::cout << "On packet: " << packet.className() << std::endl;
-        numPackets++;
-    }
-
-    void onPacketWithSender(void*, IPacket& packet)
-    {
-        std::cout << "On packet sender: " << packet.className() << std::endl;
-        numPackets++;
-    }
-
-public:
-    void run() {
-        v2::Signal < void(IPacket&) > sig1;
-        v2::Signal < void(void*, IPacket&) > sig2;
-
-        sig1() += v2::slot(this, &PolymorphicSignalTests::onPacket);
-        sig2() += v2::slot(this, &PolymorphicSignalTests::onPacketWithSender);
-
-        RawPacket p("hello", 5);
-        sig1.emit(p);
-        sig2.emit(this, p);
-
-        expect(numPackets == 2);
-    }
-};
-
-
-class BasicSignalTests: public Test {
-    static std::string accu;
-    struct Foo {
-        char foo_bool(float f, int i, std::string s) {
-            accu += util::format("Foo: %.2f\n", f + i + s.size());
-            return true;
-        }
-    };
-    static char float_callback(float f, int, std::string) {
-        accu += util::format("float: %.2f\n", f);
-        return 0;
-    }
-
-public:
-    void run() {
-        accu = "";
-        v2::Signal < char(float, int, std::string) > sig1;
-        size_t id1 = sig1() += float_callback;
-        size_t id2 = sig1() += [](float, int i, std::string) {
-            accu += util::format("int: %d\n", i);
-            return 0;
-        };
-        size_t id3 = sig1() += [](float, int,
-            const std::string & s) {
-            accu += util::format("string: %s\n", s.c_str());
-            return 0;
-        };
-        sig1.emit(.3, 4, "huhu");
-        bool success;
-        success = sig1() -= id1;
-        expect(success == true);
-        success = sig1() -= id1;
-        expect(success == false);
-        success = sig1() -= id2;
-        expect(success == true);
-        success = sig1() -= id3;
-        expect(success == true);
-        success = sig1() -= id3;
-        expect(success == false);
-        success = sig1() -= id2;
-        expect(success == false);
-        Foo foo;
-        sig1() += v2::slot(foo, & Foo::foo_bool);
-        sig1() += v2::slot( & foo, & Foo::foo_bool);
-        sig1.emit(.5, 1, "12");
-
-        v2::Signal < void(std::string, int) > sig2;
-        sig2() += [](std::string msg, int) {
-            accu += util::format("msg: %s", msg.c_str());
-        };
-        sig2() += [](std::string, int d) {
-            accu += util::format(" *%d*\n", d);
-        };
-        sig2.emit("in sig2", 17);
-
-        accu += "DONE";
-
-        const char * expected = "float: 0.30\n"
-        "int: 4\n"
-        "string: huhu\n"
-        "Foo: 3.50\n"
-        "Foo: 3.50\n"
-        "msg: in sig2 *17*\n"
-        "DONE";
-        expect(accu == expected);
-        std::cout << accu << std::endl;
-    }
-};
-std::string BasicSignalTests::accu;
-
-
-class TestCollectorVector: public Test {
-    static int handler1() {
-        return 1;
-    }
-    static int handler42() {
-        return 42;
-    }
-    static int handler777() {
-        return 777;
-    }
-public:
-    void run() {
-        v2::Signal < int(), v2::CollectorVector < int >> sig_vector;
-        sig_vector() += handler777;
-        sig_vector() += handler42;
-        sig_vector() += handler1;
-        sig_vector() += handler42;
-        sig_vector() += handler777;
-        std::vector < int > results = sig_vector.emit();
-        // const int reference_array[] = { 777, 42, 1, 42, 777, };
-        // const std::vector<int> reference = vector_from_array (reference_array);
-        const std::vector < int > reference = {
-            777,
-            42,
-            1,
-            42,
-            777,
-        };
-        expect(results == reference);
-    }
-};
-
-
-class TestCollectorUntil0: public Test {
-    bool check1, check2;
-    bool handler_true() {
-        check1 = true;
-        return true;
-    }
-    bool handler_false() {
-        check2 = true;
-        return false;
-    }
-    bool handler_abort() {
-        abort();
-    }
-public:
-    TestCollectorUntil0(): check1(0), check2(0) {}
-
-    void run() {
-        TestCollectorUntil0 self;
-        v2::Signal < bool(), v2::CollectorUntil0 < bool >> sig_until0;
-        sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_true);
-        sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_false);
-        sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_abort);
-        expect(!self.check1 && !self.check2);
-        const bool result = sig_until0.emit();
-        expect(!result && self.check1 && self.check2);
-    }
-};
-
-
-class TestCollectorWhile0: public Test {
-    bool check1, check2;
-    bool handler_0() {
-        check1 = true;
-        return false;
-    }
-    bool handler_1() {
-        check2 = true;
-        return true;
-    }
-    bool handler_abort() {
-        abort();
-    }
-public:
-    TestCollectorWhile0(): check1(0), check2(0) {}
-
-    void run() {
-        TestCollectorWhile0 self;
-        v2::Signal < bool(), v2::CollectorWhile0 < bool >> sig_while0;
-        sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_0);
-        sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_1);
-        sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_abort);
-        expect(!self.check1 && !self.check2);
-        const bool result = sig_while0.emit();
-        expect(result == true && self.check1 && self.check2);
-    }
-};
-
-
-// TestCounter for Signal benchmark tests
-struct TestCounter {
-    static std::uint64_t get();
-    static void set(std::uint64_t);
-    static void add(std::uint64_t);
-    static void add2(void * , std::uint64_t);
-};
-
-namespace { // Anon
-    void( * test_counter_add2)(void * , std::uint64_t) =
-        TestCounter::add2; // external symbol to prevent easy inlining
-    static std::uint64_t test_counter_var = 0;
-} // Anon
-
-std::uint64_t TestCounter::get() {
-    return test_counter_var;
-}
-
-void TestCounter::set(std::uint64_t v) {
-    test_counter_var = v;
-}
-
-void TestCounter::add(std::uint64_t v) {
-    test_counter_var += v;
-}
-
-void TestCounter::add2(void*, std::uint64_t v) {
-    test_counter_var += v;
-}
+// class PolymorphicSignalTests: public Test {
+//     int numPackets = 0;
+//
+//     void onPacket(IPacket& packet)
+//     {
+//         std::cout << "On packet: " << packet.className() << std::endl;
+//         numPackets++;
+//     }
+//
+//     void onPacketWithSender(void*, IPacket& packet)
+//     {
+//         std::cout << "On packet sender: " << packet.className() << std::endl;
+//         numPackets++;
+//     }
+//
+// public:
+//     void run() {
+//         v2::Signal < void(IPacket&) > sig1;
+//         v2::Signal < void(void*, IPacket&) > sig2;
+//
+//         sig1() += v2::slot(this, &PolymorphicSignalTests::onPacket);
+//         sig2() += v2::slot(this, &PolymorphicSignalTests::onPacketWithSender);
+//
+//         RawPacket p("hello", 5);
+//         sig1.emit(p);
+//         sig2.emit(this, p);
+//
+//         expect(numPackets == 2);
+//     }
+// };
+//
+//
+// class BasicSignalTests: public Test {
+//     static std::string accu;
+//     struct Foo {
+//         char foo_bool(float f, int i, std::string s) {
+//             accu += util::format("Foo: %.2f\n", f + i + s.size());
+//             return true;
+//         }
+//     };
+//     static char float_callback(float f, int, std::string) {
+//         accu += util::format("float: %.2f\n", f);
+//         return 0;
+//     }
+//
+// public:
+//     void run() {
+//         accu = "";
+//         v2::Signal < char(float, int, std::string) > sig1;
+//         size_t id1 = sig1() += float_callback;
+//         size_t id2 = sig1() += [](float, int i, std::string) {
+//             accu += util::format("int: %d\n", i);
+//             return 0;
+//         };
+//         size_t id3 = sig1() += [](float, int,
+//             const std::string & s) {
+//             accu += util::format("string: %s\n", s.c_str());
+//             return 0;
+//         };
+//         sig1.emit(.3, 4, "huhu");
+//         bool success;
+//         success = sig1() -= id1;
+//         expect(success == true);
+//         success = sig1() -= id1;
+//         expect(success == false);
+//         success = sig1() -= id2;
+//         expect(success == true);
+//         success = sig1() -= id3;
+//         expect(success == true);
+//         success = sig1() -= id3;
+//         expect(success == false);
+//         success = sig1() -= id2;
+//         expect(success == false);
+//         Foo foo;
+//         sig1() += v2::slot(foo, &Foo::foo_bool);
+//         sig1() += v2::slot(&foo, &Foo::foo_bool);
+//         sig1.emit(.5, 1, "12");
+//
+//         v2::Signal < void(std::string, int) > sig2;
+//         sig2() += [](std::string msg, int) {
+//             accu += util::format("msg: %s", msg.c_str());
+//         };
+//         sig2() += [](std::string, int d) {
+//             accu += util::format(" *%d*\n", d);
+//         };
+//         sig2.emit("in sig2", 17);
+//
+//         accu += "DONE";
+//
+//         const char * expected = "float: 0.30\n"
+//         "int: 4\n"
+//         "string: huhu\n"
+//         "Foo: 3.50\n"
+//         "Foo: 3.50\n"
+//         "msg: in sig2 *17*\n"
+//         "DONE";
+//         expect(accu == expected);
+//         std::cout << accu << std::endl;
+//     }
+// };
+// std::string BasicSignalTests::accu;
+//
+//
+// class TestCollectorVector: public Test {
+//     static int handler1() {
+//         return 1;
+//     }
+//     static int handler42() {
+//         return 42;
+//     }
+//     static int handler777() {
+//         return 777;
+//     }
+// public:
+//     void run() {
+//         v2::Signal < int(), v2::CollectorVector < int >> sig_vector;
+//         sig_vector() += handler777;
+//         sig_vector() += handler42;
+//         sig_vector() += handler1;
+//         sig_vector() += handler42;
+//         sig_vector() += handler777;
+//         std::vector < int > results = sig_vector.emit();
+//         // const int reference_array[] = { 777, 42, 1, 42, 777, };
+//         // const std::vector<int> reference = vector_from_array (reference_array);
+//         const std::vector < int > reference = {
+//             777,
+//             42,
+//             1,
+//             42,
+//             777,
+//         };
+//         expect(results == reference);
+//     }
+// };
+//
+//
+// class TestCollectorUntil0: public Test {
+//     bool check1, check2;
+//     bool handler_true() {
+//         check1 = true;
+//         return true;
+//     }
+//     bool handler_false() {
+//         check2 = true;
+//         return false;
+//     }
+//     bool handler_abort() {
+//         abort();
+//     }
+// public:
+//     TestCollectorUntil0(): check1(0), check2(0) {}
+//
+//     void run() {
+//         TestCollectorUntil0 self;
+//         v2::Signal < bool(), v2::CollectorUntil0 < bool >> sig_until0;
+//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_true);
+//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_false);
+//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_abort);
+//         expect(!self.check1 && !self.check2);
+//         const bool result = sig_until0.emit();
+//         expect(!result && self.check1 && self.check2);
+//     }
+// };
+//
+//
+// class TestCollectorWhile0: public Test {
+//     bool check1, check2;
+//     bool handler_0() {
+//         check1 = true;
+//         return false;
+//     }
+//     bool handler_1() {
+//         check2 = true;
+//         return true;
+//     }
+//     bool handler_abort() {
+//         abort();
+//     }
+// public:
+//     TestCollectorWhile0(): check1(0), check2(0) {}
+//
+//     void run() {
+//         TestCollectorWhile0 self;
+//         v2::Signal < bool(), v2::CollectorWhile0 < bool >> sig_while0;
+//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_0);
+//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_1);
+//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_abort);
+//         expect(!self.check1 && !self.check2);
+//         const bool result = sig_while0.emit();
+//         expect(result == true && self.check1 && self.check2);
+//     }
+// };
+//
+//
+// // TestCounter for Signal benchmark tests
+// struct TestCounter {
+//     static std::uint64_t get();
+//     static void set(std::uint64_t);
+//     static void add(std::uint64_t);
+//     static void add2(void * , std::uint64_t);
+// };
+//
+// namespace { // Anon
+//     void( * test_counter_add2)(void * , std::uint64_t) =
+//         TestCounter::add2; // external symbol to prevent easy inlining
+//     static std::uint64_t test_counter_var = 0;
+// } // Anon
+//
+// std::uint64_t TestCounter::get() {
+//     return test_counter_var;
+// }
+//
+// void TestCounter::set(std::uint64_t v) {
+//     test_counter_var = v;
+// }
+//
+// void TestCounter::add(std::uint64_t v) {
+//     test_counter_var += v;
+// }
+//
+// void TestCounter::add2(void*, std::uint64_t v) {
+//     test_counter_var += v;
+// }
 
 
 // =============================================================================
