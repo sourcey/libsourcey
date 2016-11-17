@@ -202,8 +202,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
     audio.source = &opacket;
     audio.opaque = enc;
 
-    enc->emitter.emit(enc, audio);
-    // assert(0);
+    enc->emitter.emit(/*enc, */audio);
 }
 
 

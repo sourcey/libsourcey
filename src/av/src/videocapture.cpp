@@ -10,6 +10,7 @@
 
 
 #include "scy/av/videocapture.h"
+#include "scy/util.h"
 
 #ifdef HAVE_FFMPEG
 

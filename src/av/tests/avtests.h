@@ -14,6 +14,7 @@
 #include "scy/base.h"
 #include "scy/test.h"
 #include "scy/logger.h"
+#include "scy/util.h"
 #include "scy/av/devicemanager.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/multiplexpacketencoder.h"
@@ -168,7 +169,7 @@ class AudioEncoderTest: public Test
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOArgs...S_VALUE);
+            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
         }
 
         encoder.flush();
@@ -421,7 +422,7 @@ class AudioCaptureEncoderTest: public Test
     void onAudioCaptured(av::AudioPacket& packet)
     {
         TraceL << "On audio packet: samples=" << packet.numSamples << ", time=" << packet.time << endl;
-        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOArgs...S_VALUE);
+        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
     }
 
     void onAudioEncoded(av::AudioPacket& packet)

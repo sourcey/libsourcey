@@ -272,7 +272,7 @@ void emitPacket(VideoEncoder* enc, AVPacket& opacket)
     VideoPacket video(opacket.data, opacket.size, enc->ctx->coded_frame->width, enc->ctx->coded_frame->height, enc->time);
     video.source = &opacket;
     video.opaque = enc;
-    enc->emitter.emit(enc, video);
+    enc->emitter.emit(/*enc, */video);
 }
 
 

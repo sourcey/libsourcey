@@ -53,8 +53,8 @@ public:
     static const uv_thread_t mainID;
 
 protected:
-    Thread(const Thread&);
-    Thread& operator = (const Thread&);
+    Thread(const Thread&) = delete;
+    Thread& operator = (const Thread&) = delete;
 
     virtual bool async() const;
     virtual void startAsync();
@@ -63,13 +63,11 @@ protected:
 };
 
 
-//
-// Runner Startable
-//
-
-/// Depreciated: This class is an invisible wrapper around a TStartable instance,
+#if 0
+/// This class is an invisible wrapper around a TStartable instance,
 /// which provides asynchronous access to the TStartable start() and
 /// stop() methods. TStartable is an instance of async::Startable.
+/// @deprecated
 template <class TStartable>
 class AsyncStartable: public TStartable
 {
@@ -105,6 +103,7 @@ public:
 protected:
     Thread _thread;
 };
+#endif
 
 
 } // namespace scy

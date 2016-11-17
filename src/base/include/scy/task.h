@@ -160,8 +160,8 @@ protected:
 protected:
     typedef std::deque<Task*> TaskList;
 
-    mutable Mutex    _mutex;
-    TaskList        _tasks;
+    mutable Mutex _mutex;
+    TaskList _tasks;
     async::Runner::Ptr _runner;
 };
 

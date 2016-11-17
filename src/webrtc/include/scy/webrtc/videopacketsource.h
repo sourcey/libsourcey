@@ -42,7 +42,7 @@ public:
         cricket::VideoFormat* best_format);
     virtual bool IsScreencast() const;
 
-    void onVideoCaptured(void* sender, av::VideoPacket& packet);
+    void onVideoCaptured(av::VideoPacket& packet);
 };
 
 

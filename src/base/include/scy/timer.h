@@ -18,7 +18,6 @@
 #include "scy/signal.h"
 #include "scy/memory.h"
 #include "scy/async.h"
-
 #include <cstdint>
 #include <functional>
 
@@ -26,7 +25,6 @@
 namespace scy {
 
 
-// TODO: Should be Async, and uv::Handle a member
 class Timer
 {
 public:

@@ -10,6 +10,8 @@
 
 
 #include "scy/av/devicemanager.h"
+#include "scy/logger.h"
+
 
 #ifdef HAVE_FFMPEG
 

@@ -95,7 +95,7 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
                           dec->resampler->outNumSamples,
                           dec->time);
         dec->outputFrameSize = dec->resampler->outNumSamples;
-        dec->emitter.emit(dec, audio);
+        dec->emitter.emit(/*dec, */audio);
         // opacket.data = dec->resampler->outSamples[0];
         // opacket.size = dec->resampler->outBufferSize;
     }
@@ -108,7 +108,7 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
                           dec->outputFrameSize,
                           dec->time);
         dec->outputFrameSize = dec->frame->nb_samples;
-        dec->emitter.emit(dec, audio);
+        dec->emitter.emit(/*dec, */audio);
         // opacket.data = dec->frame->data[0];
         // opacket.size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
         //                                                    dec->frame->nb_samples,

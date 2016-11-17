@@ -73,7 +73,7 @@ void VideoPacketSource::Stop()
 }
 
 
-void VideoPacketSource::onVideoCaptured(void* sender, av::VideoPacket& packet)
+void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
 {
     TraceL << "On video frame: " << packet.width << 'x' << packet.height << std::endl;
 

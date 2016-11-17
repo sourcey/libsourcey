@@ -19,7 +19,6 @@
 #include "scy/logger.h"
 
 #include <cstdint>
-#include <list>
 #include <cstring> // memcpy
 
 
@@ -230,7 +229,6 @@ public:
         copyData(bufferCast<const char*>(buf), buf.size());
         return buf.size();
     }
-
 
     // Old Read API
     //

@@ -50,7 +50,7 @@ class AudioPacketModule
   static rtc::scoped_refptr<AudioPacketModule> Create();
 
   /// Handles input packets from the capture for sending.
-  void onAudioCaptured(void* sender, av::AudioPacket& packet);
+  void onAudioCaptured(av::AudioPacket& packet);
 
   /// Following functions are inherited from `webrtc::AudioDeviceModule`.
   /// Only functions called by `PeerConnection` are implemented, the rest do

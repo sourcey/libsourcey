@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Time_H
 #define SCY_Time_H
 
@@ -19,7 +20,7 @@
 
 namespace scy {
 
-  
+
 /// Classes and functions for handling time
 namespace time {
 

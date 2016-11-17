@@ -41,9 +41,9 @@ protected:    /// PeerConnectionManager interface
     void postMessage(const smpl::Message& m);
     void syncMessage(const ipc::Action& action);
 
-    void onPeerConnected(void*, smpl::Peer& peer);
-    void onPeerMessage(void*, smpl::Message& m);
-    void onPeerDiconnected(void*, const smpl::Peer& peer);
+    void onPeerConnected(smpl::Peer& peer);
+    void onPeerMessage(smpl::Message& m);
+    void onPeerDiconnected(const smpl::Peer& peer);
 
     void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState);
 

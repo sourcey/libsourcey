@@ -87,7 +87,7 @@ rtc::scoped_refptr<AudioPacketModule> AudioPacketModule::Create()
     return capture_module;
 }
 
-void AudioPacketModule::onAudioCaptured(void* sender, av::AudioPacket& packet)
+void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
 {
     InfoL << "Audio frame captured" << endl;
 

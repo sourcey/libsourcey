@@ -91,7 +91,7 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
                       dec->time);
     video.source = frame;
     video.opaque = dec;
-    dec->emitter.emit(dec, video);
+    dec->emitter.emit(/*dec, */video);
 
     // opacket.data = frame->data[0];
     // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt, dec->oparams.width, dec->oparams.height, 16);

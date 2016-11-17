@@ -80,9 +80,6 @@ protected:
 };
 
 
-DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, void*, nullptr)
-
-
 } } // namespace scy::av
 
 

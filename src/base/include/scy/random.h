@@ -20,6 +20,7 @@
 
 namespace scy {
 
+
 /// Random implements a pseudo random number generator (PRNG).
 /// The PRNG is a nonlinear additive feedback random number
 /// generator using 256 bytes of state information
@@ -86,11 +87,11 @@ private:
     std::uint32_t* _fptr;
     std::uint32_t* _rptr;
     std::uint32_t* _state;
-    int     _randType;
-    int     _randDeg;
-    int     _randSep;
+    int _randType;
+    int _randDeg;
+    int _randSep;
     std::uint32_t* _endPtr;
-    char*   _buffer;
+    char* _buffer;
 };
 
 

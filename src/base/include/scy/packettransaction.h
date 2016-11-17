@@ -174,9 +174,9 @@ protected:
         debugL("PacketTransaction", this) << "Timeout" << std::endl;
 
         if (!canResend()) {
-            //if (!cancelled())
+            // if (!cancelled())
             //    setState(this, TransactionState::Failed, "Transaction timeout");
-            //dispose();
+            // dispose();
             setState(this, TransactionState::Failed, "Transaction timeout");
         }
         else send();
@@ -211,6 +211,6 @@ template <class T> inline T PacketTransaction<T>::response() const { return _res
 } // namespace scy
 
 
-#endif // SCY_IDepacketizerR_H
+#endif // SCY_PacketTransaction_H
 
 /// @\}

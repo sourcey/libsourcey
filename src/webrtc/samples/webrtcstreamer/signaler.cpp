@@ -30,10 +30,10 @@ namespace scy {
 Signaler::Signaler(const smpl::Client::Options& options) :
     _client(options)
 {
-    _client.StateChange += sdelegate(this, &Signaler::onClientStateChange);
-    _client.roster().ItemAdded += sdelegate(this, &Signaler::onPeerConnected);
-    _client.roster().ItemRemoved += sdelegate(this, &Signaler::onPeerDiconnected);
-    _client += smpl::messageDelegate(this, &Signaler::onPeerMessage);
+    _client.StateChange += slot(this, &Signaler::onClientStateChange);
+    _client.roster().ItemAdded += slot(this, &Signaler::onPeerConnected);
+    _client.roster().ItemRemoved += slot(this, &Signaler::onPeerDiconnected);
+    _client += packetSlot(this, &Signaler::onPeerMessage);
     _client.connect();
 }
 
@@ -69,7 +69,7 @@ void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int m
 }
 
 
-void Signaler::onPeerConnected(void*, smpl::Peer& peer)
+void Signaler::onPeerConnected(smpl::Peer& peer)
 {
     if (peer.id() == _client.ourID()) return;
     DebugL << "Peer connected: " << peer.id()  << endl;
@@ -186,7 +186,7 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
 }
 
 
-void Signaler::onPeerMessage(void*, smpl::Message& m)
+void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
 
@@ -203,7 +203,7 @@ void Signaler::onPeerMessage(void*, smpl::Message& m)
 }
 
 
-void Signaler::onPeerDiconnected(void*, const smpl::Peer& peer)
+void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
     DebugL << "Peer disconnected" << endl;
 

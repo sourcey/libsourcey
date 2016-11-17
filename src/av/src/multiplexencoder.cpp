@@ -65,7 +65,7 @@ static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer, int bufferSi
             return bufferSize;
         }
         MediaPacket packet(buffer, bufferSize);
-        klass->emitter.emit(klass, packet);
+        klass->emitter.emit(/*klass, */packet);
         TraceL << "Dispatching packet: OK: " << bufferSize << endl;
     }
 
