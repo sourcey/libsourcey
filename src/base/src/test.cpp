@@ -137,17 +137,17 @@ void TestRunner::clear()
 }
 
 
-test_list_t TestRunner::tests() const
+TestList TestRunner::tests() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _tests;
 }
 
 
-error_map_t TestRunner::errors() const
+ErrorMap TestRunner::errors() const
 {
-    error_map_t errors;
-    test_list_t tests = this->tests();
+    ErrorMap errors;
+    TestList tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
         if (!(*it)->passed()) {
             errors[(*it)] = (*it)->errors;
@@ -177,7 +177,7 @@ void TestRunner::run()
 
     std::uint64_t start = time::hrtime();
     double duration = 0;
-    test_list_t tests = this->tests();
+    TestList tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
         {
             Mutex::ScopedLock lock(_mutex);

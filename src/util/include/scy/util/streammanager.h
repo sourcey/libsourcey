@@ -20,17 +20,14 @@
 namespace scy {
 
 
-/// @addtogroup util
 typedef LiveCollection<
-    std::string, PacketStream,
-        std::default_delete<PacketStream>
-        // DeferredDeleter<PacketStream>
-        // DestroyMethodDeleter<PacketStream>
+    std::string, PacketStream, std::default_delete<PacketStream>
+    // DeferredDeleter<PacketStream>
+    // DestroyMethodDeleter<PacketStream>
 > StreamManagerBase;
 
 
-/// @addtogroup util
-class StreamManager: public StreamManagerBase//, public basic::Polymorphic
+class StreamManager: public StreamManagerBase
 {
 public:
     typedef StreamManagerBase Manager;
