@@ -5,10 +5,8 @@
 #include "scy/net/address.h"
 #include <memory>
 
-
 namespace scy {
 namespace net {
-
 
 template <typename SocketT> class ClientSocketTest
 {
@@ -36,10 +34,10 @@ public:
         // Create the socket instance on the stack.
         // When the socket is closed it will unref the main loop
         // causing the test to complete successfully.
-        socket.Recv+= slot(this, &ClientSocketTest::onRecv);
-        socket.Connect+= slot(this, &ClientSocketTest::onConnect);
-        socket.Error+= slot(this, &ClientSocketTest::onError);
-        socket.Close+= slot(this, &ClientSocketTest::onClose);
+        socket.Recv += slot(this, &ClientSocketTest::onRecv);
+        socket.Connect += slot(this, &ClientSocketTest::onConnect);
+        socket.Error += slot(this, &ClientSocketTest::onError);
+        socket.Close += slot(this, &ClientSocketTest::onClose);
         // assert(socket.base().refCount() == 1);
         socket.connect(address);
     }
@@ -70,7 +68,7 @@ public:
         // Check for return packet echoing sent data
         if (data == "client > server") {
             TraceL << "Recv: Got Return Packet!" << std::endl;
-            passed= true;
+            passed = true;
 
             // Send the shutdown command to close the connection gracefully.
             // The peer disconnection will trigger an eof error callback
@@ -96,7 +94,6 @@ public:
         TraceL << "On closed" << std::endl;
     }
 };
-
 
 } // namespace net
 } // namespace scy

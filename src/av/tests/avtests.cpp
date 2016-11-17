@@ -1,11 +1,9 @@
 #include "avtests.h"
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::av;
 using namespace scy::test;
-
 
 int main(int argc, char** argv)
 {
@@ -32,7 +30,6 @@ int main(int argc, char** argv)
 
     return test::finalize();
 }
-
 
 // //
 // /// Device Manager Tests

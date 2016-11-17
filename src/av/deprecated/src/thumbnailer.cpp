@@ -8,7 +8,6 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/thumbnailer.h"
 
 #if 0 // needs updating to latest API
@@ -134,6 +133,5 @@ std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::s
 
 #endif
 #endif
-
 
 /// @\}

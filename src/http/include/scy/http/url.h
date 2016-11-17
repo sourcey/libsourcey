@@ -8,19 +8,15 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_URL_H
 #define SCY_HTTP_URL_H
-
 
 #include "scy/base.h"
 #include "scy/collection.h"
 #include <http_parser.h>
 
-
 namespace scy {
 namespace http {
-
 
 /// An RFC 3986 based URL which uses an external c
 /// library to do the heavy lifting.
@@ -37,7 +33,7 @@ public:
         const std::string& pathEtc);
     URL(const std::string& scheme, const std::string& authority,
         const std::string& path, const std::string& query,
-        const std::string& fragment= "");
+        const std::string& fragment = "");
     ~URL();
 
     URL& operator=(const URL& uri);
@@ -47,7 +43,7 @@ public:
     /// Parses and assigns an URI from the given std::string.
     /// Throws a SyntaxException if whiny is set and the
     /// given url is invalid.
-    bool parse(const std::string& url, bool whiny= true);
+    bool parse(const std::string& url, bool whiny = true);
 
     /// RFC 3986 based URL encoding based on JavaScript's
     /// encodeURIComponent()
@@ -91,12 +87,9 @@ protected:
     std::string _buf;
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif // SCY_HTTP_URL_H
-
 
 /// @\}

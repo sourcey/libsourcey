@@ -8,57 +8,46 @@
 /// @addtogroup symple
 /// @{
 
-
 #include "scy/symple/client.h"
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace smpl {
 
-
 //
 // TCP Client
 //
-
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
     return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
 }
 
-
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
 {
 }
 
-
 //
 // SSL Client
 //
-
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
     return new Client(std::make_shared<net::SSLSocket>(loop), options);
 }
 
-
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::SSLSocket>(loop), options)
 {
 }
 
-
 //
 // Client implementation
 //
-
 
 Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     : sockio::Client(socket)
@@ -68,12 +57,10 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     TraceL << "Create" << endl;
 }
 
-
 Client::~Client()
 {
     TraceL << "Destroy" << endl;
 }
-
 
 void Client::connect()
 {
@@ -83,21 +70,19 @@ void Client::connect()
     assert(!_options.user.empty());
 
     // Update the Socket.IO options with local values before connecting
-    sockio::Client::options().host= _options.host;
-    sockio::Client::options().port= _options.port;
-    sockio::Client::options().reconnection= _options.reconnection;
-    sockio::Client::options().reconnectAttempts= _options.reconnectAttempts;
+    sockio::Client::options().host = _options.host;
+    sockio::Client::options().port = _options.port;
+    sockio::Client::options().reconnection = _options.reconnection;
+    sockio::Client::options().reconnectAttempts = _options.reconnectAttempts;
 
     sockio::Client::connect();
 }
-
 
 void Client::close()
 {
     TraceL << "Closing" << endl;
     sockio::Client::close();
 }
-
 
 void assertCanSend(Client* client, Message& m)
 {
@@ -124,21 +109,18 @@ void assertCanSend(Client* client, Message& m)
 #endif
 }
 
-
 int Client::send(Message& m, bool ack)
 {
     assertCanSend(this, m);
     return sockio::Client::send(m, ack);
 }
 
-
 sockio::Transaction* Client::createTransaction(Message& message)
 {
     sockio::Packet pkt(message, true);
-    auto txn= sockio::Client::createTransaction(pkt);
+    auto txn = sockio::Client::createTransaction(pkt);
     return txn; //->send();
 }
-
 
 int Client::send(const std::string& data, bool ack)
 {
@@ -148,26 +130,23 @@ int Client::send(const std::string& data, bool ack)
     return send(m, ack);
 }
 
-
 int Client::respond(Message& m, bool ack)
 {
     m.setTo(m.from());
     return send(m, ack);
 }
 
-
 void Client::createPresence(Presence& p)
 {
     TraceL << "Create presence" << endl;
 
-    auto peer= ourPeer();
+    auto peer = ourPeer();
     if (peer) {
         CreatePresence.emit(/*this, */ *peer);
-        p["data"]= *peer;
+        p["data"] = *peer;
     } else
         assert(0 && "no session");
 }
-
 
 int Client::sendPresence(bool probe)
 {
@@ -178,7 +157,6 @@ int Client::sendPresence(bool probe)
     p.setProbe(probe);
     return send(p);
 }
-
 
 int Client::sendPresence(const Address& to, bool probe)
 {
@@ -191,22 +169,20 @@ int Client::sendPresence(const Address& to, bool probe)
     return send(p);
 }
 
-
 int Client::announce()
 {
     TraceL << "Announcing" << endl;
 
     json::Value data;
-    data["user"]= _options.user;
-    data["name"]= _options.name;
-    data["type"]= _options.type;
-    data["token"]= _options.token;
+    data["user"] = _options.user;
+    data["name"] = _options.name;
+    data["type"] = _options.type;
+    data["token"] = _options.token;
     sockio::Packet pkt("announce", data, true);
-    auto txn= sockio::Client::createTransaction(pkt);
-    txn->StateChange+= slot(this, &Client::onAnnounceState);
+    auto txn = sockio::Client::createTransaction(pkt);
+    txn->StateChange += slot(this, &Client::onAnnounceState);
     return txn->send();
 }
-
 
 int Client::joinRoom(const std::string& room)
 {
@@ -217,7 +193,6 @@ int Client::joinRoom(const std::string& room)
     return sockio::Client::send(pkt);
 }
 
-
 int Client::leaveRoom(const std::string& room)
 {
     DebugL << "Leave room: " << room << endl;
@@ -227,24 +202,23 @@ int Client::leaveRoom(const std::string& room)
     return sockio::Client::send(pkt);
 }
 
-
 void Client::onAnnounceState(void* sender, TransactionState& state,
                              const TransactionState&)
 {
     TraceL << "On announce response: " << state << endl;
 
-    auto transaction= reinterpret_cast<sockio::Transaction*>(sender);
+    auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
     switch (state.id()) {
         case TransactionState::Success:
             try {
-                json::Value data=
+                json::Value data =
                     transaction->response().json(); //[(unsigned)0];
-                _announceStatus= data["status"].asInt();
+                _announceStatus = data["status"].asInt();
 
                 if (_announceStatus != 200)
                     throw std::runtime_error(data["message"].asString());
 
-                _ourID= data["data"]["id"].asString(); // Address();
+                _ourID = data["data"]["id"].asString(); // Address();
                 if (_ourID.empty())
                     throw std::runtime_error("Invalid announce response.");
 
@@ -274,7 +248,6 @@ void Client::onAnnounceState(void* sender, TransactionState& state,
     }
 }
 
-
 void Client::onOnline()
 {
     // TraceL << "On online" << endl;
@@ -287,16 +260,15 @@ void Client::onOnline()
         sockio::Client::onOnline();
 }
 
-
 void Client::emit(/*void* sender, */ IPacket& raw)
 {
-    auto packet= reinterpret_cast<sockio::Packet&>(raw);
+    auto packet = reinterpret_cast<sockio::Packet&>(raw);
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
         TraceL << "JSON packet: " << packet.toString() << endl;
 
-        json::Value data= packet.json();
+        json::Value data = packet.json();
 #ifdef _DEBUG
         TraceL << "Received " << json::stringify(data, true)
                << endl; // type << ": " <<
@@ -366,25 +338,24 @@ void Client::emit(/*void* sender, */ IPacket& raw)
     }
 }
 
-
 void Client::onPresenceData(const json::Value& data, bool whiny)
 {
     TraceL << "Updating: " << json::stringify(data, true) << endl;
 
     if (data.isObject() && data.isMember("id") && data.isMember("user") &&
         data.isMember("name") && data.isMember("online")) {
-        std::string id= data["id"].asString();
-        bool online= data["online"].asBool();
-        auto peer= _roster.get(id, false);
+        std::string id = data["id"].asString();
+        bool online = data["online"].asBool();
+        auto peer = _roster.get(id, false);
         if (online) {
             if (!peer) {
-                peer= new Peer(data);
+                peer = new Peer(data);
                 _roster.add(id, peer);
                 InfoL << "Peer connected: " << peer->address().toString()
                       << endl;
                 PeerConnected.emit(/*this, */ *peer);
             } else
-                static_cast<json::Value&>(*peer)= data;
+                static_cast<json::Value&>(*peer) = data;
         } else {
             if (peer) {
                 InfoL << "Peer disconnected: " << peer->address().toString()
@@ -433,7 +404,6 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
 #endif
 }
 
-
 void Client::reset()
 {
     // Note: Not clearing persisted messages just in case
@@ -442,11 +412,10 @@ void Client::reset()
 
     _roster.clear();
     _rooms.clear();
-    _announceStatus= 0;
-    _ourID= "";
+    _announceStatus = 0;
+    _ourID = "";
     sockio::Client::reset();
 }
-
 
 Roster& Client::roster()
 {
@@ -454,30 +423,25 @@ Roster& Client::roster()
     return _roster;
 }
 
-
 PersistenceT& Client::persistence()
 {
     return _persistence;
 }
-
 
 Client::Options& Client::options()
 {
     return _options;
 }
 
-
 std::string Client::ourID() const
 {
     return _ourID;
 }
 
-
 StringVec Client::rooms() const
 {
     return _rooms;
 }
-
 
 Peer* Client::ourPeer()
 {
@@ -487,16 +451,13 @@ Peer* Client::ourPeer()
     return _roster.get(_ourID, false);
 }
 
-
 Client& Client::operator>>(Message& message)
 {
     send(message);
     return *this;
 }
 
-
 } // namespace smpl
 } // namespace scy
-
 
 /// @\}

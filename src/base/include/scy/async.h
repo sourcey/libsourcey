@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Async_H
 #define SCY_Async_H
-
 
 #include "scy/uv/uvpp.h"
 #include <atomic>
@@ -20,13 +18,10 @@
 #include <memory>
 #include <stdexcept>
 
-
 namespace scy {
-
 
 /// Classes for asynchronous programming
 namespace async {
-
 
 /// A generic interface for classes that can be run and cancelled.
 class Runnable
@@ -41,11 +36,11 @@ public:
     virtual ~Runnable() {}
 
     /// The run method will be called by the async context.
-    virtual void run()= 0;
+    virtual void run() = 0;
 
     /// Cancel the current task.
     /// The run() method should return ASAP.
-    virtual void cancel(bool flag= true)
+    virtual void cancel(bool flag = true)
     {
         exit.store(flag, std::memory_order_release);
     }
@@ -53,18 +48,16 @@ public:
     /// True when the task has been cancelled.
     virtual bool cancelled() const
     {
-        bool s= exit.load(std::memory_order_relaxed);
+        bool s = exit.load(std::memory_order_relaxed);
         if (s)
             std::atomic_thread_fence(std::memory_order_acquire);
         return s;
     };
 };
 
-
 //
 // Runner Interface
 //
-
 
 /// Runner is a virtual interface for implementing
 /// asynchronous objects such as threads and futures.
@@ -109,7 +102,7 @@ public:
 
     /// Returns true if the implementation is thread-based, or false
     /// if it belongs to an event loop.
-    virtual bool async() const= 0;
+    virtual bool async() const = 0;
 
     typedef std::shared_ptr<Runner> Ptr;
 
@@ -147,13 +140,13 @@ public:
         // the context if it is to be reused.
         void reset()
         {
-            tid= (uv_thread_t)(0);
-            arg= nullptr;
-            target= nullptr;
-            target1= nullptr;
-            started= false;
-            running= false;
-            exit= false;
+            tid = (uv_thread_t)(0);
+            arg = nullptr;
+            target = nullptr;
+            target1 = nullptr;
+            started = false;
+            running = false;
+            exit = false;
         }
 
         Context()
@@ -161,8 +154,8 @@ public:
             reset();
 
             // Non-reseting members
-            repeating= false;
-            handle= nullptr;
+            repeating = false;
+            handle = nullptr;
         }
     };
 
@@ -171,7 +164,7 @@ protected:
     Context::ptr pContext;
 
     /// Start the context from the control thread.
-    virtual void startAsync()= 0;
+    virtual void startAsync() = 0;
 
     /// Run the context from the async thread.
     static void runAsync(Context* context);
@@ -179,7 +172,6 @@ protected:
     Runner(const Runner&);
     Runner& operator=(const Runner&);
 };
-
 
 //
 // Concurrent Flag
@@ -192,10 +184,10 @@ class Flag
     std::atomic<bool> state;
 
     /// Non-copyable and non-movable
-    Flag(const Flag&)= delete;
-    Flag(Flag&&)= delete;
-    Flag& operator=(const Flag&)= delete;
-    Flag& operator=(Flag&&)= delete;
+    Flag(const Flag&) = delete;
+    Flag(Flag&&) = delete;
+    Flag& operator=(const Flag&) = delete;
+    Flag& operator=(Flag&&) = delete;
 
 public:
     Flag()
@@ -203,7 +195,7 @@ public:
 
     bool get() const
     {
-        bool s= state.load(std::memory_order_relaxed);
+        bool s = state.load(std::memory_order_relaxed);
         if (s)
             std::atomic_thread_fence(std::memory_order_acquire);
         return s;
@@ -212,36 +204,30 @@ public:
     void set(bool flag) { state.store(flag, std::memory_order_release); }
 };
 
-
 /// For C client data callbacks.
 typedef void (*Callable)(void*);
-
 
 /// A generic interface for a classes
 /// that can be started and stopped.
 class Startable
 {
 public:
-    virtual void start()= 0;
-    virtual void stop()= 0;
+    virtual void start() = 0;
+    virtual void stop() = 0;
 };
-
 
 /// A generic interface for classes
 /// that can be sent and cancelled.
 class Sendable
 {
 public:
-    virtual bool send()= 0;
+    virtual bool send() = 0;
     virtual void cancel(){};
 };
-
 
 } // namespace async
 } // namespace scy
 
-
 #endif // SCY_Async_H
-
 
 /// @\}

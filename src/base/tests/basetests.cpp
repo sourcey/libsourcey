@@ -1,12 +1,10 @@
 #include "basetests.h"
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using namespace scy;
 using namespace scy::test;
-
 
 int main(int argc, char** argv)
 {
@@ -34,13 +32,13 @@ int main(int argc, char** argv)
     describe("signal const class member benchmark", []() {
         Signal<void(std::uint64_t&)> signal;
         SignalCounter counter;
-        signal+= slot(&counter, &SignalCounter::incrementConst);
-        const std::uint64_t benchstart= time::hrtime();
-        std::uint64_t i, value= 0;
-        for (i= 0; i < 999999; i++) {
+        signal += slot(&counter, &SignalCounter::incrementConst);
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone= time::hrtime();
+        const std::uint64_t benchdone = time::hrtime();
         expect(value == i);
 
         std::cout << "signal const class member benchmark: "
@@ -83,7 +81,6 @@ int main(int argc, char** argv)
     //         << "per emission (sz=" << sizeof (signal) << ")"
     //         << std::endl;
     // });
-
 
     // =========================================================================
     // Signal V2 Tests
@@ -608,7 +605,6 @@ int main(int argc, char** argv)
 
     return test::finalize();
 }
-
 
 // class Tests
 // {

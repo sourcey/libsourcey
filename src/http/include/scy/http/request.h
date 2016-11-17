@@ -8,17 +8,14 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_Request_H
 #define SCY_Request_H
-
 
 #include "scy/base.h"
 #include "scy/collection.h"
 #include "scy/http/message.h"
 
 #include <sstream>
-
 
 namespace scy {
 namespace http {
@@ -35,7 +32,6 @@ struct Method
     static const std::string Trace;
     static const std::string Connect;
 };
-
 
 /// This class encapsulates an HTTP request message.
 ///
@@ -162,12 +158,9 @@ private:
     std::string _uri;
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

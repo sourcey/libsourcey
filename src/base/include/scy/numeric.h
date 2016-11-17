@@ -11,14 +11,11 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-
 #ifndef SCY_Numeric_H
 #define SCY_Numeric_H
 
-
 #include <cstdint>
 #include <string>
-
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define I64_FMT "I64"
@@ -28,15 +25,12 @@
 #define I64_FMT "ll"
 #endif
 
-
 namespace scy {
 namespace numeric {
-
 
 //
 // Integer To String Formatting
 //
-
 
 /// Formats an integer value in decimal notation.
 void format(std::string& str, int value);
@@ -168,7 +162,6 @@ void formatHex(std::string& str, std::uint64_t value);
 /// the specified width.
 void formatHex(std::string& str, std::uint64_t value, int width);
 
-
 #if 0
 /// Formats a float value in decimal floating-point notation,
 /// according to std::printf's %g format with a precision of 8 fractional digits.
@@ -193,16 +186,12 @@ void format(std::string& str, double value, int width, int precision);
 void format(std::string& str, const void* ptr);
 #endif
 
-
 } // namespace numeric
 } // namespace scy
 
-
 #endif // SCY_Numeric_H
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2004-2008, Applied Informatics Software Engineering GmbH.

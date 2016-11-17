@@ -9,20 +9,14 @@
 ///
 /// The `turn` module contains TURN (rfc5766) client and server implementations.
 
-
 #ifndef SCY_TURN_H
 #define SCY_TURN_H
 
-
 namespace scy {
 namespace turn {
-
-
 } // namespace turn
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

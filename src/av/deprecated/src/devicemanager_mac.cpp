@@ -9,7 +9,6 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #include "scy/av/devicemanager_mac.h"
 
 #include <CoreAudio/CoreAudio.h>
@@ -26,12 +25,10 @@ class DeviceWatcherImpl;
 namespace scy {
 namespace av {
 
-
 IDeviceManager* DeviceManagerFactory::create()
 {
     return new MacDeviceManager();
 }
-
 
 class MacDeviceWatcher : public DeviceWatcher
 {
@@ -46,20 +43,19 @@ private:
     DeviceWatcherImpl* impl_;
 };
 
-
-static const char* kFilteredAudioDevicesName[]= {
+static const char* kFilteredAudioDevicesName[] = {
     NULL,
 };
 // TODO: Try to get hold of a copy of Final Cut to understand
 // why we crash while scanning their components on OS X.
-static const char* const kFilteredVideoDevicesName[]= {
+static const char* const kFilteredVideoDevicesName[] = {
     "Google Camera Adapter", // Our own magiccams
     "DVCPRO HD",             // Final cut
     "Sonix SN9C201p",        // Crashes in OpenAComponent and CloseComponent
     NULL,
 };
-static const int kVideoDeviceOpenAttempts= 3;
-static const std::uint32_t kAudioDeviceNameLength= 64;
+static const int kVideoDeviceOpenAttempts = 3;
+static const std::uint32_t kAudioDeviceNameLength = 64;
 // Obj-C functions defined in DeviceManager_MAC.mm
 // TODO: have a shared header for these function defines.
 extern DeviceWatcherImpl* CreateDeviceWatcherCallback(IDeviceManager* dm);
@@ -69,17 +65,14 @@ extern bool GetAVFoundationVideoDevices(std::vector<Device>* out);
 // static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string*
 // out);
 
-
 MacDeviceManager::MacDeviceManager()
 {
     setWatcher(new MacDeviceWatcher(this));
 }
 
-
 MacDeviceManager::~MacDeviceManager()
 {
 }
-
 
 bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 {
@@ -89,7 +82,6 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
     }
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
-
 
 // bool MacDeviceManager::getAudioDevices(bool input,
 //                                        std::vector<Device>& devs) {
@@ -176,7 +168,6 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //   return true;
 // }
 
-
 MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager)
     : DeviceWatcher(manager)
     , manager_(manager)
@@ -184,33 +175,28 @@ MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager)
 {
 }
 
-
 MacDeviceWatcher::~MacDeviceWatcher()
 {
 }
 
-
 bool MacDeviceWatcher::start()
 {
     if (!impl_) {
-        impl_= CreateDeviceWatcherCallback(manager_);
+        impl_ = CreateDeviceWatcherCallback(manager_);
     }
     return impl_ != NULL;
 }
-
 
 void MacDeviceWatcher::stop()
 {
     if (impl_) {
         ReleaseDeviceWatcherCallback(impl_);
-        impl_= NULL;
+        impl_ = NULL;
     }
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 /*
  * libjingle

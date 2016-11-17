@@ -1,7 +1,6 @@
 #ifndef SCY_Symple_Tests_H
 #define SCY_Symple_Tests_H
 
-
 #include "scy/base.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
@@ -13,9 +12,7 @@ using std::cerr;
 using std::endl;
 using scy::test::Test;
 
-
 namespace scy {
-
 
 // =============================================================================
 // Test Client
@@ -37,15 +34,15 @@ public:
         : gotOnline(false)
         , gotRemotePresence(false)
     {
-        user= options.user;
+        user = options.user;
 
         // client += messageDelegate(this, &TestClient::onRecvMessage);
-        client.options()= options;
+        client.options() = options;
 
-        client+= slot(this, &TestClient::onRecvPacket);
-        client.Announce+= slot(this, &TestClient::onClientAnnounce);
-        client.StateChange+= slot(this, &TestClient::onClientStateChange);
-        client.CreatePresence+= slot(this, &TestClient::onCreatePresence);
+        client += slot(this, &TestClient::onRecvPacket);
+        client.Announce += slot(this, &TestClient::onClientAnnounce);
+        client.StateChange += slot(this, &TestClient::onClientStateChange);
+        client.CreatePresence += slot(this, &TestClient::onCreatePresence);
     }
 
     ~TestClient() { client.close(); }
@@ -79,17 +76,17 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        auto presence= dynamic_cast<smpl::Presence*>(&raw);
+        auto presence = dynamic_cast<smpl::Presence*>(&raw);
         if (presence) {
             return onRecvPresence(*presence);
         }
 
-        auto message= dynamic_cast<smpl::Message*>(&raw);
+        auto message = dynamic_cast<smpl::Message*>(&raw);
         if (message) {
             return onRecvMessage(*message);
         }
 
-        auto packet= dynamic_cast<sockio::Packet*>(&raw);
+        auto packet = dynamic_cast<sockio::Packet*>(&raw);
         if (packet) {
             return onRecvPacket(*packet);
         }
@@ -112,7 +109,7 @@ public:
             expect(!"user should be 'l' or 'r'");
         }
 
-        gotRemotePresence= true;
+        gotRemotePresence = true;
     }
 
     void onRecvMessage(smpl::Message& message)
@@ -136,7 +133,7 @@ public:
             case sockio::ClientState::Connected:
                 break;
             case sockio::ClientState::Online: {
-                gotOnline= true;
+                gotOnline = true;
 
                 // Join the test room when online
                 client.joinRoom("test");
@@ -158,16 +155,13 @@ public:
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.
-        peer["agent"]= "Spot";
-        peer["version"]= "1.0.1";
+        peer["agent"] = "Spot";
+        peer["version"] = "1.0.1";
     }
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Symple_Tests_H
-
 
 /// @\}

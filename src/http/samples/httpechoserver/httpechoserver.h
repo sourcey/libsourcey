@@ -1,14 +1,11 @@
 #include "scy/http/server.h"
 #include "scy/idler.h"
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
 
-
 namespace scy {
-
 
 /// Basic server responder (make echo?)
 class BasicResponder : public http::ServerResponder
@@ -32,7 +29,6 @@ public:
     }
 };
 
-
 /// Basic echo server responder
 class BasicEchoResponder : public http::ServerResponder
 {
@@ -52,7 +48,6 @@ public:
     }
 };
 
-
 struct RandomDataSource : public Idler
 {
     PacketSignal signal;
@@ -65,7 +60,6 @@ struct RandomDataSource : public Idler
         signal.emit(/*this, */ packet);
     }
 };
-
 
 /// Chunked responder that broadcasts random data to the client.
 class ChunkedResponder : public http::ServerResponder
@@ -94,11 +88,11 @@ public:
         assert(gotClose);
     }
 
-    void onHeaders(http::Request& request) { gotHeaders= true; }
+    void onHeaders(http::Request& request) { gotHeaders = true; }
 
     void onRequest(http::Request& request, http::Response& response)
     {
-        gotRequest= true;
+        gotRequest = true;
 
         connection().response().set("Access-Control-Allow-Origin", "*");
         connection().response().set("Content-Type", "text/html");
@@ -114,11 +108,10 @@ public:
     void onClose()
     {
         DebugL << "On connection close" << endl;
-        gotClose= true;
+        gotClose = true;
         dataSource.cancel();
     }
 };
-
 
 class WebSocketResponder : public http::ServerResponder
 {
@@ -145,7 +138,7 @@ public:
     {
         DebugL << "On payload: " << body.size() << endl;
 
-        gotPayload= true;
+        gotPayload = true;
 
         // Echo the request back to the client
         connection().send(body.cstr(), body.size());
@@ -154,10 +147,9 @@ public:
     virtual void onClose()
     {
         DebugL << "On connection close" << endl;
-        gotClose= true;
+        gotClose = true;
     }
 };
-
 
 /// A Server Responder Factory for testing the HTTP server
 class OurServerResponderFactory : public http::ServerResponderFactory
@@ -182,6 +174,5 @@ public:
             return new BasicResponder(conn);
     }
 };
-
 
 } // namespace scy

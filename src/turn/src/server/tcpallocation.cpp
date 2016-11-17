@@ -8,18 +8,14 @@
 /// @addtogroup turn
 /// @{
 
-
 #include "scy/turn/server/tcpallocation.h"
 #include "scy/logger.h"
 #include "scy/turn/server/server.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
                              const FiveTuple& tuple,
@@ -32,28 +28,27 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
     // Bind a socket acceptor for incoming peer connections.
     _acceptor->bind(net::Address(server.options().listenAddr.host(), 0));
     _acceptor->listen();
-    _acceptor->AcceptConnection+= slot(this, &TCPAllocation::onPeerAccept);
+    _acceptor->AcceptConnection += slot(this, &TCPAllocation::onPeerAccept);
 
     // The allocation will be deleted if the control connection is lost.
-    _control->Close+= slot(this, &TCPAllocation::onControlClosed);
+    _control->Close += slot(this, &TCPAllocation::onControlClosed);
 
     TraceL << "Initializing on " << _acceptor->address() << endl;
 }
-
 
 TCPAllocation::~TCPAllocation()
 {
     TraceL << "Destroy TCP allocation" << endl;
 
     // Mutex::ScopedLock lock(_mutex);
-    _acceptor->AcceptConnection-= slot(this, &TCPAllocation::onPeerAccept);
+    _acceptor->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
     _acceptor->close();
 
-    _control->Close-= slot(this, &TCPAllocation::onControlClosed);
+    _control->Close -= slot(this, &TCPAllocation::onControlClosed);
     _control->close();
 
-    auto pairs= this->pairs().map();
-    for (auto it= pairs.begin(); it != pairs.end(); ++it) {
+    auto pairs = this->pairs().map();
+    for (auto it = pairs.begin(); it != pairs.end(); ++it) {
         // The allocation will be removed via callback
         delete it->second;
     }
@@ -61,7 +56,6 @@ TCPAllocation::~TCPAllocation()
 
     TraceL << "Destroy TCP allocation: OK" << endl;
 }
-
 
 void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 {
@@ -96,7 +90,7 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
     // as well as a CONNECTION-ID attribute uniquely identifying the peer
     // data connection.
     //
-    auto pair= new TCPConnectionPair(*this);
+    auto pair = new TCPConnectionPair(*this);
     // assert(socket->/*base().*/refCount() == 1);
     pair->setPeerSocket(socket);
     // assert(socket->/*base().*/refCount() == 2);
@@ -106,14 +100,14 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
     // stun::Message response;
     // response.setType(stun::Message::ConnectionAttempt);
 
-    auto addrAttr= new stun::XorPeerAddress;
+    auto addrAttr = new stun::XorPeerAddress;
     addrAttr->setAddress(socket->peerAddress());
     // addrAttr->setFamily(1);
     // addrAttr->setPort(socket->peerAddress().port());
     // addrAttr->setIP(socket->peerAddress().host());
     response.add(addrAttr);
 
-    auto connAttr= new stun::ConnectionID;
+    auto connAttr = new stun::ConnectionID;
     connAttr->setValue(pair->connectionID);
     response.add(connAttr);
 
@@ -122,7 +116,6 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
     TraceL << "Peer connection accepted with ID: " << pair->connectionID
            << endl;
 }
-
 
 bool TCPAllocation::handleRequest(Request& request)
 {
@@ -140,14 +133,13 @@ bool TCPAllocation::handleRequest(Request& request)
     return true;
 }
 
-
 bool TCPAllocation::onTimer()
 {
     TraceL << "TCPAllocation: On timer" << endl;
 
     // Clean up any expired Connect request peer connections.
-    auto pairs= this->pairs().map();
-    for (auto it= pairs.begin(); it != pairs.end(); ++it) {
+    auto pairs = this->pairs().map();
+    for (auto it = pairs.begin(); it != pairs.end(); ++it) {
         if (it->second->expired()) {
             TraceL << "TCPAllocation: On timer: Removing expired peer" << endl;
             this->pairs().free(it->first);
@@ -156,7 +148,6 @@ bool TCPAllocation::onTimer()
 
     return ServerAllocation::onTimer();
 }
-
 
 void TCPAllocation::handleConnectRequest(Request& request)
 {
@@ -187,7 +178,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
     // If the new connection is forbidden by local policy, the server MUST
     // reject the request with a 403 (Forbidden) error.
     //
-    auto peerAttr= request.get<stun::XorPeerAddress>();
+    auto peerAttr = request.get<stun::XorPeerAddress>();
     if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
         server().respondError(request, 400, "Bad Request");
         return;
@@ -200,19 +191,18 @@ void TCPAllocation::handleConnectRequest(Request& request)
     // out, the server MUST return a 447 (Connection Timeout or Failure)
     // error.  The timeout value MUST be at least 30 seconds.
     //
-    auto pair= new TCPConnectionPair(*this);
-    pair->transactionID= request.transactionID();
+    auto pair = new TCPConnectionPair(*this);
+    pair->transactionID = request.transactionID();
     pair->doPeerConnect(peerAttr->address());
 }
-
 
 void TCPAllocation::handleConnectionBindRequest(Request& request)
 {
     TraceL << "Handle ConnectionBind Request" << endl;
 
     assert(request.methodType() == stun::Message::ConnectionBind);
-    TCPConnectionPair* pair= nullptr;
-    auto socket= _server.getTCPSocket(request.remoteAddress);
+    TCPConnectionPair* pair = nullptr;
+    auto socket = _server.getTCPSocket(request.remoteAddress);
     try {
         if (!socket)
             throw std::runtime_error("Invalid TCP socket");
@@ -233,7 +223,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
         // this attribute does not refer to an existing pending connection, the
         // server MUST return a 400 (Bad Request) error.
         //
-        auto connAttr= request.get<stun::ConnectionID>();
+        auto connAttr = request.get<stun::ConnectionID>();
         if (!connAttr)
             throw std::runtime_error(
                 "ConnectionBind missing CONNECTION-ID attribute");
@@ -247,7 +237,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
         // received after the associated Connect or request was successfully
         // processed and before this ConnectionBind request was received.
         //
-        pair= pairs().get(connAttr->value(), false);
+        pair = pairs().get(connAttr->value(), false);
         if (!pair) {
             throw std::runtime_error("No client for ConnectionBind request: " +
                                      util::itostr(connAttr->value()));
@@ -287,7 +277,6 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
     }
 }
 
-
 void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
                                             bool success)
 {
@@ -309,11 +298,11 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
     response.setTransactionID(pair->transactionID);
 
     if (success) {
-        auto connAttr= new stun::ConnectionID;
+        auto connAttr = new stun::ConnectionID;
         connAttr->setValue(pair->connectionID);
         response.add(connAttr);
     } else {
-        auto errorCodeAttr= new stun::ErrorCode();
+        auto errorCodeAttr = new stun::ErrorCode();
         errorCodeAttr->setErrorCode(447);
         errorCodeAttr->setReason("Connection Timeout or Failure");
         response.add(errorCodeAttr);
@@ -322,14 +311,12 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
     sendToControl(response);
 }
 
-
 int TCPAllocation::sendToControl(stun::Message& message)
 {
     // Mutex::ScopedLock lock(_mutex);
     TraceL << "Send to control: " << message << endl;
     return _control->sendPacket(message, 0);
 }
-
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
@@ -338,9 +325,8 @@ void TCPAllocation::onControlClosed(net::Socket& socket)
 
     // The allocation will be destroyed on the
     // next timer call to IAllocation::deleted()
-    _deleted= true;
+    _deleted = true;
 }
-
 
 net::TCPSocket& TCPAllocation::control()
 {
@@ -348,13 +334,11 @@ net::TCPSocket& TCPAllocation::control()
     return *_control.get();
 }
 
-
 TCPConnectionPairMap& TCPAllocation::pairs()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _pairs;
 }
-
 
 net::Address TCPAllocation::relayedAddress() const
 {
@@ -363,6 +347,5 @@ net::Address TCPAllocation::relayedAddress() const
 }
 }
 } //  namespace scy::turn
-
 
 /// @\}

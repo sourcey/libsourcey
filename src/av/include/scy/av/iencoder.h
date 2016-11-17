@@ -8,26 +8,22 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_IEncoder_H
 #define SCY_AV_IEncoder_H
-
 
 #include "scy/av/format.h"
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 #include "scy/stateful.h"
 
-
 namespace scy {
 namespace av {
-
 
 struct EncoderState : public State
 {
     enum Type
     {
-        None= 0,
+        None = 0,
         Ready,
         Encoding,
         Stopped,
@@ -52,7 +48,6 @@ struct EncoderState : public State
     };
 };
 
-
 struct EncoderOptions
 {
     Format iformat;    // input media format.
@@ -60,10 +55,10 @@ struct EncoderOptions
     std::string ifile; // input file path.
     std::string ofile; // output file path.
     long duration;     // duration of time to record in nanoseconds.
-    EncoderOptions(const Format& iformat= Format(),
-                   const Format& oformat= Format(),
-                   const std::string& ifile= "", const std::string& ofile= "",
-                   long duration= 0)
+    EncoderOptions(const Format& iformat = Format(),
+                   const Format& oformat = Format(),
+                   const std::string& ifile = "", const std::string& ofile = "",
+                   long duration = 0)
         : iformat(iformat)
         , oformat(oformat)
         , ifile(ifile)
@@ -80,16 +75,16 @@ class IEncoder : public Stateful<EncoderState>
 public:
     enum Type
     {
-        None= 0,     // huh?
-        Video= 1,    // video only
-        Audio= 2,    // audio only
-        Multiplex= 3 // both video & audio
+        None = 0,     // huh?
+        Video = 1,    // video only
+        Audio = 2,    // audio only
+        Multiplex = 3 // both video & audio
     };
 
-    virtual void initialize()= 0;
-    virtual void uninitialize()= 0;
+    virtual void initialize() = 0;
+    virtual void uninitialize() = 0;
 
-    virtual EncoderOptions& options()= 0;
+    virtual EncoderOptions& options() = 0;
 
     virtual bool isNone() const { return stateEquals(EncoderState::None); };
     virtual bool isReady() const { return stateEquals(EncoderState::Ready); };
@@ -108,7 +103,6 @@ public:
     virtual bool isError() const { return stateEquals(EncoderState::Error); };
 };
 
-
 typedef IEncoder IPacketEncoder; /// 0.8.x compatibility
 
 /*/// This class extends the IEncoder interface to add
@@ -122,12 +116,9 @@ public:
 };
 */
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_IEncoder_H
-
 
 /// @\}

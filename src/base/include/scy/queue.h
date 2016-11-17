@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Queue_H
 #define SCY_Queue_H
-
 
 #include "scy/datetime.h"
 #include "scy/interface.h"
@@ -20,9 +18,7 @@
 #include "scy/thread.h"
 #include <queue>
 
-
 namespace scy {
-
 
 /// Implements a thread-safe queue container.
 // TODO: Iterators
@@ -94,11 +90,9 @@ public:
     }
 };
 
-
 //
 // Runnable Queue
 //
-
 
 template <class T>
 class RunnableQueue : public Queue<T*>, public async::Runnable
@@ -108,8 +102,7 @@ public:
     /// Must be set before the queue is running.
     std::function<void(T&)> ondispatch;
 
-
-    RunnableQueue(int limit= 2048, int timeout= 0)
+    RunnableQueue(int limit = 2048, int timeout = 0)
         : _limit(limit)
         , _timeout(timeout)
     {
@@ -136,9 +129,8 @@ public:
         /// do {
         /// }    // while (dispatchNext());    //     // scy::sleep(1);
 
-
         while (!queue_t::empty()) {
-            auto next= queue_t::front();
+            auto next = queue_t::front();
             dispatch(*next);
             queue_t::pop();
             delete next;
@@ -197,7 +189,7 @@ public:
     {
         Mutex::ScopedLock lock(_mutex);
         assert(queue_t::empty() && "queue must not be active");
-        _timeout= milliseconds;
+        _timeout = milliseconds;
     }
 
 protected:
@@ -212,7 +204,7 @@ protected:
             if (queue_t::empty())
                 return nullptr;
 
-            next= queue_t::front();
+            next = queue_t::front();
             queue_t::pop();
         }
         return next;
@@ -220,7 +212,7 @@ protected:
 
     virtual bool dispatchNext() // Pops and dispatches the next waiting item.
     {
-        T* next= popNext();
+        T* next = popNext();
         if (next) {
             dispatch(*next);
             delete next;
@@ -234,11 +226,9 @@ protected:
     mutable Mutex _mutex;
 };
 
-
 //
 // Synchronization Queue
 //
-
 
 template <class T>
 
@@ -250,10 +240,11 @@ class SyncQueue : public RunnableQueue<T>
 public:
     typedef RunnableQueue<T> base_t;
 
-    SyncQueue(uv::Loop* loop, int limit= 2048, int timeout= 20)
-        : base_t(limit, timeout)
+    SyncQueue(uv::Loop* loop, int limit = 2048, int timeout = 20)
+        : base_t(limit,
+                 timeout)
         , // Note: The SyncQueue instance must not be destroyed
-          /// while the RunnableQueue is still dispatching items.
+        /// while the RunnableQueue is still dispatching items.
         _sync(loop, std::bind(&base_t::run, this))
     {
     }
@@ -285,11 +276,9 @@ protected:
     SyncContext _sync;
 };
 
-
 //
 // Asynchronous Queue
 //
-
 
 template <class T>
 
@@ -306,7 +295,7 @@ class AsyncQueue : public RunnableQueue<T>
 public:
     typedef RunnableQueue<T> base_t;
 
-    AsyncQueue(int limit= 2048)
+    AsyncQueue(int limit = 2048)
         : base_t(limit)
         , _thread(std::bind(&base_t::run, this))
     {
@@ -323,7 +312,6 @@ protected:
 
     Thread _thread;
 };
-
 
 #if 0
 //
@@ -380,11 +368,8 @@ public:
 };
 #endif
 
-
 } // namespace scy
 
-
 #endif // SCY_Queue_H
-
 
 /// @\}

@@ -8,19 +8,15 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Thread_H
 #define SCY_Thread_H
-
 
 #include "scy/async.h"
 #include "scy/mutex.h"
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
 
-
 namespace scy {
-
 
 /// This class implements a platform-independent
 /// wrapper around an operating system thread.
@@ -42,7 +38,7 @@ public:
     /// The thread should be cancelled beore calling this method.
     /// This method must be called from outside the current thread
     /// context or deadlock will ensue.
-    bool waitForExit(int timeout= 5000);
+    bool waitForExit(int timeout = 5000);
 
     /// Returns the native thread handle.
     uv_thread_t id() const;
@@ -53,15 +49,14 @@ public:
     static const uv_thread_t mainID;
 
 protected:
-    Thread(const Thread&)= delete;
-    Thread& operator=(const Thread&)= delete;
+    Thread(const Thread&) = delete;
+    Thread& operator=(const Thread&) = delete;
 
     virtual bool async() const;
     virtual void startAsync();
 
     uv_thread_t _handle;
 };
-
 
 #if 0
 /// This class is an invisible wrapper around a TStartable instance,
@@ -105,11 +100,8 @@ protected:
 };
 #endif
 
-
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

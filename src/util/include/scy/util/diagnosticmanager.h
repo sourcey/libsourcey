@@ -8,18 +8,14 @@
 /// @addtogroup util
 /// @{
 
-
 #ifndef SCY_DiagnosticManager_H
 #define SCY_DiagnosticManager_H
-
 
 #include "scy/collection.h"
 #include "scy/stateful.h"
 #include "scy/thread.h"
 
-
 namespace scy {
-
 
 /// @addtogroup util
 /// @{///
@@ -28,7 +24,7 @@ struct DiagnosticState : public State
 {
     enum Type
     {
-        None= 0,
+        None = 0,
         Checking,
         Passed,
         Failed
@@ -52,11 +48,9 @@ struct DiagnosticState : public State
     }
 };
 
-
 //
 // Diagnostic Interface
 //
-
 
 class IDiagnostic : public Stateful<DiagnosticState>
 {
@@ -86,21 +80,18 @@ public:
 
 protected:
     /// Override to implement diagnostic logic.
-    virtual void run()= 0;
+    virtual void run() = 0;
 
     virtual bool pass();
     virtual bool fail();
     virtual void addSummary(const std::string& text);
 };
 
-
 typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
-
 
 //
 // Asynchronous Diagnostic Base
 //
-
 
 class AsyncDiagnostic : public IDiagnostic, public async::Runnable
 {
@@ -117,11 +108,9 @@ protected:
     Thread _thread;
 };
 
-
 //
 // Diagnostic Manager
 //
-
 
 class DiagnosticManager : public DiagnosticStore
 {
@@ -153,14 +142,10 @@ public:
                                          const DiagnosticState&);
 };
 
-
 /// @\}
-
 
 } // namespace scy
 
-
 #endif // SCY_DiagnosticManager_H
-
 
 /// @\}

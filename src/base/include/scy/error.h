@@ -8,24 +8,19 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Error_H
 #define SCY_Error_H
-
 
 #include "scy/base.h"
 #include <exception> // use std::exception types
 #include <stdexcept>
 #include <string>
 
-
 namespace scy {
-
 
 //
 // Error type
 //
-
 
 struct Error
 {
@@ -38,13 +33,13 @@ struct Error
     Error(const std::string& msg)
     {
         reset();
-        message= msg;
+        message = msg;
     }
 
     Error(const char* msg)
     {
         reset();
-        message= msg;
+        message = msg;
     }
 
     bool any() const
@@ -54,9 +49,9 @@ struct Error
 
     void reset()
     {
-        errorno= 0;
+        errorno = 0;
         message.clear();
-        exception= nullptr;
+        exception = nullptr;
     }
 
     void rethrow()
@@ -72,11 +67,8 @@ struct Error
     }
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Error_H
-
 
 /// @\}

@@ -8,51 +8,43 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/message.h"
-
 
 namespace scy {
 namespace http {
 
-
-const std::string Message::HTTP_1_0= "HTTP/1.0";
-const std::string Message::HTTP_1_1= "HTTP/1.1";
-const std::string Message::IDENTITY_TRANSFER_ENCODING= "identity";
-const std::string Message::CHUNKED_TRANSFER_ENCODING= "chunked";
-const int Message::UNKNOWN_CONTENT_LENGTH= -1;
+const std::string Message::HTTP_1_0 = "HTTP/1.0";
+const std::string Message::HTTP_1_1 = "HTTP/1.1";
+const std::string Message::IDENTITY_TRANSFER_ENCODING = "identity";
+const std::string Message::CHUNKED_TRANSFER_ENCODING = "chunked";
+const int Message::UNKNOWN_CONTENT_LENGTH = -1;
 const std::string Message::UNKNOWN_CONTENT_TYPE;
-const std::string Message::CONTENT_LENGTH= "Content-Length";
-const std::string Message::CONTENT_TYPE= "Content-Type";
-const std::string Message::TRANSFER_ENCODING= "Transfer-Encoding";
-const std::string Message::CONNECTION= "Connection";
-const std::string Message::CONNECTION_KEEP_ALIVE= "Keep-Alive";
-const std::string Message::CONNECTION_CLOSE= "Close";
+const std::string Message::CONTENT_LENGTH = "Content-Length";
+const std::string Message::CONTENT_TYPE = "Content-Type";
+const std::string Message::TRANSFER_ENCODING = "Transfer-Encoding";
+const std::string Message::CONNECTION = "Connection";
+const std::string Message::CONNECTION_KEEP_ALIVE = "Keep-Alive";
+const std::string Message::CONNECTION_CLOSE = "Close";
 const std::string Message::EMPTY;
-
 
 Message::Message()
     : _version(HTTP_1_1)
 {
 }
 
-
 Message::Message(const std::string& version)
     : _version(version)
 {
 }
 
-
 Message::~Message()
 {
 }
 
-
 void Message::setVersion(const std::string& version)
 {
-    _version= version;
+    _version = version;
 }
-
 
 void Message::setContentLength(std::uint64_t length)
 {
@@ -62,16 +54,14 @@ void Message::setContentLength(std::uint64_t length)
         erase(CONTENT_LENGTH);
 }
 
-
 std::uint64_t Message::getContentLength() const
 {
-    const std::string& contentLength= get(CONTENT_LENGTH, EMPTY);
+    const std::string& contentLength = get(CONTENT_LENGTH, EMPTY);
     if (!contentLength.empty()) {
         return util::strtoi<std::uint64_t>(contentLength);
     } else
         return std::uint64_t(UNKNOWN_CONTENT_LENGTH);
 }
-
 
 void Message::setTransferEncoding(const std::string& transferEncoding)
 {
@@ -81,12 +71,10 @@ void Message::setTransferEncoding(const std::string& transferEncoding)
         set(TRANSFER_ENCODING, transferEncoding);
 }
 
-
 const std::string& Message::getTransferEncoding() const
 {
     return get(TRANSFER_ENCODING, IDENTITY_TRANSFER_ENCODING);
 }
-
 
 void Message::setChunkedTransferEncoding(bool flag)
 {
@@ -96,13 +84,11 @@ void Message::setChunkedTransferEncoding(bool flag)
         setTransferEncoding(IDENTITY_TRANSFER_ENCODING);
 }
 
-
 bool Message::isChunkedTransferEncoding() const
 {
     return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) ==
            0;
 }
-
 
 void Message::setContentType(const std::string& contentType)
 {
@@ -112,12 +98,10 @@ void Message::setContentType(const std::string& contentType)
         set(CONTENT_TYPE, contentType);
 }
 
-
 const std::string& Message::getContentType() const
 {
     return get(CONTENT_TYPE, UNKNOWN_CONTENT_TYPE);
 }
-
 
 void Message::setKeepAlive(bool keepAlive)
 {
@@ -127,45 +111,38 @@ void Message::setKeepAlive(bool keepAlive)
         set(CONNECTION, CONNECTION_CLOSE);
 }
 
-
 bool Message::getKeepAlive() const
 {
-    const std::string& connection= get(CONNECTION, EMPTY);
+    const std::string& connection = get(CONNECTION, EMPTY);
     if (!connection.empty())
         return util::icompare(connection, CONNECTION_CLOSE) != 0;
     else
         return getVersion() == HTTP_1_1;
 }
 
-
 const std::string& Message::getVersion() const
 {
     return _version;
 }
-
 
 bool Message::hasContentLength() const
 {
     return has(CONTENT_LENGTH);
 }
 
-
 void Message::write(std::ostream& ostr) const
 {
-    NVCollection::ConstIterator it= begin();
+    NVCollection::ConstIterator it = begin();
     while (it != end()) {
         ostr << it->first << ": " << it->second << "\r\n";
         ++it;
     }
 }
 
-
 } // namespace http
 } // namespace scy
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

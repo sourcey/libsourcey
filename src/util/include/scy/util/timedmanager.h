@@ -8,46 +8,43 @@
 /// @addtogroup util
 /// @{
 
-
 #ifndef SCY_TimedManager_H
 #define SCY_TimedManager_H
-
 
 #include "scy/base.h"
 #include "scy/collection.h"
 #include "scy/timer.h"
 
-
 namespace scy {
-
 
 /// @addtogroup util
 /// Provides timed persistent data storage for class instances.
 /// TValue must implement the clone() method.
-template <class TKey, class TValue, class TDeleter= std::default_delete<TValue>>
+template <class TKey, class TValue,
+          class TDeleter = std::default_delete<TValue>>
 class TimedManager : public PointerCollection<TKey, TValue, TDeleter>
 {
 public:
     typedef PointerCollection<TKey, TValue, TDeleter> Base;
     typedef std::map<TValue*, Timeout> TimeoutMap;
 
-    TimedManager(uv::Loop* loop= uv::defaultLoop())
+    TimedManager(uv::Loop* loop = uv::defaultLoop())
         : _timer(loop)
     {
-        _timer.Timeout+= slot(this, &TimedManager::onTimerUpdate);
+        _timer.Timeout += slot(this, &TimedManager::onTimerUpdate);
         _timer.start(100); // check every 100ms
     }
 
     virtual ~TimedManager()
     {
-        _timer.Timeout-= slot(this, &TimedManager::onTimerUpdate);
+        _timer.Timeout -= slot(this, &TimedManager::onTimerUpdate);
     }
 
     /// Add an item which will expire (and be deleted) after the
     /// specified timeout value.
     /// If the timeout is 0 the item will be stored indefinitely.
     /// The TimedManager assumes ownership of the given pointer.
-    virtual void add(const TKey& key, TValue* item, long timeout= 0)
+    virtual void add(const TKey& key, TValue* item, long timeout = 0)
     {
         Base::free(key);      // Free existing item and timeout (if any)
         Base::add(key, item); // Add new entry
@@ -84,11 +81,11 @@ protected:
             if (timeout > 0) {
                 TraceS(this) << "Set timeout: " << item << ": " << timeout
                              << std::endl;
-                auto& t= _timeouts[item];
+                auto& t = _timeouts[item];
                 t.setDelay(timeout);
                 t.start();
             } else {
-                auto it= _timeouts.find(item);
+                auto it = _timeouts.find(item);
                 if (it != _timeouts.end()) {
                     _timeouts.erase(it);
                 }
@@ -103,7 +100,7 @@ protected:
     {
         // Remove timeout entry
         Mutex::ScopedLock lock(_tmutex);
-        auto it= _timeouts.find(item);
+        auto it = _timeouts.find(item);
         if (it != _timeouts.end())
             _timeouts.erase(it);
 
@@ -125,7 +122,7 @@ protected:
         _tmutex.unlock();
 
         // for (auto ref : timeouts) {}
-        for (auto it= timeouts.begin(); it != timeouts.end(); ++it) {
+        for (auto it = timeouts.begin(); it != timeouts.end(); ++it) {
             // TraceS(this) << "Check item: "
             //    << it->first << ": "
             //    << it->second.delay() << ": "
@@ -145,11 +142,8 @@ protected:
     Timer _timer;
 };
 
-
 } // namespace scy:
 
-
 #endif // SCY_TimedManager_H
-
 
 /// @\}

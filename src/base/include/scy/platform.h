@@ -8,17 +8,13 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Platform_H
 #define SCY_Platform_H
-
 
 #include <cstdint>
 #include <string>
 
-
 namespace scy {
-
 
 //
 /// Cross-platform utilities
@@ -42,7 +38,6 @@ void sleep(int ms);
 /// Pause the current thread until enter is pressed.
 void pause();
 
-
 //
 /// Windows helpers
 //
@@ -60,9 +55,7 @@ std::string toUtf8(const std::wstring& wstr);
 
 #endif
 
-
 } // namespace scy
-
 
 #endif // SCY_Platform_H
 

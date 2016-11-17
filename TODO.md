@@ -1,7 +1,6 @@
 # TODO
 
-Refactor Timer to use Idler Async pattern
-Update Signal to use std::bind with lambdas  
+Refactor Timer to use async pattern
 Stateful classes and thread flags should use std::atomic
 Replace zlib with libarchive for better Pacm archive support  
 Test data folders should be installed relative to compiled test binaries

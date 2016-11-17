@@ -8,10 +8,8 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_TCPClient_H
 #define SCY_TURN_TCPClient_H
-
 
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
@@ -20,13 +18,10 @@
 #include <deque>
 #include <string>
 
-
 namespace scy {
 namespace turn {
 
-
 class TCPClient;
-
 
 struct TCPClientObserver : public ClientObserver
 {
@@ -49,23 +44,20 @@ struct TCPClientObserver : public ClientObserver
     };
 };
 
-
 struct RelayConnectionBinding
 {
     std::uint32_t connectionID;
     net::Address peerAddress;
 };
 
-
 typedef KVCollection<net::Address, net::TCPSocket::Ptr> ConnectionManager;
 typedef ConnectionManager::Map ConnectionManagerMap;
-
 
 class TCPClient : public Client
 {
 public:
     TCPClient(TCPClientObserver& observer,
-              const Client::Options& options= Client::Options());
+              const Client::Options& options = Client::Options());
     virtual ~TCPClient();
 
     virtual void initiate();
@@ -111,8 +103,6 @@ protected:
 }
 } //  namespace scy::turn
 
-
 #endif // SCY_TURN_TCPClient_H
-
 
 /// @\}

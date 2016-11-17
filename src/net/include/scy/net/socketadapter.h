@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_SocketAdapter_H
 #define SCY_Net_SocketAdapter_H
-
 
 #include "scy/base.h"
 #include "scy/memory.h"
@@ -21,13 +19,10 @@
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 
-
 namespace scy {
 namespace net {
 
-
 class Socket;
-
 
 /// SocketAdapter is the abstract interface for all socket classes.
 /// A SocketAdapter can also be attached to a Socket in order to
@@ -41,8 +36,8 @@ class SocketAdapter
 {
 public:
     /// Creates the SocketAdapter.
-    SocketAdapter(SocketAdapter* sender= nullptr,
-                  SocketAdapter* receiver= nullptr);
+    SocketAdapter(SocketAdapter* sender = nullptr,
+                  SocketAdapter* receiver = nullptr);
 
     /// Destroys the SocketAdapter.
     virtual ~SocketAdapter();
@@ -52,18 +47,18 @@ public:
     /// No exception will be thrown.
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len,
-                     const Address& peerAddress, int flags= 0);
+                     const Address& peerAddress, int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// Returns the number of bytes sent or -1 on error.
     /// No exception will be thrown.
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
-    virtual int sendPacket(const IPacket& packet, int flags= 0);
+    virtual int sendPacket(const IPacket& packet, int flags = 0);
     virtual int sendPacket(const IPacket& packet, const Address& peerAddress,
-                           int flags= 0);
+                           int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// This method provides delegate compatability, and unlike
@@ -83,13 +78,13 @@ public:
     /// Send methods proxy data to this adapter by default.
     /// Note that we only keep a simple pointer so
     /// as to avoid circular references preventing destruction.
-    void setSender(SocketAdapter* adapter, bool freeExisting= false);
+    void setSender(SocketAdapter* adapter, bool freeExisting = false);
 
     /// Returns the output SocketAdapter pointer
     SocketAdapter* sender();
 
     /// Adds an input SocketAdapter for receiving socket callbacks.
-    void addReceiver(SocketAdapter* adapter, int priority= 0);
+    void addReceiver(SocketAdapter* adapter, int priority = 0);
 
     /// Removes an input SocketAdapter.
     void removeReceiver(SocketAdapter* adapter);
@@ -128,12 +123,9 @@ protected:
     SocketAdapter* _sender;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_SocketAdapter_H
-
 
 /// @\}

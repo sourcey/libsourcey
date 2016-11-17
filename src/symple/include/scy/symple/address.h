@@ -8,18 +8,14 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Address_H
 #define SCY_Symple_Address_H
-
 
 #include <cstdint>
 #include <string>
 
-
 namespace scy {
 namespace smpl {
-
 
 /// The Address structure is an endpoint identifier for a
 /// peer on the network.
@@ -53,12 +49,9 @@ public:
     std::string id;
 };
 
-
 } // namespace scy
 } // namespace smpl
 
-
 #endif // SCY_Symple_Address_H
-
 
 /// @\}

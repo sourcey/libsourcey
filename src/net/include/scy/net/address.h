@@ -8,17 +8,13 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_Address_H
 #define SCY_Net_Address_H
 
-
 #include "scy/net/types.h"
-
 
 namespace scy {
 namespace net {
-
 
 /// This class represents an internet (IP) endpoint/socket
 /// address. The address can belong either to the
@@ -122,7 +118,7 @@ public:
     /// Maximum length in bytes of a socket address.
     enum
     {
-        MAX_ADDRESS_LENGTH=
+        MAX_ADDRESS_LENGTH =
 #if defined(LibSourcey_HAVE_IPv6)
             sizeof(struct sockaddr_in6)
 #else
@@ -137,16 +133,12 @@ private:
     AddressBase* _base;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_Address_H
 
-
 /// @\}
-
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

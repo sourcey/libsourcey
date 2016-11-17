@@ -8,12 +8,10 @@
 /// @addtogroup stun
 /// @{
 
-
 #include "scy/stun/transaction.h"
 #include "scy/logger.h"
 #include "scy/net/socket.h"
 #include <iostream>
-
 
 using namespace std;
 
@@ -21,10 +19,8 @@ using scy::net::Transaction;
 using scy::net::Address;
 using scy::net::Socket;
 
-
 namespace scy {
 namespace stun {
-
 
 Transaction::Transaction(const net::Socket::Ptr& socket,
                          const net::Address& peerAddress, long timeout,
@@ -37,19 +33,16 @@ Transaction::Transaction(const net::Socket::Ptr& socket,
     net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
 }
 
-
 Transaction::~Transaction()
 {
     DebugS(this) << "Destroy" << std::endl;
 }
-
 
 bool Transaction::checkResponse(const Message& message)
 {
     return net::Transaction<Message>::checkResponse(message) &&
            _request.transactionID() == message.transactionID();
 }
-
 
 void Transaction::onResponse()
 {
@@ -67,6 +60,5 @@ void Transaction::onResponse()
 }
 }
 } // namespace scy:stun
-
 
 /// @\}

@@ -8,22 +8,17 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Time_H
 #define SCY_Time_H
-
 
 #include <cstdint>
 #include <ctime>
 #include <string>
 
-
 namespace scy {
-
 
 /// Classes and functions for handling time
 namespace time {
-
 
 /// The date/time format defined in the ISO 8601 standard.
 /// This is the default format used throughout the library for consistency.
@@ -31,7 +26,7 @@ namespace time {
 /// Examples:
 ///   2005-01-01T12:00:00+01:00
 ///   2005-01-01T11:00:00Z
-static const char* ISO8601Format= "%Y-%m-%dT%H:%M:%SZ";
+static const char* ISO8601Format = "%Y-%m-%dT%H:%M:%SZ";
 
 /// Return the number of UTC milliseconds since epoch.
 std::time_t now();
@@ -40,13 +35,13 @@ std::time_t now();
 double clockSecs();
 
 /// Cross-platform time formatting.
-std::string print(const std::tm& dt, const char* fmt= ISO8601Format);
+std::string print(const std::tm& dt, const char* fmt = ISO8601Format);
 
 /// Print the current local time using the given format.
-std::string printLocal(const char* fmt= ISO8601Format);
+std::string printLocal(const char* fmt = ISO8601Format);
 
 /// Print the current UTC time using the given format.
-std::string printUTC(const char* fmt= ISO8601Format);
+std::string printUTC(const char* fmt = ISO8601Format);
 
 /// Convert the given time value to local time.
 /// Uses thread-safe native functions.
@@ -73,12 +68,9 @@ std::uint64_t ticks();
 std::uint64_t getTimeMS();
 #endif
 
-
 } // namespace time
 } // namespace scy
 
-
 #endif // SCY_Time_H
-
 
 /// @\}

@@ -8,15 +8,12 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/cookie.h"
 #include "scy/datetime.h"
 #include "scy/http/url.h"
 
-
 namespace scy {
 namespace http {
-
 
 Cookie::Cookie()
     : _version(0)
@@ -25,7 +22,6 @@ Cookie::Cookie()
     , _httpOnly(false)
 {
 }
-
 
 Cookie::Cookie(const std::string& name)
     : _version(0)
@@ -36,16 +32,15 @@ Cookie::Cookie(const std::string& name)
 {
 }
 
-
 Cookie::Cookie(const NVCollection& nvc)
     : _version(0)
     , _secure(false)
     , _maxAge(-1)
     , _httpOnly(false)
 {
-    for (NVCollection::ConstIterator it= nvc.begin(); it != nvc.end(); ++it) {
-        const std::string& name= it->first;
-        const std::string& value= it->second;
+    for (NVCollection::ConstIterator it = nvc.begin(); it != nvc.end(); ++it) {
+        const std::string& name = it->first;
+        const std::string& value = it->second;
         if (util::icompare(name, "comment") == 0) {
             setComment(value);
         } else if (util::icompare(name, "domain") == 0) {
@@ -58,7 +53,7 @@ Cookie::Cookie(const NVCollection& nvc)
             setSecure(true);
         } else if (util::icompare(name, "expires") == 0) {
             int tzd;
-            DateTime exp= DateTimeParser::parse(value, tzd);
+            DateTime exp = DateTimeParser::parse(value, tzd);
             Timestamp now;
             setMaxAge((int)((exp.timestamp() - now) / Timestamp::resolution()));
         } else if (util::icompare(name, "version") == 0) {
@@ -72,7 +67,6 @@ Cookie::Cookie(const NVCollection& nvc)
     }
 }
 
-
 Cookie::Cookie(const std::string& name, const std::string& value)
     : _version(0)
     , _name(name)
@@ -82,7 +76,6 @@ Cookie::Cookie(const std::string& name, const std::string& value)
     , _httpOnly(false)
 {
 }
-
 
 Cookie::Cookie(const Cookie& cookie)
     : _version(cookie._version)
@@ -97,82 +90,70 @@ Cookie::Cookie(const Cookie& cookie)
 {
 }
 
-
 Cookie::~Cookie()
 {
 }
 
-
 Cookie& Cookie::operator=(const Cookie& cookie)
 {
     if (&cookie != this) {
-        _version= cookie._version;
-        _name= cookie._name;
-        _value= cookie._value;
-        _comment= cookie._comment;
-        _domain= cookie._domain;
-        _path= cookie._path;
-        _secure= cookie._secure;
-        _maxAge= cookie._maxAge;
-        _httpOnly= cookie._httpOnly;
+        _version = cookie._version;
+        _name = cookie._name;
+        _value = cookie._value;
+        _comment = cookie._comment;
+        _domain = cookie._domain;
+        _path = cookie._path;
+        _secure = cookie._secure;
+        _maxAge = cookie._maxAge;
+        _httpOnly = cookie._httpOnly;
     }
     return *this;
 }
 
-
 void Cookie::setVersion(int version)
 {
-    _version= version;
+    _version = version;
 }
-
 
 void Cookie::setName(const std::string& name)
 {
-    _name= name;
+    _name = name;
 }
-
 
 void Cookie::setValue(const std::string& value)
 {
-    _value= value;
+    _value = value;
 }
-
 
 void Cookie::setComment(const std::string& comment)
 {
-    _comment= comment;
+    _comment = comment;
 }
-
 
 void Cookie::setDomain(const std::string& domain)
 {
-    _domain= domain;
+    _domain = domain;
 }
-
 
 void Cookie::setPath(const std::string& path)
 {
-    _path= path;
+    _path = path;
 }
-
 
 void Cookie::setSecure(bool secure)
 {
-    _secure= secure;
+    _secure = secure;
 }
-
 
 void Cookie::setMaxAge(int maxAge)
 {
-    _maxAge= maxAge;
+    _maxAge = maxAge;
 }
-
 
 void Cookie::setHttpOnly(bool flag)
 {
-    _httpOnly= flag;
+    _httpOnly = flag;
 }
-
 
 std::string Cookie::toString() const
 {
@@ -193,7 +174,7 @@ std::string Cookie::toString() const
         }
         if (_maxAge >= 0) {
             Timestamp ts;
-            ts+= _maxAge * Timestamp::resolution();
+            ts += _maxAge * Timestamp::resolution();
             res.append("; expires=");
             DateTimeFormatter::append(res, ts, DateTimeFormat::HTTP_FORMAT);
         }
@@ -239,25 +220,20 @@ std::string Cookie::toString() const
     return res;
 }
 
-
 std::string Cookie::escape(const std::string& str)
 {
     return http::URL::encode(str);
 }
-
 
 std::string Cookie::unescape(const std::string& str)
 {
     return http::URL::decode(str);
 }
 
-
 } // namespace http
 } // namespace scy
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

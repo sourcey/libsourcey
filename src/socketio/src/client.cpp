@@ -8,42 +8,34 @@
 /// @addtogroup socketio
 /// @{
 
-
 #include "scy/socketio/client.h"
 #include "scy/http/client.h"
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 #include <stdexcept>
 
-
 using std::endl;
-
 
 namespace scy {
 namespace sockio {
 
-
 //
 // TCP Client
 //
-
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
     return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
 }
 
-
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
 {
 }
 
-
 //
 // SSL Client
 //
-
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
@@ -51,17 +43,14 @@ Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
                       options); //, loop);
 }
 
-
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::SSLSocket>(loop), options) //, loop)
 {
 }
 
-
 //
 // Base Client
 //
-
 
 // Client::Client(const net::Socket::Ptr& socket) :
 //     _pingTimer(socket->loop()),
@@ -71,7 +60,6 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
 // {
 //     _ws.addReceiver(this);
 // }
-
 
 Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     : _pingTimer(socket->loop())
@@ -88,7 +76,6 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     _ws.addReceiver(this);
 }
 
-
 Client::~Client()
 {
     _ws.removeReceiver(this);
@@ -97,7 +84,6 @@ Client::~Client()
     close();
     // reset();
 }
-
 
 // void Client::connect(const std::string& host, std::uint16_t port)
 // {
@@ -108,7 +94,6 @@ Client::~Client()
 //     }
 //     connect();
 // }
-
 
 void Client::connect()
 {
@@ -137,7 +122,6 @@ void Client::connect()
     _ws.socket->connect(_options.host, _options.port);
 }
 
-
 void Client::close()
 {
     TraceN(this) << "Closing" << endl;
@@ -149,13 +133,11 @@ void Client::close()
     TraceN(this) << "Closing: OK" << endl;
 }
 
-
 int Client::send(const std::string& message, bool ack)
 {
     Packet packet(message, ack);
     return send(packet);
 }
-
 
 int Client::send(const json::Value& message, bool ack)
 {
@@ -163,12 +145,10 @@ int Client::send(const json::Value& message, bool ack)
     return send(packet);
 }
 
-
 int Client::send(const sockio::Packet& packet)
 {
     return _ws.sendPacket(packet);
 }
-
 
 int Client::send(const std::string& event, const char* message, bool ack)
 {
@@ -176,13 +156,11 @@ int Client::send(const std::string& event, const char* message, bool ack)
     return send(packet);
 }
 
-
 int Client::send(const std::string& event, const std::string& message, bool ack)
 {
     Packet packet(event, message, ack);
     return send(packet);
 }
-
 
 int Client::send(const std::string& event, const json::Value& message, bool ack)
 {
@@ -190,13 +168,11 @@ int Client::send(const std::string& event, const json::Value& message, bool ack)
     return send(packet);
 }
 
-
 Transaction* Client::createTransaction(const sockio::Packet& request,
                                        long timeout)
 {
     return new Transaction(*this, request, timeout);
 }
-
 
 int Client::sendPing()
 {
@@ -208,7 +184,6 @@ int Client::sendPing()
     return _ws.send("2", 1);
 }
 
-
 void Client::reset()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -216,24 +191,23 @@ void Client::reset()
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
 
-    _pingTimer.Timeout-= slot(this, &Client::onPingTimer);
+    _pingTimer.Timeout -= slot(this, &Client::onPingTimer);
     _pingTimer.stop();
 
-    _pingTimeoutTimer.Timeout-= slot(this, &Client::onPingTimeoutTimer);
+    _pingTimeoutTimer.Timeout -= slot(this, &Client::onPingTimeoutTimer);
     _pingTimeoutTimer.stop();
 
-    _reconnectTimer.Timeout-= slot(this, &Client::onReconnectTimer);
+    _reconnectTimer.Timeout -= slot(this, &Client::onReconnectTimer);
     _reconnectTimer.stop();
 
     _ws.socket->close();
 
     _error.reset();
-    _sessionID= "";
-    _pingInterval= 0;
-    _pingTimeout= 0;
+    _sessionID = "";
+    _pingInterval = 0;
+    _pingTimeout = 0;
     // _wasOnline = false; // Reset via onClose()
 }
-
 
 void Client::setError(const scy::Error& error)
 {
@@ -241,9 +215,9 @@ void Client::setError(const scy::Error& error)
 
     // Set the wasOnline flag if previously online before error
     if (stateEquals(ClientState::Online))
-        _wasOnline= true;
+        _wasOnline = true;
 
-    _error= error;
+    _error = error;
     setState(this, ClientState::Error, error.message);
 
     // Start the reconnection timer if required
@@ -257,7 +231,6 @@ void Client::setError(const scy::Error& error)
     }
 }
 
-
 void Client::onConnect()
 {
     TraceN(this) << "On connect" << endl;
@@ -268,27 +241,24 @@ void Client::onConnect()
     stopReconnectTimer();
 }
 
-
 void Client::startReconnectTimer()
 {
     assert(_options.reconnection);
-    _reconnectTimer.Timeout+= slot(this, &Client::onReconnectTimer);
+    _reconnectTimer.Timeout += slot(this, &Client::onReconnectTimer);
     _reconnectTimer.start(_options.reconnectDelay);
     _reconnectTimer.handle().ref();
-    _reconnecting= true;
+    _reconnecting = true;
 }
-
 
 void Client::stopReconnectTimer()
 {
     if (_reconnecting) {
-        _reconnectTimer.Timeout-= slot(this, &Client::onReconnectTimer);
+        _reconnectTimer.Timeout -= slot(this, &Client::onReconnectTimer);
         _reconnectTimer.handle().unref();
         _reconnectTimer.stop();
-        _reconnecting= false;
+        _reconnecting = false;
     }
 }
-
 
 void Client::onOnline()
 {
@@ -299,14 +269,13 @@ void Client::onOnline()
 
     // Setup and start the ping timer
     assert(_pingInterval);
-    _pingTimer.Timeout+= slot(this, &Client::onPingTimer);
+    _pingTimer.Timeout += slot(this, &Client::onPingTimer);
     _pingTimer.start(_pingInterval); //, _pingInterval
 
     // Setup the ping timeout timer
     assert(_pingTimeout);
-    _pingTimeoutTimer.Timeout+= slot(this, &Client::onPingTimeoutTimer);
+    _pingTimeoutTimer.Timeout += slot(this, &Client::onPingTimeoutTimer);
 }
-
 
 void Client::onClose()
 {
@@ -316,9 +285,8 @@ void Client::onClose()
 
     // Back to initial Closed state
     setState(this, ClientState::Closed);
-    _wasOnline= false;
+    _wasOnline = false;
 }
-
 
 //
 // Socket Callbacks
@@ -328,14 +296,12 @@ void Client::onSocketConnect(net::Socket& socket)
     onConnect();
 }
 
-
 void Client::onSocketError(net::Socket& socket, const scy::Error& error)
 {
     TraceN(this) << "On socket error: " << error.message << endl;
 
     setError(error);
 }
-
 
 void Client::onSocketClose(net::Socket& socket)
 {
@@ -348,20 +314,19 @@ void Client::onSocketClose(net::Socket& socket)
     //    setError("Disconnected from the server");
 }
 
-
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
 {
     TraceN(this) << "On socket recv: " << buffer.size() << endl;
 
     sockio::Packet pkt;
-    char* buf= bufferCast<char*>(buffer);
-    std::size_t len= buffer.size();
-    std::size_t nread= 0;
-    while (len > 0 && (nread= pkt.read(constBuffer(buf, len))) > 0) {
+    char* buf = bufferCast<char*>(buffer);
+    std::size_t len = buffer.size();
+    std::size_t nread = 0;
+    while (len > 0 && (nread = pkt.read(constBuffer(buf, len))) > 0) {
         onPacket(pkt);
-        buf+= nread;
-        len-= nread;
+        buf += nread;
+        len -= nread;
     }
     if (len == buffer.size())
         WarnN(this) << "Failed to parse incoming Socket.IO packet." << endl;
@@ -375,26 +340,24 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 #endif
 }
 
-
 void Client::onHandshake(sockio::Packet& packet)
 {
     assert(stateEquals(ClientState::Connected));
     assert(packet.frame() == sockio::Packet::Frame::Open);
 
-    json::Value json= packet.json();
+    json::Value json = packet.json();
     if (json.isMember("sid"))
-        _sessionID= json["sid"].asString();
+        _sessionID = json["sid"].asString();
     if (json.isMember("pingInterval"))
-        _pingInterval= json["pingInterval"].asInt();
+        _pingInterval = json["pingInterval"].asInt();
     if (json.isMember("pingTimeout"))
-        _pingTimeout= json["pingTimeout"].asInt();
+        _pingTimeout = json["pingTimeout"].asInt();
 
     DebugN(this) << "On handshake: "
                  << "sid=" << _sessionID << ", "
                  << "pingInterval=" << _pingInterval << ", "
                  << "pingTimeout=" << _pingTimeout << endl;
 }
-
 
 void Client::onMessage(sockio::Packet& packet)
 {
@@ -432,7 +395,6 @@ void Client::onMessage(sockio::Packet& packet)
     }
 }
 
-
 void Client::onPacket(sockio::Packet& packet)
 {
     TraceN(this) << "On packet: " << packet.toString() << endl;
@@ -459,13 +421,11 @@ void Client::onPacket(sockio::Packet& packet)
     }
 }
 
-
 void Client::onPong()
 {
     // Pong received, stop the ping timeout
     _pingTimeoutTimer.stop();
 }
-
 
 void Client::onPingTimer()
 {
@@ -479,12 +439,10 @@ void Client::onPingTimer()
     _pingTimer.again();
 }
 
-
 void Client::onPingTimeoutTimer()
 {
     assert(0 && "implement me");
 }
-
 
 void Client::onReconnectTimer()
 {
@@ -497,18 +455,15 @@ void Client::onReconnectTimer()
     _reconnectTimer.again();
 }
 
-
 http::ws::WebSocket& Client::ws()
 {
     return _ws;
 }
 
-
 std::string Client::sessionID() const
 {
     return _sessionID;
 }
-
 
 Error Client::error() const
 {
@@ -516,24 +471,20 @@ Error Client::error() const
     return _error;
 }
 
-
 bool Client::isOnline() const
 {
     return stateEquals(ClientState::Online);
 }
-
 
 Client::Options& Client::options()
 {
     return _options;
 }
 
-
 bool Client::reconnecting() const
 {
     return _reconnecting;
 }
-
 
 bool Client::wasOnline() const
 {
@@ -541,9 +492,7 @@ bool Client::wasOnline() const
     return _wasOnline;
 }
 
-
 } // namespace sockio
 } // namespace scy
-
 
 /// @\}

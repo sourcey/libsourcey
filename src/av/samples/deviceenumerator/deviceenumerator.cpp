@@ -1,9 +1,7 @@
 #include "scy/av/devicemanager.h"
 #include "scy/logger.h"
 
-
 using namespace scy;
-
 
 int main(int argc, char** argv)
 {

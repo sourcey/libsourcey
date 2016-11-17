@@ -8,7 +8,6 @@
 /// @addtogroup turn
 /// @{
 
-
 #include "scy/turn/client/client.h"
 #include "scy/application.h"
 #include "scy/crypto/hash.h"
@@ -21,13 +20,10 @@
 #include <assert.h>
 #include <iostream>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 Client::Client(ClientObserver& observer, const Options& options)
     : _observer(observer)
@@ -35,7 +31,6 @@ Client::Client(ClientObserver& observer, const Options& options)
     , _socket(nullptr) //, false
 {
 }
-
 
 Client::~Client()
 {
@@ -45,29 +40,27 @@ Client::~Client()
     // assert(closed());
 }
 
-
 void Client::initiate()
 {
     TraceL << "TURN client connecting to " << _options.serverAddr << endl;
 
     assert(!_permissions.empty() && "must set permissions");
 
-    auto udpSocket= dynamic_cast<net::UDPSocket*>(_socket.get());
+    auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.get());
     if (udpSocket) {
         udpSocket->bind(net::Address("0.0.0.0", 0));
         // udpSocket->setBroadcast(true);
     }
 
-    _socket->Recv+= slot(this, &Client::onSocketRecv, -1,
-                         -1); // using PacketSocket for STUN transactions
-    _socket->Connect+= slot(this, &Client::onSocketConnect);
-    _socket->Close+= slot(this, &Client::onSocketClose);
+    _socket->Recv += slot(this, &Client::onSocketRecv, -1,
+                          -1); // using PacketSocket for STUN transactions
+    _socket->Connect += slot(this, &Client::onSocketConnect);
+    _socket->Close += slot(this, &Client::onSocketClose);
     _socket->connect(_options.serverAddr);
     //_socket
     // else
     //    onSocketConnect(&_socket->base());
 }
-
 
 void Client::shutdown()
 {
@@ -75,18 +68,18 @@ void Client::shutdown()
         // Mutex::ScopedLock lock(_mutex);
         _timer.stop();
 
-        for (auto it= _transactions.begin(); it != _transactions.end();) {
+        for (auto it = _transactions.begin(); it != _transactions.end();) {
             TraceL << "Shutdown base: Delete transaction: " << *it << endl;
-            (*it)->StateChange-= slot(this, &Client::onTransactionProgress);
+            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
             // delete *it;
             (*it)->dispose();
-            it= _transactions.erase(it);
+            it = _transactions.erase(it);
         }
 
-        _socket->Connect-= slot(this, &Client::onSocketConnect);
-        _socket->Recv-= slot(this, &Client::onSocketRecv);
+        _socket->Connect -= slot(this, &Client::onSocketConnect);
+        _socket->Recv -= slot(this, &Client::onSocketRecv);
         //_socket->Error -= slot(this, &Client::onSocketError);
-        _socket->Close-= slot(this, &Client::onSocketClose);
+        _socket->Close -= slot(this, &Client::onSocketClose);
         if (!_socket->closed()) {
             _socket->close();
         }
@@ -94,18 +87,16 @@ void Client::shutdown()
     }
 }
 
-
 void Client::onSocketConnect(net::Socket& socket)
 {
     TraceL << "Client connected" << endl;
     // _socket->Connect -= slot(this, &Client::onSocketConnect);
 
-    _timer.Timeout+= slot(this, &Client::onTimer);
+    _timer.Timeout += slot(this, &Client::onTimer);
     _timer.start(_options.timerInterval, _options.timerInterval);
 
     sendAllocate();
 }
-
 
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
@@ -114,13 +105,13 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 
     stun::Message message;
     // auto socket = reinterpret_cast<net::Socket*>(sender);
-    char* buf= bufferCast<char*>(buffer);
-    std::size_t len= buffer.size();
-    std::size_t nread= 0;
-    while (len > 0 && (nread= message.read(constBuffer(buf, len))) > 0) {
+    char* buf = bufferCast<char*>(buffer);
+    std::size_t len = buffer.size();
+    std::size_t nread = 0;
+    while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
         handleResponse(message);
-        buf+= nread;
-        len-= nread;
+        buf += nread;
+        len -= nread;
     }
     if (len == buffer.size())
         WarnL << "Non STUN packet received" << endl;
@@ -134,7 +125,6 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 #endif
 }
 
-
 void Client::onSocketClose(net::Socket& socket) //, const Error& error
 {
     assert(&socket == _socket.get());
@@ -143,7 +133,6 @@ void Client::onSocketClose(net::Socket& socket) //, const Error& error
     shutdown();
     setState(this, ClientState::Failed, _socket->error().message);
 }
-
 
 void Client::sendRefresh()
 {
@@ -162,17 +151,16 @@ void Client::sendRefresh()
 
     TraceL << "Send refresh allocation request" << endl;
 
-    auto transaction= createTransaction();
+    auto transaction = createTransaction();
     transaction->request().setClass(stun::Message::Request);
     transaction->request().setMethod(stun::Message::Refresh);
 
-    stun::Lifetime* lifetimeAttr= new stun::Lifetime;
+    stun::Lifetime* lifetimeAttr = new stun::Lifetime;
     lifetimeAttr->setValue((std::uint32_t)_options.lifetime / 1000);
     transaction->request().add(lifetimeAttr);
 
     sendAuthenticatedTransaction(transaction);
 }
-
 
 void Client::handleRefreshResponse(const stun::Message& response)
 {
@@ -191,13 +179,13 @@ void Client::handleRefreshResponse(const stun::Message& response)
     // a request to delete the allocation, then the allocation no longer
     // exists and it should consider its request as having effectively
     // succeeded.
-    auto errorAttr= response.get<stun::ErrorCode>();
+    auto errorAttr = response.get<stun::ErrorCode>();
     if (errorAttr) {
         assert(errorAttr->errorCode() == 437);
         return;
     }
 
-    auto lifetimeAttr= response.get<stun::Lifetime>();
+    auto lifetimeAttr = response.get<stun::Lifetime>();
     if (!lifetimeAttr) {
         assert(0);
         return;
@@ -210,15 +198,14 @@ void Client::handleRefreshResponse(const stun::Message& response)
     // If lifetime is 0 the allocation will be cleaned up by garbage collection.
 }
 
-
 bool Client::removeTransaction(stun::Transaction* transaction)
 {
     TraceL << "Removing transaction: " << transaction << endl;
 
     // Mutex::ScopedLock lock(_mutex);
-    for (auto it= _transactions.begin(); it != _transactions.end(); ++it) {
+    for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
         if (*it == transaction) {
-            (*it)->StateChange-= slot(this, &Client::onTransactionProgress);
+            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
             _transactions.erase(it);
             return true;
         }
@@ -226,7 +213,6 @@ bool Client::removeTransaction(stun::Transaction* transaction)
     assert(0 && "unknown transaction");
     return false;
 }
-
 
 void Client::authenticateRequest(stun::Message& request)
 {
@@ -237,20 +223,20 @@ void Client::authenticateRequest(stun::Message& request)
         return;
 
     if (_options.username.size()) {
-        auto usernameAttr= new stun::Username;
+        auto usernameAttr = new stun::Username;
         usernameAttr->copyBytes(_options.username.c_str(),
                                 _options.username.size());
         request.add(usernameAttr);
     }
 
     if (_realm.size()) {
-        auto realmAttr= new stun::Realm;
+        auto realmAttr = new stun::Realm;
         realmAttr->copyBytes(_realm.c_str(), _realm.size());
         request.add(realmAttr);
     }
 
     if (_nonce.size()) {
-        auto nonceAttr= new stun::Nonce;
+        auto nonceAttr = new stun::Nonce;
         nonceAttr->copyBytes(_nonce.c_str(), _nonce.size());
         request.add(nonceAttr);
     }
@@ -265,12 +251,11 @@ void Client::authenticateRequest(stun::Message& request)
         TraceL << "Generating HMAC: data="
                << (_options.username + ":" + _realm + ":" + _options.password)
                << ", key=" << engine.digestStr() << endl;
-        auto integrityAttr= new stun::MessageIntegrity;
+        auto integrityAttr = new stun::MessageIntegrity;
         integrityAttr->setKey(engine.digestStr());
         request.add(integrityAttr);
     }
 }
-
 
 bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 {
@@ -280,19 +265,17 @@ bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
     return transaction->send();
 }
 
-
 stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 {
     // Mutex::ScopedLock lock(_mutex);
     // socket = socket ? socket : _socket;
     // assert(socket && !socket->isNull());
-    auto transaction= new stun::Transaction(
+    auto transaction = new stun::Transaction(
         socket ? socket : _socket, _options.serverAddr, _options.timeout, 1);
-    transaction->StateChange+= slot(this, &Client::onTransactionProgress);
+    transaction->StateChange += slot(this, &Client::onTransactionProgress);
     _transactions.push_back(transaction);
     return transaction;
 }
-
 
 bool Client::handleResponse(const stun::Message& response)
 {
@@ -336,7 +319,6 @@ bool Client::handleResponse(const stun::Message& response)
     return true;
 }
 
-
 void Client::sendAllocate()
 {
     TraceL << "Send allocation request" << endl;
@@ -373,7 +355,7 @@ void Client::sendAllocate()
     // wants to communicate with the server using UDP, TCP, or TLS-over-TCP,
     // respectively.
     //
-    auto transaction= createTransaction();
+    auto transaction = createTransaction();
     // stun::Message request(stun::Message::Request, stun::Message::Allocate);
     transaction->request().setClass(stun::Message::Request);
     transaction->request().setMethod(stun::Message::Allocate);
@@ -383,7 +365,7 @@ void Client::sendAllocate()
     // server and the peers (note that this is NOT the transport protocol
     // that appears in the 5-tuple).
     //
-    auto transportAttr= new stun::RequestedTransport;
+    auto transportAttr = new stun::RequestedTransport;
     transportAttr->setValue(transportProtocol() << 24);
     transaction->request().add(transportAttr);
 
@@ -395,7 +377,7 @@ void Client::sendAllocate()
     // initialize the field to less than the default value.
     //
     if (_options.lifetime) {
-        auto lifetimeAttr= new stun::Lifetime;
+        auto lifetimeAttr = new stun::Lifetime;
         lifetimeAttr->setValue((std::uint32_t)_options.lifetime / 1000);
         transaction->request().add(lifetimeAttr);
     }
@@ -427,7 +409,6 @@ void Client::sendAllocate()
     sendAuthenticatedTransaction(transaction);
 }
 
-
 //  At this point the response has already been authenticated, but we
 //  have not checked for existing allocations on this 5 tuple.
 void Client::handleAllocateResponse(const stun::Message& response)
@@ -458,18 +439,18 @@ void Client::handleAllocateResponse(const stun::Message& response)
     // the client needs to remember the actual lifetime received back from
     // the server, rather than the value sent to the server in the request.
     //
-    auto lifetimeAttr= response.get<stun::Lifetime>();
+    auto lifetimeAttr = response.get<stun::Lifetime>();
     if (!lifetimeAttr) {
         assert(0);
         return;
     }
 
-    auto mappedAttr= response.get<stun::XorMappedAddress>();
+    auto mappedAttr = response.get<stun::XorMappedAddress>();
     if (!mappedAttr || mappedAttr->family() != 1) {
         assert(0);
         return;
     }
-    _mappedAddress=
+    _mappedAddress =
         mappedAttr->address(); // net::Address(mappedAttr->address().host(),
                                // mappedAttr->address().port());
 
@@ -485,7 +466,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
     // reflexive address it receives in the XOR-MAPPED-ADDRESS attribute in
     // its ICE processing.
     //
-    auto relayedAttr= response.get<stun::XorRelayedAddress>();
+    auto relayedAttr = response.get<stun::XorRelayedAddress>();
     if (!relayedAttr || (relayedAttr && relayedAttr->family() != 1)) {
         assert(0);
         return;
@@ -497,7 +478,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
     }
 
     // Use the relay server host and relayed port
-    _relayedAddress= net::Address(
+    _relayedAddress = net::Address(
         relayedAttr->address().host(),
         relayedAttr->address().port()); //_options.serverAddr.host()
 
@@ -516,7 +497,6 @@ void Client::handleAllocateResponse(const stun::Message& response)
         sendCreatePermission();
 }
 
-
 void Client::handleAllocateErrorResponse(const stun::Message& response)
 {
     TraceL << "Allocate error response" << endl;
@@ -524,7 +504,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
     assert(response.methodType() == stun::Message::Allocate &&
            response.classType() == stun::Message::ErrorResponse);
 
-    auto errorAttr= response.get<stun::ErrorCode>();
+    auto errorAttr = response.get<stun::ErrorCode>();
     if (!errorAttr) {
         assert(0);
         return;
@@ -578,15 +558,15 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             if (_realm.empty() || _nonce.empty()) {
 
                 // REALM
-                const stun::Realm* realmAttr= response.get<stun::Realm>();
+                const stun::Realm* realmAttr = response.get<stun::Realm>();
                 if (realmAttr) {
-                    _realm= realmAttr->asString();
+                    _realm = realmAttr->asString();
                 }
 
                 // NONCE
-                const stun::Nonce* nonceAttr= response.get<stun::Nonce>();
+                const stun::Nonce* nonceAttr = response.get<stun::Nonce>();
                 if (nonceAttr) {
-                    _nonce= nonceAttr->asString();
+                    _nonce = nonceAttr->asString();
                 }
 
                 // Now that our realm and nonce are set we can re-send the
@@ -705,20 +685,17 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
     }
 }
 
-
 void Client::addPermission(const IPList& peerIPs)
 {
-    for (auto it= peerIPs.begin(); it != peerIPs.end(); ++it) {
+    for (auto it = peerIPs.begin(); it != peerIPs.end(); ++it) {
         addPermission(*it);
     }
 }
-
 
 void Client::addPermission(const std::string& peerIP)
 {
     IAllocation::addPermission(peerIP);
 }
-
 
 void Client::sendCreatePermission()
 {
@@ -737,14 +714,14 @@ void Client::sendCreatePermission()
     // attribute will be ignored and can be any arbitrary value.  The
     // various XOR-PEER-ADDRESS attributes can appear in any order.
 
-    auto transaction= createTransaction();
+    auto transaction = createTransaction();
     // stun::Message request(stun::Message::Request, stun::Message::Allocate);
     transaction->request().setClass(stun::Message::Request);
     transaction->request().setMethod(stun::Message::CreatePermission);
 
-    for (auto it= _permissions.begin(); it != _permissions.end(); ++it) {
+    for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
         TraceL << "Create permission request: " << (*it).ip << endl;
-        auto peerAttr= new stun::XorPeerAddress;
+        auto peerAttr = new stun::XorPeerAddress;
         peerAttr->setAddress(net::Address((*it).ip, 0));
         // peerAttr->setFamily(1);
         // peerAttr->setPort(0);
@@ -754,7 +731,6 @@ void Client::sendCreatePermission()
 
     sendAuthenticatedTransaction(transaction);
 }
-
 
 void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 {
@@ -795,7 +771,6 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     setState(this, ClientState::Success);
 }
 
-
 void Client::handleCreatePermissionErrorResponse(
     const stun::Message& /* response */)
 {
@@ -805,7 +780,6 @@ void Client::handleCreatePermissionErrorResponse(
 
     setState(this, ClientState::Failed, "Cannot create server permissions.");
 }
-
 
 void Client::sendChannelBind(const std::string& /* peerIP */)
 {
@@ -826,7 +800,6 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
     // channels.
     assert(0 && "not implemented");
 }
-
 
 void Client::sendData(const char* data, std::size_t size,
                       const net::Address& peerAddress)
@@ -855,14 +828,14 @@ void Client::sendData(const char* data, std::size_t size,
     // indication if it wishes the server to set the DF bit on the UDP
     // datagram sent to the peer.
 
-    auto peerAttr= new stun::XorPeerAddress;
+    auto peerAttr = new stun::XorPeerAddress;
     peerAttr->setAddress(peerAddress);
     // peerAttr->setFamily(1);
     // peerAttr->setPort(peerAddress.port());
     // peerAttr->setIP(peerAddress.host());
     request.add(peerAttr);
 
-    auto dataAttr= new stun::Data;
+    auto dataAttr = new stun::Data;
     dataAttr->copyBytes(data, size);
     request.add(dataAttr);
 
@@ -891,7 +864,6 @@ void Client::sendData(const char* data, std::size_t size,
     }
 }
 
-
 void Client::handleDataIndication(const stun::Message& response)
 {
     // When the client receives a Data indication, it checks that the Data
@@ -911,13 +883,13 @@ void Client::handleDataIndication(const stun::Message& response)
     // with an indication that they were received from the peer whose
     // transport address is given by the XOR-PEER-ADDRESS attribute.
 
-    auto peerAttr= response.get<stun::XorPeerAddress>();
+    auto peerAttr = response.get<stun::XorPeerAddress>();
     if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
         assert(0);
         return;
     }
 
-    auto dataAttr= response.get<stun::Data>();
+    auto dataAttr = response.get<stun::Data>();
     if (!dataAttr) {
         assert(0);
         return;
@@ -931,14 +903,13 @@ void Client::handleDataIndication(const stun::Message& response)
     }
 }
 
-
 void Client::onTransactionProgress(void* sender, TransactionState& state,
                                    const TransactionState&)
 {
     TraceL << "Transaction state change: " << sender << ": " << state << endl;
 
-    auto transaction= reinterpret_cast<stun::Transaction*>(sender);
-    transaction->response().opaque= transaction;
+    auto transaction = reinterpret_cast<stun::Transaction*>(sender);
+    transaction->response().opaque = transaction;
 
     if (!closed())
         _observer.onTransactionResponse(*this, *transaction);
@@ -977,7 +948,6 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
     }
 }
 
-
 void Client::onTimer()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -992,25 +962,21 @@ void Client::onTimer()
     _observer.onTimer(*this);
 }
 
-
 void Client::onStateChange(void* timer, ClientState& state,
                            const ClientState& oldState)
 {
     _observer.onClientStateChange(*this, state, oldState);
 }
 
-
 int Client::transportProtocol()
 {
     return 17; // UDP
 }
 
-
 bool Client::closed() const
 {
     return stateEquals(ClientState::None) || stateEquals(ClientState::Failed);
 }
-
 
 Client::Options& Client::options()
 {
@@ -1018,13 +984,11 @@ Client::Options& Client::options()
     return _options;
 }
 
-
 net::Address Client::mappedAddress() const
 {
     // Mutex::ScopedLock lock(_mutex);
     return _mappedAddress;
 }
-
 
 net::Address Client::relayedAddress() const
 {
@@ -1033,6 +997,5 @@ net::Address Client::relayedAddress() const
 }
 }
 } //  namespace scy::turn
-
 
 /// @\}

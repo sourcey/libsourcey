@@ -8,10 +8,8 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_Client_H
 #define SCY_HTTP_Client_H
-
 
 #include "scy/http/connection.h"
 #include "scy/http/websocket.h"
@@ -22,10 +20,8 @@
 #include "scy/packetio.h"
 #include "scy/timer.h"
 
-
 namespace scy {
 namespace http {
-
 
 class Client;
 class ClientConnection : public Connection
@@ -34,7 +30,7 @@ public:
     typedef std::shared_ptr<ClientConnection> Ptr;
 
     /// Create a standalone connection with the given host.
-    ClientConnection(const URL& url, const net::Socket::Ptr& socket= nullptr);
+    ClientConnection(const URL& url, const net::Socket::Ptr& socket = nullptr);
 
     virtual ~ClientConnection();
 
@@ -58,7 +54,7 @@ public:
     /// Calls send() internally.
     ///
     /// Throws an exception if the socket is not already or connected.
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
     // virtual int send(const std::string& buf, int flags = 0);
     // virtual void sendData(const char* buf, std::size_t len); //, int flags =
     // 0
@@ -75,7 +71,7 @@ public:
     /// Return the cast read stream pointer or nullptr.
     template <class StreamT> StreamT& readStream()
     {
-        auto adapter= Incoming.getProcessor<StreamWriter>();
+        auto adapter = Incoming.getProcessor<StreamWriter>();
         if (!adapter)
             throw std::runtime_error(
                 "No stream reader associated with HTTP client.");
@@ -127,14 +123,11 @@ protected:
     bool _complete;
 };
 
-
 typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
-
 
 //
 // Client Connection Adapter
 //
-
 
 class ClientAdapter : public ConnectionAdapter
 {
@@ -145,34 +138,32 @@ public:
     }
 };
 
-
 //
 // HTTP Connection Helpers
 //
 
-
 template <class ConnectionT>
 inline ClientConnection::Ptr
-createConnectionT(const URL& url, uv::Loop* loop= uv::defaultLoop())
+createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 {
     ClientConnection::Ptr conn;
 
     if (url.scheme() == "http") {
         // conn = std::make_shared<ConnectionT>(url,
         // std::make_shared<net::TCPSocket>(loop));
-        conn= std::shared_ptr<ConnectionT>(
+        conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
             deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "https") {
         // conn = std::make_shared<ConnectionT>(url,
         // std::make_shared<net::SSLSocket>(loop));
-        conn= std::shared_ptr<ConnectionT>(
+        conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
             deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "ws") {
         // conn = std::make_shared<ConnectionT>(url,
         // std::make_shared<net::TCPSocket>(loop));
-        conn= std::shared_ptr<ConnectionT>(
+        conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
             deleter::Deferred<ConnectionT>());
         // replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
@@ -181,7 +172,7 @@ createConnectionT(const URL& url, uv::Loop* loop= uv::defaultLoop())
     } else if (url.scheme() == "wss") {
         // conn = std::make_shared<ConnectionT>(url,
         // std::make_shared<net::SSLSocket>(loop));
-        conn= std::shared_ptr<ConnectionT>(
+        conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
             deleter::Deferred<ConnectionT>());
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
@@ -192,11 +183,9 @@ createConnectionT(const URL& url, uv::Loop* loop= uv::defaultLoop())
     return conn;
 }
 
-
 //
 // HTTP Client
 //
-
 
 class Client
 {
@@ -215,9 +204,9 @@ public:
 
     template <class ConnectionT>
     ClientConnection::Ptr createConnectionT(const URL& url,
-                                            uv::Loop* loop= uv::defaultLoop())
+                                            uv::Loop* loop = uv::defaultLoop())
     {
-        auto connection= http::createConnectionT<ConnectionT>(url, loop);
+        auto connection = http::createConnectionT<ConnectionT>(url, loop);
         if (connection) {
             addConnection(connection);
         }
@@ -225,9 +214,9 @@ public:
     }
 
     ClientConnection::Ptr createConnection(const URL& url,
-                                           uv::Loop* loop= uv::defaultLoop())
+                                           uv::Loop* loop = uv::defaultLoop())
     {
-        auto connection= http::createConnectionT<ClientConnection>(url, loop);
+        auto connection = http::createConnectionT<ClientConnection>(url, loop);
         if (connection) {
             addConnection(connection);
         }
@@ -247,18 +236,16 @@ protected:
     ClientConnectionPtrVec _connections;
 };
 
-
-inline ClientConnection::Ptr createConnection(const URL& url,
-                                              http::Client* client= nullptr,
-                                              uv::Loop* loop= uv::defaultLoop())
+inline ClientConnection::Ptr
+createConnection(const URL& url, http::Client* client = nullptr,
+                 uv::Loop* loop = uv::defaultLoop())
 {
-    auto connection= createConnectionT<ClientConnection>(url, loop);
+    auto connection = createConnectionT<ClientConnection>(url, loop);
     if (client && connection)
         client->addConnection(connection);
 
     return connection;
 }
-
 
 #if 0
 class SecureClientConnection: public ClientConnection
@@ -305,12 +292,9 @@ public:
 };
 #endif
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

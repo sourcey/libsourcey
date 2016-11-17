@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_IPC_H
 #define SCY_IPC_H
-
 
 #include "scy/mutex.h"
 #include "scy/synccontext.h"
@@ -19,13 +17,10 @@
 #include <deque>
 #include <string>
 
-
 namespace scy {
-
 
 /// Classes for inter-process communication
 namespace ipc {
-
 
 /// Default action type for executing synchronized callbacks.
 struct Action
@@ -35,7 +30,7 @@ struct Action
     void* arg;
     std::string data;
 
-    Action(callback_t target, void* arg= nullptr, const std::string& data= "")
+    Action(callback_t target, void* arg = nullptr, const std::string& data = "")
         : target(target)
         , arg(arg)
         , data(data)
@@ -43,10 +38,9 @@ struct Action
     }
 };
 
-
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
-template <typename TAction= ipc::Action> class Queue
+template <typename TAction = ipc::Action> class Queue
 {
 public:
     Queue() {}
@@ -67,15 +61,15 @@ public:
         if (_actions.empty())
             return nullptr;
         Mutex::ScopedLock lock(_mutex);
-        TAction* next= _actions.front();
+        TAction* next = _actions.front();
         _actions.pop_front();
         return next;
     }
 
     virtual void runSync()
     {
-        TAction* next= nullptr;
-        while ((next= pop())) {
+        TAction* next = nullptr;
+        while ((next = pop())) {
             next->target(*next);
             delete next;
         }
@@ -104,14 +98,14 @@ protected:
     std::deque<TAction*> _actions;
 };
 
-
 /// IPC synchronization queue is for passing templated
 /// actions between threads and the event loop we are
 /// synchronizing with.
-template <typename TAction= ipc::Action> class SyncQueue : public Queue<TAction>
+template <typename TAction = ipc::Action>
+class SyncQueue : public Queue<TAction>
 {
 public:
-    SyncQueue(uv::Loop* loop= uv::defaultLoop())
+    SyncQueue(uv::Loop* loop = uv::defaultLoop())
         : _sync(loop, std::bind(&Queue<TAction>::runSync, this))
     {
     }
@@ -128,16 +122,12 @@ protected:
     SyncContext _sync;
 };
 
-
 typedef ipc::Queue<ipc::Action> ActionQueue;
 typedef ipc::SyncQueue<ipc::Action> ActionSyncQueue;
-
 
 } // namespace ipc
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

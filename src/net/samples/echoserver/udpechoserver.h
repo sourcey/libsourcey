@@ -2,10 +2,8 @@
 #include "scy/net/udpsocket.h"
 #include "scy/time.h"
 
-
 namespace scy {
 namespace net {
-
 
 class UDPEchoServer : public SocketAdapter
 {
@@ -62,7 +60,6 @@ public:
 
     void onSocketClose() { DebugL << "On close" << std::endl; }
 };
-
 
 } // namespace net
 } // namespace scy

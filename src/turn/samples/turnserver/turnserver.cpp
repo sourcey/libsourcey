@@ -2,13 +2,11 @@
 #include "scy/crypto/hash.h"
 #include "scy/turn/server/server.h"
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::uv;
 using namespace scy::net;
 using namespace scy::turn;
-
 
 const std::string SERVER_BIND_IP("0.0.0.0");
 const int SERVER_BIND_PORT(3478);
@@ -17,7 +15,6 @@ const std::string SERVER_EXTERNAL_IP("127.0.0.1"); // 202.173.167.126
 const std::string SERVER_USERNAME("username");
 const std::string SERVER_PASSWORD("password");
 const std::string SERVER_REALM("sourcey.com");
-
 
 class RelayServer : public ServerObserver
 {
@@ -62,10 +59,10 @@ public:
         // or MESSAGE-INTEGRITY attributes. If these attributes are not provided
         // we return
         // a 401 (Unauthorized) response.
-        auto usernameAttr= request.get<stun::Username>();
-        auto realmAttr= request.get<stun::Realm>();
-        auto nonceAttr= request.get<stun::Nonce>();
-        auto integrityAttr= request.get<stun::MessageIntegrity>();
+        auto usernameAttr = request.get<stun::Username>();
+        auto realmAttr = request.get<stun::Realm>();
+        auto nonceAttr = request.get<stun::Nonce>();
+        auto integrityAttr = request.get<stun::MessageIntegrity>();
         if (!usernameAttr || !realmAttr || !nonceAttr || !integrityAttr) {
             DebugL << "Authenticating: Unauthorized STUN Request" << endl;
             return turn::NotAuthorized;
@@ -77,7 +74,7 @@ public:
                                 SERVER_PASSWORD);
         crypto::Hash engine("md5");
         engine.update(credentials);
-        request.hash= engine.digestStr();
+        request.hash = engine.digestStr();
 
 #if ENABLE_AUTHENTICATION
         DebugL << "Generating HMAC: data=" << credentials
@@ -103,7 +100,6 @@ public:
     }
 };
 
-
 int main(void)
 {
 #ifdef _MSC_VER
@@ -116,13 +112,13 @@ int main(void)
         Application app;
         {
             ServerOptions opts;
-            opts.software= "Sourcey STUN/TURN Server [rfc5766]";
-            opts.realm= "sourcey.com";
-            opts.listenAddr= net::Address(SERVER_BIND_IP, SERVER_BIND_PORT);
-            opts.externalIP= SERVER_EXTERNAL_IP;
-            opts.allocationDefaultLifetime= 2 * 60 * 1000;
-            opts.allocationMaxLifetime= 10 * 60 * 1000;
-            opts.timerInterval= 5 * 1000;
+            opts.software = "Sourcey STUN/TURN Server [rfc5766]";
+            opts.realm = "sourcey.com";
+            opts.listenAddr = net::Address(SERVER_BIND_IP, SERVER_BIND_PORT);
+            opts.externalIP = SERVER_EXTERNAL_IP;
+            opts.allocationDefaultLifetime = 2 * 60 * 1000;
+            opts.allocationMaxLifetime = 10 * 60 * 1000;
+            opts.timerInterval = 5 * 1000;
             // opts.enableUDP                      = false;
 
             RelayServer srv(opts);

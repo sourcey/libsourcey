@@ -9,10 +9,8 @@
 ///
 /// The `base` module contains reusable cross platform tools and utilities.
 
-
 #ifndef SCY_H
 #define SCY_H
-
 
 //
 /// Version number
@@ -28,10 +26,8 @@
     SCY_AUX_STR(SCY_MAJOR_VERSION)                                             \
     "." SCY_AUX_STR(SCY_MINOR_VERSION) "." SCY_AUX_STR(SCY_PATCH_VERSION)
 
-
 // Include build config
 #include "libsourcey.h"
-
 
 //
 /// Platform and compiler definitions
@@ -59,7 +55,6 @@
 #define SCY_MINGW
 #endif
 
-
 #ifdef SCY_WIN
 #ifndef SCY_SHARED_LIBRARY // libsourcey.h
 #define SCY_EXTERN __declspec(dllexport)
@@ -69,7 +64,6 @@
 #else
 #define SCY_EXTERN // nothing
 #endif
-
 
 //
 /// Windows specific
@@ -83,18 +77,15 @@
 #error Must compile with /MD, /MDd, /MT or /MTd
 #endif
 
-
 // Check debug/release settings consistency
 #if defined(NDEBUG) && defined(_DEBUG)
 #error Inconsistent build settings (check for /MD[d])
 #endif
 
-
 // Unicode Support
 #if defined(UNICODE)
 #define SCY_UNICODE
 #endif
-
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
@@ -113,6 +104,5 @@
 #endif
 
 #endif // WIN32
-
 
 #endif // SCY_H

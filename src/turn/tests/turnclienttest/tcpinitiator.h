@@ -1,7 +1,6 @@
 #ifndef TURN_TCPinitiator_TEST_H
 #define TURN_TCPinitiator_TEST_H
 
-
 #include "scy/logger.h"
 #include "scy/signal.h"
 #include "scy/timer.h"
@@ -9,13 +8,10 @@
 
 #include <iostream>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 struct TCPInitiator : public TCPClientObserver
 {
@@ -69,13 +65,13 @@ struct TCPInitiator : public TCPClientObserver
                 break;
             case ClientState::Success:
                 AllocationCreated.emit(/*this*/); //, *this->client
-                success= true;
+                success = true;
                 // TestComplete.emit(/*this, */success);
                 // client.terminate();
                 break;
             case ClientState::Failed:
                 // assert(false);
-                success= false;
+                success = false;
                 TestComplete.emit(/*this, */ success);
                 // case ClientState::Terminated:                    //    break;
                 break;
@@ -90,7 +86,7 @@ struct TCPInitiator : public TCPClientObserver
         // Send the intial data packet to peer
         // client.sendData("hello peer", 10, peerAddr);    /// Remember the last
         // peer
-        lastPeerAddr= peerAddr;
+        lastPeerAddr = peerAddr;
         ConnectionCreated.emit(/*this, */ peerAddr);
     }
 
@@ -149,9 +145,7 @@ struct TCPInitiator : public TCPClientObserver
 }
 } //  namespace scy::turn
 
-
 #endif // TURN_TCPinitiator_TEST_H
-
 
 /*
 bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const

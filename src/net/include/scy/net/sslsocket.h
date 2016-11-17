@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_SSLSocket_H
 #define SCY_Net_SSLSocket_H
-
 
 #include "scy/net/socket.h"
 #include "scy/net/ssladapter.h"
@@ -20,10 +18,8 @@
 #include "scy/net/tcpsocket.h"
 #include "scy/uv/uvpp.h"
 
-
 namespace scy {
 namespace net {
-
 
 class SSLSocket : public TCPSocket
 {
@@ -32,10 +28,10 @@ public:
     typedef std::vector<Ptr> Vec;
 
     SSLSocket(
-        uv::Loop* loop= uv::defaultLoop()); //, SocketMode mode = ClientSide
-    SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop= uv::defaultLoop());
+        uv::Loop* loop = uv::defaultLoop()); //, SocketMode mode = ClientSide
+    SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
     SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session,
-              uv::Loop* loop= uv::defaultLoop());
+              uv::Loop* loop = uv::defaultLoop());
 
     virtual ~SSLSocket();
 
@@ -57,9 +53,9 @@ public:
     /// Closes the socket forcefully.
     virtual void close();
 
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len,
-                     const net::Address& peerAddress, int flags= 0);
+                     const net::Address& peerAddress, int flags = 0);
 
     /// Use the given SSL context for this socket.
     void useContext(SSLContext::Ptr context);
@@ -104,7 +100,6 @@ public:
     /// Reads raw encrypted SSL data
     virtual void onRead(const char* data, std::size_t len);
 
-
 protected:
     /// virtual bool readStart();
 
@@ -115,12 +110,9 @@ protected:
     friend class net::SSLAdapter;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_SSLSocket_H
-
 
 /// @\}

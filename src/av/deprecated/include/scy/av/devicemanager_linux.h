@@ -9,10 +9,8 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #ifndef SCY_AV_DeviceManager_LINUX_H
 #define SCY_AV_DeviceManager_LINUX_H
-
 
 #include <string>
 #include <vector>
@@ -23,10 +21,8 @@
 //#include "talk/base/stringencode.h"
 //#include "talk/sound/soundsystemfactory.h"
 
-
 namespace scy {
 namespace av {
-
 
 class LinuxDeviceManager : public DeviceManager
 {
@@ -37,13 +33,10 @@ public:
     virtual bool getCameras(std::vector<Device>& devs);
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_DeviceManager_LINUX_H
-
 
 /*
  * libjingle

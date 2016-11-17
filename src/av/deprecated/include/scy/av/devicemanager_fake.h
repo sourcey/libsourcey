@@ -9,10 +9,8 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #ifndef SCY_AV_DeviceManager_FAKE_H
 #define SCY_AV_DeviceManager_FAKE_H
-
 
 #include <string>
 #include <vector>
@@ -21,10 +19,8 @@
 //#include "talk/session/phone/devicemanager.h"
 //#include "talk/session/phone/mediacommon.h"
 
-
 namespace scy {
 namespace av {
-
 
 class FakeDeviceManager : public IDeviceManager
 {
@@ -38,28 +34,28 @@ public:
     virtual int getCapabilities()
     {
         std::vector<Device> devices;
-        int caps= VIDEO_RECV;
+        int caps = VIDEO_RECV;
         if (!input_devices_.empty()) {
-            caps|= AUDIO_SEND;
+            caps |= AUDIO_SEND;
         }
         if (!output_devices_.empty()) {
-            caps|= AUDIO_RECV;
+            caps |= AUDIO_RECV;
         }
         if (!vidcap_devices_.empty()) {
-            caps|= VIDEO_SEND;
+            caps |= VIDEO_SEND;
         }
         return caps;
     }
 
     virtual bool getMicrophones(std::vector<Device>& devs)
     {
-        devs= input_devices_;
+        devs = input_devices_;
         return true;
     }
 
     virtual bool getSpeakers(std::vector<Device>& devs)
     {
-        devs= output_devices_;
+        devs = output_devices_;
         return true;
     }
 
@@ -75,7 +71,7 @@ public:
 
     virtual bool getCameras(std::vector<Device>& devs)
     {
-        devs= vidcap_devices_;
+        devs = vidcap_devices_;
         return true;
     }
 
@@ -84,15 +80,15 @@ public:
         if (vidcap_devices_.empty()) {
             return false;
         }
-        device= vidcap_devices_[0];
+        device = vidcap_devices_[0];
         return true;
     }
 
 #ifdef OSX
     bool QtKitToSgDevice(const std::string& qtkit_name, Device& out)
     {
-        out->name= qtkit_name;
-        out->id= "sg:" + qtkit_name;
+        out->name = qtkit_name;
+        out->id = "sg:" + qtkit_name;
         return true;
     }
 #endif
@@ -105,7 +101,7 @@ public:
         // input_devices_.clear();
 
         // DevicesChanged();
-        input_devices_= devices;
+        input_devices_ = devices;
     }
 
     void setSpeakers(const std::vector<Device>& devices)
@@ -116,7 +112,7 @@ public:
         // output_devices_.clear();
 
         // DevicesChanged();
-        output_devices_= devices;
+        output_devices_ = devices;
     }
 
     void setCameras(const std::vector<Device>& devices)
@@ -127,9 +123,8 @@ public:
         // vidcap_devices_.clear();
 
         // DevicesChanged();
-        vidcap_devices_= devices;
+        vidcap_devices_ = devices;
     }
-
 
     virtual bool getCamera(const std::string& name, Device& out)
     {
@@ -138,7 +133,7 @@ public:
 
         // If the name is empty, return the default device.
         if (name.empty() || name == kDefaultDeviceName) {
-            out= vidcap_devices_[0];
+            out = vidcap_devices_[0];
             return true;
         }
 
@@ -160,10 +155,10 @@ public:
     static bool findDeviceByName(const std::vector<Device>& devices,
                                  const std::string& name, Device& out)
     {
-        for (std::vector<Device>::const_iterator it= devices.begin();
+        for (std::vector<Device>::const_iterator it = devices.begin();
              it != devices.end(); ++it) {
             if (name == it->name) {
-                out= *it;
+                out = *it;
                 return true;
             }
         }
@@ -176,13 +171,10 @@ private:
     std::vector<Device> vidcap_devices_;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_DeviceManager_FAKE_H
-
 
 /*
  * libjingle

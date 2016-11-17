@@ -8,20 +8,16 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/videoencoder.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 VideoConverter::VideoConverter()
     : ctx(nullptr)
@@ -29,12 +25,10 @@ VideoConverter::VideoConverter()
 {
 }
 
-
 VideoConverter::~VideoConverter()
 {
     close();
 }
-
 
 void VideoConverter::create()
 {
@@ -51,10 +45,10 @@ void VideoConverter::create()
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");
 
-    oframe= createVideoFrame(av_get_pix_fmt(oparams.pixelFmt.c_str()),
-                             oparams.width, oparams.height);
+    oframe = createVideoFrame(av_get_pix_fmt(oparams.pixelFmt.c_str()),
+                              oparams.width, oparams.height);
 
-    ctx= sws_getContext(
+    ctx = sws_getContext(
         iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt.c_str()),
         oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt.c_str()),
         /* SWS_FAST_BILINEAR */ SWS_BICUBIC, nullptr, nullptr, nullptr);
@@ -64,24 +58,22 @@ void VideoConverter::create()
     TraceS(this) << "Create: OK: " << ctx << endl;
 }
 
-
 void VideoConverter::close()
 {
     TraceS(this) << "Closing" << endl;
 
     if (oframe) {
         av_free(oframe);
-        oframe= nullptr;
+        oframe = nullptr;
     }
 
     if (ctx) {
         sws_freeContext(ctx);
-        ctx= nullptr;
+        ctx = nullptr;
     }
 
     TraceS(this) << "Closing: OK" << endl;
 }
-
 
 AVFrame* VideoConverter::convert(AVFrame* iframe)
 {
@@ -124,12 +116,9 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
     return oframe;
 }
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

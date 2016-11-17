@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_SSLAdapter_H
 #define SCY_Net_SSLAdapter_H
-
 
 #include "scy/net/address.h"
 #include "scy/net/types.h"
@@ -23,10 +21,8 @@
 #include <string>
 #include <vector>
 
-
 namespace scy {
 namespace net {
-
 
 /// TODO: Decouple from SSLSocket implementation
 
@@ -84,12 +80,9 @@ protected:
         _bufferOut; ///<  The outgoing payload to be encrypted and sent
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_SSLAdapter_H
-
 
 /// @\}

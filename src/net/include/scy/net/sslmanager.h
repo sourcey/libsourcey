@@ -10,10 +10,8 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-
 #ifndef SCY_Net_SSLManager_H
 #define SCY_Net_SSLManager_H
-
 
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
@@ -22,13 +20,10 @@
 
 #include <openssl/ssl.h>
 
-
 namespace scy {
 namespace net {
 
-
 class VerificationErrorDetails;
-
 
 /// SSLManager is a singleton for holding the default server/client
 /// Context and handling callbacks for certificate verification errors
@@ -82,8 +77,8 @@ public:
 
     /// Initializes a default no verify server context that's useful for
     /// testing.
-    static void initNoVerifyServer(const std::string& privateKeyFile= "",
-                                   const std::string& certificateFile= "");
+    static void initNoVerifyServer(const std::string& privateKeyFile = "",
+                                   const std::string& certificateFile = "");
 
 protected:
     /// The return value of this method defines how errors in
@@ -123,7 +118,6 @@ private:
     friend class Singleton<SSLManager>;
     friend class SSLContext;
 };
-
 
 //
 // Verification Error Details
@@ -168,53 +162,43 @@ private:
     bool _ignoreError;
 };
 
-
 inline const crypto::X509Certificate&
 VerificationErrorDetails::certificate() const
 {
     return _cert;
 }
 
-
 inline int VerificationErrorDetails::errorDepth() const
 {
     return _errorDepth;
 }
-
 
 inline int VerificationErrorDetails::errorNumber() const
 {
     return _errorNumber;
 }
 
-
 inline const std::string& VerificationErrorDetails::errorMessage() const
 {
     return _errorMessage;
 }
 
-
 inline void VerificationErrorDetails::setIgnoreError(bool ignoreError)
 {
-    _ignoreError= ignoreError;
+    _ignoreError = ignoreError;
 }
-
 
 inline bool VerificationErrorDetails::getIgnoreError() const
 {
     return _ignoreError;
 }
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_SSLManager_H
 
-
 /// @\}
-
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

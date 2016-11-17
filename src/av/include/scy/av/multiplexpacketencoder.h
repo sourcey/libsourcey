@@ -8,16 +8,13 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_MultiplexPacketEncoder_H
 #define SCY_AV_MultiplexPacketEncoder_H
-
 
 #include "scy/base.h"
 #ifdef HAVE_FFMPEG
 #include "scy/av/multiplexencoder.h"
 #include "scy/packetstream.h"
-
 
 namespace scy {
 namespace av {
@@ -29,7 +26,7 @@ class MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
 {
 public:
     MultiplexPacketEncoder(
-        const EncoderOptions& options=
+        const EncoderOptions& options =
             EncoderOptions()); //, bool muxLiveStreams = false
     /// MultiplexPacketEncoder(bool muxLiveStreams = false);
     virtual ~MultiplexPacketEncoder();
@@ -48,7 +45,6 @@ protected:
     mutable Mutex
         _mutex; /// bool _muxLiveStreams;    /// VideoPacket* _lastVideoPacket;
 };
-
 
 #if 0
 //
@@ -113,10 +109,8 @@ struct PTSCalculator
 };
 #endif
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif
 #endif

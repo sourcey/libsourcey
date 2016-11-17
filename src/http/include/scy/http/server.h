@@ -8,10 +8,8 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_Server_H
 #define SCY_HTTP_Server_H
-
 
 #include "scy/base.h"
 #include "scy/http/connection.h"
@@ -22,10 +20,8 @@
 #include "scy/net/socket.h"
 #include "scy/timer.h"
 
-
 namespace scy {
 namespace http {
-
 
 class Server;
 class ServerResponder;
@@ -64,9 +60,7 @@ protected:
     bool _requestComplete;
 };
 
-
 typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
-
 
 // -------------------------------------------------------------------
 //
@@ -78,7 +72,6 @@ public:
     {
     }
 };
-
 
 // -------------------------------------------------------------------
 //
@@ -116,12 +109,11 @@ protected:
     ServerConnection& _connection;
 
 private:
-    ServerResponder(const ServerResponder&)= delete;
-    ServerResponder(ServerResponder&&)= delete;
-    ServerResponder& operator=(const ServerResponder&)= delete;
-    ServerResponder& operator=(ServerResponder&&)= delete;
+    ServerResponder(const ServerResponder&) = delete;
+    ServerResponder(ServerResponder&&) = delete;
+    ServerResponder& operator=(const ServerResponder&) = delete;
+    ServerResponder& operator=(ServerResponder&&) = delete;
 };
-
 
 /// -------------------------------------------------------------------
 ///
@@ -136,9 +128,8 @@ public:
 
     /// Factory method for instantiating the ServerResponder
     /// instance using the given ServerConnection.
-    virtual ServerResponder* createResponder(ServerConnection& connection)= 0;
+    virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
 };
-
 
 // -------------------------------------------------------------------
 //
@@ -183,7 +174,6 @@ protected:
     friend class ServerConnection;
 };
 
-
 // ---------------------------------------------------------------------
 //
 class BadRequestHandler : public ServerResponder
@@ -202,12 +192,9 @@ public:
     }
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

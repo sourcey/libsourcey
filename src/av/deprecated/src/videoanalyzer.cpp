@@ -8,19 +8,14 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/videoanalyzer.h"
-
 
 #ifdef HAVE_FFMPEG
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 VideoAnalyzer::VideoAnalyzer(const Options& options)
     : _options(options)
@@ -31,13 +26,11 @@ VideoAnalyzer::VideoAnalyzer(const Options& options)
     TraceN(this) << "Create" << endl;
 }
 
-
 VideoAnalyzer::~VideoAnalyzer()
 {
     TraceN(this) << "Destroy" << endl;
     uninitialize();
 }
-
 
 void VideoAnalyzer::initialize()
 {
@@ -46,27 +39,26 @@ void VideoAnalyzer::initialize()
 
     TraceN(this) << "Loading: " << _options.ifile << endl;
 
-    _error= "";
+    _error = "";
 
     // Open the input file decoder.
     _reader.openFile(_options.ifile);
 
     if (_reader.video()) {
-        _videoConv= nullptr;
-        _video= new VideoAnalyzer::Stream("Video", _options.rdftSize);
+        _videoConv = nullptr;
+        _video = new VideoAnalyzer::Stream("Video", _options.rdftSize);
         _video->initialize();
     }
 
     if (_reader.audio()) {
-        _audio= new VideoAnalyzer::Stream("Audio", _options.rdftSize);
+        _audio = new VideoAnalyzer::Stream("Audio", _options.rdftSize);
         _audio->initialize();
     }
 
-    _reader.emitter+= packetSlot(this, &VideoAnalyzer::onVideo);
-    _reader.emitter+= packetSlot(this, &VideoAnalyzer::onAudio);
-    _reader.Closing+= sdelegate(this, &VideoAnalyzer::onReadComplete);
+    _reader.emitter += packetSlot(this, &VideoAnalyzer::onVideo);
+    _reader.emitter += packetSlot(this, &VideoAnalyzer::onAudio);
+    _reader.Closing += sdelegate(this, &VideoAnalyzer::onReadComplete);
 }
-
 
 void VideoAnalyzer::uninitialize()
 {
@@ -84,7 +76,6 @@ void VideoAnalyzer::uninitialize()
         delete _audio;
 }
 
-
 void VideoAnalyzer::start()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -98,23 +89,21 @@ void VideoAnalyzer::start()
         // else
         _reader.start();
     } catch (std::exception& exc) {
-        _error= exc.what();
+        _error = exc.what();
         ErrorS(this) << "Error: " << _error << endl;
         throw exc; //.rethrow()
     }
 }
-
 
 void VideoAnalyzer::stop()
 {
     // Can't lock here in case we are inside a callback.
     // Mutex::ScopedLock lock(_mutex);
 
-    _reader.Closing-= sdelegate(this, &VideoAnalyzer::onReadComplete);
+    _reader.Closing -= sdelegate(this, &VideoAnalyzer::onReadComplete);
     _reader.emitter.detach(this);
     _reader.stop();
 }
-
 
 void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 {
@@ -122,11 +111,11 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
     //    << packet.size() << ": " << packet.time << endl;
 
     VideoAnalyzer::Packet pkt(packet.time);
-    AVFrame* greyFrame= getGrayVideoFrame();
-    int width= greyFrame->width;
-    int height= greyFrame->height;
-    int step= greyFrame->linesize[0];
-    int frames= 0;
+    AVFrame* greyFrame = getGrayVideoFrame();
+    int width = greyFrame->width;
+    int height = greyFrame->height;
+    int step = greyFrame->linesize[0];
+    int frames = 0;
     // VideoDecoder* video = _reader.video();
 
     Mutex::ScopedLock lock(_mutex);
@@ -135,16 +124,16 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
     //    http://stackoverflow.com/questions/7790877/forward-fft-an-image-and-backward-fft-an-image-to-get-the-same-result
     //    https://code.google.com/p/video-processing-application/source/browse/trunk/+video-processing-application/untitled6/Fourier/highpassrgb.cpp?r=2
     //    http://codepaste.ru/9226/
-    for (int y= 0; y < height; y++) {
-        for (int x= 0; x < width; x++) {
-            _video->rdftData[_video->filled++]=
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            _video->rdftData[_video->filled++] =
                 (float)greyFrame->data[0][y * step + x] * pow(-1.0, y + x);
             if (_video->filled == _video->rdftSize) {
                 _video->fft();
-                pkt.value+= CalculateFrequencyIntensity(*_video);
+                pkt.value += CalculateFrequencyIntensity(*_video);
                 frames++;
                 _video->frames++;
-                _video->filled= 0;
+                _video->filled = 0;
             }
         }
     }
@@ -152,8 +141,8 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
     if (frames) {
 
         // Calculate and scale the average value for this video frame
-        pkt.value/= frames;
-        pkt.value= sqrt(pkt.value); ///= _video->rdftSize;
+        pkt.value /= frames;
+        pkt.value = sqrt(pkt.value); ///= _video->rdftSize;
 
         TraceN(this) << "Video Output: " << pkt.time << ", " << pkt.value
                      << endl;
@@ -169,32 +158,32 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
     Mutex::ScopedLock lock(_mutex);
 
     VideoAnalyzer::Packet pkt(packet.time);
-    short const* data= reinterpret_cast<short*>(packet.data());
-    int channels= _reader.audio()->stream->codec->channels;
-    int size= packet.size();
-    int frames= 0;
+    short const* data = reinterpret_cast<short*>(packet.data());
+    int channels = _reader.audio()->stream->codec->channels;
+    int size = packet.size();
+    int frames = 0;
 
     // Packet size / 2 = 2 bytes per sample (short)
     // Example at http://blackhole.ubitux.fr/bench-fftw-ffmpeg-fft/fft.c
-    for (int i= 0; i < size / 2; i+= channels) {
-        int k, v= 0;
-        for (k= 0; k < channels; k++) // mix channels
-            v+= data[i + k];
+    for (int i = 0; i < size / 2; i += channels) {
+        int k, v = 0;
+        for (k = 0; k < channels; k++) // mix channels
+            v += data[i + k];
 
-        _audio->rdftData[_audio->filled++]= (float)v / channels / SHRT_MAX;
+        _audio->rdftData[_audio->filled++] = (float)v / channels / SHRT_MAX;
         if (_audio->filled == _audio->rdftSize) {
             _audio->fft();
-            pkt.value+= CalculateFrequencyIntensity(*_audio);
+            pkt.value += CalculateFrequencyIntensity(*_audio);
             frames++;
             _audio->frames++;
-            _audio->filled= 0;
+            _audio->filled = 0;
         }
     }
 
     if (frames) {
 
         // Calculate the average value for this video frame
-        pkt.value/= frames;
+        pkt.value /= frames;
 
         TraceN(this) << "Audio Output: " << pkt.time << ", " << pkt.value
                      << endl;
@@ -202,25 +191,24 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
     }
 }
 
-
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {
     Mutex::ScopedLock lock(_mutex);
-    VideoDecoder* video= _reader.video();
+    VideoDecoder* video = _reader.video();
 
     // TODO: Conversion via decoder?
     if (_videoConv == nullptr) {
-        _videoConv= new VideoConverter();
+        _videoConv = new VideoConverter();
 
-        auto& iparams= _videoConv->iparams;
-        iparams.width= video->ctx->width;
-        iparams.height= video->ctx->height;
-        iparams.pixelFmt= av_get_pix_fmt_name(video->ctx->pix_fmt);
+        auto& iparams = _videoConv->iparams;
+        iparams.width = video->ctx->width;
+        iparams.height = video->ctx->height;
+        iparams.pixelFmt = av_get_pix_fmt_name(video->ctx->pix_fmt);
 
-        auto& oparams= _videoConv->oparams;
-        oparams.width= video->ctx->width;
-        oparams.height= video->ctx->height;
-        oparams.pixelFmt= "gray";
+        auto& oparams = _videoConv->oparams;
+        oparams.width = video->ctx->width;
+        oparams.height = video->ctx->height;
+        oparams.pixelFmt = "gray";
 
         _videoConv->create();
     }
@@ -232,21 +220,19 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
     return _videoConv->convert(video->frame);
 }
 
-
 void VideoAnalyzer::onReadComplete(void* sender)
 {
     TraceN(this) << "On Read Complete" << endl;
 
-    MediaCapture* reader= reinterpret_cast<MediaCapture*>(sender);
+    MediaCapture* reader = reinterpret_cast<MediaCapture*>(sender);
     {
         Mutex::ScopedLock lock(_mutex);
         if (_error.empty())
-            _error= reader->error();
+            _error = reader->error();
     }
 
     Complete.emit(/*this*/);
 }
-
 
 MediaCapture& VideoAnalyzer::reader()
 {
@@ -254,20 +240,17 @@ MediaCapture& VideoAnalyzer::reader()
     return _reader;
 }
 
-
 VideoAnalyzer::Options& VideoAnalyzer::options()
 {
     Mutex::ScopedLock lock(_mutex);
     return _options;
 }
 
-
 std::string VideoAnalyzer::error() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;
 }
-
 
 // ---------------------------------------------------------------------
 //
@@ -280,11 +263,9 @@ VideoAnalyzer::Packet::Packet(double time, double value)
     // this->max = max;
 }
 
-
 // ---------------------------------------------------------------------
 //
-const int kMaxFFTPow2Size= 24;
-
+const int kMaxFFTPow2Size = 24;
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     : name(name)
@@ -305,29 +286,26 @@ VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     assert(int(1UL << rdftBits) == rdftSize);
 }
 
-
 VideoAnalyzer::Stream::~Stream()
 {
     uninitialize();
 }
 
-
 void VideoAnalyzer::Stream::initialize()
 {
-    frames= 0;
-    filled= 0;
+    frames = 0;
+    filled = 0;
 
     assert(rdft == nullptr);
-    rdft= av_rdft_init(rdftBits, DFT_R2C);
+    rdft = av_rdft_init(rdftBits, DFT_R2C);
     if (rdft == nullptr)
         throw std::runtime_error("Cannot allocate FFT context");
 
     assert(rdftData == nullptr);
-    rdftData= (FFTSample*)av_malloc(rdftSize * sizeof(*rdftData));
+    rdftData = (FFTSample*)av_malloc(rdftSize * sizeof(*rdftData));
     if (rdftData == nullptr)
         throw std::runtime_error("Cannot allocate FFT buffer");
 }
-
 
 void VideoAnalyzer::Stream::uninitialize()
 {
@@ -340,13 +318,11 @@ void VideoAnalyzer::Stream::uninitialize()
         av_free(rdftData);
 }
 
-
 void VideoAnalyzer::Stream::fft()
 {
     assert(filled == rdftSize);
     av_rdft_calc(rdft, rdftData);
 }
-
 
 // ---------------------------------------------------------------------
 //
@@ -354,34 +330,31 @@ double CalculateCentroidFrequency(VideoAnalyzer::Stream& stream)
 {
     // These two values are used for getting the Spectral Centroid
     // http://en.wikipedia.org/wiki/Spectral_centroid
-    double centroidFnXn= 0;
-    double centroidXn= 0;
+    double centroidFnXn = 0;
+    double centroidXn = 0;
 
-    for (int i= 0; i < stream.filled / 2; i+= 2) {
-        centroidFnXn+= i * abs(stream.rdftData[i]);
-        centroidXn+= abs(stream.rdftData[i]);
+    for (int i = 0; i < stream.filled / 2; i += 2) {
+        centroidFnXn += i * abs(stream.rdftData[i]);
+        centroidXn += abs(stream.rdftData[i]);
     }
 
     return centroidFnXn / centroidXn;
 }
 
-
 double CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream)
 {
-    double intensity= 0.0;
-    for (int i= 0; i < stream.filled / 2; i+= 2) {
-        intensity+=
+    double intensity = 0.0;
+    for (int i = 0; i < stream.filled / 2; i += 2) {
+        intensity +=
             GetFrequencyIntensity(stream.rdftData[i], stream.rdftData[i + 1]);
     }
     return intensity;
 }
 
-
 double GetFrequencyIntensity(double re, double im)
 {
     return sqrt((re * re) + (im * im));
 }
-
 
 double GetDecibels(double re, double im)
 {
@@ -398,7 +371,6 @@ double GetAmplitudeScaled(double re, double im, int len, int scale)
     return static_cast<int>(GetAmplitude(re, im, len)) % scale;
 }
 
-
 #ifdef SCY_WIN
 double log2(double n)
 {
@@ -406,12 +378,9 @@ double log2(double n)
 }
 #endif
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

@@ -8,40 +8,33 @@
 /// @addtogroup symple
 /// @{
 
-
 #include "scy/symple/roster.h"
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace smpl {
-
 
 Roster::Roster()
 {
     // TraceS(this) << "Create" << endl;
 }
 
-
 Roster::~Roster()
 {
     // TraceS(this) << "Destroy" << endl;
 }
 
-
 Peer* Roster::getByHost(const std::string& host)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _map.begin(); it != _map.end(); ++it) {
+    for (auto it = _map.begin(); it != _map.end(); ++it) {
         if (it->second->host() == host)
             return it->second;
     }
     return NULL;
 }
-
 
 Roster::PeerMap Roster::peers() const
 {
@@ -49,18 +42,16 @@ Roster::PeerMap Roster::peers() const
     return _map;
 }
 
-
 void Roster::print(std::ostream& os) const
 {
     Mutex::ScopedLock lock(_mutex);
 
     os << "Roster[";
-    for (auto it= _map.begin(); it != _map.end(); ++it) {
+    for (auto it = _map.begin(); it != _map.end(); ++it) {
         os << "\n\t" << it->second << ": " << it->first;
     }
     os << "\n]";
 }
-
 
 #if 0
 void Roster::update(const json::Value& data, bool whiny)
@@ -94,9 +85,7 @@ void Roster::update(const json::Value& data, bool whiny)
 }
 #endif
 
-
 } // namespace smpl
 } // namespace scy
-
 
 /// @\}

@@ -6,18 +6,14 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
-
 #include "filepeerconnection.h"
 #include "scy/logger.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/webrtc/videopacketsource.h"
 
-
 using std::endl;
 
-
 namespace scy {
-
 
 FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
                                        const std::string& peerid, Mode mode)
@@ -25,10 +21,10 @@ FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
 {
     // Setup a PeerConnectionFactory with our custom ADM
     // TODO: Setup threads properly:
-    auto networkThread= rtc::Thread::CreateWithSocketServer().release();
-    auto workerThread= rtc::Thread::Create().release();
-    auto signalingThread= rtc::Thread::Current();
-    _factory= webrtc::CreatePeerConnectionFactory(
+    auto networkThread = rtc::Thread::CreateWithSocketServer().release();
+    auto workerThread = rtc::Thread::Create().release();
+    auto signalingThread = rtc::Thread::Current();
+    _factory = webrtc::CreatePeerConnectionFactory(
         networkThread, workerThread, signalingThread,
         _capturer.getAudioModule(), nullptr, nullptr);
     networkThread->Start();
@@ -40,11 +36,9 @@ FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
     _constraints.SetAllowDtlsSctpDataChannels();
 }
 
-
 FilePeerConnection::~FilePeerConnection()
 {
 }
-
 
 rtc::scoped_refptr<webrtc::MediaStreamInterface>
 FilePeerConnection::createMediaStream()
@@ -53,14 +47,13 @@ FilePeerConnection::createMediaStream()
     assert(_factory);
     assert(!_stream);
     // assert(!_capture);
-    _stream= _factory->CreateLocalMediaStream(kStreamLabel);
+    _stream = _factory->CreateLocalMediaStream(kStreamLabel);
 
     _capturer.openFile("test.mp4");
     _capturer.addMediaTracks(_factory, _stream);
 
     return _stream;
 }
-
 
 // void
 // FilePeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState
@@ -118,7 +111,6 @@ void FilePeerConnection::OnIceConnectionChange(
 
     PeerConnection::OnIceConnectionChange(new_state);
 }
-
 
 //
 //
@@ -341,6 +333,5 @@ void FilePeerConnection::OnIceConnectionChange(
 //     ErrorL << "On SDP parse error: " << error << endl;
 //     assert(0);
 // }
-
 
 } // namespace scy

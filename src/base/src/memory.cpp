@@ -8,20 +8,15 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/memory.h"
 #include "scy/util.h"
 
-
 using std::endl;
-
 
 namespace scy {
 
-
 static Singleton<GarbageCollector> singleton;
-static const int GCTimerDelay= 2400;
-
+static const int GCTimerDelay = 2400;
 
 GarbageCollector::GarbageCollector()
     : _handle(uv::defaultLoop(), new uv_timer_t)
@@ -30,13 +25,12 @@ GarbageCollector::GarbageCollector()
 {
     TraceL << "Create" << std::endl;
 
-    _handle.ptr()->data= this;
+    _handle.ptr()->data = this;
     uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
     uv_timer_start(_handle.ptr<uv_timer_t>(), GarbageCollector::onTimer,
                    GCTimerDelay, GCTimerDelay);
     uv_unref(_handle.ptr());
 }
-
 
 GarbageCollector::~GarbageCollector()
 {
@@ -57,7 +51,6 @@ GarbageCollector::~GarbageCollector()
     assert(_ready.empty());
 }
 
-
 void GarbageCollector::finalize()
 {
     TraceL << "Finalize" << std::endl;
@@ -68,10 +61,10 @@ void GarbageCollector::finalize()
     // assert(_handle.loop()->active_handles <= 1);
     assert(!_handle.closed());
     assert(!_finalize);
-    _finalize= true;
+    _finalize = true;
 
     // Make sure uv_stop doesn't prevent cleanup.
-    _handle.loop()->stop_flag= 0;
+    _handle.loop()->stop_flag = 0;
 
     // Run the loop until managed pointers have been deleted,
     // and the internal timer has also been deleted.
@@ -85,12 +78,10 @@ void GarbageCollector::finalize()
     TraceL << "Finalize: OK" << std::endl;
 }
 
-
 void onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
     DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
-
 
 void GarbageCollector::runAsync()
 {
@@ -98,7 +89,7 @@ void GarbageCollector::runAsync()
     {
         Mutex::ScopedLock lock(_mutex);
         if (!_tid) {
-            _tid= uv_thread_self();
+            _tid = uv_thread_self();
         }
         if (!_ready.empty() || !_pending.empty()) {
             TraceL << "Deleting: "
@@ -106,7 +97,7 @@ void GarbageCollector::runAsync()
                    << "pending=" << _pending.size() << std::endl;
 
             // Delete waiting pointers
-            deletable= _ready;
+            deletable = _ready;
             _ready.clear();
 
             // Swap pending pointers to the ready queue
@@ -139,32 +130,26 @@ void GarbageCollector::runAsync()
     }
 }
 
-
 void GarbageCollector::onTimer(uv_timer_t* handle)
 {
     static_cast<GarbageCollector*>(handle->data)->runAsync();
 }
-
 
 uv_thread_t GarbageCollector::tid()
 {
     return _tid;
 }
 
-
 void GarbageCollector::destroy()
 {
     singleton.destroy();
 }
-
 
 GarbageCollector& GarbageCollector::instance()
 {
     return *singleton.get();
 }
 
-
 } // namespace scy
-
 
 /// @\}

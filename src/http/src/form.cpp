@@ -8,7 +8,6 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/form.h"
 #include "scy/crypto/crypto.h"
 #include "scy/filesystem.h"
@@ -18,27 +17,23 @@
 #include "scy/idler.h"
 #include <stdexcept>
 
-
 namespace scy {
 namespace http {
-
 
 //
 // Form Writer
 //
 
+const char* FormWriter::ENCODING_URL = "application/x-www-form-urlencoded";
+const char* FormWriter::ENCODING_MULTIPART_FORM = "multipart/form-data";
+const char* FormWriter::ENCODING_MULTIPART_RELATED = "multipart/related";
 
-const char* FormWriter::ENCODING_URL= "application/x-www-form-urlencoded";
-const char* FormWriter::ENCODING_MULTIPART_FORM= "multipart/form-data";
-const char* FormWriter::ENCODING_MULTIPART_RELATED= "multipart/related";
-
-const int FILE_CHUNK_SIZE= 65536; // 32384;
-
+const int FILE_CHUNK_SIZE = 65536; // 32384;
 
 FormWriter* FormWriter::create(ClientConnection& conn,
                                const std::string& encoding)
 {
-    auto wr= new http::FormWriter(
+    auto wr = new http::FormWriter(
         conn, std::make_shared<Idler>(
                   conn.socket()->loop()) /*std::make_shared<Thread>()*/,
         encoding);
@@ -51,7 +46,6 @@ FormWriter* FormWriter::create(ClientConnection& conn,
     conn.Outgoing.lock();
     return wr;
 }
-
 
 FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner,
                        const std::string& encoding)
@@ -72,13 +66,11 @@ FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner,
 #endif
 }
 
-
 FormWriter::~FormWriter()
 {
-    for (auto it= _parts.begin(); it != _parts.end(); ++it)
+    for (auto it = _parts.begin(); it != _parts.end(); ++it)
         delete it->part;
 }
-
 
 void FormWriter::addPart(const std::string& name, FormPart* part)
 {
@@ -86,19 +78,18 @@ void FormWriter::addPart(const std::string& name, FormPart* part)
     assert(_encoding != ENCODING_URL);
 
     Part p;
-    p.part= part;
-    p.name= name;
+    p.part = part;
+    p.name = name;
     _parts.push_back(p);
 
-    _filesLength+= part->length();
+    _filesLength += part->length();
 }
-
 
 void FormWriter::prepareSubmit()
 {
     TraceS(this) << "Prepare submit" << std::endl;
 
-    http::Request& request= _connection.request();
+    http::Request& request = _connection.request();
     if (request.getMethod() == http::Method::Post ||
         request.getMethod() == http::Method::Put) {
         if (_encoding == ENCODING_URL) {
@@ -110,7 +101,7 @@ void FormWriter::prepareSubmit()
             request.setContentLength(ostr.tellp());
         } else {
             if (_boundary.empty())
-                _boundary= createBoundary();
+                _boundary = createBoundary();
             std::string ct(_encoding);
             ct.append("; boundary=\"");
             ct.append(_boundary);
@@ -122,7 +113,7 @@ void FormWriter::prepareSubmit()
             // factor chunk headers.
             if (!_parts.empty()) {
                 assert(_filesLength);
-                _connection.OutgoingProgress.total= _filesLength;
+                _connection.OutgoingProgress.total = _filesLength;
             }
 
             // Set Content-Length for non-chunked transfers
@@ -135,7 +126,7 @@ void FormWriter::prepareSubmit()
             request.setChunkedTransferEncoding(false);
         }
     } else {
-        std::string uri= request.getURI();
+        std::string uri = request.getURI();
         std::ostringstream ostr;
         writeUrl(ostr);
         uri.append("?");
@@ -143,7 +134,6 @@ void FormWriter::prepareSubmit()
         request.setURI(uri);
     }
 }
-
 
 void FormWriter::start()
 {
@@ -155,7 +145,6 @@ void FormWriter::start()
     _runner->start(std::bind(&FormWriter::writeAsync, this));
 }
 
-
 void FormWriter::stop()
 {
     TraceS(this) << "Stop" << std::endl;
@@ -164,11 +153,10 @@ void FormWriter::stop()
     _runner->cancel();
 }
 
-
 std::uint64_t FormWriter::calculateMultipartContentLength()
 {
     std::ostringstream ostr;
-    for (NVCollection::ConstIterator it= begin(); it != end(); ++it) {
+    for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
         NVCollection header;
         if (_encoding == ENCODING_MULTIPART_FORM) {
             std::string disp("form-data; name=\"");
@@ -179,16 +167,16 @@ std::uint64_t FormWriter::calculateMultipartContentLength()
         writePartHeader(header, ostr);
         ostr << it->second;
     }
-    for (PartQueue::const_iterator pit= _parts.begin(); pit != _parts.end();
+    for (PartQueue::const_iterator pit = _parts.begin(); pit != _parts.end();
          ++pit) {
         NVCollection header(pit->part->headers());
         if (_encoding == ENCODING_MULTIPART_FORM) {
             std::string disp("form-data; name=\"");
             disp.append(pit->name);
             disp.append("\"");
-            auto filePart= dynamic_cast<http::FilePart*>(pit->part);
+            auto filePart = dynamic_cast<http::FilePart*>(pit->part);
             if (filePart) {
-                std::string filename= filePart->filename();
+                std::string filename = filePart->filename();
                 if (!filename.empty()) {
                     disp.append("; filename=\"");
                     disp.append(filename);
@@ -206,7 +194,6 @@ std::uint64_t FormWriter::calculateMultipartContentLength()
     return ostr.tellp();
 }
 
-
 void FormWriter::writeAsync()
 {
     try {
@@ -216,7 +203,7 @@ void FormWriter::writeAsync()
             writeUrl(ostr);
             TraceL << "Writing URL: " << ostr.str() << std::endl;
             emit(ostr.str());
-            _complete= true;
+            _complete = true;
         } else
             writeMultipartChunk();
         if (complete())
@@ -229,7 +216,6 @@ void FormWriter::writeAsync()
         //#endif
     }
 }
-
 
 #if 0
 void FormWriter::writeMultipart()
@@ -272,7 +258,6 @@ void FormWriter::writeMultipart()
 }
 #endif
 
-
 void FormWriter::writeMultipartChunk()
 {
     TraceS(this) << "Writing chunk: " << _writeState << std::endl;
@@ -281,7 +266,7 @@ void FormWriter::writeMultipartChunk()
 
         // Send form values
         case 0:
-            for (NVCollection::ConstIterator it= begin(); it != end(); ++it) {
+            for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
                 std::ostringstream ostr;
                 NVCollection header;
                 if (_encoding == ENCODING_MULTIPART_FORM) {
@@ -300,7 +285,7 @@ void FormWriter::writeMultipartChunk()
         // Send file parts
         case 1:
             if (!_parts.empty()) {
-                auto& p= _parts.front();
+                auto& p = _parts.front();
 
                 if (p.part->initialWrite()) {
                     std::ostringstream ostr;
@@ -309,9 +294,9 @@ void FormWriter::writeMultipartChunk()
                         std::string disp("form-data; name=\"");
                         disp.append(p.name);
                         disp.append("\"");
-                        auto filePart= dynamic_cast<http::FilePart*>(p.part);
+                        auto filePart = dynamic_cast<http::FilePart*>(p.part);
                         if (filePart) {
-                            std::string filename= filePart->filename();
+                            std::string filename = filePart->filename();
                             if (!filename.empty()) {
                                 disp.append("; filename=\"");
                                 disp.append(filename);
@@ -351,8 +336,8 @@ void FormWriter::writeMultipartChunk()
             }
 
             TraceS(this) << "Request complete" << std::endl;
-            _complete= true;
-            _writeState= -1; // raise error if called again
+            _complete = true;
+            _writeState = -1; // raise error if called again
         } break;
 
         // Invalid state
@@ -363,26 +348,24 @@ void FormWriter::writeMultipartChunk()
     }
 }
 
-
 void FormWriter::writeUrl(std::ostream& ostr)
 {
-    for (NVCollection::ConstIterator it= begin(); it != end(); ++it) {
+    for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
         if (it != begin())
             ostr << "&";
         ostr << URL::encode(it->first) << "=" << URL::encode(it->second);
     }
 }
 
-
 void FormWriter::writePartHeader(const NVCollection& header, std::ostream& ostr)
 {
     if (_initial)
-        _initial= false;
+        _initial = false;
     else
         ostr << "\r\n";
     ostr << "--" << _boundary << "\r\n";
 
-    NVCollection::ConstIterator it= header.begin();
+    NVCollection::ConstIterator it = header.begin();
     while (it != header.end()) {
         ostr << it->first << ": " << it->second << "\r\n";
         ++it;
@@ -390,71 +373,59 @@ void FormWriter::writePartHeader(const NVCollection& header, std::ostream& ostr)
     ostr << "\r\n";
 }
 
-
 void FormWriter::writeEnd(std::ostream& ostr)
 {
     ostr << "\r\n--" << _boundary << "--\r\n";
 }
-
 
 void FormWriter::updateProgress(int nread)
 {
     _connection.OutgoingProgress.update(nread);
 }
 
-
 std::string FormWriter::createBoundary()
 {
     return "boundary_" + util::randomString(8);
 }
 
-
 void FormWriter::setEncoding(const std::string& encoding)
 {
-    _encoding= encoding;
+    _encoding = encoding;
 }
-
 
 void FormWriter::setBoundary(const std::string& boundary)
 {
-    _boundary= boundary;
+    _boundary = boundary;
 }
-
 
 const std::string& FormWriter::encoding() const
 {
     return _encoding;
 }
 
-
 const std::string& FormWriter::boundary() const
 {
     return _boundary;
 }
-
 
 ClientConnection& FormWriter::connection()
 {
     return _connection;
 }
 
-
 bool FormWriter::complete() const
 {
     return _complete;
 }
-
 
 bool FormWriter::cancelled() const
 {
     return _runner->cancelled();
 }
 
-
 //
 // File Part Source
 //
-
 
 FormPart::FormPart(const std::string& contentType)
     : _contentType(contentType)
@@ -462,40 +433,33 @@ FormPart::FormPart(const std::string& contentType)
 {
 }
 
-
 FormPart::~FormPart()
 {
 }
-
 
 NVCollection& FormPart::headers()
 {
     return _headers;
 }
 
-
 const std::string& FormPart::contentType() const
 {
     return _contentType;
 }
-
 
 bool FormPart::initialWrite() const
 {
     return _initialWrite;
 }
 
-
 void FormPart::reset()
 {
-    _initialWrite= true;
+    _initialWrite = true;
 }
-
 
 //
 // File Part Source
 //
-
 
 FilePart::FilePart(const std::string& path)
     : _path(path)
@@ -505,7 +469,6 @@ FilePart::FilePart(const std::string& path)
     open();
 }
 
-
 FilePart::FilePart(const std::string& path, const std::string& contentType)
     : FormPart(contentType)
     , _path(path)
@@ -514,7 +477,6 @@ FilePart::FilePart(const std::string& path, const std::string& contentType)
 {
     open();
 }
-
 
 FilePart::FilePart(const std::string& path, const std::string& filename,
                    const std::string& contentType)
@@ -526,11 +488,9 @@ FilePart::FilePart(const std::string& path, const std::string& filename,
     open();
 }
 
-
 FilePart::~FilePart()
 {
 }
-
 
 void FilePart::open()
 {
@@ -542,10 +502,9 @@ void FilePart::open()
 
     // Get file size
     _istr.seekg(0, std::ios::end);
-    _fileSize= _istr.tellg();
+    _fileSize = _istr.tellg();
     _istr.seekg(0, std::ios::beg);
 }
-
 
 void FilePart::reset()
 {
@@ -554,12 +513,11 @@ void FilePart::reset()
     _istr.seekg(0, std::ios::beg);
 }
 
-
 bool FilePart::writeChunk(FormWriter& writer)
 {
     TraceS(this) << "Write chunk" << std::endl;
     assert(!writer.cancelled());
-    _initialWrite= false;
+    _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
     if (_istr.read(buffer, FILE_CHUNK_SIZE)) {
@@ -581,11 +539,10 @@ bool FilePart::writeChunk(FormWriter& writer)
     throw std::runtime_error("Cannot read multipart source file: " + _filename);
 }
 
-
 void FilePart::write(FormWriter& writer)
 {
     TraceS(this) << "Write" << std::endl;
-    _initialWrite= false;
+    _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
     while (_istr.read(buffer, FILE_CHUNK_SIZE) && !writer.cancelled()) {
@@ -603,11 +560,10 @@ void FilePart::write(FormWriter& writer)
                                  _filename);
 }
 
-
 void FilePart::write(std::ostream& ostr)
 {
     TraceS(this) << "Write" << std::endl;
-    _initialWrite= false;
+    _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
     while (_istr.read(buffer, FILE_CHUNK_SIZE))
@@ -621,29 +577,24 @@ void FilePart::write(std::ostream& ostr)
                                  _filename);
 }
 
-
 const std::string& FilePart::filename() const
 {
     return _filename;
 }
-
 
 std::ifstream& FilePart::stream()
 {
     return _istr;
 }
 
-
 std::uint64_t FilePart::length() const
 {
     return _fileSize;
 }
 
-
 //
 // String Part Source
 //
-
 
 StringPart::StringPart(const std::string& data)
     : FormPart("application/octet-stream")
@@ -651,23 +602,20 @@ StringPart::StringPart(const std::string& data)
 {
 }
 
-
 StringPart::StringPart(const std::string& data, const std::string& contentType)
     : FormPart(contentType)
     , _data(data)
 {
 }
 
-
 StringPart::~StringPart()
 {
 }
 
-
 bool StringPart::writeChunk(FormWriter& writer)
 {
     TraceS(this) << "Write chunk" << std::endl;
-    _initialWrite= false;
+    _initialWrite = false;
 
     // TODO: Honour chunk size for large strings
 
@@ -677,38 +625,32 @@ bool StringPart::writeChunk(FormWriter& writer)
     return false;
 }
 
-
 void StringPart::write(FormWriter& writer)
 {
     TraceS(this) << "Write" << std::endl;
-    _initialWrite= false;
+    _initialWrite = false;
 
     writer.emit(_data.c_str(), _data.length());
     writer.updateProgress((int)_data.length());
 }
 
-
 void StringPart::write(std::ostream& ostr)
 {
     TraceS(this) << "Write" << std::endl;
-    _initialWrite= false;
+    _initialWrite = false;
 
     ostr.write(_data.c_str(), _data.length());
 }
-
 
 std::uint64_t StringPart::length() const
 {
     return _data.length();
 }
 
-
 } // namespace http
 } // namespace scy
 
-
 /// @\}
-
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

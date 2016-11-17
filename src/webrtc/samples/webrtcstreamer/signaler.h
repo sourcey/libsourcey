@@ -11,7 +11,6 @@
 #ifndef SCY_WebRTC_WebRTCStreamer_Signaler_H
 #define SCY_WebRTC_WebRTCStreamer_Signaler_H
 
-
 #include "scy/application.h"
 #include "scy/ipc.h"
 #include "scy/net/sslmanager.h"
@@ -20,9 +19,7 @@
 #include "scy/util.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 
-
 namespace scy {
-
 
 class Signaler : public PeerConnectionManager, public Application
 {
@@ -59,8 +56,6 @@ protected:
 #endif
 };
 
-
 } // namespace scy
-
 
 #endif

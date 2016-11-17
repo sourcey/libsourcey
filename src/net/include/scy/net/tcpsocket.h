@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_TCPSocket_H
 #define SCY_Net_TCPSocket_H
-
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
@@ -20,10 +18,8 @@
 #include "scy/stream.h"
 #include "scy/uv/uvpp.h"
 
-
 namespace scy {
 namespace net {
-
 
 class TCPSocket : public Stream, public net::Socket
 {
@@ -31,7 +27,7 @@ public:
     typedef std::shared_ptr<TCPSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    TCPSocket(uv::Loop* loop= uv::defaultLoop());
+    TCPSocket(uv::Loop* loop = uv::defaultLoop());
     virtual ~TCPSocket();
 
     virtual bool shutdown();
@@ -39,12 +35,12 @@ public:
 
     virtual void connect(const net::Address& peerAddress);
 
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len,
-                     const net::Address& peerAddress, int flags= 0);
+                     const net::Address& peerAddress, int flags = 0);
 
-    virtual void bind(const net::Address& address, unsigned flags= 0);
-    virtual void listen(int backlog= 64);
+    virtual void bind(const net::Address& address, unsigned flags = 0);
+    virtual void listen(int backlog = 64);
 
     virtual void acceptConnection();
 
@@ -96,12 +92,9 @@ protected:
     SocketMode _mode;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_TCPSocket_H
-
 
 /// @\}

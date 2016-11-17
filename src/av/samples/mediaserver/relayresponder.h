@@ -3,18 +3,14 @@
 #include "scy/turn/client/tcpclient.h"
 #include "scy/util/streammanager.h"
 
-
 namespace scy {
-
 
 #define RELAY_USERNAME "user"
 #define RELAY_PASSWORD "illusion"
 
-
 //
 // Relayed Streaming Client Allocation
 //
-
 
 class RelayedStreamingAllocation : public turn::TCPClientObserver
 {
@@ -76,7 +72,7 @@ public:
         streams.closeAll();
         // Destroy the client when the allocation is lost
         scy::deleteLater<RelayedStreamingAllocation>(this);
-        deleted= true;
+        deleted = true;
     }
 
 protected:
@@ -122,7 +118,7 @@ protected:
             ConnectionCreated.emit(/*this, */ client, peerAddr);
 
             // Create an output media stream for the new connection
-            auto stream= new PacketStream(peerAddr.toString());
+            auto stream = new PacketStream(peerAddr.toString());
 
             // Setup the packet stream ensuring the audio capture isn't
             // destroyed with the stream, as it may be reused while the
@@ -131,7 +127,7 @@ protected:
             MediaServer::setupPacketStream(*stream, options, true, true);
 
             // Feed the packet stream directly into the connection
-            stream->emitter+=
+            stream->emitter +=
                 packetSlot(static_cast<net::SocketAdapter*>(
                                const_cast<net::TCPSocket*>(socket.get())),
                            &net::SocketAdapter::sendPacket);
@@ -155,9 +151,9 @@ protected:
         try {
             // Destroy the media stream for the closed connection (if any).
             // this->streams.free(peerAddress.toString());
-            PacketStream* stream= streams.remove(peerAddress.toString());
+            PacketStream* stream = streams.remove(peerAddress.toString());
             if (stream) {
-                stream->emitter-=
+                stream->emitter -=
                     packetSlot(static_cast<net::SocketAdapter*>(
                                    const_cast<net::TCPSocket*>(socket.get())),
                                &net::SocketAdapter::sendPacket);
@@ -189,11 +185,9 @@ protected:
     }
 };
 
-
 //
 // Relayed Streaming Connection Handler
 //
-
 
 class RelayedStreamingResponder : public http::ServerResponder
 {
@@ -220,18 +214,18 @@ public:
                      << std::endl;
 
         turn::Client::Options co;
-        co.serverAddr= net::Address(kRelayServerIP, 3478);
-        co.lifetime= 120 * 1000; // 2 minutes
-        co.timeout= 10 * 1000;
-        co.timerInterval= 3 * 1000;
-        co.username= RELAY_USERNAME;
-        co.password= RELAY_PASSWORD;
+        co.serverAddr = net::Address(kRelayServerIP, 3478);
+        co.lifetime = 120 * 1000; // 2 minutes
+        co.timeout = 10 * 1000;
+        co.timerInterval = 3 * 1000;
+        co.username = RELAY_USERNAME;
+        co.password = RELAY_PASSWORD;
 
-        allocation= new RelayedStreamingAllocation(
+        allocation = new RelayedStreamingAllocation(
             options, co, connection().socket()->peerAddress().host());
         // allocation->AllocationFailed += sdelegate(this,
         // &RelayedStreamingResponder::onAllocationFailed);
-        allocation->AllocationCreated+=
+        allocation->AllocationCreated +=
             sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
 
         allocation->initiate();
@@ -239,7 +233,7 @@ public:
 
     void onAllocationCreated(void* sender, turn::Client& client)
     {
-        allocation->AllocationCreated-=
+        allocation->AllocationCreated -=
             sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
         std::string address(allocation->client.relayedAddress().toString());
 
@@ -272,6 +266,5 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
-
 
 } // namespace scy

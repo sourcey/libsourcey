@@ -12,37 +12,31 @@
 /// @addtogroup stun
 /// @{
 
-
 #ifndef SCY_STUN_H
 #define SCY_STUN_H
-
 
 #include "scy/base.h"
 #include <cstdint>
 
-
 namespace scy {
 namespace stun {
 
-
 // Following values correspond to RFC5389.
-const int kAttributeHeaderSize= 4;
-const int kMessageHeaderSize= 20;
-const int kTransactionIdOffset= 8;
-const int kTransactionIdLength= 12;
-const std::uint32_t kMagicCookie= 0x2112A442;
-const int kMagicCookieLength= sizeof(kMagicCookie);
-
+const int kAttributeHeaderSize = 4;
+const int kMessageHeaderSize = 20;
+const int kTransactionIdOffset = 8;
+const int kTransactionIdLength = 12;
+const std::uint32_t kMagicCookie = 0x2112A442;
+const int kMagicCookieLength = sizeof(kMagicCookie);
 
 /// STUN address types as defined in RFC 5389.
 /// NB: Undefined is not part of the STUN spec.
 enum AddressFamily
 {
-    Undefined= 0,
-    IPv4= 1,
-    IPv6= 2
+    Undefined = 0,
+    IPv4 = 1,
+    IPv6 = 2
 };
-
 
 #if 0
 inline bool isChannelData(std::uint16_t msgType)
@@ -75,7 +69,6 @@ inline int getErrorResponseType(int reqType) {
     return isRequestType(reqType) ? (reqType | 0x110) : -1;
 }
 
-
 #define IS_STUN_REQUEST(msgType) (((msgType)&0x0110) == 0x0000)
 #define IS_STUN_INDICATION(msgType) (((msgType)&0x0110) == 0x0010)
 #define IS_STUN_SUCCESS_RESP(msgType) (((msgType)&0x0110) == 0x0100)
@@ -107,8 +100,6 @@ inline int getErrorResponseType(int reqType) {
 }
 } // namespace scy:stun
 
-
 #endif // SCY_STUN_H
-
 
 /// @\}

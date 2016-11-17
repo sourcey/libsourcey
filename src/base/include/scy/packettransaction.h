@@ -8,25 +8,21 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_PacketTransaction_H
 #define SCY_PacketTransaction_H
-
 
 #include "scy/interface.h"
 #include "scy/packet.h"
 #include "scy/stateful.h"
 #include "scy/timer.h"
 
-
 namespace scy {
-
 
 struct TransactionState : public State
 {
     enum Type
     {
-        Waiting= 0,
+        Waiting = 0,
         Running,
         Success,
         Cancelled,
@@ -51,7 +47,6 @@ struct TransactionState : public State
     };
 };
 
-
 /// This class provides request/response functionality for IPacket types.
 ///
 /// PacketTransactions are fire and forget. The object will be deleted
@@ -61,8 +56,8 @@ class PacketTransaction : public async::Sendable,
                           public Stateful<TransactionState>
 {
 public:
-    PacketTransaction(long timeout= 10000, int retries= 0,
-                      uv::Loop* loop= uv::defaultLoop())
+    PacketTransaction(long timeout = 10000, int retries = 0,
+                      uv::Loop* loop = uv::defaultLoop())
         : _timer(loop)
         , _timeout(timeout)
         , _retries(retries)
@@ -71,8 +66,8 @@ public:
     {
     }
 
-    PacketTransaction(const PacketT& request, long timeout= 10000,
-                      int retries= 0, uv::Loop* loop= uv::defaultLoop())
+    PacketTransaction(const PacketT& request, long timeout = 10000,
+                      int retries = 0, uv::Loop* loop = uv::defaultLoop())
         : _request(request)
         , _timer(loop)
         , _timeout(timeout)
@@ -92,7 +87,7 @@ public:
         _attempts++;
         if (_timer.active())
             _timer.stop();
-        _timer.Timeout+= slot(this, &PacketTransaction::onTimeout);
+        _timer.Timeout += slot(this, &PacketTransaction::onTimeout);
         _timer.start(_timeout, 0);
 
         return setState(this, TransactionState::Running);
@@ -118,8 +113,8 @@ public:
         traceL("PacketTransaction", this) << "Dispose" << std::endl;
 
         if (!_destroyed) {
-            _destroyed= true;
-            _timer.Timeout-= slot(this, &PacketTransaction::onTimeout);
+            _destroyed = true;
+            _timer.Timeout -= slot(this, &PacketTransaction::onTimeout);
             _timer.stop();
 
             deleteLater<PacketTransaction>(this);
@@ -158,7 +153,7 @@ protected:
     virtual bool handlePotentialResponse(const PacketT& packet)
     {
         if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
-            _response= packet;
+            _response = packet;
             onResponse();
             setState(this, TransactionState::Success);
             return true;
@@ -168,7 +163,7 @@ protected:
 
     /// Checks a potential response candidate and
     /// returns true on successful match.
-    virtual bool checkResponse(const PacketT& packet)= 0;
+    virtual bool checkResponse(const PacketT& packet) = 0;
 
     /// Called when a successful response is received.
     virtual void onResponse()
@@ -203,7 +198,6 @@ protected:
     int _attempts; ///< The number of times the transaction has been sent.
     bool _destroyed;
 };
-
 
 template <class T> inline void PacketTransaction<T>::cancel()
 {
@@ -244,11 +238,8 @@ template <class T> inline T PacketTransaction<T>::response() const
     return _response;
 }
 
-
 } // namespace scy
 
-
 #endif // SCY_PacketTransaction_H
-
 
 /// @\}

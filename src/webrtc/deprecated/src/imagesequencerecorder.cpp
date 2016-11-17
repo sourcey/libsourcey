@@ -8,7 +8,6 @@
 /// @addtogroup webrtc
 /// @{
 
-
 #include "scy/webrtc/imagesequencerecorder.h"
 
 #include "scy/av/ffmpeg.h"
@@ -19,9 +18,7 @@
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
 #include "webrtc/modules/video_capture/video_capture_factory.h"
 
-
 namespace scy {
-
 
 ImageSequenceRecorder::ImageSequenceRecorder(
     webrtc::VideoTrackInterface* track_to_render, const std::string& basename)
@@ -36,7 +33,6 @@ ImageSequenceRecorder::ImageSequenceRecorder(
     av::initializeFFmpeg();
 }
 
-
 ImageSequenceRecorder::~ImageSequenceRecorder()
 {
     _renderedTrack->RemoveSink(this);
@@ -48,7 +44,6 @@ ImageSequenceRecorder::~ImageSequenceRecorder()
         av_free(_avframe);
 }
 
-
 std::string ImageSequenceRecorder::getNextFilename()
 {
     std::stringstream filename;
@@ -59,26 +54,25 @@ std::string ImageSequenceRecorder::getNextFilename()
     return filename.str();
 }
 
-
 void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 {
     TraceL << "On video frame: " << yuvframe.width() << 'x' << yuvframe.height()
            << std::endl;
 
     if (_width != yuvframe.width() || _height != yuvframe.height()) {
-        _width= yuvframe.width();
-        _height= yuvframe.height();
+        _width = yuvframe.width();
+        _height = yuvframe.height();
 
-        _encoder.iparams.width= yuvframe.width();
-        _encoder.iparams.height= yuvframe.height();
-        _encoder.iparams.pixelFmt= "yuv420p";
+        _encoder.iparams.width = yuvframe.width();
+        _encoder.iparams.height = yuvframe.height();
+        _encoder.iparams.pixelFmt = "yuv420p";
 
-        _encoder.oparams.encoder= "mjpeg"; // "png"
-        _encoder.oparams.pixelFmt= "yuvj420p";
-        _encoder.oparams.width= yuvframe.width();
-        _encoder.oparams.height= yuvframe.height();
-        _encoder.oparams.fps= 25; // avoid FFmpeg 0 fps bitrate tolerance error
-        _encoder.oparams.enabled= true;
+        _encoder.oparams.encoder = "mjpeg"; // "png"
+        _encoder.oparams.pixelFmt = "yuvj420p";
+        _encoder.oparams.width = yuvframe.width();
+        _encoder.oparams.height = yuvframe.height();
+        _encoder.oparams.fps = 25; // avoid FFmpeg 0 fps bitrate tolerance error
+        _encoder.oparams.enabled = true;
 
         _encoder.create();
         _encoder.open();
@@ -88,10 +82,10 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
             av_free(_avframe);
 
         // Initialize the AVFrame
-        _avframe= av_frame_alloc();
-        _avframe->width= yuvframe.width();
-        _avframe->height= yuvframe.height();
-        _avframe->format= AV_PIX_FMT_YUV420P;
+        _avframe = av_frame_alloc();
+        _avframe->width = yuvframe.width();
+        _avframe->height = yuvframe.height();
+        _avframe->format = AV_PIX_FMT_YUV420P;
 
         // Initialize avframe->linesize
         avpicture_fill((AVPicture*)_avframe, NULL,
@@ -100,9 +94,9 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
     }
 
     // Set avframe->data pointers manually
-    _avframe->data[0]= (uint8_t*)yuvframe.video_frame_buffer()->DataY();
-    _avframe->data[1]= (uint8_t*)yuvframe.video_frame_buffer()->DataU();
-    _avframe->data[2]= (uint8_t*)yuvframe.video_frame_buffer()->DataV();
+    _avframe->data[0] = (uint8_t*)yuvframe.video_frame_buffer()->DataY();
+    _avframe->data[1] = (uint8_t*)yuvframe.video_frame_buffer()->DataU();
+    _avframe->data[2] = (uint8_t*)yuvframe.video_frame_buffer()->DataV();
 
     // Feed the raw frame into the encoder
     AVPacket opacket;
@@ -116,8 +110,6 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
     }
 }
 
-
 } // namespace scy
-
 
 /// @\}

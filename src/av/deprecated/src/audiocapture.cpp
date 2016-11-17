@@ -8,19 +8,15 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/mediacapture.h"
 #include "scy/logger.h"
 
 #ifdef HAVE_RTAUDIO
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
                            RtAudioFormat format)
@@ -32,9 +28,9 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
 {
     TraceS(this) << "Create" << endl;
 
-    _iParams.deviceId= _deviceId;
-    _iParams.nChannels= _channels;
-    _iParams.firstChannel= 0;
+    _iParams.deviceId = _deviceId;
+    _iParams.nChannels = _channels;
+    _iParams.firstChannel = 0;
 
     if (_audio.getDeviceCount() < 1) {
         WarnL << "No audio devices found!" << endl;
@@ -49,12 +45,10 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
     TraceS(this) << "Create: OK" << endl;
 }
 
-
 AudioCapture::~AudioCapture()
 {
     TraceS(this) << "Destroy" << endl;
 }
-
 
 void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
 {
@@ -65,10 +59,10 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
     TraceS(this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 
     // 1024 is a common frame size for many codecs.
-    unsigned int nBufferFrames= 1024; // 256, 512
+    unsigned int nBufferFrames = 1024; // 256, 512
 
     RtAudio::StreamOptions options;
-    options.flags= RTAUDIO_SCHEDULE_REALTIME;
+    options.flags = RTAUDIO_SCHEDULE_REALTIME;
 
     // TODO: Implement planar audio format to pass the `RTAUDIO_NONINTERLEAVED`
     // flag to RtAudio::StreamOptions. Some work will be required for the packet
@@ -79,8 +73,8 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
                           &nBufferFrames, &AudioCapture::audioCallback,
                           (void*)this, &options, AudioCapture::errorCallback);
 
-        _error= "";
-        _opened= true;
+        _error = "";
+        _opened = true;
         TraceS(this) << "Opening: OK" << endl;
     } catch (RtAudioError& e) {
         setError("Cannot open audio capture: " + e.getMessage());
@@ -89,13 +83,12 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
     }
 }
 
-
 void AudioCapture::close()
 {
     TraceS(this) << "Closing" << endl;
     try {
         Mutex::ScopedLock lock(_mutex);
-        _opened= false;
+        _opened = false;
         if (_audio.isStreamOpen())
             _audio.closeStream();
         TraceS(this) << "Closing: OK" << endl;
@@ -106,7 +99,6 @@ void AudioCapture::close()
     }
 }
 
-
 void AudioCapture::start()
 {
     TraceS(this) << "Starting" << endl;
@@ -115,7 +107,7 @@ void AudioCapture::start()
         try {
             Mutex::ScopedLock lock(_mutex);
             _audio.startStream();
-            _error= "";
+            _error = "";
             TraceS(this) << "Starting: OK" << endl;
         } catch (RtAudioError& e) {
             setError("Cannot start audio capture: " + e.getMessage());
@@ -124,7 +116,6 @@ void AudioCapture::start()
         }
     }
 }
-
 
 void AudioCapture::stop()
 {
@@ -143,7 +134,6 @@ void AudioCapture::stop()
         }
     }
 }
-
 
 #if 0
 void AudioCapture::attach(const PacketDelegateBase& delegate)
@@ -168,12 +158,11 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 }
 #endif
 
-
 int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
                                 unsigned int nBufferFrames, double streamTime,
                                 RtAudioStreamStatus status, void* data)
 {
-    auto self= reinterpret_cast<AudioCapture*>(data);
+    auto self = reinterpret_cast<AudioCapture*>(data);
     AudioPacket packet;
 
     if (status)
@@ -189,8 +178,8 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
         Mutex::ScopedLock lock(self->_mutex);
         packet.setData((char*)inputBuffer,
                        nBufferFrames * self->_channels * sizeof(RtAudioFormat));
-        packet.numSamples= nBufferFrames;
-        packet.time= streamTime;
+        packet.numSamples = nBufferFrames;
+        packet.time = streamTime;
     }
 
     // TraceL << "Captured audio packet: "
@@ -204,22 +193,19 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     return 0;
 }
 
-
 void AudioCapture::errorCallback(RtAudioError::Type type,
                                  const std::string& errorText)
 {
     ErrorL << "Audio system error: " << errorText << endl;
 }
 
-
 void AudioCapture::setError(const std::string& message, bool throwExec)
 {
     ErrorS(this) << "Error: " << message << endl;
-    _error= message;
+    _error = message;
     if (throwExec)
         throw std::runtime_error(message);
 }
-
 
 RtAudioFormat AudioCapture::format() const
 {
@@ -227,13 +213,11 @@ RtAudioFormat AudioCapture::format() const
     return _format;
 }
 
-
 bool AudioCapture::isOpen() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _opened;
 }
-
 
 bool AudioCapture::running() const
 {
@@ -241,13 +225,11 @@ bool AudioCapture::running() const
     return _audio.isStreamRunning();
 }
 
-
 int AudioCapture::deviceId() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _deviceId;
 }
-
 
 int AudioCapture::sampleRate() const
 {
@@ -255,13 +237,11 @@ int AudioCapture::sampleRate() const
     return _sampleRate;
 }
 
-
 int AudioCapture::channels() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _channels;
 }
-
 
 std::string AudioCapture::formatString() const
 {
@@ -278,7 +258,7 @@ std::string AudioCapture::formatString() const
     // fltp     32
     // dblp     64
 
-    bool planar= false; // planar audio not implemented
+    bool planar = false; // planar audio not implemented
     switch (format()) {
         case RTAUDIO_SINT8:
             return planar ? "u8p" : "u8";
@@ -297,18 +277,17 @@ std::string AudioCapture::formatString() const
     return "";
 }
 
-
 void AudioCapture::getAudioCodec(AudioCodec& icodec)
 {
-    icodec.channels= channels();
-    icodec.sampleRate= sampleRate();
-    icodec.sampleFmt= formatString();
+    icodec.channels = channels();
+    icodec.sampleRate = sampleRate();
+    icodec.sampleFmt = formatString();
 }
 
 void AudioCapture::getEncoderFormat(Format& iformat)
 {
-    iformat.name= "PCM";
-    iformat.audio.enabled= true;
+    iformat.name = "PCM";
+    iformat.audio.enabled = true;
     getAudioCodec(iformat.audio);
     // bool planar = true;
     // switch(_format) {
@@ -333,9 +312,7 @@ void AudioCapture::getEncoderFormat(Format& iformat)
     // }
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif

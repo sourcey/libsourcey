@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_VideoConverter_H
 #define SCY_AV_VideoConverter_H
-
 
 #include "scy/base.h"
 
@@ -24,10 +22,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-
 namespace scy {
 namespace av {
-
 
 struct VideoConverter
 {
@@ -45,13 +41,10 @@ struct VideoConverter
     VideoCodec oparams;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_VideoConverter_H
-
 
 /// @\}

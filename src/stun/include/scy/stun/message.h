@@ -8,71 +8,67 @@
 /// @addtogroup stun
 /// @{
 
-
 #ifndef SCY_STUN_Message_H
 #define SCY_STUN_Message_H
-
 
 #include "scy/packet.h"
 #include "scy/stun/attributes.h"
 #include "scy/stun/stun.h"
 
-
 namespace scy {
 namespace stun {
 
-
 typedef std::string TransactionID;
-
 
 class Message : public IPacket
 {
 public:
     enum MethodType
     {
-        Undefined= 0x0000, ///< default error type
+        Undefined = 0x0000, ///< default error type
 
         /// STUN
-        Binding= 0x0001,
+        Binding = 0x0001,
 
         /// TURN
-        Allocate= 0x0003, ///< (only request/response semantics defined)
-        Refresh= 0x0004,
-        SendIndication= 0x0006,   ///< (only indication semantics defined)
-        DataIndication= 0x0007,   ///< (only indication semantics defined)
-        CreatePermission= 0x0008, ///< (only request/response semantics defined)
-        ChannelBind= 0x0009,      ///< (only request/response semantics defined)
+        Allocate = 0x0003, ///< (only request/response semantics defined)
+        Refresh = 0x0004,
+        SendIndication = 0x0006, ///< (only indication semantics defined)
+        DataIndication = 0x0007, ///< (only indication semantics defined)
+        CreatePermission =
+            0x0008,           ///< (only request/response semantics defined)
+        ChannelBind = 0x0009, ///< (only request/response semantics defined)
 
         /// TURN TCP RFC 6062
-        Connect= 0x000a,
-        ConnectionBind= 0x000b,
-        ConnectionAttempt= 0x000c
+        Connect = 0x000a,
+        ConnectionBind = 0x000b,
+        ConnectionAttempt = 0x000c
     };
 
     enum ClassType
     {
-        Request= 0x0000,
-        Indication= 0x0010,
-        SuccessResponse= 0x0100,
-        ErrorResponse= 0x0110
+        Request = 0x0000,
+        Indication = 0x0010,
+        SuccessResponse = 0x0100,
+        ErrorResponse = 0x0110
     };
 
     enum ErrorCodes
     {
-        BadRequest= 400,
-        NotAuthorized= 401,
-        UnknownAttribute= 420,
-        StaleCredentials= 430,
-        IntegrityCheckFailure= 431,
-        MissingUsername= 432,
-        UseTLS= 433,
-        RoleConflict= 487,
-        ServerError= 500,
-        GlobalFailure= 600,
+        BadRequest = 400,
+        NotAuthorized = 401,
+        UnknownAttribute = 420,
+        StaleCredentials = 430,
+        IntegrityCheckFailure = 431,
+        MissingUsername = 432,
+        UseTLS = 433,
+        RoleConflict = 487,
+        ServerError = 500,
+        GlobalFailure = 600,
 
         /// TURN TCP
-        ConnectionAlreadyExists= 446,
-        ConnectionTimeoutOrFailure= 447
+        ConnectionAlreadyExists = 446,
+        ConnectionTimeoutOrFailure = 447
     };
 
 public:
@@ -100,9 +96,9 @@ public:
     std::string errorString(std::uint16_t errorCode) const;
 
     void add(Attribute* attr);
-    Attribute* get(Attribute::Type type, int index= 0) const;
+    Attribute* get(Attribute::Type type, int index = 0) const;
 
-    template <typename T> T* get(int index= 0) const
+    template <typename T> T* get(int index = 0) const
     {
         return reinterpret_cast<T*>(
             get(static_cast<Attribute::Type>(T::TypeID), index));
@@ -128,7 +124,6 @@ protected:
     std::vector<Attribute*> _attrs;
 };
 
-
 inline bool isValidMethod(std::uint16_t methodType)
 {
     switch (methodType) {
@@ -149,8 +144,6 @@ inline bool isValidMethod(std::uint16_t methodType)
 }
 } // namespace scy:stun
 
-
 #endif // SCY_STUN_Message_H
-
 
 /// @\}

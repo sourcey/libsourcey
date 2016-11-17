@@ -8,27 +8,21 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_SERVER_TCPAllocation_H
 #define SCY_TURN_SERVER_TCPAllocation_H
-
 
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/turn/server/serverallocation.h"
 #include "scy/turn/server/tcpconnectionpair.h"
 
-
 namespace scy {
 namespace turn {
 
-
 class Server;
-
 
 typedef PointerCollection<std::uint32_t, TCPConnectionPair>
     TCPConnectionPairMap;
-
 
 class TCPAllocation : public ServerAllocation
 {
@@ -68,8 +62,6 @@ protected:
 }
 } //  namespace scy::turn
 
-
 #endif // SCY_TURN_SERVER_TCPAllocation_H
-
 
 /// @\}

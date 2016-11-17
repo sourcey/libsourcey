@@ -8,17 +8,13 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Delegate_H
 #define SCY_Delegate_H
-
 
 #include <functional>
 // #include "scy/logger.h"
 
-
 namespace scy {
-
 
 ///
 /// Abstract delegate interface.
@@ -30,10 +26,10 @@ namespace scy {
 ///
 template <typename RT, typename... Args> struct AbstractDelegate
 {
-    virtual RT operator()(Args... args) const= 0;
-    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const= 0;
+    virtual RT operator()(Args... args) const = 0;
+    virtual bool
+    operator==(const AbstractDelegate<RT, Args...>& that) const = 0;
 };
-
 
 ///
 /// The `FunctionDelegate` contains a `std::function`.
@@ -59,7 +55,6 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
     }
 };
 
-
 ///
 /// The `ClassDelegate` contains a pointer to a class member.
 ///
@@ -84,12 +79,11 @@ struct ClassDelegate : AbstractDelegate<RT, Args...>
 
     virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
     {
-        auto other= dynamic_cast<const ClassDelegate*>(&that);
+        auto other = dynamic_cast<const ClassDelegate*>(&that);
         return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
-
 
 ///
 /// The `ConstClassDelegate` contains a pointer to a `const` class member.
@@ -115,12 +109,11 @@ struct ConstClassDelegate : AbstractDelegate<RT, Args...>
 
     virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
     {
-        auto other= dynamic_cast<const ConstClassDelegate*>(&that);
+        auto other = dynamic_cast<const ConstClassDelegate*>(&that);
         return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
-
 
 ///
 /// Polymorphic function delegate.
@@ -142,7 +135,7 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
 
     virtual RT operator()(IT& object) const
     {
-        auto test= dynamic_cast<PT*>(&object);
+        auto test = dynamic_cast<PT*>(&object);
         if (test)
             return (instance->*method)(*test);
         return RT();
@@ -150,17 +143,14 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
 
     virtual bool operator==(const AbstractDelegate<RT, IT&>& that) const
     {
-        auto other= dynamic_cast<const PolymorphicDelegate*>(&that);
+        auto other = dynamic_cast<const PolymorphicDelegate*>(&that);
         return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Delegate_H
-
 
 /// @\}

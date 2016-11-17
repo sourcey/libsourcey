@@ -8,17 +8,13 @@
 /// @addtogroup util
 /// @{
 
-
 #ifndef SCY_StreamManager_H
 #define SCY_StreamManager_H
-
 
 #include "scy/collection.h"
 #include "scy/packetstream.h"
 
-
 namespace scy {
-
 
 typedef LiveCollection<std::string, PacketStream,
                        std::default_delete<PacketStream>
@@ -27,7 +23,6 @@ typedef LiveCollection<std::string, PacketStream,
                        >
     StreamManagerBase;
 
-
 class StreamManager : public StreamManagerBase
 {
 public:
@@ -35,13 +30,13 @@ public:
     typedef Manager::Map Map;
 
 public:
-    StreamManager(bool freeClosedStreams= true);
+    StreamManager(bool freeClosedStreams = true);
     virtual ~StreamManager();
 
-    virtual bool addStream(PacketStream* stream, bool whiny= true);
-    virtual bool closeStream(const std::string& name, bool whiny= true);
+    virtual bool addStream(PacketStream* stream, bool whiny = true);
+    virtual bool closeStream(const std::string& name, bool whiny = true);
     virtual void closeAll();
-    virtual PacketStream* getStream(const std::string& name, bool whiny= true);
+    virtual PacketStream* getStream(const std::string& name, bool whiny = true);
 
     /// Returns the first stream in the list, or NULL.
     virtual PacketStream* getDafaultStream();
@@ -66,11 +61,8 @@ protected:
     bool _freeClosedStreams;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_StreamManager_H
-
 
 /// @\}

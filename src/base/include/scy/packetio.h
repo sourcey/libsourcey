@@ -8,18 +8,14 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_PACKET_IO_H
 #define SCY_PACKET_IO_H
-
 
 #include "scy/packetstream.h"
 #include <fstream>
 #include <iostream>
 
-
 namespace scy {
-
 
 /// Threaded stream reader class.
 ///
@@ -49,7 +45,7 @@ public:
     {
         _runner.start(
             [](void* arg) {
-                auto self= reinterpret_cast<ThreadedStreamReader*>(arg);
+                auto self = reinterpret_cast<ThreadedStreamReader*>(arg);
                 std::string line;
                 if (getline(self->stream(), line)) {
                     self->emit(line);
@@ -69,7 +65,7 @@ public:
 
     template <class StreamT> StreamT& stream()
     {
-        auto stream= dynamic_cast<StreamT*>(_istream);
+        auto stream = dynamic_cast<StreamT*>(_istream);
         if (!stream)
             throw std::runtime_error("Cannot cast internal stream type.");
 
@@ -84,7 +80,6 @@ protected:
     Thread _runner;
     std::istream* _istream;
 };
-
 
 /// Packet stream writer class.
 ///
@@ -103,7 +98,7 @@ public:
     virtual ~StreamWriter()
     {
         if (_ostream) {
-            auto fstream= dynamic_cast<std::ofstream*>(_ostream);
+            auto fstream = dynamic_cast<std::ofstream*>(_ostream);
             if (fstream)
                 fstream->close();
             delete _ostream;
@@ -123,7 +118,7 @@ public:
 
     template <class StreamT> StreamT& stream()
     {
-        auto stream= dynamic_cast<StreamT*>(_ostream);
+        auto stream = dynamic_cast<StreamT*>(_ostream);
         if (!stream)
             throw std::runtime_error("Cannot cast internal stream type.");
 
@@ -138,11 +133,8 @@ protected:
     std::ostream* _ostream;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_PACKET_IO_H
-
 
 /// @\}

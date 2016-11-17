@@ -8,10 +8,8 @@
 /// @addtogroup stun
 /// @{
 
-
 #ifndef SCY_STUN_Attributes_H
 #define SCY_STUN_Attributes_H
-
 
 #include "scy/buffer.h"
 #include "scy/crypto/crypto.h"
@@ -24,10 +22,8 @@
 #include <string>
 #include <vector>
 
-
 namespace scy {
 namespace stun {
-
 
 /// The virtual base class for all STUN/TURN attributes.
 class Attribute
@@ -35,65 +31,65 @@ class Attribute
 public:
     enum Type
     {
-        NotExist= 0,
-        MappedAddress= 0x0001,
-        ResponseAddress= 0x0002, // Not implemented
-        ChangeRequest= 0x0003,   // Not implemented
-        SourceAddress= 0x0004,   // Not implemented
-        ChangedAddress= 0x0005,  // Not implemented
-        Username= 0x0006,
-        Password= 0x0007, // Not implemented
-        MessageIntegrity= 0x0008,
-        ErrorCode= 0x0009,
-        Bandwidth= 0x0010,          // Not implemented
-        DestinationAddress= 0x0011, // Not implemented
-        UnknownAttributes= 0x000a,
-        ReflectedFrom= 0x000b, // Not implemented
+        NotExist = 0,
+        MappedAddress = 0x0001,
+        ResponseAddress = 0x0002, // Not implemented
+        ChangeRequest = 0x0003,   // Not implemented
+        SourceAddress = 0x0004,   // Not implemented
+        ChangedAddress = 0x0005,  // Not implemented
+        Username = 0x0006,
+        Password = 0x0007, // Not implemented
+        MessageIntegrity = 0x0008,
+        ErrorCode = 0x0009,
+        Bandwidth = 0x0010,          // Not implemented
+        DestinationAddress = 0x0011, // Not implemented
+        UnknownAttributes = 0x000a,
+        ReflectedFrom = 0x000b, // Not implemented
         // TransportPreferences    = 0x000c, // Not implemented
-        MagicCookie= 0x000f, // Not implemented, ByteString, 4 bytes
-        Realm= 0x0014,
-        Nonce= 0x0015,
-        XorMappedAddress= 0x0020,
-        Software= 0x8022,
-        Options= 0x8001, // Not implemented
-        AlternateServer= 0x000e,
-        Fingerprint= 0x8028, /// TURN
-        ChannelNumber= 0x000c,
-        Lifetime= 0x000d, // 0x0010: Reserved (was BANDWIDTH)
-        XorPeerAddress= 0x0012,
-        Data= 0x0013,
-        XorRelayedAddress= 0x0016,
-        EventPort= 0x0018, // Not implemented
-        RequestedTransport= 0x0019,
-        DontFragment= 0x001A, // Not implemented
+        MagicCookie = 0x000f, // Not implemented, ByteString, 4 bytes
+        Realm = 0x0014,
+        Nonce = 0x0015,
+        XorMappedAddress = 0x0020,
+        Software = 0x8022,
+        Options = 0x8001, // Not implemented
+        AlternateServer = 0x000e,
+        Fingerprint = 0x8028, /// TURN
+        ChannelNumber = 0x000c,
+        Lifetime = 0x000d, // 0x0010: Reserved (was BANDWIDTH)
+        XorPeerAddress = 0x0012,
+        Data = 0x0013,
+        XorRelayedAddress = 0x0016,
+        EventPort = 0x0018, // Not implemented
+        RequestedTransport = 0x0019,
+        DontFragment = 0x001A, // Not implemented
         /// 0x0021: Reserved (was TIMER-VAL)
-        ReservationToken= 0x0022, // 8 bytes token value
+        ReservationToken = 0x0022, // 8 bytes token value
 
         /// TURN TCP
-        ConnectionID= 0x002a,
+        ConnectionID = 0x002a,
 
         /// ICE
-        ICEControlled= 0x8029,
-        ICEControlling= 0x802A,
-        ICEPriority= 0x0024,
-        ICEUseCandidate= 0x0025
+        ICEControlled = 0x8029,
+        ICEControlling = 0x802A,
+        ICEPriority = 0x0024,
+        ICEUseCandidate = 0x0025
     };
 
     virtual ~Attribute() {}
-    virtual Attribute* clone()= 0;
+    virtual Attribute* clone() = 0;
 
     /// Reads the body (not the type or size) for this
     /// type of attribute from  the given buffer. Return
     /// value is true if successful.
-    virtual void read(BitReader& reader)= 0;
+    virtual void read(BitReader& reader) = 0;
 
     /// Writes the body (not the type or size) to the
     /// given buffer. Return value is true if successful.
-    virtual void write(BitWriter& writer) const= 0;
+    virtual void write(BitWriter& writer) const = 0;
 
     /// Creates an attribute object with the given type
     /// and size.
-    static Attribute* create(std::uint16_t type, std::uint16_t size= 0);
+    static Attribute* create(std::uint16_t type, std::uint16_t size = 0);
 
     std::uint16_t type() const;
     std::uint16_t size() const;
@@ -101,32 +97,31 @@ public:
     void consumePadding(BitReader& reader) const;
     void writePadding(BitWriter& writer) const;
 
-    static const std::uint16_t TypeID= 0;
+    static const std::uint16_t TypeID = 0;
 
     std::string typeString();
     static std::string typeString(std::uint16_t type);
 
 protected:
-    Attribute(std::uint16_t type, std::uint16_t size= 0);
+    Attribute(std::uint16_t type, std::uint16_t size = 0);
     void setLength(std::uint16_t size);
 
     std::uint16_t _type;
     std::uint16_t _size;
 };
 
-
 ///
 /// Implements a STUN/TURN attribute that contains a socket address.
 class AddressAttribute : public Attribute
 {
 public:
-    AddressAttribute(std::uint16_t type, bool ipv4= true); // bool xor,
+    AddressAttribute(std::uint16_t type, bool ipv4 = true); // bool xor,
     AddressAttribute(const AddressAttribute& r);
 
     virtual stun::Attribute* clone();
 
-    static const std::uint16_t IPv4Size= 8;
-    static const std::uint16_t IPv6Size= 20;
+    static const std::uint16_t IPv4Size = 8;
+    static const std::uint16_t IPv6Size = 20;
 
     stun::AddressFamily family() const
     {
@@ -144,7 +139,7 @@ public:
     virtual void read(BitReader& reader);
     virtual void write(BitWriter& writer) const;
 
-    virtual void setAddress(const net::Address& addr) { _address= addr; }
+    virtual void setAddress(const net::Address& addr) { _address = addr; }
 
 #if 0
     virtual std::uint16_t port() const { return _port; }
@@ -165,7 +160,6 @@ private:
     net::Address _address;
 };
 
-
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt8Attribute : public Attribute
@@ -176,10 +170,10 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size= 1;
+    static const std::uint16_t Size = 1;
 
     std::uint8_t value() const { return _bits; }
-    void setValue(std::uint8_t bits) { _bits= bits; }
+    void setValue(std::uint8_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -191,7 +185,6 @@ private:
     std::uint8_t _bits;
 };
 
-
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt32Attribute : public Attribute
@@ -202,10 +195,10 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size= 4;
+    static const std::uint16_t Size = 4;
 
     std::uint32_t value() const { return _bits; }
-    void setValue(std::uint32_t bits) { _bits= bits; }
+    void setValue(std::uint32_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -217,7 +210,6 @@ private:
     std::uint32_t _bits;
 };
 
-
 ///
 /// Implements STUN/TURN attribute that reflects a 64-bit integer.
 class UInt64Attribute : public Attribute
@@ -228,10 +220,10 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size= 8;
+    static const std::uint16_t Size = 8;
 
     std::uint64_t value() const { return _bits; }
-    void setValue(std::uint64_t bits) { _bits= bits; }
+    void setValue(std::uint64_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -251,19 +243,18 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size= 0;
+    static const std::uint16_t Size = 0;
 
     void read(BitReader&) { assert(0 && "not implemented"); }
     void write(BitWriter&) const { assert(0 && "not implemented"); }
 };
-
 
 ///
 /// Implements STUN/TURN attribute that reflects an arbitrary byte string
 class StringAttribute : public Attribute
 {
 public:
-    StringAttribute(std::uint16_t type, std::uint16_t size= 0);
+    StringAttribute(std::uint16_t type, std::uint16_t size = 0);
     StringAttribute(const StringAttribute& r);
     virtual ~StringAttribute();
 
@@ -285,7 +276,6 @@ public:
 private:
     char* _bytes;
 };
-
 
 ///
 /// Implements STUN/TURN attribute that reflects a list of attribute names.
@@ -310,7 +300,6 @@ private:
     std::vector<std::uint16_t> _attrTypes;
 };
 
-
 ///
 /// Implements STUN/TURN attributes that reflects an internet address.
 class MessageIntegrity : public Attribute
@@ -322,8 +311,8 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t TypeID= 0x0008;
-    static const std::uint16_t Size= 20;
+    static const std::uint16_t TypeID = 0x0008;
+    static const std::uint16_t Size = 20;
 
     bool verifyHmac(const std::string& key) const;
 
@@ -331,9 +320,9 @@ public:
     std::string hmac() const { return _hmac; }
     std::string key() const { return _key; }
 
-    void setInput(const std::string& input) { _input= input; }
-    void setHmac(const std::string& hmac) { _hmac= hmac; }
-    void setKey(const std::string& key) { _key= key; }
+    void setInput(const std::string& input) { _input = input; }
+    void setHmac(const std::string& hmac) { _hmac = hmac; }
+    void setKey(const std::string& key) { _key = key; }
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
@@ -344,20 +333,19 @@ private:
     std::string _key;
 };
 
-
 ///
 /// Implements STUN/TURN attribute that reflects an error code.
 class ErrorCode : public Attribute
 {
 public:
-    ErrorCode(std::uint16_t size= MinSize);
+    ErrorCode(std::uint16_t size = MinSize);
     ErrorCode(const ErrorCode& r);
     virtual ~ErrorCode();
 
     virtual Attribute* clone();
 
-    static const std::uint16_t TypeID= 0x0009;
-    static const std::uint16_t MinSize= 4;
+    static const std::uint16_t TypeID = 0x0009;
+    static const std::uint16_t MinSize = 4;
 
     void setErrorCode(int code);
     // void setErrorClass(std::uint8_t eClass);
@@ -378,7 +366,6 @@ private:
     std::string _reason;
 };
 
-
 //
 /// Attribute macros
 //
@@ -388,7 +375,7 @@ private:
     class Name : public Derives                                                \
     {                                                                          \
     public:                                                                    \
-        static const std::uint16_t TypeID= Type;                               \
+        static const std::uint16_t TypeID = Type;                              \
         Name()                                                                 \
             : Derives(TypeID){};                                               \
         virtual ~Name(){};                                                     \
@@ -399,12 +386,11 @@ private:
     class Name : public Derives                                                \
     {                                                                          \
     public:                                                                    \
-        static const std::uint16_t TypeID= Type;                               \
-        Name(std::uint16_t size= Length)                                       \
+        static const std::uint16_t TypeID = Type;                              \
+        Name(std::uint16_t size = Length)                                      \
             : Derives(TypeID, size){};                                         \
         virtual ~Name(){};                                                     \
     };
-
 
 //
 /// Attribute declarations
@@ -459,8 +445,6 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 }
 } // namespace scy:stun
 
-
 #endif // SCY_STUN_Attributes_H
-
 
 /// @\}

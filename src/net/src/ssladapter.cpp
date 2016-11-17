@@ -8,7 +8,6 @@
 /// @addtogroup net
 /// @{
 
-
 #include "scy/net/ssladapter.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
@@ -20,10 +19,8 @@
 
 using namespace std;
 
-
 namespace scy {
 namespace net {
-
 
 SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     : _socket(socket)
@@ -34,17 +31,15 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     TraceS(this) << "Create" << endl;
 }
 
-
 SSLAdapter::~SSLAdapter()
 {
     TraceS(this) << "Destroy" << endl;
     if (_ssl) {
         SSL_free(_ssl);
-        _ssl= nullptr;
+        _ssl = nullptr;
     }
     TraceS(this) << "Destroy: OK" << endl;
 }
-
 
 void SSLAdapter::initClient()
 {
@@ -54,20 +49,19 @@ void SSLAdapter::initClient()
         _socket->useContext(SSLManager::instance().defaultClientContext());
     assert(!_socket->context()->isForServerUse());
 
-    _ssl= SSL_new(_socket->context()->sslContext());
+    _ssl = SSL_new(_socket->context()->sslContext());
 
     // TODO: Improve automatic SSL session handling.
     // Maybe add a stored session to the network manager.
     if (_socket->currentSession())
         SSL_set_session(_ssl, _socket->currentSession()->sslSession());
 
-    _readBIO= BIO_new(BIO_s_mem());
-    _writeBIO= BIO_new(BIO_s_mem());
+    _readBIO = BIO_new(BIO_s_mem());
+    _writeBIO = BIO_new(BIO_s_mem());
     SSL_set_bio(_ssl, _readBIO, _writeBIO);
     SSL_set_connect_state(_ssl);
     SSL_do_handshake(_ssl);
 }
-
 
 void SSLAdapter::initServer() //(SSL* ssl)
 {
@@ -77,14 +71,13 @@ void SSLAdapter::initServer() //(SSL* ssl)
         _socket->useContext(SSLManager::instance().defaultServerContext());
     assert(_socket->context()->isForServerUse());
 
-    _ssl= SSL_new(_socket->context()->sslContext());
-    _readBIO= BIO_new(BIO_s_mem());
-    _writeBIO= BIO_new(BIO_s_mem());
+    _ssl = SSL_new(_socket->context()->sslContext());
+    _readBIO = BIO_new(BIO_s_mem());
+    _writeBIO = BIO_new(BIO_s_mem());
     SSL_set_bio(_ssl, _readBIO, _writeBIO);
     SSL_set_accept_state(_ssl);
     SSL_do_handshake(_ssl);
 }
-
 
 void SSLAdapter::shutdown()
 {
@@ -93,8 +86,8 @@ void SSLAdapter::shutdown()
         TraceS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
-        int shutdownState= SSL_get_shutdown(_ssl);
-        bool shutdownSent=
+        int shutdownState = SSL_get_shutdown(_ssl);
+        bool shutdownSent =
             (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
         if (!shutdownSent) {
             // A proper clean shutdown would require us to
@@ -104,32 +97,28 @@ void SSLAdapter::shutdown()
             // most web browsers, so we just set the shutdown
             // flag by calling SSL_shutdown() once and be
             // done with it.
-            int rc= SSL_shutdown(_ssl);
+            int rc = SSL_shutdown(_ssl);
             if (rc < 0)
                 handleError(rc);
         }
     }
 }
 
-
 bool SSLAdapter::initialized() const
 {
     return !!_ssl;
 }
-
 
 bool SSLAdapter::ready() const
 {
     return _ssl && SSL_is_init_finished(_ssl);
 }
 
-
 int SSLAdapter::available() const
 {
     assert(_ssl);
     return SSL_pending(_ssl);
 }
-
 
 void SSLAdapter::addIncomingData(const char* data, std::size_t len)
 {
@@ -139,26 +128,22 @@ void SSLAdapter::addIncomingData(const char* data, std::size_t len)
     flush();
 }
 
-
 void SSLAdapter::addOutgoingData(const std::string& s)
 {
     addOutgoingData(s.c_str(), s.size());
 }
-
 
 void SSLAdapter::addOutgoingData(const char* data, std::size_t len)
 {
     std::copy(data, data + len, std::back_inserter(_bufferOut));
 }
 
-
 void SSLAdapter::handshake()
 {
-    int r= SSL_do_handshake(_ssl);
+    int r = SSL_do_handshake(_ssl);
     if (r < 0)
         handleError(r);
 }
-
 
 void SSLAdapter::flush()
 {
@@ -173,9 +158,9 @@ void SSLAdapter::flush()
 
     // Write any local data to SSL for excryption
     if (_bufferOut.size() > 0) {
-        int r= SSL_write(_ssl, &_bufferOut[0],
-                         _bufferOut.size()); // causes the write_bio to fill up
-                                             // (which we need to flush)
+        int r = SSL_write(_ssl, &_bufferOut[0],
+                          _bufferOut.size()); // causes the write_bio to fill up
+                                              // (which we need to flush)
         if (r < 0) {
             handleError(r);
         }
@@ -187,38 +172,35 @@ void SSLAdapter::flush()
     flushWriteBIO();
 }
 
-
 void SSLAdapter::flushReadBIO()
 {
-    int npending= BIO_ctrl_pending(_readBIO);
+    int npending = BIO_ctrl_pending(_readBIO);
     if (npending > 0) {
         int nread;
         char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
-        while ((nread= SSL_read(_ssl, buffer, MAX_TCP_PACKET_SIZE)) > 0) {
+        while ((nread = SSL_read(_ssl, buffer, MAX_TCP_PACKET_SIZE)) > 0) {
             _socket->onRecv(mutableBuffer(buffer, nread));
         }
     }
 }
 
-
 void SSLAdapter::flushWriteBIO()
 {
-    int npending= BIO_ctrl_pending(_writeBIO);
+    int npending = BIO_ctrl_pending(_writeBIO);
     if (npending > 0) {
         char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
-        int nread= BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);
+        int nread = BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);
         if (nread > 0) {
             _socket->write(buffer, nread);
         }
     }
 }
 
-
 void SSLAdapter::handleError(int rc)
 {
     if (rc >= 0)
         return;
-    int error= SSL_get_error(_ssl, rc);
+    int error = SSL_get_error(_ssl, rc);
     switch (error) {
         case SSL_ERROR_ZERO_RETURN:
             // TraceL << "SSL_ERROR_ZERO_RETURN" << endl;
@@ -245,9 +227,7 @@ void SSLAdapter::handleError(int rc)
     }
 }
 
-
 } // namespace net
 } // namespace scy
-
 
 /// @\}

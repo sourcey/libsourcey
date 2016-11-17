@@ -8,24 +8,19 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_Packetizers_H
 #define SCY_HTTP_Packetizers_H
-
 
 #include "scy/http/connection.h"
 #include "scy/signal.h"
 #include <sstream>
 
-
 namespace scy {
 namespace http {
-
 
 //
 // HTTP Chunked Adapter
 //
-
 
 class ChunkedAdapter : public IPacketizer
 {
@@ -36,8 +31,8 @@ public:
     bool initial;
     bool nocopy;
 
-    ChunkedAdapter(Connection* connection= nullptr,
-                   const std::string& frameSeparator= "", bool nocopy= true)
+    ChunkedAdapter(Connection* connection = nullptr,
+                   const std::string& frameSeparator = "", bool nocopy = true)
         : PacketProcessor(this->emitter)
         , connection(connection)
         , contentType(connection->outgoingHeader()->getContentType())
@@ -46,7 +41,7 @@ public:
     }
 
     ChunkedAdapter(const std::string& contentType,
-                   const std::string& frameSeparator= "", bool nocopy= true)
+                   const std::string& frameSeparator = "", bool nocopy = true)
         : PacketProcessor(this->emitter)
         , connection(nullptr)
         , contentType(contentType)
@@ -110,7 +105,7 @@ public:
             throw std::invalid_argument("Incompatible packet type");
         // Emit HTTP response header
         if (initial) {
-            initial= false;
+            initial = false;
             emitHeader();
         }
         // Get hex stream length
@@ -139,11 +134,9 @@ public:
     PacketSignal emitter;
 };
 
-
 //
 // HTTP Multipart Adapter
 //
-
 
 class MultipartAdapter : public IPacketizer
 {
@@ -153,7 +146,7 @@ public:
     bool isBase64;
     bool initial;
 
-    MultipartAdapter(Connection* connection, bool base64= false)
+    MultipartAdapter(Connection* connection, bool base64 = false)
         : IPacketizer(this->emitter)
         , connection(connection)
         , contentType(connection->outgoingHeader()->getContentType())
@@ -162,7 +155,7 @@ public:
     {
     }
 
-    MultipartAdapter(const std::string& contentType, bool base64= false)
+    MultipartAdapter(const std::string& contentType, bool base64 = false)
         : IPacketizer(this->emitter)
         , connection(nullptr)
         , contentType(contentType)
@@ -227,7 +220,7 @@ public:
     {
         // Write the initial HTTP response header
         if (initial) {
-            initial= false;
+            initial = false;
             emitHeader();
         }
         // Broadcast the HTTP header separately
@@ -241,12 +234,9 @@ public:
     PacketSignal emitter;
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

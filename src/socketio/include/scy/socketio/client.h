@@ -8,10 +8,8 @@
 /// @addtogroup socketio
 /// @{
 
-
 #ifndef SCY_SocketIO_Client_H
 #define SCY_SocketIO_Client_H
-
 
 #include "scy/collection.h"
 #include "scy/http/websocket.h"
@@ -19,20 +17,18 @@
 #include "scy/socketio/packet.h"
 #include "scy/socketio/transaction.h"
 
-
 namespace scy {
 namespace sockio {
-
 
 struct ClientState : public State
 {
     enum Type
     {
-        Closed= 0x00,
-        Connecting= 0x01,
-        Connected= 0x02,
-        Online= 0x04,
-        Error= 0x08
+        Closed = 0x00,
+        Connecting = 0x01,
+        Connected = 0x02,
+        Online = 0x04,
+        Error = 0x08
     };
 
     std::string str(unsigned int id) const
@@ -55,7 +51,6 @@ struct ClientState : public State
     };
 };
 
-
 class Client : public Stateful<ClientState>,
                public net::SocketAdapter,
                public PacketSignal
@@ -76,19 +71,19 @@ public:
 
         Options()
         {
-            host= "127.0.0.1";
-            port= 4500;
+            host = "127.0.0.1";
+            port = 4500;
 
-            reconnection= true;
-            reconnectAttempts= 0;
-            reconnectDelay= 6 * 1000; // 6 secs
+            reconnection = true;
+            reconnectAttempts = 0;
+            reconnectDelay = 6 * 1000; // 6 secs
         }
     };
 
 public:
     /// Client(const net::Socket::Ptr& socket);
     Client(const net::Socket::Ptr& socket,
-           const Options& options=
+           const Options& options =
                Options()); //, const std::string& host, std::uint16_t port
     virtual ~Client();
 
@@ -97,23 +92,23 @@ public:
     virtual void close();
 
     /// Send a default message packet.
-    virtual int send(const std::string& message, bool ack= false);
-    virtual int send(const json::Value& message, bool ack= false);
+    virtual int send(const std::string& message, bool ack = false);
+    virtual int send(const json::Value& message, bool ack = false);
 
     /// Send an event packet.
     virtual int send(const std::string& event, const char* message,
-                     bool ack= false);
+                     bool ack = false);
     virtual int send(const std::string& event, const std::string& message,
-                     bool ack= false);
+                     bool ack = false);
     virtual int send(const std::string& event, const json::Value& message,
-                     bool ack= false);
+                     bool ack = false);
 
     /// Send the given packet.
     virtual int send(const sockio::Packet& packet);
 
     /// Create a packet transaction.
     Transaction* createTransaction(const sockio::Packet& request,
-                                   long timeout= 10000);
+                                   long timeout = 10000);
 
     /// Return a reference to the client options object.
     Client::Options& options();
@@ -185,44 +180,37 @@ protected:
     bool _wasOnline;
 };
 
-
 //
 // TCP Client
 //
 
-
-Client* createTCPClient(const Client::Options& options= Client::Options(),
-                        uv::Loop* loop= uv::defaultLoop());
+Client* createTCPClient(const Client::Options& options = Client::Options(),
+                        uv::Loop* loop = uv::defaultLoop());
 
 class TCPClient : public Client
 {
 public:
-    TCPClient(const Client::Options& options= Client::Options(),
-              uv::Loop* loop= uv::defaultLoop());
+    TCPClient(const Client::Options& options = Client::Options(),
+              uv::Loop* loop = uv::defaultLoop());
 };
-
 
 //
 // SSL Client
 //
 
-
-Client* createSSLClient(const Client::Options& options= Client::Options(),
-                        uv::Loop* loop= uv::defaultLoop());
+Client* createSSLClient(const Client::Options& options = Client::Options(),
+                        uv::Loop* loop = uv::defaultLoop());
 
 class SSLClient : public Client
 {
 public:
-    SSLClient(const Client::Options& options= Client::Options(),
-              uv::Loop* loop= uv::defaultLoop());
+    SSLClient(const Client::Options& options = Client::Options(),
+              uv::Loop* loop = uv::defaultLoop());
 };
-
 
 } // namespace sockio
 } // namespace scy
 
-
 #endif // SCY_SocketIO_Client_H
-
 
 /// @\}

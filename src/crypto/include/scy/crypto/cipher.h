@@ -8,10 +8,8 @@
 /// @addtogroup crypto
 /// @{
 
-
 #ifndef SCY_Crypto_Cipher_H
 #define SCY_Crypto_Cipher_H
-
 
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
@@ -19,10 +17,8 @@
 
 #include <openssl/evp.h>
 
-
 namespace scy {
 namespace crypto {
-
 
 /// Provides symmetric algorithms for encryption and decryption.
 /// The algorithms that are available depend on the particular
@@ -85,22 +81,22 @@ public:
     /// Transport encoding to use for encrypt() and decrypt().
     enum Encoding
     {
-        Binary= 0x00,      ///< Plain binary output
-        Base64= 0x01,      ///< Base64-encoded output
-        BinHex= 0x02,      ///< BinHex-encoded output
-        Base64_NoLF= 0x81, ///< Base64-encoded output, no linefeeds
-        BinHex_NoLF= 0x82, ///< BinHex-encoded output, no linefeeds
+        Binary = 0x00,      ///< Plain binary output
+        Base64 = 0x01,      ///< Base64-encoded output
+        BinHex = 0x02,      ///< BinHex-encoded output
+        Base64_NoLF = 0x81, ///< Base64-encoded output, no linefeeds
+        BinHex_NoLF = 0x82, ///< BinHex-encoded output, no linefeeds
     };
 
     /// Encrypts a buffer and encode it using the given encoding.
     /// This method performs the encryption, and calls final() internally.
     int encrypt(const unsigned char* inbuf, std::size_t inlen,
                 unsigned char* outbuf, std::size_t outlen,
-                Encoding encoding= Binary);
+                Encoding encoding = Binary);
 
     /// Alias for encrypt() which accepts a range of buffer types.
     template <typename I, typename O>
-    int encrypt(const I& input, O& output, Encoding encoding= Binary)
+    int encrypt(const I& input, O& output, Encoding encoding = Binary)
     {
         internal::Raw<const unsigned char*> in(input);
         internal::Raw<unsigned char*> out(output);
@@ -109,26 +105,26 @@ public:
 
     /// Encrypts a string and encodes it using the given encoding.
     virtual std::string encryptString(const std::string& str,
-                                      Encoding encoding= Binary);
+                                      Encoding encoding = Binary);
 
     /// Decrypts a string that is encoded with the given encoding.
     virtual std::string decryptString(const std::string& str,
-                                      Encoding encoding= Binary);
+                                      Encoding encoding = Binary);
 
     /// Encrypts an input stream and encodes it using the given encoding.
     virtual void encryptStream(std::istream& source, std::ostream& sink,
-                               Encoding encoding= Binary);
+                               Encoding encoding = Binary);
 
     /// Decrypts an input stream that is encoded with the given encoding.
     virtual void decryptStream(std::istream& source, std::ostream& sink,
-                               Encoding encoding= Binary);
+                               Encoding encoding = Binary);
 
     /// Sets the key for the Cipher.
     template <typename T> void setKey(const T& key)
     {
         assert(int(key.size()) == keySize());
         _key.clear();
-        for (typename T::const_iterator it= key.begin(); it != key.end(); ++it)
+        for (typename T::const_iterator it = key.begin(); it != key.end(); ++it)
             _key.push_back(static_cast<unsigned char>(*it));
     }
 
@@ -137,7 +133,7 @@ public:
     {
         assert(int(iv.size()) == ivSize());
         _iv.clear();
-        for (typename T::const_iterator it= iv.begin(); it != iv.end(); ++it)
+        for (typename T::const_iterator it = iv.begin(); it != iv.end(); ++it)
             _iv.push_back(static_cast<unsigned char>(*it));
     }
 
@@ -203,11 +199,10 @@ protected:
     ByteVec _iv;
 };
 
-
 template <typename K, typename I>
 std::string encryptString(const std::string& algorithm, const std::string& data,
                           const K& key, const I& iv,
-                          Cipher::Encoding encoding= Cipher::Binary)
+                          Cipher::Encoding encoding = Cipher::Binary)
 {
     Cipher ciph(algorithm);
 
@@ -219,11 +214,10 @@ std::string encryptString(const std::string& algorithm, const std::string& data,
     return ciph.encryptString(data, encoding);
 }
 
-
 template <typename K, typename I>
 std::string decryptString(const std::string& algorithm, const std::string& data,
                           const K& key, const I& iv,
-                          Cipher::Encoding encoding= Cipher::Binary)
+                          Cipher::Encoding encoding = Cipher::Binary)
 {
     Cipher ciph(algorithm);
 
@@ -235,12 +229,9 @@ std::string decryptString(const std::string& algorithm, const std::string& data,
     return ciph.decryptString(data, encoding);
 }
 
-
 } // namespace crypto
 } // namespace scy
 
-
 #endif // SCY_Crypto_Cipher_H
-
 
 /// @\}

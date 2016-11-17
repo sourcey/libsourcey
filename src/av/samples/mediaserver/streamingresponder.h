@@ -1,8 +1,6 @@
 #include "mediaserver.h"
 
-
 namespace scy {
-
 
 class StreamingRequestHandler : public http::ServerResponder
 {
@@ -31,7 +29,7 @@ public:
         connection().shouldSendHeader(false); /// Create the packet stream
         MediaServer::setupPacketStream(stream, options, true,
                                        true); /// Start the stream
-        stream.emitter+=
+        stream.emitter +=
             packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.start();
     }
@@ -39,7 +37,7 @@ public:
     virtual void onClose()
     {
         DebugS(this) << "On close" << std::endl;
-        stream.emitter-=
+        stream.emitter -=
             packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.stop();
     }
@@ -49,7 +47,6 @@ public:
         DebugS(this) << "Send packet: "
                      // assert(!connection().socket()->closed());
                      << packet.size() << ": " << fpsCounter.fps << std::endl;
-
 
         try {
             connection().socket()->send((const char*)packet.data(),
@@ -65,6 +62,5 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
-
 
 } // namespace scy

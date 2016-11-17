@@ -8,16 +8,11 @@
 /// @addtogroup net
 /// @{
 
-
 #include "scy/net/util.h"
-
 
 namespace scy {
 namespace util {
-
-
 } // namespace util
 } // namespace scy
-
 
 /// @\}

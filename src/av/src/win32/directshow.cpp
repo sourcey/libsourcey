@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/win32/directshow.h"
 #include "scy/platform.h"
-
 
 #include <dbt.h> // DBT_* & DEV_*
 #include <dshow.h>
@@ -19,22 +17,19 @@
 #include <ksmedia.h> // KSCATEGORY_*
 #include <windows.h>
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
 namespace dshow {
 
-
 bool getDeviceCategoryList(Device::Type type, REFGUID category,
                            std::vector<av::Device>& devices)
 {
-    IMoniker* m= nullptr;
+    IMoniker* m = nullptr;
 
-    HRESULT hr= CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-    bool needCoUninitialize= SUCCEEDED(hr);
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool needCoUninitialize = SUCCEEDED(hr);
     if (FAILED(hr)) {
         if (hr != RPC_E_CHANGED_MODE) {
             ErrorL << "CoInitialize failed, hr=" << hr << endl;
@@ -44,22 +39,22 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
         }
     }
 
-    ICreateDevEnum* devenum= nullptr;
+    ICreateDevEnum* devenum = nullptr;
     if (CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC_SERVER,
                          IID_ICreateDevEnum, (void**)&devenum) != S_OK)
         return false;
 
-    IEnumMoniker* classenum= nullptr;
+    IEnumMoniker* classenum = nullptr;
     if (devenum->CreateClassEnumerator(category, (IEnumMoniker**)&classenum,
                                        0) != S_OK)
         return false;
 
     while (classenum->Next(1, &m, nullptr) == S_OK) {
         VARIANT var;
-        IPropertyBag* bag= nullptr;
-        LPMALLOC coMalloc= nullptr;
-        IBindCtx* bindCtx= nullptr;
-        LPOLESTR olestr= nullptr;
+        IPropertyBag* bag = nullptr;
+        LPMALLOC coMalloc = nullptr;
+        IBindCtx* bindCtx = nullptr;
+        LPOLESTR olestr = nullptr;
         std::string devId, devHumanName;
 
         if (CoGetMalloc(1, &coMalloc) != S_OK)
@@ -70,22 +65,22 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
         // Get an uuid for the device that we can pass to ffmpeg directly
         if (m->GetDisplayName(bindCtx, nullptr, &olestr) != S_OK)
             goto fail;
-        devId= scy::toUtf8(olestr);
+        devId = scy::toUtf8(olestr);
 
         // Replace ':' with '_' since FFmpeg uses : to delimitate sources
-        for (size_t i= 0; i < devId.length(); i++)
+        for (size_t i = 0; i < devId.length(); i++)
             if (devId[i] == ':')
-                devId[i]= '_';
+                devId[i] = '_';
 
         // Get a human friendly name/description
         if (m->BindToStorage(nullptr, nullptr, IID_IPropertyBag,
                              (void**)&bag) != S_OK)
             goto fail;
 
-        var.vt= VT_BSTR;
+        var.vt = VT_BSTR;
         if (bag->Read(L"FriendlyName", &var, nullptr) != S_OK)
             goto fail;
-        devHumanName= scy::toUtf8(var.bstrVal);
+        devHumanName = scy::toUtf8(var.bstrVal);
 
         devices.push_back(av::Device(type, "video=" + devId, devHumanName));
 
@@ -107,7 +102,6 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
     return !devices.empty();
 }
 
-
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     switch (type) {
@@ -128,10 +122,8 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
     return false;
 }
 
-
 } // namespace dshow
 } // namespace av
 } // namespace scy
-
 
 /// @\}

@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Memory_H
 #define SCY_Memory_H
-
 
 #include "scy/logger.h"
 #include "scy/mutex.h"
@@ -23,12 +21,9 @@
 #include <memory>
 #include <vector>
 
-
 namespace scy {
 
-
 class ScopedPointer;
-
 
 /// Simple garbage collector for deferred pointer deletion.
 class GarbageCollector
@@ -73,13 +68,11 @@ protected:
     uv_thread_t _tid;
 };
 
-
 //
 /// Deleter Functors
 //
 
 namespace deleter {
-
 
 #if 0 // use std::default_delete instead
 template<class T> struct Default
@@ -94,7 +87,6 @@ template<class T> struct Default
 };
 #endif
 
-
 template <class T> struct Deferred
 {
     void operator()(T* ptr)
@@ -105,7 +97,6 @@ template <class T> struct Deferred
     }
 };
 
-
 template <class T> struct Dispose
 {
     void operator()(T* ptr)
@@ -115,7 +106,6 @@ template <class T> struct Dispose
         ptr->dispose();
     }
 };
-
 
 template <class T> struct Array
 {
@@ -128,14 +118,11 @@ template <class T> struct Array
     }
 };
 
-
 } // namespace deleter
-
 
 //
 /// Scoped Pointer Classes
 //
-
 
 /// ScopedPointer provides an interface for holding
 /// and ansynchronously deleting a pointer in various ways.
@@ -146,10 +133,9 @@ public:
     virtual ~ScopedPointer() {}
 };
 
-
 /// ScopedRawPointer implements the ScopedPointer interface
 /// to provide a method for deleting a raw pointer.
-template <class T, typename D= std::default_delete<T>>
+template <class T, typename D = std::default_delete<T>>
 class ScopedRawPointer : public ScopedPointer
 {
 public:
@@ -164,10 +150,9 @@ public:
     {
         D func;
         func((T*)ptr);
-        ptr= nullptr;
+        ptr = nullptr;
     }
 };
-
 
 /// ScopedSharedPointer implements the ScopedPointer interface to
 /// provide deferred deletion for shared_ptr managed pointers.
@@ -190,11 +175,9 @@ public:
     virtual ~ScopedSharedPointer() {}
 };
 
-
 //
 // Garbage Collector inlines
 //
-
 
 /// Schedules a pointer for deferred deletion.
 template <class C> inline void GarbageCollector::deleteLater(C* ptr)
@@ -202,7 +185,6 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
     Mutex::ScopedLock lock(_mutex);
     _pending.push_back(new ScopedRawPointer<C>(ptr));
 }
-
 
 /// Schedules a shared pointer for deferred deletion.
 template <class C>
@@ -212,13 +194,11 @@ inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
     _pending.push_back(new ScopedSharedPointer<C>(ptr));
 }
 
-
 /// Convenience function for accessing GarbageCollector::deleteLater
 template <class C> inline void deleteLater(C* ptr)
 {
     GarbageCollector::instance().deleteLater(ptr);
 }
-
 
 /// Convenience function for accessing GarbageCollector::deleteLater
 template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
@@ -226,11 +206,9 @@ template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
     GarbageCollector::instance().deleteLater(ptr);
 }
 
-
 //
 // Memory and Reference Counted Objects
 //
-
 
 /// SharedObject is the base class for objects that
 /// employ reference counting based garbage collection.
@@ -242,7 +220,7 @@ class SharedObject
 public:
     /// Creates the SharedObject with an
     /// initial reference count of one.
-    SharedObject(bool deferred= false)
+    SharedObject(bool deferred = false)
         : count(1)
         , deferred(deferred)
     {
@@ -292,11 +270,8 @@ protected:
     bool deferred;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Memory_H
-
 
 /// @\}

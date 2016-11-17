@@ -12,10 +12,8 @@
 /// @addtogroup uv
 /// @{
 
-
 #ifndef SCY_UV_UVPP_H
 #define SCY_UV_UVPP_H
-
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
@@ -31,17 +29,14 @@
 #include <cstdint>
 #include <functional>
 
-
 namespace scy {
 namespace uv {
-
 
 //
 // Helpers
 //
 
-
-inline std::string formatError(const std::string& message, int errorno= 0)
+inline std::string formatError(const std::string& message, int errorno = 0)
 {
     std::string m(
         message); // prefix the message, since libuv errors are very brisk
@@ -56,32 +51,29 @@ inline std::string formatError(const std::string& message, int errorno= 0)
     return m;
 }
 
-
-inline void throwError(const std::string& message, int errorno= UV_UNKNOWN)
+inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 {
     throw std::runtime_error(formatError(message, errorno));
 }
-
 
 //
 // Default Event Loop
 //
 
-
 typedef uv_loop_t Loop;
 
-static uv_thread_t mainThread= 0;
+static uv_thread_t mainThread = 0;
 
 inline Loop* defaultLoop()
 {
     // Capture the main TID the first time
     // uv_default_loop is accessed.
     if (mainThread == 0)
-        mainThread= uv_thread_self();
+        mainThread = uv_thread_self();
     return uv_default_loop();
 }
 
-inline void runDefaultLoop(uv_run_mode mode= UV_RUN_DEFAULT)
+inline void runDefaultLoop(uv_run_mode mode = UV_RUN_DEFAULT)
 {
     uv_run(defaultLoop(), mode);
 }
@@ -91,18 +83,16 @@ inline void stopDefaultLoop()
     uv_stop(defaultLoop());
 }
 
-
 //
 /// UV Handle
 //
-
 
 /// A base class for managing a `libuv` handle during it's lifecycle and
 /// safely handling its asynchronous destruction mechanism.
 class Handle
 {
 public:
-    Handle(uv_loop_t* loop= nullptr, void* handle= nullptr);
+    Handle(uv_loop_t* loop = nullptr, void* handle = nullptr);
     virtual ~Handle();
 
     /// The event loop may be set before the handle is initialized.
@@ -143,20 +133,20 @@ public:
 
     /// Sets and throws the last error.
     /// Should never be called inside `libuv` callbacks.
-    virtual void setAndThrowError(const std::string& prefix= "UV Error",
-                                  int errorno= 0);
+    virtual void setAndThrowError(const std::string& prefix = "UV Error",
+                                  int errorno = 0);
 
     /// Throws the last error.
     /// This function is const so it can be used for
     /// invalid getter operations on closed handles.
     /// The actual error would be set on the next iteraton.
-    virtual void throwError(const std::string& prefix= "UV Error",
-                            int errorno= 0) const;
+    virtual void throwError(const std::string& prefix = "UV Error",
+                            int errorno = 0) const;
 
     /// Sets the last error and sends relevant callbacks.
     /// This method can be called inside `libuv` callbacks.
-    virtual void setUVError(const std::string& prefix= "UV Error",
-                            int errorno= 0);
+    virtual void setUVError(const std::string& prefix = "UV Error",
+                            int errorno = 0);
 
     /// Sets the error content and triggers callbacks.
     virtual void setError(const scy::Error& err);
@@ -176,8 +166,8 @@ protected:
     virtual void onClose();
 
 protected:
-    Handle(const Handle&)= delete;
-    Handle& operator=(const Handle&)= delete;
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
 
     uv_loop_t* _loop;
     uv_handle_t* _ptr;
@@ -186,11 +176,9 @@ protected:
     bool _closed;
 };
 
-
 //
 // Shutdown Signal Handler
 //
-
 
 struct ShutdownCmd
 {
@@ -199,18 +187,18 @@ struct ShutdownCmd
 };
 
 inline void onShutdownSignal(std::function<void(void*)> callback,
-                             void* opaque= nullptr, Loop* loop= defaultLoop())
+                             void* opaque = nullptr, Loop* loop = defaultLoop())
 {
-    auto cmd= new ShutdownCmd;
-    cmd->opaque= opaque;
-    cmd->callback= callback;
+    auto cmd = new ShutdownCmd;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
 
-    auto sig= new uv_signal_t;
-    sig->data= cmd;
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
     uv_signal_init(loop, sig);
     uv_signal_start(sig,
                     [](uv_signal_t* req, int /* signum */) {
-                        auto cmd= reinterpret_cast<ShutdownCmd*>(req->data);
+                        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
                         uv_close((uv_handle_t*)req,
                                  [](uv_handle_t* handle) { delete handle; });
                         if (cmd->callback)
@@ -221,17 +209,15 @@ inline void onShutdownSignal(std::function<void(void*)> callback,
 }
 
 inline void waitForShutdown(std::function<void(void*)> callback,
-                            void* opaque= nullptr, Loop* loop= defaultLoop())
+                            void* opaque = nullptr, Loop* loop = defaultLoop())
 {
     onShutdownSignal(callback, opaque, loop);
     uv_run(defaultLoop(), UV_RUN_DEFAULT);
 }
 
-
 //
 // Default Callbacks (Depreciated)
 //
-
 
 #define UVCallback(ClassName, Function, Handle)                                \
                                                                                \
@@ -240,41 +226,35 @@ inline void waitForShutdown(std::function<void(void*)> callback,
         static_cast<ClassName*>(handle->data)->Function();                     \
     };
 
-
 #define UVStatusCallback(ClassName, Function, Handle)                          \
                                                                                \
     static void Function(Handle* handle, int status)                           \
     {                                                                          \
-        ClassName* self= static_cast<ClassName*>(handle->data);                \
+        ClassName* self = static_cast<ClassName*>(handle->data);               \
         self->Function(status);                                                \
     }
-
 
 #define UVEmptyStatusCallback(ClassName, Function, Handle)                     \
                                                                                \
     static void Function(Handle* handle, int status)                           \
     {                                                                          \
-        ClassName* self= static_cast<ClassName*>(handle->data);                \
+        ClassName* self = static_cast<ClassName*>(handle->data);               \
         if (status)                                                            \
             self->setUVError("UV error", status);                              \
         self->Function();                                                      \
     }
 
-
 #define UVStatusCallbackWithType(ClassName, Function, Handle)                  \
                                                                                \
     static void Function(Handle* handle, int status)                           \
     {                                                                          \
-        ClassName* self= static_cast<ClassName*>(handle->data);                \
+        ClassName* self = static_cast<ClassName*>(handle->data);               \
         self->Function(handle, status);                                        \
     }
-
 
 } // namespace uv
 } // namespace scy
 
-
 #endif // SCY_UV_UVPP_H
-
 
 /// @\}

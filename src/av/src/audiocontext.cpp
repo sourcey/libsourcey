@@ -8,23 +8,18 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/audiocontext.h"
 #include "scy/av/audioresampler.h"
-
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 AudioContext::AudioContext()
     : // PacketProcessor(this->emitter),
@@ -39,13 +34,11 @@ AudioContext::AudioContext()
     initializeFFmpeg();
 }
 
-
 AudioContext::~AudioContext()
 {
     close();
     uninitializeFFmpeg();
 }
-
 
 void AudioContext::open()
 {
@@ -69,35 +62,33 @@ void AudioContext::open()
     }
 }
 
-
 void AudioContext::close()
 {
     if (frame) {
         // av_free(frame);
         av_frame_free(&frame);
-        frame= nullptr;
+        frame = nullptr;
     }
 
     if (ctx) {
         avcodec_close(ctx);
-        ctx= nullptr;
+        ctx = nullptr;
     }
 
     if (stream) {
         // The stream pointer is managed by the AVFormatContext
-        stream= nullptr;
+        stream = nullptr;
     }
 
     if (resampler) {
         delete resampler;
-        resampler= nullptr;
+        resampler = nullptr;
     }
 
-    time= 0;
-    pts= 0;
+    time = 0;
+    pts = 0;
     // error = "";
 }
-
 
 // double AudioContext::ptsSeconds()
 // {
@@ -117,7 +108,6 @@ void AudioContext::close()
 //
 //     return val;
 // }
-
 
 bool AudioContext::recreateResampler()
 {
@@ -154,39 +144,35 @@ bool AudioContext::recreateResampler()
     DebugL << "Recreating audio resampler context" << endl;
     if (resampler)
         delete resampler;
-    resampler= new AudioResampler();
-    resampler->iparams= iparams;
-    resampler->oparams= oparams;
+    resampler = new AudioResampler();
+    resampler->iparams = iparams;
+    resampler->oparams = oparams;
     resampler->open();
     return true;
 }
-
 
 // bool AudioContext::accepts(IPacket& packet)
 // {
 //     return dynamic_cast<AudioPacket*>(&packet) != 0;
 // }
 
-
 //
 // Helper functions
 //
 
-
 void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params)
 {
-    params.enabled= true;
-    params.encoder= avcodec_get_name(ctx->codec_id);
-    params.sampleFmt= av_get_sample_fmt_name(ctx->sample_fmt);
-    params.channels= ctx->channels;
-    params.sampleRate= ctx->sample_rate;
-    params.bitRate= ctx->bit_rate;
+    params.enabled = true;
+    params.encoder = avcodec_get_name(ctx->codec_id);
+    params.sampleFmt = av_get_sample_fmt_name(ctx->sample_fmt);
+    params.channels = ctx->channels;
+    params.sampleRate = ctx->sample_rate;
+    params.bitRate = ctx->bit_rate;
 }
-
 
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 {
-    const enum AVSampleFormat* p= codec->sample_fmts;
+    const enum AVSampleFormat* p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
         if (*p == sampleFormat)
             return true;
@@ -195,17 +181,16 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
     return false;
 }
 
-
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 {
-    enum AVSampleFormat compatible= AV_SAMPLE_FMT_NONE;
-    enum AVSampleFormat requested= av_get_sample_fmt(params.sampleFmt.c_str());
-    bool planar= av_sample_fmt_is_planar(requested);
-    const enum AVSampleFormat* p= codec->sample_fmts;
+    enum AVSampleFormat compatible = AV_SAMPLE_FMT_NONE;
+    enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
+    bool planar = av_sample_fmt_is_planar(requested);
+    const enum AVSampleFormat* p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
         if (compatible == AV_SAMPLE_FMT_NONE &&
             av_sample_fmt_is_planar(*p) == planar)
-            compatible= *p; // or use the first compatible format
+            compatible = *p; // or use the first compatible format
         if (*p == requested)
             return requested; // always try to return requested format
         p++;
@@ -213,12 +198,9 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
     return compatible;
 }
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

@@ -8,7 +8,6 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/ffmpeg.h"
 
 #ifdef HAVE_FFMPEG
@@ -18,7 +17,6 @@
 #include <iostream>
 #include <stdexcept>
 
-
 extern "C" {
 #include <libavformat/avformat.h>
 #ifdef HAVE_FFMPEG_AVDEVICE
@@ -26,17 +24,15 @@ extern "C" {
 #endif
 }
 
-
 namespace scy {
 namespace av {
 namespace internal {
-
 
 static int LockManagerOperation(void** lock, enum AVLockOp op)
 {
     switch (op) {
         case AV_LOCK_CREATE:
-            *lock= new Mutex();
+            *lock = new Mutex();
             if (!*lock)
                 return 1;
             return 0;
@@ -51,16 +47,14 @@ static int LockManagerOperation(void** lock, enum AVLockOp op)
 
         case AV_LOCK_DESTROY:
             delete static_cast<Mutex*>(*lock);
-            *lock= NULL;
+            *lock = NULL;
             return 0;
     }
     return 1;
 }
 
-
 static Mutex _mutex;
 static int _refCount(0);
-
 
 void initialize()
 {
@@ -83,7 +77,6 @@ void initialize()
     }
 }
 
-
 void uninitialize()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -93,21 +86,17 @@ void uninitialize()
     }
 }
 
-
 } // namespace internal
-
 
 void initializeFFmpeg()
 {
     internal::initialize();
 }
 
-
 void uninitializeFFmpeg()
 {
     internal::uninitialize();
 }
-
 
 std::string averror(const int error)
 {
@@ -116,69 +105,59 @@ std::string averror(const int error)
     return error_buffer;
 }
 
-
 void printInputFormats(std::ostream& ost, const char* delim)
 {
     initializeFFmpeg(); // init here so reference is not held
-    AVInputFormat* p= av_iformat_next(nullptr);
+    AVInputFormat* p = av_iformat_next(nullptr);
     while (p) {
         ost << p->name << delim;
-        p= av_iformat_next(p);
+        p = av_iformat_next(p);
     }
     uninitializeFFmpeg();
 }
-
 
 void printOutputFormats(std::ostream& ost, const char* delim)
 {
     initializeFFmpeg(); // init here so reference is not held
-    AVOutputFormat* p= av_oformat_next(nullptr);
+    AVOutputFormat* p = av_oformat_next(nullptr);
     while (p) {
         ost << p->name << delim;
-        p= av_oformat_next(p);
+        p = av_oformat_next(p);
     }
     uninitializeFFmpeg();
 }
-
 
 void printEncoders(std::ostream& ost, const char* delim)
 {
     initializeFFmpeg(); // init here so reference is not held
-    AVCodec* p= av_codec_next(nullptr);
+    AVCodec* p = av_codec_next(nullptr);
     while (p) {
         if (av_codec_is_encoder(p))
             ost << p->name << delim;
-        p= p->next;
+        p = p->next;
     }
     uninitializeFFmpeg();
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 #else
 
 namespace scy {
 namespace av {
 
-
 void initializeFFmpeg()
 {
 }
-
 
 void uninitializeFFmpeg()
 {
 }
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

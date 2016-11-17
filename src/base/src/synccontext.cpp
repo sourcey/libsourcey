@@ -8,12 +8,9 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/synccontext.h"
 
-
 namespace scy {
-
 
 SyncContext::SyncContext(uv::Loop* loop)
     : _handle(loop, new uv_async_t)
@@ -21,14 +18,12 @@ SyncContext::SyncContext(uv::Loop* loop)
     // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
 }
 
-
 SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target)
     : _handle(loop, new uv_async_t)
 {
     // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
     start(target);
 }
-
 
 SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target,
                          void* arg)
@@ -38,13 +33,11 @@ SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target,
     start(target, arg);
 }
 
-
 SyncContext::~SyncContext()
 {
     // assert(_handle.closed()); // must be dispose()d
     close();
 }
-
 
 void SyncContext::post()
 {
@@ -52,21 +45,21 @@ void SyncContext::post()
     uv_async_send(_handle.ptr<uv_async_t>());
 }
 
-
 void SyncContext::startAsync()
 {
     // assert(!_handle.active()); // active() can be unreliable when called
     // inside thread
 
-    _handle.ptr()->data= new async::Runner::Context::ptr(pContext);
-    int r= uv_async_init(
+    _handle.ptr()->data = new async::Runner::Context::ptr(pContext);
+    int r = uv_async_init(
         _handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
             assert(req->data != nullptr); // catch late callbacks, may need to
                                           // make uv handle a context member
-            auto ctx= reinterpret_cast<async::Runner::Context::ptr*>(req->data);
+            auto ctx =
+                reinterpret_cast<async::Runner::Context::ptr*>(req->data);
             if (ctx->get()->cancelled()) {
                 delete ctx; // delete the context and free memory
-                req->data= nullptr;
+                req->data = nullptr;
                 return;
             }
 
@@ -77,12 +70,10 @@ void SyncContext::startAsync()
         _handle.setAndThrowError("Cannot initialize async", r);
 }
 
-
 void SyncContext::cancel()
 {
     async::Runner::cancel();
 }
-
 
 void SyncContext::close()
 {
@@ -93,26 +84,21 @@ void SyncContext::close()
     _handle.close();
 }
 
-
 bool SyncContext::closed()
 {
     return _handle.closed();
 }
-
 
 bool SyncContext::async() const
 {
     return false;
 }
 
-
 uv::Handle& SyncContext::handle()
 {
     return _handle;
 }
 
-
 } // namespace scy
-
 
 /// @\}

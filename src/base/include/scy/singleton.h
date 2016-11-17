@@ -8,16 +8,12 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Singleton_H
 #define SCY_Singleton_H
 
-
 #include <cstdint>
 
-
 namespace scy {
-
 
 /// This is a helper template class for managing
 /// singleton objects allocated on the heap.
@@ -46,7 +42,7 @@ public:
     {
         Mutex::ScopedLock lock(_m);
         if (!_ptr)
-            _ptr= new S;
+            _ptr = new S;
         return _ptr;
     }
 
@@ -55,8 +51,8 @@ public:
     S* swap(S* newPtr)
     {
         Mutex::ScopedLock lock(_m);
-        S* oldPtr= _ptr;
-        _ptr= newPtr;
+        S* oldPtr = _ptr;
+        _ptr = newPtr;
         return oldPtr;
     }
 
@@ -66,7 +62,7 @@ public:
         Mutex::ScopedLock lock(_m);
         if (_ptr)
             delete _ptr;
-        _ptr= nullptr;
+        _ptr = nullptr;
     }
 
 private:
@@ -74,11 +70,8 @@ private:
     Mutex _m;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Singleton_H
-
 
 /// @\}

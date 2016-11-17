@@ -8,16 +8,13 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/application.h"
 #include "scy/error.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
 #include "scy/singleton.h"
 
-
 namespace scy {
-
 
 namespace internal {
 
@@ -31,12 +28,10 @@ struct ShutdownCmd
 };
 }
 
-
 Application& Application::getDefault()
 {
     return *internal::singleton.get();
 }
-
 
 Application::Application(uv::Loop* loop)
     : loop(loop)
@@ -44,24 +39,20 @@ Application::Application(uv::Loop* loop)
     DebugS(this) << "Create" << std::endl;
 }
 
-
 Application::~Application()
 {
     DebugS(this) << "Destroy" << std::endl;
 }
-
 
 void Application::run()
 {
     uv_run(loop, UV_RUN_DEFAULT);
 }
 
-
 void Application::stop()
 {
     uv_stop(loop);
 }
-
 
 void Application::finalize()
 {
@@ -84,21 +75,19 @@ void Application::finalize()
     DebugS(this) << "Finalization complete" << std::endl;
 }
 
-
 void Application::bindShutdownSignal(std::function<void(void*)> callback,
                                      void* opaque)
 {
-    auto cmd= new internal::ShutdownCmd;
-    cmd->self= this;
-    cmd->opaque= opaque;
-    cmd->callback= callback;
+    auto cmd = new internal::ShutdownCmd;
+    cmd->self = this;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
 
-    auto sig= new uv_signal_t;
-    sig->data= cmd;
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
     uv_signal_init(loop, sig);
     uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 }
-
 
 void Application::waitForShutdown(std::function<void(void*)> callback,
                                   void* opaque)
@@ -108,10 +97,9 @@ void Application::waitForShutdown(std::function<void(void*)> callback,
     run();
 }
 
-
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
-    auto cmd= reinterpret_cast<internal::ShutdownCmd*>(req->data);
+    auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
     DebugS(cmd->self) << "Got shutdown signal" << std::endl;
 
     uv_close((uv_handle_t*)req, [](uv_handle_t* handle) { delete handle; });
@@ -120,23 +108,20 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
     delete cmd;
 }
 
-
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
     DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
-
 //
 // Command-line option parser
 //
 
-
 OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 {
-    char* lastkey= 0;
-    int dlen= strlen(delim);
-    for (int i= 0; i < argc; i++) {
+    char* lastkey = 0;
+    int dlen = strlen(delim);
+    for (int i = 0; i < argc; i++) {
 
         // Get the application exe path
         if (i == 0) {
@@ -146,14 +131,14 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 
         // Get option keys
         if (strncmp(argv[i], delim, dlen) == 0) {
-            lastkey= (&argv[i][dlen]);
-            args[lastkey]= "";
+            lastkey = (&argv[i][dlen]);
+            args[lastkey] = "";
         }
 
         // Get value for current key
         else if (lastkey) {
-            args[lastkey]= argv[i];
-            lastkey= 0;
+            args[lastkey] = argv[i];
+            lastkey = 0;
         }
 
         else {
@@ -162,8 +147,6 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
     }
 }
 
-
 } // namespace scy
-
 
 /// @\}

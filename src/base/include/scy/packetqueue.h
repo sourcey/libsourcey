@@ -8,39 +8,34 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_PacketQueue_H
 #define SCY_PacketQueue_H
-
 
 #include "scy/base.h"
 #include "scy/packetstream.h"
 #include "scy/queue.h"
 #include "scy/synccontext.h"
 
-
 namespace scy {
-
 
 //
 // Synchronized Packet Queue
 //
 
-
-template <class T= IPacket>
+template <class T = IPacket>
 class SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
 {
 public:
     typedef SyncQueue<T> base_t;
     typedef PacketProcessor proc_t;
 
-    SyncPacketQueue(uv::Loop* loop, int maxSize= 1024)
+    SyncPacketQueue(uv::Loop* loop, int maxSize = 1024)
         : base_t(loop, maxSize)
         , proc_t(this->emitter)
     {
     }
 
-    SyncPacketQueue(int maxSize= 1024)
+    SyncPacketQueue(int maxSize = 1024)
         : base_t(uv::defaultLoop(), maxSize)
         , proc_t(this->emitter)
     {
@@ -58,7 +53,6 @@ protected:
 
     virtual void onStreamStateChange(const PacketStreamState&);
 };
-
 
 // SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
 //     SyncQueue<IPacket>(loop, maxSize),
@@ -81,7 +75,6 @@ protected:
 //     TraceS(this) << "Destroy" << std::endl;
 // }
 
-
 template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (base_t::cancelled()) {
@@ -92,7 +85,6 @@ template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
 
     base_t::push(reinterpret_cast<T*>(packet.clone()));
 }
-
 
 /// Emit should never be called after closure.
 /// Any late packets should have been dealt with
@@ -108,12 +100,10 @@ template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
     proc_t::emit(packet);
 }
 
-
 template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket& packet)
 {
     return dynamic_cast<T*>(&packet) != 0;
 }
-
 
 template <class T>
 inline void
@@ -134,20 +124,18 @@ SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
     }
 }
 
-
 //
 // Asynchronous Packet Queue
 //
 
-
-template <class T= IPacket>
+template <class T = IPacket>
 class AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
 {
 public:
     typedef AsyncQueue<T> base_t;
     typedef PacketProcessor proc_t;
 
-    AsyncPacketQueue(int maxSize= 1024)
+    AsyncPacketQueue(int maxSize = 1024)
         : base_t(maxSize)
         , proc_t(this->emitter)
     {
@@ -168,7 +156,6 @@ protected:
     virtual void onStreamStateChange(const PacketStreamState&);
 };
 
-
 template <class T> inline void AsyncPacketQueue<T>::close()
 {
     // Flush queued items, some protocols can't afford dropped packets
@@ -177,7 +164,6 @@ template <class T> inline void AsyncPacketQueue<T>::close()
     base_t::cancel();
     base_t::_thread.join();
 }
-
 
 template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
 {
@@ -190,7 +176,6 @@ template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
     proc_t::emit(packet);
 }
 
-
 template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
     if (base_t::cancelled()) {
@@ -202,12 +187,10 @@ template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
     base_t::push(reinterpret_cast<T*>(packet.clone()));
 }
 
-
 template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket& packet)
 {
     return dynamic_cast<T*>(&packet) != 0;
 }
-
 
 template <class T>
 inline void
@@ -235,8 +218,6 @@ AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 
 } // namespace scy
 
-
 #endif // SCY_PacketQueue_H
-
 
 /// @\}

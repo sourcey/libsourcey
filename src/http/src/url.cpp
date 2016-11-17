@@ -8,20 +8,16 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/url.h"
 #include "scy/util.h"
 
-
 namespace scy {
 namespace http {
-
 
 URL::URL()
 {
     parse("");
 }
-
 
 URL::URL(const char* url)
 {
@@ -29,26 +25,22 @@ URL::URL(const char* url)
     parse(url);
 }
 
-
 URL::URL(const std::string& url)
 {
     DebugL << "Parse string: " << url << std::endl;
     parse(url);
 }
 
-
 URL::URL(const std::string& scheme, const std::string& authority)
 {
     parse(scheme + "://" + authority);
 }
-
 
 URL::URL(const std::string& scheme, const std::string& authority,
          const std::string& pathEtc)
 {
     parse(scheme + "://" + authority + pathEtc);
 }
-
 
 URL::URL(const std::string& scheme, const std::string& authority,
          const std::string& path, const std::string& query,
@@ -57,11 +49,9 @@ URL::URL(const std::string& scheme, const std::string& authority,
     parse(scheme + "://" + authority + path + "?" + query + "#" + fragment);
 }
 
-
 URL::~URL()
 {
 }
-
 
 URL& URL::operator=(const URL& uri)
 {
@@ -70,13 +60,11 @@ URL& URL::operator=(const URL& uri)
     return *this;
 }
 
-
 URL& URL::operator=(const std::string& uri)
 {
     parse(uri);
     return *this;
 }
-
 
 URL& URL::operator=(const char* uri)
 {
@@ -84,12 +72,11 @@ URL& URL::operator=(const char* uri)
     return *this;
 }
 
-
 bool URL::parse(const std::string& url, bool whiny)
 {
     DebugL << "Parsing: " << url << std::endl;
     std::string src(util::trim(url));
-    _buf= src;
+    _buf = src;
     if (http_parser_parse_url(src.c_str(), src.length(), 0, &_parser) == 0)
         return true;
     _buf.clear();
@@ -98,7 +85,6 @@ bool URL::parse(const std::string& url, bool whiny)
                                  src);
     return false;
 }
-
 
 std::string URL::scheme() const
 {
@@ -111,7 +97,6 @@ std::string URL::scheme() const
     return res;
 }
 
-
 std::string URL::host() const
 {
     if (hasHost())
@@ -120,19 +105,17 @@ std::string URL::host() const
     return std::string();
 }
 
-
 std::uint16_t URL::port() const
 {
     if (hasPort())
         return _parser.port;
-    std::string sc= scheme();
+    std::string sc = scheme();
     if (sc == "http")
         return 80;
     else if (sc == "https")
         return 443;
     return 0;
 }
-
 
 std::string URL::authority() const
 {
@@ -149,7 +132,6 @@ std::string URL::authority() const
     return res;
 }
 
-
 std::string URL::pathEtc() const
 {
     std::string res;
@@ -165,7 +147,6 @@ std::string URL::pathEtc() const
     return res;
 }
 
-
 std::string URL::path() const
 {
     if (hasPath())
@@ -173,7 +154,6 @@ std::string URL::path() const
                            _parser.field_data[UF_PATH].len);
     return std::string();
 }
-
 
 std::string URL::query() const
 {
@@ -183,7 +163,6 @@ std::string URL::query() const
     return std::string();
 }
 
-
 std::string URL::fragment() const
 {
     if (hasFragment())
@@ -192,7 +171,6 @@ std::string URL::fragment() const
     return std::string();
 }
 
-
 std::string URL::userInfo() const
 {
     if (hasUserInfo())
@@ -200,7 +178,6 @@ std::string URL::userInfo() const
                            _parser.field_data[UF_USERINFO].len);
     return std::string();
 }
-
 
 #if 0
 void URL::updateSchema(const std::string& scheme)
@@ -282,68 +259,58 @@ void URL::updateUserInfo(const std::string& info)
 }
 #endif
 
-
 bool URL::valid() const
 {
     return !_buf.empty();
 }
-
 
 std::string URL::str() const
 {
     return _buf;
 }
 
-
 bool URL::hasSchema() const
 {
     return (_parser.field_set & (1 << UF_SCHEMA)) == (1 << UF_SCHEMA);
 }
-
 
 bool URL::hasHost() const
 {
     return (_parser.field_set & (1 << UF_HOST)) == (1 << UF_HOST);
 }
 
-
 bool URL::hasPort() const
 {
     return (_parser.field_set & (1 << UF_PORT)) == (1 << UF_PORT);
 }
-
 
 bool URL::hasPath() const
 {
     return (_parser.field_set & (1 << UF_PATH)) == (1 << UF_PATH);
 }
 
-
 bool URL::hasQuery() const
 {
     return (_parser.field_set & (1 << UF_QUERY)) == (1 << UF_QUERY);
 }
-
 
 bool URL::hasFragment() const
 {
     return (_parser.field_set & (1 << UF_FRAGMENT)) == (1 << UF_FRAGMENT);
 }
 
-
 bool URL::hasUserInfo() const
 {
     return (_parser.field_set & (1 << UF_USERINFO)) == (1 << UF_USERINFO);
 }
 
-
 std::string URL::encode(const std::string& str)
 {
-    const std::string unreserved=
+    const std::string unreserved =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
-    std::string escaped= "";
-    for (std::size_t i= 0; i < str.length(); i++) {
+    std::string escaped = "";
+    for (std::size_t i = 0; i < str.length(); i++) {
         if (unreserved.find_first_of(str[i]) != std::string::npos) {
             escaped.push_back(str[i]);
         } else {
@@ -356,26 +323,23 @@ std::string URL::encode(const std::string& str)
     return escaped;
 }
 
-
 std::string URL::decode(const std::string& str)
 {
-    std::string clean= "";
-    for (std::size_t i= 0; i < str.length(); i++) {
+    std::string clean = "";
+    for (std::size_t i = 0; i < str.length(); i++) {
         if (str[i] == '%') {
-            const std::string digits= "0123456789ABCDEF";
-            clean+=
+            const std::string digits = "0123456789ABCDEF";
+            clean +=
                 (char)(digits.find(str[i + 1]) * 16 + digits.find(str[i + 2]));
-            i+= 2;
+            i += 2;
         } else {
-            clean+= str[i];
+            clean += str[i];
         }
     }
     return clean;
 }
 
-
 } // namespace http
 } // namespace scy
-
 
 /// @\}

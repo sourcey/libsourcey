@@ -8,24 +8,19 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/configuration.h"
 #include "scy/error.h"
 #include "scy/util.h"
 
-
 namespace scy {
-
 
 Configuration::Configuration()
 {
 }
 
-
 Configuration::~Configuration()
 {
 }
-
 
 bool Configuration::exists(const std::string& key) const
 {
@@ -34,7 +29,6 @@ bool Configuration::exists(const std::string& key) const
     std::string tmp;
     return getRaw(key, tmp);
 }
-
 
 std::string Configuration::getString(const std::string& key) const
 {
@@ -46,7 +40,6 @@ std::string Configuration::getString(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 std::string Configuration::getString(const std::string& key,
                                      const std::string& defaultValue) const
@@ -60,7 +53,6 @@ std::string Configuration::getString(const std::string& key,
         return defaultValue;
 }
 
-
 std::string Configuration::getRawString(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -71,7 +63,6 @@ std::string Configuration::getRawString(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 std::string Configuration::getRawString(const std::string& key,
                                         const std::string& defaultValue) const
@@ -85,7 +76,6 @@ std::string Configuration::getRawString(const std::string& key,
         return defaultValue;
 }
 
-
 int Configuration::getInt(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -96,7 +86,6 @@ int Configuration::getInt(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 int Configuration::getInt(const std::string& key, int defaultValue) const
 {
@@ -109,7 +98,6 @@ int Configuration::getInt(const std::string& key, int defaultValue) const
         return defaultValue;
 }
 
-
 std::int64_t Configuration::getLargeInt(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -120,7 +108,6 @@ std::int64_t Configuration::getLargeInt(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 std::int64_t Configuration::getLargeInt(const std::string& key,
                                         std::int64_t defaultValue) const
@@ -134,7 +121,6 @@ std::int64_t Configuration::getLargeInt(const std::string& key,
         return defaultValue;
 }
 
-
 double Configuration::getDouble(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -145,7 +131,6 @@ double Configuration::getDouble(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 double Configuration::getDouble(const std::string& key,
                                 double defaultValue) const
@@ -159,7 +144,6 @@ double Configuration::getDouble(const std::string& key,
         return defaultValue;
 }
 
-
 bool Configuration::getBool(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -170,7 +154,6 @@ bool Configuration::getBool(const std::string& key) const
     else
         throw std::invalid_argument("Not found: " + key);
 }
-
 
 bool Configuration::getBool(const std::string& key, bool defaultValue) const
 {
@@ -183,14 +166,12 @@ bool Configuration::getBool(const std::string& key, bool defaultValue) const
         return defaultValue;
 }
 
-
 void Configuration::setString(const std::string& key, const std::string& value)
 {
     Mutex::ScopedLock lock(_mutex);
 
     setRaw(key, value);
 }
-
 
 void Configuration::setInt(const std::string& key, int value)
 {
@@ -199,14 +180,12 @@ void Configuration::setInt(const std::string& key, int value)
     setRaw(key, util::itostr<int>(value));
 }
 
-
 void Configuration::setLargeInt(const std::string& key, std::int64_t value)
 {
     Mutex::ScopedLock lock(_mutex);
 
     setRaw(key, util::itostr<std::int64_t>(value));
 }
-
 
 void Configuration::setDouble(const std::string& key, double value)
 {
@@ -215,14 +194,12 @@ void Configuration::setDouble(const std::string& key, double value)
     setRaw(key, util::itostr<double>(value));
 }
 
-
 void Configuration::setBool(const std::string& key, bool value)
 {
     Mutex::ScopedLock lock(_mutex);
 
     setRaw(key, value ? "true" : "false");
 }
-
 
 int Configuration::parseInt(const std::string& value)
 {
@@ -232,7 +209,6 @@ int Configuration::parseInt(const std::string& value)
         return util::strtoi<int>(value);
 }
 
-
 std::int64_t Configuration::parseLargeInt(const std::string& value)
 {
     if (value.compare(0, 2, "0x") == 0)
@@ -240,7 +216,6 @@ std::int64_t Configuration::parseLargeInt(const std::string& value)
     else
         return util::strtoi<std::int64_t>(value);
 }
-
 
 bool Configuration::parseBool(const std::string& value)
 {
@@ -265,11 +240,9 @@ bool Configuration::parseBool(const std::string& value)
                                  value);
 }
 
-
 //
 // Scoped Configuration
 //
-
 
 ScopedConfiguration::ScopedConfiguration(Configuration& config,
                                          const std::string& currentScope,
@@ -280,14 +253,12 @@ ScopedConfiguration::ScopedConfiguration(Configuration& config,
 {
 }
 
-
 ScopedConfiguration::ScopedConfiguration(const ScopedConfiguration& r)
     : config(r.config)
     , currentScope(r.currentScope)
     , defaultScope(r.defaultScope)
 {
 }
-
 
 /*
 ScopedConfiguration& ScopedConfiguration::operator = (const ScopedConfiguration&
@@ -302,7 +273,6 @@ that)
 }
 */
 
-
 std::string ScopedConfiguration::getString(const std::string& key,
                                            const std::string& defaultValue,
                                            bool forceDefaultScope) const
@@ -314,7 +284,6 @@ std::string ScopedConfiguration::getString(const std::string& key,
                      config.getString(getDafaultKey(key), defaultValue));
 }
 
-
 int ScopedConfiguration::getInt(const std::string& key, int defaultValue,
                                 bool forceDefaultScope) const
 {
@@ -323,7 +292,6 @@ int ScopedConfiguration::getInt(const std::string& key, int defaultValue,
                : config.getInt(getCurrentScope(key),
                                config.getInt(getDafaultKey(key), defaultValue));
 }
-
 
 double ScopedConfiguration::getDouble(const std::string& key,
                                       double defaultValue,
@@ -336,7 +304,6 @@ double ScopedConfiguration::getDouble(const std::string& key,
                      config.getDouble(getDafaultKey(key), defaultValue));
 }
 
-
 bool ScopedConfiguration::getBool(const std::string& key, bool defaultValue,
                                   bool forceDefaultScope) const
 {
@@ -346,13 +313,11 @@ bool ScopedConfiguration::getBool(const std::string& key, bool defaultValue,
                                                              defaultValue));
 }
 
-
 void ScopedConfiguration::setString(const std::string& key,
                                     const std::string& value, bool defaultScope)
 {
     config.setString(getScopedKey(key, defaultScope), value);
 }
-
 
 void ScopedConfiguration::setInt(const std::string& key, int value,
                                  bool defaultScope)
@@ -360,13 +325,11 @@ void ScopedConfiguration::setInt(const std::string& key, int value,
     config.setInt(getScopedKey(key, defaultScope), value);
 }
 
-
 void ScopedConfiguration::setDouble(const std::string& key, double value,
                                     bool defaultScope)
 {
     config.setDouble(getScopedKey(key, defaultScope), value);
 }
-
 
 void ScopedConfiguration::setBool(const std::string& key, bool value,
                                   bool defaultScope)
@@ -374,18 +337,15 @@ void ScopedConfiguration::setBool(const std::string& key, bool value,
     config.setBool(getScopedKey(key, defaultScope), value);
 }
 
-
 std::string ScopedConfiguration::getCurrentScope(const std::string& key) const
 {
     return currentScope + key;
 }
 
-
 std::string ScopedConfiguration::getDafaultKey(const std::string& key) const
 {
     return defaultScope + key;
 }
-
 
 std::string ScopedConfiguration::getScopedKey(const std::string& key,
                                               bool defaultScope) const
@@ -393,8 +353,6 @@ std::string ScopedConfiguration::getScopedKey(const std::string& key,
     return defaultScope ? getDafaultKey(key) : getCurrentScope(key);
 }
 
-
 } // namespace scy
-
 
 /// @\}

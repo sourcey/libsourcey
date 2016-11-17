@@ -8,7 +8,6 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/videodecoder.h"
 
 #ifdef HAVE_FFMPEG
@@ -16,42 +15,37 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
 
-
 VideoDecoder::VideoDecoder(AVStream* stream)
 {
-    this->stream= stream;
+    this->stream = stream;
 }
-
 
 VideoDecoder::~VideoDecoder()
 {
     close();
 }
 
-
 void VideoDecoder::create()
 {
     assert(stream);
     TraceS(this) << "Create: " << stream->index << endl;
 
-    ctx= stream->codec;
+    ctx = stream->codec;
 
-    codec= avcodec_find_decoder(ctx->codec_id);
+    codec = avcodec_find_decoder(ctx->codec_id);
     if (!codec)
         throw std::runtime_error("Video codec missing or unsupported.");
 
-    frame= av_frame_alloc();
+    frame = av_frame_alloc();
     if (frame == nullptr)
         throw std::runtime_error("Cannot allocate video input frame.");
 
-    int ret= avcodec_open2(ctx, codec, nullptr);
+    int ret = avcodec_open2(ctx, codec, nullptr);
     if (ret < 0)
         throw std::runtime_error("Cannot open the audio codec: " +
                                  averror(ret));
@@ -64,33 +58,30 @@ void VideoDecoder::create()
     initVideoCodecFromContext(stream, ctx, oparams);
 
     // Default to bgr24 output (planar formats not currently supported)
-    oparams.pixelFmt= "bgr24";
+    oparams.pixelFmt = "bgr24";
 }
-
 
 void VideoDecoder::open()
 {
     VideoContext::open();
 }
 
-
 void VideoDecoder::close()
 {
     VideoContext::close();
 }
-
 
 void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 {
     // assert(av_pix_fmt_count_planes((AVPixelFormat)frame->format) == 1 &&
     // "planar formats not supported");
 
-    dec->time= frame->pkt_pts > 0
-                   ? static_cast<std::int64_t>(frame->pkt_pts *
-                                               av_q2d(dec->stream->time_base) *
-                                               AV_TIME_BASE)
-                   : 0;
-    dec->pts= frame->pkt_pts;
+    dec->time = frame->pkt_pts > 0
+                    ? static_cast<std::int64_t>(frame->pkt_pts *
+                                                av_q2d(dec->stream->time_base) *
+                                                AV_TIME_BASE)
+                    : 0;
+    dec->pts = frame->pkt_pts;
 
     VideoPacket video(frame->data[0],
                       av_image_get_buffer_size(
@@ -98,8 +89,8 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
                           dec->oparams.height, 16), // frame->pkt_size,
                       frame->width,
                       frame->height, dec->time);
-    video.source= frame;
-    video.opaque= dec;
+    video.source = frame;
+    video.opaque = dec;
     dec->emitter.emit(/*dec, */ video);
 
     // opacket.data = frame->data[0];
@@ -133,17 +124,15 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
     //     << endl;
 }
 
-
 bool VideoDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.stream_index= stream->index;
-    ipacket.data= data;
-    ipacket.size= size;
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
     return decode(ipacket); //, opacket
 }
-
 
 bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 {
@@ -152,11 +141,11 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     assert(frame);
     assert(!stream || ipacket.stream_index == stream->index);
 
-    int ret, frameDecoded= 0;
+    int ret, frameDecoded = 0;
     while (ipacket.size > 0) {
-        ret= avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+        ret = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
-            error= "Audio decoder error: " + averror(ret);
+            error = "Audio decoder error: " + averror(ret);
             ErrorS(this) << error << endl;
             throw std::runtime_error(error);
         }
@@ -179,8 +168,8 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
             emitPacket(this, convert(frame)); //, frame, opacket, &ptsSeconds
         }
 
-        ipacket.size-= ret;
-        ipacket.data+= ret;
+        ipacket.size -= ret;
+        ipacket.data += ret;
     }
     assert(ipacket.size == 0);
 
@@ -243,36 +232,32 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     return !!frameDecoded;
 }
 
-
 void VideoDecoder::flush() // AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.data= nullptr;
-    ipacket.size= 0;
+    ipacket.data = nullptr;
+    ipacket.size = 0;
 
     // av_init_packet(&opacket);
     // opacket.data = nullptr;
     // opacket.size = 0;
 
-    int frameDecoded= 0;
+    int frameDecoded = 0;
     do {
         avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (frameDecoded) {
             TraceS(this) << "Flushed video frame" << endl;
             emitPacket(this,
                        convert(frame)); //, opacket stream, ctx, &pts, oparams
-            // return true;
+                                        // return true;
         }
     } while (frameDecoded);
 }
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

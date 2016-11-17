@@ -8,23 +8,18 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/client.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace http {
 
-
 //
 // Client Connection
 //
-
 
 ClientConnection::ClientConnection(const URL& url,
                                    const net::Socket::Ptr& socket)
@@ -38,8 +33,8 @@ ClientConnection::ClientConnection(const URL& url,
 {
     TraceS(this) << "Create: " << url << endl;
 
-    IncomingProgress.sender= this;
-    OutgoingProgress.sender= this;
+    IncomingProgress.sender = this;
+    OutgoingProgress.sender = this;
 
     _request.setURI(url.pathEtc());
     _request.setHost(url.host(), url.port());
@@ -49,7 +44,6 @@ ClientConnection::ClientConnection(const URL& url,
 
     replaceAdapter(new ClientAdapter(*this));
 }
-
 
 ClientConnection::~ClientConnection()
 {
@@ -61,7 +55,6 @@ ClientConnection::~ClientConnection()
     // }
 }
 
-
 void ClientConnection::close()
 {
     if (!closed()) {
@@ -70,21 +63,18 @@ void ClientConnection::close()
     }
 }
 
-
 void ClientConnection::send()
 {
     assert(!_connect);
     connect();
 }
 
-
 void ClientConnection::send(http::Request& req)
 {
     assert(!_connect);
-    _request= req;
+    _request = req;
     connect();
 }
-
 
 int ClientConnection::send(const char* data, std::size_t len, int flags)
 {
@@ -97,7 +87,6 @@ int ClientConnection::send(const char* data, std::size_t len, int flags)
     return len;
     // return Connection::send(data, len, flags);
 }
-
 
 // int ClientConnection::send(const std::string& buf, int flags) //, int flags
 // {
@@ -126,16 +115,14 @@ int ClientConnection::send(const char* data, std::size_t len, int flags)
 //     return _client;
 // }
 
-
 void ClientConnection::connect()
 {
     if (!_connect) {
-        _connect= true;
+        _connect = true;
         TraceS(this) << "Connecting" << endl;
         _socket->connect(_url.host(), _url.port());
     }
 }
-
 
 void ClientConnection::setReadStream(std::ostream* os)
 {
@@ -144,18 +131,15 @@ void ClientConnection::setReadStream(std::ostream* os)
     Incoming.attach(new StreamWriter(os), -1, true);
 }
 
-
 http::Message* ClientConnection::incomingHeader()
 {
     return static_cast<http::Message*>(&_response);
 }
 
-
 http::Message* ClientConnection::outgoingHeader()
 {
     return static_cast<http::Message*>(&_request);
 }
-
 
 //
 // Socket Callbacks
@@ -165,7 +149,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
     TraceS(this) << "On connect" << endl;
 
     // Set the connection to active
-    _active= true;
+    _active = true;
 
     // Emit the connect signal so raw connections like
     // websockets can kick off the data flow
@@ -194,18 +178,16 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
     }
 }
 
-
 //
 // Connection Callbacks
 
 void ClientConnection::onHeaders()
 {
     TraceS(this) << "On headers" << endl;
-    IncomingProgress.total= _response.getContentLength();
+    IncomingProgress.total = _response.getContentLength();
 
     Headers.emit(/*this, */ _response);
 }
-
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
@@ -233,7 +215,6 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
     Payload.emit(/*this, */ buffer);
 }
 
-
 void ClientConnection::onMessage()
 {
     TraceS(this) << "On complete" << endl;
@@ -241,15 +222,13 @@ void ClientConnection::onMessage()
     onComplete();
 }
 
-
 void ClientConnection::onComplete()
 {
     if (!_complete) {
-        _complete= true; // in case close() is called inside callback
+        _complete = true; // in case close() is called inside callback
         Complete.emit(/*this, */ _response);
     }
 }
-
 
 void ClientConnection::onClose()
 {
@@ -258,11 +237,9 @@ void ClientConnection::onClose()
     Connection::onClose();
 }
 
-
 //
 // HTTP Client
 //
-
 
 Singleton<Client>& singleton()
 {
@@ -270,18 +247,15 @@ Singleton<Client>& singleton()
     return singleton;
 }
 
-
 Client& Client::instance()
 {
     return *singleton().get();
 }
 
-
 void Client::destroy()
 {
     singleton().destroy();
 }
-
 
 Client::Client()
 {
@@ -291,13 +265,11 @@ Client::Client()
     //_timer.start(5000);
 }
 
-
 Client::~Client()
 {
     TraceS(this) << "Destroy" << endl;
     shutdown();
 }
-
 
 void Client::shutdown()
 {
@@ -307,14 +279,13 @@ void Client::shutdown()
     Shutdown.emit(/*this*/);
 
     //_connections.clear();
-    auto conns= _connections;
+    auto conns = _connections;
     for (auto conn : conns) {
         TraceS(this) << "Shutdown: " << conn << endl;
         conn->close(); // close and remove via callback
     }
     assert(_connections.empty());
 }
-
 
 void Client::addConnection(ClientConnection::Ptr conn)
 {
@@ -324,16 +295,15 @@ void Client::addConnection(ClientConnection::Ptr conn)
     //     removeConnection(conn.get());
     // };
 
-    conn->Close+=
+    conn->Close +=
         slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
     _connections.push_back(conn);
 }
 
-
 void Client::removeConnection(ClientConnection* conn)
 {
     TraceS(this) << "Removing connection: " << conn << endl;
-    for (auto it= _connections.begin(); it != _connections.end(); ++it) {
+    for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (conn == it->get()) {
             TraceS(this) << "Removed connection: " << conn << endl;
             _connections.erase(it);
@@ -343,12 +313,10 @@ void Client::removeConnection(ClientConnection* conn)
     assert(0 && "unknown connection");
 }
 
-
 void Client::onConnectionClose(Connection& conn)
 {
     removeConnection(reinterpret_cast<ClientConnection*>(&conn));
 }
-
 
 #if 0
 void Client::onConnectionTimer(void*)
@@ -365,9 +333,7 @@ void Client::onConnectionTimer(void*)
 }
 #endif
 
-
 } // namespace http
 } // namespace scy
-
 
 /// @\}

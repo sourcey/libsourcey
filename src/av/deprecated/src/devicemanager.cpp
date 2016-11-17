@@ -9,38 +9,32 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #include "scy/av/devicemanager.h"
 
 #ifdef HAVE_RTAUDIO
 #include "RtAudio.h"
 #endif
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
 
-static const char* kFilteredAudioDevicesName[]= {
+static const char* kFilteredAudioDevicesName[] = {
     NULL,
 };
 
 // Initialize to empty string
-const char IDeviceManager::kDefaultDeviceName[]= "";
-
+const char IDeviceManager::kDefaultDeviceName[] = "";
 
 //
 // Device
 //
 
-
 Device::Device()
     : id(-1)
 {
 }
-
 
 Device::Device(const std::string& type, int id, const std::string& name,
                const std::string& guid, bool isDefault, bool isAvailable)
@@ -53,25 +47,21 @@ Device::Device(const std::string& type, int id, const std::string& name,
 {
 }
 
-
 void Device::print(std::ostream& os)
 {
     os << "Device[" << type << ": " << id << ": " << name << ": " << isDefault
        << ": " << isAvailable << "]";
 }
 
-
 //
 // Device Manager
 //
-
 
 DeviceManager::DeviceManager()
     : _watcher(nullptr)
     , _initialized(false)
 {
 }
-
 
 DeviceManager::~DeviceManager()
 {
@@ -80,7 +70,6 @@ DeviceManager::~DeviceManager()
     if (_watcher)
         delete _watcher;
 }
-
 
 bool DeviceManager::initialize()
 {
@@ -92,7 +81,6 @@ bool DeviceManager::initialize()
     return true;
 }
 
-
 void DeviceManager::uninitialize()
 {
     if (initialized()) {
@@ -102,35 +90,31 @@ void DeviceManager::uninitialize()
     }
 }
 
-
 int DeviceManager::getCapabilities()
 {
     std::vector<Device> devices;
-    int caps= VIDEO_RECV;
+    int caps = VIDEO_RECV;
     if (getAudioInputDevices(devices) && !devices.empty()) {
-        caps|= AUDIO_SEND;
+        caps |= AUDIO_SEND;
     }
     if (getAudioOutputDevices(devices) && !devices.empty()) {
-        caps|= AUDIO_RECV;
+        caps |= AUDIO_RECV;
     }
     if (getVideoCaptureDevices(devices) && !devices.empty()) {
-        caps|= VIDEO_SEND;
+        caps |= VIDEO_SEND;
     }
     return caps;
 }
-
 
 bool DeviceManager::getAudioInputDevices(std::vector<Device>& devices)
 {
     return getAudioDevices(true, devices);
 }
 
-
 bool DeviceManager::getAudioOutputDevices(std::vector<Device>& devices)
 {
     return getAudioDevices(false, devices);
 }
-
 
 bool DeviceManager::getAudioInputDevice(Device& out, const std::string& name,
                                         int id)
@@ -138,12 +122,10 @@ bool DeviceManager::getAudioInputDevice(Device& out, const std::string& name,
     return getAudioDevice(true, out, name, id);
 }
 
-
 bool DeviceManager::getAudioInputDevice(Device& out, int id)
 {
     return getAudioDevice(true, out, id);
 }
-
 
 bool DeviceManager::getAudioOutputDevice(Device& out, const std::string& name,
                                          int id)
@@ -151,12 +133,10 @@ bool DeviceManager::getAudioOutputDevice(Device& out, const std::string& name,
     return getAudioDevice(false, out, name, id);
 }
 
-
 bool DeviceManager::getAudioOutputDevice(Device& out, int id)
 {
     return getAudioDevice(false, out, id);
 }
-
 
 bool DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
 {
@@ -171,7 +151,6 @@ bool DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
     return false;
 #endif
 }
-
 
 #if 0
 bool DeviceManager::getAudioInputDevice(Device& out, const std::string& name, int id)
@@ -198,13 +177,11 @@ bool DeviceManager::getAudioOutputDevice(Device& out, const std::string& name, i
 }
 #endif
 
-
 bool DeviceManager::getVideoCaptureDevice(Device& out, int id)
 {
     std::vector<Device> devices;
     return getVideoCaptureDevices(devices) && matchID(devices, out, id);
 }
-
 
 bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
                                           int id)
@@ -238,7 +215,6 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
 #endif
 }
 
-
 bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 {
     devs.clear();
@@ -261,14 +237,14 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
     RtAudio audio;
 
     // Determine the number of devices available
-    auto ndevices= audio.getDeviceCount();
+    auto ndevices = audio.getDeviceCount();
     TraceS(this) << "Get audio devices: " << ndevices << endl;
 
     // Scan through devices for various capabilities
     RtAudio::DeviceInfo info;
-    for (unsigned i= 0; i <= ndevices; i++) {
+    for (unsigned i = 0; i <= ndevices; i++) {
         try {
-            info= audio.getDeviceInfo(i); // may throw RtAudioError
+            info = audio.getDeviceInfo(i); // may throw RtAudioError
 
             TraceS(this) << "Device:"
                          << "\n\tName: " << info.name
@@ -298,19 +274,17 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 #endif
 }
 
-
 bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 {
-    bool ret= false;
+    bool ret = false;
     // We just return the first device.
     std::vector<Device> devices;
-    ret= (getVideoCaptureDevices(devices) && !devices.empty());
+    ret = (getVideoCaptureDevices(devices) && !devices.empty());
     if (ret) {
-        device= devices[0];
+        device = devices[0];
     }
     return ret;
 }
-
 
 bool DeviceManager::getAudioDevice(bool input, Device& out,
                                    const std::string& name, int id)
@@ -332,7 +306,6 @@ bool DeviceManager::getAudioDevice(bool input, Device& out,
     return matchNameAndID(devices, out, name, id);
 }
 
-
 bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
 {
     std::vector<Device> devices;
@@ -340,7 +313,6 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
     TraceL << "Get audio devices: " << devices.size() << endl;
     return matchID(devices, out, id);
 }
-
 
 #if 0
 bool DeviceManager::getDefaultAudioInputDevice(Device& device)
@@ -369,33 +341,30 @@ bool DeviceManager::getDefaultAudioOutputDevice(Device& device)
 }
 #endif
 
-
 bool DeviceManager::getDefaultAudioDevice(bool input, Device& device)
 {
-    bool ret= false;
+    bool ret = false;
     std::vector<Device> devices;
-    ret= (getAudioDevices(input, devices) && !devices.empty());
+    ret = (getAudioDevices(input, devices) && !devices.empty());
     if (ret) {
         // Use the first device by default
-        device= devices[0];
+        device = devices[0];
 
         // Loop through devices to check if any are explicitly
         // set as default
-        for (std::size_t i= 0; i < devices.size(); ++i) {
+        for (std::size_t i = 0; i < devices.size(); ++i) {
             if (devices[i].isDefault) {
-                device= devices[i];
+                device = devices[i];
             }
         }
     }
     return ret;
 }
 
-
 bool DeviceManager::getDefaultAudioInputDevice(Device& device)
 {
     return getDefaultAudioDevice(true, device);
 }
-
 
 bool DeviceManager::getDefaultAudioOutputDevice(Device& device)
 {
@@ -417,7 +386,6 @@ bool DeviceManager::getDefaultAudioOutputDevice(Device& device)
 //     return getDefaultAudioDevice(false, device);
 // }
 
-
 bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName,
                                           const char* const exclusionList[])
 {
@@ -425,7 +393,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName,
     if (!exclusionList)
         return false;
 
-    int i= 0;
+    int i = 0;
     while (exclusionList[i]) {
         if (util::icompare(deviceName, exclusionList[i]) == 0) {
             DebugL << "Ignoring device " << deviceName << endl;
@@ -436,13 +404,12 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName,
     return false;
 }
 
-
 bool DeviceManager::filterDevices(std::vector<Device>& devices,
                                   const char* const exclusionList[])
 {
-    for (auto it= devices.begin(); it != devices.end();) {
+    for (auto it = devices.begin(); it != devices.end();) {
         if (shouldDeviceBeIgnored(it->name, exclusionList)) {
-            it= devices.erase(it);
+            it = devices.erase(it);
         } else {
             ++it;
         }
@@ -450,12 +417,11 @@ bool DeviceManager::filterDevices(std::vector<Device>& devices,
     return !devices.empty();
 }
 
-
 bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 {
-    for (unsigned i= 0; i < devices.size(); ++i) {
+    for (unsigned i = 0; i < devices.size(); ++i) {
         if (devices[i].id == id) {
-            out= devices[i];
+            out = devices[i];
             return true;
         }
     }
@@ -467,23 +433,22 @@ bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
     return false;
 }
 
-
 bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out,
                                    const std::string& name, int id)
 {
     TraceL << "Match name and ID: " << name << ": " << id << endl;
 
-    bool ret= false;
-    for (int i= 0; i < static_cast<int>(devices.size()); ++i) {
+    bool ret = false;
+    for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
         TraceL << "Match name and ID: Checking: " << devices[i].name << endl;
         if (devices[i].name == name) {
             // The first device matching the given name will be returned,
             // but we will try and match the given ID as well.
             // if (out.id == -1)
-            out= devices[i];
+            out = devices[i];
             TraceL << "Match name and ID: Match: " << out.name << endl;
 
-            ret= true;
+            ret = true;
             if (id == -1 || id == i) {
 
                 TraceL << "Match name and ID: Match ID: " << out.name << endl;
@@ -495,51 +460,45 @@ bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out,
     return ret;
 }
 
-
 void DeviceManager::setWatcher(DeviceWatcher* watcher)
 {
     if (_watcher)
         delete _watcher;
-    _watcher= watcher;
+    _watcher = watcher;
     //_watcher.reset(watcher);
 }
-
 
 DeviceWatcher* DeviceManager::watcher()
 {
     return _watcher; //_watcher.get();
 }
 
-
 void DeviceManager::setInitialized(bool initialized)
 {
-    _initialized= initialized;
+    _initialized = initialized;
 }
-
 
 void DeviceManager::print(std::ostream& ost)
 {
     std::vector<Device> devs;
     getAudioInputDevices(devs);
     ost << "Audio input devices: " << endl;
-    for (std::size_t i= 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 
     getAudioOutputDevices(devs);
     ost << "Audio output devices: " << endl;
-    for (std::size_t i= 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 
     getVideoCaptureDevices(devs);
     ost << "Video capture devices: " << endl;
-    for (std::size_t i= 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 /*
  * libjingle

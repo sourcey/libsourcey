@@ -12,16 +12,13 @@
 
 #include <iostream>
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::net;
 using namespace scy::turn;
 
-
 namespace scy {
 namespace turn {
-
 
 struct TestServer : public turn::ServerObserver
 {
@@ -35,7 +32,7 @@ struct TestServer : public turn::ServerObserver
 
     void run(const turn::ServerOptions& opts)
     {
-        server->options()= opts;
+        server->options() = opts;
         server->start();
     }
 
@@ -57,7 +54,6 @@ struct TestServer : public turn::ServerObserver
         DebugS(this) << "Allocation removed" << endl;
     }
 };
-
 
 /// The initiating client...
 struct ClientTest
@@ -105,7 +101,7 @@ struct ClientTest
 
     void run()
     {
-        initiator->AllocationCreated+=
+        initiator->AllocationCreated +=
             slot(this, &ClientTest::onInitiatorAllocationCreated);
 
         // TODO: Use STUN binding request to get IP
@@ -121,7 +117,7 @@ struct ClientTest
 
 #if !TEST_TCP
         // Set the local responder address for UDP send indications
-        initiator->responderAddress= net::Address(
+        initiator->responderAddress = net::Address(
             TURN_AUTHORIZE_PEER_IP, responder->socket.address().port());
 #endif
     }
@@ -129,11 +125,10 @@ struct ClientTest
     void onTestComplete(void* sender, bool success)
     {
         DebugL << "Test complete: " << success << endl;
-        result= success ? Success : Failed;
+        result = success ? Success : Failed;
         // TestComplete.emit(/*this, */result);
     }
 };
-
 
 struct ClientTestRunner
 {
@@ -162,10 +157,10 @@ struct ClientTestRunner
         //    Timer::getDefault().start(TimerCallback<ClientTestRunner>(this,
         //    &ClientTestRunner::onTimeout, timeout));
 
-        nTimes= times;
-        for (int i= 0; i < nTimes; i++) {
-            auto client= new turn::ClientTest(i, o); //, reactor, runner
-            client->initiator->TestComplete+=
+        nTimes = times;
+        for (int i = 0; i < nTimes; i++) {
+            auto client = new turn::ClientTest(i, o); //, reactor, runner
+            client->initiator->TestComplete +=
                 slot(this, &ClientTestRunner::onTestComplete);
             client->run();
             tests.push_back(client);
@@ -199,7 +194,6 @@ struct ClientTestRunner
             << "\n\tSucceeded: " << nSucceeded << endl;
     }
 };
-
 
 struct TestTCPClientObserver : public TCPClientObserver
 {
@@ -242,7 +236,6 @@ struct TestTCPClientObserver : public TCPClientObserver
 }
 } //  namespace scy::turn
 
-
 /*
 static void onKillSignal(uv_signal_t *req, int signum)
 {
@@ -250,7 +243,6 @@ static void onKillSignal(uv_signal_t *req, int signum)
     uv_signal_stop(req);
 }
 */
-
 
 int main(int argc, char** argv)
 {
@@ -265,15 +257,15 @@ int main(int argc, char** argv)
 #if RAISE_LOCAL_SERVER
             DebugL << "Running Test Server" << endl;
             turn::ServerOptions so;
-            so.software= "Sourcey STUN/TURN Server [rfc5766]";
-            so.realm= "sourcey.com";
-            so.allocationDefaultLifetime= 1 * 60 * 1000;
-            so.allocationMaxLifetime= 15 * 60 * 1000;
+            so.software = "Sourcey STUN/TURN Server [rfc5766]";
+            so.realm = "sourcey.com";
+            so.allocationDefaultLifetime = 1 * 60 * 1000;
+            so.allocationMaxLifetime = 15 * 60 * 1000;
             // so.allocationDefaultLifetime        = 1 * 60 * 1000; // 1 min
             // so.allocationMaxLifetime            = 5 * 1000; // 5 seccs
-            so.timerInterval= 5 * 1000; // 5 seccs
-            so.listenAddr= net::Address("127.0.0.1", 3478);
-            so.enableUDP= false;
+            so.timerInterval = 5 * 1000; // 5 seccs
+            so.listenAddr = net::Address("127.0.0.1", 3478);
+            so.enableUDP = false;
 
             DebugL << "Binding Test Server" << endl;
             turn::TestServer srv;
@@ -287,12 +279,12 @@ int main(int argc, char** argv)
             {
                 DebugL << "Running Client Tests" << endl;
                 turn::Client::Options co;
-                co.serverAddr= net::Address(TURN_SERVER_IP, TURN_SERVER_PORT);
-                co.username= TURN_SERVER_USERNAME;
-                co.password= TURN_SERVER_PASSWORD;
-                co.lifetime= 120 * 1000; // 1 minute
-                co.timeout= 10 * 1000;
-                co.timerInterval= 3 * 1000;
+                co.serverAddr = net::Address(TURN_SERVER_IP, TURN_SERVER_PORT);
+                co.username = TURN_SERVER_USERNAME;
+                co.password = TURN_SERVER_PASSWORD;
+                co.lifetime = 120 * 1000; // 1 minute
+                co.timeout = 10 * 1000;
+                co.timerInterval = 3 * 1000;
 
                 turn::ClientTestRunner test;
                 test.run(co, 1, 10000);

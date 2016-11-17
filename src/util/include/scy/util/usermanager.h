@@ -8,28 +8,24 @@
 /// @addtogroup util
 /// @{
 
-
 #ifndef SCY_UserManager_H
 #define SCY_UserManager_H
 
 #include "scy/collection.h"
 #include <map>
 
-
 namespace scy {
-
 
 struct IUser
 {
-    virtual std::string username() const= 0;
-    virtual std::string password() const= 0;
+    virtual std::string username() const = 0;
+    virtual std::string password() const = 0;
 };
-
 
 class BasicUser : public IUser
 {
 public:
-    BasicUser(const std::string& username, const std::string& password= "")
+    BasicUser(const std::string& username, const std::string& password = "")
         : _username(username)
         , _password(password)
     {
@@ -43,9 +39,7 @@ protected:
     std::string _password;
 };
 
-
 typedef std::map<std::string, IUser*> IUserMap;
-
 
 /// @deprecated
 /// This class contains a list of users that have access
@@ -66,11 +60,8 @@ public:
     };
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_UserManager_H
-
 
 /// @\}

@@ -1,10 +1,8 @@
 #include "sympletests.h"
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::test;
-
 
 #define SERVER_HOST "localhost"
 #define USE_SSL 0
@@ -13,7 +11,6 @@ using namespace scy::test;
 #else
 #define SERVER_PORT 4500
 #endif
-
 
 int main(int argc, char** argv)
 {
@@ -54,10 +51,10 @@ int main(int argc, char** argv)
     //
     describe("client", []() {
         smpl::Client::Options loptions;
-        loptions.host= SERVER_HOST;
-        loptions.port= SERVER_PORT;
-        loptions.user= "l";
-        loptions.name= "Left";
+        loptions.host = SERVER_HOST;
+        loptions.port = SERVER_PORT;
+        loptions.user = "l";
+        loptions.name = "Left";
         // loptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
         // NOTE: The server should allow anonymous
@@ -65,10 +62,10 @@ int main(int argc, char** argv)
         // options.token = ""; used for authentication
 
         smpl::Client::Options roptions;
-        roptions.host= SERVER_HOST;
-        roptions.port= SERVER_PORT;
-        roptions.user= "r";
-        roptions.name= "Right";
+        roptions.host = SERVER_HOST;
+        roptions.port = SERVER_PORT;
+        roptions.user = "r";
+        roptions.name = "Right";
         // roptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
         TestClient lclient(loptions);

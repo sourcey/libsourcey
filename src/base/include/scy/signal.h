@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Signal_H
 #define SCY_Signal_H
-
 
 #include "scy/delegate.h"
 #include "scy/mutex.h"
@@ -19,9 +17,7 @@
 #include <memory>
 #include <vector>
 
-
 namespace scy {
-
 
 /// Internal classes
 namespace internal {
@@ -30,7 +26,6 @@ namespace internal {
 template <typename RT, typename... Args> struct Slot;
 
 } // namespace internal
-
 
 /// Signal and slots implementation.
 ///
@@ -123,8 +118,8 @@ public:
 
     /// Connects a lambda or `std::function` to the `Signal`.
     /// The returned value can be used to detach the slot.
-    int attach(Function const& func, void* instance= nullptr, int id= -1,
-               int priority= -1) const
+    int attach(Function const& func, void* instance = nullptr, int id = -1,
+               int priority = -1) const
     {
         return attach(std::make_shared<internal::Slot<RT, Args...>>(
             new FunctionDelegate<RT, Args...>(func), instance, id, priority));
@@ -137,7 +132,7 @@ public:
         detach(slot); // clear duplicates
         Mutex::ScopedLock lock(_mutex);
         if (slot->id == -1)
-            slot->id= ++_lastId; // TODO: assert unique?
+            slot->id = ++_lastId; // TODO: assert unique?
         _slots.push_back(slot);
         return slot->id;
     }
@@ -146,8 +141,8 @@ public:
     bool detach(int id) const
     {
         Mutex::ScopedLock lock(_mutex);
-        for (auto it= _slots.begin(); it != _slots.end();) {
-            auto& slot= *it;
+        for (auto it = _slots.begin(); it != _slots.end();) {
+            auto& slot = *it;
             if (slot->alive() && slot->id == id) {
                 slot->kill();
                 _slots.erase(it);
@@ -162,13 +157,13 @@ public:
     bool detach(const void* instance) const
     {
         Mutex::ScopedLock lock(_mutex);
-        bool removed= true;
-        for (auto it= _slots.begin(); it != _slots.end();) {
-            auto& slot= *it;
+        bool removed = true;
+        for (auto it = _slots.begin(); it != _slots.end();) {
+            auto& slot = *it;
             if (slot->alive() && slot->instance == instance) {
                 slot->kill();
-                it= _slots.erase(it);
-                removed= true;
+                it = _slots.erase(it);
+                removed = true;
             } else
                 ++it;
         }
@@ -179,8 +174,8 @@ public:
     bool detach(SlotPtr other) const
     {
         Mutex::ScopedLock lock(_mutex);
-        for (auto it= _slots.begin(); it != _slots.end();) {
-            auto& slot= *it;
+        for (auto it = _slots.begin(); it != _slots.end();) {
+            auto& slot = *it;
             if (slot->alive() && (*slot->delegate == *other->delegate)) {
                 slot->kill();
                 _slots.erase(it);
@@ -239,23 +234,20 @@ private:
 
     mutable Mutex _mutex;
     mutable std::vector<SlotPtr> _slots;
-    mutable int _lastId= 0;
+    mutable int _lastId = 0;
 };
 
-
 typedef Signal<void()> NullSignal;
-
 
 //
 // Inline Helpers
 //
 
-
 // Class member function slot
 template <class Class, class RT, class... Args>
-std::shared_ptr<internal::Slot<RT, Args...>> slot(Class* instance,
-                                                  RT (Class::*method)(Args...),
-                                                  int id= -1, int priority= -1)
+std::shared_ptr<internal::Slot<RT, Args...>>
+slot(Class* instance, RT (Class::*method)(Args...), int id = -1,
+     int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, Args...>>(
         new ClassDelegate<Class, RT, Args...>(instance, method), instance, id,
@@ -265,8 +257,8 @@ std::shared_ptr<internal::Slot<RT, Args...>> slot(Class* instance,
 // Const class member function slot
 template <class Class, class RT, class... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
-slot(Class* instance, RT (Class::*method)(Args...) const, int id= -1,
-     int priority= -1)
+slot(Class* instance, RT (Class::*method)(Args...) const, int id = -1,
+     int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, Args...>>(
         new ConstClassDelegate<Class, RT, Args...>(instance, method), instance,
@@ -275,8 +267,8 @@ slot(Class* instance, RT (Class::*method)(Args...) const, int id= -1,
 
 // Static function slot
 template <class RT, class... Args>
-std::shared_ptr<internal::Slot<RT, Args...>> slot(RT (*method)(Args...),
-                                                  int id= -1, int priority= -1)
+std::shared_ptr<internal::Slot<RT, Args...>>
+slot(RT (*method)(Args...), int id = -1, int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, Args...>>(
         new FunctionDelegate<RT, Args...>([method](Args... args) {
@@ -284,7 +276,6 @@ std::shared_ptr<internal::Slot<RT, Args...>> slot(RT (*method)(Args...),
         }),
         nullptr, id, priority);
 }
-
 
 /// Internal classes
 namespace internal {
@@ -298,8 +289,8 @@ template <typename RT, typename... Args> struct Slot
     int priority;
     std::atomic_flag flag;
 
-    Slot(AbstractDelegate<RT, Args...>* delegate, void* instance= nullptr,
-         int id= -1, int priority= -1)
+    Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr,
+         int id = -1, int priority = -1)
         : delegate(delegate)
         , instance(instance)
         , id(id)
@@ -315,7 +306,6 @@ template <typename RT, typename... Args> struct Slot
 };
 
 } // namespace internal
-
 
 // /// This exception is used to break out of a Signal callback scope.
 // class StopPropagation: public std::exception
@@ -547,11 +537,8 @@ template <typename RT, typename... Args> struct Slot
 // class Signal4: public SignalBase<DelegateBase<P, P2, P3, P4>, P, P2, P3, P4>
 // {};
 
-
 } // namespace scy
 
-
 #endif // SCY_Signal_H
-
 
 /// @\}

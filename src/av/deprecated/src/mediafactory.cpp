@@ -8,44 +8,35 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/mediafactory.h"
 #include "scy/logger.h"
 
-
 #if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
 
-
 static Singleton<MediaFactory> singleton;
-
 
 MediaFactory& MediaFactory::instance()
 {
     return *singleton.get();
 }
 
-
 void MediaFactory::shutdown()
 {
     singleton.destroy();
 }
 
-
 MediaFactory::MediaFactory()
 {
-    _devices= DeviceManagerFactory::create();
+    _devices = DeviceManagerFactory::create();
     _devices->initialize();
     //_devices->DevicesChanged += sdelegate(this,
     //&MediaFactory::onDevicesChanged);
 }
-
 
 MediaFactory::~MediaFactory()
 {
@@ -57,20 +48,17 @@ MediaFactory::~MediaFactory()
     }
 }
 
-
 IDeviceManager& MediaFactory::devices()
 {
     Mutex::ScopedLock lock(_mutex);
     return *_devices;
 }
 
-
 FormatRegistry& MediaFactory::formats()
 {
     Mutex::ScopedLock lock(_mutex);
     return _formats;
 }
-
 
 void MediaFactory::loadVideoCaptures()
 {
@@ -82,7 +70,7 @@ void MediaFactory::loadVideoCaptures()
     // reference count becomes positive.
     std::vector<Device> devs;
     devices().getCameras(devs);
-    for (std::size_t i= 0; i < devs.size(); ++i) {
+    for (std::size_t i = 0; i < devs.size(); ++i) {
         try {
             createVideoCapture(devs[0].id);
         } catch (std::exception& exc) {
@@ -92,7 +80,6 @@ void MediaFactory::loadVideoCaptures()
     }
 }
 
-
 void MediaFactory::reloadFailedVideoCaptures()
 {
     DebugL << "Reloading failed video captures" << endl;
@@ -100,7 +87,7 @@ void MediaFactory::reloadFailedVideoCaptures()
 
     // Loop through captures and attempt to reopen any
     // that may have been unplugged
-    auto videoCaptures= this->videoCaptures();
+    auto videoCaptures = this->videoCaptures();
     for (auto& kv : videoCaptures) {
         if (kv.second->error().any()) {
             TraceL << "Reloading capture " << kv.second->deviceId() << ": "
@@ -122,20 +109,17 @@ void MediaFactory::reloadFailedVideoCaptures()
     }
 }
 
-
 std::map<int, VideoCapture::Ptr> MediaFactory::videoCaptures() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _videoCaptures;
 }
 
-
 void MediaFactory::unloadVideoCaptures()
 {
     Mutex::ScopedLock lock(_mutex);
     _videoCaptures.clear();
 }
-
 
 VideoCapture::Ptr
 MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
@@ -147,34 +131,32 @@ MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 
     Mutex::ScopedLock lock(_mutex);
 
-    auto it= _videoCaptures.find(deviceId);
+    auto it = _videoCaptures.find(deviceId);
     if (it != _videoCaptures.end())
         return it->second;
 
-    auto capture= std::make_shared<VideoCapture>(deviceId);
-    _videoCaptures[deviceId]= capture;
+    auto capture = std::make_shared<VideoCapture>(deviceId);
+    _videoCaptures[deviceId] = capture;
     VideoCaptureLoaded.emit(/*this, */ capture);
 
     // Listen for errors.
     // NOTE: The capture is opened and started in the constructor,
     // so exceptions thrown during startup will not be handled
     // via this callback.
-    capture->Error+= sdelegate(this, &MediaFactory::onVideoCaptureError);
+    capture->Error += sdelegate(this, &MediaFactory::onVideoCaptureError);
     return capture;
 }
 
-
 void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 {
-    auto capture= reinterpret_cast<VideoCapture*>(sender);
-    auto videoCaptures= this->videoCaptures();
-    auto it= videoCaptures.find(capture->deviceId());
+    auto capture = reinterpret_cast<VideoCapture*>(sender);
+    auto videoCaptures = this->videoCaptures();
+    auto it = videoCaptures.find(capture->deviceId());
     if (it != videoCaptures.end()) {
         VideoCaptureError.emit(/*this, */ it->second);
     } else
         assert(0);
 }
-
 
 VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 {
@@ -182,7 +164,6 @@ VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 
     return std::make_shared<VideoCapture>(file);
 }
-
 
 AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels,
                                                    int sampleRate,
@@ -196,9 +177,7 @@ AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels,
                                           format);
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif

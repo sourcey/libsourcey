@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_VideoEncoder_H
 #define SCY_AV_VideoEncoder_H
-
 
 #include "scy/base.h"
 
@@ -22,14 +20,12 @@
 #include "scy/av/types.h"
 #include "scy/av/videocontext.h"
 
-
 namespace scy {
 namespace av {
 
-
 struct VideoEncoder : public VideoContext
 {
-    VideoEncoder(AVFormatContext* format= nullptr);
+    VideoEncoder(AVFormatContext* format = nullptr);
     virtual ~VideoEncoder();
 
     virtual void create();
@@ -50,17 +46,13 @@ struct VideoEncoder : public VideoContext
     /// This method should be called once before stream closure.
     virtual void flush();
 
-
     AVFormatContext* format; /// std::uint8_t* buffer;    /// int bufferSize;
 };
-
 
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_VideoEncoder_H
-
 
 /// @\}

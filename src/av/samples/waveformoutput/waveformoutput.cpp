@@ -3,11 +3,9 @@
 
 #include <conio.h>
 
-
 using namespace std;
 using namespace Sourcey;
 using namespace Sourcey::Media;
-
 
 /*
 // Detect Memory Leaks
@@ -17,7 +15,6 @@ CMemLeakDetect memLeakDetect;
 #endif<DataPacket>
 */
 
-
 int main(int argc, char** argv)
 {
     try {
@@ -25,10 +22,10 @@ int main(int argc, char** argv)
 
         VideoAnalyzer analyzer;
 
-        std::string ifile= "d:/Harold Kumar 3 Christmas tablet.mp4";
-        std::string ofile= "output.csv";
+        std::string ifile = "d:/Harold Kumar 3 Christmas tablet.mp4";
+        std::string ofile = "output.csv";
 
-        char o= 0;
+        char o = 0;
         while (o != 'Q') {
             cout << "COMMANDS:\n\n"
                     "  I    Set Input File.\n"
@@ -37,7 +34,7 @@ int main(int argc, char** argv)
                     "  S    Stop Analyzing Video.\n"
                     "  Q    Quit.\n\n";
 
-            o= toupper(getch());
+            o = toupper(getch());
 
             // Set Input File
             if (o == 'I') {
@@ -70,9 +67,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-
 // using namespace Poco::Net;
-
 
 /*
 #include "AVFileReader.h"
@@ -235,7 +230,6 @@ double min = 0, double max = 0, double avg = 0)
     }
 */
 
-
 /*
 
     //AudioDecoder* audio = reinterpret_cast<AudioDecoder*>(packet.opaque);
@@ -295,7 +289,6 @@ vector<FFT::Complex> _fftData;
 };
 */
 
-
 /*
 
 // A standard 16-bit stereo WAVE file, but with a long header
@@ -332,7 +325,6 @@ for (int k = 0; k < (n >> 1); ++k)
     system("pause");
 
 */
-
 
 /*
 WaveformOutput app;

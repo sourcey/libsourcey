@@ -8,10 +8,8 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_IAllocation_H
 #define SCY_TURN_IAllocation_H
-
 
 #include "scy/logger.h"
 #include "scy/mutex.h"
@@ -22,10 +20,8 @@
 #include "scy/turn/turn.h"
 #include "scy/turn/types.h"
 
-
 namespace scy {
 namespace turn {
-
 
 /// All TURN operations revolve around allocations, and all TURN messages
 /// are associated with an allocation.  An allocation conceptually
@@ -73,14 +69,14 @@ namespace turn {
 class IAllocation
 {
 public:
-    IAllocation(const FiveTuple& tuple= FiveTuple(),
-                const std::string& username= "",
-                std::int64_t lifetime= 10 * 60 * 1000);
+    IAllocation(const FiveTuple& tuple = FiveTuple(),
+                const std::string& username = "",
+                std::int64_t lifetime = 10 * 60 * 1000);
     virtual ~IAllocation();
 
     /// Updates the allocation's internal timeout and bandwidth
     /// usage each time the allocation is used.
-    virtual void updateUsage(std::int64_t numBytes= 0);
+    virtual void updateUsage(std::int64_t numBytes = 0);
 
     /// Sets the lifetime of the allocation and resets the timeout.
     virtual void setLifetime(std::int64_t lifetime);
@@ -110,7 +106,7 @@ public:
     virtual std::int64_t lifetime() const;
     virtual PermissionList permissions() const;
 
-    virtual net::Address relayedAddress() const= 0;
+    virtual net::Address relayedAddress() const = 0;
 
     virtual void addPermission(const std::string& ip);
     virtual void addPermissions(const IPList& ips);
@@ -145,12 +141,9 @@ protected:
     bool _deleted;
 };
 
-
 } // namespace turn
 } // namespace scy
 
-
 #endif // SCY_TURN_IAllocation_H
-
 
 /// @\}

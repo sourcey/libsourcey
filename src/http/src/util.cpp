@@ -8,72 +8,65 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/util.h"
 #include "scy/util.h"
 
-
 // using std::endl;
-
 
 namespace scy {
 namespace http {
 
-
 std::string parseURI(const std::string& request)
 {
-    std::string req= request;
-    std::string value= "";
-    std::string::size_type start, end= 0;
+    std::string req = request;
+    std::string value = "";
+    std::string::size_type start, end = 0;
     util::toUpper(req);
-    start= req.find(" ");
+    start = req.find(" ");
     if (start != std::string::npos) {
         start++;
-        end= req.find(" HTTPS", start);
+        end = req.find(" HTTPS", start);
         if (end == std::string::npos)
-            end= req.find(" HTTP", start);
+            end = req.find(" HTTP", start);
         if (end == std::string::npos)
-            end= req.find(" RTSP", start);
+            end = req.find(" RTSP", start);
         if (end == std::string::npos)
             return "";
-        value= request.substr(start, end - start);
+        value = request.substr(start, end - start);
     }
     return value;
 }
 
-
 bool matchURL(const std::string& uri, const std::string& expression)
 {
-    std::string::size_type index= uri.find("?");
+    std::string::size_type index = uri.find("?");
     return util::matchNodes(uri.substr(0, index), expression, "/");
 }
 
-
 std::string parseCookieItem(const std::string& cookie, const std::string& item)
 {
-    std::string::size_type start, end= 0;
-    start= cookie.find(item + "=");
+    std::string::size_type start, end = 0;
+    start = cookie.find(item + "=");
     if (start != std::string::npos) {
-        start+= item.size() + 1;
-        end= cookie.find(";", start);
+        start += item.size() + 1;
+        end = cookie.find(";", start);
         return cookie.substr(start, end - start);
     }
     return "";
 }
 
-
 bool splitURIParameters(const std::string& uri, NVCollection& out)
 {
-    std::size_t len= uri.length();
-    std::size_t i= 0;
+    std::size_t len = uri.length();
+    std::size_t i = 0;
 
     // Parse REST parameters
     while (i < len && uri[i] != '?') {
         i++;
 
-        std::string value= "";
+        std::string value = "";
         while (uri[i] != '/' && uri[i] != '?' && i < len)
-            value+= uri[i++];
+            value += uri[i++];
 
         // REST parameters are referenced by index
         if (!value.empty())
@@ -84,13 +77,13 @@ bool splitURIParameters(const std::string& uri, NVCollection& out)
     if (uri[i] == '?')
         i++;
     while (i < len) {
-        std::string name= "";
+        std::string name = "";
         while (uri[i] != '=' && i < len)
-            name+= uri[i++];
+            name += uri[i++];
         i++;
-        std::string value= "";
+        std::string value = "";
         while (uri[i] != '&' && i < len)
-            value+= uri[i++];
+            value += uri[i++];
         i++;
 
         if (!name.empty() && !value.empty())
@@ -100,26 +93,24 @@ bool splitURIParameters(const std::string& uri, NVCollection& out)
     return out.size() > 0;
 }
 
-
 void splitParameters(const std::string& s, std::string& value,
                      NVCollection& parameters)
 {
     value.clear();
     parameters.clear();
 
-    std::string::const_iterator it= s.begin();
-    std::string::const_iterator end= s.end();
+    std::string::const_iterator it = s.begin();
+    std::string::const_iterator end = s.end();
     while (it != end && ::isspace(*it))
         ++it;
     while (it != end && *it != ';')
-        value+= *it++;
+        value += *it++;
     util::trimRightInPlace(value);
     if (it != end)
         ++it;
 
     splitParameters(it, end, parameters);
 }
-
 
 void splitParameters(const std::string::const_iterator& begin,
                      const std::string::const_iterator& end,
@@ -129,14 +120,14 @@ void splitParameters(const std::string::const_iterator& begin,
     std::string pvalue;
     pname.reserve(32);
     pvalue.reserve(64);
-    std::string::const_iterator it= begin;
+    std::string::const_iterator it = begin;
     while (it != end) {
         pname.clear();
         pvalue.clear();
         while (it != end && ::isspace(*it))
             ++it;
         while (it != end && *it != '=' && *it != ';')
-            pname+= *it++;
+            pname += *it++;
         util::trimRightInPlace(pname);
         if (it != end && *it != ';')
             ++it;
@@ -149,18 +140,18 @@ void splitParameters(const std::string::const_iterator& begin,
                     if (*it == '\\') {
                         ++it;
                         if (it != end)
-                            pvalue+= *it++;
+                            pvalue += *it++;
                     } else
-                        pvalue+= *it++;
+                        pvalue += *it++;
                 }
                 if (it != end)
                     ++it;
             } else if (*it == '\\') {
                 ++it;
                 if (it != end)
-                    pvalue+= *it++;
+                    pvalue += *it++;
             } else
-                pvalue+= *it++;
+                pvalue += *it++;
         }
         util::trimRightInPlace(pvalue);
         if (!pname.empty())
@@ -169,7 +160,6 @@ void splitParameters(const std::string::const_iterator& begin,
             ++it;
     }
 }
-
 
 #if 0
 string parseHeader(const std::string& request, const std::string& name)
@@ -193,9 +183,7 @@ string parseHeader(const std::string& request, const std::string& name)
 }
 #endif
 
-
 } // namespace http
 } // namespace scy
-
 
 /// @\}

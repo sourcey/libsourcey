@@ -8,13 +8,10 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_ByteOrder_H
 #define SCY_ByteOrder_H
 
-
 #include <cstdint>
-
 
 #ifdef POSIX
 #include <arpa/inet.h>
@@ -24,20 +21,17 @@
 #include <stdlib.h>
 #endif
 
-
 namespace scy {
-
 
 enum class ByteOrder
 {
-    Network= 0, ///< Default, use network byte order (big endian).
-    Host,       ///< Use the native order of the host.
+    Network = 0, ///< Default, use network byte order (big endian).
+    Host,        ///< Use the native order of the host.
 };
-
 
 inline void set8(void* memory, std::size_t offset, std::uint8_t v)
 {
-    static_cast<std::uint8_t*>(memory)[offset]= v;
+    static_cast<std::uint8_t*>(memory)[offset] = v;
 }
 
 inline std::uint8_t get8(const void* memory, std::size_t offset)
@@ -152,7 +146,7 @@ inline std::uint64_t getLE64(const void* memory)
 // Check if the current host is big endian.
 inline bool isBigEndian()
 {
-    static const int number= 1;
+    static const int number = 1;
     return 0 == *reinterpret_cast<const char*>(&number);
 }
 
@@ -192,11 +186,8 @@ inline std::uint64_t networkToHost64(std::uint64_t n)
     return getBE64(&n);
 }
 
-
 } // namespace scy
 
-
 #endif // SCY_ByteOrder_H
-
 
 /// @\}

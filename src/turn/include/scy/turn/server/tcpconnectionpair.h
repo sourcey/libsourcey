@@ -8,23 +8,18 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_TCPClientConnection_H
 #define SCY_TURN_TCPClientConnection_H
-
 
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/stun/message.h"
 #include "scy/timer.h"
 
-
 namespace scy {
 namespace turn {
 
-
 class TCPAllocation;
-
 
 class TCPConnectionPair
 {
@@ -91,18 +86,15 @@ public:
     stun::TransactionID transactionID;
 
 private:
-    TCPConnectionPair(const TCPConnectionPair&)= delete;
-    TCPConnectionPair(TCPConnectionPair&&)= delete;
-    TCPConnectionPair& operator=(const TCPConnectionPair&)= delete;
-    TCPConnectionPair& operator=(TCPConnectionPair&&)= delete;
+    TCPConnectionPair(const TCPConnectionPair&) = delete;
+    TCPConnectionPair(TCPConnectionPair&&) = delete;
+    TCPConnectionPair& operator=(const TCPConnectionPair&) = delete;
+    TCPConnectionPair& operator=(TCPConnectionPair&&) = delete;
 };
-
 
 } // namespace turn
 } // namespace scy
 
-
 #endif // SCY_TURN_TCPClientConnection_H
-
 
 /// @\}

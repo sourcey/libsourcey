@@ -1,18 +1,14 @@
 #ifndef TURN_TCPresponder_TEST_H
 #define TURN_TCPresponder_TEST_H
 
-
 #include "scy/logger.h"
 #include "scy/net/tcpsocket.h"
 #include <string>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 class TCPResponder : public net::SocketAdapter
 {
@@ -45,7 +41,7 @@ public:
         DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
 
         try {
-            this->relayedAddr= relayedAddr;
+            this->relayedAddr = relayedAddr;
 
             // Since we extend SocketAdapter socket callbacks
             // will be received below.
@@ -65,7 +61,7 @@ public:
         sendLatencyCheck();
 
         // Start the send timer
-        timer.Timeout+= slot(this, &TCPResponder::onSendTimer);
+        timer.Timeout += slot(this, &TCPResponder::onSendTimer);
         timer.start(1000, 1000);
     }
 
@@ -113,6 +109,5 @@ public:
 };
 }
 } //  namespace scy::turn
-
 
 #endif // TURN_TCPresponder_TEST_H

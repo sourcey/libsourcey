@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_AudioCapture_H
 #define SCY_AV_AudioCapture_H
-
 
 #include "scy/base.h"
 
@@ -28,10 +26,8 @@
 #include <map>
 #include <queue>
 
-
 namespace scy {
 namespace av {
-
 
 DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase,
                                  void*, nullptr)
@@ -46,7 +42,7 @@ public:
     typedef std::shared_ptr<AudioCapture> Ptr;
 
     AudioCapture(int deviceId, int channels, int sampleRate,
-                 RtAudioFormat format= RTAUDIO_SINT16);
+                 RtAudioFormat format = RTAUDIO_SINT16);
     virtual ~AudioCapture();
 
     virtual void open();
@@ -68,8 +64,7 @@ public:
 
 protected:
     /// Sets the error message and throws an exception.
-    virtual void setError(const std::string& message, bool throwExec= true);
-
+    virtual void setError(const std::string& message, bool throwExec = true);
 
     static int audioCallback(
         void* outputBuffer, void* inputBuffer,
@@ -86,7 +81,6 @@ protected:
     static void errorCallback(RtAudioError::Type type,
                               const std::string& errorText);
 
-
 private:
     mutable Mutex _mutex;
     int _deviceId;
@@ -99,13 +93,10 @@ private:
     bool _opened;
 };
 
-
 typedef std::map<int, AudioCapture*> AudioCaptureMap;
-
 
 } // namespace av
 } // namespace scy
-
 
 #endif
 #endif

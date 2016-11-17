@@ -1,7 +1,6 @@
 #ifndef SCY_HTTP_Tests_H
 #define SCY_HTTP_Tests_H
 
-
 #include "scy/async.h"
 #include "scy/base.h"
 #include "scy/crypto/hash.h"
@@ -22,24 +21,19 @@
 
 #include "../samples/httpechoserver/httpechoserver.h"
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using scy::test::Test;
 
-
 #define TEST_HTTP_PORT 1337
 #define TEST_HTTPS_PORT 1338
 
-
 namespace scy {
-
 
 //
 /// Generic Callback Context
 //
-
 
 // struct CallbackContext
 // {
@@ -100,7 +94,6 @@ namespace scy {
 //     }
 // };
 
-
 //
 /// HTTP Client Tests
 //
@@ -116,7 +109,7 @@ struct HTTPEchoTest
     int numSuccess;
     int numWanted;
 
-    HTTPEchoTest(int numWanted= 1)
+    HTTPEchoTest(int numWanted = 1)
         : server(TEST_HTTP_PORT, new OurServerResponderFactory)
         , numSuccess(0)
         , numWanted(numWanted)
@@ -130,14 +123,14 @@ struct HTTPEchoTest
     {
         std::ostringstream url;
         url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << endl;
-        conn= client.createConnection(url.str());
-        conn->Connect+= slot(this, &HTTPEchoTest::onConnect);
-        conn->Headers+= slot(this, &HTTPEchoTest::onHeaders);
+        conn = client.createConnection(url.str());
+        conn->Connect += slot(this, &HTTPEchoTest::onConnect);
+        conn->Headers += slot(this, &HTTPEchoTest::onHeaders);
         // conn->Payload += slot(this, &HTTPEchoTest::onPayload);
-        conn->Incoming.emitter+= slot(this, &HTTPEchoTest::onPayload);
+        conn->Incoming.emitter += slot(this, &HTTPEchoTest::onPayload);
 
-        conn->Complete+= slot(this, &HTTPEchoTest::onComplete);
-        conn->Close+= slot(this, &HTTPEchoTest::onClose);
+        conn->Complete += slot(this, &HTTPEchoTest::onComplete);
+        conn->Close += slot(this, &HTTPEchoTest::onClose);
         return conn;
     }
 
@@ -178,7 +171,7 @@ struct HTTPEchoTest
 
     void onPayload(IPacket& pkt)
     {
-        auto packet= dynamic_cast<RawPacket*>(&pkt);
+        auto packet = dynamic_cast<RawPacket*>(&pkt);
         std::string data(packet->data(), packet->size());
         DebugL << "On payload: " << packet->size() << ": " << data << endl;
 
@@ -199,11 +192,8 @@ struct HTTPEchoTest
     }
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_HTTP_Tests_H
-
 
 /// @\}

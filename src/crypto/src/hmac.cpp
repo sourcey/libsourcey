@@ -8,7 +8,6 @@
 /// @addtogroup crypto
 /// @{
 
-
 #include "scy/crypto/hmac.h"
 #include "scy/util.h"
 #include <assert.h>
@@ -22,10 +21,8 @@
 #endif
 #include <openssl/hmac.h>
 
-
 namespace scy {
 namespace crypto {
-
 
 std::string computeHMAC(const std::string& input, const std::string& key)
 {
@@ -33,7 +30,7 @@ std::string computeHMAC(const std::string& input, const std::string& key)
     // input.length())
     //    << "', inputLength=" << input.length() << ", key='" << key << "',
     //    keyLength=" << key.length() << std::endl;
-    unsigned int len= 0;
+    unsigned int len = 0;
     char buf[20];
     HMAC(EVP_sha1(), key.c_str(), key.length(),
          reinterpret_cast<const unsigned char*>(input.c_str()), input.length(),
@@ -42,9 +39,7 @@ std::string computeHMAC(const std::string& input, const std::string& key)
     return std::string(buf, len);
 }
 
-
 } // namespace crypto
 } // namespace scy
-
 
 /// @\}

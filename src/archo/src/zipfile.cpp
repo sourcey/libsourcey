@@ -8,17 +8,13 @@
 /// @addtogroup archo
 /// @{
 
-
 #include "scy/archo/zipfile.h"
 #include "scy/filesystem.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace archo {
-
 
 namespace internal {
 
@@ -44,15 +40,15 @@ std::string errmsg(int code)
     }
 }
 
-void throwError(const std::string& error, int code= 0)
+void throwError(const std::string& error, int code = 0)
 {
     std::string msg;
     if (!error.empty()) {
-        msg+= error;
+        msg += error;
     }
     if (code) {
-        msg+= ": ";
-        msg+= errmsg(code);
+        msg += ": ";
+        msg += errmsg(code);
     }
     throw std::runtime_error(msg);
 }
@@ -65,12 +61,10 @@ void api(const char* what, int ret)
 
 } // namespace internal
 
-
 ZipFile::ZipFile()
     : fp(nullptr)
 {
 }
-
 
 ZipFile::ZipFile(const std::string& file)
     : fp(nullptr)
@@ -78,28 +72,25 @@ ZipFile::ZipFile(const std::string& file)
     this->open(file);
 }
 
-
 ZipFile::~ZipFile()
 {
     this->close();
 }
-
 
 bool ZipFile::opened() const
 {
     return this->fp != nullptr;
 }
 
-
 void ZipFile::open(const std::string& file)
 {
     this->close();
-    this->fp= unzOpen(fs::transcode(file).c_str());
+    this->fp = unzOpen(fs::transcode(file).c_str());
     if (this->fp == nullptr)
         internal::throwError("Cannot open archive file: " + file);
 
-    for (int ret= unzGoToFirstFile(this->fp); ret == UNZ_OK;
-         ret= unzGoToNextFile(this->fp)) {
+    for (int ret = unzGoToFirstFile(this->fp); ret == UNZ_OK;
+         ret = unzGoToNextFile(this->fp)) {
         unz_file_info fileInfo;
         char fileName[1024];
         internal::api("unzGetCurrentFileInfo",
@@ -107,10 +98,10 @@ void ZipFile::open(const std::string& file)
                                             nullptr, 0, nullptr, 0));
 
         FileInfo info;
-        info.path= fileName;
-        info.compressedSize=
+        info.path = fileName;
+        info.compressedSize =
             static_cast<std::size_t>(fileInfo.uncompressed_size);
-        info.uncompressedSize=
+        info.uncompressedSize =
             static_cast<std::size_t>(fileInfo.compressed_size);
         this->info.push_back(info);
 
@@ -120,15 +111,13 @@ void ZipFile::open(const std::string& file)
     unzGoToFirstFile(this->fp); // rewind
 }
 
-
 void ZipFile::close()
 {
     if (this->opened()) {
         internal::api("unzClose", unzClose(this->fp));
-        this->fp= nullptr;
+        this->fp = nullptr;
     }
 }
-
 
 void ZipFile::extract(const std::string& path)
 {
@@ -146,7 +135,6 @@ void ZipFile::extract(const std::string& path)
             break;
     }
 }
-
 
 bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 {
@@ -166,7 +154,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 
 // Create directory
 #if !WIN32
-        const int FILE_ATTRIBUTE_DIRECTORY= 0x10;
+        const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
 #endif
         if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
             fname[strlen(fname) - 1] == fs::delimiter) {
@@ -197,7 +185,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
                                          outPath);
 
             char buffer[16384];
-            while ((ret= unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
+            while ((ret = unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
                 ofs.write(buffer, ret);
 
             ofs.close();
@@ -214,30 +202,25 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
     return true;
 }
 
-
 bool ZipFile::goToFirstFile()
 {
     return unzGoToFirstFile(this->fp) == UNZ_OK;
 }
-
 
 bool ZipFile::goToNextFile()
 {
     return unzGoToNextFile(this->fp) == UNZ_OK;
 }
 
-
 void ZipFile::openCurrentFile()
 {
     internal::api("unzOpenCurrentFile", unzOpenCurrentFile(this->fp));
 }
 
-
 void ZipFile::closeCurrentFile()
 {
     internal::api("unzCloseCurrentFile", unzOpenCurrentFile(this->fp));
 }
-
 
 std::string ZipFile::currentFileName()
 {
@@ -248,9 +231,7 @@ std::string ZipFile::currentFileName()
     return buf;
 }
 
-
 } // namespace archo
 } // namespace scy
-
 
 /// @\}

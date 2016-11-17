@@ -8,10 +8,8 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_Client_H
 #define SCY_TURN_Client_H
-
 
 #include "scy/net/udpsocket.h"
 #include "scy/stateful.h"
@@ -24,21 +22,19 @@
 
 #include <deque>
 
-
 namespace scy {
 namespace turn {
-
 
 struct ClientState : public State
 {
     enum Type
     {
-        None= 0x00,
-        Allocating= 0x02,
-        Authorizing= 0x04,
-        Success= 0x08,
+        None = 0x00,
+        Allocating = 0x02,
+        Authorizing = 0x04,
+        Success = 0x08,
         // Terminated      = 0x10,
-        Failed= 0x10
+        Failed = 0x10
     };
 
     std::string toString() const
@@ -61,18 +57,16 @@ struct ClientState : public State
     };
 };
 
-
 class Client;
-
 
 struct ClientObserver
 {
     virtual void onClientStateChange(Client& client, ClientState& state,
-                                     const ClientState& oldState)= 0;
+                                     const ClientState& oldState) = 0;
 
     virtual void onRelayDataReceived(Client& client, const char* data,
                                      std::size_t size,
-                                     const net::Address& peerAddress)= 0;
+                                     const net::Address& peerAddress) = 0;
 
     virtual void onAllocationCreated(Client& client,
                                      const stun::Transaction& transaction){};
@@ -94,7 +88,6 @@ struct ClientObserver
     virtual void onTimer(Client& client){};
 };
 
-
 class Client : public Stateful<ClientState>, protected IAllocation
 {
 public:
@@ -111,20 +104,20 @@ public:
         net::Address serverAddr;
         Options()
         {
-            software= "Sourcey STUN/TURN Client [rfc5766]";
-            username= util::randomString(4);
-            password= util::randomString(22);
+            software = "Sourcey STUN/TURN Client [rfc5766]";
+            username = util::randomString(4);
+            password = util::randomString(22);
             // realm                    = "sourcey.com";
-            lifetime= 5 * 60 * 1000; // 5 minutes
-            timeout= 10 * 1000;
-            timerInterval= 30 * 1000; // 30 seconds
-            serverAddr= net::Address("127.0.0.1", 3478);
+            lifetime = 5 * 60 * 1000; // 5 minutes
+            timeout = 10 * 1000;
+            timerInterval = 30 * 1000; // 30 seconds
+            serverAddr = net::Address("127.0.0.1", 3478);
         }
     };
 
 public:
     Client(ClientObserver& observer,
-           const Options& options= Options()); // net::Socket* socket,
+           const Options& options = Options()); // net::Socket* socket,
     virtual ~Client();
 
     /// Initiates the allocation sequence.
@@ -165,7 +158,7 @@ public:
 
     virtual int transportProtocol();
     virtual stun::Transaction*
-    createTransaction(const net::Socket::Ptr& socket= nullptr);
+    createTransaction(const net::Socket::Ptr& socket = nullptr);
     virtual void authenticateRequest(stun::Message& request);
     virtual bool sendAuthenticatedTransaction(stun::Transaction* transaction);
     virtual bool removeTransaction(stun::Transaction* transaction);
@@ -210,8 +203,6 @@ protected:
 }
 } //  namespace scy::turn
 
-
 #endif // SCY_TURN_Client_H
-
 
 /// @\}

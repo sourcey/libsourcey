@@ -1,13 +1,11 @@
 #ifndef TURN_TurnClientTest_H
 #define TURN_TurnClientTest_H
 
-
 #include "scy/net/socket.h"
 #include "scy/time.h"
 #include "scy/util.h"
 
 #include <iostream>
-
 
 #define TEST_TCP 1
 #define RAISE_LOCAL_SERVER 0
@@ -24,12 +22,10 @@
 #define TEST_INITIATOR_TO_RESPONDER
 //#define TEST_RESPONDER_TO_INITIATOR
 
-
 namespace scy {
 namespace turn {
 
-
-inline std::string createLatencyCheck(int packetSize= 1024)
+inline std::string createLatencyCheck(int packetSize = 1024)
 {
     std::string payload;
     // payload.append(util::itostr(time::ticks()));
@@ -38,6 +34,5 @@ inline std::string createLatencyCheck(int packetSize= 1024)
 }
 }
 } //  namespace scy::turn
-
 
 #endif // TURN_TurnClientTest_H

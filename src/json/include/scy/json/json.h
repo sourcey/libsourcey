@@ -8,27 +8,22 @@
 /// @addtogroup json
 /// @{
 
-
 #ifndef SCY_JSON_H
 #define SCY_JSON_H
-
 
 #include "scy/error.h"
 #include "json/json.h"
 #include <cstdint>
 #include <fstream>
 
-
 namespace scy {
 namespace json {
-
 
 typedef Json::Value Value;
 typedef Json::ValueIterator ValueIterator;
 typedef Json::StyledWriter StyledWriter;
 typedef Json::FastWriter FastWriter;
 typedef Json::Reader Reader;
-
 
 inline void loadFile(const std::string& path, json::Value& root)
 {
@@ -43,7 +38,6 @@ inline void loadFile(const std::string& path, json::Value& root)
                                  reader.getFormattedErrorMessages());
 }
 
-
 inline void saveFile(const std::string& path, const json::Value& root)
 {
     json::StyledWriter writer;
@@ -55,30 +49,27 @@ inline void saveFile(const std::string& path, const json::Value& root)
     ofs.close();
 }
 
-
 inline void stringify(const json::Value& root, std::string& output,
-                      bool pretty= false)
+                      bool pretty = false)
 {
     if (pretty) {
         json::StyledWriter writer;
-        output= writer.write(root);
+        output = writer.write(root);
     } else {
         json::FastWriter writer;
-        output= writer.write(root); /// NOTE: The FastWriter appends a newline
-                                    /// character which we don't want.
+        output = writer.write(root); /// NOTE: The FastWriter appends a newline
+                                     /// character which we don't want.
         if (output.size() > 0)
             output.resize(output.size() - 1);
     }
 }
 
-
-inline std::string stringify(const json::Value& root, bool pretty= false)
+inline std::string stringify(const json::Value& root, bool pretty = false)
 {
     std::string output;
     stringify(root, output, pretty);
     return output;
 }
-
 
 inline void assertMember(const json::Value& root, const std::string& name)
 {
@@ -86,24 +77,22 @@ inline void assertMember(const json::Value& root, const std::string& name)
         throw std::runtime_error("A '" + name + "' member is required.");
 }
 
-
 inline void countNestedKeys(json::Value& root, const std::string& key,
-                            int& count, int depth= 0)
+                            int& count, int depth = 0)
 {
     depth++;
-    for (auto it= root.begin(); it != root.end(); it++) {
+    for (auto it = root.begin(); it != root.end(); it++) {
         if ((*it).isObject() && (*it).isMember(key))
             count++;
         countNestedKeys(*it, key, count, depth);
     }
 }
 
-
 inline bool hasNestedKey(json::Value& root, const std::string& key,
-                         int depth= 0)
+                         int depth = 0)
 {
     depth++;
-    for (auto it= root.begin(); it != root.end(); it++) {
+    for (auto it = root.begin(); it != root.end(); it++) {
         if ((*it).isObject() && (*it).isMember(key))
             return true;
         if (hasNestedKey(*it, key, depth))
@@ -112,11 +101,10 @@ inline bool hasNestedKey(json::Value& root, const std::string& key,
     return false;
 }
 
-
 inline bool findNestedObjectWithProperty(
     json::Value& root, json::Value*& result, const std::string& key,
-    const std::string& value, bool partial= true, int index= 0,
-    int depth= 0) /// Only works for objects with string values.
+    const std::string& value, bool partial = true, int index = 0,
+    int depth = 0) /// Only works for objects with string values.
 /// Key or value may be empty for selecting wildcard values.
 /// If partial is false substring matches will be accepted.
 /// Result must be a reference to a pointer or the root value's
@@ -125,9 +113,9 @@ inline bool findNestedObjectWithProperty(
 {
     depth++;
     if (root.isObject()) {
-        json::Value::Members members= root.getMemberNames();
-        for (std::size_t i= 0; i < members.size(); i++) {
-            json::Value& test= root[members[(int)i]];
+        json::Value::Members members = root.getMemberNames();
+        for (std::size_t i = 0; i < members.size(); i++) {
+            json::Value& test = root[members[(int)i]];
             if (test.isNull())
                 continue;
             else if (test.isString() &&
@@ -137,7 +125,7 @@ inline bool findNestedObjectWithProperty(
                                 : test.asString().find(value) !=
                                       std::string::npos))) {
                 if (index == 0) {
-                    result= &root;
+                    result = &root;
                     return true;
                 } else
                     index--;
@@ -148,8 +136,8 @@ inline bool findNestedObjectWithProperty(
                 return true;
         }
     } else if (root.isArray()) {
-        for (std::size_t i= 0; i < root.size(); i++) {
-            json::Value& test= root[(int)i];
+        for (std::size_t i = 0; i < root.size(); i++) {
+            json::Value& test = root[(int)i];
             if (!test.isNull() && (test.isObject() || test.isArray()) &&
                 findNestedObjectWithProperty(root[(int)i], result, key, value,
                                              partial, index, depth))
@@ -159,12 +147,9 @@ inline bool findNestedObjectWithProperty(
     return false;
 }
 
-
 } // namespace json
 } // namespace scy
 
-
 #endif // SCY_JSON_H
-
 
 /// @\}

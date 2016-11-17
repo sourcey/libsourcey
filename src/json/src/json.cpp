@@ -11,5 +11,4 @@
 #include "scy/json/json.h"
 // just to keep compiler happy
 
-
 /// @\}

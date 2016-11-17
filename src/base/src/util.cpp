@@ -8,7 +8,6 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/util.h"
 #include "scy/base64.h"
 #include "scy/random.h"
@@ -22,68 +21,61 @@
 #include <sstream>
 #include <string>
 
-
 using std::endl;
-
 
 namespace scy {
 namespace util {
 
-
 std::string string_vprintf(const char* fmt, va_list args)
 {
-    std::size_t size= 500;
-    char* buf= (char*)malloc(size);
+    std::size_t size = 500;
+    char* buf = (char*)malloc(size);
     // Grow the buffer size until the output is no longer truncated
     while (true) {
         va_list args_copy;
 #if defined(_WIN32)
-        args_copy= args;
-        std::size_t nwritten= _vsnprintf(buf, size - 1, fmt, args_copy);
+        args_copy = args;
+        std::size_t nwritten = _vsnprintf(buf, size - 1, fmt, args_copy);
 #else
         va_copy(args_copy, args);
-        std::size_t nwritten= vsnprintf(buf, size - 1, fmt, args_copy);
+        std::size_t nwritten = vsnprintf(buf, size - 1, fmt, args_copy);
 #endif
         // Some c libraries return -1 for overflow,
         // some return a number larger than size-1
         if (nwritten < size - 2) {
-            buf[nwritten + 1]= 0;
+            buf[nwritten + 1] = 0;
             std::string ret(buf);
             free(buf);
             return ret;
         }
-        size*= 2;
-        buf= (char*)realloc(buf, size);
+        size *= 2;
+        buf = (char*)realloc(buf, size);
     }
 }
-
 
 std::string format(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    std::string ret= string_vprintf(fmt, args);
+    std::string ret = string_vprintf(fmt, args);
     va_end(args);
     return ret;
 }
 
-
 bool isNumber(const std::string& str)
 {
-    for (std::size_t i= 0; i < str.length(); i++) {
+    for (std::size_t i = 0; i < str.length(); i++) {
         if (!::isdigit(str[i]))
             return false;
     }
     return true;
 }
 
-
 bool tryParseHex(const std::string& str, unsigned& value)
 {
     char temp;
     return std::sscanf(str.c_str(), "%x%c", &value, &temp) == 1;
 }
-
 
 unsigned parseHex(const std::string& str)
 {
@@ -95,36 +87,32 @@ unsigned parseHex(const std::string& str)
             "Syntax error: Not a valid hexadecimal integer: " + str);
 }
 
-
 std::string memAddress(const void* ptr)
 {
     return itostr<const void*>(ptr);
 }
-
 
 std::string randomBinaryString(int size, bool doBase64)
 {
     std::string res;
     Random rnd;
     rnd.seed();
-    for (int i= 0; i < size; ++i)
+    for (int i = 0; i < size; ++i)
         res.push_back(rnd.nextChar());
 
     if (doBase64) {
         std::string out;
         base64::Encoder enc;
         enc.encode(res, out);
-        res= out;
+        res = out;
     }
     return res;
 }
-
 
 std::string randomString(int size)
 {
     return randomBinaryString(size, true).substr(0, size);
 }
-
 
 std::uint32_t randomNumber()
 {
@@ -133,24 +121,22 @@ std::uint32_t randomNumber()
     return rnd.next();
 }
 
-
 void split(const std::string& s, const std::string& delim,
            std::vector<std::string>& elems, int limit)
 {
-    bool final= false;
-    std::string::size_type prev= 0, pos= 0;
-    while ((pos= s.find(delim, pos)) != std::string::npos) {
-        final= limit && static_cast<int>(elems.size() + 1) == limit;
+    bool final = false;
+    std::string::size_type prev = 0, pos = 0;
+    while ((pos = s.find(delim, pos)) != std::string::npos) {
+        final = limit && static_cast<int>(elems.size() + 1) == limit;
         elems.push_back(
             s.substr(prev, final ? (s.size() - prev) : (pos - prev)));
-        prev= ++pos;
+        prev = ++pos;
         if (final)
             break;
     }
     if (prev != std::string::npos)
         elems.push_back(s.substr(prev, pos - prev));
 }
-
 
 std::vector<std::string> split(const std::string& s, const std::string& delim,
                                int limit)
@@ -159,7 +145,6 @@ std::vector<std::string> split(const std::string& s, const std::string& delim,
     split(s, delim, elems, limit);
     return elems;
 }
-
 
 void split(const std::string& s, char delim, std::vector<std::string>& elems,
            int limit)
@@ -177,7 +162,6 @@ void split(const std::string& s, char delim, std::vector<std::string>& elems,
                             static_cast<unsigned int>(s.size() - ss.tellg())));
 }
 
-
 std::vector<std::string> split(const std::string& s, char delim, int limit)
 {
     std::vector<std::string> elems;
@@ -185,12 +169,10 @@ std::vector<std::string> split(const std::string& s, char delim, int limit)
     return elems;
 }
 
-
 bool endsWith(const std::string& str, const std::string& suffix)
 {
     return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
-
 
 #if 0
 double intToDouble(std::int64_t v)
@@ -219,13 +201,12 @@ std::int64_t doubleToInt(double d)
 }
 #endif
 
-
 std::string dumpbin(const char* data, std::size_t len)
 {
     std::string output;
-    for (std::size_t i= 0; i < len; i++) {
-        char byte= data[i];
-        for (std::size_t mask= 0x80; mask > 0; mask>>= 1) {
+    for (std::size_t i = 0; i < len; i++) {
+        char byte = data[i];
+        for (std::size_t mask = 0x80; mask > 0; mask >>= 1) {
             output.push_back(byte & mask ? '1' : '0');
         }
         if (i % 4 == 3)
@@ -236,7 +217,6 @@ std::string dumpbin(const char* data, std::size_t len)
     return output;
 }
 
-
 bool compareVersion(const std::string& l, const std::string& r)
 {
     if (l.empty())
@@ -244,41 +224,38 @@ bool compareVersion(const std::string& l, const std::string& r)
     if (r.empty())
         return true;
 
-    bool equal= true;
+    bool equal = true;
     std::vector<std::string> lnums, rnums;
     util::split(l, ".", lnums);
     util::split(r, ".", rnums);
-    for (unsigned i= 0; i < lnums.size(); i++) {
+    for (unsigned i = 0; i < lnums.size(); i++) {
         if (rnums.size() < i + 1)
             break;
-        int ln= util::strtoi<int>(lnums[i]);
-        int rn= util::strtoi<int>(rnums[i]);
+        int ln = util::strtoi<int>(lnums[i]);
+        int rn = util::strtoi<int>(rnums[i]);
         if (ln < rn)
             return false;
         else if (ln > rn)
-            equal= false;
+            equal = false;
     }
     return !equal;
 }
 
-
 void removeSpecialCharacters(std::string& str, bool allowSpaces)
 {
-    for (std::size_t i= 0; i < str.length(); ++i)
+    for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) &&
             str[i] != '.')
             str.erase(i, 1);
 }
 
-
 void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
 {
-    for (std::size_t i= 0; i < str.length(); ++i)
+    for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) &&
             str[i] != '.')
-            str[i]= with;
+            str[i] = with;
 }
-
 
 void toUnderscore(std::string& str)
 {
@@ -286,17 +263,15 @@ void toUnderscore(std::string& str)
     toLower(str);
 }
 
-
 bool matchNodes(const std::string& node, const std::string& xnode,
                 const std::string& delim)
 {
     if (xnode == "*")
         return true;
-    std::vector<std::string> params= util::split(node, delim);
-    std::vector<std::string> xparams= util::split(xnode, delim);
+    std::vector<std::string> params = util::split(node, delim);
+    std::vector<std::string> xparams = util::split(xnode, delim);
     return matchNodes(params, xparams);
 }
-
 
 bool matchNodes(const std::vector<std::string>& params,
                 const std::vector<std::string>& xparams)
@@ -312,7 +287,7 @@ bool matchNodes(const std::vector<std::string>& params,
     if (params.size() > xparams.size() && xparams[xparams.size() - 1] != "*")
         return false;
 
-    for (std::size_t i= 0; i < xparams.size(); ++i) {
+    for (std::size_t i = 0; i < xparams.size(); ++i) {
 
         // Wildcard * matches anything.
         if (xparams[i] == "*")
@@ -325,33 +300,31 @@ bool matchNodes(const std::vector<std::string>& params,
     return true;
 }
 
-
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
                            std::size_t bufferSize)
 {
     assert(bufferSize > 0);
 
     std::unique_ptr<char[]> buffer(new char[bufferSize]);
-    std::streamsize len= 0;
+    std::streamsize len = 0;
     istr.read(buffer.get(), bufferSize);
-    std::streamsize n= istr.gcount();
+    std::streamsize n = istr.gcount();
     while (n > 0) {
-        len+= n;
+        len += n;
         ostr.write(buffer.get(), n);
         if (istr && ostr) {
             istr.read(buffer.get(), bufferSize);
-            n= istr.gcount();
+            n = istr.gcount();
         } else
-            n= 0;
+            n = 0;
     }
     return len;
 }
 
-
 std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
 {
     char c;
-    std::streamsize len= 0;
+    std::streamsize len = 0;
     istr.get(c);
     while (istr && ostr) {
         ++len;
@@ -361,31 +334,28 @@ std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
     return len;
 }
 
-
 std::streamsize copyToString(std::istream& istr, std::string& str,
                              std::size_t bufferSize)
 {
     assert(bufferSize > 0);
 
     std::unique_ptr<char[]> buffer(new char[bufferSize]);
-    std::streamsize len= 0;
+    std::streamsize len = 0;
     istr.read(buffer.get(), bufferSize);
-    std::streamsize n= istr.gcount();
+    std::streamsize n = istr.gcount();
     while (n > 0) {
-        len+= n;
+        len += n;
         str.append(buffer.get(), static_cast<std::string::size_type>(n));
         if (istr) {
             istr.read(buffer.get(), bufferSize);
-            n= istr.gcount();
+            n = istr.gcount();
         } else
-            n= 0;
+            n = 0;
     }
     return len;
 }
 
-
 } // namespace util
 } // namespace scy
-
 
 /// @\}

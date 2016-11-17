@@ -8,7 +8,6 @@
 /// @addtogroup net
 /// @{
 
-
 #include "scy/net/socket.h"
 #include "scy/net/address.h"
 #include "scy/net/socketadapter.h"
@@ -16,25 +15,20 @@
 
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace net {
-
 
 Socket::Socket()
 {
     TraceS(this) << "Create" << endl;
 }
 
-
 Socket::~Socket()
 {
     TraceS(this) << "Destroy" << endl;
 }
-
 
 void Socket::connect(const std::string& host, std::uint16_t port)
 {
@@ -47,7 +41,7 @@ void Socket::connect(const std::string& host, std::uint16_t port)
         net::resolveDNS(
             host, port,
             [](const net::DNSResult& dns) {
-                auto* sock= reinterpret_cast<Socket*>(dns.opaque);
+                auto* sock = reinterpret_cast<Socket*>(dns.opaque);
                 TraceL << "DNS resolved: " << dns.success() << endl;
 
                 // Return if the socket was closed while resolving
@@ -74,9 +68,7 @@ void Socket::connect(const std::string& host, std::uint16_t port)
     }
 }
 
-
 } // namespace net
 } // namespace scy
-
 
 /// @\}

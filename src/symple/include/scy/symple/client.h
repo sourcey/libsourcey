@@ -8,10 +8,8 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Client_H
 #define SCY_Symple_Client_H
-
 
 #include "scy/bitwise.h"
 #include "scy/http/websocket.h"
@@ -26,18 +24,14 @@
 #include "scy/symple/roster.h"
 #include "scy/util/timedmanager.h"
 
-
 namespace scy {
 namespace smpl {
 
-
 typedef TimedManager<std::string, Message> PersistenceT;
-
 
 //
 // Symple Client
 //
-
 
 class Client : public sockio::Client
 {
@@ -61,21 +55,21 @@ public:
 
         Options()
         {
-            host= "127.0.0.1";
-            port= 4500;
+            host = "127.0.0.1";
+            port = 4500;
 
-            reconnection= true;
-            reconnectAttempts= 0;
+            reconnection = true;
+            reconnectAttempts = 0;
 
-            user= "";
-            name= "";
-            type= "";
-            token= "";
+            user = "";
+            name = "";
+            type = "";
+            token = "";
         }
     };
 
 public:
-    Client(const net::Socket::Ptr& socket, const Options& options= Options());
+    Client(const net::Socket::Ptr& socket, const Options& options = Options());
     virtual ~Client();
 
     void connect();
@@ -83,27 +77,27 @@ public:
 
     /// Send a message.
     /// May be a polymorphic Command, Presence, Event or other ...
-    virtual int send(Message& message, bool ack= false);
+    virtual int send(Message& message, bool ack = false);
 
     /// Send a string message.
     /// The message must be a valid Symple message otherwise it will
     /// not be delivered.
-    virtual int send(const std::string& message, bool ack= false);
+    virtual int send(const std::string& message, bool ack = false);
 
     /// Create a Transaction object with the given message which will
     /// notify on Ack response from the server.
     sockio::Transaction* createTransaction(Message& message);
 
     /// Swap the 'to' and 'from' fields and send the given message.
-    virtual int respond(Message& message, bool ack= false);
+    virtual int respond(Message& message, bool ack = false);
 
     /// Broadcast presence to the user group scope.
     /// The outgoing Presence object may be modified via
     /// the CreatePresence signal.
-    virtual int sendPresence(bool probe= false);
+    virtual int sendPresence(bool probe = false);
 
     /// Send directed presence to the given peer.
-    virtual int sendPresence(const Address& to, bool probe= false);
+    virtual int sendPresence(const Address& to, bool probe = false);
 
     /// Join the given room.
     virtual int joinRoom(const std::string& room);
@@ -136,7 +130,7 @@ public:
     virtual Client& operator>>(Message& message);
 
     /// Update the roster from the given client object.
-    virtual void onPresenceData(const json::Value& data, bool whiny= false);
+    virtual void onPresenceData(const json::Value& data, bool whiny = false);
 
     ///
     /// Signals
@@ -159,7 +153,6 @@ public:
     /// Called by createPresence() so outside classes
     /// can modify the outgoing Peer JSON object.
     Signal<void(Peer&)> CreatePresence;
-
 
 protected:
     /// Called when a new connection is established
@@ -191,62 +184,53 @@ protected:
     int _announceStatus;
 };
 
-
 //
 // TCP Client
 //
 
-
-Client* createTCPClient(const Client::Options& options= Client::Options(),
-                        uv::Loop* loop= uv::defaultLoop());
-
+Client* createTCPClient(const Client::Options& options = Client::Options(),
+                        uv::Loop* loop = uv::defaultLoop());
 
 class TCPClient : public Client
 {
 public:
-    TCPClient(const Client::Options& options= Client::Options(),
-              uv::Loop* loop= uv::defaultLoop());
+    TCPClient(const Client::Options& options = Client::Options(),
+              uv::Loop* loop = uv::defaultLoop());
 };
-
 
 //
 // SSL Client
 //
 
-
-Client* createSSLClient(const Client::Options& options= Client::Options(),
-                        uv::Loop* loop= uv::defaultLoop());
-
+Client* createSSLClient(const Client::Options& options = Client::Options(),
+                        uv::Loop* loop = uv::defaultLoop());
 
 class SSLClient : public Client
 {
 public:
-    SSLClient(const Client::Options& options= Client::Options(),
-              uv::Loop* loop= uv::defaultLoop());
+    SSLClient(const Client::Options& options = Client::Options(),
+              uv::Loop* loop = uv::defaultLoop());
 };
-
 
 //
 // Filters
 //
 
-
 enum FilterFlags
 {
-    AcceptRequests= 0x01,
-    AcceptResponses= 0x02
+    AcceptRequests = 0x01,
+    AcceptResponses = 0x02
 };
-
 
 struct Filter //: public Flaggable
 {
-    Filter(const std::string& path, unsigned flags= 0)
+    Filter(const std::string& path, unsigned flags = 0)
         : flags(flags)
         , path(path)
     {
     }
 
-    Filter(unsigned flags= 0)
+    Filter(unsigned flags = 0)
         : flags(flags)
         , path("*")
     {
@@ -256,11 +240,9 @@ struct Filter //: public Flaggable
     std::string path;
 };
 
-
 //
 // Polymorphic Message Delegates
 //
-
 
 #if 0
 struct MessageDelegate: public PacketDelegateBase
@@ -342,12 +324,9 @@ DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 #endif
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Client_H
-
 
 /// @\}

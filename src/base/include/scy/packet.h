@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Packet_H
 #define SCY_Packet_H
-
 
 #include "scy/bitwise.h"
 #include "scy/buffer.h"
@@ -21,9 +19,7 @@
 #include <cstdint>
 #include <cstring> // memcpy
 
-
 namespace scy {
-
 
 /// An abstract interface for packet sources to
 /// provide extra information about packets.
@@ -32,9 +28,8 @@ struct IPacketInfo
     IPacketInfo(){};
     virtual ~IPacketInfo(){};
 
-    virtual IPacketInfo* clone() const= 0;
+    virtual IPacketInfo* clone() const = 0;
 };
-
 
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
@@ -42,8 +37,8 @@ struct IPacketInfo
 class IPacket //: public basic::Polymorphic
 {
 public:
-    IPacket(void* source= nullptr, void* opaque= nullptr,
-            IPacketInfo* info= nullptr, unsigned flags= 0)
+    IPacket(void* source = nullptr, void* opaque = nullptr,
+            IPacketInfo* info = nullptr, unsigned flags = 0)
         : source(source)
         , opaque(opaque)
         , info(info)
@@ -61,14 +56,14 @@ public:
 
     IPacket& operator=(const IPacket& r)
     {
-        source= r.source;
-        opaque= r.opaque;
-        info= (r.info ? r.info->clone() : nullptr);
-        flags= r.flags;
+        source = r.source;
+        opaque = r.opaque;
+        info = (r.info ? r.info->clone() : nullptr);
+        flags = r.flags;
         return *this;
     }
 
-    virtual IPacket* clone() const= 0;
+    virtual IPacket* clone() const = 0;
 
     virtual ~IPacket()
     {
@@ -94,7 +89,7 @@ public:
 
     /// Read/parse to the packet from the given input buffer.
     /// The number of bytes read is returned.
-    virtual std::size_t read(const ConstBuffer&)= 0;
+    virtual std::size_t read(const ConstBuffer&) = 0;
 
     /// Copy/generate to the packet given output buffer.
     /// The number of bytes written can be obtained from the buffer.
@@ -104,7 +99,7 @@ public:
     /// that the buffer be dynamically resizable for some protocols...
     ///
     /// virtual std::size_t write(MutableBuffer&) const = 0;
-    virtual void write(Buffer&) const= 0;
+    virtual void write(Buffer&) const = 0;
 
     /// The size of the packet in bytes.
     ///
@@ -120,7 +115,7 @@ public:
 
     /// The const packet data pointer for buffered packets.
     virtual const char* constData() const { return data(); }
-    virtual const char* className() const= 0;
+    virtual const char* className() const = 0;
     virtual void print(std::ostream& os) const
     {
         os << className() << std::endl;
@@ -133,12 +128,11 @@ public:
     }
 };
 
-
 /// A simple flag packet for sending state flags along the packet stream.
 class FlagPacket : public IPacket
 {
 public:
-    FlagPacket(unsigned flags= 0)
+    FlagPacket(unsigned flags = 0)
         : IPacket(nullptr, nullptr, nullptr, flags)
     {
     }
@@ -159,15 +153,14 @@ public:
     virtual const char* className() const { return "FlagPacket"; }
 };
 
-
 /// RawPacket is the default data packet type which consists
 /// of an optionally managed char pointer and a size value.
 class RawPacket : public IPacket
 {
 public:
-    RawPacket(char* data= nullptr, std::size_t size= 0, unsigned flags= 0,
-              void* source= nullptr, void* opaque= nullptr,
-              IPacketInfo* info= nullptr)
+    RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0,
+              void* source = nullptr, void* opaque = nullptr,
+              IPacketInfo* info = nullptr)
         : IPacket(source, opaque, info, flags)
         , _data(data)
         , _size(size)
@@ -175,9 +168,9 @@ public:
     {
     }
 
-    RawPacket(const char* data, std::size_t size= 0, unsigned flags= 0,
-              void* source= nullptr, void* opaque= nullptr,
-              IPacketInfo* info= nullptr)
+    RawPacket(const char* data, std::size_t size = 0, unsigned flags = 0,
+              void* source = nullptr, void* opaque = nullptr,
+              IPacketInfo* info = nullptr)
         : IPacket(source, opaque, info, flags)
         , _data(nullptr)
         , _size(size)
@@ -213,8 +206,8 @@ public:
         if (_free) // Copy data if reuqests
             copyData(data, size);
         else { // Otherwise just assign the pointer
-            _data= data;
-            _size= size;
+            _data = data;
+            _size = size;
         }
     }
 
@@ -226,9 +219,9 @@ public:
         assert(size > 0);
         if (_data && _free)
             delete[] _data;
-        _size= size;
-        _data= new char[size];
-        _free= true;
+        _size = size;
+        _data = new char[size];
+        _free = true;
         // }
         std::memcpy(_data, data, size);
     }
@@ -269,51 +262,47 @@ public:
 
     virtual bool ownsBuffer() const { return _free; }
 
-    virtual void assignDataOwnership() { _free= true; }
+    virtual void assignDataOwnership() { _free = true; }
 
     char* _data;
     std::size_t _size;
     bool _free;
 };
 
-
-inline RawPacket rawPacket(const MutableBuffer& buf, unsigned flags= 0,
-                           void* source= nullptr, void* opaque= nullptr,
-                           IPacketInfo* info= nullptr)
+inline RawPacket rawPacket(const MutableBuffer& buf, unsigned flags = 0,
+                           void* source = nullptr, void* opaque = nullptr,
+                           IPacketInfo* info = nullptr)
 {
     return RawPacket(bufferCast<char*>(buf), buf.size(), flags, source, opaque,
                      info);
 }
 
-inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags= 0,
-                           void* source= nullptr, void* opaque= nullptr,
-                           IPacketInfo* info= nullptr)
+inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags = 0,
+                           void* source = nullptr, void* opaque = nullptr,
+                           IPacketInfo* info = nullptr)
 {
     return RawPacket(bufferCast<const char*>(buf), buf.size(), flags, source,
                      opaque,
                      info); // copy const data
 }
 
-inline RawPacket rawPacket(char* data= nullptr, std::size_t size= 0,
-                           unsigned flags= 0, void* source= nullptr,
-                           void* opaque= nullptr, IPacketInfo* info= nullptr)
+inline RawPacket rawPacket(char* data = nullptr, std::size_t size = 0,
+                           unsigned flags = 0, void* source = nullptr,
+                           void* opaque = nullptr, IPacketInfo* info = nullptr)
 {
     return RawPacket(data, size, flags, source, opaque, info);
 }
 
-inline RawPacket rawPacket(const char* data= nullptr, std::size_t size= 0,
-                           unsigned flags= 0, void* source= nullptr,
-                           void* opaque= nullptr, IPacketInfo* info= nullptr)
+inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0,
+                           unsigned flags = 0, void* source = nullptr,
+                           void* opaque = nullptr, IPacketInfo* info = nullptr)
 {
     return RawPacket(data, size, flags, source, opaque,
                      info); // copy const data
 }
 
-
 } // namespace scy
 
-
 #endif // SCY_Packet_H
-
 
 /// @\}

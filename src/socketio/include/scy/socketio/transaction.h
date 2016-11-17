@@ -8,27 +8,22 @@
 /// @addtogroup socketio
 /// @{
 
-
 #ifndef SCY_SocketIO_Transaction_H
 #define SCY_SocketIO_Transaction_H
-
 
 #include "scy/packettransaction.h"
 #include "scy/socketio/packet.h"
 
-
 namespace scy {
 namespace sockio {
 
-
 class Client;
-
 
 struct Transaction : public PacketTransaction<sockio::Packet>
 {
-    Transaction(sockio::Client& client, long timeout= 10000);
+    Transaction(sockio::Client& client, long timeout = 10000);
     Transaction(sockio::Client& client, const sockio::Packet& request,
-                long timeout= 10000);
+                long timeout = 10000);
 
     virtual bool send();
     virtual bool checkResponse(const sockio::Packet& packet);
@@ -44,12 +39,9 @@ protected:
     virtual ~Transaction();
 };
 
-
 } // namespace sockio
 } // namespace scy
 
-
 #endif // SCY_SocketIO_Transaction_H
-
 
 /// @\}

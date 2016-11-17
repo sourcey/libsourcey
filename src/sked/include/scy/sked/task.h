@@ -8,31 +8,26 @@
 /// @addtogroup sked
 /// @{
 
-
 #ifndef SCY_Sked_Task_H
 #define SCY_Sked_Task_H
-
 
 #include "scy/json/iserializable.h"
 #include "scy/sked/trigger.h"
 #include "scy/task.h"
 
-
 namespace scy {
 namespace sked {
 
-
 class Scheduler;
-
 
 /// This class extends the Task class to implement
 /// scheduling capabilities.
 class Task : public scy::Task, public json::ISerializable
 {
 public:
-    Task(const std::string& type= "", const std::string& name= "");
+    Task(const std::string& type = "", const std::string& name = "");
     Task(Scheduler& scheduler, const std::string& type,
-         const std::string& name= "");
+         const std::string& name = "");
 
     // virtual void start();
 
@@ -42,10 +37,9 @@ public:
     /// Deserializes the task from JSON.
     virtual void deserialize(json::Value& root);
 
-
     template <typename T> T* createTrigger()
     {
-        T* p= new T();
+        T* p = new T();
         setTrigger(p);
         return p;
     }
@@ -74,7 +68,7 @@ protected:
     virtual ~Task();
 
     virtual bool beforeRun();
-    virtual void run()= 0;
+    virtual void run() = 0;
     virtual bool afterRun();
 
     // For stl::sort operations
@@ -93,15 +87,11 @@ protected:
     mutable Mutex _mutex;
 };
 
-
 typedef std::vector<sked::Task*> TaskList;
-
 
 } // namespace sked
 } // namespace scy
 
-
 #endif // SCY_Sked_Task_H
-
 
 /// @\}

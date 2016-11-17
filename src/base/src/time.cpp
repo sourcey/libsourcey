@@ -8,7 +8,6 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/time.h"
 #include "scy/util.h"
 #include "scy/uv/uvpp.h"
@@ -19,10 +18,8 @@
 #include <locale>
 #include <sstream>
 
-
 namespace scy {
 namespace time {
-
 
 std::time_t now()
 {
@@ -33,12 +30,10 @@ std::time_t now()
     return std::time(0);
 }
 
-
 double clockSecs()
 {
     return clock() / CLOCKS_PER_SEC;
 }
-
 
 std::tm toLocal(const std::time_t& time)
 {
@@ -50,7 +45,6 @@ std::tm toLocal(const std::time_t& time)
 #endif
     return tm_snapshot;
 }
-
 
 std::tm toUTC(const std::time_t& time)
 {
@@ -64,7 +58,6 @@ std::tm toUTC(const std::time_t& time)
     return tm_snapshot;
 }
 
-
 std::string print(const std::tm& dt, const char* fmt)
 {
 #if defined(WIN32)
@@ -77,9 +70,9 @@ std::string print(const std::tm& dt, const char* fmt)
 
 #else
     // LINUX
-    const std::size_t size= 1024;
+    const std::size_t size = 1024;
     char buffer[size];
-    auto success= std::strftime(buffer, size, fmt, &dt);
+    auto success = std::strftime(buffer, size, fmt, &dt);
 
     if (0 == success)
         return fmt;
@@ -88,36 +81,30 @@ std::string print(const std::tm& dt, const char* fmt)
 #endif
 }
 
-
 std::string printLocal(const char* fmt)
 {
     return print(toLocal(now()), fmt);
 }
-
 
 std::string printUTC(const char* fmt)
 {
     return print(toUTC(now()), fmt);
 }
 
-
 std::string getLocal()
 {
     return printLocal(ISO8601Format);
 }
-
 
 std::string getUTC()
 {
     return printUTC(ISO8601Format);
 }
 
-
 std::uint64_t hrtime()
 {
     return uv_hrtime();
 }
-
 
 #if 0
 std::time_t nowUTC()
@@ -144,9 +131,7 @@ std::uint64_t getTimeMS()
 }
 #endif
 
-
 } // namespace time
 } // namespace scy
-
 
 /// @\}

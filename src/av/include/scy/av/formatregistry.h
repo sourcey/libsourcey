@@ -8,20 +8,16 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_FormatRegistry_H
 #define SCY_AV_FormatRegistry_H
-
 
 #include "scy/av/format.h"
 #include "scy/mutex.h"
 
 #include <vector>
 
-
 namespace scy {
 namespace av {
-
 
 class FormatRegistry
 {
@@ -51,7 +47,6 @@ public:
     /// Sets the default fallback media format.
     virtual void setDefault(const std::string& name);
 
-
     virtual bool exists(const std::string& name);
     virtual void clear();
 
@@ -66,12 +61,9 @@ private:
     mutable Mutex _mutex;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_FormatRegistry_H
-
 
 /// @\}

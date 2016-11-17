@@ -9,10 +9,8 @@
 /// @addtogroup turn
 /// @{
 
-
 #ifndef SCY_TURN_Server_H
 #define SCY_TURN_Server_H
-
 
 #include "scy/net/tcpsocket.h"
 #include "scy/net/udpsocket.h"
@@ -23,16 +21,13 @@
 #include "scy/turn/server/udpallocation.h"
 #include "scy/turn/turn.h"
 
-
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
 #include <string>
 
-
 namespace scy {
 namespace turn {
-
 
 /// Configuration options for the TURN server.
 struct ServerOptions
@@ -55,20 +50,19 @@ struct ServerOptions
 
     ServerOptions()
     {
-        software= "Sourcey STUN/TURN Server [rfc5766]";
-        realm= "sourcey.com";
-        listenAddr= net::Address("0.0.0.0", 3478);
-        externalIP= "";
-        allocationDefaultLifetime= 2 * 60 * 1000;
-        allocationMaxLifetime= 15 * 60 * 1000;
-        allocationMaxPermissions= 10;
-        timerInterval= 10 * 1000;
-        earlyMediaBufferSize= 8192;
-        enableTCP= true;
-        enableUDP= true;
+        software = "Sourcey STUN/TURN Server [rfc5766]";
+        realm = "sourcey.com";
+        listenAddr = net::Address("0.0.0.0", 3478);
+        externalIP = "";
+        allocationDefaultLifetime = 2 * 60 * 1000;
+        allocationMaxLifetime = 15 * 60 * 1000;
+        allocationMaxPermissions = 10;
+        timerInterval = 10 * 1000;
+        earlyMediaBufferSize = 8192;
+        enableTCP = true;
+        enableUDP = true;
     }
 };
-
 
 /// The ServerObserver receives callbacks for and is responsible
 /// for managing allocation and bandwidth quotas, authentication
@@ -76,9 +70,9 @@ struct ServerOptions
 struct ServerObserver
 {
     virtual void onServerAllocationCreated(Server* server,
-                                           IAllocation* alloc)= 0;
+                                           IAllocation* alloc) = 0;
     virtual void onServerAllocationRemoved(Server* server,
-                                           IAllocation* alloc)= 0;
+                                           IAllocation* alloc) = 0;
 
     /// The observer class can implement authentication
     /// using the long-term credential mechanism of [RFC5389].
@@ -96,19 +90,17 @@ struct ServerObserver
     /// (Allocation Quota Exceeded) (see Section 6.2), and should discard
     /// application data traffic that exceeds the bandwidth quota.
     virtual AuthenticationState authenticateRequest(Server* server,
-                                                    Request& request)= 0;
+                                                    Request& request) = 0;
 };
 
-
 typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
-
 
 /// TURN server rfc5766 implementation
 class Server
 {
 public:
     Server(ServerObserver& observer,
-           const ServerOptions& options= ServerOptions());
+           const ServerOptions& options = ServerOptions());
     virtual ~Server();
 
     virtual void start();
@@ -155,8 +147,6 @@ private:
 }
 } //  namespace scy::turn
 
-
 #endif // SCY_TURN_Server_H
-
 
 /// @\}

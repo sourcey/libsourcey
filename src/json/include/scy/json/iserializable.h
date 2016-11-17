@@ -8,27 +8,22 @@
 /// @addtogroup json
 /// @{
 
-
 #ifndef SCY_JSON_ISerializable_h
 #define SCY_JSON_ISerializable_h
-
 
 #include "scy/json/json.h"
 #include <ostream>
 
-
 namespace scy {
 namespace json {
-
 
 class ISerializable
 {
 public:
     virtual ~ISerializable(){};
-    virtual void serialize(json::Value& root)= 0;
-    virtual void deserialize(json::Value& root)= 0;
+    virtual void serialize(json::Value& root) = 0;
+    virtual void deserialize(json::Value& root) = 0;
 };
-
 
 inline bool serialize(ISerializable* pObj, std::string& output)
 {
@@ -39,11 +34,10 @@ inline bool serialize(ISerializable* pObj, std::string& output)
     pObj->serialize(serializeRoot);
 
     json::StyledWriter writer;
-    output= writer.write(serializeRoot);
+    output = writer.write(serializeRoot);
 
     return true;
 }
-
 
 inline bool deserialize(ISerializable* pObj, std::string& input)
 {
@@ -61,9 +55,7 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
     return true;
 }
 
-
 } // namespace json
 } // namespace scy
-
 
 #endif // SCY_JSON_ISerializable.h

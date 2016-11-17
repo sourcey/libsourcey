@@ -8,29 +8,26 @@
 #include "scy/test.h"
 #include "scy/util.h"
 
-
 #include <algorithm>
 #include <assert.h>
 #include <stdexcept>
-
 
 using std::endl;
 using namespace scy;
 using namespace scy::test;
 
-
 namespace scy {
-
 
 void testCipher(const std::string algorithm, int iterations)
 {
     {
         crypto::Cipher ciph(algorithm);
-        clock_t start= clock();
-        for (int n= 1; n < iterations; n++) {
+        clock_t start = clock();
+        for (int n = 1; n < iterations; n++) {
             std::string in(n, 'x');
-            std::string out= ciph.encryptString(in, crypto::Cipher::Binary);
-            std::string result= ciph.decryptString(out, crypto::Cipher::Binary);
+            std::string out = ciph.encryptString(in, crypto::Cipher::Binary);
+            std::string result =
+                ciph.decryptString(out, crypto::Cipher::Binary);
             assert(in == result);
         }
         DebugL << "Binary: " << (clock() - start) << endl;
@@ -38,11 +35,12 @@ void testCipher(const std::string algorithm, int iterations)
 
     {
         crypto::Cipher ciph(algorithm);
-        clock_t start= clock();
-        for (int n= 1; n < iterations; n++) {
+        clock_t start = clock();
+        for (int n = 1; n < iterations; n++) {
             std::string in(n, 'x');
-            std::string out= ciph.encryptString(in, crypto::Cipher::Base64);
-            std::string result= ciph.decryptString(out, crypto::Cipher::Base64);
+            std::string out = ciph.encryptString(in, crypto::Cipher::Base64);
+            std::string result =
+                ciph.decryptString(out, crypto::Cipher::Base64);
             assert(in == result);
         }
         DebugL << "Base64: " << (clock() - start) << endl;
@@ -50,11 +48,12 @@ void testCipher(const std::string algorithm, int iterations)
 
     {
         crypto::Cipher ciph(algorithm);
-        clock_t start= clock();
-        for (int n= 1; n < iterations; n++) {
+        clock_t start = clock();
+        for (int n = 1; n < iterations; n++) {
             std::string in(n, 'x');
-            std::string out= ciph.encryptString(in, crypto::Cipher::BinHex);
-            std::string result= ciph.decryptString(out, crypto::Cipher::BinHex);
+            std::string out = ciph.encryptString(in, crypto::Cipher::BinHex);
+            std::string result =
+                ciph.decryptString(out, crypto::Cipher::BinHex);
             assert(in == result);
         }
         DebugL << "BinHex: " << (clock() - start) << endl;
@@ -66,10 +65,10 @@ void testCipher(const std::string algorithm, int iterations)
         std::string key(util::randomString(32));
         std::string in(1000, 'x');
 
-        std::string out= crypto::encryptString(algorithm, in, key, iv,
-                                               crypto::Cipher::Binary);
-        std::string result= crypto::decryptString(algorithm, out, key, iv,
-                                                  crypto::Cipher::Binary);
+        std::string out = crypto::encryptString(algorithm, in, key, iv,
+                                                crypto::Cipher::Binary);
+        std::string result = crypto::decryptString(algorithm, out, key, iv,
+                                                   crypto::Cipher::Binary);
         assert(in == result);
     }
 
@@ -82,17 +81,15 @@ void testCipher(const std::string algorithm, int iterations)
         // We can use a string as buffer as long
         // as the implementation is contiguous (as per c++11)
         std::string out(100, '\0');
-        int len= ciph.encrypt(in, out, crypto::Cipher::BinHex);
+        int len = ciph.encrypt(in, out, crypto::Cipher::BinHex);
         out.resize(len);
 
-        std::string result= ciph.decryptString(out, crypto::Cipher::BinHex);
+        std::string result = ciph.decryptString(out, crypto::Cipher::BinHex);
         assert(in == result);
     }
 }
 
-
 } // namespace scy
-
 
 int main(int argc, char** argv)
 {
@@ -122,7 +119,7 @@ int main(int argc, char** argv)
                "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 
         engine.reset();
-        for (int i= 0; i < 1000000; ++i)
+        for (int i = 0; i < 1000000; ++i)
             engine.update('a');
         assert(hex::encode(engine.digest()) ==
                "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
@@ -183,12 +180,12 @@ int main(int argc, char** argv)
         std::string in(1000, 'x');
 
         char encBuf[2048];
-        std::size_t len= enc.encode(in.c_str(), in.length(), encBuf);
+        std::size_t len = enc.encode(in.c_str(), in.length(), encBuf);
         std::string encRes(encBuf, len);
         DebugL << "Encoded: " << encRes << endl;
 
         char decBuf[2048];
-        len= dec.decode(encBuf, len, decBuf);
+        len = dec.decode(encBuf, len, decBuf);
         std::string decRes(decBuf, len);
         DebugL << "Decoded: " << decRes << endl;
 

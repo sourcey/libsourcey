@@ -9,7 +9,6 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #ifndef SCY_AV_DeviceManager_WIN32_H
 #define SCY_AV_DeviceManager_WIN32_H
 
@@ -25,15 +24,12 @@
 
 #ifdef HAVE_RTAUDIO
 
-
 namespace scy {
 namespace av {
-
 
 //
 // Win32 Device Manager
 //
-
 
 class Win32DeviceManager : public DeviceManager
 {
@@ -52,11 +48,9 @@ private:
     static Mutex _mutex;
 };
 
-
 //
 // Win32 Window
 //
-
 
 class Win32Window
 {
@@ -88,11 +82,9 @@ private:
     static ATOM window_class_;
 };
 
-
 //
 // Win32 Device Watcher
 //
-
 
 /// Plugs into windows event notifications to detect the adding
 /// and removing of attached audio and video devices.
@@ -117,14 +109,11 @@ private:
     HDEVNOTIFY video_notify_;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_DeviceManager_WIN32_H
-
 
 /*
 * libjingle

@@ -1,9 +1,7 @@
 #include "mediaserver.h"
 #include "scy/http/websocket.h"
 
-
 namespace scy {
-
 
 // ----------------------------------------------------------------------------
 //
@@ -19,7 +17,7 @@ public:
         DebugS(this) << "Create" << std::endl;
         // Create the packet stream
         MediaServer::setupPacketStream(stream, options); /// Start the stream
-        stream.emitter+=
+        stream.emitter +=
             packetSlot(this, &WebSocketRequestHandler::onVideoEncoded);
         stream.start();
     }
@@ -33,7 +31,7 @@ public:
     {
         DebugS(this) << "On close" << std::endl;
 
-        stream.emitter-=
+        stream.emitter -=
             packetSlot(this, &WebSocketRequestHandler::onVideoEncoded);
         stream.stop();
     }
@@ -44,7 +42,6 @@ public:
                      // assert(!connection().socket()->closed());
                      << &connection() << ": " << packet.size() << ": "
                      << fpsCounter.fps << std::endl;
-
 
         try {
             connection().socket()->send(packet.data(), packet.size(),
@@ -62,6 +59,5 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
-
 
 } // namespace scy

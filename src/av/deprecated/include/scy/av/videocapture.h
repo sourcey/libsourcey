@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_VideoCapture_H
 #define SCY_AV_VideoCapture_H
-
 
 #include "scy/av/format.h"
 #include "scy/av/fpscounter.h"
@@ -30,10 +28,8 @@
 
 #define HAVE_OPENCV_VIDEOCAPTURE
 
-
 namespace scy {
 namespace av {
-
 
 //
 // Video Capture
@@ -72,8 +68,7 @@ public:
     virtual ~VideoCapture();
 
     /// Opens the VideoCapture.
-    bool open(bool whiny= true);
-
+    bool open(bool whiny = true);
 
     virtual void start();
     virtual void stop(); /// True when the system device is open.
@@ -82,8 +77,7 @@ public:
     /// True when the internal thread is running.
     bool running() const;
 
-
-    void getFrame(cv::Mat& frame, int width= 0, int height= 0);
+    void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
     virtual void getEncoderFormat(Format& iformat);
 
@@ -98,7 +92,6 @@ public:
     cv::VideoCapture&
     capture(); /// Signals that the capture is closed in error.
     Signal<void(const scy::Error&)> Error;
-
 
 protected:
     cv::Mat grab();
@@ -124,14 +117,11 @@ private:
     Thread _thread;
 };
 
-
 typedef std::map<int, VideoCapture::Ptr> VideoCaptureMap;
-
 
 //
 // Matrix Packet
 //
-
 
 class MatrixPacket : public VideoPacket
 {
@@ -140,15 +130,15 @@ public:
                   // TODO: Use stream offset time instead of process time
     // for consistency with AudioCapture for realtime pts calculation
 
-    MatrixPacket(cv::Mat* mat, double time= time::clockSecs())
+    MatrixPacket(cv::Mat* mat, double time = time::clockSecs())
         : VideoPacket(reinterpret_cast<std::uint8_t*>(mat->data),
                       mat->rows * mat->step, mat->cols, mat->rows, time)
         , mat(mat)
     {
     }
 
-    MatrixPacket(char* data= nullptr, int size= 0, int width= 0, int height= 0,
-                 double time= time::clockSecs())
+    MatrixPacket(char* data = nullptr, int size = 0, int width = 0,
+                 int height = 0, double time = time::clockSecs())
         : VideoPacket(reinterpret_cast<std::uint8_t*>(data), size, width,
                       height, time)
         , mat(nullptr){};
@@ -158,13 +148,10 @@ public:
     virtual const char* className() const { return "MatrixPacket"; }
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_VideoCapture_H
-
 
 /// @\}

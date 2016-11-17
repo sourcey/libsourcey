@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Stream_H
 #define SCY_Stream_H
-
 
 #include "scy/memory.h"
 #include "scy/uv/uvpp.h"
@@ -20,14 +18,12 @@
 #include "scy/signal.h"
 #include <stdexcept>
 
-
 namespace scy {
-
 
 class Stream : public uv::Handle
 {
 public:
-    Stream(uv::Loop* loop= uv::defaultLoop(), void* stream= nullptr)
+    Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr)
         : uv::Handle(loop, stream)
         , _buffer(65536)
     {
@@ -62,8 +58,8 @@ public:
         // returned via handleRead() which sets the stream
         // to error state. This is not really an error,
         // perhaps it should be handled differently?
-        int r= uv_shutdown(new uv_shutdown_t, ptr<uv_stream_t>(),
-                           [](uv_shutdown_t* req, int) { delete req; });
+        int r = uv_shutdown(new uv_shutdown_t, ptr<uv_stream_t>(),
+                            [](uv_shutdown_t* req, int) { delete req; });
 
         return r == 0;
     }
@@ -83,18 +79,18 @@ public:
             return false;
 
         int r;
-        uv_write_t* req= new uv_write_t;
-        uv_buf_t buf= uv_buf_init((char*)data, len);
-        uv_stream_t* stream= this->ptr<uv_stream_t>();
-        bool isIPC= stream->type == UV_NAMED_PIPE &&
-                    reinterpret_cast<uv_pipe_t*>(stream)->ipc;
+        uv_write_t* req = new uv_write_t;
+        uv_buf_t buf = uv_buf_init((char*)data, len);
+        uv_stream_t* stream = this->ptr<uv_stream_t>();
+        bool isIPC = stream->type == UV_NAMED_PIPE &&
+                     reinterpret_cast<uv_pipe_t*>(stream)->ipc;
 
         if (!isIPC) {
-            r= uv_write(req, stream, &buf, 1,
-                        [](uv_write_t* req, int) { delete req; });
-        } else {
-            r= uv_write2(req, stream, &buf, 1, nullptr,
+            r = uv_write(req, stream, &buf, 1,
                          [](uv_write_t* req, int) { delete req; });
+        } else {
+            r = uv_write2(req, stream, &buf, 1, nullptr,
+                          [](uv_write_t* req, int) { delete req; });
         }
 
         if (r) {
@@ -120,8 +116,8 @@ protected:
     virtual bool readStart()
     {
         // TraceL << "Read start: " << ptr() << std::endl;
-        int r= uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer,
-                             handleRead);
+        int r = uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer,
+                              handleRead);
         if (r)
             setUVError("Stream read error", r);
         return r == 0;
@@ -130,7 +126,7 @@ protected:
     virtual bool readStop()
     {
         // TraceL << "Read stop: " << ptr() << std::endl;
-        int r= uv_read_stop(ptr<uv_stream_t>());
+        int r = uv_read_stop(ptr<uv_stream_t>());
         if (r)
             setUVError("Stream read error", r);
         return r == 0;
@@ -146,8 +142,7 @@ protected:
                                  const uv_buf_t* buf, uv_handle_type pending)
     {
         // TraceL << "Handle read: " << nread << std::endl;
-        auto self= reinterpret_cast<Stream*>(handle->data);
-
+        auto self = reinterpret_cast<Stream*>(handle->data);
 
         if (nread >= 0) {
             self->onRead(buf->base, nread);
@@ -165,7 +160,6 @@ protected:
     // {
     //     return this;
     // }
-
 
     ///
     /// UV callbacks
@@ -186,24 +180,21 @@ protected:
     static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size,
                                 uv_buf_t* buf)
     {
-        auto self= reinterpret_cast<Stream*>(
+        auto self = reinterpret_cast<Stream*>(
             handle->data); // Reserve the recommended buffer size
         // if (suggested_size > self->_buffer.capacity())    //
         // self->_buffer.capacity(suggested_size);
         assert(self->_buffer.size() >=
                suggested_size); /// Reset the buffer position on each read
-        buf->base= self->_buffer.data();
-        buf->len= self->_buffer.size();
+        buf->base = self->_buffer.data();
+        buf->len = self->_buffer.size();
     }
 
     Buffer _buffer;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Stream_H
-
 
 /// @\}

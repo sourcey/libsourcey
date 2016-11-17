@@ -8,19 +8,15 @@
 /// @addtogroup sked
 /// @{
 
-
 #include "scy/sked/trigger.h"
 #include "scy/datetime.h"
 #include "scy/logger.h"
 #include "scy/sked/scheduler.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace sked {
-
 
 Trigger::Trigger(const std::string& type, const std::string& name)
     : type(type)
@@ -29,14 +25,12 @@ Trigger::Trigger(const std::string& type, const std::string& name)
 {
 }
 
-
 std::int64_t Trigger::remaining()
 {
     DateTime now;
-    Timespan ts= scheduleAt - now;
+    Timespan ts = scheduleAt - now;
     return ts.totalMilliseconds();
 }
-
 
 bool Trigger::timeout()
 {
@@ -44,28 +38,25 @@ bool Trigger::timeout()
     return now >= scheduleAt;
 }
 
-
 bool Trigger::expired()
 {
     return false;
 }
 
-
 void Trigger::serialize(json::Value& root)
 {
     TraceL << "Serializing" << endl;
 
-    root["type"]= type;
-    root["name"]= name;
-    root["createdAt"]=
+    root["type"] = type;
+    root["name"] = name;
+    root["createdAt"] =
         DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
-    root["scheduleAt"]=
+    root["scheduleAt"] =
         DateTimeFormatter::format(scheduleAt, DateTimeFormat::ISO8601_FORMAT);
-    root["lastRunAt"]=
+    root["lastRunAt"] =
         DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
-    root["timesRun"]= timesRun;
+    root["timesRun"] = timesRun;
 }
-
 
 void Trigger::deserialize(json::Value& root)
 {
@@ -79,17 +70,16 @@ void Trigger::deserialize(json::Value& root)
     json::assertMember(root, "timesRun");
 
     int tzd;
-    type= root["type"].asString();
-    name= root["name"].asString();
-    createdAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                     root["createdAt"].asString(), tzd);
-    scheduleAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                      root["scheduleAt"].asString(), tzd);
-    lastRunAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                     root["lastRunAt"].asString(), tzd);
-    timesRun= root["timesRun"].asInt();
+    type = root["type"].asString();
+    name = root["name"].asString();
+    createdAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                      root["createdAt"].asString(), tzd);
+    scheduleAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                       root["scheduleAt"].asString(), tzd);
+    lastRunAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                      root["lastRunAt"].asString(), tzd);
+    timesRun = root["timesRun"].asInt();
 }
-
 
 // ---------------------------------------------------------------------
 //
@@ -98,12 +88,10 @@ OnceOnlyTrigger::OnceOnlyTrigger()
 {
 }
 
-
 bool OnceOnlyTrigger::expired()
 {
     return timesRun > 0;
 }
-
 
 // ---------------------------------------------------------------------
 //
@@ -113,18 +101,15 @@ IntervalTrigger::IntervalTrigger()
 {
 }
 
-
 void IntervalTrigger::update()
 {
-    scheduleAt+= interval;
+    scheduleAt += interval;
 }
-
 
 bool IntervalTrigger::expired()
 {
     return maxTimes > 0 && timesRun >= maxTimes;
 }
-
 
 void IntervalTrigger::serialize(json::Value& root)
 {
@@ -132,12 +117,11 @@ void IntervalTrigger::serialize(json::Value& root)
 
     Trigger::serialize(root);
 
-    root["interval"]["days"]= interval.days();
-    root["interval"]["hours"]= interval.hours();
-    root["interval"]["minutes"]= interval.minutes();
-    root["interval"]["seconds"]= interval.seconds();
+    root["interval"]["days"] = interval.days();
+    root["interval"]["hours"] = interval.hours();
+    root["interval"]["minutes"] = interval.minutes();
+    root["interval"]["seconds"] = interval.seconds();
 }
-
 
 void IntervalTrigger::deserialize(json::Value& root)
 {
@@ -161,10 +145,9 @@ void IntervalTrigger::deserialize(json::Value& root)
             "Interval trigger must have non zero interval.");
 
     DateTime now;
-    scheduleAt= now;
-    scheduleAt+= interval;
+    scheduleAt = now;
+    scheduleAt += interval;
 }
-
 
 // ---------------------------------------------------------------------
 //
@@ -173,30 +156,29 @@ DailyTrigger::DailyTrigger()
 {
 }
 
-
 void DailyTrigger::update()
 {
     DateTime now;
     DateTime next;
     DateTime prev(scheduleAt);
     Timespan day(1, 0, 0, 0, 0);
-    bool initial= createdAt == scheduleAt;
+    bool initial = createdAt == scheduleAt;
 
     // Set next date as tomorrow if the schedule
     // timeout is expired, or if we are setting up.
     if (!initial && now > scheduleAt)
-        next+= day;
+        next += day;
 
     // Get the next day the task can run
-    bool match= false;
-    for (unsigned i= 0; i < 6; i++) {
-        match= false;
-        for (unsigned x= 0; x < daysExcluded.size(); x++) {
+    bool match = false;
+    for (unsigned i = 0; i < 6; i++) {
+        match = false;
+        for (unsigned x = 0; x < daysExcluded.size(); x++) {
             if (daysExcluded[x] == next.dayOfWeek()) {
-                match= true;
+                match = true;
 
                 // Increment the start date
-                next+= day;
+                next += day;
             }
         }
         if (!match)
@@ -223,9 +205,7 @@ void DailyTrigger::update()
             */
 }
 
-
 } // namespace sked
 } // namespace scy
-
 
 /// @\}

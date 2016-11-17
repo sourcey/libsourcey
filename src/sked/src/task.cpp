@@ -8,18 +8,14 @@
 /// @addtogroup sked
 /// @{
 
-
 #include "scy/sked/task.h"
 #include "scy/datetime.h"
 #include "scy/sked/scheduler.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace sked {
-
 
 Task::Task(const std::string& type, const std::string& name)
     : _type(type)
@@ -29,7 +25,6 @@ Task::Task(const std::string& type, const std::string& name)
 {
     TraceL << "Create" << endl;
 }
-
 
 Task::Task(sked::Scheduler& scheduler, const std::string& type,
            const std::string& name)
@@ -41,12 +36,10 @@ Task::Task(sked::Scheduler& scheduler, const std::string& type,
     TraceL << "Create" << endl;
 }
 
-
 Task::~Task()
 {
     TraceL << "Destroy" << endl;
 }
-
 
 /*
 void Task::start()
@@ -56,18 +49,16 @@ void Task::start()
 }
 */
 
-
 void Task::serialize(json::Value& root)
 {
     TraceL << "Serializing" << endl;
 
     Mutex::ScopedLock lock(_mutex);
 
-    root["id"]= _id;
-    root["type"]= _type;
-    root["name"]= _name;
+    root["id"] = _id;
+    root["type"] = _type;
+    root["name"] = _name;
 }
-
 
 void Task::deserialize(json::Value& root)
 {
@@ -79,11 +70,10 @@ void Task::deserialize(json::Value& root)
     json::assertMember(root, "type");
     json::assertMember(root, "name");
 
-    _id= root["id"].asUInt();
-    _type= root["type"].asString();
-    _name= root["name"].asString();
+    _id = root["id"].asUInt();
+    _type = root["type"].asString();
+    _name = root["name"].asString();
 }
-
 
 bool Task::beforeRun()
 {
@@ -91,26 +81,23 @@ bool Task::beforeRun()
     return _trigger && _trigger->timeout() && !_destroyed && !cancelled();
 }
 
-
 bool Task::afterRun()
 {
     Mutex::ScopedLock lock(_mutex);
     DateTime now;
     _trigger->update();
     _trigger->timesRun++;
-    _trigger->lastRunAt= now;
+    _trigger->lastRunAt = now;
     return !_trigger->expired();
 }
-
 
 void Task::setTrigger(sked::Trigger* trigger)
 {
     Mutex::ScopedLock lock(_mutex);
     if (_trigger)
         delete _trigger;
-    _trigger= trigger;
+    _trigger = trigger;
 }
-
 
 string Task::name() const
 {
@@ -118,13 +105,11 @@ string Task::name() const
     return _name;
 }
 
-
 string Task::type() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _type;
 }
-
 
 std::int64_t Task::remaining() const
 {
@@ -134,7 +119,6 @@ std::int64_t Task::remaining() const
     return _trigger->remaining();
 }
 
-
 sked::Trigger& Task::trigger()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -142,7 +126,6 @@ sked::Trigger& Task::trigger()
         throw std::runtime_error("Tasks must have a Trigger instance.");
     return *_trigger;
 }
-
 
 sked::Scheduler& Task::scheduler()
 {
@@ -153,9 +136,7 @@ sked::Scheduler& Task::scheduler()
     return *_scheduler;
 }
 
-
 } // namespace sked
 } // namespace scy
-
 
 /// @\}

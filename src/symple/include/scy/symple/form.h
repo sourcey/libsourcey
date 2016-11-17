@@ -8,21 +8,16 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Form_H
 #define SCY_Symple_Form_H
-
 
 #include "scy/json/json.h"
 #include "scy/symple/command.h"
 
-
 namespace scy {
 namespace smpl {
 
-
 class Form;
-
 
 /// Base implementation for form pages, sections and fields.
 class FormField;
@@ -30,8 +25,8 @@ class FormElement
 {
 public:
     FormElement();
-    FormElement(json::Value& root, const std::string& type= "",
-                const std::string& id= "", const std::string& label= "");
+    FormElement(json::Value& root, const std::string& type = "",
+                const std::string& id = "", const std::string& label = "");
     FormElement(const FormElement& r);
     FormElement& operator=(const FormElement& r);
     virtual ~FormElement();
@@ -45,7 +40,6 @@ public:
     ///      list, list-multi, checkbox, media, custom
     void setType(const std::string& type);
 
-
     void setId(const std::string& id);
     void setLabel(const std::string& text);
     void setHint(const std::string& text);
@@ -53,21 +47,22 @@ public:
     /// Sets and optional validation error message.
     void setError(const std::string& error);
 
-    FormElement addPage(const std::string& id= "",
-                        const std::string& label= "");
-    FormElement addSection(const std::string& id= "",
-                           const std::string& label= "");
-    FormField addField(const std::string& type, const std::string& id= "",
-                       const std::string& label= "");
+    FormElement addPage(const std::string& id = "",
+                        const std::string& label = "");
+    FormElement addSection(const std::string& id = "",
+                           const std::string& label = "");
+    FormField addField(const std::string& type, const std::string& id = "",
+                       const std::string& label = "");
 
-    FormField getField(const std::string& id, bool partial= false);
-    bool getField(const std::string& id, FormField& field, bool partial= false);
+    FormField getField(const std::string& id, bool partial = false);
+    bool getField(const std::string& id, FormField& field,
+                  bool partial = false);
 
     /// Returns true if the given Address matches any of the
     /// internal form element IDs.
     /// If the partial flag is set then substring matches
     /// will be counted.
-    bool hasField(const std::string& id, bool partial= false);
+    bool hasField(const std::string& id, bool partial = false);
 
     /// Live fields or elements are used to submit partial
     /// sections a form, without sending the entire form.
@@ -79,7 +74,7 @@ public:
     bool live() const;
 
     /// Clears child elements matching the given ID.
-    bool clearElements(const std::string& id, bool partial= false);
+    bool clearElements(const std::string& id, bool partial = false);
 
     /// Clear the entire form.
     void clear();
@@ -103,7 +98,6 @@ protected:
     /// the externally managed JSON value memory.
     json::Value* _root;
 };
-
 
 class Form : public FormElement
 {
@@ -135,13 +129,12 @@ public:
     void setPartial(bool flag);
 };
 
-
 class FormField : public FormElement
 {
 public:
     FormField();
-    FormField(json::Value& root, const std::string& type= "",
-              const std::string& id= "", const std::string& label= "");
+    FormField(json::Value& root, const std::string& type = "",
+              const std::string& id = "", const std::string& label = "");
     virtual ~FormField();
 
     /// Adds an option for list based fields.
@@ -172,12 +165,9 @@ public:
     bool boolValue() const;
 };
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Form_H
-
 
 /// @\}

@@ -12,14 +12,12 @@
 
 #include <conio.h>
 
-
 using namespace std;
 using namespace Scy;
 using namespace Scy::Net;
 using namespace Scy::Media;
 using namespace Scy::TURN;
 using namespace Scy::Util;
-
 
 // TODO: Simplify this to an echo client.
 // Use the Symple MediaServer for media streaming example.
@@ -33,15 +31,13 @@ CMemLeakDetect memLeakDetect;
 #endif
 */
 
-
 namespace Scy {
 namespace TURN {
-
 
 // ----------------------------------------------------------------------------
 // Media Formats
 //
-Format MP344100=
+Format MP344100 =
     Format("MP3", "mp3", VideoCodec(),
            AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));
 // Adobe Flash Player requires that audio files be 16bit and have a sample rate
@@ -50,37 +46,35 @@ Format MP344100=
 // 128kbps, 160kbps or 256kbps.
 // NOTE: 128000 works fine for 44100, but 64000 is broken!
 
-Format MP38000= Format("MP3", "mp3", VideoCodec(),
-                       AudioCodec("MP3", "libmp3lame", 1, 8000, 64000));
+Format MP38000 = Format("MP3", "mp3", VideoCodec(),
+                        AudioCodec("MP3", "libmp3lame", 1, 8000, 64000));
 
-Format MP311000= Format("MP3", "mp3", VideoCodec(),
-                        AudioCodec("MP3", "libmp3lame", 1, 11000, 16000));
+Format MP311000 = Format("MP3", "mp3", VideoCodec(),
+                         AudioCodec("MP3", "libmp3lame", 1, 11000, 16000));
 
-Format MP348000=
+Format MP348000 =
     Format("MP3", "mp3", VideoCodec(), AudioCodec("MP3", "libmp3lame", 2, 48000,
                                                   128000, "s16p")); //, "s16p")
 
-Format FLVNoAudio=
+Format FLVNoAudio =
     Format("FLV", "flv", VideoCodec("FLV", "flv", 320, 240)); //, 6, 9000, 64000
 
-Format FLVSpeex16000= Format("FLV", "flv", VideoCodec("FLV", "flv", 320, 240),
-                             AudioCodec("Speex", "libspeex", 1, 16000));
+Format FLVSpeex16000 = Format("FLV", "flv", VideoCodec("FLV", "flv", 320, 240),
+                              AudioCodec("Speex", "libspeex", 1, 16000));
 
-Format FLVSpeex16000NoVideo=
+Format FLVSpeex16000NoVideo =
     Format("FLV", "flv", VideoCodec(),
            AudioCodec("Speex", "libspeex", 1, 16000)); //, 16800
 
-Format MJPEG=
+Format MJPEG =
     Format("MJPEG", "mjpeg", VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
-
 
 // Global for now
 class TURNMediaProvider;
-Format ourMediaFormat= MJPEG;
-VideoCapture* ourVideoCapture= NULL;
-AudioCapture* ourAudioCapture= NULL;
-TURNMediaProvider* ourMediaProvider= NULL;
-
+Format ourMediaFormat = MJPEG;
+VideoCapture* ourVideoCapture = NULL;
+AudioCapture* ourAudioCapture = NULL;
+TURNMediaProvider* ourMediaProvider = NULL;
 
 // ----------------------------------------------------------------------------
 // TCP TURN Initiator
@@ -136,7 +130,7 @@ public:
         LogDebug() << "[TURNMediaProvider: " << this << "] Play Media" << endl;
 
         RecorderOptions options;
-        options.oformat= ourMediaFormat;
+        options.oformat = ourMediaFormat;
         if (options.oformat.video.enabled && ourVideoCapture) {
             AllocateOpenCVInputFormat(ourVideoCapture, options.iformat);
             stream.attach(ourVideoCapture, false);
@@ -146,17 +140,17 @@ public:
             stream.attach(ourAudioCapture, false);
         }
 
-        MultiplexEncoder* encoder= new MultiplexEncoder(options);
+        MultiplexEncoder* encoder = new MultiplexEncoder(options);
         encoder->initialize();
         stream.attach(encoder, 5, true);
 
         if (options.oformat.label == "MJPEG") {
-            HTTP::MultipartPacketizer* packetizer=
+            HTTP::MultipartPacketizer* packetizer =
                 new HTTP::MultipartPacketizer("image/jpeg", false);
             stream.attach(packetizer, 10, true);
         }
 
-        stream+= packetSlot(this, &TURNMediaProvider::onMediaEncoded);
+        stream += packetSlot(this, &TURNMediaProvider::onMediaEncoded);
         stream.start();
         LogDebug() << "[TURNMediaProvider: " << this << "] Play Media: OK"
                    << endl;
@@ -165,7 +159,7 @@ public:
     void stopMedia()
     {
         LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media" << endl;
-        stream-= packetSlot(this, &TURNMediaProvider::onMediaEncoded);
+        stream -= packetSlot(this, &TURNMediaProvider::onMediaEncoded);
         stream.close();
         LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media: OK"
                    << endl;
@@ -202,7 +196,7 @@ protected:
     {
         LogDebug() << "[TURNMediaProvider: " << this
                    << "] Connection Created: " << peerAddr << endl;
-        currentPeerAddr= peerAddr; // Current peer
+        currentPeerAddr = peerAddr; // Current peer
 
         ConnectionCreated.emit(/*this, */ this->client, peerAddr);
 
@@ -253,7 +247,6 @@ protected:
     }
 };
 
-
 // ----------------------------------------------------------------------------
 // Media Connection
 //
@@ -277,12 +270,12 @@ public:
 
         // Reinitiate the provider session
         ourMediaProvider->initiate();
-        ourMediaProvider->AllocationCreated+=
+        ourMediaProvider->AllocationCreated +=
             sdelegate(this, &AddressRequestHandler::onAllocationCreated);
 
         wakeUp.wait();
 
-        ourMediaProvider->AllocationCreated-=
+        ourMediaProvider->AllocationCreated -=
             sdelegate(this, &AddressRequestHandler::onAllocationCreated);
 
         Log("trace") << "[AddressRequestHandler] Exiting" << endl;
@@ -294,7 +287,7 @@ public:
 
         // Write the relay address
         assert(ourMediaProvider);
-        std::string data= ourMediaProvider->client.relayedAddress().toString();
+        std::string data = ourMediaProvider->client.relayedAddress().toString();
         socket().sendBytes(data.data(), data.size());
 
         LogDebug() << "[AddressRequestHandler] Allocation Created 1" << endl;
@@ -304,7 +297,6 @@ public:
 
     Poco::Event wakeUp;
 };
-
 
 // ----------------------------------------------------------------------------
 // HTTP Connection Factory
@@ -326,7 +318,7 @@ public:
             // then parse and redirect accordingly.
             char buffer[4096];
             sock.setReceiveTimeout(Poco::Timespan(2, 0));
-            int size= sock.receiveBytes(buffer, sizeof(buffer));
+            int size = sock.receiveBytes(buffer, sizeof(buffer));
             std::string request(buffer, size);
 
             Log("trace") << "HTTP Connection:\n"
@@ -352,7 +344,6 @@ public:
     }
 };
 
-
 // ----------------------------------------------------------------------------
 // HTTP Relay Address Service
 //
@@ -367,10 +358,8 @@ public:
     ~RelayAddressService() {}
 };
 
-
 } // namespace TURN
 } // namespace Scy
-
 
 int main(int argc, char** argv)
 {
@@ -381,7 +370,7 @@ int main(int argc, char** argv)
     // MediaFactory::instance()->loadAudio();
 
     // Init input devices
-    ourVideoCapture= new VideoCapture(0);
+    ourVideoCapture = new VideoCapture(0);
     // ourAudioCapture = MediaFactory::instance()->audio.getCapture(0,
     //    ourMediaFormat.audio.channels,
     //    ourMediaFormat.audio.sampleRate);
@@ -391,26 +380,26 @@ int main(int argc, char** argv)
     Net::Reactor reactor;
     Net::IP peerIP("127.0.0.1");
     TURN::Client::Options co;
-    co.serverAddr= Net::Address("127.0.0.1", 3478); // "173.230.150.125"
-    co.lifetime= 120 * 1000;                        // 2 minute
-    co.timeout= 10 * 1000;
-    co.timerInterval= 3 * 1000;
-    co.username= Anionu_API_USERNAME;
-    co.password= Anionu_API_KEY;
-    ourMediaProvider= new TURNMediaProvider(reactor, runner, co, peerIP);
+    co.serverAddr = Net::Address("127.0.0.1", 3478); // "173.230.150.125"
+    co.lifetime = 120 * 1000;                        // 2 minute
+    co.timeout = 10 * 1000;
+    co.timerInterval = 3 * 1000;
+    co.username = Anionu_API_USERNAME;
+    co.password = Anionu_API_KEY;
+    ourMediaProvider = new TURNMediaProvider(reactor, runner, co, peerIP);
 
     // Create address service
     RelayAddressService service(800);
     service.start();
 
-    char o= 0;
+    char o = 0;
     while (o != 'Q') {
         cout << "COMMANDS:\n\n"
                 "  A    Create the Allocation\n"
                 "  Z    Print the Allocation Address\n"
                 "  Q    Quit\n\n";
 
-        o= toupper(getch());
+        o = toupper(getch());
 
         // Create the Allocation
         if (o == 'A') {

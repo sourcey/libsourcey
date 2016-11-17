@@ -1,20 +1,16 @@
 #ifndef TURN_UDPresponder_TEST_H
 #define TURN_UDPresponder_TEST_H
 
-
 #include "scy/logger.h"
 #include "scy/net/udpsocket.h"
 #include "scy/time.h"
 #include "scy/timer.h"
 #include "turnclienttest.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 class UDPResponder : public net::SocketAdapter
 {
@@ -36,7 +32,6 @@ public:
         // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         socket.bind(net::Address("0.0.0.0", 0));
 
-
         DebugS(this) << id << ": Listening on: " << socket.address() << endl;
     }
 
@@ -52,7 +47,7 @@ public:
         DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
 
         try {
-            this->relayedAddr= relayedAddr;
+            this->relayedAddr = relayedAddr;
 
             // socket.bind(net::Address("0.0.0.0", 0));
             // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
@@ -80,7 +75,7 @@ public:
     void onSocketConnect()
     {
 #if TEST_RESPONDER_TO_INITIATOR_LATENCY
-        timer.Timeout+= sdelegate(this, &UDPResponder::onSendTimer);
+        timer.Timeout += sdelegate(this, &UDPResponder::onSendTimer);
         timer.start(0, 100);
 #endif
     }
@@ -109,9 +104,7 @@ public:
 }
 } //  namespace scy::turn
 
-
 #endif // TURN_UDPresponder_TEST_H
-
 
 /*
 void sendLatencyCheck()

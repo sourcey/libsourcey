@@ -8,21 +8,16 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/apple/avfoundation.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
 namespace avfoundation {
 
-
 extern bool GetAVFoundationVideoDevices(Device::Type type,
                                         std::vector<Device>* devices);
-
 
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
@@ -40,10 +35,8 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
     return false;
 }
 
-
 } // namespace avfoundation
 } // namespace av
 } // namespace scy
-
 
 /// @\}

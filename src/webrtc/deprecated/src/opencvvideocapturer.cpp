@@ -19,12 +19,9 @@
 
 #include "scy/webrtc/opencvvideocapturer.h"
 
-
 using std::endl;
 
-
 namespace scy {
-
 
 OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
     : capture(av::MediaFactory::instance().createVideoCapture(deviceId))
@@ -45,11 +42,9 @@ OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
                              cricket::FOURCC_I420));
 }
 
-
 OpenCVVideoCapturer::~OpenCVVideoCapturer()
 {
 }
-
 
 cricket::CaptureState
 OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
@@ -67,7 +62,7 @@ OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
         // Output packets must be av::MatrixPacket types so we can access
         // the underlying cv::Mat.
         capture->start();
-        capture->emitter+=
+        capture->emitter +=
             packetSlot(this, &OpenCVVideoCapturer::onFrameCaptured);
 
         SetCaptureFormat(&capture_format);
@@ -76,7 +71,6 @@ OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
     }
     return cricket::CS_FAILED;
 }
-
 
 void OpenCVVideoCapturer::Stop()
 {
@@ -97,7 +91,6 @@ void OpenCVVideoCapturer::Stop()
     return;
 }
 
-
 void OpenCVVideoCapturer::onFrameCaptured(void* sender,
                                           av::MatrixPacket& packet)
 {
@@ -108,21 +101,19 @@ void OpenCVVideoCapturer::onFrameCaptured(void* sender,
     cv::cvtColor(*packet.mat, yuv, CV_BGR2YUV_I420);
 
     cricket::CapturedFrame frame;
-    frame.width= packet.width;
-    frame.height= packet.height;
-    frame.fourcc= cricket::FOURCC_I420;
-    frame.data_size= yuv.rows * yuv.step;
-    frame.data= yuv.data;
+    frame.width = packet.width;
+    frame.height = packet.height;
+    frame.fourcc = cricket::FOURCC_I420;
+    frame.data_size = yuv.rows * yuv.step;
+    frame.data = yuv.data;
 
     SignalFrameCaptured(this, &frame);
 }
-
 
 bool OpenCVVideoCapturer::IsRunning()
 {
     return capture_state() == cricket::CS_RUNNING;
 }
-
 
 bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
@@ -134,7 +125,6 @@ bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
     return true;
 }
 
-
 bool OpenCVVideoCapturer::GetBestCaptureFormat(
     const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
 {
@@ -142,19 +132,17 @@ bool OpenCVVideoCapturer::GetBestCaptureFormat(
         return false;
 
     // Use the supported format as the best format.
-    best_format->width= desired.width;
-    best_format->height= desired.height;
-    best_format->fourcc= cricket::FOURCC_I420;
-    best_format->interval= desired.interval;
+    best_format->width = desired.width;
+    best_format->height = desired.height;
+    best_format->fourcc = cricket::FOURCC_I420;
+    best_format->interval = desired.interval;
 
     return true;
 }
-
 
 bool OpenCVVideoCapturer::IsScreencast() const
 {
     return false;
 }
-
 
 } // namespace scy

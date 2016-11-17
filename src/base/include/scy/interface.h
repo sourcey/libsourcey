@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Interfaces_H
 #define SCY_Interfaces_H
-
 
 #include <atomic>
 #include <cstdint>
@@ -19,16 +17,12 @@
 #include <memory>
 #include <stdexcept>
 
-
 namespace scy {
-
 
 /// Forward the LogStream for logger.h
 struct LogStream;
 
-
 namespace basic { // interface pieces
-
 
 class Decoder
 {
@@ -36,10 +30,9 @@ public:
     Decoder() {}
     virtual ~Decoder() {}
     virtual std::size_t decode(const char* inbuf, std::size_t nread,
-                               char* outbuf)= 0;
+                               char* outbuf) = 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
-
 
 class Encoder
 {
@@ -47,10 +40,9 @@ public:
     Encoder() {}
     virtual ~Encoder() {}
     virtual std::size_t encode(const char* inbuf, std::size_t nread,
-                               char* outbuf)= 0;
+                               char* outbuf) = 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
-
 
 #if 0
 /// A base module class for C++ callback polymorphism.
@@ -79,18 +71,14 @@ public:
 };
 #endif
 
-
 /// The LibSourcey base module type.
 /// May become a class type in the future.
 /// depreciated
 // typedef Polymorphic Module;
 
-
 } // namespace basic
 } // namespace scy
 
-
 #endif // SCY_Interfaces_H
-
 
 /// @\}

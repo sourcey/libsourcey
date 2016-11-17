@@ -8,20 +8,16 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_UDPSocket_H
 #define SCY_Net_UDPSocket_H
-
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/net/types.h"
 #include "scy/uv/uvpp.h"
 
-
 namespace scy {
 namespace net {
-
 
 class UDPSocket : public net::Socket, public uv::Handle
 {
@@ -29,17 +25,17 @@ public:
     typedef std::shared_ptr<UDPSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    UDPSocket(uv::Loop* loop= uv::defaultLoop());
+    UDPSocket(uv::Loop* loop = uv::defaultLoop());
     virtual ~UDPSocket();
 
     virtual void connect(const net::Address& peerAddress);
     virtual void close();
 
-    virtual void bind(const net::Address& address, unsigned flags= 0);
+    virtual void bind(const net::Address& address, unsigned flags = 0);
 
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len,
-                     const net::Address& peerAddress, int flags= 0);
+                     const net::Address& peerAddress, int flags = 0);
 
     virtual bool setBroadcast(bool flag);
     virtual bool setMulticastLoop(bool flag);
@@ -80,12 +76,9 @@ protected:
     Buffer _buffer;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_UDPSocket_H
-
 
 /// @\}

@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_Codec_H
 #define SCY_AV_Codec_H
-
 
 #include "scy/av/config.h"
 #include "scy/base.h"
@@ -20,10 +18,8 @@
 #include <list>
 #include <string>
 
-
 namespace scy {
 namespace av {
-
 
 // ---------------------------------------------------------------------
 ///// Defines a codec for encoding/decoding media.
@@ -43,11 +39,11 @@ struct Codec
     // Ctors/Dtors
 
     Codec();
-    Codec(const std::string& name, int sampleRate= 0, int bitRate= 0,
-          bool enabled= true);
+    Codec(const std::string& name, int sampleRate = 0, int bitRate = 0,
+          bool enabled = true);
     Codec(const std::string& name, const std::string& encoder,
-          int sampleRate= 0, int bitRate= 0,
-          bool enabled= true); /// Codec(const Codec& r);
+          int sampleRate = 0, int bitRate = 0,
+          bool enabled = true); /// Codec(const Codec& r);
     virtual ~Codec();
 
     //
@@ -61,14 +57,12 @@ struct Codec
     // Codec& operator=(const Codec& r);
 };
 
-
 // ---------------------------------------------------------------------
 //
 #define DEFAULT_AUDIO_SAMPLE_RATE 44100
 #define DEFAULT_AUDIO_BIT_RATE 64000
 #define DEFAULT_AUDIO_CHANNELS 2
 #define DEFAULT_AUDIO_SAMPLE_FMT "s16"
-
 
 struct AudioCodec : public Codec
 {
@@ -81,15 +75,15 @@ struct AudioCodec : public Codec
 
     AudioCodec();
     AudioCodec(const std::string& name,
-               int channels= 0,                   // = DEFAULT_AUDIO_CHANNELS
-               int sampleRate= 0,                 // = DEFAULT_AUDIO_SAMPLE_RATE
-               int bitRate= 0,                    // = DEFAULT_AUDIO_BIT_RATE
-               const std::string& sampleFmt= ""); // = DEFAULT_AUDIO_SAMPLE_FMT
+               int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
+               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+               int bitRate = 0,    // = DEFAULT_AUDIO_BIT_RATE
+               const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
     AudioCodec(const std::string& name, const std::string& encoder,
-               int channels= 0,                   // = DEFAULT_AUDIO_CHANNELS
-               int sampleRate= 0,                 // = DEFAULT_AUDIO_SAMPLE_RATE
-               int bitRate= 0,                    // = DEFAULT_AUDIO_BIT_RATE
-               const std::string& sampleFmt= ""); // = DEFAULT_AUDIO_SAMPLE_FMT
+               int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
+               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+               int bitRate = 0,    // = DEFAULT_AUDIO_BIT_RATE
+               const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
     /// AudioCodec(const AudioCodec& r);
     virtual ~AudioCodec();
 
@@ -99,7 +93,6 @@ struct AudioCodec : public Codec
     /// AudioCodec& operator==(const AudioCodec& that);
 };
 
-
 // ---------------------------------------------------------------------
 //
 #define DEFAULT_VIDEO_SAMPLE_RATE                                              \
@@ -107,7 +100,6 @@ struct AudioCodec : public Codec
            // using video compression
 #define DEFAULT_VIDEO_BIT_RATE 400000
 #define DEFAULT_VIDEO_PIXEL_FMT "yuv420p"
-
 
 struct VideoCodec : public Codec
 {
@@ -117,15 +109,15 @@ struct VideoCodec : public Codec
     std::string pixelFmt;
 
     VideoCodec();
-    VideoCodec(const std::string& name, int width= 0, int height= 0,
-               double fps= 20, int bitRate= DEFAULT_VIDEO_BIT_RATE,
-               int sampleRate= DEFAULT_VIDEO_SAMPLE_RATE,
-               const std::string& pixelFmt= DEFAULT_VIDEO_PIXEL_FMT);
+    VideoCodec(const std::string& name, int width = 0, int height = 0,
+               double fps = 20, int bitRate = DEFAULT_VIDEO_BIT_RATE,
+               int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE,
+               const std::string& pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);
     VideoCodec(const std::string& name, const std::string& encoder,
-               int width= 0, int height= 0, double fps= 20,
-               int bitRate= DEFAULT_VIDEO_BIT_RATE,
-               int sampleRate= DEFAULT_VIDEO_SAMPLE_RATE,
-               const std::string& pixelFmt= DEFAULT_VIDEO_PIXEL_FMT);
+               int width = 0, int height = 0, double fps = 20,
+               int bitRate = DEFAULT_VIDEO_BIT_RATE,
+               int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE,
+               const std::string& pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);
     VideoCodec(const VideoCodec& r);
     virtual ~VideoCodec();
 
@@ -133,13 +125,10 @@ struct VideoCodec : public Codec
     virtual void print(std::ostream& ost);
 };
 
-
 typedef std::list<Codec> CodecList;
 typedef std::list<Codec*> CodecPList;
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif

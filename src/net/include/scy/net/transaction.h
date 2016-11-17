@@ -8,18 +8,14 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_Transaction_H
 #define SCY_Net_Transaction_H
-
 
 #include "scy/net/packetsocket.h"
 #include "scy/packettransaction.h"
 
-
 namespace scy {
 namespace net {
-
 
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
@@ -29,8 +25,8 @@ class Transaction : public PacketTransaction<PacketT>,
 {
 public:
     Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
-                int timeout= 10000, int retries= 1,
-                uv::Loop* loop= uv::defaultLoop())
+                int timeout = 10000, int retries = 1,
+                uv::Loop* loop = uv::defaultLoop())
         : PacketTransaction<PacketT>(timeout, retries, loop)
         , PacketSocketAdapter(socket)
         , _peerAddress(peerAddress)
@@ -108,7 +104,7 @@ protected:
         assert(packet.info && "socket must provide packet info");
         if (!packet.info)
             return false;
-        auto info= reinterpret_cast<net::PacketInfo*>(packet.info);
+        auto info = reinterpret_cast<net::PacketInfo*>(packet.info);
         return socket->address() == info->socket->address() &&
                _peerAddress == info->peerAddress;
     }
@@ -117,12 +113,9 @@ protected:
     // net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_Transaction_H
-
 
 /// @\}

@@ -15,7 +15,6 @@
 #include "scy/av/videocapture.h"
 #include "scy/packetstream.h"
 
-
 // This demo showcases how to implement a H.264 multiplex recorder from realtime
 // device captures using LibSourcey.
 
@@ -28,7 +27,6 @@ using std::endl;
                                             48000, 128000, "yuv420p"),         \
                av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
-
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LDebug));
@@ -39,8 +37,8 @@ int main(int argc, char** argv)
         PacketStream stream;
 
         av::EncoderOptions options;
-        options.ofile= OUTPUT_FILENAME;
-        options.oformat= OUTPUT_FORMAT;
+        options.ofile = OUTPUT_FILENAME;
+        options.oformat = OUTPUT_FORMAT;
 
         // Create a device manager instance to enumerate system devices
         av::Device device;

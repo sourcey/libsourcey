@@ -6,10 +6,8 @@
 #include "scy/net/dns.h"
 #include "scy/packetstream.h"
 
-
 using namespace std;
 using namespace scy;
-
 
 #define USE_AVDEVICE_CAPTURE 0
 
@@ -22,9 +20,7 @@ av::MediaCapture* gVideoCapture;
 av::VideoCapture* gVideoCapture;
 #endif
 
-
 namespace scy {
-
 
 class MPEGResponder : public http::ServerResponder
 {
@@ -37,7 +33,7 @@ public:
     {
         DebugL << "Creating" << endl;
 
-        auto stream= new PacketStream;
+        auto stream = new PacketStream;
 
         // We will be sending our own headers
         conn.shouldSendHeader(false);
@@ -47,24 +43,24 @@ public:
 
         // Setup the encoder options
         av::EncoderOptions options;
-        options.oformat= av::Format(
+        options.oformat = av::Format(
             "MJPEG", "mjpeg", av::VideoCodec("MJPEG", "mjpeg", 400, 300, 25,
                                              48000, 128000, "yuvj420p"));
         gVideoCapture->getEncoderFormat(options.iformat);
 
         // Create and attach the encoder
-        av::MultiplexPacketEncoder* encoder=
+        av::MultiplexPacketEncoder* encoder =
             new av::MultiplexPacketEncoder(options);
         encoder->initialize();
         stream->attach(encoder, 5, true);
 
         // Create and attach the HTTP multipart packetizer
-        auto packetizer= new http::MultipartAdapter("image/jpeg", false);
+        auto packetizer = new http::MultipartAdapter("image/jpeg", false);
         stream->attach(packetizer, 10, true);
         // assert(0 && "fixme");
 
         // Start the stream
-        stream->emitter+= packetSlot(this, &MPEGResponder::onVideoEncoded);
+        stream->emitter += packetSlot(this, &MPEGResponder::onVideoEncoded);
         stream->start();
     }
 
@@ -86,7 +82,7 @@ public:
     {
         DebugL << "On close" << endl;
 
-        stream->emitter-= packetSlot(this, &MPEGResponder::onVideoEncoded);
+        stream->emitter -= packetSlot(this, &MPEGResponder::onVideoEncoded);
         DebugL << "On close 1" << endl;
         stream->stop();
         DebugL << "On close 2" << endl;
@@ -108,7 +104,6 @@ public:
     }
 };
 
-
 // -------------------------------------------------------------------
 //
 class StreamingResponderFactory : public http::ServerResponderFactory
@@ -120,29 +115,26 @@ public:
     }
 };
 
-
 } // namespace scy
-
 
 static void onShutdownSignal(void* opaque)
 {
     reinterpret_cast<http::Server*>(opaque)->shutdown();
 }
 
-
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
-    gVideoCapture= new av::MediaCapture();
+    gVideoCapture = new av::MediaCapture();
     // gAVVideoCapture->openDevice(0);
     gVideoCapture->openFile(VIDEO_FILE_SOURCE);
     gVideoCapture->start();
 #else
     // VideoCapture instances must be
     // instantiated in the main thread.
-    gVideoCapture= new av::VideoCapture(0);
+    gVideoCapture = new av::VideoCapture(0);
 #endif
 
     {

@@ -8,17 +8,13 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_Message_H
 #define SCY_HTTP_Message_H
 
-
 #include "scy/collection.h"
-
 
 namespace scy {
 namespace http {
-
 
 /// The base class for Request and Response.
 ///
@@ -138,16 +134,12 @@ private:
     std::string _version;
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif // SCY_HTTP_Message_H
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

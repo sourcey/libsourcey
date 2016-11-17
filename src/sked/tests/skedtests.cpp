@@ -4,15 +4,12 @@
 #include "scy/sked/scheduler.h"
 #include "scy/test.h"
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::test;
 
-
 static sked::Scheduler scheduler;
-static int taskRunTimes= 0;
-
+static int taskRunTimes = 0;
 
 // =============================================================================
 // Test Scheduled Task
@@ -32,7 +29,7 @@ struct ScheduledTask : public sked::Task
     {
         sked::Task::serialize(root);
 
-        root["CustomField"]= "blah";
+        root["CustomField"] = "blah";
     }
 
     void deserialize(json::Value& root)
@@ -42,7 +39,6 @@ struct ScheduledTask : public sked::Task
         sked::Task::deserialize(root);
     }
 };
-
 
 int main(int argc, char** argv)
 {
@@ -63,14 +59,14 @@ int main(int argc, char** argv)
 
         // Schedule a once only task to run in 100ms time.
         {
-            taskRunTimes= 0;
+            taskRunTimes = 0;
 
-            auto task= new ScheduledTask();
-            auto trigger= task->createTrigger<sked::OnceOnlyTrigger>();
+            auto task = new ScheduledTask();
+            auto trigger = task->createTrigger<sked::OnceOnlyTrigger>();
 
             DateTime dt;
-            dt+= hundredMs;
-            trigger->scheduleAt= dt;
+            dt += hundredMs;
+            trigger->scheduleAt = dt;
 
             scheduler.start(task);
 
@@ -84,13 +80,13 @@ int main(int argc, char** argv)
 
         // Deserialize the previous task from JSON and run it again
         {
-            taskRunTimes= 0;
+            taskRunTimes = 0;
 
             // Set the task to run in 100ms time
             {
                 DateTime dt;
-                dt+= hundredMs;
-                json[(int)0]["trigger"]["scheduleAt"]=
+                dt += hundredMs;
+                json[(int)0]["trigger"]["scheduleAt"] =
                     DateTimeFormatter::format(dt,
                                               DateTimeFormat::ISO8601_FORMAT);
             }
@@ -126,16 +122,16 @@ int main(int argc, char** argv)
     describe("interval task", []() {
         DebugL << "Running Scheduled Task Test" << endl;
 
-        taskRunTimes= 0;
+        taskRunTimes = 0;
 
         // Schedule an interval task to run 3 times at 100ms intervals
         {
-            auto task= new ScheduledTask();
-            sked::IntervalTrigger* trigger=
+            auto task = new ScheduledTask();
+            sked::IntervalTrigger* trigger =
                 task->createTrigger<sked::IntervalTrigger>();
 
-            trigger->interval= Timespan(0, 1);
-            trigger->maxTimes= 3;
+            trigger->interval = Timespan(0, 1);
+            trigger->maxTimes = 3;
 
             scheduler.start(task);
 

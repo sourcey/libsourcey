@@ -6,10 +6,8 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
-
 #ifndef SCY_Base_Tests_H
 #define SCY_Base_Tests_H
-
 
 #include "scy/application.h"
 #include "scy/base.h"
@@ -31,15 +29,12 @@
 #include "scy/timer.h"
 #include "scy/util.h"
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using scy::test::Test;
 
-
 namespace scy {
-
 
 // =============================================================================
 // IPC Test
@@ -53,8 +48,8 @@ class IpcTest : public Test
     {
         // std::cout << "Test IPC" << std::endl;
 
-        want_x_ipc_callbacks= 5;
-        num_ipc_callbacks= 0;
+        want_x_ipc_callbacks = 5;
+        num_ipc_callbacks = 0;
 
         ipc::SyncQueue<> ipc;
         ipc.push(new ipc::Action(
@@ -87,7 +82,6 @@ class IpcTest : public Test
     }
 };
 
-
 // =============================================================================
 // Timer Test
 //
@@ -97,20 +91,20 @@ class TimerTest : public Test
     {
         std::cout << "Starting" << std::endl;
 
-        int numTimerTicks= 0;
-        int wantTimerTicks= 10;
-        bool timerRestarted= false;
+        int numTimerTicks = 0;
+        int wantTimerTicks = 10;
+        bool timerRestarted = false;
 
         Timer timer;
         timer.start(10, 10);
         timer.handle().ref();
-        timer.Timeout+= [&]() {
+        timer.Timeout += [&]() {
             // std::cout << "On timeout: " << timer->count() << std::endl;
 
             numTimerTicks++;
             if (timer.count() == wantTimerTicks / 2) {
                 if (!timerRestarted) {
-                    timerRestarted= true;
+                    timerRestarted = true;
                     timer.restart(); // restart once, count returns to 0
                 } else {
                     timer.handle().unref();
@@ -126,7 +120,6 @@ class TimerTest : public Test
     }
 };
 
-
 // =============================================================================
 // Idler Test
 //
@@ -138,8 +131,8 @@ class IdlerTest : public Test
 
     void run()
     {
-        wantIdlerTicks= 5;
-        numIdlerTicks= 0;
+        wantIdlerTicks = 5;
+        numIdlerTicks = 0;
 
         idler.start(std::bind(&IdlerTest::idlerCallback, this));
         idler.handle().ref();
@@ -158,7 +151,6 @@ class IdlerTest : public Test
         }
     }
 };
-
 
 // =============================================================================
 // Signal Test
@@ -210,7 +202,6 @@ class IdlerTest : public Test
 //     }
 // };
 
-
 struct SignalCounter
 {
     void increment(std::uint64_t& val) { val++; }
@@ -220,19 +211,16 @@ struct SignalCounter
     static void incrementStatic(std::uint64_t& val) { val++; }
 };
 
-
 void signalIncrementFree(std::uint64_t& val)
 {
     val++;
 }
-
 
 bool signalHandlerC(const char* sl, std::size_t ln)
 {
     std::cout << "signalHandlerC: " << sl << ln << std::endl;
     return false;
 }
-
 
 // class SignalTest: public Test
 // {
@@ -300,7 +288,6 @@ bool signalHandlerC(const char* sl, std::size_t ln)
 //     }
 // };
 
-
 // =============================================================================
 // Process
 //
@@ -337,7 +324,6 @@ class ProcessTest : public Test
     }
 };
 
-
 // =============================================================================
 // Packet Stream
 //
@@ -357,7 +343,7 @@ struct MockThreadedPacketSource : public PacketSource, public async::Startable
         std::cout << "Start" << std::endl;
         runner.start(
             [](void* arg) {
-                auto self= reinterpret_cast<MockThreadedPacketSource*>(arg);
+                auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
                 std::cout << "Emitting" << std::endl;
                 RawPacket p("hello", 5);
                 self->emitter.emit(/*self, */ p);
@@ -403,7 +389,7 @@ class PacketStreamTest : public Test
 
     void run()
     {
-        numPackets= 0;
+        numPackets = 0;
         // stream.setRunner(std::make_shared<Thread>());
         PacketStream stream;
         // stream.attach(new AsyncPacketQueue, 0, true);
@@ -412,7 +398,7 @@ class PacketStreamTest : public Test
         // stream.synchronizeOutput(uv::defaultLoop());
         stream.attach(new MockPacketProcessor, 1, true);
 
-        stream.emitter+= slot(this, &PacketStreamTest::onPacketStreamOutput);
+        stream.emitter += slot(this, &PacketStreamTest::onPacketStreamOutput);
         // stream.emitter += packetSlot(this,
         // &PacketStreamTest::onPacketStreamOutput);
         // stream.emitter.attach<PacketStreamTest,
@@ -431,7 +417,7 @@ class PacketStreamTest : public Test
     }
 };
 
-static std::string RANDOM_CONTENT= "r@ndom";
+static std::string RANDOM_CONTENT = "r@ndom";
 
 struct PacketStreamIOTest : public Test
 {
@@ -452,7 +438,7 @@ struct PacketStreamIOTest : public Test
 
     void run()
     {
-        numPackets= 0;
+        numPackets = 0;
         PacketStream stream;
         stream.attachSource(
             new ThreadedStreamReader(new std::ifstream("input.txt")), true,
@@ -542,11 +528,8 @@ class MultiPacketStreamTest : public Test
     }
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Base_Tests_H
-
 
 /// @\}

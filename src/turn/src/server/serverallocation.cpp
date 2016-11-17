@@ -8,20 +8,16 @@
 /// @addtogroup turn
 /// @{
 
-
 #include "scy/turn/server/server.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
 #include <algorithm>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple,
                                    const std::string& username,
@@ -33,12 +29,10 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple,
     _server.addAllocation(this);
 }
 
-
 ServerAllocation::~ServerAllocation()
 {
     _server.removeAllocation(this);
 }
-
 
 bool ServerAllocation::handleRequest(Request& request)
 {
@@ -58,7 +52,6 @@ bool ServerAllocation::handleRequest(Request& request)
 
     return true;
 }
-
 
 void ServerAllocation::handleRefreshRequest(Request& request)
 {
@@ -81,11 +74,11 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     // Otherwise, the "desired lifetime" is the default lifetime.
 
     // Compute the appropriate LIFETIME for this allocation.
-    auto lifetimeAttr= request.get<stun::Lifetime>();
+    auto lifetimeAttr = request.get<stun::Lifetime>();
     if (!lifetimeAttr) {
         return;
     }
-    std::uint32_t desiredLifetime= std::min<std::uint32_t>(
+    std::uint32_t desiredLifetime = std::min<std::uint32_t>(
         _server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
     // lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 
@@ -123,14 +116,13 @@ void ServerAllocation::handleRefreshRequest(Request& request)
                            stun::Message::Refresh);
     response.setTransactionID(request.transactionID());
 
-    auto resLifetimeAttr= new stun::Lifetime;
+    auto resLifetimeAttr = new stun::Lifetime;
     resLifetimeAttr->setValue(desiredLifetime);
     response.add(resLifetimeAttr);
 
     _server.respond(request, response);
     // request.socket->send(response, request.remoteAddress);
 }
-
 
 void ServerAllocation::handleCreatePermission(Request& request)
 {
@@ -167,8 +159,8 @@ void ServerAllocation::handleCreatePermission(Request& request)
     //   "stateless stack approach".  Retransmitted CreatePermission
     //   requests will simply refresh the permissions.
     //
-    for (int i= 0; i < _server.options().allocationMaxPermissions; i++) {
-        auto peerAttr= request.get<stun::XorPeerAddress>(i);
+    for (int i = 0; i < _server.options().allocationMaxPermissions; i++) {
+        auto peerAttr = request.get<stun::XorPeerAddress>(i);
         if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
             if (i == 0) {
                 _server.respondError(request, 400, "Bad Request");
@@ -187,7 +179,6 @@ void ServerAllocation::handleCreatePermission(Request& request)
     // request.socket->send(response, request.remoteAddress);
 }
 
-
 bool ServerAllocation::onTimer()
 {
     TraceL << "ServerAllocation: On timer: " << IAllocation::deleted() << endl;
@@ -198,13 +189,11 @@ bool ServerAllocation::onTimer()
     return true;
 }
 
-
 std::int64_t ServerAllocation::maxTimeRemaining() const
 {
-    std::int64_t elapsed= static_cast<std::int64_t>(time(0) - _createdAt);
+    std::int64_t elapsed = static_cast<std::int64_t>(time(0) - _createdAt);
     return elapsed > _maxLifetime ? 0 : _maxLifetime - elapsed;
 }
-
 
 std::int64_t ServerAllocation::timeRemaining() const
 {
@@ -212,13 +201,11 @@ std::int64_t ServerAllocation::timeRemaining() const
     return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
-
 Server& ServerAllocation::server()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _server;
 }
-
 
 void ServerAllocation::print(std::ostream& os) const
 {
@@ -234,9 +221,7 @@ void ServerAllocation::print(std::ostream& os) const
        << "\n\tExpired=" << expired() << "]" << endl;
 }
 
-
 } // namespace turn
 } // namespace scy
-
 
 /// @\}

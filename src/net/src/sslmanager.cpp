@@ -10,30 +10,24 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-
 #include "scy/net/sslmanager.h"
 #include "scy/net/sslcontext.h"
 #include "scy/singleton.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace net {
-
 
 int SSLManager::verifyServerCallback(int ok, X509_STORE_CTX* pStore)
 {
     return SSLManager::verifyCallback(true, ok, pStore);
 }
 
-
 int SSLManager::verifyClientCallback(int ok, X509_STORE_CTX* pStore)
 {
     return SSLManager::verifyCallback(false, ok, pStore);
 }
-
 
 void SSLManager::initNoVerifyClient()
 {
@@ -43,7 +37,6 @@ void SSLManager::initNoVerifyClient()
                                 net::SSLContext::VERIFY_NONE, 9, false,
                                 "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
-
 
 void SSLManager::initNoVerifyServer(const std::string& privateKeyFile,
                                     const std::string& certificateFile)
@@ -101,27 +94,23 @@ void SSLManager::initNoVerifyServer(const std::string& privateKeyFile,
             "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
 
-
 SSLManager::SSLManager()
 {
 }
-
 
 SSLManager::~SSLManager()
 {
     shutdown();
 }
 
-
 void SSLManager::shutdown()
 {
     PrivateKeyPassphraseRequired.detachAll();
     ClientVerificationError.detachAll();
     ServerVerificationError.detachAll();
-    _defaultServerContext= nullptr;
-    _defaultClientContext= nullptr;
+    _defaultServerContext = nullptr;
+    _defaultClientContext = nullptr;
 }
-
 
 /*
 namespace
@@ -136,30 +125,25 @@ Singleton<SSLManager>& singleton()
     return singleton;
 }
 
-
 SSLManager& SSLManager::instance()
 {
     return *singleton().get();
 }
-
 
 void SSLManager::destroy()
 {
     singleton().destroy();
 }
 
-
 void SSLManager::initializeServer(SSLContext::Ptr ptrContext)
 {
-    _defaultServerContext= ptrContext;
+    _defaultServerContext = ptrContext;
 }
-
 
 void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 {
-    _defaultClientContext= ptrContext;
+    _defaultClientContext = ptrContext;
 }
-
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
@@ -167,21 +151,19 @@ SSLContext::Ptr SSLManager::defaultServerContext()
     return _defaultServerContext;
 }
 
-
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
     Mutex::ScopedLock lock(_mutex);
     return _defaultClientContext;
 }
 
-
 int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 {
     if (!ok) {
-        X509* pCert= X509_STORE_CTX_get_current_cert(pStore);
+        X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
         crypto::X509Certificate x509(pCert, true);
-        int depth= X509_STORE_CTX_get_error_depth(pStore);
-        int err= X509_STORE_CTX_get_error(pStore);
+        int depth = X509_STORE_CTX_get_error_depth(pStore);
+        int err = X509_STORE_CTX_get_error(pStore);
         std::string error(X509_verify_cert_error_string(err));
         VerificationErrorDetails args(x509, depth, err, error);
         if (server)
@@ -190,12 +172,11 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
         else
             SSLManager::instance().ClientVerificationError.emit(
                 /*&SSLManager::instance(), */ args);
-        ok= args.getIgnoreError() ? 1 : 0;
+        ok = args.getIgnoreError() ? 1 : 0;
     }
 
     return ok;
 }
-
 
 int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag,
                                              void* userData)
@@ -205,19 +186,17 @@ int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag,
         /*&SSLManager::instance(), */ pwd);
 
     strncpy(pBuf, (char*)(pwd.c_str()), size);
-    pBuf[size - 1]= '\0';
+    pBuf[size - 1] = '\0';
     if (size > (int)pwd.length())
-        size= (int)pwd.length();
+        size = (int)pwd.length();
 
     return size;
 }
-
 
 void initializeSSL()
 {
     crypto::initializeEngine();
 }
-
 
 void uninitializeSSL()
 {
@@ -225,11 +204,9 @@ void uninitializeSSL()
     crypto::uninitializeEngine();
 }
 
-
 //
 // Verification Error Details
 //
-
 
 VerificationErrorDetails::VerificationErrorDetails(
     const crypto::X509Certificate& cert, int errDepth, int errNum,
@@ -242,18 +219,14 @@ VerificationErrorDetails::VerificationErrorDetails(
 {
 }
 
-
 VerificationErrorDetails::~VerificationErrorDetails()
 {
 }
 
-
 } // namespace net
 } // namespace scy
 
-
 /// @\}
-
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

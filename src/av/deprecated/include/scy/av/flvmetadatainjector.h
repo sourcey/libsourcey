@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_FLVMetadataInjector_H
 #define SCY_AV_FLVMetadataInjector_H
-
 
 #include "scy/av/format.h"
 #include "scy/av/fpscounter.h"
@@ -20,7 +18,6 @@
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 #include <sstream>
-
 
 namespace scy {
 namespace av {
@@ -36,33 +33,33 @@ class FLVMetadataInjector : public IPacketizer
 public:
     enum AMFDataType
     {
-        AMF_DATA_TYPE_NUMBER= 0x00,
-        AMF_DATA_TYPE_BOOL= 0x01,
-        AMF_DATA_TYPE_STRING= 0x02,
-        AMF_DATA_TYPE_OBJECT= 0x03,
-        AMF_DATA_TYPE_NULL= 0x05,
-        AMF_DATA_TYPE_UNDEFINED= 0x06,
-        AMF_DATA_TYPE_REFERENCE= 0x07,
-        AMF_DATA_TYPE_MIXEDARRAY= 0x08,
-        AMF_DATA_TYPE_OBJECT_END= 0x09,
-        AMF_DATA_TYPE_ARRAY= 0x0a,
-        AMF_DATA_TYPE_DATE= 0x0b,
-        AMF_DATA_TYPE_LONG_STRING= 0x0c,
-        AMF_DATA_TYPE_UNSUPPORTED= 0x0d,
+        AMF_DATA_TYPE_NUMBER = 0x00,
+        AMF_DATA_TYPE_BOOL = 0x01,
+        AMF_DATA_TYPE_STRING = 0x02,
+        AMF_DATA_TYPE_OBJECT = 0x03,
+        AMF_DATA_TYPE_NULL = 0x05,
+        AMF_DATA_TYPE_UNDEFINED = 0x06,
+        AMF_DATA_TYPE_REFERENCE = 0x07,
+        AMF_DATA_TYPE_MIXEDARRAY = 0x08,
+        AMF_DATA_TYPE_OBJECT_END = 0x09,
+        AMF_DATA_TYPE_ARRAY = 0x0a,
+        AMF_DATA_TYPE_DATE = 0x0b,
+        AMF_DATA_TYPE_LONG_STRING = 0x0c,
+        AMF_DATA_TYPE_UNSUPPORTED = 0x0d,
     };
 
     enum
     {
-        FLV_TAG_TYPE_AUDIO= 0x08,
-        FLV_TAG_TYPE_VIDEO= 0x09,
-        FLV_TAG_TYPE_SCRIPT= 0x12,
+        FLV_TAG_TYPE_AUDIO = 0x08,
+        FLV_TAG_TYPE_VIDEO = 0x09,
+        FLV_TAG_TYPE_SCRIPT = 0x12,
     };
 
     enum
     {
-        FLV_FRAME_KEY= 1 << 4,
-        FLV_FRAME_INTER= 2 << 4,
-        FLV_FRAME_DISP_INTER= 3 << 4,
+        FLV_FRAME_KEY = 1 << 4,
+        FLV_FRAME_INTER = 2 << 4,
+        FLV_FRAME_DISP_INTER = 3 << 4,
     };
 
     IPacketizer(this->emitter), _format(format), _initial(true),
@@ -80,10 +77,10 @@ public:
 
         switch (state.id()) {
             case PacketStreamState::Active:
-                _initial= true;
-                _modifyingStream= false;
-                _waitingForKeyframe= false;
-                _timestampOffset= 0;
+                _initial = true;
+                _modifyingStream = false;
+                _waitingForKeyframe = false;
+                _timestampOffset = 0;
                 break;
         }
 
@@ -92,7 +89,7 @@ public:
 
     virtual void process(IPacket& packet)
     {
-        av::MediaPacket* mpacket= dynamic_cast<av::MediaPacket*>(&packet);
+        av::MediaPacket* mpacket = dynamic_cast<av::MediaPacket*>(&packet);
         if (mpacket && mpacket->size() > 15) {
 
             // Read the first packet to determine weather or not
@@ -100,10 +97,10 @@ public:
             if (_initial && !_modifyingStream) {
                 // Buffer buf;
                 // packet.write(buf);
-                _modifyingStream= true; //! isFLVHeader(buf);
-                _waitingForKeyframe= _modifyingStream;
-                _timestampOffset= 0;
-                _initial= false;
+                _modifyingStream = true; //! isFLVHeader(buf);
+                _waitingForKeyframe = _modifyingStream;
+                _timestampOffset = 0;
+                _initial = false;
             }
 
             // Modify the stream only if required. This involves
@@ -124,7 +121,7 @@ public:
                     }
 
                     // Create and dispatch our custom header.
-                    _waitingForKeyframe= false;
+                    _waitingForKeyframe = false;
                     traceL("FLVMetadataInjector", this)
                         << "Got keyframe, prepending headers" << std::endl;
                     // Buffer flvHeader(512);
@@ -167,7 +164,7 @@ public:
     /// Caution: this method does not check buffer size.
     virtual void fastUpdateTimestamp(char* buf, std::uint32_t timestamp)
     {
-        std::uint32_t val= hostToNetwork32(timestamp);
+        std::uint32_t val = hostToNetwork32(timestamp);
 
         // traceL("FLVMetadataInjector", this) << "Updating timestamp: "    //
         // << "\n\tTimestamp: " << timestamp
@@ -184,7 +181,7 @@ public:
     } /// Caution: this method does not check buffer size.
     virtual bool fastIsFLVKeyFrame(char* buf)
     {
-        std::uint8_t flags= buf[11];
+        std::uint8_t flags = buf[11];
         return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
     }
 
@@ -203,12 +200,12 @@ public:
         ///
         /// FLV Metadata Object
         writer.putU8(FLV_TAG_TYPE_SCRIPT);
-        int dataSizePos= writer.position(); // - offset;
+        int dataSizePos = writer.position(); // - offset;
         writer.putU24(0); // size of data part (sum of all parts below)
         writer.putU24(0); // time stamp
         writer.putU32(0); // reserved
 
-        int dataStartPos= writer.position(); // - offset;
+        int dataStartPos = writer.position(); // - offset;
 
         writer.putU8(AMF_DATA_TYPE_STRING); // AMF_DATA_TYPE_STRING
         writeAMFSring(writer, "onMetaData");
@@ -265,7 +262,7 @@ public:
 
         writer.put("", 1);
         writer.putU8(AMF_DATA_TYPE_OBJECT_END); /// Write data size
-        int dataSize= writer.position() - dataStartPos;
+        int dataSize = writer.position() - dataStartPos;
         writer.updateU24(dataSize, dataSizePos); /// Write tag size
         writer.putU32(dataSize + 11);
 
@@ -279,7 +276,7 @@ public:
 
     static bool dumpFLVTags(BitReader& reader)
     {
-        bool result= false;
+        bool result = false;
 
         std::uint8_t tagType;
         std::uint32_t dataSize;
@@ -314,20 +311,20 @@ public:
                 break;
 
             // Start of data size bytes
-            int dataStartPos= reader.position();
+            int dataStartPos = reader.position();
 
             reader.getU8(flags);
 
-            bool isKeyFrame= false;
-            bool isInterFrame= false;
+            bool isKeyFrame = false;
+            bool isInterFrame = false;
             // bool isDispInterFrame = false;
             switch (tagType) {
                 case FLV_TAG_TYPE_AUDIO:
                     break;
 
                 case FLV_TAG_TYPE_VIDEO:
-                    isKeyFrame= (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
-                    isInterFrame= (flags & FLV_FRAME_INTER) == FLV_FRAME_INTER;
+                    isKeyFrame = (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
+                    isInterFrame = (flags & FLV_FRAME_INTER) == FLV_FRAME_INTER;
                     // isDispInterFrame = (flags & FLV_FRAME_DISP_INTER) ==
                     // FLV_FRAME_DISP_INTER;
                     break;
@@ -361,7 +358,7 @@ public:
                 //<< "\n\tStream ID: " << streamId
                 << std::endl;
 
-            result= true;
+            result = true;
 
         } while (0);
 
@@ -376,11 +373,10 @@ public:
         else if (d - d)
             return 0x7FF0000000000000LL + ((std::int64_t)(d < 0) << 63) +
                    (d != d);
-        d= frexp(d, &e);
+        d = frexp(d, &e);
         return (std::int64_t)(d < 0) << 63 | (e + 1022LL) << 52 |
                (std::int64_t)((fabs(d) - 0.5) * (1LL << 53));
     }
-
 
     ///
     /// AMF Helpers
@@ -388,7 +384,7 @@ public:
 
     virtual void writeAMFSring(BitWriter& writer, const char* val)
     {
-        std::uint16_t len= strlen(val);
+        std::uint16_t len = strlen(val);
         writer.putU16(len);
         writer.put(val, len);
     }
@@ -396,7 +392,7 @@ public:
     virtual void writeAMFDouble(BitWriter& writer, double val)
     {
 #if WIN32 // The implementation is not perfect, but it's sufficient for our
-          // needs.
+        // needs.
         if ((val > double(_I64_MAX)) || (val < double(_I64_MIN))) {
             traceL("FLVMetadataInjector") << "Double to int truncated"
                                           << std::endl;
@@ -426,13 +422,10 @@ protected:
     legacy::FPSCounter _fpsCounter; // Need legacy counter for smooth playback
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /*
 virtual void updateTimestamp(Buffer& buf, std::uint32_t timestamp)

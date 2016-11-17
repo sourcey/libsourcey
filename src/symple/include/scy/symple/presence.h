@@ -8,19 +8,15 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Presence_H
 #define SCY_Symple_Presence_H
-
 
 #include "scy/base.h"
 #include "scy/json/json.h"
 #include "scy/symple/message.h"
 
-
 namespace scy {
 namespace smpl {
-
 
 class Presence : public Message
 {
@@ -34,12 +30,9 @@ public:
     void setProbe(bool flag);
 };
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Presence_H
-
 
 /// @\}

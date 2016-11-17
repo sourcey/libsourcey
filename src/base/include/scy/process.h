@@ -8,26 +8,21 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Process_H
 #define SCY_Process_H
-
 
 #include "scy/uv/uvpp.h"
 #include <functional>
 #include <vector>
 
-
 namespace scy {
 
-
 typedef uv_process_options_t ProcessOptions;
-
 
 class Process : public uv::Handle
 {
 public:
-    Process(uv::Loop* loop= uv::defaultLoop());
+    Process(uv::Loop* loop = uv::defaultLoop());
 
     /// Spawns the process.
     /// Options must be properly set.
@@ -35,7 +30,7 @@ public:
     void spawn();
 
     /// Kills the process
-    bool kill(int signum= 0);
+    bool kill(int signum = 0);
 
     /// Returns the process PID
     int pid() const;
@@ -54,11 +49,8 @@ protected:
     uv_process_t _proc;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Process_H
-
 
 /// @\}

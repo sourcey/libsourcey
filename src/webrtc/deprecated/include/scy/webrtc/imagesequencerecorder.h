@@ -8,18 +8,14 @@
 /// @addtogroup webrtc
 /// @{
 
-
 #ifndef SCY_WebRTC_ImageSequenceRecorder_H
 #define SCY_WebRTC_ImageSequenceRecorder_H
-
 
 #include "scy/av/videoencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 
-
 namespace scy {
-
 
 class ImageSequenceRecorder
     : public rtc::VideoSinkInterface<cricket::VideoFrame>
@@ -44,11 +40,8 @@ protected:
     AVFrame* _avframe;
 };
 
-
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

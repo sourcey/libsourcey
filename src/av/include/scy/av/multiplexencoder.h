@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_MultiplexEncoder_H
 #define SCY_AV_MultiplexEncoder_H
-
 
 #include "scy/base.h"
 
@@ -33,7 +31,6 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-
 namespace scy {
 namespace av {
 
@@ -41,7 +38,7 @@ namespace av {
 class MultiplexEncoder : public IEncoder
 {
 public:
-    MultiplexEncoder(const EncoderOptions& options= EncoderOptions());
+    MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
     virtual ~MultiplexEncoder();
 
     virtual void initialize();
@@ -57,18 +54,16 @@ public:
     /// If no time is specified a realtime time value will be assigned to
     /// the frame.
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width,
-                             int height, std::int64_t time= AV_NOPTS_VALUE);
-
+                             int height, std::int64_t time = AV_NOPTS_VALUE);
 
     virtual void createAudio();
     virtual void freeAudio(); /// virtual bool encodeAudio(AVFrame* frame);
                               /// // Encode a single audio frame
     virtual bool encodeAudio(std::uint8_t* buffer, int numSamples,
-                             std::int64_t time= AV_NOPTS_VALUE);
+                             std::int64_t time = AV_NOPTS_VALUE);
 
     /// Flush and beffered or queued packets.
     virtual void flush();
-
 
     EncoderOptions& options();
     VideoEncoder* video();
@@ -95,16 +90,12 @@ protected:
     std::uint64_t _pts;
 };
 
-
 // bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
-
 
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_MultiplexEncoder_H
-
 
 /// @\}

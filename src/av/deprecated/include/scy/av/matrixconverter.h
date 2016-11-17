@@ -8,7 +8,6 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_MatrixConverter_H
 #define SCY_AV_MatrixConverter_H
 
@@ -23,7 +22,6 @@ extern "C" {
 }
 
 #include <opencv/cv.h>
-
 
 namespace scy {
 namespace av {
@@ -59,14 +57,14 @@ public:
 
     virtual void process(IPacket& packet)
     {
-        VideoPacket& vpacket= reinterpret_cast<VideoPacket&>(packet);
-        VideoDecoder* video= reinterpret_cast<VideoDecoder*>(packet.opaque);
+        VideoPacket& vpacket = reinterpret_cast<VideoPacket&>(packet);
+        VideoDecoder* video = reinterpret_cast<VideoDecoder*>(packet.opaque);
         if (video == nullptr)
             throw std::runtime_error("Matrix Converter: Video packets must "
                                      "contain a VideoDecoder pointer.");
         // Create and allocate the conversion frame.
         if (_oframe == nullptr) {
-            _oframe= av_frame_alloc();
+            _oframe = av_frame_alloc();
             if (_oframe == nullptr)
                 throw std::runtime_error(
                     "Matrix Converter: Could not allocate the output frame.");
@@ -77,10 +75,10 @@ public:
         }
         // Convert the image from its native format to BGR.
         if (_convCtx == nullptr) {
-            _convCtx= sws_getContext(video->ctx->width, video->ctx->height,
-                                     video->ctx->pix_fmt, video->ctx->width,
-                                     video->ctx->height, AV_PIX_FMT_BGR24,
-                                     SWS_BICUBIC, nullptr, nullptr, nullptr);
+            _convCtx = sws_getContext(video->ctx->width, video->ctx->height,
+                                      video->ctx->pix_fmt, video->ctx->width,
+                                      video->ctx->height, AV_PIX_FMT_BGR24,
+                                      SWS_BICUBIC, nullptr, nullptr, nullptr);
             _mat.create(video->ctx->height, video->ctx->width, CV_8UC(3));
         }
         if (_convCtx == nullptr)
@@ -94,18 +92,18 @@ public:
                                                                    /// the
                                                                    /// OpenCV
                                                                    /// Matrix.
-        for (int y= 0; y < video->ctx->height; y++) {
-            for (int x= 0; x < video->ctx->width; x++) {
-                _mat.at<cv::Vec3b>(y, x)[0]=
+        for (int y = 0; y < video->ctx->height; y++) {
+            for (int x = 0; x < video->ctx->width; x++) {
+                _mat.at<cv::Vec3b>(y, x)[0] =
                     _oframe->data[0][y * _oframe->linesize[0] + x * 3 + 0];
-                _mat.at<cv::Vec3b>(y, x)[1]=
+                _mat.at<cv::Vec3b>(y, x)[1] =
                     _oframe->data[0][y * _oframe->linesize[0] + x * 3 + 1];
-                _mat.at<cv::Vec3b>(y, x)[2]=
+                _mat.at<cv::Vec3b>(y, x)[2] =
                     _oframe->data[0][y * _oframe->linesize[0] + x * 3 + 2];
             }
         }
 
-        vpacket.mat= &_mat;
+        vpacket.mat = &_mat;
         emit(this, vpacket);
     }
 
@@ -114,10 +112,8 @@ public:
     struct SwsContext* _convCtx;
 };
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif
 #endif

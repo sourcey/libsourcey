@@ -8,17 +8,14 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_Format_H
 #define SCY_AV_Format_H
-
 
 #include "scy/av/codec.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
-
 
 namespace scy {
 namespace av {
@@ -30,10 +27,10 @@ struct Format
 {
     enum Type
     {
-        None= 0,
-        Video= 1,    ///< video only
-        Audio= 2,    ///< audio only
-        Multiplex= 3 ///< both video & audio
+        None = 0,
+        Video = 1,    ///< video only
+        Audio = 2,    ///< audio only
+        Multiplex = 3 ///< both video & audio
     };
 
     ///
@@ -54,18 +51,15 @@ struct Format
 
     Format(const std::string& name,
            const std::string& id, // Multiplex format constructor
-           const VideoCodec& video, const AudioCodec& audio, int priority= 0);
-
+           const VideoCodec& video, const AudioCodec& audio, int priority = 0);
 
     Format(const std::string& name,
            const std::string& id, // Video only format constructor
-           const VideoCodec& video, int priority= 0);
-
+           const VideoCodec& video, int priority = 0);
 
     Format(const std::string& name,
            const std::string& id, // Audio only format constructor
-           const AudioCodec& audio, int priority= 0);
-
+           const AudioCodec& audio, int priority = 0);
 
     Format(const Format& r);
 
@@ -81,13 +75,10 @@ struct Format
     }
 };
 
-
 typedef std::vector<Format> FormatList;
 typedef std::vector<Format*> FormatPList;
 
-
 } // namespace av
 } // namespace scy
-
 
 #endif

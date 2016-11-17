@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_MediaCapture_H
 #define SCY_AV_MediaCapture_H
-
 
 #include "scy/base.h"
 
@@ -25,7 +23,6 @@
 #include "scy/interface.h"
 #include "scy/mutex.h"
 #include "scy/packetsignal.h"
-
 
 namespace scy {
 namespace av {
@@ -66,7 +63,6 @@ public:
     /// Careful, this signal is emitted from inside the tread contect.
     NullSignal Closing;
 
-
 protected:
     virtual void openStream(const std::string& filename,
                             AVInputFormat* inputFormat,
@@ -84,13 +80,10 @@ protected:
     bool _stopping;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_MediaCapture_H
-
 
 /// @\}

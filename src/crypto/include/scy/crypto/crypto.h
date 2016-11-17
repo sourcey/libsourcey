@@ -8,18 +8,14 @@
 /// @addtogroup crypto
 /// @{
 
-
 #ifndef SCY_Crypto_Crypto_H
 #define SCY_Crypto_Crypto_H
-
 
 #include "scy/base64.h"
 #include <vector>
 
-
 namespace scy {
 namespace crypto {
-
 
 /// Initialize the Crypto library, as well as the underlying OpenSSL
 /// libraries.
@@ -44,7 +40,7 @@ typedef std::vector<unsigned char> ByteVec;
 namespace internal {
 
 /// Check return values from OpenSSL and throw an exception if it failed.
-void api(int ret, const char* error= nullptr);
+void api(int ret, const char* error = nullptr);
 
 /// Throws the last OpenSSL error.
 void throwError();
@@ -61,49 +57,46 @@ template <typename T> struct Raw
 
     Raw(T ptr, std::size_t len)
     {
-        ptr= ptr;
-        len= len;
+        ptr = ptr;
+        len = len;
     }
 
     Raw(const char* ptr, std::size_t len)
     {
-        ptr= reinterpret_cast<T>(const_cast<char*>(ptr));
-        len= len;
+        ptr = reinterpret_cast<T>(const_cast<char*>(ptr));
+        len = len;
     }
 
     Raw(std::string& str)
     {
-        ptr= reinterpret_cast<T>(&str[0]);
-        len= str.length();
+        ptr = reinterpret_cast<T>(&str[0]);
+        len = str.length();
     }
 
     Raw(const std::string& str)
     {
-        ptr= reinterpret_cast<T>(const_cast<char*>(&str[0]));
-        len= str.length();
+        ptr = reinterpret_cast<T>(const_cast<char*>(&str[0]));
+        len = str.length();
     }
 
     Raw(const std::vector<char>& vec)
     {
-        ptr= reinterpret_cast<T>(const_cast<char*>(&vec[0]));
-        len= vec.size();
+        ptr = reinterpret_cast<T>(const_cast<char*>(&vec[0]));
+        len = vec.size();
     }
 
     Raw(const ByteVec& vec)
     {
-        ptr= reinterpret_cast<T>(const_cast<unsigned char*>(&vec[0]));
-        len= vec.size();
+        ptr = reinterpret_cast<T>(const_cast<unsigned char*>(&vec[0]));
+        len = vec.size();
     }
 };
 
 } // namespace internal
 
-
 } // namespace crypto
 } // namespace scy
 
-
 #endif // SCY_Crypto_Crypto_H
-
 
 /// @\}

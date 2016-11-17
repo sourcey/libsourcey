@@ -18,16 +18,16 @@ BinPackParameters: true
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BraceWrapping: {
-    AfterClass: true
-    AfterControlStatement: false
-    AfterEnum : true
-    AfterFunction : true
-    AfterNamespace : false
-    AfterStruct : true
-    AfterUnion : true
-    BeforeCatch : false
-    BeforeElse : false
-    IndentBraces : false
+    AfterClass: 'true'
+    AfterControlStatement: 'false'
+    AfterEnum: 'true'
+    AfterFunction: 'true'
+    AfterNamespace: 'false'
+    AfterStruct: 'true'
+    AfterUnion: 'true'
+    BeforeCatch: 'false'
+    BeforeElse: 'false'
+    IndentBraces: 'false'
 }
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: true

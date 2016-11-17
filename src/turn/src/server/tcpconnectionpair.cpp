@@ -8,19 +8,15 @@
 /// @addtogroup turn
 /// @{
 
-
 #include "scy/turn/server/tcpconnectionpair.h"
 #include "scy/crypto/crypto.h"
 #include "scy/turn/server/server.h"
 #include "scy/turn/server/tcpallocation.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation)
     : allocation(allocation)
@@ -31,11 +27,10 @@ TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation)
     , isDataConnection(false)
 {
     while (!allocation.pairs().add(connectionID, this, false)) {
-        connectionID= util::randomNumber();
+        connectionID = util::randomNumber();
     }
     TraceS(this) << "Create: " << connectionID << endl;
 }
-
 
 TCPConnectionPair::~TCPConnectionPair()
 {
@@ -43,16 +38,16 @@ TCPConnectionPair::~TCPConnectionPair()
 
     if (client) {
         // assert(client->base().refCount() == 2);
-        client->Recv-= slot(this, &TCPConnectionPair::onClientDataReceived);
-        client->Close-= slot(this, &TCPConnectionPair::onConnectionClosed);
+        client->Recv -= slot(this, &TCPConnectionPair::onClientDataReceived);
+        client->Close -= slot(this, &TCPConnectionPair::onConnectionClosed);
         client->close();
     }
     if (peer) {
         // assert(peer->base().refCount() == 1);
-        peer->Recv-= slot(this, &TCPConnectionPair::onPeerDataReceived);
-        peer->Connect-= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
-        peer->Error-= slot(this, &TCPConnectionPair::onPeerConnectError);
-        peer->Close-= slot(this, &TCPConnectionPair::onConnectionClosed);
+        peer->Recv -= slot(this, &TCPConnectionPair::onPeerDataReceived);
+        peer->Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+        peer->Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
+        peer->Close -= slot(this, &TCPConnectionPair::onConnectionClosed);
         peer->close();
     }
 
@@ -60,21 +55,20 @@ TCPConnectionPair::~TCPConnectionPair()
     allocation.pairs().remove(connectionID);
 }
 
-
 bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 {
     try {
         assert(!transactionID.empty());
-        peer= std::make_shared<net::TCPSocket>();
-        peer->opaque= this;
-        peer->Close+= slot(this, &TCPConnectionPair::onConnectionClosed);
+        peer = std::make_shared<net::TCPSocket>();
+        peer->opaque = this;
+        peer->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
         // Start receiving early media
-        peer->Recv+= slot(this, &TCPConnectionPair::onPeerDataReceived);
+        peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
 
         // Connect request specific events
-        peer->Connect+= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
-        peer->Error+= slot(this, &TCPConnectionPair::onPeerConnectError);
+        peer->Connect += slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+        peer->Error += slot(this, &TCPConnectionPair::onPeerConnectError);
 
         client->connect(peerAddr);
     } catch (std::exception& exc) {
@@ -85,7 +79,6 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
     return true;
 }
 
-
 void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set peer socket: " << connectionID << ": "
@@ -94,15 +87,14 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 
     assert(peer == nullptr);
     // assert(socket./*base().*/refCount() == 1);
-    peer= socket;
-    peer->Close+= slot(this, &TCPConnectionPair::onConnectionClosed);
+    peer = socket;
+    peer->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
     // Receive and buffer early media from peer
-    peer->Recv+= slot(this, &TCPConnectionPair::onPeerDataReceived);
+    peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
     net::setServerSocketRecvBufSize<uv_tcp_t>(
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
-
 
 void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
@@ -111,12 +103,11 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
     //<< ": " << socket./*base().*/refCount()
     assert(client == nullptr);
     // assert(socket./*base().*/refCount() == 2);
-    client= socket;
-    client->Close+= slot(this, &TCPConnectionPair::onConnectionClosed);
+    client = socket;
+    client->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
     net::setServerSocketRecvBufSize<uv_tcp_t>(
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
-
 
 bool TCPConnectionPair::makeDataConnection()
 {
@@ -124,8 +115,8 @@ bool TCPConnectionPair::makeDataConnection()
     if (!peer || !client)
         return false;
 
-    peer->Recv+= slot(this, &TCPConnectionPair::onPeerDataReceived);
-    client->Recv+= slot(this, &TCPConnectionPair::onClientDataReceived);
+    peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
+    client->Recv += slot(this, &TCPConnectionPair::onClientDataReceived);
 
     // Relase and unbind the client socket from the server.
     // The client socket instance, events and data will be
@@ -140,9 +131,8 @@ bool TCPConnectionPair::makeDataConnection()
         earlyPeerData.clear();
     }
 
-    return (isDataConnection= true);
+    return (isDataConnection = true);
 }
-
 
 void TCPConnectionPair::onPeerDataReceived(net::Socket&,
                                            const MutableBuffer& buffer,
@@ -156,8 +146,8 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     // char* buf = bufferCast<char*>(buf);
 
     // Buffer& buf = pkt.buffer;
-    const char* buf= bufferCast<const char*>(buffer);
-    std::size_t len= buffer.size();
+    const char* buf = bufferCast<const char*>(buffer);
+    std::size_t len = buffer.size();
     if (client) {
 
         allocation.updateUsage(len);
@@ -183,7 +173,8 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     // Buffer early media
     // TODO: Make buffer size server option
     else {
-        std::size_t maxSize= allocation.server().options().earlyMediaBufferSize;
+        std::size_t maxSize =
+            allocation.server().options().earlyMediaBufferSize;
         DebugS(this) << "Buffering early data: " << len << endl;
         //#ifdef _DEBUG
         //        DebugS(this) << "Printing early data: " << std::string(buf,
@@ -199,7 +190,6 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
         earlyPeerData.insert(earlyPeerData.end(), buf, buf + len);
     }
 }
-
 
 void TCPConnectionPair::onClientDataReceived(net::Socket&,
                                              const MutableBuffer& buffer,
@@ -219,13 +209,12 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
     }
 }
 
-
 void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 {
     TraceS(this) << "Peer Connect request success" << endl;
     assert(&socket == peer.get());
-    peer->Connect-= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
-    peer->Error-= slot(this, &TCPConnectionPair::onPeerConnectError);
+    peer->Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+    peer->Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
 
     // If no ConnectionBind request associated with this peer data
     // connection is received after 30 seconds, the peer data connection
@@ -237,7 +226,6 @@ void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
     startTimeout();
 }
 
-
 void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
                                            const Error& error)
 {
@@ -248,7 +236,6 @@ void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
     // The TCPConnectionPair will be deleted on next call to onConnectionClosed
 }
 
-
 void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 {
     TraceS(this) << "Connection pair socket closed: " << connectionID << ": "
@@ -256,13 +243,11 @@ void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
     delete this; // fail
 }
 
-
 void TCPConnectionPair::startTimeout()
 {
     // Mutex::ScopedLock lock(_mutex);
     timeout.reset();
 }
-
 
 bool TCPConnectionPair::expired() const
 {
@@ -270,9 +255,7 @@ bool TCPConnectionPair::expired() const
     return timeout.running() && timeout.expired();
 }
 
-
 } // namespace turn
 } // namespace scy
-
 
 /// @\}

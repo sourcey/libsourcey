@@ -8,7 +8,6 @@
 /// @addtogroup base
 /// @{
 
-
 #include "scy/task.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
@@ -19,17 +18,13 @@
 #include <assert.h>
 #include <iostream>
 
-
 using std::endl;
 
-
 namespace scy {
-
 
 //
 // Task
 //
-
 
 Task::Task(bool repeat)
     : _id(util::randomNumber())
@@ -38,41 +33,34 @@ Task::Task(bool repeat)
 {
 }
 
-
 Task::~Task()
 {
     // assert(destroyed());
 }
 
-
 void Task::destroy()
 {
-    _destroyed= true;
+    _destroyed = true;
 }
-
 
 std::uint32_t Task::id() const
 {
     return _id;
 }
 
-
 bool Task::destroyed() const
 {
     return _destroyed;
 }
-
 
 bool Task::repeating() const
 {
     return _repeating;
 }
 
-
 //
 // Task Runner
 //
-
 
 TaskRunner::TaskRunner(async::Runner::Ptr runner)
 {
@@ -82,7 +70,6 @@ TaskRunner::TaskRunner(async::Runner::Ptr runner)
         setRunner(std::make_shared<Thread>());
 }
 
-
 TaskRunner::~TaskRunner()
 {
     Shutdown.emit(/*this*/);
@@ -91,7 +78,6 @@ TaskRunner::~TaskRunner()
         _runner->cancel();
     clear();
 }
-
 
 bool TaskRunner::start(Task* task)
 {
@@ -107,7 +93,6 @@ bool TaskRunner::start(Task* task)
     //}
     // return false;
 }
-
 
 bool TaskRunner::cancel(Task* task)
 {
@@ -131,7 +116,6 @@ bool TaskRunner::cancel(Task* task)
     return false;
 }
 
-
 bool TaskRunner::destroy(Task* task)
 {
     TraceN(this) << "Abort task: " << task << endl;
@@ -139,7 +123,7 @@ bool TaskRunner::destroy(Task* task)
     // If the task exists then set the destroyed flag.
     if (exists(task)) {
         TraceN(this) << "Abort managed task: " << task << endl;
-        task->_destroyed= true;
+        task->_destroyed = true;
     }
 
     // Otherwise destroy the pointer.
@@ -150,7 +134,6 @@ bool TaskRunner::destroy(Task* task)
 
     return true; // hmmm
 }
-
 
 bool TaskRunner::add(Task* task)
 {
@@ -166,13 +149,12 @@ bool TaskRunner::add(Task* task)
     return false;
 }
 
-
 bool TaskRunner::remove(Task* task)
 {
     TraceN(this) << "Remove task: " << task << endl;
 
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task) {
             _tasks.erase(it);
             // dereference the idler handle when a task is removed
@@ -184,50 +166,45 @@ bool TaskRunner::remove(Task* task)
     return false;
 }
 
-
 bool TaskRunner::exists(Task* task) const
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task)
             return true;
     }
     return false;
 }
 
-
 Task* TaskRunner::get(std::uint32_t id) const
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if ((*it)->id() == id)
             return *it;
     }
     return nullptr;
 }
 
-
 Task* TaskRunner::next() const
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (!(*it)->cancelled())
             return *it;
     }
     return nullptr;
 }
 
-
 void TaskRunner::clear()
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         TraceN(this) << "Clear: Destroying task: " << *it << endl;
         delete *it;
     }
     _tasks.clear();
 }
-
 
 void TaskRunner::setRunner(async::Runner::Ptr runner)
 {
@@ -235,15 +212,14 @@ void TaskRunner::setRunner(async::Runner::Ptr runner)
 
     Mutex::ScopedLock lock(_mutex);
     assert(!_runner);
-    _runner= runner;
+    _runner = runner;
     _runner->setRepeating(true);
     _runner->start(*this);
 }
 
-
 void TaskRunner::run()
 {
-    Task* task= next();
+    Task* task = next();
     // TraceN(this) << "Next task: " << task << endl;
 
     // Run the task
@@ -266,7 +242,7 @@ void TaskRunner::run()
         // Advance the task queue
         {
             Mutex::ScopedLock lock(_mutex);
-            Task* t= _tasks.front();
+            Task* t = _tasks.front();
             _tasks.pop_front();
             _tasks.push_back(t);
         }
@@ -287,38 +263,31 @@ void TaskRunner::run()
     scy::sleep(1);
 }
 
-
 void TaskRunner::onAdd(Task*)
 {
 }
-
 
 void TaskRunner::onStart(Task*)
 {
 }
 
-
 void TaskRunner::onCancel(Task*)
 {
 }
-
 
 void TaskRunner::onRemove(Task*)
 {
 }
 
-
 void TaskRunner::onRun(Task*)
 {
 }
-
 
 TaskRunner& TaskRunner::getDefault()
 {
     static Singleton<TaskRunner> sh;
     return *sh.get();
 }
-
 
 } // namespace scy
 

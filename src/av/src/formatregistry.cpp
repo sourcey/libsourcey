@@ -8,27 +8,21 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/formatregistry.h"
 #include "scy/singleton.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 FormatRegistry::FormatRegistry()
 {
 }
 
-
 FormatRegistry::~FormatRegistry()
 {
 }
-
 
 FormatRegistry& FormatRegistry::instance()
 {
@@ -36,11 +30,10 @@ FormatRegistry& FormatRegistry::instance()
     return *sh.get();
 }
 
-
 Format& FormatRegistry::get(const std::string& name)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (unsigned int i= 0; i < _formats.size(); i++) {
+    for (unsigned int i = 0; i < _formats.size(); i++) {
         if (_formats[i].name == name) {
             return _formats[i];
         }
@@ -49,11 +42,10 @@ Format& FormatRegistry::get(const std::string& name)
     throw std::runtime_error("Not found: No media format for: " + name);
 }
 
-
 Format& FormatRegistry::getByID(const std::string& id)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (unsigned int i= 0; i < _formats.size(); i++) {
+    for (unsigned int i = 0; i < _formats.size(); i++) {
         if (_formats[i].id == id) {
             return _formats[i];
         }
@@ -62,12 +54,11 @@ Format& FormatRegistry::getByID(const std::string& id)
     throw std::runtime_error("Not found: No media format type: " + id);
 }
 
-
 Format& FormatRegistry::getOrDefault(const std::string& name)
 {
     {
         Mutex::ScopedLock lock(_mutex);
-        for (unsigned int i= 0; i < _formats.size(); i++) {
+        for (unsigned int i = 0; i < _formats.size(); i++) {
             if (_formats[i].name == name) {
                 return _formats[i];
             }
@@ -76,7 +67,6 @@ Format& FormatRegistry::getOrDefault(const std::string& name)
 
     return getDefault();
 }
-
 
 Format& FormatRegistry::getDefault()
 {
@@ -90,11 +80,10 @@ Format& FormatRegistry::getDefault()
     throw std::runtime_error("Not found: No default media format.");
 }
 
-
 bool FormatRegistry::exists(const std::string& name)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (unsigned int i= 0; i < _formats.size(); i++) {
+    for (unsigned int i = 0; i < _formats.size(); i++) {
         if (_formats[i].name == name) {
             return true;
         }
@@ -103,20 +92,17 @@ bool FormatRegistry::exists(const std::string& name)
     return false;
 }
 
-
 void FormatRegistry::clear()
 {
     Mutex::ScopedLock lock(_mutex);
     _formats.clear();
 }
 
-
 FormatList FormatRegistry::formats() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _formats;
 }
-
 
 void FormatRegistry::registerFormat(const Format& format)
 {
@@ -125,32 +111,28 @@ void FormatRegistry::registerFormat(const Format& format)
     _formats.push_back(format);
 }
 
-
 bool FormatRegistry::unregisterFormat(const std::string& name)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (FormatList::iterator it= _formats.begin(); it != _formats.end();
+    for (FormatList::iterator it = _formats.begin(); it != _formats.end();
          ++it) {
         if ((*it).name == name) {
             _formats.erase(it);
             if (_default == name)
-                _default= "";
+                _default = "";
             return true;
         }
     }
     return false;
 }
 
-
 void FormatRegistry::setDefault(const std::string& name)
 {
     Mutex::ScopedLock lock(_mutex);
-    _default= name;
+    _default = name;
 }
-
 
 } // namespace av
 } // namespace scy
-
 
 /// @\}

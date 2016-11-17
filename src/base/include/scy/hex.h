@@ -11,10 +11,8 @@
 // http://libb64.sourceforge.net/
 //
 
-
 #ifndef SCY_Hex_H
 #define SCY_Hex_H
-
 
 #include "scy/error.h"
 #include "scy/interface.h"
@@ -23,15 +21,12 @@
 #include <cstring>
 #include <iostream>
 
-
 namespace scy {
 namespace hex {
-
 
 //
 // Hex Encoder
 //
-
 
 struct Encoder : public basic::Encoder
 {
@@ -46,18 +41,18 @@ struct Encoder : public basic::Encoder
                                char* outbuf)
     {
         // static const int eof = std::char_traits<char>::eof();
-        static const char digits[]= "0123456789abcdef0123456789ABCDEF";
+        static const char digits[] = "0123456789abcdef0123456789ABCDEF";
 
         char c;
-        std::size_t nwrite= 0;
-        for (unsigned i= 0; i < nread; i++) {
-            c= inbuf[i];
+        std::size_t nwrite = 0;
+        for (unsigned i = 0; i < nread; i++) {
+            c = inbuf[i];
             std::memcpy(outbuf + nwrite++,
                         &digits[_uppercase + ((c >> 4) & 0xF)], 1);
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + (c & 0xF)], 1);
             if (_lineLength > 0 &&
-                (_linePos+= 2) >= _lineLength) { //++_linePos//++_linePos;
-                _linePos= 0;
+                (_linePos += 2) >= _lineLength) { //++_linePos//++_linePos;
+                _linePos = 0;
                 std::memcpy(outbuf + nwrite++, "\n", 1);
             }
         }
@@ -67,36 +62,33 @@ struct Encoder : public basic::Encoder
 
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 
-    void setUppercase(bool flag) { _uppercase= flag ? 16 : 0; }
+    void setUppercase(bool flag) { _uppercase = flag ? 16 : 0; }
 
-    void setLineLength(int lineLength) { _lineLength= lineLength; }
+    void setLineLength(int lineLength) { _lineLength = lineLength; }
 
     int _linePos;
     int _lineLength;
     int _uppercase;
 };
 
-
 /// Converts the STL container to Hex.
 template <typename T> inline std::string encode(const T& bytes)
 {
-    static const char digits[]= "0123456789abcdef";
+    static const char digits[] = "0123456789abcdef";
     std::string res;
     res.reserve(bytes.size() * 2);
-    for (typename T::const_iterator it= bytes.begin(); it != bytes.end();
+    for (typename T::const_iterator it = bytes.begin(); it != bytes.end();
          ++it) {
-        const unsigned char c= static_cast<const unsigned char>(*it);
-        res+= digits[(c >> 4) & 0xF];
-        res+= digits[c & 0xF];
+        const unsigned char c = static_cast<const unsigned char>(*it);
+        res += digits[(c >> 4) & 0xF];
+        res += digits[c & 0xF];
     }
     return res;
 }
 
-
 //
 // Hex Decoder
 //
-
 
 struct Decoder : public basic::Decoder
 {
@@ -111,11 +103,11 @@ struct Decoder : public basic::Decoder
     {
         int n;
         char c;
-        std::size_t rpos= 0;
-        std::size_t nwrite= 0;
+        std::size_t rpos = 0;
+        std::size_t nwrite = 0;
         while (rpos < nread) {
             if (readnext(inbuf, nread, rpos, c))
-                n= (nybble(c) << 4);
+                n = (nybble(c) << 4);
 
             else if (rpos >= nread) {
                 // Store the last byte to be
@@ -126,7 +118,7 @@ struct Decoder : public basic::Decoder
             }
 
             readnext(inbuf, nread, rpos, c);
-            n= n | nybble(c);
+            n = n | nybble(c);
             std::memcpy(outbuf + nwrite++, &n, 1);
         }
         return nwrite;
@@ -139,12 +131,12 @@ struct Decoder : public basic::Decoder
     {
         if (rpos == 0 && lastbyte != '\0') {
             assert(!iswspace(lastbyte));
-            c= lastbyte;
-            lastbyte= '\0';
+            c = lastbyte;
+            lastbyte = '\0';
         } else {
-            c= inbuf[rpos++];
+            c = inbuf[rpos++];
             while (iswspace(c) && rpos < nread)
-                c= inbuf[rpos++];
+                c = inbuf[rpos++];
         }
         return rpos < nread;
     }
@@ -169,12 +161,9 @@ struct Decoder : public basic::Decoder
     char lastbyte;
 };
 
-
 } // namespace hex
 } // namespace scy
 
-
 #endif // SCY_Hex_H
-
 
 /// @\}

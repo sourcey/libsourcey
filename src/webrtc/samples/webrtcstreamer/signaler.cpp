@@ -20,28 +20,23 @@
 #include "webrtc/api/mediastreamtrackproxy.h"
 #include "webrtc/api/peerconnectionfactory.h"
 
-
 using std::endl;
 
-
 namespace scy {
-
 
 Signaler::Signaler(const smpl::Client::Options& options)
     : _client(options)
 {
-    _client.StateChange+= slot(this, &Signaler::onClientStateChange);
-    _client.roster().ItemAdded+= slot(this, &Signaler::onPeerConnected);
-    _client.roster().ItemRemoved+= slot(this, &Signaler::onPeerDiconnected);
-    _client+= packetSlot(this, &Signaler::onPeerMessage);
+    _client.StateChange += slot(this, &Signaler::onClientStateChange);
+    _client.roster().ItemAdded += slot(this, &Signaler::onPeerConnected);
+    _client.roster().ItemRemoved += slot(this, &Signaler::onPeerDiconnected);
+    _client += packetSlot(this, &Signaler::onPeerMessage);
     _client.connect();
 }
-
 
 Signaler::~Signaler()
 {
 }
-
 
 void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
                        const std::string& sdp)
@@ -49,27 +44,25 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
     assert(type == "offer" || type == "answer");
     smpl::Message m;
     Json::Value desc;
-    desc[kSessionDescriptionTypeName]= type;
-    desc[kSessionDescriptionSdpName]= sdp;
-    m[type]= desc;
+    desc[kSessionDescriptionTypeName] = type;
+    desc[kSessionDescriptionSdpName] = sdp;
+    m[type] = desc;
 
     postMessage(m);
 }
-
 
 void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
                              int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
     Json::Value desc;
-    desc[kCandidateSdpMidName]= mid;
-    desc[kCandidateSdpMlineIndexName]= mlineindex;
-    desc[kCandidateSdpName]= sdp;
-    m["candidate"]= desc;
+    desc[kCandidateSdpMidName] = mid;
+    desc[kCandidateSdpMlineIndexName] = mlineindex;
+    desc[kCandidateSdpName] = sdp;
+    m["candidate"] = desc;
 
     postMessage(m);
 }
-
 
 void Signaler::onPeerConnected(smpl::Peer& peer)
 {
@@ -87,7 +80,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    auto conn= new FilePeerConnection(this, peer.id(), PeerConnection::Offer);
+    auto conn = new FilePeerConnection(this, peer.id(), PeerConnection::Offer);
     // conn->constraints().SetMandatoryReceiveAudio(false);
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();
@@ -103,7 +96,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     // av::Device device;
 
     // Create the media stream
-    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream=
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =
         conn->createMediaStream();
 
     // Create and add the audio stream
@@ -198,7 +191,6 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     PeerConnectionManager::add(peer.id(), conn);
 }
 
-
 void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
@@ -213,18 +205,16 @@ void Signaler::onPeerMessage(smpl::Message& m)
     // else assert(0 && "unknown event");
 }
 
-
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
     DebugL << "Peer disconnected" << endl;
 
-    auto conn= PeerConnectionManager::remove(peer.id());
+    auto conn = PeerConnectionManager::remove(peer.id());
     if (conn) {
         DebugL << "Deleting peer connection: " << peer.id() << endl;
         delete conn;
     }
 }
-
 
 void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
                                    const sockio::ClientState& oldState)
@@ -246,20 +236,17 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
     }
 }
 
-
 void Signaler::onAddRemoteStream(PeerConnection* conn,
                                  webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }
 
-
 void Signaler::onRemoveRemoteStream(PeerConnection* conn,
                                     webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }
-
 
 void Signaler::postMessage(const smpl::Message& m)
 {
@@ -268,13 +255,11 @@ void Signaler::postMessage(const smpl::Message& m)
         m.clone()));
 }
 
-
 void Signaler::syncMessage(const ipc::Action& action)
 {
-    auto m= reinterpret_cast<smpl::Message*>(action.arg);
+    auto m = reinterpret_cast<smpl::Message*>(action.arg);
     _client.send(*m);
     delete m;
 }
-
 
 } // namespace scy

@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_AudioBuffer_H
 #define SCY_AV_AudioBuffer_H
-
 
 #include <string>
 
@@ -23,10 +21,8 @@ extern "C" {
 #include <libavutil/audio_fifo.h>
 }
 
-
 namespace scy {
 namespace av {
-
 
 struct AudioBuffer
 {
@@ -34,7 +30,7 @@ struct AudioBuffer
     ~AudioBuffer();
 
     void alloc(const std::string& sampleFmt, int channels,
-               int numSamples= 1024);
+               int numSamples = 1024);
     void reset();
     void close();
 
@@ -46,13 +42,10 @@ struct AudioBuffer
     AVAudioFifo* fifo;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_AudioBuffer_H
-
 
 /// @\}

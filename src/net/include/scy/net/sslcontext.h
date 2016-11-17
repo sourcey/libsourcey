@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_SSLContext_H
 #define SCY_Net_SSLContext_H
-
 
 #include "scy/crypto/rsa.h"
 #include "scy/crypto/x509certificate.h"
@@ -22,10 +20,8 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
-
 namespace scy {
 namespace net {
-
 
 /// This class encapsulates context information for
 /// an SSL server or client, such as the certificate
@@ -56,7 +52,7 @@ public:
         /// Client: If not using an anonymous cipher (by default disabled),
         /// the server will send a certificate which will be checked, but
         /// the result of the check will be ignored.
-        VERIFY_NONE= SSL_VERIFY_NONE,
+        VERIFY_NONE = SSL_VERIFY_NONE,
 
         /// Server: The server sends a client certificate request to the
         /// client. The certificate returned (if any) is checked.
@@ -68,21 +64,21 @@ public:
         /// If the verification process fails, the TLS/SSL handshake is
         /// immediately terminated with an alert message containing the
         /// reason for the verification failure.
-        VERIFY_RELAXED= SSL_VERIFY_PEER,
+        VERIFY_RELAXED = SSL_VERIFY_PEER,
 
         /// Server: If the client did not return a certificate, the TLS/SSL
         /// handshake is immediately terminated with a handshake failure
         /// alert.
         ///
         /// Client: Same as VERIFY_RELAXED.
-        VERIFY_STRICT= SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+        VERIFY_STRICT = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
 
         /// Server: Only request a client certificate on the initial
         /// TLS/SSL handshake. Do not ask for a client certificate
         /// again in case of a renegotiation.
         ///
         /// Client: Same as VERIFY_RELAXED.
-        VERIFY_ONCE= SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
+        VERIFY_ONCE = SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
     };
 
     /// Creates a Context.
@@ -117,9 +113,9 @@ public:
     SSLContext(
         Usage usage, const std::string& privateKeyFile,
         const std::string& certificateFile, const std::string& caLocation,
-        VerificationMode verificationMode= VERIFY_RELAXED,
-        int verificationDepth= 9, bool loadDefaultCAs= false,
-        const std::string& cipherList= "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        VerificationMode verificationMode = VERIFY_RELAXED,
+        int verificationDepth = 9, bool loadDefaultCAs = false,
+        const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     /// Creates a Context.
     ///
@@ -141,9 +137,9 @@ public:
     /// usePrivateKey()/useCertificate() before the Context can be used.
     SSLContext(
         Usage usage, const std::string& caLocation,
-        VerificationMode verificationMode= VERIFY_RELAXED,
-        int verificationDepth= 9, bool loadDefaultCAs= false,
-        const std::string& cipherList= "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        VerificationMode verificationMode = VERIFY_RELAXED,
+        int verificationDepth = 9, bool loadDefaultCAs = false,
+        const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     /// Destroys the Context.
     ~SSLContext();
@@ -199,7 +195,7 @@ public:
     /// To enable session caching on the server side, use the
     /// two-argument version of this method to specify
     /// a session ID context.
-    void enableSessionCache(bool flag= true);
+    void enableSessionCache(bool flag = true);
 
     /// Enables or disables SSL/TLS session caching on the server.
     /// For session caching to work, it must be enabled
@@ -269,52 +265,46 @@ private:
     bool _extendedVerificationErrorDetails;
 };
 
-
 inline SSLContext::Usage SSLContext::usage() const
 {
     return _usage;
 }
-
 
 inline bool SSLContext::isForServerUse() const
 {
     return _usage == SERVER_USE || _usage == TLSV1_SERVER_USE;
 }
 
-
 inline SSLContext::VerificationMode SSLContext::verificationMode() const
 {
     return _mode;
 }
-
 
 inline SSL_CTX* SSLContext::sslContext() const
 {
     return _sslContext;
 }
 
-
 //
 // Utilities
 //
-
 
 /// Non-case sensitive conversion of a string to a VerificationMode enum.
 /// If verMode is illegal an ArgumentException is thrown.
 inline SSLContext::VerificationMode
 convertVerificationMode(const std::string& vMode)
 {
-    std::string mode= util::toLower(vMode);
-    SSLContext::VerificationMode verMode= SSLContext::VERIFY_STRICT;
+    std::string mode = util::toLower(vMode);
+    SSLContext::VerificationMode verMode = SSLContext::VERIFY_STRICT;
 
     if (mode == "none")
-        verMode= SSLContext::VERIFY_NONE;
+        verMode = SSLContext::VERIFY_NONE;
     else if (mode == "relaxed")
-        verMode= SSLContext::VERIFY_RELAXED;
+        verMode = SSLContext::VERIFY_RELAXED;
     else if (mode == "strict")
-        verMode= SSLContext::VERIFY_STRICT;
+        verMode = SSLContext::VERIFY_STRICT;
     else if (mode == "once")
-        verMode= SSLContext::VERIFY_ONCE;
+        verMode = SSLContext::VERIFY_ONCE;
     else
         throw std::invalid_argument("Invalid verification mode: " + vMode);
 
@@ -331,7 +321,7 @@ inline std::string convertCertificateError(long errCode)
 /// Returns the last error from the error stack
 inline std::string getLastError()
 {
-    unsigned long errCode= ERR_get_error();
+    unsigned long errCode = ERR_get_error();
     if (errCode != 0) {
         char buffer[256];
         ERR_error_string_n(errCode, buffer, sizeof(buffer));
@@ -346,16 +336,12 @@ inline void clearErrorStack()
     ERR_clear_error();
 }
 
-
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_SSLContext_H
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

@@ -8,7 +8,6 @@
 /// @addtogroup turn
 /// @{
 
-
 #include "scy/turn/server/udpallocation.h"
 #include "scy/buffer.h"
 #include "scy/logger.h"
@@ -19,13 +18,10 @@
 #include <cstring>
 #include <iostream>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
                              const std::string& username,
@@ -37,19 +33,17 @@ UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
     // This will remove the need for allocation lookups when receiving
     // data from peers.
     _relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));
-    _relaySocket.Recv+= slot(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv += slot(this, &UDPAllocation::onPeerDataReceived);
 
     TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
 
-
 UDPAllocation::~UDPAllocation()
 {
     TraceL << "Destroy" << endl;
-    _relaySocket.Recv-= slot(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
     _relaySocket.close();
 }
-
 
 bool UDPAllocation::handleRequest(Request& request)
 {
@@ -65,7 +59,6 @@ bool UDPAllocation::handleRequest(Request& request)
     return true;
 }
 
-
 void UDPAllocation::handleSendIndication(Request& request)
 {
     TraceL << "Handle Send Indication" << endl;
@@ -76,14 +69,14 @@ void UDPAllocation::handleSendIndication(Request& request)
     // discarded.  Note that the DATA attribute is allowed to contain zero
     // bytes of data.
 
-    auto peerAttr= request.get<stun::XorPeerAddress>();
+    auto peerAttr = request.get<stun::XorPeerAddress>();
     if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
         ErrorL << "Send Indication error: No Peer Address" << endl;
         // silently discard...
         return;
     }
 
-    auto dataAttr= request.get<stun::Data>();
+    auto dataAttr = request.get<stun::Data>();
     if (!dataAttr) {
         ErrorL << "Send Indication error: No Data attribute" << endl;
         // silently discard...
@@ -105,7 +98,7 @@ void UDPAllocation::handleSendIndication(Request& request)
     // allowed in the XOR-PEER-ADDRESS attribute -- if a value is not
     // allowed, the server silently discards the Send indication.
 
-    net::Address peerAddress= peerAttr->address();
+    net::Address peerAddress = peerAttr->address();
     if (!hasPermission(peerAddress.host())) {
         ErrorL << "Send Indication error: No permission for: "
                << peerAddress.host() << endl;
@@ -140,7 +133,6 @@ void UDPAllocation::handleSendIndication(Request& request)
     }
 }
 
-
 void UDPAllocation::onPeerDataReceived(net::Socket&,
                                        const MutableBuffer& buffer,
                                        const net::Address& peerAddress)
@@ -170,11 +162,11 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
         assert(0 && "external IP not set");
     }
 
-    auto peerAttr= new stun::XorPeerAddress;
+    auto peerAttr = new stun::XorPeerAddress;
     peerAttr->setAddress(net::Address(peerHost, peerAddress.port()));
     message.add(peerAttr);
 
-    auto dataAttr= new stun::Data;
+    auto dataAttr = new stun::Data;
     dataAttr->copyBytes(bufferCast<const char*>(buffer), buffer.size());
     message.add(dataAttr);
 
@@ -185,7 +177,6 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
 
     server().udpSocket().sendPacket(message, _tuple.remote());
 }
-
 
 int UDPAllocation::send(const char* data, std::size_t size,
                         const net::Address& peerAddress)
@@ -201,7 +192,6 @@ int UDPAllocation::send(const char* data, std::size_t size,
     return _relaySocket./*base().*/ send(data, size, peerAddress);
 }
 
-
 net::Address UDPAllocation::relayedAddress() const
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -209,6 +199,5 @@ net::Address UDPAllocation::relayedAddress() const
 }
 }
 } //  namespace scy::turn
-
 
 /// @\}

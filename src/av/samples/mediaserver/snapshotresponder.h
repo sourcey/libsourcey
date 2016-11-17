@@ -1,8 +1,6 @@
 #include "mediaserver.h"
 
-
 namespace scy {
-
 
 class SnapshotRequestHandler : public http::ServerResponder
 {
@@ -26,9 +24,9 @@ public:
                                        options.oformat.video.height);
 
         std::vector<unsigned char> buffer;
-        std::vector<int> param= std::vector<int>(2);
-        param[0]= CV_IMWRITE_JPEG_QUALITY;
-        param[1]= 95; // default(95) 0-100
+        std::vector<int> param = std::vector<int>(2);
+        param[0] = CV_IMWRITE_JPEG_QUALITY;
+        param[1] = 95; // default(95) 0-100
         cv::imencode(".jpg", frame, buffer, param);
 
         DebugS(this) << "Taking Snapshot Image: "
@@ -45,7 +43,6 @@ public:
         // delete data;
         // unsigned char* data = new unsigned char[buffer.size()];
 
-
         // connection().sendData((const char*)&buffer[0], buffer.size());
         connection().response().set("Access-Control-Allow-Origin", "*");
 
@@ -55,6 +52,5 @@ public:
 
     StreamingOptions options;
 };
-
 
 } // namespace scy

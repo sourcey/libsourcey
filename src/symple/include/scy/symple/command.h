@@ -8,19 +8,15 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Command_H
 #define SCY_Symple_Command_H
-
 
 #include "scy/base.h"
 #include "scy/json/json.h"
 #include "scy/symple/message.h"
 
-
 namespace scy {
 namespace smpl {
-
 
 class Command : public Message
 {
@@ -43,12 +39,9 @@ public:
     bool matches(const std::string& xnode) const;
 };
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Command_H
-
 
 /// @\}

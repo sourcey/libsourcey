@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_PacketSocket_H
 #define SCY_Net_PacketSocket_H
-
 
 #include "scy/base.h"
 #include "scy/logger.h"
@@ -20,19 +18,15 @@
 #include "scy/packetfactory.h"
 #include "scy/packetsignal.h"
 
-
 namespace scy {
 namespace net {
-
 
 struct PacketInfo;
 class PacketSocket;
 
-
 //
 // Packet Socket Adapter
 //
-
 
 class PacketSocketAdapter : public SocketAdapter, public PacketSignal
 {
@@ -49,14 +43,13 @@ public:
     /// Creates and dispatches a packet utilizing the available
     /// creation strategies. For best performance the most used
     /// strategies should have the highest priority.
-    PacketSocketAdapter(const Socket::Ptr& socket= nullptr);
+    PacketSocketAdapter(const Socket::Ptr& socket = nullptr);
 
     virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer,
                               const Address& peerAddress);
 
     virtual void onPacket(IPacket& pkt);
 };
-
 
 #if 0
 //
@@ -102,12 +95,9 @@ protected:
 };
 #endif
 
-
 } // namespace Net
 } // namespace scy
 
-
 #endif // SCY_Net_PacketSocket_H
-
 
 /// @\}

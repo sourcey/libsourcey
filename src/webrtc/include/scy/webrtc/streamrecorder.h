@@ -8,18 +8,14 @@
 /// @addtogroup webrtc
 /// @{
 
-
 #ifndef SCY_WebRTC_StreamRecorder_H
 #define SCY_WebRTC_StreamRecorder_H
-
 
 #include "scy/av/multiplexencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 
-
 namespace scy {
-
 
 class StreamRecorder : public rtc::VideoSinkInterface<cricket::VideoFrame>,
                        public webrtc::AudioTrackSinkInterface
@@ -48,11 +44,8 @@ protected:
     bool _awaitingAudio;
 };
 
-
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

@@ -8,18 +8,14 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Event_H
 #define SCY_Symple_Event_H
-
 
 #include "scy/symple/message.h"
 #include <ctime>
 
-
 namespace scy {
 namespace smpl {
-
 
 class Event : public Message
 {
@@ -43,12 +39,9 @@ public:
     // void setTime(const std::string& time);
 };
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Event_H
-
 
 /// @\}

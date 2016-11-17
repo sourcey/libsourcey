@@ -7,14 +7,12 @@
 
 #include <iostream>
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using namespace scy;
 using namespace scy::net;
 using namespace scy::util;
-
 
 //
 // Symple Console Application
@@ -27,9 +25,7 @@ using namespace scy::util;
 // -name Somedude
 //
 
-
 #define USE_SSL 0
-
 
 class SympleApplication : public scy::Application
 {
@@ -75,26 +71,26 @@ public:
     {
         OptionParser optparse(argc, argv, "-");
         for (auto& kv : optparse.args) {
-            const std::string& key= kv.first;
-            const std::string& value= kv.second;
+            const std::string& key = kv.first;
+            const std::string& value = kv.second;
             DebugL << "Setting option: " << key << ": " << value << std::endl;
 
             if (key == "help") {
-                showHelp= true;
+                showHelp = true;
             } else if (key == "host") {
-                client.options().host= value;
+                client.options().host = value;
             } else if (key == "port") {
-                client.options().port= util::strtoi<std::uint16_t>(value);
+                client.options().port = util::strtoi<std::uint16_t>(value);
             } else if (key == "token") {
-                client.options().token= value;
+                client.options().token = value;
             } else if (key == "user") {
-                client.options().user= value;
+                client.options().user = value;
             } else if (key == "name") {
-                client.options().name= value;
+                client.options().name = value;
             } else if (key == "type") {
-                client.options().type= value;
+                client.options().type = value;
             } else if (key == "logfile") {
-                auto log= dynamic_cast<FileChannel*>(
+                auto log = dynamic_cast<FileChannel*>(
                     scy::Logger::instance().get("Symple"));
                 log->setPath(value);
             } else {
@@ -121,21 +117,21 @@ public:
             }
 
             // Setup the client
-            client+= slot(this, &SympleApplication::onRecvPacket);
+            client += slot(this, &SympleApplication::onRecvPacket);
             // client += slot(this, &SympleApplication::onRecvMessage);
-            client.Announce+= slot(this, &SympleApplication::onClientAnnounce);
-            client.StateChange+=
+            client.Announce += slot(this, &SympleApplication::onClientAnnounce);
+            client.StateChange +=
                 slot(this, &SympleApplication::onClientStateChange);
-            client.CreatePresence+=
+            client.CreatePresence +=
                 slot(this, &SympleApplication::onCreatePresence);
             client.connect();
 
             // Start the console thread
             Thread console(
                 [](void* arg) {
-                    auto app= reinterpret_cast<SympleApplication*>(arg);
+                    auto app = reinterpret_cast<SympleApplication*>(arg);
 
-                    char o= 0;
+                    char o = 0;
                     while (o != 'Q') {
                         cout << "COMMANDS:\n"
                                 "  M	Send a message.\n"
@@ -144,7 +140,7 @@ public:
                                 "  C	Print contacts list.\n"
                                 "  Q	Quit.\n";
 
-                        o= toupper(std::getchar());
+                        o = toupper(std::getchar());
                         std::cin.ignore();
 
                         // Send a message
@@ -153,7 +149,7 @@ public:
                             std::string data;
                             std::getline(std::cin, data);
 
-                            auto message= new smpl::Message();
+                            auto message = new smpl::Message();
                             message->setData(data);
 
                             cout << "Sending message: " << data << endl;
@@ -169,7 +165,7 @@ public:
                         // Join a room
                         else if (o == 'J') {
                             cout << "Join a room: " << endl;
-                            auto data= new std::string();
+                            auto data = new std::string();
                             std::getline(std::cin, *data);
 
                             app->ipc.push(new ipc::Action(
@@ -181,7 +177,7 @@ public:
                         // Leave a room
                         else if (o == 'L') {
                             cout << "Leave a room: " << endl;
-                            auto data= new std::string();
+                            auto data = new std::string();
                             std::getline(std::cin, *data);
 
                             app->ipc.push(new ipc::Action(
@@ -217,14 +213,14 @@ public:
     void onSyncMessage(const ipc::Action& action)
     {
         // Send the message on the main thread
-        auto message= reinterpret_cast<smpl::Message*>(action.arg);
+        auto message = reinterpret_cast<smpl::Message*>(action.arg);
 
         // Send without transaction
         // client.send(*message);
 
         // Send with transaction
-        auto transaction= client.createTransaction(*message);
-        transaction->StateChange+= slot(this, &SympleApplication::onAckState);
+        auto transaction = client.createTransaction(*message);
+        transaction->StateChange += slot(this, &SympleApplication::onAckState);
         transaction->send();
 
         delete message;
@@ -232,7 +228,7 @@ public:
 
     void onSyncCommand(const ipc::Action& action)
     {
-        auto arg= reinterpret_cast<std::string*>(action.arg);
+        auto arg = reinterpret_cast<std::string*>(action.arg);
 
         if (action.data == "join") {
             client.joinRoom(*arg);
@@ -260,12 +256,12 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        auto message= dynamic_cast<smpl::Message*>(&raw);
+        auto message = dynamic_cast<smpl::Message*>(&raw);
         if (message) {
             return onRecvMessage(*message);
         }
 
-        auto packet= dynamic_cast<sockio::Packet*>(&raw);
+        auto packet = dynamic_cast<sockio::Packet*>(&raw);
         if (packet) {
             return onRecvPacket(*packet);
         }
@@ -317,11 +313,10 @@ public:
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.
-        peer["agent"]= "SympleConsole";
-        peer["version"]= "0.1.0";
+        peer["agent"] = "SympleConsole";
+        peer["version"] = "0.1.0";
     }
 };
-
 
 int main(int argc, char** argv)
 {

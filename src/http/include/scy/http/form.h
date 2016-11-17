@@ -8,25 +8,20 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_Form_H
 #define SCY_HTTP_Form_H
-
 
 #include "scy/collection.h"
 #include "scy/net/types.h"
 #include "scy/packetstream.h"
 #include "scy/thread.h"
 
-
 namespace scy {
 namespace http {
-
 
 class Request;
 class ClientConnection;
 class FormPart;
-
 
 //
 // HTML Form Writer
@@ -50,7 +45,7 @@ public:
     /// (which is the default) or "multipart/form-data".
     static FormWriter*
     create(ClientConnection& conn,
-           const std::string& encoding= FormWriter::ENCODING_URL);
+           const std::string& encoding = FormWriter::ENCODING_URL);
 
     /// Destroys the FormWriter.
     virtual ~FormWriter();
@@ -149,7 +144,7 @@ protected:
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
     FormWriter(ClientConnection& conn, async::Runner::Ptr runner,
-               const std::string& encoding= FormWriter::ENCODING_URL);
+               const std::string& encoding = FormWriter::ENCODING_URL);
     FormWriter(const FormWriter&);
     FormWriter& operator=(const FormWriter&);
 
@@ -193,7 +188,6 @@ protected:
     bool _complete;
 };
 
-
 //
 // Form Part
 //
@@ -203,7 +197,7 @@ class FormPart
 {
 public:
     /// Creates the FormPart with the given MIME type.
-    FormPart(const std::string& contentType= "application/octet-stream");
+    FormPart(const std::string& contentType = "application/octet-stream");
 
     /// Destroys the FormPart.
     virtual ~FormPart();
@@ -213,13 +207,13 @@ public:
 
     /// Writes a form data chunk to the given HTTP client connection.
     /// Returns true if there is more data to be written.
-    virtual bool writeChunk(FormWriter& writer)= 0;
+    virtual bool writeChunk(FormWriter& writer) = 0;
 
     /// Writes the form data to the given HTTP client connection.
-    virtual void write(FormWriter& writer)= 0;
+    virtual void write(FormWriter& writer) = 0;
 
     /// Writes the form data to the given output stream.
-    virtual void write(std::ostream& ostr)= 0;
+    virtual void write(std::ostream& ostr) = 0;
 
     /// Returns a NVCollection containing additional header
     /// fields for the part.
@@ -232,7 +226,7 @@ public:
     const std::string& contentType() const;
 
     /// Returns the length of the current part.
-    virtual std::uint64_t length() const= 0;
+    virtual std::uint64_t length() const = 0;
 
 protected:
     std::string _contentType;
@@ -240,7 +234,6 @@ protected:
     NVCollection _headers;
     bool _initialWrite;
 };
-
 
 //
 // File Part
@@ -321,7 +314,6 @@ protected:
     // NVCollection _headers;
 };
 
-
 //
 // String Part
 //
@@ -356,16 +348,12 @@ protected:
     std::string _data;
 };
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif // SCY_HTTP_Form_H
 
-
 /// @\}
-
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

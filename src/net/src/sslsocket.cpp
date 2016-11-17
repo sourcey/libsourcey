@@ -8,21 +8,16 @@
 /// @addtogroup net
 /// @{
 
-
 #include "scy/net/sslsocket.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
 
-
 using namespace std;
-
 
 namespace scy {
 namespace net {
 
-
 // TODO: Using client context, should assert no bind()/listen() on this socket
-
 
 SSLSocket::SSLSocket(uv::Loop* loop)
     : //, SocketMode mode
@@ -37,7 +32,6 @@ SSLSocket::SSLSocket(uv::Loop* loop)
     TraceS(this) << "Create" << endl;
 }
 
-
 SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
     : TCPSocket(loop)
     , _context(context)
@@ -46,7 +40,6 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
 {
     TraceS(this) << "Create" << endl;
 }
-
 
 SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session,
                      uv::Loop* loop)
@@ -58,24 +51,20 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session,
     TraceS(this) << "Create" << endl;
 }
 
-
 SSLSocket::~SSLSocket()
 {
     TraceS(this) << "Destroy" << endl;
 }
-
 
 int SSLSocket::available() const
 {
     return _sslAdapter.available();
 }
 
-
 void SSLSocket::close()
 {
     TCPSocket::close();
 }
-
 
 bool SSLSocket::shutdown()
 {
@@ -88,12 +77,10 @@ bool SSLSocket::shutdown()
     return TCPSocket::shutdown();
 }
 
-
 int SSLSocket::send(const char* data, std::size_t len, int flags)
 {
     return send(data, len, peerAddress(), flags);
 }
-
 
 int SSLSocket::send(const char* data, std::size_t len,
                     const net::Address& /* peerAddress */, int /* flags */)
@@ -116,7 +103,6 @@ int SSLSocket::send(const char* data, std::size_t len,
     return len;
 }
 
-
 void SSLSocket::acceptConnection()
 {
     assert(_context->isForServerUse());
@@ -124,7 +110,7 @@ void SSLSocket::acceptConnection()
     // Create the shared socket pointer so the if the socket handle is not
     // incremented the accepted socket will be destroyed.
     // auto socket = net::makeSocket<net::SSLSocket>(loop());
-    auto socket=
+    auto socket =
         std::shared_ptr<net::SSLSocket>(new SSLSocket(_context, loop()));
 
     TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
@@ -139,17 +125,15 @@ void SSLSocket::acceptConnection()
     AcceptConnection.emit(/*Socket::self(), */ socket);
 }
 
-
 void SSLSocket::useSession(SSLSession::Ptr session)
 {
-    _session= session;
+    _session = session;
 }
-
 
 SSLSession::Ptr SSLSocket::currentSession()
 {
     if (_sslAdapter._ssl) {
-        SSL_SESSION* session= SSL_get1_session(_sslAdapter._ssl);
+        SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
         if (session) {
             if (_session && session == _session->sslSession()) {
                 SSL_SESSION_free(session);
@@ -162,22 +146,19 @@ SSLSession::Ptr SSLSocket::currentSession()
     return 0;
 }
 
-
 void SSLSocket::useContext(SSLContext::Ptr context)
 {
     if (_sslAdapter._ssl)
         throw std::runtime_error(
             "Cannot change the SSL context for an active socket.");
 
-    _context= context;
+    _context = context;
 }
-
 
 SSLContext::Ptr SSLSocket::context() const
 {
     return _context;
 }
-
 
 bool SSLSocket::sessionWasReused()
 {
@@ -187,12 +168,10 @@ bool SSLSocket::sessionWasReused()
         return false;
 }
 
-
 net::TransportType SSLSocket::transport() const
 {
     return net::SSLTCP;
 }
-
 
 //
 // Callbacks
@@ -206,7 +185,6 @@ void SSLSocket::onRead(const char* data, std::size_t len)
     _sslAdapter.addIncomingData(data, len);
     _sslAdapter.flush();
 }
-
 
 void SSLSocket::onConnect(uv_connect_t* handle, int status)
 {
@@ -223,9 +201,7 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
     onSocketConnect(*this);
 }
 
-
 } // namespace net
 } // namespace scy
-
 
 /// @\}

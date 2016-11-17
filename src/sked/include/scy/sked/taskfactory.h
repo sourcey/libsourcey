@@ -8,10 +8,8 @@
 /// @addtogroup sked
 /// @{
 
-
 #ifndef SCY_Sked_TaskFactory_H
 #define SCY_Sked_TaskFactory_H
-
 
 #include "scy/logger.h"
 #include "scy/singleton.h"
@@ -20,13 +18,10 @@
 
 #include <vector>
 
-
 namespace scy {
 namespace sked {
 
-
 class Scheduler;
-
 
 template <typename T> sked::Task* instantiateTask()
 {
@@ -36,7 +31,6 @@ template <typename T> sked::Trigger* instantiateTrigger()
 {
     return new T;
 }
-
 
 /// The TaskFactory can dynamically instantiate
 /// registered sked::Task and sked::Trigger
@@ -58,7 +52,7 @@ public:
     sked::Task* createTask(const std::string& type /*, Scheduler& scheduler*/)
     {
         Mutex::ScopedLock lock(_mutex);
-        TaskMap::iterator it= _tasks.find(type);
+        TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             throw std::runtime_error("Failed to create scheduled task: " +
                                      type);
@@ -68,13 +62,13 @@ public:
     template <typename T> void registerTask(const std::string& type)
     {
         Mutex::ScopedLock lock(_mutex);
-        _tasks[type]= &instantiateTask<T>;
+        _tasks[type] = &instantiateTask<T>;
     }
 
     void unregisterTask(const std::string& type)
     {
         Mutex::ScopedLock lock(_mutex);
-        TaskMap::iterator it= _tasks.find(type);
+        TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             return;
         _tasks.erase(it);
@@ -93,7 +87,7 @@ public:
     sked::Trigger* createTrigger(const std::string& type)
     {
         Mutex::ScopedLock lock(_mutex);
-        TriggerMap::iterator it= _triggers.find(type);
+        TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             throw std::runtime_error("Failed to create scheduled trigger: " +
                                      type);
@@ -103,13 +97,13 @@ public:
     template <typename T> void registerTrigger(const std::string& type)
     {
         Mutex::ScopedLock lock(_mutex);
-        _triggers[type]= &instantiateTrigger<T>;
+        _triggers[type] = &instantiateTrigger<T>;
     }
 
     void unregisterTrigger(const std::string& type)
     {
         Mutex::ScopedLock lock(_mutex);
-        TriggerMap::iterator it= _triggers.find(type);
+        TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             return;
         _triggers.erase(it);
@@ -128,12 +122,9 @@ protected:
     TriggerMap _triggers;
 };
 
-
 } // namespace sked
 } // namespace scy
 
-
 #endif // SCY_Sked_TaskFactory_H
-
 
 /// @\}

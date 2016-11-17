@@ -10,10 +10,8 @@
 // This file uses some functions from POCO C++ Libraries (license below)
 //
 
-
 #ifndef SCY_Util_H
 #define SCY_Util_H
-
 
 #include "scy/error.h"
 #include <cstdint>
@@ -26,10 +24,8 @@
 #include <string>
 #include <vector>
 
-
 namespace scy {
 namespace util {
-
 
 /// Printf style string formatting for POD types.
 std::string format(const char* fmt, ...);
@@ -45,9 +41,9 @@ bool isNumber(const std::string& str);
 bool endsWith(const std::string& str, const std::string& suffix);
 
 /// Replaces non-alphanumeric characters.
-void removeSpecialCharacters(std::string& str, bool allowSpaces= false);
-void replaceSpecialCharacters(std::string& str, char with= '_',
-                              bool allowSpaces= false);
+void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
+void replaceSpecialCharacters(std::string& str, char with = '_',
+                              bool allowSpaces = false);
 
 /// String to hex value.
 bool tryParseHex(const std::string& s, unsigned& value);
@@ -64,13 +60,12 @@ bool compareVersion(const std::string& l, const std::string& r);
 
 /// Matches two node lists against each other.
 bool matchNodes(const std::string& node, const std::string& xnode,
-                const std::string& delim= "\r\n");
+                const std::string& delim = "\r\n");
 bool matchNodes(const std::vector<std::string>& params,
                 const std::vector<std::string>& xparams);
 
 /// Returns the pointer memory address as a string.
 std::string memAddress(const void* ptr);
-
 
 //
 // Type converters
@@ -107,7 +102,6 @@ float intToFloat(std::int32_t v);
 std::int64_t doubleToInt(double d);
 #endif
 
-
 //
 // Random generators
 //
@@ -119,8 +113,7 @@ std::uint32_t randomNumber();
 std::string randomString(int size);
 
 /// Generates a random (optionally base64 encoded) binary key.
-std::string randomBinaryString(int size, bool doBase64= false);
-
+std::string randomBinaryString(int size, bool doBase64 = false);
 
 //
 // String splitters
@@ -128,16 +121,15 @@ std::string randomBinaryString(int size, bool doBase64= false);
 
 /// Splits the given string at the delimiter string.
 void split(const std::string& str, const std::string& delim,
-           std::vector<std::string>& elems, int limit= -1);
+           std::vector<std::string>& elems, int limit = -1);
 std::vector<std::string> split(const std::string& str, const std::string& delim,
-                               int limit= -1);
+                               int limit = -1);
 
 /// Splits the given string at the delimiter character.
 void split(const std::string& str, char delim, std::vector<std::string>& elems,
-           int limit= -1);
+           int limit = -1);
 std::vector<std::string> split(const std::string& str, char delim,
-                               int limit= -1);
-
+                               int limit = -1);
 
 //
 // String replace methods (POCO)
@@ -145,19 +137,19 @@ std::vector<std::string> split(const std::string& str, char delim,
 
 template <class S>
 S& replaceInPlace(S& str, const S& from, const S& to,
-                  typename S::size_type start= 0)
+                  typename S::size_type start = 0)
 {
     assert(from.size() > 0);
 
     S result;
-    typename S::size_type pos= 0;
+    typename S::size_type pos = 0;
     result.append(str, 0, start);
     do {
-        pos= str.find(from, start);
+        pos = str.find(from, start);
         if (pos != S::npos) {
             result.append(str, start, pos - start);
             result.append(to);
-            start= pos + from.length();
+            start = pos + from.length();
         } else
             result.append(str, start, str.size() - start);
     } while (pos != S::npos);
@@ -168,20 +160,20 @@ S& replaceInPlace(S& str, const S& from, const S& to,
 template <class S>
 S& replaceInPlace(S& str, const typename S::value_type* from,
                   const typename S::value_type* to,
-                  typename S::size_type start= 0)
+                  typename S::size_type start = 0)
 {
     assert(*from);
 
     S result;
-    typename S::size_type pos= 0;
-    typename S::size_type fromLen= std::strlen(from);
+    typename S::size_type pos = 0;
+    typename S::size_type fromLen = std::strlen(from);
     result.append(str, 0, start);
     do {
-        pos= str.find(from, start);
+        pos = str.find(from, start);
         if (pos != S::npos) {
             result.append(str, start, pos - start);
             result.append(to);
-            start= pos + fromLen;
+            start = pos + fromLen;
         } else
             result.append(str, start, str.size() - start);
     } while (pos != S::npos);
@@ -193,7 +185,7 @@ S& replaceInPlace(S& str, const typename S::value_type* from,
 /// in str with to, starting at position start.
 template <class S>
 S replace(const S& str, const S& from, const S& to,
-          typename S::size_type start= 0)
+          typename S::size_type start = 0)
 {
     S result(str);
     replaceInPlace(result, from, to, start);
@@ -202,13 +194,12 @@ S replace(const S& str, const S& from, const S& to,
 
 template <class S>
 S replace(const S& str, const typename S::value_type* from,
-          const typename S::value_type* to, typename S::size_type start= 0)
+          const typename S::value_type* to, typename S::size_type start = 0)
 {
     S result(str);
     replaceInPlace(result, from, to, start);
     return result;
 }
-
 
 //
 // String trimming
@@ -218,8 +209,8 @@ S replace(const S& str, const typename S::value_type* from,
 /// whitespace removed.
 template <class S> S trimLeft(const S& str)
 {
-    typename S::const_iterator it= str.begin();
-    typename S::const_iterator end= str.end();
+    typename S::const_iterator it = str.begin();
+    typename S::const_iterator end = str.end();
 
     while (it != end && ::isspace(*it))
         ++it;
@@ -229,8 +220,8 @@ template <class S> S trimLeft(const S& str)
 /// Removes all leading whitespace in str.
 template <class S> S& trimLeftInPlace(S& str)
 {
-    typename S::iterator it= str.begin();
-    typename S::iterator end= str.end();
+    typename S::iterator it = str.begin();
+    typename S::iterator end = str.end();
 
     while (it != end && ::isspace(*it))
         ++it;
@@ -242,7 +233,7 @@ template <class S> S& trimLeftInPlace(S& str)
 /// whitespace removed.
 template <class S> S trimRight(const S& str)
 {
-    int pos= int(str.size()) - 1;
+    int pos = int(str.size()) - 1;
 
     while (pos >= 0 && ::isspace(str[pos]))
         --pos;
@@ -252,7 +243,7 @@ template <class S> S trimRight(const S& str)
 /// Removes all trailing whitespace in str.
 template <class S> S& trimRightInPlace(S& str)
 {
-    int pos= int(str.size()) - 1;
+    int pos = int(str.size()) - 1;
 
     while (pos >= 0 && ::isspace(str[pos]))
         --pos;
@@ -265,8 +256,8 @@ template <class S> S& trimRightInPlace(S& str)
 /// trailing whitespace removed.
 template <class S> S trim(const S& str)
 {
-    int first= 0;
-    int last= int(str.size()) - 1;
+    int first = 0;
+    int last = int(str.size()) - 1;
 
     while (first <= last && ::isspace(str[first]))
         ++first;
@@ -279,8 +270,8 @@ template <class S> S trim(const S& str)
 /// Removes all leading and trailing whitespace in str.
 template <class S> S& trimInPlace(S& str)
 {
-    int first= 0;
-    int last= int(str.size()) - 1;
+    int first = 0;
+    int last = int(str.size()) - 1;
 
     while (first <= last && ::isspace(str[first]))
         ++first;
@@ -293,7 +284,6 @@ template <class S> S& trimInPlace(S& str)
     return str;
 }
 
-
 //
 // String case conversion
 //
@@ -301,24 +291,24 @@ template <class S> S& trimInPlace(S& str)
 /// Returns a copy of str containing all upper-case characters.
 template <class S> S toUpper(const S& str)
 {
-    typename S::const_iterator it= str.begin();
-    typename S::const_iterator end= str.end();
+    typename S::const_iterator it = str.begin();
+    typename S::const_iterator end = str.end();
 
     S result;
     result.reserve(str.size());
     while (it != end)
-        result+= static_cast<char>(::toupper(*it++));
+        result += static_cast<char>(::toupper(*it++));
     return result;
 }
 
 /// Replaces all characters in str with their upper-case counterparts.
 template <class S> S& toUpperInPlace(S& str)
 {
-    typename S::iterator it= str.begin();
-    typename S::iterator end= str.end();
+    typename S::iterator it = str.begin();
+    typename S::iterator end = str.end();
 
     while (it != end) {
-        *it= static_cast<char>(::toupper(*it));
+        *it = static_cast<char>(::toupper(*it));
         ++it;
     }
     return str;
@@ -327,29 +317,28 @@ template <class S> S& toUpperInPlace(S& str)
 /// Returns a copy of str containing all lower-case characters.
 template <class S> S toLower(const S& str)
 {
-    typename S::const_iterator it= str.begin();
-    typename S::const_iterator end= str.end();
+    typename S::const_iterator it = str.begin();
+    typename S::const_iterator end = str.end();
 
     S result;
     result.reserve(str.size());
     while (it != end)
-        result+= static_cast<char>(::tolower(*it++));
+        result += static_cast<char>(::tolower(*it++));
     return result;
 }
 
 /// Replaces all characters in str with their lower-case counterparts.
 template <class S> S& toLowerInPlace(S& str)
 {
-    typename S::iterator it= str.begin();
-    typename S::iterator end= str.end();
+    typename S::iterator it = str.begin();
+    typename S::iterator end = str.end();
 
     while (it != end) {
-        *it= static_cast<char>(::tolower(*it));
+        *it = static_cast<char>(::tolower(*it));
         ++it;
     }
     return str;
 }
-
 
 //
 // String case-insensative comparators (POCO)
@@ -360,13 +349,13 @@ template <class S, class It>
 int icompare(const S& str, typename S::size_type pos, typename S::size_type n,
              It it2, It end2)
 {
-    typename S::size_type sz= str.size();
+    typename S::size_type sz = str.size();
     if (pos > sz)
-        pos= sz;
+        pos = sz;
     if (pos + n > sz)
-        n= sz - pos;
-    It it1= str.begin() + pos;
-    It end1= str.begin() + pos + n;
+        n = sz - pos;
+    It it1 = str.begin() + pos;
+    It end1 = str.begin() + pos + n;
     while (it1 != end1 && it2 != end2) {
         typename S::value_type c1(::tolower(*it1));
         typename S::value_type c2(::tolower(*it2));
@@ -412,7 +401,7 @@ int icompare(const S& str1, typename S::size_type n1, const S& str2,
              typename S::size_type n2)
 {
     if (n2 > str2.size())
-        n2= str2.size();
+        n2 = str2.size();
     return icompare(str1, 0, n1, str2.begin(), str2.begin() + n2);
 }
 
@@ -420,7 +409,7 @@ template <class S>
 int icompare(const S& str1, typename S::size_type n, const S& str2)
 {
     if (n > str2.size())
-        n= str2.size();
+        n = str2.size();
     return icompare(str1, 0, n, str2.begin(), str2.begin() + n);
 }
 
@@ -436,11 +425,11 @@ int icompare(const S& str1, typename S::size_type pos1,
              typename S::size_type n1, const S& str2,
              typename S::size_type pos2, typename S::size_type n2)
 {
-    typename S::size_type sz2= str2.size();
+    typename S::size_type sz2 = str2.size();
     if (pos2 > sz2)
-        pos2= sz2;
+        pos2 = sz2;
     if (pos2 + n2 > sz2)
-        n2= sz2 - pos2;
+        n2 = sz2 - pos2;
     return icompare(str1, pos1, n1, str2.begin() + pos2,
                     str2.begin() + pos2 + n2);
 }
@@ -449,11 +438,11 @@ template <class S>
 int icompare(const S& str1, typename S::size_type pos1, typename S::size_type n,
              const S& str2, typename S::size_type pos2)
 {
-    typename S::size_type sz2= str2.size();
+    typename S::size_type sz2 = str2.size();
     if (pos2 > sz2)
-        pos2= sz2;
+        pos2 = sz2;
     if (pos2 + n > sz2)
-        n= sz2 - pos2;
+        n = sz2 - pos2;
     return icompare(str1, pos1, n, str2.begin() + pos2,
                     str2.begin() + pos2 + n);
 }
@@ -463,13 +452,13 @@ int icompare(const S& str, typename S::size_type pos, typename S::size_type n,
              const typename S::value_type* ptr)
 {
     assert(ptr);
-    typename S::size_type sz= str.size();
+    typename S::size_type sz = str.size();
     if (pos > sz)
-        pos= sz;
+        pos = sz;
     if (pos + n > sz)
-        n= sz - pos;
-    typename S::const_iterator it= str.begin() + pos;
-    typename S::const_iterator end= str.begin() + pos + n;
+        n = sz - pos;
+    typename S::const_iterator it = str.begin() + pos;
+    typename S::const_iterator end = str.begin() + pos + n;
     while (it != end && *ptr) {
         typename S::value_type c1(static_cast<char>(::tolower(*it)));
         typename S::value_type c2(static_cast<char>(::tolower(*ptr)));
@@ -499,17 +488,15 @@ template <class S> int icompare(const S& str, const typename S::value_type* ptr)
     return icompare(str, 0, str.size(), ptr);
 }
 
-
 //
 // Stream copiers
 //
 
 std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
-                           std::size_t bufferSize= 8192);
+                           std::size_t bufferSize = 8192);
 std::streamsize copyToString(std::istream& istr, std::string& str,
-                             std::size_t bufferSize= 8192);
-
+                             std::size_t bufferSize = 8192);
 
 //
 // Version string helper
@@ -522,13 +509,13 @@ struct Version
         std::sscanf(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision,
                     &build);
         if (major < 0)
-            major= 0;
+            major = 0;
         if (minor < 0)
-            minor= 0;
+            minor = 0;
         if (revision < 0)
-            revision= 0;
+            revision = 0;
         if (build < 0)
-            build= 0;
+            build = 0;
     }
 
     bool operator<(const Version& other)
@@ -565,7 +552,6 @@ struct Version
     int major, minor, revision, build;
 };
 
-
 //
 // Container helpers
 //
@@ -574,10 +560,10 @@ struct Version
 /// @param L List of pointers to delete.
 template <typename Val> inline void clearList(std::list<Val*>& L)
 {
-    typename std::list<Val*>::iterator it= L.begin();
+    typename std::list<Val*>::iterator it = L.begin();
     while (it != L.end()) {
         delete *it;
-        it= L.erase(it);
+        it = L.erase(it);
     }
 }
 
@@ -585,10 +571,10 @@ template <typename Val> inline void clearList(std::list<Val*>& L)
 /// @param D List of pointers to delete.
 template <typename Val> inline void clearDeque(std::deque<Val*>& D)
 {
-    typename std::deque<Val*>::iterator it= D.begin();
+    typename std::deque<Val*>::iterator it = D.begin();
     while (it != D.end()) {
         delete *it;
-        it= D.erase(it);
+        it = D.erase(it);
     }
 }
 
@@ -607,12 +593,12 @@ template <typename Val> inline void clearDeque(std::deque<Val*>& D)
 /// @param V Vector of pointers to delete.
 template <typename Val> inline void clearVector(std::vector<Val*>& V)
 {
-    typename std::vector<Val*>::iterator it= V.begin();
+    typename std::vector<Val*>::iterator it = V.begin();
     while (it != V.end()) {
         // Deleter::func(*it);
         delete *it;
 
-        it= V.erase(it);
+        it = V.erase(it);
     }
 }
 
@@ -621,10 +607,10 @@ template <typename Val> inline void clearVector(std::vector<Val*>& V)
 template <typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
 {
-    typename std::map<Key, Val*>::iterator it= M.begin();
+    typename std::map<Key, Val*>::iterator it = M.begin();
     typename std::map<Key, Val*>::iterator it2;
     while (it != M.end()) {
-        it2= it++;
+        it2 = it++;
         delete (*it2).second;
         M.erase(it2);
     }
@@ -636,10 +622,10 @@ inline void clearMap(std::map<Key, Val*>& M)
 template <typename Deleter, typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
 {
-    typename std::map<Key, Val*>::iterator it= M.begin();
+    typename std::map<Key, Val*>::iterator it = M.begin();
     typename std::map<Key, Val*>::iterator it2;
     while (it != M.end()) {
-        it2= it++;
+        it2 = it++;
         Deleter func;
         func((*it2).second);
         M.erase(it2);
@@ -652,25 +638,21 @@ inline void clearMap(std::map<Key, Val*>& M)
 template <typename Key, typename Val>
 inline void clearMap(std::map<const Key, Val*>& M)
 {
-    typename std::map<const Key, Val*>::iterator it= M.begin();
+    typename std::map<const Key, Val*>::iterator it = M.begin();
     typename std::map<const Key, Val*>::iterator it2;
     while (it != M.end()) {
-        it2= it++;
+        it2 = it++;
         delete (*it2).second;
         M.erase(it2);
     }
 }
 
-
 } // namespace util
 } // namespace scy
 
-
 #endif // SCY_Util_H
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

@@ -8,10 +8,8 @@
 /// @addtogroup crypto
 /// @{
 
-
 #ifndef SCY_Crypto_X509Certificate_H
 #define SCY_Crypto_X509Certificate_H
-
 
 #include "scy/crypto/crypto.h"
 #include "scy/datetime.h"
@@ -20,10 +18,8 @@
 #include <openssl/ssl.h>
 #include <set>
 
-
 namespace scy {
 namespace crypto {
-
 
 /// This class represents a X509 Certificate.
 class X509Certificate
@@ -33,12 +29,12 @@ public:
     /// a certificate subject's or issuer's distinguished name.
     enum NID
     {
-        NID_COMMON_NAME= 13,
-        NID_COUNTRY= 14,
-        NID_LOCALITY_NAME= 15,
-        NID_STATE_OR_PROVINCE= 16,
-        NID_ORGANIZATION_NAME= 17,
-        NID_ORGANIZATION_UNIT_NAME= 18
+        NID_COMMON_NAME = 13,
+        NID_COUNTRY = 14,
+        NID_LOCALITY_NAME = 15,
+        NID_STATE_OR_PROVINCE = 16,
+        NID_ORGANIZATION_NAME = 17,
+        NID_ORGANIZATION_UNIT_NAME = 18
     };
 
     /// Creates the X509Certificate object by reading
@@ -141,7 +137,7 @@ protected:
 private:
     enum
     {
-        NAME_BUFFER_SIZE= 256
+        NAME_BUFFER_SIZE = 256
     };
 
     std::string _issuerName;
@@ -149,16 +145,12 @@ private:
     X509* _certificate;
 };
 
-
 } // namespace crypto
 } // namespace scy
 
-
 #endif // SCY_Crypto_X509Certificate_H
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2006-2009, Applied Informatics Software Engineering GmbH.

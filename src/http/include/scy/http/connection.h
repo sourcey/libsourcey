@@ -8,10 +8,8 @@
 /// @addtogroup http
 /// @{
 
-
 #ifndef SCY_HTTP_ServerConnection_H
 #define SCY_HTTP_ServerConnection_H
-
 
 #include "scy/http/parser.h"
 #include "scy/http/request.h"
@@ -22,10 +20,8 @@
 #include "scy/packetqueue.h"
 #include "scy/timer.h"
 
-
 namespace scy {
 namespace http {
-
 
 class ProgressSignal : public Signal<void(const double&)>
 {
@@ -46,12 +42,11 @@ public:
     void update(int nread)
     {
         // assert(current <= total);
-        current+= nread;
+        current += nread;
 
         emit(/*sender ? sender : this, */ progress());
     }
 };
-
 
 class ConnectionAdapter;
 class Connection : public net::SocketAdapter
@@ -61,7 +56,7 @@ public:
     virtual ~Connection();
 
     /// Send raw data to the peer.
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
 
     /// Send the outdoing HTTP header.
     virtual int sendHeader();
@@ -80,9 +75,9 @@ public:
     /// a proper response within the allotted time.
     /// bool expired() const;
 
-    virtual void onHeaders()= 0;
+    virtual void onHeaders() = 0;
     virtual void onPayload(const MutableBuffer&){};
-    virtual void onMessage()= 0;
+    virtual void onMessage() = 0;
     virtual void onClose(); // not virtual
 
     bool shouldSendHeader() const;
@@ -117,8 +112,8 @@ public:
     ProgressSignal IncomingProgress; ///< Fired on download progress
     ProgressSignal OutgoingProgress; ///< Fired on upload progress
 
-    virtual http::Message* incomingHeader()= 0;
-    virtual http::Message* outgoingHeader()= 0;
+    virtual http::Message* incomingHeader() = 0;
+    virtual http::Message* outgoingHeader() = 0;
 
     Signal<void(Connection&)> Close;
 
@@ -147,7 +142,6 @@ protected:
     friend struct std::default_delete<Connection>;
 };
 
-
 //
 // Connection Adapter
 //
@@ -159,7 +153,7 @@ public:
     ConnectionAdapter(Connection& connection, http_parser_type type);
     virtual ~ConnectionAdapter();
 
-    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len, int flags = 0);
 
     Parser& parser();
     Connection& connection();
@@ -185,22 +179,18 @@ protected:
     Parser _parser;
 };
 
-
 inline bool isExplicitKeepAlive(http::Message* message)
 {
-    const std::string& connection=
+    const std::string& connection =
         message->get(http::Message::CONNECTION, http::Message::EMPTY);
     return !connection.empty() &&
            util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) ==
                0;
 }
 
-
 } // namespace http
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

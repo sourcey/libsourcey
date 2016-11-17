@@ -8,26 +8,22 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_FPSCounter_H
 #define SCY_AV_FPSCounter_H
-
 
 #include "scy/av/types.h"
 #include "scy/packetstream.h"
 
 #include <time.h>
 
-
 namespace scy {
 namespace av {
-
 
 /// An FPS counter based on the simple moving average (SMA) algorithm
 class FPSCounter
 {
 private:
-    static const int MAX= 100;
+    static const int MAX = 100;
 
     int tickIndex;
     clock_t prevTick;
@@ -36,11 +32,11 @@ private:
 
     double updateAvg(clock_t newTick)
     {
-        tickSum-= tickList[tickIndex]; // subtract value falling off
-        tickSum+= newTick;             // add new value
-        tickList[tickIndex]=
+        tickSum -= tickList[tickIndex]; // subtract value falling off
+        tickSum += newTick;             // add new value
+        tickList[tickIndex] =
             newTick; // save new value so it can be subtracted later
-        tickIndex= (tickIndex + 1) % MAX;
+        tickIndex = (tickIndex + 1) % MAX;
 
         return ((double)tickSum / MAX); // return average
     }
@@ -53,28 +49,27 @@ public:
 
     void reset()
     {
-        fps= 0;
-        frames= 0;
-        tickIndex= 0;
-        tickSum= 0;
-        prevTick= 0;
-        for (int i= 0; i < MAX; i++)
-            tickList[i]= 0;
+        fps = 0;
+        frames = 0;
+        tickIndex = 0;
+        tickSum = 0;
+        prevTick = 0;
+        for (int i = 0; i < MAX; i++)
+            tickList[i] = 0;
     }
 
     void tick()
     {
         frames++;
-        clock_t newTick= clock();
-        double avgTick= updateAvg(newTick - prevTick);
-        prevTick= newTick;
+        clock_t newTick = clock();
+        double avgTick = updateAvg(newTick - prevTick);
+        prevTick = newTick;
         if (avgTick == 0.)
-            fps= 0.0; //-1.;
+            fps = 0.0; //-1.;
         else
-            fps= CLOCKS_PER_SEC / avgTick;
+            fps = CLOCKS_PER_SEC / avgTick;
     }
 };
-
 
 namespace legacy {
 
@@ -97,29 +92,28 @@ struct FPSCounter
 
     void reset()
     {
-        start= 0;
-        end= 0;
-        total= 0;
-        fps= 0;
-        frames= 0;
+        start = 0;
+        end = 0;
+        total = 0;
+        fps = 0;
+        frames = 0;
     }
 
     bool started() { return start != 0; }
 
-    void startFrame() { start= clock(); }
+    void startFrame() { start = clock(); }
 
     double endFrame()
     {
-        end= clock();
-        total+= (double)(end - start) / CLOCKS_PER_SEC;
+        end = clock();
+        total += (double)(end - start) / CLOCKS_PER_SEC;
         frames++;
-        fps= (1.0 * frames) / total;
+        fps = (1.0 * frames) / total;
         return fps;
     }
 };
 
 } // legacy
-
 
 /// This class limits the throughput rate of IPackets
 /// in a PacketStream. If the throughput rate exceeds the
@@ -131,7 +125,7 @@ struct FPSCounter
 class FPSLimiter : public PacketProcessor
 {
 public:
-    FPSLimiter(int max, bool videoOnly= false)
+    FPSLimiter(int max, bool videoOnly = false)
         : PacketProcessor(this->emitter)
         , _max(max)
         , _videoOnly(videoOnly)
@@ -170,12 +164,9 @@ protected:
     legacy::FPSCounter _counter;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_FPSCounter_H
-
 
 /// @\}

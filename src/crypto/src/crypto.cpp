@@ -8,7 +8,6 @@
 /// @addtogroup crypto
 /// @{
 
-
 #include "scy/crypto/crypto.h"
 #include "scy/mutex.h"
 #include "scy/random.h"
@@ -24,7 +23,6 @@
 #include <openssl/conf.h>
 #endif
 
-
 extern "C" {
 struct CRYPTO_dynlock_value
 {
@@ -32,18 +30,16 @@ struct CRYPTO_dynlock_value
 };
 }
 
-
 namespace scy {
 namespace crypto {
 namespace internal {
-
 
 void throwError()
 {
     unsigned long err;
     std::string msg;
 
-    while ((err= ERR_get_error())) {
+    while ((err = ERR_get_error())) {
         if (!msg.empty())
             msg.append("; ");
         msg.append(ERR_error_string(err, 0));
@@ -51,7 +47,6 @@ void throwError()
 
     throw std::runtime_error(msg);
 }
-
 
 void api(int ret, const char* error)
 {
@@ -63,17 +58,14 @@ void api(int ret, const char* error)
     }
 }
 
-
 //
 // Private internal methods
 //
 
-
-const int SEEDSIZE= 256;
+const int SEEDSIZE = 256;
 static Mutex* _mutexes(0);
 static Mutex _mutex;
 static int _refCount(0);
-
 
 void lock(int mode, int n, const char* /* file */, int /* line */)
 {
@@ -83,19 +75,16 @@ void lock(int mode, int n, const char* /* file */, int /* line */)
         _mutexes[n].unlock();
 }
 
-
 // unsigned long id()
 // {
 //     return Thread::currentID();
 // }
-
 
 struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */,
                                            int /* line */)
 {
     return new CRYPTO_dynlock_value;
 }
-
 
 void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
              const char* /* file */, int /* line */)
@@ -108,13 +97,11 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
         lock->_mutex.unlock();
 }
 
-
 void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */,
                     int /* line */)
 {
     delete lock;
 }
-
 
 void initialize()
 {
@@ -132,8 +119,8 @@ void initialize()
         Random::getSeed(seed, sizeof(seed));
         RAND_seed(seed, SEEDSIZE);
 
-        int nMutexes= CRYPTO_num_locks();
-        _mutexes= new Mutex[nMutexes];
+        int nMutexes = CRYPTO_num_locks();
+        _mutexes = new Mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
         // #ifndef WIN32 // SF# 1828231: random unhandled exceptions when
         // linking with ssl
@@ -144,7 +131,6 @@ void initialize()
         CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);
     }
 }
-
 
 void uninitialize()
 {
@@ -160,9 +146,7 @@ void uninitialize()
     }
 }
 
-
 } // namespace internal
-
 
 /// Initializes the OpenSSL library.
 void initializeEngine()
@@ -176,9 +160,7 @@ void uninitializeEngine()
     internal::uninitialize();
 }
 
-
 } // namespace crypto
 } // namespace scy
-
 
 /// @\}

@@ -10,13 +10,11 @@
 // This file uses functions from POCO C++ Libraries (license below).
 //
 
-
 #include "scy/random.h"
 #include "scy/error.h"
 
 #include <assert.h>
 #include <stdexcept>
-
 
 #include <ctime>
 #if defined(WIN32)
@@ -29,7 +27,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-
 
 /*
  * random.c:
@@ -90,7 +87,6 @@
  * byte buffer it is about 5 percent faster.
  */
 
-
 /*
  * For each of the currently supported random number generators, we have a
  * break value on the amount of state information (you need at least this
@@ -123,15 +119,13 @@
 #define DEG_4 63
 #define SEP_4 1
 
-
 namespace scy {
-
 
 Random::Random(int stateSize)
 {
     assert(BREAK_0 <= stateSize && stateSize <= BREAK_4);
 
-    _buffer= new char[stateSize];
+    _buffer = new char[stateSize];
 #if defined(_WIN32_WCE)
     initState((std::uint32_t)wceex_time(nullptr), _buffer, stateSize);
 #else
@@ -139,12 +133,10 @@ Random::Random(int stateSize)
 #endif
 }
 
-
 Random::~Random()
 {
     delete[] _buffer;
 }
-
 
 /*
  * Compute x = (7^5 * x) mod (2^31 - 1)
@@ -159,16 +151,15 @@ std::uint32_t Random::goodRand(std::int32_t x)
     std::int32_t hi, lo;
 
     if (x == 0)
-        x= 123459876;
-    hi= x / 127773;
-    lo= x % 127773;
-    x= 16807 * lo - 2836 * hi;
+        x = 123459876;
+    hi = x / 127773;
+    lo = x % 127773;
+    x = 16807 * lo - 2836 * hi;
     if (x < 0)
-        x+= 0x7FFFFFFF;
+        x += 0x7FFFFFFF;
 
     return x;
 }
-
 
 /*
  * Initialize the random number generator based on the given seed.  If the
@@ -184,20 +175,19 @@ void Random::seed(std::uint32_t x)
 {
     int i, lim;
 
-    _state[0]= x;
+    _state[0] = x;
     if (_randType == TYPE_0)
-        lim= NSHUFF;
+        lim = NSHUFF;
     else {
-        for (i= 1; i < _randDeg; i++)
-            _state[i]= goodRand(_state[i - 1]);
-        _fptr= &_state[_randSep];
-        _rptr= &_state[0];
-        lim= 10 * _randDeg;
+        for (i = 1; i < _randDeg; i++)
+            _state[i] = goodRand(_state[i - 1]);
+        _fptr = &_state[_randSep];
+        _rptr = &_state[0];
+        lim = 10 * _randDeg;
     }
-    for (i= 0; i < lim; i++)
+    for (i = 0; i < lim; i++)
         next();
 }
-
 
 /*
  * Many programs choose the seed value in a totally predictable manner.
@@ -213,28 +203,27 @@ void Random::seed()
     int len;
 
     if (_randType == TYPE_0)
-        len= sizeof _state[0];
+        len = sizeof _state[0];
     else
-        len= _randDeg * sizeof _state[0];
+        len = _randDeg * sizeof _state[0];
 
     getSeed((char*)_state, len);
 }
 
-
 void Random::getSeed(char* seed, unsigned length)
 {
-    int n= 0;
+    int n = 0;
 
 #ifdef SCY_WIN
-    HCRYPTPROV hProvider= 0;
+    HCRYPTPROV hProvider = 0;
     CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
     CryptGenRandom(hProvider, (DWORD)length, (BYTE*)seed);
     CryptReleaseContext(hProvider, 0);
-    n= static_cast<int>(length);
+    n = static_cast<int>(length);
 #else
-    int fd= open("/dev/urandom", O_RDONLY, 0);
+    int fd = open("/dev/urandom", O_RDONLY, 0);
     if (fd >= 0) {
-        n= read(fd, seed, length);
+        n = read(fd, seed, length);
         close(fd);
     }
 #endif
@@ -245,7 +234,6 @@ void Random::getSeed(char* seed, unsigned length)
     if (n == 0)
         throw std::runtime_error("Cannot generate random number seed");
 }
-
 
 /*
  * Initialize the state information in the given array of n bytes for future
@@ -270,42 +258,41 @@ void Random::getSeed(char* seed, unsigned length)
  */
 void Random::initState(std::uint32_t s, char* argState, std::int32_t n)
 {
-    std::uint32_t* intArgState= (std::uint32_t*)argState;
+    std::uint32_t* intArgState = (std::uint32_t*)argState;
 
     if (n < BREAK_0) {
         assert(0 && "not enough state");
         return;
     }
     if (n < BREAK_1) {
-        _randType= TYPE_0;
-        _randDeg= DEG_0;
-        _randSep= SEP_0;
+        _randType = TYPE_0;
+        _randDeg = DEG_0;
+        _randSep = SEP_0;
     } else if (n < BREAK_2) {
-        _randType= TYPE_1;
-        _randDeg= DEG_1;
-        _randSep= SEP_1;
+        _randType = TYPE_1;
+        _randDeg = DEG_1;
+        _randSep = SEP_1;
     } else if (n < BREAK_3) {
-        _randType= TYPE_2;
-        _randDeg= DEG_2;
-        _randSep= SEP_2;
+        _randType = TYPE_2;
+        _randDeg = DEG_2;
+        _randSep = SEP_2;
     } else if (n < BREAK_4) {
-        _randType= TYPE_3;
-        _randDeg= DEG_3;
-        _randSep= SEP_3;
+        _randType = TYPE_3;
+        _randDeg = DEG_3;
+        _randSep = SEP_3;
     } else {
-        _randType= TYPE_4;
-        _randDeg= DEG_4;
-        _randSep= SEP_4;
+        _randType = TYPE_4;
+        _randDeg = DEG_4;
+        _randSep = SEP_4;
     }
-    _state= intArgState + 1;    /* first location */
-    _endPtr= &_state[_randDeg]; /* must set end_ptr before seed */
+    _state = intArgState + 1;    /* first location */
+    _endPtr = &_state[_randDeg]; /* must set end_ptr before seed */
     seed(s);
     if (_randType == TYPE_0)
-        intArgState[0]= _randType;
+        intArgState[0] = _randType;
     else
-        intArgState[0]= MAX_TYPES * (int)(_rptr - _state) + _randType;
+        intArgState[0] = MAX_TYPES * (int)(_rptr - _state) + _randType;
 }
-
 
 /*
  * Next:
@@ -330,65 +317,57 @@ std::uint32_t Random::next()
     std::uint32_t *f, *r;
 
     if (_randType == TYPE_0) {
-        i= _state[0];
-        _state[0]= i= goodRand(i) & 0x7FFFFFFF;
+        i = _state[0];
+        _state[0] = i = goodRand(i) & 0x7FFFFFFF;
     } else {
         /*
          * Use local variables rather than static variables for speed.
          */
-        f= _fptr;
-        r= _rptr;
-        *f+= *r;
-        i= (*f >> 1) & 0x7FFFFFFF; /* chucking least random bit */
+        f = _fptr;
+        r = _rptr;
+        *f += *r;
+        i = (*f >> 1) & 0x7FFFFFFF; /* chucking least random bit */
         if (++f >= _endPtr) {
-            f= _state;
+            f = _state;
             ++r;
         } else if (++r >= _endPtr) {
-            r= _state;
+            r = _state;
         }
 
-        _fptr= f;
-        _rptr= r;
+        _fptr = f;
+        _rptr = r;
     }
     return i;
 }
-
 
 std::uint32_t Random::next(std::uint32_t n)
 {
     return next() % n;
 }
 
-
 char Random::nextChar()
 {
     return char((next() >> 3) & 0xFF);
 }
-
 
 bool Random::nextBool()
 {
     return (next() & 0x1000) != 0;
 }
 
-
 float Random::nextFloat()
 {
     return float(next()) / 0x7FFFFFFF;
 }
-
 
 double Random::nextDouble()
 {
     return double(next()) / 0x7FFFFFFF;
 }
 
-
 } // namespace scy
 
-
 /// @\}
-
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

@@ -4,21 +4,17 @@
 #include "scy/socketio/transaction.h"
 #include "scy/util.h"
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::net;
 using namespace scy::util;
 
-
 namespace scy {
 namespace sockio {
-
 
 #define SERVER_HOST "localhost"
 #define SERVER_PORT 4444 // 443
 #define USE_SSL 0        // 1
-
 
 // ----------------------------------------------------------------------------
 // SocketIO Client Test
@@ -60,15 +56,13 @@ public:
         testClient();
     }
 
-
     ~Tests() { app.finalize(); }
-
 
     void testClient()
     {
         sockio::Client::Options options;
-        options.host= SERVER_HOST;
-        options.port= SERVER_PORT;
+        options.host = SERVER_HOST;
+        options.port = SERVER_PORT;
 
 #if USE_SSL
         sockio::SSLClient client(options, app.loop);
@@ -76,7 +70,7 @@ public:
         sockio::TCPClient client(options, app.loop);
 #endif
 
-        client.StateChange+= slot(this, &Tests::onClientStateChange);
+        client.StateChange += slot(this, &Tests::onClientStateChange);
         client.connect();
 
         // app.run();
@@ -93,7 +87,7 @@ public:
     void onClientStateChange(void* sender, sockio::ClientState& state,
                              const sockio::ClientState& oldState)
     {
-        auto client= reinterpret_cast<sockio::Client*>(sender);
+        auto client = reinterpret_cast<sockio::Client*>(sender);
         DebugL << "Connection state changed: " << state.toString() << endl;
 
         switch (state.id()) {
@@ -112,10 +106,8 @@ public:
     }
 };
 
-
 } // namespace sockio
 } // namespace scy
-
 
 int main(int argc, char** argv)
 {

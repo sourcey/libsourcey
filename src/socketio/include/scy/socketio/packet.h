@@ -8,69 +8,65 @@
 /// @addtogroup socketio
 /// @{
 
-
 #ifndef SCY_SocketIO_Packet_H
 #define SCY_SocketIO_Packet_H
-
 
 #include "scy/json/json.h"
 #include "scy/packet.h"
 
-
 namespace scy {
 namespace sockio {
-
 
 class Packet : public IPacket
 {
 public:
     enum class Frame : int
     {
-        Open= 0,
-        Close= 1,
-        Ping= 2,
-        Pong= 3,
-        Message= 4,
-        Upgrade= 5,
-        Noop= 6,
-        Unknown= -1
+        Open = 0,
+        Close = 1,
+        Ping = 2,
+        Pong = 3,
+        Message = 4,
+        Upgrade = 5,
+        Noop = 6,
+        Unknown = -1
     };
 
     enum class Type : int
     {
-        TypeMin= 0,
-        Connect= 0,
-        Disconnect= 1,
-        Event= 2,
-        Ack= 3,
-        Error= 4,
-        BinaryEvent= 5,
-        BinaryAck= 6,
-        TypeMax= 6,
-        Unknown= -1
+        TypeMin = 0,
+        Connect = 0,
+        Disconnect = 1,
+        Event = 2,
+        Ack = 3,
+        Error = 4,
+        BinaryEvent = 5,
+        BinaryAck = 6,
+        TypeMax = 6,
+        Unknown = -1
     };
 
     /// Default contructor
-    Packet(Frame frame= Frame::Message, Type type= Type::Event, int id= -1,
-           const std::string& nsp= "/", const std::string& event= "",
-           const std::string& message= "", bool ack= false);
+    Packet(Frame frame = Frame::Message, Type type = Type::Event, int id = -1,
+           const std::string& nsp = "/", const std::string& event = "",
+           const std::string& message = "", bool ack = false);
 
     /// General contructor
-    Packet(Type type, const std::string& message= "", bool ack= false);
+    Packet(Type type, const std::string& message = "", bool ack = false);
 
     /// Message contructor
-    Packet(const std::string& message, bool ack= false);
+    Packet(const std::string& message, bool ack = false);
 
     /// JSON contructor
-    Packet(const json::Value& message, bool ack= false);
+    Packet(const json::Value& message, bool ack = false);
 
     /// Event contructor
     Packet(const std::string& event, const std::string& message,
-           bool ack= false);
+           bool ack = false);
 
     /// Event JSON contructor
     Packet(const std::string& event, const json::Value& message,
-           bool ack= false);
+           bool ack = false);
 
     Packet(const Packet& r);
     Packet& operator=(const Packet& r);
@@ -115,12 +111,9 @@ protected:
     std::size_t _size;
 };
 
-
 } // namespace sockio
 } // namespace scy
 
-
 #endif // SCY_SocketIO_Packet_H
-
 
 /// @\}

@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-
 /* -----------------------------------------------------------------------------
  FIXME, THIS CODE IS OUT OF DATE!
 ----------------------------------------------------------------------------- */
@@ -17,7 +16,6 @@ using namespace std;
 using namespace Sourcey;
 using namespace Sourcey::Util;
 using namespace Sourcey::Net;
-
 
 class Messenger : public SocketIO::Socket
 {
@@ -31,8 +29,8 @@ public:
 
     void sendTransaction(const SocketIO::Packet& packet)
     {
-        SocketIO::Transaction* txn= new SocketIO::Transaction(*this, packet);
-        txn->StateChanged+=
+        SocketIO::Transaction* txn = new SocketIO::Transaction(*this, packet);
+        txn->StateChanged +=
             sdelegate(this, &Messenger::onTransactionStateChanged);
         txn->send();
     }
@@ -43,7 +41,7 @@ public:
         Log("debug", this) << "Transaction State Changed: " << state.toString()
                            << endl;
 
-        SocketIO::Transaction* transaction=
+        SocketIO::Transaction* transaction =
             reinterpret_cast<SocketIO::Transaction*>(sender);
         switch (state.id()) {
             case TransactionState::Running:
@@ -64,7 +62,6 @@ public:
 //} // namespace SocketIO
 } // namespace Sourcey
 
-
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
@@ -73,9 +70,9 @@ int main(int argc, char** argv)
     Messenger app(srvAddr);
     app.connect();
 
-    std::string network= "4";
+    std::string network = "4";
     std::string event;
-    char o= 0;
+    char o = 0;
     while (o != 'Q') {
         try {
             cout << "COMMANDS:\n\n"
@@ -95,7 +92,7 @@ int main(int argc, char** argv)
                     //"  D    Update All Packages.\n"
                     "  Q    Quit.\n\n";
 
-            o= toupper(getch());
+            o = toupper(getch());
 
             // Set Input File
             if (o == 'E') {
@@ -141,10 +138,8 @@ int main(int argc, char** argv)
         }
     }
 
-
     return 0;
 }
-
 
 /*
 // Call Upload Asset Service

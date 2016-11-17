@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Timer_H
 #define SCY_Timer_H
-
 
 #include "scy/async.h"
 #include "scy/datetime.h"
@@ -21,14 +19,12 @@
 #include <cstdint>
 #include <functional>
 
-
 namespace scy {
-
 
 class Timer
 {
 public:
-    Timer(uv::Loop* loop= uv::defaultLoop());
+    Timer(uv::Loop* loop = uv::defaultLoop());
     virtual ~Timer();
 
     virtual void start(std::int64_t interval);
@@ -79,11 +75,8 @@ protected:
     std::int64_t _count;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Timer_H
-
 
 /// @\}

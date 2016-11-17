@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Task_H
 #define SCY_Task_H
-
 
 #include "scy/idler.h"
 #include "scy/interface.h"
@@ -20,19 +18,16 @@
 #include "scy/task.h"
 #include "scy/uv/uvpp.h"
 
-
 namespace scy {
 
-
 class TaskRunner;
-
 
 /// This class is for implementing any kind
 /// async task that is compatible with a TaskRunner.
 class Task : public async::Runnable
 {
 public:
-    Task(bool repeat= false);
+    Task(bool repeat = false);
 
     /// Sets the task to destroyed state.
     virtual void destroy();
@@ -67,7 +62,7 @@ protected:
     /// and false will cause the task to be destroyed.
     /// The task will similarly be destroyed id destroy()
     /// was called during the current task iteration.
-    virtual void run()= 0;
+    virtual void run() = 0;
 
     /// Tasks belong to a TaskRunner instance.
     friend class TaskRunner;
@@ -77,7 +72,6 @@ protected:
     bool _destroyed;
 };
 
-
 /// The TaskRunner is an asynchronous event loop in
 /// charge of running one or many tasks.
 ///
@@ -86,7 +80,7 @@ protected:
 class TaskRunner : public async::Runnable
 {
 public:
-    TaskRunner(async::Runner::Ptr runner= nullptr);
+    TaskRunner(async::Runner::Ptr runner = nullptr);
     virtual ~TaskRunner();
 
     /// Starts a task, adding it if it doesn't exist.
@@ -165,11 +159,8 @@ protected:
     async::Runner::Ptr _runner;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Task_H
-
 
 /// @\}

@@ -8,7 +8,6 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/audiobuffer.h"
 
 #ifdef HAVE_FFMPEG
@@ -16,13 +15,10 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 AudioBuffer::AudioBuffer()
     : fifo(nullptr)
@@ -30,7 +26,6 @@ AudioBuffer::AudioBuffer()
     TraceS(this) << "Create" << endl;
     assert(!fifo);
 }
-
 
 AudioBuffer::~AudioBuffer()
 {
@@ -47,18 +42,17 @@ void AudioBuffer::alloc(const std::string& sampleFmt, int channels,
                  << "\n\tNb Samples: " << numSamples << "\n\tfifo: " << fifo
                  << endl;
 
-    enum AVSampleFormat format= av_get_sample_fmt(sampleFmt.c_str());
+    enum AVSampleFormat format = av_get_sample_fmt(sampleFmt.c_str());
     assert(!fifo);
     assert(channels);
     assert(format != AV_SAMPLE_FMT_NONE);
 
     // Create the FIFO buffer based on the specified sample format.
-    fifo= av_audio_fifo_alloc(format, channels, numSamples);
+    fifo = av_audio_fifo_alloc(format, channels, numSamples);
     if (!fifo) {
         throw std::runtime_error("Cannot allocate FIFO: Out of memory");
     }
 }
-
 
 void AudioBuffer::reset()
 {
@@ -69,17 +63,15 @@ void AudioBuffer::reset()
     }
 }
 
-
 void AudioBuffer::close()
 {
     TraceS(this) << "Close" << endl;
 
     if (fifo) {
         av_audio_fifo_free(fifo);
-        fifo= nullptr;
+        fifo = nullptr;
     }
 }
-
 
 void AudioBuffer::write(void** samples, int numSamples)
 {
@@ -90,8 +82,8 @@ void AudioBuffer::write(void** samples, int numSamples)
 
     // Make the FIFO as large as it needs to be to hold both
     // the old and the new samples.
-    if ((error= av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) +
-                                                numSamples)) < 0) {
+    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) +
+                                                 numSamples)) < 0) {
         throw std::runtime_error("Cannot reallocate FIFO: " + averror(error));
     }
 
@@ -100,7 +92,6 @@ void AudioBuffer::write(void** samples, int numSamples)
         throw std::runtime_error("Cannot write data to FIFO");
     }
 }
-
 
 bool AudioBuffer::read(void** samples, int numSamples)
 {
@@ -125,7 +116,6 @@ bool AudioBuffer::read(void** samples, int numSamples)
     return true;
 }
 
-
 int AudioBuffer::available() const
 {
     if (fifo)
@@ -133,12 +123,9 @@ int AudioBuffer::available() const
     return 0;
 }
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

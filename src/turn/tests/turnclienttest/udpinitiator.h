@@ -1,7 +1,6 @@
 #ifndef TURN_UDPinitiator_TEST_H
 #define TURN_UDPinitiator_TEST_H
 
-
 #include "scy/logger.h"
 #include "scy/time.h"
 #include "scy/turn/client/udpclient.h"
@@ -9,13 +8,10 @@
 
 #include <iostream>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace turn {
-
 
 class UDPInitiator : public scy::turn::ClientObserver
 {
@@ -69,7 +65,7 @@ protected:
             case ClientState::Success:
                 AllocationCreated.emit(/*this*/);
 #ifdef TEST_INITIATOR_TO_RESPONDER
-                timer.Timeout+= slot(this, &UDPInitiator::onSendTimer);
+                timer.Timeout += slot(this, &UDPInitiator::onSendTimer);
                 timer.start(0, 1000);
 #endif
                 break;
@@ -98,8 +94,8 @@ protected:
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'),
                       payload.end());
         if (payload.length() == 9) {
-            std::uint64_t sentAt= util::strtoi<std::uint64_t>(payload);
-            std::uint64_t latency= time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugS(this) << id << ": Received data from " << peerAddr
                          << ": payload=" << payload << ", latency=" << latency
@@ -135,9 +131,7 @@ protected:
 }
 } //  namespace scy::turn
 
-
 #endif // TURN_UDPinitiator_TEST_H
-
 
 /*
 void initiate(const Client::Options opts, const std::string& peerIP)

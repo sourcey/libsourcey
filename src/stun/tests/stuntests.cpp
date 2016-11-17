@@ -7,14 +7,11 @@
 #include <algorithm>
 #include <stdexcept>
 
-
 using namespace std;
 using namespace scy;
 using namespace scy::test;
 
-
 // TODO: Test vectors from http://tools.ietf.org/html/rfc5769
-
 
 int main(int argc, char** argv)
 {
@@ -31,11 +28,11 @@ int main(int argc, char** argv)
         stun::Message request(stun::Message::Request, stun::Message::Allocate);
         // request.setType(stun::Message::Allocate);
 
-        auto usernameAttr= new stun::Username;
+        auto usernameAttr = new stun::Username;
         usernameAttr->copyBytes(username.c_str(), username.size());
         request.add(usernameAttr);
 
-        auto integrityAttr= new stun::MessageIntegrity;
+        auto integrityAttr = new stun::MessageIntegrity;
         integrityAttr->setKey(password);
         request.add(integrityAttr);
 
@@ -45,7 +42,7 @@ int main(int argc, char** argv)
         stun::Message response;
         response.read(constBuffer(buf));
 
-        integrityAttr= response.get<stun::MessageIntegrity>();
+        integrityAttr = response.get<stun::MessageIntegrity>();
         expect(integrityAttr->verifyHmac(password));
     });
 
@@ -53,13 +50,13 @@ int main(int argc, char** argv)
     // Request Types
     //
     describe("request types", []() {
-        std::uint16_t type=
+        std::uint16_t type =
             stun::Message::Indication | stun::Message::SendIndication;
 
         // expect(IS_STUN_INDICATION(type));
 
-        std::uint16_t classType= type & 0x0110;
-        std::uint16_t methodType= type & 0x000F;
+        std::uint16_t classType = type & 0x0110;
+        std::uint16_t methodType = type & 0x000F;
 
         expect(classType == stun::Message::Indication);
         expect(methodType == stun::Message::SendIndication);
@@ -91,7 +88,7 @@ int main(int argc, char** argv)
         // stun::Message request;
         // request.setType(stun::Message::Allocate);
 
-        auto addrAttr= new stun::XorRelayedAddress;
+        auto addrAttr = new stun::XorRelayedAddress;
         addrAttr->setAddress(addr);
         request.add(addrAttr);
         DebugL << "Request Address: " << addrAttr->address() << endl;
@@ -102,7 +99,7 @@ int main(int argc, char** argv)
         stun::Message response;
         response.read(constBuffer(buf));
 
-        addrAttr= response.get<stun::XorRelayedAddress>();
+        addrAttr = response.get<stun::XorRelayedAddress>();
 
         DebugL << "Response Address: " << addrAttr->address() << endl;
         expect(addrAttr->address() == addr);

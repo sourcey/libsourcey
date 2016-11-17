@@ -8,10 +8,8 @@
 /// @addtogroup net
 /// @{
 
-
 #ifndef SCY_Net_DNS_H
 #define SCY_Net_DNS_H
-
 
 #include "scy/net/address.h"
 #include "scy/util.h"
@@ -19,10 +17,8 @@
 #include <cstdint>
 #include <vector>
 
-
 namespace scy {
 namespace net {
-
 
 ///
 /// DNS Resolver
@@ -36,7 +32,6 @@ namespace net {
 /// }
 /// net::resolveDNS("google.com", 80, onDNSResult);
 /// ```
-
 
 struct DNSResult
 {
@@ -61,7 +56,6 @@ struct DNSResult
     /// Client data pointer
     void* opaque;
 
-
     enum Status
     {
         None,
@@ -84,7 +78,6 @@ struct DNSResult
     }
 };
 
-
 inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
                           struct addrinfo* res)
 {
@@ -97,9 +90,9 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
     net::Address resolved(res->ai_addr, 16);
     traceL("Network") << "DNS resolved: " << resolved << std::endl;
 
-    DNSResult* dns= reinterpret_cast<DNSResult*>(handle->data);
-    dns->status= status == 0 ? DNSResult::Success : DNSResult::Failed;
-    dns->info= res;
+    DNSResult* dns = reinterpret_cast<DNSResult*>(handle->data);
+    dns->status = status == 0 ? DNSResult::Success : DNSResult::Failed;
+    dns->info = res;
     dns->addr.swap(resolved);
 
     dns->callback(*dns);
@@ -109,7 +102,6 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
     delete dns;
 }
 
-
 inline bool resolveDNS(DNSResult* dns)
 {
     // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port <<
@@ -118,35 +110,31 @@ inline bool resolveDNS(DNSResult* dns)
     assert(dns->port);
     assert(!dns->host.empty());
     assert(dns->callback);
-    dns->status= DNSResult::Resolving;
+    dns->status = DNSResult::Resolving;
 
-    uv_getaddrinfo_t* handle= new uv_getaddrinfo_t;
-    handle->data= dns;
+    uv_getaddrinfo_t* handle = new uv_getaddrinfo_t;
+    handle->data = dns;
     return uv_getaddrinfo(
                uv_default_loop(), handle, onDNSResolved, dns->host.c_str(),
                util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
 }
 
-
 inline bool resolveDNS(const std::string& host, std::uint16_t port,
                        std::function<void(const DNSResult&)> callback,
-                       void* opaque= nullptr, struct addrinfo* hints= nullptr)
+                       void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {
-    DNSResult* dns= new DNSResult();
-    dns->host= host;
-    dns->port= port;
-    dns->opaque= opaque;
-    dns->hints= hints;
-    dns->callback= callback;
+    DNSResult* dns = new DNSResult();
+    dns->host = host;
+    dns->port = port;
+    dns->opaque = opaque;
+    dns->hints = hints;
+    dns->callback = callback;
     return resolveDNS(dns);
 }
-
 
 } // namespace net
 } // namespace scy
 
-
 #endif // SCY_Net_DNS_H
-
 
 /// @\}

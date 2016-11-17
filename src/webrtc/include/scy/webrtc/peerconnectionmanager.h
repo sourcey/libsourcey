@@ -8,10 +8,8 @@
 /// @addtogroup webrtc
 /// @{
 
-
 #ifndef SCY_PeerConnectionManager_H
 #define SCY_PeerConnectionManager_H
-
 
 #include "scy/collection.h"
 #include "scy/json/json.h"
@@ -23,19 +21,16 @@
 #include <iostream>
 #include <string>
 
-
 namespace scy {
 
-
 class PeerConnection;
-
 
 class PeerConnectionManager
     : public PointerCollection<std::string, PeerConnection>
 {
 public:
     PeerConnectionManager(
-        rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory=
+        rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory =
             nullptr);
     virtual ~PeerConnectionManager();
 
@@ -63,11 +58,8 @@ protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
 };
 
-
 } // namespace scy
 
-
 #endif
-
 
 /// @\}

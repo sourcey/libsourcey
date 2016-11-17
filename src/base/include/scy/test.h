@@ -8,10 +8,8 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Test_H
 #define SCY_Test_H
-
 
 #include "scy/interface.h"
 #include "scy/mutex.h"
@@ -19,13 +17,10 @@
 #include <list>
 #include <map>
 
-
 namespace scy {
-
 
 /// Modern unit testing framework
 namespace test {
-
 
 class Test;
 class TestRunner;
@@ -61,11 +56,9 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 #define expect(x) test::expectImpl(x, #x, __FILE__, __LINE__)
 #endif
 
-
 //
 // Test
 //
-
 
 /// Test wrapper class.
 ///
@@ -74,13 +67,13 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 class Test
 {
 public:
-    Test(const std::string& name= "Unnamed Test");
+    Test(const std::string& name = "Unnamed Test");
 
     /// Should remain protected.
     virtual ~Test();
 
     /// Called by the TestRunner to run the test.
-    virtual void run()= 0;
+    virtual void run() = 0;
 
     /// Return true when the test passed without errors.
     bool passed();
@@ -95,13 +88,12 @@ public:
     double duration;
 
 protected:
-    Test(const Test& test)= delete;
-    Test& operator=(Test const&)= delete;
+    Test(const Test& test) = delete;
+    Test& operator=(Test const&) = delete;
 
     /// Tests belong to a TestRunner instance.
     friend class TestRunner;
 };
-
 
 // Test class that runs a static or lambda function.
 class FunctionTest : public Test
@@ -110,7 +102,7 @@ public:
     std::function<void()> target;
 
     FunctionTest(std::function<void()> target,
-                 const std::string& name= "Unnamed Test")
+                 const std::string& name = "Unnamed Test")
         : Test(name)
         , target(target)
     {
@@ -122,11 +114,9 @@ protected:
     void run() { target(); }
 };
 
-
 //
 // Test Runner
 //
-
 
 /// The TestRunner is a queue in charge of running one or many tests.
 ///
@@ -173,12 +163,9 @@ protected:
     Test* _current;
 };
 
-
 } // namespace test
 } // namespace scy
 
-
 #endif // SCY_Test_H
-
 
 /// @\}

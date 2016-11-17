@@ -1,10 +1,8 @@
 #include "httptests.h"
 
-
 using std::endl;
 using namespace scy;
 using namespace scy::test;
-
 
 int main(int argc, char** argv)
 {
@@ -89,8 +87,8 @@ int main(int argc, char** argv)
                                  "encoding=Base64&packetizer=chunked&rand=0."
                                  "09983996045775712",
                                  params);
-        for (NVCollection::ConstIterator it= params.begin(); it != params.end();
-             ++it) {
+        for (NVCollection::ConstIterator it = params.begin();
+             it != params.end(); ++it) {
             DebugL << "URL Parameter: " << it->first << ": " << it->second
                    << endl;
         }
@@ -114,12 +112,12 @@ int main(int argc, char** argv)
 
     describe("client connection download", []() {
         std::string filename("zlib-1.2.8.tar.gz");
-        auto conn= http::Client::instance().createConnection(
+        auto conn = http::Client::instance().createConnection(
             "http://zlib.net/zlib-1.2.8.tar.gz");
         // std::string filename("7z920.tar.bz2");
         // auto conn =
         // http::Client::instance().createConnection("http://d.7-zip.org/a/7z920.tar.bz2");
-        conn->Complete+= [&](const http::Response& response) {
+        conn->Complete += [&](const http::Response& response) {
             std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
@@ -148,11 +146,11 @@ int main(int argc, char** argv)
     // });
 
     describe("client connection", []() {
-        auto conn=
+        auto conn =
             http::Client::instance().createConnection("http://google.com/");
         // conn->Complete += sdelegate(&context,
         // &CallbackContext::onClientConnectionComplete);
-        conn->Complete+= [&](const http::Response& response) {
+        conn->Complete += [&](const http::Response& response) {
             std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
@@ -165,11 +163,11 @@ int main(int argc, char** argv)
     });
 
     describe("secure client connection", []() {
-        auto conn=
+        auto conn =
             http::Client::instance().createConnection("https://google.com/");
         // conn->Complete += sdelegate(&context,
         // &CallbackContext::onClientConnectionComplete);
-        conn->Complete+= [&](const http::Response& response) {
+        conn->Complete += [&](const http::Response& response) {
             std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
@@ -187,14 +185,14 @@ int main(int argc, char** argv)
 
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://sourcey.com");
-        conn.Headers+= [&](http::Response& response) {
+        conn.Headers += [&](http::Response& response) {
             std::cout << "On response headers: " << response << endl;
         };
-        conn.Payload+= [&](const MutableBuffer& buffer) {
+        conn.Payload += [&](const MutableBuffer& buffer) {
             std::cout << "On payload: " << buffer.size() << ": " << buffer.str()
                       << endl;
         };
-        conn.Complete+= [&](const http::Response& response) {
+        conn.Complete += [&](const http::Response& response) {
             std::cout << "On response complete: " << response
                       << conn.readStream<std::stringstream>().str() << endl;
 
@@ -217,7 +215,7 @@ int main(int argc, char** argv)
     describe("websocket client and server", []() {
         HTTPEchoTest test(100);
         test.raiseServer();
-        auto conn= test.createConnection("ws", "/websocket");
+        auto conn = test.createConnection("ws", "/websocket");
         conn->send("PING", 4);
 
         uv::runDefaultLoop();
@@ -229,7 +227,7 @@ int main(int argc, char** argv)
     describe("http client and server", []() {
         HTTPEchoTest test;
         test.raiseServer();
-        auto conn= test.createConnection("http", "/echo");
+        auto conn = test.createConnection("http", "/echo");
         conn->request().setMethod("POST");
         conn->request().setContentLength(4);
         conn->send("PING", 4);
@@ -239,7 +237,6 @@ int main(int argc, char** argv)
         expect(conn->closed());
         expect(!conn->error().any());
     });
-
 
     //
     /// Google Drive Upload Test

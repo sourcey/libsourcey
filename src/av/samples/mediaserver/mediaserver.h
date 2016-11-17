@@ -1,7 +1,6 @@
 #ifndef SCY_MediaServer_H
 #define SCY_MediaServer_H
 
-
 #include "config.h"
 #include "scy/application.h"
 #include "scy/av/mediafactory.h"
@@ -11,12 +10,9 @@
 #include "scy/packetstream.h"
 #include "scy/util.h"
 
-
 namespace scy {
 
-
 class MediaServer;
-
 
 // ----------------------------------------------------------------------------
 // HTTP Streaming Options
@@ -30,13 +26,12 @@ struct StreamingOptions : public av::EncoderOptions
     av::VideoCapture::Ptr videoCapture; // Video capture instance
     av::AudioCapture::Ptr audioCapture; // Audio capture instance
 
-    StreamingOptions(MediaServer* server= nullptr,
-                     av::VideoCapture::Ptr videoCapture= nullptr,
-                     av::AudioCapture::Ptr audioCapture= nullptr);
+    StreamingOptions(MediaServer* server = nullptr,
+                     av::VideoCapture::Ptr videoCapture = nullptr,
+                     av::AudioCapture::Ptr audioCapture = nullptr);
 
     virtual ~StreamingOptions();
 };
-
 
 // ----------------------------------------------------------------------------
 // HTTP Media Server
@@ -49,10 +44,9 @@ public:
 
     static void setupPacketStream(PacketStream& stream,
                                   const StreamingOptions& options,
-                                  bool freeCaptures= true,
-                                  bool attachPacketizers= false);
+                                  bool freeCaptures = true,
+                                  bool attachPacketizers = false);
 };
-
 
 // ----------------------------------------------------------------------------
 // HTTP Streaming Connection Factory
@@ -67,8 +61,6 @@ public:
     MediaServer* _server;
 };
 
-
 } // namespace scy
-
 
 #endif

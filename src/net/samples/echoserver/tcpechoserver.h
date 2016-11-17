@@ -1,10 +1,8 @@
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 
-
 namespace scy {
 namespace net {
-
 
 template <class SocketT> /// The TCP echo server accepts a template argument
 /// of either a TCPSocket or a SSLSocket.
@@ -23,13 +21,13 @@ public:
 
     void start(const std::string& host, std::uint16_t port)
     {
-        auto ssl= dynamic_cast<SSLSocket*>(socket.get());
+        auto ssl = dynamic_cast<SSLSocket*>(socket.get());
         if (ssl)
             ssl->useContext(SSLManager::instance().defaultServerContext());
 
         socket->bind(Address(host, port));
         socket->listen();
-        socket->AcceptConnection+= slot(this, &EchoServer::onAcceptConnection);
+        socket->AcceptConnection += slot(this, &EchoServer::onAcceptConnection);
     }
 
     void shutdown()
@@ -42,11 +40,11 @@ public:
     {
         /// std::static_pointer_cast<SocketT>(ptr)
         sockets.push_back(sock);
-        auto& socket= sockets.back();
+        auto& socket = sockets.back();
         DebugL << "On accept: " << socket << std::endl;
-        socket->Recv+= slot(this, &EchoServer::onClientSocketRecv);
-        socket->Error+= slot(this, &EchoServer::onClientSocketError);
-        socket->Close+= slot(this, &EchoServer::onClientSocketClose);
+        socket->Recv += slot(this, &EchoServer::onClientSocketRecv);
+        socket->Error += slot(this, &EchoServer::onClientSocketError);
+        socket->Close += slot(this, &EchoServer::onClientSocketClose);
     }
 
     void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer,
@@ -72,7 +70,7 @@ public:
 
     void releaseSocket(net::Socket* sock)
     {
-        for (typename Socket::Vec::iterator it= sockets.begin();
+        for (typename Socket::Vec::iterator it = sockets.begin();
              it != sockets.end(); ++it) {
             if (sock == it->get()) {
                 DebugL << "Removing: " << sock << std::endl;
@@ -88,11 +86,9 @@ public:
     }
 };
 
-
 // Some generic server types
 typedef EchoServer<TCPSocket> TCPEchoServer;
 typedef EchoServer<SSLSocket> SSLEchoServer;
-
 
 } // namespace net
 } // namespace scy

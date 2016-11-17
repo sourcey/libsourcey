@@ -8,17 +8,13 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Configuration_H
 #define SCY_Configuration_H
-
 
 #include "scy/mutex.h"
 #include "scy/signal.h"
 
-
 namespace scy {
-
 
 /// Configuration is an abstract base class for managing /// different kinds of
 /// configuration storage back ends such as /// JSON, XML, or database.
@@ -149,14 +145,14 @@ protected:
     /// in value and returns true. Otherwise, returns false.
     ///
     /// Must be overridden by subclasses.
-    virtual bool getRaw(const std::string& key, std::string& value) const= 0;
+    virtual bool getRaw(const std::string& key, std::string& value) const = 0;
 
     /// Sets the property with the given key to the given value.
     /// An already existing value for the key is overwritten.
     ///
     /// The implementation is responsible for emitting the
     /// PropertyChanged signal.
-    virtual void setRaw(const std::string& key, const std::string& value)= 0;
+    virtual void setRaw(const std::string& key, const std::string& value) = 0;
 
     static int parseInt(const std::string& value);
     static std::int64_t parseLargeInt(const std::string& value);
@@ -169,11 +165,9 @@ private:
     mutable Mutex _mutex;
 };
 
-
 //
 // Scoped Configuration
 //
-
 
 /// ScopedConfiguration provides multiple levels of configuration for a module.
 /// Multiple levels means that there is a module level scope, and a default
@@ -194,25 +188,25 @@ public:
 
     std::string getString(const std::string& key,
                           const std::string& defaultValue,
-                          bool forceDefaultScope= false) const;
+                          bool forceDefaultScope = false) const;
     int getInt(const std::string& key, int defaultValue,
-               bool forceDefaultScope= false) const;
+               bool forceDefaultScope = false) const;
     double getDouble(const std::string& key, double defaultValue,
-                     bool forceDefaultScope= false) const;
+                     bool forceDefaultScope = false) const;
     bool getBool(const std::string& key, bool defaultValue,
-                 bool forceDefaultScope= false) const;
+                 bool forceDefaultScope = false) const;
 
     void setString(const std::string& key, const std::string& value,
-                   bool defaultScope= false);
-    void setInt(const std::string& key, int value, bool defaultScope= false);
+                   bool defaultScope = false);
+    void setInt(const std::string& key, int value, bool defaultScope = false);
     void setDouble(const std::string& key, double value,
-                   bool defaultScope= false);
-    void setBool(const std::string& key, bool value, bool defaultScope= false);
+                   bool defaultScope = false);
+    void setBool(const std::string& key, bool value, bool defaultScope = false);
 
     std::string getCurrentScope(const std::string& key) const;
     std::string getDafaultKey(const std::string& key) const;
     std::string getScopedKey(const std::string& key,
-                             bool defaultScope= false) const;
+                             bool defaultScope = false) const;
 
     Configuration& config;
     std::string currentScope;
@@ -222,15 +216,11 @@ private:
     ScopedConfiguration& operator=(const ScopedConfiguration&);
 };
 
-
 } // namespace scy
-
 
 #endif // SCY_Configuration_H
 
-
 /// @\}
-
 
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

@@ -8,25 +8,20 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/format.h"
 #include <algorithm>
 #include <sstream>
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 Format::Format()
     : name("Unknown")
     , priority(0)
 {
 }
-
 
 Format::Format(const std::string& name, const std::string& id,
                const VideoCodec& video, const AudioCodec& audio, int priority)
@@ -38,7 +33,6 @@ Format::Format(const std::string& name, const std::string& id,
 {
 }
 
-
 Format::Format(const std::string& name, const std::string& id,
                const VideoCodec& video, int priority)
     : name(name)
@@ -47,7 +41,6 @@ Format::Format(const std::string& name, const std::string& id,
     , priority(priority)
 {
 }
-
 
 Format::Format(const std::string& name, const std::string& id,
                const AudioCodec& audio, int priority)
@@ -58,7 +51,6 @@ Format::Format(const std::string& name, const std::string& id,
 {
 }
 
-
 Format::Format(const Format& r)
     : name(r.name)
     , id(r.id)
@@ -67,7 +59,6 @@ Format::Format(const Format& r)
     , priority(r.priority)
 {
 }
-
 
 Format::Type Format::type() const
 {
@@ -81,7 +72,6 @@ Format::Type Format::type() const
         return Format::None;
 }
 
-
 std::string Format::toString() const
 {
     std::ostringstream os;
@@ -93,7 +83,6 @@ std::string Format::toString() const
     os << "]";
     return os.str();
 }
-
 
 void Format::print(std::ostream& ost)
 {
@@ -111,9 +100,7 @@ void Format::print(std::ostream& ost)
     ost << "\n]";
 }
 
-
 } // namespace av
 } // namespace scy
-
 
 /// @\}

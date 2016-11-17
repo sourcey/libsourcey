@@ -8,19 +8,15 @@
 /// @addtogroup symple
 /// @{
 
-
 #ifndef SCY_Symple_Roster_H
 #define SCY_Symple_Roster_H
-
 
 #include "scy/collection.h"
 #include "scy/symple/address.h"
 #include "scy/symple/peer.h"
 
-
 namespace scy {
 namespace smpl {
-
 
 /// The Roster provides a registry for active network
 /// peers indexed by session ID.
@@ -44,12 +40,9 @@ public:
     virtual const char* className() const { return "Symple::Roster"; }
 };
 
-
 } // namespace smpl
 } // namespace scy
 
-
 #endif // SCY_Symple_Roster_H
-
 
 /// @\}

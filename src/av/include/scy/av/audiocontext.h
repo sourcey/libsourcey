@@ -8,10 +8,8 @@
 /// @addtogroup av
 /// @{
 
-
 #ifndef SCY_AV_AudioContext_H
 #define SCY_AV_AudioContext_H
-
 
 #include "scy/base.h"
 #include "scy/packetsignal.h"
@@ -28,13 +26,10 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-
 namespace scy {
 namespace av {
 
-
 struct AudioResampler;
-
 
 struct AudioContext
 {
@@ -42,14 +37,13 @@ struct AudioContext
     virtual ~AudioContext();
 
     /// Initialize the `AVCodecContext` with default values
-    virtual void create()= 0;
+    virtual void create() = 0;
 
     /// Open the AVCodecContext
     virtual void open();
 
     /// Close the AVCodecContext
     virtual void close();
-
 
     virtual bool recreateResampler();
 
@@ -69,20 +63,16 @@ struct AudioContext
     std::string error; ///< error message
 };
 
-
 void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params);
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx,
                             const AVFrame* frame, AVPacket* opacket);
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif
 #endif // SCY_AV_AudioContext_H
-
 
 /// @\}

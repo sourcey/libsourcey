@@ -8,7 +8,6 @@
 /// @addtogroup sked
 /// @{
 
-
 #include "scy/sked/scheduler.h"
 #include "scy/datetime.h"
 #include "scy/logger.h"
@@ -18,23 +17,18 @@
 #include "assert.h"
 #include <algorithm>
 
-
 using namespace std;
-
 
 namespace scy {
 namespace sked {
-
 
 Scheduler::Scheduler()
 {
 }
 
-
 Scheduler::~Scheduler()
 {
 }
-
 
 void Scheduler::schedule(sked::Task* task)
 {
@@ -42,20 +36,17 @@ void Scheduler::schedule(sked::Task* task)
     //_wakeUp.set();
 }
 
-
 void Scheduler::cancel(sked::Task* task)
 {
     TaskRunner::cancel(task);
     //_wakeUp.set();
 }
 
-
 void Scheduler::clear()
 {
     TaskRunner::clear();
     //_wakeUp.set();
 }
-
 
 void Scheduler::run()
 {
@@ -71,14 +62,14 @@ void Scheduler::run()
 
     // TODO: Create a nextTask member so we don't
     // need to call next() on each iteration
-    auto task= reinterpret_cast<sked::Task*>(next());
+    auto task = reinterpret_cast<sked::Task*>(next());
 
     // Run the task
     if (task && task->trigger().timeout()) {
 #if _DEBUG
         {
             DateTime now;
-            Timespan remaining= task->trigger().scheduleAt - now;
+            Timespan remaining = task->trigger().scheduleAt - now;
             TraceS(this) << "Waiting: "
                          << "\n\tPID: " << task
                          << "\n\tDays: " << remaining.days()
@@ -129,7 +120,7 @@ void Scheduler::run()
                 onRun(task);
             else {
                 TraceS(this) << "Destroy After Run: " << task << endl;
-                task->_destroyed= true; // destroy();
+                task->_destroyed = true; // destroy();
             }
         } else
             TraceS(this) << "Skipping Task: " << task << endl;
@@ -165,7 +156,6 @@ void Scheduler::run()
     // TraceS(this) << "Exiting" << endl;
 }
 
-
 void Scheduler::update()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -173,11 +163,11 @@ void Scheduler::update()
     // TraceS(this) << "Updating: " << _tasks.size() << endl;
 
     // Update and clean the task list
-    auto it= _tasks.begin();
+    auto it = _tasks.begin();
     while (it != _tasks.end()) {
-        sked::Task* task= reinterpret_cast<sked::Task*>(*it);
+        sked::Task* task = reinterpret_cast<sked::Task*>(*it);
         if (task->destroyed()) {
-            it= _tasks.erase(it);
+            it = _tasks.erase(it);
             onRemove(task);
             TraceS(this) << "Destroy: " << task << endl;
             delete task;
@@ -190,34 +180,32 @@ void Scheduler::update()
     sort(_tasks.begin(), _tasks.end(), sked::Task::CompareTimeout);
 }
 
-
 void Scheduler::serialize(json::Value& root)
 {
     TraceS(this) << "Serializing" << endl;
 
     Mutex::ScopedLock lock(_mutex);
-    for (auto it= _tasks.begin(); it != _tasks.end(); ++it) {
-        sked::Task* task= reinterpret_cast<sked::Task*>(*it);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
+        sked::Task* task = reinterpret_cast<sked::Task*>(*it);
         TraceS(this) << "Serializing: " << task << endl;
-        json::Value& entry= root[root.size()];
+        json::Value& entry = root[root.size()];
         task->serialize(entry);
         task->trigger().serialize(entry["trigger"]);
     }
 }
 
-
 void Scheduler::deserialize(json::Value& root)
 {
     TraceS(this) << "Deserializing" << endl;
 
-    for (auto it= root.begin(); it != root.end(); it++) {
-        sked::Task* task= nullptr;
-        sked::Trigger* trigger= nullptr;
+    for (auto it = root.begin(); it != root.end(); it++) {
+        sked::Task* task = nullptr;
+        sked::Trigger* trigger = nullptr;
         try {
             json::assertMember(*it, "trigger");
-            task= factory().createTask((*it)["type"].asString());
+            task = factory().createTask((*it)["type"].asString());
             task->deserialize((*it));
-            trigger=
+            trigger =
                 factory().createTrigger((*it)["trigger"]["type"].asString());
             trigger->deserialize((*it)["trigger"]);
             task->setTrigger(trigger);
@@ -232,7 +220,6 @@ void Scheduler::deserialize(json::Value& root)
     }
 }
 
-
 void Scheduler::print(std::ostream& ost)
 {
     json::StyledWriter writer;
@@ -241,22 +228,18 @@ void Scheduler::print(std::ostream& ost)
     ost << writer.write(data);
 }
 
-
 Scheduler& Scheduler::getDefault()
 {
     static Singleton<Scheduler> sh;
     return *sh.get();
 }
 
-
 TaskFactory& Scheduler::factory()
 {
     return TaskFactory::getDefault();
 }
 
-
 } // namespace sked
 } // namespace scy
-
 
 /// @\}

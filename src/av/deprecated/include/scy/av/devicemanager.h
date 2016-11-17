@@ -9,7 +9,6 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
-
 #ifndef SCY_AV_DeviceManager_H
 #define SCY_AV_DeviceManager_H
 
@@ -19,7 +18,6 @@
 #include "scy/base.h"
 #include "scy/signal.h"
 
-
 namespace scy {
 namespace av {
 
@@ -28,8 +26,8 @@ struct Device
 {
     Device();
     Device(const std::string& type, int id, const std::string& name,
-           const std::string& guid= "", bool isDefault= false,
-           bool isAvailable= true);
+           const std::string& guid = "", bool isDefault = false,
+           bool isAvailable = true);
 
     void print(std::ostream& os);
 
@@ -47,13 +45,12 @@ struct Device
     }
 };
 
-
 enum MediaCapabilities
 {
-    AUDIO_RECV= 1 << 0,
-    AUDIO_SEND= 1 << 1,
-    VIDEO_RECV= 1 << 2,
-    VIDEO_SEND= 1 << 3,
+    AUDIO_RECV = 1 << 0,
+    AUDIO_SEND = 1 << 1,
+    VIDEO_RECV = 1 << 2,
+    VIDEO_SEND = 1 << 3,
 };
 
 /// A platform independent interface to enumerate audio
@@ -63,47 +60,45 @@ class IDeviceManager
 public:
     virtual ~IDeviceManager() {}
     /// Initialization
-    virtual bool initialize()= 0;
-    virtual void uninitialize()= 0;
+    virtual bool initialize() = 0;
+    virtual void uninitialize() = 0;
 
     /// Device enumeration
-    virtual bool getAudioInputDevices(std::vector<Device>& devices)= 0;
-    virtual bool getAudioOutputDevices(std::vector<Device>& devices)= 0;
+    virtual bool getAudioInputDevices(std::vector<Device>& devices) = 0;
+    virtual bool getAudioOutputDevices(std::vector<Device>& devices) = 0;
 
     virtual bool getAudioInputDevice(Device& out, const std::string& name,
-                                     int id= -1)= 0;
-    virtual bool getAudioInputDevice(Device& out, int id)= 0;
+                                     int id = -1) = 0;
+    virtual bool getAudioInputDevice(Device& out, int id) = 0;
 
     virtual bool getAudioOutputDevice(Device& out, const std::string& name,
-                                      int id= -1)= 0;
-    virtual bool getAudioOutputDevice(Device& out, int id)= 0;
+                                      int id = -1) = 0;
+    virtual bool getAudioOutputDevice(Device& out, int id) = 0;
 
     // virtual bool getAudioInputDevice(const std::string& name, Device& out) =
     // 0;
     // virtual bool getAudioOutputDevice(const std::string& name, Device& out) =
     // 0;
 
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs)= 0;
-    virtual bool getVideoCaptureDevice(Device& out, int id)= 0;
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs) = 0;
+    virtual bool getVideoCaptureDevice(Device& out, int id) = 0;
     virtual bool getVideoCaptureDevice(Device& out, const std::string& name,
-                                       int id= -1)= 0;
+                                       int id = -1) = 0;
 
-    virtual bool getDefaultAudioInputDevice(Device& device)= 0;
-    virtual bool getDefaultAudioOutputDevice(Device& device)= 0;
-    virtual bool getDefaultVideoCaptureDevice(Device& device)= 0;
+    virtual bool getDefaultAudioInputDevice(Device& device) = 0;
+    virtual bool getDefaultAudioOutputDevice(Device& device) = 0;
+    virtual bool getDefaultVideoCaptureDevice(Device& device) = 0;
 
     /// Capabilities
-    virtual int getCapabilities()= 0;
+    virtual int getCapabilities() = 0;
 
-    virtual void print(std::ostream& ost)= 0; /// Signals on DevicesChanged.
+    virtual void print(std::ostream& ost) = 0; /// Signals on DevicesChanged.
     /// Arg 1 is true when device is video, false for audio
     /// Arg 2 is true when device connects, flase on disconnection
     Signal<void(bool&, bool&)> DevicesChanged;
 
-
     static const char kDefaultDeviceName[];
 };
-
 
 class DeviceWatcher
 {
@@ -114,7 +109,6 @@ public:
     virtual void stop() {}
 };
 
-
 class DeviceManagerFactory
 {
 public:
@@ -123,7 +117,6 @@ public:
 private:
     DeviceManagerFactory();
 };
-
 
 class DeviceManager : public IDeviceManager
 {
@@ -146,20 +139,19 @@ public:
     // virtual bool getAudioOutputDevice(const std::string& name, Device& out);
 
     virtual bool getAudioInputDevice(Device& out, const std::string& name,
-                                     int id= -1);
+                                     int id = -1);
     virtual bool getAudioInputDevice(Device& out, int id);
 
     virtual bool getAudioOutputDevice(Device& out, const std::string& name,
-                                      int id= -1);
+                                      int id = -1);
     virtual bool getAudioOutputDevice(Device& out, int id);
 
     virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
     virtual bool getVideoCaptureDevice(
         Device& out, const std::string& name,
-        int id=
+        int id =
             -1); /// Returns the video capture device at the given system index.
     virtual bool getVideoCaptureDevice(Device& out, int id);
-
 
     virtual bool getDefaultAudioInputDevice(Device& device);
     virtual bool getDefaultAudioOutputDevice(Device& device);
@@ -177,8 +169,7 @@ public:
     /// device of that name will be returned.
     /// If the ID should not be matched the given ID should be -1.
     static bool matchNameAndID(std::vector<Device>& devices, Device& out,
-                               const std::string& name, int id= -1);
-
+                               const std::string& name, int id = -1);
 
     bool initialized() const { return _initialized; }
 
@@ -188,7 +179,7 @@ protected:
     virtual bool getDefaultAudioDevice(bool input, Device& device);
     virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
     virtual bool getAudioDevice(bool input, Device& out,
-                                const std::string& name, int id= -1);
+                                const std::string& name, int id = -1);
     virtual bool getAudioDevice(bool input, Device& out, int id);
 
     void setInitialized(bool initialized);
@@ -204,13 +195,10 @@ private: /// The exclusionList MUST be a nullptr terminated list.
     bool _initialized;
 };
 
-
 } // namespace av
 } // namespace scy
 
-
 #endif // SCY_AV_DeviceManager_H
-
 
 /*
  * libjingle

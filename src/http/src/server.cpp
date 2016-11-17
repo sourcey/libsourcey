@@ -8,19 +8,15 @@
 /// @addtogroup http
 /// @{
 
-
 #include "scy/http/server.h"
 #include "scy/http/websocket.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace http {
-
 
 Server::Server(short port, ServerResponderFactory* factory)
     : socket(net::makeSocket<net::TCPSocket>())
@@ -30,7 +26,6 @@ Server::Server(short port, ServerResponderFactory* factory)
     TraceS(this) << "Create" << endl;
 }
 
-
 Server::~Server()
 {
     TraceS(this) << "Destroy" << endl;
@@ -39,13 +34,12 @@ Server::~Server()
         delete factory;
 }
 
-
 void Server::start()
 {
     // TODO: Register self as an observer
     // socket.reset(new net::TCPSocket);
-    socket->AcceptConnection+= slot(this, &Server::onSocketAccept);
-    socket->Close+= slot(this, &Server::onSocketClose);
+    socket->AcceptConnection += slot(this, &Server::onSocketAccept);
+    socket->Close += slot(this, &Server::onSocketClose);
     socket->bind(address);
     socket->listen();
 
@@ -55,14 +49,13 @@ void Server::start()
     // timer.start(5000, 5000);
 }
 
-
 void Server::shutdown()
 {
     TraceS(this) << "Shutdown" << endl;
 
     if (socket) {
-        socket->AcceptConnection-= slot(this, &Server::onSocketAccept);
-        socket->Close-= slot(this, &Server::onSocketClose);
+        socket->AcceptConnection -= slot(this, &Server::onSocketAccept);
+        socket->Close -= slot(this, &Server::onSocketClose);
         socket->close();
     }
 
@@ -74,22 +67,19 @@ void Server::shutdown()
     assert(this->connections.empty());
 }
 
-
 std::uint16_t Server::port()
 {
     return address.port();
 }
 
-
 ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
 {
-    auto conn= std::shared_ptr<ServerConnection>(
+    auto conn = std::shared_ptr<ServerConnection>(
         new ServerConnection(*this, sock),
         deleter::Deferred<ServerConnection>());
     addConnection(conn);
     return conn; // return new ServerConnection(*this, sock);
 }
-
 
 ServerResponder* Server::createResponder(ServerConnection& conn)
 {
@@ -99,20 +89,18 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
     return factory->createResponder(conn);
 }
 
-
 void Server::addConnection(ServerConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
-    conn->Close+=
+    conn->Close +=
         slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
     connections.push_back(conn);
 }
 
-
 void Server::removeConnection(ServerConnection* conn)
 {
     TraceS(this) << "Removing connection: " << conn << endl;
-    for (auto it= connections.begin(); it != connections.end(); ++it) {
+    for (auto it = connections.begin(); it != connections.end(); ++it) {
         if (conn == it->get()) {
             connections.erase(it);
             return;
@@ -121,23 +109,20 @@ void Server::removeConnection(ServerConnection* conn)
     assert(0 && "unknown connection");
 }
 
-
 void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
 {
     TraceS(this) << "On server accept" << endl;
-    ServerConnection::Ptr conn= createConnection(sock);
+    ServerConnection::Ptr conn = createConnection(sock);
     if (!conn) {
         WarnL << "Cannot create connection" << endl;
         assert(0);
     }
 }
 
-
 void Server::onSocketClose(net::Socket& socket)
 {
     TraceS(this) << "On server socket close" << endl;
 }
-
 
 void Server::onConnectionClose(Connection& conn)
 {
@@ -145,11 +130,9 @@ void Server::onConnectionClose(Connection& conn)
     removeConnection(reinterpret_cast<ServerConnection*>(&conn));
 }
 
-
 //
 // Server Connection
 //
-
 
 ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket)
     : Connection(socket)
@@ -163,7 +146,6 @@ ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket)
     replaceAdapter(new ServerAdapter(*this));
 }
 
-
 ServerConnection::~ServerConnection()
 {
     TraceS(this) << "Destroy" << endl;
@@ -174,7 +156,6 @@ ServerConnection::~ServerConnection()
     }
 }
 
-
 void ServerConnection::close()
 {
     if (!closed()) {
@@ -182,12 +163,10 @@ void ServerConnection::close()
     }
 }
 
-
 Server& ServerConnection::server()
 {
     return _server;
 }
-
 
 //
 // Connection Callbacks
@@ -200,10 +179,9 @@ void ServerConnection::onHeaders()
     if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 &&
         util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {
         TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
-        _upgrade= true;
+        _upgrade = true;
 
-
-        auto wsAdapter= new ws::ConnectionAdapter(*this, ws::ServerSide);
+        auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -221,13 +199,13 @@ void ServerConnection::onHeaders()
         // Send the handshake request to the WS adapter for handling.
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
-        auto sock= socket().get();
+        auto sock = socket().get();
         wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer),
                                 sock->peerAddress());
     }
 
     // Instantiate the responder when request headers have been parsed
-    _responder= _server.createResponder(*this);
+    _responder = _server.createResponder(*this);
 
     // If no responder was created we close the connection.
     // TODO: Should we return a 404 instead?
@@ -247,7 +225,6 @@ void ServerConnection::onHeaders()
     // Outgoing.start();
 }
 
-
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
     TraceS(this) << "On payload: " << buffer.size() << endl;
@@ -263,7 +240,6 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
     _responder->onPayload(buffer);
 }
 
-
 void ServerConnection::onMessage()
 {
     TraceS(this) << "On complete" << endl;
@@ -278,10 +254,9 @@ void ServerConnection::onMessage()
     // The request handler can give a response.
     assert(_responder);
     assert(!_requestComplete);
-    _requestComplete= true;
+    _requestComplete = true;
     _responder->onRequest(_request, _response);
 }
-
 
 void ServerConnection::onClose()
 {
@@ -293,7 +268,6 @@ void ServerConnection::onClose()
     Connection::onClose();
 }
 
-
 /*
 void ServerConnection::onServerShutdown(void*)
 {
@@ -303,21 +277,17 @@ void ServerConnection::onServerShutdown(void*)
 }
 */
 
-
 http::Message* ServerConnection::incomingHeader()
 {
     return reinterpret_cast<http::Message*>(&_request);
 }
-
 
 http::Message* ServerConnection::outgoingHeader()
 {
     return reinterpret_cast<http::Message*>(&_response);
 }
 
-
 } // namespace http
 } // namespace scy
-
 
 /// @\}

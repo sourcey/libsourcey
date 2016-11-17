@@ -8,26 +8,22 @@
 /// @addtogroup base
 /// @{
 
-
 #ifndef SCY_Stateful_H
 #define SCY_Stateful_H
-
 
 #include "scy/signal.h"
 
 #include <iostream>
 #include <string>
 
-
 namespace scy {
-
 
 class State
 {
 public:
     typedef unsigned int ID;
 
-    State(ID id= 0, const std::string& message= "");
+    State(ID id = 0, const std::string& message = "");
     virtual ~State(){};
 
     virtual ID id() const;
@@ -40,7 +36,7 @@ public:
 
     virtual bool between(ID lid, ID rid) const
     {
-        ID id= this->id();
+        ID id = this->id();
         return id >= lid && id <= rid;
     }
 
@@ -61,7 +57,6 @@ protected:
     std::string _message;
 };
 
-
 //
 // Mutex State
 //
@@ -70,7 +65,7 @@ protected:
 class MutexState : public State
 {
 public:
-    MutexState(ID id= 0);
+    MutexState(ID id = 0);
     MutexState(const MutexState& r)
         : State(r)
     {
@@ -85,7 +80,7 @@ public:
     virtual void set(ID id)
     {
         Mutex::ScopedLock lock(_mutex);
-        _id= id;
+        _id = id;
     }
     virtual std::string message() const
     {
@@ -95,23 +90,21 @@ public:
     virtual void setMessage(const std::string& message)
     {
         Mutex::ScopedLock lock(_mutex);
-        _message= message;
+        _message = message;
     }
 
 protected:
     mutable Mutex _mutex;
 };
 
-
 //
 // State Signal
 //
 
-
 class StateSignal : public MutexState
 {
 public:
-    StateSignal(ID id= 0);
+    StateSignal(ID id = 0);
     StateSignal(const StateSignal& r);
     virtual ~StateSignal(){};
 
@@ -127,11 +120,9 @@ protected:
     virtual void set(ID id);
 };
 
-
 //
 // Stateful Interface
 //
-
 
 /// This class implements a simple state machine.
 /// T should be a derived State type.
@@ -174,7 +165,7 @@ protected:
     /// Sets the state and sends the state signal if
     /// the state change was successful.
     virtual bool setState(void* sender, unsigned int id,
-                          const std::string& message= "")
+                          const std::string& message = "")
     {
         T state;
         state.set(id);
@@ -187,8 +178,8 @@ protected:
     virtual bool setState(void* sender, const T& state)
     {
         if (beforeStateChange(state)) {
-            T oldState= _state;
-            _state= state;
+            T oldState = _state;
+            _state = state;
             //_state.set(id);
             //_state.setMessage(message);
             onStateChange(_state, oldState);
@@ -208,11 +199,8 @@ protected:
     T _state;
 };
 
-
 } // namespace scy
 
-
 #endif // SCY_Stateful_H
-
 
 /// @\}

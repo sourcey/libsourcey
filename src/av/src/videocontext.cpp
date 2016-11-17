@@ -8,20 +8,16 @@
 /// @addtogroup av
 /// @{
 
-
 #include "scy/av/videocontext.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
 
-
 using std::endl;
-
 
 namespace scy {
 namespace av {
-
 
 VideoContext::VideoContext()
     : stream(nullptr)
@@ -36,7 +32,6 @@ VideoContext::VideoContext()
     initializeFFmpeg();
 }
 
-
 VideoContext::~VideoContext()
 {
     TraceS(this) << "Destroy" << endl;
@@ -45,11 +40,9 @@ VideoContext::~VideoContext()
     uninitializeFFmpeg();
 }
 
-
 void VideoContext::create()
 {
 }
-
 
 void VideoContext::open()
 {
@@ -70,24 +63,23 @@ void VideoContext::open()
     recreateConverter();
 }
 
-
 void VideoContext::close()
 {
     TraceS(this) << "Closing" << endl;
 
     if (frame) {
         av_free(frame);
-        frame= nullptr;
+        frame = nullptr;
     }
 
     if (ctx) {
         avcodec_close(ctx);
-        ctx= nullptr;
+        ctx = nullptr;
     }
 
     if (conv) {
         delete conv;
-        conv= nullptr;
+        conv = nullptr;
     }
 
     // Streams are managed differently by the external impl
@@ -97,13 +89,12 @@ void VideoContext::close()
     // av_freep(stream);
     //}
 
-    time= 0;
-    pts= 0;
-    error= "";
+    time = 0;
+    pts = 0;
+    error = "";
 
     TraceS(this) << "Closing: OK" << endl;
 }
-
 
 AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
 {
@@ -119,9 +110,9 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
     if (iframe->width != /*conv->*/ oparams.width ||
         iframe->height != /*conv->*/ oparams.height ||
         iframe->format != /*conv->*/ av_get_pix_fmt(oparams.pixelFmt.c_str())) {
-        iparams.width= iframe->width;
-        iparams.height= iframe->height;
-        iparams.pixelFmt= av_get_pix_fmt_name((AVPixelFormat)iframe->format);
+        iparams.width = iframe->width;
+        iparams.height = iframe->height;
+        iparams.pixelFmt = av_get_pix_fmt_name((AVPixelFormat)iframe->format);
         recreateConverter();
     }
 
@@ -137,7 +128,6 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
     // Convert the input frame and return the result
     return conv->convert(iframe);
 }
-
 
 bool VideoContext::recreateConverter()
 {
@@ -171,27 +161,25 @@ bool VideoContext::recreateConverter()
     DebugL << "Recreating video conversion context" << endl;
     if (conv)
         delete conv;
-    conv= new VideoConverter();
-    conv->iparams= iparams;
-    conv->oparams= oparams;
+    conv = new VideoConverter();
+    conv->iparams = iparams;
+    conv->oparams = oparams;
     conv->create();
     return true;
 }
-
 
 //
 // Helper functions
 //
 
-
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
 {
-    auto picture= av_frame_alloc();
+    auto picture = av_frame_alloc();
     if (!picture)
         return nullptr;
 
-    int size= av_image_get_buffer_size(pixelFmt, width, height, 16);
-    auto buffer= reinterpret_cast<std::uint8_t*>(av_malloc(size));
+    int size = av_image_get_buffer_size(pixelFmt, width, height, 16);
+    auto buffer = reinterpret_cast<std::uint8_t*>(av_malloc(size));
     if (!buffer) {
         av_free(picture);
         return nullptr;
@@ -201,35 +189,31 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
                          width, height, 1);
 
     // FFmpeg v3.1.4 does not set width and height values for us anymore
-    picture->width= width;
-    picture->height= height;
-    picture->format= pixelFmt;
+    picture->width = width;
+    picture->height = height;
+    picture->format = pixelFmt;
 
     return picture;
 }
 
-
 void initVideoCodecFromContext(const AVStream* stream,
                                const AVCodecContext* ctx, VideoCodec& params)
 {
-    params.enabled= true;
-    params.encoder= avcodec_get_name(ctx->codec_id);
-    params.pixelFmt= av_get_pix_fmt_name(ctx->pix_fmt);
-    params.width= ctx->width;
-    params.height= ctx->height;
-    params.sampleRate= ctx->sample_rate;
-    params.bitRate= ctx->bit_rate;
+    params.enabled = true;
+    params.encoder = avcodec_get_name(ctx->codec_id);
+    params.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
+    params.width = ctx->width;
+    params.height = ctx->height;
+    params.sampleRate = ctx->sample_rate;
+    params.bitRate = ctx->bit_rate;
     if (stream && stream->r_frame_rate.num) {
-        params.fps= stream->r_frame_rate.num / stream->r_frame_rate.den;
+        params.fps = stream->r_frame_rate.num / stream->r_frame_rate.den;
     }
 }
-
 
 } // namespace av
 } // namespace scy
 
-
 #endif
-
 
 /// @\}
