@@ -69,7 +69,8 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

@@ -150,7 +150,8 @@ typedef ipc::Queue<ipc::Action> ActionQueue;
 typedef ipc::SyncQueue<ipc::Action> ActionSyncQueue;
 
 
-} } // namespace scy::ipc
+} // namespace ipc
+} // namespace scy
 
 
 #endif

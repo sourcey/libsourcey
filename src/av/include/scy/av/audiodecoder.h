@@ -53,7 +53,8 @@ struct AudioDecoder: public AudioContext
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

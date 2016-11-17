@@ -342,7 +342,8 @@ public:
 };
 
 
-} } // namespace Scy::TURN
+} // namespace TURN
+} // namespace Scy
 
 
 

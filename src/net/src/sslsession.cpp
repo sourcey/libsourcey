@@ -37,6 +37,7 @@ SSL_SESSION* SSLSession::sslSession() const
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

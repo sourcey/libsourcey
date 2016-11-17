@@ -96,7 +96,8 @@ private:
 typedef std::map<int, AudioCapture*> AudioCaptureMap;
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

@@ -125,7 +125,8 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

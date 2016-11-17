@@ -157,7 +157,8 @@ struct DailyTrigger: public Trigger
 };
 
 
-} } // namespace scy::sked
+} // namespace sked
+} // namespace scy
 
 
 #endif // SCY_Sked_Trigger_H

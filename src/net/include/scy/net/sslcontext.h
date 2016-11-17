@@ -336,7 +336,8 @@ inline void clearErrorStack()
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif // SCY_Net_SSLContext_H

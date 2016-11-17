@@ -15,4 +15,5 @@ namespace scy {
 namespace crypto {
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy

@@ -70,6 +70,7 @@ string FiveTuple::toString() const
 }
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 /// @\}

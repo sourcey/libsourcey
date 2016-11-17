@@ -41,6 +41,7 @@ std::string computeHMAC(const std::string& input, const std::string& key)
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 /// @\}

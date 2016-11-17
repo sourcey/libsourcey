@@ -75,7 +75,8 @@ private:
 
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 */
 
 

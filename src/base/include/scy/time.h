@@ -74,7 +74,8 @@ std::uint64_t getTimeMS();
 #endif
 
 
-} } // namespace scy::time
+} // namespace time
+} // namespace scy
 
 
 #endif // SCY_Time_H

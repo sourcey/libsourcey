@@ -287,7 +287,9 @@ protected:
 };
 
 
-} } } // namespace scy::http::ws
+} // namespace ws
+} // namespace http
+} // namespace scy
 
 
 #endif // SCY_NET_WebSocket_H

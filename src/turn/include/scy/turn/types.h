@@ -58,7 +58,8 @@ public:
 typedef std::vector<std::string> IPList;
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 
 #endif // SCY_TURN_Types_H

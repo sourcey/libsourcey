@@ -344,6 +344,7 @@ void Packet::print(std::ostream& os) const
 }
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 /// @\}

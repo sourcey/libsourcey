@@ -213,6 +213,7 @@ void Request::setCredentials(const std::string& header, const std::string& schem
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}

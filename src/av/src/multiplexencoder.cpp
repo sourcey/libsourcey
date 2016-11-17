@@ -506,7 +506,8 @@ void MultiplexEncoder::onAudioEncoded(av::AudioPacket& packet)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

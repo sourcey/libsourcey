@@ -61,7 +61,8 @@ protected:
 // static std::string DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
-} } // namespace scy::sked
+} // namespace sked
+} // namespace scy
 
 
 #endif // SCY_Sked_Scheduler_H

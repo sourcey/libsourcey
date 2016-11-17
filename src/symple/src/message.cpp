@@ -289,6 +289,7 @@ bool Message::hasData(const std::string& name)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

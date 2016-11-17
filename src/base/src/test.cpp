@@ -243,6 +243,7 @@ bool Test::passed()
 }
 
 
-} } // namespace scy::test
+} // namespace test
+} // namespace scy
 
 /// @\}

@@ -124,6 +124,8 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 }
 
 
-} } } // namespace scy::av::dshow
+} // namespace dshow
+} // namespace av
+} // namespace scy
 
 /// @\}

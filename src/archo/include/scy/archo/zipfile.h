@@ -56,7 +56,8 @@ struct ZipFile
 };
 
 
-} } // namespace scy::arc
+} // namespace arc
+} // namespace scy
 
 
 #endif // SCY_Archo_ZipFile_H

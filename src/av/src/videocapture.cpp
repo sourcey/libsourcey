@@ -69,7 +69,8 @@ void VideoCapture::open(const std::string& device, int width, int height, double
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

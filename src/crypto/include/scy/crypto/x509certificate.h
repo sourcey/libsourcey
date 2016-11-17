@@ -149,7 +149,8 @@ private:
 };
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 #endif // SCY_Crypto_X509Certificate_H

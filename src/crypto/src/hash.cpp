@@ -96,6 +96,7 @@ const std::string& Hash::algorithm(void) const
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 /// @\}

@@ -218,6 +218,7 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

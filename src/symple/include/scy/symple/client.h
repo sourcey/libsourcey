@@ -331,7 +331,8 @@ DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 #endif
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 
 #endif // SCY_Symple_Client_H

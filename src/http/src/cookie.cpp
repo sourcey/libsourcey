@@ -265,7 +265,8 @@ std::string Cookie::unescape(const std::string& str)
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}
 

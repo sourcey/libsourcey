@@ -314,6 +314,7 @@ http::Message* ServerConnection::outgoingHeader()
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}

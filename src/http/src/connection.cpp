@@ -409,6 +409,7 @@ Connection& ConnectionAdapter::connection()
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}

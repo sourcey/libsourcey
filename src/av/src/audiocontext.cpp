@@ -213,7 +213,8 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

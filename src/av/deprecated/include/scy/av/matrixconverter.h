@@ -106,7 +106,8 @@ public:
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

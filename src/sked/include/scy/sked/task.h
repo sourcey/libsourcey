@@ -98,7 +98,8 @@ protected:
 typedef std::vector<sked::Task*> TaskList;
 
 
-} } // namespace scy::sked
+} // namespace sked
+} // namespace scy
 
 
 #endif // SCY_Sked_Task_H

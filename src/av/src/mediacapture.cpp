@@ -329,7 +329,8 @@ std::string MediaCapture::error() const
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

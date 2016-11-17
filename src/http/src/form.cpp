@@ -702,7 +702,8 @@ std::uint64_t StringPart::length() const
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}
 

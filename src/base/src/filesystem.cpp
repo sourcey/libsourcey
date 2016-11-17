@@ -294,6 +294,7 @@ bool savefile(const std::string& path, const char* data, std::size_t size, bool 
 }
 
 
-} } // namespace scy::fs
+} // namespace fs
+} // namespace scy
 
 /// @\}

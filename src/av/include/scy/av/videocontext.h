@@ -91,7 +91,8 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

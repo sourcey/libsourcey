@@ -371,6 +371,7 @@ int Parser::on_message_complete(http_parser* parser)
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}

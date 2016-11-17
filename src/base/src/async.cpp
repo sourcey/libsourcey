@@ -176,6 +176,7 @@ bool Runner::Context::cancelled() const
 }
 
 
-} } // namespace scy::basic
+} // namespace basic
+} // namespace scy
 
 /// @\}

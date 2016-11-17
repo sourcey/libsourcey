@@ -314,7 +314,8 @@ int main(int argc, char** argv)
 // };
 //
 //
-// } } // namespace scy::net
+// } // namespace net
+} // namespace scy
 //
 //
 // int main(int argc, char** argv)

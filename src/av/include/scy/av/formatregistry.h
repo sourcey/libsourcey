@@ -66,7 +66,8 @@ private:
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // SCY_AV_FormatRegistry_H

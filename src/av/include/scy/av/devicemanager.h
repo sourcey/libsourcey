@@ -154,7 +154,8 @@ protected:
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // HAVE_FFMPEG

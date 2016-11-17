@@ -110,7 +110,8 @@ public:
 };
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 
 int main(int argc, char** argv)

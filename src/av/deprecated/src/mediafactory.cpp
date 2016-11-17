@@ -192,7 +192,8 @@ AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels, i
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

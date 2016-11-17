@@ -51,7 +51,8 @@ enum SocketMode
 };
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif

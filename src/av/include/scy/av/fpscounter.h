@@ -177,7 +177,8 @@ protected:
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // SCY_AV_FPSCounter_H

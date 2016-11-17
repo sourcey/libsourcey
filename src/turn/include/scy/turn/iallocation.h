@@ -145,7 +145,8 @@ protected:
 };
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 
 #endif // SCY_TURN_IAllocation_H

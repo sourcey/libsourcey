@@ -140,6 +140,7 @@ void Peer::setHost(const std::string& host)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

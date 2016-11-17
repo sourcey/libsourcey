@@ -336,7 +336,8 @@ void VideoEncoder::flush()
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

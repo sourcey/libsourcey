@@ -194,7 +194,8 @@ void format(std::string& str, const void* ptr);
 #endif
 
 
-} } // namespace scy::numeric
+} // namespace numeric
+} // namespace scy
 
 
 #endif // SCY_Numeric_H

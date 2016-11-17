@@ -400,7 +400,8 @@ double log2(double n)
 #endif
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

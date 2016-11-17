@@ -32,7 +32,8 @@ void printOutputFormats(std::ostream& ost, const char* delim = " ");
 void printEncoders(std::ostream& ost, const char* delim = " ");
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // SCY_Media_FFmpeg_H

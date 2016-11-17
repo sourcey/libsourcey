@@ -183,7 +183,8 @@ void extractCredentials(const std::string& userInfo, std::string& username, std:
 void extractCredentials(const http::URL& uri, std::string& username, std::string& password);    /// Extracts username and password from the given URI (e.g.: "http://user:pass@sample.com/secret").
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif // SCY_HTTP_Authenticator_H

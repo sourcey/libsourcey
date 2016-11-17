@@ -651,6 +651,8 @@ bool WebSocketFramer::mustMaskPayload() const
 }
 
 
-} } } // namespace scy::http::ws
+} // namespace ws
+} // namespace http
+} // namespace scy
 
 /// @\}

@@ -93,7 +93,8 @@ namespace internal {
 } // namespace internal
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 #endif // SCY_Crypto_Crypto_H

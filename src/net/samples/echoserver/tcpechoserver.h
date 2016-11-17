@@ -94,4 +94,5 @@ typedef EchoServer<TCPSocket> TCPEchoServer;
 typedef EchoServer<SSLSocket> SSLEchoServer;
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy

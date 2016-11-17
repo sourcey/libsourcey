@@ -286,7 +286,8 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 #endif
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

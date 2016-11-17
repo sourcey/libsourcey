@@ -100,6 +100,7 @@ bool Address::operator == (std::string& r)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

@@ -191,7 +191,8 @@ private:    /// The exclusionList MUST be a nullptr terminated list.
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif  // SCY_AV_DeviceManager_H

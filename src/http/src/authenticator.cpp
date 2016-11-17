@@ -305,7 +305,8 @@ const std::string& BasicAuthenticator::password() const
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}
 

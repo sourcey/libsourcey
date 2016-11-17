@@ -363,6 +363,7 @@ void Client::onConnectionTimer(void*)
 #endif
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}

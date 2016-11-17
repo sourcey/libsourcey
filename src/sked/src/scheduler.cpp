@@ -249,6 +249,7 @@ TaskFactory& Scheduler::factory()
 }
 
 
-} } // namespace scy::sked
+} // namespace sked
+} // namespace scy
 
 /// @\}

@@ -218,6 +218,8 @@ int decode_block(const char* code_in, const int length_in, char* plaintext_out, 
 }
 
 
-} } } // namespace scy::base64::internal
+} // namespace internal
+} // namespace base64
+} // namespace scy
 
 /// @\}

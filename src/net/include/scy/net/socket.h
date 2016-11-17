@@ -263,7 +263,8 @@ template<class NativeT> int setServerSocketRecvBufSize(uv::Handle& handle, int s
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif // SCY_Net_Socket_H

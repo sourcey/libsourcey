@@ -95,6 +95,7 @@ void Roster::update(const json::Value& data, bool whiny)
 #endif
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

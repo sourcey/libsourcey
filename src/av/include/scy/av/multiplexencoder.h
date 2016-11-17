@@ -96,7 +96,8 @@ protected:
 // bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

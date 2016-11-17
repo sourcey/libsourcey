@@ -127,7 +127,8 @@ inline bool resolveDNS(const std::string& host, std::uint16_t port, std::functio
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif // SCY_Net_DNS_H

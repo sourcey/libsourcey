@@ -160,7 +160,8 @@ void Message::write(std::ostream& ostr) const
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 /// @\}
 

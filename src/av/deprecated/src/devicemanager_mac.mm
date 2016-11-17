@@ -194,4 +194,5 @@ bool GetAVFoundationVideoDevices(std::vector<Device>* devices) {
 #endif  // __MAC_OS_X_VERSION_MAX_ALLOWED
 }
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy

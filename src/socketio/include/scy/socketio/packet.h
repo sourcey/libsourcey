@@ -126,7 +126,8 @@ protected:
 };
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 
 #endif // SCY_SocketIO_Packet_H

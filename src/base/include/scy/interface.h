@@ -84,7 +84,8 @@ public:
 // typedef Polymorphic Module;
 
 
-} } // namespace scy::basic
+} // namespace basic
+} // namespace scy
 
 
 #endif // SCY_Interfaces_H

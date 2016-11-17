@@ -74,6 +74,7 @@ void Socket::connect(const std::string& host, std::uint16_t port)
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

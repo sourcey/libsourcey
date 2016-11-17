@@ -278,7 +278,8 @@ const X509* X509Certificate::certificate() const
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 //

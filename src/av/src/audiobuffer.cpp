@@ -133,7 +133,8 @@ int AudioBuffer::available() const
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

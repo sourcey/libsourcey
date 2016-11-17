@@ -227,7 +227,8 @@ void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

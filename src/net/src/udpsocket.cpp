@@ -343,6 +343,7 @@ uv::Loop* UDPSocket::loop() const
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

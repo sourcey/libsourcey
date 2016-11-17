@@ -204,7 +204,8 @@ void MacDeviceWatcher::stop()
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 /*

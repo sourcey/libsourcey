@@ -102,7 +102,8 @@ protected:
 #endif
 
 
-} } // namespace scy::Net
+} // namespace Net
+} // namespace scy
 
 
 #endif // SCY_Net_PacketSocket_H

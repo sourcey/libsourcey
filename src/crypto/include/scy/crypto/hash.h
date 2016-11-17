@@ -93,7 +93,8 @@ inline std::string checksum(const std::string& algorithm, const std::string& pat
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 #endif // SCY_Crypto_Hash_H

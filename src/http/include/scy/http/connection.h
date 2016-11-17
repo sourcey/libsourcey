@@ -190,7 +190,8 @@ inline bool isExplicitKeepAlive(http::Message* message)
 }
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif

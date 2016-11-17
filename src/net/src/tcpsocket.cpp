@@ -320,6 +320,7 @@ void TCPSocket::onClose()
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

@@ -258,7 +258,8 @@ void AudioDecoder::flush() //AVPacket& opacket
 // }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

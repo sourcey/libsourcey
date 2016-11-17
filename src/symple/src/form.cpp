@@ -426,6 +426,7 @@ void FormField::addValue(bool value)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

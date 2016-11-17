@@ -295,7 +295,8 @@ public:
 #endif
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif

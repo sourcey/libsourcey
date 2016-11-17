@@ -58,7 +58,8 @@ struct Permission
 typedef std::vector<Permission> PermissionList;
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 
 #endif // SCY_TURN_Permission_H

@@ -76,7 +76,8 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket);
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

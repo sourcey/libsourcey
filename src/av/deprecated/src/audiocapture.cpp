@@ -336,7 +336,8 @@ void AudioCapture::getEncoderFormat(Format& iformat)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

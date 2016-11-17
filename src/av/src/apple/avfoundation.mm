@@ -119,7 +119,9 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
 }
 
 
-} } } // namespace scy::av::avfoundation
+} // namespace avfoundation
+} // namespace av
+} // namespace scy
 
 
 /*

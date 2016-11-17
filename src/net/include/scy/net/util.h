@@ -44,7 +44,8 @@ inline void getNetworkInterfaces(std::vector<net::Address>& hosts)
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif // SCY_Net_Util_H

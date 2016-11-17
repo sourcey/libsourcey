@@ -126,7 +126,8 @@ protected:
 };
 
 
-} } // namespace scy::sked
+} // namespace sked
+} // namespace scy
 
 
 #endif // SCY_Sked_TaskFactory_H

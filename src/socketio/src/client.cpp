@@ -535,6 +535,7 @@ bool Client::wasOnline() const
 }
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 /// @\}

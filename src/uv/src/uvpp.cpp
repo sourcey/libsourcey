@@ -173,6 +173,7 @@ void Handle::onClose()
 }
 
 
-} } // namespace scy::uv
+} // namespace uv
+} // namespace scy
 
 /// @\}

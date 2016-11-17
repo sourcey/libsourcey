@@ -138,7 +138,8 @@ private:
 };
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif // SCY_HTTP_Message_H

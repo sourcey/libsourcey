@@ -171,7 +171,8 @@ struct Decoder: public basic::Decoder
 };
 
 
-} } // namespace scy::hex
+} // namespace hex
+} // namespace scy
 
 
 #endif // SCY_Hex_H

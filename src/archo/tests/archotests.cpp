@@ -86,7 +86,8 @@ public:
 };
 
 
-} } // namespace scy::arc
+} // namespace arc
+} // namespace scy
 
 
 int main(int argc, char** argv)

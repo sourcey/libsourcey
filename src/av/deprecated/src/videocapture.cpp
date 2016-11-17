@@ -409,7 +409,8 @@ cv::VideoCapture& VideoCapture::capture()
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

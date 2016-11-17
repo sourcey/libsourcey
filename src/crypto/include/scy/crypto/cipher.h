@@ -228,7 +228,8 @@ std::string decryptString(const std::string& algorithm, const std::string& data,
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 #endif // SCY_Crypto_Cipher_H

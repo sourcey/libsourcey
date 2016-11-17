@@ -195,7 +195,8 @@ inline bool VerificationErrorDetails::getIgnoreError() const
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 
 #endif // SCY_Net_SSLManager_H

@@ -56,7 +56,8 @@ protected:
 };
 
 
-} } // namespace scy::json
+} // namespace json
+} // namespace scy
 
 
 #endif // SCY_JSON_Configuration_H

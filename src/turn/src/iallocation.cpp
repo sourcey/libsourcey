@@ -229,6 +229,7 @@ bool IAllocation::hasPermission(const std::string& peerIP)
 }
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 /// @\}

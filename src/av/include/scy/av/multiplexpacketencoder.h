@@ -111,7 +111,8 @@ struct PTSCalculator
 #endif
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

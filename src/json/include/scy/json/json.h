@@ -156,7 +156,8 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
 }
 
 
-} } // namespace scy::json
+} // namespace json
+} // namespace scy
 
 
 #endif // SCY_JSON_H

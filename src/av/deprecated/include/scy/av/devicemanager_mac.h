@@ -41,7 +41,8 @@ private:    /// virtual bool getAudioDevices(bool input, std::vector<Device>& de
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif  // SCY_AV_DeviceManager_MAC_H

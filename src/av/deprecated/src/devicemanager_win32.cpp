@@ -741,7 +741,8 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 //#endif
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

@@ -184,7 +184,8 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

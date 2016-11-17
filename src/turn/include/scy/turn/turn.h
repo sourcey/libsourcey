@@ -18,7 +18,8 @@ namespace scy {
 namespace turn {
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 
 #endif

@@ -260,7 +260,8 @@ inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = 
     }                                                                \
 
 
-} } // namespace scy::uv
+} // namespace uv
+} // namespace scy
 
 
 #endif // SCY_UV_UVPP_H

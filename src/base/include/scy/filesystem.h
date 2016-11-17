@@ -93,7 +93,8 @@ bool savefile(const std::string& path, const char* data, std::size_t size, bool 
 // TODO: Implement more libuv fs_* types
 
 
-} } // namespace scy::fs
+} // namespace fs
+} // namespace scy
 
 
 #endif

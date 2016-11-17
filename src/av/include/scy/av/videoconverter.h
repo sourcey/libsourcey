@@ -46,7 +46,8 @@ struct VideoConverter
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

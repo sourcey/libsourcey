@@ -232,6 +232,7 @@ std::string ZipFile::currentFileName()
 }
 
 
-} } // namespace scy::archo
+} // namespace archo
+} // namespace scy
 
 /// @\}

@@ -320,7 +320,8 @@ void SSLContext::createSSLContext()
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}
 

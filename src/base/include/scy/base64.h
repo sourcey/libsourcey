@@ -248,7 +248,8 @@ inline std::string decode(const T& bytes)
 }
 
 
-} } // namespace scy::base64
+} // namespace base64
+} // namespace scy
 
 
 #endif // SCY_Base64_H

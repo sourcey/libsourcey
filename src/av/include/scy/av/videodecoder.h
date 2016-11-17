@@ -48,7 +48,8 @@ struct VideoDecoder: public VideoContext
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif

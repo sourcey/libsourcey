@@ -230,6 +230,7 @@ void VideoCodec::print(std::ostream& ost)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 /// @\}

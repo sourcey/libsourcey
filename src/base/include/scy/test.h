@@ -177,7 +177,8 @@ protected:
 };
 
 
-} } // namespace scy::test
+} // namespace test
+} // namespace scy
 
 
 #endif // SCY_Test_H

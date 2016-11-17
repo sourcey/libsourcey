@@ -687,7 +687,8 @@ AVOutputFormat* nextOutputDevice(Device::Type type, AVOutputFormat* prev = nullp
 #endif
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // HAVE_FFMPEG

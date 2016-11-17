@@ -348,7 +348,8 @@ protected:
 };
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif // SCY_HTTP_Form_H

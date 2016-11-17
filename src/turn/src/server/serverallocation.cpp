@@ -234,6 +234,7 @@ void ServerAllocation::print(std::ostream& os) const
 }
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 /// @\}

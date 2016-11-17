@@ -213,7 +213,8 @@ public:
 };
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif

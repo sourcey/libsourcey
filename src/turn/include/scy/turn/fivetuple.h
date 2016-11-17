@@ -95,7 +95,8 @@ private:
 };
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 
 #endif // SCY_TURN_FiveTuple_H

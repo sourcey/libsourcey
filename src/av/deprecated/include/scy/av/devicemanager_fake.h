@@ -179,7 +179,8 @@ private:
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif  // SCY_AV_DeviceManager_FAKE_H

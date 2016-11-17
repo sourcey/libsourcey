@@ -83,7 +83,8 @@ protected:
 // };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // SCY_RealtimePacketQueue_H

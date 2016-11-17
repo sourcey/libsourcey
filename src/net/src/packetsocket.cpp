@@ -140,6 +140,7 @@ void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& sta
 #endif
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

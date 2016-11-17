@@ -60,6 +60,7 @@ void Presence::setProbe(bool flag)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

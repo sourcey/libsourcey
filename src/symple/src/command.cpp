@@ -101,6 +101,7 @@ bool Command::matches(const std::string& xnode) const
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

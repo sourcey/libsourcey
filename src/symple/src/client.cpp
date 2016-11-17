@@ -496,6 +496,7 @@ Client& Client::operator >> (Message& message)
 }
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 /// @\}

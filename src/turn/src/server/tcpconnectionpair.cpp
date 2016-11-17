@@ -256,6 +256,7 @@ bool TCPConnectionPair::expired() const
 }
 
 
-} } // namespace scy::turn
+} // namespace turn
+} // namespace scy
 
 /// @\}

@@ -26,7 +26,8 @@ namespace crypto {
 typedef ::RSA RSAKey;
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 
 #endif // SCY_Crypto_RSA_H

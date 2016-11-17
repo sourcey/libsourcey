@@ -202,7 +202,8 @@ public:
 };
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 
 #endif // SCY_SocketIO_Client_H

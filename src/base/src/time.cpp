@@ -145,6 +145,7 @@ std::uint64_t getTimeMS()
 
 
 
-} } // namespace scy::time
+} // namespace time
+} // namespace scy
 
 /// @\}

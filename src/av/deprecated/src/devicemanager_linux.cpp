@@ -506,7 +506,8 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 // }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 /*

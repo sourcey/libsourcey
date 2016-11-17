@@ -59,7 +59,8 @@ public:
     };
 };
 
-//} } // namespace Sourcey::SocketIO
+//} // namespace SocketIO
+} // namespace Sourcey
 
 
 int main(int argc, char** argv)

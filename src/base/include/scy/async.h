@@ -233,7 +233,8 @@ public:
 };
 
 
-} } // namespace scy::async
+} // namespace async
+} // namespace scy
 
 
 #endif // SCY_Async_H

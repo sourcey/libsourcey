@@ -241,6 +241,7 @@ void SSLAdapter::handleError(int rc)
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

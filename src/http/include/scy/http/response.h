@@ -158,7 +158,8 @@ private:
 const char* getStatusCodeReason(StatusCode status);
 
 
-} } // namespace scy::http
+} // namespace http
+} // namespace scy
 
 
 #endif

@@ -78,6 +78,7 @@ void Transaction::onResponse()
 }
 
 
-} } // namespace scy::sockio
+} // namespace sockio
+} // namespace scy
 
 /// @\}

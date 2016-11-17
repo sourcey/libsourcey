@@ -175,6 +175,7 @@ void uninitializeEngine()
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 /// @\}

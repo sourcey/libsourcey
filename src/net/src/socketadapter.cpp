@@ -183,6 +183,7 @@ void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
 }
 
 
-} } // namespace scy::net
+} // namespace net
+} // namespace scy
 
 /// @\}

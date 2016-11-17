@@ -129,7 +129,8 @@ std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::s
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 #endif
 #endif

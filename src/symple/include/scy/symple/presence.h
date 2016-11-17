@@ -35,7 +35,8 @@ public:
 };
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 
 #endif // SCY_Symple_Presence_H

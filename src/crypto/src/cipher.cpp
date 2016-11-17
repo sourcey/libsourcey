@@ -459,6 +459,7 @@ void Cipher::generateKey(const std::string& password, const std::string& salt, i
 }
 
 
-} } // namespace scy::crypto
+} // namespace crypto
+} // namespace scy
 
 /// @\}

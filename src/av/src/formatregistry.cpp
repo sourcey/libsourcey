@@ -149,6 +149,7 @@ void FormatRegistry::setDefault(const std::string& name)
 }
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 /// @\}

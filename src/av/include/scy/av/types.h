@@ -104,7 +104,8 @@ struct AudioPacket: public MediaPacket
 };
 
 
-} } // namespace scy::av
+} // namespace av
+} // namespace scy
 
 
 #endif // SCY_AV_Types_H

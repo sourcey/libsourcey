@@ -164,7 +164,8 @@ public:
 };
 
 
-} } // namespace scy::smpl
+} // namespace smpl
+} // namespace scy
 
 
 #endif // SCY_Symple_Form_H
