@@ -26,6 +26,9 @@ namespace scy {
 namespace net {
 
 
+class Socket;
+
+
 /// SocketAdapter is the abstract interface for all socket classes.
 /// A SocketAdapter can also be attached to a Socket in order to
 /// override default Socket callbacks and behaviour, while still
@@ -67,10 +70,10 @@ public:
 
     /// These virtual methods can be overridden as necessary
     /// to intercept socket events before they hit the application.
-    virtual void onSocketConnect();
-    virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
-    virtual void onSocketError(const Error& error);
-    virtual void onSocketClose();
+    virtual void onSocketConnect(Socket& socket);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
+    virtual void onSocketError(Socket& socket, const Error& error);
+    virtual void onSocketClose(Socket& socket);
 
     /// A pointer to the adapter for handling outgoing data.
     /// Send methods proxy data to this adapter by default.
@@ -94,28 +97,28 @@ public:
     void* opaque;
 
     /// Signals that the socket is connected.
-    NullSignal Connect;
+    Signal<void(Socket&)> Connect;
 
     /// Signals when data is received by the socket.
-    Signal2<const MutableBuffer&, const Address&> Recv;
-    
+    Signal<void(Socket&, const MutableBuffer&, const Address&)> Recv;
+
     /// Signals that the socket is closed in error.
     /// This signal will be sent just before the
     /// Closed signal.
-    Signal<const scy::Error&> Error;
+    Signal<void(Socket&, const scy::Error&)> Error;
 
     /// Signals that the underlying socket is closed.
-    NullSignal Close;
+    Signal<void(Socket&)> Close;
 
 protected:
     /// Returns the polymorphic instance pointer
     /// for signal delegate callbacks.
     virtual void* self() { return this; };
 
-    virtual void emitSocketConnect();
-    virtual void emitSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
-    virtual void emitSocketError(const scy::Error& error);
-    virtual void emitSocketClose();
+    virtual void emitSocketConnect(Socket& socket);
+    virtual void emitSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
+    virtual void emitSocketError(Socket& socket, const scy::Error& error);
+    virtual void emitSocketClose(Socket& socket);
 
     SocketAdapter* _sender;
 };

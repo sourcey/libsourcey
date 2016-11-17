@@ -45,7 +45,7 @@ void IDiagnostic::check()
 void IDiagnostic::addSummary(const std::string& text)
 {
     summary.push_back(text);
-    SummaryUpdated.emit(this, text);
+    SummaryUpdated.emit(/*this, */text);
 }
 
 
@@ -162,7 +162,7 @@ void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& s
     TraceL << "Diagnostic state change: " << test->name << ": " << state << endl;
 
     if (test->complete() && allComplete())
-        DiagnosticsComplete.emit(this);
+        DiagnosticsComplete.emit(/*this*/);
 }
 
 

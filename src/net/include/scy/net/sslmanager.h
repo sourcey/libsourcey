@@ -49,14 +49,14 @@ public:
     SSLContext::Ptr defaultClientContext();
 
     /// Fired whenever a certificate verification error is detected by the server during a handshake.
-    Signal<VerificationErrorDetails&> ServerVerificationError;
+    Signal<void(VerificationErrorDetails&)> ServerVerificationError;
 
     /// Fired whenever a certificate verification error is detected by the client during a handshake.
-    Signal<VerificationErrorDetails&> ClientVerificationError;
+    Signal<void(VerificationErrorDetails&)> ClientVerificationError;
 
     /// Fired when a encrypted certificate is loaded. Not setting the password
     /// in the event parameter will result in a failure to load the certificate.
-    Signal<std::string&> PrivateKeyPassphraseRequired;
+    Signal<void(std::string&)> PrivateKeyPassphraseRequired;
 
     /// Shuts down the SSLManager and releases the default Context
     /// objects. After a call to shutdown(), the SSLManager can no

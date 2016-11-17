@@ -71,10 +71,10 @@ public:
     virtual bool createAndBindConnection(std::uint32_t connectionID, const net::Address& peerAddress);
     //virtual void onRelayConnectionStateChange(void* sender, Net::SocketState& state, const Net::SocketState& oldState);
 
-    virtual void onRelayConnectionConnect(void* sender);
-    virtual void onRelayDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onRelayConnectionError(void* sender, const Error& error) ;
-    virtual void onRelayConnectionClosed(void* sender);
+    virtual void onRelayConnectionConnect(net::Socket& socket);
+    virtual void onRelayDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onRelayConnectionError(net::Socket& socket, const Error& error) ;
+    virtual void onRelayConnectionClosed(net::Socket& socket);
 
     void freeConnection(const net::Address& peerAddress);
 

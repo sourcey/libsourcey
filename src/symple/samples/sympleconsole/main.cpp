@@ -127,11 +127,11 @@ public:
             }
 
             // Setup the client
-            client += packetDelegate(this, &SympleApplication::onRecvPacket);
-            client += packetDelegate(this, &SympleApplication::onRecvMessage);
-            client.Announce += delegate(this, &SympleApplication::onClientAnnounce);
-            client.StateChange += delegate(this, &SympleApplication::onClientStateChange);
-            client.CreatePresence += delegate(this, &SympleApplication::onCreatePresence);
+            client += slot(this, &SympleApplication::onRecvPacket);
+            // client += slot(this, &SympleApplication::onRecvMessage);
+            client.Announce += slot(this, &SympleApplication::onClientAnnounce);
+            client.StateChange += slot(this, &SympleApplication::onClientStateChange);
+            client.CreatePresence += slot(this, &SympleApplication::onCreatePresence);
             client.connect();
 
             // Start the console thread
@@ -222,7 +222,7 @@ public:
 
         // Send with transaction
         auto transaction = client.createTransaction(*message);
-        transaction->StateChange += sdelegate(this, &SympleApplication::onAckState);
+        transaction->StateChange += slot(this, &SympleApplication::onAckState);
         transaction->send();
 
         delete message;
@@ -256,14 +256,24 @@ public:
         }
     }
 
-    void onRecvPacket(void* sender, sockio::Packet& packet)
+    void onRecvPacket(IPacket& raw)
     {
-        DebugL << "####### On raw packet: " << packet.className() << endl;
+        auto message = dynamic_cast<smpl::Message*>(&raw);
+        if (message) {
+            return onRecvMessage(*message);
+        }
 
-        // Handle incoming raw Socket.IO packets here (not required)
+        auto packet = dynamic_cast<sockio::Packet*>(&raw);
+        if (packet) {
+            return onRecvPacket(*packet);
+        }
+
+        DebugL << "####### On raw packet: " << raw.className() << endl;
+
+        // Handle incoming raw packets here
     }
 
-    void onRecvMessage(void* sender, smpl::Message& message)
+    void onRecvMessage(smpl::Message& message)
     {
         DebugL << "####### On message: " << message.className() << endl;
 
@@ -276,7 +286,7 @@ public:
         assert(status == 200);
     }
 
-    void onClientStateChange(sockio::ClientState& state, const sockio::ClientState& oldState)
+    void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
         DebugL << "Client state changed: " << state << ": " << client.ws().socket->address() << endl;
 

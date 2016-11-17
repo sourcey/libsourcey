@@ -48,8 +48,7 @@ struct Encoder: public basic::Encoder
 
         char c;
         std::size_t nwrite = 0;
-        for (unsigned i = 0; i < nread; i++)
-        {
+        for (unsigned i = 0; i < nread; i++) {
             c = inbuf[i];
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + ((c >> 4) & 0xF)], 1);
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + (c & 0xF)], 1);

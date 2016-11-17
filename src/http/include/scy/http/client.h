@@ -54,14 +54,14 @@ public:
     /// will be sent when the socket is connected.
     virtual void send(http::Request& req);
 
+    /// Send raw data to the peer.
+    /// Calls send() internally.
+    ///
+    /// Throws an exception if the socket is not already or connected.
     virtual int send(const char* data, std::size_t len, int flags = 0);
-    //virtual int send(const std::string& buf, int flags = 0);
-    //virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
-    //virtual void sendData(const std::string& buf); //, int flags = 0
-    // Send raw data to the peer.
-    // Calls send() internally.
-    //
-    // Throws an exception if the socket is not already or connected.
+    // virtual int send(const std::string& buf, int flags = 0);
+    // virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
+    // virtual void sendData(const std::string& buf); //, int flags = 0
 
     /// Forcefully closes the HTTP connection.
     virtual void close();
@@ -85,7 +85,8 @@ public:
     /// Optional unmanaged client data pointer.
     void* opaque;
 
-    ///// Internal callbacks
+    //
+    /// Internal callbacks
 
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
@@ -93,12 +94,13 @@ public:
     virtual void onComplete();
     virtual void onClose();
 
-    ///// Status signals
+    //
+    /// Status signals
 
-    NullSignal Connect;                     ///< Signal when the client socket is connected and data can flow
-    Signal<Response&> Headers;              ///<  Signal when the response HTTP header has been received
-    Signal<const MutableBuffer&> Payload;   ///<  Signal when raw data is received
-    Signal<const Response&> Complete;       ///<  Signal when the HTTP transaction is complete
+    NullSignal Connect;                           ///< Signals when the client socket is connected and data can flow
+    Signal<void(Response&)> Headers;              ///< Signals when the response HTTP header has been received
+    Signal<void(const MutableBuffer&)> Payload;   ///< Signals when raw data is received
+    Signal<void(const Response&)> Complete;       ///< Signals when the HTTP transaction is complete
 
 protected:
     /// Connects to the server endpoint.
@@ -109,7 +111,7 @@ protected:
     http::Message* incomingHeader();
     http::Message* outgoingHeader();
 
-    void onSocketConnect();
+    void onSocketConnect(net::Socket& socket);
     void onHostResolved(void*, const net::DNSResult& result);
 
 protected:
@@ -229,14 +231,13 @@ public:
     NullSignal Shutdown;
 
 protected:
-    //void onConnectionTimer(void*);
-    void onConnectionClose(void*);
+    void onConnectionClose(Connection& conn);
 
     friend class ClientConnection;
 
     ClientConnectionPtrVec _connections;
-    //Timer _timer;
 };
+
 
 inline ClientConnection::Ptr createConnection(const URL& url, http::Client* client = nullptr, uv::Loop* loop = uv::defaultLoop())
 {

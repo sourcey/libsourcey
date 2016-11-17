@@ -38,7 +38,7 @@ UDPAllocation::UDPAllocation(Server& server,
     // This will remove the need for allocation lookups when receiving
     // data from peers.
     _relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));
-    _relaySocket.Recv += sdelegate(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv += slot(this, &UDPAllocation::onPeerDataReceived);
 
     TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
@@ -47,7 +47,7 @@ UDPAllocation::UDPAllocation(Server& server,
 UDPAllocation::~UDPAllocation()
 {
     TraceL << "Destroy" << endl;
-    _relaySocket.Recv -= sdelegate(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
     _relaySocket.close();
 }
 
@@ -142,9 +142,9 @@ void UDPAllocation::handleSendIndication(Request& request)
 }
 
 
-void UDPAllocation::onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
+void UDPAllocation::onPeerDataReceived(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    //auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
+    // auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
     TraceL << "Received UDP Datagram from " << peerAddress << endl;
 
     if (!hasPermission(peerAddress.host())) {
@@ -176,8 +176,6 @@ void UDPAllocation::onPeerDataReceived(void*, const MutableBuffer& buffer, const
     dataAttr->copyBytes(bufferCast<const char*>(buffer), buffer.size());
     message.add(dataAttr);
 
-    //Mutex::ScopedLock lock(_mutex);
-
     TraceL << "Send data indication:"
         << "\n\tFrom: " << peerAddress
         << "\n\tTo: " << _tuple.remote()
@@ -185,9 +183,6 @@ void UDPAllocation::onPeerDataReceived(void*, const MutableBuffer& buffer, const
         << endl;
 
     server().udpSocket().sendPacket(message, _tuple.remote());
-
-    //net::Address tempAddress("58.7.41.244", _tuple.remote().port());
-    //server().udpSocket().send(message, tempAddress);
 }
 
 

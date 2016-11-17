@@ -22,18 +22,17 @@
 
 namespace scy {
 
-  
-/// Modern unit testing classes
+
+/// Modern unit testing framework
 namespace test {
 
 
 class Test;
 class TestRunner;
 
-typedef std::function<void()> voidfunc_t;
-typedef std::list<Test*> test_list_t;
-typedef std::list<std::string> error_list_t;
-typedef std::map<Test*, error_list_t> error_map_t;
+typedef std::list<Test*> TestList;
+typedef std::list<std::string> ErrorList;
+typedef std::map<Test*, ErrorList> ErrorMap;
 
 /// Initialize the test environment.
 void initialize();
@@ -47,7 +46,7 @@ int finalize();
 void runAll();
 
 /// Describe a test environment implemented by the given lambda function.
-void describe(const std::string& name, voidfunc_t target);
+void describe(const std::string& name, std::function<void()> target);
 
 /// Describe a test environment implemented by the given test instance.
 void describe(const std::string& name, Test* test);
@@ -67,8 +66,11 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 // Test
 //
 
-/// This class is for implementing any kind
-/// async test that is compatible with a TestRunner.
+
+/// Test wrapper class.
+///
+/// This class is for implementing any kind of unit
+/// test that can be executed by a `TestRunner`.
 class Test
 {
 public:
@@ -87,26 +89,27 @@ public:
     std::string name;
 
     /// A list of test errors.
-    error_list_t errors;
+    ErrorList errors;
 
     /// The test run duration for benchmarking.
     double duration;
 
 protected:
-    Test(const Test& test);
-    Test& operator=(Test const&);
+    Test(const Test& test) = delete;
+    Test& operator=(Test const&) = delete;
 
     /// Tests belong to a TestRunner instance.
     friend class TestRunner;
 };
 
 
+// Test class that runs a static or lambda function.
 class FunctionTest: public Test
 {
 public:
-    voidfunc_t target;
+    std::function<void()> target;
 
-    FunctionTest(voidfunc_t target, const std::string& name = "Unnamed Test") :
+    FunctionTest(std::function<void()> target, const std::string& name = "Unnamed Test") :
         Test(name), target(target)
     {
     }
@@ -155,10 +158,10 @@ public:
     Test* current() const;
 
     /// Return the list of tests.
-    test_list_t tests() const;
+    TestList tests() const;
 
     /// Return a map of tests and errors.
-    error_map_t errors() const;
+    ErrorMap errors() const;
 
     /// Return true if all tests passed.
     bool passed() const;
@@ -168,8 +171,8 @@ public:
     static TestRunner& getDefault();
 
 protected:
-    mutable Mutex    _mutex;
-    std::list<Test*> _tests;
+    mutable Mutex _mutex;
+    TestList _tests;
     Test* _current;
 };
 

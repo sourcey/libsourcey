@@ -95,7 +95,7 @@ public:
     virtual void print(std::ostream& ost) = 0;    /// Signals on DevicesChanged.
     /// Arg 1 is true when device is video, false for audio
     /// Arg 2 is true when device connects, flase on disconnection
-    Signal2<bool&, bool&> DevicesChanged;
+    Signal<void(bool&, bool&)> DevicesChanged;
 
 
     static const char kDefaultDeviceName[];

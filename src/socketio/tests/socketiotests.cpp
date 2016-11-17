@@ -76,7 +76,7 @@ public:
         sockio::TCPClient client(options, app.loop);
 #endif
 
-        client.StateChange += sdelegate(this, &Tests::onClientStateChange);
+        client.StateChange += slot(this, &Tests::onClientStateChange);
         client.connect();
 
         // app.run();

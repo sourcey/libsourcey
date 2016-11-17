@@ -93,7 +93,7 @@ public:
     int height();
     cv::Mat lastFrame() const;
     cv::VideoCapture& capture();    /// Signals that the capture is closed in error.
-    Signal<const scy::Error&> Error;
+    Signal<void(const scy::Error&)> Error;
 
 
 protected:

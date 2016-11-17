@@ -9,15 +9,15 @@
 /// @{
 
 
-#ifndef SCY_Net_Network_H
-#define SCY_Net_Network_H
+#ifndef SCY_Net_DNS_H
+#define SCY_Net_DNS_H
 
 
 #include <cstdint>
-#include "scy/uv/uvpp.h"
-
-#include "scy/net/address.h"
 #include <vector>
+#include "scy/uv/uvpp.h"
+#include "scy/util.h"
+#include "scy/net/address.h"
 
 
 namespace scy {
@@ -130,6 +130,6 @@ inline bool resolveDNS(const std::string& host, std::uint16_t port, std::functio
 } } // namespace scy::net
 
 
-#endif // SCY_Net_Network_H
+#endif // SCY_Net_DNS_H
 
 /// @\}

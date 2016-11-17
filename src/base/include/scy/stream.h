@@ -120,7 +120,7 @@ class Stream: public uv::Handle
     }
 
     /// Signals when data can be read from the stream.
-    Signal2<const char*, const int&> Read;
+    Signal<void(Stream&, const char*, const int&)> Read;
 
  protected:
     virtual bool readStart()
@@ -142,7 +142,7 @@ class Stream: public uv::Handle
     virtual void onRead(const char* data, std::size_t len)
     {
         //TraceL << "On read: " << len << std::endl;
-        Read.emit(self(), data, len);
+        Read.emit(*this, data, len);
     }
 
     static void handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
@@ -166,10 +166,10 @@ class Stream: public uv::Handle
     {
     }
 
-    virtual void* self()
-    {
-        return this;
-    }
+    // virtual void* self()
+    // {
+    //     return this;
+    // }
 
 
     ///

@@ -18,15 +18,6 @@ using namespace scy;
 using namespace scy::net;
 using namespace scy::turn;
 
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
 
 namespace scy {
 namespace turn {
@@ -67,9 +58,8 @@ struct TestServer: public turn::ServerObserver
 };
 
 
+/// The initiating client...
 struct ClientTest
-    //
-    // The initiating client...
 {
     enum Result {
         None,
@@ -77,7 +67,7 @@ struct ClientTest
         Failed
     };
 
-    //Signal<Result&>    TestComplete;
+    //Signal<Result&> TestComplete;
 
     int id;
     Result result;
@@ -109,13 +99,13 @@ struct ClientTest
 
     void run()
     {
-        initiator->AllocationCreated += sdelegate(this, &ClientTest::onInitiatorAllocationCreated);
+        initiator->AllocationCreated += slot(this, &ClientTest::onInitiatorAllocationCreated);
 
         // TODO: Use STUN binding request to get IP
         initiator->initiate(TURN_AUTHORIZE_PEER_IP);
     }
 
-    void onInitiatorAllocationCreated(void* sender) //, turn::Client& client
+    void onInitiatorAllocationCreated() //, turn::Client& client
     {
         DebugL << "Initiator allocation created" << endl;
 
@@ -132,7 +122,7 @@ struct ClientTest
     {
         DebugL << "Test complete: " << success << endl;
         result = success ? Success : Failed;
-        //TestComplete.emit(this, result);
+        //TestComplete.emit(/*this, */result);
     }
 };
 
@@ -159,7 +149,7 @@ struct ClientTestRunner
         nTimes = times;
         for (int i = 0; i < nTimes; i++) {
             auto client = new turn::ClientTest(i, o); //, reactor, runner
-            client->initiator->TestComplete += sdelegate(this, &ClientTestRunner::onTestComplete);
+            client->initiator->TestComplete += slot(this, &ClientTestRunner::onTestComplete);
             client->run();
             tests.push_back(client);
         }
@@ -167,13 +157,13 @@ struct ClientTestRunner
         //done.wait();
     }
 
-    //void onTimeout(TimerCallback<ClientTestRunner>& timer)
-    //{
-        // took too long...
-        //done.set();
-    //}
+    // void onTimeout(TimerCallback<ClientTestRunner>& timer)
+    // {
+    //     // took too long...
+    //     done.set();
+    // }
 
-    void onTestComplete(void* sender, bool result)
+    void onTestComplete(bool result)
     {
         DebugL << "ClientTestRunner: TestComplete" << endl;
 
@@ -187,7 +177,7 @@ struct ClientTestRunner
 
     void print(ostream& ost)
     {
-        ost << "#################Test results:"
+        ost << "Test results:"
             << "\n\tTimes: " << nTimes
             << "\n\tComplete: " << nComplete
             << "\n\tSucceeded: " << nSucceeded

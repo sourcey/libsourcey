@@ -5,10 +5,11 @@
 //
 // SPDX-License-Identifier:	LGPL-2.1+
 //
+// This file uses parts of the public domain libb64 library:
+// http://libb64.sourceforge.net/
+//
 /// @addtogroup base
 /// @{
-// This file uses the public domain libb64 library: http://libb64.sourceforge.net/
-//
 
 
 #ifndef SCY_Base64_H

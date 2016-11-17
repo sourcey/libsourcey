@@ -150,7 +150,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
     // it back through the socket recv method.
     std::size_t remaining = buffer.size() - nparsed;
     if (remaining) {
-        onSocketRecv(MutableBuffer(&data[nparsed], remaining), peerAddr);
+        onSocketRecv(*socket.get(), MutableBuffer(&data[nparsed], remaining), peerAddr);
     }
 }
 
@@ -158,7 +158,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
 void WebSocketAdapter::onHandshakeComplete()
 {
     // Call SocketAdapter::onSocketConnect to notify handlers that data may flow
-    SocketAdapter::onSocketConnect();
+    SocketAdapter::onSocketConnect(*socket.get());
 }
 
 
@@ -175,7 +175,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
 
     // Allow the application to verify the incoming request.
     // TODO: Handle authentication
-    // VerifyServerRequest.emit(this, request);
+    // VerifyServerRequest.emit(/*this, */request);
 
     // Verify the WebSocket handshake request
     try {
@@ -187,7 +187,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
     }
 
     // Allow the application to override the response
-    // PrepareServerResponse.emit(this, response);
+    // PrepareServerResponse.emit(/*this, */response);
 
     // Send response
     std::ostringstream oss;
@@ -198,7 +198,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
 }
 
 
-void WebSocketAdapter::onSocketConnect()
+void WebSocketAdapter::onSocketConnect(net::Socket& socket)
 {
     TraceS(this) << "On connect" << endl;
 
@@ -209,7 +209,7 @@ void WebSocketAdapter::onSocketConnect()
 }
 
 
-void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
+void WebSocketAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceS(this) << "On recv: " << buffer.size() << endl;
 
@@ -262,14 +262,14 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
             }
             catch (std::exception& exc) {
                 ErrorS(this) << "Parser error: " << exc.what() << endl;
-                socket->setError(exc.what());
+                socket.setError(exc.what());
                 return;
             }
 
             // Emit the result packet
             assert(payload);
             assert(payloadLength);
-            SocketAdapter::onSocketRecv(mutableBuffer(payload, (std::size_t)payloadLength), peerAddress);
+            SocketAdapter::onSocketRecv(socket, mutableBuffer(payload, (std::size_t)payloadLength), peerAddress);
         }
         assert(offset == total);
     }
@@ -282,14 +282,14 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
         }
         catch (std::exception& exc) {
             ErrorS(this) << "Read error: " << exc.what() << endl;
-            socket->setError(exc.what());
+            socket.setError(exc.what());
         }
         return;
     }
 }
 
 
-void WebSocketAdapter::onSocketClose()
+void WebSocketAdapter::onSocketClose(net::Socket& socket)
 {
     // Reset state so the connection can be reused
     _request.clear();
@@ -298,7 +298,7 @@ void WebSocketAdapter::onSocketClose()
     framer._frameFlags = 0;
 
     // Emit closed event
-    SocketAdapter::onSocketClose();
+    SocketAdapter::onSocketClose(socket);
 }
 
 
@@ -324,7 +324,7 @@ ConnectionAdapter::~ConnectionAdapter()
 
 void ConnectionAdapter::onHandshakeComplete()
 {
-    SocketAdapter::onSocketConnect();
+    SocketAdapter::onSocketConnect(*socket.get());
 }
 
 // void ConnectionAdapter::onParserHeadersEnd()

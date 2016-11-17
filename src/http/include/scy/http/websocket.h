@@ -206,23 +206,25 @@ public:
     /// Sent data will be proxied to this socket.
     net::Socket::Ptr socket;
 
-    ///// Client side
+    //
+    /// Client side
 
     virtual void sendClientRequest();
     virtual void handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr);
     //virtual void prepareClientRequest(http::Request& request);
     //virtual void verifyClientResponse(http::Response& response);
 
-    ///// Server side
+    //
+    /// Server side
 
     virtual void handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr);
     //virtual void sendConnectResponse();
     //virtual void verifyServerRequest(http::Request& request);
     //virtual void prepareClientResponse(http::Response& response);
 
-    virtual void onSocketConnect();
-    virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketClose();
+    virtual void onSocketConnect(net::Socket& socket);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketClose(net::Socket& socket);
 
     virtual void onHandshakeComplete();
 

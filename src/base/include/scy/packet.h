@@ -13,12 +13,12 @@
 #define SCY_Packet_H
 
 
-#include <cstdint>
 #include "scy/bitwise.h"
 #include "scy/interface.h"
 #include "scy/buffer.h"
 #include "scy/logger.h"
 
+#include <cstdint>
 #include <list>
 #include <cstring> // memcpy
 
@@ -40,7 +40,7 @@ struct IPacketInfo
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
 /// processing and callbacks using PacketStream and friends.
-class IPacket: public basic::Polymorphic
+class IPacket //: public basic::Polymorphic
 {
 public:
     IPacket(void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr, unsigned flags = 0) :

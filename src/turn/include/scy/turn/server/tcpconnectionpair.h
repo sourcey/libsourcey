@@ -44,17 +44,17 @@ public:
     void setClientSocket(const net::TCPSocket::Ptr& socket);
 
     /// Connection success callback for Connect request.
-    void onPeerConnectSuccess(void* sender);
+    void onPeerConnectSuccess(net::Socket& socket);
 
     /// Connection error callback for Connect request.
-    void onPeerConnectError(void* sender, const Error& error);
+    void onPeerConnectError(net::Socket& socket, const Error& error);
 
-    void onClientDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-    void onPeerDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onClientDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
 
     /// Callback for handing either client or peer connections
     /// which result in the destruction of the TCPConnectionPair.
-    void onConnectionClosed(void* sender);
+    void onConnectionClosed(net::Socket& socket);
 
     /// Starts the ConnectionBind request timeout.
     ///
@@ -84,15 +84,15 @@ public:
     bool isDataConnection;
 
     /// The ConnectionBind request timeout counter.
-    Timeout    timeout;
+    Timeout timeout;
 
-    stun::TransactionID    transactionID;
+    stun::TransactionID transactionID;
 
 private:
-    TCPConnectionPair(const TCPConnectionPair&); // = delete;
-    TCPConnectionPair(TCPConnectionPair&&); // = delete;
-    TCPConnectionPair& operator=(const TCPConnectionPair&); // = delete;
-    TCPConnectionPair& operator=(TCPConnectionPair&&); // = delete;
+    TCPConnectionPair(const TCPConnectionPair&) = delete;
+    TCPConnectionPair(TCPConnectionPair&&) = delete;
+    TCPConnectionPair& operator=(const TCPConnectionPair&) = delete;
+    TCPConnectionPair& operator=(TCPConnectionPair&&) = delete;
 };
 
 

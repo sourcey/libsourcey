@@ -245,16 +245,16 @@ public:
 public:
     virtual void onAdd(const TKey&, TValue* item)
     {
-        ItemAdded.emit(this, *item);
+        ItemAdded.emit(/*this, */*item);
     }
 
     virtual void onRemove(const TKey&, TValue* item)
     {
-        ItemRemoved.emit(this, *item);
+        ItemRemoved.emit(/*this, */*item);
     }
 
-    Signal<TValue&>            ItemAdded;
-    Signal<const TValue&>    ItemRemoved;
+    Signal<void(TValue&)>            ItemAdded;
+    Signal<void(const TValue&)>    ItemRemoved;
 };
 
 

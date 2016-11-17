@@ -184,10 +184,10 @@ public:
 
 protected:
     /// Non-copyable and non-movable
-    Logger(const Logger&); // = delete;
-    Logger(Logger&&); // = delete;
-    Logger& operator=(const Logger&); // = delete;
-    Logger& operator=(Logger&&); // = delete;
+    Logger(const Logger&) = delete;
+    Logger(Logger&&) = delete;
+    Logger& operator=(const Logger&) = delete;
+    Logger& operator=(Logger&&) = delete;
 
     typedef std::map<std::string, LogChannel*> LogChannelMap;
 
@@ -488,7 +488,7 @@ public:
         const char* realm = "", const void* ptr = nullptr);
     virtual void write(const LogStream& stream);
 
-    Signal3<const std::string&, LogLevel&, const Polymorphic*&> OnLogStream;
+    Signal<void(const std::string&, LogLevel&, const Polymorphic*&)> OnLogStream;
 };
 #endif
 

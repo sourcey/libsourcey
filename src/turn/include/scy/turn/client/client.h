@@ -159,12 +159,12 @@ public:
     ClientObserver& observer();
     Options& options();
 
-    virtual void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketConnect(void* sender);
-    virtual void onSocketClose(void* sender);
+    virtual void onSocketConnect(net::Socket& socket);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketClose(net::Socket& socket);
     virtual void onTransactionProgress(void* sender, TransactionState& state, const TransactionState&);
-    virtual void onStateChange(ClientState& state, const ClientState& oldState);
-    virtual void onTimer(void*);
+    virtual void onStateChange(void* sender, ClientState& state, const ClientState& oldState);
+    virtual void onTimer();
 
 protected:
     //mutable Mutex _mutex;

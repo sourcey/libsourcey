@@ -1,1 +1,0 @@
-define_sourcey_module_sample(flashpolicyserver uv base net)

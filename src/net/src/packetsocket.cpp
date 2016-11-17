@@ -22,14 +22,14 @@ namespace net {
 //
 
 
-PacketSocketAdapter::PacketSocketAdapter(const net::Socket::Ptr& socket) :
+PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket) :
     SocketAdapter(socket.get()), socket(socket)
 {
     TraceS(this) << "Create: " << socket << endl;
 }
 
 
-void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
+void PacketSocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     TraceS(this) << "Recv: " << buffer.size() << endl;
 
@@ -39,7 +39,7 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
     std::size_t nread = 0;
     while (len > 0 && (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
         assert(nread > 0);
-        pkt->info = new PacketInfo(socket, peerAddress);
+        pkt->info = new PacketInfo(this->socket, peerAddress);
         onPacket(*pkt);
         delete pkt;
         buf += nread;
@@ -51,7 +51,7 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 void PacketSocketAdapter::onPacket(IPacket& pkt)
 {
     //TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
-    PacketSignal::emit(socket.get(), pkt);
+    PacketSignal::emit(/*socket.get(), */pkt);
 }
 
 

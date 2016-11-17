@@ -151,7 +151,7 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
         Mutex::ScopedLock lock(_mutex);
         (root)[key] = value;
     }
-    PropertyChanged.emit(this, key, value);
+    PropertyChanged.emit(/*this, */key, value);
 }
 
 

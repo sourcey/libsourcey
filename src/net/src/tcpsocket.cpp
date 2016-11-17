@@ -169,7 +169,7 @@ void TCPSocket::acceptConnection()
     TraceS(this) << "Accept connection: " << socket->ptr() << endl;
     uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
     socket->readStart();
-    AcceptConnection.emit(Socket::self(), socket);
+    AcceptConnection.emit(/*Socket::self(), */socket);
 }
 
 
@@ -273,7 +273,7 @@ void TCPSocket::onRead(const char* data, std::size_t len)
 void TCPSocket::onRecv(const MutableBuffer& buf)
 {
     TraceS(this) << "Recv: " << buf.size() << endl;
-    onSocketRecv(buf, peerAddress());
+    onSocketRecv(*this, buf, peerAddress());
 }
 
 
@@ -284,7 +284,7 @@ void TCPSocket::onConnect(uv_connect_t* handle, int status)
     // Error handled by static callback proxy
     if (status == 0) {
         if (readStart())
-            onSocketConnect();
+            onSocketConnect(*this);
     }
     else {
         setUVError("Connection failed", status);
@@ -308,7 +308,7 @@ void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
 void TCPSocket::onError(const scy::Error& error)
 {
     DebugS(this) << "Error: " << error.message << endl;
-    onSocketError(error);
+    onSocketError(*this, error);
     close(); // close on error
 }
 
@@ -316,7 +316,7 @@ void TCPSocket::onError(const scy::Error& error)
 void TCPSocket::onClose()
 {
     TraceS(this) << "On close" << endl;
-    onSocketClose();
+    onSocketClose(*this);
 }
 
 

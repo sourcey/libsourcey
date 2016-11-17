@@ -59,10 +59,10 @@ public:
     virtual void onStreamStateChange(const PacketStreamState&) {};
 
 protected:
-    PacketStreamAdapter(const PacketStreamAdapter&); // = delete;
-    PacketStreamAdapter(PacketStreamAdapter&&); // = delete;
-    PacketStreamAdapter& operator=(const PacketStreamAdapter&); // = delete;
-    PacketStreamAdapter& operator=(PacketStreamAdapter&&); // = delete;
+    PacketStreamAdapter(const PacketStreamAdapter&) = delete;
+    PacketStreamAdapter(PacketStreamAdapter&&) = delete;
+    PacketStreamAdapter& operator=(const PacketStreamAdapter&) = delete;
+    PacketStreamAdapter& operator=(PacketStreamAdapter&&) = delete;
 
     PacketSignal& _emitter;
 };
@@ -272,7 +272,7 @@ public:
 
     /// Attaches a source packet emitter to the stream.
     /// If freePointer is true, the pointer will be deleted when the stream is closed.
-    /// If syncState is true and the source is a basic::Stratable, then
+    /// If syncState is true and the source is a async::Stratable, then
     /// the source's start()/stop() methods will be synchronized when
     /// calling startSources()/stopSources().
     virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
@@ -355,12 +355,12 @@ public:
     /// If stream output is synchronized then the Error signal will be
     /// sent from the synchronization context, otherwise it will be sent from
     /// the async processor context. See synchronizeOutput()
-    Signal<const std::exception_ptr&> Error;
+    Signal<void(PacketStream&, const std::exception_ptr&)> Error;
 
     /// Signals that the PacketStream is in Close state.
     /// This signal is sent immediately via the close() method,
     /// and as such will be sent from the calling thread context.
-    NullSignal Close;
+    Signal<void(PacketStream&)> Close;
 
     /// Returns a combined list of all stream sources and processors.
     PacketAdapterVec adapters() const;

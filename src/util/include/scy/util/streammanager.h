@@ -30,7 +30,7 @@ typedef LiveCollection<
 
 
 /// @addtogroup util
-class StreamManager: public StreamManagerBase, public basic::Polymorphic
+class StreamManager: public StreamManagerBase//, public basic::Polymorphic
 {
 public:
     typedef StreamManagerBase Manager;

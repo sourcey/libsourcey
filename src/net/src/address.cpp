@@ -12,9 +12,9 @@
 #include "scy/net/address.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
+#include "scy/util.h"
 #include <cstdint>
-
-#include "uv.h"
+// #include "uv.h"
 
 
 using std::endl;

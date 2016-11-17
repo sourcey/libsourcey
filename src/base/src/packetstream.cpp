@@ -182,7 +182,7 @@ void PacketStream::close()
     }
 
     // Send the Closed signal
-    Close.emit(this);
+    Close.emit(*this);
 
     TraceS(this) << "Close: OK" << endl;
 }
@@ -492,7 +492,7 @@ void PacketStream::process(IPacket& packet)
         // Capture the exception so it can be rethrown elsewhere.
         // The Error signal will be sent on next call to emit()
         _error = std::current_exception();
-        /*stream()->*/Error.emit(this, _error);
+        /*stream()->*/Error.emit(*this, _error);
 
         //_syncError = true;
         if (_closeOnError) {
@@ -534,12 +534,12 @@ void PacketStream::emit(IPacket& packet)
 
     try {
         // Emit the result packet
-        if (emitter.enabled()) {
-            emitter.emit(this, packet);
-        }
-        else {
-            TraceS(this) << "Dropping packet: No emitter: " << state() << endl;
-        }
+        // if (emitter.enabled()) {
+            emitter.emit(/*this, */packet);
+        // }
+        // else {
+        //     TraceS(this) << "Dropping packet: No emitter: " << state() << endl;
+        // }
     }
     catch (std::exception& exc) {
         ErrorL << "Emit error: " << exc.what() << std::endl;
@@ -551,7 +551,7 @@ void PacketStream::emit(IPacket& packet)
         // Capture the exception so it can be rethrown elsewhere.
         // The Error signal will be sent on next call to emit()
         _error = std::current_exception();
-        /*stream()->*/Error.emit(this, _error);
+        /*stream()->*/Error.emit(*this, _error);
 
         //_syncError = true;
         if (_closeOnError) {
@@ -575,18 +575,23 @@ void PacketStream::setup()
         for (auto& proc : _processors) {
             thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
             if (lastProc) {
-                lastProc->getEmitter().attach(packetDelegate(thisProc, &PacketProcessor::process));
+                // lastProc->getEmitter().attach<PacketProcessor, &PacketProcessor::process>(thisProc);
+                lastProc->getEmitter() += slot(thisProc, &PacketProcessor::process);
             }
             lastProc = thisProc;
         }
 
         // The last processor will emit the packet to the application
         if (lastProc)
-            lastProc->getEmitter().attach(packetDelegate(this, &PacketStream::emit));
+            // lastProc->getEmitter().attach<PacketStream, &PacketStream::emit>(this);
+            lastProc->getEmitter() += slot(this, &PacketStream::emit);
+            // lastProc->getEmitter().attach(packetSlot(this, &PacketStream::emit));
 
         // Attach source emitters to the PacketStream::process method
         for (auto& source : _sources) {
-            source->ptr->getEmitter().attach(packetDelegate(this, &PacketStream::process));
+            source->ptr->getEmitter() += slot(this, &PacketStream::process);
+                // source->ptr->getEmitter().attach<PacketStream, &PacketStream::process>(this);
+            // source->ptr->getEmitter().attach(packetSlot(this, &PacketStream::process));
         }
     }
     catch (std::exception& exc) {
@@ -608,15 +613,21 @@ void PacketStream::teardown()
     for (auto& proc : _processors) {
         thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
         if (lastProc)
-            lastProc->getEmitter().detach(packetDelegate(thisProc, &PacketProcessor::process));
+            lastProc->getEmitter() -= slot(thisProc, &PacketProcessor::process);
+            // lastProc->getEmitter().detach<PacketProcessor, &PacketProcessor::process>(this);
+            // lastProc->getEmitter().detach(packetSlot(thisProc, &PacketProcessor::process));
         lastProc = thisProc;
     }
     if (lastProc)
-        lastProc->getEmitter().detach(packetDelegate(this, &PacketStream::emit));
+        lastProc->getEmitter() -= slot(this, &PacketStream::emit);
+        // lastProc->getEmitter().detach<PacketStream, &PacketStream::emit>(this);
+        // lastProc->getEmitter().detach(packetSlot(this, &PacketStream::emit));
 
     // Detach sources
     for (auto& source : _sources) {
-        source->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::process));
+        source->ptr->getEmitter() -= slot(this, &PacketStream::process);
+        // source->ptr->getEmitter().detach<PacketStream, &PacketStream::process>(this);
+        // source->ptr->getEmitter().detach(packetSlot(this, &PacketStream::process));
     }
 
     TraceS(this) << "Teardown: OK" << endl;
@@ -698,7 +709,10 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if ((*it)->ptr == source) {
-            (*it)->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::write));
+            (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
+            // (*it)->ptr->getEmitter() -= slot(this, static_cast<void(PacketStream::*)(IPacket&)>(&PacketStream::write));
+            // (*it)->ptr->getEmitter().detach<PacketStream, &PacketStream::write>(this);
+            // (*it)->ptr->getEmitter().detach(packetSlot(this, &PacketStream::write));
             TraceS(this) << "Detached source adapter: " << source << endl;
 
             // Note: The PacketStream is no longer responsible
@@ -719,7 +733,10 @@ bool PacketStream::detachSource(PacketSignal& source)
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if (&(*it)->ptr->getEmitter() == &source) {
-            (*it)->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::write));
+            (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
+            // (*it)->ptr->getEmitter() -= slot(this, static_cast<void(PacketStream::*)(IPacket&)>(&PacketStream::write));
+            // (*it)->ptr->getEmitter().detach<PacketStream, &PacketStream::write>(this);
+            // (*it)->ptr->getEmitter().detach(packetSlot(this, &PacketStream::write));
             TraceS(this) << "Detached source signal: " << &source << endl;
 
             // Free the PacketStreamAdapter wrapper instance,
@@ -761,7 +778,7 @@ bool PacketStream::detach(PacketProcessor* proc)
         if ((*it)->ptr == proc) {
             TraceS(this) << "Detached processor: " << proc << endl;
 
-            // Note: The PacketStream is no longer responsible
+            // Note: The PacketStream is not responsible
             // for deleting the managed pointer.
             _processors.erase(it);
             return true;
@@ -1014,7 +1031,7 @@ void PacketStreamAdapter::emit(unsigned flags)
 
 void PacketStreamAdapter::emit(IPacket& packet)
 {
-    getEmitter().emit(this, packet);
+    getEmitter().emit(/*this, */packet);
 }
 
 

@@ -134,7 +134,7 @@ void VideoCapture::stop()
     // stoppage one must first disconnect all signals.
 
     assert(Thread::currentID() != _thread.tid());
-    if (_started && emitter.ndelegates() == 0) { //_thread.started()
+    if (_started && emitter.nslots() == 0) { //_thread.started()
         TraceS(this) << "Terminating thread" << std::endl;
         _stopping = true;
         _thread.join();
@@ -184,7 +184,7 @@ void VideoCapture::run()
             frame = grab();
             // TraceS(this) << "Frame: " << frame.rows << "x" << frame.cols << std::endl;
 
-            empty = emitter.ndelegates() == 0;
+            empty = emitter.nslots() == 0;
             if (!empty) {
                 TraceS(this) << "Emitting: " << _counter.fps << std::endl;
                 MatrixPacket out(&frame);
@@ -333,7 +333,7 @@ void VideoCapture::setError(const std::string& error)
         Mutex::ScopedLock lock(_mutex);
         _error.message = error;
     }
-    Error.emit(this, _error);
+    Error.emit(/*this, */_error);
 }
 
 

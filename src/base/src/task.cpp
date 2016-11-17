@@ -14,6 +14,7 @@
 #include "scy/memory.h"
 #include "scy/singleton.h"
 #include "scy/platform.h"
+#include "scy/util.h"
 
 #include <iostream>
 #include <assert.h>
@@ -84,7 +85,7 @@ TaskRunner::TaskRunner(async::Runner::Ptr runner)
 
 TaskRunner::~TaskRunner()
 {
-    Shutdown.emit(this);
+    Shutdown.emit(/*this*/);
     //Idler::stop();
     if (_runner)
         _runner->cancel();
@@ -279,8 +280,8 @@ void TaskRunner::run()
     }
 
     // Dispatch the Idle signal
-    //TraceN(this) << "idle: "<< Idle.ndelegates() << endl;
-    Idle.emit(this);
+    //TraceN(this) << "idle: "<< Idle.nslots() << endl;
+    Idle.emit(/*this*/);
 
     // Prevent 100% CPU
     scy::sleep(1);

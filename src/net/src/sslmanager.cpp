@@ -111,9 +111,9 @@ SSLManager::~SSLManager()
 
 void SSLManager::shutdown()
 {
-    PrivateKeyPassphraseRequired.clear();
-    ClientVerificationError.clear();
-    ServerVerificationError.clear();
+    PrivateKeyPassphraseRequired.detachAll();
+    ClientVerificationError.detachAll();
+    ServerVerificationError.detachAll();
     _defaultServerContext = nullptr;
     _defaultClientContext = nullptr;
 }
@@ -181,9 +181,9 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
         std::string error(X509_verify_cert_error_string(err));
         VerificationErrorDetails args(x509, depth, err, error);
         if (server)
-            SSLManager::instance().ServerVerificationError.emit(&SSLManager::instance(), args);
+            SSLManager::instance().ServerVerificationError.emit(/*&SSLManager::instance(), */args);
         else
-            SSLManager::instance().ClientVerificationError.emit(&SSLManager::instance(), args);
+            SSLManager::instance().ClientVerificationError.emit(/*&SSLManager::instance(), */args);
         ok = args.getIgnoreError() ? 1 : 0;
     }
 
@@ -194,7 +194,7 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData)
 {
     std::string pwd;
-    SSLManager::instance().PrivateKeyPassphraseRequired.emit(&SSLManager::instance(), pwd);
+    SSLManager::instance().PrivateKeyPassphraseRequired.emit(/*&SSLManager::instance(), */pwd);
 
     strncpy(pBuf, (char *)(pwd.c_str()), size);
     pBuf[size - 1] = '\0';

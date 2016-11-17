@@ -59,10 +59,10 @@ protected:
     Server&    _server;
 
 private:
-    ServerAllocation(const ServerAllocation&); // = delete;
-    ServerAllocation(ServerAllocation&&); // = delete;
-    ServerAllocation& operator=(const ServerAllocation&); // = delete;
-    ServerAllocation& operator=(ServerAllocation&&); // = delete;
+    ServerAllocation(const ServerAllocation&) = delete;
+    ServerAllocation(ServerAllocation&&) = delete;
+    ServerAllocation& operator=(const ServerAllocation&) = delete;
+    ServerAllocation& operator=(ServerAllocation&&) = delete;
 };
 
 

@@ -27,9 +27,9 @@ public:
     bool connected;
     bool deleted;
 
-    Signal<turn::Client&> AllocationCreated;
+    Signal<void(turn::Client&)> AllocationCreated;
     //Signal<turn::Client&> AllocationFailed;
-    Signal2<turn::Client&, const net::Address&> ConnectionCreated;
+    Signal<void(turn::Client&, const net::Address&)> ConnectionCreated;
 
         client(*this, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false), deleted(false)
     RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const std::string& peerIP) :
@@ -87,12 +87,12 @@ protected:
         case turn::ClientState::Authorizing:
             break;
         case turn::ClientState::Success:
-            AllocationCreated.emit(this, this->client);
+            AllocationCreated.emit(/*this, */this->client);
             break;
         case turn::ClientState::Failed:
             //assert(0 && "Allocation failed");
             WarnS(this) << "Relay connection lost" << std::endl;
-            //AllocationFailed.emit(this, this->client);
+            //AllocationFailed.emit(/*this, */this->client);
             //dispose();
         //case turn::ClientState::Terminated:        //    break;
             break;
@@ -110,7 +110,7 @@ protected:
 
         try    {
             // Notify the outside application
-            ConnectionCreated.emit(this, client, peerAddr);
+            ConnectionCreated.emit(/*this, */client, peerAddr);
 
             // Create an output media stream for the new connection
             auto stream = new PacketStream(peerAddr.toString());
@@ -122,7 +122,7 @@ protected:
             MediaServer::setupPacketStream(*stream, options, true, true);
 
             // Feed the packet stream directly into the connection
-            stream->emitter += packetDelegate(static_cast<net::SocketAdapter*>(
+            stream->emitter += packetSlot(static_cast<net::SocketAdapter*>(
                 const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
 
             // Start the stream
@@ -145,7 +145,7 @@ protected:
             //this->streams.free(peerAddress.toString());
             PacketStream* stream = streams.remove(peerAddress.toString());
             if (stream) {
-                stream->emitter -= packetDelegate(static_cast<net::SocketAdapter*>(
+                stream->emitter -= packetSlot(static_cast<net::SocketAdapter*>(
                     const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
                 delete stream;
                 //stream->destroy();

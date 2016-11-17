@@ -94,8 +94,8 @@ public:
     Net::Address    currentPeerAddr;    
     PacketStream    stream;
 
-    Signal<TURN::Client&> AllocationCreated;
-    Signal2<TURN::Client&, const Net::Address&> ConnectionCreated;
+    Signal<void(TURN::Client&)> AllocationCreated;
+    Signal<void(TURN::Client&, const Net::Address&)> ConnectionCreated;
 
     TURNMediaProvider(Net::Reactor& reactor, Runner& runner, const TURN::Client::Options& options, const Net::IP& peerIP) : 
         client(*this, reactor, runner, options), peerIP(peerIP)
@@ -150,14 +150,14 @@ public:
             stream.attach(packetizer, 10, true);
         }
         
-        stream += packetDelegate(this, &TURNMediaProvider::onMediaEncoded);
+        stream += packetSlot(this, &TURNMediaProvider::onMediaEncoded);
         stream.start();    
         LogDebug() << "[TURNMediaProvider: " << this << "] Play Media: OK" << endl;
     }
 
     void stopMedia() {
         LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media" << endl;
-        stream -= packetDelegate(this, &TURNMediaProvider::onMediaEncoded);
+        stream -= packetSlot(this, &TURNMediaProvider::onMediaEncoded);
         stream.close();    
         LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media: OK" << endl;
     }
@@ -175,7 +175,7 @@ protected:
         case TURN::ClientState::Authorizing:
             break;
         case TURN::ClientState::Success:
-            AllocationCreated.emit(this, this->client);
+            AllocationCreated.emit(/*this, */this->client);
             break;
         case TURN::ClientState::Failed:
             assert(0 && "Allocation failed");
@@ -190,7 +190,7 @@ protected:
         LogDebug() << "[TURNMediaProvider: " << this << "] Connection Created: " << peerAddr << endl;
         currentPeerAddr = peerAddr; // Current peer
 
-        ConnectionCreated.emit(this, this->client, peerAddr);
+        ConnectionCreated.emit(/*this, */this->client, peerAddr);
 
         // Restart the media steram for each new peer
         stopMedia();

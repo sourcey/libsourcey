@@ -29,10 +29,10 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control, co
     // Bind a socket acceptor for incoming peer connections.
     _acceptor->bind(net::Address(server.options().listenAddr.host(), 0));
     _acceptor->listen();
-    _acceptor->AcceptConnection += sdelegate(this, &TCPAllocation::onPeerAccept);
+    _acceptor->AcceptConnection += slot(this, &TCPAllocation::onPeerAccept);
 
     // The allocation will be deleted if the control connection is lost.
-    _control->Close += sdelegate(this, &TCPAllocation::onControlClosed);
+    _control->Close += slot(this, &TCPAllocation::onControlClosed);
 
     TraceL << "Initializing on " << _acceptor->address() << endl;
 }
@@ -43,12 +43,10 @@ TCPAllocation::~TCPAllocation()
     TraceL << "Destroy TCP allocation" << endl;
 
     //Mutex::ScopedLock lock(_mutex);
-    //assert(_acceptor->/*base().*/refCount() == 1);
-    _acceptor->AcceptConnection -= sdelegate(this, &TCPAllocation::onPeerAccept);
+    _acceptor->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
     _acceptor->close();
 
-    //assert(_acceptor->/*base().*/refCount() == 1);
-    _control->Close -= sdelegate(this, &TCPAllocation::onControlClosed);
+    _control->Close -= slot(this, &TCPAllocation::onControlClosed);
     _control->close();
 
     auto pairs = this->pairs().map();
@@ -62,7 +60,7 @@ TCPAllocation::~TCPAllocation()
 }
 
 
-void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket::Ptr& socket)
+void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 {
     TraceL << "Peer connection accepted: " << socket->peerAddress() << endl;
 
@@ -323,7 +321,7 @@ int TCPAllocation::sendToControl(stun::Message& message)
 }
 
 
-void TCPAllocation::onControlClosed(void* sender)
+void TCPAllocation::onControlClosed(net::Socket& socket)
 {
     //Mutex::ScopedLock lock(_mutex);
     TraceL << "Control socket disconnected" << endl;

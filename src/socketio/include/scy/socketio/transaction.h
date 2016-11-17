@@ -32,7 +32,7 @@ struct Transaction: public PacketTransaction<sockio::Packet>
     virtual bool send();
     virtual bool checkResponse(const sockio::Packet& packet);
 
-    virtual void onPotentialResponse(void*, sockio::Packet& packet);
+    virtual void onPotentialResponse(IPacket& packet);
     virtual void onResponse();
 
     virtual const char* className() const { return "SocketIO::Transaction"; }

@@ -145,8 +145,8 @@ public:
             assert(!socket);
             this->relayedAddr = relayedAddr;
             socket = new Net::UDPPacketSocket(reactor, runner);
-            socket->attach(packetDelegate<UDPResponder, stun::Message>(this, &UDPResponder::onSTUNPacketReceived, 101));
-            socket->attach(packetDelegate<UDPResponder, RawPacket>(this, &UDPResponder::onRawPacketReceived, 102));
+            socket->attach(packetSlot<UDPResponder, stun::Message>(this, &UDPResponder::onSTUNPacketReceived, 101));
+            socket->attach(packetSlot<UDPResponder, RawPacket>(this, &UDPResponder::onRawPacketReceived, 102));
             socket->connect(relayedAddr);
 
             Timer::getDefault().start(TimerCallback<UDPResponder>(this, &UDPResponder::onTimer, 2000, 2000));
@@ -160,8 +160,8 @@ public:
     {        
         Timer::getDefault().stop(TimerCallback<UDPResponder>(this, &UDPResponder::onTimer));
         if (socket) {    
-            socket->detach(packetDelegate<UDPResponder, stun::Message>(this, &UDPResponder::onSTUNPacketReceived, 101));
-            socket->detach(packetDelegate<UDPResponder, RawPacket>(this, &UDPResponder::onRawPacketReceived, 102));
+            socket->detach(packetSlot<UDPResponder, stun::Message>(this, &UDPResponder::onSTUNPacketReceived, 101));
+            socket->detach(packetSlot<UDPResponder, RawPacket>(this, &UDPResponder::onRawPacketReceived, 102));
             delete socket;
             socket = NULL;
         }

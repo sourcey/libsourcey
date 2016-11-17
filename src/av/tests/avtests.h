@@ -160,7 +160,7 @@ class AudioEncoderTest: public Test
         oparams.sampleFmt = "s16"; // fltp
         oparams.enabled = true;
 
-        encoder.emitter += packetDelegate(this, &AudioEncoderTest::onAudioEncoded);
+        encoder.emitter += packetSlot(this, &AudioEncoderTest::onAudioEncoded);
         encoder.create();
         encoder.open();
 
@@ -168,7 +168,7 @@ class AudioEncoderTest: public Test
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
+            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOArgs...S_VALUE);
         }
 
         encoder.flush();
@@ -316,7 +316,7 @@ class AudioCaptureTest: public Test
         // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
 
-        capture.emitter.attach(packetDelegate(this, &AudioCaptureTest::onAudioCaptured));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureTest::onAudioCaptured));
         capture.start();
 
         av::AudioCodec oparams;
@@ -388,8 +388,8 @@ class AudioCaptureEncoderTest: public Test
         encoder.create();
         encoder.open();
 
-        capture.emitter.attach(packetDelegate(this, &AudioCaptureEncoderTest::onAudioCaptured));
-        encoder.emitter.attach(packetDelegate(this, &AudioCaptureEncoderTest::onAudioEncoded));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureEncoderTest::onAudioCaptured));
+        encoder.emitter.attach(packetSlot(this, &AudioCaptureEncoderTest::onAudioEncoded));
 
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
@@ -421,7 +421,7 @@ class AudioCaptureEncoderTest: public Test
     void onAudioCaptured(av::AudioPacket& packet)
     {
         TraceL << "On audio packet: samples=" << packet.numSamples << ", time=" << packet.time << endl;
-        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
+        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOArgs...S_VALUE);
     }
 
     void onAudioEncoded(av::AudioPacket& packet)
@@ -478,7 +478,7 @@ class AudioCaptureResamplerTest: public Test
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
         resampler.open();
-        capture.emitter.attach(packetDelegate(this, &AudioCaptureResamplerTest::onAudioCaptured));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureResamplerTest::onAudioCaptured));
 
         // numFramesRemaining = kNumberFramesWanted; // * 8;
         while (numFramesRemaining > 0) {
@@ -539,7 +539,7 @@ struct MockMediaPacketSource: public PacketSource, public async::Startable
                 cout << "Emitting: " << self->numFramesRemaining << endl;
                 av::MediaPacket p(new std::uint8_t[10], 10, time);
                 p.assignDataOwnership();
-                self->emitter.emit(self, p);
+                self->emitter.emit(/*self, */p);
             }
         }, this);
     }
@@ -562,6 +562,7 @@ struct MockMediaPacketSource: public PacketSource, public async::Startable
     }
 };
 
+
 class RealtimeMediaQueueTest: public Test
 {
     PacketStream stream;
@@ -575,7 +576,7 @@ class RealtimeMediaQueueTest: public Test
         stream.attachSource(new MockMediaPacketSource, true, true);
         stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(), 5);
         stream.start();
-        stream.emitter += packetDelegate(this, &RealtimeMediaQueueTest::onPacketPlayout);
+        stream.emitter += packetSlot(this, &RealtimeMediaQueueTest::onPacketPlayout);
 
         while (numFramesRemaining > 0) {
             // cout << "Waiting for completion: " << numFramesRemaining << endl;
@@ -588,6 +589,7 @@ class RealtimeMediaQueueTest: public Test
 
     void onPacketPlayout(av::MediaPacket& packet)
     {
+        // auto pkt = reinterpret_cast<av::MediaPacket*>(packet);
         if (numFramesRemaining) {
             numFramesRemaining--;
             cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
@@ -711,14 +713,14 @@ class RealtimeMediaQueueTest: public Test
 //                 new VideoCapture(_filename) :
 //                 new VideoCapture(_deviceID));
 //
-//             capture.emitter += packetDelegate(this, &VideoCaptureThread::onVideo);
+//             capture.emitter += packetSlot(this, &VideoCaptureThread::onVideo);
 //             capture.start();
 //
 //             while (!closed) {
 //                 cv::waitKey(5);
 //             }
 //
-//             capture.emitter -= packetDelegate(this, &VideoCaptureThread::onVideo);
+//             capture.emitter -= packetSlot(this, &VideoCaptureThread::onVideo);
 //             capture.stop();
 //
 //             DebugL << " Ended.................." << endl;
@@ -917,7 +919,7 @@ class RealtimeMediaQueueTest: public Test
 //                 DebugL << "Video device: " << 0 << endl;
 //                 videoCapture = MediaFactory::instance().createVideoCapture(0); //0
 //                 //videoCapture = MediaFactory::instance().createFileCapture("D:/dev/lib/ffmpeg/bin/channel1.avi"); //0
-//                 //videoCapture->emitter += packetDelegate(this, &StreamEncoderTest::onVideoCapture);
+//                 //videoCapture->emitter += packetSlot(this, &StreamEncoderTest::onVideoCapture);
 //                 videoCapture->getEncoderFormat(options.iformat);
 //                 stream.attachSource(videoCapture, true, true); //
 //
@@ -948,7 +950,7 @@ class RealtimeMediaQueueTest: public Test
 //             stream.attach(encoder, 5, true);
 //
 //             // Start the stream
-//             stream.emitter += packetDelegate(this, &StreamEncoderTest::onVideoEncoded);
+//             stream.emitter += packetSlot(this, &StreamEncoderTest::onVideoEncoded);
 //             stream.StateChange += sdelegate(this, &StreamEncoderTest::onStreamStateChange);
 //             stream.start();
 //         }
@@ -1247,18 +1249,18 @@ class RealtimeMediaQueueTest: public Test
 //         DebugL << "Running Audio Capture test..." << endl;
 //
 //         AudioCapture* capture = new AudioCapture(0, 1, 16000);
-//         capture.attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.attach(packetSlot(this, &Tests::onCaptureTestAudioCapture));
 //         //scy::pause();
-//         capture.detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.detach(packetSlot(this, &Tests::onCaptureTestAudioCapture));
 //         delete capture;
 //
 //         AudioCapture* capture = new AudioCapture(0, 1, 16000);
-//         capture.attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.attach(packetSlot(this, &Tests::onCaptureTestAudioCapture));
 //         //audioCapture->start();
 //
 //         //scy::pause();
 //
-//         capture.detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.detach(packetSlot(this, &Tests::onCaptureTestAudioCapture));
 //         delete capture;
 //         //audioCapture->stop();
 //     }
@@ -1301,7 +1303,7 @@ class RealtimeMediaQueueTest: public Test
 //
 //                 stream.attach(videoCapture, false);
 //
-//                 stream.attach(packetDelegate(this, &MediaConnection::onVideoEncoded));
+//                 stream.attach(packetSlot(this, &MediaConnection::onVideoEncoded));
 //
 //                 // init encoder
 //                 MultiplexEncoder* encoder = new MultiplexEncoder();
@@ -1323,7 +1325,7 @@ class RealtimeMediaQueueTest: public Test
 //                     Thread::sleep(50);
 //                 }
 //
-//                 //stream.detach(packetDelegate(this, &MediaConnection::onVideoEncoded));
+//                 //stream.detach(packetSlot(this, &MediaConnection::onVideoEncoded));
 //                 //stream.stop();
 //
 //                 //outputFile.close();
@@ -1398,7 +1400,7 @@ class RealtimeMediaQueueTest: public Test
 //         CaptureRecorder enc(options, videoCapture, audioCapture);
 //         //enc.initialize();
 //
-//         enc.attach(packetDelegate(this, &Tests::onCaptureRecorderTestVideoEncoded));
+//         enc.attach(packetSlot(this, &Tests::onCaptureRecorderTestVideoEncoded));
 //         enc.start();
 //         //scy::pause();
 //         enc.stop();
@@ -1474,14 +1476,14 @@ class RealtimeMediaQueueTest: public Test
 //
 //         void start()
 //         {
-//             capture.emitter += packetDelegate(this, &CaptureRecorder::onFrame);
+//             capture.emitter += packetSlot(this, &CaptureRecorder::onFrame);
 //             capture.start();
 //             //audioCapture->start();
 //         }
 //
 //         void stop()
 //         {
-//             capture.emitter -= packetDelegate(this, &CaptureRecorder::onFrame);
+//             capture.emitter -= packetSlot(this, &CaptureRecorder::onFrame);
 //             capture.stop();
 //             encoder.uninitialize();
 //             closed = true;

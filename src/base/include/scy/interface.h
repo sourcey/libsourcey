@@ -50,6 +50,7 @@ public:
 };
 
 
+#if 0
 /// A base module class for C++ callback polymorphism.
 /// @deprecated
 class Polymorphic
@@ -74,6 +75,7 @@ public:
 
     virtual const char* className() const = 0;
 };
+#endif
 
 
 /// The LibSourcey base module type.

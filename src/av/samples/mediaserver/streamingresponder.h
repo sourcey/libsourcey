@@ -27,14 +27,14 @@ public:
             << std::endl;    /// We will be sending our own headers
         connection().shouldSendHeader(false);    /// Create the packet stream
         MediaServer::setupPacketStream(stream, options, true, true);    /// Start the stream
-        stream.emitter += packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
+        stream.emitter += packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.start();
     }
 
     virtual void onClose()
     {
         DebugS(this) << "On close" << std::endl;
-        stream.emitter -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
+        stream.emitter -= packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.stop();
     }
 

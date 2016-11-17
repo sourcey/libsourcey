@@ -38,7 +38,7 @@ public:
     virtual ~UDPAllocation();
 
     //void onPacketReceived(void* sender, RawPacket& packet);
-    void onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
 
     bool handleRequest(Request& request);
     void handleSendIndication(Request& request);

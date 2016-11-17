@@ -62,7 +62,7 @@ cricket::CaptureState OpenCVVideoCapturer::Start(const cricket::VideoFormat& cap
         // Output packets must be av::MatrixPacket types so we can access
         // the underlying cv::Mat.
         capture->start();
-        capture->emitter += packetDelegate(this, &OpenCVVideoCapturer::onFrameCaptured);
+        capture->emitter += packetSlot(this, &OpenCVVideoCapturer::onFrameCaptured);
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;

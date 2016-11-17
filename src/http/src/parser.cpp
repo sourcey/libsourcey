@@ -84,8 +84,8 @@ void Parser::init(http_parser_type type)
 
 std::size_t Parser::parse(const char* data, std::size_t len)
 {
-    // TraceS(this) << "Parse: " << len << endl;
-    TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) << endl;
+    TraceS(this) << "Parse: " << len << endl;
+    // TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) << endl;
 
     assert(!complete());
     assert(_parser.data == this);
@@ -190,6 +190,7 @@ bool Parser::shouldKeepAlive() const
 // Events
 //
 
+
 void Parser::onURL(const std::string& value)
 {
     TraceS(this) << "onURL: " << value << endl;
@@ -213,10 +214,10 @@ void Parser::onHeader(const std::string& name, const std::string& value)
 void Parser::onHeadersEnd()
 {
     /// HTTP version
-    //start_line_.version(parser_.http_major, parser_.http_minor);
+    // start_line_.version(parser_.http_major, parser_.http_minor);
 
     /// KeepAlive
-    //headers->setKeepAlive(http_should_keep_alive(parser) > 0);
+    // headers->setKeepAlive(http_should_keep_alive(parser) > 0);
 
     /// Request HTTP method
     if (_request)
@@ -227,11 +228,11 @@ void Parser::onHeadersEnd()
 }
 
 
-void Parser::onBody(const char* buf, std::size_t len) //std::size_t off,
+void Parser::onBody(const char* buf, std::size_t len)
 {
     TraceS(this) << "onBody" << endl;
     if (_observer)
-        _observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
+        _observer->onParserChunk(buf, len);
 }
 
 

@@ -104,7 +104,7 @@ public:
 
     /// Signals on VideoAnalyzer::Packet output
     /// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
-    Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
+    Signal<void(const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&)> PacketOut;
 
     /// Signals on analysis complete
     NullSignal Complete;

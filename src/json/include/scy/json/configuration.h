@@ -14,16 +14,16 @@
 
 
 #include "scy/configuration.h"
-#include "scy/json/json.h"
-
+#include "scy/util.h"
 #include "scy/mutex.h"
+#include "scy/json/json.h"
 
 
 namespace scy {
 namespace json {
 
 
-class Configuration: public scy::Configuration//, public json::Value
+class Configuration: public scy::Configuration
 {
 public:
     Configuration();
@@ -42,7 +42,7 @@ public:
     virtual std::string path();
     virtual bool loaded();
 
-    /// See IConfiguration for data accessors
+    /// See base Configuration for all accessors
 
     json::Value root;
 

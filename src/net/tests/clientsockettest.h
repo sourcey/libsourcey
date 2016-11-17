@@ -32,14 +32,14 @@ public:
     }
 
     void run()
-    {    
-    /// Create the socket instance on the stack.
-    /// When the socket is closed it will unref the main loop
-    /// causing the test to complete successfully.
-        socket.Recv += sdelegate(this, &ClientSocketTest::onRecv);
-        socket.Connect += sdelegate(this, &ClientSocketTest::onConnect);
-        socket.Error += sdelegate(this, &ClientSocketTest::onError);
-        socket.Close += sdelegate(this, &ClientSocketTest::onClose);
+    {
+        // Create the socket instance on the stack.
+        // When the socket is closed it will unref the main loop
+        // causing the test to complete successfully.
+        socket.Recv += slot(this, &ClientSocketTest::onRecv);
+        socket.Connect += slot(this, &ClientSocketTest::onConnect);
+        socket.Error += slot(this, &ClientSocketTest::onError);
+        socket.Close += slot(this, &ClientSocketTest::onClose);
         //assert(socket.base().refCount() == 1);
         socket.connect(address);
 
@@ -51,20 +51,23 @@ public:
         socket.shutdown();
     }
 
-    void onConnect(void* sender)
-    {    
-    /// assert(sender == &socket);    // socket.send("client > server", 15);    // socket.send("client > server", 15);
+    void onConnect(Socket& socket)
+    {
+        // assert(sender == &socket);
+        // socket.send("client > server", 15);
+        // socket.send("client > server", 15);
         TraceL << "Connected" << std::endl;
 
         socket.send("client > server", 15);
     }
 
-    void onRecv(void* sender, const MutableBuffer& buffer, const Address& peerAddress)
-    {    
-    /// assert(sender == &socket);
-        auto socket = reinterpret_cast<net::Socket*>(sender);
+    void onRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
+    {
+        // assert(sender == &socket);
+        // auto socket = reinterpret_cast<net::Socket*>(sender);
         std::string data(bufferCast<const char*>(buffer), buffer.size());
-        DebugL << "On recv: " << socket << ": " << data << std::endl;    /// Check for return packet echoing sent data
+        DebugL << "On recv: " << &socket << ": " << data << std::endl;
+        // Check for return packet echoing sent data
         if (data == "client > server") {
             TraceL << "Recv: Got Return Packet!" << std::endl;
             passed = true;
@@ -80,20 +83,18 @@ public:
             assert(false); // fail...
     }
 
-    void onError(void* sender, const Error& error)
-    {    
-    /// assert(sender == &socket);
+    void onError(Socket& socket, const Error& error)
+    {
+        // assert(sender == &socket);
         InfoL << "On error: " << error.message << std::endl;
-
     }
 
-    void onClose(void* sender)
-    {    
-    /// The last callback to fire is the Closed signal
-    /// which notifies us the underlying libuv socket
-    /// handle is closed. Das is gut!
+    void onClose(Socket& socket)
+    {
+        // The last callback to fire is the Closed signal
+        // which notifies us the underlying libuv socket
+        // handle is closed. Das is gut!
         TraceL << "On closed" << std::endl;
-
     }
 };
 

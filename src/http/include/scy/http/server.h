@@ -43,7 +43,6 @@ public:
     /// Closes the HTTP connection
     virtual void close();
 
-
 protected:
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
@@ -126,10 +125,10 @@ protected:
     ServerConnection& _connection;
 
 private:
-    ServerResponder(const ServerResponder&); // = delete;
-    ServerResponder(ServerResponder&&); // = delete;
-    ServerResponder& operator=(const ServerResponder&); // = delete;
-    ServerResponder& operator=(ServerResponder&&); // = delete;
+    ServerResponder(const ServerResponder&) = delete;
+    ServerResponder(ServerResponder&&) = delete;
+    ServerResponder& operator=(const ServerResponder&) = delete;
+    ServerResponder& operator=(ServerResponder&&) = delete;
 };
 
 
@@ -187,9 +186,9 @@ protected:
     virtual void addConnection(ServerConnection::Ptr conn);
     virtual void removeConnection(ServerConnection* conn);
 
-    void onAccept(const net::TCPSocket::Ptr& sock);
-    void onClose(); // main socket close
-    void onConnectionClose(void*); // connection socket close
+    void onSocketAccept(const net::TCPSocket::Ptr& socket);
+    void onSocketClose(net::Socket& socket); // main socket close
+    void onConnectionClose(Connection& socket); // connection socket close
 
     friend class ServerConnection;
 };

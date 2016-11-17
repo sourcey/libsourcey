@@ -173,8 +173,8 @@ protected:
     virtual void onClose();
 
  protected:
-    Handle(const Handle&); // = delete;
-    Handle& operator=(const Handle&); // = delete;
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
 
     uv_loop_t* _loop;
     uv_handle_t* _ptr;

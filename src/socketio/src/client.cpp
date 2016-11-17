@@ -213,13 +213,13 @@ void Client::reset()
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
 
-    _pingTimer.Timeout -= delegate(this, &Client::onPingTimer);
+    _pingTimer.Timeout -= slot(this, &Client::onPingTimer);
     _pingTimer.stop();
 
-    _pingTimeoutTimer.Timeout -= delegate(this, &Client::onPingTimeoutTimer);
+    _pingTimeoutTimer.Timeout -= slot(this, &Client::onPingTimeoutTimer);
     _pingTimeoutTimer.stop();
 
-    _reconnectTimer.Timeout -= delegate(this, &Client::onReconnectTimer);
+    _reconnectTimer.Timeout -= slot(this, &Client::onReconnectTimer);
     _reconnectTimer.stop();
 
     _ws.socket->close();
@@ -269,7 +269,7 @@ void Client::onConnect()
 void Client::startReconnectTimer()
 {
     assert(_options.reconnection);
-    _reconnectTimer.Timeout += delegate(this, &Client::onReconnectTimer);
+    _reconnectTimer.Timeout += slot(this, &Client::onReconnectTimer);
     _reconnectTimer.start(_options.reconnectDelay);
     _reconnectTimer.handle().ref();
     _reconnecting = true;
@@ -279,7 +279,7 @@ void Client::startReconnectTimer()
 void Client::stopReconnectTimer()
 {
     if (_reconnecting) {
-        _reconnectTimer.Timeout -= delegate(this, &Client::onReconnectTimer);
+        _reconnectTimer.Timeout -= slot(this, &Client::onReconnectTimer);
         _reconnectTimer.handle().unref();
         _reconnectTimer.stop();
         _reconnecting = false;
@@ -296,12 +296,12 @@ void Client::onOnline()
 
     // Setup and start the ping timer
     assert(_pingInterval);
-    _pingTimer.Timeout += delegate(this, &Client::onPingTimer);
+    _pingTimer.Timeout += slot(this, &Client::onPingTimer);
     _pingTimer.start(_pingInterval); //, _pingInterval
 
     // Setup the ping timeout timer
     assert(_pingTimeout);
-    _pingTimeoutTimer.Timeout += delegate(this, &Client::onPingTimeoutTimer);
+    _pingTimeoutTimer.Timeout += slot(this, &Client::onPingTimeoutTimer);
 }
 
 
@@ -320,13 +320,13 @@ void Client::onClose()
 //
 // Socket Callbacks
 
-void Client::onSocketConnect()
+void Client::onSocketConnect(net::Socket& socket)
 {
     onConnect();
 }
 
 
-void Client::onSocketError(const scy::Error& error)
+void Client::onSocketError(net::Socket& socket, const scy::Error& error)
 {
     TraceN(this) << "On socket error: " << error.message << endl;
 
@@ -334,7 +334,7 @@ void Client::onSocketError(const scy::Error& error)
 }
 
 
-void Client::onSocketClose()
+void Client::onSocketClose(net::Socket& socket)
 {
     TraceN(this) << "On socket close" << endl;
 
@@ -346,7 +346,7 @@ void Client::onSocketClose()
 }
 
 
-void Client::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
+void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceN(this) << "On socket recv: " << buffer.size() << endl;
 
@@ -403,17 +403,17 @@ void Client::onMessage(sockio::Packet& packet)
         case Packet::Packet::Type::Event:
             assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(this, packet);
+            emit(/*this, */packet);
             break;
         case Packet::Packet::Type::Ack:
             // assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(this, packet);
+            emit(/*this, */packet);
             break;
         case Packet::Packet::Type::Error:
             // assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(this, packet);
+            emit(/*this, */packet);
             break;
         case Packet::Packet::Type::BinaryEvent:
             assert(0 && "not implemented");

@@ -147,17 +147,17 @@ public:
     ///   - 401: Authentication failed
     ///   - 400: Bad request data
     ///   - 500: Server not found
-    Signal<const int&> Announce;
+    Signal<void(const int&)> Announce;
 
     /// Signals when a peer connects.
-    Signal<Peer&> PeerConnected;
+    Signal<void(Peer&)> PeerConnected;
 
     /// Signals when a peer disconnects.
-    Signal<Peer&> PeerDisconnected;
+    Signal<void(Peer&)> PeerDisconnected;
 
     /// Called by createPresence() so outside classes
     /// can modify the outgoing Peer JSON object.
-    Signal<Peer&> CreatePresence;
+    Signal<void(Peer&)> CreatePresence;
 
 
 protected:
@@ -174,7 +174,7 @@ protected:
     virtual void createPresence(Presence& p);
 
     /// Override PacketSignal::emit
-    virtual void emit(void* sender, IPacket& packet);
+    virtual void emit(/*void* sender, */IPacket& packet);
 
     virtual void onOnline();
     virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);
@@ -250,6 +250,7 @@ struct Filter//: public Flaggable
 //
 
 
+#if 0
 struct MessageDelegate: public PacketDelegateBase
 {
     typedef Filter DataT;
@@ -327,6 +328,7 @@ DefinePolymorphicDelegateWithArg(messageDelegate, IPacket, MessageDelegate, cons
 DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, const Filter&, Filter())
 DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
+#endif
 
 
 } } // namespace scy::smpl

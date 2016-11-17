@@ -132,7 +132,7 @@ public:
     void setBool(const std::string& key, bool value);
 
     /// The Key and Value of the changed configuration property.
-    Signal2<const std::string&, const std::string&> PropertyChanged;
+    Signal<void(const std::string&, const std::string&)> PropertyChanged;
 
 protected:
     /// If the property with the given key exists, stores the property's value

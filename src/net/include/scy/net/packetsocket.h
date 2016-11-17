@@ -39,7 +39,7 @@ class PacketSocketAdapter: public SocketAdapter, public PacketSignal
 public:
     /// Pointer to the underlying socket.
     /// Sent data will be proxied to this socket.
-    net::Socket::Ptr socket;
+    Socket::Ptr socket;
 
     PacketFactory factory;
 
@@ -49,9 +49,9 @@ public:
     /// Creates and dispatches a packet utilizing the available
     /// creation strategies. For best performance the most used
     /// strategies should have the highest priority.
-    PacketSocketAdapter(const net::Socket::Ptr& socket = nullptr);
+    PacketSocketAdapter(const Socket::Ptr& socket = nullptr);
 
-    virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
 
     virtual void onPacket(IPacket& pkt);
 };

@@ -34,13 +34,13 @@ public:
     TimedManager(uv::Loop* loop = uv::defaultLoop()) :
         _timer(loop)
     {
-        _timer.Timeout += sdelegate(this, &TimedManager::onTimerUpdate);
+        _timer.Timeout += slot(this, &TimedManager::onTimerUpdate);
         _timer.start(100); // check every 100ms
     }
 
     virtual ~TimedManager()
     {
-        _timer.Timeout -= sdelegate(this, &TimedManager::onTimerUpdate);
+        _timer.Timeout -= slot(this, &TimedManager::onTimerUpdate);
     }
 
     /// Add an item which will expire (and be deleted) after the
@@ -118,7 +118,7 @@ protected:
         }
     }
 
-    void onTimerUpdate(void*)
+    void onTimerUpdate()
     {
         _tmutex.lock();
         TimeoutMap timeouts(_timeouts);

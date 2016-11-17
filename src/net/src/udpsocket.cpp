@@ -63,7 +63,7 @@ void UDPSocket::connect(const Address& peerAddress)
     // Send the Connected signal to mimic TCP behaviour
     // since socket implementations are interchangable.
     //emitConnect();
-    onSocketConnect();
+    onSocketConnect(*this);
 }
 
 
@@ -208,7 +208,7 @@ void UDPSocket::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
     TraceS(this) << "Recv: " << buf.size() << endl;
     //emitRecv(buf, address);
-    onSocketRecv(buf, address);
+    onSocketRecv(*this, buf, address);
 }
 
 
@@ -325,8 +325,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
 void UDPSocket::onError(const scy::Error& error)
 {
     ErrorS(this) << "Error: " << error.message << endl;
-    //emitError(error);
-    onSocketError(error);
+    onSocketError(*this, error);
     close(); // close on error
 }
 
@@ -334,8 +333,7 @@ void UDPSocket::onError(const scy::Error& error)
 void UDPSocket::onClose()
 {
     ErrorS(this) << "On close" << endl;
-    //emitClose();
-    onSocketClose();
+    onSocketClose(*this);
 }
 
 

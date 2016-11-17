@@ -13,10 +13,10 @@
 #define SCY_Buffer_H
 
 
-#include <cstdint>
 #include "scy/memory.h"
 #include "scy/byteorder.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <algorithm>

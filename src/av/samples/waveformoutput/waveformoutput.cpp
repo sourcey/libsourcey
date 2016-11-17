@@ -165,14 +165,14 @@ public:
         // Receive MHI output images directly from the motion
         // detector. The motion level will represent the 
         // output waveform level.
-        _detector.attach(packetDelegate(this, &WaveformOutput::onVideo));
-        //stream.attach(packetDelegate(this, &WaveformOutput::onVideo));
+        _detector.attach(packetSlot(this, &WaveformOutput::onVideo));
+        //stream.attach(packetSlot(this, &WaveformOutput::onVideo));
                 
         // Receive decoded audio from the file decoder and
         // run it through the FFT algorithm to gather
         // visualisation data.
-        _reader.attach(packetDelegate(this, &WaveformOutput::onAudio));
-        //stream.attach(packetDelegate(this, &WaveformOutput::onAudio));
+        _reader.attach(packetSlot(this, &WaveformOutput::onAudio));
+        //stream.attach(packetSlot(this, &WaveformOutput::onAudio));
 
         // Kick off the packet stream...
         stream.start();

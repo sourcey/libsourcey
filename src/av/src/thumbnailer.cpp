@@ -46,7 +46,7 @@ void Thumbnailer::open() //, int owidth, int oheight, double seek
         options.ofile = defaultThumbPath(options.ifile);
     }
 
-    reader.emitter += packetDelegate(this, &Thumbnailer::onVideoPacket);
+    reader.emitter += packetSlot(this, &Thumbnailer::onVideoPacket);
     reader.openFile(options.ifile);
 
     if (options.seek > reader.video()->stream->duration)

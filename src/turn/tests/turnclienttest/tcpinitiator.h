@@ -26,8 +26,8 @@ struct TCPInitiator: public TCPClientObserver
     bool success;
 
     NullSignal AllocationCreated;
-    Signal<const net::Address&> ConnectionCreated;
-    Signal<bool> TestComplete;
+    Signal<void(const net::Address&)> ConnectionCreated;
+    Signal<void(bool)> TestComplete;
 
     TCPInitiator(int id, const Client::Options opts) :
         id(id), client(*this, opts), success(false)
@@ -65,19 +65,19 @@ struct TCPInitiator: public TCPClientObserver
             break;
         case ClientState::Authorizing:
             //success = true;
-            //TestComplete.emit(this, success);
+            //TestComplete.emit(/*this, */success);
             //client.terminate();
             break;
         case ClientState::Success:
-            AllocationCreated.emit(this); //, *this->client
+            AllocationCreated.emit(/*this*/); //, *this->client
             success = true;
-            //TestComplete.emit(this, success);
+            //TestComplete.emit(/*this, */success);
             //client.terminate();
             break;
         case ClientState::Failed:
             //assert(false);
             success = false;
-            TestComplete.emit(this, success);
+            TestComplete.emit(/*this, */success);
         //case ClientState::Terminated:                    //    break;
             break;
 
@@ -90,7 +90,7 @@ struct TCPInitiator: public TCPClientObserver
                     // Send the intial data packet to peer
         //client.sendData("hello peer", 10, peerAddr);    /// Remember the last peer
         lastPeerAddr = peerAddr;
-        ConnectionCreated.emit(this, peerAddr);
+        ConnectionCreated.emit(/*this, */peerAddr);
     }
 
     void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr)
@@ -160,7 +160,7 @@ struct TCPInitiator: public TCPClientObserver
         DebugS(this) << "TCPInitiator: " << id << ": Connection Error: " << connectionID << endl;
         if (_dataSocket) {
             _dataSocket->StateChange -= sdelegate(this, &TCPInitiator::onDataSocketStateChange);
-            _dataSocket->detach(packetDelegate<TCPInitiator, RawPacket>(this, &TCPInitiator::onRawPacketReceived, 102));
+            _dataSocket->detach(packetSlot<TCPInitiator, RawPacket>(this, &TCPInitiator::onRawPacketReceived, 102));
             _dataSocket = NULL;
         }
     }

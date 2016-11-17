@@ -55,11 +55,11 @@ public:
     bool onTimer();
 
     /// Accepts incoming peer sockets for ConnectionBind requests.
-    void onPeerAccept(void* sender, const net::TCPSocket::Ptr& sock);
+    void onPeerAccept(const net::TCPSocket::Ptr& sock);
 
     /// Callback for handling controll connection destruction.
     /// The allocation will be deleted.
-    void onControlClosed(void* sender);
+    void onControlClosed(net::Socket& socket);
 
 protected:
     net::TCPSocket::Ptr _control;

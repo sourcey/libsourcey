@@ -76,7 +76,7 @@ public:
     void setSimultaneousAccepts(bool enable);
 #endif
 
-    Signal<const net::TCPSocket::Ptr&> AcceptConnection;
+    Signal<void(const net::TCPSocket::Ptr&)> AcceptConnection;
 
 public:
     virtual void onConnect(uv_connect_t* handle, int status);

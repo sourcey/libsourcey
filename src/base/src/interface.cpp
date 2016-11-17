@@ -22,10 +22,12 @@ namespace scy {
 //
 
 
+#if 0
 LogStream& basic::Polymorphic::log(const char* level) const
 {
     return printL(level, className(), this);
 }
+#endif
 
 
 } // namespace scy

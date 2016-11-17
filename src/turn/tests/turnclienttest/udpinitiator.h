@@ -26,58 +26,58 @@ public:
 
     /// The responder local socket address for Send indications
     net::Address responderAddress;
-    
+
     //Client::Options    opts;
     //Signal<const net::Address&>    ConnectionCreated;
 
     NullSignal AllocationCreated;
-    Signal<bool> TestComplete; // unused
+    Signal<void(bool)> TestComplete; // unused
 
-    UDPInitiator(int id, const Client::Options& opts) : 
+    UDPInitiator(int id, const Client::Options& opts) :
         id(id), client(*this, opts) {}
     virtual ~UDPInitiator() { }
-    
-    void initiate(const std::string& peerIP) 
+
+    void initiate(const std::string& peerIP)
     {
         DebugS(this) << id << ": Initializing" << endl;
         try    {
             client.addPermission(peerIP);
-            client.addPermission("127.0.0.1");        
-            client.addPermission("192.168.1.1");            
+            client.addPermission("127.0.0.1");
+            client.addPermission("192.168.1.1");
             client.initiate();
-        } 
+        }
         catch (std::exception& exc) {
             ErrorS(this) << id << ": " << exc.what() << std::endl;
         }
     }
 
 protected:
-    void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
+    void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch(state.id()) {
-        case ClientState::None:                
+        case ClientState::None:
             break;
-        case ClientState::Allocating:                
+        case ClientState::Allocating:
             break;
-        case ClientState::Authorizing:        
+        case ClientState::Authorizing:
             break;
         case ClientState::Success:
-            AllocationCreated.emit(this);
+            AllocationCreated.emit(/*this*/);
 #ifdef TEST_INITIATOR_TO_RESPONDER
-            timer.Timeout += sdelegate(this, &UDPInitiator::onSendTimer);
+            timer.Timeout += slot(this, &UDPInitiator::onSendTimer);
             timer.start(0, 1000);
 #endif
             break;
-        case ClientState::Failed:                
+        case ClientState::Failed:
         //case ClientState::Terminated:                    //    break;
             break;
 
         }
     }
 
-    void onSendTimer(void*)
+    void onSendTimer()
     {
         assert(responderAddress.valid());
         std::string payload(createLatencyCheck(1024));
@@ -86,9 +86,9 @@ protected:
         //socket.send(payload.c_str(), payload.length());    /// Echo back to peer
         //client.sendData(data, size, peerAddr);
     }
-    
+
     void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
-    {    
+    {
 #ifdef TEST_RESPONDER_TO_INITIATOR
         std::string payload(data, size);
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
@@ -98,9 +98,9 @@ protected:
 
             DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
-        else        
+        else
             DebugS(this) << id << ": Received dummy data from " << peerAddr << ": payloadLength=" << payload.length() << endl;
-        
+
         /*
         if (size < 150) {
             std::string payload(data, size);
@@ -117,7 +117,7 @@ protected:
         DebugS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
 #endif
     }
-    
+
     void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;
@@ -134,14 +134,14 @@ protected:
 
 
     /*
-    void initiate(const Client::Options opts, const std::string& peerIP) 
+    void initiate(const Client::Options opts, const std::string& peerIP)
     {
         try    {
             client = new UDPClient(*this, opts); //, reactor, runner
-            //client.StateChange += sdelegate(this, &UDPInitiator::onStateChange);
-            client.addPermission(peerIP);    
+            //client.StateChange += slot(this, &UDPInitiator::onStateChange);
+            client.addPermission(peerIP);
             client.initiate();
-        } 
+        }
         catch (std::exception& exc) {
             errorL() << "UDPInitiator: " << id << ": Error: " << exc.what() << std::endl;
         }

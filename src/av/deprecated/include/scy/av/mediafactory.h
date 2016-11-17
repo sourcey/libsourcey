@@ -84,10 +84,10 @@ public:
     void reloadFailedVideoCaptures();
 
     /// Siganls when a video capture is loaded.
-    Signal<const VideoCapture::Ptr&> VideoCaptureLoaded;
+    Signal<void(const VideoCapture::Ptr&)> VideoCaptureLoaded;
 
     /// Siganls when a video capture fails, or is unplugged.
-    Signal<const VideoCapture::Ptr&> VideoCaptureError;
+    Signal<void(const VideoCapture::Ptr&)> VideoCaptureError;
 
 
     std::map<int, VideoCapture::Ptr> videoCaptures() const;    /// Returns the device manager instance.

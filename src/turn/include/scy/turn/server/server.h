@@ -131,10 +131,10 @@ public:
     net::TCPSocket& tcpSocket();
     Timer& timer();
 
-    void onTCPAcceptConnection(void* sender, const net::TCPSocket::Ptr& sock);
-    void onTCPSocketClosed(void* sender);
-    void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-    void onTimer(void*);
+    void onTCPAcceptConnection(const net::TCPSocket::Ptr& sock);
+    void onTCPSocketClosed(net::Socket& socket);
+    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onTimer();
 
 private:
     ServerObserver& _observer;

@@ -157,7 +157,7 @@ http::Message* ClientConnection::outgoingHeader()
 //
 // Socket Callbacks
 
-void ClientConnection::onSocketConnect()
+void ClientConnection::onSocketConnect(net::Socket& socket)
 {
     TraceS(this) << "On connect" << endl;
 
@@ -166,7 +166,7 @@ void ClientConnection::onSocketConnect()
 
     // Emit the connect signal so raw connections like
     // websockets can kick off the data flow
-    Connect.emit(this);
+    Connect.emit(/*this*/);
 
     // Start the outgoing send stream if there are
     // any queued packets or adapters attached
@@ -200,20 +200,22 @@ void ClientConnection::onHeaders()
     TraceS(this) << "On headers" << endl;
     IncomingProgress.total = _response.getContentLength();
 
-    Headers.emit(this, _response);
+    Headers.emit(/*this, */_response);
 }
 
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
     TraceS(this) << "On payload: " << buffer.size() << endl;
+    // TraceS(this) << "@@@@@@@@@@@@@@@@@ payload: " << buffer.size() << ": "
+    //   << std::string(bufferCast<const char*>(buffer), 100) << endl;
 
     // Update download progress
     IncomingProgress.update(buffer.size());
 
     // Write to the incoming packet stream if adapters are attached
     if (Incoming.numAdapters() > 0 ||
-        Incoming.emitter.ndelegates() > 0) {
+        Incoming.emitter.nslots() > 0) {
         // if (!Incoming.active());
         //     throw std::runtime_error("startInputStream() must be called");
         Incoming.write(bufferCast<const char*>(buffer), buffer.size());
@@ -226,7 +228,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
     //     _readStream->flush();
     // }
 
-    Payload.emit(this, buffer);
+    Payload.emit(/*this, */buffer);
 }
 
 
@@ -242,7 +244,7 @@ void ClientConnection::onComplete()
 {
     if (!_complete) {
         _complete = true; // in case close() is called inside callback
-        Complete.emit(this, _response);
+        Complete.emit(/*this, */_response);
     }
 }
 
@@ -300,7 +302,7 @@ void Client::shutdown()
     TraceS(this) << "Shutdown" << endl;
 
     //_timer.stop();
-    Shutdown.emit(this);
+    Shutdown.emit(/*this*/);
 
     //_connections.clear();
     auto conns = _connections;
@@ -316,7 +318,11 @@ void Client::addConnection(ClientConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
 
-    conn->Close += sdelegate(this, &Client::onConnectionClose, -1); // lowest priority
+    // conn->Close += [&](net::Socket&) {
+    //     removeConnection(conn.get());
+    // };
+
+    conn->Close += slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
     _connections.push_back(conn);
 }
 
@@ -335,9 +341,9 @@ void Client::removeConnection(ClientConnection* conn)
 }
 
 
-void Client::onConnectionClose(void* sender)
+void Client::onConnectionClose(Connection& conn)
 {
-    removeConnection(reinterpret_cast<ClientConnection*>(sender));
+    removeConnection(reinterpret_cast<ClientConnection*>(&conn));
 }
 
 

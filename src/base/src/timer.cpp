@@ -73,7 +73,7 @@ void Timer::start(std::int64_t timeout, std::int64_t interval)
     int err = uv_timer_start(_handle.ptr<uv_timer_t>(), [](uv_timer_t* req) {
         auto self = reinterpret_cast<Timer*>(req->data);
         self->_count++;
-        self->Timeout.emit(self);
+        self->Timeout.emit();
     }, timeout, interval);
     if (err < 0)
         _handle.setAndThrowError("Invalid timer", err);

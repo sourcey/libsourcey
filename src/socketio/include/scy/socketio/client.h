@@ -85,7 +85,7 @@ public:
         const Options& options = Options()); //, const std::string& host, std::uint16_t port
     virtual ~Client();
 
-    /// virtual void connect(const std::string& host, std::uint16_t port);
+    // virtual void connect(const std::string& host, std::uint16_t port);
     virtual void connect();
     virtual void close();
 
@@ -141,10 +141,10 @@ protected:
     virtual void onHandshake(sockio::Packet& packet);
     virtual void onMessage(sockio::Packet& packet);
 
-    virtual void onSocketConnect();
-    virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketError(const scy::Error& error);
-    virtual void onSocketClose();
+    virtual void onSocketConnect(net::Socket& socket);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketError(net::Socket& socket, const scy::Error& error);
+    virtual void onSocketClose(net::Socket& socket);
 
     virtual void onPingTimer();
     virtual void onPingTimeoutTimer();
@@ -157,8 +157,7 @@ protected:
     virtual void onPong();
 
 protected:
-    // mutable Mutex    _mutex;
-
+    // mutable Mutex _mutex;
     Timer _pingTimer;
     Timer _pingTimeoutTimer;
     Timer _reconnectTimer;

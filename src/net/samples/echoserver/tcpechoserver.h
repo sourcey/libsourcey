@@ -32,7 +32,7 @@ public:
 
         socket->bind(Address(host, port));
         socket->listen();
-        socket->AcceptConnection += delegate(this, &EchoServer::onAcceptConnection);
+        socket->AcceptConnection += slot(this, &EchoServer::onAcceptConnection);
     }
 
     void shutdown()
@@ -42,33 +42,33 @@ public:
     }
 
     void onAcceptConnection(const TCPSocket::Ptr& sock)
-    {    
+    {
     /// std::static_pointer_cast<SocketT>(ptr)
         sockets.push_back(sock);
         auto& socket = sockets.back();
         DebugL << "On accept: " << socket << std::endl;
-        socket->Recv += sdelegate(this, &EchoServer::onClientSocketRecv);
-        socket->Error += sdelegate(this, &EchoServer::onClientSocketError);
-        socket->Close += sdelegate(this, &EchoServer::onClientSocketClose);
+        socket->Recv += slot(this, &EchoServer::onClientSocketRecv);
+        socket->Error += slot(this, &EchoServer::onClientSocketError);
+        socket->Close += slot(this, &EchoServer::onClientSocketClose);
     }
 
-    void onClientSocketRecv(void* sender, const MutableBuffer& buffer, const Address& peerAddress)
+    void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
     {
-        auto socket = reinterpret_cast<net::Socket*>(sender);
-        DebugL << "On recv: " << socket << ": "
+        // auto socket = reinterpret_cast<net::Socket*>(sender);
+        DebugL << "On recv: " << &socket << ": "
             << buffer.str() << std::endl;    /// Echo it back
-        socket->send(bufferCast<const char*>(buffer), buffer.size());
+        socket.send(bufferCast<const char*>(buffer), buffer.size());
     }
 
-    void onClientSocketError(void* sender, const Error& error)
+    void onClientSocketError(Socket& socket, const Error& error)
     {
         InfoL << "On error: " << error.errorno << ": " << error.message << std::endl;
     }
 
-    void onClientSocketClose(void* sender)
+    void onClientSocketClose(Socket& socket)
     {
         DebugL << "On close" << std::endl;
-        releaseSocket(reinterpret_cast<net::Socket*>(sender));
+        releaseSocket(&socket);
     }
 
     void releaseSocket(net::Socket* sock)

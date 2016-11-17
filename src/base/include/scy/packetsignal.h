@@ -15,20 +15,23 @@
 
 #include <cstdint>
 #include "scy/packet.h"
-#include "scy/polymorphicsignal.h"
-#include "scy/signal2.h"
+#include "scy/signal.h"
 
 
 namespace scy {
 
 
-// typedef v2::Signal<void(IPacket&)> PacketSignal; //void*, 
+/// Signal that broadcasts `IPacket` types.
+typedef Signal<void(IPacket&)> PacketSignal;
 
-typedef DelegateBase<IPacket&> PacketDelegateBase;
-typedef SignalBase<PacketDelegateBase, IPacket&> PacketSignal;
-typedef std::vector<PacketSignal*> PacketSignalVec;
 
-DefinePolymorphicDelegate(packetDelegate, IPacket, PacketDelegateBase)
+/// Signal slot that allows listeners to filter polymorphic `IPacket` types.
+template <class Class, class RT, class PT, class IT = IPacket>
+std::shared_ptr<internal::Slot<RT, IT&>> packetSlot(Class* instance, RT(Class::*method)(PT&), int id = -1, int priority = -1)
+{
+    return std::make_shared<internal::Slot<RT, IT&>>(
+        new PolymorphicDelegate<Class, RT, PT, IT>(instance, method), instance, id, priority);
+}
 
 
 } // namespace scy

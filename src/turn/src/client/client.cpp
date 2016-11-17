@@ -59,9 +59,9 @@ void Client::initiate()
         //udpSocket->setBroadcast(true);
     }
 
-    _socket->Recv += sdelegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
-    _socket->Connect += sdelegate(this, &Client::onSocketConnect);
-    _socket->Close += sdelegate(this, &Client::onSocketClose);
+    _socket->Recv += slot(this, &Client::onSocketRecv, -1, -1); // using PacketSocket for STUN transactions
+    _socket->Connect += slot(this, &Client::onSocketConnect);
+    _socket->Close += slot(this, &Client::onSocketClose);
     _socket->connect(_options.serverAddr);
     //_socket
     //else
@@ -77,16 +77,16 @@ void Client::shutdown()
 
         for (auto it = _transactions.begin(); it != _transactions.end();) {
             TraceL << "Shutdown base: Delete transaction: " << *it << endl;
-            (*it)->StateChange -= sdelegate(this, &Client::onTransactionProgress);
+            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
             //delete *it;
             (*it)->dispose();
             it = _transactions.erase(it);
         }
 
-        _socket->Connect -= sdelegate(this, &Client::onSocketConnect);
-        _socket->Recv -= sdelegate(this, &Client::onSocketRecv);
-        //_socket->Error -= sdelegate(this, &Client::onSocketError);
-        _socket->Close -= sdelegate(this, &Client::onSocketClose);
+        _socket->Connect -= slot(this, &Client::onSocketConnect);
+        _socket->Recv -= slot(this, &Client::onSocketRecv);
+        //_socket->Error -= slot(this, &Client::onSocketError);
+        _socket->Close -= slot(this, &Client::onSocketClose);
         if (!_socket->closed()) {
             _socket->close();
         }
@@ -95,19 +95,19 @@ void Client::shutdown()
 }
 
 
-void Client::onSocketConnect(void*)
+void Client::onSocketConnect(net::Socket& socket)
 {
     TraceL << "Client connected" << endl;
-    _socket->Connect -= sdelegate(this, &Client::onSocketConnect);
+    // _socket->Connect -= slot(this, &Client::onSocketConnect);
 
-    _timer.Timeout += sdelegate(this, &Client::onTimer);
+    _timer.Timeout += slot(this, &Client::onTimer);
     _timer.start(_options.timerInterval, _options.timerInterval);
 
     sendAllocate();
 }
 
 
-void Client::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
+void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceL << "Control socket recv: " << buffer.size() << endl;
 
@@ -134,10 +134,10 @@ void Client::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::
 }
 
 
-void Client::onSocketClose(void* sender)  //, const Error& error
+void Client::onSocketClose(net::Socket& socket)  //, const Error& error
 {
-    assert(sender == _socket.get());
-    TraceL << "Control socket closed: " << sender << ": " << _socket->error().message << endl;
+    assert(&socket == _socket.get());
+    TraceL << "Control socket closed" << endl;
     assert(_socket->closed());
     shutdown();
     setState(this, ClientState::Failed, _socket->error().message);
@@ -217,7 +217,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
     //Mutex::ScopedLock lock(_mutex);
     for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
         if (*it == transaction) {
-            (*it)->StateChange -= sdelegate(this, &Client::onTransactionProgress);
+            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
             _transactions.erase(it);
             return true;
         }
@@ -280,7 +280,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
     //socket = socket ? socket : _socket;
     //assert(socket && !socket->isNull());
     auto transaction = new stun::Transaction(socket ? socket : _socket, _options.serverAddr, _options.timeout, 1);
-    transaction->StateChange += sdelegate(this, &Client::onTransactionProgress);
+    transaction->StateChange += slot(this, &Client::onTransactionProgress);
     _transactions.push_back(transaction);
     return transaction;
 }
@@ -957,7 +957,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state, const 
 }
 
 
-void Client::onTimer(void*)
+void Client::onTimer()
 {
     //Mutex::ScopedLock lock(_mutex);
 
@@ -972,7 +972,7 @@ void Client::onTimer(void*)
 }
 
 
-void Client::onStateChange(ClientState& state, const ClientState& oldState)
+void Client::onStateChange(void* timer, ClientState& state, const ClientState& oldState)
 {
     _observer.onClientStateChange(*this, state, oldState);
 }

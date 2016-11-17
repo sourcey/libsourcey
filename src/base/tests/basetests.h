@@ -16,7 +16,6 @@
 #include "scy/logger.h"
 #include "scy/idler.h"
 #include "scy/signal.h"
-#include "scy/signal2.h"
 #include "scy/buffer.h"
 #include "scy/platform.h"
 #include "scy/collection.h"
@@ -83,45 +82,37 @@ class IpcTest: public Test
 //
 class TimerTest: public Test
 {
-    int numTimerTicks;
-    int wantTimerTicks;
-    bool timerRestarted;
-
     void run()
     {
         std::cout << "Starting" << std::endl;
 
-        numTimerTicks = 0;
-        wantTimerTicks = 10;
-        timerRestarted = false;
+        int numTimerTicks = 0;
+        int wantTimerTicks = 10;
+        bool timerRestarted = false;
 
         Timer timer;
-        timer.Timeout += sdelegate(this, &TimerTest::timerCallback);
         timer.start(10, 10);
         timer.handle().ref();
+        timer.Timeout += [&]() {
+            // std::cout << "On timeout: " << timer->count() << std::endl;
+
+            numTimerTicks++;
+            if (timer.count() == wantTimerTicks / 2) {
+                if (!timerRestarted) {
+                    timerRestarted = true;
+                    timer.restart(); // restart once, count returns to 0
+                }
+                else {
+                    timer.handle().unref();
+                    timer.stop(); // event loop will be released
+                }
+            }
+        };
 
         // std::cout << "Ending" << std::endl;
         uv::runDefaultLoop();
 
         expect(numTimerTicks == wantTimerTicks);
-    }
-
-    void timerCallback(void* sender)
-    {
-        // std::cout << "On timeout: " << timer->count() << std::endl;
-        auto timer = reinterpret_cast<Timer*>(sender);
-
-        numTimerTicks++;
-        if (timer->count() == wantTimerTicks / 2) {
-            if (!timerRestarted) {
-                timerRestarted = true;
-                timer->restart(); // restart once, count returns to 0
-            }
-            else {
-                timer->handle().unref();
-                timer->stop(); // event loop will be released
-            }
-        }
     }
 };
 
@@ -162,280 +153,151 @@ class IdlerTest: public Test
 // =============================================================================
 // Signal Test
 //
-class SignalTest: public Test
+// class SignalTest: public Test
+// {
+//     Signal<void(std::uint64_t&)> TestSignal;
+//
+//     void run()
+//     {
+//         int val = 0;
+//         TestSignal += sdelegate(this, &SignalTest::intCallback);
+//         TestSignal += slot(this, &SignalTest::intCallbackNoSender);
+//         TestSignal.emit(/*this, */val);
+//         expect(val == 2);
+//
+//         val = -1;
+//         TestSignal.clear();
+//         TestSignal += slot(this, &SignalTest::priorityOne, 1); // last
+//         TestSignal += slot(this, &SignalTest::priorityZero, 0); // second
+//         TestSignal += slot(this, &SignalTest::priorityMinusOne, -1); // first
+//         TestSignal.emit(/*this, */val);
+//     }
+//
+//     void intCallback(void* sender, int& val)
+//     {
+//         expect(sender == this);
+//         val++;
+//     }
+//
+//     void intCallbackNoSender(int& val)
+//     {
+//         val++;
+//     }
+//
+//     void priorityMinusOne(int& val)
+//     {
+//         expect(val++ == -1);
+//     }
+//
+//     void priorityZero(int& val)
+//     {
+//         expect(val++ == 0);
+//     }
+//
+//     void priorityOne(int& val)
+//     {
+//         expect(val++ == 1);
+//     }
+// };
+
+
+struct SignalCounter
 {
-    Signal<int&> TestSignal;
-
-    void run()
-    {
-        int val = 0;
-        TestSignal += sdelegate(this, &SignalTest::intCallback);
-        TestSignal += delegate(this, &SignalTest::intCallbackNoSender);
-        TestSignal.emit(this, val);
-        expect(val == 2);
-
-        val = -1;
-        TestSignal.clear();
-        TestSignal += delegate(this, &SignalTest::priorityOne, 1); // last
-        TestSignal += delegate(this, &SignalTest::priorityZero, 0); // second
-        TestSignal += delegate(this, &SignalTest::priorityMinusOne, -1); // first
-        TestSignal.emit(this, val);
-    }
-
-    void intCallback(void* sender, int& val)
-    {
-        expect(sender == this);
-        val++;
-    }
-
-    void intCallbackNoSender(int& val)
+    void increment(std::uint64_t& val)
     {
         val++;
     }
 
-    void priorityMinusOne(int& val)
+    void incrementConst(std::uint64_t& val) const
     {
-        expect(val++ == -1);
+        val++;
     }
 
-    void priorityZero(int& val)
+    static void incrementStatic(std::uint64_t& val)
     {
-        expect(val++ == 0);
-    }
-
-    void priorityOne(int& val)
-    {
-        expect(val++ == 1);
+        val++;
     }
 };
 
 
-// =============================================================================
-// Signal V2 Test
-//
-// class PolymorphicSignalTests: public Test {
-//     int numPackets = 0;
-//
-//     void onPacket(IPacket& packet)
+void signalIncrementFree(std::uint64_t& val)
+{
+    val++;
+}
+
+
+bool signalHandlerC(const char* sl, std::size_t ln)
+{
+    std::cout << "signalHandlerC: " << sl << ln << std::endl;
+    return false;
+}
+
+
+// class SignalTest: public Test
+// {
+//     struct Foo
 //     {
-//         std::cout << "On packet: " << packet.className() << std::endl;
-//         numPackets++;
-//     }
+//         int timesCalled = 0;
 //
-//     void onPacketWithSender(void*, IPacket& packet)
-//     {
-//         std::cout << "On packet sender: " << packet.className() << std::endl;
-//         numPackets++;
-//     }
-//
-// public:
-//     void run() {
-//         v2::Signal < void(IPacket&) > sig1;
-//         v2::Signal < void(void*, IPacket&) > sig2;
-//
-//         sig1() += v2::slot(this, &PolymorphicSignalTests::onPacket);
-//         sig2() += v2::slot(this, &PolymorphicSignalTests::onPacketWithSender);
-//
-//         RawPacket p("hello", 5);
-//         sig1.emit(p);
-//         sig2.emit(this, p);
-//
-//         expect(numPackets == 2);
-//     }
-// };
-//
-//
-// class BasicSignalTests: public Test {
-//     static std::string accu;
-//     struct Foo {
-//         char foo_bool(float f, int i, std::string s) {
-//             accu += util::format("Foo: %.2f\n", f + i + s.size());
+//         bool signalHandlerA(const char* sl, std::size_t ln)
+//         {
+//             std::cout << "signalHandlerA: " << sl << ln << std::endl;
+//             timesCalled++;
 //             return true;
 //         }
+//
+//         // bool signalHandlerB(const char* sl, std::size_t ln) const
+//         // {
+//         //     // std::cout << sl << ln << std::endl;
+//         //     return true;
+//         // }
 //     };
-//     static char float_callback(float f, int, std::string) {
-//         accu += util::format("float: %.2f\n", f);
-//         return 0;
-//     }
+//     // Signal<int&> TestSignal;
 //
-// public:
-//     void run() {
-//         accu = "";
-//         v2::Signal < char(float, int, std::string) > sig1;
-//         size_t id1 = sig1() += float_callback;
-//         size_t id2 = sig1() += [](float, int i, std::string) {
-//             accu += util::format("int: %d\n", i);
-//             return 0;
-//         };
-//         size_t id3 = sig1() += [](float, int,
-//             const std::string & s) {
-//             accu += util::format("string: %s\n", s.c_str());
-//             return 0;
-//         };
-//         sig1.emit(.3, 4, "huhu");
-//         bool success;
-//         success = sig1() -= id1;
-//         expect(success == true);
-//         success = sig1() -= id1;
-//         expect(success == false);
-//         success = sig1() -= id2;
-//         expect(success == true);
-//         success = sig1() -= id3;
-//         expect(success == true);
-//         success = sig1() -= id3;
-//         expect(success == false);
-//         success = sig1() -= id2;
-//         expect(success == false);
+//     void run()
+//     {
 //         Foo foo;
-//         sig1() += v2::slot(foo, &Foo::foo_bool);
-//         sig1() += v2::slot(&foo, &Foo::foo_bool);
-//         sig1.emit(.5, 1, "12");
+//         Signal<void(std::uint64_t&)> signal;
 //
-//         v2::Signal < void(std::string, int) > sig2;
-//         sig2() += [](std::string msg, int) {
-//             accu += util::format("msg: %s", msg.c_str());
+//         int refid1, refid2, refid3, refid4; //, refid5;
+//
+//         // Attach a lambda function
+//         refid1 = signal.attach([&](const char* arg1, std::size_t arg2) {
+//             std::cout << "lambda: " << arg1 << arg2 << std::endl;
+//
+//             // Detach slots inside callback scope
+//             expect(signal.nslots() == 3);
+//             signal.detach(refid1);
+//             signal.detach(refid2);
+//             expect(signal.nslots() == 1);
+//             return true;
+//         });
+//         expect(refid1 == 1);
+//
+//         // Attach a lambda function via += operator
+//         refid2 = signal += [&](const char* arg1, std::size_t arg2) {
+//             std::cout << "lambda 2: " << arg1 << arg2 << std::endl;
+//             return true;
 //         };
-//         sig2() += [](std::string, int d) {
-//             accu += util::format(" *%d*\n", d);
-//         };
-//         sig2.emit("in sig2", 17);
+//         expect(refid2 == 2);
 //
-//         accu += "DONE";
+//         // Attach and disconnect a class member slot
+//         refid3 = signal += slot(&foo, &Foo::signalHandlerA);
+//         expect(refid3 == 3);
+//         expect(signal.nslots() == 3);
+//         bool detached = signal -= slot(&foo, &Foo::signalHandlerA);
+//         expect(detached == true);
+//         expect(signal.nslots() == 2);
 //
-//         const char * expected = "float: 0.30\n"
-//         "int: 4\n"
-//         "string: huhu\n"
-//         "Foo: 3.50\n"
-//         "Foo: 3.50\n"
-//         "msg: in sig2 *17*\n"
-//         "DONE";
-//         expect(accu == expected);
-//         std::cout << accu << std::endl;
+//         // remove slot pointers, add clone method
+//
+//         // Attach a static function via += operator
+//         refid4 = signal += signalHandlerC;
+//         expect(refid4 == 4);
+//
+//         signal.emit("the answer to life the universe and everything is", 42);
 //     }
 // };
-// std::string BasicSignalTests::accu;
-//
-//
-// class TestCollectorVector: public Test {
-//     static int handler1() {
-//         return 1;
-//     }
-//     static int handler42() {
-//         return 42;
-//     }
-//     static int handler777() {
-//         return 777;
-//     }
-// public:
-//     void run() {
-//         v2::Signal < int(), v2::CollectorVector < int >> sig_vector;
-//         sig_vector() += handler777;
-//         sig_vector() += handler42;
-//         sig_vector() += handler1;
-//         sig_vector() += handler42;
-//         sig_vector() += handler777;
-//         std::vector < int > results = sig_vector.emit();
-//         // const int reference_array[] = { 777, 42, 1, 42, 777, };
-//         // const std::vector<int> reference = vector_from_array (reference_array);
-//         const std::vector < int > reference = {
-//             777,
-//             42,
-//             1,
-//             42,
-//             777,
-//         };
-//         expect(results == reference);
-//     }
-// };
-//
-//
-// class TestCollectorUntil0: public Test {
-//     bool check1, check2;
-//     bool handler_true() {
-//         check1 = true;
-//         return true;
-//     }
-//     bool handler_false() {
-//         check2 = true;
-//         return false;
-//     }
-//     bool handler_abort() {
-//         abort();
-//     }
-// public:
-//     TestCollectorUntil0(): check1(0), check2(0) {}
-//
-//     void run() {
-//         TestCollectorUntil0 self;
-//         v2::Signal < bool(), v2::CollectorUntil0 < bool >> sig_until0;
-//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_true);
-//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_false);
-//         sig_until0() += v2::slot(self, & TestCollectorUntil0::handler_abort);
-//         expect(!self.check1 && !self.check2);
-//         const bool result = sig_until0.emit();
-//         expect(!result && self.check1 && self.check2);
-//     }
-// };
-//
-//
-// class TestCollectorWhile0: public Test {
-//     bool check1, check2;
-//     bool handler_0() {
-//         check1 = true;
-//         return false;
-//     }
-//     bool handler_1() {
-//         check2 = true;
-//         return true;
-//     }
-//     bool handler_abort() {
-//         abort();
-//     }
-// public:
-//     TestCollectorWhile0(): check1(0), check2(0) {}
-//
-//     void run() {
-//         TestCollectorWhile0 self;
-//         v2::Signal < bool(), v2::CollectorWhile0 < bool >> sig_while0;
-//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_0);
-//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_1);
-//         sig_while0() += v2::slot(self, & TestCollectorWhile0::handler_abort);
-//         expect(!self.check1 && !self.check2);
-//         const bool result = sig_while0.emit();
-//         expect(result == true && self.check1 && self.check2);
-//     }
-// };
-//
-//
-// // TestCounter for Signal benchmark tests
-// struct TestCounter {
-//     static std::uint64_t get();
-//     static void set(std::uint64_t);
-//     static void add(std::uint64_t);
-//     static void add2(void * , std::uint64_t);
-// };
-//
-// namespace { // Anon
-//     void( * test_counter_add2)(void * , std::uint64_t) =
-//         TestCounter::add2; // external symbol to prevent easy inlining
-//     static std::uint64_t test_counter_var = 0;
-// } // Anon
-//
-// std::uint64_t TestCounter::get() {
-//     return test_counter_var;
-// }
-//
-// void TestCounter::set(std::uint64_t v) {
-//     test_counter_var = v;
-// }
-//
-// void TestCounter::add(std::uint64_t v) {
-//     test_counter_var += v;
-// }
-//
-// void TestCounter::add2(void*, std::uint64_t v) {
-//     test_counter_var += v;
-// }
 
 
 // =============================================================================
@@ -496,9 +358,10 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
         std::cout << "Start" << std::endl;
         runner.start([](void* arg) {
             auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
-            // std::cout << "Emitting" << std::endl;
+            std::cout << "Emitting" << std::endl;
             RawPacket p("hello", 5);
-            self->emitter.emit(self, p);
+            self->emitter.emit(/*self, */p);
+            std::cout << "Emitting 2" << std::endl;
         }, this);
     }
 
@@ -522,8 +385,8 @@ struct MockPacketProcessor: public PacketProcessor
 
     void process(IPacket& packet)
     {
-        // std::cout << "Process: " << packet.className() << std::endl;
-        emit(packet);
+        std::cout << "Process: " << packet.className() << std::endl;
+        emitter.emit(packet);
     }
 };
 
@@ -531,9 +394,9 @@ class PacketStreamTest: public Test
 {
     int numPackets;
 
-    void onPacketStreamOutput(void* sender, IPacket& packet)
+    void onPacketStreamOutput(IPacket& packet) //void* sender,
     {
-        // std::cout << "On packet: " << packet.className() << std::endl;
+        std::cout << "On packet: " << packet.className() << std::endl;
         numPackets++;
     }
 
@@ -548,9 +411,14 @@ class PacketStreamTest: public Test
         // stream.synchronizeOutput(uv::defaultLoop());
         stream.attach(new MockPacketProcessor, 1, true);
 
-        stream.emitter += packetDelegate(this, &PacketStreamTest::onPacketStreamOutput);
+        stream.emitter += slot(this, &PacketStreamTest::onPacketStreamOutput);
+        // stream.emitter += packetSlot(this, &PacketStreamTest::onPacketStreamOutput);
+        // stream.emitter.attach<PacketStreamTest, &PacketStreamTest::onPacketStreamOutput>(this);
+
+            // (*it)->ptr->getEmitter() -= slot(this, &PacketStream::write);
         stream.start();
-    /// TODO: Test pause/resume functionality
+
+        // TODO: Test pause/resume functionality
         // Run the thread for 100ms
         scy::sleep(100);
 
@@ -618,7 +486,7 @@ class MultiPacketStreamTest: public Test
         // stream.attachSource(new MockThreadedPacketSource, true, true);
         // //stream.attach(new AsyncPacketQueue, 0, true);
         // stream.attach(new MockPacketProcessor, 1, true);
-        // //stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);
+        // //stream.emitter += packetSlot(this, &Tests::onPacketStreamOutput);
         // stream.start();
         ///
         /// // The second PacketStream receives packets from the first one
@@ -630,21 +498,21 @@ class MultiPacketStreamTest: public Test
         // children.s1->attach(new AsyncPacketQueue, 0, true);
         // children.s1->attach(new SyncPacketQueue, 1, true);
         // children.s1->synchronizeOutput(uv::defaultLoop());
-        // children.s1->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s1->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s1->start();
         ///
         /// children.s2 = new PacketStream;
         // children.s2->attachSource(stream.emitter);
         // children.s2->attach(new AsyncPacketQueue, 0, true);
         // children.s2->synchronizeOutput(uv::defaultLoop());
-        // children.s2->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s2->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s2->start();
         ///
         /// children.s3 = new PacketStream;
         // children.s3->attachSource(stream.emitter);
         // children.s3->attach(new AsyncPacketQueue, 0, true);
         // children.s3->synchronizeOutput(uv::defaultLoop());
-        // children.s3->emitter += packetDelegate(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s3->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s3->start();
         ///
         /// // app.waitForShutdown([](void* arg) {

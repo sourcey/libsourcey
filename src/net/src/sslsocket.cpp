@@ -132,7 +132,7 @@ void SSLSocket::acceptConnection()
 
     TraceS(this) << "Accept SSL connection: OK: " << socket->ptr() << endl;
 
-    AcceptConnection.emit(Socket::self(), socket);
+    AcceptConnection.emit(/*Socket::self(), */socket);
 }
 
 
@@ -214,7 +214,7 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
     _sslAdapter.initClient();
     // _sslAdapter.start();
 
-    onSocketConnect();
+    onSocketConnect(*this);
 }
 
 

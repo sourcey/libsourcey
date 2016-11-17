@@ -45,7 +45,7 @@ cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& captu
         //
         // // Connect and start the packet stream.
         // _capture->start();
-        // _capture->emitter += packetDelegate(this, &VideoPacketSource::onVideoCaptured);
+        // _capture->emitter += packetSlot(this, &VideoPacketSource::onVideoCaptured);
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;

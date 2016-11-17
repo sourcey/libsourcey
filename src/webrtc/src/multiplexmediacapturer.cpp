@@ -27,11 +27,11 @@ MultiplexMediaCapturer::MultiplexMediaCapturer()
     , _audioModule(AudioPacketModule::Create())//,
     // _videoSource(VideoPacketSource::Create())
 {
-    // _capture->emitter += packetDelegate(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
+    // _capture->emitter += packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
 
     _stream.attachSource(_capture, true);
     _stream.attach(std::make_shared<av::RealtimePacketQueue<av::VideoPacket>>(0), 5);
-    _stream.emitter += packetDelegate(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
+    _stream.emitter += packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
 }
 
 
@@ -69,7 +69,7 @@ void MultiplexMediaCapturer::openFile(const std::string& file)
 VideoPacketSource* MultiplexMediaCapturer::createVideoSource()
 {
     auto videoSource = new VideoPacketSource();
-    _stream.emitter += packetDelegate(videoSource, &VideoPacketSource::onVideoCaptured);
+    _stream.emitter += packetSlot(videoSource, &VideoPacketSource::onVideoCaptured);
     return videoSource;
 }
 

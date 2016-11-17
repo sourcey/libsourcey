@@ -50,7 +50,7 @@ void Server::start()
 
     if (_options.enableUDP) {
         //_udpSocket.assign(new UDPSocket, false);
-        _udpSocket.Recv += sdelegate(this, &Server::onSocketRecv, 1);
+        _udpSocket.Recv += slot(this, &Server::onSocketRecv, 1);
         _udpSocket.bind(_options.listenAddr);
         //_udpSocket./*base().*/setBroadcast(true);
         TraceL << "UDP listening on " << _options.listenAddr << endl;
@@ -60,11 +60,11 @@ void Server::start()
         //_tcpSocket.assign(new TCPSocket, false);
         _tcpSocket.bind(_options.listenAddr);
         _tcpSocket.listen();
-        _tcpSocket.AcceptConnection += sdelegate(this, &Server::onTCPAcceptConnection);
+        _tcpSocket.AcceptConnection += slot(this, &Server::onTCPAcceptConnection);
         TraceL << "TCP listening on " << _options.listenAddr << endl;
     }
 
-    _timer.Timeout += sdelegate(this, &Server::onTimer);
+    _timer.Timeout += slot(this, &Server::onTimer);
     _timer.start(_options.timerInterval, _options.timerInterval);
 }
 
@@ -100,7 +100,7 @@ void Server::stop()
 }
 
 
-void Server::onTimer(void*)
+void Server::onTimer()
 {
     ServerAllocationMap allocations = this->allocations();
     for (auto it = allocations.begin(); it != allocations.end(); ++it) {
@@ -113,7 +113,7 @@ void Server::onTimer(void*)
 }
 
 
-void Server::onTCPAcceptConnection(void*, const net::TCPSocket::Ptr& sock)
+void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 {
     TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;
 
@@ -121,8 +121,8 @@ void Server::onTCPAcceptConnection(void*, const net::TCPSocket::Ptr& sock)
     _tcpSockets.push_back(sock);
     net::TCPSocket::Ptr& socket = _tcpSockets.back();
     //assert(socket./*base().*/refCount() == 2);
-    socket->Recv += sdelegate(this, &Server::onSocketRecv);
-    socket->Close += sdelegate(this, &Server::onTCPSocketClosed);
+    socket->Recv += slot(this, &Server::onSocketRecv);
+    socket->Close += slot(this, &Server::onTCPSocketClosed);
 
     // No need to increase control socket buffer size
     // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); // TODO: make option
@@ -142,26 +142,18 @@ net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 }
 
 
-void Server::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
+void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceL << "Data received: " << buffer.size() << endl;
-     //auto info = reinterpret_cast<net::PacketInfo*>(packet.info);
-    //assert(info);
-    //if (!info)
-    //    return;    const net::TCPSocket::Ptr& socket
+
     stun::Message message;
-    auto socket = reinterpret_cast<net::Socket*>(sender);
     char* buf = bufferCast<char*>(buffer);
     std::size_t len = buffer.size();
     std::size_t nread = 0;
     while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
         if (message.classType() == stun::Message::Request ||
             message.classType() == stun::Message::Indication) {
-            Request request(message, socket->transport(), socket->address(), peerAddress); //getTCPSocket(socket->address()),
-            //if (!request.socket) {
-            //    assert(0 && "invalid socket");
-            //    continue;
-            //}
+            Request request(message, socket.transport(), socket.address(), peerAddress);
 
             // TODO: Only authenticate stun::Message::Request types
             handleRequest(request, _observer.authenticateRequest(this, request));
@@ -190,10 +182,10 @@ void Server::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::
 }
 
 
-void Server::onTCPSocketClosed(void* sender)
+void Server::onTCPSocketClosed(net::Socket& socket)
 {
     TraceL << "TCP socket closed" << endl;
-    releaseTCPSocket(reinterpret_cast<net::Socket*>(sender));
+    releaseTCPSocket(&socket);
 }
 
 
@@ -202,8 +194,8 @@ void Server::releaseTCPSocket(net::Socket* socket)
     TraceS(this) << "Removing TCP socket: " << socket << std::endl;
     for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
         if (it->get() == socket) {
-            socket->Recv -= sdelegate(this, &Server::onSocketRecv);
-            socket->Close -= sdelegate(this, &Server::onTCPSocketClosed);
+            socket->Recv -= slot(this, &Server::onSocketRecv);
+            socket->Close -= slot(this, &Server::onTCPSocketClosed);
 
             // All we need to do is erase the socket in order to
             // deincrement the ref counter and destroy the socket.

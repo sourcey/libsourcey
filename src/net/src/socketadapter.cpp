@@ -107,70 +107,70 @@ void SocketAdapter::sendPacket(IPacket& packet)
 }
 
 
-void SocketAdapter::onSocketConnect()
+void SocketAdapter::onSocketConnect(Socket& socket)
 {
-    emitSocketConnect();
+    emitSocketConnect(socket);
 }
 
 
-void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
+void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
-    emitSocketRecv(buffer, peerAddress);
+    emitSocketRecv(socket, buffer, peerAddress);
 }
 
 
-void SocketAdapter::onSocketError(const scy::Error& error) //const Error& error
+void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error) //const Error& error
 {
-    emitSocketError(error);
+    emitSocketError(socket, error);
 }
 
 
-void SocketAdapter::onSocketClose()
+void SocketAdapter::onSocketClose(Socket& socket)
 {
-    emitSocketClose();
+    emitSocketClose(socket);
 }
 
 
-void SocketAdapter::emitSocketConnect()
+void SocketAdapter::emitSocketConnect(Socket& socket)
 {
-    Connect.emit(self());
+    Connect.emit(socket/*self()*/);
 }
 
 
-void SocketAdapter::emitSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
+void SocketAdapter::emitSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
-    Recv.emit(self(), buffer, peerAddress);
+    Recv.emit(/*self(), */socket, buffer, peerAddress);
 }
 
 
-void SocketAdapter::emitSocketError(const scy::Error& error)
+void SocketAdapter::emitSocketError(Socket& socket, const scy::Error& error)
 {
-    Error.emit(self(), error);
+    Error.emit(/*self(), */socket, error);
 }
 
 
-void SocketAdapter::emitSocketClose()
+void SocketAdapter::emitSocketClose(Socket& socket)
 {
-    Close.emit(self());
+    Close.emit(socket/*self()*/);
 }
 
 
 
 void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
 {
-    Connect += delegate(adapter, &net::SocketAdapter::onSocketConnect, priority);
-    Recv += delegate(adapter, &net::SocketAdapter::onSocketRecv, priority);
-    Error += delegate(adapter, &net::SocketAdapter::onSocketError, priority);
-    Close += delegate(adapter, &net::SocketAdapter::onSocketClose, priority);
+    Connect += slot(adapter, &net::SocketAdapter::onSocketConnect, priority);
+    Recv += slot(adapter, &net::SocketAdapter::onSocketRecv, priority);
+    Error += slot(adapter, &net::SocketAdapter::onSocketError, priority);
+    Close += slot(adapter, &net::SocketAdapter::onSocketClose, priority);
 }
 
 
 void SocketAdapter::removeReceiver(SocketAdapter* adapter)
 {
-    Connect -= delegate(adapter, &net::SocketAdapter::onSocketConnect);
-    Recv -= delegate(adapter, &net::SocketAdapter::onSocketRecv);
-    Error -= delegate(adapter, &net::SocketAdapter::onSocketError);
-    Close -= delegate(adapter, &net::SocketAdapter::onSocketClose);
+    Connect -= slot(adapter, &net::SocketAdapter::onSocketConnect);
+    Recv -= slot(adapter, &net::SocketAdapter::onSocketRecv);
+    Error -= slot(adapter, &net::SocketAdapter::onSocketError);
+    Close -= slot(adapter, &net::SocketAdapter::onSocketClose);
 }
 
 

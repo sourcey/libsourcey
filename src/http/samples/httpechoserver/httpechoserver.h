@@ -65,7 +65,7 @@ struct RandomDataSource: public Idler
     void onIdle()
     {
         RawPacket packet("hello", 5);
-        signal.emit(this, packet);
+        signal.emit(/*this, */packet);
     }
 };
 

@@ -315,7 +315,7 @@ void MultiplexEncoder::createVideo()
     assert(_options.oformat.video.enabled);
     assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
     _video = new VideoEncoder(_formatCtx);
-    _video->emitter.attach(packetDelegate(this, &MultiplexEncoder::onVideoEncoded));
+    _video->emitter.attach(packetSlot(this, &MultiplexEncoder::onVideoEncoded));
     _video->iparams = _options.iformat.video;
     _video->oparams = _options.oformat.video;
     _video->create();
@@ -435,7 +435,7 @@ void MultiplexEncoder::createAudio()
     assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);
 
     _audio = new AudioEncoder(_formatCtx);
-    _audio->emitter.attach(packetDelegate(this, &MultiplexEncoder::onAudioEncoded));
+    _audio->emitter.attach(packetSlot(this, &MultiplexEncoder::onAudioEncoded));
     _audio->iparams = _options.iformat.audio;
     _audio->oparams = _options.oformat.audio;
     _audio->create();

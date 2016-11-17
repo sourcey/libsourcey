@@ -39,16 +39,16 @@ TCPConnectionPair::~TCPConnectionPair()
 
     if (client) {
         //assert(client->base().refCount() == 2);
-        client->Recv -= sdelegate(this, &TCPConnectionPair::onClientDataReceived);
-        client->Close -= sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+        client->Recv -= slot(this, &TCPConnectionPair::onClientDataReceived);
+        client->Close -= slot(this, &TCPConnectionPair::onConnectionClosed);
         client->close();
     }
     if (peer) {
         //assert(peer->base().refCount() == 1);
-        peer->Recv -= sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
-        peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-        peer->Error -= sdelegate(this, &TCPConnectionPair::onPeerConnectError);
-        peer->Close -= sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+        peer->Recv -= slot(this, &TCPConnectionPair::onPeerDataReceived);
+        peer->Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+        peer->Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
+        peer->Close -= slot(this, &TCPConnectionPair::onConnectionClosed);
         peer->close();
     }
 
@@ -63,14 +63,14 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
         assert(!transactionID.empty());
         peer = std::make_shared<net::TCPSocket>();
         peer->opaque = this;
-        peer->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+        peer->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
         // Start receiving early media
-        peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
+        peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
 
         // Connect request specific events
-        peer->Connect += sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-        peer->Error += sdelegate(this, &TCPConnectionPair::onPeerConnectError);
+        peer->Connect += slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+        peer->Error += slot(this, &TCPConnectionPair::onPeerConnectError);
 
         client->connect(peerAddr);
     }
@@ -92,10 +92,10 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
     assert(peer == nullptr);
     //assert(socket./*base().*/refCount() == 1);
     peer = socket;
-    peer->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+    peer->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
     // Receive and buffer early media from peer
-    peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
+    peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
     net::setServerSocketRecvBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
@@ -108,7 +108,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
     assert(client == nullptr);
     //assert(socket./*base().*/refCount() == 2);
     client = socket;
-    client->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+    client->Close += slot(this, &TCPConnectionPair::onConnectionClosed);
     net::setServerSocketRecvBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
@@ -119,8 +119,8 @@ bool TCPConnectionPair::makeDataConnection()
     if (!peer || !client)
         return false;
 
-    peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
-    client->Recv += sdelegate(this, &TCPConnectionPair::onClientDataReceived);
+    peer->Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
+    client->Recv += slot(this, &TCPConnectionPair::onClientDataReceived);
 
     // Relase and unbind the client socket from the server.
     // The client socket instance, events and data will be
@@ -138,7 +138,7 @@ bool TCPConnectionPair::makeDataConnection()
 }
 
 
-void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
+void TCPConnectionPair::onPeerDataReceived(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceS(this) << "Peer => Client: " << buffer.size() << endl;
     //assert(pkt.buffer.position() == 0);
@@ -189,7 +189,7 @@ void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, c
 }
 
 
-void TCPConnectionPair::onClientDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
+void TCPConnectionPair::onClientDataReceived(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceS(this) << "Client => Peer: " << buffer.size() << endl;
     //assert(packet.buffer.position() == 0);
@@ -206,12 +206,12 @@ void TCPConnectionPair::onClientDataReceived(void*, const MutableBuffer& buffer,
 }
 
 
-void TCPConnectionPair::onPeerConnectSuccess(void* sender)
+void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 {
     TraceS(this) << "Peer Connect request success" << endl;
-    assert(sender == &peer);
-    peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-    peer->Error -= sdelegate(this, &TCPConnectionPair::onPeerConnectError);
+    assert(&socket == peer.get());
+    peer->Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
+    peer->Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
 
     // If no ConnectionBind request associated with this peer data
     // connection is received after 30 seconds, the peer data connection
@@ -224,19 +224,19 @@ void TCPConnectionPair::onPeerConnectSuccess(void* sender)
 }
 
 
-void TCPConnectionPair::onPeerConnectError(void* sender, const Error& error)
+void TCPConnectionPair::onPeerConnectError(net::Socket& socket, const Error& error)
 {
     TraceS(this) << "Peer Connect request error: " << error.message << endl;
-    assert(sender == &peer);
+    assert(&socket == peer.get());
     allocation.sendPeerConnectResponse(this, false);
 
     // The TCPConnectionPair will be deleted on next call to onConnectionClosed
 }
 
 
-void TCPConnectionPair::onConnectionClosed(void* sender)
+void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 {
-    TraceS(this) << "Connection pair socket closed: " << connectionID << ": " << sender << endl;
+    TraceS(this) << "Connection pair socket closed: " << connectionID << ": " << &socket << endl;
     delete this; // fail
 }
 

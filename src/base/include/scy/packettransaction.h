@@ -84,7 +84,7 @@ public:
         _attempts++;
         if (_timer.active())
             _timer.stop();
-        _timer.Timeout += sdelegate(this, &PacketTransaction::onTimeout);
+        _timer.Timeout += slot(this, &PacketTransaction::onTimeout);
         _timer.start(_timeout, 0);
 
         return setState(this, TransactionState::Running);
@@ -111,7 +111,7 @@ public:
 
         if (!_destroyed) {
             _destroyed = true;
-            _timer.Timeout -= sdelegate(this, &PacketTransaction::onTimeout);
+            _timer.Timeout -= slot(this, &PacketTransaction::onTimeout);
             _timer.stop();
 
             deleteLater<PacketTransaction>(this);
@@ -169,7 +169,7 @@ protected:
             << _response.toString() << std::endl;
     }
 
-    virtual void onTimeout(void*)
+    virtual void onTimeout()
     {
         debugL("PacketTransaction", this) << "Timeout" << std::endl;
 

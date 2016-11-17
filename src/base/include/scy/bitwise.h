@@ -12,9 +12,6 @@
 #define SCY_Flaggable_H
 
 
-#include <string>
-
-
 namespace scy {
 
 

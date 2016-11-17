@@ -146,13 +146,13 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
         auto codec = stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             _video = new VideoDecoder(stream);
-            _video->emitter.attach(packetDelegate(this, &MediaCapture::emit)); // proxy packets
+            _video->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
             _video->create();
             _video->open();
         }
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _audio = new AudioDecoder(stream);
-            _audio->emitter.attach(packetDelegate(this, &MediaCapture::emit)); // proxy packets
+            _audio->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
             _audio->create();
             _audio->open();
         }
@@ -200,7 +200,7 @@ void MediaCapture::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
 
-    emitter.emit(this, packet);
+    emitter.emit(/*this, */packet);
 }
 
 
@@ -264,7 +264,7 @@ void MediaCapture::run()
 
     TraceS(this) << "Exiting" << endl;
     _stopping = true;
-    Closing.emit(this);
+    Closing.emit(/*this*/);
 }
 
 

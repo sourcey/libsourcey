@@ -93,7 +93,6 @@ public:
     /// the client connection.
     void writeUrl(std::ostream& ostr);
 
-
 #if 0
     /// Writes the complete "multipart/form-data" request to the
     /// client connection. This method is blocking, and should be

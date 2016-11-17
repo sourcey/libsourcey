@@ -15,6 +15,7 @@
 
 #include "scy/packetsignal.h"
 #include "scy/buffer.h"
+#include "scy/util.h"
 
 
 namespace scy {

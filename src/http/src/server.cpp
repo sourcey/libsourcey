@@ -44,14 +44,14 @@ void Server::start()
 {
     // TODO: Register self as an observer
     //socket.reset(new net::TCPSocket);
-    socket->AcceptConnection += delegate(this, &Server::onAccept);
-    socket->Close += delegate(this, &Server::onClose);
+    socket->AcceptConnection += slot(this, &Server::onSocketAccept);
+    socket->Close += slot(this, &Server::onSocketClose);
     socket->bind(address);
     socket->listen();
 
     TraceS(this) << "Server listening on " << port() << endl;
 
-    //timer.Timeout += delegate(this, &Server::onTimer);
+    //timer.Timeout += slot(this, &Server::onTimer);
     //timer.start(5000, 5000);
 }
 
@@ -61,12 +61,12 @@ void Server::shutdown()
     TraceS(this) << "Shutdown" << endl;
 
     if (socket) {
-        socket->AcceptConnection -= delegate(this, &Server::onAccept);
-        socket->Close -= delegate(this, &Server::onClose);
+        socket->AcceptConnection -= slot(this, &Server::onSocketAccept);
+        socket->Close -= slot(this, &Server::onSocketClose);
         socket->close();
     }
 
-    Shutdown.emit(this);
+    Shutdown.emit(/*this*/);
 
     for (auto conn : this->connections) {
         conn->close(); // close and remove via callback
@@ -103,7 +103,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 void Server::addConnection(ServerConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
-    conn->Close += sdelegate(this, &Server::onConnectionClose, -1); // lowest priority
+    conn->Close += slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
     connections.push_back(conn);
 }
 
@@ -121,7 +121,7 @@ void Server::removeConnection(ServerConnection* conn)
 }
 
 
-void Server::onAccept(const net::TCPSocket::Ptr& sock)
+void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
 {
     TraceS(this) << "On server accept" << endl;
     ServerConnection::Ptr conn = createConnection(sock);
@@ -132,16 +132,16 @@ void Server::onAccept(const net::TCPSocket::Ptr& sock)
 }
 
 
-void Server::onClose()
+void Server::onSocketClose(net::Socket& socket)
 {
     TraceS(this) << "On server socket close" << endl;
 }
 
 
-void Server::onConnectionClose(void* sender)
+void Server::onConnectionClose(Connection& conn)
 {
     TraceS(this) << "On connection close" << endl;
-    removeConnection(reinterpret_cast<ServerConnection*>(sender));
+    removeConnection(reinterpret_cast<ServerConnection*>(&conn));
 }
 
 
@@ -220,7 +220,8 @@ void ServerConnection::onHeaders()
         // Send the handshake request to the WS adapter for handling.
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
-        wsAdapter->onSocketRecv(mutableBuffer(buffer), socket()->peerAddress());
+        auto sock = socket().get();
+        wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer), sock->peerAddress());
     }
 
     // Instantiate the responder when request headers have been parsed

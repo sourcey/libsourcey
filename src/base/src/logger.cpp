@@ -556,7 +556,7 @@ void EventedFileChannel::write(const LogStream& stream, LogLevel level, const ch
         return;
 
     FileChannel::write(message, level, ptr);
-    OnLogStream.emit(this, message, level, ptr);
+    OnLogStream.emit(/*this, */message, level, ptr);
 }
 #endif
 

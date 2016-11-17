@@ -81,14 +81,14 @@ int main(int argc, char** argv)
 //     DebugL << "Starting" << endl;
 //
 //     av::VideoCapture::Ptr capture = MediaFactory::instance().createVideoCapture(0);
-//     capture->emitter += packetDelegate(&context, &CallbackContext::onVideoCaptureFrame);
+//     capture->emitter += packetSlot(&context, &CallbackContext::onVideoCaptureFrame);
 //
 //     // std::puts("Press any key to continue...");
 //     // std::getchar();
 //
 //     // FIXME: Run loop until x number of frames received
 //
-//     capture->emitter -= packetDelegate(this, &CallbackContext::onVideoCaptureFrame);
+//     capture->emitter -= packetSlot(this, &CallbackContext::onVideoCaptureFrame);
 //
 //     DebugL << "Complete" << endl;
 // }
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 //     av::VideoCapture::Ptr capture = MediaFactory::instance().createVideoCapture(0);
 //     {
 //         PacketStream stream;
-//         stream.emitter += packetDelegate(&context, &CallbackContext::onVideoCaptureStreamFrame);
+//         stream.emitter += packetSlot(&context, &CallbackContext::onVideoCaptureStreamFrame);
 //         stream.attachSource<av::VideoCapture>(capture, true);
 //         stream.start();
 //
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 //         // std::getchar();
 //     }
 //
-//     assert(capture->emitter.ndelegates() == 0);
+//     assert(capture->emitter.nslots() == 0);
 //
 //     DebugL << "Complete" << endl;
 // });

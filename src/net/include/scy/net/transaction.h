@@ -89,7 +89,7 @@ protected:
 
             // Stop socket data propagation since
             // we have handled the packet
-            throw StopPropagation();
+            // throw StopPropagation();
         }
     }
 
@@ -98,7 +98,7 @@ protected:
     {
         TraceS(this) << "On success: " <<
             PacketTransaction<PacketT>::_response.toString() << std::endl;
-        PacketSignal::emit(socket.get(), PacketTransaction<PacketT>::_response);
+        PacketSignal::emit(/*socket.get(), */PacketTransaction<PacketT>::_response);
     }
 
     /// Sub classes should derive this method to implement

@@ -27,7 +27,7 @@ namespace scy {
 namespace http {
 
 
-class ProgressSignal: public Signal<const double&>
+class ProgressSignal: public Signal<void(const double&)>
 {
 public:
     void* sender;
@@ -47,7 +47,7 @@ public:
         // assert(current <= total);
         current += nread;
 
-        emit(sender ? sender : this, progress());
+        emit(/*sender ? sender : this, */progress());
     }
 };
 
@@ -119,13 +119,16 @@ public:
     virtual http::Message* incomingHeader() = 0;
     virtual http::Message* outgoingHeader() = 0;
 
+    Signal<void(Connection&)> Close;
+
 protected:
-    virtual void onSocketConnect();
-    virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketError(const scy::Error& error);
-    virtual void onSocketClose();
+    virtual void onSocketConnect(net::Socket& socket);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketError(net::Socket& socket, const scy::Error& error);
+    virtual void onSocketClose(net::Socket& socket);
 
     /// Set the internal error.
+    /// Note: Setting the error does not `close()` the connection.
     virtual void setError(const scy::Error& err);
 
 protected:
@@ -163,11 +166,11 @@ protected:
 
     ///// SocketAdapter callbacks
 
-    virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     //virtual void onSocketError(const Error& error);
     //virtual void onSocketClose();
 
-    ///// HTTPParser callbacks
+    //// HTTP Parser callbacks
 
     virtual void onParserHeader(const std::string& name, const std::string& value);
     virtual void onParserHeadersEnd();

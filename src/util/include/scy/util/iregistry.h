@@ -45,7 +45,7 @@ public:
     void registerType(const std::string& s)
     {
         _types.insert(std::make_pair(s, &createT<T>));
-        TypeRegistered.emit(this, s);
+        TypeRegistered.emit(/*this, */s);
     }
 
     virtual void unregisterType(const std::string& s)
@@ -54,13 +54,13 @@ public:
         if (it == _types.end())
             return;
         _types.erase(it);
-        TypeUnregistered.emit(this, s);
+        TypeUnregistered.emit(/*this, */s);
     }
 
     TypeMap types() const { return _types; }
 
-    Signal<const std::string&> TypeRegistered;
-    Signal<const std::string&> TypeUnregistered;
+    Signal<void(const std::string&)> TypeRegistered;
+    Signal<void(const std::string&)> TypeUnregistered;
 
 private:
     TypeMap _types;

@@ -46,17 +46,20 @@ bool Transaction::send()
 {
     TraceN(this) << "Send: " << _request.id() << endl;
     _request.setAck(true);
-    client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
+    client += slot(this, &Transaction::onPotentialResponse, -1, 100);
     if (client.send(_request))
         return PacketTransaction<Packet>::send();
     return false;
 }
 
 
-void Transaction::onPotentialResponse(void*, Packet& packet)
+void Transaction::onPotentialResponse(IPacket& pkt)
 {
-    TraceN(this) << "On potential response: " << packet.id() << endl;
-    PacketTransaction<Packet>::handlePotentialResponse(packet);
+    auto packet = dynamic_cast<sockio::Packet*>(&pkt);
+    if (packet) {
+        TraceN(this) << "On potential response: " << packet->id() << endl;
+        PacketTransaction<Packet>::handlePotentialResponse(*packet);
+    }
 }
 
 
@@ -70,7 +73,7 @@ bool Transaction::checkResponse(const Packet& packet)
 void Transaction::onResponse()
 {
     TraceN(this) << "On success" << endl;
-    client -= packetDelegate(this, &Transaction::onPotentialResponse);
+    client -= slot(this, &Transaction::onPotentialResponse);
     PacketTransaction<Packet>::onResponse();
 }
 

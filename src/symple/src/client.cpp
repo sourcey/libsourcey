@@ -45,12 +45,12 @@ TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop) :
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
-    return new Client(std::make_shared<net::SSLSocket>(loop), options); //, loop);
+    return new Client(std::make_shared<net::SSLSocket>(loop), options);
 }
 
 
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
-    Client(std::make_shared<net::SSLSocket>(loop), options) //, loop)
+    Client(std::make_shared<net::SSLSocket>(loop), options)
 {
 }
 
@@ -60,8 +60,8 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
 //
 
 
-Client::Client(const net::Socket::Ptr& socket, const Client::Options& options) : //, uv::Loop* loop
-    sockio::Client(socket), //, loop
+Client::Client(const net::Socket::Ptr& socket, const Client::Options& options) :
+    sockio::Client(socket),
     _options(options),
     _announceStatus(0)
 {
@@ -161,7 +161,7 @@ void Client::createPresence(Presence& p)
 
     auto peer = ourPeer();
     if (peer) {
-        CreatePresence.emit(this, *peer);
+        CreatePresence.emit(/*this, */*peer);
         p["data"] = *peer;
     }
     else assert(0 && "no session");
@@ -202,7 +202,7 @@ int Client::announce()
     data["token"] = _options.token;
     sockio::Packet pkt("announce", data, true);
     auto txn = sockio::Client::createTransaction(pkt);
-    txn->StateChange += sdelegate(this, &Client::onAnnounceState);
+    txn->StateChange += slot(this, &Client::onAnnounceState);
     return txn->send();
 }
 
@@ -250,7 +250,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
 
             // Notify the outside application of the response
             // status before we transition the client state.
-            Announce.emit(this, _announceStatus);
+            Announce.emit(/*this, */_announceStatus);
 
             // Transition to Online state.
             onOnline();
@@ -266,7 +266,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
         break;
 
     case TransactionState::Failed:
-        Announce.emit(this, _announceStatus);
+        Announce.emit(/*this, */_announceStatus);
         setError(state.message());
         break;
     }
@@ -286,7 +286,7 @@ void Client::onOnline()
 }
 
 
-void Client::emit(void* sender, IPacket& raw)
+void Client::emit(/*void* sender, */IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
 
@@ -311,7 +311,7 @@ void Client::emit(void* sender, IPacket& raw)
                     WarnL << "Dropping invalid message: " << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(this, m);
+                PacketSignal::emit(/*this, */m);
             }
             else if (type == "event") {
                 Event e(data);
@@ -319,7 +319,7 @@ void Client::emit(void* sender, IPacket& raw)
                     WarnL << "Dropping invalid event: " << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(this, e);
+                PacketSignal::emit(/*this, */e);
             }
             else if (type == "presence") {
                 Presence p(data);
@@ -327,7 +327,7 @@ void Client::emit(void* sender, IPacket& raw)
                     WarnL << "Dropping invalid presence: " << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(this, p);
+                PacketSignal::emit(/*this, */p);
                 if (p.isMember("data")) {
                     onPresenceData(p["data"], false);
                     if (p.isProbe())
@@ -340,7 +340,7 @@ void Client::emit(void* sender, IPacket& raw)
                     WarnL << "Dropping invalid command: " << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(this, c);
+                PacketSignal::emit(/*this, */c);
                 if (c.isRequest()) {
                     c.setStatus(404);
                     WarnL << "Command not handled: " << c.id() << ": " << c.node() << endl;
@@ -359,7 +359,7 @@ void Client::emit(void* sender, IPacket& raw)
     // Other packet types are proxied directly
     else {
         TraceL << "Proxying packet" << endl;
-        PacketSignal::emit(this, packet);
+        PacketSignal::emit(/*this, */packet);
     }
 }
 
@@ -381,7 +381,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
                 peer = new Peer(data);
                 _roster.add(id, peer);
                 InfoL << "Peer connected: " << peer->address().toString() << endl;
-                PeerConnected.emit(this, *peer);
+                PeerConnected.emit(/*this, */*peer);
             }
             else
                 static_cast<json::Value&>(*peer) = data;
@@ -389,7 +389,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
         else {
             if (peer) {
                 InfoL << "Peer disconnected: " << peer->address().toString() << endl;
-                PeerDisconnected.emit(this, *peer);
+                PeerDisconnected.emit(/*this, */*peer);
                 _roster.free(id);
             }
             else {

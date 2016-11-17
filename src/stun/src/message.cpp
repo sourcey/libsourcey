@@ -11,6 +11,7 @@
 
 #include "scy/stun/message.h"
 #include "scy/logger.h"
+#include "scy/util.h"
 
 
 using namespace std;

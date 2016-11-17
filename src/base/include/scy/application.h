@@ -23,25 +23,26 @@
 namespace scy {
 
 
-/// A simple event based application which runs until the
-/// internal event loop is terminated.
 ///
-/// The Application class provides shutdown handling (Ctrl-C).
+/// Main LibSourcey application class.
 ///
-// TODO: Cross platform getopts
+/// This class exposes basic features required by most applications:
+///
+///   * Running the event loop
+///   * Command line option parsing @see OptionParser
+///   * Shutdown signal (Ctrl-C) handling
+///   * Garbage collection
 ///
 class Application
 {
 public:
     /// Returns the default Application singleton, although
     /// Application instances may be initialized individually.
-    /// The default runner should be kept for short running
-    /// tasks such as timers in order to maintain performance.
     static Application& getDefault();
 
     /// The active event loop.
     /// May be assigned at construction, otherwise the default
-    /// event loop is used.
+    /// event loop will be used.
     uv::Loop* loop;
 
     Application(uv::Loop* loop = uv::defaultLoop());
@@ -51,9 +52,9 @@ public:
     void stop();
     void finalize();
 
-    ///
+    //
     /// Shutdown handling
-    ///
+    //
 
     /// Bind the shutdown signal.
     void bindShutdownSignal(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
@@ -65,15 +66,15 @@ public:
     static void onPrintHandle(uv_handle_t* handle, void* arg);
 
 protected:
-    Application(const Application&); // = delete;
-    Application(Application&&); // = delete;
-    Application& operator=(const Application&); // = delete;
-    Application& operator=(Application&&); // = delete;
+    Application(const Application&) = delete;
+    Application(Application&&) = delete;
+    Application& operator=(const Application&) = delete;
+    Application& operator=(Application&&) = delete;
 };
 
 
 //
-// Command Line Option Parser
+/// Command Line Option Parser
 //
 
 

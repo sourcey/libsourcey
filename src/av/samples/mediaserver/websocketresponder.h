@@ -16,7 +16,7 @@ public:
         DebugS(this) << "Create" << std::endl;
             // Create the packet stream
         MediaServer::setupPacketStream(stream, options);    /// Start the stream
-        stream.emitter += packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
+        stream.emitter += packetSlot(this, &WebSocketRequestHandler::onVideoEncoded);
         stream.start();
     }
 
@@ -29,7 +29,7 @@ public:
     {
         DebugS(this) << "On close" << std::endl;
 
-        stream.emitter -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
+        stream.emitter -= packetSlot(this, &WebSocketRequestHandler::onVideoEncoded);
         stream.stop();
     }
 

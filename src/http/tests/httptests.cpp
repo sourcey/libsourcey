@@ -8,12 +8,9 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
     net::SSLManager::initNoVerifyClient();
-
-    // Create the static callback context
-    static CallbackContext context;
 
     //
     /// HTTP URL Tests
@@ -111,7 +108,11 @@ int main(int argc, char** argv)
     describe("client connection download", []() {
         std::string filename("zlib-1.2.8.tar.gz");
         auto conn = http::Client::instance().createConnection("http://zlib.net/zlib-1.2.8.tar.gz");
-        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
+        // std::string filename("7z920.tar.bz2");
+        // auto conn = http::Client::instance().createConnection("http://d.7-zip.org/a/7z920.tar.bz2");
+        conn->Complete += [&](const http::Response& response) {
+            std::cout << "Server response: " << response << endl;
+        };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
         conn->setReadStream(new std::ofstream(filename, std::ios_base::out | std::ios_base::binary));
@@ -134,7 +135,10 @@ int main(int argc, char** argv)
 
     describe("client connection", []() {
         auto conn = http::Client::instance().createConnection("http://google.com/");
-        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += [&](const http::Response& response) {
+            std::cout << "Server response: " << response << endl;
+        };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
@@ -146,7 +150,10 @@ int main(int argc, char** argv)
 
     describe("secure client connection", []() {
         auto conn = http::Client::instance().createConnection("https://google.com/");
-        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += [&](const http::Response& response) {
+            std::cout << "Server response: " << response << endl;
+        };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
@@ -161,11 +168,21 @@ int main(int argc, char** argv)
     //
 
     describe("standalone client connection", []() {
-        http::ClientConnection conn("http://google.com/");
-        conn.Headers += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionHeaders);
-        conn.Payload += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionPayload);
-        conn.Complete += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionComplete);
-        // conn.setReadStream(new std::stringstream);
+        http::ClientConnection conn("http://sourcey.com");
+        conn.Headers += [&](http::Response& response) {
+            std::cout << "On response headers: " << response << endl;
+        };
+        conn.Payload += [&](const MutableBuffer& buffer) {
+            std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+        };
+        conn.Complete += [&](const http::Response& response) {
+            std::cout << "On response complete: " << response
+                << conn.readStream<std::stringstream>().str() << endl;
+
+            // Force connection closure if the other side hasn't already
+            conn.close();
+        };
+        conn.setReadStream(new std::stringstream);
         conn.send(); // send default GET /
 
         uv::runDefaultLoop();

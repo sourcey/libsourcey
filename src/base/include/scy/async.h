@@ -23,13 +23,12 @@
 
 namespace scy {
 
-  
+
 /// Classes for asynchronous programming
 namespace async {
 
 
-/// A generic interface for classes that
-/// can be run and cancelled.
+/// A generic interface for classes that can be run and cancelled.
 class Runnable
 {
     std::atomic<bool> exit;
@@ -188,10 +187,10 @@ class Flag
     std::atomic<bool> state;
 
     /// Non-copyable and non-movable
-    Flag(const Flag&); // = delete;
-    Flag(Flag&&); // = delete;
-    Flag& operator=(const Flag&); // = delete;
-    Flag& operator=(Flag&&); // = delete;
+    Flag(const Flag&) = delete;
+    Flag(Flag&&) = delete;
+    Flag& operator=(const Flag&) = delete;
+    Flag& operator=(Flag&&) = delete;
 
 public:
     Flag() : state(false) {};

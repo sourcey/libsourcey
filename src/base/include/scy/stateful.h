@@ -139,7 +139,7 @@ public:
     }
 
     /// Signals when the state changes.
-    Signal2<T&, const T&> StateChange;
+    Signal<void(void*, T&, const T&)> StateChange;
 
     virtual bool stateEquals(unsigned int id) const
     {

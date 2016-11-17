@@ -62,7 +62,7 @@ public:
         //assert(0 && "fixme");
 
         // Start the stream
-        stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
+        stream->emitter += packetSlot(this, &MPEGResponder::onVideoEncoded);
         stream->start();
     }
 
@@ -84,7 +84,7 @@ public:
     {
         DebugL << "On close" << endl;
 
-        stream->emitter -= packetDelegate(this, &MPEGResponder::onVideoEncoded);
+        stream->emitter -= packetSlot(this, &MPEGResponder::onVideoEncoded);
             DebugL << "On close 1" << endl;
         stream->stop();
             DebugL << "On close 2" << endl;

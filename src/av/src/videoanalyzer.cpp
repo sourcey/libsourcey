@@ -62,8 +62,8 @@ void VideoAnalyzer::initialize()
         _audio->initialize();
     }
 
-    _reader.emitter += packetDelegate(this, &VideoAnalyzer::onVideo);
-    _reader.emitter += packetDelegate(this, &VideoAnalyzer::onAudio);
+    _reader.emitter += packetSlot(this, &VideoAnalyzer::onVideo);
+    _reader.emitter += packetSlot(this, &VideoAnalyzer::onAudio);
     _reader.Closing += sdelegate(this, &VideoAnalyzer::onReadComplete);
 }
 
@@ -158,7 +158,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 
         TraceN(this) << "Video Output: "
             << pkt.time << ", " << pkt.value << endl;
-        PacketOut.emit(this, *_video, pkt);
+        PacketOut.emit(/*this, */*_video, pkt);
     }
 }
 
@@ -199,7 +199,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 
         TraceN(this) << "Audio Output: "
             << pkt.time << ", " << pkt.value << endl;
-        PacketOut.emit(this, *_audio, pkt);
+        PacketOut.emit(/*this, */*_audio, pkt);
     }
 }
 
@@ -244,7 +244,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
             _error = reader->error();
     }
 
-    Complete.emit(this);
+    Complete.emit(/*this*/);
 }
 
 

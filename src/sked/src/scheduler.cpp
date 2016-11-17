@@ -150,11 +150,11 @@ void Scheduler::run()
         // Dispatch the Idle signal
         // TODO: Send Idle complete iteration of all tasks,
         // rather than after each task.
-        //Idle.emit(this);
+        //Idle.emit(/*this*/);
     //}
 
     //TraceS(this) << "Shutdown" << endl;
-    //Shutdown.emit(this);
+    //Shutdown.emit(/*this*/);
     //TraceS(this) << "Exiting" << endl;
 }
 

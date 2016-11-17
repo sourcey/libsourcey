@@ -111,7 +111,7 @@ void MediaFactory::reloadFailedVideoCaptures()
                 // Manually emit the capture loaded signal if the
                 // capture was successfully reloaded
                 if (!kv.second->error().any()) {
-                    VideoCaptureLoaded.emit(this, kv.second);
+                    VideoCaptureLoaded.emit(/*this, */kv.second);
                 }
             }
             catch (std::exception& exc) {
@@ -151,7 +151,7 @@ VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned fl
 
     auto capture = std::make_shared<VideoCapture>(deviceId);
     _videoCaptures[deviceId] = capture;
-    VideoCaptureLoaded.emit(this, capture);
+    VideoCaptureLoaded.emit(/*this, */capture);
 
     // Listen for errors.
     // NOTE: The capture is opened and started in the constructor,
@@ -168,7 +168,7 @@ void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
     auto videoCaptures = this->videoCaptures();
     auto it = videoCaptures.find(capture->deviceId());
     if (it != videoCaptures.end()) {
-        VideoCaptureError.emit(this, it->second);
+        VideoCaptureError.emit(/*this, */it->second);
     }
     else assert(0);
 }
