@@ -13,32 +13,35 @@
 #define SCY_Net_SSLSocket_H
 
 
-#include "scy/uv/uvpp.h"
 #include "scy/net/socket.h"
-#include "scy/net/tcpsocket.h"
 #include "scy/net/ssladapter.h"
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/uv/uvpp.h"
 
 
 namespace scy {
 namespace net {
 
 
-class SSLSocket: public TCPSocket
+class SSLSocket : public TCPSocket
 {
 public:
     typedef std::shared_ptr<SSLSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    SSLSocket(uv::Loop* loop = uv::defaultLoop()); //, SocketMode mode = ClientSide
-    SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
-    SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
+    SSLSocket(
+        uv::Loop* loop= uv::defaultLoop()); //, SocketMode mode = ClientSide
+    SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop= uv::defaultLoop());
+    SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session,
+              uv::Loop* loop= uv::defaultLoop());
 
     virtual ~SSLSocket();
 
     /// Initialize the SSLSocket with the given SSLContext.
-    // virtual void init(SSLContext::Ptr sslContext, SocketMode mode = ClientSide);
+    // virtual void init(SSLContext::Ptr sslContext, SocketMode mode =
+    // ClientSide);
 
     /// Initializes the socket and establishes a secure connection to
     /// the TCP server at the given address.
@@ -54,8 +57,9 @@ public:
     /// Closes the socket forcefully.
     virtual void close();
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
+    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len,
+                     const net::Address& peerAddress, int flags= 0);
 
     /// Use the given SSL context for this socket.
     void useContext(SSLContext::Ptr context);
@@ -117,5 +121,6 @@ protected:
 
 
 #endif // SCY_Net_SSLSocket_H
+
 
 /// @\}

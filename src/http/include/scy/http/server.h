@@ -14,12 +14,12 @@
 
 
 #include "scy/base.h"
-#include "scy/logger.h"
-#include "scy/net/socket.h"
 #include "scy/http/connection.h"
+#include "scy/http/parser.h"
 #include "scy/http/request.h"
 #include "scy/http/response.h"
-#include "scy/http/parser.h"
+#include "scy/logger.h"
+#include "scy/net/socket.h"
 #include "scy/timer.h"
 
 
@@ -29,7 +29,7 @@ namespace http {
 
 class Server;
 class ServerResponder;
-class ServerConnection: public Connection
+class ServerConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ServerConnection> Ptr;
@@ -55,7 +55,7 @@ protected:
     http::Message* outgoingHeader();
 
     ///// Server callbacks
-    //void onServerShutdown(void*);
+    // void onServerShutdown(void*);
 
 protected:
     Server& _server;
@@ -70,11 +70,11 @@ typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
 
 // -------------------------------------------------------------------
 //
-class ServerAdapter: public ConnectionAdapter
+class ServerAdapter : public ConnectionAdapter
 {
 public:
-    ServerAdapter(ServerConnection& connection) :
-        ConnectionAdapter(connection, HTTP_REQUEST)
+    ServerAdapter(ServerConnection& connection)
+        : ConnectionAdapter(connection, HTTP_REQUEST)
     {
     }
 };
@@ -94,8 +94,8 @@ public:
 class ServerResponder
 {
 public:
-    ServerResponder(ServerConnection& connection) :
-        _connection(connection)
+    ServerResponder(ServerConnection& connection)
+        : _connection(connection)
     {
     }
 
@@ -104,31 +104,22 @@ public:
     virtual void onHeaders(Request& /* request */) {}
     virtual void onPayload(const MutableBuffer& /* body */) {}
     virtual void onRequest(Request& /* request */, Response& /* response */) {}
-    virtual void onClose() {};
+    virtual void onClose(){};
 
-    ServerConnection& connection()
-    {
-        return _connection;
-    }
+    ServerConnection& connection() { return _connection; }
 
-    Request& request()
-    {
-        return _connection.request();
-    }
+    Request& request() { return _connection.request(); }
 
-    Response& response()
-    {
-        return _connection.response();
-    }
+    Response& response() { return _connection.response(); }
 
 protected:
     ServerConnection& _connection;
 
 private:
-    ServerResponder(const ServerResponder&) = delete;
-    ServerResponder(ServerResponder&&) = delete;
-    ServerResponder& operator=(const ServerResponder&) = delete;
-    ServerResponder& operator=(ServerResponder&&) = delete;
+    ServerResponder(const ServerResponder&)= delete;
+    ServerResponder(ServerResponder&&)= delete;
+    ServerResponder& operator=(const ServerResponder&)= delete;
+    ServerResponder& operator=(ServerResponder&&)= delete;
 };
 
 
@@ -140,13 +131,12 @@ private:
 class ServerResponderFactory
 {
 public:
-    ServerResponderFactory() {};
-    virtual ~ServerResponderFactory() {};
+    ServerResponderFactory(){};
+    virtual ~ServerResponderFactory(){};
 
     /// Factory method for instantiating the ServerResponder
     /// instance using the given ServerConnection.
-    virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
-
+    virtual ServerResponder* createResponder(ServerConnection& connection)= 0;
 };
 
 
@@ -167,7 +157,7 @@ public:
     ServerResponderFactory* factory;
     ServerConnectionList connections;
     net::Address address;
-    //Timer timer;
+    // Timer timer;
 
     Server(short port, ServerResponderFactory* factory);
     virtual ~Server();
@@ -187,7 +177,7 @@ protected:
     virtual void removeConnection(ServerConnection* conn);
 
     void onSocketAccept(const net::TCPSocket::Ptr& socket);
-    void onSocketClose(net::Socket& socket); // main socket close
+    void onSocketClose(net::Socket& socket);    // main socket close
     void onConnectionClose(Connection& socket); // connection socket close
 
     friend class ServerConnection;
@@ -196,11 +186,11 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class BadRequestHandler: public ServerResponder
+class BadRequestHandler : public ServerResponder
 {
 public:
-    BadRequestHandler(ServerConnection& connection) :
-        ServerResponder(connection)
+    BadRequestHandler(ServerConnection& connection)
+        : ServerResponder(connection)
     {
     }
 
@@ -218,5 +208,6 @@ public:
 
 
 #endif
+
 
 /// @\}

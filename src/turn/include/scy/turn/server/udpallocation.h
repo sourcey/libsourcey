@@ -13,10 +13,10 @@
 #define SCY_TURN_SERVER_UDPAllocation_H
 
 
-#include "scy/turn/types.h"
-#include "scy/turn/server/serverallocation.h"
 #include "scy/net/packetsocket.h"
 #include "scy/net/udpsocket.h"
+#include "scy/turn/server/serverallocation.h"
+#include "scy/turn/types.h"
 
 
 namespace scy {
@@ -27,34 +27,33 @@ class Server;
 class IConnection;
 
 
-class UDPAllocation: public ServerAllocation
+class UDPAllocation : public ServerAllocation
 {
 public:
-    UDPAllocation(
-        Server& server,
-        const FiveTuple& tuple,
-        const std::string& username,
-        const std::uint32_t& lifetime);
+    UDPAllocation(Server& server, const FiveTuple& tuple,
+                  const std::string& username, const std::uint32_t& lifetime);
     virtual ~UDPAllocation();
 
-    //void onPacketReceived(void* sender, RawPacket& packet);
-    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    // void onPacketReceived(void* sender, RawPacket& packet);
+    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer,
+                            const net::Address& peerAddress);
 
     bool handleRequest(Request& request);
     void handleSendIndication(Request& request);
 
-    int send(const char* data, std::size_t size, const net::Address& peerAddress);
+    int send(const char* data, std::size_t size,
+             const net::Address& peerAddress);
 
     net::Address relayedAddress() const;
 
 private:
     net::UDPSocket _relaySocket;
 };
-
-
-} } //  namespace scy::turn
+}
+} //  namespace scy::turn
 
 
 #endif // SCY_TURN_SERVER_UDPAllocation_H
+
 
 /// @\}

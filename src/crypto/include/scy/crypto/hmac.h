@@ -34,4 +34,5 @@ std::string computeHMAC(const std::string& input, const std::string& key);
 
 #endif // SCY_Crypto_HMAC_H
 
+
 /// @\}

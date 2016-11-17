@@ -20,18 +20,21 @@ namespace av {
 namespace avfoundation {
 
 
-extern bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices);
+extern bool GetAVFoundationVideoDevices(Device::Type type,
+                                        std::vector<Device>* devices);
 
 
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     switch (type) {
-    case Device::VideoInput:
-    case Device::AudioInput:
-        return GetAVFoundationVideoDevices(type, &devices);
-    default:
-        DebugL << "AVFoundation cannot enumerate output devices: Not implemented" << endl;
-        break;
+        case Device::VideoInput:
+        case Device::AudioInput:
+            return GetAVFoundationVideoDevices(type, &devices);
+        default:
+            DebugL << "AVFoundation cannot enumerate output devices: Not "
+                      "implemented"
+                   << endl;
+            break;
     }
 
     return false;
@@ -41,5 +44,6 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 } // namespace avfoundation
 } // namespace av
 } // namespace scy
+
 
 /// @\}

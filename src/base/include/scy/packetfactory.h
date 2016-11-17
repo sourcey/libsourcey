@@ -13,8 +13,8 @@
 #define SCY_PacketFactory_H
 
 
-#include "scy/packetsignal.h"
 #include "scy/buffer.h"
+#include "scy/packetsignal.h"
 #include "scy/util.h"
 
 
@@ -25,11 +25,14 @@ class IPacketCreationStrategy
 {
 public:
     IPacketCreationStrategy() {}
-    virtual ~IPacketCreationStrategy() {};
-    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;
-    virtual int priority() const = 0; // 0 - 100
+    virtual ~IPacketCreationStrategy(){};
+    virtual IPacket* create(const ConstBuffer& buffer,
+                            std::size_t& nread) const= 0;
+    virtual int priority() const= 0; // 0 - 100
 
-    static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
+    static bool compareProiroty(const IPacketCreationStrategy* l,
+                                const IPacketCreationStrategy* r)
+    {
         return l->priority() > r->priority();
     }
 };
@@ -41,17 +44,19 @@ typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 /// This template class implements an adapter that sits between
 /// an SignalBase and an object receiving notifications from it.
 template <class PacketT>
-struct PacketCreationStrategy: public IPacketCreationStrategy
+struct PacketCreationStrategy : public IPacketCreationStrategy
 {
-    PacketCreationStrategy(int priority = 0) :
-        _priority(priority) {
+    PacketCreationStrategy(int priority= 0)
+        : _priority(priority)
+    {
         assert(_priority <= 100);
     }
-    virtual ~PacketCreationStrategy() {};
+    virtual ~PacketCreationStrategy(){};
 
-    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const {
-        auto packet = new PacketT;
-        if ((nread = packet->read(buffer)) > 0)
+    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const
+    {
+        auto packet= new PacketT;
+        if ((nread= packet->read(buffer)) > 0)
             return packet;
         delete packet;
         return nullptr;
@@ -73,22 +78,21 @@ class PacketFactory
 {
 public:
     PacketFactory() {}
-    virtual ~PacketFactory() {
-        util::clearVector(_types);
-    }
+    virtual ~PacketFactory() { util::clearVector(_types); }
 
-    template <class PacketT>
-    void registerPacketType(int priority) {
+    template <class PacketT> void registerPacketType(int priority)
+    {
         unregisterPacketType<PacketT>(); // ensure unique values
-        //Mutex::ScopedLock lock(_mutex);
+        // Mutex::ScopedLock lock(_mutex);
         _types.push_back(new PacketCreationStrategy<PacketT>(priority));
-        sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
+        sort(_types.begin(), _types.end(),
+             IPacketCreationStrategy::compareProiroty);
     }
 
-    template <class PacketT>
-    void unregisterPacketType() {
-        //Mutex::ScopedLock lock(_mutex);
-        for (auto it = _types.begin(); it != _types.end(); ++it) {
+    template <class PacketT> void unregisterPacketType()
+    {
+        // Mutex::ScopedLock lock(_mutex);
+        for (auto it= _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
                 delete *it;
                 _types.erase(it);
@@ -97,18 +101,19 @@ public:
         }
     }
 
-    template <class StrategyT>
-    void registerStrategy(int priority) {
+    template <class StrategyT> void registerStrategy(int priority)
+    {
         unregisterStrategy<StrategyT>(); // ensure unique values
-        //Mutex::ScopedLock lock(_mutex);
+        // Mutex::ScopedLock lock(_mutex);
         _types.push_back(new StrategyT(priority));
-        std::sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
+        std::sort(_types.begin(), _types.end(),
+                  IPacketCreationStrategy::compareProiroty);
     }
 
-    template <class StrategyT>
-    void unregisterStrategy() {
-        //Mutex::ScopedLock lock(_mutex);
-        for (auto it = _types.begin(); it != _types.end(); ++it) {
+    template <class StrategyT> void unregisterStrategy()
+    {
+        // Mutex::ScopedLock lock(_mutex);
+        for (auto it= _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<StrategyT*>(*it) != 0) {
                 delete *it;
                 _types.erase(it);
@@ -117,28 +122,29 @@ public:
         }
     }
 
-    PacketCreationStrategyList& types() {
-        //Mutex::ScopedLock lock(_mutex);
+    PacketCreationStrategyList& types()
+    {
+        // Mutex::ScopedLock lock(_mutex);
         return _types;
     }
 
-    PacketCreationStrategyList types() const {
-        //Mutex::ScopedLock lock(_mutex);
+    PacketCreationStrategyList types() const
+    {
+        // Mutex::ScopedLock lock(_mutex);
         return _types;
     }
 
     /// returning false will stop packet propagation
-    virtual bool onPacketCreated(IPacket*) {
-        return true;
-    }
+    virtual bool onPacketCreated(IPacket*) { return true; }
 
-    virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
-        //Mutex::ScopedLock lock(_mutex);
-        //std::size_t offset = reader.position();
+    virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread)
+    {
+        // Mutex::ScopedLock lock(_mutex);
+        // std::size_t offset = reader.position();
         assert(!_types.empty() && "no packet types registered");
 
-        for (unsigned i = 0; i < _types.size(); i++) {
-            IPacket* packet = _types[i]->create(buffer, nread);
+        for (unsigned i= 0; i < _types.size(); i++) {
+            IPacket* packet= _types[i]->create(buffer, nread);
             if (packet) {
                 if (!onPacketCreated(packet)) {
                     delete packet;
@@ -146,14 +152,14 @@ public:
                 }
                 return packet;
             }
-            //reader.seek(offset);
+            // reader.seek(offset);
         }
         return nullptr;
     }
 
 protected:
     PacketCreationStrategyList _types;
-    //mutable Mutex    _mutex;
+    // mutable Mutex    _mutex;
 };
 
 
@@ -161,5 +167,6 @@ protected:
 
 
 #endif // SCY_PacketFactory_H
+
 
 /// @\}

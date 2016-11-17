@@ -29,14 +29,16 @@ namespace av {
 
 class DeviceWatcher;
 
-class MacDeviceManager: public DeviceManager {
+class MacDeviceManager : public DeviceManager
+{
 public:
     MacDeviceManager();
     virtual ~MacDeviceManager();
 
     virtual bool getCameras(std::vector<Device>& devs);
 
-private:    /// virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
+private
+    : /// virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
     bool FilterDevice(const Device& d);
 };
 
@@ -45,7 +47,7 @@ private:    /// virtual bool getAudioDevices(bool input, std::vector<Device>& de
 } // namespace scy
 
 
-#endif  // SCY_AV_DeviceManager_MAC_H
+#endif // SCY_AV_DeviceManager_MAC_H
 
 
 /*

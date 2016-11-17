@@ -15,9 +15,9 @@
 #define SCY_Net_SSLManager_H
 
 
-#include "scy/net/types.h"
-#include "scy/net/sslsession.h"
 #include "scy/net/sslcontext.h"
+#include "scy/net/sslsession.h"
+#include "scy/net/types.h"
 #include "scy/singleton.h"
 
 #include <openssl/ssl.h>
@@ -39,7 +39,8 @@ public:
     /// Initializes the server side of the SSLManager server-side SSLContext.
     void initializeServer(SSLContext::Ptr ptrContext);
 
-    /// Initializes the client side of the SSLManager with a default client-side SSLContext.
+    /// Initializes the client side of the SSLManager with a default client-side
+    /// SSLContext.
     void initializeClient(SSLContext::Ptr ptrContext);
 
     /// Returns the default Context used by the server if initialized.
@@ -48,10 +49,12 @@ public:
     /// Returns the default Context used by the client if initialized.
     SSLContext::Ptr defaultClientContext();
 
-    /// Fired whenever a certificate verification error is detected by the server during a handshake.
+    /// Fired whenever a certificate verification error is detected by the
+    /// server during a handshake.
     Signal<void(VerificationErrorDetails&)> ServerVerificationError;
 
-    /// Fired whenever a certificate verification error is detected by the client during a handshake.
+    /// Fired whenever a certificate verification error is detected by the
+    /// client during a handshake.
     Signal<void(VerificationErrorDetails&)> ClientVerificationError;
 
     /// Fired when a encrypted certificate is loaded. Not setting the password
@@ -73,13 +76,14 @@ public:
     /// Shuts down and destroys the SSLManager singleton instance.
     static void destroy();
 
-    /// Initializes a default no verify client context that's useful for testing.
+    /// Initializes a default no verify client context that's useful for
+    /// testing.
     static void initNoVerifyClient();
 
-    /// Initializes a default no verify server context that's useful for testing.
-    static void initNoVerifyServer(
-        const std::string& privateKeyFile = "",
-        const std::string& certificateFile = "");
+    /// Initializes a default no verify server context that's useful for
+    /// testing.
+    static void initNoVerifyServer(const std::string& privateKeyFile= "",
+                                   const std::string& certificateFile= "");
 
 protected:
     /// The return value of this method defines how errors in
@@ -92,10 +96,13 @@ protected:
     /// or 1 to continue despite the error.
     static int verifyServerCallback(int ok, X509_STORE_CTX* pStore);
 
-    /// Method is invoked by OpenSSL to retrieve a passwd for an encrypted certificate.
-    /// The request is delegated to the PrivatekeyPassword event. This method returns the
+    /// Method is invoked by OpenSSL to retrieve a passwd for an encrypted
+    /// certificate.
+    /// The request is delegated to the PrivatekeyPassword event. This method
+    /// returns the
     /// length of the password.
-    static int privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData);
+    static int privateKeyPassphraseCallback(char* pBuf, int size, int flag,
+                                            void* userData);
 
 private:
     /// Creates the SSLManager.
@@ -126,8 +133,10 @@ private:
 class VerificationErrorDetails
 {
 public:
-    /// Creates the VerificationErrorDetails. _ignoreError is per default set to false.
-    VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
+    /// Creates the VerificationErrorDetails. _ignoreError is per default set to
+    /// false.
+    VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth,
+                             int errNum, const std::string& errMsg);
 
     /// Destroys the VerificationErrorDetails.
     ~VerificationErrorDetails();
@@ -144,14 +153,15 @@ public:
     /// Returns the textual presentation of the errorNumber.
     const std::string& errorMessage() const;
 
-    /// setIgnoreError to true, if a verification error is judged non-fatal by the user.
+    /// setIgnoreError to true, if a verification error is judged non-fatal by
+    /// the user.
     void setIgnoreError(bool ignoreError);
 
     /// returns the value of _ignoreError
     bool getIgnoreError() const;
 
 private:
-    crypto::X509Certificate    _cert;
+    crypto::X509Certificate _cert;
     int _errorDepth;
     int _errorNumber;
     std::string _errorMessage; // Textual representation of the `_errorNumber`
@@ -159,7 +169,8 @@ private:
 };
 
 
-inline const crypto::X509Certificate& VerificationErrorDetails::certificate() const
+inline const crypto::X509Certificate&
+VerificationErrorDetails::certificate() const
 {
     return _cert;
 }
@@ -185,7 +196,7 @@ inline const std::string& VerificationErrorDetails::errorMessage() const
 
 inline void VerificationErrorDetails::setIgnoreError(bool ignoreError)
 {
-    _ignoreError = ignoreError;
+    _ignoreError= ignoreError;
 }
 
 
@@ -200,6 +211,7 @@ inline bool VerificationErrorDetails::getIgnoreError() const
 
 
 #endif // SCY_Net_SSLManager_H
+
 
 /// @\}
 

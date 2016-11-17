@@ -13,14 +13,14 @@
 #define SCY_TURN_IAllocation_H
 
 
+#include "scy/logger.h"
+#include "scy/mutex.h"
+#include "scy/net/address.h"
+#include "scy/timer.h"
+#include "scy/turn/fivetuple.h"
+#include "scy/turn/permission.h"
 #include "scy/turn/turn.h"
 #include "scy/turn/types.h"
-#include "scy/turn/permission.h"
-#include "scy/turn/fivetuple.h"
-#include "scy/timer.h"
-#include "scy/logger.h"
-#include "scy/net/address.h"
-#include "scy/mutex.h"
 
 
 namespace scy {
@@ -73,14 +73,14 @@ namespace turn {
 class IAllocation
 {
 public:
-    IAllocation(const FiveTuple& tuple = FiveTuple(),
-                const std::string& username = "",
-                std::int64_t lifetime = 10 * 60 * 1000);
+    IAllocation(const FiveTuple& tuple= FiveTuple(),
+                const std::string& username= "",
+                std::int64_t lifetime= 10 * 60 * 1000);
     virtual ~IAllocation();
 
     /// Updates the allocation's internal timeout and bandwidth
     /// usage each time the allocation is used.
-    virtual void updateUsage(std::int64_t numBytes = 0);
+    virtual void updateUsage(std::int64_t numBytes= 0);
 
     /// Sets the lifetime of the allocation and resets the timeout.
     virtual void setLifetime(std::int64_t lifetime);
@@ -110,14 +110,14 @@ public:
     virtual std::int64_t lifetime() const;
     virtual PermissionList permissions() const;
 
-    virtual net::Address relayedAddress() const = 0;
+    virtual net::Address relayedAddress() const= 0;
 
     virtual void addPermission(const std::string& ip);
     virtual void addPermissions(const IPList& ips);
     virtual void removePermission(const std::string& ip);
     virtual void removeAllPermissions();
     virtual void removeExpiredPermissions();
-    //virtual void refreshAllPermissions();
+    // virtual void refreshAllPermissions();
     virtual bool hasPermission(const std::string& peerIP);
 
     virtual void print(std::ostream& os) const
@@ -125,17 +125,18 @@ public:
         os << "Allocation[" << relayedAddress() << "]" << std::endl;
     }
 
-    friend std::ostream& operator << (std::ostream& stream, const IAllocation& alloc)
+    friend std::ostream& operator<<(std::ostream& stream,
+                                    const IAllocation& alloc)
     {
         alloc.print(stream);
         return stream;
     }
 
 protected:
-    //mutable Mutex _mutex;
+    // mutable Mutex _mutex;
     FiveTuple _tuple;
-    std::string    _username;
-    PermissionList    _permissions;
+    std::string _username;
+    PermissionList _permissions;
     std::int64_t _lifetime;
     std::int64_t _bandwidthLimit;
     std::int64_t _bandwidthUsed;
@@ -150,5 +151,6 @@ protected:
 
 
 #endif // SCY_TURN_IAllocation_H
+
 
 /// @\}

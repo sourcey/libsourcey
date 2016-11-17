@@ -1,5 +1,5 @@
-#include "scy/net/udpsocket.h"
 #include "scy/net/socketadapter.h"
+#include "scy/net/udpsocket.h"
 #include "scy/time.h"
 
 
@@ -7,36 +7,35 @@ namespace scy {
 namespace net {
 
 
-class UDPEchoServer: public SocketAdapter
+class UDPEchoServer : public SocketAdapter
 {
 public:
     UDPSocket::Ptr socket;
 
-    UDPEchoServer() : 
-        socket(std::make_shared<UDPSocket>())
+    UDPEchoServer()
+        : socket(std::make_shared<UDPSocket>())
     {
         socket->addReceiver(this);
     }
 
     virtual ~UDPEchoServer()
     {
-        socket->removeReceiver(this); 
+        socket->removeReceiver(this);
         shutdown();
     }
-    
+
     void start(const std::string& host, std::uint16_t port)
-    {    
+    {
         socket->bind(Address(host, port));
     }
 
-    void shutdown() 
+    void shutdown() { socket->close(); }
+
+    void onSocketRecv(const MutableBuffer& buffer,
+                      const net::Address& peerAddress)
     {
-        socket->close();
-    }
-    
-    void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
-    {
-        DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
+        DebugL << "On recv: " << peerAddress << ": " << buffer.size()
+               << std::endl;
 
 #if 0        
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
@@ -51,19 +50,17 @@ public:
                 << std::endl;
         }
 #endif
-    /// Echo back to client
-        socket->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
+        /// Echo back to client
+        socket->send(bufferCast<const char*>(buffer), buffer.size(),
+                     peerAddress);
     }
 
-    void onSocketError(const scy::Error& error) 
+    void onSocketError(const scy::Error& error)
     {
         ErrorL << "On error: " << error.message << std::endl;
     }
 
-    void onSocketClose() 
-    {
-        DebugL << "On close" << std::endl;
-    }
+    void onSocketClose() { DebugL << "On close" << std::endl; }
 };
 
 

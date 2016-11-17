@@ -24,24 +24,21 @@ namespace scy {
 /// The given Mutex is locked in the constructor,
 /// and unlocked it in the destructor.
 /// T can be any class with lock() and unlock() functions.
-template <class T>
-class ScopedLock
+template <class T> class ScopedLock
 {
 public:
-    explicit ScopedLock(T& m) : _m(m)
+    explicit ScopedLock(T& m)
+        : _m(m)
     {
         _m.lock();
     }
 
-    ~ScopedLock()
-    {
-        _m.unlock();
-    }
+    ~ScopedLock() { _m.unlock(); }
 
 private:
     ScopedLock();
     ScopedLock(const ScopedLock&);
-    ScopedLock& operator = (const ScopedLock&);
+    ScopedLock& operator=(const ScopedLock&);
 
     T& _m;
 };
@@ -78,7 +75,7 @@ public:
 
 private:
     Mutex(const Mutex&);
-    Mutex& operator = (const Mutex&);
+    Mutex& operator=(const Mutex&);
 
     uv_mutex_t _mx;
 };
@@ -92,5 +89,6 @@ private:
 
 
 #endif // SCY_Mutex_H
+
 
 /// @\}

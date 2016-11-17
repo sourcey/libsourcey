@@ -17,15 +17,15 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/stateful.h"
-#include "scy/signal.h"
-#include "scy/packetstream.h"
-#include "scy/interface.h"
-#include "scy/packetstream.h"
+#include "scy/av/format.h"
+#include "scy/av/fpscounter.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/videoconverter.h"
-#include "scy/av/fpscounter.h"
-#include "scy/av/format.h"
+#include "scy/interface.h"
+#include "scy/packetstream.h"
+#include "scy/packetstream.h"
+#include "scy/signal.h"
+#include "scy/stateful.h"
 
 extern "C" {
 #include <libavcodec/avfft.h>
@@ -48,13 +48,14 @@ class VideoAnalyzer //: public PacketProcessor
 public:
     struct Options
     {
-        std::string ifile;    // The input video file.
-        int rdftSize;        // Size of the FFT input array
-        //bool blocking;        // Blocking mode (disable async)
+        std::string ifile; // The input video file.
+        int rdftSize;      // Size of the FFT input array
+        // bool blocking;        // Blocking mode (disable async)
 
-        Options() {
-            rdftSize = 1024;
-            //blocking = false;
+        Options()
+        {
+            rdftSize= 1024;
+            // blocking = false;
         }
     };
 
@@ -75,22 +76,25 @@ public:
         void uninitialize();
 
         void fft();
-            // Preforms FFT on internal rdftData
+        // Preforms FFT on internal rdftData
     };
 
     struct Packet
     {
         double time;
-        //double min;
-        //double max;
+        // double min;
+        // double max;
         double value;
 
-        Packet(double time = 0.0, double value = 0.0); //, double min = 99999.9, double max = -99999.9
+        Packet(
+            double time= 0.0,
+            double value= 0.0); //, double min = 99999.9, double max = -99999.9
     };
 
 public:
-    VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
-    virtual ~VideoAnalyzer();    /// Set everything up, and open the input file.
+    VideoAnalyzer(
+        const VideoAnalyzer::Options& options= VideoAnalyzer::Options());
+    virtual ~VideoAnalyzer(); /// Set everything up, and open the input file.
     virtual void initialize();
 
     /// Stop processing and free everything.
@@ -104,7 +108,8 @@ public:
 
     /// Signals on VideoAnalyzer::Packet output
     /// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
-    Signal<void(const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&)> PacketOut;
+    Signal<void(const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&)>
+        PacketOut;
 
     /// Signals on analysis complete
     NullSignal Complete;
@@ -160,7 +165,5 @@ inline double log2(double n);
 #endif
 
 
-
-
-    //virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
-    //std::ofstream _ofile;
+// virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
+// std::ofstream _ofile;

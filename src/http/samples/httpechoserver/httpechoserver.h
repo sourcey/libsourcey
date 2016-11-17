@@ -11,11 +11,11 @@ namespace scy {
 
 
 /// Basic server responder (make echo?)
-class BasicResponder: public http::ServerResponder
+class BasicResponder : public http::ServerResponder
 {
 public:
-    BasicResponder(http::ServerConnection& conn) :
-        http::ServerResponder(conn)
+    BasicResponder(http::ServerConnection& conn)
+        : http::ServerResponder(conn)
     {
         DebugL << "Creating" << endl;
     }
@@ -34,11 +34,11 @@ public:
 
 
 /// Basic echo server responder
-class BasicEchoResponder: public http::ServerResponder
+class BasicEchoResponder : public http::ServerResponder
 {
 public:
-    BasicEchoResponder(http::ServerConnection& conn) :
-        http::ServerResponder(conn)
+    BasicEchoResponder(http::ServerConnection& conn)
+        : http::ServerResponder(conn)
     {
         DebugL << "Creating" << endl;
     }
@@ -53,25 +53,22 @@ public:
 };
 
 
-struct RandomDataSource: public Idler
+struct RandomDataSource : public Idler
 {
     PacketSignal signal;
 
-    void init()
-    {
-        start(std::bind(&RandomDataSource::onIdle, this));
-    }
+    void init() { start(std::bind(&RandomDataSource::onIdle, this)); }
 
     void onIdle()
     {
         RawPacket packet("hello", 5);
-        signal.emit(/*this, */packet);
+        signal.emit(/*this, */ packet);
     }
 };
 
 
 /// Chunked responder that broadcasts random data to the client.
-class ChunkedResponder: public http::ServerResponder
+class ChunkedResponder : public http::ServerResponder
 {
 public:
     RandomDataSource dataSource;
@@ -79,11 +76,11 @@ public:
     bool gotRequest;
     bool gotClose;
 
-    ChunkedResponder(http::ServerConnection& conn) :
-        http::ServerResponder(conn),
-        gotHeaders(false),
-        gotRequest(false),
-        gotClose(false)
+    ChunkedResponder(http::ServerConnection& conn)
+        : http::ServerResponder(conn)
+        , gotHeaders(false)
+        , gotRequest(false)
+        , gotClose(false)
     {
         // conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
         // dataSource.signal += sdelegate(&conn.socket(), &Socket::send);
@@ -97,21 +94,18 @@ public:
         assert(gotClose);
     }
 
-    void onHeaders(http::Request& request)
-    {
-        gotHeaders = true;
-    }
+    void onHeaders(http::Request& request) { gotHeaders= true; }
 
     void onRequest(http::Request& request, http::Response& response)
     {
-        gotRequest = true;
+        gotRequest= true;
 
         connection().response().set("Access-Control-Allow-Origin", "*");
         connection().response().set("Content-Type", "text/html");
         connection().response().set("Transfer-Encoding", "chunked");
 
         // headers pushed through automatically
-        //connection().sendHeader();
+        // connection().sendHeader();
 
         // Start shooting data at the client
         dataSource.init();
@@ -120,22 +114,22 @@ public:
     void onClose()
     {
         DebugL << "On connection close" << endl;
-        gotClose = true;
+        gotClose= true;
         dataSource.cancel();
     }
 };
 
 
-class WebSocketResponder: public http::ServerResponder
+class WebSocketResponder : public http::ServerResponder
 {
 public:
     bool gotPayload;
     bool gotClose;
 
-    WebSocketResponder(http::ServerConnection& conn) :
-        http::ServerResponder(conn),
-        gotPayload(false),
-        gotClose(false)
+    WebSocketResponder(http::ServerConnection& conn)
+        : http::ServerResponder(conn)
+        , gotPayload(false)
+        , gotClose(false)
     {
         DebugL << "Creating" << endl;
     }
@@ -151,7 +145,7 @@ public:
     {
         DebugL << "On payload: " << body.size() << endl;
 
-        gotPayload = true;
+        gotPayload= true;
 
         // Echo the request back to the client
         connection().send(body.cstr(), body.size());
@@ -160,13 +154,13 @@ public:
     virtual void onClose()
     {
         DebugL << "On connection close" << endl;
-        gotClose = true;
+        gotClose= true;
     }
 };
 
 
 /// A Server Responder Factory for testing the HTTP server
-class OurServerResponderFactory: public http::ServerResponderFactory
+class OurServerResponderFactory : public http::ServerResponderFactory
 {
 public:
     http::ServerResponder* createResponder(http::ServerConnection& conn)

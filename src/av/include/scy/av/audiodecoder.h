@@ -34,20 +34,20 @@ namespace scy {
 namespace av {
 
 
-struct AudioDecoder: public AudioContext
+struct AudioDecoder : public AudioContext
 {
-    AudioDecoder(AVStream* stream); //AVFormatContext* format,
+    AudioDecoder(AVStream* stream); // AVFormatContext* format,
     virtual ~AudioDecoder();
 
     virtual void create();
     virtual void close();
 
     virtual bool decode(std::uint8_t* data, int size); //, AVPacket& opacket
-    virtual bool decode(AVPacket& ipacket); //, AVPacket& opacket
+    virtual bool decode(AVPacket& ipacket);            //, AVPacket& opacket
     /// Decodes a the given input packet.
     /// Returns true an output packet was returned,    // false otherwise.
 
-    virtual void flush(); //AVPacket& opacket
+    virtual void flush(); // AVPacket& opacket
     /// Flushes buffered frames.
     /// This method should be called once after decoding.
 };
@@ -59,5 +59,6 @@ struct AudioDecoder: public AudioContext
 
 #endif
 #endif // SCY_AV_AudioDecoder_H
+
 
 /// @\}

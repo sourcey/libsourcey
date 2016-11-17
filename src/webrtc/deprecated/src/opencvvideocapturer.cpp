@@ -26,19 +26,23 @@ using std::endl;
 namespace scy {
 
 
-OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId) :
-    capture(av::MediaFactory::instance().createVideoCapture(deviceId))
+OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
+    : capture(av::MediaFactory::instance().createVideoCapture(deviceId))
 {
     // Default supported formats. Use ResetSupportedFormats to over write.
     std::vector<cricket::VideoFormat> formats;
-    formats.push_back(cricket::VideoFormat(1280, 720,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420));
-    formats.push_back(cricket::VideoFormat(640, 480,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420));
-    formats.push_back(cricket::VideoFormat(320, 240,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420));
-    formats.push_back(cricket::VideoFormat(160, 120,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420));
+    formats.push_back(
+        cricket::VideoFormat(1280, 720, cricket::VideoFormat::FpsToInterval(30),
+                             cricket::FOURCC_I420));
+    formats.push_back(
+        cricket::VideoFormat(640, 480, cricket::VideoFormat::FpsToInterval(30),
+                             cricket::FOURCC_I420));
+    formats.push_back(
+        cricket::VideoFormat(320, 240, cricket::VideoFormat::FpsToInterval(30),
+                             cricket::FOURCC_I420));
+    formats.push_back(
+        cricket::VideoFormat(160, 120, cricket::VideoFormat::FpsToInterval(30),
+                             cricket::FOURCC_I420));
 }
 
 
@@ -47,7 +51,8 @@ OpenCVVideoCapturer::~OpenCVVideoCapturer()
 }
 
 
-cricket::CaptureState OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
+cricket::CaptureState
+OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
 {
     try {
         if (capture_state() == cricket::CS_RUNNING) {
@@ -62,11 +67,13 @@ cricket::CaptureState OpenCVVideoCapturer::Start(const cricket::VideoFormat& cap
         // Output packets must be av::MatrixPacket types so we can access
         // the underlying cv::Mat.
         capture->start();
-        capture->emitter += packetSlot(this, &OpenCVVideoCapturer::onFrameCaptured);
+        capture->emitter+=
+            packetSlot(this, &OpenCVVideoCapturer::onFrameCaptured);
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;
-    } catch (...) {}
+    } catch (...) {
+    }
     return cricket::CS_FAILED;
 }
 
@@ -85,12 +92,14 @@ void OpenCVVideoCapturer::Stop()
         SetCaptureFormat(NULL);
         SetCaptureState(cricket::CS_STOPPED);
         return;
-    } catch (...) {}
+    } catch (...) {
+    }
     return;
 }
 
 
-void OpenCVVideoCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet)
+void OpenCVVideoCapturer::onFrameCaptured(void* sender,
+                                          av::MatrixPacket& packet)
 {
     // TraceS(this) << "On frame" << std::endl;
 
@@ -99,11 +108,11 @@ void OpenCVVideoCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet
     cv::cvtColor(*packet.mat, yuv, CV_BGR2YUV_I420);
 
     cricket::CapturedFrame frame;
-    frame.width = packet.width;
-    frame.height = packet.height;
-    frame.fourcc = cricket::FOURCC_I420;
-    frame.data_size = yuv.rows * yuv.step;
-    frame.data = yuv.data;
+    frame.width= packet.width;
+    frame.height= packet.height;
+    frame.fourcc= cricket::FOURCC_I420;
+    frame.data_size= yuv.rows * yuv.step;
+    frame.data= yuv.data;
 
     SignalFrameCaptured(this, &frame);
 }
@@ -126,16 +135,17 @@ bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 }
 
 
-bool OpenCVVideoCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
+bool OpenCVVideoCapturer::GetBestCaptureFormat(
+    const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
 {
     if (!best_format)
         return false;
 
     // Use the supported format as the best format.
-    best_format->width = desired.width;
-    best_format->height = desired.height;
-    best_format->fourcc = cricket::FOURCC_I420;
-    best_format->interval = desired.interval;
+    best_format->width= desired.width;
+    best_format->height= desired.height;
+    best_format->fourcc= cricket::FOURCC_I420;
+    best_format->interval= desired.interval;
 
     return true;
 }

@@ -10,8 +10,8 @@
 
 
 #include "scy/symple/presence.h"
-#include "scy/util.h"
 #include "assert.h"
+#include "scy/util.h"
 
 
 using std::endl;
@@ -23,23 +23,23 @@ namespace smpl {
 
 Presence::Presence()
 {
-    (*this)["type"] = "presence";
+    (*this)["type"]= "presence";
 }
 
 
-Presence::Presence(const Presence& root) :
-    Message(root)
+Presence::Presence(const Presence& root)
+    : Message(root)
 {
     if (!isMember("type"))
-        (*this)["type"] = "presence";
+        (*this)["type"]= "presence";
 }
 
 
-Presence::Presence(const json::Value& root) :
-    Message(root)
+Presence::Presence(const json::Value& root)
+    : Message(root)
 {
     if (!isMember("type"))
-        (*this)["type"] = "presence";
+        (*this)["type"]= "presence";
 }
 
 
@@ -56,11 +56,12 @@ bool Presence::isProbe()
 
 void Presence::setProbe(bool flag)
 {
-    (*this)["probe"] = flag;
+    (*this)["probe"]= flag;
 }
 
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

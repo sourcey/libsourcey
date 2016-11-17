@@ -33,7 +33,8 @@ public:
 
     virtual Format& get(const std::string& name);
     virtual Format& getByID(const std::string& id);
-    virtual Format& getOrDefault(const std::string& name);    // Returns the default media format.
+    virtual Format&
+    getOrDefault(const std::string& name); // Returns the default media format.
     /// If a default has been specified it will be
     /// returned, other the format with the highest
     /// priority will take precedence.
@@ -57,8 +58,8 @@ public:
     virtual FormatList formats() const;
 
 private:
-    FormatRegistry(FormatRegistry const&) {};
-    //FormatRegistry& operator=(FormatRegistry const&) {};
+    FormatRegistry(FormatRegistry const&){};
+    // FormatRegistry& operator=(FormatRegistry const&) {};
 
     FormatList _formats;
     std::string _default;
@@ -71,5 +72,6 @@ private:
 
 
 #endif // SCY_AV_FormatRegistry_H
+
 
 /// @\}

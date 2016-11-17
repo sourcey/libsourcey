@@ -39,20 +39,22 @@ void SSLManager::initNoVerifyClient()
 {
     net::SSLManager::instance().initializeClient(
         std::shared_ptr<net::SSLContext>(
-            new net::SSLContext(
-                net::SSLContext::CLIENT_USE, "", "", "",
-                net::SSLContext::VERIFY_NONE, 9, false,
-                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
+            new net::SSLContext(net::SSLContext::CLIENT_USE, "", "", "",
+                                net::SSLContext::VERIFY_NONE, 9, false,
+                                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
 
 
 void SSLManager::initNoVerifyServer(const std::string& privateKeyFile,
                                     const std::string& certificateFile)
 {
-    // Create server/client self-signed certificate/key (self signed, DONT ADD PASSWORD)
+    // Create server/client self-signed certificate/key (self signed, DONT ADD
+    // PASSWORD)
     //
-    // openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout client-key.pem -out client-cert.pem
-    // openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem -out server-cert.pem
+    // openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout
+    // client-key.pem -out client-cert.pem
+    // openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout
+    // server-key.pem -out server-cert.pem
 
     // const char defaultPrivateKey[] =
     //     "-----BEGIN RSA PRIVATE KEY-----\n"
@@ -87,14 +89,16 @@ void SSLManager::initNoVerifyServer(const std::string& privateKeyFile,
     //     "-----END CERTIFICATE-----";
 
     net::SSLManager::instance().initializeServer(
-        std::shared_ptr<net::SSLContext>(
-            new net::SSLContext(
-                net::SSLContext::SERVER_USE,
-                privateKeyFile.empty() ? (std::string(SCY_SOURCE_DIR) + "/net/tests/key.pem") : privateKeyFile,
-                certificateFile.empty() ? (std::string(SCY_SOURCE_DIR) + "/net/tests/cert.pem") : certificateFile,
-                "",
-                net::SSLContext::VERIFY_NONE, 9, false,
-                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
+        std::shared_ptr<net::SSLContext>(new net::SSLContext(
+            net::SSLContext::SERVER_USE,
+            privateKeyFile.empty()
+                ? (std::string(SCY_SOURCE_DIR) + "/net/tests/key.pem")
+                : privateKeyFile,
+            certificateFile.empty()
+                ? (std::string(SCY_SOURCE_DIR) + "/net/tests/cert.pem")
+                : certificateFile,
+            "", net::SSLContext::VERIFY_NONE, 9, false,
+            "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
 
 
@@ -114,8 +118,8 @@ void SSLManager::shutdown()
     PrivateKeyPassphraseRequired.detachAll();
     ClientVerificationError.detachAll();
     ServerVerificationError.detachAll();
-    _defaultServerContext = nullptr;
-    _defaultClientContext = nullptr;
+    _defaultServerContext= nullptr;
+    _defaultClientContext= nullptr;
 }
 
 
@@ -147,13 +151,13 @@ void SSLManager::destroy()
 
 void SSLManager::initializeServer(SSLContext::Ptr ptrContext)
 {
-    _defaultServerContext = ptrContext;
+    _defaultServerContext= ptrContext;
 }
 
 
 void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 {
-    _defaultClientContext = ptrContext;
+    _defaultClientContext= ptrContext;
 }
 
 
@@ -174,32 +178,36 @@ SSLContext::Ptr SSLManager::defaultClientContext()
 int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 {
     if (!ok) {
-        X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
+        X509* pCert= X509_STORE_CTX_get_current_cert(pStore);
         crypto::X509Certificate x509(pCert, true);
-        int depth = X509_STORE_CTX_get_error_depth(pStore);
-        int err = X509_STORE_CTX_get_error(pStore);
+        int depth= X509_STORE_CTX_get_error_depth(pStore);
+        int err= X509_STORE_CTX_get_error(pStore);
         std::string error(X509_verify_cert_error_string(err));
         VerificationErrorDetails args(x509, depth, err, error);
         if (server)
-            SSLManager::instance().ServerVerificationError.emit(/*&SSLManager::instance(), */args);
+            SSLManager::instance().ServerVerificationError.emit(
+                /*&SSLManager::instance(), */ args);
         else
-            SSLManager::instance().ClientVerificationError.emit(/*&SSLManager::instance(), */args);
-        ok = args.getIgnoreError() ? 1 : 0;
+            SSLManager::instance().ClientVerificationError.emit(
+                /*&SSLManager::instance(), */ args);
+        ok= args.getIgnoreError() ? 1 : 0;
     }
 
     return ok;
 }
 
 
-int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData)
+int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag,
+                                             void* userData)
 {
     std::string pwd;
-    SSLManager::instance().PrivateKeyPassphraseRequired.emit(/*&SSLManager::instance(), */pwd);
+    SSLManager::instance().PrivateKeyPassphraseRequired.emit(
+        /*&SSLManager::instance(), */ pwd);
 
-    strncpy(pBuf, (char *)(pwd.c_str()), size);
-    pBuf[size - 1] = '\0';
+    strncpy(pBuf, (char*)(pwd.c_str()), size);
+    pBuf[size - 1]= '\0';
     if (size > (int)pwd.length())
-        size = (int)pwd.length();
+        size= (int)pwd.length();
 
     return size;
 }
@@ -223,12 +231,14 @@ void uninitializeSSL()
 //
 
 
-VerificationErrorDetails::VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
-    _cert(cert),
-    _errorDepth(errDepth),
-    _errorNumber(errNum),
-    _errorMessage(errMsg),
-    _ignoreError(false)
+VerificationErrorDetails::VerificationErrorDetails(
+    const crypto::X509Certificate& cert, int errDepth, int errNum,
+    const std::string& errMsg)
+    : _cert(cert)
+    , _errorDepth(errDepth)
+    , _errorNumber(errNum)
+    , _errorMessage(errMsg)
+    , _ignoreError(false)
 {
 }
 
@@ -238,9 +248,9 @@ VerificationErrorDetails::~VerificationErrorDetails()
 }
 
 
-
 } // namespace net
 } // namespace scy
+
 
 /// @\}
 

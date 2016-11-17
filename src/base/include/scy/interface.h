@@ -13,11 +13,11 @@
 #define SCY_Interfaces_H
 
 
-#include <cstdint>
-#include <stdexcept>
 #include <atomic>
+#include <cstdint>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 
 
 namespace scy {
@@ -35,7 +35,8 @@ class Decoder
 public:
     Decoder() {}
     virtual ~Decoder() {}
-    virtual std::size_t decode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
+    virtual std::size_t decode(const char* inbuf, std::size_t nread,
+                               char* outbuf)= 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
 
@@ -45,7 +46,8 @@ class Encoder
 public:
     Encoder() {}
     virtual ~Encoder() {}
-    virtual std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
+    virtual std::size_t encode(const char* inbuf, std::size_t nread,
+                               char* outbuf)= 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
 
@@ -89,5 +91,6 @@ public:
 
 
 #endif // SCY_Interfaces_H
+
 
 /// @\}

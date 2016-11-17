@@ -22,20 +22,20 @@ namespace smpl {
 
 Roster::Roster()
 {
-    //TraceS(this) << "Create" << endl;
+    // TraceS(this) << "Create" << endl;
 }
 
 
 Roster::~Roster()
 {
-    //TraceS(this) << "Destroy" << endl;
+    // TraceS(this) << "Destroy" << endl;
 }
 
 
 Peer* Roster::getByHost(const std::string& host)
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it = _map.begin(); it != _map.end(); ++it) {
+    for (auto it= _map.begin(); it != _map.end(); ++it) {
         if (it->second->host() == host)
             return it->second;
     }
@@ -55,7 +55,7 @@ void Roster::print(std::ostream& os) const
     Mutex::ScopedLock lock(_mutex);
 
     os << "Roster[";
-    for (auto it = _map.begin(); it != _map.end(); ++it) {
+    for (auto it= _map.begin(); it != _map.end(); ++it) {
         os << "\n\t" << it->second << ": " << it->first;
     }
     os << "\n]";
@@ -97,5 +97,6 @@ void Roster::update(const json::Value& data, bool whiny)
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

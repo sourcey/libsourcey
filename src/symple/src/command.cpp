@@ -10,8 +10,8 @@
 
 
 #include "scy/symple/command.h"
-#include "scy/util.h"
 #include "assert.h"
+#include "scy/util.h"
 
 
 using std::endl;
@@ -23,23 +23,23 @@ namespace smpl {
 
 Command::Command()
 {
-    (*this)["type"] = "command";
+    (*this)["type"]= "command";
 }
 
 
-Command::Command(const Command& root) :
-    Message(root)
+Command::Command(const Command& root)
+    : Message(root)
 {
     if (!isMember("type"))
-        (*this)["type"] = "command";
+        (*this)["type"]= "command";
 }
 
 
-Command::Command(const json::Value& root) :
-    Message(root)
+Command::Command(const json::Value& root)
+    : Message(root)
 {
     if (!isMember("type"))
-        (*this)["type"] = "command";
+        (*this)["type"]= "command";
 }
 
 
@@ -50,8 +50,7 @@ Command::~Command()
 
 bool Command::valid() const
 {
-    return Message::valid()
-        && isMember("node");
+    return Message::valid() && isMember("node");
 }
 
 
@@ -69,23 +68,23 @@ std::string Command::action() const
 
 void Command::setNode(const std::string& node)
 {
-    (*this)["node"] = node;
+    (*this)["node"]= node;
 }
 
 
 void Command::setAction(const std::string& action)
 {
-    (*this)["action"] = action;
+    (*this)["action"]= action;
 }
 
 
 std::string Command::param(int n) const
 {
-    std::vector<std::string> params = util::split(node(), ':');
+    std::vector<std::string> params= util::split(node(), ':');
     assert(int(params.size()) >= n);
     if (int(params.size()) < n)
         return "";
-    return params[n-1].c_str();
+    return params[n - 1].c_str();
 }
 
 
@@ -103,5 +102,6 @@ bool Command::matches(const std::string& xnode) const
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

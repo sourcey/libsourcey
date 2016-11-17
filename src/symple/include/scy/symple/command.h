@@ -13,8 +13,8 @@
 #define SCY_Symple_Command_H
 
 
-#include "scy/json/json.h"
 #include "scy/base.h"
+#include "scy/json/json.h"
 #include "scy/symple/message.h"
 
 
@@ -22,7 +22,7 @@ namespace scy {
 namespace smpl {
 
 
-class Command: public Message
+class Command : public Message
 {
 public:
     Command();
@@ -49,5 +49,6 @@ public:
 
 
 #endif // SCY_Symple_Command_H
+
 
 /// @\}

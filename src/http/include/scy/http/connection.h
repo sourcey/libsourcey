@@ -13,54 +13,55 @@
 #define SCY_HTTP_ServerConnection_H
 
 
-#include "scy/timer.h"
-#include "scy/packetqueue.h"
-#include "scy/net/tcpsocket.h"
-#include "scy/net/socketadapter.h"
+#include "scy/http/parser.h"
 #include "scy/http/request.h"
 #include "scy/http/response.h"
-#include "scy/http/parser.h"
 #include "scy/http/url.h"
+#include "scy/net/socketadapter.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/packetqueue.h"
+#include "scy/timer.h"
 
 
 namespace scy {
 namespace http {
 
 
-class ProgressSignal: public Signal<void(const double&)>
+class ProgressSignal : public Signal<void(const double&)>
 {
 public:
     void* sender;
     std::uint64_t current;
     std::uint64_t total;
 
-    ProgressSignal() :
-        sender(nullptr), current(0), total(0) {}
-
-    double progress() const
+    ProgressSignal()
+        : sender(nullptr)
+        , current(0)
+        , total(0)
     {
-        return (current / (total * 1.0)) * 100;
     }
+
+    double progress() const { return (current / (total * 1.0)) * 100; }
 
     void update(int nread)
     {
         // assert(current <= total);
-        current += nread;
+        current+= nread;
 
-        emit(/*sender ? sender : this, */progress());
+        emit(/*sender ? sender : this, */ progress());
     }
 };
 
 
 class ConnectionAdapter;
-class Connection: public net::SocketAdapter
+class Connection : public net::SocketAdapter
 {
 public:
     Connection(const net::Socket::Ptr& socket);
     virtual ~Connection();
 
     /// Send raw data to the peer.
-    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual int send(const char* data, std::size_t len, int flags= 0);
 
     /// Send the outdoing HTTP header.
     virtual int sendHeader();
@@ -79,9 +80,9 @@ public:
     /// a proper response within the allotted time.
     /// bool expired() const;
 
-    virtual void onHeaders() = 0;
-    virtual void onPayload(const MutableBuffer&) {};
-    virtual void onMessage() = 0;
+    virtual void onHeaders()= 0;
+    virtual void onPayload(const MutableBuffer&){};
+    virtual void onMessage()= 0;
     virtual void onClose(); // not virtual
 
     bool shouldSendHeader() const;
@@ -113,17 +114,18 @@ public:
     /// This is useful for example when writing incoming data to a file.
     PacketStream Incoming;
 
-    ProgressSignal IncomingProgress;        ///< Fired on download progress
-    ProgressSignal OutgoingProgress;        ///< Fired on upload progress
+    ProgressSignal IncomingProgress; ///< Fired on download progress
+    ProgressSignal OutgoingProgress; ///< Fired on upload progress
 
-    virtual http::Message* incomingHeader() = 0;
-    virtual http::Message* outgoingHeader() = 0;
+    virtual http::Message* incomingHeader()= 0;
+    virtual http::Message* outgoingHeader()= 0;
 
     Signal<void(Connection&)> Close;
 
 protected:
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                              const net::Address& peerAddress);
     virtual void onSocketError(net::Socket& socket, const scy::Error& error);
     virtual void onSocketClose(net::Socket& socket);
 
@@ -151,28 +153,29 @@ protected:
 //
 
 /// Default HTTP socket adapter for reading and writing HTTP messages
-class ConnectionAdapter: public ParserObserver, public net::SocketAdapter
+class ConnectionAdapter : public ParserObserver, public net::SocketAdapter
 {
 public:
     ConnectionAdapter(Connection& connection, http_parser_type type);
     virtual ~ConnectionAdapter();
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual int send(const char* data, std::size_t len, int flags= 0);
 
     Parser& parser();
     Connection& connection();
 
 protected:
-
     ///// SocketAdapter callbacks
 
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
-    //virtual void onSocketError(const Error& error);
-    //virtual void onSocketClose();
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                              const net::Address& peerAddress);
+    // virtual void onSocketError(const Error& error);
+    // virtual void onSocketClose();
 
     //// HTTP Parser callbacks
 
-    virtual void onParserHeader(const std::string& name, const std::string& value);
+    virtual void onParserHeader(const std::string& name,
+                                const std::string& value);
     virtual void onParserHeadersEnd();
     virtual void onParserChunk(const char* buf, std::size_t len);
     virtual void onParserError(const ParserError& err);
@@ -185,8 +188,11 @@ protected:
 
 inline bool isExplicitKeepAlive(http::Message* message)
 {
-    const std::string& connection = message->get(http::Message::CONNECTION, http::Message::EMPTY);
-    return !connection.empty() && util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) == 0;
+    const std::string& connection=
+        message->get(http::Message::CONNECTION, http::Message::EMPTY);
+    return !connection.empty() &&
+           util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) ==
+               0;
 }
 
 
@@ -195,5 +201,6 @@ inline bool isExplicitKeepAlive(http::Message* message)
 
 
 #endif
+
 
 /// @\}

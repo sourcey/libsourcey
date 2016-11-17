@@ -17,7 +17,6 @@
 #include "scy/collection.h"
 
 
-
 namespace scy {
 namespace http {
 
@@ -48,13 +47,16 @@ bool splitURIParameters(const std::string& uri, NVCollection& out);
 ///   multipart/mixed
 /// and the parameter
 ///   boundary -> boundary-01234567
-void splitParameters(const std::string& s, std::string& value, NVCollection& parameters);
+void splitParameters(const std::string& s, std::string& value,
+                     NVCollection& parameters);
 
 /// Splits the given std::string into a collection of parameters.
 /// Parameters are expected to be separated by semicolons.
 ///
 /// Enclosing quotes of parameter values are removed.
-void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVCollection& parameters);
+void splitParameters(const std::string::const_iterator& begin,
+                     const std::string::const_iterator& end,
+                     NVCollection& parameters);
 
 
 } // namespace http
@@ -62,5 +64,6 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 
 
 #endif // SCY_HTTP_Util_H
+
 
 /// @\}

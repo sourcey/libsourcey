@@ -30,38 +30,41 @@ struct Format
 {
     enum Type
     {
-        None        = 0,
-        Video       = 1,    ///< video only
-        Audio       = 2,    ///< audio only
-        Multiplex   = 3     ///< both video & audio
+        None= 0,
+        Video= 1,    ///< video only
+        Audio= 2,    ///< audio only
+        Multiplex= 3 ///< both video & audio
     };
 
     ///
     /// Base Format Variables
     //
-    std::string name;        ///< The display name of this format.
-    std::string id;          ///< The short name of this format.
+    std::string name; ///< The display name of this format.
+    std::string id;   ///< The short name of this format.
 
-    VideoCodec video;        ///< The video codec.
-    AudioCodec audio;        ///< The audio codec.
+    VideoCodec video; ///< The video codec.
+    AudioCodec audio; ///< The audio codec.
 
-    int priority;            ///< The priority this format will be displayed on the list.
+    int priority; ///< The priority this format will be displayed on the list.
 
     ///
     /// Ctors/Dtors
     //
     Format();
 
-    Format(const std::string& name, const std::string& id,    // Multiplex format constructor
-        const VideoCodec& video, const AudioCodec& audio, int priority = 0);
+    Format(const std::string& name,
+           const std::string& id, // Multiplex format constructor
+           const VideoCodec& video, const AudioCodec& audio, int priority= 0);
 
 
-    Format(const std::string& name, const std::string& id,    // Video only format constructor
-        const VideoCodec& video, int priority = 0);
+    Format(const std::string& name,
+           const std::string& id, // Video only format constructor
+           const VideoCodec& video, int priority= 0);
 
 
-    Format(const std::string& name, const std::string& id,    // Audio only format constructor
-        const AudioCodec& audio, int priority = 0);
+    Format(const std::string& name,
+           const std::string& id, // Audio only format constructor
+           const AudioCodec& audio, int priority= 0);
 
 
     Format(const Format& r);
@@ -72,7 +75,8 @@ struct Format
     virtual std::string toString() const;
     virtual void print(std::ostream& ost);
 
-    static bool preferable(const Format& first, const Format& second) {
+    static bool preferable(const Format& first, const Format& second)
+    {
         return first.priority > second.priority;
     }
 };

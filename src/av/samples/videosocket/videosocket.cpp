@@ -1,10 +1,10 @@
 #include "scy/application.h"
-#include "scy/packetstream.h"
 #include "scy/av/iencoder.h"
 #include "scy/av/multiplexpacketencoder.h"
-#include "scy/net/dns.h"
-#include "scy/http/server.h"
 #include "scy/http/packetizers.h"
+#include "scy/http/server.h"
+#include "scy/net/dns.h"
+#include "scy/packetstream.h"
 
 
 using namespace std;
@@ -26,18 +26,18 @@ av::VideoCapture* gVideoCapture;
 namespace scy {
 
 
-class MPEGResponder: public http::ServerResponder
+class MPEGResponder : public http::ServerResponder
 {
     av::FPSCounter fpsCounter;
     PacketStream* stream;
 
 public:
-    MPEGResponder(http::ServerConnection& conn) :
-        http::ServerResponder(conn)
+    MPEGResponder(http::ServerConnection& conn)
+        : http::ServerResponder(conn)
     {
         DebugL << "Creating" << endl;
 
-        auto stream = new PacketStream;
+        auto stream= new PacketStream;
 
         // We will be sending our own headers
         conn.shouldSendHeader(false);
@@ -47,29 +47,31 @@ public:
 
         // Setup the encoder options
         av::EncoderOptions options;
-        options.oformat = av::Format("MJPEG", "mjpeg", av::VideoCodec(
-            "MJPEG", "mjpeg", 400, 300, 25, 48000, 128000, "yuvj420p"));
+        options.oformat= av::Format(
+            "MJPEG", "mjpeg", av::VideoCodec("MJPEG", "mjpeg", 400, 300, 25,
+                                             48000, 128000, "yuvj420p"));
         gVideoCapture->getEncoderFormat(options.iformat);
 
         // Create and attach the encoder
-        av::MultiplexPacketEncoder* encoder = new av::MultiplexPacketEncoder(options);
+        av::MultiplexPacketEncoder* encoder=
+            new av::MultiplexPacketEncoder(options);
         encoder->initialize();
         stream->attach(encoder, 5, true);
 
         // Create and attach the HTTP multipart packetizer
-        auto packetizer = new http::MultipartAdapter("image/jpeg", false);
+        auto packetizer= new http::MultipartAdapter("image/jpeg", false);
         stream->attach(packetizer, 10, true);
-        //assert(0 && "fixme");
+        // assert(0 && "fixme");
 
         // Start the stream
-        stream->emitter += packetSlot(this, &MPEGResponder::onVideoEncoded);
+        stream->emitter+= packetSlot(this, &MPEGResponder::onVideoEncoded);
         stream->start();
     }
 
     ~MPEGResponder()
     {
         DebugL << "Destroying" << endl;
-        //stream->destroy();
+        // stream->destroy();
         delete stream;
     }
 
@@ -84,23 +86,23 @@ public:
     {
         DebugL << "On close" << endl;
 
-        stream->emitter -= packetSlot(this, &MPEGResponder::onVideoEncoded);
-            DebugL << "On close 1" << endl;
+        stream->emitter-= packetSlot(this, &MPEGResponder::onVideoEncoded);
+        DebugL << "On close 1" << endl;
         stream->stop();
-            DebugL << "On close 2" << endl;
+        DebugL << "On close 2" << endl;
     }
 
     void onVideoEncoded(void* sender, RawPacket& packet)
     {
-        TraceL << "Sending packet: "
-            << packet.size() << ": " << fpsCounter.fps << endl;
+        TraceL << "Sending packet: " << packet.size() << ": " << fpsCounter.fps
+               << endl;
 
         try {
             connection().send(packet.data(), packet.size());
             fpsCounter.tick();
-        }
-        catch (std::exception/*Exception*/& exc) {
-            ErrorL << "Error: " << std::string(exc.what())/*message()*/ << endl;
+        } catch (std::exception /*Exception*/& exc) {
+            ErrorL << "Error: " << std::string(exc.what()) /*message()*/
+                   << endl;
             connection().close();
         }
     }
@@ -109,7 +111,7 @@ public:
 
 // -------------------------------------------------------------------
 //
-class StreamingResponderFactory: public http::ServerResponderFactory
+class StreamingResponderFactory : public http::ServerResponderFactory
 {
 public:
     http::ServerResponder* createResponder(http::ServerConnection& conn)
@@ -133,14 +135,14 @@ int main(int argc, char** argv)
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
-    gVideoCapture = new av::MediaCapture();
-    //gAVVideoCapture->openDevice(0);
+    gVideoCapture= new av::MediaCapture();
+    // gAVVideoCapture->openDevice(0);
     gVideoCapture->openFile(VIDEO_FILE_SOURCE);
     gVideoCapture->start();
 #else
     // VideoCapture instances must be
     // instantiated in the main thread.
-    gVideoCapture = new av::VideoCapture(0);
+    gVideoCapture= new av::VideoCapture(0);
 #endif
 
     {

@@ -13,10 +13,10 @@
 #define SCY_AV_MediaFactory_H
 
 
-#include "scy/av/types.h"
-#include "scy/av/mediacapture.h"
-#include "scy/av/mediacapture.h"
 #include "scy/av/formatregistry.h"
+#include "scy/av/mediacapture.h"
+#include "scy/av/mediacapture.h"
+#include "scy/av/types.h"
 #include "scy/mutex.h"
 
 #if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
@@ -46,7 +46,7 @@ namespace av {
 /// captures, device enumeration and encoder media formats.
 class MediaFactory
 {
-public:    
+public:
     /// Creates a VideoCapture instance for given device ID.
     ///
     /// If the VideoCapture already exists for this camera then this method
@@ -63,15 +63,17 @@ public:
     VideoCapture::Ptr createFileCapture(const std::string& file);
 
 
-    AudioCapture::Ptr createAudioCapture(int deviceId,
-        int channels = DEFAULT_AUDIO_CHANNELS,
-        int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE,    // Creates an AudioCapture from given options.
-        RtAudioFormat format = RTAUDIO_SINT16);
+    AudioCapture::Ptr createAudioCapture(
+        int deviceId, int channels= DEFAULT_AUDIO_CHANNELS,
+        int sampleRate= DEFAULT_AUDIO_SAMPLE_RATE, // Creates an AudioCapture
+                                                   // from given options.
+        RtAudioFormat format= RTAUDIO_SINT16);
 
     /// Preloads a VideoCapture instance for each available camera.
     /// This method MUST be called from the main thread.
     /// This method can be called from the main thread to lazy load
-    /// video device captures. Alternatively you can call createVideoCapture()    // This will ensure captures are always available to the
+    /// video device captures. Alternatively you can call createVideoCapture()
+    /// // This will ensure captures are always available to the
     /// application using createVideoCapture(), from any thread.
     void loadVideoCaptures();
 
@@ -90,7 +92,8 @@ public:
     Signal<void(const VideoCapture::Ptr&)> VideoCaptureError;
 
 
-    std::map<int, VideoCapture::Ptr> videoCaptures() const;    /// Returns the device manager instance.
+    std::map<int, VideoCapture::Ptr>
+    videoCaptures() const; /// Returns the device manager instance.
     IDeviceManager& devices();
 
     /// Returns all registered media formats.
@@ -106,12 +109,12 @@ public:
 protected:
     MediaFactory();
     MediaFactory(MediaFactory const&){};
-    //MediaFactory& operator=(MediaFactory const&){};
+    // MediaFactory& operator=(MediaFactory const&){};
     ~MediaFactory();
 
     void onVideoCaptureError(void*, const scy::Error& err);
 
-    //VideoCapture::Ptr getVideoCapture(int deviceId);
+    // VideoCapture::Ptr getVideoCapture(int deviceId);
 
     friend class Singleton<MediaFactory>;
     friend class VideoCapture;
@@ -119,8 +122,8 @@ protected:
     mutable Mutex _mutex;
 
     IDeviceManager* _devices;
-    FormatRegistry    _formats;
-    //bool _hasFailedVideoCaptures;
+    FormatRegistry _formats;
+    // bool _hasFailedVideoCaptures;
     std::map<int, VideoCapture::Ptr> _videoCaptures;
 };
 

@@ -13,14 +13,14 @@
 #define SCY_Net_SSLContext_H
 
 
+#include "scy/crypto/rsa.h"
+#include "scy/crypto/x509certificate.h"
 #include "scy/memory.h"
 #include "scy/util.h" // remove me
-#include "scy/crypto/x509certificate.h"
-#include "scy/crypto/rsa.h"
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <cstdlib>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
 
 
 namespace scy {
@@ -35,7 +35,7 @@ namespace net {
 ///
 /// The Context class is also used to control
 /// SSL session caching on the server and client side.
-class SSLContext: public SharedObject
+class SSLContext : public SharedObject
 {
 public:
     typedef std::shared_ptr<SSLContext> Ptr;
@@ -56,7 +56,7 @@ public:
         /// Client: If not using an anonymous cipher (by default disabled),
         /// the server will send a certificate which will be checked, but
         /// the result of the check will be ignored.
-        VERIFY_NONE    = SSL_VERIFY_NONE,
+        VERIFY_NONE= SSL_VERIFY_NONE,
 
         /// Server: The server sends a client certificate request to the
         /// client. The certificate returned (if any) is checked.
@@ -68,74 +68,82 @@ public:
         /// If the verification process fails, the TLS/SSL handshake is
         /// immediately terminated with an alert message containing the
         /// reason for the verification failure.
-        VERIFY_RELAXED = SSL_VERIFY_PEER,
+        VERIFY_RELAXED= SSL_VERIFY_PEER,
 
         /// Server: If the client did not return a certificate, the TLS/SSL
         /// handshake is immediately terminated with a handshake failure
         /// alert.
         ///
         /// Client: Same as VERIFY_RELAXED.
-        VERIFY_STRICT  = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+        VERIFY_STRICT= SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
 
         /// Server: Only request a client certificate on the initial
         /// TLS/SSL handshake. Do not ask for a client certificate
         /// again in case of a renegotiation.
         ///
         /// Client: Same as VERIFY_RELAXED.
-        VERIFY_ONCE    = SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
+        VERIFY_ONCE= SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
     };
 
     /// Creates a Context.
     ///
     ///   * usage specifies whether the context is used by a client or server.
-    ///   * privateKeyFile contains the path to the private key file used for encryption.
+    ///   * privateKeyFile contains the path to the private key file used for
+    ///   encryption.
     ///     Can be empty if no private key file is used.
-    ///   * certificateFile contains the path to the certificate file (in PEM format).
-    ///     If the private key and the certificate are stored in the same file, this
+    ///   * certificateFile contains the path to the certificate file (in PEM
+    ///   format).
+    ///     If the private key and the certificate are stored in the same file,
+    ///     this
     ///     can be empty if privateKeyFile is given.
     ///   * caLocation contains the path to the file or directory containing the
-    ///     CA/root certificates. Can be empty if the OpenSSL builtin CA certificates
+    ///     CA/root certificates. Can be empty if the OpenSSL builtin CA
+    ///     certificates
     ///     are used (see loadDefaultCAs).
-    ///   * verificationMode specifies whether and how peer certificates are validated.
-    ///   * verificationDepth sets the upper limit for verification chain sizes. Verification
+    ///   * verificationMode specifies whether and how peer certificates are
+    ///   validated.
+    ///   * verificationDepth sets the upper limit for verification chain sizes.
+    ///   Verification
     ///     will fail if a certificate chain larger than this is encountered.
-    ///   * loadDefaultCAs specifies wheter the builtin CA certificates from OpenSSL are used.
+    ///   * loadDefaultCAs specifies wheter the builtin CA certificates from
+    ///   OpenSSL are used.
     ///   * cipherList specifies the supported ciphers in OpenSSL notation.
     ///
-    /// Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
-    /// must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
+    /// Note: If the private key is protected by a passphrase, a
+    /// PrivateKeyPassphraseHandler
+    /// must have been setup with the SSLManager, or the SSLManager's
+    /// PrivateKeyPassphraseRequired
     /// event must be handled.
     SSLContext(
-        Usage usage,
-        const std::string& privateKeyFile,
-        const std::string& certificateFile,
-        const std::string& caLocation,
-        VerificationMode verificationMode = VERIFY_RELAXED,
-        int verificationDepth = 9,
-        bool loadDefaultCAs = false,
-        const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        Usage usage, const std::string& privateKeyFile,
+        const std::string& certificateFile, const std::string& caLocation,
+        VerificationMode verificationMode= VERIFY_RELAXED,
+        int verificationDepth= 9, bool loadDefaultCAs= false,
+        const std::string& cipherList= "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     /// Creates a Context.
     ///
     ///   * usage specifies whether the context is used by a client or server.
     ///   * caLocation contains the path to the file or directory containing the
-    ///     CA/root certificates. Can be empty if the OpenSSL builtin CA certificates
+    ///     CA/root certificates. Can be empty if the OpenSSL builtin CA
+    ///     certificates
     ///     are used (see loadDefaultCAs).
-    ///   * verificationMode specifies whether and how peer certificates are validated.
-    ///   * verificationDepth sets the upper limit for verification chain sizes. Verification
+    ///   * verificationMode specifies whether and how peer certificates are
+    ///   validated.
+    ///   * verificationDepth sets the upper limit for verification chain sizes.
+    ///   Verification
     ///     will fail if a certificate chain larger than this is encountered.
-    ///   * loadDefaultCAs specifies weather the builtin CA certificates from OpenSSL are used.
+    ///   * loadDefaultCAs specifies weather the builtin CA certificates from
+    ///   OpenSSL are used.
     ///   * cipherList specifies the supported ciphers in OpenSSL notation.
     ///
     /// Note that a private key and/or certificate must be specified with
     /// usePrivateKey()/useCertificate() before the Context can be used.
     SSLContext(
-        Usage usage,
-        const std::string& caLocation,
-        VerificationMode verificationMode = VERIFY_RELAXED,
-        int verificationDepth = 9,
-        bool loadDefaultCAs = false,
-        const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        Usage usage, const std::string& caLocation,
+        VerificationMode verificationMode= VERIFY_RELAXED,
+        int verificationDepth= 9, bool loadDefaultCAs= false,
+        const std::string& cipherList= "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     /// Destroys the Context.
     ~SSLContext();
@@ -158,8 +166,10 @@ public:
     /// Note that useCertificate() must always be called before
     /// usePrivateKey().
     ///
-    /// Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
-    /// must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
+    /// Note: If the private key is protected by a passphrase, a
+    /// PrivateKeyPassphraseHandler
+    /// must have been setup with the SSLManager, or the SSLManager's
+    /// PrivateKeyPassphraseRequired
     /// event must be handled.
     // void usePrivateKey(const crypto::RSAKey& key);
 
@@ -189,7 +199,7 @@ public:
     /// To enable session caching on the server side, use the
     /// two-argument version of this method to specify
     /// a session ID context.
-    void enableSessionCache(bool flag = true);
+    void enableSessionCache(bool flag= true);
 
     /// Enables or disables SSL/TLS session caching on the server.
     /// For session caching to work, it must be enabled
@@ -291,19 +301,20 @@ inline SSL_CTX* SSLContext::sslContext() const
 
 /// Non-case sensitive conversion of a string to a VerificationMode enum.
 /// If verMode is illegal an ArgumentException is thrown.
-inline SSLContext::VerificationMode convertVerificationMode(const std::string& vMode)
+inline SSLContext::VerificationMode
+convertVerificationMode(const std::string& vMode)
 {
-    std::string mode = util::toLower(vMode);
-    SSLContext::VerificationMode verMode = SSLContext::VERIFY_STRICT;
+    std::string mode= util::toLower(vMode);
+    SSLContext::VerificationMode verMode= SSLContext::VERIFY_STRICT;
 
     if (mode == "none")
-        verMode = SSLContext::VERIFY_NONE;
+        verMode= SSLContext::VERIFY_NONE;
     else if (mode == "relaxed")
-        verMode = SSLContext::VERIFY_RELAXED;
+        verMode= SSLContext::VERIFY_RELAXED;
     else if (mode == "strict")
-        verMode = SSLContext::VERIFY_STRICT;
+        verMode= SSLContext::VERIFY_STRICT;
     else if (mode == "once")
-        verMode = SSLContext::VERIFY_ONCE;
+        verMode= SSLContext::VERIFY_ONCE;
     else
         throw std::invalid_argument("Invalid verification mode: " + vMode);
 
@@ -320,13 +331,13 @@ inline std::string convertCertificateError(long errCode)
 /// Returns the last error from the error stack
 inline std::string getLastError()
 {
-    unsigned long errCode = ERR_get_error();
+    unsigned long errCode= ERR_get_error();
     if (errCode != 0) {
         char buffer[256];
         ERR_error_string_n(errCode, buffer, sizeof(buffer));
         return std::string(buffer);
-    }
-    else return "No error";
+    } else
+        return "No error";
 }
 
 /// Clears the error stack
@@ -341,6 +352,7 @@ inline void clearErrorStack()
 
 
 #endif // SCY_Net_SSLContext_H
+
 
 /// @\}
 

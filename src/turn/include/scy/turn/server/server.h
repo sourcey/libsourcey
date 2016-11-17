@@ -16,18 +16,18 @@
 
 #include "scy/net/tcpsocket.h"
 #include "scy/net/udpsocket.h"
-#include "scy/timer.h"
 #include "scy/stun/message.h"
+#include "scy/timer.h"
 #include "scy/turn/server/serverallocation.h"
-#include "scy/turn/server/udpallocation.h"
 #include "scy/turn/server/tcpallocation.h"
+#include "scy/turn/server/udpallocation.h"
 #include "scy/turn/turn.h"
 
 
-#include <assert.h>
-#include <string>
-#include <iostream>
 #include <algorithm>
+#include <assert.h>
+#include <iostream>
+#include <string>
 
 
 namespace scy {
@@ -47,23 +47,25 @@ struct ServerOptions
     int earlyMediaBufferSize;
 
     net::Address listenAddr; ///< The TCP and UDP bind() address
-    std::string externalIP;  ///< The external public facing IP address of the server
+    std::string
+        externalIP; ///< The external public facing IP address of the server
 
     bool enableTCP;
     bool enableUDP;
 
-    ServerOptions() {
-        software                            = "Sourcey STUN/TURN Server [rfc5766]";
-        realm                               = "sourcey.com";
-        listenAddr                          = net::Address("0.0.0.0", 3478);
-        externalIP                          = "";
-        allocationDefaultLifetime           = 2 * 60 * 1000;
-        allocationMaxLifetime               = 15 * 60 * 1000;
-        allocationMaxPermissions            = 10;
-        timerInterval                       = 10 * 1000;
-        earlyMediaBufferSize                = 8192;
-        enableTCP                           = true;
-        enableUDP                           = true;
+    ServerOptions()
+    {
+        software= "Sourcey STUN/TURN Server [rfc5766]";
+        realm= "sourcey.com";
+        listenAddr= net::Address("0.0.0.0", 3478);
+        externalIP= "";
+        allocationDefaultLifetime= 2 * 60 * 1000;
+        allocationMaxLifetime= 15 * 60 * 1000;
+        allocationMaxPermissions= 10;
+        timerInterval= 10 * 1000;
+        earlyMediaBufferSize= 8192;
+        enableTCP= true;
+        enableUDP= true;
     }
 };
 
@@ -73,8 +75,10 @@ struct ServerOptions
 /// methods and authentication.
 struct ServerObserver
 {
-    virtual void onServerAllocationCreated(Server* server, IAllocation* alloc) = 0;
-    virtual void onServerAllocationRemoved(Server* server, IAllocation* alloc) = 0;
+    virtual void onServerAllocationCreated(Server* server,
+                                           IAllocation* alloc)= 0;
+    virtual void onServerAllocationRemoved(Server* server,
+                                           IAllocation* alloc)= 0;
 
     /// The observer class can implement authentication
     /// using the long-term credential mechanism of [RFC5389].
@@ -91,7 +95,8 @@ struct ServerObserver
     /// allowed number of allocations active at one time with a 486
     /// (Allocation Quota Exceeded) (see Section 6.2), and should discard
     /// application data traffic that exceeds the bandwidth quota.
-    virtual AuthenticationState authenticateRequest(Server* server, Request& request) = 0;
+    virtual AuthenticationState authenticateRequest(Server* server,
+                                                    Request& request)= 0;
 };
 
 
@@ -102,7 +107,8 @@ typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 class Server
 {
 public:
-    Server(ServerObserver& observer, const ServerOptions& options = ServerOptions());
+    Server(ServerObserver& observer,
+           const ServerOptions& options= ServerOptions());
     virtual ~Server();
 
     virtual void start();
@@ -133,7 +139,8 @@ public:
 
     void onTCPAcceptConnection(const net::TCPSocket::Ptr& sock);
     void onTCPSocketClosed(net::Socket& socket);
-    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                      const net::Address& peerAddress);
     void onTimer();
 
 private:
@@ -142,14 +149,14 @@ private:
     net::UDPSocket _udpSocket;
     net::TCPSocket _tcpSocket;
     net::TCPSocket::Vec _tcpSockets;
-    ServerAllocationMap    _allocations;
+    ServerAllocationMap _allocations;
     Timer _timer;
 };
-
-
-} } //  namespace scy::turn
+}
+} //  namespace scy::turn
 
 
 #endif // SCY_TURN_Server_H
+
 
 /// @\}

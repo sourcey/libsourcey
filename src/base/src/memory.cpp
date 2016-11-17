@@ -20,19 +20,20 @@ namespace scy {
 
 
 static Singleton<GarbageCollector> singleton;
-static const int GCTimerDelay = 2400;
+static const int GCTimerDelay= 2400;
 
 
-GarbageCollector::GarbageCollector() :
-    _handle(uv::defaultLoop(), new uv_timer_t),
-    _finalize(false),
-    _tid(0)
+GarbageCollector::GarbageCollector()
+    : _handle(uv::defaultLoop(), new uv_timer_t)
+    , _finalize(false)
+    , _tid(0)
 {
     TraceL << "Create" << std::endl;
 
-    _handle.ptr()->data = this;
+    _handle.ptr()->data= this;
     uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
-    uv_timer_start(_handle.ptr<uv_timer_t>(), GarbageCollector::onTimer, GCTimerDelay, GCTimerDelay);
+    uv_timer_start(_handle.ptr<uv_timer_t>(), GarbageCollector::onTimer,
+                   GCTimerDelay, GCTimerDelay);
     uv_unref(_handle.ptr());
 }
 
@@ -40,10 +41,9 @@ GarbageCollector::GarbageCollector() :
 GarbageCollector::~GarbageCollector()
 {
     TraceL << "Destroy: "
-        << "ready=" << _ready.size() << ", "
-        << "pending=" << _pending.size() << ", "
-        << "finalize=" << _finalize
-        << std::endl;
+           << "ready=" << _ready.size() << ", "
+           << "pending=" << _pending.size() << ", "
+           << "finalize=" << _finalize << std::endl;
 
     // NOTE: Calling finalize() here is dangerous since more handles may be
     // queued to the garbage collector during finalization causing a deadlock.
@@ -68,10 +68,10 @@ void GarbageCollector::finalize()
     // assert(_handle.loop()->active_handles <= 1);
     assert(!_handle.closed());
     assert(!_finalize);
-    _finalize = true;
+    _finalize= true;
 
     // Make sure uv_stop doesn't prevent cleanup.
-    _handle.loop()->stop_flag = 0;
+    _handle.loop()->stop_flag= 0;
 
     // Run the loop until managed pointers have been deleted,
     // and the internal timer has also been deleted.
@@ -97,15 +97,16 @@ void GarbageCollector::runAsync()
     std::vector<ScopedPointer*> deletable;
     {
         Mutex::ScopedLock lock(_mutex);
-        if (!_tid) { _tid = uv_thread_self(); }
+        if (!_tid) {
+            _tid= uv_thread_self();
+        }
         if (!_ready.empty() || !_pending.empty()) {
             TraceL << "Deleting: "
-                << "ready=" << _ready.size() << ", "
-                << "pending=" << _pending.size()
-                << std::endl;
+                   << "ready=" << _ready.size() << ", "
+                   << "pending=" << _pending.size() << std::endl;
 
             // Delete waiting pointers
-            deletable = _ready;
+            deletable= _ready;
             _ready.clear();
 
             // Swap pending pointers to the ready queue
@@ -126,12 +127,13 @@ void GarbageCollector::runAsync()
             uv_timer_stop(_handle.ptr<uv_timer_t>());
             //_handle.close();
 
-            TraceL << "Finalization complete: " << _handle.loop()->active_handles << std::endl;
+            TraceL << "Finalization complete: "
+                   << _handle.loop()->active_handles << std::endl;
 
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left
             uv_walk(_handle.loop(), onPrintHandle, nullptr);
-            //assert(_handle.loop()->active_handles <= 1);
+// assert(_handle.loop()->active_handles <= 1);
 #endif
         }
     }
@@ -163,5 +165,6 @@ GarbageCollector& GarbageCollector::instance()
 
 
 } // namespace scy
+
 
 /// @\}

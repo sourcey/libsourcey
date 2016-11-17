@@ -10,8 +10,8 @@
 
 
 #include "scy/symple/client.h"
-#include "scy/net/tcpsocket.h"
 #include "scy/net/sslsocket.h"
+#include "scy/net/tcpsocket.h"
 
 
 using std::endl;
@@ -32,8 +32,8 @@ Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 }
 
 
-TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop) :
-    Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
+TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
+    : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
 {
 }
 
@@ -49,8 +49,8 @@ Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 }
 
 
-SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
-    Client(std::make_shared<net::SSLSocket>(loop), options)
+SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
+    : Client(std::make_shared<net::SSLSocket>(loop), options)
 {
 }
 
@@ -60,10 +60,10 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
 //
 
 
-Client::Client(const net::Socket::Ptr& socket, const Client::Options& options) :
-    sockio::Client(socket),
-    _options(options),
-    _announceStatus(0)
+Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
+    : sockio::Client(socket)
+    , _options(options)
+    , _announceStatus(0)
 {
     TraceL << "Create" << endl;
 }
@@ -83,10 +83,10 @@ void Client::connect()
     assert(!_options.user.empty());
 
     // Update the Socket.IO options with local values before connecting
-    sockio::Client::options().host = _options.host;
-    sockio::Client::options().port = _options.port;
-    sockio::Client::options().reconnection = _options.reconnection;
-    sockio::Client::options().reconnectAttempts = _options.reconnectAttempts;
+    sockio::Client::options().host= _options.host;
+    sockio::Client::options().port= _options.port;
+    sockio::Client::options().reconnection= _options.reconnection;
+    sockio::Client::options().reconnectAttempts= _options.reconnectAttempts;
 
     sockio::Client::connect();
 }
@@ -110,7 +110,8 @@ void assertCanSend(Client* client, Message& m)
 
     if (m.to().id == m.from().id) {
         assert(0);
-        throw std::runtime_error("Cannot send message with matching sender and recipient.");
+        throw std::runtime_error(
+            "Cannot send message with matching sender and recipient.");
     }
 
     if (!m.valid()) {
@@ -134,7 +135,7 @@ int Client::send(Message& m, bool ack)
 sockio::Transaction* Client::createTransaction(Message& message)
 {
     sockio::Packet pkt(message, true);
-    auto txn = sockio::Client::createTransaction(pkt);
+    auto txn= sockio::Client::createTransaction(pkt);
     return txn; //->send();
 }
 
@@ -159,12 +160,12 @@ void Client::createPresence(Presence& p)
 {
     TraceL << "Create presence" << endl;
 
-    auto peer = ourPeer();
+    auto peer= ourPeer();
     if (peer) {
-        CreatePresence.emit(/*this, */*peer);
-        p["data"] = *peer;
-    }
-    else assert(0 && "no session");
+        CreatePresence.emit(/*this, */ *peer);
+        p["data"]= *peer;
+    } else
+        assert(0 && "no session");
 }
 
 
@@ -196,13 +197,13 @@ int Client::announce()
     TraceL << "Announcing" << endl;
 
     json::Value data;
-    data["user"] = _options.user;
-    data["name"] = _options.name;
-    data["type"] = _options.type;
-    data["token"] = _options.token;
+    data["user"]= _options.user;
+    data["name"]= _options.name;
+    data["type"]= _options.type;
+    data["token"]= _options.token;
     sockio::Packet pkt("announce", data, true);
-    auto txn = sockio::Client::createTransaction(pkt);
-    txn->StateChange += slot(this, &Client::onAnnounceState);
+    auto txn= sockio::Client::createTransaction(pkt);
+    txn->StateChange+= slot(this, &Client::onAnnounceState);
     return txn->send();
 }
 
@@ -227,48 +228,49 @@ int Client::leaveRoom(const std::string& room)
 }
 
 
-void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
+void Client::onAnnounceState(void* sender, TransactionState& state,
+                             const TransactionState&)
 {
     TraceL << "On announce response: " << state << endl;
 
-    auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
+    auto transaction= reinterpret_cast<sockio::Transaction*>(sender);
     switch (state.id()) {
-    case TransactionState::Success:
-        try {
-            json::Value data = transaction->response().json(); //[(unsigned)0];
-            _announceStatus = data["status"].asInt();
+        case TransactionState::Success:
+            try {
+                json::Value data=
+                    transaction->response().json(); //[(unsigned)0];
+                _announceStatus= data["status"].asInt();
 
-            if (_announceStatus != 200)
-                throw std::runtime_error(data["message"].asString());
+                if (_announceStatus != 200)
+                    throw std::runtime_error(data["message"].asString());
 
-            _ourID = data["data"]["id"].asString(); //Address();
-            if (_ourID.empty())
-                throw std::runtime_error("Invalid announce response.");
+                _ourID= data["data"]["id"].asString(); // Address();
+                if (_ourID.empty())
+                    throw std::runtime_error("Invalid announce response.");
 
-            // Set our local peer data from the response or fail.
-            onPresenceData(data["data"], true);
+                // Set our local peer data from the response or fail.
+                onPresenceData(data["data"], true);
 
-            // Notify the outside application of the response
-            // status before we transition the client state.
-            Announce.emit(/*this, */_announceStatus);
+                // Notify the outside application of the response
+                // status before we transition the client state.
+                Announce.emit(/*this, */ _announceStatus);
 
-            // Transition to Online state.
-            onOnline();
-            // setState(this, sockio::ClientState::Online);
+                // Transition to Online state.
+                onOnline();
+                // setState(this, sockio::ClientState::Online);
 
-            // Broadcast a presence probe to our network.
-            sendPresence(true);
-        }
-        catch (std::exception& exc) {
-            // Set the error message and close the connection.
-            setError("Announce failed: " + std::string(exc.what()));
-        }
-        break;
+                // Broadcast a presence probe to our network.
+                sendPresence(true);
+            } catch (std::exception& exc) {
+                // Set the error message and close the connection.
+                setError("Announce failed: " + std::string(exc.what()));
+            }
+            break;
 
-    case TransactionState::Failed:
-        Announce.emit(/*this, */_announceStatus);
-        setError(state.message());
-        break;
+        case TransactionState::Failed:
+            Announce.emit(/*this, */ _announceStatus);
+            setError(state.message());
+            break;
     }
 }
 
@@ -286,17 +288,18 @@ void Client::onOnline()
 }
 
 
-void Client::emit(/*void* sender, */IPacket& raw)
+void Client::emit(/*void* sender, */ IPacket& raw)
 {
-    auto packet = reinterpret_cast<sockio::Packet&>(raw);
+    auto packet= reinterpret_cast<sockio::Packet&>(raw);
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
         TraceL << "JSON packet: " << packet.toString() << endl;
 
-        json::Value data = packet.json();
+        json::Value data= packet.json();
 #ifdef _DEBUG
-        TraceL << "Received " << json::stringify(data, true) << endl; //type << ": " <<
+        TraceL << "Received " << json::stringify(data, true)
+               << endl; // type << ": " <<
 #endif
         assert(data.isObject());
         if (data.isMember("type")) {
@@ -308,58 +311,58 @@ void Client::emit(/*void* sender, */IPacket& raw)
             if (type == "message") {
                 Message m(data);
                 if (!m.valid()) {
-                    WarnL << "Dropping invalid message: " << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid message: "
+                          << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(/*this, */m);
-            }
-            else if (type == "event") {
+                PacketSignal::emit(/*this, */ m);
+            } else if (type == "event") {
                 Event e(data);
                 if (!e.valid()) {
-                    WarnL << "Dropping invalid event: " << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid event: "
+                          << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(/*this, */e);
-            }
-            else if (type == "presence") {
+                PacketSignal::emit(/*this, */ e);
+            } else if (type == "presence") {
                 Presence p(data);
                 if (!p.valid()) {
-                    WarnL << "Dropping invalid presence: " << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid presence: "
+                          << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(/*this, */p);
+                PacketSignal::emit(/*this, */ p);
                 if (p.isMember("data")) {
                     onPresenceData(p["data"], false);
                     if (p.isProbe())
                         sendPresence(p.from());
                 }
-            }
-            else if (type == "command") {
+            } else if (type == "command") {
                 Command c(data);
                 if (!c.valid()) {
-                    WarnL << "Dropping invalid command: " << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid command: "
+                          << json::stringify(data, false) << endl;
                     return;
                 }
-                PacketSignal::emit(/*this, */c);
+                PacketSignal::emit(/*this, */ c);
                 if (c.isRequest()) {
                     c.setStatus(404);
-                    WarnL << "Command not handled: " << c.id() << ": " << c.node() << endl;
+                    WarnL << "Command not handled: " << c.id() << ": "
+                          << c.node() << endl;
                     respond(c);
                 }
-            }
-            else
+            } else
                 WarnL << "Received non-standard message: " << type << endl;
-        }
-        else {
-          assert(0 && "invalid packet");
-          WarnL << "Invalid Symple message" << endl;
+        } else {
+            assert(0 && "invalid packet");
+            WarnL << "Invalid Symple message" << endl;
         }
     }
 
     // Other packet types are proxied directly
     else {
         TraceL << "Proxying packet" << endl;
-        PacketSignal::emit(/*this, */packet);
+        PacketSignal::emit(/*this, */ packet);
     }
 }
 
@@ -368,36 +371,32 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
 {
     TraceL << "Updating: " << json::stringify(data, true) << endl;
 
-    if (data.isObject() &&
-        data.isMember("id") &&
-        data.isMember("user") &&
-        data.isMember("name") &&
-        data.isMember("online")) {
-        std::string id = data["id"].asString();
-        bool online = data["online"].asBool();
-        auto peer = _roster.get(id, false);
+    if (data.isObject() && data.isMember("id") && data.isMember("user") &&
+        data.isMember("name") && data.isMember("online")) {
+        std::string id= data["id"].asString();
+        bool online= data["online"].asBool();
+        auto peer= _roster.get(id, false);
         if (online) {
             if (!peer) {
-                peer = new Peer(data);
+                peer= new Peer(data);
                 _roster.add(id, peer);
-                InfoL << "Peer connected: " << peer->address().toString() << endl;
-                PeerConnected.emit(/*this, */*peer);
-            }
-            else
-                static_cast<json::Value&>(*peer) = data;
-        }
-        else {
+                InfoL << "Peer connected: " << peer->address().toString()
+                      << endl;
+                PeerConnected.emit(/*this, */ *peer);
+            } else
+                static_cast<json::Value&>(*peer)= data;
+        } else {
             if (peer) {
-                InfoL << "Peer disconnected: " << peer->address().toString() << endl;
-                PeerDisconnected.emit(/*this, */*peer);
+                InfoL << "Peer disconnected: " << peer->address().toString()
+                      << endl;
+                PeerDisconnected.emit(/*this, */ *peer);
                 _roster.free(id);
-            }
-            else {
-                WarnL << "Got peer disconnected for unknown peer: " << id << endl;
+            } else {
+                WarnL << "Got peer disconnected for unknown peer: " << id
+                      << endl;
             }
         }
-    }
-    else {
+    } else {
         std::string error("Bad presence data: " + json::stringify(data));
         ErrorL << error << endl;
         if (whiny)
@@ -443,15 +442,15 @@ void Client::reset()
 
     _roster.clear();
     _rooms.clear();
-    _announceStatus = 0;
-    _ourID = "";
+    _announceStatus= 0;
+    _ourID= "";
     sockio::Client::reset();
 }
 
 
 Roster& Client::roster()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _roster;
 }
 
@@ -484,12 +483,12 @@ Peer* Client::ourPeer()
 {
     if (_ourID.empty())
         return nullptr;
-        //throw std::runtime_error("No active peer session is available.");
+    // throw std::runtime_error("No active peer session is available.");
     return _roster.get(_ourID, false);
 }
 
 
-Client& Client::operator >> (Message& message)
+Client& Client::operator>>(Message& message)
 {
     send(message);
     return *this;
@@ -498,5 +497,6 @@ Client& Client::operator >> (Message& message)
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

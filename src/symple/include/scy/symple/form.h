@@ -30,9 +30,10 @@ class FormElement
 {
 public:
     FormElement();
-    FormElement(json::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
+    FormElement(json::Value& root, const std::string& type= "",
+                const std::string& id= "", const std::string& label= "");
     FormElement(const FormElement& r);
-    FormElement& operator = (const FormElement& r);
+    FormElement& operator=(const FormElement& r);
     virtual ~FormElement();
 
     std::string type() const;
@@ -52,18 +53,21 @@ public:
     /// Sets and optional validation error message.
     void setError(const std::string& error);
 
-    FormElement addPage(const std::string& id = "", const std::string& label = "");
-    FormElement addSection(const std::string& id = "", const std::string& label = "");
-    FormField addField(const std::string& type, const std::string& id = "", const std::string& label = "");
+    FormElement addPage(const std::string& id= "",
+                        const std::string& label= "");
+    FormElement addSection(const std::string& id= "",
+                           const std::string& label= "");
+    FormField addField(const std::string& type, const std::string& id= "",
+                       const std::string& label= "");
 
-    FormField getField(const std::string& id, bool partial = false);
-    bool getField(const std::string& id, FormField& field, bool partial = false);
+    FormField getField(const std::string& id, bool partial= false);
+    bool getField(const std::string& id, FormField& field, bool partial= false);
 
     /// Returns true if the given Address matches any of the
     /// internal form element IDs.
     /// If the partial flag is set then substring matches
     /// will be counted.
-    bool hasField(const std::string& id, bool partial = false);
+    bool hasField(const std::string& id, bool partial= false);
 
     /// Live fields or elements are used to submit partial
     /// sections a form, without sending the entire form.
@@ -75,7 +79,7 @@ public:
     bool live() const;
 
     /// Clears child elements matching the given ID.
-    bool clearElements(const std::string& id, bool partial = false);
+    bool clearElements(const std::string& id, bool partial= false);
 
     /// Clear the entire form.
     void clear();
@@ -101,7 +105,7 @@ protected:
 };
 
 
-class Form: public FormElement
+class Form : public FormElement
 {
 public:
     Form();
@@ -115,10 +119,14 @@ public:
     bool partial() const;
 
     /// Possible "action" values
-    /// `form` The form-processing entity is asking the form-submitting entity to complete a form.
-    /// `submit` The form-submitting entity is submitting data to the form-processing entity.
-    /// `cancel` The form-submitting entity has cancelled submission of data to the form-processing entity.
-    /// `result` The form-processing entity is returning data to the form-submitting entity.
+    /// `form` The form-processing entity is asking the form-submitting entity
+    /// to complete a form.
+    /// `submit` The form-submitting entity is submitting data to the
+    /// form-processing entity.
+    /// `cancel` The form-submitting entity has cancelled submission of data to
+    /// the form-processing entity.
+    /// `result` The form-processing entity is returning data to the
+    /// form-submitting entity.
     void setAction(const std::string& action);
 
     /// Notifies the form is a partial section of the form.
@@ -128,11 +136,12 @@ public:
 };
 
 
-class FormField: public FormElement
+class FormField : public FormElement
 {
 public:
     FormField();
-    FormField(json::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
+    FormField(json::Value& root, const std::string& type= "",
+              const std::string& id= "", const std::string& label= "");
     virtual ~FormField();
 
     /// Adds an option for list based fields.
@@ -169,5 +178,6 @@ public:
 
 
 #endif // SCY_Symple_Form_H
+
 
 /// @\}

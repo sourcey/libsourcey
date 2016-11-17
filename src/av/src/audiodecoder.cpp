@@ -14,9 +14,9 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/logger.h"
-#include "scy/av/ffmpeg.h"
 #include "scy/av/audioresampler.h"
+#include "scy/av/ffmpeg.h"
+#include "scy/logger.h"
 
 
 using std::endl;
@@ -28,7 +28,7 @@ namespace av {
 
 AudioDecoder::AudioDecoder(AVStream* stream)
 {
-    this->stream = stream;
+    this->stream= stream;
 }
 
 
@@ -44,19 +44,20 @@ void AudioDecoder::create()
 
     TraceS(this) << "Create: " << stream->index << endl;
 
-    ctx = stream->codec;
+    ctx= stream->codec;
 
-    codec = avcodec_find_decoder(ctx->codec_id);
+    codec= avcodec_find_decoder(ctx->codec_id);
     if (!codec)
         throw std::runtime_error("Cannot find audio decoder.");
 
-    frame = av_frame_alloc();
+    frame= av_frame_alloc();
     if (!frame)
         throw std::runtime_error("Cannot allocate input frame.");
 
-    int ret = avcodec_open2(ctx, codec, nullptr);
+    int ret= avcodec_open2(ctx, codec, nullptr);
     if (ret < 0)
-        throw std::runtime_error("Cannot open the audio codec: " + averror(ret));
+        throw std::runtime_error("Cannot open the audio codec: " +
+                                 averror(ret));
 
     // Set the default input and output parameters are set here once the codec
     // context has been opened. The output sample format, channels or sample
@@ -66,7 +67,7 @@ void AudioDecoder::create()
     initAudioCodecFromContext(ctx, oparams);
 
     // Default to s16 output (planar formats not currently supported)
-    oparams.sampleFmt = "s16";
+    oparams.sampleFmt= "s16";
 }
 
 
@@ -76,50 +77,56 @@ void AudioDecoder::close()
 }
 
 
-bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
+bool emitPacket(AudioDecoder* dec)
 {
-    auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
-    assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
+    auto sampleFmt= av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
+    assert(av_sample_fmt_is_planar(sampleFmt) == 0 &&
+           "planar formats not supported");
 
-    dec->time = dec->frame->pkt_pts > 0 ? static_cast<std::int64_t>(dec->frame->pkt_pts * av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
-    dec->pts = dec->frame->pkt_pts;
+    dec->time= dec->frame->pkt_pts > 0
+                   ? static_cast<std::int64_t>(dec->frame->pkt_pts *
+                                               av_q2d(dec->stream->time_base) *
+                                               AV_TIME_BASE)
+                   : 0;
+    dec->pts= dec->frame->pkt_pts;
 
     if (dec->resampler) {
-        if (!dec->resampler->resample((std::uint8_t**)dec->frame->data, dec->frame->nb_samples)) {
+        if (!dec->resampler->resample((std::uint8_t**)dec->frame->data,
+                                      dec->frame->nb_samples)) {
             DebugL << "Samples buffered by resampler" << endl;
             return false;
         }
 
         AudioPacket audio(dec->resampler->outSamples[0],
                           dec->resampler->outBufferSize,
-                          dec->resampler->outNumSamples,
-                          dec->time);
-        dec->outputFrameSize = dec->resampler->outNumSamples;
-        dec->emitter.emit(/*dec, */audio);
+                          dec->resampler->outNumSamples, dec->time);
+        dec->outputFrameSize= dec->resampler->outNumSamples;
+        dec->emitter.emit(/*dec, */ audio);
         // opacket.data = dec->resampler->outSamples[0];
         // opacket.size = dec->resampler->outBufferSize;
-    }
-    else {
-        int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
-                                                       dec->frame->nb_samples,
-                                                       dec->ctx->sample_fmt, 0);
-        AudioPacket audio(dec->frame->data[0],
-                          size,
-                          dec->outputFrameSize,
+    } else {
+        int size= av_samples_get_buffer_size(nullptr, dec->ctx->channels,
+                                             dec->frame->nb_samples,
+                                             dec->ctx->sample_fmt, 0);
+        AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize,
                           dec->time);
-        dec->outputFrameSize = dec->frame->nb_samples;
-        dec->emitter.emit(/*dec, */audio);
+        dec->outputFrameSize= dec->frame->nb_samples;
+        dec->emitter.emit(/*dec, */ audio);
         // opacket.data = dec->frame->data[0];
-        // opacket.size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
+        // opacket.size = av_samples_get_buffer_size(nullptr,
+        // dec->ctx->channels,
         //                                                    dec->frame->nb_samples,
-        //                                                    dec->ctx->sample_fmt, 0);
+        //                                                    dec->ctx->sample_fmt,
+        //                                                    0);
     }
 
-    // opacket.pts = dec->frame->pkt_pts; // Decoder PTS values may be out of sequence
+    // opacket.pts = dec->frame->pkt_pts; // Decoder PTS values may be out of
+    // sequence
     // opacket.dts = dec->frame->pkt_dts;
 
     // Compute stream time in milliseconds
-    // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts * av_q2d(dec->stream->time_base) * 1000) : 0;
+    // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts *
+    // av_q2d(dec->stream->time_base) * 1000) : 0;
     // dec->pts = opacket.pts;
 
     // assert(opacket.data);
@@ -135,10 +142,10 @@ bool AudioDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.data = data;
-    ipacket.size = size;
+    ipacket.data= data;
+    ipacket.size= size;
     if (stream)
-        ipacket.stream_index = stream->index;
+        ipacket.stream_index= stream->index;
     return decode(ipacket); //, opacket
 }
 
@@ -159,11 +166,11 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     // int bytesDecoded = 0;
     // int bytesRemaining = ipacket.size;
 
-    int ret, frameDecoded = 0;
+    int ret, frameDecoded= 0;
     while (ipacket.size > 0) {
-        ret = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
+        ret= avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
-            error = "Audio decoder error: " + averror(ret);
+            error= "Audio decoder error: " + averror(ret);
             ErrorS(this) << error << endl;
             throw std::runtime_error(error);
         }
@@ -187,8 +194,8 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
             emitPacket(this); //, frame, opacket, &ptsSeconds
         }
 
-        ipacket.size -= ret;
-        ipacket.data += ret;
+        ipacket.size-= ret;
+        ipacket.data+= ret;
     }
     assert(ipacket.size == 0);
 
@@ -209,7 +216,8 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     // while (bytesRemaining) // && !frameDecoded
     // {
     //     av_frame_unref(frame);
-    //     bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
+    //     bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded,
+    //     &ipacket);
     //     if (bytesDecoded < 0) {
     //         ErrorS(this) << "Decoder Error" << endl;
     //         error = "Decoder error";
@@ -223,18 +231,18 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 }
 
 
-void AudioDecoder::flush() //AVPacket& opacket
+void AudioDecoder::flush() // AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.data = nullptr;
-    ipacket.size = 0;
+    ipacket.data= nullptr;
+    ipacket.size= 0;
 
     // av_init_packet(&opacket);
     // opacket.data = nullptr;
     // opacket.size = 0;
 
-    int frameDecoded = 0;
+    int frameDecoded= 0;
     av_frame_unref(frame);
     avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
 

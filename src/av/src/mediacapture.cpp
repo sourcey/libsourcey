@@ -13,9 +13,9 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/platform.h"
-#include "scy/logger.h"
 #include "scy/av/devicemanager.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -30,11 +30,11 @@ namespace scy {
 namespace av {
 
 
-MediaCapture::MediaCapture() :
-    _formatCtx(nullptr),
-    _video(nullptr),
-    _audio(nullptr),
-    _stopping(false)
+MediaCapture::MediaCapture()
+    : _formatCtx(nullptr)
+    , _video(nullptr)
+    , _audio(nullptr)
+    , _stopping(false)
 {
     TraceS(this) << "Create" << endl;
     initializeFFmpeg();
@@ -58,17 +58,17 @@ void MediaCapture::close()
 
     if (_video) {
         delete _video;
-        _video = nullptr;
+        _video= nullptr;
     }
 
     if (_audio) {
         delete _audio;
-        _audio = nullptr;
+        _audio= nullptr;
     }
 
     if (_formatCtx) {
         avformat_close_input(&_formatCtx);
-        _formatCtx = nullptr;
+        _formatCtx= nullptr;
     }
 
     TraceS(this) << "Closing: OK" << endl;
@@ -84,7 +84,8 @@ void MediaCapture::openFile(const std::string& file)
 
 // // #ifdef HAVE_FFMPEG_AVDEVICE
 //
-// void MediaCapture::openCamera(const std::string& device, int width, int height, double fps)
+// void MediaCapture::openCamera(const std::string& device, int width, int
+// height, double fps)
 // {
 //     TraceS(this) << "Opening camera: " << device << endl;
 //
@@ -94,9 +95,11 @@ void MediaCapture::openFile(const std::string& file)
 //
 //     AVDictionary* iparams = nullptr;
 //     if (width > 0 && height > 0)
-//         av_dict_set(&iparams, "video_size", util::format("%dx%d", width, height).c_str(), 0);
+//         av_dict_set(&iparams, "video_size", util::format("%dx%d", width,
+//         height).c_str(), 0);
 //     if (fps > 0)
-//         av_dict_set(&iparams, "framerate", util::format("%f", fps).c_str(), 0);
+//         av_dict_set(&iparams, "framerate", util::format("%f", fps).c_str(),
+//         0);
 //
 //     openStream(device.c_str(), iformat, &iparams);
 //
@@ -104,7 +107,8 @@ void MediaCapture::openFile(const std::string& file)
 // }
 //
 //
-// void MediaCapture::openMicrophone(const std::string& device, int channels, int sampleRate)
+// void MediaCapture::openMicrophone(const std::string& device, int channels,
+// int sampleRate)
 // {
 //     TraceS(this) << "Opening microphone: " << device << endl;
 //
@@ -126,14 +130,17 @@ void MediaCapture::openFile(const std::string& file)
 // // #endif
 
 
-void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
+void MediaCapture::openStream(const std::string& filename,
+                              AVInputFormat* inputFormat,
+                              AVDictionary** formatParams)
 {
     TraceS(this) << "Opening stream: " << filename << endl;
 
     if (_formatCtx)
         throw std::runtime_error("Capture has already been initialized");
 
-    if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat, formatParams) < 0)
+    if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat,
+                            formatParams) < 0)
         throw std::runtime_error("Cannot open the media source: " + filename);
 
     if (avformat_find_stream_info(_formatCtx, nullptr) < 0)
@@ -141,25 +148,27 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
 
     av_dump_format(_formatCtx, 0, filename.c_str(), 0);
 
-    for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
-        auto stream = _formatCtx->streams[i];
-        auto codec = stream->codec;
+    for (unsigned i= 0; i < _formatCtx->nb_streams; i++) {
+        auto stream= _formatCtx->streams[i];
+        auto codec= stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-            _video = new VideoDecoder(stream);
-            _video->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
+            _video= new VideoDecoder(stream);
+            _video->emitter.attach(
+                packetSlot(this, &MediaCapture::emit)); // proxy packets
             _video->create();
             _video->open();
-        }
-        else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            _audio = new AudioDecoder(stream);
-            _audio->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
+        } else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            _audio= new AudioDecoder(stream);
+            _audio->emitter.attach(
+                packetSlot(this, &MediaCapture::emit)); // proxy packets
             _audio->create();
             _audio->open();
         }
     }
 
     if (!_video && !_audio)
-        throw std::runtime_error("Cannot find a valid media stream: " + filename);
+        throw std::runtime_error("Cannot find a valid media stream: " +
+                                 filename);
 }
 
 
@@ -172,7 +181,7 @@ void MediaCapture::start()
 
     if ((_video || _audio) && !_thread.running()) {
         TraceS(this) << "Initializing Thread" << endl;
-        _stopping = false;
+        _stopping= false;
         _thread.start(*this);
     }
 
@@ -186,7 +195,7 @@ void MediaCapture::stop()
 
     Mutex::ScopedLock lock(_mutex);
 
-    _stopping = true;
+    _stopping= true;
     if (_thread.running()) {
         TraceS(this) << "Terminating Thread" << endl;
         _thread.join();
@@ -200,7 +209,7 @@ void MediaCapture::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
 
-    emitter.emit(/*this, */packet);
+    emitter.emit(/*this, */ packet);
 }
 
 
@@ -212,25 +221,27 @@ void MediaCapture::run()
         int res;
         AVPacket ipacket;
         av_init_packet(&ipacket);
-        while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-            TraceS(this) << "Read frame: pts=" << ipacket.pts << ", dts=" << ipacket.dts << endl;
-            if (_stopping) break;
+        while ((res= av_read_frame(_formatCtx, &ipacket)) >= 0) {
+            TraceS(this) << "Read frame: pts=" << ipacket.pts
+                         << ", dts=" << ipacket.dts << endl;
+            if (_stopping)
+                break;
             if (_video && ipacket.stream_index == _video->stream->index) {
                 if (_video->decode(ipacket)) {
                     TraceS(this) << "Decoded video: "
-                        << "time=" << _video->time //<< ", "
-                        // << "pts=" << opacket.pts << ", "
-                        // << "dts=" << opacket.dts
-                        << endl;
+                                 << "time=" << _video->time //<< ", "
+                                 // << "pts=" << opacket.pts << ", "
+                                 // << "dts=" << opacket.dts
+                                 << endl;
                 }
-            }
-            else if (_audio && ipacket.stream_index == _audio->stream->index) {
+            } else if (_audio &&
+                       ipacket.stream_index == _audio->stream->index) {
                 if (_audio->decode(ipacket)) { //, opacket
                     TraceS(this) << "Decoded Audio: "
-                        << "time=" << _audio->time //<< ", "
-                        // << "pts=" << opacket.pts << ", "
-                        // << "dts=" << opacket.dts
-                        << endl;
+                                 << "time=" << _audio->time //<< ", "
+                                 // << "pts=" << opacket.pts << ", "
+                                 // << "dts=" << opacket.dts
+                                 << endl;
                 }
             }
 
@@ -252,25 +263,23 @@ void MediaCapture::run()
             // End of file or error.
             TraceS(this) << "Decoding: EOF" << endl;
         }
-    }
-    catch (std::exception& exc) {
-        _error = exc.what();
+    } catch (std::exception& exc) {
+        _error= exc.what();
         ErrorS(this) << "Decoder Error: " << _error << endl;
-    }
-    catch (...) {
-        _error = "Unknown Error";
+    } catch (...) {
+        _error= "Unknown Error";
         ErrorS(this) << "Unknown Error" << endl;
     }
 
     TraceS(this) << "Exiting" << endl;
-    _stopping = true;
+    _stopping= true;
     Closing.emit(/*this*/);
 }
 
 
 void MediaCapture::getEncoderFormat(Format& format)
 {
-    format.name = "Capture";
+    format.name= "Capture";
     getEncoderVideoCodec(format.video);
     getEncoderAudioCodec(format.audio);
 }
@@ -280,7 +289,7 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
     Mutex::ScopedLock lock(_mutex);
     if (_audio) {
-        params = _audio->oparams;
+        params= _audio->oparams;
     }
 }
 
@@ -289,7 +298,7 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     Mutex::ScopedLock lock(_mutex);
     if (_video) {
-        params = _video->oparams;
+        params= _video->oparams;
     }
 }
 
@@ -334,5 +343,6 @@ std::string MediaCapture::error() const
 
 
 #endif
+
 
 /// @\}

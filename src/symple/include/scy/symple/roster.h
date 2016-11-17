@@ -14,8 +14,8 @@
 
 
 #include "scy/collection.h"
-#include "scy/symple/peer.h"
 #include "scy/symple/address.h"
+#include "scy/symple/peer.h"
 
 
 namespace scy {
@@ -24,11 +24,11 @@ namespace smpl {
 
 /// The Roster provides a registry for active network
 /// peers indexed by session ID.
-class Roster: public LiveCollection<std::string, Peer>
+class Roster : public LiveCollection<std::string, Peer>
 {
 public:
-    typedef LiveCollection<std::string, Peer>   Manager;
-    typedef Manager::Map                        PeerMap;
+    typedef LiveCollection<std::string, Peer> Manager;
+    typedef Manager::Map PeerMap;
 
 public:
     Roster();
@@ -50,5 +50,6 @@ public:
 
 
 #endif // SCY_Symple_Roster_H
+
 
 /// @\}

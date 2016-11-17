@@ -20,27 +20,28 @@
 namespace scy {
 
 
-typedef LiveCollection<
-    std::string, PacketStream, std::default_delete<PacketStream>
-    // DeferredDeleter<PacketStream>
-    // DestroyMethodDeleter<PacketStream>
-> StreamManagerBase;
+typedef LiveCollection<std::string, PacketStream,
+                       std::default_delete<PacketStream>
+                       // DeferredDeleter<PacketStream>
+                       // DestroyMethodDeleter<PacketStream>
+                       >
+    StreamManagerBase;
 
 
-class StreamManager: public StreamManagerBase
+class StreamManager : public StreamManagerBase
 {
 public:
     typedef StreamManagerBase Manager;
-    typedef Manager::Map      Map;
+    typedef Manager::Map Map;
 
 public:
-    StreamManager(bool freeClosedStreams = true);
+    StreamManager(bool freeClosedStreams= true);
     virtual ~StreamManager();
 
-    virtual bool addStream(PacketStream* stream, bool whiny = true);
-    virtual bool closeStream(const std::string& name, bool whiny = true);
+    virtual bool addStream(PacketStream* stream, bool whiny= true);
+    virtual bool closeStream(const std::string& name, bool whiny= true);
     virtual void closeAll();
-    virtual PacketStream* getStream(const std::string& name, bool whiny = true);
+    virtual PacketStream* getStream(const std::string& name, bool whiny= true);
 
     /// Returns the first stream in the list, or NULL.
     virtual PacketStream* getDafaultStream();
@@ -56,7 +57,8 @@ protected:
     /// Called after a stream is removed.
     virtual void onRemove(PacketStream* task);
 
-    virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);
+    virtual void onStreamStateChange(void* sender, PacketStreamState& state,
+                                     const PacketStreamState&);
 
     virtual const char* className() const { return "Stream Manager"; };
 
@@ -69,5 +71,6 @@ protected:
 
 
 #endif // SCY_StreamManager_H
+
 
 /// @\}

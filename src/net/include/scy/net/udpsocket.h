@@ -13,32 +13,33 @@
 #define SCY_Net_UDPSocket_H
 
 
-#include "scy/uv/uvpp.h"
+#include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/net/types.h"
-#include "scy/net/address.h"
+#include "scy/uv/uvpp.h"
 
 
 namespace scy {
 namespace net {
 
 
-class UDPSocket: public net::Socket, public uv::Handle
+class UDPSocket : public net::Socket, public uv::Handle
 {
 public:
     typedef std::shared_ptr<UDPSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    UDPSocket(uv::Loop* loop = uv::defaultLoop());
+    UDPSocket(uv::Loop* loop= uv::defaultLoop());
     virtual ~UDPSocket();
 
     virtual void connect(const net::Address& peerAddress);
     virtual void close();
 
-    virtual void bind(const net::Address& address, unsigned flags = 0);
+    virtual void bind(const net::Address& address, unsigned flags= 0);
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
+    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len,
+                     const net::Address& peerAddress, int flags= 0);
 
     virtual bool setBroadcast(bool flag);
     virtual bool setMulticastLoop(bool flag);
@@ -66,9 +67,11 @@ protected:
     virtual bool recvStart();
     virtual bool recvStop();
 
-    static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
+    static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
+                       const struct sockaddr* addr, unsigned flags);
     static void afterSend(uv_udp_send_t* req, int status);
-    static void allocRecvBuffer(uv_handle_t *handle, std::size_t suggested_size, uv_buf_t* buf);
+    static void allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
+                                uv_buf_t* buf);
 
     virtual void onError(const scy::Error& error);
     virtual void onClose();
@@ -83,5 +86,6 @@ protected:
 
 
 #endif // SCY_Net_UDPSocket_H
+
 
 /// @\}

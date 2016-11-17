@@ -14,8 +14,8 @@
 
 
 #include "scy/crypto/crypto.h"
-#include <cstdint>
 #include "scy/hex.h"
+#include <cstdint>
 
 #include <openssl/evp.h>
 
@@ -53,10 +53,10 @@ public:
 protected:
     Hash& operator=(Hash const&);
 
-    EVP_MD_CTX    _ctx;
-    const EVP_MD*    _md;
-    crypto::ByteVec    _digest;
-    std::string    _algorithm;
+    EVP_MD_CTX _ctx;
+    const EVP_MD* _md;
+    crypto::ByteVec _digest;
+    std::string _algorithm;
 };
 
 
@@ -68,7 +68,8 @@ inline std::string hash(const std::string& algorithm, const std::string& data)
 }
 
 
-inline std::string hash(const std::string& algorithm, const void* data, unsigned length)
+inline std::string hash(const std::string& algorithm, const void* data,
+                        unsigned length)
 {
     Hash engine(algorithm);
     engine.update(data, length);
@@ -77,7 +78,8 @@ inline std::string hash(const std::string& algorithm, const void* data, unsigned
 
 
 /// Computes the MD5/SHA checksum for the given file.
-inline std::string checksum(const std::string& algorithm, const std::string& path)
+inline std::string checksum(const std::string& algorithm,
+                            const std::string& path)
 {
     std::ifstream fstr(path, std::ios::in | std::ios::binary);
     if (!fstr.is_open())
@@ -98,5 +100,6 @@ inline std::string checksum(const std::string& algorithm, const std::string& pat
 
 
 #endif // SCY_Crypto_Hash_H
+
 
 /// @\}

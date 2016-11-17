@@ -14,8 +14,8 @@
 
 
 #include "scy/base.h"
-#include "scy/queue.h"
 #include "scy/packetstream.h"
+#include "scy/queue.h"
 #include "scy/synccontext.h"
 
 
@@ -27,28 +27,26 @@ namespace scy {
 //
 
 
-template <class T = IPacket>
-class SyncPacketQueue: public SyncQueue<T>, public PacketProcessor
+template <class T= IPacket>
+class SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
 {
 public:
     typedef SyncQueue<T> base_t;
     typedef PacketProcessor proc_t;
 
-    SyncPacketQueue(uv::Loop* loop, int maxSize = 1024) :
-        base_t(loop, maxSize),
-        proc_t(this->emitter)
+    SyncPacketQueue(uv::Loop* loop, int maxSize= 1024)
+        : base_t(loop, maxSize)
+        , proc_t(this->emitter)
     {
     }
 
-    SyncPacketQueue(int maxSize = 1024) :
-        base_t(uv::defaultLoop(), maxSize),
-        proc_t(this->emitter)
+    SyncPacketQueue(int maxSize= 1024)
+        : base_t(uv::defaultLoop(), maxSize)
+        , proc_t(this->emitter)
     {
     }
 
-    virtual ~SyncPacketQueue()
-    {
-    }
+    virtual ~SyncPacketQueue() {}
 
     virtual void process(IPacket& packet);
     virtual bool accepts(IPacket& packet);
@@ -117,20 +115,22 @@ template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket& packet)
 }
 
 
-template <class T> inline void SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
+template <class T>
+inline void
+SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "Stream state: " << state << std::endl;
 
     switch (state.id()) {
-    //case PacketStreamState::None:
-    //case PacketStreamState::Active:
-    //case PacketStreamState::Resetting:
-    //case PacketStreamState::Stopping:
-    //case PacketStreamState::Stopped:
-    case PacketStreamState::Closed:
-    case PacketStreamState::Error:
-        base_t::cancel();
-        break;
+        // case PacketStreamState::None:
+        // case PacketStreamState::Active:
+        // case PacketStreamState::Resetting:
+        // case PacketStreamState::Stopping:
+        // case PacketStreamState::Stopped:
+        case PacketStreamState::Closed:
+        case PacketStreamState::Error:
+            base_t::cancel();
+            break;
     }
 }
 
@@ -140,22 +140,20 @@ template <class T> inline void SyncPacketQueue<T>::onStreamStateChange(const Pac
 //
 
 
-template <class T = IPacket>
-class AsyncPacketQueue: public AsyncQueue<T>, public PacketProcessor
+template <class T= IPacket>
+class AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
 {
 public:
     typedef AsyncQueue<T> base_t;
     typedef PacketProcessor proc_t;
 
-    AsyncPacketQueue(int maxSize = 1024) :
-        base_t(maxSize),
-        proc_t(this->emitter)
+    AsyncPacketQueue(int maxSize= 1024)
+        : base_t(maxSize)
+        , proc_t(this->emitter)
     {
     }
 
-    virtual ~AsyncPacketQueue()
-    {
-    }
+    virtual ~AsyncPacketQueue() {}
 
     virtual void close();
 
@@ -211,25 +209,27 @@ template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket& packet)
 }
 
 
-template <class T> inline void AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
+template <class T>
+inline void
+AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "Stream state: " << state << std::endl;
 
     switch (state.id()) {
-    case PacketStreamState::Active:
-        break;
+        case PacketStreamState::Active:
+            break;
 
-    case PacketStreamState::Stopped:
-        break;
+        case PacketStreamState::Stopped:
+            break;
 
-    case PacketStreamState::Error:
-    case PacketStreamState::Closed:
-        close();
-        break;
+        case PacketStreamState::Error:
+        case PacketStreamState::Closed:
+            close();
+            break;
 
-    //case PacketStreamState::Resetting:
-    //case PacketStreamState::None:
-    //case PacketStreamState::Stopping:
+            // case PacketStreamState::Resetting:
+            // case PacketStreamState::None:
+            // case PacketStreamState::Stopping:
     }
 }
 
@@ -237,5 +237,6 @@ template <class T> inline void AsyncPacketQueue<T>::onStreamStateChange(const Pa
 
 
 #endif // SCY_PacketQueue_H
+
 
 /// @\}

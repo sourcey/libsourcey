@@ -11,24 +11,24 @@
 #define SCY_Base_Tests_H
 
 
-#include "scy/base.h"
-#include "scy/test.h"
-#include "scy/logger.h"
-#include "scy/idler.h"
-#include "scy/signal.h"
-#include "scy/buffer.h"
-#include "scy/platform.h"
-#include "scy/collection.h"
 #include "scy/application.h"
-#include "scy/packetstream.h"
-#include "scy/packetqueue.h"
-#include "scy/packetio.h"
-#include "scy/sharedlibrary.h"
+#include "scy/base.h"
+#include "scy/buffer.h"
+#include "scy/collection.h"
 #include "scy/filesystem.h"
-#include "scy/process.h"
-#include "scy/timer.h"
-#include "scy/time.h"
+#include "scy/idler.h"
 #include "scy/ipc.h"
+#include "scy/logger.h"
+#include "scy/packetio.h"
+#include "scy/packetqueue.h"
+#include "scy/packetstream.h"
+#include "scy/platform.h"
+#include "scy/process.h"
+#include "scy/sharedlibrary.h"
+#include "scy/signal.h"
+#include "scy/test.h"
+#include "scy/time.h"
+#include "scy/timer.h"
 #include "scy/util.h"
 
 
@@ -44,23 +44,34 @@ namespace scy {
 // =============================================================================
 // IPC Test
 //
-class IpcTest: public Test
+class IpcTest : public Test
 {
     int want_x_ipc_callbacks;
     int num_ipc_callbacks;
 
-    void run() {
+    void run()
+    {
         // std::cout << "Test IPC" << std::endl;
 
-        want_x_ipc_callbacks = 5;
-        num_ipc_callbacks = 0;
+        want_x_ipc_callbacks= 5;
+        num_ipc_callbacks= 0;
 
         ipc::SyncQueue<> ipc;
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test1"));
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test2"));
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test3"));
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test4"));
-        ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test5"));
+        ipc.push(new ipc::Action(
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
+            "test1"));
+        ipc.push(new ipc::Action(
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
+            "test2"));
+        ipc.push(new ipc::Action(
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
+            "test3"));
+        ipc.push(new ipc::Action(
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
+            "test4"));
+        ipc.push(new ipc::Action(
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
+            "test5"));
 
         // std::cout << "Test IPC: OK" << std::endl;
         uv::runDefaultLoop();
@@ -80,29 +91,28 @@ class IpcTest: public Test
 // =============================================================================
 // Timer Test
 //
-class TimerTest: public Test
+class TimerTest : public Test
 {
     void run()
     {
         std::cout << "Starting" << std::endl;
 
-        int numTimerTicks = 0;
-        int wantTimerTicks = 10;
-        bool timerRestarted = false;
+        int numTimerTicks= 0;
+        int wantTimerTicks= 10;
+        bool timerRestarted= false;
 
         Timer timer;
         timer.start(10, 10);
         timer.handle().ref();
-        timer.Timeout += [&]() {
+        timer.Timeout+= [&]() {
             // std::cout << "On timeout: " << timer->count() << std::endl;
 
             numTimerTicks++;
             if (timer.count() == wantTimerTicks / 2) {
                 if (!timerRestarted) {
-                    timerRestarted = true;
+                    timerRestarted= true;
                     timer.restart(); // restart once, count returns to 0
-                }
-                else {
+                } else {
                     timer.handle().unref();
                     timer.stop(); // event loop will be released
                 }
@@ -120,7 +130,7 @@ class TimerTest: public Test
 // =============================================================================
 // Idler Test
 //
-class IdlerTest: public Test
+class IdlerTest : public Test
 {
     int wantIdlerTicks;
     int numIdlerTicks;
@@ -128,8 +138,8 @@ class IdlerTest: public Test
 
     void run()
     {
-        wantIdlerTicks = 5;
-        numIdlerTicks = 0;
+        wantIdlerTicks= 5;
+        numIdlerTicks= 0;
 
         idler.start(std::bind(&IdlerTest::idlerCallback, this));
         idler.handle().ref();
@@ -203,20 +213,11 @@ class IdlerTest: public Test
 
 struct SignalCounter
 {
-    void increment(std::uint64_t& val)
-    {
-        val++;
-    }
+    void increment(std::uint64_t& val) { val++; }
 
-    void incrementConst(std::uint64_t& val) const
-    {
-        val++;
-    }
+    void incrementConst(std::uint64_t& val) const { val++; }
 
-    static void incrementStatic(std::uint64_t& val)
-    {
-        val++;
-    }
+    static void incrementStatic(std::uint64_t& val) { val++; }
 };
 
 
@@ -303,12 +304,11 @@ bool signalHandlerC(const char* sl, std::size_t ln)
 // =============================================================================
 // Process
 //
-class ProcessTest: public Test
+class ProcessTest : public Test
 {
     void run()
     {
-        try
-        {
+        try {
             Process proc;
 
             // TODO: Write cross platfrom process test
@@ -320,13 +320,12 @@ class ProcessTest: public Test
             //
             // proc.options.args = args;
             // proc.options.file = args[0];
-            // proc.onexit = std::bind(&Tests::processExit, this, std::placeholders::_1);
+            // proc.onexit = std::bind(&Tests::processExit, this,
+            // std::placeholders::_1);
             // proc.spawn();
 
             uv::runDefaultLoop();
-        }
-        catch (std::exception& exc)
-        {
+        } catch (std::exception& exc) {
             std::cerr << "Process error: " << exc.what() << std::endl;
             expect(0);
         }
@@ -342,13 +341,13 @@ class ProcessTest: public Test
 // =============================================================================
 // Packet Stream
 //
-struct MockThreadedPacketSource: public PacketSource, public async::Startable
+struct MockThreadedPacketSource : public PacketSource, public async::Startable
 {
     Thread runner;
     PacketSignal emitter;
 
-    MockThreadedPacketSource() :
-        PacketSource(emitter)
+    MockThreadedPacketSource()
+        : PacketSource(emitter)
     {
         runner.setRepeating(true);
     }
@@ -356,13 +355,15 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
     void start()
     {
         std::cout << "Start" << std::endl;
-        runner.start([](void* arg) {
-            auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
-            std::cout << "Emitting" << std::endl;
-            RawPacket p("hello", 5);
-            self->emitter.emit(/*self, */p);
-            std::cout << "Emitting 2" << std::endl;
-        }, this);
+        runner.start(
+            [](void* arg) {
+                auto self= reinterpret_cast<MockThreadedPacketSource*>(arg);
+                std::cout << "Emitting" << std::endl;
+                RawPacket p("hello", 5);
+                self->emitter.emit(/*self, */ p);
+                std::cout << "Emitting 2" << std::endl;
+            },
+            this);
     }
 
     void stop()
@@ -374,12 +375,12 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
     }
 };
 
-struct MockPacketProcessor: public PacketProcessor
+struct MockPacketProcessor : public PacketProcessor
 {
     PacketSignal emitter;
 
-    MockPacketProcessor() :
-        PacketProcessor(emitter)
+    MockPacketProcessor()
+        : PacketProcessor(emitter)
     {
     }
 
@@ -390,11 +391,11 @@ struct MockPacketProcessor: public PacketProcessor
     }
 };
 
-class PacketStreamTest: public Test
+class PacketStreamTest : public Test
 {
     int numPackets;
 
-    void onPacketStreamOutput(IPacket& packet) //void* sender,
+    void onPacketStreamOutput(IPacket& packet) // void* sender,
     {
         std::cout << "On packet: " << packet.className() << std::endl;
         numPackets++;
@@ -402,7 +403,7 @@ class PacketStreamTest: public Test
 
     void run()
     {
-        numPackets = 0;
+        numPackets= 0;
         // stream.setRunner(std::make_shared<Thread>());
         PacketStream stream;
         // stream.attach(new AsyncPacketQueue, 0, true);
@@ -411,11 +412,13 @@ class PacketStreamTest: public Test
         // stream.synchronizeOutput(uv::defaultLoop());
         stream.attach(new MockPacketProcessor, 1, true);
 
-        stream.emitter += slot(this, &PacketStreamTest::onPacketStreamOutput);
-        // stream.emitter += packetSlot(this, &PacketStreamTest::onPacketStreamOutput);
-        // stream.emitter.attach<PacketStreamTest, &PacketStreamTest::onPacketStreamOutput>(this);
+        stream.emitter+= slot(this, &PacketStreamTest::onPacketStreamOutput);
+        // stream.emitter += packetSlot(this,
+        // &PacketStreamTest::onPacketStreamOutput);
+        // stream.emitter.attach<PacketStreamTest,
+        // &PacketStreamTest::onPacketStreamOutput>(this);
 
-            // (*it)->ptr->getEmitter() -= slot(this, &PacketStream::write);
+        // (*it)->ptr->getEmitter() -= slot(this, &PacketStream::write);
         stream.start();
 
         // TODO: Test pause/resume functionality
@@ -428,16 +431,17 @@ class PacketStreamTest: public Test
     }
 };
 
-static std::string RANDOM_CONTENT = "r@ndom";
+static std::string RANDOM_CONTENT= "r@ndom";
 
-struct PacketStreamIOTest: public Test
+struct PacketStreamIOTest : public Test
 {
 
     int numPackets;
 
     PacketStreamIOTest()
     {
-        fs::savefile("input.txt", RANDOM_CONTENT.c_str(), RANDOM_CONTENT.length(), true);
+        fs::savefile("input.txt", RANDOM_CONTENT.c_str(),
+                     RANDOM_CONTENT.length(), true);
     }
 
     ~PacketStreamIOTest()
@@ -448,10 +452,13 @@ struct PacketStreamIOTest: public Test
 
     void run()
     {
-        numPackets = 0;
+        numPackets= 0;
         PacketStream stream;
-        stream.attachSource(new ThreadedStreamReader(new std::ifstream("input.txt")), true, true);
-        stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1, true);
+        stream.attachSource(
+            new ThreadedStreamReader(new std::ifstream("input.txt")), true,
+            true);
+        stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1,
+                      true);
         stream.start();
         // Run the thread for 100ms
         scy::sleep(100);
@@ -466,7 +473,7 @@ struct PacketStreamIOTest: public Test
     }
 };
 
-class MultiPacketStreamTest: public Test
+class MultiPacketStreamTest : public Test
 {
     void onChildPacketStreamOutput(void* sender, IPacket& packet)
     {
@@ -498,21 +505,24 @@ class MultiPacketStreamTest: public Test
         // children.s1->attach(new AsyncPacketQueue, 0, true);
         // children.s1->attach(new SyncPacketQueue, 1, true);
         // children.s1->synchronizeOutput(uv::defaultLoop());
-        // children.s1->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s1->emitter += packetSlot(this,
+        // &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s1->start();
         ///
         /// children.s2 = new PacketStream;
         // children.s2->attachSource(stream.emitter);
         // children.s2->attach(new AsyncPacketQueue, 0, true);
         // children.s2->synchronizeOutput(uv::defaultLoop());
-        // children.s2->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s2->emitter += packetSlot(this,
+        // &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s2->start();
         ///
         /// children.s3 = new PacketStream;
         // children.s3->attachSource(stream.emitter);
         // children.s3->attach(new AsyncPacketQueue, 0, true);
         // children.s3->synchronizeOutput(uv::defaultLoop());
-        // children.s3->emitter += packetSlot(this, &MultiPacketStreamTest::onChildPacketStreamOutput);
+        // children.s3->emitter += packetSlot(this,
+        // &MultiPacketStreamTest::onChildPacketStreamOutput);
         // children.s3->start();
         ///
         /// // app.waitForShutdown([](void* arg) {
@@ -537,5 +547,6 @@ class MultiPacketStreamTest: public Test
 
 
 #endif // SCY_Base_Tests_H
+
 
 /// @\}

@@ -10,8 +10,8 @@
 
 
 #include "scy/av/format.h"
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 
 using std::endl;
@@ -21,36 +21,50 @@ namespace scy {
 namespace av {
 
 
-Format::Format() :
-    name("Unknown"), priority(0)
+Format::Format()
+    : name("Unknown")
+    , priority(0)
 {
 }
 
 
-Format::Format(const std::string& name, const std::string& id, const VideoCodec& video, const AudioCodec& audio, int priority) :
-    name(name), id(id), video(video), audio(audio), priority(priority)
+Format::Format(const std::string& name, const std::string& id,
+               const VideoCodec& video, const AudioCodec& audio, int priority)
+    : name(name)
+    , id(id)
+    , video(video)
+    , audio(audio)
+    , priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const std::string& id, const VideoCodec& video, int priority) :
-    name(name), id(id), video(video), priority(priority)
+Format::Format(const std::string& name, const std::string& id,
+               const VideoCodec& video, int priority)
+    : name(name)
+    , id(id)
+    , video(video)
+    , priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const std::string& id, const AudioCodec& audio, int priority) :
-    name(name), id(id), audio(audio), priority(priority)
+Format::Format(const std::string& name, const std::string& id,
+               const AudioCodec& audio, int priority)
+    : name(name)
+    , id(id)
+    , audio(audio)
+    , priority(priority)
 {
 }
 
 
-Format::Format(const Format& r) :
-    name(r.name),
-    id(r.id),
-    video(r.video),
-    audio(r.audio),
-    priority(r.priority)
+Format::Format(const Format& r)
+    : name(r.name)
+    , id(r.id)
+    , video(r.video)
+    , audio(r.audio)
+    , priority(r.priority)
 {
 }
 
@@ -71,7 +85,7 @@ Format::Type Format::type() const
 std::string Format::toString() const
 {
     std::ostringstream os;
-    os << "Format[" << name << ":"  << id;
+    os << "Format[" << name << ":" << id;
     if (video.enabled)
         os << "\n\t" << video.toString();
     if (audio.enabled)
@@ -83,16 +97,16 @@ std::string Format::toString() const
 
 void Format::print(std::ostream& ost)
 {
-    ost << "Format[" << name << ":"  << id;
+    ost << "Format[" << name << ":" << id;
     if (video.enabled) {
         ost << "\n";
         video.print(ost);
-        //ost << "\n";
+        // ost << "\n";
     }
     if (audio.enabled) {
         ost << "\n";
         audio.print(ost);
-        //ost << "\n";
+        // ost << "\n";
     }
     ost << "\n]";
 }
@@ -100,5 +114,6 @@ void Format::print(std::ostream& ost)
 
 } // namespace av
 } // namespace scy
+
 
 /// @\}

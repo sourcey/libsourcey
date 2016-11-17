@@ -28,7 +28,8 @@ VideoPacketSource::~VideoPacketSource()
 }
 
 
-cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& capture_format)
+cricket::CaptureState
+VideoPacketSource::Start(const cricket::VideoFormat& capture_format)
 {
     try {
         if (capture_state() == cricket::CS_RUNNING) {
@@ -45,11 +46,13 @@ cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& captu
         //
         // // Connect and start the packet stream.
         // _capture->start();
-        // _capture->emitter += packetSlot(this, &VideoPacketSource::onVideoCaptured);
+        // _capture->emitter += packetSlot(this,
+        // &VideoPacketSource::onVideoCaptured);
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;
-    } catch (...) {}
+    } catch (...) {
+    }
     return cricket::CS_FAILED;
 }
 
@@ -68,23 +71,25 @@ void VideoPacketSource::Stop()
         SetCaptureFormat(nullptr);
         SetCaptureState(cricket::CS_STOPPED);
         return;
-    } catch (...) {}
+    } catch (...) {
+    }
     return;
 }
 
 
 void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
 {
-    TraceL << "On video frame: " << packet.width << 'x' << packet.height << std::endl;
+    TraceL << "On video frame: " << packet.width << 'x' << packet.height
+           << std::endl;
 
     cricket::CapturedFrame frame;
-    frame.width = packet.width;
-    frame.height = packet.height;
-    frame.pixel_width = 1;
-    frame.pixel_height = 1;
-    frame.fourcc = cricket::FOURCC_NV12; // FOURCC_I420
-    frame.data = packet.data();
-    frame.data_size = packet.size();
+    frame.width= packet.width;
+    frame.height= packet.height;
+    frame.pixel_width= 1;
+    frame.pixel_height= 1;
+    frame.fourcc= cricket::FOURCC_NV12; // FOURCC_I420
+    frame.data= packet.data();
+    frame.data_size= packet.size();
     // frame.time_stamp = packet.time; // time in microseconds is ignored
 
     SignalFrameCaptured(this, &frame);
@@ -108,16 +113,17 @@ bool VideoPacketSource::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 }
 
 
-bool VideoPacketSource::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
+bool VideoPacketSource::GetBestCaptureFormat(
+    const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
 {
     if (!best_format)
         return false;
 
     // Use the supported format as the best format.
-    best_format->width = desired.width;
-    best_format->height = desired.height;
-    best_format->fourcc = cricket::FOURCC_NV12; // FOURCC_I420
-    best_format->interval = desired.interval;
+    best_format->width= desired.width;
+    best_format->height= desired.height;
+    best_format->fourcc= cricket::FOURCC_NV12; // FOURCC_I420
+    best_format->interval= desired.interval;
 
     return true;
 }
@@ -130,5 +136,6 @@ bool VideoPacketSource::IsScreencast() const
 
 
 } // namespace scy
+
 
 /// @\}

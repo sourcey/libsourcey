@@ -17,34 +17,36 @@
 
 #ifdef HAVE_RTAUDIO
 
-#include "scy/av/types.h"
-#include "scy/av/icapture.h"
 #include "scy/av/format.h"
+#include "scy/av/icapture.h"
+#include "scy/av/types.h"
 #include "scy/signal.h"
 
 #include "RtAudio.h"
 
 #include <iostream>
-#include <queue>
 #include <map>
+#include <queue>
 
 
 namespace scy {
 namespace av {
 
 
-DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, void*, nullptr)
+DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase,
+                                 void*, nullptr)
 
-/// Implements a cross platfrom audio device capture class.
-///
-/// NOTE: Audio buffer samples are always in interleaved, not planar channel
-/// format for ease of use ie. `c1 c1 c2 c2 c1 c1 c2 c2...`
-class AudioCapture: public ICapture
+    /// Implements a cross platfrom audio device capture class.
+    ///
+    /// NOTE: Audio buffer samples are always in interleaved, not planar channel
+    /// format for ease of use ie. `c1 c1 c2 c2 c1 c1 c2 c2...`
+    class AudioCapture : public ICapture
 {
 public:
     typedef std::shared_ptr<AudioCapture> Ptr;
 
-    AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16);
+    AudioCapture(int deviceId, int channels, int sampleRate,
+                 RtAudioFormat format= RTAUDIO_SINT16);
     virtual ~AudioCapture();
 
     virtual void open();
@@ -64,20 +66,25 @@ public:
     void getEncoderFormat(Format& iformat);
     void getAudioCodec(AudioCodec& icodec);
 
-protected:    
+protected:
     /// Sets the error message and throws an exception.
-    virtual void setError(const std::string& message, bool throwExec = true);
+    virtual void setError(const std::string& message, bool throwExec= true);
 
 
-    static int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,    // The system audio capture callback.
-    /// Samples will be dispatched from the audio capture thread,    // so proper synchronization is required.
-                             double streamTime, RtAudioStreamStatus status, void *data);
+    static int audioCallback(
+        void* outputBuffer, void* inputBuffer,
+        unsigned int nBufferFrames, // The system audio capture callback.
+        /// Samples will be dispatched from the audio capture thread,    // so
+        /// proper synchronization is required.
+        double streamTime, RtAudioStreamStatus status, void* data);
 
     /// The system audio error callback.
-    /// Since this static method provides no client data argument we just log the error.
-    /// Errors *may* be dispatched from the audio capture thread,    // so proper synchronization is required.
-    static void errorCallback(RtAudioError::Type type, const std::string &errorText);
-
+    /// Since this static method provides no client data argument we just log
+    /// the error.
+    /// Errors *may* be dispatched from the audio capture thread,    // so
+    /// proper synchronization is required.
+    static void errorCallback(RtAudioError::Type type,
+                              const std::string& errorText);
 
 
 private:

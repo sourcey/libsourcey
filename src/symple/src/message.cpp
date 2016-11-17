@@ -10,9 +10,9 @@
 
 
 #include "scy/symple/message.h"
-#include "scy/util.h"
-#include "scy/logger.h"
 #include "assert.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 
 
 using std::endl;
@@ -22,31 +22,31 @@ namespace scy {
 namespace smpl {
 
 
-Message::Message() :
-    json::Value(Json::objectValue)
+Message::Message()
+    : json::Value(Json::objectValue)
 {
-    (*this)["id"] = util::randomString(16);
-    (*this)["type"] = "message";
+    (*this)["id"]= util::randomString(16);
+    (*this)["type"]= "message";
 }
 
 
-Message::Message(const Message& root) :
-    json::Value(root)
+Message::Message(const Message& root)
+    : json::Value(root)
 {
     if (!isMember("id"))
-        (*this)["id"] = util::randomString(16);
+        (*this)["id"]= util::randomString(16);
     if (!isMember("type"))
-        (*this)["type"] = "message";
+        (*this)["type"]= "message";
 }
 
 
-Message::Message(const json::Value& root) :
-    json::Value(root)
+Message::Message(const json::Value& root)
+    : json::Value(root)
 {
     if (!isMember("id"))
-        (*this)["id"] = util::randomString(16);
+        (*this)["id"]= util::randomString(16);
     if (!isMember("type"))
-        (*this)["type"] = "message";
+        (*this)["type"]= "message";
 }
 
 
@@ -78,7 +78,7 @@ void Message::write(Buffer& buf) const
 {
     std::string data(json::stringify(*this));
 
-    //buf.append(data.c_str(), data.size());
+    // buf.append(data.c_str(), data.size());
     buf.insert(buf.end(), data.begin(), data.end());
 }
 
@@ -98,10 +98,8 @@ void Message::print(std::ostream& os) const
 
 bool Message::valid() const
 {
-    return isMember("type")
-        && isMember("id")
-        && isMember("from")
-        && (*this)["from"].isString();
+    return isMember("type") && isMember("id") && isMember("from") &&
+           (*this)["from"].isString();
 }
 
 
@@ -179,50 +177,50 @@ json::Value& Message::data(const std::string& name)
 
 void Message::setType(const std::string& type)
 {
-    (*this)["type"] = type;
+    (*this)["type"]= type;
 }
 
 
 void Message::setTo(const Peer& to)
 {
-    (*this)["to"] = to.address().toString();
+    (*this)["to"]= to.address().toString();
 }
 
 
 void Message::setTo(const Address& to)
 {
-    (*this)["to"] = to.toString();
+    (*this)["to"]= to.toString();
 }
 
 
 void Message::setTo(const std::string& to)
 {
-    (*this)["to"] = to;
+    (*this)["to"]= to;
 }
 
 
 void Message::setFrom(const Peer& from)
 {
-    (*this)["from"] = from.address().toString();
+    (*this)["from"]= from.address().toString();
 }
 
 
 void Message::setFrom(const Address& from)
 {
-    (*this)["from"] = from.toString();
+    (*this)["from"]= from.toString();
 }
 
 
 void Message::setFrom(const std::string& from)
 {
-    (*this)["from"] = from;
+    (*this)["from"]= from;
 }
 
 
 void Message::setStatus(int code)
 {
     assert(code > 100 && code < 505);
-    (*this)["status"] = code;
+    (*this)["status"]= code;
 }
 
 
@@ -234,46 +232,42 @@ void Message::setNote(const std::string& type, const std::string& text)
 
 void Message::addNote(const std::string& type, const std::string& text)
 {
-    assert(
-        type == "info" ||
-        type == "warn" ||
-        type == "error"
-    );
+    assert(type == "info" || type == "warn" || type == "error");
 
     json::Value note;
-    note["type"] = type;
-    note["text"] = text;
+    note["type"]= type;
+    note["text"]= text;
     (*this)["notes"].append(note);
 }
 
 
 json::Value& Message::setData(const std::string& name)
 {
-    return (*this)["data"][name] = name;
+    return (*this)["data"][name]= name;
 }
 
 
 void Message::setData(const std::string& name, const char* data)
 {
-    (*this)["data"][name] = data;
+    (*this)["data"][name]= data;
 }
 
 
 void Message::setData(const std::string& name, const std::string& data)
 {
-    (*this)["data"][name] = data;
+    (*this)["data"][name]= data;
 }
 
 
 void Message::setData(const std::string& name, const json::Value& data)
 {
-    (*this)["data"][name] = data;
+    (*this)["data"][name]= data;
 }
 
 
 void Message::setData(const std::string& name, int data)
 {
-    (*this)["data"][name] = data;
+    (*this)["data"][name]= data;
 }
 
 
@@ -291,5 +285,6 @@ bool Message::hasData(const std::string& name)
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

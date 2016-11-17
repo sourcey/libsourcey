@@ -17,11 +17,11 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
+#include "scy/av/audiobuffer.h"
+#include "scy/av/audiocontext.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
-#include "scy/av/audiocontext.h"
-#include "scy/av/audiobuffer.h"
+#include "scy/av/types.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -35,19 +35,21 @@ namespace scy {
 namespace av {
 
 
-struct AudioEncoder: public AudioContext
+struct AudioEncoder : public AudioContext
 {
-    AudioEncoder(AVFormatContext* format = nullptr);
+    AudioEncoder(AVFormatContext* format= nullptr);
     virtual ~AudioEncoder();
 
-    virtual void create();    /// virtual void open();
-    virtual void close();    /// Encode an arbitrary number of interleaved audio samples.
+    virtual void create(); /// virtual void open();
+    virtual void
+    close(); /// Encode an arbitrary number of interleaved audio samples.
     ///
     /// @param samples    The input samples to encode.
     /// @param numSamples The number of input samples per channel.
     /// @param pts        The input samples presentation timestamp.
     /// @param opacket    The output packet data will be encoded to.
-    virtual bool encode(/*const */std::uint8_t* samples, const int numSamples, const std::int64_t pts);
+    virtual bool encode(/*const */ std::uint8_t* samples, const int numSamples,
+                        const std::int64_t pts);
 
     /// Encode a single AVFrame from the decoder.
     virtual bool encode(AVFrame* iframe);
@@ -68,5 +70,6 @@ struct AudioEncoder: public AudioContext
 
 #endif
 #endif // SCY_AV_AudioEncoder_H
+
 
 /// @\}

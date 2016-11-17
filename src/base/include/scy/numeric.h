@@ -21,11 +21,11 @@
 
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
-    #define I64_FMT "I64"
+#define I64_FMT "I64"
 #elif defined(__APPLE__)
-    #define I64_FMT "q"
+#define I64_FMT "q"
 #else
-    #define I64_FMT "ll"
+#define I64_FMT "ll"
 #endif
 
 
@@ -199,6 +199,7 @@ void format(std::string& str, const void* ptr);
 
 
 #endif // SCY_Numeric_H
+
 
 /// @\}
 

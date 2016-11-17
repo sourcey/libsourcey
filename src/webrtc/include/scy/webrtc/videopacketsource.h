@@ -33,13 +33,13 @@ public:
     virtual ~VideoPacketSource();
 
     /// cricket::VideoCapturer implementation.
-    virtual cricket::CaptureState Start(
-        const cricket::VideoFormat& capture_format);
+    virtual cricket::CaptureState
+    Start(const cricket::VideoFormat& capture_format);
     virtual void Stop();
     virtual bool IsRunning();
     virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs);
     virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired,
-        cricket::VideoFormat* best_format);
+                                      cricket::VideoFormat* best_format);
     virtual bool IsScreencast() const;
 
     void onVideoCaptured(av::VideoPacket& packet);
@@ -61,5 +61,6 @@ public:
 
 
 #endif
+
 
 /// @\}

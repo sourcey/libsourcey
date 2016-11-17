@@ -17,9 +17,9 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
+#include "scy/av/types.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -41,11 +41,12 @@ namespace av {
 //
 struct AudioResampler
 {
-    AudioResampler(const AudioCodec& iparams = AudioCodec(), const AudioCodec& oparams = AudioCodec());
+    AudioResampler(const AudioCodec& iparams= AudioCodec(),
+                   const AudioCodec& oparams= AudioCodec());
     ~AudioResampler();
 
     void open();
-    void close();    /// Convert the input samples to the output format.
+    void close(); /// Convert the input samples to the output format.
     /// NOTE: Input buffers must be contiguous, therefore only interleaved
     /// input formats are accepted at this point.
     ///
@@ -57,7 +58,7 @@ struct AudioResampler
 
 
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-    SwrContext* ctx;           // the conversion context
+    SwrContext* ctx; // the conversion context
 #else
     AVAudioResampleContext* ctx;
 #endif
@@ -65,9 +66,10 @@ struct AudioResampler
     AudioCodec iparams;        // input audio parameters
     AudioCodec oparams;        // output audio parameters
     std::uint8_t** outSamples; // the output samples buffer
-    int outNumSamples;         // the number of samples currently in the output buffer
-    int outBufferSize;         // the number of bytes currently in the buffer
-    int maxNumSamples;         // the maximum number of samples that can be stored in the output buffer
+    int outNumSamples; // the number of samples currently in the output buffer
+    int outBufferSize; // the number of bytes currently in the buffer
+    int maxNumSamples; // the maximum number of samples that can be stored in
+                       // the output buffer
     enum AVSampleFormat inSampleFmt;  // input sample format
     enum AVSampleFormat outSampleFmt; // output sample format
 };
@@ -79,5 +81,6 @@ struct AudioResampler
 
 #endif
 #endif // SCY_AV_AudioResampler_H
+
 
 /// @\}

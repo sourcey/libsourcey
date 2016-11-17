@@ -14,9 +14,9 @@
 
 
 #include "scy/base.h"
-#include <string>
 #include <exception> // use std::exception types
 #include <stdexcept>
+#include <string>
 
 
 namespace scy {
@@ -33,21 +33,18 @@ struct Error
     std::string message;
     std::exception_ptr exception;
 
-    Error()
-    {
-        reset();
-    }
+    Error() { reset(); }
 
     Error(const std::string& msg)
     {
         reset();
-        message = msg;
+        message= msg;
     }
 
     Error(const char* msg)
     {
         reset();
-        message = msg;
+        message= msg;
     }
 
     bool any() const
@@ -57,9 +54,9 @@ struct Error
 
     void reset()
     {
-        errorno = 0;
+        errorno= 0;
         message.clear();
-        exception = nullptr;
+        exception= nullptr;
     }
 
     void rethrow()
@@ -68,7 +65,7 @@ struct Error
             std::rethrow_exception(exception);
     }
 
-    friend std::ostream& operator << (std::ostream& stream, const Error& err)
+    friend std::ostream& operator<<(std::ostream& stream, const Error& err)
     {
         stream << err.message;
         return stream;
@@ -80,5 +77,6 @@ struct Error
 
 
 #endif // SCY_Error_H
+
 
 /// @\}

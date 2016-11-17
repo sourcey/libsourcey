@@ -20,7 +20,7 @@ namespace async {
 
 Runner::Runner()
 {
-    pContext = std::make_shared<Runner::Context>();
+    pContext= std::make_shared<Runner::Context>();
 }
 
 
@@ -34,43 +34,40 @@ Runner::~Runner()
 void Runner::runAsync(Context* c)
 {
     // std::cout << "Runner::runAsync" << std::endl;
-    c->running = true;
+    c->running= true;
     try {
         if (!c->cancelled()) {
             if (!c->tid)
-                c->tid = uv_thread_self();
+                c->tid= uv_thread_self();
             if (c->target) {
-                //assert((!c->cancelled()));
+                // assert((!c->cancelled()));
                 c->target();
-            } else if (
-                c->target1) {
+            } else if (c->target1) {
                 c->target1(c->arg);
-            }
-            else {
+            } else {
                 // Ensure runAsync is not being hmmered by the
                 // calling thread after cancelled and reset.
                 assert(c->cancelled() && "no callback target");
                 throw std::runtime_error("Async callback has no target");
             }
         }
-    }
-    catch (std::exception& exc) {
+    } catch (std::exception& exc) {
         ErrorL << "Runner error: " << exc.what() << std::endl;
 #ifdef _DEBUG
         throw exc;
 #endif
     }
 
-    c->running = false;
+    c->running= false;
     if (c->cancelled()) {
         // Once cancelled we release callback functions to allow freeing
         // of memory allocated by std::shared_ptr managed pointers used to
         // std::bind the std::function.
-        c->target = nullptr;
-        c->target1 = nullptr;
+        c->target= nullptr;
+        c->target1= nullptr;
 
-        //c->reset();
-        //c->cancel();
+        // c->reset();
+        // c->cancel();
     }
 }
 
@@ -80,10 +77,10 @@ void Runner::start(async::Runnable& target)
     if (started())
         throw std::runtime_error("Runner context already active");
 
-    pContext->target = std::bind(&async::Runnable::run, &target);
-    pContext->arg = nullptr;
-    pContext->running = false;
-    pContext->started = true;
+    pContext->target= std::bind(&async::Runnable::run, &target);
+    pContext->arg= nullptr;
+    pContext->running= false;
+    pContext->started= true;
     startAsync();
 }
 
@@ -93,10 +90,10 @@ void Runner::start(std::function<void()> target)
     if (started())
         throw std::runtime_error("Runner context already active");
 
-    pContext->target = target;
-    pContext->arg = nullptr;
-    pContext->running = false;
-    pContext->started = true;
+    pContext->target= target;
+    pContext->arg= nullptr;
+    pContext->running= false;
+    pContext->started= true;
     startAsync();
 }
 
@@ -106,10 +103,10 @@ void Runner::start(std::function<void(void*)> target, void* arg)
     if (started())
         throw std::runtime_error("Runner context already active");
 
-    pContext->target1 = target;
-    pContext->arg = arg;
-    pContext->running = false;
-    pContext->started = true;
+    pContext->target1= target;
+    pContext->arg= arg;
+    pContext->running= false;
+    pContext->started= true;
     startAsync();
 }
 
@@ -117,7 +114,7 @@ void Runner::start(std::function<void(void*)> target, void* arg)
 void Runner::setRepeating(bool flag)
 {
     assert(!pContext->started);
-    pContext->repeating = flag;
+    pContext->repeating= flag;
 }
 
 
@@ -170,13 +167,15 @@ void Runner::Context::cancel()
 
 bool Runner::Context::cancelled() const
 {
-    bool s = exit.load(std::memory_order_relaxed);
-    if (s) std::atomic_thread_fence(std::memory_order_acquire);
+    bool s= exit.load(std::memory_order_relaxed);
+    if (s)
+        std::atomic_thread_fence(std::memory_order_acquire);
     return s;
 }
 
 
 } // namespace basic
 } // namespace scy
+
 
 /// @\}

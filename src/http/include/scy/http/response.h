@@ -13,9 +13,9 @@
 #define SCY_HTTP_Response_H
 
 
-#include "scy/http/message.h"
-#include "scy/http/cookie.h"
 #include "scy/datetime.h"
+#include "scy/http/cookie.h"
+#include "scy/http/message.h"
 
 #include <sstream>
 
@@ -27,57 +27,57 @@ namespace http {
 /// HTTP Response Status Codes
 enum class StatusCode
 {
-    Continue = 100,
-    SwitchingProtocols = 101,
+    Continue= 100,
+    SwitchingProtocols= 101,
 
-    OK = 200,
-    Created = 201,
-    Accepted = 202,
-    NonAuthoritative = 203,
-    NoContent = 204,
-    ResetContent = 205,
-    PartialContent = 206,
+    OK= 200,
+    Created= 201,
+    Accepted= 202,
+    NonAuthoritative= 203,
+    NoContent= 204,
+    ResetContent= 205,
+    PartialContent= 206,
 
-    MultipleChoices = 300,
-    MovedPermanently = 301,
-    Found = 302,
-    SeeOther = 303,
-    NotModified = 304,
-    UseProxy = 305,
+    MultipleChoices= 300,
+    MovedPermanently= 301,
+    Found= 302,
+    SeeOther= 303,
+    NotModified= 304,
+    UseProxy= 305,
     // SwitchProxy = 306, not used
-    TemporaryRedirect = 307,
+    TemporaryRedirect= 307,
 
-    BadRequest = 400,
-    Unauthorized = 401,
-    PaymentRequired = 402,
-    Forbidden = 403,
-    NotFound = 404,
-    MethodNotAllowed = 405,
-    NotAcceptable = 406,
-    ProxyAuthRequired = 407,
-    RequestTimeout = 408,
-    Conflict = 409,
-    Gone = 410,
-    LengthRequired = 411,
-    PreconditionFailed = 412,
-    EntityTooLarge = 413,
-    UriTooLong = 414,
-    UnsupportedMediaType = 415,
-    RangeNotSatisfiable = 416,
-    ExpectationFailed = 417,
-    UpgradeRequired = 426,
+    BadRequest= 400,
+    Unauthorized= 401,
+    PaymentRequired= 402,
+    Forbidden= 403,
+    NotFound= 404,
+    MethodNotAllowed= 405,
+    NotAcceptable= 406,
+    ProxyAuthRequired= 407,
+    RequestTimeout= 408,
+    Conflict= 409,
+    Gone= 410,
+    LengthRequired= 411,
+    PreconditionFailed= 412,
+    EntityTooLarge= 413,
+    UriTooLong= 414,
+    UnsupportedMediaType= 415,
+    RangeNotSatisfiable= 416,
+    ExpectationFailed= 417,
+    UpgradeRequired= 426,
 
-    InternalServerError = 500,
-    NotImplemented = 501,
-    BadGateway = 502,
-    Unavailable = 503,
-    GatewayTimeout = 504,
-    VersionNotSupported = 505
+    InternalServerError= 500,
+    NotImplemented= 501,
+    BadGateway= 502,
+    Unavailable= 503,
+    GatewayTimeout= 504,
+    VersionNotSupported= 505
 };
 
 
 /// This class encapsulates an HTTP response message.
-class Response: public http::Message
+class Response : public http::Message
 {
 public:
     /// typedef std::shared_ptr<Response> Ptr;
@@ -89,7 +89,8 @@ public:
     Response(StatusCode status, const std::string& reason);
 
     /// Creates the Response with the given version, status and reason phrase.
-    Response(const std::string& version, StatusCode status, const std::string& reason);
+    Response(const std::string& version, StatusCode status,
+             const std::string& reason);
 
     /// Creates the Response with the given status
     /// an an appropriate reason phrase.
@@ -140,7 +141,7 @@ public:
     /// Returns true if the HTTP response code was successful (>= 400).
     virtual bool success() const;
 
-    friend std::ostream& operator << (std::ostream& stream, const Response& res)
+    friend std::ostream& operator<<(std::ostream& stream, const Response& res)
     {
         res.write(stream);
         return stream;
@@ -148,9 +149,9 @@ public:
 
 private:
     Response(const Response&);
-    Response& operator = (const Response&);
+    Response& operator=(const Response&);
 
-    StatusCode  _status;
+    StatusCode _status;
     std::string _reason;
 };
 
@@ -163,6 +164,7 @@ const char* getStatusCodeReason(StatusCode status);
 
 
 #endif
+
 
 /// @\}
 

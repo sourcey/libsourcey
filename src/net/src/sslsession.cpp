@@ -19,8 +19,8 @@ namespace scy {
 namespace net {
 
 
-SSLSession::SSLSession(SSL_SESSION* ptr):
-    _ptr(ptr)
+SSLSession::SSLSession(SSL_SESSION* ptr)
+    : _ptr(ptr)
 {
 }
 
@@ -39,5 +39,6 @@ SSL_SESSION* SSLSession::sslSession() const
 
 } // namespace net
 } // namespace scy
+
 
 /// @\}

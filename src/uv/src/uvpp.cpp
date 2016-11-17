@@ -15,14 +15,16 @@ namespace scy {
 namespace uv {
 
 
-Handle::Handle(uv_loop_t* loop, void* handle) :
-    _loop(loop ? loop : uv_default_loop()), // nullptr will be uv_default_loop
-    _ptr((uv_handle_t*)handle), // nullptr or instance of uv_handle_t
-    _tid(uv_thread_self()),
-    _closed(false)
+Handle::Handle(uv_loop_t* loop, void* handle)
+    : _loop(loop ? loop : uv_default_loop())
+    , // nullptr will be uv_default_loop
+    _ptr((uv_handle_t*)handle)
+    , // nullptr or instance of uv_handle_t
+    _tid(uv_thread_self())
+    , _closed(false)
 {
     if (_ptr)
-        _ptr->data = this;
+        _ptr->data= this;
 }
 
 
@@ -39,7 +41,7 @@ void Handle::setLoop(uv_loop_t* loop)
 {
     assertThread();
     assert(_ptr == nullptr && "loop must be set before handle");
-    _loop = loop;
+    _loop= loop;
 }
 
 
@@ -117,18 +119,18 @@ void Handle::throwError(const std::string& prefix, int errorno) const
 void Handle::setUVError(const std::string& prefix, int errorno)
 {
     scy::Error err;
-    err.errorno = errorno;
-    //err.syserr = uv.sys_errno_;
-    err.message = formatError(prefix, errorno);
+    err.errorno= errorno;
+    // err.syserr = uv.sys_errno_;
+    err.message= formatError(prefix, errorno);
     setError(err);
 }
 
 
 void Handle::setError(const scy::Error& err)
 {
-    //if (_error == err) return;
+    // if (_error == err) return;
     assertThread();
-    _error = err;
+    _error= err;
     onError(err);
 }
 
@@ -138,15 +140,13 @@ void Handle::close()
     assertThread();
     if (!_closed) {
         if (_ptr && !uv_is_closing(_ptr)) {
-            uv_close(_ptr, [](uv_handle_t* handle) {
-                delete handle;
-            });
+            uv_close(_ptr, [](uv_handle_t* handle) { delete handle; });
         }
 
         // We no longer know about the handle.
         // The handle pointer will be deleted on afterClose.
-        _ptr = nullptr;
-        _closed = true;
+        _ptr= nullptr;
+        _closed= true;
 
         // Send the local onClose to run final callbacks.
         onClose();
@@ -157,8 +157,8 @@ void Handle::close()
 void Handle::assertThread() const
 {
 #ifdef _DEBUG
-		uv_thread_t current = uv_thread_self();
-		assert(uv_thread_equal(&_tid, &current));
+    uv_thread_t current= uv_thread_self();
+    assert(uv_thread_equal(&_tid, &current));
 #endif
 }
 
@@ -175,5 +175,6 @@ void Handle::onClose()
 
 } // namespace uv
 } // namespace scy
+
 
 /// @\}

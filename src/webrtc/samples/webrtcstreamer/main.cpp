@@ -7,9 +7,9 @@
 //
 
 
-#include "signaler.h"
-#include "scy/logger.h"
 #include "scy/idler.h"
+#include "scy/logger.h"
+#include "signaler.h"
 
 #include "webrtc/base/ssladapter.h"
 #include "webrtc/base/thread.h"
@@ -23,7 +23,7 @@ using namespace scy;
 
 
 #define SERVER_HOST "localhost"
-#define USE_SSL     0 // 1
+#define USE_SSL 0 // 1
 #if USE_SSL
 #define SERVER_PORT 443
 #else
@@ -33,7 +33,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); //LTrace
+    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace
 
 #if USE_SSL
     SSLManager::initNoVerifyClient();
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     // av::MediaFactory::instance().loadVideoCaptures();
 
     // Setup WebRTC environment
-    rtc::LogMessage::LogToDebug(rtc::LERROR); //LERROR (rtc::LoggingSeverity)
+    rtc::LogMessage::LogToDebug(rtc::LERROR); // LERROR (rtc::LoggingSeverity)
     rtc::LogMessage::LogTimestamps();
     rtc::LogMessage::LogThreads();
 
@@ -51,10 +51,10 @@ int main(int argc, char** argv)
 
     {
         smpl::Client::Options options;
-        options.host = SERVER_HOST;
-        options.port = SERVER_PORT;
-        options.name = "Video Server";
-        options.user = "videoserver";
+        options.host= SERVER_HOST;
+        options.port= SERVER_PORT;
+        options.name= "Video Server";
+        options.user= "videoserver";
 
         // NOTE: The server must enable anonymous
         // authentication for this test.
@@ -62,19 +62,21 @@ int main(int argc, char** argv)
 
         Signaler app(options);
 
-        Idler rtc(app.loop, [](void* arg) {
-            // DebugL << "Running WebRTC loop" << endl;
-            auto thread = reinterpret_cast<rtc::Thread*>(arg);
-            thread->ProcessMessages(10);
-        }, rtc::Thread::Current());
+        Idler rtc(app.loop,
+                  [](void* arg) {
+                      // DebugL << "Running WebRTC loop" << endl;
+                      auto thread= reinterpret_cast<rtc::Thread*>(arg);
+                      thread->ProcessMessages(10);
+                  },
+                  rtc::Thread::Current());
 
         app.waitForShutdown();
         // app.finalize();
     }
 
-    // Shutdown the media factory and release devices
-    // av::MediaFactory::instance().unloadVideoCaptures();
-    // av::MediaFactory::shutdown();
+// Shutdown the media factory and release devices
+// av::MediaFactory::instance().unloadVideoCaptures();
+// av::MediaFactory::shutdown();
 
 #if USE_SSL
     net::SSLManager::destroy();

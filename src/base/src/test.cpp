@@ -16,8 +16,8 @@
 #include "scy/time.h"
 #include "scy/util.h"
 
-#include <iostream>
 #include <assert.h>
+#include <iostream>
 
 
 using std::cout;
@@ -48,7 +48,7 @@ void initialize()
 
 int finalize()
 {
-    bool passed = TestRunner::getDefault().passed();
+    bool passed= TestRunner::getDefault().passed();
     singleton.destroy();
 
     // Finalize the garbage collector to ensure memory if freed before exiting.
@@ -65,14 +65,14 @@ void runAll()
 
 void describe(const std::string& name, std::function<void()> target)
 {
-    auto test = new FunctionTest(target, name);
+    auto test= new FunctionTest(target, name);
     TestRunner::getDefault().add(test);
 }
 
 
 void describe(const std::string& name, Test* test)
 {
-    test->name = name;
+    test->name= name;
     TestRunner::getDefault().add(test);
 }
 
@@ -85,7 +85,7 @@ void expectImpl(bool passed, const char* assert, const char* file, long line)
     std::stringstream ss;
     ss << "failed on " << assert << " in " << file << " at " << line;
 
-    auto test = TestRunner::getDefault().current();
+    auto test= TestRunner::getDefault().current();
     if (test) {
         test->errors.push_back(ss.str());
     }
@@ -99,8 +99,8 @@ void expectImpl(bool passed, const char* assert, const char* file, long line)
 //
 
 
-TestRunner::TestRunner() :
-    _current(nullptr)
+TestRunner::TestRunner()
+    : _current(nullptr)
 {
 }
 
@@ -122,7 +122,7 @@ void TestRunner::add(Test* test)
 Test* TestRunner::get(const std::string& name) const
 {
     Mutex::ScopedLock lock(_mutex);
-    for (auto it = _tests.begin(); it != _tests.end(); ++it) {
+    for (auto it= _tests.begin(); it != _tests.end(); ++it) {
         if ((*it)->name == name)
             return *it;
     }
@@ -147,10 +147,10 @@ TestList TestRunner::tests() const
 ErrorMap TestRunner::errors() const
 {
     ErrorMap errors;
-    TestList tests = this->tests();
-    for (auto it = tests.begin(); it != tests.end(); ++it) {
+    TestList tests= this->tests();
+    for (auto it= tests.begin(); it != tests.end(); ++it) {
         if (!(*it)->passed()) {
-            errors[(*it)] = (*it)->errors;
+            errors[(*it)]= (*it)->errors;
         }
     }
     return errors;
@@ -172,42 +172,45 @@ Test* TestRunner::current() const
 
 void TestRunner::run()
 {
-    cout << "===============================================================" << endl;
+    cout << "==============================================================="
+         << endl;
     // cout << "running all tests" << endl;
 
-    std::uint64_t start = time::hrtime();
-    double duration = 0;
-    TestList tests = this->tests();
-    for (auto it = tests.begin(); it != tests.end(); ++it) {
+    std::uint64_t start= time::hrtime();
+    double duration= 0;
+    TestList tests= this->tests();
+    for (auto it= tests.begin(); it != tests.end(); ++it) {
         {
             Mutex::ScopedLock lock(_mutex);
-            _current = *it;
+            _current= *it;
         }
-        cout << "---------------------------------------------------------------" << endl;
+        cout
+            << "---------------------------------------------------------------"
+            << endl;
         cout << _current->name << " starting" << endl;
-        std::uint64_t test_start = time::hrtime();
+        std::uint64_t test_start= time::hrtime();
         try {
             _current->run();
-        }
-        catch (std::exception& exc) {
+        } catch (std::exception& exc) {
             _current->errors.push_back(exc.what());
             cout << "exception thrown: " << exc.what() << endl;
         }
-        _current->duration = (time::hrtime() - test_start) / 1e9;
-        cout << _current->name << " ended after " << _current->duration << " seconds" << endl;
+        _current->duration= (time::hrtime() - test_start) / 1e9;
+        cout << _current->name << " ended after " << _current->duration
+             << " seconds" << endl;
     }
 
-    duration = (time::hrtime() - start) / 1e9;
+    duration= (time::hrtime() - start) / 1e9;
 
-    cout << "---------------------------------------------------------------" << endl;
+    cout << "---------------------------------------------------------------"
+         << endl;
     cout << "all tests completed after " << duration << " seconds" << endl;
     // cout << "summary: " << endl;
 
-    for (auto it = tests.begin(); it != tests.end(); ++it) {
+    for (auto it= tests.begin(); it != tests.end(); ++it) {
         if ((*it)->passed()) {
             cout << (*it)->name << " passed" << endl;
-        }
-        else {
+        } else {
             cout << (*it)->name << " failed" << endl;
         }
     }
@@ -225,8 +228,9 @@ TestRunner& TestRunner::getDefault()
 //
 
 
-Test::Test(const std::string& name) :
-    name(name), duration(0)
+Test::Test(const std::string& name)
+    : name(name)
+    , duration(0)
 {
 }
 
@@ -245,5 +249,6 @@ bool Test::passed()
 
 } // namespace test
 } // namespace scy
+
 
 /// @\}

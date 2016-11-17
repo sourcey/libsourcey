@@ -33,7 +33,8 @@ struct AudioBuffer
     AudioBuffer();
     ~AudioBuffer();
 
-    void alloc(const std::string& sampleFmt, int channels, int numSamples = 1024);
+    void alloc(const std::string& sampleFmt, int channels,
+               int numSamples= 1024);
     void reset();
     void close();
 
@@ -52,5 +53,6 @@ struct AudioBuffer
 
 #endif
 #endif // SCY_AV_AudioBuffer_H
+
 
 /// @\}

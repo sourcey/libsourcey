@@ -19,12 +19,19 @@ struct Bitwise
 {
     unsigned data; // storage integer
 
-    Bitwise(unsigned flags = 0) : data(flags) {}
-    virtual void reset() { data = 0; };
-    virtual void set(unsigned flag) { if (!has(flag)) data |= flag; };
-    virtual void add(unsigned flag) { data |= flag; };
-    virtual void remove(unsigned flag) { data &= ~flag; };
-    virtual void toggle(unsigned flag) { data ^= flag; };
+    Bitwise(unsigned flags= 0)
+        : data(flags)
+    {
+    }
+    virtual void reset() { data= 0; };
+    virtual void set(unsigned flag)
+    {
+        if (!has(flag))
+            data|= flag;
+    };
+    virtual void add(unsigned flag) { data|= flag; };
+    virtual void remove(unsigned flag) { data&= ~flag; };
+    virtual void toggle(unsigned flag) { data^= flag; };
     virtual bool has(unsigned flag) const { return (data & flag) == flag; };
 };
 
@@ -67,5 +74,6 @@ protected:
 
 
 #endif // SCY_Flaggable_H
+
 
 /// @\}

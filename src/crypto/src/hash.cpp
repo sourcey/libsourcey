@@ -22,12 +22,12 @@ namespace scy {
 namespace crypto {
 
 
-Hash::Hash(const std::string& algorithm) :
-    _algorithm(algorithm)
+Hash::Hash(const std::string& algorithm)
+    : _algorithm(algorithm)
 {
     crypto::initializeEngine();
 
-    _md = EVP_get_digestbyname(algorithm.data());
+    _md= EVP_get_digestbyname(algorithm.data());
     if (!_md)
         throw std::runtime_error("Algorithm not supported: " + algorithm);
 
@@ -74,7 +74,7 @@ const ByteVec& Hash::digest()
     // Compute the first time
     if (_digest.size() == 0) {
         _digest.resize(EVP_MAX_MD_SIZE); // TODO: Get actual algorithm size
-        unsigned int len = 0;
+        unsigned int len= 0;
         internal::api(EVP_DigestFinal(&_ctx, &_digest[0], &len));
         _digest.resize(len);
     }
@@ -84,10 +84,9 @@ const ByteVec& Hash::digest()
 
 std::string Hash::digestStr()
 {
-    const ByteVec& vec = digest();
+    const ByteVec& vec= digest();
     return std::string((const char*)vec.data(), vec.size());
 }
-
 
 
 const std::string& Hash::algorithm(void) const
@@ -98,5 +97,6 @@ const std::string& Hash::algorithm(void) const
 
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

@@ -14,17 +14,17 @@
 
 
 #include "scy/bitwise.h"
-#include "scy/socketio/client.h"
-#include "scy/net/socket.h"
 #include "scy/http/websocket.h"
-#include "scy/util/timedmanager.h"
-#include "scy/symple/roster.h"
-#include "scy/symple/message.h"
-#include "scy/symple/presence.h"
+#include "scy/net/socket.h"
+#include "scy/socketio/client.h"
 #include "scy/symple/command.h"
 #include "scy/symple/event.h"
 #include "scy/symple/form.h"
+#include "scy/symple/message.h"
 #include "scy/symple/peer.h"
+#include "scy/symple/presence.h"
+#include "scy/symple/roster.h"
+#include "scy/util/timedmanager.h"
 
 
 namespace scy {
@@ -39,7 +39,7 @@ typedef TimedManager<std::string, Message> PersistenceT;
 //
 
 
-class Client: public sockio::Client
+class Client : public sockio::Client
 {
 public:
     struct Options
@@ -59,22 +59,23 @@ public:
         std::string type;
         std::string token;
 
-        Options() {
-            host = "127.0.0.1";
-            port = 4500;
+        Options()
+        {
+            host= "127.0.0.1";
+            port= 4500;
 
-            reconnection = true;
-            reconnectAttempts = 0;
+            reconnection= true;
+            reconnectAttempts= 0;
 
-            user  = "";
-            name  = "";
-            type  = "";
-            token = "";
+            user= "";
+            name= "";
+            type= "";
+            token= "";
         }
     };
 
 public:
-    Client(const net::Socket::Ptr& socket, const Options& options = Options());
+    Client(const net::Socket::Ptr& socket, const Options& options= Options());
     virtual ~Client();
 
     void connect();
@@ -82,27 +83,27 @@ public:
 
     /// Send a message.
     /// May be a polymorphic Command, Presence, Event or other ...
-    virtual int send(Message& message, bool ack = false);
+    virtual int send(Message& message, bool ack= false);
 
     /// Send a string message.
     /// The message must be a valid Symple message otherwise it will
     /// not be delivered.
-    virtual int send(const std::string& message, bool ack = false);
+    virtual int send(const std::string& message, bool ack= false);
 
     /// Create a Transaction object with the given message which will
     /// notify on Ack response from the server.
     sockio::Transaction* createTransaction(Message& message);
 
     /// Swap the 'to' and 'from' fields and send the given message.
-    virtual int respond(Message& message, bool ack = false);
+    virtual int respond(Message& message, bool ack= false);
 
     /// Broadcast presence to the user group scope.
     /// The outgoing Presence object may be modified via
     /// the CreatePresence signal.
-    virtual int sendPresence(bool probe = false);
+    virtual int sendPresence(bool probe= false);
 
     /// Send directed presence to the given peer.
-    virtual int sendPresence(const Address& to, bool probe = false);
+    virtual int sendPresence(const Address& to, bool probe= false);
 
     /// Join the given room.
     virtual int joinRoom(const std::string& room);
@@ -132,10 +133,10 @@ public:
     Client::Options& options();
 
     /// Stream operator alias for send().
-    virtual Client& operator >> (Message& message);
+    virtual Client& operator>>(Message& message);
 
     /// Update the roster from the given client object.
-    virtual void onPresenceData(const json::Value& data, bool whiny = false);
+    virtual void onPresenceData(const json::Value& data, bool whiny= false);
 
     ///
     /// Signals
@@ -174,10 +175,11 @@ protected:
     virtual void createPresence(Presence& p);
 
     /// Override PacketSignal::emit
-    virtual void emit(/*void* sender, */IPacket& packet);
+    virtual void emit(/*void* sender, */ IPacket& packet);
 
     virtual void onOnline();
-    virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);
+    virtual void onAnnounceState(void* sender, TransactionState& state,
+                                 const TransactionState&);
     // virtual void onPacket(sockio::Packet& packet);
 
 protected:
@@ -195,13 +197,15 @@ protected:
 //
 
 
-Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+Client* createTCPClient(const Client::Options& options= Client::Options(),
+                        uv::Loop* loop= uv::defaultLoop());
 
 
-class TCPClient: public Client
+class TCPClient : public Client
 {
 public:
-    TCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+    TCPClient(const Client::Options& options= Client::Options(),
+              uv::Loop* loop= uv::defaultLoop());
 };
 
 
@@ -210,13 +214,15 @@ public:
 //
 
 
-Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+Client* createSSLClient(const Client::Options& options= Client::Options(),
+                        uv::Loop* loop= uv::defaultLoop());
 
 
-class SSLClient: public Client
+class SSLClient : public Client
 {
 public:
-    SSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+    SSLClient(const Client::Options& options= Client::Options(),
+              uv::Loop* loop= uv::defaultLoop());
 };
 
 
@@ -227,18 +233,24 @@ public:
 
 enum FilterFlags
 {
-    AcceptRequests        = 0x01,
-    AcceptResponses        = 0x02
+    AcceptRequests= 0x01,
+    AcceptResponses= 0x02
 };
 
 
-struct Filter//: public Flaggable
+struct Filter //: public Flaggable
 {
-    Filter(const std::string& path, unsigned flags = 0) :
-        flags(flags), path(path) {}
+    Filter(const std::string& path, unsigned flags= 0)
+        : flags(flags)
+        , path(path)
+    {
+    }
 
-    Filter(unsigned flags = 0) :
-        flags(flags), path("*") {}
+    Filter(unsigned flags= 0)
+        : flags(flags)
+        , path("*")
+    {
+    }
 
     Bitwise flags;
     std::string path;
@@ -336,5 +348,6 @@ DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 
 #endif // SCY_Symple_Client_H
+
 
 /// @\}

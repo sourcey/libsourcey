@@ -10,8 +10,8 @@
 
 
 #include "scy/webrtc/peerconnection.h"
-#include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/logger.h"
+#include "scy/webrtc/peerconnectionmanager.h"
 
 
 using std::endl;
@@ -20,13 +20,14 @@ using std::endl;
 namespace scy {
 
 
-PeerConnection::PeerConnection(PeerConnectionManager* manager, const std::string& peerid, Mode mode) :
-    _manager(manager),
-    _peerid(peerid),
-    _mode(mode),
-    _factory(manager->factory()),
-    _peerConnection(nullptr),
-    _stream(nullptr)
+PeerConnection::PeerConnection(PeerConnectionManager* manager,
+                               const std::string& peerid, Mode mode)
+    : _manager(manager)
+    , _peerid(peerid)
+    , _mode(mode)
+    , _factory(manager->factory())
+    , _peerConnection(nullptr)
+    , _stream(nullptr)
 {
     // webrtc::PeerConnectionInterface::IceServer stun;
     // stun.uri = kGoogleStunServerUri;
@@ -34,7 +35,8 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager, const std::string
 
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
-    // _constraints.SetAllowDtlsSctpDataChannels(); // triggers error on CreateAnswer
+    // _constraints.SetAllowDtlsSctpDataChannels(); // triggers error on
+    // CreateAnswer
 }
 
 
@@ -49,12 +51,13 @@ PeerConnection::~PeerConnection()
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStream()
+rtc::scoped_refptr<webrtc::MediaStreamInterface>
+PeerConnection::createMediaStream()
 {
     assert(_mode == Offer);
     assert(_factory);
     assert(!_stream);
-    _stream = _factory->CreateLocalMediaStream(kStreamLabel);
+    _stream= _factory->CreateLocalMediaStream(kStreamLabel);
     return _stream;
 }
 
@@ -63,8 +66,8 @@ void PeerConnection::createConnection()
 {
     assert(_factory);
 
-    _peerConnection = _factory->CreatePeerConnection(
-        _config, &_constraints, nullptr, nullptr, this);
+    _peerConnection= _factory->CreatePeerConnection(_config, &_constraints,
+                                                    nullptr, nullptr, this);
 
     if (_stream) {
         if (!_peerConnection->AddStream(_stream)) {
@@ -80,8 +83,7 @@ void PeerConnection::closeConnection()
 
     if (_peerConnection) {
         _peerConnection->Close();
-    }
-    else {
+    } else {
         // Call onClosed if no connection has been
         // made so callbacks are always run.
         _manager->onClosed(this);
@@ -103,60 +105,68 @@ void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
     DebugL << _peerid << ": Receive " << type << ": " << sdp << endl;
 
     webrtc::SdpParseError error;
-    webrtc::SessionDescriptionInterface* desc(webrtc::CreateSessionDescription(type, sdp, &error));
+    webrtc::SessionDescriptionInterface* desc(
+        webrtc::CreateSessionDescription(type, sdp, &error));
     if (!desc) {
-        throw std::runtime_error("Can't parse remote SDP: " + error.description);
+        throw std::runtime_error("Can't parse remote SDP: " +
+                                 error.description);
     }
-    _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
+    _peerConnection->SetRemoteDescription(
+        DummySetSessionDescriptionObserver::Create(), desc);
 
     if (type == "offer") {
         assert(_mode == Answer);
         _peerConnection->CreateAnswer(this, &_constraints);
-    }
-    else {
+    } else {
         assert(_mode == Offer);
     }
 }
 
 
-void PeerConnection::recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp)
+void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
+                                   const std::string& sdp)
 {
     webrtc::SdpParseError error;
-    std::unique_ptr<webrtc::IceCandidateInterface> candidate(webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
+    std::unique_ptr<webrtc::IceCandidateInterface> candidate(
+        webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
     if (!candidate) {
-        throw std::runtime_error("Can't parse remote candidate: " + error.description);
+        throw std::runtime_error("Can't parse remote candidate: " +
+                                 error.description);
     }
     _peerConnection->AddIceCandidate(candidate.get());
 }
 
 
-void PeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
+void PeerConnection::OnSignalingChange(
+    webrtc::PeerConnectionInterface::SignalingState new_state)
 {
     DebugL << _peerid << ": On signaling state change: " << new_state << endl;
 
-    switch(new_state) {
-    case webrtc::PeerConnectionInterface::kStable:
-        _manager->onStable(this);
-        break;
-    case webrtc::PeerConnectionInterface::kClosed:
-        _manager->onClosed(this);
-        break;
-    case webrtc::PeerConnectionInterface::kHaveLocalOffer:
-    case webrtc::PeerConnectionInterface::kHaveRemoteOffer:
-    case webrtc::PeerConnectionInterface::kHaveLocalPrAnswer:
-    case webrtc::PeerConnectionInterface::kHaveRemotePrAnswer:
-        break;
+    switch (new_state) {
+        case webrtc::PeerConnectionInterface::kStable:
+            _manager->onStable(this);
+            break;
+        case webrtc::PeerConnectionInterface::kClosed:
+            _manager->onClosed(this);
+            break;
+        case webrtc::PeerConnectionInterface::kHaveLocalOffer:
+        case webrtc::PeerConnectionInterface::kHaveRemoteOffer:
+        case webrtc::PeerConnectionInterface::kHaveLocalPrAnswer:
+        case webrtc::PeerConnectionInterface::kHaveRemotePrAnswer:
+            break;
     }
 }
 
 
-void PeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state)
+void PeerConnection::OnIceConnectionChange(
+    webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugL << _peerid << ": On ICE connection change: " << new_state << endl;
 }
 
 
-void PeerConnection::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state)
+void PeerConnection::OnIceGatheringChange(
+    webrtc::PeerConnectionInterface::IceGatheringState new_state)
 {
     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
 }
@@ -186,7 +196,8 @@ void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 }
 
 
-void PeerConnection::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
+void PeerConnection::OnIceCandidate(
+    const webrtc::IceCandidateInterface* candidate)
 {
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
@@ -195,7 +206,8 @@ void PeerConnection::OnIceCandidate(const webrtc::IceCandidateInterface* candida
         return;
     }
 
-    _manager->sendCandidate(this, candidate->sdp_mid(), candidate->sdp_mline_index(), sdp);
+    _manager->sendCandidate(this, candidate->sdp_mid(),
+                            candidate->sdp_mline_index(), sdp);
 }
 
 
@@ -225,10 +237,11 @@ void PeerConnection::OnFailure(const std::string& error)
 }
 
 
-void PeerConnection::setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+void PeerConnection::setPeerConnectionFactory(
+    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
 {
     assert(!_factory); // should not be already set via PeerConnectionManager
-    _factory = factory;
+    _factory= factory;
 }
 
 
@@ -250,7 +263,8 @@ webrtc::PeerConnectionFactoryInterface* PeerConnection::factory() const
 }
 
 
-rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnection::peerConnection() const
+rtc::scoped_refptr<webrtc::PeerConnectionInterface>
+PeerConnection::peerConnection() const
 {
     return _peerConnection;
 }
@@ -281,5 +295,6 @@ void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 
 
 } // namespace scy
+
 
 /// @\}

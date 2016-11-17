@@ -29,7 +29,8 @@ struct Address
 public:
     Address();
     Address(const std::string& addr);
-    Address(const std::string& user, const std::string& id); //const std::string& group,
+    Address(const std::string& user,
+            const std::string& id); // const std::string& group,
     virtual ~Address();
 
     bool parse(const std::string& addr);
@@ -38,10 +39,10 @@ public:
     void print(std::ostream& os) const;
     std::string toString() const;
 
-    bool operator == (const Address& r);
-    bool operator == (std::string& r);
+    bool operator==(const Address& r);
+    bool operator==(std::string& r);
 
-    friend std::ostream& operator << (std::ostream& os, const Address& addr)
+    friend std::ostream& operator<<(std::ostream& os, const Address& addr)
     {
         addr.print(os);
         return os;
@@ -58,5 +59,6 @@ public:
 
 
 #endif // SCY_Symple_Address_H
+
 
 /// @\}

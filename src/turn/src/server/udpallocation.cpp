@@ -10,10 +10,10 @@
 
 
 #include "scy/turn/server/udpallocation.h"
-#include "scy/turn/server/server.h"
-#include "scy/net/udpsocket.h"
 #include "scy/buffer.h"
 #include "scy/logger.h"
+#include "scy/net/udpsocket.h"
+#include "scy/turn/server/server.h"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -27,18 +27,17 @@ namespace scy {
 namespace turn {
 
 
-UDPAllocation::UDPAllocation(Server& server,
-                             const FiveTuple& tuple,
+UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
                              const std::string& username,
-                             const std::uint32_t& lifetime) :
-    ServerAllocation(server, tuple, username, lifetime)//,
-    //_relaySocket(new net::UDPSocket) //server.reactor(), server.runner()
+                             const std::uint32_t& lifetime)
+    : ServerAllocation(server, tuple, username, lifetime) //,
+//_relaySocket(new net::UDPSocket) //server.reactor(), server.runner()
 {
     // Handle data from the relay socket directly from the allocation.
     // This will remove the need for allocation lookups when receiving
     // data from peers.
     _relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));
-    _relaySocket.Recv += slot(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv+= slot(this, &UDPAllocation::onPeerDataReceived);
 
     TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
@@ -47,7 +46,7 @@ UDPAllocation::UDPAllocation(Server& server,
 UDPAllocation::~UDPAllocation()
 {
     TraceL << "Destroy" << endl;
-    _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
+    _relaySocket.Recv-= slot(this, &UDPAllocation::onPeerDataReceived);
     _relaySocket.close();
 }
 
@@ -77,14 +76,14 @@ void UDPAllocation::handleSendIndication(Request& request)
     // discarded.  Note that the DATA attribute is allowed to contain zero
     // bytes of data.
 
-    auto peerAttr = request.get<stun::XorPeerAddress>();
+    auto peerAttr= request.get<stun::XorPeerAddress>();
     if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
         ErrorL << "Send Indication error: No Peer Address" << endl;
         // silently discard...
         return;
     }
 
-    auto dataAttr = request.get<stun::Data>();
+    auto dataAttr= request.get<stun::Data>();
     if (!dataAttr) {
         ErrorL << "Send Indication error: No Data attribute" << endl;
         // silently discard...
@@ -106,9 +105,10 @@ void UDPAllocation::handleSendIndication(Request& request)
     // allowed in the XOR-PEER-ADDRESS attribute -- if a value is not
     // allowed, the server silently discards the Send indication.
 
-    net::Address peerAddress = peerAttr->address();
+    net::Address peerAddress= peerAttr->address();
     if (!hasPermission(peerAddress.host())) {
-        ErrorL << "Send Indication error: No permission for: " << peerAddress.host() << endl;
+        ErrorL << "Send Indication error: No permission for: "
+               << peerAddress.host() << endl;
         // silently discard...
         return;
     }
@@ -131,9 +131,8 @@ void UDPAllocation::handleSendIndication(Request& request)
     // The resulting UDP datagram is then sent to the peer.
 
     TraceL << "Relaying Send Indication: "
-        << "\r\tFrom: " << request.remoteAddress.toString()
-        << "\r\tTo: " << peerAddress
-        << endl;
+           << "\r\tFrom: " << request.remoteAddress.toString()
+           << "\r\tTo: " << peerAddress << endl;
 
     if (send(dataAttr->bytes(), dataAttr->size(), peerAddress) == -1) {
         _server.respondError(request, 486, "Allocation Quota Reached");
@@ -142,7 +141,9 @@ void UDPAllocation::handleSendIndication(Request& request)
 }
 
 
-void UDPAllocation::onPeerDataReceived(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
+void UDPAllocation::onPeerDataReceived(net::Socket&,
+                                       const MutableBuffer& buffer,
+                                       const net::Address& peerAddress)
 {
     // auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
     TraceL << "Received UDP Datagram from " << peerAddress << endl;
@@ -158,7 +159,8 @@ void UDPAllocation::onPeerDataReceived(net::Socket&, const MutableBuffer& buffer
     if (IAllocation::deleted())
         return;
 
-    stun::Message message(stun::Message::Indication, stun::Message::DataIndication);
+    stun::Message message(stun::Message::Indication,
+                          stun::Message::DataIndication);
 
     // Try to use the externalIP value for the XorPeerAddress
     // attribute to overcome proxy and NAT issues.
@@ -168,25 +170,25 @@ void UDPAllocation::onPeerDataReceived(net::Socket&, const MutableBuffer& buffer
         assert(0 && "external IP not set");
     }
 
-    auto peerAttr = new stun::XorPeerAddress;
+    auto peerAttr= new stun::XorPeerAddress;
     peerAttr->setAddress(net::Address(peerHost, peerAddress.port()));
     message.add(peerAttr);
 
-    auto dataAttr = new stun::Data;
+    auto dataAttr= new stun::Data;
     dataAttr->copyBytes(bufferCast<const char*>(buffer), buffer.size());
     message.add(dataAttr);
 
     TraceL << "Send data indication:"
-        << "\n\tFrom: " << peerAddress
-        << "\n\tTo: " << _tuple.remote()
-        //<< "\n\tData: " << std::string(packet.data(), packet.size())
-        << endl;
+           << "\n\tFrom: " << peerAddress << "\n\tTo: " << _tuple.remote()
+           //<< "\n\tData: " << std::string(packet.data(), packet.size())
+           << endl;
 
     server().udpSocket().sendPacket(message, _tuple.remote());
 }
 
 
-int UDPAllocation::send(const char* data, std::size_t size, const net::Address& peerAddress)
+int UDPAllocation::send(const char* data, std::size_t size,
+                        const net::Address& peerAddress)
 {
     updateUsage(size);
 
@@ -196,17 +198,17 @@ int UDPAllocation::send(const char* data, std::size_t size, const net::Address& 
         return -1;
     }
 
-    return _relaySocket./*base().*/send(data, size, peerAddress);
+    return _relaySocket./*base().*/ send(data, size, peerAddress);
 }
 
 
 net::Address UDPAllocation::relayedAddress() const
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _relaySocket.address();
 }
+}
+} //  namespace scy::turn
 
-
-} } //  namespace scy::turn
 
 /// @\}

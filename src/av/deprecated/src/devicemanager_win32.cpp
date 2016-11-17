@@ -14,11 +14,11 @@
 
 //#ifdef HAVE_RTAUDIO
 
-#include <windows.h>
-#include <dshow.h>
 #include <dbt.h> // DBT_* & DEV_*
+#include <dshow.h>
 #include <ks.h>
 #include <ksmedia.h> // KSCATEGORY_*
+#include <windows.h>
 
 
 using std::endl;
@@ -28,13 +28,13 @@ namespace scy {
 namespace av {
 
 
-static const char* const kFilteredVideoDevicesName[] =  {
-    "Google Camera Adapter",   // Google magiccams
-    "Asus virtual Camera",     // Bad Asus desktop virtual cam
-    "Bluetooth Video",         // Bad Sony viao bluetooth sharing driver
+static const char* const kFilteredVideoDevicesName[]= {
+    "Google Camera Adapter", // Google magiccams
+    "Asus virtual Camera",   // Bad Asus desktop virtual cam
+    "Bluetooth Video",       // Bad Sony viao bluetooth sharing driver
     NULL,
 };
-static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
+static const char kUsbDevicePathPrefix[]= "\\\\?\\usb";
 static bool getDevicesWin32(const CLSID& catid, std::vector<Device>& out);
 
 
@@ -49,8 +49,8 @@ IDeviceManager* DeviceManagerFactory::create()
 //
 
 
-Win32DeviceManager::Win32DeviceManager() :
-    _needCoUninitialize(false)
+Win32DeviceManager::Win32DeviceManager()
+    : _needCoUninitialize(false)
 {
     TraceL << "Create" << endl;
 
@@ -69,15 +69,14 @@ bool Win32DeviceManager::initialize()
 {
     TraceL << "Initializing" << endl;
     if (!initialized()) {
-        HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-        //HRESULT hr = CoInitialize(nullptr);
-        _needCoUninitialize = SUCCEEDED(hr);
+        HRESULT hr= CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+        // HRESULT hr = CoInitialize(nullptr);
+        _needCoUninitialize= SUCCEEDED(hr);
         if (FAILED(hr)) {
             if (hr != RPC_E_CHANGED_MODE) {
                 ErrorL << "CoInitialize failed, hr=" << hr << endl;
                 return false;
-            }
-            else
+            } else
                 WarnL << "CoInitialize Changed Mode" << endl;
         }
         if (watcher() && !watcher()->start()) {
@@ -100,7 +99,7 @@ void Win32DeviceManager::uninitialize()
             watcher()->stop();
         if (_needCoUninitialize) {
             CoUninitialize();
-            _needCoUninitialize = false;
+            _needCoUninitialize= false;
         }
         setInitialized(false);
     }
@@ -116,24 +115,25 @@ bool Win32DeviceManager::getCameras(std::vector<Device>& devices)
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
 
-#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
+#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x) / sizeof(x[0]))))
 
 
 bool Win32DeviceManager::getDefaultCamera(Device& device)
 {
-    bool ret = false;
+    bool ret= false;
     // If there are multiple capture devices, we want the first USB device.
     // This avoids issues with defaulting to virtual cameras or grabber cards.
     std::vector<Device> devices;
-    ret = (getCameras(devices) && !devices.empty());
+    ret= (getCameras(devices) && !devices.empty());
     if (ret) {
-        device = devices[0];
-        for (std::size_t i = 0; i < devices.size(); ++i) {
-            if (strnicmp(devices[i].guid.c_str(), kUsbDevicePathPrefix,
-            //if (strnicmp(devices[i].id.c_str(), kUsbDevicePathPrefix,
-                ARRAY_SIZE(kUsbDevicePathPrefix) - 1) == 0) {
-                    device = devices[i];
-                    break;
+        device= devices[0];
+        for (std::size_t i= 0; i < devices.size(); ++i) {
+            if (strnicmp(
+                    devices[i].guid.c_str(), kUsbDevicePathPrefix,
+                    // if (strnicmp(devices[i].id.c_str(), kUsbDevicePathPrefix,
+                    ARRAY_SIZE(kUsbDevicePathPrefix) - 1) == 0) {
+                device= devices[i];
+                break;
             }
         }
     }
@@ -143,71 +143,71 @@ bool Win32DeviceManager::getDefaultCamera(Device& device)
 
 namespace internal { // Windows API stuff
 
-    #pragma comment(lib, "strmiids")
+#pragma comment(lib, "strmiids")
 
-    HRESULT enumerateDevices(REFGUID category, IEnumMoniker **ppEnum)
-    {
-        // Create the System Device Enumerator.
-        ICreateDevEnum *pDevEnum;
-        HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL,
-            CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDevEnum));
+HRESULT enumerateDevices(REFGUID category, IEnumMoniker** ppEnum)
+{
+    // Create the System Device Enumerator.
+    ICreateDevEnum* pDevEnum;
+    HRESULT hr= CoCreateInstance(CLSID_SystemDeviceEnum, NULL,
+                                 CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDevEnum));
 
-        if (SUCCEEDED(hr)) {
-            // Create an enumerator for the category.
-            hr = pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
-            if (hr == S_FALSE) {
-                hr = VFW_E_NOT_FOUND;  // The category is empty. Treat as an error.
-            }
-            pDevEnum->Release();
+    if (SUCCEEDED(hr)) {
+        // Create an enumerator for the category.
+        hr= pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
+        if (hr == S_FALSE) {
+            hr= VFW_E_NOT_FOUND; // The category is empty. Treat as an error.
         }
-        return hr;
+        pDevEnum->Release();
     }
+    return hr;
+}
 
 
-    void getDeviceInformation(IEnumMoniker *pEnum, REFGUID catid, std::vector<Device>& devices)
-    {
-        IMoniker *pMoniker = NULL;
+void getDeviceInformation(IEnumMoniker* pEnum, REFGUID catid,
+                          std::vector<Device>& devices)
+{
+    IMoniker* pMoniker= NULL;
 
-        while (pEnum->Next(1, &pMoniker, NULL) == S_OK)
-        {
-            IPropertyBag *pPropBag;
-            HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
-            if (FAILED(hr)) {
-                pMoniker->Release();
-                continue;
-            }
-
-            VARIANT var;
-            VariantInit(&var);
-            std::string name_str, path_str;
-
-            // Get description or friendly name.
-            hr = pPropBag->Read(L"FriendlyName", &var, 0);
-            if (FAILED(hr)) {
-                hr = pPropBag->Read(L"Description", &var, 0);
-            }
-            if (SUCCEEDED(hr)) {
-                //printf("%S\n", var.bstrVal);
-                name_str = scy::toUtf8(var.bstrVal);
-                VariantClear(&var);
-            }
-
-            hr = pPropBag->Read(L"DevicePath", &var, 0);
-            if (SUCCEEDED(hr)) {
-                // The device path is not intended for display.
-                //printf("Device path: %S\n", var.bstrVal);
-                path_str = scy::toUtf8(var.bstrVal);
-                VariantClear(&var);
-            }
-
-            devices.push_back(
-                Device(catid == CLSID_VideoInputDeviceCategory ? "video" : "audio",
-                (int)devices.size(), name_str, path_str));
-
-            pPropBag->Release();
+    while (pEnum->Next(1, &pMoniker, NULL) == S_OK) {
+        IPropertyBag* pPropBag;
+        HRESULT hr= pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
+        if (FAILED(hr)) {
             pMoniker->Release();
+            continue;
         }
+
+        VARIANT var;
+        VariantInit(&var);
+        std::string name_str, path_str;
+
+        // Get description or friendly name.
+        hr= pPropBag->Read(L"FriendlyName", &var, 0);
+        if (FAILED(hr)) {
+            hr= pPropBag->Read(L"Description", &var, 0);
+        }
+        if (SUCCEEDED(hr)) {
+            // printf("%S\n", var.bstrVal);
+            name_str= scy::toUtf8(var.bstrVal);
+            VariantClear(&var);
+        }
+
+        hr= pPropBag->Read(L"DevicePath", &var, 0);
+        if (SUCCEEDED(hr)) {
+            // The device path is not intended for display.
+            // printf("Device path: %S\n", var.bstrVal);
+            path_str= scy::toUtf8(var.bstrVal);
+            VariantClear(&var);
+        }
+
+        devices.push_back(
+            Device(catid == CLSID_VideoInputDeviceCategory ? "video" : "audio",
+                   (int)devices.size(), name_str, path_str));
+
+        pPropBag->Release();
+        pMoniker->Release();
     }
+}
 
 } // namespace internal
 
@@ -217,8 +217,8 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
     // Selecting a Capture Device
     // http://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
 
-    IEnumMoniker *pEnum;
-    HRESULT hr = internal::enumerateDevices(catid, &pEnum);
+    IEnumMoniker* pEnum;
+    HRESULT hr= internal::enumerateDevices(catid, &pEnum);
     if (SUCCEEDED(hr)) {
         internal::getDeviceInformation(pEnum, catid, devices);
         pEnum->Release();
@@ -233,11 +233,11 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 //
 
 
-Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager) :
-    DeviceWatcher(manager),
-    manager_(manager),
-    audio_notify_(NULL),
-    video_notify_(NULL)
+Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
+    : DeviceWatcher(manager)
+    , manager_(manager)
+    , audio_notify_(NULL)
+    , video_notify_(NULL)
 {
 }
 
@@ -253,13 +253,13 @@ bool Win32DeviceWatcher::start()
         return false;
     }
 
-    audio_notify_ = Register(KSCATEGORY_AUDIO);
+    audio_notify_= Register(KSCATEGORY_AUDIO);
     if (!audio_notify_) {
         stop();
         return false;
     }
 
-    video_notify_ = Register(KSCATEGORY_VIDEO);
+    video_notify_= Register(KSCATEGORY_VIDEO);
     if (!video_notify_) {
         stop();
         return false;
@@ -272,32 +272,32 @@ bool Win32DeviceWatcher::start()
 void Win32DeviceWatcher::stop()
 {
     UnregisterDeviceNotification(video_notify_);
-    video_notify_ = NULL;
+    video_notify_= NULL;
     UnregisterDeviceNotification(audio_notify_);
-    audio_notify_ = NULL;
+    audio_notify_= NULL;
     Destroy();
 }
 
 
 HDEVNOTIFY Win32DeviceWatcher::Register(REFGUID guid)
 {
-    //DEV_BROADCAST_DEVICEINTERFACE dbdi;
-    //dbdi.dbcc_size = sizeof(dbdi);
-    //dbdi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-    //dbdi.dbcc_classguid = guid;
+    // DEV_BROADCAST_DEVICEINTERFACE dbdi;
+    // dbdi.dbcc_size = sizeof(dbdi);
+    // dbdi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+    // dbdi.dbcc_classguid = guid;
 
     DEV_BROADCAST_DEVICEINTERFACE dbdi;
 
-    ZeroMemory( &dbdi, sizeof(dbdi) );
-    dbdi.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
-    dbdi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-    dbdi.dbcc_classguid = guid;
+    ZeroMemory(&dbdi, sizeof(dbdi));
+    dbdi.dbcc_size= sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+    dbdi.dbcc_devicetype= DBT_DEVTYP_DEVICEINTERFACE;
+    dbdi.dbcc_classguid= guid;
 
     // Add DEVICE_NOTIFY_ALL_INTERFACE_CLASSES to ignore
     // dbcc_classguid and listen for all GUID types.
     return RegisterDeviceNotification(handle(), &dbdi,
-        DEVICE_NOTIFY_WINDOW_HANDLE);
-        //DEVICE_NOTIFY_WINDOW_HANDLE);
+                                      DEVICE_NOTIFY_WINDOW_HANDLE);
+    // DEVICE_NOTIFY_WINDOW_HANDLE);
 }
 
 
@@ -307,26 +307,27 @@ void Win32DeviceWatcher::Unregister(HDEVNOTIFY handle)
 }
 
 
-bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
+bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
+                                   LRESULT& result)
 {
     DebugL << "OnMessage: " << uMsg << endl;
 
     if (uMsg == WM_DEVICECHANGE) {
-        //bool arriving = wParam == DBT_DEVICEARRIVAL;
-        //bool removing = wParam == DBT_DEVICEREMOVECOMPLETE;
-        if (wParam == DBT_DEVICEARRIVAL ||
-            wParam == DBT_DEVICEREMOVECOMPLETE) {
-                DEV_BROADCAST_DEVICEINTERFACE* dbdi =
-                    reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
-                if (dbdi->dbcc_classguid == KSCATEGORY_AUDIO ||
-                    dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
-                        bool isVideo = dbdi->dbcc_classguid == KSCATEGORY_VIDEO;
-                        bool isConnect = wParam == DBT_DEVICEARRIVAL;
-                        DebugL << "Signal Devices changed: " << isVideo << ": " << isConnect << endl;
-                        manager_->DevicesChanged.emit(manager_, isVideo, isConnect);
-                }
+        // bool arriving = wParam == DBT_DEVICEARRIVAL;
+        // bool removing = wParam == DBT_DEVICEREMOVECOMPLETE;
+        if (wParam == DBT_DEVICEARRIVAL || wParam == DBT_DEVICEREMOVECOMPLETE) {
+            DEV_BROADCAST_DEVICEINTERFACE* dbdi=
+                reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
+            if (dbdi->dbcc_classguid == KSCATEGORY_AUDIO ||
+                dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
+                bool isVideo= dbdi->dbcc_classguid == KSCATEGORY_VIDEO;
+                bool isConnect= wParam == DBT_DEVICEARRIVAL;
+                DebugL << "Signal Devices changed: " << isVideo << ": "
+                       << isConnect << endl;
+                manager_->DevicesChanged.emit(manager_, isVideo, isConnect);
+            }
         }
-        result = 0;
+        result= 0;
         return true;
     }
 
@@ -338,11 +339,12 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRES
 // Win32 Window
 //
 
-static const wchar_t kWindowBaseClassName[] = L"WindowBaseClass";
-HINSTANCE Win32Window::instance_ = NULL;
-ATOM Win32Window::window_class_ = 0;
+static const wchar_t kWindowBaseClassName[]= L"WindowBaseClass";
+HINSTANCE Win32Window::instance_= NULL;
+ATOM Win32Window::window_class_= 0;
 
-Win32Window::Win32Window() : wnd_(NULL)
+Win32Window::Win32Window()
+    : wnd_(NULL)
 {
 }
 
@@ -363,35 +365,35 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
 
     if (!window_class_) {
         if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            reinterpret_cast<LPCWSTR>(&Win32Window::WndProc),
-            &instance_)) {
-                ErrorL << "GetModuleHandleEx failed" << endl;
-                return false;
+                                   GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                               reinterpret_cast<LPCWSTR>(&Win32Window::WndProc),
+                               &instance_)) {
+            ErrorL << "GetModuleHandleEx failed" << endl;
+            return false;
         }
 
         // Class not registered, register it.
         WNDCLASSEX wcex;
         memset(&wcex, 0, sizeof(wcex));
-        wcex.cbSize = sizeof(wcex);
-        wcex.hInstance = instance_;
-        wcex.lpfnWndProc = &Win32Window::WndProc;
-        wcex.lpszClassName = kWindowBaseClassName;
-        window_class_ = ::RegisterClassEx(&wcex);
+        wcex.cbSize= sizeof(wcex);
+        wcex.hInstance= instance_;
+        wcex.lpfnWndProc= &Win32Window::WndProc;
+        wcex.lpszClassName= kWindowBaseClassName;
+        window_class_= ::RegisterClassEx(&wcex);
         if (!window_class_) {
             ErrorL << "RegisterClassEx failed" << endl;
             return false;
         }
     }
-    wnd_ = ::CreateWindowEx(exstyle, kWindowBaseClassName, title, style,
-        x, y, cx, cy, parent, NULL, instance_, this);
+    wnd_= ::CreateWindowEx(exstyle, kWindowBaseClassName, title, style, x, y,
+                           cx, cy, parent, NULL, instance_, this);
     return (NULL != wnd_);
 }
 
 
 void Win32Window::Destroy()
 {
-    BOOL res = ::DestroyWindow(wnd_);
+    BOOL res= ::DestroyWindow(wnd_);
     assert(res != FALSE);
 }
 
@@ -400,20 +402,21 @@ void Win32Window::Shutdown()
 {
     if (window_class_) {
         ::UnregisterClass(MAKEINTATOM(window_class_), instance_);
-        window_class_ = 0;
+        window_class_= 0;
     }
 }
 
 
-bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
+bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
+                            LRESULT& result)
 {
     switch (uMsg) {
-    case WM_CLOSE:
-        if (!OnClose()) {
-            result = 0;
-            return true;
-        }
-        break;
+        case WM_CLOSE:
+            if (!OnClose()) {
+                result= 0;
+                return true;
+            }
+            break;
     }
     return false;
 }
@@ -421,26 +424,27 @@ bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& re
 
 LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    Win32Window* that = reinterpret_cast<Win32Window*>(
-        ::GetWindowLongPtr(hwnd, GWLP_USERDATA));
+    Win32Window* that=
+        reinterpret_cast<Win32Window*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
     if (!that && (WM_CREATE == uMsg)) {
-        CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
-        that = static_cast<Win32Window*>(cs->lpCreateParams);
-        that->wnd_ = hwnd;
-        ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(that));
+        CREATESTRUCT* cs= reinterpret_cast<CREATESTRUCT*>(lParam);
+        that= static_cast<Win32Window*>(cs->lpCreateParams);
+        that->wnd_= hwnd;
+        ::SetWindowLongPtr(hwnd, GWLP_USERDATA,
+                           reinterpret_cast<LONG_PTR>(that));
     }
     if (that) {
         LRESULT result;
-        bool handled = that->OnMessage(uMsg, wParam, lParam, result);
+        bool handled= that->OnMessage(uMsg, wParam, lParam, result);
         if (WM_DESTROY == uMsg) {
-            for (HWND child = ::GetWindow(hwnd, GW_CHILD); child;
-                child = ::GetWindow(child, GW_HWNDNEXT)) {
-                    DebugL << "Child window: " << static_cast<void*>(child) << endl;
+            for (HWND child= ::GetWindow(hwnd, GW_CHILD); child;
+                 child= ::GetWindow(child, GW_HWNDNEXT)) {
+                DebugL << "Child window: " << static_cast<void*>(child) << endl;
             }
         }
         if (WM_NCDESTROY == uMsg) {
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, NULL);
-            that->wnd_ = NULL;
+            that->wnd_= NULL;
             that->OnNcDestroy();
         }
         if (handled) {

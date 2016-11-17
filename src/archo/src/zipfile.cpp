@@ -22,49 +22,58 @@ namespace archo {
 
 namespace internal {
 
-    std::string errmsg(int code)
-    {
-        switch(code) {
-            case UNZ_END_OF_LIST_OF_FILE:       return "end of file list reached";
-            case UNZ_EOF:                       return "end of file reached";
-            case UNZ_PARAMERROR:                return "invalid parameter given";
-            case UNZ_BADZIPFILE:                return "bad zip file";
-            case UNZ_INTERNALERROR:             return "internal error";
-            case UNZ_CRCERROR:                  return "crc error, file is corrupt";
-            case UNZ_ERRNO:                     return strerror(code);
-            default:                            return "unknown error";
-        }
+std::string errmsg(int code)
+{
+    switch (code) {
+        case UNZ_END_OF_LIST_OF_FILE:
+            return "end of file list reached";
+        case UNZ_EOF:
+            return "end of file reached";
+        case UNZ_PARAMERROR:
+            return "invalid parameter given";
+        case UNZ_BADZIPFILE:
+            return "bad zip file";
+        case UNZ_INTERNALERROR:
+            return "internal error";
+        case UNZ_CRCERROR:
+            return "crc error, file is corrupt";
+        case UNZ_ERRNO:
+            return strerror(code);
+        default:
+            return "unknown error";
     }
+}
 
-    void throwError(const std::string& error, int code = 0)
-    {
-        std::string msg;
-        if (!error.empty()) {
-            msg += error;
-        }
-        if (code) {
-            msg += ": ";
-            msg += errmsg(code);
-        }
-        throw std::runtime_error(msg);
+void throwError(const std::string& error, int code= 0)
+{
+    std::string msg;
+    if (!error.empty()) {
+        msg+= error;
     }
+    if (code) {
+        msg+= ": ";
+        msg+= errmsg(code);
+    }
+    throw std::runtime_error(msg);
+}
 
-    void api(const char* what, int ret)
-    {
-        if (ret != UNZ_OK)
-            throwError(what, ret);
-    }
+void api(const char* what, int ret)
+{
+    if (ret != UNZ_OK)
+        throwError(what, ret);
+}
 
 } // namespace internal
 
 
-ZipFile::ZipFile() :
-    fp(nullptr)
+ZipFile::ZipFile()
+    : fp(nullptr)
 {
 }
 
 
-ZipFile::ZipFile(const std::string& file) : fp(nullptr)
+ZipFile::ZipFile(const std::string& file)
+    : fp(nullptr)
 {
     this->open(file);
 }
@@ -85,19 +94,24 @@ bool ZipFile::opened() const
 void ZipFile::open(const std::string& file)
 {
     this->close();
-    this->fp = unzOpen(fs::transcode(file).c_str());
+    this->fp= unzOpen(fs::transcode(file).c_str());
     if (this->fp == nullptr)
         internal::throwError("Cannot open archive file: " + file);
 
-    for (int ret = unzGoToFirstFile(this->fp); ret == UNZ_OK; ret = unzGoToNextFile(this->fp)) {
+    for (int ret= unzGoToFirstFile(this->fp); ret == UNZ_OK;
+         ret= unzGoToNextFile(this->fp)) {
         unz_file_info fileInfo;
         char fileName[1024];
-        internal::api("unzGetCurrentFileInfo", unzGetCurrentFileInfo(this->fp, &fileInfo, fileName, 1024, nullptr, 0, nullptr, 0));
+        internal::api("unzGetCurrentFileInfo",
+                      unzGetCurrentFileInfo(this->fp, &fileInfo, fileName, 1024,
+                                            nullptr, 0, nullptr, 0));
 
         FileInfo info;
-        info.path             = fileName;
-        info.compressedSize   = static_cast< std::size_t >(fileInfo.uncompressed_size);
-        info.uncompressedSize = static_cast< std::size_t >(fileInfo.compressed_size);
+        info.path= fileName;
+        info.compressedSize=
+            static_cast<std::size_t>(fileInfo.uncompressed_size);
+        info.uncompressedSize=
+            static_cast<std::size_t>(fileInfo.compressed_size);
         this->info.push_back(info);
 
         TraceL << "Zip file contains: " << fileName << endl;
@@ -111,7 +125,7 @@ void ZipFile::close()
 {
     if (this->opened()) {
         internal::api("unzClose", unzClose(this->fp));
-        this->fp = nullptr;
+        this->fp= nullptr;
     }
 }
 
@@ -128,7 +142,8 @@ void ZipFile::extract(const std::string& path)
 
     while (true) {
         extractCurrentFile(path, true);
-        if (!goToNextFile()) break;
+        if (!goToNextFile())
+            break;
     }
 }
 
@@ -140,16 +155,18 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
     char fname[1024];
 
     try {
-        internal::api("unzGetCurrentFileInfo", unzGetCurrentFileInfo(this->fp, &info, fname, 1024, nullptr, 0, nullptr, 0));
+        internal::api("unzGetCurrentFileInfo",
+                      unzGetCurrentFileInfo(this->fp, &info, fname, 1024,
+                                            nullptr, 0, nullptr, 0));
 
         std::string outPath(path);
         fs::addnode(outPath, fname);
 
         TraceL << "Extracting asset: " << outPath << endl;
 
-        // Create directory
+// Create directory
 #if !WIN32
-        const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
+        const int FILE_ATTRIBUTE_DIRECTORY= 0x10;
 #endif
         if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
             fname[strlen(fname) - 1] == fs::delimiter) {
@@ -176,10 +193,11 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
             }
 
             if (!ofs.is_open())
-                throw std::runtime_error("Cannot open zip output file: " + outPath);
+                throw std::runtime_error("Cannot open zip output file: " +
+                                         outPath);
 
             char buffer[16384];
-            while ((ret = unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
+            while ((ret= unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
                 ofs.write(buffer, ret);
 
             ofs.close();
@@ -187,8 +205,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
             internal::api("unzReadCurrentFile", ret); // throw file read errors
             closeCurrentFile();
         }
-    }
-    catch (std::exception& exc) {
+    } catch (std::exception& exc) {
         ErrorL << "Cannot unzip file: " << exc.what() << endl;
         if (whiny)
             throw exc;
@@ -226,13 +243,14 @@ std::string ZipFile::currentFileName()
 {
     char buf[1024];
     internal::api("unzGetCurrentFileInfo",
-        unzGetCurrentFileInfo(this->fp, nullptr, buf,
-            sizeof(buf), nullptr, 0, nullptr, 0));
+                  unzGetCurrentFileInfo(this->fp, nullptr, buf, sizeof(buf),
+                                        nullptr, 0, nullptr, 0));
     return buf;
 }
 
 
 } // namespace archo
 } // namespace scy
+
 
 /// @\}

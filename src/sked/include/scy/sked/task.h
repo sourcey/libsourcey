@@ -13,9 +13,9 @@
 #define SCY_Sked_Task_H
 
 
-#include "scy/task.h"
 #include "scy/json/iserializable.h"
 #include "scy/sked/trigger.h"
+#include "scy/task.h"
 
 
 namespace scy {
@@ -27,13 +27,14 @@ class Scheduler;
 
 /// This class extends the Task class to implement
 /// scheduling capabilities.
-class Task: public scy::Task, public json::ISerializable
+class Task : public scy::Task, public json::ISerializable
 {
 public:
-    Task(const std::string& type = "", const std::string& name = "");
-    Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
+    Task(const std::string& type= "", const std::string& name= "");
+    Task(Scheduler& scheduler, const std::string& type,
+         const std::string& name= "");
 
-    //virtual void start();
+    // virtual void start();
 
     /// Serializes the task to JSON.
     virtual void serialize(json::Value& root);
@@ -42,10 +43,9 @@ public:
     virtual void deserialize(json::Value& root);
 
 
-    template<typename T>
-    T* createTrigger()
+    template <typename T> T* createTrigger()
     {
-        T* p = new T();
+        T* p= new T();
         setTrigger(p);
         return p;
     }
@@ -70,19 +70,18 @@ public:
     void setName(const std::string& name);
 
 protected:
-    //Task& operator=(Task const&) {}
+    // Task& operator=(Task const&) {}
     virtual ~Task();
 
     virtual bool beforeRun();
-    virtual void run() = 0;
+    virtual void run()= 0;
     virtual bool afterRun();
 
     // For stl::sort operations
     static bool CompareTimeout(const scy::Task* l, const scy::Task* r)
     {
-        return
-            reinterpret_cast<const Task*>(l)->remaining() <
-            reinterpret_cast<const Task*>(r)->remaining();
+        return reinterpret_cast<const Task*>(l)->remaining() <
+               reinterpret_cast<const Task*>(r)->remaining();
     }
 
     friend class Scheduler;
@@ -103,5 +102,6 @@ typedef std::vector<sked::Task*> TaskList;
 
 
 #endif // SCY_Sked_Task_H
+
 
 /// @\}

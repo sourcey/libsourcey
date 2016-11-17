@@ -16,8 +16,8 @@
 #include "scy/mutex.h"
 #include "scy/synccontext.h"
 
-#include <string>
 #include <deque>
+#include <string>
 
 
 namespace scy {
@@ -35,24 +35,23 @@ struct Action
     void* arg;
     std::string data;
 
-    Action(callback_t target, void* arg = nullptr, const std::string& data = "") :
-        target(target), arg(arg), data(data) {}
+    Action(callback_t target, void* arg= nullptr, const std::string& data= "")
+        : target(target)
+        , arg(arg)
+        , data(data)
+    {
+    }
 };
 
 
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
-template<typename TAction = ipc::Action>
-class Queue
+template <typename TAction= ipc::Action> class Queue
 {
 public:
-    Queue()
-    {
-    }
+    Queue() {}
 
-    virtual ~Queue()
-    {
-    }
+    virtual ~Queue() {}
 
     virtual void push(TAction* action)
     {
@@ -68,32 +67,28 @@ public:
         if (_actions.empty())
             return nullptr;
         Mutex::ScopedLock lock(_mutex);
-        TAction* next = _actions.front();
+        TAction* next= _actions.front();
         _actions.pop_front();
         return next;
     }
 
     virtual void runSync()
     {
-        TAction* next = nullptr;
-        while ((next = pop())) {
+        TAction* next= nullptr;
+        while ((next= pop())) {
             next->target(*next);
             delete next;
         }
     }
 
-    virtual void close()
-    {
-    }
+    virtual void close() {}
 
-    virtual void post()
-    {
-    }
+    virtual void post() {}
 
     void waitForSync()
     {
         // TODO: Impose a time limit
-        while(true) {
+        while (true) {
             {
                 Mutex::ScopedLock lock(_mutex);
                 if (_actions.empty())
@@ -113,33 +108,21 @@ protected:
 /// IPC synchronization queue is for passing templated
 /// actions between threads and the event loop we are
 /// synchronizing with.
-template<typename TAction = ipc::Action>
-class SyncQueue: public Queue<TAction>
+template <typename TAction= ipc::Action> class SyncQueue : public Queue<TAction>
 {
 public:
-    SyncQueue(uv::Loop* loop = uv::defaultLoop()) :
-        _sync(loop, std::bind(&Queue<TAction>::runSync, this))
+    SyncQueue(uv::Loop* loop= uv::defaultLoop())
+        : _sync(loop, std::bind(&Queue<TAction>::runSync, this))
     {
     }
 
-    virtual ~SyncQueue()
-    {
-    }
+    virtual ~SyncQueue() {}
 
-    virtual void close()
-    {
-        _sync.close();
-    }
+    virtual void close() { _sync.close(); }
 
-    virtual void post()
-    {
-        _sync.post();
-    }
+    virtual void post() { _sync.post(); }
 
-    virtual SyncContext& sync()
-    {
-        return _sync;
-    }
+    virtual SyncContext& sync() { return _sync; }
 
 protected:
     SyncContext _sync;
@@ -155,5 +138,6 @@ typedef ipc::SyncQueue<ipc::Action> ActionSyncQueue;
 
 
 #endif
+
 
 /// @\}

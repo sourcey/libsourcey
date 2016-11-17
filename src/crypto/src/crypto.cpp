@@ -10,27 +10,26 @@
 
 
 #include "scy/crypto/crypto.h"
-#include "scy/random.h"
 #include "scy/mutex.h"
+#include "scy/random.h"
 #include "scy/thread.h"
 #include <stdexcept>
 
-#include <openssl/ssl.h>
-#include <openssl/rand.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
+#include <openssl/rand.h>
+#include <openssl/ssl.h>
 //#include <openssl/opensslconf.h>
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
 #include <openssl/conf.h>
 #endif
 
 
-extern "C"
+extern "C" {
+struct CRYPTO_dynlock_value
 {
-    struct CRYPTO_dynlock_value
-    {
-        scy::Mutex _mutex;
-    };
+    scy::Mutex _mutex;
+};
 }
 
 
@@ -44,7 +43,7 @@ void throwError()
     unsigned long err;
     std::string msg;
 
-    while ((err = ERR_get_error())) {
+    while ((err= ERR_get_error())) {
         if (!msg.empty())
             msg.append("; ");
         msg.append(ERR_error_string(err, 0));
@@ -70,7 +69,7 @@ void api(int ret, const char* error)
 //
 
 
-const int SEEDSIZE = 256;
+const int SEEDSIZE= 256;
 static Mutex* _mutexes(0);
 static Mutex _mutex;
 static int _refCount(0);
@@ -91,13 +90,15 @@ void lock(int mode, int n, const char* /* file */, int /* line */)
 // }
 
 
-struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */, int /* line */)
+struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */,
+                                           int /* line */)
 {
     return new CRYPTO_dynlock_value;
 }
 
 
-void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
+void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
+             const char* /* file */, int /* line */)
 {
     assert(lock);
 
@@ -108,7 +109,8 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* /* file */
 }
 
 
-void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
+void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */,
+                    int /* line */)
 {
     delete lock;
 }
@@ -118,8 +120,7 @@ void initialize()
 {
     Mutex::ScopedLock lock(_mutex);
 
-    if (++_refCount == 1)
-    {
+    if (++_refCount == 1) {
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
         OPENSSL_config(NULL);
 #endif
@@ -131,12 +132,13 @@ void initialize()
         Random::getSeed(seed, sizeof(seed));
         RAND_seed(seed, SEEDSIZE);
 
-        int nMutexes = CRYPTO_num_locks();
-        _mutexes = new Mutex[nMutexes];
+        int nMutexes= CRYPTO_num_locks();
+        _mutexes= new Mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
-// #ifndef WIN32 // SF# 1828231: random unhandled exceptions when linking with ssl
-//         CRYPTO_set_id_callback(&internal::id);
-// #endif
+        // #ifndef WIN32 // SF# 1828231: random unhandled exceptions when
+        // linking with ssl
+        //         CRYPTO_set_id_callback(&internal::id);
+        // #endif
         CRYPTO_set_dynlock_create_callback(&internal::dynlockCreate);
         CRYPTO_set_dynlock_lock_callback(&internal::dynlock);
         CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);
@@ -154,7 +156,7 @@ void uninitialize()
         EVP_cleanup();
         ERR_free_strings();
         CRYPTO_set_locking_callback(0);
-        delete [] _mutexes;
+        delete[] _mutexes;
     }
 }
 
@@ -177,5 +179,6 @@ void uninitializeEngine()
 
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

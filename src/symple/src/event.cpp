@@ -27,8 +27,8 @@ Event::Event()
 }
 
 
-Event::Event(const Event& root) :
-    Message(root)
+Event::Event(const Event& root)
+    : Message(root)
 {
     if (!isMember("type"))
         setType("event");
@@ -37,8 +37,8 @@ Event::Event(const Event& root) :
 }
 
 
-Event::Event(const json::Value& root) :
-    Message(root)
+Event::Event(const json::Value& root)
+    : Message(root)
 {
     if (!isMember("type"))
         setType("event");
@@ -54,8 +54,7 @@ Event::~Event()
 
 bool Event::valid() const
 {
-    return Message::valid()
-        && isMember("name");
+    return Message::valid() && isMember("name");
 }
 
 
@@ -73,14 +72,14 @@ time_t Event::time() const
 
 void Event::setName(const std::string& name)
 {
-    (*this)["name"] = name;
+    (*this)["name"]= name;
 }
 
 
 void Event::setTime(time_t time)
 {
-    (*this)["time"] = static_cast<Json::UInt64>(time);
-    //DateTimeFormatter::format(
+    (*this)["time"]= static_cast<Json::UInt64>(time);
+    // DateTimeFormatter::format(
     //    Timestamp::fromEpochTime(time),
     //    DateTimeFormat::ISO8601_FORMAT);
 }
@@ -88,5 +87,6 @@ void Event::setTime(time_t time)
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

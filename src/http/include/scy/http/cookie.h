@@ -63,7 +63,7 @@ public:
     ~Cookie();
 
     /// Assigns a cookie.
-    Cookie& operator = (const Cookie& cookie);
+    Cookie& operator=(const Cookie& cookie);
 
     /// Sets the version of the cookie.
     ///
@@ -137,7 +137,7 @@ public:
     int getMaxAge() const;
 
     /// Sets the HttpOnly flag for the cookie.
-    void setHttpOnly(bool flag = true);
+    void setHttpOnly(bool flag= true);
 
     /// Returns true if the cookie's HttpOnly flag is set.
     bool getHttpOnly() const;
@@ -176,15 +176,15 @@ public:
     static std::string unescape(const std::string& str);
 
 private:
-    int         _version;
+    int _version;
     std::string _name;
     std::string _value;
     std::string _comment;
     std::string _domain;
     std::string _path;
-    bool        _secure;
-    int         _maxAge;
-    bool        _httpOnly;
+    bool _secure;
+    int _maxAge;
+    bool _httpOnly;
 };
 
 
@@ -247,6 +247,7 @@ inline bool Cookie::getHttpOnly() const
 
 
 #endif // SCY_HTTP_Cookie_H
+
 
 /// @\}
 

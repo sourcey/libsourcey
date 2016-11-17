@@ -1,7 +1,7 @@
+#include "scy/application.h"
+#include "scy/net/sslmanager.h"
 #include "scy/socketio/client.h"
 #include "scy/socketio/transaction.h"
-#include "scy/net/sslmanager.h"
-#include "scy/application.h"
 #include "scy/util.h"
 
 
@@ -16,8 +16,8 @@ namespace sockio {
 
 
 #define SERVER_HOST "localhost"
-#define SERVER_PORT 4444 //443
-#define USE_SSL     0 //1
+#define SERVER_PORT 4444 // 443
+#define USE_SSL 0        // 1
 
 
 // ----------------------------------------------------------------------------
@@ -30,45 +30,45 @@ class Tests
 public:
     Tests()
     {
-// #if USE_SSL
-//         // Init SSL Context
-//         SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-//             SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-//         SSLManager::instance().initializeClient(ptrContext);
-//
-//         sockio::SSLClient client(app.loop);
-// #else
-//         sockio::TCPClient client(app.loop);
-// #endif
-//
-//         client.StateChange += sdelegate(this, &Tests::onClientStateChange);
-//         client.connect(SERVER_HOST, SERVER_PORT);
-//
-//         app.run();
-//
-//         // TODO: Benchmarks
-//         // TODO: Transaction tests
-//
-// #if USE_SSL
-//     SSLManager::instance().shutdown();
-// #endif
-//         app.finalize();
+        // #if USE_SSL
+        //         // Init SSL Context
+        //         SSLContext::Ptr ptrContext = new
+        //         SSLContext(SSLContext::CLIENT_USE, "", "", "",
+        //             SSLContext::VERIFY_NONE, 9, true,
+        //             "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        //         SSLManager::instance().initializeClient(ptrContext);
+        //
+        //         sockio::SSLClient client(app.loop);
+        // #else
+        //         sockio::TCPClient client(app.loop);
+        // #endif
+        //
+        //         client.StateChange += sdelegate(this,
+        //         &Tests::onClientStateChange);
+        //         client.connect(SERVER_HOST, SERVER_PORT);
+        //
+        //         app.run();
+        //
+        //         // TODO: Benchmarks
+        //         // TODO: Transaction tests
+        //
+        // #if USE_SSL
+        //     SSLManager::instance().shutdown();
+        // #endif
+        //         app.finalize();
 
         testClient();
     }
 
 
-    ~Tests()
-    {
-        app.finalize();
-    }
+    ~Tests() { app.finalize(); }
 
 
     void testClient()
     {
         sockio::Client::Options options;
-        options.host = SERVER_HOST;
-        options.port = SERVER_PORT;
+        options.host= SERVER_HOST;
+        options.port= SERVER_PORT;
 
 #if USE_SSL
         sockio::SSLClient client(options, app.loop);
@@ -76,35 +76,38 @@ public:
         sockio::TCPClient client(options, app.loop);
 #endif
 
-        client.StateChange += slot(this, &Tests::onClientStateChange);
+        client.StateChange+= slot(this, &Tests::onClientStateChange);
         client.connect();
 
         // app.run();
-        app.waitForShutdown([](void* opaque) {
-            reinterpret_cast<sockio::Client*>(opaque)->close();
-        }, &client);
+        app.waitForShutdown(
+            [](void* opaque) {
+                reinterpret_cast<sockio::Client*>(opaque)->close();
+            },
+            &client);
 
         // TODO: Benchmarks
         // TODO: Transaction tests
     }
 
-    void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState)
+    void onClientStateChange(void* sender, sockio::ClientState& state,
+                             const sockio::ClientState& oldState)
     {
-        auto client = reinterpret_cast<sockio::Client*>(sender);
+        auto client= reinterpret_cast<sockio::Client*>(sender);
         DebugL << "Connection state changed: " << state.toString() << endl;
 
         switch (state.id()) {
-        case sockio::ClientState::Connecting:
-            break;
-        case sockio::ClientState::Connected:
-            DebugL << "Connected" << endl;
-            break;
-        case sockio::ClientState::Online:
-            // TODO: Send message
-            client->send("ping", "hello", true);
-            break;
-        case sockio::ClientState::Error:
-            break;
+            case sockio::ClientState::Connecting:
+                break;
+            case sockio::ClientState::Connected:
+                DebugL << "Connected" << endl;
+                break;
+            case sockio::ClientState::Online:
+                // TODO: Send message
+                client->send("ping", "hello", true);
+                break;
+            case sockio::ClientState::Error:
+                break;
         }
     }
 };

@@ -20,25 +20,31 @@
 
 namespace scy {
 namespace av {
-    struct Format;
+struct Format;
 
 
-class ICapture: public PacketSource, public async::Startable
+class ICapture : public PacketSource, public async::Startable
 {
 public:
-    ICapture() : PacketSource(this->emitter) {};
-    virtual ~ICapture() {};
+    ICapture()
+        : PacketSource(this->emitter){};
+    virtual ~ICapture(){};
 
-    virtual void start() = 0;
-    virtual void stop() = 0;    /// Sets the input format for encoding with this capture device.
-    virtual void getEncoderFormat(Format& iformat) = 0;
+    virtual void start()= 0;
+    virtual void
+    stop()= 0; /// Sets the input format for encoding with this capture device.
+    virtual void getEncoderFormat(Format& iformat)= 0;
 
 
     virtual void onStreamStateChange(const PacketStreamState& state)
     {
         switch (state.id()) {
-            case PacketStreamState::Active: start(); break;
-            case PacketStreamState::Stopping: stop(); break;
+            case PacketStreamState::Active:
+                start();
+                break;
+            case PacketStreamState::Stopping:
+                stop();
+                break;
         }
     }
 
@@ -51,5 +57,6 @@ public:
 
 
 #endif // SCY_AV_ICapture_H
+
 
 /// @\}

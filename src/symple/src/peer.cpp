@@ -10,8 +10,8 @@
 
 
 #include "scy/symple/peer.h"
-#include "scy/logger.h"
 #include "assert.h"
+#include "scy/logger.h"
 
 
 using std::endl;
@@ -24,21 +24,21 @@ namespace smpl {
 
 Peer::Peer()
 {
-    (*this)["type"] = "Peer";
+    (*this)["type"]= "Peer";
 }
 
 
-Peer::Peer(const Peer& r) :
-    json::Value(r)
+Peer::Peer(const Peer& r)
+    : json::Value(r)
 {
-    (*this)["type"] = "Peer";
+    (*this)["type"]= "Peer";
 }
 
 
-Peer::Peer(const json::Value& r) :
-    json::Value(r)
+Peer::Peer(const json::Value& r)
+    : json::Value(r)
 {
-    (*this)["type"] = "Peer";
+    (*this)["type"]= "Peer";
 }
 
 
@@ -56,9 +56,7 @@ void Peer::print(std::ostream& os) const
 
 bool Peer::valid()
 {
-    return isMember("id")
-        && isMember("user")
-        && isMember("type");
+    return isMember("id") && isMember("user") && isMember("type");
 }
 
 
@@ -106,19 +104,19 @@ std::string Peer::host() const
 
 void Peer::setID(const std::string& id)
 {
-    (*this)["id"] = id;
+    (*this)["id"]= id;
 }
 
 
 void Peer::setUser(const std::string& user)
 {
-    (*this)["user"] = user;
+    (*this)["user"]= user;
 }
 
 
 void Peer::setName(const std::string& name)
 {
-    (*this)["name"] = name;
+    (*this)["name"]= name;
 }
 
 
@@ -130,17 +128,18 @@ void Peer::setName(const std::string& name)
 
 void Peer::setType(const std::string& type)
 {
-    (*this)["type"] = type;
+    (*this)["type"]= type;
 }
 
 
 void Peer::setHost(const std::string& host)
 {
-    (*this)["host"] = host;
+    (*this)["host"]= host;
 }
 
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

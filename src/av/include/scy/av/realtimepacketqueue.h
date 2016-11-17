@@ -13,36 +13,32 @@
 #define SCY_RealtimePacketQueue_H
 
 
+#include "scy/av/types.h"
 #include "scy/base.h"
 #include "scy/packetqueue.h"
-#include "scy/av/types.h"
 
 
 namespace scy {
 namespace av {
 
 
-template <class PacketT>/// This class emits media packets based on their realtime pts value.
-class RealtimePacketQueue: public AsyncPacketQueue<PacketT>
+template <class PacketT> /// This class emits media packets based on their
+/// realtime pts value.
+class RealtimePacketQueue : public AsyncPacketQueue<PacketT>
 {
 public:
     typedef std::shared_ptr<RealtimePacketQueue> ptr_t;
     typedef AsyncPacketQueue<PacketT> base_t;
 
-    RealtimePacketQueue(int maxSize = 1024) :
-        base_t(maxSize)
+    RealtimePacketQueue(int maxSize= 1024)
+        : base_t(maxSize)
     {
     }
 
-    virtual ~RealtimePacketQueue()
-    {
-    }
+    virtual ~RealtimePacketQueue() {}
 
     /// Return the current duration from stream start in microseconds
-    std::int64_t realTime()
-    {
-        return (time::hrtime() - _startTime) / 1000;
-    }
+    std::int64_t realTime() { return (time::hrtime() - _startTime) / 1000; }
 
 protected:
     virtual PacketT* popNext()
@@ -50,13 +46,15 @@ protected:
         if (base_t::empty())
             return nullptr;
 
-        // WarnS(this) << "popNext: " << base_t::size() << ": " << realTime() << " < " <<  next->time << std::endl;
-        auto next = base_t::front();
+        // WarnS(this) << "popNext: " << base_t::size() << ": " << realTime() <<
+        // " < " <<  next->time << std::endl;
+        auto next= base_t::front();
         if (next->time > realTime())
             return nullptr;
         base_t::pop();
 
-        WarnS(this) << "popNext: " << base_t::size() << ": " << realTime() << " > " <<  next->time << std::endl;
+        WarnS(this) << "popNext: " << base_t::size() << ": " << realTime()
+                    << " > " << next->time << std::endl;
         return next;
     }
 
@@ -65,7 +63,7 @@ protected:
         TraceS(this) << "Stream state: " << state << std::endl;
 
         if (state.equals(PacketStreamState::Active)) {
-            _startTime = time::hrtime();
+            _startTime= time::hrtime();
         }
 
         base_t::onStreamStateChange(state);
@@ -88,5 +86,6 @@ protected:
 
 
 #endif // SCY_RealtimePacketQueue_H
+
 
 /// @\}

@@ -24,10 +24,11 @@ namespace sockio {
 class Client;
 
 
-struct Transaction: public PacketTransaction<sockio::Packet>
+struct Transaction : public PacketTransaction<sockio::Packet>
 {
-    Transaction(sockio::Client& client, long timeout = 10000);
-    Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
+    Transaction(sockio::Client& client, long timeout= 10000);
+    Transaction(sockio::Client& client, const sockio::Packet& request,
+                long timeout= 10000);
 
     virtual bool send();
     virtual bool checkResponse(const sockio::Packet& packet);
@@ -49,5 +50,6 @@ protected:
 
 
 #endif // SCY_SocketIO_Transaction_H
+
 
 /// @\}

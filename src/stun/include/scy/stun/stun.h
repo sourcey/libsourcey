@@ -26,21 +26,21 @@ namespace stun {
 
 
 // Following values correspond to RFC5389.
-const int kAttributeHeaderSize = 4;
-const int kMessageHeaderSize = 20;
-const int kTransactionIdOffset = 8;
-const int kTransactionIdLength = 12;
-const std::uint32_t kMagicCookie = 0x2112A442;
-const int kMagicCookieLength = sizeof(kMagicCookie);
+const int kAttributeHeaderSize= 4;
+const int kMessageHeaderSize= 20;
+const int kTransactionIdOffset= 8;
+const int kTransactionIdLength= 12;
+const std::uint32_t kMagicCookie= 0x2112A442;
+const int kMagicCookieLength= sizeof(kMagicCookie);
 
 
 /// STUN address types as defined in RFC 5389.
 /// NB: Undefined is not part of the STUN spec.
 enum AddressFamily
 {
-    Undefined    = 0,
-    IPv4         = 1,
-    IPv6         = 2
+    Undefined= 0,
+    IPv4= 1,
+    IPv6= 2
 };
 
 
@@ -76,15 +76,15 @@ inline int getErrorResponseType(int reqType) {
 }
 
 
-#define IS_STUN_REQUEST(msgType)       (((msgType) & 0x0110) == 0x0000)
-#define IS_STUN_INDICATION(msgType)    (((msgType) & 0x0110) == 0x0010)
-#define IS_STUN_SUCCESS_RESP(msgType)  (((msgType) & 0x0110) == 0x0100)
-#define IS_STUN_ERR_RESP(msgType)      (((msgType) & 0x0110) == 0x0110)
+#define IS_STUN_REQUEST(msgType) (((msgType)&0x0110) == 0x0000)
+#define IS_STUN_INDICATION(msgType) (((msgType)&0x0110) == 0x0010)
+#define IS_STUN_SUCCESS_RESP(msgType) (((msgType)&0x0110) == 0x0100)
+#define IS_STUN_ERR_RESP(msgType) (((msgType)&0x0110) == 0x0110)
 
-#define GET_STUN_REQUEST(msgType)      (msgType & 0xFEEF)
-#define GET_STUN_INDICATION(msgType)   ((msgType & 0xFEEF)|0x0010)
-#define GET_STUN_SUCCESS_RESP(msgType) ((msgType & 0xFEEF)|0x0100)
-#define GET_STUN_ERR_RESP(msgType)      (msgType | 0x0110)
+#define GET_STUN_REQUEST(msgType) (msgType & 0xFEEF)
+#define GET_STUN_INDICATION(msgType) ((msgType & 0xFEEF) | 0x0010)
+#define GET_STUN_SUCCESS_RESP(msgType) ((msgType & 0xFEEF) | 0x0100)
+#define GET_STUN_ERR_RESP(msgType) (msgType | 0x0110)
 
 #define STUN_HEADER_LENGTH (20)
 #define STUN_CHANNEL_HEADER_LENGTH (4)
@@ -104,11 +104,11 @@ inline int getErrorResponseType(int reqType) {
 #define STUN_PERMISSION_LIFETIME (300)
 #define STUN_NONCE_EXPIRATION_TIME (600)
 #endif
-
-
-} } // namespace scy:stun
+}
+} // namespace scy:stun
 
 
 #endif // SCY_STUN_H
+
 
 /// @\}

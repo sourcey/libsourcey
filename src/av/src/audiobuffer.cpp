@@ -13,8 +13,8 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/logger.h"
 #include "scy/av/ffmpeg.h"
+#include "scy/logger.h"
 
 
 using std::endl;
@@ -24,8 +24,8 @@ namespace scy {
 namespace av {
 
 
-AudioBuffer::AudioBuffer() :
-    fifo(nullptr)
+AudioBuffer::AudioBuffer()
+    : fifo(nullptr)
 {
     TraceS(this) << "Create" << endl;
     assert(!fifo);
@@ -38,22 +38,22 @@ AudioBuffer::~AudioBuffer()
     close();
 }
 
-void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSamples)
+void AudioBuffer::alloc(const std::string& sampleFmt, int channels,
+                        int numSamples)
 {
     TraceS(this) << "Create audio buffer:\n"
-        << "\n\tNb Channels: " << channels
-        << "\n\tSample Fmt: " << sampleFmt
-        << "\n\tNb Samples: " << numSamples
-        << "\n\tfifo: " << fifo
-        << endl;
+                 << "\n\tNb Channels: " << channels
+                 << "\n\tSample Fmt: " << sampleFmt
+                 << "\n\tNb Samples: " << numSamples << "\n\tfifo: " << fifo
+                 << endl;
 
-    enum AVSampleFormat format = av_get_sample_fmt(sampleFmt.c_str());
+    enum AVSampleFormat format= av_get_sample_fmt(sampleFmt.c_str());
     assert(!fifo);
     assert(channels);
     assert(format != AV_SAMPLE_FMT_NONE);
 
     // Create the FIFO buffer based on the specified sample format.
-    fifo = av_audio_fifo_alloc(format, channels, numSamples);
+    fifo= av_audio_fifo_alloc(format, channels, numSamples);
     if (!fifo) {
         throw std::runtime_error("Cannot allocate FIFO: Out of memory");
     }
@@ -76,7 +76,7 @@ void AudioBuffer::close()
 
     if (fifo) {
         av_audio_fifo_free(fifo);
-        fifo = nullptr;
+        fifo= nullptr;
     }
 }
 
@@ -90,7 +90,8 @@ void AudioBuffer::write(void** samples, int numSamples)
 
     // Make the FIFO as large as it needs to be to hold both
     // the old and the new samples.
-    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + numSamples)) < 0) {
+    if ((error= av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) +
+                                                numSamples)) < 0) {
         throw std::runtime_error("Cannot reallocate FIFO: " + averror(error));
     }
 
@@ -138,5 +139,6 @@ int AudioBuffer::available() const
 
 
 #endif
+
 
 /// @\}

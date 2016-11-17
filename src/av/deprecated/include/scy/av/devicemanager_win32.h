@@ -17,8 +17,8 @@
 //#define __WINDOWS_DS__
 //#endif
 
-#include "scy/base.h"
 #include "scy/av/devicemanager.h"
+#include "scy/base.h"
 
 #include <string>
 #include <vector>
@@ -35,7 +35,7 @@ namespace av {
 //
 
 
-class Win32DeviceManager: public DeviceManager
+class Win32DeviceManager : public DeviceManager
 {
 public:
     Win32DeviceManager();
@@ -48,7 +48,6 @@ public:
     virtual bool getDefaultCamera(Device& device);
 
 private:
-
     bool _needCoUninitialize;
     static Mutex _mutex;
 };
@@ -66,7 +65,7 @@ public:
     virtual ~Win32Window();
 
     bool Create(HWND parent, const wchar_t* title, DWORD style, DWORD exstyle,
-        int x, int y, int cx, int cy);
+                int x, int y, int cx, int cy);
     void Destroy();
 
     HWND handle() const { return wnd_; }
@@ -74,13 +73,15 @@ public:
     static void Shutdown();
 
 protected:
-    virtual bool OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result);
+    virtual bool OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
+                           LRESULT& result);
 
     virtual bool OnClose() { return true; }
-    virtual void OnNcDestroy() { }
+    virtual void OnNcDestroy() {}
 
 private:
-    static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+                                    LPARAM lParam);
 
     HWND wnd_;
     static HINSTANCE instance_;
@@ -98,7 +99,7 @@ private:
 ///
 /// Note: The application must be compiled with SUBSYSTEM:WINDOWS.
 /// Console applications receive no device notification.
-class Win32DeviceWatcher: public DeviceWatcher, public Win32Window
+class Win32DeviceWatcher : public DeviceWatcher, public Win32Window
 {
 public:
     explicit Win32DeviceWatcher(Win32DeviceManager* dm);
@@ -122,7 +123,7 @@ private:
 
 
 #endif
-#endif  // SCY_AV_DeviceManager_WIN32_H
+#endif // SCY_AV_DeviceManager_WIN32_H
 
 
 /*

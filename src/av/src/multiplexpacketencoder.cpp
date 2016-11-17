@@ -20,11 +20,12 @@ namespace scy {
 namespace av {
 
 
-MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options) : //, bool muxLiveStreams
-    MultiplexEncoder(options),
-    PacketProcessor(MultiplexEncoder::emitter) //,
-    // _muxLiveStreams(muxLiveStreams),
-    // _lastVideoPacket(nullptr)
+MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
+    : //, bool muxLiveStreams
+    MultiplexEncoder(options)
+    , PacketProcessor(MultiplexEncoder::emitter) //,
+// _muxLiveStreams(muxLiveStreams),
+// _lastVideoPacket(nullptr)
 {
 }
 
@@ -118,22 +119,22 @@ void MultiplexPacketEncoder::process(IPacket& packet)
     TraceS(this) << "Processing" << std::endl;
 
     // We may be receiving either audio or video packets
-    auto vPacket = dynamic_cast<VideoPacket*>(&packet);
-    auto aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
+    auto vPacket= dynamic_cast<VideoPacket*>(&packet);
+    auto aPacket= vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
     if (!vPacket && !aPacket)
         throw std::invalid_argument("Unknown media packet type.");
 
     if (vPacket) {
         encode(*vPacket);
-    }
-    else if (aPacket) {
+    } else if (aPacket) {
         encode(*aPacket);
     }
 }
 
 void MultiplexPacketEncoder::encode(VideoPacket& packet)
 {
-    encodeVideo((std::uint8_t*)packet.data(), packet.size(), packet.width, packet.height, packet.time);
+    encodeVideo((std::uint8_t*)packet.data(), packet.size(), packet.width,
+                packet.height, packet.time);
 }
 
 
@@ -156,28 +157,28 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     Mutex::ScopedLock lock(_mutex);
 
     switch (state.id()) {
-    case PacketStreamState::Active:
-        if (!isActive()) {
-            TraceS(this) << "Initializing" << endl;
-            //if (MultiplexEncoder::options().oformat.video.enabled &&
-            //    MultiplexEncoder::options().oformat.audio.enabled)
-            //    _muxLiveStreams = true;
-            MultiplexEncoder::initialize();
-        }
-        break;
+        case PacketStreamState::Active:
+            if (!isActive()) {
+                TraceS(this) << "Initializing" << endl;
+                // if (MultiplexEncoder::options().oformat.video.enabled &&
+                //    MultiplexEncoder::options().oformat.audio.enabled)
+                //    _muxLiveStreams = true;
+                MultiplexEncoder::initialize();
+            }
+            break;
 
-    // case PacketStreamState::Resetting:
-    case PacketStreamState::Stopping:
-        if (isActive()) {
-            TraceS(this) << "Uninitializing" << endl;
-            MultiplexEncoder::flush();
-            MultiplexEncoder::uninitialize();
-        }
-        break;
-    //case PacketStreamState::Stopped:
-    //case PacketStreamState::Error:
-    //case PacketStreamState::None:
-    //case PacketStreamState::Closed:
+        // case PacketStreamState::Resetting:
+        case PacketStreamState::Stopping:
+            if (isActive()) {
+                TraceS(this) << "Uninitializing" << endl;
+                MultiplexEncoder::flush();
+                MultiplexEncoder::uninitialize();
+            }
+            break;
+            // case PacketStreamState::Stopped:
+            // case PacketStreamState::Error:
+            // case PacketStreamState::None:
+            // case PacketStreamState::Closed:
     }
 
     TraceS(this) << "Stream state change: OK: " << state << endl;
@@ -189,5 +190,6 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 
 
 #endif
+
 
 /// @\}

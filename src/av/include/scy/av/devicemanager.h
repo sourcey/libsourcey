@@ -46,7 +46,8 @@ class DeviceManager;
 /// Represents a system audio, video or render device.
 struct Device
 {
-    enum Type {
+    enum Type
+    {
         Unknown,
         VideoInput,
         VideoOutput,
@@ -60,25 +61,24 @@ struct Device
     bool isDefault;
 
     Device();
-    Device(Type type, const std::string& id, const std::string& name, bool isDefault = false);
+    Device(Type type, const std::string& id, const std::string& name,
+           bool isDefault= false);
 
     void print(std::ostream& os);
 
-    bool operator == (const Device& that) const
+    bool operator==(const Device& that) const
     {
-        return type == that.type
-            && id == that.id
-            && name == that.name;
+        return type == that.type && id == that.id && name == that.name;
     }
 };
 
 
 enum MediaCapabilities
 {
-    AUDIO_RECV = 1 << 0,
-    AUDIO_SEND = 1 << 1,
-    VIDEO_RECV = 1 << 2,
-    VIDEO_SEND = 1 << 3,
+    AUDIO_RECV= 1 << 0,
+    AUDIO_SEND= 1 << 1,
+    VIDEO_RECV= 1 << 2,
+    VIDEO_SEND= 1 << 3,
 };
 
 

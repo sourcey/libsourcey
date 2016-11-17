@@ -13,14 +13,15 @@
 #define SCY_Configuration_H
 
 
-#include "scy/signal.h"
 #include "scy/mutex.h"
+#include "scy/signal.h"
 
 
 namespace scy {
 
 
-/// Configuration is an abstract base class for managing /// different kinds of configuration storage back ends such as /// JSON, XML, or database.
+/// Configuration is an abstract base class for managing /// different kinds of
+/// configuration storage back ends such as /// JSON, XML, or database.
 ///
 /// Subclasses must override the getRaw() and setRaw() and methods.
 ///
@@ -41,19 +42,23 @@ public:
     /// Throws a NotFoundException if the key does not exist.
     std::string getString(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's string value,
+    /// If a property with the given key exists, returns the property's string
+    /// value,
     /// otherwise returns the given default value.
-    std::string getString(const std::string& key, const std::string& defaultValue) const;
+    std::string getString(const std::string& key,
+                          const std::string& defaultValue) const;
 
     /// Returns the raw string value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
     /// References to other properties are not expanded.
     std::string getRawString(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's raw string value,
+    /// If a property with the given key exists, returns the property's raw
+    /// string value,
     /// otherwise returns the given default value.
     /// References to other properties are not expanded.
-    std::string getRawString(const std::string& key, const std::string& defaultValue) const;
+    std::string getRawString(const std::string& key,
+                             const std::string& defaultValue) const;
 
     /// Returns the int value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
@@ -62,7 +67,8 @@ public:
     /// Numbers starting with 0x are treated as hexadecimal.
     int getInt(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's int value,
+    /// If a property with the given key exists, returns the property's int
+    /// value,
     /// otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to an int.
@@ -76,12 +82,14 @@ public:
     /// Numbers starting with 0x are treated as hexadecimal.
     std::int64_t getLargeInt(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's int value,
+    /// If a property with the given key exists, returns the property's int
+    /// value,
     /// otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to an int.
     /// Numbers starting with 0x are treated as hexadecimal.
-    std::int64_t getLargeInt(const std::string& key, std::int64_t defaultValue) const;
+    std::int64_t getLargeInt(const std::string& key,
+                             std::int64_t defaultValue) const;
 
     /// Returns the double value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
@@ -89,7 +97,8 @@ public:
     /// to a double.
     double getDouble(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's double value,
+    /// If a property with the given key exists, returns the property's double
+    /// value,
     /// otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to an double.
@@ -101,7 +110,8 @@ public:
     /// to a double.
     bool getBool(const std::string& key) const;
 
-    /// If a property with the given key exists, returns the property's bool value,
+    /// If a property with the given key exists, returns the property's bool
+    /// value,
     /// otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to a boolean.
@@ -139,14 +149,14 @@ protected:
     /// in value and returns true. Otherwise, returns false.
     ///
     /// Must be overridden by subclasses.
-    virtual bool getRaw(const std::string& key, std::string& value) const = 0;
+    virtual bool getRaw(const std::string& key, std::string& value) const= 0;
 
     /// Sets the property with the given key to the given value.
     /// An already existing value for the key is overwritten.
     ///
     /// The implementation is responsible for emitting the
     /// PropertyChanged signal.
-    virtual void setRaw(const std::string& key, const std::string& value) = 0;
+    virtual void setRaw(const std::string& key, const std::string& value)= 0;
 
     static int parseInt(const std::string& value);
     static std::int64_t parseLargeInt(const std::string& value);
@@ -154,7 +164,7 @@ protected:
 
 private:
     Configuration(const Configuration&);
-    Configuration& operator = (const Configuration&);
+    Configuration& operator=(const Configuration&);
 
     mutable Mutex _mutex;
 };
@@ -166,8 +176,10 @@ private:
 
 
 /// ScopedConfiguration provides multiple levels of configuration for a module.
-/// Multiple levels means that there is a module level scope, and a default scope.
-/// When a property is accessed, the module scope value will be used if available,
+/// Multiple levels means that there is a module level scope, and a default
+/// scope.
+/// When a property is accessed, the module scope value will be used if
+/// available,
 /// otherwise the default scope value will be used.
 ///
 /// Example scoping:
@@ -176,37 +188,46 @@ private:
 class ScopedConfiguration
 {
 public:
-    ScopedConfiguration(Configuration& config, const std::string& currentScope, const std::string& defaultScope);
+    ScopedConfiguration(Configuration& config, const std::string& currentScope,
+                        const std::string& defaultScope);
     ScopedConfiguration(const ScopedConfiguration& that);
 
-    std::string getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope = false) const;
-    int getInt(const std::string& key, int defaultValue, bool forceDefaultScope = false) const;
-    double getDouble(const std::string& key, double defaultValue, bool forceDefaultScope = false) const;
-    bool getBool(const std::string& key, bool defaultValue, bool forceDefaultScope = false) const;
+    std::string getString(const std::string& key,
+                          const std::string& defaultValue,
+                          bool forceDefaultScope= false) const;
+    int getInt(const std::string& key, int defaultValue,
+               bool forceDefaultScope= false) const;
+    double getDouble(const std::string& key, double defaultValue,
+                     bool forceDefaultScope= false) const;
+    bool getBool(const std::string& key, bool defaultValue,
+                 bool forceDefaultScope= false) const;
 
-    void setString(const std::string& key, const std::string& value, bool defaultScope = false);
-    void setInt(const std::string& key, int value, bool defaultScope = false);
-    void setDouble(const std::string& key, double value, bool defaultScope = false);
-    void setBool(const std::string& key, bool value, bool defaultScope = false);
+    void setString(const std::string& key, const std::string& value,
+                   bool defaultScope= false);
+    void setInt(const std::string& key, int value, bool defaultScope= false);
+    void setDouble(const std::string& key, double value,
+                   bool defaultScope= false);
+    void setBool(const std::string& key, bool value, bool defaultScope= false);
 
     std::string getCurrentScope(const std::string& key) const;
     std::string getDafaultKey(const std::string& key) const;
-    std::string getScopedKey(const std::string& key, bool defaultScope = false) const;
+    std::string getScopedKey(const std::string& key,
+                             bool defaultScope= false) const;
 
     Configuration& config;
     std::string currentScope;
     std::string defaultScope;
 
 private:
-    ScopedConfiguration& operator = (const ScopedConfiguration&);
+    ScopedConfiguration& operator=(const ScopedConfiguration&);
 };
-
 
 
 } // namespace scy
 
 
 #endif // SCY_Configuration_H
+
 
 /// @\}
 

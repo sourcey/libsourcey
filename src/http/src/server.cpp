@@ -22,10 +22,10 @@ namespace scy {
 namespace http {
 
 
-Server::Server(short port, ServerResponderFactory* factory) :
-    socket(net::makeSocket<net::TCPSocket>()),
-    factory(factory),
-    address("0.0.0.0", port)
+Server::Server(short port, ServerResponderFactory* factory)
+    : socket(net::makeSocket<net::TCPSocket>())
+    , factory(factory)
+    , address("0.0.0.0", port)
 {
     TraceS(this) << "Create" << endl;
 }
@@ -43,16 +43,16 @@ Server::~Server()
 void Server::start()
 {
     // TODO: Register self as an observer
-    //socket.reset(new net::TCPSocket);
-    socket->AcceptConnection += slot(this, &Server::onSocketAccept);
-    socket->Close += slot(this, &Server::onSocketClose);
+    // socket.reset(new net::TCPSocket);
+    socket->AcceptConnection+= slot(this, &Server::onSocketAccept);
+    socket->Close+= slot(this, &Server::onSocketClose);
     socket->bind(address);
     socket->listen();
 
     TraceS(this) << "Server listening on " << port() << endl;
 
-    //timer.Timeout += slot(this, &Server::onTimer);
-    //timer.start(5000, 5000);
+    // timer.Timeout += slot(this, &Server::onTimer);
+    // timer.start(5000, 5000);
 }
 
 
@@ -61,8 +61,8 @@ void Server::shutdown()
     TraceS(this) << "Shutdown" << endl;
 
     if (socket) {
-        socket->AcceptConnection -= slot(this, &Server::onSocketAccept);
-        socket->Close -= slot(this, &Server::onSocketClose);
+        socket->AcceptConnection-= slot(this, &Server::onSocketAccept);
+        socket->Close-= slot(this, &Server::onSocketClose);
         socket->close();
     }
 
@@ -83,11 +83,11 @@ std::uint16_t Server::port()
 
 ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
 {
-    auto conn = std::shared_ptr<ServerConnection>(
+    auto conn= std::shared_ptr<ServerConnection>(
         new ServerConnection(*this, sock),
-            deleter::Deferred<ServerConnection>());
+        deleter::Deferred<ServerConnection>());
     addConnection(conn);
-    return conn; //return new ServerConnection(*this, sock);
+    return conn; // return new ServerConnection(*this, sock);
 }
 
 
@@ -103,7 +103,8 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 void Server::addConnection(ServerConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
-    conn->Close += slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
+    conn->Close+=
+        slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
     connections.push_back(conn);
 }
 
@@ -111,7 +112,7 @@ void Server::addConnection(ServerConnection::Ptr conn)
 void Server::removeConnection(ServerConnection* conn)
 {
     TraceS(this) << "Removing connection: " << conn << endl;
-    for (auto it = connections.begin(); it != connections.end(); ++it) {
+    for (auto it= connections.begin(); it != connections.end(); ++it) {
         if (conn == it->get()) {
             connections.erase(it);
             return;
@@ -124,7 +125,7 @@ void Server::removeConnection(ServerConnection* conn)
 void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
 {
     TraceS(this) << "On server accept" << endl;
-    ServerConnection::Ptr conn = createConnection(sock);
+    ServerConnection::Ptr conn= createConnection(sock);
     if (!conn) {
         WarnL << "Cannot create connection" << endl;
         assert(0);
@@ -150,12 +151,12 @@ void Server::onConnectionClose(Connection& conn)
 //
 
 
-ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket) :
-    Connection(socket),
-    _server(server),
-    _responder(nullptr),
-    _upgrade(false),
-    _requestComplete(false)
+ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket)
+    : Connection(socket)
+    , _server(server)
+    , _responder(nullptr)
+    , _upgrade(false)
+    , _requestComplete(false)
 {
     TraceS(this) << "Create" << endl;
 
@@ -199,10 +200,10 @@ void ServerConnection::onHeaders()
     if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 &&
         util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {
         TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
-        _upgrade = true;
+        _upgrade= true;
 
 
-        auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
+        auto wsAdapter= new ws::ConnectionAdapter(*this, ws::ServerSide);
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -220,12 +221,13 @@ void ServerConnection::onHeaders()
         // Send the handshake request to the WS adapter for handling.
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
-        auto sock = socket().get();
-        wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer), sock->peerAddress());
+        auto sock= socket().get();
+        wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer),
+                                sock->peerAddress());
     }
 
     // Instantiate the responder when request headers have been parsed
-    _responder = _server.createResponder(*this);
+    _responder= _server.createResponder(*this);
 
     // If no responder was created we close the connection.
     // TODO: Should we return a 404 instead?
@@ -256,7 +258,7 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
         return;
     }
 
-    //assert(_upgrade); // no payload for upgrade requests
+    // assert(_upgrade); // no payload for upgrade requests
     assert(_responder);
     _responder->onPayload(buffer);
 }
@@ -276,7 +278,7 @@ void ServerConnection::onMessage()
     // The request handler can give a response.
     assert(_responder);
     assert(!_requestComplete);
-    _requestComplete = true;
+    _requestComplete= true;
     _responder->onRequest(_request, _response);
 }
 
@@ -316,5 +318,6 @@ http::Message* ServerConnection::outgoingHeader()
 
 } // namespace http
 } // namespace scy
+
 
 /// @\}

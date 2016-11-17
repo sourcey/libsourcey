@@ -13,14 +13,14 @@
 #define SCY_TURN_Permission_H
 
 
-#include "scy/turn/fivetuple.h"
-#include "scy/timer.h"
 #include "scy/net/address.h"
+#include "scy/timer.h"
+#include "scy/turn/fivetuple.h"
 
-#include <string>
-#include <vector>
 #include <list>
 #include <map>
+#include <string>
+#include <vector>
 
 
 namespace scy {
@@ -28,7 +28,7 @@ namespace turn {
 
 
 /// Permission Lifetime MUST be 300 seconds (= 5 minutes).
-const int PERMISSION_LIFETIME = 3 * 60 * 1000;
+const int PERMISSION_LIFETIME= 3 * 60 * 1000;
 
 
 /// TURN permission for a user session
@@ -37,21 +37,16 @@ struct Permission
     std::string ip;
     Timeout timeout;
 
-    Permission(const std::string& ip) :
-        ip(ip), timeout(PERMISSION_LIFETIME)
+    Permission(const std::string& ip)
+        : ip(ip)
+        , timeout(PERMISSION_LIFETIME)
     {
         refresh();
     }
 
-    void refresh()
-    {
-        timeout.reset();
-    }
+    void refresh() { timeout.reset(); }
 
-    bool operator ==(const std::string& r) const
-    {
-        return ip == r;
-    }
+    bool operator==(const std::string& r) const { return ip == r; }
 };
 
 
@@ -63,5 +58,6 @@ typedef std::vector<Permission> PermissionList;
 
 
 #endif // SCY_TURN_Permission_H
+
 
 /// @\}

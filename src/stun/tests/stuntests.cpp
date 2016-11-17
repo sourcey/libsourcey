@@ -1,8 +1,8 @@
-#include "scy/test.h"
 #include "scy/base.h"
 #include "scy/logger.h"
-#include "scy/util.h"
 #include "scy/stun/message.h"
+#include "scy/test.h"
+#include "scy/util.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -29,13 +29,13 @@ int main(int argc, char** argv)
         std::string password("somepass");
 
         stun::Message request(stun::Message::Request, stun::Message::Allocate);
-        //request.setType(stun::Message::Allocate);
+        // request.setType(stun::Message::Allocate);
 
-        auto usernameAttr = new stun::Username;
+        auto usernameAttr= new stun::Username;
         usernameAttr->copyBytes(username.c_str(), username.size());
         request.add(usernameAttr);
 
-        auto integrityAttr = new stun::MessageIntegrity;
+        auto integrityAttr= new stun::MessageIntegrity;
         integrityAttr->setKey(password);
         request.add(integrityAttr);
 
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
         stun::Message response;
         response.read(constBuffer(buf));
 
-        integrityAttr = response.get<stun::MessageIntegrity>();
+        integrityAttr= response.get<stun::MessageIntegrity>();
         expect(integrityAttr->verifyHmac(password));
     });
 
@@ -53,24 +53,28 @@ int main(int argc, char** argv)
     // Request Types
     //
     describe("request types", []() {
-        std::uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
+        std::uint16_t type=
+            stun::Message::Indication | stun::Message::SendIndication;
 
-        //expect(IS_STUN_INDICATION(type));
+        // expect(IS_STUN_INDICATION(type));
 
-        std::uint16_t classType = type & 0x0110;
-        std::uint16_t methodType = type & 0x000F;
+        std::uint16_t classType= type & 0x0110;
+        std::uint16_t methodType= type & 0x000F;
 
         expect(classType == stun::Message::Indication);
         expect(methodType == stun::Message::SendIndication);
 
-        stun::Message request(stun::Message::Indication, stun::Message::SendIndication);
-        //expect(IS_STUN_INDICATION(request.classType() | request.methodType()));
+        stun::Message request(stun::Message::Indication,
+                              stun::Message::SendIndication);
+        // expect(IS_STUN_INDICATION(request.classType() |
+        // request.methodType()));
 
         expect(request.classType() != stun::Message::Request);
         expect(request.classType() == stun::Message::Indication);
 
         stun::Message request1(stun::Message::Request, stun::Message::Allocate);
-        //expect(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
+        // expect(IS_STUN_REQUEST(request1.classType() |
+        // request1.methodType()));
     });
 
     // =========================================================================
@@ -84,10 +88,10 @@ int main(int argc, char** argv)
         DebugL << "Source Address: " << addr << endl;
 
         stun::Message request(stun::Message::Request, stun::Message::Allocate);
-        //stun::Message request;
-        //request.setType(stun::Message::Allocate);
+        // stun::Message request;
+        // request.setType(stun::Message::Allocate);
 
-        auto addrAttr = new stun::XorRelayedAddress;
+        auto addrAttr= new stun::XorRelayedAddress;
         addrAttr->setAddress(addr);
         request.add(addrAttr);
         DebugL << "Request Address: " << addrAttr->address() << endl;
@@ -98,7 +102,7 @@ int main(int argc, char** argv)
         stun::Message response;
         response.read(constBuffer(buf));
 
-        addrAttr = response.get<stun::XorRelayedAddress>();
+        addrAttr= response.get<stun::XorRelayedAddress>();
 
         DebugL << "Response Address: " << addrAttr->address() << endl;
         expect(addrAttr->address() == addr);

@@ -13,8 +13,8 @@
 #define SCY_TURN_ServerAllocation_H
 
 
-#include "scy/turn/iallocation.h"
 #include "scy/turn/fivetuple.h"
+#include "scy/turn/iallocation.h"
 
 
 namespace scy {
@@ -24,13 +24,11 @@ namespace turn {
 class Server;
 
 
-class ServerAllocation: public IAllocation
+class ServerAllocation : public IAllocation
 {
 public:
-    ServerAllocation(Server& server,
-                     const FiveTuple& tuple,
-                     const std::string& username,
-                     std::int64_t lifetime);
+    ServerAllocation(Server& server, const FiveTuple& tuple,
+                     const std::string& username, std::int64_t lifetime);
 
     virtual bool handleRequest(Request& request);
     virtual void handleRefreshRequest(Request& request);
@@ -56,13 +54,13 @@ protected:
     friend class Server;
 
     std::uint32_t _maxLifetime;
-    Server&    _server;
+    Server& _server;
 
 private:
-    ServerAllocation(const ServerAllocation&) = delete;
-    ServerAllocation(ServerAllocation&&) = delete;
-    ServerAllocation& operator=(const ServerAllocation&) = delete;
-    ServerAllocation& operator=(ServerAllocation&&) = delete;
+    ServerAllocation(const ServerAllocation&)= delete;
+    ServerAllocation(ServerAllocation&&)= delete;
+    ServerAllocation& operator=(const ServerAllocation&)= delete;
+    ServerAllocation& operator=(ServerAllocation&&)= delete;
 };
 
 
@@ -71,5 +69,6 @@ private:
 
 
 #endif // SCY_TURN_ServerAllocation_H
+
 
 /// @\}

@@ -13,8 +13,8 @@
 #define SCY_Symple_Presence_H
 
 
-#include "scy/json/json.h"
 #include "scy/base.h"
+#include "scy/json/json.h"
 #include "scy/symple/message.h"
 
 
@@ -22,7 +22,7 @@ namespace scy {
 namespace smpl {
 
 
-class Presence: public Message
+class Presence : public Message
 {
 public:
     Presence();
@@ -40,5 +40,6 @@ public:
 
 
 #endif // SCY_Symple_Presence_H
+
 
 /// @\}

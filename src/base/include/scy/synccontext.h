@@ -13,11 +13,11 @@
 #define SCY_SyncContext_H
 
 
-#include "scy/uv/uvpp.h"
-#include "scy/platform.h"
-#include "scy/logger.h"
 #include "scy/async.h"
 #include "scy/interface.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
+#include "scy/uv/uvpp.h"
 
 #include <deque>
 
@@ -31,7 +31,7 @@ namespace scy {
 
 /// SyncContext enables any thread to communicate with
 /// the associated event loop via synchronized callbacks.
-class SyncContext: public async::Runner
+class SyncContext : public async::Runner
 {
 public:
     /// Create the synchronization context the given event loop and method.
@@ -180,5 +180,6 @@ static SyncDelegate<C,
 
 
 #endif // SCY_SyncContext_H
+
 
 /// @\}

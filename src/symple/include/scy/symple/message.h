@@ -14,17 +14,17 @@
 
 
 #include "scy/base.h"
-#include "scy/packet.h"
 #include "scy/json/json.h"
-#include "scy/symple/peer.h"
+#include "scy/packet.h"
 #include "scy/symple/address.h"
+#include "scy/symple/peer.h"
 
 
 namespace scy {
 namespace smpl {
 
 
-class Message: public json::Value, public IPacket
+class Message : public json::Value, public IPacket
 {
 public:
     Message();
@@ -92,5 +92,6 @@ public:
 
 
 #endif // SCY_Symple_Message_H
+
 
 /// @\}

@@ -13,8 +13,8 @@
 #define SCY_Net_Transaction_H
 
 
-#include "scy/packettransaction.h"
 #include "scy/net/packetsocket.h"
+#include "scy/packettransaction.h"
 
 
 namespace scy {
@@ -24,30 +24,31 @@ namespace net {
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
 template <class PacketT>
-class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
+class Transaction : public PacketTransaction<PacketT>,
+                    public PacketSocketAdapter
 {
 public:
-    Transaction(const net::Socket::Ptr& socket,
-                const Address& peerAddress,
-                int timeout = 10000,
-                int retries = 1,
-                uv::Loop* loop = uv::defaultLoop()) :
-        PacketTransaction<PacketT>(timeout, retries, loop),
-        PacketSocketAdapter(socket),
-        _peerAddress(peerAddress)
+    Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
+                int timeout= 10000, int retries= 1,
+                uv::Loop* loop= uv::defaultLoop())
+        : PacketTransaction<PacketT>(timeout, retries, loop)
+        , PacketSocketAdapter(socket)
+        , _peerAddress(peerAddress)
     {
         TraceS(this) << "Create" << std::endl;
 
-        PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
+        PacketSocketAdapter::socket->addReceiver(this,
+                                                 100); // highest prioority
     }
 
     virtual bool send()
     {
         TraceS(this) << "Send" << std::endl;
-        //assert(PacketSocketAdapter::socket->recvAdapter() == this);
+        // assert(PacketSocketAdapter::socket->recvAdapter() == this);
         assert(PacketSocketAdapter::socket);
 
-        if (PacketSocketAdapter::socket->sendPacket(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
+        if (PacketSocketAdapter::socket->sendPacket(
+                PacketTransaction<PacketT>::_request, _peerAddress) > 0)
             return PacketTransaction<PacketT>::send();
         PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
         return false;
@@ -61,7 +62,7 @@ public:
 
     virtual void dispose()
     {
-        //if (!PacketTransaction<PacketT>::_destroyed) {
+        // if (!PacketTransaction<PacketT>::_destroyed) {
         //    PacketSocketAdapter::socket->setAdapter(nullptr);
         //}
         TraceS(this) << "Dispose" << std::endl;
@@ -70,22 +71,18 @@ public:
         PacketTransaction<PacketT>::dispose(); // gc
     }
 
-    Address peerAddress() const
-    {
-        return _peerAddress;
-    }
+    Address peerAddress() const { return _peerAddress; }
 
 protected:
-    virtual ~Transaction()
-    {
-    }
+    virtual ~Transaction() {}
 
     /// Overrides the PacketSocketAdapter::onPacket
     /// callback for checking potential response candidates.
     virtual void onPacket(IPacket& packet)
     {
         TraceS(this) << "On packet: " << packet.size() << std::endl;
-        if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
+        if (PacketTransaction<PacketT>::handlePotentialResponse(
+                static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
             // we have handled the packet
@@ -96,9 +93,11 @@ protected:
     /// Called when a successful response match is received.
     virtual void onResponse()
     {
-        TraceS(this) << "On success: " <<
-            PacketTransaction<PacketT>::_response.toString() << std::endl;
-        PacketSignal::emit(/*socket.get(), */PacketTransaction<PacketT>::_response);
+        TraceS(this) << "On success: "
+                     << PacketTransaction<PacketT>::_response.toString()
+                     << std::endl;
+        PacketSignal::emit(
+            /*socket.get(), */ PacketTransaction<PacketT>::_response);
     }
 
     /// Sub classes should derive this method to implement
@@ -109,13 +108,13 @@ protected:
         assert(packet.info && "socket must provide packet info");
         if (!packet.info)
             return false;
-        auto info = reinterpret_cast<net::PacketInfo*>(packet.info);
-        return socket->address()  == info->socket->address()
-            && _peerAddress == info->peerAddress;
+        auto info= reinterpret_cast<net::PacketInfo*>(packet.info);
+        return socket->address() == info->socket->address() &&
+               _peerAddress == info->peerAddress;
     }
 
     Address _peerAddress;
-    //net::Socket::Ptr PacketSocketAdapter::socket;
+    // net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
 
@@ -124,5 +123,6 @@ protected:
 
 
 #endif // SCY_Net_Transaction_H
+
 
 /// @\}

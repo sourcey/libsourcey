@@ -16,9 +16,9 @@
 #include "scy/crypto/crypto.h"
 #include "scy/datetime.h"
 #include "scy/memory.h"
-#include <set>
 #include <istream>
 #include <openssl/ssl.h>
+#include <set>
 
 
 namespace scy {
@@ -33,12 +33,12 @@ public:
     /// a certificate subject's or issuer's distinguished name.
     enum NID
     {
-        NID_COMMON_NAME = 13,
-        NID_COUNTRY = 14,
-        NID_LOCALITY_NAME = 15,
-        NID_STATE_OR_PROVINCE = 16,
-        NID_ORGANIZATION_NAME = 17,
-        NID_ORGANIZATION_UNIT_NAME = 18
+        NID_COMMON_NAME= 13,
+        NID_COUNTRY= 14,
+        NID_LOCALITY_NAME= 15,
+        NID_STATE_OR_PROVINCE= 16,
+        NID_ORGANIZATION_NAME= 17,
+        NID_ORGANIZATION_UNIT_NAME= 18
     };
 
     /// Creates the X509Certificate object by reading
@@ -64,7 +64,7 @@ public:
     X509Certificate(const X509Certificate& cert);
 
     /// Assigns a certificate.
-    X509Certificate& operator = (const X509Certificate& cert);
+    X509Certificate& operator=(const X509Certificate& cert);
 
     /// Exchanges the certificate with another one.
     void swap(X509Certificate& cert);
@@ -94,7 +94,8 @@ public:
 
     /// Extracts the common name and the alias domain names from the
     /// certificate.
-    void extractNames(std::string& commonName, std::set<std::string>& domainNames) const;
+    void extractNames(std::string& commonName,
+                      std::set<std::string>& domainNames) const;
 
     /// Returns the date and time the certificate is valid from.
     DateTime validFrom() const;
@@ -140,12 +141,12 @@ protected:
 private:
     enum
     {
-        NAME_BUFFER_SIZE = 256
+        NAME_BUFFER_SIZE= 256
     };
 
     std::string _issuerName;
     std::string _subjectName;
-    X509*       _certificate;
+    X509* _certificate;
 };
 
 
@@ -154,6 +155,7 @@ private:
 
 
 #endif // SCY_Crypto_X509Certificate_H
+
 
 /// @\}
 

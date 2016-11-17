@@ -34,19 +34,18 @@ int main(int argc, char** argv)
     describe("signal const class member benchmark", []() {
         Signal<void(std::uint64_t&)> signal;
         SignalCounter counter;
-        signal += slot(&counter, &SignalCounter::incrementConst);
-        const std::uint64_t benchstart = time::hrtime();
-        std::uint64_t i, value = 0;
-        for (i = 0; i < 999999; i++) {
+        signal+= slot(&counter, &SignalCounter::incrementConst);
+        const std::uint64_t benchstart= time::hrtime();
+        std::uint64_t i, value= 0;
+        for (i= 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone = time::hrtime();
+        const std::uint64_t benchdone= time::hrtime();
         expect(value == i);
 
         std::cout << "signal const class member benchmark: "
-            << ((benchdone - benchstart) * 1.0 / i) << "ns "
-            << "per emission (sz=" << sizeof (signal) << ")"
-            << std::endl;
+                  << ((benchdone - benchstart) * 1.0 / i) << "ns "
+                  << "per emission (sz=" << sizeof(signal) << ")" << std::endl;
     });
 
     // describe("signal static member benchmark", []() {
@@ -97,7 +96,8 @@ int main(int argc, char** argv)
     // describe("v2 signal collector while0", new TestCollectorWhile0);
     //
     // describe("v2 async signal", []() {
-    //     typedef v2::AsyncSignal < std::string(const std::string & , std::string & ,
+    //     typedef v2::AsyncSignal < std::string(const std::string & ,
+    //     std::string & ,
     //             std::string, double, int) >
     //         StringTestSignal;
     //     std::string btag = "B";
@@ -111,7 +111,8 @@ int main(int argc, char** argv)
     //     expect(emi->done() == true);
     //     delete emi;
     //     // add simple handler
-    //     auto lambda1 = [](const std::string & a, std::string & b, std::string c,
+    //     auto lambda1 = [](const std::string & a, std::string & b, std::string
+    //     c,
     //         double d, long l) -> std::string {
     //         return "1" + a + b + c + util::format("%.0f%d", d, l);
     //     };
@@ -134,10 +135,12 @@ int main(int argc, char** argv)
     //     Mutex handler2_lock;
     //     auto lambda2 = [ & handler2_lock](
     //         const std::string & a, std::string & b, std::string c, double d,
-    //             int i) -> std::future < std::string > { // need to turn (std::string &b) into
+    //             int i) -> std::future < std::string > { // need to turn
+    //             (std::string &b) into
     //         // (std::string b) copy for deferred
     //         // execution
-    //         auto lambda = [ & handler2_lock](const std::string & a, std::string b,
+    //         auto lambda = [ & handler2_lock](const std::string & a,
+    //         std::string b,
     //             std::string c, double d,
     //             int i) // -> std::string
     //         {
@@ -167,19 +170,22 @@ int main(int argc, char** argv)
     //         emi->get_value(); // test deadlock...
     //     handler2_lock.unlock(); // unblock handler2
     //     bool saved_pending = emi->pending();
-    //     while (emi->has_value() == false) // waiting for async handler2 completion
+    //     while (emi->has_value() == false) // waiting for async handler2
+    //     completion
     //     {
     //         expect(saved_pending == false);
     //         scy::sleep(1); // allow for async handler2 completion
     //         saved_pending = emi->pending();
     //     }
     //     expect(emi->pending() == true); // pending, since has_value() == true
-    //     expect(emi->get_value() == "2aBc-57"); // synchronize, fetch and validate value
+    //     expect(emi->get_value() == "2aBc-57"); // synchronize, fetch and
+    //     validate value
     //     expect(!emi->has_value() && !emi->pending() && emi->done());
     //     delete emi;
     //     // add handler with promise
     //     std::promise < std::string > result3;
-    //     auto lambda3 = [ & result3](const std::string & a, std::string & b, std::string c,
+    //     auto lambda3 = [ & result3](const std::string & a, std::string & b,
+    //     std::string c,
     //             double d, int i) // -> std::future<std::string>
     //         {
     //             return result3.get_future();
@@ -192,7 +198,8 @@ int main(int argc, char** argv)
     //     expect(emi->get_value() == "1_B_-7-6"); // fetch and validate value
     //     expect(!emi->done() && !emi->has_value() && emi->pending());
     //     expect(emi->dispatch() && !emi->done());
-    //     expect(emi->get_value() == "2_B_-7-6"); // synchronize with handler2, fetch and validate value
+    //     expect(emi->get_value() == "2_B_-7-6"); // synchronize with handler2,
+    //     fetch and validate value
     //     expect(!emi->done() && !emi->has_value() && emi->pending());
     //     expect(emi->dispatch() && !emi->done());
     //     expect(emi->has_value() == false); // promise remains unset
@@ -209,7 +216,8 @@ int main(int argc, char** argv)
     //         sig_string_test.emission("(2)", btag, "x", -1, -1);
     //     StringTestSignal::Emission * emi3 =
     //         sig_string_test.emission("(3)", btag, "x", -1, -1);
-    //     expect(emi1 -> dispatch() && emi2 -> dispatch() && emi3 -> dispatch());
+    //     expect(emi1 -> dispatch() && emi2 -> dispatch() && emi3 ->
+    //     dispatch());
     //     expect(emi1 -> get_value() == "1(1)Bx-1-1" &&
     //         emi2 -> get_value() == "1(2)Bx-1-1" &&
     //         emi3 -> get_value() == "1(3)Bx-1-1");
@@ -219,7 +227,8 @@ int main(int argc, char** argv)
     //         emi3 -> get_value() == "2(3)Bx-1-1");
     //     delete emi3;
     //     if (0)
-    //         expect(emi2 -> dispatch()); // avoid future_already_retrieved exception
+    //         expect(emi2 -> dispatch()); // avoid future_already_retrieved
+    //         exception
     //     delete emi2;
     // });
     //
@@ -243,7 +252,8 @@ int main(int argc, char** argv)
     //     const std::uint64_t end_counter = TestCounter::get();
     //     expect(end_counter - start_counter == i);
     //
-    //     std::cout << util::format("SignalBench: AsyncSignal: %fns per emission (sz=%u)", size_t
+    //     std::cout << util::format("SignalBench: AsyncSignal: %fns per
+    //     emission (sz=%u)", size_t
     //     (benchdone - benchstart) * 1.0 / size_t (i),
     //               sizeof (sig_increment)) << std::endl;
     // });
@@ -261,12 +271,15 @@ int main(int argc, char** argv)
     //     const std::uint64_t end_counter = TestCounter::get();
     //     expect(end_counter - start_counter == i);
     //
-    //     std::cout << util::format("signal benchmark: v2::Signal: %fns per emission (sz=%u)",
-    //         size_t (benchdone - benchstart) * 1.0 / size_t (i), sizeof (sig_increment)) << std::endl;
+    //     std::cout << util::format("signal benchmark: v2::Signal: %fns per
+    //     emission (sz=%u)",
+    //         size_t (benchdone - benchstart) * 1.0 / size_t (i), sizeof
+    //         (sig_increment)) << std::endl;
     // });
     //
     // describe("signal benchmark: callback loop", []() {
-    //     void( * counter_increment)(void * , std::uint64_t) = test_counter_add2;
+    //     void( * counter_increment)(void * , std::uint64_t) =
+    //     test_counter_add2;
     //     const std::uint64_t start_counter = TestCounter::get();
     //     const std::uint64_t benchstart = time::hrtime();
     //     std::uint64_t i;
@@ -277,11 +290,13 @@ int main(int argc, char** argv)
     //     const std::uint64_t end_counter = TestCounter::get();
     //     expect(end_counter - start_counter == i);
     //
-    //     std::cout << util::format("signal benchmark: callback loop: %fns per round",
+    //     std::cout << util::format("signal benchmark: callback loop: %fns per
+    //     round",
     //         size_t (benchdone - benchstart) * 1.0 / size_t (i)) << std::endl;
     // });
 
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Buffer
     // //
     // describe("buffer", []() {
@@ -332,7 +347,8 @@ int main(int argc, char** argv)
     //
     //         // Write and read std::uint64_t.
     //         std::uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
-    //         std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) << 32) + wu32;
+    //         std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) <<
+    //         32) + wu32;
     //         writer.putU64(wu64);
     //         std::uint64_t ru64;
     //         reader.getU64(ru64);
@@ -371,7 +387,8 @@ int main(int argc, char** argv)
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Collection
     // //
     // describe("collection", []() {
@@ -431,7 +448,8 @@ int main(int argc, char** argv)
     //     std::string v2 = it->second;
     //     expect(it->first == "name3");
     //
-    //     expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
+    //     expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2
+    //     == "value3"));
     //
     //     nvc.erase("name3");
     //     expect(!nvc.has("name3"));
@@ -451,7 +469,8 @@ int main(int argc, char** argv)
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Filesystem
     // //
     // describe("filesystem", []() {
@@ -474,7 +493,8 @@ int main(int argc, char** argv)
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Logger
     // //
     // describe("logger", []() {
@@ -485,26 +505,30 @@ int main(int argc, char** argv)
     //     clock_t start = clock();
     //     for (unsigned i = 0; i < 1000; i++)
     //         TraceL << "test: " << i << endl;
-    //     cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
+    //     cout << "logger: synchronous test completed after: " << (clock() -
+    //     start) << endl;
     //
     //     // Test asynchronous writer (approx 10x faster)
     //     logger.setWriter(new AsyncLogWriter);
     //     start = clock();
     //     for (unsigned i = 0; i < 1000; i++)
     //         TraceL << "test: " << i << endl;
-    //     cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
+    //     cout << "logger: asynchronous test completed after: " << (clock() -
+    //     start) << endl;
     //
     //     // // Test function logging
     //     // start = clock();
     //     // for (unsigned i = 0; i < 1000; i++)
     //     //     TraceS(this) << "test: " << i << endl;
-    //     // cout << "logger: asynchronous function logging completed after: " << (clock() - start) << endl;
+    //     // cout << "logger: asynchronous function logging completed after: "
+    //     << (clock() - start) << endl;
     //
     //     // // Test function and mem address logging
     //     // start = clock();
     //     // for (unsigned i = 0; i < 1000; i++)
     //     //     TraceS(this) << "test: " << i << endl;
-    //     // cout << "logger: asynchronous function and mem address logging completed after: " << (clock() - start) << endl;
+    //     // cout << "logger: asynchronous function and mem address logging
+    //     completed after: " << (clock() - start) << endl;
     //
     //     logger.setWriter(nullptr);
     //
@@ -516,7 +540,8 @@ int main(int argc, char** argv)
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Platform
     // //
     // describe("platform", []() {
@@ -530,22 +555,26 @@ int main(int argc, char** argv)
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Version String Comparison
     // //
     // describe("version string comparison", []() {
-    //     expect((util::Version("3.7.8.0") == util::Version("3.7.8.0")) == true);
+    //     expect((util::Version("3.7.8.0") == util::Version("3.7.8.0")) ==
+    //     true);
     //     expect((util::Version("3.7.8.0") == util::Version("3.7.8")) == true);
     //     expect((util::Version("3.7.8.0") < util::Version("3.7.8")) == false);
     //     expect((util::Version("3.7.9") < util::Version("3.7.8")) == false);
     //     // expect((util::Version("3") < util::Version("3.7.9")) == true);
     //     expect((util::Version("1.7.9") < util::Version("3.1")) == true);
     //
-    //     // cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0") << endl;
+    //     // cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0")
+    //     << endl;
     // });
     //
     //
-    // // =========================================================================
+    // //
+    // =========================================================================
     // // Thread
     // //
     // describe("thread", []() {
@@ -619,7 +648,8 @@ int main(int argc, char** argv)
 // #endif
 //     }
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Sync Delegate
 //     //
 //     NullSignal SyncText;
@@ -658,7 +688,8 @@ int main(int argc, char** argv)
 //     }
 //
 // #if 0
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Plugin Test
 //     //
 //     typedef int (*GimmeFiveFunc)();
@@ -667,7 +698,8 @@ int main(int argc, char** argv)
 //     {
 //         DebugL << "Starting" << endl;
 //         // TODO: Use getExePath
-//         std::string path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
+//         std::string
+//         path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
 //
 //         try
 //         {
@@ -691,11 +723,14 @@ int main(int argc, char** argv)
 //             //
 //             // Version checking
 //             if (info->abiVersion != SCY_PLUGIN_ABI_VERSION)
-//                 throw std::runtime_error(util::format("Module version mismatch. Expected %s, got %s.", SCY_PLUGIN_ABI_VERSION, info->abiVersion));
+//                 throw std::runtime_error(util::format("Module version
+//                 mismatch. Expected %s, got %s.", SCY_PLUGIN_ABI_VERSION,
+//                 info->abiVersion));
 //
 //             //
 //             // Instantiate the plugin
-//             TestPlugin* plugin = reinterpret_cast<TestPlugin*>(info->initializeFunc());
+//             TestPlugin* plugin =
+//             reinterpret_cast<TestPlugin*>(info->initializeFunc());
 //
 //             //
 //             // Run test methods
@@ -726,7 +761,8 @@ int main(int argc, char** argv)
 //     }
 // #endif
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Packet Signal Tests
 //     //
 //     PacketSignal BroadcastPacket;
@@ -747,7 +783,8 @@ int main(int argc, char** argv)
 //     }
 //
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Garbage Collector Tests
 //     //
 //     void runGarbageCollectorTests() {
@@ -766,7 +803,8 @@ int main(int argc, char** argv)
 //         TraceL << "Running Garbage Collector Test: END" << endl;
 //     }
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Timer Task Tests
 //     //
 //     void onTimerTask(void* sender)
@@ -789,7 +827,8 @@ int main(int argc, char** argv)
 //     }
 //
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Signal Tests
 //     //
 //     struct SignalBroadcaster
@@ -831,7 +870,8 @@ int main(int argc, char** argv)
 //         //util::pause();
 //     }
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // Exception Test
 //     //
 //     void runExceptionTest()

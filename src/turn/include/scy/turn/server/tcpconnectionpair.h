@@ -14,9 +14,9 @@
 
 
 #include "scy/collection.h"
-#include "scy/timer.h"
-#include "scy/stun/message.h"
 #include "scy/net/tcpsocket.h"
+#include "scy/stun/message.h"
+#include "scy/timer.h"
 
 
 namespace scy {
@@ -49,8 +49,10 @@ public:
     /// Connection error callback for Connect request.
     void onPeerConnectError(net::Socket& socket, const Error& error);
 
-    void onClientDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
-    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onClientDataReceived(net::Socket& socket, const MutableBuffer& buffer,
+                              const net::Address& peerAddress);
+    void onPeerDataReceived(net::Socket& socket, const MutableBuffer& buffer,
+                            const net::Address& peerAddress);
 
     /// Callback for handing either client or peer connections
     /// which result in the destruction of the TCPConnectionPair.
@@ -89,10 +91,10 @@ public:
     stun::TransactionID transactionID;
 
 private:
-    TCPConnectionPair(const TCPConnectionPair&) = delete;
-    TCPConnectionPair(TCPConnectionPair&&) = delete;
-    TCPConnectionPair& operator=(const TCPConnectionPair&) = delete;
-    TCPConnectionPair& operator=(TCPConnectionPair&&) = delete;
+    TCPConnectionPair(const TCPConnectionPair&)= delete;
+    TCPConnectionPair(TCPConnectionPair&&)= delete;
+    TCPConnectionPair& operator=(const TCPConnectionPair&)= delete;
+    TCPConnectionPair& operator=(TCPConnectionPair&&)= delete;
 };
 
 
@@ -101,5 +103,6 @@ private:
 
 
 #endif // SCY_TURN_TCPClientConnection_H
+
 
 /// @\}

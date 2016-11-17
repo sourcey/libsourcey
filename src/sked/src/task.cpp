@@ -10,8 +10,8 @@
 
 
 #include "scy/sked/task.h"
-#include "scy/sked/scheduler.h"
 #include "scy/datetime.h"
+#include "scy/sked/scheduler.h"
 
 
 using namespace std;
@@ -21,21 +21,22 @@ namespace scy {
 namespace sked {
 
 
-Task::Task(const std::string& type, const std::string& name) :
-    _type(type),
-    _name(name),
-    _scheduler(nullptr),
-    _trigger(nullptr)
+Task::Task(const std::string& type, const std::string& name)
+    : _type(type)
+    , _name(name)
+    , _scheduler(nullptr)
+    , _trigger(nullptr)
 {
     TraceL << "Create" << endl;
 }
 
 
-Task::Task(sked::Scheduler& scheduler, const std::string& type, const std::string& name) :
-    _type(type),
-    _name(name),
-    _scheduler(&scheduler),
-    _trigger(nullptr)
+Task::Task(sked::Scheduler& scheduler, const std::string& type,
+           const std::string& name)
+    : _type(type)
+    , _name(name)
+    , _scheduler(&scheduler)
+    , _trigger(nullptr)
 {
     TraceL << "Create" << endl;
 }
@@ -62,9 +63,9 @@ void Task::serialize(json::Value& root)
 
     Mutex::ScopedLock lock(_mutex);
 
-    root["id"] = _id;
-    root["type"] = _type;
-    root["name"] = _name;
+    root["id"]= _id;
+    root["type"]= _type;
+    root["name"]= _name;
 }
 
 
@@ -78,9 +79,9 @@ void Task::deserialize(json::Value& root)
     json::assertMember(root, "type");
     json::assertMember(root, "name");
 
-    _id = root["id"].asUInt();
-    _type = root["type"].asString();
-    _name = root["name"].asString();
+    _id= root["id"].asUInt();
+    _type= root["type"].asString();
+    _name= root["name"].asString();
 }
 
 
@@ -97,7 +98,7 @@ bool Task::afterRun()
     DateTime now;
     _trigger->update();
     _trigger->timesRun++;
-    _trigger->lastRunAt = now;
+    _trigger->lastRunAt= now;
     return !_trigger->expired();
 }
 
@@ -107,7 +108,7 @@ void Task::setTrigger(sked::Trigger* trigger)
     Mutex::ScopedLock lock(_mutex);
     if (_trigger)
         delete _trigger;
-    _trigger = trigger;
+    _trigger= trigger;
 }
 
 
@@ -147,12 +148,14 @@ sked::Scheduler& Task::scheduler()
 {
     Mutex::ScopedLock lock(_mutex);
     if (!_scheduler)
-        throw std::runtime_error("Tasks must be started with a sked::Scheduler instance.");
+        throw std::runtime_error(
+            "Tasks must be started with a sked::Scheduler instance.");
     return *_scheduler;
 }
 
 
 } // namespace sked
 } // namespace scy
+
 
 /// @\}

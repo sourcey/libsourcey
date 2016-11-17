@@ -29,28 +29,24 @@ namespace net {
 //
 
 
-class AddressBase: public SharedObject
+class AddressBase : public SharedObject
 {
 public:
-    virtual std::string host() const = 0;
-    virtual std::uint16_t port() const = 0;
-    virtual Address::Family family() const = 0;
-    virtual socklen_t length() const = 0;
-    virtual const struct sockaddr* addr() const = 0;
-    virtual int af() const = 0;
+    virtual std::string host() const= 0;
+    virtual std::uint16_t port() const= 0;
+    virtual Address::Family family() const= 0;
+    virtual socklen_t length() const= 0;
+    virtual const struct sockaddr* addr() const= 0;
+    virtual int af() const= 0;
 
 protected:
-    AddressBase()
-    {
-    }
+    AddressBase() {}
 
-    virtual ~AddressBase()
-    {
-    }
+    virtual ~AddressBase() {}
 
 private:
     AddressBase(const AddressBase&);
-    AddressBase& operator = (const AddressBase&);
+    AddressBase& operator=(const AddressBase&);
 };
 
 
@@ -59,27 +55,27 @@ private:
 //
 
 
-class IPv4AddressBase: public AddressBase
+class IPv4AddressBase : public AddressBase
 {
 public:
     IPv4AddressBase()
     {
-        _addr.sin_family = AF_INET;
+        _addr.sin_family= AF_INET;
         memset(&_addr, 0, sizeof(_addr));
     }
 
     IPv4AddressBase(const struct sockaddr_in* addr)
     {
-        _addr.sin_family = AF_INET;
+        _addr.sin_family= AF_INET;
         memcpy(&_addr, addr, sizeof(_addr));
     }
 
     IPv4AddressBase(const void* addr, std::uint16_t port)
     {
         memset(&_addr, 0, sizeof(_addr));
-        _addr.sin_family = AF_INET;
+        _addr.sin_family= AF_INET;
         memcpy(&_addr.sin_addr, addr, sizeof(_addr.sin_addr));
-        _addr.sin_port = port;
+        _addr.sin_port= port;
     }
 
     std::string host() const
@@ -90,30 +86,18 @@ public:
         return dest;
     }
 
-    std::uint16_t port() const
-    {
-        return _addr.sin_port;
-    }
+    std::uint16_t port() const { return _addr.sin_port; }
 
-    Address::Family family() const
-    {
-        return Address::IPv4;
-    }
+    Address::Family family() const { return Address::IPv4; }
 
-    socklen_t length() const
-    {
-        return sizeof(_addr);
-    }
+    socklen_t length() const { return sizeof(_addr); }
 
     const struct sockaddr* addr() const
     {
         return reinterpret_cast<const struct sockaddr*>(&_addr);
     }
 
-    int af() const
-    {
-        return _addr.sin_family;
-    }
+    int af() const { return _addr.sin_family; }
 
 private:
     struct sockaddr_in _addr;
@@ -127,30 +111,30 @@ private:
 #if defined(LibSourcey_HAVE_IPv6)
 
 
-class IPv6AddressBase: public AddressBase
+class IPv6AddressBase : public AddressBase
 {
 public:
     IPv6AddressBase(const struct sockaddr_in6* addr)
     {
-        _addr.sin6_family = AF_INET6;
+        _addr.sin6_family= AF_INET6;
         memcpy(&_addr, addr, sizeof(_addr));
     }
 
     IPv6AddressBase(const void* addr, std::uint16_t port)
     {
-        _addr.sin6_family = AF_INET6;
+        _addr.sin6_family= AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
         memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
-        _addr.sin6_port = port;
+        _addr.sin6_port= port;
     }
 
     IPv6AddressBase(const void* addr, std::uint16_t port, std::uint32_t scope)
     {
-        _addr.sin6_family = AF_INET6;
+        _addr.sin6_family= AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
         memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
-        _addr.sin6_port = port;
-        _addr.sin6_scope_id = scope;
+        _addr.sin6_port= port;
+        _addr.sin6_scope_id= scope;
     }
 
     std::string host() const
@@ -161,30 +145,18 @@ public:
         return dest;
     }
 
-    std::uint16_t port() const
-    {
-        return _addr.sin6_port;
-    }
+    std::uint16_t port() const { return _addr.sin6_port; }
 
-    Address::Family family() const
-    {
-        return Address::IPv6;
-    }
+    Address::Family family() const { return Address::IPv6; }
 
-    socklen_t length() const
-    {
-        return sizeof(_addr);
-    }
+    socklen_t length() const { return sizeof(_addr); }
 
     const struct sockaddr* addr() const
     {
         return reinterpret_cast<const struct sockaddr*>(&_addr);
     }
 
-    int af() const
-    {
-        return _addr.sin6_family;
-    }
+    int af() const { return _addr.sin6_family; }
 
 private:
     struct sockaddr_in6 _addr;
@@ -201,7 +173,7 @@ private:
 
 Address::Address()
 {
-    _base = new IPv4AddressBase;
+    _base= new IPv4AddressBase;
 }
 
 
@@ -223,22 +195,25 @@ Address::Address(const std::string& hostAndPort)
 
     std::string host;
     std::string port;
-    std::string::const_iterator it  = hostAndPort.begin();
-    std::string::const_iterator end = hostAndPort.end();
+    std::string::const_iterator it= hostAndPort.begin();
+    std::string::const_iterator end= hostAndPort.end();
     if (*it == '[') {
         ++it;
-        while (it != end && *it != ']') host += *it++;
-        if (it == end) throw std::runtime_error("Invalid address: Malformed IPv6 address");
+        while (it != end && *it != ']')
+            host+= *it++;
+        if (it == end)
+            throw std::runtime_error("Invalid address: Malformed IPv6 address");
         ++it;
-    }
-    else {
-        while (it != end && *it != ':') host += *it++;
+    } else {
+        while (it != end && *it != ':')
+            host+= *it++;
     }
     if (it != end && *it == ':') {
         ++it;
-        while (it != end) port += *it++;
-    }
-    else throw std::runtime_error("Invalid address: Missing port number");
+        while (it != end)
+            port+= *it++;
+    } else
+        throw std::runtime_error("Invalid address: Missing port number");
     init(host, resolveService(port));
 }
 
@@ -246,18 +221,21 @@ Address::Address(const std::string& hostAndPort)
 Address::Address(const struct sockaddr* addr, socklen_t length)
 {
     if (length == sizeof(struct sockaddr_in))
-        _base = new IPv4AddressBase(reinterpret_cast<const struct sockaddr_in*>(addr));
+        _base= new IPv4AddressBase(
+            reinterpret_cast<const struct sockaddr_in*>(addr));
 #if defined(LibSourcey_HAVE_IPv6)
     else if (length == sizeof(struct sockaddr_in6))
-        _base = new IPv6AddressBase(reinterpret_cast<const struct sockaddr_in6*>(addr));
+        _base= new IPv6AddressBase(
+            reinterpret_cast<const struct sockaddr_in6*>(addr));
 #endif
-    else throw std::runtime_error("Invalid address length passed to Address()");
+    else
+        throw std::runtime_error("Invalid address length passed to Address()");
 }
 
 
 Address::Address(const Address& addr)
 {
-    _base = addr._base;
+    _base= addr._base;
     _base->duplicate();
 }
 
@@ -268,11 +246,11 @@ Address::~Address()
 }
 
 
-Address& Address::operator = (const Address& addr)
+Address& Address::operator=(const Address& addr)
 {
     if (&addr != this) {
         _base->release();
-        _base = addr._base;
+        _base= addr._base;
         _base->duplicate();
     }
     return *this;
@@ -281,13 +259,13 @@ Address& Address::operator = (const Address& addr)
 
 void Address::init(const std::string& host, std::uint16_t port)
 {
-    //TraceS(this) << "Parse: " << host << ":" << port << endl;
+    // TraceS(this) << "Parse: " << host << ":" << port << endl;
 
     char ia[sizeof(struct in6_addr)];
     if (uv_inet_pton(AF_INET, host.c_str(), &ia) == 0)
-        _base = new IPv4AddressBase(&ia, htons(port));
+        _base= new IPv4AddressBase(&ia, htons(port));
     else if (uv_inet_pton(AF_INET6, host.c_str(), &ia) == 0)
-        _base = new IPv6AddressBase(&ia, htons(port));
+        _base= new IPv6AddressBase(&ia, htons(port));
     else
         throw std::runtime_error("Invalid IP address format: " + host);
 }
@@ -349,20 +327,21 @@ std::string Address::toString() const
 }
 
 
-bool Address::operator < (const Address& addr) const
+bool Address::operator<(const Address& addr) const
 {
-    if (family() < addr.family()) return true;
+    if (family() < addr.family())
+        return true;
     return (port() < addr.port());
 }
 
 
-bool Address::operator == (const Address& addr) const
+bool Address::operator==(const Address& addr) const
 {
     return host() == addr.host() && port() == addr.port();
 }
 
 
-bool Address::operator != (const Address& addr) const
+bool Address::operator!=(const Address& addr) const
 {
     return host() != addr.host() || port() != addr.port();
 }
@@ -400,11 +379,11 @@ bool Address::validateIP(const std::string& addr)
 
 std::uint16_t Address::resolveService(const std::string& service)
 {
-    std::uint16_t port = util::strtoi<std::uint16_t>(service);
+    std::uint16_t port= util::strtoi<std::uint16_t>(service);
     if (port && port > 0) //, port) && port <= 0xFFFF
-        return (std::uint16_t) port;
+        return (std::uint16_t)port;
 
-    struct servent* se = getservbyname(service.c_str(), nullptr);
+    struct servent* se= getservbyname(service.c_str(), nullptr);
     if (se)
         return ntohs(se->s_port);
     else
@@ -414,6 +393,7 @@ std::uint16_t Address::resolveService(const std::string& service)
 
 } // namespace net
 } // namespace scy
+
 
 /// @\}
 

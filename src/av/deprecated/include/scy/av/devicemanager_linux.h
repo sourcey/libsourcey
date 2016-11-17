@@ -42,7 +42,7 @@ public:
 } // namespace scy
 
 
-#endif  // SCY_AV_DeviceManager_LINUX_H
+#endif // SCY_AV_DeviceManager_LINUX_H
 
 
 /*

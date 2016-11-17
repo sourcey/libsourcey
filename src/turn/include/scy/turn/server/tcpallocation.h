@@ -13,9 +13,9 @@
 #define SCY_TURN_SERVER_TCPAllocation_H
 
 
-#include "scy/turn/server/serverallocation.h"
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
+#include "scy/turn/server/serverallocation.h"
 #include "scy/turn/server/tcpconnectionpair.h"
 
 
@@ -26,16 +26,15 @@ namespace turn {
 class Server;
 
 
-typedef PointerCollection<std::uint32_t, TCPConnectionPair> TCPConnectionPairMap;
+typedef PointerCollection<std::uint32_t, TCPConnectionPair>
+    TCPConnectionPairMap;
 
 
-class TCPAllocation: public ServerAllocation
+class TCPAllocation : public ServerAllocation
 {
 public:
-    TCPAllocation(Server& server,
-                  const net::Socket::Ptr& control,
-                  const FiveTuple& tuple,
-                  const std::string& username,
+    TCPAllocation(Server& server, const net::Socket::Ptr& control,
+                  const FiveTuple& tuple, const std::string& username,
                   const std::uint32_t& lifetime);
     virtual ~TCPAllocation();
 
@@ -66,11 +65,11 @@ protected:
     net::TCPSocket::Ptr _acceptor;
     TCPConnectionPairMap _pairs;
 };
-
-
-} } //  namespace scy::turn
+}
+} //  namespace scy::turn
 
 
 #endif // SCY_TURN_SERVER_TCPAllocation_H
+
 
 /// @\}

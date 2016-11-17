@@ -28,11 +28,10 @@ namespace scy {
 /// delegates and also provides an equality operator for comparing the
 /// underlying function where supported.
 ///
-template <typename RT, typename... Args>
-struct AbstractDelegate
+template <typename RT, typename... Args> struct AbstractDelegate
 {
-    virtual RT operator() (Args... args) const = 0;
-    virtual bool operator == (const AbstractDelegate<RT, Args...>& that) const = 0;
+    virtual RT operator()(Args... args) const= 0;
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const= 0;
 };
 
 
@@ -49,12 +48,12 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
     {
     }
 
-    virtual RT operator() (Args... args) const
+    virtual RT operator()(Args... args) const
     {
         return func(std::forward<Args>(args)...);
     }
 
-    virtual bool operator == (const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
     {
         return false; // dynamic function delegates cannot be compared
     }
@@ -72,22 +71,21 @@ struct ClassDelegate : AbstractDelegate<RT, Args...>
     Class* instance;
     RT (Class::*method)(Args...);
 
-    ClassDelegate(Class* instance, RT(Class::*method)(Args...))
+    ClassDelegate(Class* instance, RT (Class::*method)(Args...))
         : instance(instance)
         , method(method)
     {
     }
 
-    virtual RT operator() (Args... args) const
+    virtual RT operator()(Args... args) const
     {
         return (instance->*method)(std::forward<Args>(args)...);
     }
 
-    virtual bool operator == (const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
     {
-        auto other = dynamic_cast<const ClassDelegate*>(&that);
-        return other &&
-               other->instance == this->instance &&
+        auto other= dynamic_cast<const ClassDelegate*>(&that);
+        return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
@@ -104,22 +102,21 @@ struct ConstClassDelegate : AbstractDelegate<RT, Args...>
     Class* instance;
     RT (Class::*method)(Args...) const;
 
-    ConstClassDelegate(Class* instance, RT(Class::*method)(Args...) const)
+    ConstClassDelegate(Class* instance, RT (Class::*method)(Args...) const)
         : instance(instance)
         , method(method)
     {
     }
 
-    virtual RT operator() (Args... args) const
+    virtual RT operator()(Args... args) const
     {
         return (instance->*method)(std::forward<Args>(args)...);
     }
 
-    virtual bool operator == (const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
     {
-        auto other = dynamic_cast<const ConstClassDelegate*>(&that);
-        return other &&
-               other->instance == this->instance &&
+        auto other= dynamic_cast<const ConstClassDelegate*>(&that);
+        return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
@@ -137,25 +134,24 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
     Class* instance;
     RT (Class::*method)(PT&);
 
-    PolymorphicDelegate(Class* instance, RT(Class::*method)(PT&))
+    PolymorphicDelegate(Class* instance, RT (Class::*method)(PT&))
         : instance(instance)
         , method(method)
     {
     }
 
-    virtual RT operator() (IT& object) const
+    virtual RT operator()(IT& object) const
     {
-        auto test = dynamic_cast<PT*>(&object);
+        auto test= dynamic_cast<PT*>(&object);
         if (test)
             return (instance->*method)(*test);
         return RT();
     }
 
-    virtual bool operator == (const AbstractDelegate<RT, IT&>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, IT&>& that) const
     {
-        auto other = dynamic_cast<const PolymorphicDelegate*>(&that);
-        return other &&
-               other->instance == this->instance &&
+        auto other= dynamic_cast<const PolymorphicDelegate*>(&that);
+        return other && other->instance == this->instance &&
                other->method == this->method;
     }
 };
@@ -165,5 +161,6 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
 
 
 #endif // SCY_Delegate_H
+
 
 /// @\}

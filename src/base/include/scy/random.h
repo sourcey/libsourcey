@@ -30,17 +30,17 @@ class Random
 public:
     enum Type
     {
-        RND_STATE_0   =   8,  /// linear congruential
-        RND_STATE_32  =  32,  /// x**7 + x**3 + 1
-        RND_STATE_64  =  64,  /// x**15 + x + 1
-        RND_STATE_128 = 128,  /// x**31 + x**3 + 1
-        RND_STATE_256 = 256   /// x**63 + x + 1
+        RND_STATE_0= 8,     /// linear congruential
+        RND_STATE_32= 32,   /// x**7 + x**3 + 1
+        RND_STATE_64= 64,   /// x**15 + x + 1
+        RND_STATE_128= 128, /// x**31 + x**3 + 1
+        RND_STATE_256= 256  /// x**63 + x + 1
     };
 
     /// Creates and initializes the PRNG.
     /// Specify either a state buffer size
     /// (8 to 256 bytes) or one of the Type values.
-    Random(int stateSize = 256);
+    Random(int stateSize= 256);
 
     /// Destroys the PRNG.
     ~Random();
@@ -80,8 +80,8 @@ protected:
 private:
     enum
     {
-        MAX_TYPES = 5,
-        NSHUFF    = 50
+        MAX_TYPES= 5,
+        NSHUFF= 50
     };
 
     std::uint32_t* _fptr;
@@ -99,6 +99,7 @@ private:
 
 
 #endif // SCY_Random_H
+
 
 /// @\}
 

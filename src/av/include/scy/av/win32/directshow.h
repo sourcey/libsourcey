@@ -12,8 +12,8 @@
 #define SCY_AV_DirectShow_H
 
 
-#include "scy/base.h"
 #include "scy/av/devicemanager.h"
+#include "scy/base.h"
 
 
 #ifndef SCY_WIN
@@ -38,4 +38,4 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices);
 } // namespace scy
 
 
-#endif  // SCY_AV_DirectShow_H
+#endif // SCY_AV_DirectShow_H

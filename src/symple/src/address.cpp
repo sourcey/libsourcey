@@ -10,9 +10,9 @@
 
 
 #include "scy/symple/address.h"
+#include "assert.h"
 #include "scy/util.h"
 #include "sstream"
-#include "assert.h"
 
 
 using std::endl;
@@ -33,8 +33,9 @@ Address::Address(const std::string& id)
 }
 
 
-Address::Address(const std::string& user, const std::string& id) :
-    user(user), id(id)
+Address::Address(const std::string& user, const std::string& id)
+    : user(user)
+    , id(id)
 {
 }
 
@@ -49,22 +50,21 @@ bool Address::parse(const std::string& addr)
     if (addr.empty())
         return false;
 
-    std::vector<std::string> params = util::split(addr, '|');
+    std::vector<std::string> params= util::split(addr, '|');
     // assert(params.size() > 1);
     if (params.empty())
         return false;
     if (params.size() > 0)
-        user = params[0];
+        user= params[0];
     if (params.size() > 1)
-        id = params[1];
+        id= params[1];
 
     return valid();
 }
 
 bool Address::valid() const
 {
-    return !user.empty()
-        || !id.empty();
+    return !user.empty() || !id.empty();
 }
 
 
@@ -87,14 +87,13 @@ std::string Address::toString() const
 }
 
 
-bool Address::operator == (const Address& r)
+bool Address::operator==(const Address& r)
 {
-    return user == r.user
-        && id == r.id;
+    return user == r.user && id == r.id;
 }
 
 
-bool Address::operator == (std::string& r)
+bool Address::operator==(std::string& r)
 {
     return toString() == r;
 }
@@ -102,5 +101,6 @@ bool Address::operator == (std::string& r)
 
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

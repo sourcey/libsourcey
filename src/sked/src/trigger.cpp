@@ -10,9 +10,9 @@
 
 
 #include "scy/sked/trigger.h"
-#include "scy/sked/scheduler.h"
-#include "scy/logger.h"
 #include "scy/datetime.h"
+#include "scy/logger.h"
+#include "scy/sked/scheduler.h"
 
 
 using namespace std;
@@ -22,10 +22,10 @@ namespace scy {
 namespace sked {
 
 
-Trigger::Trigger(const std::string& type, const std::string& name) :
-    type(type),
-    name(name),
-    timesRun(0)
+Trigger::Trigger(const std::string& type, const std::string& name)
+    : type(type)
+    , name(name)
+    , timesRun(0)
 {
 }
 
@@ -33,7 +33,7 @@ Trigger::Trigger(const std::string& type, const std::string& name) :
 std::int64_t Trigger::remaining()
 {
     DateTime now;
-    Timespan ts = scheduleAt - now;
+    Timespan ts= scheduleAt - now;
     return ts.totalMilliseconds();
 }
 
@@ -55,12 +55,15 @@ void Trigger::serialize(json::Value& root)
 {
     TraceL << "Serializing" << endl;
 
-    root["type"] = type;
-    root["name"] = name;
-    root["createdAt"] = DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
-    root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, DateTimeFormat::ISO8601_FORMAT);
-    root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
-    root["timesRun"] = timesRun;
+    root["type"]= type;
+    root["name"]= name;
+    root["createdAt"]=
+        DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
+    root["scheduleAt"]=
+        DateTimeFormatter::format(scheduleAt, DateTimeFormat::ISO8601_FORMAT);
+    root["lastRunAt"]=
+        DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
+    root["timesRun"]= timesRun;
 }
 
 
@@ -76,19 +79,22 @@ void Trigger::deserialize(json::Value& root)
     json::assertMember(root, "timesRun");
 
     int tzd;
-    type = root["type"].asString();
-    name = root["name"].asString();
-    createdAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["createdAt"].asString(), tzd);
-    scheduleAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["scheduleAt"].asString(), tzd);
-    lastRunAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["lastRunAt"].asString(), tzd);
-    timesRun = root["timesRun"].asInt();
+    type= root["type"].asString();
+    name= root["name"].asString();
+    createdAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                     root["createdAt"].asString(), tzd);
+    scheduleAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                      root["scheduleAt"].asString(), tzd);
+    lastRunAt= DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
+                                     root["lastRunAt"].asString(), tzd);
+    timesRun= root["timesRun"].asInt();
 }
 
 
 // ---------------------------------------------------------------------
 //
-OnceOnlyTrigger::OnceOnlyTrigger() :
-    Trigger("OnceOnlyTrigger", "Once Only")
+OnceOnlyTrigger::OnceOnlyTrigger()
+    : Trigger("OnceOnlyTrigger", "Once Only")
 {
 }
 
@@ -101,16 +107,16 @@ bool OnceOnlyTrigger::expired()
 
 // ---------------------------------------------------------------------
 //
-IntervalTrigger::IntervalTrigger() :
-    Trigger("IntervalTrigger", "Interval"),
-    maxTimes(0)
+IntervalTrigger::IntervalTrigger()
+    : Trigger("IntervalTrigger", "Interval")
+    , maxTimes(0)
 {
 }
 
 
 void IntervalTrigger::update()
 {
-    scheduleAt += interval;
+    scheduleAt+= interval;
 }
 
 
@@ -126,10 +132,10 @@ void IntervalTrigger::serialize(json::Value& root)
 
     Trigger::serialize(root);
 
-    root["interval"]["days"] = interval.days();
-    root["interval"]["hours"] = interval.hours();
-    root["interval"]["minutes"] = interval.minutes();
-    root["interval"]["seconds"] = interval.seconds();
+    root["interval"]["days"]= interval.days();
+    root["interval"]["hours"]= interval.hours();
+    root["interval"]["minutes"]= interval.minutes();
+    root["interval"]["seconds"]= interval.seconds();
 }
 
 
@@ -145,25 +151,25 @@ void IntervalTrigger::deserialize(json::Value& root)
 
     Trigger::deserialize(root);
 
-    interval.assign(
-        root["interval"]["days"].asInt(),
-        root["interval"]["hours"].asInt(),
-        root["interval"]["minutes"].asInt(),
-        root["interval"]["seconds"].asInt(), 0);
+    interval.assign(root["interval"]["days"].asInt(),
+                    root["interval"]["hours"].asInt(),
+                    root["interval"]["minutes"].asInt(),
+                    root["interval"]["seconds"].asInt(), 0);
 
     if (!interval.totalSeconds())
-        throw std::runtime_error("Interval trigger must have non zero interval.");
+        throw std::runtime_error(
+            "Interval trigger must have non zero interval.");
 
     DateTime now;
-    scheduleAt = now;
-    scheduleAt += interval;
+    scheduleAt= now;
+    scheduleAt+= interval;
 }
 
 
 // ---------------------------------------------------------------------
 //
-DailyTrigger::DailyTrigger() :
-    Trigger("DailyTrigger", "Daily")
+DailyTrigger::DailyTrigger()
+    : Trigger("DailyTrigger", "Daily")
 {
 }
 
@@ -174,23 +180,23 @@ void DailyTrigger::update()
     DateTime next;
     DateTime prev(scheduleAt);
     Timespan day(1, 0, 0, 0, 0);
-    bool initial = createdAt == scheduleAt;
+    bool initial= createdAt == scheduleAt;
 
     // Set next date as tomorrow if the schedule
     // timeout is expired, or if we are setting up.
     if (!initial && now > scheduleAt)
-        next += day;
+        next+= day;
 
     // Get the next day the task can run
-    bool match = false;
-    for (unsigned i = 0; i < 6; i++) {
-        match = false;
-        for (unsigned x = 0; x < daysExcluded.size(); x++) {
+    bool match= false;
+    for (unsigned i= 0; i < 6; i++) {
+        match= false;
+        for (unsigned x= 0; x < daysExcluded.size(); x++) {
             if (daysExcluded[x] == next.dayOfWeek()) {
-                match = true;
+                match= true;
 
                 // Increment the start date
-                next += day;
+                next+= day;
             }
         }
         if (!match)
@@ -198,23 +204,21 @@ void DailyTrigger::update()
     }
 
     // Assign the next scheduled time
-    scheduleAt.assign(
-        next.year(),
-        next.month(),
-        next.day(),
-        timeOfDay.hour(),
-        timeOfDay.minute(),
-        timeOfDay.second(),
-        timeOfDay.millisecond(),
-        timeOfDay.microsecond());
+    scheduleAt.assign(next.year(), next.month(), next.day(), timeOfDay.hour(),
+                      timeOfDay.minute(), timeOfDay.second(),
+                      timeOfDay.millisecond(), timeOfDay.microsecond());
 
     /*
     TraceL << "[DailyTrigger] Updating: "
             << "\n\tDayOfWeek: " << next.dayOfWeek()
-            << "\n\tNowTime: " << DateTimeFormatter::format(now, Poco::DateTimeFormat::ISO8601_FORMAT)
-            << "\n\tPrevTime: " << DateTimeFormatter::format(prev, Poco::DateTimeFormat::ISO8601_FORMAT)
-            << "\n\tNextTime: " << DateTimeFormatter::format(next, Poco::DateTimeFormat::ISO8601_FORMAT)
-            << "\n\tScheduleTime: " << DateTimeFormatter::format(scheduleAt, Poco::DateTimeFormat::ISO8601_FORMAT)
+            << "\n\tNowTime: " << DateTimeFormatter::format(now,
+    Poco::DateTimeFormat::ISO8601_FORMAT)
+            << "\n\tPrevTime: " << DateTimeFormatter::format(prev,
+    Poco::DateTimeFormat::ISO8601_FORMAT)
+            << "\n\tNextTime: " << DateTimeFormatter::format(next,
+    Poco::DateTimeFormat::ISO8601_FORMAT)
+            << "\n\tScheduleTime: " << DateTimeFormatter::format(scheduleAt,
+    Poco::DateTimeFormat::ISO8601_FORMAT)
             << endl;
             */
 }
@@ -222,5 +226,6 @@ void DailyTrigger::update()
 
 } // namespace sked
 } // namespace scy
+
 
 /// @\}

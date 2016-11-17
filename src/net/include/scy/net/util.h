@@ -13,8 +13,8 @@
 #define SCY_Net_Util_H
 
 
-#include "scy/uv/uvpp.h"
 #include "scy/net/address.h"
+#include "scy/uv/uvpp.h"
 #include <vector>
 
 
@@ -29,15 +29,16 @@ namespace net {
 
 inline void getNetworkInterfaces(std::vector<net::Address>& hosts)
 {
-    uv_interface_address_t *info;
+    uv_interface_address_t* info;
     int count, i;
 
     uv_interface_addresses(&info, &count);
-    i = count;
+    i= count;
 
     while (i--) {
-        uv_interface_address_t iface = info[i];
-        hosts.push_back(net::Address(reinterpret_cast<const sockaddr*>(&iface.address.address4), 16));
+        uv_interface_address_t iface= info[i];
+        hosts.push_back(net::Address(
+            reinterpret_cast<const sockaddr*>(&iface.address.address4), 16));
     }
 
     uv_free_interface_addresses(info, count);
@@ -49,5 +50,6 @@ inline void getNetworkInterfaces(std::vector<net::Address>& hosts)
 
 
 #endif // SCY_Net_Util_H
+
 
 /// @\}

@@ -21,10 +21,12 @@
 namespace scy {
 
 
-class ImageSequenceRecorder: public rtc::VideoSinkInterface<cricket::VideoFrame>
+class ImageSequenceRecorder
+    : public rtc::VideoSinkInterface<cricket::VideoFrame>
 {
 public:
-    ImageSequenceRecorder(webrtc::VideoTrackInterface* track_to_render, const std::string& basename);
+    ImageSequenceRecorder(webrtc::VideoTrackInterface* track_to_render,
+                          const std::string& basename);
     virtual ~ImageSequenceRecorder();
 
     std::string getNextFilename();
@@ -47,5 +49,6 @@ protected:
 
 
 #endif
+
 
 /// @\}

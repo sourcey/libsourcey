@@ -135,4 +135,5 @@ std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::s
 #endif
 #endif
 
+
 /// @\}

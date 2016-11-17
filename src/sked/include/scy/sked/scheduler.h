@@ -13,12 +13,12 @@
 #define SCY_Sked_Scheduler_H
 
 
-#include "scy/logger.h"
-#include "scy/task.h"
 #include "scy/json/iserializable.h"
+#include "scy/logger.h"
+#include "scy/singleton.h"
 #include "scy/sked/task.h"
 #include "scy/sked/taskfactory.h"
-#include "scy/singleton.h"
+#include "scy/task.h"
 
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace sked {
 
 /// The Scheduler manages and runs tasks
 /// that need to be executed at specific times.
-class Scheduler: public TaskRunner, public json::ISerializable
+class Scheduler : public TaskRunner, public json::ISerializable
 {
 public:
     Scheduler();
@@ -66,5 +66,6 @@ protected:
 
 
 #endif // SCY_Sked_Scheduler_H
+
 
 /// @\}

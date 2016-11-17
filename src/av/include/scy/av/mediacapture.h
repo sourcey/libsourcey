@@ -17,14 +17,14 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/packetsignal.h"
-#include "scy/interface.h"
-#include "scy/av/types.h"
+#include "scy/av/audiodecoder.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/icapture.h"
+#include "scy/av/types.h"
 #include "scy/av/videodecoder.h"
-#include "scy/av/audiodecoder.h"
+#include "scy/interface.h"
 #include "scy/mutex.h"
+#include "scy/packetsignal.h"
 
 
 namespace scy {
@@ -32,7 +32,7 @@ namespace av {
 
 /// This class implements a cross platform audio, video, screen and
 /// video file capturer.
-class MediaCapture: public ICapture, public async::Runnable
+class MediaCapture : public ICapture, public async::Runnable
 {
 public:
     typedef std::shared_ptr<MediaCapture> Ptr;
@@ -41,9 +41,12 @@ public:
     virtual ~MediaCapture();
 
     virtual void openFile(const std::string& file);
-// #ifdef HAVE_FFMPEG_AVDEVICE
-    /// virtual void openCamera(const std::string& device, int width = -1, int height = -1, double framerate = -1);    /// virtual void openMicrophone(const std::string& device, int channels = -1, int sampleRate = -1);
-// #endif
+    // #ifdef HAVE_FFMPEG_AVDEVICE
+    /// virtual void openCamera(const std::string& device, int width = -1, int
+    /// height = -1, double framerate = -1);    /// virtual void
+    /// openMicrophone(const std::string& device, int channels = -1, int
+    /// sampleRate = -1);
+    // #endif
     virtual void close();
 
     virtual void start();
@@ -59,13 +62,15 @@ public:
     VideoDecoder* video() const;
     AudioDecoder* audio() const;
     bool stopping() const;
-    std::string error() const;    /// Notifies that the capture thread is closing.
+    std::string error() const; /// Notifies that the capture thread is closing.
     /// Careful, this signal is emitted from inside the tread contect.
     NullSignal Closing;
 
 
 protected:
-    virtual void openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
+    virtual void openStream(const std::string& filename,
+                            AVInputFormat* inputFormat,
+                            AVDictionary** formatParams);
 
     void emit(IPacket& packet);
 
@@ -86,5 +91,6 @@ protected:
 
 #endif
 #endif // SCY_AV_MediaCapture_H
+
 
 /// @\}

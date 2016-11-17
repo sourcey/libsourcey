@@ -18,8 +18,9 @@ using std::endl;
 namespace scy {
 
 
-State::State(State::ID id, const std::string& message) :
-    _id(id), _message(message)
+State::State(State::ID id, const std::string& message)
+    : _id(id)
+    , _message(message)
 {
 }
 
@@ -32,7 +33,7 @@ unsigned int State::id() const
 
 void State::set(State::ID id)
 {
-    _id = id;
+    _id= id;
 }
 
 
@@ -44,7 +45,7 @@ std::string State::message() const
 
 void State::setMessage(const std::string& message)
 {
-    _message = message;
+    _message= message;
 }
 
 
@@ -67,8 +68,8 @@ std::string State::toString() const
 //
 
 
-MutexState::MutexState(State::ID id) :
-    State(id)
+MutexState::MutexState(State::ID id)
+    : State(id)
 {
 }
 
@@ -78,8 +79,8 @@ MutexState::MutexState(State::ID id) :
 //
 
 
-StateSignal::StateSignal(State::ID id) :
-    MutexState(id)
+StateSignal::StateSignal(State::ID id)
+    : MutexState(id)
 {
 }
 
@@ -87,7 +88,7 @@ StateSignal::StateSignal(State::ID id) :
 bool StateSignal::change(State::ID id)
 {
     if (canChange(id)) {
-        unsigned int old = this->id();
+        unsigned int old= this->id();
         MutexState::set(id);
         onChange(id, old);
         return true;
@@ -108,7 +109,7 @@ bool StateSignal::canChange(State::ID id)
 void StateSignal::onChange(ID id, ID prev)
 {
     // Can be overridden
-    //Change.emit(/*this, */id, prev);
+    // Change.emit(/*this, */id, prev);
 }
 
 
@@ -119,5 +120,6 @@ void StateSignal::set(State::ID id)
 
 
 } // namespace scy
+
 
 /// @\}

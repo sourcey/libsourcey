@@ -14,9 +14,9 @@
 
 
 #include "scy/collection.h"
+#include "scy/net/types.h"
 #include "scy/packetstream.h"
 #include "scy/thread.h"
-#include "scy/net/types.h"
 
 
 namespace scy {
@@ -38,7 +38,9 @@ class FormPart;
 /// while uploading big files. Class members are not synchronized hence
 /// they should not be accessed while the form is sending, not that there
 /// would be any reason to do so.
-class FormWriter: public NVCollection, public PacketSource, public async::Startable
+class FormWriter : public NVCollection,
+                   public PacketSource,
+                   public async::Startable
 {
 public:
     /// Creates the FormWriter that uses the given connection and
@@ -46,7 +48,9 @@ public:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    static FormWriter* create(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
+    static FormWriter*
+    create(ClientConnection& conn,
+           const std::string& encoding= FormWriter::ENCODING_URL);
 
     /// Destroys the FormWriter.
     virtual ~FormWriter();
@@ -101,12 +105,14 @@ public:
 #endif
 
     /// Writes the next multipart "multipart/form-data" encoded
-    /// to the client connection. This method is non-blocking,    // and is suitable for use with the event loop.
+    /// to the client connection. This method is non-blocking,    // and is
+    /// suitable for use with the event loop.
     void writeMultipartChunk();
 
     /// Called asynchronously by the Runner to write the next message chunk.
     /// If "multipart/form-data" the next multipart chunk will be written.
-    /// If "application/x-www-form-urlencoded" the entire message will be written.
+    /// If "application/x-www-form-urlencoded" the entire message will be
+    /// written.
     /// The complete flag will be set when the entire request has been written.
     void writeAsync();
 
@@ -132,18 +138,20 @@ public:
     /// The outgoing packet emitter.
     PacketSignal emitter;
 
-    static const char* ENCODING_URL;                ///< "application/x-www-form-urlencoded"
-    static const char* ENCODING_MULTIPART_FORM;     ///< "multipart/form-data"
-    static const char* ENCODING_MULTIPART_RELATED;  ///< "multipart/related" http://tools.ietf.org/html/rfc2387
+    static const char* ENCODING_URL; ///< "application/x-www-form-urlencoded"
+    static const char* ENCODING_MULTIPART_FORM;    ///< "multipart/form-data"
+    static const char* ENCODING_MULTIPART_RELATED; ///< "multipart/related"
+    /// http://tools.ietf.org/html/rfc2387
 
 protected:
     /// Creates the FormWriter that uses the given encoding.
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    FormWriter(ClientConnection& conn, async::Runner::Ptr runner, const std::string& encoding = FormWriter::ENCODING_URL);
+    FormWriter(ClientConnection& conn, async::Runner::Ptr runner,
+               const std::string& encoding= FormWriter::ENCODING_URL);
     FormWriter(const FormWriter&);
-    FormWriter& operator = (const FormWriter&);
+    FormWriter& operator=(const FormWriter&);
 
     /// Writes the message boundary std::string, followed
     /// by the message header to the output stream.
@@ -195,7 +203,7 @@ class FormPart
 {
 public:
     /// Creates the FormPart with the given MIME type.
-    FormPart(const std::string& contentType = "application/octet-stream");
+    FormPart(const std::string& contentType= "application/octet-stream");
 
     /// Destroys the FormPart.
     virtual ~FormPart();
@@ -205,13 +213,13 @@ public:
 
     /// Writes a form data chunk to the given HTTP client connection.
     /// Returns true if there is more data to be written.
-    virtual bool writeChunk(FormWriter& writer) = 0;
+    virtual bool writeChunk(FormWriter& writer)= 0;
 
     /// Writes the form data to the given HTTP client connection.
-    virtual void write(FormWriter& writer) = 0;
+    virtual void write(FormWriter& writer)= 0;
 
     /// Writes the form data to the given output stream.
-    virtual void write(std::ostream& ostr) = 0;
+    virtual void write(std::ostream& ostr)= 0;
 
     /// Returns a NVCollection containing additional header
     /// fields for the part.
@@ -224,7 +232,7 @@ public:
     const std::string& contentType() const;
 
     /// Returns the length of the current part.
-    virtual std::uint64_t length() const = 0;
+    virtual std::uint64_t length() const= 0;
 
 protected:
     std::string _contentType;
@@ -239,7 +247,7 @@ protected:
 //
 
 /// An implementation of FilePart for plain files.
-class FilePart: public FormPart
+class FilePart : public FormPart
 {
 public:
     /// Creates the FilePart for the given path.
@@ -260,7 +268,8 @@ public:
     /// used as part filename (see filename()) only.
     ///
     /// Throws an FileException if the file cannot be opened.
-    FilePart(const std::string& path, const std::string& filename, const std::string& contentType);
+    FilePart(const std::string& path, const std::string& filename,
+             const std::string& contentType);
 
     /// Destroys the FilePart.
     virtual ~FilePart();
@@ -303,13 +312,13 @@ public:
     // std::uint64_t fileSize() const;
 
 protected:
-    //std::string _contentType;
+    // std::string _contentType;
     std::string _path;
     std::string _filename;
     std::ifstream _istr;
     std::uint64_t _fileSize;
-    //std::uint64_t _nWritten;
-    //NVCollection _headers;
+    // std::uint64_t _nWritten;
+    // NVCollection _headers;
 };
 
 
@@ -318,7 +327,7 @@ protected:
 //
 
 /// An implementation of StringPart for plain files.
-class StringPart: public FormPart
+class StringPart : public FormPart
 {
 public:
     /// Creates the StringPart for the given string.
@@ -353,6 +362,7 @@ protected:
 
 
 #endif // SCY_HTTP_Form_H
+
 
 /// @\}
 

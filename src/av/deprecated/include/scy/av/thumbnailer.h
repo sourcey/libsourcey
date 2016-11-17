@@ -15,14 +15,14 @@
 
 #if 0 // needs updating to latest API
 
-#include "scy/base.h"
 #include "scy/av/config.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/videoencoder.h"
+#include "scy/base.h"
 
 #include <iostream>
-#include <string>
 #include <list>
+#include <string>
 
 
 namespace scy {

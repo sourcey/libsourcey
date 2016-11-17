@@ -306,13 +306,13 @@ void format(std::string& str, const void* ptr)
 {
     char buffer[24];
 #if defined(SCY_PTR_IS_64_BIT)
-    #if defined(SCY_LONG_IS_64_BIT)
-        std::sprintf(buffer, "%016lX", (std::uintptr_t) ptr);
-    #else
-        std::sprintf(buffer, "%016" I64_FMT "X", (std::uintptr_t) ptr);
-    #endif
+#if defined(SCY_LONG_IS_64_BIT)
+    std::sprintf(buffer, "%016lX", (std::uintptr_t)ptr);
 #else
-    std::sprintf(buffer, "%08lX", (std::uintptr_t) ptr);
+    std::sprintf(buffer, "%016" I64_FMT "X", (std::uintptr_t)ptr);
+#endif
+#else
+    std::sprintf(buffer, "%08lX", (std::uintptr_t)ptr);
 #endif
     str.append(buffer);
 }
@@ -320,6 +320,7 @@ void format(std::string& str, const void* ptr)
 
 } // namespace numeric
 } // namespace scy
+
 
 /// @\}
 

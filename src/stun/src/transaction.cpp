@@ -10,8 +10,8 @@
 
 
 #include "scy/stun/transaction.h"
-#include "scy/net/socket.h"
 #include "scy/logger.h"
+#include "scy/net/socket.h"
 #include <iostream>
 
 
@@ -27,11 +27,9 @@ namespace stun {
 
 
 Transaction::Transaction(const net::Socket::Ptr& socket,
-                         const net::Address& peerAddress,
-                         long timeout,
-                         int retries,
-                         uv::Loop* loop) :
-    net::Transaction<Message>(socket, peerAddress, timeout, retries, loop)
+                         const net::Address& peerAddress, long timeout,
+                         int retries, uv::Loop* loop)
+    : net::Transaction<Message>(socket, peerAddress, timeout, retries, loop)
 {
     DebugS(this) << "Create" << std::endl;
 
@@ -48,8 +46,8 @@ Transaction::~Transaction()
 
 bool Transaction::checkResponse(const Message& message)
 {
-    return net::Transaction<Message>::checkResponse(message)
-        && _request.transactionID() == message.transactionID();
+    return net::Transaction<Message>::checkResponse(message) &&
+           _request.transactionID() == message.transactionID();
 }
 
 
@@ -62,13 +60,13 @@ void Transaction::onResponse()
     if (_response.get<stun::ErrorCode>())
         _response.setClass(Message::ErrorResponse);
     else if (_response.methodType() == Message::SendIndication ||
-        _response.methodType() == Message::DataIndication)
+             _response.methodType() == Message::DataIndication)
         _response.setClass(Message::Indication);
 
     net::Transaction<Message>::onResponse();
 }
+}
+} // namespace scy:stun
 
-
-} } // namespace scy:stun
 
 /// @\}

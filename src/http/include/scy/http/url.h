@@ -33,22 +33,25 @@ public:
     URL(const char* url);
     URL(const std::string& url);
     URL(const std::string& scheme, const std::string& authority);
-    URL(const std::string& scheme, const std::string& authority, const std::string& pathEtc);
-    URL(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query, const std::string& fragment = "");
+    URL(const std::string& scheme, const std::string& authority,
+        const std::string& pathEtc);
+    URL(const std::string& scheme, const std::string& authority,
+        const std::string& path, const std::string& query,
+        const std::string& fragment= "");
     ~URL();
 
-    URL& operator = (const URL& uri);
-    URL& operator = (const std::string& uri);
-    URL& operator = (const char* uri);
+    URL& operator=(const URL& uri);
+    URL& operator=(const std::string& uri);
+    URL& operator=(const char* uri);
 
     /// Parses and assigns an URI from the given std::string.
     /// Throws a SyntaxException if whiny is set and the
     /// given url is invalid.
-    bool parse(const std::string& url, bool whiny = true);
+    bool parse(const std::string& url, bool whiny= true);
 
     /// RFC 3986 based URL encoding based on JavaScript's
     /// encodeURIComponent()
-    static std::string encode(const std::string &str);
+    static std::string encode(const std::string& str);
 
     /// RFC 3986 based URL decoding based on JavaScript's
     /// decodeURIComponent()
@@ -77,7 +80,7 @@ public:
 
     std::string str() const;
 
-    friend std::ostream& operator << (std::ostream& stream, const URL& url)
+    friend std::ostream& operator<<(std::ostream& stream, const URL& url)
     {
         stream << url.str();
         return stream;
@@ -94,5 +97,6 @@ protected:
 
 
 #endif // SCY_HTTP_URL_H
+
 
 /// @\}

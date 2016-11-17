@@ -21,15 +21,16 @@ namespace scy {
 namespace av {
 
 
-void initializeFFmpeg();    /// Initialize the FFmpeg library.
+void initializeFFmpeg(); /// Initialize the FFmpeg library.
 
-void uninitializeFFmpeg();    /// Uninitializes the FFmpeg library.
+void uninitializeFFmpeg(); /// Uninitializes the FFmpeg library.
 
-std::string averror(const int error);    /// Get an error string for the given error code.
+std::string
+averror(const int error); /// Get an error string for the given error code.
 
-void printInputFormats(std::ostream& ost, const char* delim = " ");
-void printOutputFormats(std::ostream& ost, const char* delim = " ");
-void printEncoders(std::ostream& ost, const char* delim = " ");
+void printInputFormats(std::ostream& ost, const char* delim= " ");
+void printOutputFormats(std::ostream& ost, const char* delim= " ");
+void printEncoders(std::ostream& ost, const char* delim= " ");
 
 
 } // namespace av
@@ -37,5 +38,6 @@ void printEncoders(std::ostream& ost, const char* delim = " ");
 
 
 #endif // SCY_Media_FFmpeg_H
+
 
 /// @\}

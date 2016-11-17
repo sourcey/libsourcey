@@ -10,8 +10,8 @@
 
 
 #include "scy/time.h"
-#include "scy/uv/uvpp.h"
 #include "scy/util.h"
+#include "scy/uv/uvpp.h"
 #include <ctime>
 #include <time.h>
 //#include <chrono>
@@ -59,7 +59,7 @@ std::tm toUTC(const std::time_t& time)
 #if defined(WIN32)
     gmtime_s(&tm_snapshot, &time); // thread-safe?
 #else
-    gmtime_r(&time, &tm_snapshot); // POSIX
+    gmtime_r(&time, &tm_snapshot);    // POSIX
 #endif
     return tm_snapshot;
 }
@@ -68,7 +68,8 @@ std::tm toUTC(const std::time_t& time)
 std::string print(const std::tm& dt, const char* fmt)
 {
 #if defined(WIN32)
-    // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm* "
+    // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a
+    // "const struct tm* "
     // ref. C++11 standard: ISO/IEC 14882:2011, � 27.7.1,
     std::ostringstream oss;
     oss << std::put_time(const_cast<std::tm*>(&dt), fmt);
@@ -76,12 +77,12 @@ std::string print(const std::tm& dt, const char* fmt)
 
 #else
     // LINUX
-    const std::size_t size = 1024;
+    const std::size_t size= 1024;
     char buffer[size];
-    auto success = std::strftime(buffer, size, fmt, &dt);
+    auto success= std::strftime(buffer, size, fmt, &dt);
 
     if (0 == success)
-    return fmt;
+        return fmt;
 
     return buffer;
 #endif
@@ -90,25 +91,25 @@ std::string print(const std::tm& dt, const char* fmt)
 
 std::string printLocal(const char* fmt)
 {
-   return print(toLocal(now()), fmt);
+    return print(toLocal(now()), fmt);
 }
 
 
 std::string printUTC(const char* fmt)
 {
-   return print(toUTC(now()), fmt);
+    return print(toUTC(now()), fmt);
 }
 
 
 std::string getLocal()
 {
-   return printLocal(ISO8601Format);
+    return printLocal(ISO8601Format);
 }
 
 
 std::string getUTC()
 {
-   return printUTC(ISO8601Format);
+    return printUTC(ISO8601Format);
 }
 
 
@@ -144,8 +145,8 @@ std::uint64_t getTimeMS()
 #endif
 
 
-
 } // namespace time
 } // namespace scy
+
 
 /// @\}

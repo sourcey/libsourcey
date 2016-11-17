@@ -15,18 +15,18 @@
 
 #include "scy/base.h"
 #include "scy/buffer.h"
+#include "scy/http/parser.h"
+#include "scy/http/request.h"
+#include "scy/http/response.h"
 #include "scy/net/socket.h"
 #include "scy/net/socketadapter.h"
 #include "scy/net/tcpsocket.h"
-#include "scy/http/request.h"
-#include "scy/http/response.h"
-#include "scy/http/parser.h"
 #include "scy/random.h"
 
 
 namespace scy {
 namespace http {
-    class Connection;
+class Connection;
 namespace ws {
 
 
@@ -40,23 +40,23 @@ enum Mode
 /// Frame header flags.
 enum class FrameFlags
 {
-    Fin  = 0x80, ///< FIN bit: final fragment of a multi-fragment message.
-    Rsv1 = 0x40, ///< Reserved for future use. Must be zero.
-    Rsv2 = 0x20, ///< Reserved for future use. Must be zero.
-    Rsv3 = 0x10, ///< Reserved for future use. Must be zero.
+    Fin= 0x80,  ///< FIN bit: final fragment of a multi-fragment message.
+    Rsv1= 0x40, ///< Reserved for future use. Must be zero.
+    Rsv2= 0x20, ///< Reserved for future use. Must be zero.
+    Rsv3= 0x10, ///< Reserved for future use. Must be zero.
 };
 
 
 /// Frame header opcodes.
 enum class Opcode
 {
-    Continuation    = 0x00, ///< Continuation frame.
-    Text            = 0x01, ///< Text frame.
-    Binary          = 0x02, ///< Binary frame.
-    Close           = 0x08, ///< Close connection.
-    Ping            = 0x09, ///< Ping frame.
-    Pong            = 0x0a, ///< Pong frame.
-    Bitmask         = 0x0f  ///< Bit mask for opcodes.
+    Continuation= 0x00, ///< Continuation frame.
+    Text= 0x01,         ///< Text frame.
+    Binary= 0x02,       ///< Binary frame.
+    Close= 0x08,        ///< Close connection.
+    Ping= 0x09,         ///< Ping frame.
+    Pong= 0x0a,         ///< Pong frame.
+    Bitmask= 0x0f       ///< Bit mask for opcodes.
 };
 
 
@@ -64,27 +64,27 @@ enum class Opcode
 /// the payload type of sent frames.
 enum SendFlags
 {
-    Text   = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Text),
-    Binary = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Binary)
+    Text= unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Text),
+    Binary= unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Binary)
 };
 
 
 /// StatusCodes for CLOSE frames sent with shutdown().
 enum StatusCodes
 {
-    StatusNormalClose           = 1000,
-    StatusEndpointGoingAway     = 1001,
-    StatusProtocolError         = 1002,
-    StatusPayloadNotAcceptable  = 1003,
-    StatusReserved              = 1004,
-    StatusReservedNoStatusCode  = 1005,
-    StatusReservedAbnormalClose = 1006,
-    StatusMalformedPayload      = 1007,
-    StatusPolicyViolation       = 1008,
-    StatusPayloadTooBig         = 1009,
-    StatusExtensionRequired     = 1010,
-    StatusUnexpectedCondition   = 1011,
-    StatusReservedTLSFailure    = 1015
+    StatusNormalClose= 1000,
+    StatusEndpointGoingAway= 1001,
+    StatusProtocolError= 1002,
+    StatusPayloadNotAcceptable= 1003,
+    StatusReserved= 1004,
+    StatusReservedNoStatusCode= 1005,
+    StatusReservedAbnormalClose= 1006,
+    StatusMalformedPayload= 1007,
+    StatusPolicyViolation= 1008,
+    StatusPayloadTooBig= 1009,
+    StatusExtensionRequired= 1010,
+    StatusUnexpectedCondition= 1011,
+    StatusReservedTLSFailure= 1015
 };
 
 
@@ -92,21 +92,26 @@ enum StatusCodes
 /// to determine the exact cause of the error.
 enum ErrorCodes
 {
-    ErrorNoHandshake             = 1, ///< No Connection: Upgrade or Upgrade: websocket header in handshake request.
-    ErrorHandshakeNoVersion      = 2, ///< No Sec-WebSocket-Version header in handshake request.
-    ErrorHandshakeUnsupportedVersion = 3, ///< Unsupported WebSocket version requested by client.
-    ErrorHandshakeNoKey          = 4, ///< No Sec-WebSocket-Key header in handshake request.
-    ErrorHandshakeAccept         = 5, ///< No Sec-WebSocket-Accept header or wrong value.
-    ErrorUnauthorized            = 6, ///< The server rejected the username or password for authentication.
-    ErrorPayloadTooBig           = 10, ///< Payload too big for supplied buffer.
-    ErrorIncompleteFrame         = 11 ///< Incomplete frame received.
+    ErrorNoHandshake= 1, ///< No Connection: Upgrade or Upgrade: websocket
+                         /// header in handshake request.
+    ErrorHandshakeNoVersion=
+        2, ///< No Sec-WebSocket-Version header in handshake request.
+    ErrorHandshakeUnsupportedVersion=
+        3, ///< Unsupported WebSocket version requested by client.
+    ErrorHandshakeNoKey=
+        4, ///< No Sec-WebSocket-Key header in handshake request.
+    ErrorHandshakeAccept= 5, ///< No Sec-WebSocket-Accept header or wrong value.
+    ErrorUnauthorized=
+        6, ///< The server rejected the username or password for authentication.
+    ErrorPayloadTooBig= 10,  ///< Payload too big for supplied buffer.
+    ErrorIncompleteFrame= 11 ///< Incomplete frame received.
 };
 
 
-static std::string ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+static std::string ProtocolGuid= "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 /// The WebSocket protocol version supported (13).
-static std::string ProtocolVersion = "13";
+static std::string ProtocolVersion= "13";
 
 
 //
@@ -124,7 +129,8 @@ public:
     virtual ~WebSocketFramer();
 
     /// Writes a WebSocket protocol frame from the given data.
-    virtual std::size_t writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame);
+    virtual std::size_t writeFrame(const char* data, std::size_t len, int flags,
+                                   BitWriter& frame);
 
     /// Reads a single WebSocket frame from the given buffer (frame).
     ///
@@ -170,8 +176,8 @@ protected:
 
     enum
     {
-        FRAME_FLAG_MASK   = 0x80,
-        MAX_HEADER_LENGTH = 14
+        FRAME_FLAG_MASK= 0x80,
+        MAX_HEADER_LENGTH= 14
     };
 
 private:
@@ -191,16 +197,22 @@ private:
 //
 
 
-class WebSocketAdapter: public net::SocketAdapter
+class WebSocketAdapter : public net::SocketAdapter
 {
 public:
-    WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode, http::Request& request, http::Response& response);
-    //WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response& response);
+    WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
+                     http::Request& request, http::Response& response);
+    // WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response&
+    // response);
 
-    virtual int send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
-    virtual int send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual int send(const char* data, std::size_t len,
+                     int flags= 0); // flags = ws::Text || ws::Binary
+    virtual int send(const char* data, std::size_t len,
+                     const net::Address& peerAddr,
+                     int flags= 0); // flags = ws::Text || ws::Binary
 
-    virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);
+    virtual bool shutdown(std::uint16_t statusCode,
+                          const std::string& statusMessage);
 
     /// Pointer to the underlying socket.
     /// Sent data will be proxied to this socket.
@@ -210,20 +222,23 @@ public:
     /// Client side
 
     virtual void sendClientRequest();
-    virtual void handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr);
-    //virtual void prepareClientRequest(http::Request& request);
-    //virtual void verifyClientResponse(http::Response& response);
+    virtual void handleClientResponse(const MutableBuffer& buffer,
+                                      const net::Address& peerAddr);
+    // virtual void prepareClientRequest(http::Request& request);
+    // virtual void verifyClientResponse(http::Response& response);
 
     //
     /// Server side
 
-    virtual void handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr);
-    //virtual void sendConnectResponse();
-    //virtual void verifyServerRequest(http::Request& request);
-    //virtual void prepareClientResponse(http::Response& response);
+    virtual void handleServerRequest(const MutableBuffer& buffer,
+                                     const net::Address& peerAddr);
+    // virtual void sendConnectResponse();
+    // virtual void verifyServerRequest(http::Request& request);
+    // virtual void prepareClientResponse(http::Response& response);
 
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                              const net::Address& peerAddress);
     virtual void onSocketClose(net::Socket& socket);
 
     virtual void onHandshakeComplete();
@@ -245,7 +260,7 @@ protected:
 
 
 /// Standalone WebSocket class.
-class WebSocket: public WebSocketAdapter
+class WebSocket : public WebSocketAdapter
 {
 public:
     typedef std::vector<WebSocket> Vec;
@@ -272,7 +287,7 @@ protected:
 
 
 /// WebSocket class which belongs to a HTTP Connection.
-class ConnectionAdapter: public WebSocketAdapter
+class ConnectionAdapter : public WebSocketAdapter
 {
 public:
     ConnectionAdapter(Connection& connection, ws::Mode mode);
@@ -293,5 +308,6 @@ protected:
 
 
 #endif // SCY_NET_WebSocket_H
+
 
 /// @\}

@@ -43,52 +43,58 @@ typedef std::vector<unsigned char> ByteVec;
 
 namespace internal {
 
-    /// Check return values from OpenSSL and throw an exception if it failed.
-    void api(int ret, const char* error = nullptr);
+/// Check return values from OpenSSL and throw an exception if it failed.
+void api(int ret, const char* error= nullptr);
 
-    /// Throws the last OpenSSL error.
-    void throwError();
+/// Throws the last OpenSSL error.
+void throwError();
 
-    /// Allows template functions to accept a wide range of buffer types.
-    /// See constructor definitions below for all compatible types.
-    /// The class uses const_cast for maximum flexibility, so use with care.
-    /// Also ensure that std::string is contiguous on your platform
-    /// before using the std::string constructors (C++11 guarantees it).
-    template<typename T> struct Raw
+/// Allows template functions to accept a wide range of buffer types.
+/// See constructor definitions below for all compatible types.
+/// The class uses const_cast for maximum flexibility, so use with care.
+/// Also ensure that std::string is contiguous on your platform
+/// before using the std::string constructors (C++11 guarantees it).
+template <typename T> struct Raw
+{
+    T ptr;
+    std::size_t len;
+
+    Raw(T ptr, std::size_t len)
     {
-        T ptr;
-        std::size_t len;
+        ptr= ptr;
+        len= len;
+    }
 
-        Raw(T ptr, std::size_t len) {
-            ptr = ptr;
-            len = len;
-        }
+    Raw(const char* ptr, std::size_t len)
+    {
+        ptr= reinterpret_cast<T>(const_cast<char*>(ptr));
+        len= len;
+    }
 
-        Raw(const char* ptr, std::size_t len) {
-            ptr = reinterpret_cast<T>(const_cast<char*>(ptr));
-            len = len;
-        }
+    Raw(std::string& str)
+    {
+        ptr= reinterpret_cast<T>(&str[0]);
+        len= str.length();
+    }
 
-        Raw(std::string& str) {
-            ptr = reinterpret_cast<T>(&str[0]);
-            len = str.length();
-        }
+    Raw(const std::string& str)
+    {
+        ptr= reinterpret_cast<T>(const_cast<char*>(&str[0]));
+        len= str.length();
+    }
 
-        Raw(const std::string& str) {
-            ptr = reinterpret_cast<T>(const_cast<char*>(&str[0]));
-            len = str.length();
-        }
+    Raw(const std::vector<char>& vec)
+    {
+        ptr= reinterpret_cast<T>(const_cast<char*>(&vec[0]));
+        len= vec.size();
+    }
 
-        Raw(const std::vector<char>& vec) {
-            ptr = reinterpret_cast<T>(const_cast<char*>(&vec[0]));
-            len = vec.size();
-        }
-
-        Raw(const ByteVec& vec) {
-            ptr = reinterpret_cast<T>(const_cast<unsigned char*>(&vec[0]));
-            len = vec.size();
-        }
-    };
+    Raw(const ByteVec& vec)
+    {
+        ptr= reinterpret_cast<T>(const_cast<unsigned char*>(&vec[0]));
+        len= vec.size();
+    }
+};
 
 } // namespace internal
 
@@ -98,5 +104,6 @@ namespace internal {
 
 
 #endif // SCY_Crypto_Crypto_H
+
 
 /// @\}

@@ -21,12 +21,12 @@ namespace scy {
 
 /// This is a helper template class for managing
 /// singleton objects allocated on the heap.
-template <class S>
-class Singleton
+template <class S> class Singleton
 {
 public:
     /// Creates the Singleton wrapper.
-    Singleton() : _ptr(0)
+    Singleton()
+        : _ptr(0)
     {
     }
 
@@ -46,7 +46,7 @@ public:
     {
         Mutex::ScopedLock lock(_m);
         if (!_ptr)
-            _ptr = new S;
+            _ptr= new S;
         return _ptr;
     }
 
@@ -55,8 +55,8 @@ public:
     S* swap(S* newPtr)
     {
         Mutex::ScopedLock lock(_m);
-        S* oldPtr = _ptr;
-        _ptr = newPtr;
+        S* oldPtr= _ptr;
+        _ptr= newPtr;
         return oldPtr;
     }
 
@@ -66,7 +66,7 @@ public:
         Mutex::ScopedLock lock(_m);
         if (_ptr)
             delete _ptr;
-        _ptr = nullptr;
+        _ptr= nullptr;
     }
 
 private:
@@ -79,5 +79,6 @@ private:
 
 
 #endif // SCY_Singleton_H
+
 
 /// @\}

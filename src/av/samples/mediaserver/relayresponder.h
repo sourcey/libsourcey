@@ -1,7 +1,7 @@
 #include "mediaserver.h"
 
-#include "scy/util/streammanager.h"
 #include "scy/turn/client/tcpclient.h"
+#include "scy/util/streammanager.h"
 
 
 namespace scy {
@@ -16,44 +16,49 @@ namespace scy {
 //
 
 
-class RelayedStreamingAllocation: public turn::TCPClientObserver
+class RelayedStreamingAllocation : public turn::TCPClientObserver
 {
 public:
     turn::TCPClient client;
-    std::string    peerIP;
+    std::string peerIP;
     StreamManager streams;
     StreamingOptions options;
-    int    frameNumber;
+    int frameNumber;
     bool connected;
     bool deleted;
 
     Signal<void(turn::Client&)> AllocationCreated;
-    //Signal<turn::Client&> AllocationFailed;
+    // Signal<turn::Client&> AllocationFailed;
     Signal<void(turn::Client&, const net::Address&)> ConnectionCreated;
 
-        client(*this, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false), deleted(false)
-    RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const std::string& peerIP) :
+    client(*this, clientOptions), options(options), peerIP(peerIP),
+        frameNumber(0), connected(false),
+        deleted(false) RelayedStreamingAllocation(
+            const StreamingOptions& options,
+            const turn::Client::Options& clientOptions,
+            const std::string& peerIP)
+        :
     {
     }
 
     virtual ~RelayedStreamingAllocation()
     {
         assert(streams.empty());
-        assert(deleted);    // NOTE: We are responsible for deleting the audioCapture.
-        //if (options.audioCapture)    //    delete options.audioCapture;
+        assert(
+            deleted); // NOTE: We are responsible for deleting the audioCapture.
+        // if (options.audioCapture)    //    delete options.audioCapture;
     }
 
     void initiate()
     {
         DebugS(this) << "Initiating" << std::endl;
-        try    {
+        try {
             // Initiate the TRUN client allocation
             client.addPermission(peerIP);
-            client.addPermission("127.0.0.1"); // for proxy
+            client.addPermission("127.0.0.1");   // for proxy
             client.addPermission("192.168.1.1"); // for proxy
             client.initiate();
-        }
-        catch (std::exception& exc) {
+        } catch (std::exception& exc) {
             ErrorS(this) << "Error: " << exc.what() << std::endl;
             assert(0);
         }
@@ -67,39 +72,43 @@ public:
             return;
         }
 
-        client.shutdown();    // Free all managed packet streams
+        client.shutdown(); // Free all managed packet streams
         streams.closeAll();
-                // Destroy the client when the allocation is lost
+        // Destroy the client when the allocation is lost
         scy::deleteLater<RelayedStreamingAllocation>(this);
-        deleted = true;
+        deleted= true;
     }
 
 protected:
-    void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&)
+    void onClientStateChange(turn::Client& client, turn::ClientState& state,
+                             const turn::ClientState&)
     {
-        DebugS(this) << "Relay state changed: " << state.toString() << std::endl;
+        DebugS(this) << "Relay state changed: " << state.toString()
+                     << std::endl;
 
-        switch(state.id()) {
-        case turn::ClientState::None:
-            break;
-        case turn::ClientState::Allocating:
-            break;
-        case turn::ClientState::Authorizing:
-            break;
-        case turn::ClientState::Success:
-            AllocationCreated.emit(/*this, */this->client);
-            break;
-        case turn::ClientState::Failed:
-            //assert(0 && "Allocation failed");
-            WarnS(this) << "Relay connection lost" << std::endl;
-            //AllocationFailed.emit(/*this, */this->client);
-            //dispose();
-        //case turn::ClientState::Terminated:        //    break;
-            break;
+        switch (state.id()) {
+            case turn::ClientState::None:
+                break;
+            case turn::ClientState::Allocating:
+                break;
+            case turn::ClientState::Authorizing:
+                break;
+            case turn::ClientState::Success:
+                AllocationCreated.emit(/*this, */ this->client);
+                break;
+            case turn::ClientState::Failed:
+                // assert(0 && "Allocation failed");
+                WarnS(this) << "Relay connection lost" << std::endl;
+                // AllocationFailed.emit(/*this, */this->client);
+                // dispose();
+                // case turn::ClientState::Terminated:        //    break;
+                break;
         }
     }
 
-    void onRelayConnectionCreated(turn::TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //std::uint32_t connectionID,
+    void onRelayConnectionCreated(
+        turn::TCPClient& client, const net::TCPSocket::Ptr& socket,
+        const net::Address& peerAddr) // std::uint32_t connectionID,
     {
         DebugS(this) << "Connection created: " << peerAddr << std::endl;
         // Just allow one stream for now
@@ -108,12 +117,12 @@ protected:
             return;
         }
 
-        try    {
+        try {
             // Notify the outside application
-            ConnectionCreated.emit(/*this, */client, peerAddr);
+            ConnectionCreated.emit(/*this, */ client, peerAddr);
 
             // Create an output media stream for the new connection
-            auto stream = new PacketStream(peerAddr.toString());
+            auto stream= new PacketStream(peerAddr.toString());
 
             // Setup the packet stream ensuring the audio capture isn't
             // destroyed with the stream, as it may be reused while the
@@ -122,36 +131,40 @@ protected:
             MediaServer::setupPacketStream(*stream, options, true, true);
 
             // Feed the packet stream directly into the connection
-            stream->emitter += packetSlot(static_cast<net::SocketAdapter*>(
-                const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
+            stream->emitter+=
+                packetSlot(static_cast<net::SocketAdapter*>(
+                               const_cast<net::TCPSocket*>(socket.get())),
+                           &net::SocketAdapter::sendPacket);
 
             // Start the stream
             stream->start();
 
             this->streams.addStream(stream);
-        }
-        catch (std::exception& exc) {
+        } catch (std::exception& exc) {
             ErrorS(this) << "Stream error: " << exc.what() << std::endl;
             assert(0);
         }
     }
 
-    void onRelayConnectionClosed(turn::TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress)
+    void onRelayConnectionClosed(turn::TCPClient& client,
+                                 const net::TCPSocket::Ptr& socket,
+                                 const net::Address& peerAddress)
     {
         DebugS(this) << "Connection closed: " << peerAddress << std::endl;
 
         try {
             // Destroy the media stream for the closed connection (if any).
-            //this->streams.free(peerAddress.toString());
-            PacketStream* stream = streams.remove(peerAddress.toString());
+            // this->streams.free(peerAddress.toString());
+            PacketStream* stream= streams.remove(peerAddress.toString());
             if (stream) {
-                stream->emitter -= packetSlot(static_cast<net::SocketAdapter*>(
-                    const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
+                stream->emitter-=
+                    packetSlot(static_cast<net::SocketAdapter*>(
+                                   const_cast<net::TCPSocket*>(socket.get())),
+                               &net::SocketAdapter::sendPacket);
                 delete stream;
-                //stream->destroy();
+                // stream->destroy();
             }
-        }
-        catch (std::exception& exc) {
+        } catch (std::exception& exc) {
             ErrorS(this) << "Stream error: " << exc.what() << std::endl;
             assert(0);
         }
@@ -160,13 +173,17 @@ protected:
             dispose();
     }
 
-    void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
+    void onRelayDataReceived(turn::Client& client, const char* data,
+                             std::size_t size, const net::Address& peerAddr)
     {
-        DebugS(this) << "Received data from peer: " << std::string(data, size) <<  ": " << peerAddr << std::endl;
-        // If the remove peer is a web browser then the HTTP request sent     // to the relayed address will be the first thing we see here...
+        DebugS(this) << "Received data from peer: " << std::string(data, size)
+                     << ": " << peerAddr << std::endl;
+        // If the remove peer is a web browser then the HTTP request sent     //
+        // to the relayed address will be the first thing we see here...
     }
 
-    void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
+    void onAllocationPermissionsCreated(turn::Client& client,
+                                        const turn::PermissionList& permissions)
     {
         DebugS(this) << "Permissions created" << std::endl;
     }
@@ -178,49 +195,56 @@ protected:
 //
 
 
-class RelayedStreamingResponder: public http::ServerResponder
+class RelayedStreamingResponder : public http::ServerResponder
 {
 public:
-        http::ServerResponder(connection), options(options), allocation(nullptr)
-    RelayedStreamingResponder(http::ServerConnection& connection, const StreamingOptions& options) :
+    http::ServerResponder(connection), options(options),
+        allocation(nullptr)
+            RelayedStreamingResponder(http::ServerConnection& connection,
+                                      const StreamingOptions& options)
+        :
     {
     }
 
     virtual ~RelayedStreamingResponder()
     {
-      // Note: The RelayedStreamingAllocation is self managing
+        // Note: The RelayedStreamingAllocation is self managing
     }
 
     void onRequest(http::Request& request, http::Response& response)
     {
         DebugS(this) << "Running: "
-            << "\n\tOutput Format: " << options.oformat.name
-            << "\n\tOutput Encoding: " << options.encoding
-            << "\n\tOutput Packetizer: " << options.framing
-            << std::endl;
+                     << "\n\tOutput Format: " << options.oformat.name
+                     << "\n\tOutput Encoding: " << options.encoding
+                     << "\n\tOutput Packetizer: " << options.framing
+                     << std::endl;
 
         turn::Client::Options co;
-        co.serverAddr = net::Address(kRelayServerIP, 3478);
-        co.lifetime  = 120 * 1000;    // 2 minutes
-        co.timeout = 10 * 1000;
-        co.timerInterval = 3 * 1000;
-        co.username = RELAY_USERNAME;
-        co.password = RELAY_PASSWORD;
+        co.serverAddr= net::Address(kRelayServerIP, 3478);
+        co.lifetime= 120 * 1000; // 2 minutes
+        co.timeout= 10 * 1000;
+        co.timerInterval= 3 * 1000;
+        co.username= RELAY_USERNAME;
+        co.password= RELAY_PASSWORD;
 
-        allocation = new RelayedStreamingAllocation(options, co, connection().socket()->peerAddress().host());
-        //allocation->AllocationFailed += sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
-        allocation->AllocationCreated += sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
+        allocation= new RelayedStreamingAllocation(
+            options, co, connection().socket()->peerAddress().host());
+        // allocation->AllocationFailed += sdelegate(this,
+        // &RelayedStreamingResponder::onAllocationFailed);
+        allocation->AllocationCreated+=
+            sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
 
         allocation->initiate();
     }
 
     void onAllocationCreated(void* sender, turn::Client& client)
     {
-        allocation->AllocationCreated -= sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
+        allocation->AllocationCreated-=
+            sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
         std::string address(allocation->client.relayedAddress().toString());
 
         DebugS(this) << "Allocation Created: " << address << std::endl;
-                        // Send the relay address response to the initiator
+        // Send the relay address response to the initiator
         connection().response().set("Access-Control-Allow-Origin", "*");
         connection().send(address.c_str(), address.length());
         connection().close();
@@ -231,7 +255,8 @@ public:
     {
         //delete allocation;
         //allocation = nullptr;
-        allocation->AllocationFailed -= sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
+        allocation->AllocationFailed -= sdelegate(this,
+    &RelayedStreamingResponder::onAllocationFailed);
 
 
         DebugS(this) << "Allocation Failed" << std::endl;

@@ -13,10 +13,10 @@
 #define SCY_PeerConnectionManager_H
 
 
-#include "scy/webrtc/webrtc.h"
-#include "scy/webrtc/peerconnection.h"
 #include "scy/collection.h"
 #include "scy/json/json.h"
+#include "scy/webrtc/peerconnection.h"
+#include "scy/webrtc/webrtc.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 
@@ -30,20 +30,28 @@ namespace scy {
 class PeerConnection;
 
 
-class PeerConnectionManager: public PointerCollection<std::string, PeerConnection>
+class PeerConnectionManager
+    : public PointerCollection<std::string, PeerConnection>
 {
 public:
-    PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory = nullptr);
+    PeerConnectionManager(
+        rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory=
+            nullptr);
     virtual ~PeerConnectionManager();
 
-    virtual void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
-    virtual void sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp);
+    virtual void sendSDP(PeerConnection* conn, const std::string& type,
+                         const std::string& sdp);
+    virtual void sendCandidate(PeerConnection* conn, const std::string& mid,
+                               int mlineindex, const std::string& sdp);
 
     virtual void recvSDP(const std::string& peerid, const json::Value& data);
-    virtual void recvCandidate(const std::string& peerid, const json::Value& data);
+    virtual void recvCandidate(const std::string& peerid,
+                               const json::Value& data);
 
-    virtual void onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
-    virtual void onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
+    virtual void onAddRemoteStream(PeerConnection* conn,
+                                   webrtc::MediaStreamInterface* stream);
+    virtual void onRemoveRemoteStream(PeerConnection* conn,
+                                      webrtc::MediaStreamInterface* stream);
 
     virtual void onStable(PeerConnection* conn);
     virtual void onClosed(PeerConnection* conn);
@@ -60,5 +68,6 @@ protected:
 
 
 #endif
+
 
 /// @\}

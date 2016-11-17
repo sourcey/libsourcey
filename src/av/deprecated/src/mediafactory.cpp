@@ -40,16 +40,18 @@ void MediaFactory::shutdown()
 
 MediaFactory::MediaFactory()
 {
-    _devices = DeviceManagerFactory::create();
+    _devices= DeviceManagerFactory::create();
     _devices->initialize();
-    //_devices->DevicesChanged += sdelegate(this, &MediaFactory::onDevicesChanged);
+    //_devices->DevicesChanged += sdelegate(this,
+    //&MediaFactory::onDevicesChanged);
 }
 
 
 MediaFactory::~MediaFactory()
 {
     if (_devices) {
-        //_devices->DevicesChanged -= sdelegate(this, &MediaFactory::onDevicesChanged);
+        //_devices->DevicesChanged -= sdelegate(this,
+        //&MediaFactory::onDevicesChanged);
         _devices->uninitialize();
         delete _devices;
     }
@@ -80,13 +82,12 @@ void MediaFactory::loadVideoCaptures()
     // reference count becomes positive.
     std::vector<Device> devs;
     devices().getCameras(devs);
-    for (std::size_t i = 0; i < devs.size(); ++i) {
+    for (std::size_t i= 0; i < devs.size(); ++i) {
         try {
             createVideoCapture(devs[0].id);
-        }
-        catch (std::exception& exc) {
-            ErrorL << "Cannot load video capture: "
-                << devs[0].id << ": " << exc.what() << endl;
+        } catch (std::exception& exc) {
+            ErrorL << "Cannot load video capture: " << devs[0].id << ": "
+                   << exc.what() << endl;
         }
     }
 }
@@ -99,11 +100,11 @@ void MediaFactory::reloadFailedVideoCaptures()
 
     // Loop through captures and attempt to reopen any
     // that may have been unplugged
-    auto videoCaptures = this->videoCaptures();
+    auto videoCaptures= this->videoCaptures();
     for (auto& kv : videoCaptures) {
         if (kv.second->error().any()) {
-            TraceL << "Reloading capture " << kv.second->deviceId()
-                << ": " << kv.second->error() << endl;
+            TraceL << "Reloading capture " << kv.second->deviceId() << ": "
+                   << kv.second->error() << endl;
             try {
                 kv.second->open();
                 kv.second->start();
@@ -111,11 +112,11 @@ void MediaFactory::reloadFailedVideoCaptures()
                 // Manually emit the capture loaded signal if the
                 // capture was successfully reloaded
                 if (!kv.second->error().any()) {
-                    VideoCaptureLoaded.emit(/*this, */kv.second);
+                    VideoCaptureLoaded.emit(/*this, */ kv.second);
                 }
-            }
-            catch (std::exception& exc) {
-                ErrorL << "Capture initialization error: " << exc.what() << endl;
+            } catch (std::exception& exc) {
+                ErrorL << "Capture initialization error: " << exc.what()
+                       << endl;
             }
         }
     }
@@ -136,7 +137,8 @@ void MediaFactory::unloadVideoCaptures()
 }
 
 
-VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
+VideoCapture::Ptr
+MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 {
     TraceL << "Creating video capture: " << deviceId << endl;
 
@@ -145,32 +147,32 @@ VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned fl
 
     Mutex::ScopedLock lock(_mutex);
 
-    auto it = _videoCaptures.find(deviceId);
+    auto it= _videoCaptures.find(deviceId);
     if (it != _videoCaptures.end())
         return it->second;
 
-    auto capture = std::make_shared<VideoCapture>(deviceId);
-    _videoCaptures[deviceId] = capture;
-    VideoCaptureLoaded.emit(/*this, */capture);
+    auto capture= std::make_shared<VideoCapture>(deviceId);
+    _videoCaptures[deviceId]= capture;
+    VideoCaptureLoaded.emit(/*this, */ capture);
 
     // Listen for errors.
     // NOTE: The capture is opened and started in the constructor,
     // so exceptions thrown during startup will not be handled
     // via this callback.
-    capture->Error += sdelegate(this, &MediaFactory::onVideoCaptureError);
+    capture->Error+= sdelegate(this, &MediaFactory::onVideoCaptureError);
     return capture;
 }
 
 
 void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 {
-    auto capture = reinterpret_cast<VideoCapture*>(sender);
-    auto videoCaptures = this->videoCaptures();
-    auto it = videoCaptures.find(capture->deviceId());
+    auto capture= reinterpret_cast<VideoCapture*>(sender);
+    auto videoCaptures= this->videoCaptures();
+    auto it= videoCaptures.find(capture->deviceId());
     if (it != videoCaptures.end()) {
-        VideoCaptureError.emit(/*this, */it->second);
-    }
-    else assert(0);
+        VideoCaptureError.emit(/*this, */ it->second);
+    } else
+        assert(0);
 }
 
 
@@ -182,13 +184,16 @@ VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 }
 
 
-AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format)
+AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels,
+                                                   int sampleRate,
+                                                   RtAudioFormat format)
 {
     TraceL << "Create audio capture: " << deviceId << endl;
     if (deviceId < 0)
         throw std::runtime_error("Invalid audio device ID");
 
-    return std::make_shared<AudioCapture>(deviceId, channels, sampleRate, format);
+    return std::make_shared<AudioCapture>(deviceId, channels, sampleRate,
+                                          format);
 }
 
 

@@ -10,9 +10,9 @@
 
 
 #include "scy/buffer.h"
-#include "scy/util.h"
-#include "scy/logger.h"
 #include "scy/byteorder.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 
 #include <cstddef>
 #include <cstring>
@@ -50,11 +50,11 @@ void BitReader::init(const char* bytes, std::size_t size, ByteOrder order)
 {
     // _buffer = nullptr;
     //_mark = 0;
-    _position = 0;
+    _position= 0;
     //_capacity = size;
-    _limit = size;
-    _order = order;
-    _bytes = bytes;
+    _limit= size;
+    _order= order;
+    _bytes= bytes;
     //_free = false;
 }
 
@@ -69,7 +69,7 @@ void BitReader::seek(std::size_t val)
     if (val > _limit)
         throw std::out_of_range("index out of range");
 
-    _position = val;
+    _position= val;
 }
 
 
@@ -78,7 +78,7 @@ void BitReader::skip(std::size_t val)
     if (val > _limit)
         throw std::out_of_range("index out of range");
 
-    _position += val;
+    _position+= val;
 }
 
 
@@ -114,19 +114,19 @@ void BitReader::getU16(std::uint16_t& val)
 {
     std::uint16_t v;
     get(reinterpret_cast<char*>(&v), 2);
-    val = (_order == ByteOrder::Network) ? networkToHost16(v) : v;
+    val= (_order == ByteOrder::Network) ? networkToHost16(v) : v;
 }
 
 
 void BitReader::getU24(std::uint32_t& val)
 {
-    std::uint32_t v = 0;
-    char* target = reinterpret_cast<char*>(&v);
+    std::uint32_t v= 0;
+    char* target= reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++target;
 
     get(target, 3);
-    val = (_order == ByteOrder::Network) ? networkToHost32(v) : v;
+    val= (_order == ByteOrder::Network) ? networkToHost32(v) : v;
 }
 
 
@@ -134,7 +134,7 @@ void BitReader::getU32(std::uint32_t& val)
 {
     std::uint32_t v;
     get(reinterpret_cast<char*>(&v), 4);
-    val = (_order == ByteOrder::Network) ? networkToHost32(v) : v;
+    val= (_order == ByteOrder::Network) ? networkToHost32(v) : v;
 }
 
 
@@ -142,7 +142,7 @@ void BitReader::getU64(std::uint64_t& val)
 {
     std::uint64_t v;
     get(reinterpret_cast<char*>(&v), 8);
-    val = (_order == ByteOrder::Network) ? networkToHost64(v) : v;
+    val= (_order == ByteOrder::Network) ? networkToHost64(v) : v;
 }
 
 
@@ -150,15 +150,15 @@ void BitReader::get(std::string& val, std::size_t len)
 {
     if (len > available()) {
         ErrorS(this) << "index out of range: "
-          << "len=" << len << ", "
-          << "available=" << available() << ", "
-          << "position=" << position() << ", "
-          << "limit=" << limit() << std::endl;
+                     << "len=" << len << ", "
+                     << "available=" << available() << ", "
+                     << "position=" << position() << ", "
+                     << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
     }
 
     val.append(_bytes + _position, len);
-    _position += len;
+    _position+= len;
 }
 
 
@@ -166,103 +166,98 @@ void BitReader::get(char* val, std::size_t len)
 {
     if (len > available()) {
         ErrorS(this) << "index out of range: "
-          << "len=" << len << ", "
-          << "available=" << available() << ", "
-          << "position=" << position() << ", "
-          << "limit=" << limit() << std::endl;
+                     << "len=" << len << ", "
+                     << "available=" << available() << ", "
+                     << "position=" << position() << ", "
+                     << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
     }
 
     memcpy(val, _bytes + _position, len);
-    _position += len;
+    _position+= len;
 }
 
 
 const char BitReader::peek()
 {
-  	if (_limit > _position)
-  		  return (const char)_bytes[_position];
-  	// DebugL << "Peeking next character is NULL" << std::endl;
-  	return 0;
+    if (_limit > _position)
+        return (const char)_bytes[_position];
+    // DebugL << "Peeking next character is NULL" << std::endl;
+    return 0;
 }
 
 
 const std::uint8_t BitReader::peekU8()
 {
     try {
-      	std::uint8_t v;
-      	getU8(v);
-    		_position -= 1;
-    		return v;
+        std::uint8_t v;
+        getU8(v);
+        _position-= 1;
+        return v;
+    } catch (std::out_of_range&) {
+        DebugL << "Peeking std::uint8_t: NULL" << std::endl;
     }
-    catch (std::out_of_range&) {
-      	DebugL << "Peeking std::uint8_t: NULL" << std::endl;
-    }
-  	return 0;
+    return 0;
 }
 
 
 const std::uint16_t BitReader::peekU16()
 {
     try {
-      	std::uint16_t v;
-      	getU16(v);
-    		_position -= 2;
-    		return v;
-    }
-    catch (std::out_of_range&) {
-      	DebugL << "Peeking std::uint16_t: NULL" << std::endl;
+        std::uint16_t v;
+        getU16(v);
+        _position-= 2;
+        return v;
+    } catch (std::out_of_range&) {
+        DebugL << "Peeking std::uint16_t: NULL" << std::endl;
     }
 
-  	return 0;
+    return 0;
 }
 
 
 const std::uint32_t BitReader::peekU24()
 {
     try {
-      	std::uint32_t v;
-      	getU24(v);
-    		_position -= 3;
-    		return v;
-    }
-    catch (std::out_of_range&) {
-      	DebugL << "Peeking UInt24: NULL" << std::endl;
+        std::uint32_t v;
+        getU24(v);
+        _position-= 3;
+        return v;
+    } catch (std::out_of_range&) {
+        DebugL << "Peeking UInt24: NULL" << std::endl;
     }
 
-  	return 0;
+    return 0;
 }
 
 
 const std::uint32_t BitReader::peekU32()
 {
     try {
-      	std::uint32_t v;
-      	getU32(v);
-    		_position -= 4;
-    		return v;
-    }
-    catch (std::out_of_range&) {
-      	DebugL << "Peeking std::uint32_t: NULL" << std::endl;
+        std::uint32_t v;
+        getU32(v);
+        _position-= 4;
+        return v;
+    } catch (std::out_of_range&) {
+        DebugL << "Peeking std::uint32_t: NULL" << std::endl;
     }
 
-  	return 0;
+    return 0;
 }
 
 
 const std::uint64_t BitReader::peekU64()
 {
     try {
-      	std::uint64_t v;
-      	getU64(v);
-    		_position -= 8;
-    		return v;
-    }
-    catch (std::out_of_range&) {
-      	DebugL << "Peeking std::uint64_t: NULL" << std::endl;
+        std::uint64_t v;
+        getU64(v);
+        _position-= 8;
+        return v;
+    } catch (std::out_of_range&) {
+        DebugL << "Peeking std::uint64_t: NULL" << std::endl;
     }
 
-  	return 0;
+    return 0;
 }
 
 
@@ -272,128 +267,117 @@ const std::uint64_t BitReader::peekU64()
 
 int BitReader::skipToChar(char c)
 {
-    std::size_t len = 0;
-    while (_limit > _position + len &&
-        _bytes[_position + len] != c)
+    std::size_t len= 0;
+    while (_limit > _position + len && _bytes[_position + len] != c)
         len++;
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::skipWhitespace()
 {
-    std::size_t len = 0;
-    while (_limit > _position + len &&
-        _bytes[_position + len] == ' ')
+    std::size_t len= 0;
+    while (_limit > _position + len && _bytes[_position + len] == ' ')
         len++;
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::skipToNextLine()
 {
-    std::size_t len = 0;
-    while (_limit > _position + len &&
-        _bytes[_position + len] != '\n') {
+    std::size_t len= 0;
+    while (_limit > _position + len && _bytes[_position + len] != '\n') {
         len++;
     }
     len++; // advance past newline
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::skipNextWord()
 {
-    std::size_t len = skipWhitespace();
-    while (_limit > _position + len &&
-        _bytes[_position + len] != ' ' &&
-        _bytes[_position + len] != '\t' &&
-        _bytes[_position + len] != '\n' &&
-        _bytes[_position + len] != '\r')
+    std::size_t len= skipWhitespace();
+    while (_limit > _position + len && _bytes[_position + len] != ' ' &&
+           _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
+           _bytes[_position + len] != '\r')
         len++;
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::readToNext(std::string& val, char c)
 {
-    std::size_t len = 0;
-    while (_limit > _position + len &&
-        _bytes[_position + len] != c)
+    std::size_t len= 0;
+    while (_limit > _position + len && _bytes[_position + len] != c)
         len++;
     val.append(_bytes + _position, len);
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::readNextWord(std::string& val)
 {
-    std::size_t len = skipWhitespace();
-    while (_limit > _position + len &&
-        _bytes[_position + len] != ' ' &&
-        _bytes[_position + len] != '\t' &&
-        _bytes[_position + len] != '\n' &&
-        _bytes[_position + len] != '\r')
+    std::size_t len= skipWhitespace();
+    while (_limit > _position + len && _bytes[_position + len] != ' ' &&
+           _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
+           _bytes[_position + len] != '\r')
         len++;
     val.append(_bytes + _position, len);
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::readNextNumber(unsigned int& val)
 {
-    std::size_t len = skipWhitespace();
-    while (_limit > _position + len &&
-        _bytes[_position + len] != ' ' &&
-        _bytes[_position + len] != '\t' &&
-        _bytes[_position + len] != '\n' &&
-        _bytes[_position + len] != '\r')
+    std::size_t len= skipWhitespace();
+    while (_limit > _position + len && _bytes[_position + len] != ' ' &&
+           _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
+           _bytes[_position + len] != '\r')
         len++;
-    val = util::strtoi<std::uint32_t>(std::string(_bytes + _position, len));
+    val= util::strtoi<std::uint32_t>(std::string(_bytes + _position, len));
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
 
 int BitReader::readLine(std::string& val)
 {
-    std::size_t len = 0;
-    while (_limit > _position + len &&
-        _bytes[_position + len] != '\n')
+    std::size_t len= 0;
+    while (_limit > _position + len && _bytes[_position + len] != '\n')
         len++;
     val.append(_bytes + _position, len);
     len++; // advance past newline
     if (_limit > _position + len)
-        _position += len;
+        _position+= len;
     else
-        _position = _limit;
+        _position= _limit;
     return len;
 }
 
@@ -426,11 +410,11 @@ void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
 {
     //_vector = nullptr;
     // _buffer = nullptr;
-    _position = 0;
-    _limit = size;
+    _position= 0;
+    _limit= size;
     //_capacity = size;
-    _order = order;
-    _bytes = bytes;
+    _order= order;
+    _bytes= bytes;
     //_free = false;
 }
 
@@ -444,14 +428,14 @@ void BitWriter::skip(std::size_t val)
 {
     if (_position + val > _limit) {
         ErrorS(this) << "index out of range: "
-          << "val=" << val << ", "
-          << "available=" << available() << ", "
-          << "position=" << position() << ", "
-          << "limit=" << limit() << std::endl;
+                     << "val=" << val << ", "
+                     << "available=" << available() << ", "
+                     << "position=" << position() << ", "
+                     << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
     }
 
-    _position += val;
+    _position+= val;
 }
 
 
@@ -459,14 +443,14 @@ void BitWriter::seek(std::size_t val)
 {
     if (val > _limit) {
         ErrorS(this) << "index out of range: "
-          << "val=" << val << ", "
-          << "available=" << available() << ", "
-          << "position=" << position() << ", "
-          << "limit=" << limit() << std::endl;
+                     << "val=" << val << ", "
+                     << "available=" << available() << ", "
+                     << "position=" << position() << ", "
+                     << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
     }
 
-    _position = val;
+    _position= val;
 }
 
 
@@ -500,15 +484,17 @@ void BitWriter::putU8(std::uint8_t val)
 
 void BitWriter::putU16(std::uint16_t val)
 {
-    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    std::uint16_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     put(reinterpret_cast<const char*>(&v), 2);
 }
 
 
 void BitWriter::putU24(std::uint32_t val)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
-    char* start = reinterpret_cast<char*>(&v);
+    std::uint32_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    char* start= reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
 
@@ -518,14 +504,16 @@ void BitWriter::putU24(std::uint32_t val)
 
 void BitWriter::putU32(std::uint32_t val)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     put(reinterpret_cast<const char*>(&v), 4);
 }
 
 
 void BitWriter::putU64(std::uint64_t val)
 {
-    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    std::uint64_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     put(reinterpret_cast<const char*>(&v), 8);
 }
 
@@ -550,17 +538,17 @@ void BitWriter::put(const char* val, std::size_t len)
     //
     // Write to fixed size buffer
     // else {
-        if ((_position + len) > _limit) {
-              ErrorS(this) << "insufficient buffer capacity: "
-                << "len=" << len << ", "
-                << "available=" << available() << ", "
-                << "position=" << position() << ", "
-                << "limit=" << limit() << std::endl;
-              throw std::out_of_range("insufficient buffer capacity");
-        }
+    if ((_position + len) > _limit) {
+        ErrorS(this) << "insufficient buffer capacity: "
+                     << "len=" << len << ", "
+                     << "available=" << available() << ", "
+                     << "position=" << position() << ", "
+                     << "limit=" << limit() << std::endl;
+        throw std::out_of_range("insufficient buffer capacity");
+    }
 
-        memcpy(_bytes + _position, val, len);
-        _position += len;
+    memcpy(_bytes + _position, val, len);
+    _position+= len;
     // }
 }
 
@@ -578,15 +566,17 @@ bool BitWriter::updateU8(std::uint8_t val, std::size_t pos)
 
 bool BitWriter::updateU16(std::uint16_t val, std::size_t pos)
 {
-    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    std::uint16_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     return update(reinterpret_cast<const char*>(&v), 2, pos);
 }
 
 
 bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
-    char* start = reinterpret_cast<char*>(&v);
+    std::uint32_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    char* start= reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
 
@@ -596,14 +586,16 @@ bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 
 bool BitWriter::updateU32(std::uint32_t val, std::size_t pos)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     return update(reinterpret_cast<const char*>(&v), 4, pos);
 }
 
 
 bool BitWriter::updateU64(std::uint64_t val, std::size_t pos)
 {
-    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    std::uint64_t v=
+        (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     return update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 
@@ -625,5 +617,6 @@ bool BitWriter::update(const char* val, std::size_t len, std::size_t pos)
 
 
 } // namespace scy
+
 
 /// @\}

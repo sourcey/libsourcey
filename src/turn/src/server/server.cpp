@@ -10,8 +10,8 @@
 
 
 #include "scy/turn/server/server.h"
-#include "scy/logger.h"
 #include "scy/buffer.h"
+#include "scy/logger.h"
 #include <algorithm>
 
 
@@ -24,11 +24,11 @@ namespace scy {
 namespace turn {
 
 
-Server::Server(ServerObserver& observer, const ServerOptions& options) :
-    _observer(observer),
-    _options(options),
-    _udpSocket(nullptr),
-    _tcpSocket(nullptr)
+Server::Server(ServerObserver& observer, const ServerOptions& options)
+    : _observer(observer)
+    , _options(options)
+    , _udpSocket(nullptr)
+    , _tcpSocket(nullptr)
 {
     TraceL << "Create" << endl;
 }
@@ -37,8 +37,8 @@ Server::Server(ServerObserver& observer, const ServerOptions& options) :
 Server::~Server()
 {
     TraceL << "Destroy" << endl;
-    //assert(_udpSocket.isNull() || _udpSocket./*base().*/refCount() == 1);
-    //assert(_tcpSocket.isNull() || _tcpSocket./*base().*/refCount() == 1);
+    // assert(_udpSocket.isNull() || _udpSocket./*base().*/refCount() == 1);
+    // assert(_tcpSocket.isNull() || _tcpSocket./*base().*/refCount() == 1);
     stop();
     TraceL << "Destroy: OK" << endl;
 }
@@ -50,7 +50,7 @@ void Server::start()
 
     if (_options.enableUDP) {
         //_udpSocket.assign(new UDPSocket, false);
-        _udpSocket.Recv += slot(this, &Server::onSocketRecv, 1);
+        _udpSocket.Recv+= slot(this, &Server::onSocketRecv, 1);
         _udpSocket.bind(_options.listenAddr);
         //_udpSocket./*base().*/setBroadcast(true);
         TraceL << "UDP listening on " << _options.listenAddr << endl;
@@ -60,11 +60,12 @@ void Server::start()
         //_tcpSocket.assign(new TCPSocket, false);
         _tcpSocket.bind(_options.listenAddr);
         _tcpSocket.listen();
-        _tcpSocket.AcceptConnection += slot(this, &Server::onTCPAcceptConnection);
+        _tcpSocket.AcceptConnection+=
+            slot(this, &Server::onTCPAcceptConnection);
         TraceL << "TCP listening on " << _options.listenAddr << endl;
     }
 
-    _timer.Timeout += slot(this, &Server::onTimer);
+    _timer.Timeout+= slot(this, &Server::onTimer);
     _timer.start(_options.timerInterval, _options.timerInterval);
 }
 
@@ -76,8 +77,8 @@ void Server::stop()
     _timer.stop();
 
     // Delete allocations
-    ServerAllocationMap allocations = this->allocations();
-    for (auto it = allocations.begin(); it != allocations.end(); ++it)
+    ServerAllocationMap allocations= this->allocations();
+    for (auto it= allocations.begin(); it != allocations.end(); ++it)
         delete it->second;
 
     // Should have been cleared via callback
@@ -90,11 +91,11 @@ void Server::stop()
 
     // Close server sockets
     if (_udpSocket.active()) {
-        //assert(_udpSocket./*base().*/refCount() == 1);
+        // assert(_udpSocket./*base().*/refCount() == 1);
         _udpSocket.close();
     }
     if (_tcpSocket.active()) {
-        //assert(_tcpSocket./*base().*/refCount() == 1);
+        // assert(_tcpSocket./*base().*/refCount() == 1);
         _tcpSocket.close();
     }
 }
@@ -102,9 +103,10 @@ void Server::stop()
 
 void Server::onTimer()
 {
-    ServerAllocationMap allocations = this->allocations();
-    for (auto it = allocations.begin(); it != allocations.end(); ++it) {
-        //TraceL << "Checking allocation: " << *it->second << endl;    // print the allocation debug info
+    ServerAllocationMap allocations= this->allocations();
+    for (auto it= allocations.begin(); it != allocations.end(); ++it) {
+        // TraceL << "Checking allocation: " << *it->second << endl;    // print
+        // the allocation debug info
         if (!it->second->onTimer()) {
             // Entry removed via ServerAllocation destructor
             delete it->second;
@@ -117,22 +119,24 @@ void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 {
     TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;
 
-    //assert(sock./*base().*/refCount() == 1);
+    // assert(sock./*base().*/refCount() == 1);
     _tcpSockets.push_back(sock);
-    net::TCPSocket::Ptr& socket = _tcpSockets.back();
-    //assert(socket./*base().*/refCount() == 2);
-    socket->Recv += slot(this, &Server::onSocketRecv);
-    socket->Close += slot(this, &Server::onTCPSocketClosed);
+    net::TCPSocket::Ptr& socket= _tcpSockets.back();
+    // assert(socket./*base().*/refCount() == 2);
+    socket->Recv+= slot(this, &Server::onSocketRecv);
+    socket->Close+= slot(this, &Server::onTCPSocketClosed);
 
     // No need to increase control socket buffer size
-    // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); // TODO: make option
+    // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); //
+    // TODO: make option
 }
 
 
 net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 {
     for (auto& sock : _tcpSockets) {
-        TraceL << "sock->peerAddress(): " << sock->peerAddress() << ": " << peerAddr << endl;
+        TraceL << "sock->peerAddress(): " << sock->peerAddress() << ": "
+               << peerAddr << endl;
         if (sock->peerAddress() == peerAddr) {
             return sock;
         }
@@ -142,28 +146,30 @@ net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 }
 
 
-void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
+void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                          const net::Address& peerAddress)
 {
     TraceL << "Data received: " << buffer.size() << endl;
 
     stun::Message message;
-    char* buf = bufferCast<char*>(buffer);
-    std::size_t len = buffer.size();
-    std::size_t nread = 0;
-    while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
+    char* buf= bufferCast<char*>(buffer);
+    std::size_t len= buffer.size();
+    std::size_t nread= 0;
+    while (len > 0 && (nread= message.read(constBuffer(buf, len))) > 0) {
         if (message.classType() == stun::Message::Request ||
             message.classType() == stun::Message::Indication) {
-            Request request(message, socket.transport(), socket.address(), peerAddress);
+            Request request(message, socket.transport(), socket.address(),
+                            peerAddress);
 
             // TODO: Only authenticate stun::Message::Request types
-            handleRequest(request, _observer.authenticateRequest(this, request));
-        }
-        else {
+            handleRequest(request,
+                          _observer.authenticateRequest(this, request));
+        } else {
             assert(0 && "unknown request type");
         }
 
-        buf += nread;
-        len -= nread;
+        buf+= nread;
+        len-= nread;
     }
     if (len == buffer.size())
         WarnL << "Non STUN packet received" << std::endl;
@@ -192,14 +198,14 @@ void Server::onTCPSocketClosed(net::Socket& socket)
 void Server::releaseTCPSocket(net::Socket* socket)
 {
     TraceS(this) << "Removing TCP socket: " << socket << std::endl;
-    for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
+    for (auto it= _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
         if (it->get() == socket) {
-            socket->Recv -= slot(this, &Server::onSocketRecv);
-            socket->Close -= slot(this, &Server::onTCPSocketClosed);
+            socket->Recv-= slot(this, &Server::onSocketRecv);
+            socket->Close-= slot(this, &Server::onTCPSocketClosed);
 
             // All we need to do is erase the socket in order to
             // deincrement the ref counter and destroy the socket.
-            //socket->close();
+            // socket->close();
             _tcpSockets.erase(it);
             return;
         }
@@ -211,9 +217,8 @@ void Server::releaseTCPSocket(net::Socket* socket)
 void Server::handleRequest(Request& request, AuthenticationState state)
 {
     TraceL << "Received STUN request:\n"
-        << "\tFrom: " << request.remoteAddress << "\n"
-        << "\tData: " << request.toString()
-        << endl;
+           << "\tFrom: " << request.remoteAddress << "\n"
+           << "\tData: " << request.toString() << endl;
 
     switch (state) {
         case Authenticating:
@@ -235,7 +240,8 @@ void Server::handleRequest(Request& request, AuthenticationState state)
 }
 
 
-void Server::handleAuthorizedRequest(Request& request) //, AuthenticationState state
+void Server::handleAuthorizedRequest(
+    Request& request) //, AuthenticationState state
 {
     TraceL << "Handle authorized request: " << request.toString() << endl;
 
@@ -272,9 +278,11 @@ void Server::handleAuthorizedRequest(Request& request) //, AuthenticationState s
             break;
 
         default: {
-            FiveTuple tuple(request.remoteAddress, request.localAddress, request.transport); //socket->
-            auto allocation = getAllocation(tuple); //reinterpret_cast<ServerAllocation*>();
-            if (!allocation)  {
+            FiveTuple tuple(request.remoteAddress, request.localAddress,
+                            request.transport); // socket->
+            auto allocation=
+                getAllocation(tuple); // reinterpret_cast<ServerAllocation*>();
+            if (!allocation) {
                 respondError(request, 437, "Allocation Mismatch");
                 return;
             }
@@ -289,16 +297,17 @@ void Server::handleAuthorizedRequest(Request& request) //, AuthenticationState s
 
 void Server::handleConnectionBindRequest(Request& request)
 {
-    auto connAttr = request.get<stun::ConnectionID>();
+    auto connAttr= request.get<stun::ConnectionID>();
     if (!connAttr) {
         TraceL << "ConnectionBind request has no ConnectionID" << endl;
         respondError(request, 400, "Bad Request");
         return;
     }
 
-    auto alloc = getTCPAllocation(connAttr->value());
+    auto alloc= getTCPAllocation(connAttr->value());
     if (!alloc) {
-        TraceL << "ConnectionBind request has no allocation for: " << connAttr->value() << endl;
+        TraceL << "ConnectionBind request has no allocation for: "
+               << connAttr->value() << endl;
         respondError(request, 400, "Bad Request");
         return;
     }
@@ -314,20 +323,21 @@ void Server::handleBindingRequest(Request& request)
     assert(request.methodType() == stun::Message::Binding);
     assert(request.classType() == stun::Message::Request);
 
-    stun::Message response(stun::Message::SuccessResponse, stun::Message::Binding);
-    //response.setClass(stun::Message::Request);
-    //response.setMethod(stun::Message::Binding);
+    stun::Message response(stun::Message::SuccessResponse,
+                           stun::Message::Binding);
+    // response.setClass(stun::Message::Request);
+    // response.setMethod(stun::Message::Binding);
     response.setTransactionID(request.transactionID());
 
     // XOR-MAPPED-ADDRESS
-    auto addrAttr = new stun::XorMappedAddress;
+    auto addrAttr= new stun::XorMappedAddress;
     addrAttr->setAddress(request.remoteAddress);
-    //addrAttr->setFamily(1);
-    //addrAttr->setPort(request.remoteAddress.port());
-    //addrAttr->setIP(request.remoteAddress.host());
+    // addrAttr->setFamily(1);
+    // addrAttr->setPort(request.remoteAddress.port());
+    // addrAttr->setIP(request.remoteAddress.host());
     response.add(addrAttr);
 
-    //request.socket->sendPacket(response, request.remoteAddress);
+    // request.socket->sendPacket(response, request.remoteAddress);
     respond(request, response);
 }
 
@@ -348,7 +358,7 @@ void Server::handleAllocateRequest(Request& request)
     //     another mechanism through some procedure outside the scope of
     //     this document.
     //
-    auto usernameAttr = request.get<stun::Username>();
+    auto usernameAttr= request.get<stun::Username>();
     if (!usernameAttr) {
         TraceL << "NotAuthorized STUN Request" << endl;
         respondError(request, 401, "NotAuthorized");
@@ -368,23 +378,24 @@ void Server::handleAllocateRequest(Request& request)
     //     specifies a protocol other that UDP, the server rejects the
     //     request with a 442 (Unsupported Transport Protocol) error.
     //
-    auto transportAttr = request.get<stun::RequestedTransport>();
+    auto transportAttr= request.get<stun::RequestedTransport>();
     if (!transportAttr) {
         ErrorL << "No Requested Transport" << endl;
         respondError(request, 400, "Bad Request");
         return;
     }
 
-    int protocol = transportAttr->value() >> 24;
-    if (protocol != 6 &&
-        protocol != 17) {
-        ErrorL << "Requested Transport is neither TCP or UDP: " << protocol << endl;
+    int protocol= transportAttr->value() >> 24;
+    if (protocol != 6 && protocol != 17) {
+        ErrorL << "Requested Transport is neither TCP or UDP: " << protocol
+               << endl;
         respondError(request, 422, "Unsupported Transport Protocol");
         return;
     }
 
-    FiveTuple tuple(request.remoteAddress, request.localAddress, protocol == 17 ? net::UDP : net::TCP);
-    if (getAllocation(tuple))  {
+    FiveTuple tuple(request.remoteAddress, request.localAddress,
+                    protocol == 17 ? net::UDP : net::TCP);
+    if (getAllocation(tuple)) {
         ErrorL << "Allocation already exists for 5tuple: " << tuple << endl;
         respondError(request, 437, "Allocation Mismatch");
         return;
@@ -425,15 +436,16 @@ void Server::handleAllocateRequest(Request& request)
     //     attribute follow the specification in [RFC5389].
 
     // Compute the appropriate LIFETIME for this allocation.
-    std::uint32_t lifetime = min(options().allocationMaxLifetime / 1000, options().allocationDefaultLifetime / 1000);
-    auto lifetimeAttr = request.get<stun::Lifetime>();
+    std::uint32_t lifetime= min(options().allocationMaxLifetime / 1000,
+                                options().allocationDefaultLifetime / 1000);
+    auto lifetimeAttr= request.get<stun::Lifetime>();
     if (lifetimeAttr)
-        lifetime = min(lifetime, lifetimeAttr->value());
+        lifetime= min(lifetime, lifetimeAttr->value());
 
-    ServerAllocation* allocation = nullptr;
+    ServerAllocation* allocation= nullptr;
 
     // Protocol specific allocation handling. 6 = TCP, 17 = UDP.
-    if (protocol == 17) {        // UDP
+    if (protocol == 17) { // UDP
 
         // If all the checks pass, the server creates the allocation.  The
         // 5-tuple is set to the 5-tuple from the Allocate request, while the
@@ -504,22 +516,24 @@ void Server::handleAllocateRequest(Request& request)
         // as the initial value of the time-to-expiry field.  Otherwise, the
         // server uses the default lifetime.  It is RECOMMENDED that the server
         // use a maximum allowed lifetime value of no more than 3600 seconds (1
-        // hour).  Servers that implement allocation quotas or charge clients for
+        // hour).  Servers that implement allocation quotas or charge clients
+        // for
         // allocations in some way may wish to use a smaller maximum allowed
         // lifetime (perhaps as small as the default lifetime) to more quickly
         // remove orphaned allocations (that is, allocations where the
         // corresponding client has crashed or isTerminated or the client
-        // IConnection has been lost for some reason).  Also, note that the time-
+        // IConnection has been lost for some reason).  Also, note that the
+        // time-
         // to-expiry is recomputed with each successful Refresh request, and
         // thus the value computed here applies only until the first refresh.
 
         // Find or create the allocation matching the 5-TUPLE. If the allocation
         // already exists then send an error.
-        allocation = new UDPAllocation(*this, tuple, username, lifetime);
+        allocation= new UDPAllocation(*this, tuple, username, lifetime);
     }
 
     else if (protocol == 6) {
-    /// TCP
+        /// TCP
 
         // 5.1. Receiving a TCP Allocate Request
         //
@@ -553,17 +567,21 @@ void Server::handleAllocateRequest(Request& request)
         // connections on the relayed transport address.  Refer to Section 5.3
         // for details.
 
-        //net::TCPSocket& socket = static_cast<net::TCPSocket&>(request.socket);
-        //static_cast<net::TCPSocket&>(request.socket)
-        //assert(request.socket->/*base().*/refCount() == 1);
-        allocation = new TCPAllocation(*this, getTCPSocket(request.remoteAddress), tuple, username, lifetime); //request.socket
-        //assert(request.socket->/*base().*/refCount() == 2);
+        // net::TCPSocket& socket =
+        // static_cast<net::TCPSocket&>(request.socket);
+        // static_cast<net::TCPSocket&>(request.socket)
+        // assert(request.socket->/*base().*/refCount() == 1);
+        allocation=
+            new TCPAllocation(*this, getTCPSocket(request.remoteAddress), tuple,
+                              username, lifetime); // request.socket
+        // assert(request.socket->/*base().*/refCount() == 2);
     }
 
     // Once the allocation is created, the server replies with a success
     // response.  The success response contains:
 
-    stun::Message response(stun::Message::SuccessResponse, stun::Message::Allocate);
+    stun::Message response(stun::Message::SuccessResponse,
+                           stun::Message::Allocate);
     response.setTransactionID(request.transactionID());
 
     // o  An XOR-RELAYED-ADDRESS attribute containing the relayed transport
@@ -578,13 +596,14 @@ void Server::handleAllocateRequest(Request& request)
         assert(0 && "external IP not set");
     }
 
-    auto relayAddrAttr = new stun::XorRelayedAddress;
-    relayAddrAttr->setAddress(net::Address(relayHost, allocation->relayedAddress().port()));
+    auto relayAddrAttr= new stun::XorRelayedAddress;
+    relayAddrAttr->setAddress(
+        net::Address(relayHost, allocation->relayedAddress().port()));
     response.add(relayAddrAttr);
 
     // o  A LIFETIME attribute containing the current value of the time-to-
     //    expiry timer.
-    auto resLifetimeAttr = new stun::Lifetime;
+    auto resLifetimeAttr= new stun::Lifetime;
     resLifetimeAttr->setValue(lifetime); // / 1000
     response.add(resLifetimeAttr);
 
@@ -599,26 +618,26 @@ void Server::handleAllocateRequest(Request& request)
     //    this value, but clients running ICE can often need this value and
     //    can thus avoid having to do an extra Binding transaction with some
     //    STUN server to learn it.
-    auto mappedAddressAttr = new stun::XorMappedAddress;
+    auto mappedAddressAttr= new stun::XorMappedAddress;
     mappedAddressAttr->setAddress(request.remoteAddress);
-    //mappedAddressAttr->setFamily(1);
-    //mappedAddressAttr->setIP(request.remoteAddress.host());
-    //mappedAddressAttr->setPort(request.remoteAddress.port());
+    // mappedAddressAttr->setFamily(1);
+    // mappedAddressAttr->setIP(request.remoteAddress.host());
+    // mappedAddressAttr->setPort(request.remoteAddress.port());
     response.add(mappedAddressAttr);
 
     TraceL << "Allocate response: "
-        << "XorRelayedAddress=" << relayAddrAttr->address()
-        << ", XorMappedAddress=" << mappedAddressAttr->address()
-        << ", MessageIntegrity=" << request.hash << endl;
+           << "XorRelayedAddress=" << relayAddrAttr->address()
+           << ", XorMappedAddress=" << mappedAddressAttr->address()
+           << ", MessageIntegrity=" << request.hash << endl;
 
     // Sign the response message
-    //auto integrityAttr = new stun::MessageIntegrity;
-    //integrityAttr->setKey(request.hash);
-    //response.add(integrityAttr);
+    // auto integrityAttr = new stun::MessageIntegrity;
+    // integrityAttr->setKey(request.hash);
+    // response.add(integrityAttr);
 
     // The response (either success or error) is sent back to the client on
     // the 5-tuple.
-    //request.socket->send(response, request.remoteAddress);
+    // request.socket->send(response, request.remoteAddress);
     respond(request, response);
 
     TraceL << "Handle Allocate request: OK" << endl;
@@ -663,12 +682,13 @@ void Server::respond(Request& request, stun::Message& response)
 {
     // Sign the response message
     if (!request.hash.empty()) {
-        auto integrityAttr = new stun::MessageIntegrity;
+        auto integrityAttr= new stun::MessageIntegrity;
         integrityAttr->setKey(request.hash);
         response.add(integrityAttr);
     }
 
-    InfoL << "Sending message: " << response << ": " << request.remoteAddress << endl;
+    InfoL << "Sending message: " << response << ": " << request.remoteAddress
+          << endl;
 
     // The response (either success or error) is sent back to the
     // client on the 5-tuple.
@@ -678,7 +698,7 @@ void Server::respond(Request& request, stun::Message& response)
             break;
         case net::TCP:
         case net::SSLTCP:
-            auto socket = getTCPSocket(request.remoteAddress);
+            auto socket= getTCPSocket(request.remoteAddress);
             if (!socket) {
                 return;
             }
@@ -687,67 +707,69 @@ void Server::respond(Request& request, stun::Message& response)
     }
 }
 
-void Server::respondError(Request& request, int errorCode, const char* errorDesc)
+void Server::respondError(Request& request, int errorCode,
+                          const char* errorDesc)
 {
     TraceL << "Send STUN error: " << errorCode << ": " << errorDesc << endl;
 
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
 
     stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
     errorMsg.setTransactionID(request.transactionID());
 
     // SOFTWARE
-    auto softwareAttr = new stun::Software;
-    softwareAttr->copyBytes(_options.software.c_str(), _options.software.size());
+    auto softwareAttr= new stun::Software;
+    softwareAttr->copyBytes(_options.software.c_str(),
+                            _options.software.size());
     errorMsg.add(softwareAttr);
 
     // REALM
-    auto realmAttr = new stun::Realm;
+    auto realmAttr= new stun::Realm;
     realmAttr->copyBytes(_options.realm.c_str(), _options.realm.size());
     errorMsg.add(realmAttr);
 
     // NONCE
-    auto nonceAttr = new stun::Nonce;
-    std::string noonce = util::randomString(32);
+    auto nonceAttr= new stun::Nonce;
+    std::string noonce= util::randomString(32);
     nonceAttr->copyBytes(noonce.c_str(), noonce.size());
     errorMsg.add(nonceAttr);
 
     // ERROR-CODE
-    auto errorCodeAttr = new stun::ErrorCode();
+    auto errorCodeAttr= new stun::ErrorCode();
     errorCodeAttr->setErrorCode(errorCode);
     errorCodeAttr->setReason(errorDesc);
     errorMsg.add(errorCodeAttr);
     assert(errorCode == errorCodeAttr->errorCode());
 
-    //request.socket->sendPacket(errorMsg, request.remoteAddress);
+    // request.socket->sendPacket(errorMsg, request.remoteAddress);
     respond(request, errorMsg);
 }
 
 
 net::UDPSocket& Server::udpSocket()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _udpSocket;
 }
 
 
 ServerObserver& Server::observer()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _observer;
 }
 
 
 ServerOptions& Server::options()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _options;
 }
 
 
 ServerAllocationMap Server::allocations() const
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _allocations;
 }
 
@@ -761,14 +783,13 @@ Timer& Server::timer()
 void Server::addAllocation(ServerAllocation* alloc)
 {
     {
-        //Mutex::ScopedLock lock(_mutex);
+        // Mutex::ScopedLock lock(_mutex);
 
         assert(_allocations.find(alloc->tuple()) == _allocations.end());
-        _allocations[alloc->tuple()] = alloc;
+        _allocations[alloc->tuple()]= alloc;
 
-        InfoL << "Allocation added: "
-            << alloc->tuple().toString() << ": "
-            << _allocations.size() << " total" << endl;
+        InfoL << "Allocation added: " << alloc->tuple().toString() << ": "
+              << _allocations.size() << " total" << endl;
     }
 
     _observer.onServerAllocationCreated(this, alloc);
@@ -778,17 +799,16 @@ void Server::addAllocation(ServerAllocation* alloc)
 void Server::removeAllocation(ServerAllocation* alloc)
 {
     {
-        //Mutex::ScopedLock lock(_mutex);
+        // Mutex::ScopedLock lock(_mutex);
 
-        auto it = _allocations.find(alloc->tuple());
+        auto it= _allocations.find(alloc->tuple());
         if (it != _allocations.end()) {
             _allocations.erase(it);
 
-            InfoL << "Allocation removed: "
-                << alloc->tuple().toString() << ": "
-                << _allocations.size() << " remaining" << endl;
-        }
-        else assert(0);
+            InfoL << "Allocation removed: " << alloc->tuple().toString() << ": "
+                  << _allocations.size() << " remaining" << endl;
+        } else
+            assert(0);
     }
 
     _observer.onServerAllocationRemoved(this, alloc);
@@ -797,9 +817,9 @@ void Server::removeAllocation(ServerAllocation* alloc)
 
 ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
 
-    auto it = _allocations.find(tuple);
+    auto it= _allocations.find(tuple);
     if (it != _allocations.end())
         return it->second;
     return nullptr;
@@ -808,10 +828,10 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 
 TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
 
-    for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
-        auto alloc = dynamic_cast<TCPAllocation*>(it->second);
+    for (auto it= _allocations.begin(); it != _allocations.end(); ++it) {
+        auto alloc= dynamic_cast<TCPAllocation*>(it->second);
         if (alloc && alloc->pairs().exists(connectionID))
             return alloc;
     }
@@ -819,11 +839,11 @@ TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
     // TODO: Handle via allocation so we can remove lookup overhead.
     // The TCP allocation may have been deleted before the
     // ConnectionBind request comes in.
-    //assert(0 && "allocation mismatch");
+    // assert(0 && "allocation mismatch");
     return nullptr;
 }
+}
+} //  namespace scy::turn
 
-
-} } //  namespace scy::turn
 
 /// @\}

@@ -13,11 +13,11 @@
 #define SCY_Net_DNS_H
 
 
+#include "scy/net/address.h"
+#include "scy/util.h"
+#include "scy/uv/uvpp.h"
 #include <cstdint>
 #include <vector>
-#include "scy/uv/uvpp.h"
-#include "scy/util.h"
-#include "scy/net/address.h"
 
 
 namespace scy {
@@ -62,7 +62,8 @@ struct DNSResult
     void* opaque;
 
 
-    enum Status {
+    enum Status
+    {
         None,
         Resolving,
         Success,
@@ -74,22 +75,31 @@ struct DNSResult
     bool failed() const { return status == Failed; }
     bool complete() const { return status == Success || status == Failed; }
 
-    DNSResult() : info(nullptr), hints(nullptr), opaque(nullptr), status(None) {}
+    DNSResult()
+        : info(nullptr)
+        , hints(nullptr)
+        , opaque(nullptr)
+        , status(None)
+    {
+    }
 };
 
 
-inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo* res)
+inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
+                          struct addrinfo* res)
 {
     // Check that res is not NULL.
-    // Adding this check after receiving some weird late callbacks with NULL res.
-    if (!res) return;
+    // Adding this check after receiving some weird late callbacks with NULL
+    // res.
+    if (!res)
+        return;
 
     net::Address resolved(res->ai_addr, 16);
     traceL("Network") << "DNS resolved: " << resolved << std::endl;
 
-    DNSResult* dns = reinterpret_cast<DNSResult*>(handle->data);
-    dns->status = status == 0 ? DNSResult::Success : DNSResult::Failed;
-    dns->info = res;
+    DNSResult* dns= reinterpret_cast<DNSResult*>(handle->data);
+    dns->status= status == 0 ? DNSResult::Success : DNSResult::Failed;
+    dns->info= res;
     dns->addr.swap(resolved);
 
     dns->callback(*dns);
@@ -102,27 +112,32 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
 
 inline bool resolveDNS(DNSResult* dns)
 {
-    // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port << std::endl;
+    // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port <<
+    // std::endl;
 
     assert(dns->port);
     assert(!dns->host.empty());
     assert(dns->callback);
-    dns->status = DNSResult::Resolving;
+    dns->status= DNSResult::Resolving;
 
-    uv_getaddrinfo_t* handle = new uv_getaddrinfo_t;
-    handle->data = dns;
-    return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, dns->host.c_str(), util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
+    uv_getaddrinfo_t* handle= new uv_getaddrinfo_t;
+    handle->data= dns;
+    return uv_getaddrinfo(
+               uv_default_loop(), handle, onDNSResolved, dns->host.c_str(),
+               util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
 }
 
 
-inline bool resolveDNS(const std::string& host, std::uint16_t port, std::function<void(const DNSResult&)> callback, void* opaque = nullptr, struct addrinfo* hints = nullptr)
+inline bool resolveDNS(const std::string& host, std::uint16_t port,
+                       std::function<void(const DNSResult&)> callback,
+                       void* opaque= nullptr, struct addrinfo* hints= nullptr)
 {
-    DNSResult* dns = new DNSResult();
-    dns->host = host;
-    dns->port = port;
-    dns->opaque = opaque;
-    dns->hints = hints;
-    dns->callback = callback;
+    DNSResult* dns= new DNSResult();
+    dns->host= host;
+    dns->port= port;
+    dns->opaque= opaque;
+    dns->hints= hints;
+    dns->callback= callback;
     return resolveDNS(dns);
 }
 
@@ -132,5 +147,6 @@ inline bool resolveDNS(const std::string& host, std::uint16_t port, std::functio
 
 
 #endif // SCY_Net_DNS_H
+
 
 /// @\}

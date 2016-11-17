@@ -58,7 +58,7 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 #ifdef NDEBUG
 #define expect(x) test::expectImpl(true, "", "", 0)
 #else
-#define expect(x) test::expectImpl(x, #x , __FILE__, __LINE__)
+#define expect(x) test::expectImpl(x, #x, __FILE__, __LINE__)
 #endif
 
 
@@ -74,13 +74,13 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 class Test
 {
 public:
-    Test(const std::string& name = "Unnamed Test");
+    Test(const std::string& name= "Unnamed Test");
 
     /// Should remain protected.
     virtual ~Test();
 
     /// Called by the TestRunner to run the test.
-    virtual void run() = 0;
+    virtual void run()= 0;
 
     /// Return true when the test passed without errors.
     bool passed();
@@ -95,8 +95,8 @@ public:
     double duration;
 
 protected:
-    Test(const Test& test) = delete;
-    Test& operator=(Test const&) = delete;
+    Test(const Test& test)= delete;
+    Test& operator=(Test const&)= delete;
 
     /// Tests belong to a TestRunner instance.
     friend class TestRunner;
@@ -104,25 +104,22 @@ protected:
 
 
 // Test class that runs a static or lambda function.
-class FunctionTest: public Test
+class FunctionTest : public Test
 {
 public:
     std::function<void()> target;
 
-    FunctionTest(std::function<void()> target, const std::string& name = "Unnamed Test") :
-        Test(name), target(target)
+    FunctionTest(std::function<void()> target,
+                 const std::string& name= "Unnamed Test")
+        : Test(name)
+        , target(target)
     {
     }
 
 protected:
-    virtual ~FunctionTest()
-    {
-    }
+    virtual ~FunctionTest() {}
 
-    void run()
-    {
-        target();
-    }
+    void run() { target(); }
 };
 
 
@@ -182,5 +179,6 @@ protected:
 
 
 #endif // SCY_Test_H
+
 
 /// @\}

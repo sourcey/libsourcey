@@ -32,14 +32,14 @@ extern const char delimiter;
 /// Returns the file name and extension part of the given path.
 std::string filename(const std::string& path);
 
- /// Returns the file name sans extension.
+/// Returns the file name sans extension.
 std::string basename(const std::string& path);
 
 /// Returns the directory part of the path.
 std::string dirname(const std::string& path);
 
 /// Returns the file extension part of the path.
-std::string extname(const std::string& path, bool includeDot = false);
+std::string extname(const std::string& path, bool includeDot= false);
 
 /// Returns true if the file or directory exists.
 bool exists(const std::string& path);
@@ -54,10 +54,10 @@ std::int64_t filesize(const std::string& path);
 void readdir(const std::string& path, std::vector<std::string>& res);
 
 /// Creates a directory.
-void mkdir(const std::string& path, int mode = 0755);
+void mkdir(const std::string& path, int mode= 0755);
 
 /// Creates a directory recursively.
-void mkdirr(const std::string& path, int mode = 0755);
+void mkdirr(const std::string& path, int mode= 0755);
 
 /// Creates a directory.
 void rmdir(const std::string& path);
@@ -88,7 +88,8 @@ std::string transcode(const std::string& path);
 /// Saves the given data buffer to the output file path.
 /// Returns true on success, or if whiny is set then an
 /// exception will be thrown on error.
-bool savefile(const std::string& path, const char* data, std::size_t size, bool whiny = false);
+bool savefile(const std::string& path, const char* data, std::size_t size,
+              bool whiny= false);
 
 // TODO: Implement more libuv fs_* types
 
@@ -98,5 +99,6 @@ bool savefile(const std::string& path, const char* data, std::size_t size, bool 
 
 
 #endif
+
 
 /// @\}

@@ -29,28 +29,30 @@ namespace scy {
 // frames are being faked. E.g. NetEq will not generate this large sample value
 // unless it has received an audio frame containing a sample of this value.
 // Even simpler buffers would likely just contain audio sample values of 0.
-static const int kHighSampleValue = 10000;
+static const int kHighSampleValue= 10000;
 
 // Same value as src/modules/audio_device/main/source/audio_device_config.h in
 // https://code.google.com/p/webrtc/
-static const int kAdmMaxIdleTimeProcess = 1000;
+static const int kAdmMaxIdleTimeProcess= 1000;
 
 // Constants here are derived by running VoE using a real ADM.
 // The constants correspond to 10ms of mono audio at 44kHz.
-static const int kTimePerFrameMs = 10;
-static const uint8_t kNumberOfChannels = 2; // 1;
-static const int kSamplesPerSecond = 44000;
-static const int kTotalDelayMs = 0;
-static const int kClockDriftMs = 0;
-static const uint32_t kMaxVolume = 14392;
+static const int kTimePerFrameMs= 10;
+static const uint8_t kNumberOfChannels= 2; // 1;
+static const int kSamplesPerSecond= 44000;
+static const int kTotalDelayMs= 0;
+static const int kClockDriftMs= 0;
+static const uint32_t kMaxVolume= 14392;
 
 // The value for the following constants have been derived by running VoE
 // using a real ADM. The constants correspond to 10ms of mono audio at 44kHz.
-static const size_t kNumberSamples = 440;
-static const size_t kNumberBytesPerSample = sizeof(AudioPacketModule::Sample);
-static const size_t kNumberBufferBytes = kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
+static const size_t kNumberSamples= 440;
+static const size_t kNumberBytesPerSample= sizeof(AudioPacketModule::Sample);
+static const size_t kNumberBufferBytes=
+    kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
 
-enum {
+enum
+{
     MSG_START_PROCESS,
     MSG_RUN_PROCESS
 };
@@ -97,23 +99,23 @@ void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
         return;
     }
 
-    auto data = packet.data();
+    auto data= packet.data();
     _sendFifo.write((void**)&data, packet.numSamples);
 }
 
 void AudioPacketModule::OnMessage(rtc::Message* msg)
 {
     switch (msg->message_id) {
-    case MSG_START_PROCESS:
-        startProcessP();
-        break;
-    case MSG_RUN_PROCESS:
-        processFrameP();
-        break;
-    default:
-        // All existing messages should be caught. Getting here should never
-        // happen.
-        ASSERT(false);
+        case MSG_START_PROCESS:
+            startProcessP();
+            break;
+        case MSG_RUN_PROCESS:
+            processFrameP();
+            break;
+        default:
+            // All existing messages should be caught. Getting here should never
+            // happen.
+            ASSERT(false);
     }
 }
 
@@ -124,11 +126,13 @@ bool AudioPacketModule::Initialize()
     _sendFifo.alloc("s16", kNumberOfChannels);
 
     // Set the send buffer samples high enough that it would not occur on the
-    // remote side unless a packet containing a sample of that magnitude has been
-    // sent to it. Note that the audio processing pipeline will likely distort the
+    // remote side unless a packet containing a sample of that magnitude has
+    // been
+    // sent to it. Note that the audio processing pipeline will likely distort
+    // the
     // original signal.
     // SetSendBuffer(kHighSampleValue);
-    _lastProcessTimeMS = rtc::TimeMillis();
+    _lastProcessTimeMS= rtc::TimeMillis();
     return true;
 }
 
@@ -145,13 +149,12 @@ void AudioPacketModule::updateProcessing(bool start)
             _processThread->Start();
         }
         _processThread->Post(RTC_FROM_HERE, this, MSG_START_PROCESS);
-    }
-    else {
+    } else {
         if (_processThread) {
             _processThread->Stop();
             _processThread.reset(nullptr);
         }
-        _started = false;
+        _started= false;
     }
 }
 
@@ -169,8 +172,8 @@ void AudioPacketModule::processFrameP()
 {
     ASSERT(_processThread->IsCurrent());
     if (!_started) {
-        _nextFrameTime = rtc::TimeMillis();
-        _started = true;
+        _nextFrameTime= rtc::TimeMillis();
+        _started= true;
     }
 
     {
@@ -184,10 +187,12 @@ void AudioPacketModule::processFrameP()
         }
     }
 
-    _nextFrameTime += kTimePerFrameMs;
-    const int64_t current_time = rtc::TimeMillis();
-    const int64_t wait_time = (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
-    _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this, MSG_RUN_PROCESS);
+    _nextFrameTime+= kTimePerFrameMs;
+    const int64_t current_time= rtc::TimeMillis();
+    const int64_t wait_time=
+        (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
+    _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this,
+                                MSG_RUN_PROCESS);
 }
 
 void AudioPacketModule::sendFrameP()
@@ -197,27 +202,21 @@ void AudioPacketModule::sendFrameP()
     if (!_audioCallback) {
         return;
     }
-    bool key_pressed = false;
-    uint32_t current_mic_level = 0;
+    bool key_pressed= false;
+    uint32_t current_mic_level= 0;
     MicrophoneVolume(&current_mic_level);
 
-    auto samples = &_sendSamples[0];
+    auto samples= &_sendSamples[0];
     if (!_sendFifo.read((void**)&samples, kNumberSamples)) {
         InfoL << "No audio frames in send buffer" << endl;
         return;
     }
 
     TraceL << "Send audio" << endl;
-    if (_audioCallback->RecordedDataIsAvailable(samples,
-                                                kNumberSamples,
-                                                kNumberBytesPerSample,
-                                                kNumberOfChannels,
-                                                kSamplesPerSecond,
-                                                kTotalDelayMs,
-                                                kClockDriftMs,
-                                                current_mic_level,
-                                                key_pressed,
-                                                current_mic_level) != 0) {
+    if (_audioCallback->RecordedDataIsAvailable(
+            samples, kNumberSamples, kNumberBytesPerSample, kNumberOfChannels,
+            kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,
+            key_pressed, current_mic_level) != 0) {
         ASSERT(false);
     }
 
@@ -252,12 +251,12 @@ void AudioPacketModule::receiveFrameP()
 
 int64_t AudioPacketModule::TimeUntilNextProcess()
 {
-    const int64_t current_time = rtc::TimeMillis();
+    const int64_t current_time= rtc::TimeMillis();
     if (current_time < _lastProcessTimeMS) {
         // TODO: wraparound could be handled more gracefully.
         return 0;
     }
-    const int64_t elapsed_time = current_time - _lastProcessTimeMS;
+    const int64_t elapsed_time= current_time - _lastProcessTimeMS;
     if (kAdmMaxIdleTimeProcess < elapsed_time) {
         return 0;
     }
@@ -266,7 +265,7 @@ int64_t AudioPacketModule::TimeUntilNextProcess()
 
 void AudioPacketModule::Process()
 {
-    _lastProcessTimeMS = rtc::TimeMillis();
+    _lastProcessTimeMS= rtc::TimeMillis();
 }
 
 int32_t AudioPacketModule::ActiveAudioLayer(AudioLayer* /*audio_layer*/) const
@@ -281,23 +280,26 @@ webrtc::AudioDeviceModule::ErrorCode AudioPacketModule::LastError() const
     return webrtc::AudioDeviceModule::kAdmErrNone;
 }
 
-int32_t AudioPacketModule::RegisterEventObserver(webrtc::AudioDeviceObserver* /*event_callback*/)
+int32_t AudioPacketModule::RegisterEventObserver(
+    webrtc::AudioDeviceObserver* /*event_callback*/)
 {
     // Only used to report warnings and errors. This fake implementation won't
     // generate any so discard this callback.
     return 0;
 }
 
-int32_t AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_callback)
+int32_t
+AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_callback)
 {
     rtc::CritScope cs(&_critCallback);
-    _audioCallback = audio_callback;
+    _audioCallback= audio_callback;
     return 0;
 }
 
 int32_t AudioPacketModule::Init()
 {
-    // Initialize is called by the factory method. Safe to ignore this Init call.
+    // Initialize is called by the factory method. Safe to ignore this Init
+    // call.
     return 0;
 }
 
@@ -325,16 +327,16 @@ int16_t AudioPacketModule::RecordingDevices()
     return 0;
 }
 
-int32_t AudioPacketModule::PlayoutDeviceName(uint16_t /*index*/,
-    char /*name*/[webrtc::kAdmMaxDeviceNameSize],
+int32_t AudioPacketModule::PlayoutDeviceName(
+    uint16_t /*index*/, char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::RecordingDeviceName(uint16_t /*index*/,
-    char /*name*/[webrtc::kAdmMaxDeviceNameSize],
+int32_t AudioPacketModule::RecordingDeviceName(
+    uint16_t /*index*/, char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {
     ASSERT(false);
@@ -377,7 +379,7 @@ int32_t AudioPacketModule::PlayoutIsAvailable(bool* /*available*/)
 
 int32_t AudioPacketModule::InitPlayout()
 {
-    _playIsInitialized = true;
+    _playIsInitialized= true;
     return 0;
 }
 
@@ -394,7 +396,7 @@ int32_t AudioPacketModule::RecordingIsAvailable(bool* /*available*/)
 
 int32_t AudioPacketModule::InitRecording()
 {
-    _recIsInitialized = true;
+    _recIsInitialized= true;
     return 0;
 }
 
@@ -411,9 +413,9 @@ int32_t AudioPacketModule::StartPlayout()
     }
     {
         rtc::CritScope cs(&_crit);
-        _playing = true;
+        _playing= true;
     }
-    bool start = true;
+    bool start= true;
     updateProcessing(start);
     return 0;
 }
@@ -421,11 +423,11 @@ int32_t AudioPacketModule::StartPlayout()
 int32_t AudioPacketModule::StopPlayout()
 {
     DebugL << "Stop playout" << endl;
-    bool start = false;
+    bool start= false;
     {
         rtc::CritScope cs(&_crit);
-        _playing = false;
-        start = shouldStartProcessing();
+        _playing= false;
+        start= shouldStartProcessing();
     }
     updateProcessing(start);
     return 0;
@@ -445,9 +447,9 @@ int32_t AudioPacketModule::StartRecording()
     }
     {
         rtc::CritScope cs(&_crit);
-        _recording = true;
+        _recording= true;
     }
-    bool start = true;
+    bool start= true;
     updateProcessing(start);
     return 0;
 }
@@ -455,11 +457,11 @@ int32_t AudioPacketModule::StartRecording()
 int32_t AudioPacketModule::StopRecording()
 {
     DebugL << "Stop recording" << endl;
-    bool start = false;
+    bool start= false;
     {
         rtc::CritScope cs(&_crit);
-        _recording = false;
-        start = shouldStartProcessing();
+        _recording= false;
+        start= shouldStartProcessing();
     }
     updateProcessing(start);
     return 0;
@@ -483,14 +485,15 @@ bool AudioPacketModule::AGC() const
     return 0;
 }
 
-int32_t AudioPacketModule::SetWaveOutVolume(uint16_t /*volume_left*/, uint16_t /*volume_right*/)
+int32_t AudioPacketModule::SetWaveOutVolume(uint16_t /*volume_left*/,
+                                            uint16_t /*volume_right*/)
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::WaveOutVolume(
-    uint16_t* /*volume_left*/, uint16_t* /*volume_right*/) const
+int32_t AudioPacketModule::WaveOutVolume(uint16_t* /*volume_left*/,
+                                         uint16_t* /*volume_right*/) const
 {
     ASSERT(false);
     return 0;
@@ -565,20 +568,20 @@ int32_t AudioPacketModule::MicrophoneVolumeIsAvailable(bool* /*available*/)
 int32_t AudioPacketModule::SetMicrophoneVolume(uint32_t volume)
 {
     rtc::CritScope cs(&_crit);
-    _currentMicLevel = volume;
+    _currentMicLevel= volume;
     return 0;
 }
 
 int32_t AudioPacketModule::MicrophoneVolume(uint32_t* volume) const
 {
     rtc::CritScope cs(&_crit);
-    *volume = _currentMicLevel;
+    *volume= _currentMicLevel;
     return 0;
 }
 
 int32_t AudioPacketModule::MaxMicrophoneVolume(uint32_t* max_volume) const
 {
-    *max_volume = kMaxVolume;
+    *max_volume= kMaxVolume;
     return 0;
 }
 
@@ -588,7 +591,8 @@ int32_t AudioPacketModule::MinMicrophoneVolume(uint32_t* /*min_volume*/) const
     return 0;
 }
 
-int32_t AudioPacketModule::MicrophoneVolumeStepSize(uint16_t* /*step_size*/) const
+int32_t
+AudioPacketModule::MicrophoneVolumeStepSize(uint16_t* /*step_size*/) const
 {
     ASSERT(false);
     return 0;
@@ -652,7 +656,7 @@ int32_t AudioPacketModule::StereoPlayoutIsAvailable(bool* available) const
 {
     // No recording device, just dropping audio. Stereo can be dropped just
     // as easily as mono.
-    *available = true;
+    *available= true;
     return 0;
 }
 
@@ -672,7 +676,7 @@ int32_t AudioPacketModule::StereoPlayout(bool* /*enabled*/) const
 int32_t AudioPacketModule::StereoRecordingIsAvailable(bool* available) const
 {
     // Keep thing simple. No stereo recording.
-    *available = false;
+    *available= false;
     return 0;
 }
 
@@ -693,7 +697,8 @@ int32_t AudioPacketModule::StereoRecording(bool* /*enabled*/) const
 int32_t AudioPacketModule::SetRecordingChannel(const ChannelType channel)
 {
     if (channel != AudioDeviceModule::kChannelBoth) {
-        // There is no right or left in mono. I.e. kChannelBoth should be used for
+        // There is no right or left in mono. I.e. kChannelBoth should be used
+        // for
         // mono.
         ASSERT(false);
         return -1;
@@ -705,17 +710,19 @@ int32_t AudioPacketModule::RecordingChannel(ChannelType* channel) const
 {
     // Stereo recording not supported. However, WebRTC ADM returns kChannelBoth
     // in that case. Do the same here.
-    *channel = AudioDeviceModule::kChannelBoth;
+    *channel= AudioDeviceModule::kChannelBoth;
     return 0;
 }
 
-int32_t AudioPacketModule::SetPlayoutBuffer(const BufferType /*type*/, uint16_t /*size_ms*/)
+int32_t AudioPacketModule::SetPlayoutBuffer(const BufferType /*type*/,
+                                            uint16_t /*size_ms*/)
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::PlayoutBuffer(BufferType* /*type*/, uint16_t* /*size_ms*/) const
+int32_t AudioPacketModule::PlayoutBuffer(BufferType* /*type*/,
+                                         uint16_t* /*size_ms*/) const
 {
     ASSERT(false);
     return 0;
@@ -724,7 +731,7 @@ int32_t AudioPacketModule::PlayoutBuffer(BufferType* /*type*/, uint16_t* /*size_
 int32_t AudioPacketModule::PlayoutDelay(uint16_t* delay_ms) const
 {
     // No delay since audio frames are dropped.
-    *delay_ms = 0;
+    *delay_ms= 0;
     return 0;
 }
 
@@ -766,25 +773,29 @@ int32_t AudioPacketModule::StopRawInputFileRecording()
     return 0;
 }
 
-int32_t AudioPacketModule::SetRecordingSampleRate(const uint32_t /*samples_per_sec*/)
+int32_t
+AudioPacketModule::SetRecordingSampleRate(const uint32_t /*samples_per_sec*/)
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::RecordingSampleRate(uint32_t* /*samples_per_sec*/) const
+int32_t
+AudioPacketModule::RecordingSampleRate(uint32_t* /*samples_per_sec*/) const
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::SetPlayoutSampleRate(const uint32_t /*samples_per_sec*/)
+int32_t
+AudioPacketModule::SetPlayoutSampleRate(const uint32_t /*samples_per_sec*/)
 {
     ASSERT(false);
     return 0;
 }
 
-int32_t AudioPacketModule::PlayoutSampleRate(uint32_t* /*samples_per_sec*/) const
+int32_t
+AudioPacketModule::PlayoutSampleRate(uint32_t* /*samples_per_sec*/) const
 {
     ASSERT(false);
     return 0;
@@ -810,6 +821,7 @@ int32_t AudioPacketModule::GetLoudspeakerStatus(bool* /*enabled*/) const
 
 
 } // namespace scy
+
 
 /// @\}
 

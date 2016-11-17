@@ -14,8 +14,8 @@
 
 
 #include "scy/collection.h"
-#include "scy/thread.h"
 #include "scy/stateful.h"
+#include "scy/thread.h"
 
 
 namespace scy {
@@ -24,11 +24,11 @@ namespace scy {
 /// @addtogroup util
 /// @{///
 
-struct DiagnosticState: public State
+struct DiagnosticState : public State
 {
     enum Type
     {
-        None = 0,
+        None= 0,
         Checking,
         Passed,
         Failed
@@ -36,12 +36,17 @@ struct DiagnosticState: public State
 
     std::string str(unsigned int id) const
     {
-        switch(id) {
-        case None:            return "None";
-        case Checking:        return "Checking";
-        case Passed:        return "Passed";
-        case Failed:        return "Failed";
-        default:            assert(false);
+        switch (id) {
+            case None:
+                return "None";
+            case Checking:
+                return "Checking";
+            case Passed:
+                return "Passed";
+            case Failed:
+                return "Failed";
+            default:
+                assert(false);
         }
         return "undefined";
     }
@@ -53,16 +58,17 @@ struct DiagnosticState: public State
 //
 
 
-class IDiagnostic: public Stateful<DiagnosticState>
+class IDiagnostic : public Stateful<DiagnosticState>
 {
 public:
     IDiagnostic();
     virtual ~IDiagnostic();
 
-    std::string name;    ///< The name of the diagnostic.
+    std::string name;        ///< The name of the diagnostic.
     std::string description; ///< The diagnostic description.
-    std::vector<std::string> summary;     ///< The diagnostic summary, maybe including
-                                          ///< troubleshooting information on failure.
+    std::vector<std::string>
+        summary; ///< The diagnostic summary, maybe including
+                 ///< troubleshooting information on failure.
 
     virtual void check();
     virtual void reset();
@@ -80,7 +86,7 @@ public:
 
 protected:
     /// Override to implement diagnostic logic.
-    virtual void run() = 0;
+    virtual void run()= 0;
 
     virtual bool pass();
     virtual bool fail();
@@ -96,12 +102,13 @@ typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
 //
 
 
-class AsyncDiagnostic: public IDiagnostic, public async::Runnable
+class AsyncDiagnostic : public IDiagnostic, public async::Runnable
 {
 public:
-    virtual ~AsyncDiagnostic() {};
+    virtual ~AsyncDiagnostic(){};
 
-    virtual void check() {
+    virtual void check()
+    {
         reset();
         _thread.start(*this);
     };
@@ -116,7 +123,7 @@ protected:
 //
 
 
-class DiagnosticManager: public DiagnosticStore
+class DiagnosticManager : public DiagnosticStore
 {
 public:
     DiagnosticManager();
@@ -142,8 +149,10 @@ public:
 
     NullSignal DiagnosticsComplete;
 
-    virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
+    virtual void onDiagnosticStateChange(void*, DiagnosticState& state,
+                                         const DiagnosticState&);
 };
+
 
 /// @\}
 
@@ -152,5 +161,6 @@ public:
 
 
 #endif // SCY_DiagnosticManager_H
+
 
 /// @\}

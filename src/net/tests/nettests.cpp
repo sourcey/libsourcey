@@ -1,13 +1,13 @@
 #include "scy/base.h"
+#include "scy/logger.h"
+#include "scy/net/address.h"
+#include "scy/net/sslcontext.h"
+#include "scy/net/sslmanager.h"
+#include "scy/net/sslsocket.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/udpsocket.h"
 #include "scy/test.h"
 #include "scy/time.h"
-#include "scy/logger.h"
-#include "scy/net/tcpsocket.h"
-#include "scy/net/sslsocket.h"
-#include "scy/net/sslmanager.h"
-#include "scy/net/sslcontext.h"
-#include "scy/net/udpsocket.h"
-#include "scy/net/address.h"
 
 #include "../samples/echoserver/tcpechoserver.h"
 #include "clientsockettest.h"
@@ -53,32 +53,32 @@ int main(int argc, char** argv)
         try {
             net::Address sa3("192.168.1.100", "f00bar");
             expect(0 && "bad service name - must throw");
+        } catch (std::exception&) {
         }
-        catch (std::exception&) {}
 
         try {
             net::Address sa6("192.168.2.120", "80000");
             expect(0 && "invalid port - must throw");
+        } catch (std::exception&) {
         }
-        catch (std::exception&) {}
 
         try {
             net::Address sa5("192.168.2.260", 80);
             expect(0 && "invalid address - must throw");
+        } catch (std::exception&) {
         }
-        catch (std::exception&) {}
 
         try {
             net::Address sa9("[192.168.2.260:", 88);
             expect(0 && "invalid address - must throw");
+        } catch (std::exception&) {
         }
-        catch (std::exception&) {}
 
         try {
             net::Address sa9("[192.168.2.260]");
             expect(0 && "invalid address - must throw");
+        } catch (std::exception&) {
         }
-        catch (std::exception&) {}
     });
 
     // =========================================================================
@@ -140,12 +140,14 @@ int main(int argc, char** argv)
 //         SSLManager::initNoVerifyClient();
 //
 //             // Raise a SSL echo server
-//             //Handle<SSLEchoServer> sslServer(new SSLEchoServer(1338, true), false);
+//             //Handle<SSLEchoServer> sslServer(new SSLEchoServer(1338, true),
+//             false);
 //             //sslServer->run();
 // #endif
 //
 //             // Raise a TCP echo server
-//             //Handle<TCPEchoServer> tcpServer(new TCPEchoServer(1337, true), false); //true
+//             //Handle<TCPEchoServer> tcpServer(new TCPEchoServer(1337, true),
+//             false); //true
 //             //tcpServer->run();
 //
 //             //runAddressTest();
@@ -170,7 +172,8 @@ int main(int argc, char** argv)
 //     }
 //
 //
-//     // =========================================================================
+//     //
+//     =========================================================================
 //     // UDP Socket Test
 //     //
 //     int UDPPacketSize;
@@ -239,16 +242,19 @@ int main(int argc, char** argv)
 //     {
 //         std::string payload(packet.data(), packet.size());
 //         DebugL << "UDPSocket server recv from "
-//             << packet.info->peerAddress << ": payloadLength=" << payload.length() << endl;
+//             << packet.info->peerAddress << ": payloadLength=" <<
+//             payload.length() << endl;
 //
 //         // Send the unix ticks milisecond for checking RTT
 //         //payload.assign(util::itostr(time::ticks()));
 //
 //         // Relay back to the client to check RTT
 //         //packet.info->socket->send(packet, packet.info->peerAddress);
-//         //packet.info->socket->send(payload.c_str(), payload.length(), packet.info->peerAddress);
+//         //packet.info->socket->send(payload.c_str(), payload.length(),
+//         packet.info->peerAddress);
 //
-//         packet.info->socket->send(payload.c_str(), payload.length(), clientSendAddr);
+//         packet.info->socket->send(payload.c_str(), payload.length(),
+//         clientSendAddr);
 //
 //     }
 //     */
@@ -258,11 +264,13 @@ int main(int argc, char** argv)
 //       /*
 //         std::string payload(util::itostr(time::ticks()));
 //         payload.append(UDPPacketSize - payload.length(), 'x');
-//         udpClientSock->send(payload.c_str(), payload.length(), udpServerAddr);
+//         udpClientSock->send(payload.c_str(), payload.length(),
+//         udpServerAddr);
 //         */
 //         std::string payload;
 //         payload.append(UDPPacketSize, 'x');
-//         udpClientSock->send(payload.c_str(), payload.length(), udpServerAddr);
+//         udpClientSock->send(payload.c_str(), payload.length(),
+//         udpServerAddr);
 //     }
 //
 //     void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
@@ -275,7 +283,8 @@ int main(int argc, char** argv)
 //
 //       /*
 //         std::string payload(packet.data(), packet.size());
-//         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
+//         payload.erase(std::remove(payload.begin(), payload.end(), 'x'),
+//         payload.end());
 //         std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
 //         std::uint64_t latency = time::ticks() - sentAt;
 //
@@ -315,7 +324,7 @@ int main(int argc, char** argv)
 //
 //
 // } // namespace net
-} // namespace scy
+// } // namespace scy
 //
 //
 // int main(int argc, char** argv)

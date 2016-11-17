@@ -13,10 +13,10 @@
 #define SCY_Thread_H
 
 
-#include "scy/uv/uvpp.h"
+#include "scy/async.h"
 #include "scy/mutex.h"
 #include "scy/platform.h"
-#include "scy/async.h"
+#include "scy/uv/uvpp.h"
 
 
 namespace scy {
@@ -24,7 +24,7 @@ namespace scy {
 
 /// This class implements a platform-independent
 /// wrapper around an operating system thread.
-class Thread: public async::Runner
+class Thread : public async::Runner
 {
 public:
     typedef std::shared_ptr<Thread> ptr;
@@ -42,7 +42,7 @@ public:
     /// The thread should be cancelled beore calling this method.
     /// This method must be called from outside the current thread
     /// context or deadlock will ensue.
-    bool waitForExit(int timeout = 5000);
+    bool waitForExit(int timeout= 5000);
 
     /// Returns the native thread handle.
     uv_thread_t id() const;
@@ -53,8 +53,8 @@ public:
     static const uv_thread_t mainID;
 
 protected:
-    Thread(const Thread&) = delete;
-    Thread& operator = (const Thread&) = delete;
+    Thread(const Thread&)= delete;
+    Thread& operator=(const Thread&)= delete;
 
     virtual bool async() const;
     virtual void startAsync();
@@ -110,5 +110,6 @@ protected:
 
 
 #endif
+
 
 /// @\}

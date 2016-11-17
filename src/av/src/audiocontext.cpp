@@ -15,8 +15,8 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/logger.h"
 #include "scy/av/ffmpeg.h"
+#include "scy/logger.h"
 
 
 using std::endl;
@@ -26,15 +26,15 @@ namespace scy {
 namespace av {
 
 
-AudioContext::AudioContext() :
-    // PacketProcessor(this->emitter),
-    stream(nullptr),
-    codec(nullptr),
-    frame(nullptr),
-    resampler(nullptr),
-    outputFrameSize(0),
-    time(0),
-    pts(AV_NOPTS_VALUE)
+AudioContext::AudioContext()
+    : // PacketProcessor(this->emitter),
+    stream(nullptr)
+    , codec(nullptr)
+    , frame(nullptr)
+    , resampler(nullptr)
+    , outputFrameSize(0)
+    , time(0)
+    , pts(AV_NOPTS_VALUE)
 {
     initializeFFmpeg();
 }
@@ -50,9 +50,8 @@ AudioContext::~AudioContext()
 void AudioContext::open()
 {
     TraceS(this) << "Open: "
-        << "\n\tInput: " << iparams.toString()
-        << "\n\tOutput: " << oparams.toString()
-        << endl;
+                 << "\n\tInput: " << iparams.toString()
+                 << "\n\tOutput: " << oparams.toString() << endl;
 
     assert(ctx);
     assert(avcodec_is_open(ctx) && "avcodec_open2 must be called");
@@ -76,26 +75,26 @@ void AudioContext::close()
     if (frame) {
         // av_free(frame);
         av_frame_free(&frame);
-        frame = nullptr;
+        frame= nullptr;
     }
 
     if (ctx) {
         avcodec_close(ctx);
-        ctx = nullptr;
+        ctx= nullptr;
     }
 
     if (stream) {
         // The stream pointer is managed by the AVFormatContext
-        stream = nullptr;
+        stream= nullptr;
     }
 
     if (resampler) {
         delete resampler;
-        resampler = nullptr;
+        resampler= nullptr;
     }
 
-    time = 0;
-    pts = 0;
+    time= 0;
+    pts= 0;
     // error = "";
 }
 
@@ -125,7 +124,8 @@ bool AudioContext::recreateResampler()
     // if (resampler)
     //     throw std::runtime_error("Conversion context already exists.");
 
-    // NOTE: the input output `channels`, `sampleRate`, and `sampleFmt` parameters work
+    // NOTE: the input output `channels`, `sampleRate`, and `sampleFmt`
+    // parameters work
     // slightly differently for encoders and decoders.
     // For encoders `iparams` is the picture format from the application and
     // `oparams` is the picture format passed into the encoder.
@@ -154,9 +154,9 @@ bool AudioContext::recreateResampler()
     DebugL << "Recreating audio resampler context" << endl;
     if (resampler)
         delete resampler;
-    resampler = new AudioResampler();
-    resampler->iparams = iparams;
-    resampler->oparams = oparams;
+    resampler= new AudioResampler();
+    resampler->iparams= iparams;
+    resampler->oparams= oparams;
     resampler->open();
     return true;
 }
@@ -175,18 +175,18 @@ bool AudioContext::recreateResampler()
 
 void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params)
 {
-    params.enabled = true;
-    params.encoder = avcodec_get_name(ctx->codec_id);
-    params.sampleFmt = av_get_sample_fmt_name(ctx->sample_fmt);
-    params.channels = ctx->channels;
-    params.sampleRate = ctx->sample_rate;
-    params.bitRate = ctx->bit_rate;
+    params.enabled= true;
+    params.encoder= avcodec_get_name(ctx->codec_id);
+    params.sampleFmt= av_get_sample_fmt_name(ctx->sample_fmt);
+    params.channels= ctx->channels;
+    params.sampleRate= ctx->sample_rate;
+    params.bitRate= ctx->bit_rate;
 }
 
 
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 {
-    const enum AVSampleFormat* p = codec->sample_fmts;
+    const enum AVSampleFormat* p= codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
         if (*p == sampleFormat)
             return true;
@@ -198,13 +198,14 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 {
-    enum AVSampleFormat compatible = AV_SAMPLE_FMT_NONE;
-    enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
-    bool planar = av_sample_fmt_is_planar(requested);
-    const enum AVSampleFormat *p = codec->sample_fmts;
+    enum AVSampleFormat compatible= AV_SAMPLE_FMT_NONE;
+    enum AVSampleFormat requested= av_get_sample_fmt(params.sampleFmt.c_str());
+    bool planar= av_sample_fmt_is_planar(requested);
+    const enum AVSampleFormat* p= codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
-        if (compatible == AV_SAMPLE_FMT_NONE && av_sample_fmt_is_planar(*p) == planar)
-            compatible = *p;  // or use the first compatible format
+        if (compatible == AV_SAMPLE_FMT_NONE &&
+            av_sample_fmt_is_planar(*p) == planar)
+            compatible= *p; // or use the first compatible format
         if (*p == requested)
             return requested; // always try to return requested format
         p++;
@@ -218,5 +219,6 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 
 
 #endif
+
 
 /// @\}

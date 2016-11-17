@@ -26,18 +26,20 @@ namespace http {
 //
 
 
-ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socket) :
-    Connection(socket),
-    _url(url),
+ClientConnection::ClientConnection(const URL& url,
+                                   const net::Socket::Ptr& socket)
+    : Connection(socket)
+    , _url(url)
+    ,
     // _readStream(nullptr),
-    _connect(false),
-    _active(false),
-    _complete(false)
+    _connect(false)
+    , _active(false)
+    , _complete(false)
 {
     TraceS(this) << "Create: " << url << endl;
 
-    IncomingProgress.sender = this;
-    OutgoingProgress.sender = this;
+    IncomingProgress.sender= this;
+    OutgoingProgress.sender= this;
 
     _request.setURI(url.pathEtc());
     _request.setHost(url.host(), url.port());
@@ -79,7 +81,7 @@ void ClientConnection::send()
 void ClientConnection::send(http::Request& req)
 {
     assert(!_connect);
-    _request = req;
+    _request= req;
     connect();
 }
 
@@ -108,7 +110,8 @@ int ClientConnection::send(const char* data, std::size_t len, int flags)
 // }
 //
 //
-// void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
+// void ClientConnection::sendData(const char* buf, std::size_t len) //, int
+// flags
 // {
 //     connect();
 //     if (Outgoing.active())
@@ -127,7 +130,7 @@ int ClientConnection::send(const char* data, std::size_t len, int flags)
 void ClientConnection::connect()
 {
     if (!_connect) {
-        _connect = true;
+        _connect= true;
         TraceS(this) << "Connecting" << endl;
         _socket->connect(_url.host(), _url.port());
     }
@@ -162,7 +165,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
     TraceS(this) << "On connect" << endl;
 
     // Set the connection to active
-    _active = true;
+    _active= true;
 
     // Emit the connect signal so raw connections like
     // websockets can kick off the data flow
@@ -175,7 +178,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
 
     // Flush queued packets
     if (!_outgoingBuffer.empty()) {
-        for (const auto & packet : _outgoingBuffer) {
+        for (const auto& packet : _outgoingBuffer) {
             Outgoing.write(packet.c_str(), packet.length());
         }
         _outgoingBuffer.clear();
@@ -198,9 +201,9 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
 void ClientConnection::onHeaders()
 {
     TraceS(this) << "On headers" << endl;
-    IncomingProgress.total = _response.getContentLength();
+    IncomingProgress.total= _response.getContentLength();
 
-    Headers.emit(/*this, */_response);
+    Headers.emit(/*this, */ _response);
 }
 
 
@@ -214,8 +217,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
     IncomingProgress.update(buffer.size());
 
     // Write to the incoming packet stream if adapters are attached
-    if (Incoming.numAdapters() > 0 ||
-        Incoming.emitter.nslots() > 0) {
+    if (Incoming.numAdapters() > 0 || Incoming.emitter.nslots() > 0) {
         // if (!Incoming.active());
         //     throw std::runtime_error("startInputStream() must be called");
         Incoming.write(bufferCast<const char*>(buffer), buffer.size());
@@ -228,7 +230,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
     //     _readStream->flush();
     // }
 
-    Payload.emit(/*this, */buffer);
+    Payload.emit(/*this, */ buffer);
 }
 
 
@@ -243,8 +245,8 @@ void ClientConnection::onMessage()
 void ClientConnection::onComplete()
 {
     if (!_complete) {
-        _complete = true; // in case close() is called inside callback
-        Complete.emit(/*this, */_response);
+        _complete= true; // in case close() is called inside callback
+        Complete.emit(/*this, */ _response);
     }
 }
 
@@ -305,7 +307,7 @@ void Client::shutdown()
     Shutdown.emit(/*this*/);
 
     //_connections.clear();
-    auto conns = _connections;
+    auto conns= _connections;
     for (auto conn : conns) {
         TraceS(this) << "Shutdown: " << conn << endl;
         conn->close(); // close and remove via callback
@@ -322,7 +324,8 @@ void Client::addConnection(ClientConnection::Ptr conn)
     //     removeConnection(conn.get());
     // };
 
-    conn->Close += slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
+    conn->Close+=
+        slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
     _connections.push_back(conn);
 }
 
@@ -330,7 +333,7 @@ void Client::addConnection(ClientConnection::Ptr conn)
 void Client::removeConnection(ClientConnection* conn)
 {
     TraceS(this) << "Removing connection: " << conn << endl;
-    for (auto it = _connections.begin(); it != _connections.end(); ++it) {
+    for (auto it= _connections.begin(); it != _connections.end(); ++it) {
         if (conn == it->get()) {
             TraceS(this) << "Removed connection: " << conn << endl;
             _connections.erase(it);
@@ -365,5 +368,6 @@ void Client::onConnectionTimer(void*)
 
 } // namespace http
 } // namespace scy
+
 
 /// @\}

@@ -75,7 +75,7 @@ public:
     ~Address();
 
     /// Assigns another Address.
-    Address& operator = (const Address& addr);
+    Address& operator=(const Address& addr);
 
     /// Swaps the Address with another one.
     void swap(Address& addr);
@@ -109,11 +109,11 @@ public:
 
     static bool validateIP(const std::string& address);
 
-    bool operator < (const Address& addr) const;
-    bool operator == (const Address& addr) const;
-    bool operator != (const Address& addr) const;
+    bool operator<(const Address& addr) const;
+    bool operator==(const Address& addr) const;
+    bool operator!=(const Address& addr) const;
 
-    friend std::ostream& operator << (std::ostream& stream, const Address& addr)
+    friend std::ostream& operator<<(std::ostream& stream, const Address& addr)
     {
         stream << addr.toString();
         return stream;
@@ -122,7 +122,7 @@ public:
     /// Maximum length in bytes of a socket address.
     enum
     {
-        MAX_ADDRESS_LENGTH =
+        MAX_ADDRESS_LENGTH=
 #if defined(LibSourcey_HAVE_IPv6)
             sizeof(struct sockaddr_in6)
 #else
@@ -143,6 +143,7 @@ private:
 
 
 #endif // SCY_Net_Address_H
+
 
 /// @\}
 

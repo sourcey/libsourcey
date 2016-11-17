@@ -9,11 +9,11 @@
 /// @{
 
 #include "scy/application.h"
-#include "scy/packetstream.h"
-#include "scy/av/multiplexpacketencoder.h"
-#include "scy/av/videocapture.h"
 #include "scy/av/audiocapture.h"
 #include "scy/av/devicemanager.h"
+#include "scy/av/multiplexpacketencoder.h"
+#include "scy/av/videocapture.h"
+#include "scy/packetstream.h"
 
 
 // This demo showcases how to implement a H.264 multiplex recorder from realtime
@@ -23,9 +23,10 @@ using namespace scy;
 using std::endl;
 
 #define OUTPUT_FILENAME "deviceoutput.mp4"
-#define OUTPUT_FORMAT av::Format("MP4", "mp4", \
-    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
-    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+#define OUTPUT_FORMAT                                                          \
+    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
+                                            48000, 128000, "yuv420p"),         \
+               av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 int main(int argc, char** argv)
@@ -38,8 +39,8 @@ int main(int argc, char** argv)
         PacketStream stream;
 
         av::EncoderOptions options;
-        options.ofile = OUTPUT_FILENAME;
-        options.oformat = OUTPUT_FORMAT;
+        options.ofile= OUTPUT_FILENAME;
+        options.oformat= OUTPUT_FORMAT;
 
         // Create a device manager instance to enumerate system devices
         av::Device device;
@@ -72,9 +73,11 @@ int main(int argc, char** argv)
         stream.start();
 
         // Keep recording until Ctrl-C is pressed
-        uv::waitForShutdown([](void* opaque) {
-    		    reinterpret_cast<PacketStream*>(opaque)->stop();
-    		}, &stream);
+        uv::waitForShutdown(
+            [](void* opaque) {
+                reinterpret_cast<PacketStream*>(opaque)->stop();
+            },
+            &stream);
     }
 
     // av::DeviceManager::shutdown();

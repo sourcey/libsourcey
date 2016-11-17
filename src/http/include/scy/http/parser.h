@@ -9,9 +9,9 @@
 /// @{
 
 
-#include "scy/net/socket.h"
 #include "scy/http/request.h"
 #include "scy/http/response.h"
+#include "scy/net/socket.h"
 #include <http_parser.h>
 
 
@@ -33,12 +33,13 @@ struct ParserError
 class ParserObserver
 {
 public:
-    virtual void onParserHeader(const std::string& name, const std::string& value) = 0;
-    virtual void onParserHeadersEnd() = 0;
-    virtual void onParserChunk(const char* data, std::size_t len) = 0;
-    virtual void onParserEnd() = 0;
+    virtual void onParserHeader(const std::string& name,
+                                const std::string& value)= 0;
+    virtual void onParserHeadersEnd()= 0;
+    virtual void onParserChunk(const char* data, std::size_t len)= 0;
+    virtual void onParserEnd()= 0;
 
-    virtual void onParserError(const ParserError& err) = 0;
+    virtual void onParserError(const ParserError& err)= 0;
 };
 
 
@@ -52,7 +53,8 @@ public:
 
     void init(http_parser_type type);
 
-    std::size_t parse(const char* data, std::size_t length); //, bool expectComplete = false
+    std::size_t parse(const char* data,
+                      std::size_t length); //, bool expectComplete = false
 
     /// Feed data read from socket into the http_parser.
     ///
@@ -64,7 +66,8 @@ public:
     /// in success or error.
     bool complete() const;
 
-    void setParserError(const std::string& message = ""); //bool throwException = true,
+    void setParserError(
+        const std::string& message= ""); // bool throwException = true,
 
     void setRequest(http::Request* request);
     void setResponse(http::Response* response);
@@ -85,13 +88,14 @@ public:
     void onError(const ParserError& err);
 
 public:
-
     ///// http_parser callbacks
     static int on_message_begin(http_parser* parser);
-    static int on_url(http_parser* parser, const char *at, std::size_t len);
-    static int on_status(http_parser* parser, const char *at, std::size_t len);
-    static int on_header_field(http_parser* parser, const char* at, std::size_t len);
-    static int on_header_value(http_parser* parser, const char* at, std::size_t len);
+    static int on_url(http_parser* parser, const char* at, std::size_t len);
+    static int on_status(http_parser* parser, const char* at, std::size_t len);
+    static int on_header_field(http_parser* parser, const char* at,
+                               std::size_t len);
+    static int on_header_value(http_parser* parser, const char* at,
+                               std::size_t len);
     static int on_headers_complete(http_parser* parser);
     static int on_body(http_parser* parser, const char* at, std::size_t len);
     static int on_message_complete(http_parser* parser);
@@ -120,5 +124,6 @@ public:
 
 
 #endif // SCY_HTTP_Parser_H
+
 
 /// @\}

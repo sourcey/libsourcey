@@ -13,13 +13,13 @@
 #define SCY_Buffer_H
 
 
-#include "scy/memory.h"
 #include "scy/byteorder.h"
+#include "scy/memory.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 
 namespace scy {
@@ -40,14 +40,16 @@ class MutableBuffer
 {
 public:
     /// Construct an empty buffer.
-    MutableBuffer() :
-        _data(0), _size(0)
+    MutableBuffer()
+        : _data(0)
+        , _size(0)
     {
     }
 
     /// Construct a buffer to represent the given memory range.
-    MutableBuffer(void* data, std::size_t size) :
-        _data(data), _size(size)
+    MutableBuffer(void* data, std::size_t size)
+        : _data(data)
+        , _size(size)
     {
     }
 
@@ -68,26 +70,31 @@ private:
 // so uses of it in application code should be carefully considered.
 
 
-template<typename T> inline MutableBuffer mutableBuffer(T data, std::size_t size)
+template <typename T>
+inline MutableBuffer mutableBuffer(T data, std::size_t size)
 {
     return MutableBuffer(reinterpret_cast<void*>(data), size);
 }
 
 inline MutableBuffer mutableBuffer(std::string& str)
 {
-    return MutableBuffer(reinterpret_cast<void*>(&str[0]), str.size()); // std::string is contiguous as of C++11
+    return MutableBuffer(reinterpret_cast<void*>(&str[0]),
+                         str.size()); // std::string is contiguous as of C++11
 }
 
 
 inline MutableBuffer mutableBuffer(const std::string& str)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(&str[0])), str.size()); // careful!
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(&str[0])),
+                         str.size()); // careful!
 }
 
 
-template<typename T> inline MutableBuffer mutableBuffer(const std::vector<T>& vec)
+template <typename T>
+inline MutableBuffer mutableBuffer(const std::vector<T>& vec)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<T>(&vec[0])), vec.size()); // careful!
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<T>(&vec[0])),
+                         vec.size()); // careful!
 }
 
 
@@ -99,7 +106,8 @@ inline MutableBuffer mutableBuffer(Buffer& buf)
 
 inline MutableBuffer mutableBuffer(const Buffer& buf)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())), buf.size());
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
+                         buf.size());
 }
 
 
@@ -114,20 +122,23 @@ class ConstBuffer
 {
 public:
     /// Construct an empty buffer.
-    ConstBuffer() :
-        _data(0), _size(0)
+    ConstBuffer()
+        : _data(0)
+        , _size(0)
     {
     }
 
     /// Construct a buffer to represent the given memory range.
-    ConstBuffer(const void* data, std::size_t size) :
-        _data(data), _size(size)
+    ConstBuffer(const void* data, std::size_t size)
+        : _data(data)
+        , _size(size)
     {
     }
 
     /// Construct a non-modifiable buffer from a modifiable one.
-    ConstBuffer(const MutableBuffer& b) :
-        _data(b.data()), _size(b.size())
+    ConstBuffer(const MutableBuffer& b)
+        : _data(b.data())
+        , _size(b.size())
     {
     }
 
@@ -144,19 +155,21 @@ private:
 };
 
 
-template<typename T> inline ConstBuffer constBuffer(T data, std::size_t size)
+template <typename T> inline ConstBuffer constBuffer(T data, std::size_t size)
 {
     return ConstBuffer(reinterpret_cast<const void*>(data), size);
 }
 
 inline ConstBuffer constBuffer(const std::string& str)
 {
-    return ConstBuffer(reinterpret_cast<const void*>(&str[0]), str.size()); // careful!
+    return ConstBuffer(reinterpret_cast<const void*>(&str[0]),
+                       str.size()); // careful!
 }
 
-template<typename T> inline ConstBuffer constBuffer(const std::vector<T>& vec)
+template <typename T> inline ConstBuffer constBuffer(const std::vector<T>& vec)
 {
-    return ConstBuffer(reinterpret_cast<const void*>(&vec[0]), vec.size()); // careful!
+    return ConstBuffer(reinterpret_cast<const void*>(&vec[0]),
+                       vec.size()); // careful!
 }
 
 inline ConstBuffer constBuffer(const MutableBuffer& buf)
@@ -164,14 +177,15 @@ inline ConstBuffer constBuffer(const MutableBuffer& buf)
     return ConstBuffer(buf.data(), buf.size());
 }
 
-template<typename T> inline ConstBuffer constBuffer(Buffer& buf)
+template <typename T> inline ConstBuffer constBuffer(Buffer& buf)
 {
     return ConstBuffer(reinterpret_cast<void*>(buf.data()), buf.size());
 }
 
-template<typename T> inline ConstBuffer constBuffer(const Buffer& buf)
+template <typename T> inline ConstBuffer constBuffer(const Buffer& buf)
 {
-    return ConstBuffer(reinterpret_cast<void*>(const_cast<char *>(buf.data())), buf.size());
+    return ConstBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
+                       buf.size());
 }
 
 
@@ -205,9 +219,10 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 class BitReader
 {
 public:
-    BitReader(const char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
-    BitReader(const Buffer& buf, ByteOrder order = ByteOrder::Network);
-    BitReader(const ConstBuffer& pod, ByteOrder order = ByteOrder::Network);
+    BitReader(const char* bytes, std::size_t size,
+              ByteOrder order= ByteOrder::Network);
+    BitReader(const Buffer& buf, ByteOrder order= ByteOrder::Network);
+    BitReader(const ConstBuffer& pod, ByteOrder order= ByteOrder::Network);
     ~BitReader();
 
     /// Reads a value from the BitReader.
@@ -257,7 +272,8 @@ public:
     /// Returns the current read position.
     std::size_t position() const { return _position; }
 
-    /// Returns the number of elements between the current position and the limit.
+    /// Returns the number of elements between the current position and the
+    /// limit.
     std::size_t available() const;
 
     const char* begin() const { return _bytes; }
@@ -267,7 +283,7 @@ public:
 
     std::string toString();
 
-    friend std::ostream& operator << (std::ostream& stream, const BitReader& buf)
+    friend std::ostream& operator<<(std::ostream& stream, const BitReader& buf)
     {
         return stream.write(buf.current(), buf.position());
     }
@@ -298,9 +314,10 @@ private:
 class BitWriter
 {
 public:
-    BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
-    BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
-    BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
+    BitWriter(char* bytes, std::size_t size,
+              ByteOrder order= ByteOrder::Network);
+    BitWriter(Buffer& buf, ByteOrder order= ByteOrder::Network);
+    BitWriter(MutableBuffer& pod, ByteOrder order= ByteOrder::Network);
     ~BitWriter();
 
     /// Append bytes to the buffer.
@@ -337,7 +354,8 @@ public:
     /// Returns the current write position.
     std::size_t position() const { return _position; }
 
-    /// Returns the number of elements between the current write position and the limit.
+    /// Returns the number of elements between the current write position and
+    /// the limit.
     std::size_t available() const;
 
     char* begin() { return _bytes; }
@@ -350,7 +368,7 @@ public:
     ByteOrder order() const { return _order; }
     std::string toString();
 
-    friend std::ostream& operator << (std::ostream& stream, const BitWriter& wr)
+    friend std::ostream& operator<<(std::ostream& stream, const BitWriter& wr)
     {
         return stream.write(wr.begin(), wr.position());
     }
@@ -368,6 +386,7 @@ private:
 } // namespace scy
 
 
-#endif  // SCY_Buffer_H
+#endif // SCY_Buffer_H
+
 
 /// @\}

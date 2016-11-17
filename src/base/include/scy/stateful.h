@@ -15,8 +15,8 @@
 
 #include "scy/signal.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 
 namespace scy {
@@ -27,8 +27,8 @@ class State
 public:
     typedef unsigned int ID;
 
-    State(ID id = 0, const std::string& message = "");
-    virtual ~State() {};
+    State(ID id= 0, const std::string& message= "");
+    virtual ~State(){};
 
     virtual ID id() const;
     virtual void set(ID id);
@@ -40,27 +40,17 @@ public:
 
     virtual bool between(ID lid, ID rid) const
     {
-        ID id = this->id();
-        return id >= lid
-            && id <= rid;
+        ID id= this->id();
+        return id >= lid && id <= rid;
     }
 
-    virtual bool equals(ID id) const
-    {
-        return this->id() == id;
-    }
+    virtual bool equals(ID id) const { return this->id() == id; }
 
-    bool operator == (const State& r)
-    {
-        return id() == r.id();
-    }
+    bool operator==(const State& r) { return id() == r.id(); }
 
-    bool operator == (const State::ID& r)
-    {
-        return id() == r;
-    }
+    bool operator==(const State::ID& r) { return id() == r; }
 
-    friend std::ostream& operator << (std::ostream& os, const State& state)
+    friend std::ostream& operator<<(std::ostream& os, const State& state)
     {
         os << state.toString();
         return os;
@@ -77,17 +67,36 @@ protected:
 //
 
 // TODO: Use atomics
-class MutexState: public State
+class MutexState : public State
 {
 public:
-    MutexState(ID id = 0);
-    MutexState(const MutexState& r) : State(r) {}
-    virtual ~MutexState() {};
+    MutexState(ID id= 0);
+    MutexState(const MutexState& r)
+        : State(r)
+    {
+    }
+    virtual ~MutexState(){};
 
-    virtual ID id() const { Mutex::ScopedLock lock(_mutex); return _id;    }
-    virtual void set(ID id) { Mutex::ScopedLock lock(_mutex); _id = id; }
-    virtual std::string message() const { Mutex::ScopedLock lock(_mutex); return _message; }
-    virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex); _message = message; }
+    virtual ID id() const
+    {
+        Mutex::ScopedLock lock(_mutex);
+        return _id;
+    }
+    virtual void set(ID id)
+    {
+        Mutex::ScopedLock lock(_mutex);
+        _id= id;
+    }
+    virtual std::string message() const
+    {
+        Mutex::ScopedLock lock(_mutex);
+        return _message;
+    }
+    virtual void setMessage(const std::string& message)
+    {
+        Mutex::ScopedLock lock(_mutex);
+        _message= message;
+    }
 
 protected:
     mutable Mutex _mutex;
@@ -99,12 +108,12 @@ protected:
 //
 
 
-class StateSignal: public MutexState
+class StateSignal : public MutexState
 {
 public:
-    StateSignal(ID id = 0);
+    StateSignal(ID id= 0);
     StateSignal(const StateSignal& r);
-    virtual ~StateSignal() {};
+    virtual ~StateSignal(){};
 
     virtual bool change(ID id);
     virtual bool canChange(ID id);
@@ -112,7 +121,7 @@ public:
 
     /// Fired when the state changes to signal
     /// the new and previous states.
-    //Signal2<const ID&, const ID&> Change;
+    // Signal2<const ID&, const ID&> Change;
 
 protected:
     virtual void set(ID id);
@@ -126,17 +135,12 @@ protected:
 
 /// This class implements a simple state machine.
 /// T should be a derived State type.
-template<typename T>
-class Stateful
+template <typename T> class Stateful
 {
 public:
-    Stateful()
-    {
-    }
+    Stateful() {}
 
-    virtual ~Stateful()
-    {
-    }
+    virtual ~Stateful() {}
 
     /// Signals when the state changes.
     Signal<void(void*, T&, const T&)> StateChange;
@@ -148,15 +152,13 @@ public:
 
     virtual bool stateBetween(unsigned int lid, unsigned int rid) const
     {
-        return _state.id() >= lid
-            && _state.id() <= rid;
+        return _state.id() >= lid && _state.id() <= rid;
     }
 
     virtual T& state() { return _state; }
     virtual const T state() const { return _state; }
 
 protected:
-
     /// Override to handle pre state change logic.
     /// Return false to prevent state change.
     virtual bool beforeStateChange(const T& state)
@@ -167,13 +169,12 @@ protected:
     }
 
     /// Override to handle post state change logic.
-    virtual void onStateChange(T& /*state*/, const T& /*oldState*/)
-    {
-    }
+    virtual void onStateChange(T& /*state*/, const T& /*oldState*/) {}
 
     /// Sets the state and sends the state signal if
     /// the state change was successful.
-    virtual bool setState(void* sender, unsigned int id, const std::string& message = "")
+    virtual bool setState(void* sender, unsigned int id,
+                          const std::string& message= "")
     {
         T state;
         state.set(id);
@@ -186,13 +187,13 @@ protected:
     virtual bool setState(void* sender, const T& state)
     {
         if (beforeStateChange(state)) {
-            T oldState = _state;
-            _state = state;
+            T oldState= _state;
+            _state= state;
             //_state.set(id);
             //_state.setMessage(message);
             onStateChange(_state, oldState);
             if (sender)
-                StateChange.emit(sender, _state, oldState); //self(),
+                StateChange.emit(sender, _state, oldState); // self(),
             return true;
         }
         return false;
@@ -212,5 +213,6 @@ protected:
 
 
 #endif // SCY_Stateful_H
+
 
 /// @\}

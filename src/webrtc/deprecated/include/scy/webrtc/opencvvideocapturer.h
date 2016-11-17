@@ -33,25 +33,25 @@
 namespace scy {
 
 
-class OpenCVVideoCapturer: public cricket::VideoCapturer
-  /// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
-  /// gets decoded remote video frames from media channel.
-  /// It's used as the remote video source's VideoCapturer so that the remote
-  /// video can be used as a cricket::VideoCapturer and in that way a remote
-  /// video stream can implement the MediaStreamSourceInterface.
+class OpenCVVideoCapturer : public cricket::VideoCapturer
+/// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
+/// gets decoded remote video frames from media channel.
+/// It's used as the remote video source's VideoCapturer so that the remote
+/// video can be used as a cricket::VideoCapturer and in that way a remote
+/// video stream can implement the MediaStreamSourceInterface.
 {
 public:
     OpenCVVideoCapturer(int deviceId);
     virtual ~OpenCVVideoCapturer();
 
     /// cricket::VideoCapturer implementation.
-    virtual cricket::CaptureState Start(
-        const cricket::VideoFormat& capture_format);
+    virtual cricket::CaptureState
+    Start(const cricket::VideoFormat& capture_format);
     virtual void Stop();
     virtual bool IsRunning();
     virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs);
     virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired,
-        cricket::VideoFormat* best_format);
+                                      cricket::VideoFormat* best_format);
     virtual bool IsScreencast() const;
 
 private:
@@ -61,14 +61,16 @@ private:
 };
 
 
-// class OpenCVVideoCapturerFactory : public cricket::VideoDeviceCapturerFactory {
+// class OpenCVVideoCapturerFactory : public cricket::VideoDeviceCapturerFactory
+// {
 // public:
 //     OpenCVVideoCapturerFactory() {}
 //     virtual ~OpenCVVideoCapturerFactory() {}
 //
 //     virtual cricket::VideoCapturer* Create(const cricket::Device& device) {
 //
-//         // XXX: WebRTC uses device name to instantiate the capture, which is always 0.
+//         // XXX: WebRTC uses device name to instantiate the capture, which is
+//         always 0.
 //         return new OpenCVVideoCapturer(util::strtoi<int>(device.id));
 //     }
 // };

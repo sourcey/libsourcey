@@ -13,76 +13,83 @@
 #define SCY_SocketIO_Client_H
 
 
-#include "scy/socketio/packet.h"
-#include "scy/socketio/transaction.h"
+#include "scy/collection.h"
 #include "scy/http/websocket.h"
 #include "scy/json/json.h"
-#include "scy/collection.h"
+#include "scy/socketio/packet.h"
+#include "scy/socketio/transaction.h"
 
 
 namespace scy {
 namespace sockio {
 
 
-struct ClientState: public State
+struct ClientState : public State
 {
     enum Type
     {
-        Closed        = 0x00,
-        Connecting    = 0x01,
-        Connected     = 0x02,
-        Online        = 0x04,
-        Error         = 0x08
+        Closed= 0x00,
+        Connecting= 0x01,
+        Connected= 0x02,
+        Online= 0x04,
+        Error= 0x08
     };
 
     std::string str(unsigned int id) const
     {
-        switch(id) {
-        case Closed:          return "Closed";
-        case Connecting:      return "Connecting";
-        case Connected:       return "Connected";
-        case Online:          return "Online";
-        case Error:           return "Error";
-        default: assert(false);
+        switch (id) {
+            case Closed:
+                return "Closed";
+            case Connecting:
+                return "Connecting";
+            case Connected:
+                return "Connected";
+            case Online:
+                return "Online";
+            case Error:
+                return "Error";
+            default:
+                assert(false);
         }
         return "undefined";
     };
 };
 
 
-class Client:
-    public Stateful<ClientState>,
-    public net::SocketAdapter,
-    public PacketSignal
+class Client : public Stateful<ClientState>,
+               public net::SocketAdapter,
+               public PacketSignal
 {
-  public:
-      struct Options
-      {
-          std::string host;
-          std::uint16_t port;
+public:
+    struct Options
+    {
+        std::string host;
+        std::uint16_t port;
 
-          /// Weather or not to reconnect if disconnected from the server.
-          bool reconnection;
+        /// Weather or not to reconnect if disconnected from the server.
+        bool reconnection;
 
-          /// The number of times to attempt to reconnect if disconnected
-          /// from the server. (0 = unlimited)
-          int reconnectAttempts;
-          int reconnectDelay;
+        /// The number of times to attempt to reconnect if disconnected
+        /// from the server. (0 = unlimited)
+        int reconnectAttempts;
+        int reconnectDelay;
 
-          Options() {
-              host = "127.0.0.1";
-              port = 4500;
+        Options()
+        {
+            host= "127.0.0.1";
+            port= 4500;
 
-              reconnection = true;
-              reconnectAttempts = 0;
-              reconnectDelay = 6 * 1000; // 6 secs
-          }
-      };
+            reconnection= true;
+            reconnectAttempts= 0;
+            reconnectDelay= 6 * 1000; // 6 secs
+        }
+    };
 
 public:
     /// Client(const net::Socket::Ptr& socket);
     Client(const net::Socket::Ptr& socket,
-        const Options& options = Options()); //, const std::string& host, std::uint16_t port
+           const Options& options=
+               Options()); //, const std::string& host, std::uint16_t port
     virtual ~Client();
 
     // virtual void connect(const std::string& host, std::uint16_t port);
@@ -90,19 +97,23 @@ public:
     virtual void close();
 
     /// Send a default message packet.
-    virtual int send(const std::string& message, bool ack = false);
-    virtual int send(const json::Value& message, bool ack = false);
+    virtual int send(const std::string& message, bool ack= false);
+    virtual int send(const json::Value& message, bool ack= false);
 
     /// Send an event packet.
-    virtual int send(const std::string& event, const char* message, bool ack = false);
-    virtual int send(const std::string& event, const std::string& message, bool ack = false);
-    virtual int send(const std::string& event, const json::Value& message, bool ack = false);
+    virtual int send(const std::string& event, const char* message,
+                     bool ack= false);
+    virtual int send(const std::string& event, const std::string& message,
+                     bool ack= false);
+    virtual int send(const std::string& event, const json::Value& message,
+                     bool ack= false);
 
     /// Send the given packet.
     virtual int send(const sockio::Packet& packet);
 
     /// Create a packet transaction.
-    Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
+    Transaction* createTransaction(const sockio::Packet& request,
+                                   long timeout= 10000);
 
     /// Return a reference to the client options object.
     Client::Options& options();
@@ -142,7 +153,8 @@ protected:
     virtual void onMessage(sockio::Packet& packet);
 
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+                              const net::Address& peerAddress);
     virtual void onSocketError(net::Socket& socket, const scy::Error& error);
     virtual void onSocketClose(net::Socket& socket);
 
@@ -179,12 +191,14 @@ protected:
 //
 
 
-Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+Client* createTCPClient(const Client::Options& options= Client::Options(),
+                        uv::Loop* loop= uv::defaultLoop());
 
-class TCPClient: public Client
+class TCPClient : public Client
 {
 public:
-    TCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+    TCPClient(const Client::Options& options= Client::Options(),
+              uv::Loop* loop= uv::defaultLoop());
 };
 
 
@@ -193,12 +207,14 @@ public:
 //
 
 
-Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+Client* createSSLClient(const Client::Options& options= Client::Options(),
+                        uv::Loop* loop= uv::defaultLoop());
 
-class SSLClient: public Client
+class SSLClient : public Client
 {
 public:
-    SSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
+    SSLClient(const Client::Options& options= Client::Options(),
+              uv::Loop* loop= uv::defaultLoop());
 };
 
 
@@ -207,5 +223,6 @@ public:
 
 
 #endif // SCY_SocketIO_Client_H
+
 
 /// @\}

@@ -21,7 +21,7 @@ namespace scy {
 namespace smpl {
 
 
-class Event: public Message
+class Event : public Message
 {
 public:
     Event();
@@ -32,15 +32,15 @@ public:
     bool valid() const;
 
     std::string name() const;
-    //std::string message() const;
+    // std::string message() const;
     std::time_t time() const;
 
     void setName(const std::string& name);
-    //void setMessage(const std::string& message);
+    // void setMessage(const std::string& message);
     void setTime(std::time_t time);
 
     // Sets the time from a UTC time string.
-    //void setTime(const std::string& time);
+    // void setTime(const std::string& time);
 };
 
 
@@ -49,5 +49,6 @@ public:
 
 
 #endif // SCY_Symple_Event_H
+
 
 /// @\}

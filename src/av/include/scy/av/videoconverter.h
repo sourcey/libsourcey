@@ -53,4 +53,5 @@ struct VideoConverter
 #endif
 #endif // SCY_AV_VideoConverter_H
 
+
 /// @\}

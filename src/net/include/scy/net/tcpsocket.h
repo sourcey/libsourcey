@@ -13,25 +13,25 @@
 #define SCY_Net_TCPSocket_H
 
 
-#include "scy/uv/uvpp.h"
-#include "scy/net/tcpsocket.h"
-#include "scy/net/socket.h"
 #include "scy/net/address.h"
+#include "scy/net/socket.h"
+#include "scy/net/tcpsocket.h"
 #include "scy/net/types.h"
 #include "scy/stream.h"
+#include "scy/uv/uvpp.h"
 
 
 namespace scy {
 namespace net {
 
 
-class TCPSocket: public Stream, public net::Socket
+class TCPSocket : public Stream, public net::Socket
 {
 public:
     typedef std::shared_ptr<TCPSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    TCPSocket(uv::Loop* loop = uv::defaultLoop());
+    TCPSocket(uv::Loop* loop= uv::defaultLoop());
     virtual ~TCPSocket();
 
     virtual bool shutdown();
@@ -39,11 +39,12 @@ public:
 
     virtual void connect(const net::Address& peerAddress);
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
+    virtual int send(const char* data, std::size_t len, int flags= 0);
+    virtual int send(const char* data, std::size_t len,
+                     const net::Address& peerAddress, int flags= 0);
 
-    virtual void bind(const net::Address& address, unsigned flags = 0);
-    virtual void listen(int backlog = 64);
+    virtual void bind(const net::Address& address, unsigned flags= 0);
+    virtual void listen(int backlog= 64);
 
     virtual void acceptConnection();
 
@@ -88,9 +89,9 @@ public:
 
 protected:
     virtual void init();
-    //virtual void* self() { return this; }
+    // virtual void* self() { return this; }
 
-    //std::unique_ptr<uv_connect_t> _connectReq;
+    // std::unique_ptr<uv_connect_t> _connectReq;
     uv_connect_t* _connectReq;
     SocketMode _mode;
 };
@@ -101,5 +102,6 @@ protected:
 
 
 #endif // SCY_Net_TCPSocket_H
+
 
 /// @\}

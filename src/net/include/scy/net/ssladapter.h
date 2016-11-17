@@ -13,13 +13,13 @@
 #define SCY_Net_SSLAdapter_H
 
 
-#include "scy/uv/uvpp.h"
 #include "scy/net/address.h"
 #include "scy/net/types.h"
+#include "scy/uv/uvpp.h"
 
-#include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 #include <string>
 #include <vector>
 
@@ -39,10 +39,10 @@ public:
     ~SSLAdapter();
 
     /// Initializes the SSL context as a client.
-    void initClient(); //SSL* ssl = nullptr);
+    void initClient(); // SSL* ssl = nullptr);
 
     /// Initializes the SSL context as a server.
-    void initServer(); //SSL* ssl = nullptr);
+    void initServer(); // SSL* ssl = nullptr);
 
     /// Returns true when SSL context has been initialized.
     bool initialized() const;
@@ -78,9 +78,10 @@ protected:
 
     net::SSLSocket* _socket;
     SSL* _ssl;
-    BIO* _readBIO; ///< The incoming buffer we write encrypted SSL data into
+    BIO* _readBIO;  ///< The incoming buffer we write encrypted SSL data into
     BIO* _writeBIO; ///<  The outgoing buffer we write to the socket
-    std::vector<char> _bufferOut; ///<  The outgoing payload to be encrypted and sent
+    std::vector<char>
+        _bufferOut; ///<  The outgoing payload to be encrypted and sent
 };
 
 
@@ -89,5 +90,6 @@ protected:
 
 
 #endif // SCY_Net_SSLAdapter_H
+
 
 /// @\}

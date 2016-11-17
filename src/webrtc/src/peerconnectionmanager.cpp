@@ -19,8 +19,9 @@ using std::endl;
 namespace scy {
 
 
-PeerConnectionManager::PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory) :
-    _factory(factory) // ? factory : webrtc::CreatePeerConnectionFactory()
+PeerConnectionManager::PeerConnectionManager(
+    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+    : _factory(factory) // ? factory : webrtc::CreatePeerConnectionFactory()
 {
 }
 
@@ -30,28 +31,34 @@ PeerConnectionManager::~PeerConnectionManager()
 }
 
 
-void PeerConnectionManager::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
+void PeerConnectionManager::sendSDP(PeerConnection* conn,
+                                    const std::string& type,
+                                    const std::string& sdp)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
+void PeerConnectionManager::sendCandidate(PeerConnection* conn,
+                                          const std::string& mid,
+                                          int mlineindex,
+                                          const std::string& sdp)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::recvSDP(const std::string& peerid, const json::Value& message)
+void PeerConnectionManager::recvSDP(const std::string& peerid,
+                                    const json::Value& message)
 {
-    auto conn = PeerConnectionManager::get(peerid, false);
+    auto conn= PeerConnectionManager::get(peerid, false);
     if (!conn) {
         assert(0 && "peer mismath");
         return;
     }
 
-    std::string type = message.get(kSessionDescriptionTypeName, "").asString();
-    std::string sdp = message.get(kSessionDescriptionSdpName, "").asString();
+    std::string type= message.get(kSessionDescriptionTypeName, "").asString();
+    std::string sdp= message.get(kSessionDescriptionSdpName, "").asString();
     if (sdp.empty() || (type != "offer" && type != "answer")) {
         ErrorL << "Received bad sdp: " << type << ": " << sdp << endl;
         assert(0 && "bad sdp");
@@ -64,17 +71,18 @@ void PeerConnectionManager::recvSDP(const std::string& peerid, const json::Value
 }
 
 
-void PeerConnectionManager::recvCandidate(const std::string& peerid, const json::Value& message)
+void PeerConnectionManager::recvCandidate(const std::string& peerid,
+                                          const json::Value& message)
 {
-    auto conn = PeerConnectionManager::get(peerid, false);
+    auto conn= PeerConnectionManager::get(peerid, false);
     if (!conn) {
         assert(0 && "peer mismath");
         return;
     }
 
-    std::string mid = message.get(kCandidateSdpMidName, "").asString();
-    int mlineindex = message.get(kCandidateSdpMlineIndexName, -1).asInt();
-    std::string sdp = message.get(kCandidateSdpName, "").asString();
+    std::string mid= message.get(kCandidateSdpMidName, "").asString();
+    int mlineindex= message.get(kCandidateSdpMlineIndexName, -1).asInt();
+    std::string sdp= message.get(kCandidateSdpName, "").asString();
     if (mlineindex == -1 || mid.empty() || sdp.empty()) {
         ErrorL << "Invalid candidate format" << endl;
         assert(0 && "bad candiate");
@@ -87,13 +95,15 @@ void PeerConnectionManager::recvCandidate(const std::string& peerid, const json:
 }
 
 
-void PeerConnectionManager::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onAddRemoteStream(
+    PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onRemoveRemoteStream(
+    PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
@@ -113,7 +123,8 @@ void PeerConnectionManager::onClosed(PeerConnection* conn)
 }
 
 
-void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& error)
+void PeerConnectionManager::onFailure(PeerConnection* conn,
+                                      const std::string& error)
 {
     DebugL << "Deleting peer connection: " << conn->peerid() << endl;
 
@@ -129,5 +140,6 @@ webrtc::PeerConnectionFactoryInterface* PeerConnectionManager::factory() const
 
 
 } // namespace scy
+
 
 /// @\}

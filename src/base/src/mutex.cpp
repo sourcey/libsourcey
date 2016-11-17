@@ -49,4 +49,5 @@ bool Mutex::tryLock()
 
 } // namespace scy
 
+
 /// @\}

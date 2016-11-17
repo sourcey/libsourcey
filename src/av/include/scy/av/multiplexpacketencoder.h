@@ -15,8 +15,8 @@
 
 #include "scy/base.h"
 #ifdef HAVE_FFMPEG
-#include "scy/packetstream.h"
 #include "scy/av/multiplexencoder.h"
+#include "scy/packetstream.h"
 
 
 namespace scy {
@@ -25,10 +25,12 @@ namespace av {
 /// Encodes and multiplexes a realtime video stream form
 /// audio / video capture sources.
 /// FFmpeg is used for encoding.
-class MultiplexPacketEncoder: public MultiplexEncoder, public PacketProcessor
+class MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
 {
 public:
-    MultiplexPacketEncoder(const EncoderOptions& options = EncoderOptions()); //, bool muxLiveStreams = false
+    MultiplexPacketEncoder(
+        const EncoderOptions& options=
+            EncoderOptions()); //, bool muxLiveStreams = false
     /// MultiplexPacketEncoder(bool muxLiveStreams = false);
     virtual ~MultiplexPacketEncoder();
 
@@ -43,7 +45,8 @@ protected:
 
     friend class PacketStream;
 
-    mutable Mutex _mutex;    /// bool _muxLiveStreams;    /// VideoPacket* _lastVideoPacket;
+    mutable Mutex
+        _mutex; /// bool _muxLiveStreams;    /// VideoPacket* _lastVideoPacket;
 };
 
 

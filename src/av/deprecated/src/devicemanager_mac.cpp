@@ -27,64 +27,67 @@ namespace scy {
 namespace av {
 
 
-IDeviceManager* DeviceManagerFactory::create() {
-  return new MacDeviceManager();
+IDeviceManager* DeviceManagerFactory::create()
+{
+    return new MacDeviceManager();
 }
 
 
-class MacDeviceWatcher: public DeviceWatcher {
- public:
-  explicit MacDeviceWatcher(IDeviceManager* dm);
-  virtual ~MacDeviceWatcher();
-  virtual bool start();
-  virtual void stop();
+class MacDeviceWatcher : public DeviceWatcher
+{
+public:
+    explicit MacDeviceWatcher(IDeviceManager* dm);
+    virtual ~MacDeviceWatcher();
+    virtual bool start();
+    virtual void stop();
 
- private:
-  IDeviceManager* manager_;
-  DeviceWatcherImpl* impl_;
+private:
+    IDeviceManager* manager_;
+    DeviceWatcherImpl* impl_;
 };
 
 
-static const char* kFilteredAudioDevicesName[] = {
+static const char* kFilteredAudioDevicesName[]= {
     NULL,
 };
 // TODO: Try to get hold of a copy of Final Cut to understand
 // why we crash while scanning their components on OS X.
-static const char* const kFilteredVideoDevicesName[] =  {
-    "Google Camera Adapter",   // Our own magiccams
-    "DVCPRO HD",               // Final cut
-    "Sonix SN9C201p",          // Crashes in OpenAComponent and CloseComponent
+static const char* const kFilteredVideoDevicesName[]= {
+    "Google Camera Adapter", // Our own magiccams
+    "DVCPRO HD",             // Final cut
+    "Sonix SN9C201p",        // Crashes in OpenAComponent and CloseComponent
     NULL,
 };
-static const int kVideoDeviceOpenAttempts = 3;
-static const std::uint32_t kAudioDeviceNameLength = 64;
+static const int kVideoDeviceOpenAttempts= 3;
+static const std::uint32_t kAudioDeviceNameLength= 64;
 // Obj-C functions defined in DeviceManager_MAC.mm
 // TODO: have a shared header for these function defines.
 extern DeviceWatcherImpl* CreateDeviceWatcherCallback(IDeviceManager* dm);
 extern void ReleaseDeviceWatcherCallback(DeviceWatcherImpl* impl);
 extern bool GetAVFoundationVideoDevices(std::vector<Device>* out);
 // static bool getAudioDeviceIDs(bool inputs, std::vector<AudioDeviceID>* out);
-// static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string* out);
+// static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string*
+// out);
 
 
-MacDeviceManager::MacDeviceManager() 
+MacDeviceManager::MacDeviceManager()
 {
-  setWatcher(new MacDeviceWatcher(this));
+    setWatcher(new MacDeviceWatcher(this));
 }
 
 
-MacDeviceManager::~MacDeviceManager() 
+MacDeviceManager::~MacDeviceManager()
 {
 }
 
 
-bool MacDeviceManager::getCameras(std::vector<Device>& devices) 
+bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 {
-  devices.clear();
-  if (!GetAVFoundationVideoDevices(&devices)) {
-    return false;
-  }
-  return filterDevices(devices, kFilteredVideoDevicesName);
+    devices.clear();
+    if (!GetAVFoundationVideoDevices(&devices)) {
+        return false;
+    }
+    return filterDevices(devices, kFilteredVideoDevicesName);
 }
 
 
@@ -174,10 +177,11 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 // }
 
 
-MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager) : 
-    DeviceWatcher(manager),
-    manager_(manager),
-    impl_(NULL) {
+MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager)
+    : DeviceWatcher(manager)
+    , manager_(manager)
+    , impl_(NULL)
+{
 }
 
 
@@ -186,21 +190,21 @@ MacDeviceWatcher::~MacDeviceWatcher()
 }
 
 
-bool MacDeviceWatcher::start() 
+bool MacDeviceWatcher::start()
 {
-  if (!impl_) {
-    impl_ = CreateDeviceWatcherCallback(manager_);
-  }
-  return impl_ != NULL;
+    if (!impl_) {
+        impl_= CreateDeviceWatcherCallback(manager_);
+    }
+    return impl_ != NULL;
 }
 
 
-void MacDeviceWatcher::stop() 
+void MacDeviceWatcher::stop()
 {
-  if (impl_) {
-    ReleaseDeviceWatcherCallback(impl_);
-    impl_ = NULL;
-  }
+    if (impl_) {
+        ReleaseDeviceWatcherCallback(impl_);
+        impl_= NULL;
+    }
 }
 
 

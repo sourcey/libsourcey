@@ -1,12 +1,12 @@
+#include "scy/archo/zipfile.h"
 #include "scy/base.h"
-#include "scy/platform.h"
 #include "scy/filesystem.h"
 #include "scy/logger.h"
+#include "scy/platform.h"
 #include "scy/util.h"
-#include "scy/archo/zipfile.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <stdexcept>
 
 
@@ -21,10 +21,7 @@ namespace archo {
 class Tests
 {
 public:
-    Tests()
-    {
-        testUnzip();
-    }
+    Tests() { testUnzip(); }
 
     void testUnzip()
     {

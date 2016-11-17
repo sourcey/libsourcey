@@ -13,11 +13,11 @@
 #define SCY_Application_H
 
 
-#include "scy/uv/uvpp.h"
 #include "scy/util.h"
+#include "scy/uv/uvpp.h"
 #include <functional>
-#include <vector>
 #include <map>
+#include <vector>
 
 
 namespace scy {
@@ -45,7 +45,7 @@ public:
     /// event loop will be used.
     uv::Loop* loop;
 
-    Application(uv::Loop* loop = uv::defaultLoop());
+    Application(uv::Loop* loop= uv::defaultLoop());
     ~Application();
 
     void run();
@@ -57,19 +57,21 @@ public:
     //
 
     /// Bind the shutdown signal.
-    void bindShutdownSignal(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
+    void bindShutdownSignal(std::function<void(void*)> callback= nullptr,
+                            void* opaque= nullptr);
 
     /// Bind the shutdown signal and run the main event loop.
-    void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
+    void waitForShutdown(std::function<void(void*)> callback= nullptr,
+                         void* opaque= nullptr);
 
-    static void onShutdownSignal(uv_signal_t *req, int signum);
+    static void onShutdownSignal(uv_signal_t* req, int signum);
     static void onPrintHandle(uv_handle_t* handle, void* arg);
 
 protected:
-    Application(const Application&) = delete;
-    Application(Application&&) = delete;
-    Application& operator=(const Application&) = delete;
-    Application& operator=(Application&&) = delete;
+    Application(const Application&)= delete;
+    Application(Application&&)= delete;
+    Application& operator=(const Application&)= delete;
+    Application& operator=(Application&&)= delete;
 };
 
 
@@ -87,20 +89,19 @@ struct OptionParser
 
     OptionParser(int argc, char* argv[], const char* delim); // "--"
 
-    bool has(const char* key) {
-        return args.find(key) != args.end();
-    }
+    bool has(const char* key) { return args.find(key) != args.end(); }
 
-    std::string get(const char* key) {
-        OptionMap::const_iterator it = args.find(key);
+    std::string get(const char* key)
+    {
+        OptionMap::const_iterator it= args.find(key);
         if (it != args.end())
             return it->second;
         return std::string();
     }
 
-    template<typename NumericType>
-    NumericType get(const char* key) {
-        OptionMap::const_iterator it = args.find(key);
+    template <typename NumericType> NumericType get(const char* key)
+    {
+        OptionMap::const_iterator it= args.find(key);
         if (it != args.end())
             return util::strtoi<NumericType>(it->second);
     }
@@ -111,5 +112,6 @@ struct OptionParser
 
 
 #endif // SCY_Application_H
+
 
 /// @\}

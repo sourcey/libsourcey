@@ -25,7 +25,7 @@ namespace http {
 /// Defines the common properties of all HTTP messages.
 /// These are version, content length, content type
 /// and transfer encoding.
-class Message: public NVCollection
+class Message : public NVCollection
 {
 public:
     /// Sets the HTTP version for this message.
@@ -90,7 +90,8 @@ public:
     void setKeepAlive(bool keepAlive);
 
     /// Returns true if
-    ///   * the message has a Connection header field and its value is "Keep-Alive"
+    ///   * the message has a Connection header field and its value is
+    ///   "Keep-Alive"
     ///   * the message is a HTTP/1.1 message and not Connection header is set
     /// Returns false otherwise.
     bool getKeepAlive() const;
@@ -109,7 +110,7 @@ public:
     static const std::string IDENTITY_TRANSFER_ENCODING;
     static const std::string CHUNKED_TRANSFER_ENCODING;
 
-    static const int         UNKNOWN_CONTENT_LENGTH;
+    static const int UNKNOWN_CONTENT_LENGTH;
     static const std::string UNKNOWN_CONTENT_TYPE;
 
     static const std::string CONTENT_LENGTH;
@@ -143,6 +144,7 @@ private:
 
 
 #endif // SCY_HTTP_Message_H
+
 
 /// @\}
 

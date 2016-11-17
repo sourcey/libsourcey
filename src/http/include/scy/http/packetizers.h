@@ -13,8 +13,8 @@
 #define SCY_HTTP_Packetizers_H
 
 
-#include "scy/signal.h"
 #include "scy/http/connection.h"
+#include "scy/signal.h"
 #include <sstream>
 
 
@@ -27,7 +27,7 @@ namespace http {
 //
 
 
-class ChunkedAdapter: public IPacketizer
+class ChunkedAdapter : public IPacketizer
 {
 public:
     Connection* connection;
@@ -36,27 +36,27 @@ public:
     bool initial;
     bool nocopy;
 
-    ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true) :
-        PacketProcessor(this->emitter),
-        connection(connection),
-        contentType(connection->outgoingHeader()->getContentType()),
-        initial(true)
+    ChunkedAdapter(Connection* connection= nullptr,
+                   const std::string& frameSeparator= "", bool nocopy= true)
+        : PacketProcessor(this->emitter)
+        , connection(connection)
+        , contentType(connection->outgoingHeader()->getContentType())
+        , initial(true)
     {
     }
 
-    ChunkedAdapter(const std::string& contentType, const std::string& frameSeparator = "", bool nocopy = true) :
-        PacketProcessor(this->emitter),
-        connection(nullptr),
-        contentType(contentType),
-        frameSeparator(frameSeparator),
-        initial(true),
-        nocopy(nocopy)
+    ChunkedAdapter(const std::string& contentType,
+                   const std::string& frameSeparator= "", bool nocopy= true)
+        : PacketProcessor(this->emitter)
+        , connection(nullptr)
+        , contentType(contentType)
+        , frameSeparator(frameSeparator)
+        , initial(true)
+        , nocopy(nocopy)
     {
     }
 
-    virtual ~ChunkedAdapter()
-    {
-    }
+    virtual ~ChunkedAdapter() {}
 
     /// Sets HTTP headers for the initial response.
     /// This method must not include the final carriage return.
@@ -66,8 +66,11 @@ public:
         if (connection) {
             connection->shouldSendHeader(true);
             connection->response().setChunkedTransferEncoding(true);
-            connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
-            connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
+            connection->response().set(
+                "Cache-Control",
+                "no-store, no-cache, max-age=0, must-revalidate");
+            connection->response().set("Cache-Control",
+                                       "post-check=0, pre-check=0, FALSE");
             connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Content-Type", contentType);
@@ -80,10 +83,12 @@ public:
         else {
             std::ostringstream hst;
             hst << "HTTP/1.1 200 OK\r\n"
-                // Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110)
+                // Note: If Cache-Control: no-store is not used Chrome's
+                // (27.0.1453.110)
                 // memory usage grows exponentially for HTTP streaming:
                 // https://code.google.com/p/chromium/issues/detail?id=28035
-                << "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
+                << "Cache-Control: no-store, no-cache, max-age=0, "
+                   "must-revalidate\r\n"
                 << "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
                 << "Access-Control-Allow-Origin: *\r\n"
                 << "Connection: keep-alive\r\n"
@@ -98,13 +103,14 @@ public:
 
     virtual void process(IPacket& packet)
     {
-        traceL("ChunkedAdapter", this) << "Processing: " << packet.size() << std::endl;
+        traceL("ChunkedAdapter", this) << "Processing: " << packet.size()
+                                       << std::endl;
 
         if (!packet.hasData())
             throw std::invalid_argument("Incompatible packet type");
         // Emit HTTP response header
         if (initial) {
-            initial = false;
+            initial= false;
             emitHeader();
         }
         // Get hex stream length
@@ -139,7 +145,7 @@ public:
 //
 
 
-class MultipartAdapter: public IPacketizer
+class MultipartAdapter : public IPacketizer
 {
 public:
     Connection* connection;
@@ -147,36 +153,38 @@ public:
     bool isBase64;
     bool initial;
 
-    MultipartAdapter(Connection* connection, bool base64 = false) :
-        IPacketizer(this->emitter),
-        connection(connection),
-        contentType(connection->outgoingHeader()->getContentType()),
-        isBase64(base64),
-        initial(true)
+    MultipartAdapter(Connection* connection, bool base64= false)
+        : IPacketizer(this->emitter)
+        , connection(connection)
+        , contentType(connection->outgoingHeader()->getContentType())
+        , isBase64(base64)
+        , initial(true)
     {
     }
 
-    MultipartAdapter(const std::string& contentType, bool base64 = false) :
-        IPacketizer(this->emitter),
-        connection(nullptr),
-        contentType(contentType),
-        isBase64(base64),
-        initial(true)
+    MultipartAdapter(const std::string& contentType, bool base64= false)
+        : IPacketizer(this->emitter)
+        , connection(nullptr)
+        , contentType(contentType)
+        , isBase64(base64)
+        , initial(true)
     {
     }
 
-    virtual ~MultipartAdapter()
-    {
-    }
+    virtual ~MultipartAdapter() {}
 
     virtual void emitHeader()
     {
         // Flush connection headers if the connection is set.
         if (connection) {
             connection->shouldSendHeader(true);
-            connection->response().set("Content-Type", "multipart/x-mixed-replace; boundary=end");
-            connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
-            connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
+            connection->response().set(
+                "Content-Type", "multipart/x-mixed-replace; boundary=end");
+            connection->response().set(
+                "Cache-Control",
+                "no-store, no-cache, max-age=0, must-revalidate");
+            connection->response().set("Cache-Control",
+                                       "post-check=0, pre-check=0, FALSE");
             connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Connection", "keep-alive");
@@ -189,7 +197,8 @@ public:
             std::ostringstream hst;
             hst << "HTTP/1.1 200 OK\r\n"
                 << "Content-Type: multipart/x-mixed-replace; boundary=end\r\n"
-                << "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
+                << "Cache-Control: no-store, no-cache, max-age=0, "
+                   "must-revalidate\r\n"
                 << "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
                 << "Access-Control-Allow-Origin: *\r\n"
                 << "Pragma: no-cache\r\n"
@@ -218,7 +227,7 @@ public:
     {
         // Write the initial HTTP response header
         if (initial) {
-            initial = false;
+            initial= false;
             emitHeader();
         }
         // Broadcast the HTTP header separately
@@ -238,5 +247,6 @@ public:
 
 
 #endif
+
 
 /// @\}

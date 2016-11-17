@@ -18,21 +18,21 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
-#include "scy/av/format.h"
 #include "scy/av/ffmpeg.h"
+#include "scy/av/format.h"
 #include "scy/av/fpscounter.h"
+#include "scy/av/types.h"
 #include "scy/av/videoconverter.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 // #include <libavutil/fifo.h>
+#include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
-#include <libavutil/avutil.h>
-#include <libavutil/imgutils.h>
 }
 
 
@@ -67,18 +67,18 @@ struct VideoContext
 
     PacketSignal emitter;
 
-    VideoCodec iparams;      ///< input parameters
-    VideoCodec oparams;      ///< output parameters
-    AVStream* stream;        ///< encoder or decoder stream
-    AVCodecContext* ctx;     ///< encoder or decoder context
-    AVCodec* codec;          ///< encoder or decoder codec
-    AVFrame* frame;          ///< encoder or decoder frame
-    VideoConverter* conv;    ///< video conversion context
+    VideoCodec iparams;   ///< input parameters
+    VideoCodec oparams;   ///< output parameters
+    AVStream* stream;     ///< encoder or decoder stream
+    AVCodecContext* ctx;  ///< encoder or decoder context
+    AVCodec* codec;       ///< encoder or decoder codec
+    AVFrame* frame;       ///< encoder or decoder frame
+    VideoConverter* conv; ///< video conversion context
     /// FPSCounter fps;          ///< encoder or decoder fps rate
     /// double pts;              ///< pts in decimal seconds
-    std::int64_t time;       ///< stream time in nanoseconds
-    std::int64_t pts;        ///< last packet pts value
-    std::string error;       ///< error message
+    std::int64_t time; ///< stream time in nanoseconds
+    std::int64_t pts;  ///< last packet pts value
+    std::string error; ///< error message
 };
 
 
@@ -88,7 +88,8 @@ struct VideoContext
 
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
-void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
+void initVideoCodecFromContext(const AVStream* stream,
+                               const AVCodecContext* ctx, VideoCodec& params);
 
 
 } // namespace av
@@ -97,5 +98,6 @@ void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx
 
 #endif
 #endif // SCY_AV_VideoContext_H
+
 
 /// @\}

@@ -19,23 +19,21 @@
 namespace scy {
 
 
-/// @addtogroup util
-/// @{///
-
 struct IUser
 {
-    virtual std::string username() const = 0;
-    virtual std::string password() const = 0;
+    virtual std::string username() const= 0;
+    virtual std::string password() const= 0;
 };
 
 
-class BasicUser: public IUser
+class BasicUser : public IUser
 {
 public:
-    BasicUser(const std::string& username,
-              const std::string& password = "") :
-        _username(username),
-        _password(password) {}
+    BasicUser(const std::string& username, const std::string& password= "")
+        : _username(username)
+        , _password(password)
+    {
+    }
 
     std::string username() const { return _username; }
     std::string password() const { return _password; }
@@ -48,30 +46,31 @@ protected:
 
 typedef std::map<std::string, IUser*> IUserMap;
 
+
 /// @deprecated
 /// This class contains a list of users that have access
 /// on the system.
-class UserManager: public LiveCollection<std::string, IUser>
+class UserManager : public LiveCollection<std::string, IUser>
 {
 public:
-    typedef LiveCollection<std::string, IUser>    Manager;
-    typedef Manager::Map                          Map;
+    typedef LiveCollection<std::string, IUser> Manager;
+    typedef Manager::Map Map;
 
 public:
-    UserManager() {};
-    virtual ~UserManager() {};
+    UserManager(){};
+    virtual ~UserManager(){};
 
-    virtual bool add(IUser* user) {
+    virtual bool add(IUser* user)
+    {
         return Manager::add(user->username(), user);
     };
 };
-
-/// @\}
 
 
 } // namespace scy
 
 
 #endif // SCY_UserManager_H
+
 
 /// @\}

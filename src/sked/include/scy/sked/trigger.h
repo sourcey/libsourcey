@@ -24,43 +24,43 @@ namespace sked {
 /// Days of the week
 enum DaysOfTheWeek
 {
-    Sunday = 0,
-    Monday = 1,
-    Tuesday = 2,
-    Wednesday = 3,
-    Thursday = 4,
-    Friday = 5,
-    Saturday = 6
+    Sunday= 0,
+    Monday= 1,
+    Tuesday= 2,
+    Wednesday= 3,
+    Thursday= 4,
+    Friday= 5,
+    Saturday= 6
 };
 
 
 /// Months of the year
 enum MonthOfTheYeay
 {
-    January = 0,
-    February = 1,
-    March = 2,
-    April = 3,
-    May = 4,
-    June = 5,
-    July = 6,
-    August = 7,
-    September = 8,
-    October = 9,
-    November = 10,
-    December = 11
+    January= 0,
+    February= 1,
+    March= 2,
+    April= 3,
+    May= 4,
+    June= 5,
+    July= 6,
+    August= 7,
+    September= 8,
+    October= 9,
+    November= 10,
+    December= 11
 };
 
 
 // ---------------------------------------------------------------------
 //
-struct Trigger: public json::ISerializable
+struct Trigger : public json::ISerializable
 {
-    Trigger(const std::string& type = "", const std::string& name = "");
+    Trigger(const std::string& type= "", const std::string& name= "");
 
     /// Updates the scheduleAt value to the
     /// next scheduled time.
-    virtual void update() = 0;
+    virtual void update()= 0;
 
     /// Returns the milliseconds remaining
     /// until the next scheduled timeout.
@@ -101,11 +101,12 @@ struct Trigger: public json::ISerializable
 
 // ---------------------------------------------------------------------
 //
-struct OnceOnlyTrigger: public Trigger
+struct OnceOnlyTrigger : public Trigger
 {
     OnceOnlyTrigger();
 
-    virtual void update() {
+    virtual void update()
+    {
         // Nothing to do since scheduleAt contains
         // the correct date and we run once only.
     }
@@ -116,7 +117,7 @@ struct OnceOnlyTrigger: public Trigger
 
 // ---------------------------------------------------------------------
 //
-struct IntervalTrigger: public Trigger
+struct IntervalTrigger : public Trigger
 {
     IntervalTrigger();
 
@@ -134,13 +135,12 @@ struct IntervalTrigger: public Trigger
     /// be run before it is destroyed.
     /// 0 for no effect.
     int maxTimes;
-
 };
 
 
 // ---------------------------------------------------------------------
 //
-struct DailyTrigger: public Trigger
+struct DailyTrigger : public Trigger
 {
     DailyTrigger();
 
@@ -162,5 +162,6 @@ struct DailyTrigger: public Trigger
 
 
 #endif // SCY_Sked_Trigger_H
+
 
 /// @\}

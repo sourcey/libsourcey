@@ -22,7 +22,8 @@ namespace scy {
 
 struct SharedLibrary
 {
-    /// Opens a shared library. The filename is in utf-8. Returns true on success and
+    /// Opens a shared library. The filename is in utf-8. Returns true on
+    /// success and
     /// false on error. Call `SharedLibrary::error()` to get the error message.
     bool open(const std::string& path)
     {
@@ -33,12 +34,13 @@ struct SharedLibrary
         return true;
     }
 
-    void close()    // Closes the shared library.
+    void close() // Closes the shared library.
     {
         uv_dlclose(&_lib);
     }
 
-    /// Retrieves a data pointer from a dynamic library. It is legal for a symbol to
+    /// Retrieves a data pointer from a dynamic library. It is legal for a
+    /// symbol to
     /// map to nullptr. Returns 0 on success and -1 if the symbol was not found.
     bool sym(const char* name, void** ptr)
     {
@@ -53,14 +55,11 @@ struct SharedLibrary
     {
         std::string err(uv_dlerror(&_lib));
         assert(!err.empty());
-        _error = prefix + ": " + err;
+        _error= prefix + ": " + err;
         throw std::runtime_error(prefix + ": " + err);
     }
 
-    std::string error() const
-    {
-        return _error;
-    }
+    std::string error() const { return _error; }
 
 protected:
     uv_lib_t _lib;
@@ -72,5 +71,6 @@ protected:
 
 
 #endif // SCY_SharedLibrary_H
+
 
 /// @\}

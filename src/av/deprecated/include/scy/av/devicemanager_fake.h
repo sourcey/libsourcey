@@ -26,152 +26,150 @@ namespace scy {
 namespace av {
 
 
-class FakeDeviceManager: public IDeviceManager 
+class FakeDeviceManager : public IDeviceManager
 {
 public:
     FakeDeviceManager() {}
 
-    virtual bool initialize() 
-    {
-        return true;
-    }
+    virtual bool initialize() { return true; }
 
     virtual void uninitialize() {}
 
-    virtual int getCapabilities() 
+    virtual int getCapabilities()
     {
         std::vector<Device> devices;
-        int caps = VIDEO_RECV;
+        int caps= VIDEO_RECV;
         if (!input_devices_.empty()) {
-            caps |= AUDIO_SEND;
+            caps|= AUDIO_SEND;
         }
         if (!output_devices_.empty()) {
-            caps |= AUDIO_RECV;
+            caps|= AUDIO_RECV;
         }
         if (!vidcap_devices_.empty()) {
-            caps |= VIDEO_SEND;
+            caps|= VIDEO_SEND;
         }
         return caps;
     }
 
-    virtual bool getMicrophones(std::vector<Device>& devs) {
-        devs = input_devices_;
+    virtual bool getMicrophones(std::vector<Device>& devs)
+    {
+        devs= input_devices_;
         return true;
     }
 
-    virtual bool getSpeakers(std::vector<Device>& devs) {
-        devs = output_devices_;
+    virtual bool getSpeakers(std::vector<Device>& devs)
+    {
+        devs= output_devices_;
         return true;
     }
 
-    virtual bool getMicrophone(const std::string& name, Device& out) 
+    virtual bool getMicrophone(const std::string& name, Device& out)
     {
         return getAudioDevice(true, name, out);
     }
 
-    virtual bool getSpeaker(const std::string& name, Device& out) 
+    virtual bool getSpeaker(const std::string& name, Device& out)
     {
         return getAudioDevice(false, name, out);
     }
 
-    virtual bool getCameras(std::vector<Device>& devs) 
+    virtual bool getCameras(std::vector<Device>& devs)
     {
-        devs = vidcap_devices_;
+        devs= vidcap_devices_;
         return true;
     }
 
-    virtual bool getDefaultCamera(Device& device) 
+    virtual bool getDefaultCamera(Device& device)
     {
         if (vidcap_devices_.empty()) {
             return false;
         }
-        device = vidcap_devices_[0];
+        device= vidcap_devices_[0];
         return true;
     }
 
 #ifdef OSX
     bool QtKitToSgDevice(const std::string& qtkit_name, Device& out)
     {
-        out->name = qtkit_name;
-        out->id = "sg:" + qtkit_name;
+        out->name= qtkit_name;
+        out->id= "sg:" + qtkit_name;
         return true;
     }
 #endif
 
-    void setMicrophones(const std::vector<Device>& devices) 
+    void setMicrophones(const std::vector<Device>& devices)
     {
-        //for (std::size_t i = 0; i < devices.size(); ++i) {    
-    ///    input_devices_.push_back(Device(devices[i], i));
+        // for (std::size_t i = 0; i < devices.size(); ++i) {
+        ///    input_devices_.push_back(Device(devices[i], i));
         //}
-        //input_devices_.clear();
+        // input_devices_.clear();
 
-        //DevicesChanged();
-        input_devices_ = devices;
-
+        // DevicesChanged();
+        input_devices_= devices;
     }
 
-    void setSpeakers(const std::vector<Device>& devices) 
+    void setSpeakers(const std::vector<Device>& devices)
     {
-        //for (std::size_t i = 0; i < devices.size(); ++i) {    
-    ///    output_devices_.push_back(Device(devices[i], i));
-        //}        
-        //output_devices_.clear();
+        // for (std::size_t i = 0; i < devices.size(); ++i) {
+        ///    output_devices_.push_back(Device(devices[i], i));
+        //}
+        // output_devices_.clear();
 
-        //DevicesChanged();
-        output_devices_ = devices;
-
+        // DevicesChanged();
+        output_devices_= devices;
     }
 
-    void setCameras(const std::vector<Device>& devices) 
+    void setCameras(const std::vector<Device>& devices)
     {
-        //for (std::size_t i = 0; i < devices.size(); ++i) {    
-    ///    vidcap_devices_.push_back(Device(devices[i], i));
-        //}        
-        //vidcap_devices_.clear();
+        // for (std::size_t i = 0; i < devices.size(); ++i) {
+        ///    vidcap_devices_.push_back(Device(devices[i], i));
+        //}
+        // vidcap_devices_.clear();
 
-        //DevicesChanged();
-        vidcap_devices_ = devices;
-
+        // DevicesChanged();
+        vidcap_devices_= devices;
     }
 
 
-    virtual bool getCamera(const std::string& name, Device& out) 
+    virtual bool getCamera(const std::string& name, Device& out)
     {
-            if (vidcap_devices_.empty())
-                return false;
+        if (vidcap_devices_.empty())
+            return false;
 
-            // If the name is empty, return the default device.
-            if (name.empty() || name == kDefaultDeviceName) {
-                out = vidcap_devices_[0];
+        // If the name is empty, return the default device.
+        if (name.empty() || name == kDefaultDeviceName) {
+            out= vidcap_devices_[0];
+            return true;
+        }
+
+        return findDeviceByName(vidcap_devices_, name, out);
+    }
+
+    bool getAudioDevice(bool input, const std::string& name, Device& out)
+    {
+        // If the name is empty, return the default device.
+        // if (name.empty() || name == kDefaultDeviceName) {
+        //    out = Device(name, -1);
+        //    return true;
+        //}
+
+        return findDeviceByName((input ? input_devices_ : output_devices_),
+                                name, out);
+    }
+
+    static bool findDeviceByName(const std::vector<Device>& devices,
+                                 const std::string& name, Device& out)
+    {
+        for (std::vector<Device>::const_iterator it= devices.begin();
+             it != devices.end(); ++it) {
+            if (name == it->name) {
+                out= *it;
                 return true;
             }
-
-            return findDeviceByName(vidcap_devices_, name, out);
+        }
+        return false;
     }
 
-    bool getAudioDevice(bool input, const std::string& name, Device& out) 
-    {
-            // If the name is empty, return the default device.
-            //if (name.empty() || name == kDefaultDeviceName) {
-            //    out = Device(name, -1);
-            //    return true;
-            //}
-
-            return findDeviceByName((input ? input_devices_ : output_devices_),
-                name, out);
-    }
-
-    static bool findDeviceByName(const std::vector<Device>& devices, const std::string& name, Device& out) 
-    {
-            for (std::vector<Device>::const_iterator it = devices.begin();
-                it != devices.end(); ++it) {
-                    if (name == it->name) {
-                        out = *it;
-                        return true;
-                    }
-            }
-            return false;
-    }
 private:
     std::vector<Device> input_devices_;
     std::vector<Device> output_devices_;
@@ -183,7 +181,7 @@ private:
 } // namespace scy
 
 
-#endif  // SCY_AV_DeviceManager_FAKE_H
+#endif // SCY_AV_DeviceManager_FAKE_H
 
 
 /*

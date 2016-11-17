@@ -20,8 +20,8 @@ namespace scy {
 namespace json {
 
 
-Configuration::Configuration() :
-    _loaded(false)
+Configuration::Configuration()
+    : _loaded(false)
 {
 }
 
@@ -33,7 +33,7 @@ Configuration::~Configuration()
 
 void Configuration::load(const std::string& path, bool create)
 {
-    _path = path;
+    _path= path;
     load(create);
 }
 
@@ -43,22 +43,22 @@ void Configuration::load(bool /* create */)
     Mutex::ScopedLock lock(_mutex);
 
     if (_path.empty())
-        throw std::runtime_error("Cannot load configuration: File path not set.");
+        throw std::runtime_error(
+            "Cannot load configuration: File path not set.");
 
     DebugL << "Load: " << _path << endl;
 
     try {
-        //if (create && !fs::exists(_path))
+        // if (create && !fs::exists(_path))
         //    fs::createFile(_path);
 
         json::loadFile(_path, root);
-    }
-    catch (...) {
+    } catch (...) {
         // The config file may be empty,
         // but the path is set so we can save.
     }
 
-    _loaded = true;
+    _loaded= true;
 }
 
 
@@ -67,7 +67,8 @@ void Configuration::save()
     Mutex::ScopedLock lock(_mutex);
 
     if (_path.empty())
-        throw std::runtime_error("Cannot save: Configuration file path must be set.");
+        throw std::runtime_error(
+            "Cannot save: Configuration file path must be set.");
 
     DebugL << "save: " << _path << endl;
 
@@ -110,8 +111,8 @@ void Configuration::removeAll(const std::string& baseKey)
     TraceL << "remove all: " << baseKey << endl;
     Mutex::ScopedLock lock(_mutex);
 
-    json::Value::Members members = root.getMemberNames();
-    for (unsigned i = 0; i < members.size(); i++) {
+    json::Value::Members members= root.getMemberNames();
+    for (unsigned i= 0; i < members.size(); i++) {
         if (members[i].find(baseKey) != std::string::npos)
             root.removeMember(members[i]);
     }
@@ -124,7 +125,7 @@ void Configuration::replace(const std::string& from, const std::string& to)
 
     std::stringstream ss;
     json::StyledWriter writer;
-    std::string data = writer.write(root);
+    std::string data= writer.write(root);
     util::replaceInPlace(data, from, to);
     ss.str(data);
 
@@ -140,7 +141,7 @@ bool Configuration::getRaw(const std::string& key, std::string& value) const
     if (!root.isMember(key))
         return false;
 
-    value = (root)[key].asString();
+    value= (root)[key].asString();
     return true;
 }
 
@@ -149,18 +150,19 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
 {
     {
         Mutex::ScopedLock lock(_mutex);
-        (root)[key] = value;
+        (root)[key]= value;
     }
-    PropertyChanged.emit(/*this, */key, value);
+    PropertyChanged.emit(/*this, */ key, value);
 }
 
 
-void Configuration::keys(std::vector<std::string>& keys, const std::string& baseKey)
+void Configuration::keys(std::vector<std::string>& keys,
+                         const std::string& baseKey)
 {
     Mutex::ScopedLock lock(_mutex);
 
-    json::Value::Members members = root.getMemberNames();
-    for (unsigned i = 0; i < members.size(); i++) {
+    json::Value::Members members= root.getMemberNames();
+    for (unsigned i= 0; i < members.size(); i++) {
         if (members[i].find(baseKey) != std::string::npos)
             keys.push_back(members[i]);
     }
@@ -169,5 +171,6 @@ void Configuration::keys(std::vector<std::string>& keys, const std::string& base
 
 } // namespace json
 } // namespace scy
+
 
 /// @\}

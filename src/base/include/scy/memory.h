@@ -15,12 +15,12 @@
 
 #include "scy/logger.h"
 #include "scy/mutex.h"
-#include "scy/uv/uvpp.h"
 #include "scy/singleton.h"
+#include "scy/uv/uvpp.h"
+#include <atomic>
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <atomic>
 #include <vector>
 
 
@@ -95,38 +95,35 @@ template<class T> struct Default
 #endif
 
 
-template<class T> struct Deferred
+template <class T> struct Deferred
 {
-    void operator()(T *ptr)
+    void operator()(T* ptr)
     {
         assert(ptr);
-        static_assert(0 < sizeof(T),
-            "can't delete an incomplete type");
+        static_assert(0 < sizeof(T), "can't delete an incomplete type");
         GarbageCollector::instance().deleteLater(ptr);
     }
 };
 
 
-template<class T> struct Dispose
+template <class T> struct Dispose
 {
-    void operator()(T *ptr)
+    void operator()(T* ptr)
     {
         assert(ptr);
-        static_assert(0 < sizeof(T),
-            "can't delete an incomplete type");
+        static_assert(0 < sizeof(T), "can't delete an incomplete type");
         ptr->dispose();
     }
 };
 
 
-template<class T> struct Array
+template <class T> struct Array
 {
-    void operator()(T *ptr)
+    void operator()(T* ptr)
     {
         assert(ptr);
-        static_assert(0 < sizeof(T),
-            "can't delete an incomplete type");
-        delete [] ptr;
+        static_assert(0 < sizeof(T), "can't delete an incomplete type");
+        delete[] ptr;
         ptr->dispose();
     }
 };
@@ -152,14 +149,14 @@ public:
 
 /// ScopedRawPointer implements the ScopedPointer interface
 /// to provide a method for deleting a raw pointer.
-template <class T, typename D = std::default_delete<T>>
-class ScopedRawPointer: public ScopedPointer
+template <class T, typename D= std::default_delete<T>>
+class ScopedRawPointer : public ScopedPointer
 {
 public:
     void* ptr;
 
-    ScopedRawPointer(void* p) :
-        ptr(p)
+    ScopedRawPointer(void* p)
+        : ptr(p)
     {
     }
 
@@ -167,7 +164,7 @@ public:
     {
         D func;
         func((T*)ptr);
-        ptr = nullptr;
+        ptr= nullptr;
     }
 };
 
@@ -179,20 +176,18 @@ public:
 /// the ScopedSharedPointer instance is deleted, which makes it useful
 /// for certain asyncronous scenarios.
 template <class T> //, typename D = std::default_delete<T>
-class ScopedSharedPointer: public ScopedPointer
+class ScopedSharedPointer : public ScopedPointer
 {
 public:
     std::shared_ptr<T> ptr;
 
-    ScopedSharedPointer(std::shared_ptr<T> p) :
-        ptr(p)
+    ScopedSharedPointer(std::shared_ptr<T> p)
+        : ptr(p)
     {
         assert(ptr);
     }
 
-    virtual ~ScopedSharedPointer()
-    {
-    }
+    virtual ~ScopedSharedPointer() {}
 };
 
 
@@ -210,7 +205,8 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 
 
 /// Schedules a shared pointer for deferred deletion.
-template <class C> inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
+template <class C>
+inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
 {
     Mutex::ScopedLock lock(_mutex);
     _pending.push_back(new ScopedSharedPointer<C>(ptr));
@@ -246,8 +242,9 @@ class SharedObject
 public:
     /// Creates the SharedObject with an
     /// initial reference count of one.
-    SharedObject(bool deferred = false) :
-        count(1), deferred(deferred)
+    SharedObject(bool deferred= false)
+        : count(1)
+        , deferred(deferred)
     {
     }
 
@@ -261,19 +258,16 @@ public:
     /// calls delete if the count reaches zero.
     void release()
     {
-        if (std::atomic_fetch_sub_explicit(&count, 1u, std::memory_order_release) == 1) {
+        if (std::atomic_fetch_sub_explicit(&count, 1u,
+                                           std::memory_order_release) == 1) {
             std::atomic_thread_fence(std::memory_order_acquire);
             freeMemory();
         }
     }
 
-    unsigned refCount() const
-    {
-        return count;
-    }
+    unsigned refCount() const { return count; }
 
 protected:
-
     /// Deletes the instance when the reference count reaches zero.
     /// This method can be overridden for different deletion strategies.
     virtual void freeMemory()
@@ -289,10 +283,10 @@ protected:
     virtual ~SharedObject() {}
 
     SharedObject(const SharedObject&);
-    SharedObject& operator = (const SharedObject&);
+    SharedObject& operator=(const SharedObject&);
 
     friend struct std::default_delete<SharedObject>;
-    //friend struct deleter::Deferred<SharedObject>;
+    // friend struct deleter::Deferred<SharedObject>;
 
     std::atomic<unsigned> count;
     bool deferred;
@@ -303,5 +297,6 @@ protected:
 
 
 #endif // SCY_Memory_H
+
 
 /// @\}

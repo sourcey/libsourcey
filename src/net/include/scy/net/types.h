@@ -32,8 +32,8 @@ namespace scy {
 namespace net {
 
 
-const int MAX_TCP_PACKET_SIZE = 64 * 1024;
-const int MAX_UDP_PACKET_SIZE = 1500;
+const int MAX_TCP_PACKET_SIZE= 64 * 1024;
+const int MAX_UDP_PACKET_SIZE= 1500;
 
 
 enum TransportType

@@ -42,7 +42,7 @@ struct Method
 /// In addition to the properties common to all HTTP messages,
 /// a HTTP request has a method (e.g. GET, HEAD, POST, etc.) and
 /// a request URI.
-class Request: public http::Message
+class Request : public http::Message
 {
 public:
     // typedef std::shared_ptr<Request> Ptr;
@@ -58,7 +58,8 @@ public:
     Request(const std::string& method, const std::string& uri);
 
     /// Creates a HTTP request with the given method, URI and version.
-    Request(const std::string& method, const std::string& uri, const std::string& version);
+    Request(const std::string& method, const std::string& uri,
+            const std::string& version);
 
     /// Destroys the Request.
     virtual ~Request();
@@ -121,7 +122,8 @@ public:
     /// information in the form of an Proxy-Authorization header.
     bool hasProxyCredentials() const;
 
-    /// Returns the proxy authentication scheme and additional proxy authentication
+    /// Returns the proxy authentication scheme and additional proxy
+    /// authentication
     /// information contained in this request.
     ///
     /// Throws a std::exception if no proxy authentication information
@@ -129,12 +131,13 @@ public:
     void getProxyCredentials(std::string& scheme, std::string& authInfo) const;
 
     /// Sets the proxy authentication scheme and information for this request.
-    void setProxyCredentials(const std::string& scheme, const std::string& authInfo);
+    void setProxyCredentials(const std::string& scheme,
+                             const std::string& authInfo);
 
     /// Writes the HTTP request to the given output stream.
     void write(std::ostream& ostr) const;
 
-    friend std::ostream& operator << (std::ostream& stream, const Request& req)
+    friend std::ostream& operator<<(std::ostream& stream, const Request& req)
     {
         req.write(stream);
         return stream;
@@ -146,11 +149,13 @@ protected:
     ///
     /// Throws a NotAuthenticatedException if no authentication information
     /// is contained in the request.
-    void getCredentials(const std::string& header, std::string& scheme, std::string& authInfo) const;
+    void getCredentials(const std::string& header, std::string& scheme,
+                        std::string& authInfo) const;
 
     /// Writes the authentication scheme and information for
     /// this request to the given header.
-    void setCredentials(const std::string& header, const std::string& scheme, const std::string& authInfo);
+    void setCredentials(const std::string& header, const std::string& scheme,
+                        const std::string& authInfo);
 
 private:
     std::string _method;
@@ -163,5 +168,6 @@ private:
 
 
 #endif
+
 
 /// @\}

@@ -2,23 +2,23 @@
 #define SCY_HTTP_Tests_H
 
 
-#include "scy/base.h"
-#include "scy/test.h"
 #include "scy/async.h"
-#include "scy/timer.h"
-#include "scy/idler.h"
-#include "scy/filesystem.h"
+#include "scy/base.h"
 #include "scy/crypto/hash.h"
-#include "scy/net/sslmanager.h"
-#include "scy/net/sslcontext.h"
-#include "scy/http/server.h"
-#include "scy/http/connection.h"
+#include "scy/filesystem.h"
 #include "scy/http/client.h"
-#include "scy/http/websocket.h"
-#include "scy/http/packetizers.h"
+#include "scy/http/connection.h"
 #include "scy/http/form.h"
-#include "scy/http/util.h"
+#include "scy/http/packetizers.h"
+#include "scy/http/server.h"
 #include "scy/http/url.h"
+#include "scy/http/util.h"
+#include "scy/http/websocket.h"
+#include "scy/idler.h"
+#include "scy/net/sslcontext.h"
+#include "scy/net/sslmanager.h"
+#include "scy/test.h"
+#include "scy/timer.h"
 
 #include "../samples/httpechoserver/httpechoserver.h"
 
@@ -43,14 +43,16 @@ namespace scy {
 
 // struct CallbackContext
 // {
-//     void onClientConnectionComplete(void* sender, const http::Response& response)
+//     void onClientConnectionComplete(void* sender, const http::Response&
+//     response)
 //     {
 //         // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 //         // << conn->readStream<std::stringstream>()->str()
 //         TraceL << "Server response: " << response  << endl;
 //     }
 //
-//     void onClientConnectionDownloadComplete(void* sender, const http::Response& response)
+//     void onClientConnectionDownloadComplete(void* sender, const
+//     http::Response& response)
 //     {
 //         // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 //         TraceL << "Server response: " << response << endl;
@@ -61,12 +63,15 @@ namespace scy {
 //         DebugL << "On response headers: " << res << endl;
 //     }
 //
-//     void onStandaloneHTTPClientConnectionPayload(void* sender, const MutableBuffer& buffer)
+//     void onStandaloneHTTPClientConnectionPayload(void* sender, const
+//     MutableBuffer& buffer)
 //     {
-//         DebugL << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+//         DebugL << "On payload: " << buffer.size() << ": " << buffer.str() <<
+//         endl;
 //     }
 //
-//     void onStandaloneHTTPClientConnectionComplete(void* sender, const http::Response& response)
+//     void onStandaloneHTTPClientConnectionComplete(void* sender, const
+//     http::Response& response)
 //     {
 //         auto self = reinterpret_cast<http::ClientConnection*>(sender);
 //         // << self->readStream<std::stringstream>()->str()
@@ -111,37 +116,32 @@ struct HTTPEchoTest
     int numSuccess;
     int numWanted;
 
-    HTTPEchoTest(int numWanted = 1) :
-        server(TEST_HTTP_PORT, new OurServerResponderFactory),
-        numSuccess(0),
-        numWanted(numWanted)
+    HTTPEchoTest(int numWanted= 1)
+        : server(TEST_HTTP_PORT, new OurServerResponderFactory)
+        , numSuccess(0)
+        , numWanted(numWanted)
     {
     }
 
-    void raiseServer()
-    {
-        server.start();
-    }
+    void raiseServer() { server.start(); }
 
-    http::ClientConnection::Ptr createConnection(const std::string& protocol, const std::string& query)
+    http::ClientConnection::Ptr createConnection(const std::string& protocol,
+                                                 const std::string& query)
     {
         std::ostringstream url;
         url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << endl;
-        conn = client.createConnection(url.str());
-        conn->Connect += slot(this, &HTTPEchoTest::onConnect);
-        conn->Headers += slot(this, &HTTPEchoTest::onHeaders);
+        conn= client.createConnection(url.str());
+        conn->Connect+= slot(this, &HTTPEchoTest::onConnect);
+        conn->Headers+= slot(this, &HTTPEchoTest::onHeaders);
         // conn->Payload += slot(this, &HTTPEchoTest::onPayload);
-        conn->Incoming.emitter += slot(this, &HTTPEchoTest::onPayload);
+        conn->Incoming.emitter+= slot(this, &HTTPEchoTest::onPayload);
 
-        conn->Complete += slot(this, &HTTPEchoTest::onComplete);
-        conn->Close += slot(this, &HTTPEchoTest::onClose);
+        conn->Complete+= slot(this, &HTTPEchoTest::onComplete);
+        conn->Close+= slot(this, &HTTPEchoTest::onClose);
         return conn;
     }
 
-    void start()
-    {
-        conn->send("PING", 4);
-    }
+    void start() { conn->send("PING", 4); }
 
     void shutdown()
     {
@@ -154,7 +154,7 @@ struct HTTPEchoTest
 
     void onConnect()
     {
-        DebugL << "On connect" <<  endl;
+        DebugL << "On connect" << endl;
 
         // Bounce backwards and forwards
         // conn->send("PING", 4);
@@ -162,7 +162,7 @@ struct HTTPEchoTest
 
     void onHeaders(http::Response& res)
     {
-        DebugL << "On headers" <<  endl;
+        DebugL << "On headers" << endl;
 
         // Start the output stream when the socket connects.
         // dataSource.start();
@@ -178,7 +178,7 @@ struct HTTPEchoTest
 
     void onPayload(IPacket& pkt)
     {
-        auto packet = dynamic_cast<RawPacket*>(&pkt);
+        auto packet= dynamic_cast<RawPacket*>(&pkt);
         std::string data(packet->data(), packet->size());
         DebugL << "On payload: " << packet->size() << ": " << data << endl;
 
@@ -187,8 +187,7 @@ struct HTTPEchoTest
 
         if (numSuccess == numWanted) {
             shutdown();
-        }
-        else {
+        } else {
             conn->send("PING", 4);
         }
     }
@@ -205,5 +204,6 @@ struct HTTPEchoTest
 
 
 #endif // SCY_HTTP_Tests_H
+
 
 /// @\}

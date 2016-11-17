@@ -13,11 +13,11 @@
 #define SCY_Timer_H
 
 
-#include "scy/uv/uvpp.h"
-#include "scy/datetime.h"
-#include "scy/signal.h"
-#include "scy/memory.h"
 #include "scy/async.h"
+#include "scy/datetime.h"
+#include "scy/memory.h"
+#include "scy/signal.h"
+#include "scy/uv/uvpp.h"
 #include <cstdint>
 #include <functional>
 
@@ -28,7 +28,7 @@ namespace scy {
 class Timer
 {
 public:
-    Timer(uv::Loop* loop = uv::defaultLoop());
+    Timer(uv::Loop* loop= uv::defaultLoop());
     virtual ~Timer();
 
     virtual void start(std::int64_t interval);
@@ -51,8 +51,10 @@ public:
 
     /// Set the repeat value. Note that if the repeat value is set from
     /// a timer callback it does not immediately take effect. If the timer
-    /// was non-repeating before, it will have been stopped. If it was repeating,
-    /// then the old repeat value will have been used to schedule the next timeout.
+    /// was non-repeating before, it will have been stopped. If it was
+    /// repeating,
+    /// then the old repeat value will have been used to schedule the next
+    /// timeout.
     virtual void setInterval(std::int64_t interval);
 
     bool active() const;
@@ -67,7 +69,7 @@ public:
 
 protected:
     Timer(const Timer&);
-    Timer& operator = (const Timer&);
+    Timer& operator=(const Timer&);
 
     virtual void init();
 
@@ -82,5 +84,6 @@ protected:
 
 
 #endif // SCY_Timer_H
+
 
 /// @\}

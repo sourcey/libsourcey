@@ -13,13 +13,13 @@
 #include "scy/logger.h"
 #include "scy/util.h"
 #include "scy/uv/uvpp.h"
-#include <sstream>
+#include <algorithm>
 #include <fstream>
 #include <memory>
-#include <algorithm>
+#include <sstream>
 #if defined(_MSC_VER) && defined(SCY_UNICODE)
-#include <locale>
 #include <codecvt>
+#include <locale>
 #endif
 
 
@@ -27,43 +27,46 @@ namespace scy {
 namespace fs {
 
 
-static const char* separatorWin = "\\";
-static const char* separatorUnix = "/";
+static const char* separatorWin= "\\";
+static const char* separatorUnix= "/";
 #ifdef SCY_WIN
-    const char delimiter = '\\';
-    const char* separator = separatorWin;
-    static const char* sepPattern = "/\\";
+const char delimiter= '\\';
+const char* separator= separatorWin;
+static const char* sepPattern= "/\\";
 #else
-    const char delimiter = '/';
-    const char* separator = separatorUnix;
-    static const char* sepPattern = "/";
+const char delimiter= '/';
+const char* separator= separatorUnix;
+static const char* sepPattern= "/";
 #endif
 
 
 std::string filename(const std::string& path)
 {
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
-    if (dirp == std::string::npos) return path;
+    std::size_t dirp= path.find_last_of(fs::sepPattern);
+    if (dirp == std::string::npos)
+        return path;
     return path.substr(dirp + 1);
 }
 
 
 std::string dirname(const std::string& path)
 {
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
-    if (dirp == std::string::npos) return "";
-    if (path.find(".", dirp) == std::string::npos) return path;
+    std::size_t dirp= path.find_last_of(fs::sepPattern);
+    if (dirp == std::string::npos)
+        return "";
+    if (path.find(".", dirp) == std::string::npos)
+        return path;
     return path.substr(0, dirp);
 }
 
 
 std::string basename(const std::string& path)
 {
-    std::size_t dotp = path.find_last_of(".");
+    std::size_t dotp= path.find_last_of(".");
     if (dotp == std::string::npos)
         return path;
 
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp= path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return path;
 
@@ -73,12 +76,12 @@ std::string basename(const std::string& path)
 
 std::string extname(const std::string& path, bool includeDot)
 {
-    std::size_t dotp = path.find_last_of(".");
+    std::size_t dotp= path.find_last_of(".");
     if (dotp == std::string::npos)
         return "";
 
     // Ensure the dot was not part of the pathname
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp= path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return "";
 
@@ -88,10 +91,10 @@ std::string extname(const std::string& path, bool includeDot)
 
 bool exists(const std::string& path)
 {
-    // Normalize is needed to ensure no
-    // trailing slash for directories or
-    // stat fails to recognize validity.
-    // TODO: Do we need transcode here?
+// Normalize is needed to ensure no
+// trailing slash for directories or
+// stat fails to recognize validity.
+// TODO: Do we need transcode here?
 #ifdef SCY_WIN
     struct _stat s;
     return _stat(fs::normalize(path).c_str(), &s) != -1;
@@ -104,7 +107,7 @@ bool exists(const std::string& path)
 
 bool isdir(const std::string& path)
 {
-    // TODO: Do we need transcode here?
+// TODO: Do we need transcode here?
 #ifdef SCY_WIN
     struct _stat s;
     _stat(fs::normalize(path).c_str(), &s);
@@ -139,22 +142,22 @@ std::int64_t filesize(const std::string& path)
 
 namespace internal {
 
-    struct FSReq
-    {
-        FSReq() {}
-        ~FSReq() { uv_fs_req_cleanup(&req); }
-        FSReq(const FSReq& req);
-        FSReq& operator=(const FSReq& req);
-        uv_fs_t req;
-    };
+struct FSReq
+{
+    FSReq() {}
+    ~FSReq() { uv_fs_req_cleanup(&req); }
+    FSReq(const FSReq& req);
+    FSReq& operator=(const FSReq& req);
+    uv_fs_t req;
+};
 
-#define FSapi(func, ...)                                        \
-    FSReq wrap;                                                 \
-    int err = uv_fs_ ## func(uv_default_loop(),                 \
-        &wrap.req, __VA_ARGS__, nullptr);                       \
-    if (err < 0)                                                \
-        uv::throwError(std::string("Filesystem error: ") +      \
-            #func + std::string(" failed"), err);               \
+#define FSapi(func, ...)                                                       \
+    FSReq wrap;                                                                \
+    int err= uv_fs_##func(uv_default_loop(), &wrap.req, __VA_ARGS__, nullptr); \
+    if (err < 0)                                                               \
+        uv::throwError(std::string("Filesystem error: ") + #func +             \
+                           std::string(" failed"),                             \
+                       err);
 
 } // namespace internal
 
@@ -163,7 +166,7 @@ void readdir(const std::string& path, std::vector<std::string>& res)
 {
     internal::FSapi(scandir, path.c_str(), 0)
 
-    uv_dirent_t dent;
+        uv_dirent_t dent;
     while (UV_EOF != uv_fs_scandir_next(&wrap.req, &dent)) {
         res.push_back(dent.name);
     }
@@ -182,26 +185,26 @@ void mkdirr(const std::string& path, int mode)
     std::string level;
     std::istringstream istr(fs::normalize(path));
 
-    while (std::getline(istr, level, fs::delimiter))
-    {
-        if (level.empty()) continue;
+    while (std::getline(istr, level, fs::delimiter)) {
+        if (level.empty())
+            continue;
 
 #ifdef SCY_WIN
-        current += level;
+        current+= level;
         if (level.at(level.length() - 1) == ':') {
-            current += fs::separator;
+            current+= fs::separator;
             continue; // skip drive letter
         }
 #else
         if (current.empty())
-            current += fs::separator;
-        current += level;
+            current+= fs::separator;
+        current+= level;
 #endif
         // create current level
         if (!fs::exists(current))
             fs::mkdir(current.c_str(), mode); // create or throw
 
-        current += fs::separator;
+        current+= fs::separator;
     }
 }
 
@@ -226,7 +229,7 @@ void rename(const std::string& path, const std::string& target)
 
 void trimslash(std::string& path)
 {
-    std::size_t dirp = path.find_last_of(sepPattern);
+    std::size_t dirp= path.find_last_of(sepPattern);
     if (dirp == path.length() - 1)
         path.resize(dirp);
 }
@@ -236,11 +239,11 @@ std::string normalize(const std::string& path)
 {
     std::string s(util::replace(path,
 #ifdef SCY_WIN
-        separatorUnix, separatorWin
+                                separatorUnix, separatorWin
 #else
-        separatorWin, separatorUnix
+                                separatorWin, separatorUnix
 #endif
-    ));
+                                ));
 
     // Trim the trailing slash for stat compatability
     trimslash(s);
@@ -251,12 +254,19 @@ std::string normalize(const std::string& path)
 std::string transcode(const std::string& path)
 {
 #if defined(_MSC_VER) && defined(SCY_UNICODE)
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> convert; // conversion between UTF-16 and UTF-8
-    std::wstring uniPath = convert.from_bytes( path ); // convert UTF-8 std::string to UTF-16 std::wstring
-    DWORD len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), nullptr, 0, nullptr, nullptr);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>
+        convert; // conversion between UTF-16 and UTF-8
+    std::wstring uniPath= convert.from_bytes(
+        path); // convert UTF-8 std::string to UTF-16 std::wstring
+    DWORD len= WideCharToMultiByte(
+        CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(),
+        static_cast<int>(uniPath.length()), nullptr, 0, nullptr, nullptr);
     if (len > 0) {
         std::unique_ptr<char[]> buffer(new char[len]);
-        DWORD rc = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), buffer.get(), static_cast<int>(len), nullptr, nullptr);
+        DWORD rc= WideCharToMultiByte(
+            CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(),
+            static_cast<int>(uniPath.length()), buffer.get(),
+            static_cast<int>(len), nullptr, nullptr);
         if (rc) {
             return std::string(buffer.get(), len);
         }
@@ -276,11 +286,12 @@ void addsep(std::string& path)
 void addnode(std::string& path, const std::string& node)
 {
     fs::addsep(path);
-    path += node;
+    path+= node;
 }
 
 
-bool savefile(const std::string& path, const char* data, std::size_t size, bool whiny)
+bool savefile(const std::string& path, const char* data, std::size_t size,
+              bool whiny)
 {
     std::ofstream ofs(path, std::ios_base::binary | std::ios_base::out);
     if (ofs.is_open())
@@ -296,5 +307,6 @@ bool savefile(const std::string& path, const char* data, std::size_t size, bool 
 
 } // namespace fs
 } // namespace scy
+
 
 /// @\}

@@ -14,8 +14,8 @@
 
 
 #include "scy/base64.h"
-#include <vector>
 #include <unzip.h> // zlib
+#include <vector>
 
 
 namespace scy {
@@ -30,11 +30,11 @@ struct ZipFile
 
     void open(const std::string& file);
     bool opened() const;
-    void close();    /// Extracts the archive contents to the given directory path.
+    void close();
+
+    /// Extracts the archive contents to the given directory path.
     void extract(const std::string& path);
-
-
-    bool extractCurrentFile(const std::string& path, bool whiny = true);
+    bool extractCurrentFile(const std::string& path, bool whiny= true);
 
     bool goToFirstFile();
     bool goToNextFile();
@@ -61,5 +61,6 @@ struct ZipFile
 
 
 #endif // SCY_Archo_ZipFile_H
+
 
 /// @\}

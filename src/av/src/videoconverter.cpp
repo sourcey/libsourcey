@@ -23,9 +23,9 @@ namespace scy {
 namespace av {
 
 
-VideoConverter::VideoConverter() :
-    ctx(nullptr),
-    oframe(nullptr)
+VideoConverter::VideoConverter()
+    : ctx(nullptr)
+    , oframe(nullptr)
 {
 }
 
@@ -38,26 +38,26 @@ VideoConverter::~VideoConverter()
 
 void VideoConverter::create()
 {
-//#if 0
+    //#if 0
     TraceS(this) << "Create:"
-        << "\n\tInput Width: " << iparams.width
-        << "\n\tInput Height: " << iparams.height
-        << "\n\tInput Pixel Format: " << iparams.pixelFmt
-        << "\n\tOutput Width: " << oparams.width
-        << "\n\tOutput Height: " << oparams.height
-        << "\n\tOutput Pixel Format: " << oparams.pixelFmt
-        << endl;
-//#endif
+                 << "\n\tInput Width: " << iparams.width
+                 << "\n\tInput Height: " << iparams.height
+                 << "\n\tInput Pixel Format: " << iparams.pixelFmt
+                 << "\n\tOutput Width: " << oparams.width
+                 << "\n\tOutput Height: " << oparams.height
+                 << "\n\tOutput Pixel Format: " << oparams.pixelFmt << endl;
+    //#endif
 
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");
 
-    oframe = createVideoFrame(av_get_pix_fmt(oparams.pixelFmt.c_str()), oparams.width, oparams.height);
+    oframe= createVideoFrame(av_get_pix_fmt(oparams.pixelFmt.c_str()),
+                             oparams.width, oparams.height);
 
-    ctx = sws_getContext(
+    ctx= sws_getContext(
         iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt.c_str()),
         oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt.c_str()),
-        /* SWS_FAST_BILINEAR */SWS_BICUBIC, nullptr, nullptr, nullptr);
+        /* SWS_FAST_BILINEAR */ SWS_BICUBIC, nullptr, nullptr, nullptr);
     if (!ctx)
         throw std::runtime_error("Invalid conversion context.");
 
@@ -71,12 +71,12 @@ void VideoConverter::close()
 
     if (oframe) {
         av_free(oframe);
-        oframe = nullptr;
+        oframe= nullptr;
     }
 
     if (ctx) {
         sws_freeContext(ctx);
-        ctx = nullptr;
+        ctx= nullptr;
     }
 
     TraceS(this) << "Closing: OK" << endl;
@@ -86,12 +86,11 @@ void VideoConverter::close()
 AVFrame* VideoConverter::convert(AVFrame* iframe)
 {
     TraceS(this) << "Convert:"
-        << "\n\tIn Format: " << iparams.pixelFmt
-        << "\n\tIn Size: " << iframe->width << "x" << iframe->height
-        << "\n\tOut Format: " << oparams.pixelFmt
-        << "\n\tOut Size: " << oparams.width << "x" << oparams.height
-        << "\n\tPTS: " << iframe->pkt_pts
-        << endl;
+                 << "\n\tIn Format: " << iparams.pixelFmt
+                 << "\n\tIn Size: " << iframe->width << "x" << iframe->height
+                 << "\n\tOut Format: " << oparams.pixelFmt
+                 << "\n\tOut Size: " << oparams.width << "x" << oparams.height
+                 << "\n\tPTS: " << iframe->pkt_pts << endl;
 
     assert(iframe);
     assert(iframe->data[0]);
@@ -101,15 +100,15 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
 
-    if (sws_scale(ctx,
-        iframe->data, iframe->linesize, 0, iparams.height,
-        oframe->data, oframe->linesize) < 0)
+    if (sws_scale(ctx, iframe->data, iframe->linesize, 0, iparams.height,
+                  oframe->data, oframe->linesize) < 0)
         throw std::runtime_error("Pixel format conversion not supported.");
 
     // Copy input frame properties to output frame
     av_frame_copy_props(oframe, iframe);
 
-    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
+    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str());
+    // //ctx->pix_fmt;
     // oframe->width  = oparams.width; //iframe->width;
     // oframe->height = oparams.height; //iframe->height;
     // oframe->pkt_pts = iframe->pkt_pts;
@@ -119,7 +118,8 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
 
     // Set the input PTS or a monotonic value to keep the encoder happy.
     // The actual setting of the PTS is outside the scope of this encoder.
-    // oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
+    // oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts :
+    // ctx->frame_number;
 
     return oframe;
 }
@@ -130,5 +130,6 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
 
 
 #endif
+
 
 /// @\}

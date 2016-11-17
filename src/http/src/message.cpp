@@ -16,29 +16,29 @@ namespace scy {
 namespace http {
 
 
-const std::string Message::HTTP_1_0                   = "HTTP/1.0";
-const std::string Message::HTTP_1_1                   = "HTTP/1.1";
-const std::string Message::IDENTITY_TRANSFER_ENCODING = "identity";
-const std::string Message::CHUNKED_TRANSFER_ENCODING  = "chunked";
-const int         Message::UNKNOWN_CONTENT_LENGTH     = -1;
+const std::string Message::HTTP_1_0= "HTTP/1.0";
+const std::string Message::HTTP_1_1= "HTTP/1.1";
+const std::string Message::IDENTITY_TRANSFER_ENCODING= "identity";
+const std::string Message::CHUNKED_TRANSFER_ENCODING= "chunked";
+const int Message::UNKNOWN_CONTENT_LENGTH= -1;
 const std::string Message::UNKNOWN_CONTENT_TYPE;
-const std::string Message::CONTENT_LENGTH             = "Content-Length";
-const std::string Message::CONTENT_TYPE               = "Content-Type";
-const std::string Message::TRANSFER_ENCODING          = "Transfer-Encoding";
-const std::string Message::CONNECTION                 = "Connection";
-const std::string Message::CONNECTION_KEEP_ALIVE      = "Keep-Alive";
-const std::string Message::CONNECTION_CLOSE           = "Close";
+const std::string Message::CONTENT_LENGTH= "Content-Length";
+const std::string Message::CONTENT_TYPE= "Content-Type";
+const std::string Message::TRANSFER_ENCODING= "Transfer-Encoding";
+const std::string Message::CONNECTION= "Connection";
+const std::string Message::CONNECTION_KEEP_ALIVE= "Keep-Alive";
+const std::string Message::CONNECTION_CLOSE= "Close";
 const std::string Message::EMPTY;
 
 
-Message::Message() :
-    _version(HTTP_1_1)
+Message::Message()
+    : _version(HTTP_1_1)
 {
 }
 
 
-Message::Message(const std::string& version) :
-    _version(version)
+Message::Message(const std::string& version)
+    : _version(version)
 {
 }
 
@@ -50,7 +50,7 @@ Message::~Message()
 
 void Message::setVersion(const std::string& version)
 {
-    _version = version;
+    _version= version;
 }
 
 
@@ -65,12 +65,11 @@ void Message::setContentLength(std::uint64_t length)
 
 std::uint64_t Message::getContentLength() const
 {
-    const std::string& contentLength = get(CONTENT_LENGTH, EMPTY);
-    if (!contentLength.empty())
-    {
+    const std::string& contentLength= get(CONTENT_LENGTH, EMPTY);
+    if (!contentLength.empty()) {
         return util::strtoi<std::uint64_t>(contentLength);
-    }
-    else return std::uint64_t(UNKNOWN_CONTENT_LENGTH);
+    } else
+        return std::uint64_t(UNKNOWN_CONTENT_LENGTH);
 }
 
 
@@ -100,7 +99,8 @@ void Message::setChunkedTransferEncoding(bool flag)
 
 bool Message::isChunkedTransferEncoding() const
 {
-    return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) == 0;
+    return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) ==
+           0;
 }
 
 
@@ -130,7 +130,7 @@ void Message::setKeepAlive(bool keepAlive)
 
 bool Message::getKeepAlive() const
 {
-    const std::string& connection = get(CONNECTION, EMPTY);
+    const std::string& connection= get(CONNECTION, EMPTY);
     if (!connection.empty())
         return util::icompare(connection, CONNECTION_CLOSE) != 0;
     else
@@ -152,7 +152,7 @@ bool Message::hasContentLength() const
 
 void Message::write(std::ostream& ostr) const
 {
-    NVCollection::ConstIterator it = begin();
+    NVCollection::ConstIterator it= begin();
     while (it != end()) {
         ostr << it->first << ": " << it->second << "\r\n";
         ++it;
@@ -162,6 +162,7 @@ void Message::write(std::ostream& ostr) const
 
 } // namespace http
 } // namespace scy
+
 
 /// @\}
 

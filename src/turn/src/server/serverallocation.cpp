@@ -23,10 +23,12 @@ namespace scy {
 namespace turn {
 
 
-ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const std::string& username, std::int64_t lifetime) :
-    IAllocation(tuple, username, lifetime),
-    _maxLifetime(server.options().allocationMaxLifetime / 1000),
-    _server(server)
+ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple,
+                                   const std::string& username,
+                                   std::int64_t lifetime)
+    : IAllocation(tuple, username, lifetime)
+    , _maxLifetime(server.options().allocationMaxLifetime / 1000)
+    , _server(server)
 {
     _server.addAllocation(this);
 }
@@ -52,7 +54,7 @@ bool ServerAllocation::handleRequest(Request& request)
     else if (request.methodType() == stun::Message::Refresh)
         handleRefreshRequest(request);
     else
-        return false; //respondError(request, 600, "Operation Not Supported");
+        return false; // respondError(request, 600, "Operation Not Supported");
 
     return true;
 }
@@ -79,12 +81,13 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     // Otherwise, the "desired lifetime" is the default lifetime.
 
     // Compute the appropriate LIFETIME for this allocation.
-    auto lifetimeAttr = request.get<stun::Lifetime>();
+    auto lifetimeAttr= request.get<stun::Lifetime>();
     if (!lifetimeAttr) {
         return;
     }
-    std::uint32_t desiredLifetime = std::min<std::uint32_t>(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
-    //lifetime = min(lifetime, lifetimeAttr->value() * 1000);
+    std::uint32_t desiredLifetime= std::min<std::uint32_t>(
+        _server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
+    // lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 
     // Subsequent processing depends on the "desired lifetime" value:
 
@@ -116,15 +119,16 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     //    already been deleted, but the client will treat this as equivalent
     //    to a success response (see below).
 
-    stun::Message response(stun::Message::SuccessResponse, stun::Message::Refresh);
+    stun::Message response(stun::Message::SuccessResponse,
+                           stun::Message::Refresh);
     response.setTransactionID(request.transactionID());
 
-    auto resLifetimeAttr = new stun::Lifetime;
+    auto resLifetimeAttr= new stun::Lifetime;
     resLifetimeAttr->setValue(desiredLifetime);
     response.add(resLifetimeAttr);
 
     _server.respond(request, response);
-    //request.socket->send(response, request.remoteAddress);
+    // request.socket->send(response, request.remoteAddress);
 }
 
 
@@ -163,24 +167,24 @@ void ServerAllocation::handleCreatePermission(Request& request)
     //   "stateless stack approach".  Retransmitted CreatePermission
     //   requests will simply refresh the permissions.
     //
-    for (int i = 0; i < _server.options().allocationMaxPermissions; i++) {
-        auto peerAttr = request.get<stun::XorPeerAddress>(i);
+    for (int i= 0; i < _server.options().allocationMaxPermissions; i++) {
+        auto peerAttr= request.get<stun::XorPeerAddress>(i);
         if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
             if (i == 0) {
                 _server.respondError(request, 400, "Bad Request");
                 return;
-            }
-            else
+            } else
                 break;
         }
         addPermission(std::string(peerAttr->address().host()));
     }
 
-    stun::Message response(stun::Message::SuccessResponse, stun::Message::CreatePermission);
+    stun::Message response(stun::Message::SuccessResponse,
+                           stun::Message::CreatePermission);
     response.setTransactionID(request.transactionID());
 
     _server.respond(request, response);
-    //request.socket->send(response, request.remoteAddress);
+    // request.socket->send(response, request.remoteAddress);
 }
 
 
@@ -197,21 +201,21 @@ bool ServerAllocation::onTimer()
 
 std::int64_t ServerAllocation::maxTimeRemaining() const
 {
-    std::int64_t elapsed =  static_cast<std::int64_t>(time(0) - _createdAt);
+    std::int64_t elapsed= static_cast<std::int64_t>(time(0) - _createdAt);
     return elapsed > _maxLifetime ? 0 : _maxLifetime - elapsed;
 }
 
 
 std::int64_t ServerAllocation::timeRemaining() const
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
 
 Server& ServerAllocation::server()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
     return _server;
 }
 
@@ -219,22 +223,20 @@ Server& ServerAllocation::server()
 void ServerAllocation::print(std::ostream& os) const
 {
     os << "ServerAllocation["
-        << "\r\tTuple=" << _tuple
-        << "\r\tUsername=" << username()
-        << "\n\tBandwidth Limit=" << bandwidthLimit()
-        << "\n\tBandwidth Used=" << bandwidthUsed()
-        << "\n\tBandwidth Remaining=" << bandwidthRemaining()
-        << "\n\tBase Time Remaining=" << IAllocation::timeRemaining()
-        << "\n\tTime Remaining=" << timeRemaining()
-        << "\n\tMax Time Remaining=" << maxTimeRemaining()
-        << "\n\tDeletable=" << IAllocation::deleted()
-        << "\n\tExpired=" << expired()
-        << "]"
-        << endl;
+       << "\r\tTuple=" << _tuple << "\r\tUsername=" << username()
+       << "\n\tBandwidth Limit=" << bandwidthLimit()
+       << "\n\tBandwidth Used=" << bandwidthUsed()
+       << "\n\tBandwidth Remaining=" << bandwidthRemaining()
+       << "\n\tBase Time Remaining=" << IAllocation::timeRemaining()
+       << "\n\tTime Remaining=" << timeRemaining()
+       << "\n\tMax Time Remaining=" << maxTimeRemaining()
+       << "\n\tDeletable=" << IAllocation::deleted()
+       << "\n\tExpired=" << expired() << "]" << endl;
 }
 
 
 } // namespace turn
 } // namespace scy
+
 
 /// @\}

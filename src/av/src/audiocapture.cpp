@@ -33,7 +33,8 @@ AudioCapture::AudioCapture()
 }
 
 
-AudioCapture::AudioCapture(const std::string& device, int channels, int sampleRate)
+AudioCapture::AudioCapture(const std::string& device, int channels,
+                           int sampleRate)
 {
     open(device, channels, sampleRate);
 }
@@ -47,17 +48,16 @@ AudioCapture::~AudioCapture()
 void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 {
     TraceS(this) << "Opening microphone: "
-        << "device=" << device << ", "
-        << "channels=" << channels << ", "
-        << "sampleRate=" << sampleRate
-        << endl;
+                 << "device=" << device << ", "
+                 << "channels=" << channels << ", "
+                 << "sampleRate=" << sampleRate << endl;
 
     DeviceManager devman;
-    auto iformat = devman.findAudioInputFormat();
+    auto iformat= devman.findAudioInputFormat();
     if (!iformat)
         throw std::runtime_error("Couldn't find microphone input format.");
 
-    AVDictionary* iparams = nullptr;
+    AVDictionary* iparams= nullptr;
     if (sampleRate > 0)
         av_dict_set_int(&iparams, "sample_rate", sampleRate, 0);
     if (channels > 0)
@@ -74,5 +74,6 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 
 
 #endif
+
 
 /// @\}

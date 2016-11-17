@@ -18,29 +18,72 @@
 // TODO: implement all possible platform formats:
 //
 // input/output: alsa, decklink, fbdev, oss, pulse, sndio, v4l2
-// input: avfoundation, bktr, dshow, dv1394, gdigrab, iec61883, jack, lavfi, openal, vfwcap, x11grab, x11grab_xcb
+// input: avfoundation, bktr, dshow, dv1394, gdigrab, iec61883, jack, lavfi,
+// openal, vfwcap, x11grab, x11grab_xcb
 // output: caca, opengl, qtkit, sdl, xv
 
 #if defined(SCY_WIN)
-    #include "scy/av/win32/directshow.h"
-    #define SCY_VIDEO_INPUTS    {"dshow", "vfwcap"}
-    #define SCY_VIDEO_OUTPUTS   {}
-    #define SCY_SCREEN_INPUTS   {"gdigrab"}
-    #define SCY_AUDIO_INPUTS    {"dsound"}
-    #define SCY_AUDIO_OUTPUTS   {"dsound"}
+#include "scy/av/win32/directshow.h"
+#define SCY_VIDEO_INPUTS                                                       \
+    {                                                                          \
+        "dshow", "vfwcap"                                                      \
+    }
+#define SCY_VIDEO_OUTPUTS                                                      \
+    {                                                                          \
+    }
+#define SCY_SCREEN_INPUTS                                                      \
+    {                                                                          \
+        "gdigrab"                                                              \
+    }
+#define SCY_AUDIO_INPUTS                                                       \
+    {                                                                          \
+        "dsound"                                                               \
+    }
+#define SCY_AUDIO_OUTPUTS                                                      \
+    {                                                                          \
+        "dsound"                                                               \
+    }
 #elif defined(SCY_APPLE)
-    #include "scy/av/apple/avfoundation.h"
-    #define SCY_VIDEO_INPUTS    {"avfoundation", "qtkit"}
-    #define SCY_VIDEO_OUTPUTS   {}
-    #define SCY_SCREEN_INPUTS   {"avfoundation"}
-    #define SCY_AUDIO_INPUTS    {"avfoundation"}
-    #define SCY_AUDIO_OUTPUTS   {"avfoundation"}
+#include "scy/av/apple/avfoundation.h"
+#define SCY_VIDEO_INPUTS                                                       \
+    {                                                                          \
+        "avfoundation", "qtkit"                                                \
+    }
+#define SCY_VIDEO_OUTPUTS                                                      \
+    {                                                                          \
+    }
+#define SCY_SCREEN_INPUTS                                                      \
+    {                                                                          \
+        "avfoundation"                                                         \
+    }
+#define SCY_AUDIO_INPUTS                                                       \
+    {                                                                          \
+        "avfoundation"                                                         \
+    }
+#define SCY_AUDIO_OUTPUTS                                                      \
+    {                                                                          \
+        "avfoundation"                                                         \
+    }
 #elif defined(SCY_LINUX)
-    #define SCY_VIDEO_INPUTS    {"v4l2", "dv1394"}
-    #define SCY_VIDEO_OUTPUTS   {}
-    #define SCY_SCREEN_INPUTS   {"x11grab"}
-    #define SCY_AUDIO_INPUTS    {"alsa", "jack", "pulse"}
-    #define SCY_AUDIO_OUTPUTS   {"alsa"}
+#define SCY_VIDEO_INPUTS                                                       \
+    {                                                                          \
+        "v4l2", "dv1394"                                                       \
+    }
+#define SCY_VIDEO_OUTPUTS                                                      \
+    {                                                                          \
+    }
+#define SCY_SCREEN_INPUTS                                                      \
+    {                                                                          \
+        "x11grab"                                                              \
+    }
+#define SCY_AUDIO_INPUTS                                                       \
+    {                                                                          \
+        "alsa", "jack", "pulse"                                                \
+    }
+#define SCY_AUDIO_OUTPUTS                                                      \
+    {                                                                          \
+        "alsa"                                                                 \
+    }
 #endif
 
 
@@ -56,26 +99,28 @@ namespace av {
 //
 
 
-Device::Device() :
-    type(Unknown), isDefault(false)
+Device::Device()
+    : type(Unknown)
+    , isDefault(false)
 {
 }
 
 
-Device::Device(Type type, const std::string& id, const std::string& name, bool isDefault) :
-    type(type), id(id), name(name), isDefault(isDefault)
+Device::Device(Type type, const std::string& id, const std::string& name,
+               bool isDefault)
+    : type(type)
+    , id(id)
+    , name(name)
+    , isDefault(isDefault)
 {
 }
 
 
 void Device::print(std::ostream& os)
 {
-    os << "Device["
-        << type << ":"
-        << name << ":"
-        << id //<< ":"
-        // << isDefault
-        << "]";
+    os << "Device[" << type << ":" << name << ":" << id //<< ":"
+       // << isDefault
+       << "]";
 }
 
 
@@ -90,12 +135,12 @@ namespace internal {
 // Substitute for missing `av_find_output_format()` function
 AVOutputFormat* findOutputFormat(const std::string& name)
 {
-    AVOutputFormat* oformat = av_oformat_next(nullptr);
+    AVOutputFormat* oformat= av_oformat_next(nullptr);
     while (oformat) {
         if (name == oformat->name) {
             break;
         }
-        oformat = av_oformat_next(oformat);
+        oformat= av_oformat_next(oformat);
     }
     return oformat;
 }
@@ -103,10 +148,11 @@ AVOutputFormat* findOutputFormat(const std::string& name)
 
 AVOutputFormat* findDefaultOutputFormat(const std::vector<std::string>& outputs)
 {
-    AVOutputFormat* oformat = nullptr;
+    AVOutputFormat* oformat= nullptr;
     for (auto& output : outputs) {
-        oformat = findOutputFormat(output.c_str());
-        if (oformat) break;
+        oformat= findOutputFormat(output.c_str());
+        if (oformat)
+            break;
     }
 
     assert(oformat && "no output format found");
@@ -116,10 +162,11 @@ AVOutputFormat* findDefaultOutputFormat(const std::vector<std::string>& outputs)
 
 AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 {
-    AVInputFormat* iformat = nullptr;
+    AVInputFormat* iformat= nullptr;
     for (auto& input : inputs) {
-        iformat = av_find_input_format(input.c_str());
-        if (iformat) break;
+        iformat= av_find_input_format(input.c_str());
+        if (iformat)
+            break;
     }
 
     assert(iformat && "no input format found");
@@ -127,15 +174,16 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 }
 
 
-bool enumerateDeviceList(AVFormatContext* s, Device::Type type, std::vector<av::Device>& devices)
+bool enumerateDeviceList(AVFormatContext* s, Device::Type type,
+                         std::vector<av::Device>& devices)
 {
 #ifndef HAVE_FFMPEG_AVDEVICE
-  devices.clear();
-  return false;
+    devices.clear();
+    return false;
 #else
     int error;
     // AVDictionary *tmp = nullptr;
-    AVDeviceInfoList* devlist = nullptr;
+    AVDeviceInfoList* devlist= nullptr;
 
     // av_dict_copy(&tmp, nullptr, 0);
     // if (av_opt_set_dict2(ctx, &tmp, AV_OPT_SEARCH_CHILDREN) < 0) {
@@ -144,15 +192,15 @@ bool enumerateDeviceList(AVFormatContext* s, Device::Type type, std::vector<av::
     // }
 
     // TODO: replace with `list_devices_for_context`
-    error = avdevice_list_devices(s, &devlist);
+    error= avdevice_list_devices(s, &devlist);
     if (error || !devlist) {
         WarnL << "Cannot list system devices: " << averror(error) << endl;
         goto fail;
     }
 
     devices.clear();
-    for (int i = 0; i < devlist->nb_devices; i++) {
-        auto dev = devlist->devices[i];
+    for (int i= 0; i < devlist->nb_devices; i++) {
+        auto dev= devlist->devices[i];
         devices.push_back(
             av::Device(type, dev->device_name, dev->device_description));
     }
@@ -166,35 +214,38 @@ fail:
 }
 
 
-bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type type, std::vector<av::Device>& devices)
+bool getInputDeviceList(const std::vector<std::string>& inputs,
+                        Device::Type type, std::vector<av::Device>& devices)
 {
 #ifndef HAVE_FFMPEG_AVDEVICE
-    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices" << endl;
+    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices"
+          << endl;
     return false;
 #else
-    AVFormatContext* ctx = nullptr;
-    AVInputFormat* iformat = nullptr;
+    AVFormatContext* ctx= nullptr;
+    AVInputFormat* iformat= nullptr;
 
-    iformat = findDefaultInputFormat(inputs);
+    iformat= findDefaultInputFormat(inputs);
     if (!iformat) {
         assert(0 && "no input formats");
         return false;
     }
 
     // Alloc an input device context
-    if (!(ctx = avformat_alloc_context())) {
+    if (!(ctx= avformat_alloc_context())) {
         assert(0);
         goto fail;
     }
 
-    if (!iformat->priv_class || !AV_IS_INPUT_DEVICE(iformat->priv_class->category)) {
+    if (!iformat->priv_class ||
+        !AV_IS_INPUT_DEVICE(iformat->priv_class->category)) {
         assert(0 && "not an input device");
         goto fail;
     }
 
-    ctx->iformat = iformat;
+    ctx->iformat= iformat;
     if (ctx->iformat->priv_data_size > 0) {
-        ctx->priv_data = av_mallocz(ctx->iformat->priv_data_size);
+        ctx->priv_data= av_mallocz(ctx->iformat->priv_data_size);
         if (!ctx->priv_data) {
             assert(0);
             goto fail;
@@ -203,9 +254,8 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
             *(const AVClass**)ctx->priv_data= ctx->iformat->priv_class;
             av_opt_set_defaults(ctx->priv_data);
         }
-    }
-    else {
-        ctx->priv_data = nullptr;
+    } else {
+        ctx->priv_data= nullptr;
     }
 
     // // s->iformat->get_device_list
@@ -224,46 +274,48 @@ fail:
 }
 
 
-bool getOutputDeviceList(const std::vector<std::string>& outputs, Device::Type type, std::vector<av::Device>& devices)
+bool getOutputDeviceList(const std::vector<std::string>& outputs,
+                         Device::Type type, std::vector<av::Device>& devices)
 {
 #ifndef HAVE_FFMPEG_AVDEVICE
-    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices" << endl;
+    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices"
+          << endl;
     return false;
 #else
 
-    AVFormatContext* ctx = nullptr;
-    AVOutputFormat* oformat = nullptr;
+    AVFormatContext* ctx= nullptr;
+    AVOutputFormat* oformat= nullptr;
 
-    oformat = findDefaultOutputFormat(outputs);
+    oformat= findDefaultOutputFormat(outputs);
     if (!oformat) {
         assert(0 && "no output formats");
         return false;
     }
 
-    if (!(ctx = avformat_alloc_context())) {
+    if (!(ctx= avformat_alloc_context())) {
         assert(0);
         goto fail;
     }
 
-    if (!oformat->priv_class || !AV_IS_OUTPUT_DEVICE(oformat->priv_class->category)) {
+    if (!oformat->priv_class ||
+        !AV_IS_OUTPUT_DEVICE(oformat->priv_class->category)) {
         assert(0 && "not an output device");
         goto fail;
     }
 
-    ctx->oformat = oformat;
+    ctx->oformat= oformat;
     if (ctx->oformat->priv_data_size > 0) {
-        ctx->priv_data = av_mallocz(ctx->oformat->priv_data_size);
+        ctx->priv_data= av_mallocz(ctx->oformat->priv_data_size);
         if (!ctx->priv_data) {
             assert(0);
             goto fail;
         }
         if (ctx->oformat->priv_class) {
-            *(const AVClass**)ctx->priv_data = ctx->oformat->priv_class;
+            *(const AVClass**)ctx->priv_data= ctx->oformat->priv_class;
             av_opt_set_defaults(ctx->priv_data);
         }
-    }
-    else {
-        ctx->priv_data = nullptr;
+    } else {
+        ctx->priv_data= nullptr;
     }
 
     enumerateDeviceList(ctx, type, devices);
@@ -279,7 +331,7 @@ fail:
 
 void printDevices(std::ostream& ost, std::vector<Device>& devs)
 {
-    for (std::size_t i = 0; i < devs.size(); ++i) {
+    for (std::size_t i= 0; i < devs.size(); ++i) {
         ost << '\t';
         devs[i].print(ost);
         ost << endl;
@@ -295,8 +347,8 @@ void printDevices(std::ostream& ost, std::vector<Device>& devs)
 //
 
 
-DeviceManager::DeviceManager() :
-    _watcher(nullptr)
+DeviceManager::DeviceManager()
+    : _watcher(nullptr)
 {
     initializeFFmpeg();
 }
@@ -332,7 +384,7 @@ bool DeviceManager::findCamera(const std::string& name, Device& device)
     if (getCameras(devices)) {
         for (auto& dev : devices) {
             if (dev.id == name || dev.name == name) {
-                device = dev;
+                device= dev;
                 return true;
             }
         }
@@ -348,7 +400,7 @@ bool DeviceManager::findMicrophone(const std::string& name, Device& device)
     if (getMicrophones(devices)) {
         for (auto& dev : devices) {
             if (dev.id == name || dev.name == name) {
-                device = dev;
+                device= dev;
                 return true;
             }
         }
@@ -364,7 +416,7 @@ bool DeviceManager::findSpeaker(const std::string& name, Device& device)
     if (getSpeakers(devices)) {
         for (auto& dev : devices) {
             if (dev.id == name || dev.name == name) {
-                device = dev;
+                device= dev;
                 return true;
             }
         }
@@ -378,7 +430,7 @@ bool DeviceManager::getDefaultCamera(Device& device)
 {
     std::vector<Device> devices;
     if (getCameras(devices)) {
-        device = devices[0];
+        device= devices[0];
         return true;
     }
 
@@ -390,7 +442,7 @@ bool DeviceManager::getDefaultMicrophone(Device& device)
 {
     std::vector<Device> devices;
     if (getMicrophones(devices)) {
-        device = devices[0];
+        device= devices[0];
         return true;
     }
 
@@ -402,7 +454,7 @@ bool DeviceManager::getDefaultSpeaker(Device& device)
 {
     std::vector<Device> devices;
     if (getSpeakers(devices)) {
-        device = devices[0];
+        device= devices[0];
         return true;
     }
 
@@ -422,13 +474,14 @@ AVInputFormat* DeviceManager::findAudioInputFormat()
 }
 
 
-bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& devices)
+bool DeviceManager::getDeviceList(Device::Type type,
+                                  std::vector<av::Device>& devices)
 {
     devices.clear();
 
-    // NOTE: Unfortunately FFmpeg's dshow and avfoundation implementations don't
-    // list devices properly yet so we need to call native libraries outselves:
-    // https://trac.ffmpeg.org/ticket/4486
+// NOTE: Unfortunately FFmpeg's dshow and avfoundation implementations don't
+// list devices properly yet so we need to call native libraries outselves:
+// https://trac.ffmpeg.org/ticket/4486
 #if defined(SCY_WIN)
     return dshow::getDeviceList(type, devices);
 #elif defined(SCY_APPLE)
@@ -436,17 +489,21 @@ bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& de
 #else
     // Use FFmpeg by default
     switch (type) {
-    case Device::VideoInput:
-        return internal::getInputDeviceList(SCY_VIDEO_INPUTS, type, devices);
-    case Device::AudioInput:
-        return internal::getInputDeviceList(SCY_AUDIO_INPUTS, type, devices);
-    case Device::VideoOutput:
-        return internal::getOutputDeviceList(SCY_VIDEO_OUTPUTS, type, devices);
-    case Device::AudioOutput:
-        return internal::getOutputDeviceList(SCY_AUDIO_OUTPUTS, type, devices);
-    default:
-        assert(0 && "unknown device type");
-        break;
+        case Device::VideoInput:
+            return internal::getInputDeviceList(SCY_VIDEO_INPUTS, type,
+                                                devices);
+        case Device::AudioInput:
+            return internal::getInputDeviceList(SCY_AUDIO_INPUTS, type,
+                                                devices);
+        case Device::VideoOutput:
+            return internal::getOutputDeviceList(SCY_VIDEO_OUTPUTS, type,
+                                                 devices);
+        case Device::AudioOutput:
+            return internal::getOutputDeviceList(SCY_AUDIO_OUTPUTS, type,
+                                                 devices);
+        default:
+            assert(0 && "unknown device type");
+            break;
     }
 #endif
 
@@ -457,15 +514,15 @@ bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& de
 int DeviceManager::getCapabilities()
 {
     std::vector<Device> devices;
-    int caps = VIDEO_RECV;
+    int caps= VIDEO_RECV;
     if (getMicrophones(devices)) {
-        caps |= AUDIO_SEND;
+        caps|= AUDIO_SEND;
     }
     if (getSpeakers(devices)) {
-        caps |= AUDIO_RECV;
+        caps|= AUDIO_RECV;
     }
     if (getCameras(devices)) {
-        caps |= VIDEO_SEND;
+        caps|= VIDEO_SEND;
     }
     return caps;
 }
@@ -490,30 +547,24 @@ void DeviceManager::print(std::ostream& ost)
     ost << "Video capture devices: " << endl;
     if (getCameras(devs)) {
         internal::printDevices(ost, devs);
-    }
-    else {
+    } else {
         ost << "\tNone" << endl;
     }
 
     ost << "Audio input devices: " << endl;
     if (getMicrophones(devs)) {
         internal::printDevices(ost, devs);
-    }
-    else {
+    } else {
         ost << "\tNone" << endl;
     }
 
     ost << "Audio output devices: " << endl;
     if (getSpeakers(devs)) {
         internal::printDevices(ost, devs);
-    }
-    else {
+    } else {
         ost << "\tNone" << endl;
     }
 }
-
-
-
 
 
 #if 0
@@ -692,5 +743,6 @@ AVOutputFormat* nextOutputDevice(Device::Type type, AVOutputFormat* prev = nullp
 
 
 #endif // HAVE_FFMPEG
+
 
 /// @\}

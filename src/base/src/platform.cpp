@@ -10,8 +10,8 @@
 
 
 #include "scy/platform.h"
-#include "scy/uv/uvpp.h"
 #include "scy/error.h"
+#include "scy/uv/uvpp.h"
 
 #ifdef SCY_WIN
 #include <windows.h>
@@ -29,9 +29,10 @@ namespace scy {
 std::string getExePath()
 {
     char buf[PATHMAX];
-    std::size_t size = PATHMAX;
+    std::size_t size= PATHMAX;
     if (uv_exepath(buf, &size) != 0)
-        throw std::runtime_error("System error: Cannot resolve executable path");
+        throw std::runtime_error(
+            "System error: Cannot resolve executable path");
     return std::string(buf, size);
 }
 
@@ -39,9 +40,10 @@ std::string getExePath()
 std::string getCwd()
 {
     char buf[PATHMAX];
-    std::size_t size = PATHMAX;
+    std::size_t size= PATHMAX;
     if (uv_cwd(buf, &size) != 0)
-        throw std::runtime_error("System error: Cannot resolve working directory");
+        throw std::runtime_error(
+            "System error: Cannot resolve working directory");
     return std::string(buf);
 }
 
@@ -75,7 +77,6 @@ void pause()
 }
 
 
-
 //
 /// Windows helpers
 //
@@ -84,19 +85,22 @@ void pause()
 
 enum WindowsMajorVersions
 {
-    kWindows2000 = 5,
-    kWindowsVista = 6,
+    kWindows2000= 5,
+    kWindowsVista= 6,
 };
 
 
 bool getOsVersion(int* major, int* minor, int* build)
 {
-    OSVERSIONINFO info = {0};
-    info.dwOSVersionInfoSize = sizeof(info);
+    OSVERSIONINFO info= {0};
+    info.dwOSVersionInfoSize= sizeof(info);
     if (GetVersionEx(&info)) {
-        if (major) *major = info.dwMajorVersion;
-        if (minor) *minor = info.dwMinorVersion;
-        if (build) *build = info.dwBuildNumber;
+        if (major)
+            *major= info.dwMajorVersion;
+        if (minor)
+            *minor= info.dwMinorVersion;
+        if (build)
+            *build= info.dwBuildNumber;
         return true;
     }
     return false;
@@ -112,18 +116,18 @@ bool isWindowsXpOrLater()
 {
     int major, minor;
     return (getOsVersion(&major, &minor, nullptr) &&
-        (major >= kWindowsVista ||
-        (major == kWindows2000 && minor >= 1)));
+            (major >= kWindowsVista || (major == kWindows2000 && minor >= 1)));
 }
 
 
-#define STACK_ARRAY(TYPE, LEN) static_cast<TYPE*>(::alloca((LEN)*sizeof(TYPE)))
+#define STACK_ARRAY(TYPE, LEN)                                                 \
+    static_cast<TYPE*>(::alloca((LEN) * sizeof(TYPE)))
 
 
 std::wstring toUtf16(const char* utf8, std::size_t len)
 {
-    int len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
-    wchar_t* ws = STACK_ARRAY(wchar_t, len16);
+    int len16= ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
+    wchar_t* ws= STACK_ARRAY(wchar_t, len16);
     ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, ws, len16);
     return std::wstring(ws, len16);
 }
@@ -135,8 +139,8 @@ std::wstring toUtf16(const std::string& str)
 
 std::string toUtf8(const wchar_t* wide, std::size_t len)
 {
-    int len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
-    char* ns = STACK_ARRAY(char, len8);
+    int len8= ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
+    char* ns= STACK_ARRAY(char, len8);
     ::WideCharToMultiByte(CP_UTF8, 0, wide, len, ns, len8, NULL, NULL);
     return std::string(ns, len8);
 }
@@ -150,5 +154,6 @@ std::string toUtf8(const std::wstring& wstr)
 
 
 } // namespace scy
+
 
 /// @\}

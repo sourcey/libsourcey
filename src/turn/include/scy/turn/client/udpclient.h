@@ -13,13 +13,13 @@
 #define SCY_TURN_UDPClient_H
 
 
+#include "scy/net/udpsocket.h"
+#include "scy/stateful.h"
+#include "scy/stun/transaction.h"
 #include "scy/turn/client/client.h"
-#include "scy/turn/turn.h"
 #include "scy/turn/iallocation.h"
 #include "scy/turn/turn.h"
-#include "scy/stun/transaction.h"
-#include "scy/stateful.h"
-#include "scy/net/udpsocket.h"
+#include "scy/turn/turn.h"
 
 #include <deque>
 
@@ -28,17 +28,17 @@ namespace scy {
 namespace turn {
 
 
-class UDPClient: public Client
+class UDPClient : public Client
 {
 public:
-    UDPClient(ClientObserver& observer, const Options& options = Options());
+    UDPClient(ClientObserver& observer, const Options& options= Options());
     virtual ~UDPClient();
 };
-
-
-} } //  namespace scy::turn
+}
+} //  namespace scy::turn
 
 
 #endif // SCY_TURN_Client_H
+
 
 /// @\}

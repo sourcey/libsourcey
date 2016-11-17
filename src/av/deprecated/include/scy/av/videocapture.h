@@ -13,14 +13,14 @@
 #define SCY_AV_VideoCapture_H
 
 
-#include <cstdint>
-#include "scy/mutex.h"
+#include "scy/av/format.h"
+#include "scy/av/fpscounter.h"
+#include "scy/av/icapture.h"
+#include "scy/av/types.h"
 #include "scy/bitwise.h"
 #include "scy/interface.h"
-#include "scy/av/types.h"
-#include "scy/av/format.h"
-#include "scy/av/icapture.h"
-#include "scy/av/fpscounter.h"
+#include "scy/mutex.h"
+#include <cstdint>
 
 #ifdef HAVE_OPENCV
 #include "opencv2/opencv.hpp"
@@ -44,20 +44,23 @@ namespace av {
 ///
 /// To handle output packets listen in on the ICapture::emitter signal.
 ///
-/// Limitations:/// OpenCV doesn't support multi-thread capturing so VideoCapture
+/// Limitations:/// OpenCV doesn't support multi-thread capturing so
+/// VideoCapture
 /// instances should be created in the main thread.
 /// File captures do not have this limitation.
 /// Also avoid creating multiple instances using the same device.
 /// Instead reuse the same instance, preferably using the
 /// MediaFactory interface.
 ///
-/// Windows:/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
+/// Windows:/// OpenCV HighGUI DirectShow must be compiled with
+/// VI_COM_MULTI_THREADED
 /// defined otherwise capture there will be CoInitialize conflicts
 /// with the DeviceManager.
-class VideoCapture: public ICapture, public async::Runnable
+class VideoCapture : public ICapture, public async::Runnable
 {
 public:
-    typedef std::shared_ptr<VideoCapture> Ptr;    /// Creates and opens the given device.
+    typedef std::shared_ptr<VideoCapture>
+        Ptr; /// Creates and opens the given device.
     /// Should be created in the main thread.
     VideoCapture(int deviceId);
 
@@ -69,18 +72,18 @@ public:
     virtual ~VideoCapture();
 
     /// Opens the VideoCapture.
-    bool open(bool whiny = true);
+    bool open(bool whiny= true);
 
 
     virtual void start();
-    virtual void stop();    /// True when the system device is open.
+    virtual void stop(); /// True when the system device is open.
     bool opened() const;
 
     /// True when the internal thread is running.
     bool running() const;
 
 
-    void getFrame(cv::Mat& frame, int width = 0, int height = 0);
+    void getFrame(cv::Mat& frame, int width= 0, int height= 0);
 
     virtual void getEncoderFormat(Format& iformat);
 
@@ -92,7 +95,8 @@ public:
     int width();
     int height();
     cv::Mat lastFrame() const;
-    cv::VideoCapture& capture();    /// Signals that the capture is closed in error.
+    cv::VideoCapture&
+    capture(); /// Signals that the capture is closed in error.
     Signal<void(const scy::Error&)> Error;
 
 
@@ -107,14 +111,14 @@ protected:
 private:
     mutable Mutex _mutex;
 
-    std::string _filename;    // Source file to capture from if any
-    int _deviceId;            // Source device to capture from
+    std::string _filename; // Source file to capture from if any
+    int _deviceId;         // Source device to capture from
     bool _opened;
     bool _started;
     bool _stopping;
     bool _capturing;
-    cv::Mat _frame;           // Current video image
-    scy::Error _error;        // Error message if any
+    cv::Mat _frame;    // Current video image
+    scy::Error _error; // Error message if any
     FPSCounter _counter;
     cv::VideoCapture _capture;
     Thread _thread;
@@ -129,28 +133,27 @@ typedef std::map<int, VideoCapture::Ptr> VideoCaptureMap;
 //
 
 
-class MatrixPacket: public VideoPacket
+class MatrixPacket : public VideoPacket
 {
 public:
     cv::Mat* mat; // For OpenCV generated packets.
                   // TODO: Use stream offset time instead of process time
-                  // for consistency with AudioCapture for realtime pts calculation
+    // for consistency with AudioCapture for realtime pts calculation
 
-    MatrixPacket(cv::Mat* mat, double time = time::clockSecs()) :
-        VideoPacket(reinterpret_cast<std::uint8_t*>(mat->data), mat->rows*mat->step, mat->cols, mat->rows, time),
-        mat(mat) {}
-
-    MatrixPacket(char* data = nullptr,
-              int size = 0,
-              int width = 0,
-              int height = 0,
-              double time = time::clockSecs()) :
-        VideoPacket(reinterpret_cast<std::uint8_t*>(data), size, width, height, time),
-        mat(nullptr) {};
-
-    virtual IPacket* clone() const {
-        return new MatrixPacket(*this);
+    MatrixPacket(cv::Mat* mat, double time= time::clockSecs())
+        : VideoPacket(reinterpret_cast<std::uint8_t*>(mat->data),
+                      mat->rows * mat->step, mat->cols, mat->rows, time)
+        , mat(mat)
+    {
     }
+
+    MatrixPacket(char* data= nullptr, int size= 0, int width= 0, int height= 0,
+                 double time= time::clockSecs())
+        : VideoPacket(reinterpret_cast<std::uint8_t*>(data), size, width,
+                      height, time)
+        , mat(nullptr){};
+
+    virtual IPacket* clone() const { return new MatrixPacket(*this); }
 
     virtual const char* className() const { return "MatrixPacket"; }
 };
@@ -162,5 +165,6 @@ public:
 
 #endif
 #endif // SCY_AV_VideoCapture_H
+
 
 /// @\}

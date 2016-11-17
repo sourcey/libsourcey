@@ -17,9 +17,9 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
-#include "scy/av/format.h"
 #include "scy/av/ffmpeg.h"
+#include "scy/av/format.h"
+#include "scy/av/types.h"
 #include "scy/av/videocontext.h"
 
 
@@ -27,19 +27,22 @@ namespace scy {
 namespace av {
 
 
-struct VideoEncoder: public VideoContext
+struct VideoEncoder : public VideoContext
 {
-    VideoEncoder(AVFormatContext* format = nullptr);
+    VideoEncoder(AVFormatContext* format= nullptr);
     virtual ~VideoEncoder();
 
     virtual void create();
-    //virtual void open();
+    // virtual void open();
     virtual void close();
 
-    virtual bool encode(unsigned char* data, int size, std::int64_t pts); //, AVPacket& opacket
+    virtual bool encode(unsigned char* data, int size,
+                        std::int64_t pts); //, AVPacket& opacket
     /// Encode a single video frame.
     /// The pts argument should be in stream base time format.
-    /// virtual bool encode(AVPacket& ipacket, AVPacket& opacket);    /// virtual bool encode(AVFrame* iframe, AVPacket& opacket);    /// virtual bool flush(AVPacket& opacket);
+    /// virtual bool encode(AVPacket& ipacket, AVPacket& opacket);    ///
+    /// virtual bool encode(AVFrame* iframe, AVPacket& opacket);    /// virtual
+    /// bool flush(AVPacket& opacket);
 
     virtual bool encode(AVFrame* iframe); //, AVPacket& opacket
     /// Encode a single AVFrame.
@@ -48,7 +51,7 @@ struct VideoEncoder: public VideoContext
     virtual void flush();
 
 
-    AVFormatContext* format;    /// std::uint8_t* buffer;    /// int           bufferSize;
+    AVFormatContext* format; /// std::uint8_t* buffer;    /// int bufferSize;
 };
 
 
@@ -58,5 +61,6 @@ struct VideoEncoder: public VideoContext
 
 #endif
 #endif // SCY_AV_VideoEncoder_H
+
 
 /// @\}

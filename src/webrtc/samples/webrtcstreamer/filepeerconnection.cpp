@@ -8,9 +8,9 @@
 
 
 #include "filepeerconnection.h"
-#include "scy/webrtc/videopacketsource.h"
-#include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/logger.h"
+#include "scy/webrtc/peerconnectionmanager.h"
+#include "scy/webrtc/videopacketsource.h"
 
 
 using std::endl;
@@ -19,20 +19,18 @@ using std::endl;
 namespace scy {
 
 
-FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager, const std::string& peerid, Mode mode) :
-    PeerConnection(manager, peerid, mode)
+FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
+                                       const std::string& peerid, Mode mode)
+    : PeerConnection(manager, peerid, mode)
 {
     // Setup a PeerConnectionFactory with our custom ADM
     // TODO: Setup threads properly:
-    auto networkThread = rtc::Thread::CreateWithSocketServer().release();
-    auto workerThread = rtc::Thread::Create().release();
-    auto signalingThread = rtc::Thread::Current();
-    _factory = webrtc::CreatePeerConnectionFactory(
-                  networkThread,
-                  workerThread,
-                  signalingThread,
-                  _capturer.getAudioModule(),
-                  nullptr, nullptr);
+    auto networkThread= rtc::Thread::CreateWithSocketServer().release();
+    auto workerThread= rtc::Thread::Create().release();
+    auto signalingThread= rtc::Thread::Current();
+    _factory= webrtc::CreatePeerConnectionFactory(
+        networkThread, workerThread, signalingThread,
+        _capturer.getAudioModule(), nullptr, nullptr);
     networkThread->Start();
     workerThread->Start();
     // signalingThread->Start();
@@ -48,13 +46,14 @@ FilePeerConnection::~FilePeerConnection()
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMediaStream()
+rtc::scoped_refptr<webrtc::MediaStreamInterface>
+FilePeerConnection::createMediaStream()
 {
     assert(_mode == Offer);
     assert(_factory);
     assert(!_stream);
     // assert(!_capture);
-    _stream = _factory->CreateLocalMediaStream(kStreamLabel);
+    _stream= _factory->CreateLocalMediaStream(kStreamLabel);
 
     _capturer.openFile("test.mp4");
     _capturer.addMediaTracks(_factory, _stream);
@@ -63,7 +62,9 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMedia
 }
 
 
-// void FilePeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
+// void
+// FilePeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState
+// new_state)
 // {
 //     switch(new_state) {
 //     case webrtc::PeerConnectionInterface::kStable:
@@ -80,34 +81,39 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMedia
 //         break;
 //     }
 //     // assert(0);
-//     // DebugL << _peerid << ": kHaveRemotePrAnswer: " << webrtc::PeerConnectionInterface::kHaveRemotePrAnswer << endl;
-//     // DebugL << _peerid << ": kHaveLocalPrAnswer: " << webrtc::PeerConnectionInterface::kHaveLocalPrAnswer << endl;
-//     // DebugL << _peerid << ": kHaveRemoteOffer: " << webrtc::PeerConnectionInterface::kHaveRemoteOffer << endl;
-//     // DebugL << _peerid << ": kHaveLocalOffer: " << webrtc::PeerConnectionInterface::kHaveLocalOffer << endl;
+//     // DebugL << _peerid << ": kHaveRemotePrAnswer: " <<
+//     webrtc::PeerConnectionInterface::kHaveRemotePrAnswer << endl;
+//     // DebugL << _peerid << ": kHaveLocalPrAnswer: " <<
+//     webrtc::PeerConnectionInterface::kHaveLocalPrAnswer << endl;
+//     // DebugL << _peerid << ": kHaveRemoteOffer: " <<
+//     webrtc::PeerConnectionInterface::kHaveRemoteOffer << endl;
+//     // DebugL << _peerid << ": kHaveLocalOffer: " <<
+//     webrtc::PeerConnectionInterface::kHaveLocalOffer << endl;
 //
 //     PeerConnection::OnSignalingChange(new_state);
 // }
 
-void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state)
+void FilePeerConnection::OnIceConnectionChange(
+    webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
 
-    switch(new_state) {
-    case webrtc::PeerConnectionInterface::kIceConnectionNew:
-    case webrtc::PeerConnectionInterface::kIceConnectionChecking:
-    case webrtc::PeerConnectionInterface::kIceConnectionConnected:
-        break;
-    case webrtc::PeerConnectionInterface::kIceConnectionCompleted:
-        _capturer.start();
-        // _capture->start();
-        break;
-    case webrtc::PeerConnectionInterface::kIceConnectionFailed:
-    case webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
-    case webrtc::PeerConnectionInterface::kIceConnectionClosed:
-    case webrtc::PeerConnectionInterface::kIceConnectionMax:
-        _capturer.stop();
-        // _capture->stop();
-        break;
+    switch (new_state) {
+        case webrtc::PeerConnectionInterface::kIceConnectionNew:
+        case webrtc::PeerConnectionInterface::kIceConnectionChecking:
+        case webrtc::PeerConnectionInterface::kIceConnectionConnected:
+            break;
+        case webrtc::PeerConnectionInterface::kIceConnectionCompleted:
+            _capturer.start();
+            // _capture->start();
+            break;
+        case webrtc::PeerConnectionInterface::kIceConnectionFailed:
+        case webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
+        case webrtc::PeerConnectionInterface::kIceConnectionClosed:
+        case webrtc::PeerConnectionInterface::kIceConnectionMax:
+            _capturer.stop();
+            // _capture->stop();
+            break;
     }
 
     PeerConnection::OnIceConnectionChange(new_state);
@@ -125,7 +131,8 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 //
 //     if (_stream) {
 //         if (!_peerConnection->AddStream(_stream)) {
-//             throw std::runtime_error("Adding stream to PeerConnection failed");
+//             throw std::runtime_error("Adding stream to PeerConnection
+//             failed");
 //         }
 //     }
 // }
@@ -160,11 +167,14 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 //     DebugL << _peerid << ": Receive " << type << ": " << sdp << endl;
 //
 //     webrtc::SdpParseError error;
-//     webrtc::SessionDescriptionInterface* desc(webrtc::CreateSessionDescription(type, sdp, &error));
+//     webrtc::SessionDescriptionInterface*
+//     desc(webrtc::CreateSessionDescription(type, sdp, &error));
 //     if (!desc) {
-//         throw std::runtime_error("Can't parse remote SDP: " + error.description);
+//         throw std::runtime_error("Can't parse remote SDP: " +
+//         error.description);
 //     }
-//     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
+//     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(),
+//     desc);
 //
 //     if (type == "offer") {
 //         assert(_mode == Answer);
@@ -176,12 +186,15 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 // }
 //
 //
-// void PeerConnection::recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp)
+// void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
+// const std::string& sdp)
 // {
 //     webrtc::SdpParseError error;
-//     std::unique_ptr<webrtc::IceCandidateInterface> candidate(webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
+//     std::unique_ptr<webrtc::IceCandidateInterface>
+//     candidate(webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
 //     if (!candidate) {
-//         throw std::runtime_error("Can't parse remote candidate: " + error.description);
+//         throw std::runtime_error("Can't parse remote candidate: " +
+//         error.description);
 //     }
 //     _peerConnection->AddIceCandidate(candidate.get());
 // }
@@ -190,13 +203,17 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 
 //
 //
-// void PeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state)
+// void
+// PeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState
+// new_state)
 // {
 //     DebugL << _peerid << ": On ICE connection change: " << new_state << endl;
 // }
 //
 //
-// void PeerConnection::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state)
+// void
+// PeerConnection::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState
+// new_state)
 // {
 //     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
 // }
@@ -226,7 +243,8 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 // }
 //
 //
-// void PeerConnection::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
+// void PeerConnection::OnIceCandidate(const webrtc::IceCandidateInterface*
+// candidate)
 // {
 //     std::string sdp;
 //     if (!candidate->ToString(&sdp)) {
@@ -235,7 +253,8 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 //         return;
 //     }
 //
-//     _manager->sendCandidate(this, candidate->sdp_mid(), candidate->sdp_mline_index(), sdp);
+//     _manager->sendCandidate(this, candidate->sdp_mid(),
+//     candidate->sdp_mline_index(), sdp);
 // }
 //
 //
@@ -265,7 +284,9 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 // }
 //
 //
-// void PeerConnection::setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+// void
+// PeerConnection::setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface>
+// factory)
 // {
 //     assert(!_factory); // should not be already set via PeerConnectionManager
 //     _factory = factory;
@@ -290,13 +311,15 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 // }
 //
 //
-// rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnection::peerConnection() const
+// rtc::scoped_refptr<webrtc::PeerConnectionInterface>
+// PeerConnection::peerConnection() const
 // {
 //     return _peerConnection;
 // }
 //
 //
-// rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::stream() const
+// rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::stream()
+// const
 // {
 //     return _stream;
 // }

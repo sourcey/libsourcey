@@ -13,20 +13,20 @@
 #define SCY_PacketTransaction_H
 
 
-#include "scy/timer.h"
-#include "scy/stateful.h"
 #include "scy/interface.h"
 #include "scy/packet.h"
+#include "scy/stateful.h"
+#include "scy/timer.h"
 
 
 namespace scy {
 
 
-struct TransactionState: public State
+struct TransactionState : public State
 {
     enum Type
     {
-        Waiting = 0,
+        Waiting= 0,
         Running,
         Success,
         Cancelled,
@@ -35,12 +35,17 @@ struct TransactionState: public State
 
     std::string str(unsigned int id) const
     {
-        switch(id) {
-        case Waiting:        return "Waiting";
-        case Running:        return "Running";
-        case Success:        return "Success";
-        case Cancelled:        return "Cancelled";
-        case Failed:        return "Failed";
+        switch (id) {
+            case Waiting:
+                return "Waiting";
+            case Running:
+                return "Running";
+            case Success:
+                return "Success";
+            case Cancelled:
+                return "Cancelled";
+            case Failed:
+                return "Failed";
         }
         return "undefined";
     };
@@ -52,25 +57,28 @@ struct TransactionState: public State
 /// PacketTransactions are fire and forget. The object will be deleted
 /// after a successful response or a timeout.
 template <class PacketT>
-class PacketTransaction: public async::Sendable, public Stateful<TransactionState>
+class PacketTransaction : public async::Sendable,
+                          public Stateful<TransactionState>
 {
 public:
-    PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
-        _timer(loop),
-        _timeout(timeout),
-        _retries(retries),
-        _attempts(0),
-        _destroyed(false)
+    PacketTransaction(long timeout= 10000, int retries= 0,
+                      uv::Loop* loop= uv::defaultLoop())
+        : _timer(loop)
+        , _timeout(timeout)
+        , _retries(retries)
+        , _attempts(0)
+        , _destroyed(false)
     {
     }
 
-    PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
-        _request(request),
-        _timer(loop),
-        _timeout(timeout),
-        _retries(retries),
-        _attempts(0),
-        _destroyed(false)
+    PacketTransaction(const PacketT& request, long timeout= 10000,
+                      int retries= 0, uv::Loop* loop= uv::defaultLoop())
+        : _request(request)
+        , _timer(loop)
+        , _timeout(timeout)
+        , _retries(retries)
+        , _attempts(0)
+        , _destroyed(false)
     {
     }
 
@@ -84,7 +92,7 @@ public:
         _attempts++;
         if (_timer.active())
             _timer.stop();
-        _timer.Timeout += slot(this, &PacketTransaction::onTimeout);
+        _timer.Timeout+= slot(this, &PacketTransaction::onTimeout);
         _timer.start(_timeout, 0);
 
         return setState(this, TransactionState::Running);
@@ -110,8 +118,8 @@ public:
         traceL("PacketTransaction", this) << "Dispose" << std::endl;
 
         if (!_destroyed) {
-            _destroyed = true;
-            _timer.Timeout -= slot(this, &PacketTransaction::onTimeout);
+            _destroyed= true;
+            _timer.Timeout-= slot(this, &PacketTransaction::onTimeout);
             _timer.stop();
 
             deleteLater<PacketTransaction>(this);
@@ -131,14 +139,14 @@ public:
 protected:
     virtual ~PacketTransaction()
     {
-        //assert(!stateEquals(TransactionState::Running));
+        // assert(!stateEquals(TransactionState::Running));
     }
 
     /// Override to handle post state change logic.
     virtual void onStateChange(TransactionState& state, const TransactionState&)
     {
-        traceL("PacketTransaction", this) << "On state change: "
-            << state.toString() << std::endl;
+        traceL("PacketTransaction", this)
+            << "On state change: " << state.toString() << std::endl;
 
         if (state.equals(TransactionState::Success) ||
             state.equals(TransactionState::Failed))
@@ -150,7 +158,7 @@ protected:
     virtual bool handlePotentialResponse(const PacketT& packet)
     {
         if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
-            _response = packet;
+            _response= packet;
             onResponse();
             setState(this, TransactionState::Success);
             return true;
@@ -160,13 +168,13 @@ protected:
 
     /// Checks a potential response candidate and
     /// returns true on successful match.
-    virtual bool checkResponse(const PacketT& packet) = 0;
+    virtual bool checkResponse(const PacketT& packet)= 0;
 
     /// Called when a successful response is received.
     virtual void onResponse()
     {
-        traceL("PacketTransaction", this) << "Success: "
-            << _response.toString() << std::endl;
+        traceL("PacketTransaction", this) << "Success: " << _response.toString()
+                                          << std::endl;
     }
 
     virtual void onTimeout()
@@ -175,11 +183,12 @@ protected:
 
         if (!canResend()) {
             // if (!cancelled())
-            //    setState(this, TransactionState::Failed, "Transaction timeout");
+            //    setState(this, TransactionState::Failed, "Transaction
+            //    timeout");
             // dispose();
             setState(this, TransactionState::Failed, "Transaction timeout");
-        }
-        else send();
+        } else
+            send();
     }
 
 protected:
@@ -188,29 +197,58 @@ protected:
     PacketT _request;
     PacketT _response;
     Timer _timer;
-    int _timeout;         ///< The request timeout in milliseconds.
-    int _retries;         ///< The maximum number of attempts before the transaction is considered failed.
-    int _attempts;        ///< The number of times the transaction has been sent.
+    int _timeout;  ///< The request timeout in milliseconds.
+    int _retries;  ///< The maximum number of attempts before the transaction is
+                   /// considered failed.
+    int _attempts; ///< The number of times the transaction has been sent.
     bool _destroyed;
 };
 
 
-template <class T> inline void PacketTransaction<T>::cancel() { setState(this, TransactionState::Cancelled); }
-template <class T> inline bool PacketTransaction<T>::cancelled() const { return stateEquals(TransactionState::Cancelled); }
+template <class T> inline void PacketTransaction<T>::cancel()
+{
+    setState(this, TransactionState::Cancelled);
+}
+template <class T> inline bool PacketTransaction<T>::cancelled() const
+{
+    return stateEquals(TransactionState::Cancelled);
+}
 
-template <class T> inline bool PacketTransaction<T>::canResend() { return !cancelled() && attempts() <= retries(); }
-template <class T> inline int PacketTransaction<T>::attempts() const { return _attempts; }
-template <class T> inline int PacketTransaction<T>::retries() const { return _retries; }
+template <class T> inline bool PacketTransaction<T>::canResend()
+{
+    return !cancelled() && attempts() <= retries();
+}
+template <class T> inline int PacketTransaction<T>::attempts() const
+{
+    return _attempts;
+}
+template <class T> inline int PacketTransaction<T>::retries() const
+{
+    return _retries;
+}
 
-template <class T> inline T& PacketTransaction<T>::request() { return _request; }
-template <class T> inline T PacketTransaction<T>::request() const { return _request; }
-template <class T> inline T& PacketTransaction<T>::response() { return _response;    }
-template <class T> inline T PacketTransaction<T>::response() const { return _response; }
+template <class T> inline T& PacketTransaction<T>::request()
+{
+    return _request;
+}
+template <class T> inline T PacketTransaction<T>::request() const
+{
+    return _request;
+}
+template <class T> inline T& PacketTransaction<T>::response()
+{
+    return _response;
+}
+template <class T> inline T PacketTransaction<T>::response() const
+{
+    return _response;
+}
 
 
 } // namespace scy
 
 
 #endif // SCY_PacketTransaction_H
+
 
 /// @\}

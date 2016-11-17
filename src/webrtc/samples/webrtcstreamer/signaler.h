@@ -12,31 +12,33 @@
 #define SCY_WebRTC_WebRTCStreamer_Signaler_H
 
 
-#include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/application.h"
-#include "scy/symple/client.h"
-#include "scy/net/sslsocket.h"
-#include "scy/net/sslmanager.h"
 #include "scy/ipc.h"
+#include "scy/net/sslmanager.h"
+#include "scy/net/sslsocket.h"
+#include "scy/symple/client.h"
 #include "scy/util.h"
+#include "scy/webrtc/peerconnectionmanager.h"
 
 
 namespace scy {
 
 
-class Signaler:
-    public PeerConnectionManager,
-    public Application
+class Signaler : public PeerConnectionManager, public Application
 {
 public:
     Signaler(const smpl::Client::Options& options);
     ~Signaler();
 
-protected:    /// PeerConnectionManager interface
-    void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
-    void sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp);
-    void onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
-    void onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
+protected: /// PeerConnectionManager interface
+    void sendSDP(PeerConnection* conn, const std::string& type,
+                 const std::string& sdp);
+    void sendCandidate(PeerConnection* conn, const std::string& mid,
+                       int mlineindex, const std::string& sdp);
+    void onAddRemoteStream(PeerConnection* conn,
+                           webrtc::MediaStreamInterface* stream);
+    void onRemoveRemoteStream(PeerConnection* conn,
+                              webrtc::MediaStreamInterface* stream);
 
     void postMessage(const smpl::Message& m);
     void syncMessage(const ipc::Action& action);
@@ -45,7 +47,8 @@ protected:    /// PeerConnectionManager interface
     void onPeerMessage(smpl::Message& m);
     void onPeerDiconnected(const smpl::Peer& peer);
 
-    void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState);
+    void onClientStateChange(void* sender, sockio::ClientState& state,
+                             const sockio::ClientState& oldState);
 
 protected:
     ipc::SyncQueue<> _ipc;

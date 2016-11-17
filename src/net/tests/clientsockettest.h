@@ -1,8 +1,8 @@
 // #include "scy/uv/uvpp.h"
 // #include "scy/net/tcpsocket.h"
 // #include "scy/net/sslsocket.h"
-#include "scy/net/address.h"
 #include "scy/logger.h"
+#include "scy/net/address.h"
 #include <memory>
 
 
@@ -10,25 +10,25 @@ namespace scy {
 namespace net {
 
 
-template <typename SocketT>
-class ClientSocketTest
+template <typename SocketT> class ClientSocketTest
 {
 public:
     SocketT socket;
     Address address;
     bool passed;
 
-    ClientSocketTest(short port) : //, bool ghost = false
-        address("127.0.0.1", port), passed(false)
+    ClientSocketTest(short port)
+        : //, bool ghost = false
+        address("127.0.0.1", port)
+        , passed(false)
     {
         TraceL << "Creating: " << port << std::endl;
     }
 
     ~ClientSocketTest()
     {
-        //assert(socket.base().refCount() == 1);
+        // assert(socket.base().refCount() == 1);
         TraceL << "Destroying" << std::endl;
-
     }
 
     void run()
@@ -36,18 +36,17 @@ public:
         // Create the socket instance on the stack.
         // When the socket is closed it will unref the main loop
         // causing the test to complete successfully.
-        socket.Recv += slot(this, &ClientSocketTest::onRecv);
-        socket.Connect += slot(this, &ClientSocketTest::onConnect);
-        socket.Error += slot(this, &ClientSocketTest::onError);
-        socket.Close += slot(this, &ClientSocketTest::onClose);
-        //assert(socket.base().refCount() == 1);
+        socket.Recv+= slot(this, &ClientSocketTest::onRecv);
+        socket.Connect+= slot(this, &ClientSocketTest::onConnect);
+        socket.Error+= slot(this, &ClientSocketTest::onError);
+        socket.Close+= slot(this, &ClientSocketTest::onClose);
+        // assert(socket.base().refCount() == 1);
         socket.connect(address);
-
     }
 
     void stop()
     {
-        //socket.close();
+        // socket.close();
         socket.shutdown();
     }
 
@@ -61,7 +60,8 @@ public:
         socket.send("client > server", 15);
     }
 
-    void onRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
+    void onRecv(Socket& socket, const MutableBuffer& buffer,
+                const Address& peerAddress)
     {
         // assert(sender == &socket);
         // auto socket = reinterpret_cast<net::Socket*>(sender);
@@ -70,16 +70,15 @@ public:
         // Check for return packet echoing sent data
         if (data == "client > server") {
             TraceL << "Recv: Got Return Packet!" << std::endl;
-            passed = true;
+            passed= true;
 
             // Send the shutdown command to close the connection gracefully.
             // The peer disconnection will trigger an eof error callback
             // which notifies us that the connection is dead.
-            //socket.shutdown();
-            //socket.close();
+            // socket.shutdown();
+            // socket.close();
             stop();
-        }
-        else
+        } else
             assert(false); // fail...
     }
 
