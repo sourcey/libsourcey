@@ -8,18 +8,23 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/codec.h"
 #include <assert.h>
 #include <sstream>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
 
+
 //
 // Base Codec
 //
+
 
 Codec::Codec()
     : name("Unknown")
@@ -39,6 +44,7 @@ Codec::Codec(const std::string& name, int sampleRate, int bitRate, bool enabled)
 {
 }
 
+
 Codec::Codec(const std::string& name, const std::string& encoder,
              int sampleRate, int bitRate, bool enabled)
     : name(name)
@@ -48,6 +54,7 @@ Codec::Codec(const std::string& name, const std::string& encoder,
     , enabled(enabled)
 {
 }
+
 
 // Codec::Codec(const Codec& r) = default;
 //
@@ -74,9 +81,11 @@ Codec::Codec(const std::string& name, const std::string& encoder,
 // {
 // }
 
+
 Codec::~Codec()
 {
 }
+
 
 std::string Codec::toString() const
 {
@@ -85,6 +94,7 @@ std::string Codec::toString() const
        << enabled << "]";
     return os.str();
 }
+
 
 void Codec::print(std::ostream& ost)
 {
@@ -95,19 +105,21 @@ void Codec::print(std::ostream& ost)
         << "\n\tQuality: " << quality << "\n\tEnabled: " << enabled << "]";
 }
 
+
 //
 // Audio Codec
 //
 
+
 AudioCodec::AudioCodec()
-    : Codec("Unknown", 0, 0,
-            false)
+    : Codec("Unknown", 0, 0, false)
     , // DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE
     // channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
     channels(0) //, sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
 {
     // assert(0);
 }
+
 
 AudioCodec::AudioCodec(const std::string& name, int channels, int sampleRate,
                        int bitRate, const std::string& sampleFmt)
@@ -116,6 +128,7 @@ AudioCodec::AudioCodec(const std::string& name, int channels, int sampleRate,
     , sampleFmt(sampleFmt)
 {
 }
+
 
 AudioCodec::AudioCodec(const std::string& name, const std::string& encoder,
                        int channels, int sampleRate, int bitRate,
@@ -126,11 +139,13 @@ AudioCodec::AudioCodec(const std::string& name, const std::string& encoder,
 {
 }
 
+
 // AudioCodec::AudioCodec(const AudioCodec& r) :
 //     Codec(r.name, r.encoder, r.sampleRate, r.bitRate, r.enabled),
 //     channels(r.channels), sampleFmt(r.sampleFmt)
 // {
 // }
+
 
 // AudioCodec& AudioCodec::operator=(const AudioCodec& r) {
 //     Codec::operator=(r);
@@ -139,9 +154,11 @@ AudioCodec::AudioCodec(const std::string& name, const std::string& encoder,
 //     return *this;
 // }
 
+
 AudioCodec::~AudioCodec()
 {
 }
+
 
 std::string AudioCodec::toString() const
 {
@@ -152,6 +169,7 @@ std::string AudioCodec::toString() const
     return os.str();
 }
 
+
 void AudioCodec::print(std::ostream& ost)
 {
     ost << "AudioCodec["
@@ -161,19 +179,21 @@ void AudioCodec::print(std::ostream& ost)
         << "\n\tQuality: " << quality << "\n\tEnabled: " << enabled << "]";
 }
 
+
 //
 // Video Codec
 //
 
+
 VideoCodec::VideoCodec()
-    : Codec("Unknown", 0, 0,
-            false)
+    : Codec("Unknown", 0, 0, false)
     , // DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE
     width(0)
     , height(0)
     , fps(0) //, pixelFmt(DEFAULT_VIDEO_PIXEL_FMT)
 {
 }
+
 
 VideoCodec::VideoCodec(const std::string& name, int width, int height,
                        double fps, int sampleRate, int bitRate,
@@ -186,6 +206,7 @@ VideoCodec::VideoCodec(const std::string& name, int width, int height,
 {
 }
 
+
 VideoCodec::VideoCodec(const std::string& name, const std::string& encoder,
                        int width, int height, double fps, int sampleRate,
                        int bitRate, const std::string& pixelFmt)
@@ -197,6 +218,7 @@ VideoCodec::VideoCodec(const std::string& name, const std::string& encoder,
 {
 }
 
+
 VideoCodec::VideoCodec(const VideoCodec& r)
     : Codec(r.name, r.encoder, r.sampleRate, r.bitRate, r.enabled)
     , width(r.width)
@@ -206,9 +228,11 @@ VideoCodec::VideoCodec(const VideoCodec& r)
 {
 }
 
+
 VideoCodec::~VideoCodec()
 {
 }
+
 
 std::string VideoCodec::toString() const
 {
@@ -217,6 +241,7 @@ std::string VideoCodec::toString() const
        << height << ":" << fps << ":" << pixelFmt << ":" << enabled << "]";
     return os.str();
 }
+
 
 void VideoCodec::print(std::ostream& ost)
 {
@@ -228,7 +253,9 @@ void VideoCodec::print(std::ostream& ost)
         << "\n\tQuality: " << quality << "\n\tEnabled: " << enabled << "]";
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 /// @\}

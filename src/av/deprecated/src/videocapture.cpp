@@ -13,10 +13,12 @@
 #include "scy/platform.h"
 #include "scy/util.h"
 
+
 #ifdef HAVE_OPENCV
 
 namespace scy {
 namespace av {
+
 
 inline std::string exceptionMessage(const std::string& reason)
 {
@@ -29,9 +31,11 @@ inline std::string exceptionMessage(const std::string& reason)
     return ss.str();
 }
 
+
 //
 // Video Capture
 //
+
 
 VideoCapture::VideoCapture(int deviceId)
     : _deviceId(deviceId)
@@ -45,6 +49,7 @@ VideoCapture::VideoCapture(int deviceId)
     start();
 }
 
+
 VideoCapture::VideoCapture(const std::string& filename)
     : _filename(filename)
     , _deviceId(-1)
@@ -57,6 +62,7 @@ VideoCapture::VideoCapture(const std::string& filename)
     open();
     start();
 }
+
 
 VideoCapture::~VideoCapture()
 {
@@ -78,6 +84,7 @@ VideoCapture::~VideoCapture()
 
     TraceS(this) << "Destroy: OK" << std::endl;
 }
+
 
 void VideoCapture::start()
 {
@@ -114,6 +121,7 @@ void VideoCapture::start()
     TraceS(this) << "Starting: OK" << std::endl;
 }
 
+
 void VideoCapture::stop()
 {
     TraceS(this) << "Stopping" << std::endl;
@@ -136,6 +144,7 @@ void VideoCapture::stop()
 #endif
 }
 
+
 bool VideoCapture::open(bool whiny)
 {
     TraceS(this) << "Open" << std::endl;
@@ -156,6 +165,7 @@ bool VideoCapture::open(bool whiny)
     TraceS(this) << "Open: " << _opened << std::endl;
     return _opened;
 }
+
 
 void VideoCapture::run()
 {
@@ -216,6 +226,7 @@ void VideoCapture::run()
     TraceS(this) << "Exiting" << std::endl;
 }
 
+
 cv::Mat VideoCapture::grab()
 {
     assert(Thread::currentID() == _thread.tid());
@@ -253,6 +264,7 @@ cv::Mat VideoCapture::grab()
     return _frame;
 }
 
+
 cv::Mat VideoCapture::lastFrame() const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -276,6 +288,7 @@ cv::Mat VideoCapture::lastFrame() const
     return _frame; // no data is copied
 }
 
+
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
     TraceS(this) << "Get frame: " << width << "x" << height << std::endl;
@@ -291,6 +304,7 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
     }
 }
 
+
 void VideoCapture::getEncoderFormat(Format& iformat)
 {
     iformat.name = "OpenCV";
@@ -301,6 +315,7 @@ void VideoCapture::getEncoderFormat(Format& iformat)
     iformat.video.height = height();
     iformat.video.enabled = true;
 }
+
 
 #if 0
 void VideoCapture::addEmitter(PacketSignal* emitter)
@@ -323,6 +338,7 @@ void VideoCapture::removeEmitter(PacketSignal* emitter)
 }
 #endif
 
+
 void VideoCapture::setError(const std::string& error)
 {
     ErrorS(this) << "Set error: " << error << std::endl;
@@ -330,8 +346,9 @@ void VideoCapture::setError(const std::string& error)
         Mutex::ScopedLock lock(_mutex);
         _error.message = error;
     }
-    Error.emit(/*this, */ _error);
+    Error.emit(_error);
 }
+
 
 int VideoCapture::width()
 {
@@ -339,11 +356,13 @@ int VideoCapture::width()
     return int(_capture.get(CV_CAP_PROP_FRAME_WIDTH)); // not const
 }
 
+
 int VideoCapture::height()
 {
     Mutex::ScopedLock lock(_mutex);
     return int(_capture.get(CV_CAP_PROP_FRAME_HEIGHT)); // not const
 }
+
 
 bool VideoCapture::opened() const
 {
@@ -351,11 +370,13 @@ bool VideoCapture::opened() const
     return _opened;
 }
 
+
 bool VideoCapture::running() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _thread.running();
 }
+
 
 int VideoCapture::deviceId() const
 {
@@ -363,11 +384,13 @@ int VideoCapture::deviceId() const
     return _deviceId;
 }
 
+
 std::string VideoCapture::filename() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _filename;
 }
+
 
 std::string VideoCapture::name() const
 {
@@ -377,11 +400,13 @@ std::string VideoCapture::name() const
     return ss.str();
 }
 
+
 const scy::Error& VideoCapture::error() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;
 }
+
 
 double VideoCapture::fps() const
 {
@@ -389,13 +414,16 @@ double VideoCapture::fps() const
     return _counter.fps;
 }
 
+
 cv::VideoCapture& VideoCapture::capture()
 {
     Mutex::ScopedLock lock(_mutex);
     return _capture;
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif

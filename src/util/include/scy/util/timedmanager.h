@@ -8,14 +8,18 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_TimedManager_H
 #define SCY_TimedManager_H
+
 
 #include "scy/base.h"
 #include "scy/collection.h"
 #include "scy/timer.h"
 
+
 namespace scy {
+
 
 /// @addtogroup util
 /// Provides timed persistent data storage for class instances.
@@ -142,8 +146,11 @@ protected:
     Timer _timer;
 };
 
+
 } // namespace scy:
 
+
 #endif // SCY_TimedManager_H
+
 
 /// @\}

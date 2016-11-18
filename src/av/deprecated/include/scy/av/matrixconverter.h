@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_MatrixConverter_H
 #define SCY_AV_MatrixConverter_H
 
@@ -22,6 +23,7 @@ extern "C" {
 }
 
 #include <opencv/cv.h>
+
 
 namespace scy {
 namespace av {
@@ -112,8 +114,10 @@ public:
     struct SwsContext* _convCtx;
 };
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif
 #endif

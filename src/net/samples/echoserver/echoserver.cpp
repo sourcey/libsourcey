@@ -4,13 +4,16 @@
 #include "tcpechoserver.h"
 #include "udpechoserver.h"
 
+
 using std::endl;
 using namespace scy;
 using namespace scy::net;
 
+
 const std::uint16_t TcpPort = 1337;
 const std::uint16_t SslPort = 1338;
 const std::uint16_t UdpPort = 1339;
+
 
 struct Servers
 {
@@ -19,6 +22,7 @@ struct Servers
     SSLEchoServer ssl;
 };
 
+
 static void onShutdown(void* opaque)
 {
     auto srvs = reinterpret_cast<Servers*>(opaque);
@@ -26,6 +30,7 @@ static void onShutdown(void* opaque)
     srvs->tcp.shutdown();
     srvs->ssl.shutdown();
 }
+
 
 int main(int argc, char** argv)
 {

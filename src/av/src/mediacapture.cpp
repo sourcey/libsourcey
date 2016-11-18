@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/mediacapture.h"
 
 #ifdef HAVE_FFMPEG
@@ -21,10 +22,13 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 MediaCapture::MediaCapture()
     : _formatCtx(nullptr)
@@ -36,6 +40,7 @@ MediaCapture::MediaCapture()
     initializeFFmpeg();
 }
 
+
 MediaCapture::~MediaCapture()
 {
     TraceS(this) << "Destroy" << endl;
@@ -43,6 +48,7 @@ MediaCapture::~MediaCapture()
     close();
     uninitializeFFmpeg();
 }
+
 
 void MediaCapture::close()
 {
@@ -68,11 +74,13 @@ void MediaCapture::close()
     TraceS(this) << "Closing: OK" << endl;
 }
 
+
 void MediaCapture::openFile(const std::string& file)
 {
     TraceS(this) << "Opening file: " << file << endl;
     openStream(file, nullptr, nullptr);
 }
+
 
 // // #ifdef HAVE_FFMPEG_AVDEVICE
 //
@@ -121,6 +129,7 @@ void MediaCapture::openFile(const std::string& file)
 //
 // // #endif
 
+
 void MediaCapture::openStream(const std::string& filename,
                               AVInputFormat* inputFormat,
                               AVDictionary** formatParams)
@@ -162,6 +171,7 @@ void MediaCapture::openStream(const std::string& filename,
                                  filename);
 }
 
+
 void MediaCapture::start()
 {
     TraceS(this) << "Starting" << endl;
@@ -178,6 +188,7 @@ void MediaCapture::start()
     TraceS(this) << "Starting: OK" << endl;
 }
 
+
 void MediaCapture::stop()
 {
     TraceS(this) << "Stopping" << endl;
@@ -193,12 +204,14 @@ void MediaCapture::stop()
     TraceS(this) << "Stopping: OK" << endl;
 }
 
+
 void MediaCapture::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
 
-    emitter.emit(/*this, */ packet);
+    emitter.emit(packet);
 }
+
 
 void MediaCapture::run()
 {
@@ -263,12 +276,14 @@ void MediaCapture::run()
     Closing.emit(/*this*/);
 }
 
+
 void MediaCapture::getEncoderFormat(Format& format)
 {
     format.name = "Capture";
     getEncoderVideoCodec(format.video);
     getEncoderAudioCodec(format.audio);
 }
+
 
 void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
@@ -278,6 +293,7 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
     }
 }
 
+
 void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     Mutex::ScopedLock lock(_mutex);
@@ -286,11 +302,13 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
     }
 }
 
+
 AVFormatContext* MediaCapture::formatCtx() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _formatCtx;
 }
+
 
 VideoDecoder* MediaCapture::video() const
 {
@@ -298,11 +316,13 @@ VideoDecoder* MediaCapture::video() const
     return _video;
 }
 
+
 AudioDecoder* MediaCapture::audio() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _audio;
 }
+
 
 bool MediaCapture::stopping() const
 {
@@ -310,15 +330,19 @@ bool MediaCapture::stopping() const
     return _stopping;
 }
 
+
 std::string MediaCapture::error() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

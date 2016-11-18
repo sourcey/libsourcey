@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_SocketAdapter_H
 #define SCY_Net_SocketAdapter_H
+
 
 #include "scy/base.h"
 #include "scy/memory.h"
@@ -19,10 +21,13 @@
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 
+
 namespace scy {
 namespace net {
 
+
 class Socket;
+
 
 /// SocketAdapter is the abstract interface for all socket classes.
 /// A SocketAdapter can also be attached to a Socket in order to
@@ -123,9 +128,12 @@ protected:
     SocketAdapter* _sender;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_SocketAdapter_H
+
 
 /// @\}

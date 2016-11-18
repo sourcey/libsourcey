@@ -1,12 +1,12 @@
-// #include "scy/uv/uvpp.h"
-// #include "scy/net/tcpsocket.h"
-// #include "scy/net/sslsocket.h"
 #include "scy/logger.h"
 #include "scy/net/address.h"
+
 #include <memory>
+
 
 namespace scy {
 namespace net {
+
 
 template <typename SocketT> class ClientSocketTest
 {
@@ -16,8 +16,7 @@ public:
     bool passed;
 
     ClientSocketTest(short port)
-        : //, bool ghost = false
-        address("127.0.0.1", port)
+        : address("127.0.0.1", port)
         , passed(false)
     {
         TraceL << "Creating: " << port << std::endl;
@@ -94,6 +93,7 @@ public:
         TraceL << "On closed" << std::endl;
     }
 };
+
 
 } // namespace net
 } // namespace scy

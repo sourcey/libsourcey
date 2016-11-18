@@ -10,8 +10,10 @@
 
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
 namespace uv {
+
 
 Handle::Handle(uv_loop_t* loop, void* handle)
     : _loop(loop ? loop : uv_default_loop())
@@ -25,6 +27,7 @@ Handle::Handle(uv_loop_t* loop, void* handle)
         _ptr->data = this;
 }
 
+
 Handle::~Handle()
 {
     assertThread();
@@ -33,6 +36,7 @@ Handle::~Handle()
     assert(_ptr == nullptr);
 }
 
+
 void Handle::setLoop(uv_loop_t* loop)
 {
     assertThread();
@@ -40,11 +44,13 @@ void Handle::setLoop(uv_loop_t* loop)
     _loop = loop;
 }
 
+
 uv_loop_t* Handle::loop() const
 {
     assertThread();
     return _loop;
 }
+
 
 uv_handle_t* Handle::ptr() const
 {
@@ -52,15 +58,18 @@ uv_handle_t* Handle::ptr() const
     return _ptr;
 }
 
+
 bool Handle::active() const
 {
     return _ptr && uv_is_active(_ptr) != 0;
 }
 
+
 bool Handle::closed() const
 {
     return _closed; //_ptr && uv_is_closing(_ptr) != 0;
 }
+
 
 bool Handle::ref()
 {
@@ -71,6 +80,7 @@ bool Handle::ref()
     return true;
 }
 
+
 bool Handle::unref()
 {
     if (active())
@@ -80,15 +90,18 @@ bool Handle::unref()
     return true;
 }
 
+
 uv_thread_t Handle::tid() const
 {
     return _tid;
 }
 
+
 const scy::Error& Handle::error() const
 {
     return _error;
 }
+
 
 void Handle::setAndThrowError(const std::string& prefix, int errorno)
 {
@@ -96,10 +109,12 @@ void Handle::setAndThrowError(const std::string& prefix, int errorno)
     throwError(prefix, errorno);
 }
 
+
 void Handle::throwError(const std::string& prefix, int errorno) const
 {
     throw std::runtime_error(formatError(prefix, errorno));
 }
+
 
 void Handle::setUVError(const std::string& prefix, int errorno)
 {
@@ -110,6 +125,7 @@ void Handle::setUVError(const std::string& prefix, int errorno)
     setError(err);
 }
 
+
 void Handle::setError(const scy::Error& err)
 {
     // if (_error == err) return;
@@ -117,6 +133,7 @@ void Handle::setError(const scy::Error& err)
     _error = err;
     onError(err);
 }
+
 
 void Handle::close()
 {
@@ -136,6 +153,7 @@ void Handle::close()
     }
 }
 
+
 void Handle::assertThread() const
 {
 #ifdef _DEBUG
@@ -144,15 +162,19 @@ void Handle::assertThread() const
 #endif
 }
 
+
 void Handle::onError(const scy::Error& /* error */)
 {
 }
+
 
 void Handle::onClose()
 {
 }
 
+
 } // namespace uv
 } // namespace scy
+
 
 /// @\}

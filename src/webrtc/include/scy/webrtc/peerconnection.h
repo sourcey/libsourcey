@@ -11,13 +11,17 @@
 #ifndef SCY_PeerConnection_H
 #define SCY_PeerConnection_H
 
+
 #include "webrtc/api/jsep.h"
 #include "webrtc/api/peerconnectioninterface.h"
 #include "webrtc/api/test/fakeconstraints.h"
 
+
 namespace scy {
 
+
 class PeerConnectionManager;
+
 
 class PeerConnection : public webrtc::PeerConnectionObserver,
                        public webrtc::CreateSessionDescriptionObserver
@@ -99,6 +103,7 @@ protected:
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
 };
 
+
 class DummySetSessionDescriptionObserver
     : public webrtc::SetSessionDescriptionObserver
 {
@@ -115,8 +120,11 @@ protected:
     ~DummySetSessionDescriptionObserver() {}
 };
 
+
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

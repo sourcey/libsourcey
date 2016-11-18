@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_PacketSocket_H
 #define SCY_Net_PacketSocket_H
+
 
 #include "scy/base.h"
 #include "scy/logger.h"
@@ -18,15 +20,19 @@
 #include "scy/packetfactory.h"
 #include "scy/packetsignal.h"
 
+
 namespace scy {
 namespace net {
+
 
 struct PacketInfo;
 class PacketSocket;
 
+
 //
 // Packet Socket Adapter
 //
+
 
 class PacketSocketAdapter : public SocketAdapter, public PacketSignal
 {
@@ -50,6 +56,7 @@ public:
 
     virtual void onPacket(IPacket& pkt);
 };
+
 
 #if 0
 //
@@ -95,9 +102,12 @@ protected:
 };
 #endif
 
+
 } // namespace Net
 } // namespace scy
 
+
 #endif // SCY_Net_PacketSocket_H
+
 
 /// @\}

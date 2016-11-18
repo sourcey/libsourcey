@@ -8,19 +8,25 @@
 /// @addtogroup util
 /// @{
 
+
 #include "scy/util/diagnosticmanager.h"
+
 
 using std::endl;
 
+
 namespace scy {
+
 
 IDiagnostic::IDiagnostic()
 {
 }
 
+
 IDiagnostic::~IDiagnostic()
 {
 }
+
 
 void IDiagnostic::reset()
 {
@@ -28,27 +34,32 @@ void IDiagnostic::reset()
     setState(this, DiagnosticState::None);
 }
 
+
 void IDiagnostic::check()
 {
     reset();
     run();
 }
 
+
 void IDiagnostic::addSummary(const std::string& text)
 {
     summary.push_back(text);
-    SummaryUpdated.emit(/*this, */ text);
+    SummaryUpdated.emit(text);
 }
+
 
 bool IDiagnostic::pass()
 {
     return setState(this, DiagnosticState::Passed);
 }
 
+
 bool IDiagnostic::fail()
 {
     return setState(this, DiagnosticState::Failed);
 }
+
 
 bool IDiagnostic::complete() const
 {
@@ -56,16 +67,19 @@ bool IDiagnostic::complete() const
            stateEquals(DiagnosticState::Failed);
 }
 
+
 bool IDiagnostic::passed() const
 {
     return stateEquals(DiagnosticState::Passed) ||
            stateEquals(DiagnosticState::Failed);
 }
 
+
 bool IDiagnostic::failed() const
 {
     return stateEquals(DiagnosticState::Failed);
 }
+
 
 // ---------------------------------------------------------------------
 //
@@ -73,6 +87,7 @@ DiagnosticManager::DiagnosticManager()
 {
     TraceL << "Create" << endl;
 }
+
 
 DiagnosticManager::~DiagnosticManager()
 {
@@ -87,6 +102,7 @@ void DiagnosticManager::resetAll()
     }
 }
 
+
 void DiagnosticManager::checkAll()
 {
     Map tests = map();
@@ -94,6 +110,7 @@ void DiagnosticManager::checkAll()
         test.second->check();
     }
 }
+
 
 bool DiagnosticManager::allComplete()
 {
@@ -105,6 +122,7 @@ bool DiagnosticManager::allComplete()
     return true;
 }
 
+
 bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 {
     assert(test);
@@ -115,6 +133,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
     // &DiagnosticManager::onDiagnosticStateChange);
     return DiagnosticStore::add(test->name, test);
 }
+
 
 bool DiagnosticManager::freeDiagnostic(const std::string& name)
 {
@@ -132,10 +151,12 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
     return false;
 }
 
+
 IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name)
 {
     return DiagnosticStore::get(name, true);
 }
+
 
 void DiagnosticManager::onDiagnosticStateChange(void* sender,
                                                 DiagnosticState& state,
@@ -148,5 +169,6 @@ void DiagnosticManager::onDiagnosticStateChange(void* sender,
     if (test->complete() && allComplete())
         DiagnosticsComplete.emit(/*this*/);
 }
+
 
 } // namespace scy

@@ -8,15 +8,19 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/server/tcpconnectionpair.h"
 #include "scy/crypto/crypto.h"
 #include "scy/turn/server/server.h"
 #include "scy/turn/server/tcpallocation.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation)
     : allocation(allocation)
@@ -31,6 +35,7 @@ TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation)
     }
     TraceS(this) << "Create: " << connectionID << endl;
 }
+
 
 TCPConnectionPair::~TCPConnectionPair()
 {
@@ -54,6 +59,7 @@ TCPConnectionPair::~TCPConnectionPair()
     assert(allocation.pairs().exists(connectionID));
     allocation.pairs().remove(connectionID);
 }
+
 
 bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 {
@@ -79,6 +85,7 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
     return true;
 }
 
+
 void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set peer socket: " << connectionID << ": "
@@ -96,6 +103,7 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
+
 void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set client socket: " << connectionID << ": "
@@ -108,6 +116,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
     net::setServerSocketRecvBufSize<uv_tcp_t>(
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
+
 
 bool TCPConnectionPair::makeDataConnection()
 {
@@ -133,6 +142,7 @@ bool TCPConnectionPair::makeDataConnection()
 
     return (isDataConnection = true);
 }
+
 
 void TCPConnectionPair::onPeerDataReceived(net::Socket&,
                                            const MutableBuffer& buffer,
@@ -191,6 +201,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     }
 }
 
+
 void TCPConnectionPair::onClientDataReceived(net::Socket&,
                                              const MutableBuffer& buffer,
                                              const net::Address& peerAddress)
@@ -209,6 +220,7 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
     }
 }
 
+
 void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 {
     TraceS(this) << "Peer Connect request success" << endl;
@@ -226,6 +238,7 @@ void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
     startTimeout();
 }
 
+
 void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
                                            const Error& error)
 {
@@ -236,6 +249,7 @@ void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
     // The TCPConnectionPair will be deleted on next call to onConnectionClosed
 }
 
+
 void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 {
     TraceS(this) << "Connection pair socket closed: " << connectionID << ": "
@@ -243,11 +257,13 @@ void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
     delete this; // fail
 }
 
+
 void TCPConnectionPair::startTimeout()
 {
     // Mutex::ScopedLock lock(_mutex);
     timeout.reset();
 }
+
 
 bool TCPConnectionPair::expired() const
 {
@@ -255,7 +271,9 @@ bool TCPConnectionPair::expired() const
     return timeout.running() && timeout.expired();
 }
 
+
 } // namespace turn
 } // namespace scy
+
 
 /// @\}

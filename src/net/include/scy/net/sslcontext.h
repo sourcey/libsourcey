@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_SSLContext_H
 #define SCY_Net_SSLContext_H
+
 
 #include "scy/crypto/rsa.h"
 #include "scy/crypto/x509certificate.h"
@@ -20,8 +22,10 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
+
 namespace scy {
 namespace net {
+
 
 /// This class encapsulates context information for
 /// an SSL server or client, such as the certificate
@@ -265,29 +269,35 @@ private:
     bool _extendedVerificationErrorDetails;
 };
 
+
 inline SSLContext::Usage SSLContext::usage() const
 {
     return _usage;
 }
+
 
 inline bool SSLContext::isForServerUse() const
 {
     return _usage == SERVER_USE || _usage == TLSV1_SERVER_USE;
 }
 
+
 inline SSLContext::VerificationMode SSLContext::verificationMode() const
 {
     return _mode;
 }
+
 
 inline SSL_CTX* SSLContext::sslContext() const
 {
     return _sslContext;
 }
 
+
 //
 // Utilities
 //
+
 
 /// Non-case sensitive conversion of a string to a VerificationMode enum.
 /// If verMode is illegal an ArgumentException is thrown.
@@ -336,12 +346,16 @@ inline void clearErrorStack()
     ERR_clear_error();
 }
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_SSLContext_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

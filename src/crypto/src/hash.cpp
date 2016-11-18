@@ -8,15 +8,19 @@
 /// @addtogroup crypto
 /// @{
 
+
 #include "scy/crypto/hash.h"
 #include "scy/error.h"
 #include <assert.h>
 #include <iostream>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace crypto {
+
 
 Hash::Hash(const std::string& algorithm)
     : _algorithm(algorithm)
@@ -30,12 +34,14 @@ Hash::Hash(const std::string& algorithm)
     EVP_DigestInit(&_ctx, _md);
 }
 
+
 Hash::~Hash()
 {
     crypto::uninitializeEngine();
 
     EVP_MD_CTX_cleanup(&_ctx);
 }
+
 
 void Hash::reset()
 {
@@ -44,20 +50,24 @@ void Hash::reset()
     _digest.clear();
 }
 
+
 void Hash::update(const void* data, unsigned length)
 {
     internal::api(EVP_DigestUpdate(&_ctx, data, length));
 }
+
 
 void Hash::update(const std::string& data)
 {
     update(data.c_str(), data.length());
 }
 
+
 void Hash::update(char data)
 {
     update(&data, 1);
 }
+
 
 const ByteVec& Hash::digest()
 {
@@ -71,18 +81,22 @@ const ByteVec& Hash::digest()
     return _digest;
 }
 
+
 std::string Hash::digestStr()
 {
     const ByteVec& vec = digest();
     return std::string((const char*)vec.data(), vec.size());
 }
 
+
 const std::string& Hash::algorithm(void) const
 {
     return _algorithm;
 }
 
+
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

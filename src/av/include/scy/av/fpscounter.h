@@ -8,13 +8,16 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_FPSCounter_H
 #define SCY_AV_FPSCounter_H
 
-#include "scy/av/types.h"
+
 #include "scy/packetstream.h"
+#include "scy/av/types.h"
 
 #include <time.h>
+
 
 namespace scy {
 namespace av {
@@ -70,6 +73,7 @@ public:
             fps = CLOCKS_PER_SEC / avgTick;
     }
 };
+
 
 namespace legacy {
 
@@ -164,9 +168,12 @@ protected:
     legacy::FPSCounter _counter;
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_FPSCounter_H
+
 
 /// @\}

@@ -8,13 +8,17 @@
 /// @addtogroup archo
 /// @{
 
+
 #include "scy/archo/zipfile.h"
 #include "scy/filesystem.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace archo {
+
 
 namespace internal {
 
@@ -61,10 +65,12 @@ void api(const char* what, int ret)
 
 } // namespace internal
 
+
 ZipFile::ZipFile()
     : fp(nullptr)
 {
 }
+
 
 ZipFile::ZipFile(const std::string& file)
     : fp(nullptr)
@@ -72,15 +78,18 @@ ZipFile::ZipFile(const std::string& file)
     this->open(file);
 }
 
+
 ZipFile::~ZipFile()
 {
     this->close();
 }
 
+
 bool ZipFile::opened() const
 {
     return this->fp != nullptr;
 }
+
 
 void ZipFile::open(const std::string& file)
 {
@@ -111,6 +120,7 @@ void ZipFile::open(const std::string& file)
     unzGoToFirstFile(this->fp); // rewind
 }
 
+
 void ZipFile::close()
 {
     if (this->opened()) {
@@ -118,6 +128,7 @@ void ZipFile::close()
         this->fp = nullptr;
     }
 }
+
 
 void ZipFile::extract(const std::string& path)
 {
@@ -135,6 +146,7 @@ void ZipFile::extract(const std::string& path)
             break;
     }
 }
+
 
 bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 {
@@ -202,25 +214,30 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
     return true;
 }
 
+
 bool ZipFile::goToFirstFile()
 {
     return unzGoToFirstFile(this->fp) == UNZ_OK;
 }
+
 
 bool ZipFile::goToNextFile()
 {
     return unzGoToNextFile(this->fp) == UNZ_OK;
 }
 
+
 void ZipFile::openCurrentFile()
 {
     internal::api("unzOpenCurrentFile", unzOpenCurrentFile(this->fp));
 }
 
+
 void ZipFile::closeCurrentFile()
 {
     internal::api("unzCloseCurrentFile", unzOpenCurrentFile(this->fp));
 }
+
 
 std::string ZipFile::currentFileName()
 {
@@ -231,7 +248,9 @@ std::string ZipFile::currentFileName()
     return buf;
 }
 
+
 } // namespace archo
 } // namespace scy
+
 
 /// @\}

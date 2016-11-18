@@ -8,6 +8,7 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/imagesequencerecorder.h"
 
 #include "scy/av/ffmpeg.h"
@@ -18,7 +19,9 @@
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
 #include "webrtc/modules/video_capture/video_capture_factory.h"
 
+
 namespace scy {
+
 
 ImageSequenceRecorder::ImageSequenceRecorder(
     webrtc::VideoTrackInterface* track_to_render, const std::string& basename)
@@ -33,6 +36,7 @@ ImageSequenceRecorder::ImageSequenceRecorder(
     av::initializeFFmpeg();
 }
 
+
 ImageSequenceRecorder::~ImageSequenceRecorder()
 {
     _renderedTrack->RemoveSink(this);
@@ -44,6 +48,7 @@ ImageSequenceRecorder::~ImageSequenceRecorder()
         av_free(_avframe);
 }
 
+
 std::string ImageSequenceRecorder::getNextFilename()
 {
     std::stringstream filename;
@@ -53,6 +58,7 @@ std::string ImageSequenceRecorder::getNextFilename()
     filename << '_' << _width << 'x' << _height << ".jpg";
     return filename.str();
 }
+
 
 void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 {
@@ -110,6 +116,8 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
     }
 }
 
+
 } // namespace scy
+
 
 /// @\}

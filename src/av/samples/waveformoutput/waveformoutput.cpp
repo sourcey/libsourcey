@@ -3,9 +3,11 @@
 
 #include <conio.h>
 
+
 using namespace std;
 using namespace Sourcey;
 using namespace Sourcey::Media;
+
 
 /*
 // Detect Memory Leaks
@@ -14,6 +16,7 @@ using namespace Sourcey::Media;
 CMemLeakDetect memLeakDetect;
 #endif<DataPacket>
 */
+
 
 int main(int argc, char** argv)
 {
@@ -67,7 +70,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
+
 // using namespace Poco::Net;
+
 
 /*
 #include "AVFileReader.h"
@@ -230,6 +235,7 @@ double min = 0, double max = 0, double avg = 0)
     }
 */
 
+
 /*
 
     //AudioDecoder* audio = reinterpret_cast<AudioDecoder*>(packet.opaque);
@@ -289,6 +295,7 @@ vector<FFT::Complex> _fftData;
 };
 */
 
+
 /*
 
 // A standard 16-bit stereo WAVE file, but with a long header
@@ -325,6 +332,7 @@ for (int k = 0; k < (n >> 1); ++k)
     system("pause");
 
 */
+
 
 /*
 WaveformOutput app;

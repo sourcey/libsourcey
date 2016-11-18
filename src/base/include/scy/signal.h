@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Signal_H
 #define SCY_Signal_H
+
 
 #include "scy/delegate.h"
 #include "scy/mutex.h"
@@ -17,7 +19,9 @@
 #include <memory>
 #include <vector>
 
+
 namespace scy {
+
 
 /// Internal classes
 namespace internal {
@@ -26,6 +30,7 @@ namespace internal {
 template <typename RT, typename... Args> struct Slot;
 
 } // namespace internal
+
 
 /// Signal and slots implementation.
 ///
@@ -125,7 +130,7 @@ public:
             new FunctionDelegate<RT, Args...>(func), instance, id, priority));
     }
 
-    /// Connects a `internal::Slot` instance to the `Signal`.
+    /// Connects a `SlotPtr` instance to the `Signal`.
     /// The returned value can be used to detach the slot.
     int attach(SlotPtr slot) const
     {
@@ -237,11 +242,14 @@ private:
     mutable int _lastId = 0;
 };
 
+
 typedef Signal<void()> NullSignal;
+
 
 //
 // Inline Helpers
 //
+
 
 // Class member function slot
 template <class Class, class RT, class... Args>
@@ -277,6 +285,7 @@ slot(RT (*method)(Args...), int id = -1, int priority = -1)
         nullptr, id, priority);
 }
 
+
 /// Internal classes
 namespace internal {
 
@@ -306,6 +315,7 @@ template <typename RT, typename... Args> struct Slot
 };
 
 } // namespace internal
+
 
 // /// This exception is used to break out of a Signal callback scope.
 // class StopPropagation: public std::exception
@@ -537,8 +547,11 @@ template <typename RT, typename... Args> struct Slot
 // class Signal4: public SignalBase<DelegateBase<P, P2, P3, P4>, P, P2, P3, P4>
 // {};
 
+
 } // namespace scy
 
+
 #endif // SCY_Signal_H
+
 
 /// @\}

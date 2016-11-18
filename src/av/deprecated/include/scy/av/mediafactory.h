@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_MediaFactory_H
 #define SCY_AV_MediaFactory_H
+
 
 #include "scy/av/formatregistry.h"
 #include "scy/av/mediacapture.h"
@@ -36,6 +38,7 @@
 #include "scy/av/devicemanager_fake.h"
 #endif
 
+
 namespace scy {
 namespace av {
 
@@ -58,6 +61,7 @@ public:
     /// Creates a VideoCapture from given source file.
     /// File captures can be created in any thread.
     VideoCapture::Ptr createFileCapture(const std::string& file);
+
 
     AudioCapture::Ptr createAudioCapture(
         int deviceId, int channels = DEFAULT_AUDIO_CHANNELS,
@@ -87,6 +91,7 @@ public:
     /// Siganls when a video capture fails, or is unplugged.
     Signal<void(const VideoCapture::Ptr&)> VideoCaptureError;
 
+
     std::map<int, VideoCapture::Ptr>
     videoCaptures() const; /// Returns the device manager instance.
     IDeviceManager& devices();
@@ -99,6 +104,7 @@ public:
 
     /// Shuts down the MediaFactory and deletes the singleton instance.
     static void shutdown();
+
 
 protected:
     MediaFactory();
@@ -121,8 +127,10 @@ protected:
     std::map<int, VideoCapture::Ptr> _videoCaptures;
 };
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif
 #endif

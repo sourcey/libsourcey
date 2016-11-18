@@ -1,12 +1,14 @@
 #include "httptests.h"
 
+
 using std::endl;
 using namespace scy;
 using namespace scy::test;
 
+
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
     net::SSLManager::initNoVerifyClient();
 
@@ -237,6 +239,7 @@ int main(int argc, char** argv)
         expect(conn->closed());
         expect(!conn->error().any());
     });
+
 
     //
     /// Google Drive Upload Test

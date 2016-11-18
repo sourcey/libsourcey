@@ -10,12 +10,15 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
+
 #include "scy/numeric.h"
 
 #include <assert.h>
 
+
 namespace scy {
 namespace numeric {
+
 
 void format(std::string& str, int value)
 {
@@ -23,6 +26,7 @@ void format(std::string& str, int value)
     std::sprintf(buffer, "%d", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, int value, int width)
 {
@@ -33,6 +37,7 @@ void format(std::string& str, int value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, int value, int width)
 {
     assert(width > 0 && width < 64);
@@ -42,12 +47,14 @@ void format0(std::string& str, int value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, int value)
 {
     char buffer[64];
     std::sprintf(buffer, "%X", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, int value, int width)
 {
@@ -58,12 +65,14 @@ void formatHex(std::string& str, int value, int width)
     str.append(buffer);
 }
 
+
 void format(std::string& str, unsigned value)
 {
     char buffer[64];
     std::sprintf(buffer, "%u", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, unsigned value, int width)
 {
@@ -74,6 +83,7 @@ void format(std::string& str, unsigned value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, unsigned int value, int width)
 {
     assert(width > 0 && width < 64);
@@ -83,12 +93,14 @@ void format0(std::string& str, unsigned int value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, unsigned value)
 {
     char buffer[64];
     std::sprintf(buffer, "%X", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, unsigned value, int width)
 {
@@ -99,12 +111,14 @@ void formatHex(std::string& str, unsigned value, int width)
     str.append(buffer);
 }
 
+
 void format(std::string& str, long value)
 {
     char buffer[64];
     std::sprintf(buffer, "%ld", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, long value, int width)
 {
@@ -115,6 +129,7 @@ void format(std::string& str, long value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, long value, int width)
 {
     assert(width > 0 && width < 64);
@@ -124,12 +139,14 @@ void format0(std::string& str, long value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, long value)
 {
     char buffer[64];
     std::sprintf(buffer, "%lX", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, long value, int width)
 {
@@ -140,12 +157,14 @@ void formatHex(std::string& str, long value, int width)
     str.append(buffer);
 }
 
+
 void format(std::string& str, unsigned long value)
 {
     char buffer[64];
     std::sprintf(buffer, "%lu", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, unsigned long value, int width)
 {
@@ -156,6 +175,7 @@ void format(std::string& str, unsigned long value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, unsigned long value, int width)
 {
     assert(width > 0 && width < 64);
@@ -165,12 +185,14 @@ void format0(std::string& str, unsigned long value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, unsigned long value)
 {
     char buffer[64];
     std::sprintf(buffer, "%lX", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, unsigned long value, int width)
 {
@@ -181,7 +203,9 @@ void formatHex(std::string& str, unsigned long value, int width)
     str.append(buffer);
 }
 
+
 #if defined(SCY_HAVE_INT64) && !defined(SCY_LONG_IS_64_BIT)
+
 
 void format(std::string& str, std::int64_t value)
 {
@@ -189,6 +213,7 @@ void format(std::string& str, std::int64_t value)
     std::sprintf(buffer, "%" I64_FMT "d", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, std::int64_t value, int width)
 {
@@ -199,6 +224,7 @@ void format(std::string& str, std::int64_t value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, std::int64_t value, int width)
 {
     assert(width > 0 && width < 64);
@@ -208,12 +234,14 @@ void format0(std::string& str, std::int64_t value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, std::int64_t value)
 {
     char buffer[64];
     std::sprintf(buffer, "%" I64_FMT "X", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, std::int64_t value, int width)
 {
@@ -224,12 +252,14 @@ void formatHex(std::string& str, std::int64_t value, int width)
     str.append(buffer);
 }
 
+
 void format(std::string& str, std::uint64_t value)
 {
     char buffer[64];
     std::sprintf(buffer, "%" I64_FMT "u", value);
     str.append(buffer);
 }
+
 
 void format(std::string& str, std::uint64_t value, int width)
 {
@@ -240,6 +270,7 @@ void format(std::string& str, std::uint64_t value, int width)
     str.append(buffer);
 }
 
+
 void format0(std::string& str, std::uint64_t value, int width)
 {
     assert(width > 0 && width < 64);
@@ -249,12 +280,14 @@ void format0(std::string& str, std::uint64_t value, int width)
     str.append(buffer);
 }
 
+
 void formatHex(std::string& str, std::uint64_t value)
 {
     char buffer[64];
     std::sprintf(buffer, "%" I64_FMT "X", value);
     str.append(buffer);
 }
+
 
 void formatHex(std::string& str, std::uint64_t value, int width)
 {
@@ -265,7 +298,9 @@ void formatHex(std::string& str, std::uint64_t value, int width)
     str.append(buffer);
 }
 
+
 #endif // defined(SCY_HAVE_INT64) && !defined(SCY_LONG_IS_64_BIT)
+
 
 void format(std::string& str, const void* ptr)
 {
@@ -282,10 +317,13 @@ void format(std::string& str, const void* ptr)
     str.append(buffer);
 }
 
+
 } // namespace numeric
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2004-2008, Applied Informatics Software Engineering GmbH.

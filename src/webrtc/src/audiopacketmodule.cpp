@@ -8,6 +8,7 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/audiopacketmodule.h"
 
 #include "webrtc/base/common.h"
@@ -17,9 +18,12 @@
 
 #include "scy/logger.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 // Audio sample value that is high enough that it doesn't occur naturally when
 // frames are being faked. E.g. NetEq will not generate this large sample value
@@ -52,6 +56,7 @@ enum
     MSG_START_PROCESS,
     MSG_RUN_PROCESS
 };
+
 
 AudioPacketModule::AudioPacketModule()
     : _lastProcessTimeMS(0)
@@ -814,9 +819,12 @@ int32_t AudioPacketModule::GetLoudspeakerStatus(bool* /*enabled*/) const
     return 0;
 }
 
+
 } // namespace scy
 
+
 /// @\}
+
 
 /*
  *  Copyright 2012 The WebRTC project authors. All Rights Reserved.

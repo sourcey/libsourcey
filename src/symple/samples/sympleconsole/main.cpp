@@ -7,12 +7,14 @@
 
 #include <iostream>
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 using namespace scy;
 using namespace scy::net;
 using namespace scy::util;
+
 
 //
 // Symple Console Application
@@ -25,7 +27,9 @@ using namespace scy::util;
 // -name Somedude
 //
 
+
 #define USE_SSL 0
+
 
 class SympleApplication : public scy::Application
 {
@@ -317,6 +321,7 @@ public:
         peer["version"] = "0.1.0";
     }
 };
+
 
 int main(int argc, char** argv)
 {

@@ -8,40 +8,50 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/thread.h"
 #include "assert.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
 #include <memory>
 
+
 using std::endl;
+
 
 namespace scy {
 
+
 const uv_thread_t Thread::mainID = uv_thread_self();
+
 
 Thread::Thread()
 {
 }
+
 
 Thread::Thread(async::Runnable& target)
 {
     start(target);
 }
 
+
 Thread::Thread(std::function<void()> target)
 {
     start(target);
 }
+
 
 Thread::Thread(std::function<void(void*)> target, void* arg)
 {
     start(target, arg);
 }
 
+
 Thread::~Thread()
 {
 }
+
 
 void Thread::startAsync()
 {
@@ -64,6 +74,7 @@ void Thread::startAsync()
         throw std::runtime_error("System error: Cannot initialize thread");
 }
 
+
 void Thread::join()
 {
     // WARNING: Do not use Logger in this method
@@ -74,6 +85,7 @@ void Thread::join()
     assert(!this->running());
     assert(!this->started());
 }
+
 
 bool Thread::waitForExit(int timeout)
 {
@@ -92,16 +104,20 @@ bool Thread::waitForExit(int timeout)
     return true;
 }
 
+
 uv_thread_t Thread::currentID()
 {
     return uv_thread_self();
 }
+
 
 bool Thread::async() const
 {
     return true;
 }
 
+
 } // namespace scy
+
 
 /// @\}

@@ -8,8 +8,10 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #ifndef SCY_WebRTC_AudioPacketModule_H
 #define SCY_WebRTC_AudioPacketModule_H
+
 
 #include <memory>
 
@@ -25,7 +27,9 @@
 #include "webrtc/common_types.h"
 #include "webrtc/modules/audio_device/include/audio_device.h"
 
+
 namespace scy {
+
 
 /// This class implements an `AudioDeviceModule` that can be used to detect if
 /// audio is being received properly if it is fed by another `AudioDeviceModule`
@@ -275,11 +279,15 @@ private:
     rtc::CriticalSection _critCallback;
 };
 
+
 } /// namespace scy
+
 
 #endif /// SCY_WebRTC_AudioPacketModule_H
 
+
 /// @\}
+
 
 /*
  *  Copyright 2012 The WebRTC project authors. All Rights Reserved.

@@ -8,10 +8,13 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/process.h"
 #include "scy/filesystem.h"
 
+
 namespace scy {
+
 
 Process::Process(uv::Loop* loop)
     : uv::Handle(loop, new uv_process_t)
@@ -31,6 +34,7 @@ Process::Process(uv::Loop* loop)
         // We could call close() here to free the uv_process_t content
     };
 }
+
 
 void Process::spawn()
 {
@@ -64,17 +68,21 @@ void Process::spawn()
         setAndThrowError("Cannot spawn process", r);
 }
 
+
 bool Process::kill(int signum)
 {
     assert(pid() > 0);
     return uv_kill(pid(), signum) == 0;
 }
 
+
 int Process::pid() const
 {
     return ptr<uv_process_t>()->pid;
 }
 
+
 } // namespace scy
+
 
 /// @\}

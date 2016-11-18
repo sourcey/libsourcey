@@ -11,15 +11,19 @@
 // http://libb64.sourceforge.net/
 //
 
+
 #include "scy/base64.h"
+
 
 namespace scy {
 namespace base64 {
 namespace internal {
 
+
 //
 // Encoder
 //
+
 
 void init_encodestate(encodestate* state_in)
 {
@@ -31,6 +35,7 @@ void init_encodestate(encodestate* state_in)
         0; // added: set 1 for nullptrl terminated output string
 }
 
+
 char encode_value(char value_in)
 {
     static const char* encoding =
@@ -39,6 +44,7 @@ char encode_value(char value_in)
         return '=';
     return encoding[(int)value_in];
 }
+
 
 int encode_block(const char* plaintext_in, int length_in, char* code_out,
                  encodestate* state_in)
@@ -98,6 +104,7 @@ int encode_block(const char* plaintext_in, int length_in, char* code_out,
     return codechar - code_out;
 }
 
+
 int encode_blockend(char* code_out, encodestate* state_in)
 {
     char* codechar = code_out;
@@ -121,9 +128,11 @@ int encode_blockend(char* code_out, encodestate* state_in)
     return codechar - code_out;
 }
 
+
 //
 // Decoder
 //
+
 
 int decode_value(char value_in)
 {
@@ -140,11 +149,13 @@ int decode_value(char value_in)
     return decoding[(int)value_in];
 }
 
+
 void init_decodestate(decodestate* state_in)
 {
     state_in->step = step_a;
     state_in->plainchar = 0;
 }
+
 
 int decode_block(const char* code_in, const int length_in, char* plaintext_out,
                  decodestate* state_in)
@@ -205,8 +216,10 @@ int decode_block(const char* code_in, const int length_in, char* plaintext_out,
     return plainchar - plaintext_out;
 }
 
+
 } // namespace internal
 } // namespace base64
 } // namespace scy
+
 
 /// @\}

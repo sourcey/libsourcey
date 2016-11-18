@@ -8,23 +8,29 @@
 /// @addtogroup util
 /// @{
 
+
 #include "scy/util/streammanager.h"
 #include "scy/logger.h"
 
+
 using namespace std;
 
+
 namespace scy {
+
 
 StreamManager::StreamManager(bool freeClosedStreams)
     : _freeClosedStreams(freeClosedStreams)
 {
 }
 
+
 StreamManager::~StreamManager()
 {
     DebugL << "Destroy" << endl;
     closeAll();
 }
+
 
 void StreamManager::closeAll()
 {
@@ -46,6 +52,7 @@ void StreamManager::closeAll()
     }
 }
 
+
 bool StreamManager::addStream(PacketStream* stream, bool whiny)
 {
     assert(stream);
@@ -53,10 +60,12 @@ bool StreamManager::addStream(PacketStream* stream, bool whiny)
     return Manager::add(stream->name(), stream, whiny);
 }
 
+
 PacketStream* StreamManager::getStream(const std::string& name, bool whiny)
 {
     return Manager::get(name, whiny);
 }
+
 
 bool StreamManager::closeStream(const std::string& name, bool whiny)
 {
@@ -71,6 +80,7 @@ bool StreamManager::closeStream(const std::string& name, bool whiny)
     return false;
 }
 
+
 PacketStream* StreamManager::getDafaultStream()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -84,6 +94,7 @@ PacketStream* StreamManager::getDafaultStream()
     return NULL;
 }
 
+
 void StreamManager::onAdd(PacketStream* stream)
 {
     // Stream name can't be empty
@@ -95,11 +106,13 @@ void StreamManager::onAdd(PacketStream* stream)
     stream->StateChange += slot(this, &StreamManager::onStreamStateChange, -1);
 }
 
+
 void StreamManager::onRemove(PacketStream* stream)
 {
     DebugL << "stream removed: " << stream->name() << endl;
     stream->StateChange -= slot(this, &StreamManager::onStreamStateChange);
 }
+
 
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state,
                                         const PacketStreamState&)
@@ -125,11 +138,13 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state,
     }
 }
 
+
 StreamManager::Map StreamManager::streams() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _map;
 }
+
 
 void StreamManager::print(std::ostream& os) const
 {
@@ -142,5 +157,6 @@ void StreamManager::print(std::ostream& os) const
     }
     os << "\n]";
 }
+
 
 } // namespace scy

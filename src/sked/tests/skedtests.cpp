@@ -4,12 +4,15 @@
 #include "scy/sked/scheduler.h"
 #include "scy/test.h"
 
+
 using namespace std;
 using namespace scy;
 using namespace scy::test;
 
+
 static sked::Scheduler scheduler;
 static int taskRunTimes = 0;
+
 
 // =============================================================================
 // Test Scheduled Task
@@ -39,6 +42,7 @@ struct ScheduledTask : public sked::Task
         sked::Task::deserialize(root);
     }
 };
+
 
 int main(int argc, char** argv)
 {

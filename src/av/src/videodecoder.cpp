@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videodecoder.h"
 
 #ifdef HAVE_FFMPEG
@@ -15,20 +16,25 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 VideoDecoder::VideoDecoder(AVStream* stream)
 {
     this->stream = stream;
 }
 
+
 VideoDecoder::~VideoDecoder()
 {
     close();
 }
+
 
 void VideoDecoder::create()
 {
@@ -61,15 +67,18 @@ void VideoDecoder::create()
     oparams.pixelFmt = "bgr24";
 }
 
+
 void VideoDecoder::open()
 {
     VideoContext::open();
 }
 
+
 void VideoDecoder::close()
 {
     VideoContext::close();
 }
+
 
 void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 {
@@ -124,6 +133,7 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
     //     << endl;
 }
 
+
 bool VideoDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
@@ -133,6 +143,7 @@ bool VideoDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
     ipacket.size = size;
     return decode(ipacket); //, opacket
 }
+
 
 bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 {
@@ -232,6 +243,7 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     return !!frameDecoded;
 }
 
+
 void VideoDecoder::flush() // AVPacket& opacket
 {
     AVPacket ipacket;
@@ -250,14 +262,17 @@ void VideoDecoder::flush() // AVPacket& opacket
             TraceS(this) << "Flushed video frame" << endl;
             emitPacket(this,
                        convert(frame)); //, opacket stream, ctx, &pts, oparams
-                                        // return true;
+            // return true;
         }
     } while (frameDecoded);
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

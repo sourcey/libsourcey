@@ -8,8 +8,10 @@
 /// @addtogroup crypto
 /// @{
 
+
 #ifndef SCY_Crypto_X509Certificate_H
 #define SCY_Crypto_X509Certificate_H
+
 
 #include "scy/crypto/crypto.h"
 #include "scy/datetime.h"
@@ -18,8 +20,10 @@
 #include <openssl/ssl.h>
 #include <set>
 
+
 namespace scy {
 namespace crypto {
+
 
 /// This class represents a X509 Certificate.
 class X509Certificate
@@ -145,12 +149,16 @@ private:
     X509* _certificate;
 };
 
+
 } // namespace crypto
 } // namespace scy
 
+
 #endif // SCY_Crypto_X509Certificate_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2006-2009, Applied Informatics Software Engineering GmbH.

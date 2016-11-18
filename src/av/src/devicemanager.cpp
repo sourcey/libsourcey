@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/devicemanager.h"
 #include "scy/logger.h"
+
 
 #ifdef HAVE_FFMPEG
 
@@ -84,20 +86,25 @@
     }
 #endif
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
 
+
 //
 // Device
 //
+
 
 Device::Device()
     : type(Unknown)
     , isDefault(false)
 {
 }
+
 
 Device::Device(Type type, const std::string& id, const std::string& name,
                bool isDefault)
@@ -108,6 +115,7 @@ Device::Device(Type type, const std::string& id, const std::string& name,
 {
 }
 
+
 void Device::print(std::ostream& os)
 {
     os << "Device[" << type << ":" << name << ":" << id //<< ":"
@@ -115,11 +123,14 @@ void Device::print(std::ostream& os)
        << "]";
 }
 
+
 //
 // Helpers
 //
 
+
 namespace internal {
+
 
 // Substitute for missing `av_find_output_format()` function
 AVOutputFormat* findOutputFormat(const std::string& name)
@@ -134,6 +145,7 @@ AVOutputFormat* findOutputFormat(const std::string& name)
     return oformat;
 }
 
+
 AVOutputFormat* findDefaultOutputFormat(const std::vector<std::string>& outputs)
 {
     AVOutputFormat* oformat = nullptr;
@@ -147,6 +159,7 @@ AVOutputFormat* findDefaultOutputFormat(const std::vector<std::string>& outputs)
     return oformat;
 }
 
+
 AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 {
     AVInputFormat* iformat = nullptr;
@@ -159,6 +172,7 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
     assert(iformat && "no input format found");
     return iformat;
 }
+
 
 bool enumerateDeviceList(AVFormatContext* s, Device::Type type,
                          std::vector<av::Device>& devices)
@@ -198,6 +212,7 @@ fail:
     return !devices.empty();
 #endif
 }
+
 
 bool getInputDeviceList(const std::vector<std::string>& inputs,
                         Device::Type type, std::vector<av::Device>& devices)
@@ -258,6 +273,7 @@ fail:
 #endif
 }
 
+
 bool getOutputDeviceList(const std::vector<std::string>& outputs,
                          Device::Type type, std::vector<av::Device>& devices)
 {
@@ -312,6 +328,7 @@ fail:
 #endif
 }
 
+
 void printDevices(std::ostream& ost, std::vector<Device>& devs)
 {
     for (std::size_t i = 0; i < devs.size(); ++i) {
@@ -321,11 +338,14 @@ void printDevices(std::ostream& ost, std::vector<Device>& devs)
     }
 }
 
+
 } // namespace internal
+
 
 //
 // Device Manager
 //
+
 
 DeviceManager::DeviceManager()
     : _watcher(nullptr)
@@ -333,25 +353,30 @@ DeviceManager::DeviceManager()
     initializeFFmpeg();
 }
 
+
 DeviceManager::~DeviceManager()
 {
     uninitializeFFmpeg();
 }
+
 
 bool DeviceManager::getCameras(std::vector<Device>& devices)
 {
     return getDeviceList(Device::VideoInput, devices);
 }
 
+
 bool DeviceManager::getMicrophones(std::vector<Device>& devices)
 {
     return getDeviceList(Device::AudioInput, devices);
 }
 
+
 bool DeviceManager::getSpeakers(std::vector<Device>& devices)
 {
     return getDeviceList(Device::AudioOutput, devices);
 }
+
 
 bool DeviceManager::findCamera(const std::string& name, Device& device)
 {
@@ -368,6 +393,7 @@ bool DeviceManager::findCamera(const std::string& name, Device& device)
     return false;
 }
 
+
 bool DeviceManager::findMicrophone(const std::string& name, Device& device)
 {
     std::vector<Device> devices;
@@ -382,6 +408,7 @@ bool DeviceManager::findMicrophone(const std::string& name, Device& device)
 
     return false;
 }
+
 
 bool DeviceManager::findSpeaker(const std::string& name, Device& device)
 {
@@ -398,6 +425,7 @@ bool DeviceManager::findSpeaker(const std::string& name, Device& device)
     return false;
 }
 
+
 bool DeviceManager::getDefaultCamera(Device& device)
 {
     std::vector<Device> devices;
@@ -408,6 +436,7 @@ bool DeviceManager::getDefaultCamera(Device& device)
 
     return false;
 }
+
 
 bool DeviceManager::getDefaultMicrophone(Device& device)
 {
@@ -420,6 +449,7 @@ bool DeviceManager::getDefaultMicrophone(Device& device)
     return false;
 }
 
+
 bool DeviceManager::getDefaultSpeaker(Device& device)
 {
     std::vector<Device> devices;
@@ -431,15 +461,18 @@ bool DeviceManager::getDefaultSpeaker(Device& device)
     return false;
 }
 
+
 AVInputFormat* DeviceManager::findVideoInputFormat()
 {
     return internal::findDefaultInputFormat(SCY_VIDEO_INPUTS);
 }
 
+
 AVInputFormat* DeviceManager::findAudioInputFormat()
 {
     return internal::findDefaultInputFormat(SCY_AUDIO_INPUTS);
 }
+
 
 bool DeviceManager::getDeviceList(Device::Type type,
                                   std::vector<av::Device>& devices)
@@ -477,6 +510,7 @@ bool DeviceManager::getDeviceList(Device::Type type,
     return false;
 }
 
+
 int DeviceManager::getCapabilities()
 {
     std::vector<Device> devices;
@@ -493,15 +527,18 @@ int DeviceManager::getCapabilities()
     return caps;
 }
 
+
 void DeviceManager::setWatcher(DeviceWatcher* watcher)
 {
     _watcher.reset(watcher);
 }
 
+
 DeviceWatcher* DeviceManager::watcher()
 {
     return _watcher.get();
 }
+
 
 void DeviceManager::print(std::ostream& ost)
 {
@@ -528,6 +565,7 @@ void DeviceManager::print(std::ostream& ost)
         ost << "\tNone" << endl;
     }
 }
+
 
 #if 0
 
@@ -699,9 +737,12 @@ AVOutputFormat* nextOutputDevice(Device::Type type, AVOutputFormat* prev = nullp
 
 #endif
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // HAVE_FFMPEG
+
 
 /// @\}

@@ -6,6 +6,7 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
+
 #include "scy/idler.h"
 #include "scy/logger.h"
 #include "signaler.h"
@@ -13,10 +14,13 @@
 #include "webrtc/base/ssladapter.h"
 #include "webrtc/base/thread.h"
 
+
 using std::endl;
 using namespace scy;
 
+
 // Test this demo with the code in the `client` directory
+
 
 #define SERVER_HOST "localhost"
 #define USE_SSL 0 // 1
@@ -25,6 +29,7 @@ using namespace scy;
 #else
 #define SERVER_PORT 4500
 #endif
+
 
 int main(int argc, char** argv)
 {

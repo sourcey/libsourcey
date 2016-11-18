@@ -8,14 +8,18 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #ifndef SCY_WebRTC_VideoPacketSource_H
 #define SCY_WebRTC_VideoPacketSource_H
+
 
 #include "scy/av/types.h"
 
 #include "webrtc/media/base/videocapturer.h"
 
+
 namespace scy {
+
 
 /// VideoPacketSource implements a simple `cricket::VideoCapturer` that
 /// gets decoded remote video frames from a local media channel.
@@ -41,6 +45,7 @@ public:
     void onVideoCaptured(av::VideoPacket& packet);
 };
 
+
 // class VideoPacketSourceFactory : public cricket::VideoDeviceCapturerFactory {
 // public:
 //     VideoPacketSourceFactory() {}
@@ -51,8 +56,11 @@ public:
 //     }
 // };
 
+
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

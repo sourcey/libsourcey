@@ -8,8 +8,10 @@
 /// @addtogroup symple
 /// @{
 
+
 #ifndef SCY_Symple_Message_H
 #define SCY_Symple_Message_H
+
 
 #include "scy/base.h"
 #include "scy/json/json.h"
@@ -17,8 +19,10 @@
 #include "scy/symple/address.h"
 #include "scy/symple/peer.h"
 
+
 namespace scy {
 namespace smpl {
+
 
 class Message : public json::Value, public IPacket
 {
@@ -82,9 +86,12 @@ public:
     virtual const char* className() const { return "Symple::Message"; }
 };
 
+
 } // namespace smpl
 } // namespace scy
 
+
 #endif // SCY_Symple_Message_H
+
 
 /// @\}

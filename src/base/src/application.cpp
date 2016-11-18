@@ -8,51 +8,61 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/application.h"
-#include "scy/error.h"
-#include "scy/logger.h"
 #include "scy/memory.h"
+#include "scy/logger.h"
+#include "scy/error.h"
 #include "scy/singleton.h"
+
 
 namespace scy {
 
+
 namespace internal {
 
-static Singleton<Application> singleton;
+    static Singleton<Application> singleton;
 
-struct ShutdownCmd
-{
-    Application* self;
-    void* opaque;
-    std::function<void(void*)> callback;
-};
+    struct ShutdownCmd
+    {
+        Application* self;
+        void* opaque;
+        std::function<void(void*)> callback;
+    };
+
 }
+
 
 Application& Application::getDefault()
 {
     return *internal::singleton.get();
 }
 
-Application::Application(uv::Loop* loop)
-    : loop(loop)
+
+Application::Application(uv::Loop* loop) :
+    loop(loop)
 {
     DebugS(this) << "Create" << std::endl;
 }
+
 
 Application::~Application()
 {
     DebugS(this) << "Destroy" << std::endl;
 }
 
+
 void Application::run()
 {
     uv_run(loop, UV_RUN_DEFAULT);
 }
 
+
 void Application::stop()
 {
     uv_stop(loop);
 }
+
 
 void Application::finalize()
 {
@@ -63,20 +73,19 @@ void Application::finalize()
     uv_walk(loop, Application::onPrintHandle, nullptr);
 #endif
 
-    // Shutdown the garbage collector to safely free memory before the app
-    // exists
+    // Shutdown the garbage collector to safely free memory before the app exists
     GarbageCollector::instance().finalize();
 
     // Run until handles are closed
     run();
     assert(loop->active_handles == 0);
-    // assert(loop->active_reqs == 0);
+    //assert(loop->active_reqs == 0);
 
     DebugS(this) << "Finalization complete" << std::endl;
 }
 
-void Application::bindShutdownSignal(std::function<void(void*)> callback,
-                                     void* opaque)
+
+void Application::bindShutdownSignal(std::function<void(void*)> callback, void* opaque)
 {
     auto cmd = new internal::ShutdownCmd;
     cmd->self = this;
@@ -89,29 +98,34 @@ void Application::bindShutdownSignal(std::function<void(void*)> callback,
     uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 }
 
-void Application::waitForShutdown(std::function<void(void*)> callback,
-                                  void* opaque)
+
+void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 {
     DebugS(this) << "Wait for shutdown" << std::endl;
     bindShutdownSignal(callback, opaque);
     run();
 }
 
+
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
     auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
     DebugS(cmd->self) << "Got shutdown signal" << std::endl;
 
-    uv_close((uv_handle_t*)req, [](uv_handle_t* handle) { delete handle; });
+    uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+        delete handle;
+    });
     if (cmd->callback)
         cmd->callback(cmd->opaque);
     delete cmd;
 }
 
+
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
     DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
+
 
 //
 // Command-line option parser
@@ -147,6 +161,8 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
     }
 }
 
+
 } // namespace scy
+
 
 /// @\}

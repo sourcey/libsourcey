@@ -8,17 +8,22 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Authenticator_H
 #define SCY_HTTP_Authenticator_H
+
 
 #include "scy/http/url.h"
 #include <string>
 
+
 namespace scy {
 namespace http {
 
+
 class Request;
 class Response;
+
 
 /// This is a utility class for working with HTTP
 /// authentication (basic or digest) in http::Request objects.
@@ -93,6 +98,7 @@ private:
     std::string _password;
 };
 
+
 //
 // Basic Authenticator (rfc2617)
 //
@@ -158,9 +164,11 @@ private:
     std::string _password;
 };
 
+
 //
 // Helpers
 //
+
 
 bool isBasicCredentials(const std::string& header); /// Returns true if
                                                     /// authentication header is
@@ -212,12 +220,16 @@ void extractCredentials(
                             /// URI (e.g.:
                             /// "http://user:pass@sample.com/secret").
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_Authenticator_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

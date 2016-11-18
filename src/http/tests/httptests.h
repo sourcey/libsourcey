@@ -1,6 +1,7 @@
 #ifndef SCY_HTTP_Tests_H
 #define SCY_HTTP_Tests_H
 
+
 #include "scy/async.h"
 #include "scy/base.h"
 #include "scy/crypto/hash.h"
@@ -21,19 +22,24 @@
 
 #include "../samples/httpechoserver/httpechoserver.h"
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 using scy::test::Test;
 
+
 #define TEST_HTTP_PORT 1337
 #define TEST_HTTPS_PORT 1338
 
+
 namespace scy {
+
 
 //
 /// Generic Callback Context
 //
+
 
 // struct CallbackContext
 // {
@@ -93,6 +99,7 @@ namespace scy {
 //         //expect(response.success());
 //     }
 // };
+
 
 //
 /// HTTP Client Tests
@@ -192,8 +199,11 @@ struct HTTPEchoTest
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_HTTP_Tests_H
+
 
 /// @\}

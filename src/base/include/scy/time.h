@@ -8,17 +8,22 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Time_H
 #define SCY_Time_H
+
 
 #include <cstdint>
 #include <ctime>
 #include <string>
 
+
 namespace scy {
+
 
 /// Classes and functions for handling time
 namespace time {
+
 
 /// The date/time format defined in the ISO 8601 standard.
 /// This is the default format used throughout the library for consistency.
@@ -68,9 +73,12 @@ std::uint64_t ticks();
 std::uint64_t getTimeMS();
 #endif
 
+
 } // namespace time
 } // namespace scy
 
+
 #endif // SCY_Time_H
+
 
 /// @\}

@@ -8,14 +8,18 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/response.h"
 #include "scy/datetime.h"
 #include "scy/http/util.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace http {
+
 
 Response::Response()
     : _status(StatusCode::OK)
@@ -23,11 +27,13 @@ Response::Response()
 {
 }
 
+
 Response::Response(StatusCode status, const std::string& reason)
     : _status(status)
     , _reason(reason)
 {
 }
+
 
 Response::Response(const std::string& version, StatusCode status,
                    const std::string& reason)
@@ -37,11 +43,13 @@ Response::Response(const std::string& version, StatusCode status,
 {
 }
 
+
 Response::Response(StatusCode status)
     : _status(status)
     , _reason(getStatusCodeReason(status))
 {
 }
+
 
 Response::Response(const std::string& version, StatusCode status)
     : http::Message(version)
@@ -50,9 +58,11 @@ Response::Response(const std::string& version, StatusCode status)
 {
 }
 
+
 Response::~Response()
 {
 }
+
 
 void Response::setStatus(StatusCode status)
 {
@@ -60,10 +70,12 @@ void Response::setStatus(StatusCode status)
     _reason = getStatusCodeReason(status);
 }
 
+
 void Response::setReason(const std::string& reason)
 {
     _reason = reason;
 }
+
 
 void Response::setStatusAndReason(StatusCode status, const std::string& reason)
 {
@@ -71,11 +83,13 @@ void Response::setStatusAndReason(StatusCode status, const std::string& reason)
     _reason = reason;
 }
 
+
 void Response::setDate(const Timestamp& dateTime)
 {
     set("Date",
         DateTimeFormatter::format(dateTime, DateTimeFormat::HTTP_FORMAT));
 }
+
 
 Timestamp Response::getDate() const
 {
@@ -84,10 +98,12 @@ Timestamp Response::getDate() const
     return DateTimeParser::parse(dateTime, tzd).timestamp();
 }
 
+
 void Response::addCookie(const Cookie& cookie)
 {
     add("Set-Cookie", cookie.toString());
 }
+
 
 void Response::getCookies(std::vector<Cookie>& cookies) const
 {
@@ -101,6 +117,7 @@ void Response::getCookies(std::vector<Cookie>& cookies) const
     }
 }
 
+
 void Response::write(std::ostream& ostr) const
 {
     ostr << getVersion() << " " << static_cast<int>(_status) << " " << _reason
@@ -109,20 +126,24 @@ void Response::write(std::ostream& ostr) const
     ostr << "\r\n";
 }
 
+
 bool Response::success() const
 {
     return getStatus() < StatusCode::BadRequest; // < 400
 }
+
 
 StatusCode Response::getStatus() const
 {
     return _status;
 }
 
+
 const std::string& Response::getReason() const
 {
     return _reason;
 }
+
 
 const char* getStatusCodeReason(StatusCode status)
 {
@@ -221,10 +242,13 @@ const char* getStatusCodeReason(StatusCode status)
     return "Unknown";
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

@@ -8,17 +8,22 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_PacketSignal_H
 #define SCY_PacketSignal_H
+
 
 #include "scy/packet.h"
 #include "scy/signal.h"
 #include <cstdint>
 
+
 namespace scy {
+
 
 /// Signal that broadcasts `IPacket` types.
 typedef Signal<void(IPacket&)> PacketSignal;
+
 
 /// Signal slot that allows listeners to filter polymorphic `IPacket` types.
 template <class Class, class RT, class PT, class IT = IPacket>
@@ -31,8 +36,11 @@ packetSlot(Class* instance, RT (Class::*method)(PT&), int id = -1,
         id, priority);
 }
 
+
 } // namespace scy
 
+
 #endif // SCY_PacketSignal_H
+
 
 /// @\}

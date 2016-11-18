@@ -8,15 +8,19 @@
 /// @addtogroup archo
 /// @{
 
+
 #ifndef SCY_Archo_ZipFile_H
 #define SCY_Archo_ZipFile_H
+
 
 #include "scy/base64.h"
 #include <unzip.h> // zlib
 #include <vector>
 
+
 namespace scy {
 namespace archo {
+
 
 struct ZipFile
 {
@@ -26,10 +30,10 @@ struct ZipFile
 
     void open(const std::string& file);
     bool opened() const;
-    void close();
-
-    /// Extracts the archive contents to the given directory path.
+    void close(); /// Extracts the archive contents to the given directory path.
     void extract(const std::string& path);
+
+
     bool extractCurrentFile(const std::string& path, bool whiny = true);
 
     bool goToFirstFile();
@@ -51,9 +55,12 @@ struct ZipFile
     unzFile fp;
 };
 
+
 } // namespace arc
 } // namespace scy
 
+
 #endif // SCY_Archo_ZipFile_H
+
 
 /// @\}

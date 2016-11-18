@@ -6,8 +6,10 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
+
 #ifndef SCY_AV_Tests_H
 #define SCY_AV_Tests_H
+
 
 #include "scy/av/audiobuffer.h"
 #include "scy/av/audiocapture.h"
@@ -24,12 +26,15 @@
 #include "scy/test.h"
 #include "scy/util.h"
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 using scy::test::Test;
 
+
 namespace scy {
+
 
 static const int kNumberFramesWanted = 200;
 static const int kInNumSamples = 1024;
@@ -42,6 +47,7 @@ static const int kInNumSamples = 1024;
     av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
                                             48000, 128000, "yuv420p"),         \
                av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+
 
 // =============================================================================
 // Helpers
@@ -100,6 +106,7 @@ void fillAudioSamples(double* samples, int sample_rate, int nb_channels,
     }
 }
 
+
 std::vector<std::uint16_t*> createTestAudioSamplesS16(
     int numFrames, int nbSamples,
     const av::AudioCodec& params) // const char* sampleFmt, int sampleRate, int
@@ -118,6 +125,7 @@ std::vector<std::uint16_t*> createTestAudioSamplesS16(
     } while (--numFrames);
     return vec;
 }
+
 
 std::vector<double*> createTestAudioSamplesDBL(
     int numFrames, int nbSamples,
@@ -139,7 +147,9 @@ std::vector<double*> createTestAudioSamplesDBL(
 }
 #endif
 
+
 #ifdef HAVE_FFMPEG
+
 
 // =============================================================================
 // Audio Encoder
@@ -195,6 +205,7 @@ class AudioEncoderTest : public Test
     }
 };
 
+
 // =============================================================================
 // Audio Resampler
 //
@@ -236,6 +247,7 @@ class AudioResamplerTest : public Test
     }
 };
 
+
 // =============================================================================
 // Audio Fifo Buffer
 //
@@ -262,6 +274,7 @@ class AudioBufferTest : public Test
         delete samples;
     }
 };
+
 
 // =============================================================================
 // Video File Transcoder
@@ -297,6 +310,7 @@ class VideoFileTranscoderTest : public Test
         } // TODO: verify data integrity
     }
 };
+
 
 // =============================================================================
 // Audio Capture
@@ -355,6 +369,7 @@ class AudioCaptureTest : public Test
     }
 };
 
+
 // =============================================================================
 // Audio Capture Encoder
 //
@@ -385,7 +400,7 @@ class AudioCaptureEncoderTest : public Test
         // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
         //(std::make_shared<av::AudioCapture>(device.id, inNbChannels,
-        // inSampleRate));
+        //inSampleRate));
 
         capture.getEncoderAudioCodec(iparams);
         capture.start();
@@ -453,6 +468,7 @@ class AudioCaptureEncoderTest : public Test
         }
     }
 };
+
 
 // =============================================================================
 // Audio Capture Resampler
@@ -533,7 +549,9 @@ class AudioCaptureResamplerTest : public Test
     }
 };
 
+
 #endif // HAVE_FFMPEG
+
 
 // =============================================================================
 // Realtime Media Queue Test
@@ -588,6 +606,7 @@ struct MockMediaPacketSource : public PacketSource, public async::Startable
     }
 };
 
+
 class RealtimeMediaQueueTest : public Test
 {
     PacketStream stream;
@@ -626,6 +645,7 @@ class RealtimeMediaQueueTest : public Test
         }
     }
 };
+
 
 // class Tests
 // {
@@ -1692,8 +1712,11 @@ class RealtimeMediaQueueTest : public Test
 //     }
 // };
 
+
 } // namespace scy
 
+
 #endif // SCY_AV_Tests_H
+
 
 /// @\}

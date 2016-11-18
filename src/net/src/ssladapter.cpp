@@ -8,6 +8,7 @@
 /// @addtogroup net
 /// @{
 
+
 #include "scy/net/ssladapter.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
@@ -19,8 +20,10 @@
 
 using namespace std;
 
+
 namespace scy {
 namespace net {
+
 
 SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     : _socket(socket)
@@ -31,6 +34,7 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     TraceS(this) << "Create" << endl;
 }
 
+
 SSLAdapter::~SSLAdapter()
 {
     TraceS(this) << "Destroy" << endl;
@@ -40,6 +44,7 @@ SSLAdapter::~SSLAdapter()
     }
     TraceS(this) << "Destroy: OK" << endl;
 }
+
 
 void SSLAdapter::initClient()
 {
@@ -63,6 +68,7 @@ void SSLAdapter::initClient()
     SSL_do_handshake(_ssl);
 }
 
+
 void SSLAdapter::initServer() //(SSL* ssl)
 {
     TraceS(this) << "Init server" << endl;
@@ -78,6 +84,7 @@ void SSLAdapter::initServer() //(SSL* ssl)
     SSL_set_accept_state(_ssl);
     SSL_do_handshake(_ssl);
 }
+
 
 void SSLAdapter::shutdown()
 {
@@ -104,21 +111,25 @@ void SSLAdapter::shutdown()
     }
 }
 
+
 bool SSLAdapter::initialized() const
 {
     return !!_ssl;
 }
+
 
 bool SSLAdapter::ready() const
 {
     return _ssl && SSL_is_init_finished(_ssl);
 }
 
+
 int SSLAdapter::available() const
 {
     assert(_ssl);
     return SSL_pending(_ssl);
 }
+
 
 void SSLAdapter::addIncomingData(const char* data, std::size_t len)
 {
@@ -128,15 +139,18 @@ void SSLAdapter::addIncomingData(const char* data, std::size_t len)
     flush();
 }
 
+
 void SSLAdapter::addOutgoingData(const std::string& s)
 {
     addOutgoingData(s.c_str(), s.size());
 }
 
+
 void SSLAdapter::addOutgoingData(const char* data, std::size_t len)
 {
     std::copy(data, data + len, std::back_inserter(_bufferOut));
 }
+
 
 void SSLAdapter::handshake()
 {
@@ -144,6 +158,7 @@ void SSLAdapter::handshake()
     if (r < 0)
         handleError(r);
 }
+
 
 void SSLAdapter::flush()
 {
@@ -172,6 +187,7 @@ void SSLAdapter::flush()
     flushWriteBIO();
 }
 
+
 void SSLAdapter::flushReadBIO()
 {
     int npending = BIO_ctrl_pending(_readBIO);
@@ -184,6 +200,7 @@ void SSLAdapter::flushReadBIO()
     }
 }
 
+
 void SSLAdapter::flushWriteBIO()
 {
     int npending = BIO_ctrl_pending(_writeBIO);
@@ -195,6 +212,7 @@ void SSLAdapter::flushWriteBIO()
         }
     }
 }
+
 
 void SSLAdapter::handleError(int rc)
 {
@@ -227,7 +245,9 @@ void SSLAdapter::handleError(int rc)
     }
 }
 
+
 } // namespace net
 } // namespace scy
+
 
 /// @\}

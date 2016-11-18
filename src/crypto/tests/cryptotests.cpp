@@ -8,15 +8,19 @@
 #include "scy/test.h"
 #include "scy/util.h"
 
+
 #include <algorithm>
 #include <assert.h>
 #include <stdexcept>
+
 
 using std::endl;
 using namespace scy;
 using namespace scy::test;
 
+
 namespace scy {
+
 
 void testCipher(const std::string algorithm, int iterations)
 {
@@ -89,7 +93,9 @@ void testCipher(const std::string algorithm, int iterations)
     }
 }
 
+
 } // namespace scy
+
 
 int main(int argc, char** argv)
 {

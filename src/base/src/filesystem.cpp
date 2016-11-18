@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/util.h"
@@ -21,8 +22,10 @@
 #include <locale>
 #endif
 
+
 namespace scy {
 namespace fs {
+
 
 static const char* separatorWin = "\\";
 static const char* separatorUnix = "/";
@@ -36,6 +39,7 @@ const char* separator = separatorUnix;
 static const char* sepPattern = "/";
 #endif
 
+
 std::string filename(const std::string& path)
 {
     std::size_t dirp = path.find_last_of(fs::sepPattern);
@@ -43,6 +47,7 @@ std::string filename(const std::string& path)
         return path;
     return path.substr(dirp + 1);
 }
+
 
 std::string dirname(const std::string& path)
 {
@@ -53,6 +58,7 @@ std::string dirname(const std::string& path)
         return path;
     return path.substr(0, dirp);
 }
+
 
 std::string basename(const std::string& path)
 {
@@ -66,6 +72,7 @@ std::string basename(const std::string& path)
 
     return path.substr(0, dotp);
 }
+
 
 std::string extname(const std::string& path, bool includeDot)
 {
@@ -81,6 +88,7 @@ std::string extname(const std::string& path, bool includeDot)
     return path.substr((dotp + includeDot) ? 0 : 1);
 }
 
+
 bool exists(const std::string& path)
 {
 // Normalize is needed to ensure no
@@ -95,6 +103,7 @@ bool exists(const std::string& path)
     return stat(fs::normalize(path).c_str(), &s) != -1;
 #endif
 }
+
 
 bool isdir(const std::string& path)
 {
@@ -116,6 +125,7 @@ bool isdir(const std::string& path)
     return (s.st_mode & S_IFDIR) != 0;
 }
 
+
 std::int64_t filesize(const std::string& path)
 {
 #ifdef SCY_WIN
@@ -128,6 +138,7 @@ std::int64_t filesize(const std::string& path)
         return s.st_size;
     return -1;
 }
+
 
 namespace internal {
 
@@ -151,6 +162,7 @@ struct FSReq
 
 } // namespace internal
 
+
 void readdir(const std::string& path, std::vector<std::string>& res)
 {
     internal::FSapi(scandir, path.c_str(), 0)
@@ -161,10 +173,12 @@ void readdir(const std::string& path, std::vector<std::string>& res)
     }
 }
 
+
 void mkdir(const std::string& path, int mode)
 {
     internal::FSapi(mkdir, path.c_str(), mode)
 }
+
 
 void mkdirr(const std::string& path, int mode)
 {
@@ -195,20 +209,24 @@ void mkdirr(const std::string& path, int mode)
     }
 }
 
+
 void rmdir(const std::string& path)
 {
     internal::FSapi(rmdir, path.c_str())
 }
+
 
 void unlink(const std::string& path)
 {
     internal::FSapi(unlink, path.c_str())
 }
 
+
 void rename(const std::string& path, const std::string& target)
 {
     internal::FSapi(rename, path.c_str(), target.c_str())
 }
+
 
 void trimslash(std::string& path)
 {
@@ -216,6 +234,7 @@ void trimslash(std::string& path)
     if (dirp == path.length() - 1)
         path.resize(dirp);
 }
+
 
 std::string normalize(const std::string& path)
 {
@@ -231,6 +250,7 @@ std::string normalize(const std::string& path)
     trimslash(s);
     return s;
 }
+
 
 std::string transcode(const std::string& path)
 {
@@ -256,17 +276,20 @@ std::string transcode(const std::string& path)
     return path;
 }
 
+
 void addsep(std::string& path)
 {
     if (!path.empty() && path.at(path.length() - 1) != fs::separator[0])
         path.append(fs::separator, 1);
 }
 
+
 void addnode(std::string& path, const std::string& node)
 {
     fs::addsep(path);
     path += node;
 }
+
 
 bool savefile(const std::string& path, const char* data, std::size_t size,
               bool whiny)
@@ -282,7 +305,9 @@ bool savefile(const std::string& path, const char* data, std::size_t size,
     return true;
 }
 
+
 } // namespace fs
 } // namespace scy
+
 
 /// @\}

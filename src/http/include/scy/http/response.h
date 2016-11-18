@@ -8,8 +8,10 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Response_H
 #define SCY_HTTP_Response_H
+
 
 #include "scy/datetime.h"
 #include "scy/http/cookie.h"
@@ -17,8 +19,10 @@
 
 #include <sstream>
 
+
 namespace scy {
 namespace http {
+
 
 /// HTTP Response Status Codes
 enum class StatusCode
@@ -70,6 +74,7 @@ enum class StatusCode
     GatewayTimeout = 504,
     VersionNotSupported = 505
 };
+
 
 /// This class encapsulates an HTTP response message.
 class Response : public http::Message
@@ -150,14 +155,19 @@ private:
     std::string _reason;
 };
 
+
 const char* getStatusCodeReason(StatusCode status);
+
 
 } // namespace http
 } // namespace scy
 
+
 #endif
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_SSLSocket_H
 #define SCY_Net_SSLSocket_H
+
 
 #include "scy/net/socket.h"
 #include "scy/net/ssladapter.h"
@@ -18,8 +20,10 @@
 #include "scy/net/tcpsocket.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
 namespace net {
+
 
 class SSLSocket : public TCPSocket
 {
@@ -100,6 +104,7 @@ public:
     /// Reads raw encrypted SSL data
     virtual void onRead(const char* data, std::size_t len);
 
+
 protected:
     /// virtual bool readStart();
 
@@ -110,9 +115,12 @@ protected:
     friend class net::SSLAdapter;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_SSLSocket_H
+
 
 /// @\}

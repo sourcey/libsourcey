@@ -8,14 +8,18 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_PacketFactory_H
 #define SCY_PacketFactory_H
+
 
 #include "scy/buffer.h"
 #include "scy/packetsignal.h"
 #include "scy/util.h"
 
+
 namespace scy {
+
 
 class IPacketCreationStrategy
 {
@@ -33,7 +37,9 @@ public:
     }
 };
 
+
 typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
+
 
 /// This template class implements an adapter that sits between
 /// an SignalBase and an object receiving notifications from it.
@@ -62,9 +68,11 @@ protected:
     int _priority;
 };
 
+
 //
 // Packet Factory
 //
+
 
 class PacketFactory
 {
@@ -154,8 +162,11 @@ protected:
     // mutable Mutex    _mutex;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_PacketFactory_H
+
 
 /// @\}

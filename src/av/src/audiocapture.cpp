@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audiocapture.h"
 
 #ifdef HAVE_FFMPEG
@@ -19,14 +20,18 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
 
+
 AudioCapture::AudioCapture()
 {
 }
+
 
 AudioCapture::AudioCapture(const std::string& device, int channels,
                            int sampleRate)
@@ -34,9 +39,11 @@ AudioCapture::AudioCapture(const std::string& device, int channels,
     open(device, channels, sampleRate);
 }
 
+
 AudioCapture::~AudioCapture()
 {
 }
+
 
 void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 {
@@ -61,9 +68,12 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
     av_dict_free(&iparams); // FIXME: possible memory leak if exception thrown
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

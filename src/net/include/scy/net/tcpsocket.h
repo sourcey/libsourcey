@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_TCPSocket_H
 #define SCY_Net_TCPSocket_H
+
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
@@ -18,8 +20,10 @@
 #include "scy/stream.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
 namespace net {
+
 
 class TCPSocket : public Stream, public net::Socket
 {
@@ -92,9 +96,12 @@ protected:
     SocketMode _mode;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_TCPSocket_H
+
 
 /// @\}

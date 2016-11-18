@@ -8,6 +8,7 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/form.h"
 #include "scy/crypto/crypto.h"
 #include "scy/filesystem.h"
@@ -17,18 +18,22 @@
 #include "scy/idler.h"
 #include <stdexcept>
 
+
 namespace scy {
 namespace http {
+
 
 //
 // Form Writer
 //
+
 
 const char* FormWriter::ENCODING_URL = "application/x-www-form-urlencoded";
 const char* FormWriter::ENCODING_MULTIPART_FORM = "multipart/form-data";
 const char* FormWriter::ENCODING_MULTIPART_RELATED = "multipart/related";
 
 const int FILE_CHUNK_SIZE = 65536; // 32384;
+
 
 FormWriter* FormWriter::create(ClientConnection& conn,
                                const std::string& encoding)
@@ -46,6 +51,7 @@ FormWriter* FormWriter::create(ClientConnection& conn,
     conn.Outgoing.lock();
     return wr;
 }
+
 
 FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner,
                        const std::string& encoding)
@@ -66,11 +72,13 @@ FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner,
 #endif
 }
 
+
 FormWriter::~FormWriter()
 {
     for (auto it = _parts.begin(); it != _parts.end(); ++it)
         delete it->part;
 }
+
 
 void FormWriter::addPart(const std::string& name, FormPart* part)
 {
@@ -84,6 +92,7 @@ void FormWriter::addPart(const std::string& name, FormPart* part)
 
     _filesLength += part->length();
 }
+
 
 void FormWriter::prepareSubmit()
 {
@@ -135,6 +144,7 @@ void FormWriter::prepareSubmit()
     }
 }
 
+
 void FormWriter::start()
 {
     TraceS(this) << "Start" << std::endl;
@@ -145,6 +155,7 @@ void FormWriter::start()
     _runner->start(std::bind(&FormWriter::writeAsync, this));
 }
 
+
 void FormWriter::stop()
 {
     TraceS(this) << "Stop" << std::endl;
@@ -152,6 +163,7 @@ void FormWriter::stop()
     //_complete = true;
     _runner->cancel();
 }
+
 
 std::uint64_t FormWriter::calculateMultipartContentLength()
 {
@@ -194,6 +206,7 @@ std::uint64_t FormWriter::calculateMultipartContentLength()
     return ostr.tellp();
 }
 
+
 void FormWriter::writeAsync()
 {
     try {
@@ -216,6 +229,7 @@ void FormWriter::writeAsync()
         //#endif
     }
 }
+
 
 #if 0
 void FormWriter::writeMultipart()
@@ -257,6 +271,7 @@ void FormWriter::writeMultipart()
     emit("0\r\n\r\n", 5, PacketFlags::NoModify | PacketFlags::Final);
 }
 #endif
+
 
 void FormWriter::writeMultipartChunk()
 {
@@ -348,6 +363,7 @@ void FormWriter::writeMultipartChunk()
     }
 }
 
+
 void FormWriter::writeUrl(std::ostream& ostr)
 {
     for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
@@ -356,6 +372,7 @@ void FormWriter::writeUrl(std::ostream& ostr)
         ostr << URL::encode(it->first) << "=" << URL::encode(it->second);
     }
 }
+
 
 void FormWriter::writePartHeader(const NVCollection& header, std::ostream& ostr)
 {
@@ -373,59 +390,71 @@ void FormWriter::writePartHeader(const NVCollection& header, std::ostream& ostr)
     ostr << "\r\n";
 }
 
+
 void FormWriter::writeEnd(std::ostream& ostr)
 {
     ostr << "\r\n--" << _boundary << "--\r\n";
 }
+
 
 void FormWriter::updateProgress(int nread)
 {
     _connection.OutgoingProgress.update(nread);
 }
 
+
 std::string FormWriter::createBoundary()
 {
     return "boundary_" + util::randomString(8);
 }
+
 
 void FormWriter::setEncoding(const std::string& encoding)
 {
     _encoding = encoding;
 }
 
+
 void FormWriter::setBoundary(const std::string& boundary)
 {
     _boundary = boundary;
 }
+
 
 const std::string& FormWriter::encoding() const
 {
     return _encoding;
 }
 
+
 const std::string& FormWriter::boundary() const
 {
     return _boundary;
 }
+
 
 ClientConnection& FormWriter::connection()
 {
     return _connection;
 }
 
+
 bool FormWriter::complete() const
 {
     return _complete;
 }
+
 
 bool FormWriter::cancelled() const
 {
     return _runner->cancelled();
 }
 
+
 //
 // File Part Source
 //
+
 
 FormPart::FormPart(const std::string& contentType)
     : _contentType(contentType)
@@ -433,33 +462,40 @@ FormPart::FormPart(const std::string& contentType)
 {
 }
 
+
 FormPart::~FormPart()
 {
 }
+
 
 NVCollection& FormPart::headers()
 {
     return _headers;
 }
 
+
 const std::string& FormPart::contentType() const
 {
     return _contentType;
 }
+
 
 bool FormPart::initialWrite() const
 {
     return _initialWrite;
 }
 
+
 void FormPart::reset()
 {
     _initialWrite = true;
 }
 
+
 //
 // File Part Source
 //
+
 
 FilePart::FilePart(const std::string& path)
     : _path(path)
@@ -469,6 +505,7 @@ FilePart::FilePart(const std::string& path)
     open();
 }
 
+
 FilePart::FilePart(const std::string& path, const std::string& contentType)
     : FormPart(contentType)
     , _path(path)
@@ -477,6 +514,7 @@ FilePart::FilePart(const std::string& path, const std::string& contentType)
 {
     open();
 }
+
 
 FilePart::FilePart(const std::string& path, const std::string& filename,
                    const std::string& contentType)
@@ -488,9 +526,11 @@ FilePart::FilePart(const std::string& path, const std::string& filename,
     open();
 }
 
+
 FilePart::~FilePart()
 {
 }
+
 
 void FilePart::open()
 {
@@ -506,12 +546,14 @@ void FilePart::open()
     _istr.seekg(0, std::ios::beg);
 }
 
+
 void FilePart::reset()
 {
     FormPart::reset();
     _istr.clear();
     _istr.seekg(0, std::ios::beg);
 }
+
 
 bool FilePart::writeChunk(FormWriter& writer)
 {
@@ -539,6 +581,7 @@ bool FilePart::writeChunk(FormWriter& writer)
     throw std::runtime_error("Cannot read multipart source file: " + _filename);
 }
 
+
 void FilePart::write(FormWriter& writer)
 {
     TraceS(this) << "Write" << std::endl;
@@ -560,6 +603,7 @@ void FilePart::write(FormWriter& writer)
                                  _filename);
 }
 
+
 void FilePart::write(std::ostream& ostr)
 {
     TraceS(this) << "Write" << std::endl;
@@ -577,24 +621,29 @@ void FilePart::write(std::ostream& ostr)
                                  _filename);
 }
 
+
 const std::string& FilePart::filename() const
 {
     return _filename;
 }
+
 
 std::ifstream& FilePart::stream()
 {
     return _istr;
 }
 
+
 std::uint64_t FilePart::length() const
 {
     return _fileSize;
 }
 
+
 //
 // String Part Source
 //
+
 
 StringPart::StringPart(const std::string& data)
     : FormPart("application/octet-stream")
@@ -602,15 +651,18 @@ StringPart::StringPart(const std::string& data)
 {
 }
 
+
 StringPart::StringPart(const std::string& data, const std::string& contentType)
     : FormPart(contentType)
     , _data(data)
 {
 }
 
+
 StringPart::~StringPart()
 {
 }
+
 
 bool StringPart::writeChunk(FormWriter& writer)
 {
@@ -625,6 +677,7 @@ bool StringPart::writeChunk(FormWriter& writer)
     return false;
 }
 
+
 void StringPart::write(FormWriter& writer)
 {
     TraceS(this) << "Write" << std::endl;
@@ -634,6 +687,7 @@ void StringPart::write(FormWriter& writer)
     writer.updateProgress((int)_data.length());
 }
 
+
 void StringPart::write(std::ostream& ostr)
 {
     TraceS(this) << "Write" << std::endl;
@@ -642,15 +696,19 @@ void StringPart::write(std::ostream& ostr)
     ostr.write(_data.c_str(), _data.length());
 }
 
+
 std::uint64_t StringPart::length() const
 {
     return _data.length();
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 /// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

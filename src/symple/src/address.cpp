@@ -8,24 +8,30 @@
 /// @addtogroup symple
 /// @{
 
+
 #include "scy/symple/address.h"
 #include "assert.h"
 #include "scy/util.h"
 #include "sstream"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace smpl {
+
 
 Address::Address()
 {
 }
 
+
 Address::Address(const std::string& id)
 {
     parse(id);
 }
+
 
 Address::Address(const std::string& user, const std::string& id)
     : user(user)
@@ -33,9 +39,11 @@ Address::Address(const std::string& user, const std::string& id)
 {
 }
 
+
 Address::~Address()
 {
 }
+
 
 bool Address::parse(const std::string& addr)
 {
@@ -59,6 +67,7 @@ bool Address::valid() const
     return !user.empty() || !id.empty();
 }
 
+
 void Address::print(std::ostream& os) const
 {
     if (!user.empty())
@@ -69,6 +78,7 @@ void Address::print(std::ostream& os) const
     }
 }
 
+
 std::string Address::toString() const
 {
     std::ostringstream os;
@@ -76,17 +86,21 @@ std::string Address::toString() const
     return os.str();
 }
 
+
 bool Address::operator==(const Address& r)
 {
     return user == r.user && id == r.id;
 }
+
 
 bool Address::operator==(std::string& r)
 {
     return toString() == r;
 }
 
+
 } // namespace smpl
 } // namespace scy
+
 
 /// @\}

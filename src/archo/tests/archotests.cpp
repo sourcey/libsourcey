@@ -9,11 +9,14 @@
 #include <assert.h>
 #include <stdexcept>
 
+
 using namespace std;
 using namespace scy;
 
+
 namespace scy {
 namespace archo {
+
 
 class Tests
 {
@@ -79,8 +82,10 @@ public:
     // }
 };
 
+
 } // namespace arc
 } // namespace scy
+
 
 int main(int argc, char** argv)
 {

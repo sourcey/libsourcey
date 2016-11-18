@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/logger.h"
 #include "scy/datetime.h"
 #include "scy/filesystem.h"
@@ -16,17 +17,22 @@
 #include "scy/util.h"
 #include <assert.h>
 
+
 using std::endl;
+
 
 namespace scy {
 
+
 static Singleton<Logger> singleton;
+
 
 Logger::Logger()
     : _defaultChannel(nullptr)
     , _writer(new LogWriter)
 {
 }
+
 
 Logger::~Logger()
 {
@@ -35,10 +41,12 @@ Logger::~Logger()
     _defaultChannel = nullptr;
 }
 
+
 Logger& Logger::instance()
 {
     return *singleton.get();
 }
+
 
 void Logger::setInstance(Logger* logger, bool freeExisting)
 {
@@ -47,10 +55,12 @@ void Logger::setInstance(Logger* logger, bool freeExisting)
         delete current;
 }
 
+
 void Logger::destroy()
 {
     singleton.destroy();
 }
+
 
 void Logger::add(LogChannel* channel)
 {
@@ -60,6 +70,7 @@ void Logger::add(LogChannel* channel)
         _defaultChannel = channel;
     _channels[channel->name()] = channel;
 }
+
 
 void Logger::remove(const std::string& name, bool freePointer)
 {
@@ -75,6 +86,7 @@ void Logger::remove(const std::string& name, bool freePointer)
     }
 }
 
+
 LogChannel* Logger::get(const std::string& name, bool whiny) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -86,17 +98,20 @@ LogChannel* Logger::get(const std::string& name, bool whiny) const
     return nullptr;
 }
 
+
 void Logger::setDefault(const std::string& name)
 {
     Mutex::ScopedLock lock(_mutex);
     _defaultChannel = get(name, true);
 }
 
+
 LogChannel* Logger::getDefault() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _defaultChannel;
 }
+
 
 void Logger::setWriter(LogWriter* writer)
 {
@@ -106,11 +121,13 @@ void Logger::setWriter(LogWriter* writer)
     _writer = writer;
 }
 
+
 void Logger::write(const LogStream& stream)
 {
     // avoid if possible, requires extra copy
     write(new LogStream(stream));
 }
+
 
 void Logger::write(LogStream* stream)
 {
@@ -126,23 +143,28 @@ void Logger::write(LogStream* stream)
     _writer->write(stream);
 }
 
+
 LogStream& Logger::send(const char* level, const char* realm, const void* ptr,
                         const char* channel) const
 {
     return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
 }
 
+
 //
 // Log Writer
 //
+
 
 LogWriter::LogWriter()
 {
 }
 
+
 LogWriter::~LogWriter()
 {
 }
+
 
 void LogWriter::write(LogStream* stream)
 {
@@ -152,14 +174,17 @@ void LogWriter::write(LogStream* stream)
     delete stream;
 }
 
+
 //
 // Asynchronous Log Writer
 //
+
 
 AsyncLogWriter::AsyncLogWriter()
 {
     _thread.start(*this);
 }
+
 
 AsyncLogWriter::~AsyncLogWriter()
 {
@@ -179,11 +204,13 @@ AsyncLogWriter::~AsyncLogWriter()
     assert(_pending.empty());
 }
 
+
 void AsyncLogWriter::write(LogStream* stream)
 {
     Mutex::ScopedLock lock(_mutex);
     _pending.push_back(stream);
 }
+
 
 void AsyncLogWriter::clear()
 {
@@ -196,11 +223,13 @@ void AsyncLogWriter::clear()
     }
 }
 
+
 void AsyncLogWriter::flush()
 {
     while (writeNext())
         scy::sleep(1);
 }
+
 
 void AsyncLogWriter::run()
 {
@@ -208,6 +237,7 @@ void AsyncLogWriter::run()
         scy::sleep(writeNext() ? 1 : 50);
     }
 }
+
 
 bool AsyncLogWriter::writeNext()
 {
@@ -225,9 +255,11 @@ bool AsyncLogWriter::writeNext()
     return true;
 }
 
+
 //
 // Log Stream
 //
+
 
 LogStream::LogStream(LogLevel level, const std::string& realm, int line,
                      const void* ptr, const char* channel)
@@ -244,6 +276,7 @@ LogStream::LogStream(LogLevel level, const std::string& realm, int line,
 #endif
 }
 
+
 LogStream::LogStream(LogLevel level, const std::string& realm,
                      const std::string& address)
     : level(level)
@@ -253,6 +286,7 @@ LogStream::LogStream(LogLevel level, const std::string& realm,
     , channel(nullptr)
 {
 }
+
 
 LogStream::LogStream(const LogStream& that)
     : level(that.level)
@@ -266,13 +300,16 @@ LogStream::LogStream(const LogStream& that)
     message.str(that.message.str());
 }
 
+
 LogStream::~LogStream()
 {
 }
 
+
 //
 // Log Channel
 //
+
 
 LogChannel::LogChannel(const std::string& name, LogLevel level,
                        const std::string& timeFormat)
@@ -282,6 +319,7 @@ LogChannel::LogChannel(const std::string& name, LogLevel level,
 {
 }
 
+
 void LogChannel::write(const std::string& message, LogLevel level,
                        const char* realm, const void* ptr)
 {
@@ -290,10 +328,12 @@ void LogChannel::write(const std::string& message, LogLevel level,
     write(stream);
 }
 
+
 void LogChannel::write(const LogStream& stream)
 {
     (void)stream;
 }
+
 
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 {
@@ -314,15 +354,18 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
     ost.flush();
 }
 
+
 //
 // Console Channel
 //
+
 
 ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level,
                                const std::string& timeFormat)
     : LogChannel(name, level, timeFormat)
 {
 }
+
 
 void ConsoleChannel::write(const LogStream& stream)
 {
@@ -345,9 +388,11 @@ void ConsoleChannel::write(const LogStream& stream)
 #endif
 }
 
+
 //
 // File Channel
 //
+
 
 FileChannel::FileChannel(const std::string& name, const std::string& path,
                          LogLevel level, const char* timeFormat)
@@ -356,10 +401,12 @@ FileChannel::FileChannel(const std::string& name, const std::string& path,
 {
 }
 
+
 FileChannel::~FileChannel()
 {
     close();
 }
+
 
 void FileChannel::open()
 {
@@ -379,10 +426,12 @@ void FileChannel::open()
         throw std::runtime_error("Failed to open log file: " + _path);
 }
 
+
 void FileChannel::close()
 {
     _fstream.close();
 }
+
 
 void FileChannel::write(const LogStream& stream)
 {
@@ -408,20 +457,24 @@ void FileChannel::write(const LogStream& stream)
 #endif
 }
 
+
 void FileChannel::setPath(const std::string& path)
 {
     _path = path;
     open();
 }
 
+
 std::string FileChannel::path() const
 {
     return _path;
 }
 
+
 //
 // Rotating File Channel
 //
+
 
 RotatingFileChannel::RotatingFileChannel(const std::string& name,
                                          const std::string& dir, LogLevel level,
@@ -438,6 +491,7 @@ RotatingFileChannel::RotatingFileChannel(const std::string& name,
     // The initial log file will be opened on the first call to rotate()
 }
 
+
 RotatingFileChannel::~RotatingFileChannel()
 {
     if (_fstream) {
@@ -445,6 +499,7 @@ RotatingFileChannel::~RotatingFileChannel()
         delete _fstream;
     }
 }
+
 
 void RotatingFileChannel::write(const LogStream& stream)
 {
@@ -470,6 +525,7 @@ void RotatingFileChannel::write(const LogStream& stream)
 #endif
 }
 
+
 void RotatingFileChannel::rotate()
 {
     if (_fstream) {
@@ -490,6 +546,7 @@ void RotatingFileChannel::rotate()
     _fstream = new std::ofstream(path);
     _rotatedAt = time::now();
 }
+
 
 #if 0
 // ---------------------------------------------------------------------
@@ -521,6 +578,8 @@ void EventedFileChannel::write(const LogStream& stream, LogLevel level, const ch
 }
 #endif
 
+
 } // namespace scy
+
 
 /// @\}

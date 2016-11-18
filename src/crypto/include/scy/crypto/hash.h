@@ -8,8 +8,10 @@
 /// @addtogroup crypto
 /// @{
 
+
 #ifndef SCY_Crypto_Hash_H
 #define SCY_Crypto_Hash_H
+
 
 #include "scy/crypto/crypto.h"
 #include "scy/hex.h"
@@ -17,8 +19,10 @@
 
 #include <openssl/evp.h>
 
+
 namespace scy {
 namespace crypto {
+
 
 class Hash
 {
@@ -55,12 +59,14 @@ protected:
     std::string _algorithm;
 };
 
+
 inline std::string hash(const std::string& algorithm, const std::string& data)
 {
     Hash engine(algorithm);
     engine.update(data);
     return hex::encode(engine.digest());
 }
+
 
 inline std::string hash(const std::string& algorithm, const void* data,
                         unsigned length)
@@ -69,6 +75,7 @@ inline std::string hash(const std::string& algorithm, const void* data,
     engine.update(data, length);
     return hex::encode(engine.digest());
 }
+
 
 /// Computes the MD5/SHA checksum for the given file.
 inline std::string checksum(const std::string& algorithm,
@@ -87,9 +94,12 @@ inline std::string checksum(const std::string& algorithm,
     return hex::encode(engine.digest());
 }
 
+
 } // namespace crypto
 } // namespace scy
 
+
 #endif // SCY_Crypto_Hash_H
+
 
 /// @\}

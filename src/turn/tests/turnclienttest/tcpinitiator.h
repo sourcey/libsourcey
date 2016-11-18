@@ -1,6 +1,7 @@
 #ifndef TURN_TCPinitiator_TEST_H
 #define TURN_TCPinitiator_TEST_H
 
+
 #include "scy/logger.h"
 #include "scy/signal.h"
 #include "scy/timer.h"
@@ -8,10 +9,13 @@
 
 #include <iostream>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 struct TCPInitiator : public TCPClientObserver
 {
@@ -72,7 +76,7 @@ struct TCPInitiator : public TCPClientObserver
             case ClientState::Failed:
                 // assert(false);
                 success = false;
-                TestComplete.emit(/*this, */ success);
+                TestComplete.emit(success);
                 // case ClientState::Terminated:                    //    break;
                 break;
         }
@@ -87,7 +91,7 @@ struct TCPInitiator : public TCPClientObserver
         // client.sendData("hello peer", 10, peerAddr);    /// Remember the last
         // peer
         lastPeerAddr = peerAddr;
-        ConnectionCreated.emit(/*this, */ peerAddr);
+        ConnectionCreated.emit(peerAddr);
     }
 
     void onRelayConnectionClosed(TCPClient& client,
@@ -145,7 +149,9 @@ struct TCPInitiator : public TCPClientObserver
 }
 } //  namespace scy::turn
 
+
 #endif // TURN_TCPinitiator_TEST_H
+
 
 /*
 bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const

@@ -8,16 +8,21 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Process_H
 #define SCY_Process_H
+
 
 #include "scy/uv/uvpp.h"
 #include <functional>
 #include <vector>
 
+
 namespace scy {
 
+
 typedef uv_process_options_t ProcessOptions;
+
 
 class Process : public uv::Handle
 {
@@ -49,8 +54,11 @@ protected:
     uv_process_t _proc;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Process_H
+
 
 /// @\}

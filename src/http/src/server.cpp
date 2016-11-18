@@ -8,15 +8,19 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/server.h"
 #include "scy/http/websocket.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace http {
+
 
 Server::Server(short port, ServerResponderFactory* factory)
     : socket(net::makeSocket<net::TCPSocket>())
@@ -26,6 +30,7 @@ Server::Server(short port, ServerResponderFactory* factory)
     TraceS(this) << "Create" << endl;
 }
 
+
 Server::~Server()
 {
     TraceS(this) << "Destroy" << endl;
@@ -33,6 +38,7 @@ Server::~Server()
     if (factory)
         delete factory;
 }
+
 
 void Server::start()
 {
@@ -48,6 +54,7 @@ void Server::start()
     // timer.Timeout += slot(this, &Server::onTimer);
     // timer.start(5000, 5000);
 }
+
 
 void Server::shutdown()
 {
@@ -67,10 +74,12 @@ void Server::shutdown()
     assert(this->connections.empty());
 }
 
+
 std::uint16_t Server::port()
 {
     return address.port();
 }
+
 
 ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
 {
@@ -81,6 +90,7 @@ ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
     return conn; // return new ServerConnection(*this, sock);
 }
 
+
 ServerResponder* Server::createResponder(ServerConnection& conn)
 {
     // The initial HTTP request headers have already
@@ -89,6 +99,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
     return factory->createResponder(conn);
 }
 
+
 void Server::addConnection(ServerConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
@@ -96,6 +107,7 @@ void Server::addConnection(ServerConnection::Ptr conn)
         slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
     connections.push_back(conn);
 }
+
 
 void Server::removeConnection(ServerConnection* conn)
 {
@@ -109,6 +121,7 @@ void Server::removeConnection(ServerConnection* conn)
     assert(0 && "unknown connection");
 }
 
+
 void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
 {
     TraceS(this) << "On server accept" << endl;
@@ -119,10 +132,12 @@ void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
     }
 }
 
+
 void Server::onSocketClose(net::Socket& socket)
 {
     TraceS(this) << "On server socket close" << endl;
 }
+
 
 void Server::onConnectionClose(Connection& conn)
 {
@@ -130,9 +145,11 @@ void Server::onConnectionClose(Connection& conn)
     removeConnection(reinterpret_cast<ServerConnection*>(&conn));
 }
 
+
 //
 // Server Connection
 //
+
 
 ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket)
     : Connection(socket)
@@ -146,6 +163,7 @@ ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket)
     replaceAdapter(new ServerAdapter(*this));
 }
 
+
 ServerConnection::~ServerConnection()
 {
     TraceS(this) << "Destroy" << endl;
@@ -156,6 +174,7 @@ ServerConnection::~ServerConnection()
     }
 }
 
+
 void ServerConnection::close()
 {
     if (!closed()) {
@@ -163,10 +182,12 @@ void ServerConnection::close()
     }
 }
 
+
 Server& ServerConnection::server()
 {
     return _server;
 }
+
 
 //
 // Connection Callbacks
@@ -180,6 +201,7 @@ void ServerConnection::onHeaders()
         util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {
         TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
         _upgrade = true;
+
 
         auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
 
@@ -225,6 +247,7 @@ void ServerConnection::onHeaders()
     // Outgoing.start();
 }
 
+
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
     TraceS(this) << "On payload: " << buffer.size() << endl;
@@ -239,6 +262,7 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
     assert(_responder);
     _responder->onPayload(buffer);
 }
+
 
 void ServerConnection::onMessage()
 {
@@ -258,6 +282,7 @@ void ServerConnection::onMessage()
     _responder->onRequest(_request, _response);
 }
 
+
 void ServerConnection::onClose()
 {
     TraceS(this) << "On close" << endl;
@@ -268,6 +293,7 @@ void ServerConnection::onClose()
     Connection::onClose();
 }
 
+
 /*
 void ServerConnection::onServerShutdown(void*)
 {
@@ -277,17 +303,21 @@ void ServerConnection::onServerShutdown(void*)
 }
 */
 
+
 http::Message* ServerConnection::incomingHeader()
 {
     return reinterpret_cast<http::Message*>(&_request);
 }
+
 
 http::Message* ServerConnection::outgoingHeader()
 {
     return reinterpret_cast<http::Message*>(&_response);
 }
 
+
 } // namespace http
 } // namespace scy
+
 
 /// @\}

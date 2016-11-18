@@ -8,15 +8,19 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/request.h"
 #include "scy/http/util.h"
 
 #include <assert.h>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace http {
+
 
 const std::string Method::Get = "GET";
 const std::string Method::Head = "HEAD";
@@ -27,11 +31,13 @@ const std::string Method::Delete = "DELETE";
 const std::string Method::Trace = "TRACE";
 const std::string Method::Connect = "CONNECT";
 
+
 Request::Request()
     : _method(Method::Get)
     , _uri("/")
 {
 }
+
 
 Request::Request(const std::string& version)
     : http::Message(version)
@@ -40,11 +46,13 @@ Request::Request(const std::string& version)
 {
 }
 
+
 Request::Request(const std::string& method, const std::string& uri)
     : _method(method)
     , _uri(uri)
 {
 }
+
 
 Request::Request(const std::string& method, const std::string& uri,
                  const std::string& version)
@@ -54,24 +62,29 @@ Request::Request(const std::string& method, const std::string& uri,
 {
 }
 
+
 Request::~Request()
 {
 }
+
 
 void Request::setMethod(const std::string& method)
 {
     _method = method;
 }
 
+
 void Request::setURI(const std::string& uri)
 {
     _uri = uri;
 }
 
+
 void Request::setHost(const std::string& host)
 {
     set("Host", host);
 }
+
 
 void Request::setHost(const std::string& host, std::uint16_t port)
 {
@@ -83,15 +96,18 @@ void Request::setHost(const std::string& host, std::uint16_t port)
     setHost(value);
 }
 
+
 const std::string& Request::getHost() const
 {
     return get("Host");
 }
 
+
 const std::string& Request::getMethod() const
 {
     return _method;
 }
+
 
 const std::string& Request::getURI() const
 {
@@ -112,6 +128,7 @@ void Request::setCookies(const NVCollection& cookies)
     add("Cookie", cookie);
 }
 
+
 void Request::getCookies(NVCollection& cookies) const
 {
     NVCollection::ConstIterator it = find("Cookie");
@@ -121,20 +138,24 @@ void Request::getCookies(NVCollection& cookies) const
     }
 }
 
+
 void Request::getURIParameters(NVCollection& params) const
 {
     http::splitURIParameters(getURI(), params);
 }
+
 
 bool Request::hasCredentials() const
 {
     return has("Authorization");
 }
 
+
 void Request::getCredentials(std::string& scheme, std::string& authInfo) const
 {
     getCredentials("Authorization", scheme, authInfo);
 }
+
 
 void Request::setCredentials(const std::string& scheme,
                              const std::string& authInfo)
@@ -142,10 +163,12 @@ void Request::setCredentials(const std::string& scheme,
     setCredentials("Authorization", scheme, authInfo);
 }
 
+
 bool Request::hasProxyCredentials() const
 {
     return has("Proxy-Authorization");
 }
+
 
 void Request::getProxyCredentials(std::string& scheme,
                                   std::string& authInfo) const
@@ -153,11 +176,13 @@ void Request::getProxyCredentials(std::string& scheme,
     getCredentials("Proxy-Authorization", scheme, authInfo);
 }
 
+
 void Request::setProxyCredentials(const std::string& scheme,
                                   const std::string& authInfo)
 {
     setCredentials("Proxy-Authorization", scheme, authInfo);
 }
+
 
 void Request::write(std::ostream& ostr) const
 {
@@ -165,6 +190,7 @@ void Request::write(std::ostream& ostr) const
     http::Message::write(ostr);
     ostr << "\r\n";
 }
+
 
 void Request::getCredentials(const std::string& header, std::string& scheme,
                              std::string& authInfo) const
@@ -187,6 +213,7 @@ void Request::getCredentials(const std::string& header, std::string& scheme,
         throw std::runtime_error("Request is not authenticated");
 }
 
+
 void Request::setCredentials(const std::string& header,
                              const std::string& scheme,
                              const std::string& authInfo)
@@ -197,7 +224,9 @@ void Request::setCredentials(const std::string& header,
     set(header, auth);
 }
 
+
 } // namespace http
 } // namespace scy
+
 
 /// @\}

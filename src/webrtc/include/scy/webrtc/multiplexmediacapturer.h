@@ -8,8 +8,10 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #ifndef SCY_WebRTC_MultiplexMediaCapturer_H
 #define SCY_WebRTC_MultiplexMediaCapturer_H
+
 
 #include "scy/av/mediacapture.h"
 #include "scy/webrtc/audiopacketmodule.h"
@@ -17,7 +19,9 @@
 
 #include "webrtc/api/peerconnectioninterface.h"
 
+
 namespace scy {
+
 
 /// @addtogroup webrtc
 class MultiplexMediaCapturer
@@ -43,8 +47,11 @@ protected:
     rtc::scoped_refptr<AudioPacketModule> _audioModule;
 };
 
+
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

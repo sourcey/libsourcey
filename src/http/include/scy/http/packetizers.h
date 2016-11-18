@@ -8,19 +8,24 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Packetizers_H
 #define SCY_HTTP_Packetizers_H
+
 
 #include "scy/http/connection.h"
 #include "scy/signal.h"
 #include <sstream>
 
+
 namespace scy {
 namespace http {
+
 
 //
 // HTTP Chunked Adapter
 //
+
 
 class ChunkedAdapter : public IPacketizer
 {
@@ -134,9 +139,11 @@ public:
     PacketSignal emitter;
 };
 
+
 //
 // HTTP Multipart Adapter
 //
+
 
 class MultipartAdapter : public IPacketizer
 {
@@ -234,9 +241,12 @@ public:
     PacketSignal emitter;
 };
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

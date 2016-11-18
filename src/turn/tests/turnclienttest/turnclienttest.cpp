@@ -12,13 +12,16 @@
 
 #include <iostream>
 
+
 using namespace std;
 using namespace scy;
 using namespace scy::net;
 using namespace scy::turn;
 
+
 namespace scy {
 namespace turn {
+
 
 struct TestServer : public turn::ServerObserver
 {
@@ -54,6 +57,7 @@ struct TestServer : public turn::ServerObserver
         DebugS(this) << "Allocation removed" << endl;
     }
 };
+
 
 /// The initiating client...
 struct ClientTest
@@ -130,6 +134,7 @@ struct ClientTest
     }
 };
 
+
 struct ClientTestRunner
 {
     int nTimes;
@@ -195,6 +200,7 @@ struct ClientTestRunner
     }
 };
 
+
 struct TestTCPClientObserver : public TCPClientObserver
 {
     void onClientStateChange(turn::Client& client, turn::ClientState& state,
@@ -236,6 +242,7 @@ struct TestTCPClientObserver : public TCPClientObserver
 }
 } //  namespace scy::turn
 
+
 /*
 static void onKillSignal(uv_signal_t *req, int signum)
 {
@@ -243,6 +250,7 @@ static void onKillSignal(uv_signal_t *req, int signum)
     uv_signal_stop(req);
 }
 */
+
 
 int main(int argc, char** argv)
 {

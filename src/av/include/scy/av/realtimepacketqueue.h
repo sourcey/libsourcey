@@ -8,19 +8,24 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_RealtimePacketQueue_H
 #define SCY_RealtimePacketQueue_H
+
 
 #include "scy/av/types.h"
 #include "scy/base.h"
 #include "scy/packetqueue.h"
 
+
 namespace scy {
 namespace av {
 
+
 template <class PacketT> /// This class emits media packets based on their
-/// realtime pts value.
-class RealtimePacketQueue : public AsyncPacketQueue<PacketT>
+                         /// realtime pts value.
+                         class RealtimePacketQueue
+    : public AsyncPacketQueue<PacketT>
 {
 public:
     typedef std::shared_ptr<RealtimePacketQueue> ptr_t;
@@ -68,6 +73,7 @@ protected:
     std::int64_t _startTime;
 };
 
+
 // struct MediaPacketTimeCompare
 // {
 //     bool operator()(const MediaPacket* a, const MediaPacket* b) {
@@ -75,9 +81,12 @@ protected:
 //     }
 // };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_RealtimePacketQueue_H
+
 
 /// @\}

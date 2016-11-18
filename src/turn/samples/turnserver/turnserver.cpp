@@ -2,11 +2,13 @@
 #include "scy/crypto/hash.h"
 #include "scy/turn/server/server.h"
 
+
 using namespace std;
 using namespace scy;
 using namespace scy::uv;
 using namespace scy::net;
 using namespace scy::turn;
+
 
 const std::string SERVER_BIND_IP("0.0.0.0");
 const int SERVER_BIND_PORT(3478);
@@ -15,6 +17,7 @@ const std::string SERVER_EXTERNAL_IP("127.0.0.1"); // 202.173.167.126
 const std::string SERVER_USERNAME("username");
 const std::string SERVER_PASSWORD("password");
 const std::string SERVER_REALM("sourcey.com");
+
 
 class RelayServer : public ServerObserver
 {
@@ -99,6 +102,7 @@ public:
         DebugL << "Allocation Removed" << endl;
     }
 };
+
 
 int main(void)
 {

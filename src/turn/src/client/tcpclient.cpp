@@ -8,6 +8,7 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/client/tcpclient.h"
 #include "scy/logger.h"
 #include "scy/net/tcpsocket.h"
@@ -16,10 +17,13 @@
 #include <assert.h>
 #include <iostream>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 TCPClient::TCPClient(TCPClientObserver& observer,
                      const Client::Options& options)
@@ -33,6 +37,7 @@ TCPClient::TCPClient(TCPClientObserver& observer,
     //_socket.assign(new net::TCPSocket, false);
 }
 
+
 TCPClient::~TCPClient()
 {
     TraceL << "Destroy" << endl;
@@ -40,10 +45,12 @@ TCPClient::~TCPClient()
     // assert(connections().empty());
 }
 
+
 void TCPClient::initiate()
 {
     Client::initiate();
 }
+
 
 void TCPClient::shutdown()
 {
@@ -74,6 +81,7 @@ void TCPClient::shutdown()
     TraceL << "Shutdown: OK" << endl;
 }
 
+
 void TCPClient::sendConnectRequest(const net::Address& peerAddress)
 {
     // 4.3. Initiating a Connection
@@ -101,6 +109,7 @@ void TCPClient::sendConnectRequest(const net::Address& peerAddress)
     sendAuthenticatedTransaction(transaction);
 }
 
+
 void TCPClient::sendData(const char* data, std::size_t size,
                          const net::Address& peerAddress)
 {
@@ -118,6 +127,7 @@ void TCPClient::sendData(const char* data, std::size_t size,
 
     conn->send(data, size);
 }
+
 
 bool TCPClient::handleResponse(const stun::Message& response)
 {
@@ -147,6 +157,7 @@ bool TCPClient::handleResponse(const stun::Message& response)
 
     return true;
 }
+
 
 void TCPClient::handleConnectResponse(const stun::Message& response)
 {
@@ -182,6 +193,7 @@ void TCPClient::handleConnectResponse(const stun::Message& response)
     createAndBindConnection(connAttr->value(), peerAttr->address());
 }
 
+
 void TCPClient::handleConnectErrorResponse(const stun::Message& response)
 {
     // If the result of the Connect request was an Error Response, and the
@@ -203,6 +215,7 @@ void TCPClient::handleConnectErrorResponse(const stun::Message& response)
 
     _observer.onRelayConnectionBindingFailed(*this, peerAttr->address());
 }
+
 
 void TCPClient::handleConnectionAttemptIndication(const stun::Message& response)
 {
@@ -243,6 +256,7 @@ void TCPClient::handleConnectionAttemptIndication(const stun::Message& response)
         createAndBindConnection(connAttr->value(), peerAttr->address());
 }
 
+
 void TCPClient::handleConnectionBindResponse(const stun::Message& response)
 {
     TraceL << "ConnectionBind success response" << endl;
@@ -264,6 +278,7 @@ void TCPClient::handleConnectionBindResponse(const stun::Message& response)
     TraceL << "ConnectionBind success response: OK" << endl;
 }
 
+
 void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 {
     TraceL << "ConnectionBind error response" << endl;
@@ -276,6 +291,7 @@ void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 
     freeConnection(req->peerAddress);
 }
+
 
 bool TCPClient::createAndBindConnection(std::uint32_t connectionID,
                                         const net::Address& peerAddress)
@@ -310,6 +326,7 @@ bool TCPClient::createAndBindConnection(std::uint32_t connectionID,
     return false;
 }
 
+
 void TCPClient::onRelayConnectionConnect(net::Socket& socket)
 {
     TraceL << "onRelayConnectionConnect" << endl;
@@ -334,6 +351,7 @@ void TCPClient::onRelayConnectionConnect(net::Socket& socket)
     sendAuthenticatedTransaction(transaction);
 }
 
+
 void TCPClient::onRelayConnectionError(net::Socket& socket,
                                        const Error& /* error */)
 {
@@ -347,6 +365,7 @@ void TCPClient::onRelayConnectionError(net::Socket& socket,
     _observer.onRelayConnectionError(*this, conn, req->peerAddress);
 }
 
+
 void TCPClient::onRelayConnectionClosed(net::Socket& socket)
 {
     // auto ptr = reinterpret_cast<net::Socket*>(sender);
@@ -359,6 +378,7 @@ void TCPClient::onRelayConnectionClosed(net::Socket& socket)
     _observer.onRelayConnectionClosed(*this, conn, req->peerAddress);
     freeConnection(req->peerAddress);
 }
+
 
 void TCPClient::onRelayDataReceived(net::Socket& socket,
                                     const MutableBuffer& buffer,
@@ -374,6 +394,7 @@ void TCPClient::onRelayDataReceived(net::Socket& socket,
     _observer.onRelayDataReceived(*this, bufferCast<const char*>(buffer),
                                   buffer.size(), req->peerAddress);
 }
+
 
 void TCPClient::freeConnection(
     const net::Address& peerAddress) // const net::TCPSocket::Ptr& socket)
@@ -401,11 +422,13 @@ void TCPClient::freeConnection(
     // deleteLater<net::TCPSocket>(socket); // deferred
 }
 
+
 ConnectionManager& TCPClient::connections()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _connections;
 }
+
 
 int TCPClient::transportProtocol()
 {
@@ -413,5 +436,6 @@ int TCPClient::transportProtocol()
 }
 }
 } //  namespace scy::turn
+
 
 /// @\}

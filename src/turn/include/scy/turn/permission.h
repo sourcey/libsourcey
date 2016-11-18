@@ -8,8 +8,10 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_Permission_H
 #define SCY_TURN_Permission_H
+
 
 #include "scy/net/address.h"
 #include "scy/timer.h"
@@ -20,11 +22,14 @@
 #include <string>
 #include <vector>
 
+
 namespace scy {
 namespace turn {
 
+
 /// Permission Lifetime MUST be 300 seconds (= 5 minutes).
 const int PERMISSION_LIFETIME = 3 * 60 * 1000;
+
 
 /// TURN permission for a user session
 struct Permission
@@ -44,11 +49,15 @@ struct Permission
     bool operator==(const std::string& r) const { return ip == r; }
 };
 
+
 typedef std::vector<Permission> PermissionList;
+
 
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_Permission_H
+
 
 /// @\}

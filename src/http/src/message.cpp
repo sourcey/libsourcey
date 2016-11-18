@@ -8,10 +8,13 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/message.h"
+
 
 namespace scy {
 namespace http {
+
 
 const std::string Message::HTTP_1_0 = "HTTP/1.0";
 const std::string Message::HTTP_1_1 = "HTTP/1.1";
@@ -27,24 +30,29 @@ const std::string Message::CONNECTION_KEEP_ALIVE = "Keep-Alive";
 const std::string Message::CONNECTION_CLOSE = "Close";
 const std::string Message::EMPTY;
 
+
 Message::Message()
     : _version(HTTP_1_1)
 {
 }
+
 
 Message::Message(const std::string& version)
     : _version(version)
 {
 }
 
+
 Message::~Message()
 {
 }
+
 
 void Message::setVersion(const std::string& version)
 {
     _version = version;
 }
+
 
 void Message::setContentLength(std::uint64_t length)
 {
@@ -53,6 +61,7 @@ void Message::setContentLength(std::uint64_t length)
     else
         erase(CONTENT_LENGTH);
 }
+
 
 std::uint64_t Message::getContentLength() const
 {
@@ -63,6 +72,7 @@ std::uint64_t Message::getContentLength() const
         return std::uint64_t(UNKNOWN_CONTENT_LENGTH);
 }
 
+
 void Message::setTransferEncoding(const std::string& transferEncoding)
 {
     if (util::icompare(transferEncoding, IDENTITY_TRANSFER_ENCODING) == 0)
@@ -71,10 +81,12 @@ void Message::setTransferEncoding(const std::string& transferEncoding)
         set(TRANSFER_ENCODING, transferEncoding);
 }
 
+
 const std::string& Message::getTransferEncoding() const
 {
     return get(TRANSFER_ENCODING, IDENTITY_TRANSFER_ENCODING);
 }
+
 
 void Message::setChunkedTransferEncoding(bool flag)
 {
@@ -84,11 +96,13 @@ void Message::setChunkedTransferEncoding(bool flag)
         setTransferEncoding(IDENTITY_TRANSFER_ENCODING);
 }
 
+
 bool Message::isChunkedTransferEncoding() const
 {
     return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) ==
            0;
 }
+
 
 void Message::setContentType(const std::string& contentType)
 {
@@ -98,10 +112,12 @@ void Message::setContentType(const std::string& contentType)
         set(CONTENT_TYPE, contentType);
 }
 
+
 const std::string& Message::getContentType() const
 {
     return get(CONTENT_TYPE, UNKNOWN_CONTENT_TYPE);
 }
+
 
 void Message::setKeepAlive(bool keepAlive)
 {
@@ -110,6 +126,7 @@ void Message::setKeepAlive(bool keepAlive)
     else
         set(CONNECTION, CONNECTION_CLOSE);
 }
+
 
 bool Message::getKeepAlive() const
 {
@@ -120,15 +137,18 @@ bool Message::getKeepAlive() const
         return getVersion() == HTTP_1_1;
 }
 
+
 const std::string& Message::getVersion() const
 {
     return _version;
 }
 
+
 bool Message::hasContentLength() const
 {
     return has(CONTENT_LENGTH);
 }
+
 
 void Message::write(std::ostream& ostr) const
 {
@@ -139,10 +159,13 @@ void Message::write(std::ostream& ostr) const
     }
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

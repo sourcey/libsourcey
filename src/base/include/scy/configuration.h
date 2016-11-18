@@ -8,13 +8,17 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Configuration_H
 #define SCY_Configuration_H
+
 
 #include "scy/mutex.h"
 #include "scy/signal.h"
 
+
 namespace scy {
+
 
 /// Configuration is an abstract base class for managing /// different kinds of
 /// configuration storage back ends such as /// JSON, XML, or database.
@@ -165,9 +169,11 @@ private:
     mutable Mutex _mutex;
 };
 
+
 //
 // Scoped Configuration
 //
+
 
 /// ScopedConfiguration provides multiple levels of configuration for a module.
 /// Multiple levels means that there is a module level scope, and a default
@@ -216,11 +222,15 @@ private:
     ScopedConfiguration& operator=(const ScopedConfiguration&);
 };
 
+
 } // namespace scy
+
 
 #endif // SCY_Configuration_H
 
+
 /// @\}
+
 
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

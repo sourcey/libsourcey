@@ -8,6 +8,7 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/server/udpallocation.h"
 #include "scy/buffer.h"
 #include "scy/logger.h"
@@ -18,10 +19,13 @@
 #include <cstring>
 #include <iostream>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
                              const std::string& username,
@@ -38,12 +42,14 @@ UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
     TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
 
+
 UDPAllocation::~UDPAllocation()
 {
     TraceL << "Destroy" << endl;
     _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
     _relaySocket.close();
 }
+
 
 bool UDPAllocation::handleRequest(Request& request)
 {
@@ -58,6 +64,7 @@ bool UDPAllocation::handleRequest(Request& request)
 
     return true;
 }
+
 
 void UDPAllocation::handleSendIndication(Request& request)
 {
@@ -133,6 +140,7 @@ void UDPAllocation::handleSendIndication(Request& request)
     }
 }
 
+
 void UDPAllocation::onPeerDataReceived(net::Socket&,
                                        const MutableBuffer& buffer,
                                        const net::Address& peerAddress)
@@ -178,6 +186,7 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
     server().udpSocket().sendPacket(message, _tuple.remote());
 }
 
+
 int UDPAllocation::send(const char* data, std::size_t size,
                         const net::Address& peerAddress)
 {
@@ -192,6 +201,7 @@ int UDPAllocation::send(const char* data, std::size_t size,
     return _relaySocket./*base().*/ send(data, size, peerAddress);
 }
 
+
 net::Address UDPAllocation::relayedAddress() const
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -199,5 +209,6 @@ net::Address UDPAllocation::relayedAddress() const
 }
 }
 } //  namespace scy::turn
+
 
 /// @\}

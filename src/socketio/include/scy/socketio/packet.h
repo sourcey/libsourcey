@@ -8,14 +8,18 @@
 /// @addtogroup socketio
 /// @{
 
+
 #ifndef SCY_SocketIO_Packet_H
 #define SCY_SocketIO_Packet_H
+
 
 #include "scy/json/json.h"
 #include "scy/packet.h"
 
+
 namespace scy {
 namespace sockio {
+
 
 class Packet : public IPacket
 {
@@ -111,9 +115,12 @@ protected:
     std::size_t _size;
 };
 
+
 } // namespace sockio
 } // namespace scy
 
+
 #endif // SCY_SocketIO_Packet_H
+
 
 /// @\}

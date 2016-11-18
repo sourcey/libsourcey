@@ -8,17 +8,22 @@
 /// @addtogroup stun
 /// @{
 
+
 #ifndef SCY_STUN_Message_H
 #define SCY_STUN_Message_H
+
 
 #include "scy/packet.h"
 #include "scy/stun/attributes.h"
 #include "scy/stun/stun.h"
 
+
 namespace scy {
 namespace stun {
 
+
 typedef std::string TransactionID;
+
 
 class Message : public IPacket
 {
@@ -124,6 +129,7 @@ protected:
     std::vector<Attribute*> _attrs;
 };
 
+
 inline bool isValidMethod(std::uint16_t methodType)
 {
     switch (methodType) {
@@ -144,6 +150,8 @@ inline bool isValidMethod(std::uint16_t methodType)
 }
 } // namespace scy:stun
 
+
 #endif // SCY_STUN_Message_H
+
 
 /// @\}

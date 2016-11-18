@@ -8,8 +8,10 @@
 /// @addtogroup sked
 /// @{
 
+
 #ifndef SCY_Sked_Scheduler_H
 #define SCY_Sked_Scheduler_H
+
 
 #include "scy/json/iserializable.h"
 #include "scy/logger.h"
@@ -20,8 +22,10 @@
 
 #include <vector>
 
+
 namespace scy {
 namespace sked {
+
 
 /// The Scheduler manages and runs tasks
 /// that need to be executed at specific times.
@@ -53,11 +57,15 @@ protected:
     virtual void update();
 };
 
+
 // static std::string DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
+
 
 } // namespace sked
 } // namespace scy
 
+
 #endif // SCY_Sked_Scheduler_H
+
 
 /// @\}

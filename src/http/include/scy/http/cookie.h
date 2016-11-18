@@ -8,14 +8,18 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Cookie_H
 #define SCY_HTTP_Cookie_H
+
 
 #include "scy/collection.h"
 #include "scy/net/types.h"
 
+
 namespace scy {
 namespace http {
+
 
 /// This class represents a HTTP Cookie.
 ///
@@ -183,57 +187,70 @@ private:
     bool _httpOnly;
 };
 
+
 inline int Cookie::getVersion() const
 {
     return _version;
 }
+
 
 inline const std::string& Cookie::getName() const
 {
     return _name;
 }
 
+
 inline const std::string& Cookie::getValue() const
 {
     return _value;
 }
+
 
 inline const std::string& Cookie::getComment() const
 {
     return _comment;
 }
 
+
 inline const std::string& Cookie::getDomain() const
 {
     return _domain;
 }
+
 
 inline const std::string& Cookie::getPath() const
 {
     return _path;
 }
 
+
 inline bool Cookie::getSecure() const
 {
     return _secure;
 }
+
 
 inline int Cookie::getMaxAge() const
 {
     return _maxAge;
 }
 
+
 inline bool Cookie::getHttpOnly() const
 {
     return _httpOnly;
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_Cookie_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

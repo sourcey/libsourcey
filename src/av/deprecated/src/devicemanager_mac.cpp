@@ -9,6 +9,7 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
+
 #include "scy/av/devicemanager_mac.h"
 
 #include <CoreAudio/CoreAudio.h>
@@ -25,10 +26,12 @@ class DeviceWatcherImpl;
 namespace scy {
 namespace av {
 
+
 IDeviceManager* DeviceManagerFactory::create()
 {
     return new MacDeviceManager();
 }
+
 
 class MacDeviceWatcher : public DeviceWatcher
 {
@@ -42,6 +45,7 @@ private:
     IDeviceManager* manager_;
     DeviceWatcherImpl* impl_;
 };
+
 
 static const char* kFilteredAudioDevicesName[] = {
     NULL,
@@ -65,14 +69,17 @@ extern bool GetAVFoundationVideoDevices(std::vector<Device>* out);
 // static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string*
 // out);
 
+
 MacDeviceManager::MacDeviceManager()
 {
     setWatcher(new MacDeviceWatcher(this));
 }
 
+
 MacDeviceManager::~MacDeviceManager()
 {
 }
+
 
 bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 {
@@ -82,6 +89,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
     }
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
+
 
 // bool MacDeviceManager::getAudioDevices(bool input,
 //                                        std::vector<Device>& devs) {
@@ -168,6 +176,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //   return true;
 // }
 
+
 MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager)
     : DeviceWatcher(manager)
     , manager_(manager)
@@ -175,9 +184,11 @@ MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager)
 {
 }
 
+
 MacDeviceWatcher::~MacDeviceWatcher()
 {
 }
+
 
 bool MacDeviceWatcher::start()
 {
@@ -187,6 +198,7 @@ bool MacDeviceWatcher::start()
     return impl_ != NULL;
 }
 
+
 void MacDeviceWatcher::stop()
 {
     if (impl_) {
@@ -195,8 +207,10 @@ void MacDeviceWatcher::stop()
     }
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 /*
  * libjingle

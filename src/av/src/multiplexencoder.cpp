@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/multiplexencoder.h"
 
 #ifdef HAVE_FFMPEG
@@ -22,10 +23,13 @@ extern "C" {
 #define snprintf _snprintf
 #endif
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
     : _options(options)
@@ -41,12 +45,14 @@ MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
     initializeFFmpeg();
 }
 
+
 MultiplexEncoder::~MultiplexEncoder()
 {
     TraceS(this) << "Destroy" << endl;
     uninitialize();
     uninitializeFFmpeg();
 }
+
 
 static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer,
                                 int bufferSize)
@@ -68,6 +74,7 @@ static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer,
 
     return bufferSize;
 }
+
 
 void MultiplexEncoder::initialize()
 {
@@ -161,6 +168,7 @@ void MultiplexEncoder::initialize()
     TraceS(this) << "Initialize: OK" << endl;
 }
 
+
 void MultiplexEncoder::uninitialize()
 {
     TraceS(this) << "Uninitialize" << endl;
@@ -177,6 +185,7 @@ void MultiplexEncoder::uninitialize()
 
     TraceS(this) << "Uninitialize: OK" << endl;
 }
+
 
 void MultiplexEncoder::cleanup()
 {
@@ -219,6 +228,7 @@ void MultiplexEncoder::cleanup()
     TraceS(this) << "Cleanup: OK" << endl;
 }
 
+
 void MultiplexEncoder::flush()
 {
     TraceS(this) << "Flushing" << endl;
@@ -231,11 +241,13 @@ void MultiplexEncoder::flush()
     }
 }
 
+
 EncoderOptions& MultiplexEncoder::options()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _options;
 }
+
 
 VideoEncoder* MultiplexEncoder::video()
 {
@@ -243,15 +255,18 @@ VideoEncoder* MultiplexEncoder::video()
     return _video;
 }
 
+
 AudioEncoder* MultiplexEncoder::audio()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _audio;
 }
 
+
 //
 // Helpers
 //
+
 
 // Write a packet to the output stream.
 bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
@@ -274,6 +289,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
     return true;
 }
 
+
 void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
 {
     // https://docs.thefoundry.co.uk/products/nuke/developers/63/ndkdevguide/examples/ffmpegReader.cpp
@@ -293,9 +309,11 @@ void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
     }
 }
 
+
 //
 // Video stuff
 //
+
 
 void MultiplexEncoder::createVideo()
 {
@@ -311,6 +329,7 @@ void MultiplexEncoder::createVideo()
     _video->open();
 }
 
+
 void MultiplexEncoder::freeVideo()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -320,6 +339,7 @@ void MultiplexEncoder::freeVideo()
         _video = nullptr;
     }
 }
+
 
 bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 {
@@ -353,6 +373,7 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
     //
     // return false;
 }
+
 
 bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize,
                                    int width, int height, std::int64_t time)
@@ -401,14 +422,17 @@ bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize,
     // return false;
 }
 
+
 void MultiplexEncoder::onVideoEncoded(av::VideoPacket& packet)
 {
     writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
 
+
 //
 // Audio stuff
 //
+
 
 void MultiplexEncoder::createAudio()
 {
@@ -426,6 +450,7 @@ void MultiplexEncoder::createAudio()
     _audio->create();
     _audio->open();
 }
+
 
 void MultiplexEncoder::freeAudio()
 {
@@ -446,6 +471,7 @@ void MultiplexEncoder::freeAudio()
     //     _audioBuffer = nullptr;
     // }
 }
+
 
 bool MultiplexEncoder::encodeAudio(std::uint8_t* buffer, int numSamples,
                                    std::int64_t time)
@@ -483,14 +509,18 @@ bool MultiplexEncoder::encodeAudio(std::uint8_t* buffer, int numSamples,
     // return false;
 }
 
+
 void MultiplexEncoder::onAudioEncoded(av::AudioPacket& packet)
 {
     writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

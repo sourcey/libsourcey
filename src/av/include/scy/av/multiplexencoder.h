@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_MultiplexEncoder_H
 #define SCY_AV_MultiplexEncoder_H
+
 
 #include "scy/base.h"
 
@@ -30,6 +32,7 @@ extern "C" {
 #include <libavutil/fifo.h>
 #include <libswscale/swscale.h>
 }
+
 
 namespace scy {
 namespace av {
@@ -56,6 +59,7 @@ public:
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width,
                              int height, std::int64_t time = AV_NOPTS_VALUE);
 
+
     virtual void createAudio();
     virtual void freeAudio(); /// virtual bool encodeAudio(AVFrame* frame);
                               /// // Encode a single audio frame
@@ -64,6 +68,7 @@ public:
 
     /// Flush and beffered or queued packets.
     virtual void flush();
+
 
     EncoderOptions& options();
     VideoEncoder* video();
@@ -90,12 +95,16 @@ protected:
     std::uint64_t _pts;
 };
 
+
 // bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
+
 
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_MultiplexEncoder_H
+
 
 /// @\}

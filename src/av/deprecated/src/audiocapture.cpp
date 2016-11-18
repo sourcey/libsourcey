@@ -8,15 +8,19 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/mediacapture.h"
 #include "scy/logger.h"
 
 #ifdef HAVE_RTAUDIO
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
                            RtAudioFormat format)
@@ -45,10 +49,12 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
     TraceS(this) << "Create: OK" << endl;
 }
 
+
 AudioCapture::~AudioCapture()
 {
     TraceS(this) << "Destroy" << endl;
 }
+
 
 void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
 {
@@ -83,6 +89,7 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
     }
 }
 
+
 void AudioCapture::close()
 {
     TraceS(this) << "Closing" << endl;
@@ -98,6 +105,7 @@ void AudioCapture::close()
         setError("Cannot close audio capture.");
     }
 }
+
 
 void AudioCapture::start()
 {
@@ -117,6 +125,7 @@ void AudioCapture::start()
     }
 }
 
+
 void AudioCapture::stop()
 {
     TraceS(this) << "Stopping" << endl;
@@ -134,6 +143,7 @@ void AudioCapture::stop()
         }
     }
 }
+
 
 #if 0
 void AudioCapture::attach(const PacketDelegateBase& delegate)
@@ -157,6 +167,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
     return false;
 }
 #endif
+
 
 int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
                                 unsigned int nBufferFrames, double streamTime,
@@ -193,11 +204,13 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     return 0;
 }
 
+
 void AudioCapture::errorCallback(RtAudioError::Type type,
                                  const std::string& errorText)
 {
     ErrorL << "Audio system error: " << errorText << endl;
 }
+
 
 void AudioCapture::setError(const std::string& message, bool throwExec)
 {
@@ -207,11 +220,13 @@ void AudioCapture::setError(const std::string& message, bool throwExec)
         throw std::runtime_error(message);
 }
 
+
 RtAudioFormat AudioCapture::format() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _format;
 }
+
 
 bool AudioCapture::isOpen() const
 {
@@ -219,11 +234,13 @@ bool AudioCapture::isOpen() const
     return _opened;
 }
 
+
 bool AudioCapture::running() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _audio.isStreamRunning();
 }
+
 
 int AudioCapture::deviceId() const
 {
@@ -231,17 +248,20 @@ int AudioCapture::deviceId() const
     return _deviceId;
 }
 
+
 int AudioCapture::sampleRate() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _sampleRate;
 }
 
+
 int AudioCapture::channels() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _channels;
 }
+
 
 std::string AudioCapture::formatString() const
 {
@@ -276,6 +296,7 @@ std::string AudioCapture::formatString() const
     assert(0 && "unsupported pixel format");
     return "";
 }
+
 
 void AudioCapture::getAudioCodec(AudioCodec& icodec)
 {
@@ -312,7 +333,9 @@ void AudioCapture::getEncoderFormat(Format& iformat)
     // }
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif

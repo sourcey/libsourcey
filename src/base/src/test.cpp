@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/test.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
@@ -18,14 +19,18 @@
 #include <assert.h>
 #include <iostream>
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 
+
 namespace scy {
 namespace test {
 
+
 static Singleton<TestRunner> singleton;
+
 
 void initialize()
 {
@@ -40,6 +45,7 @@ void initialize()
     // Nothing else to do...
 }
 
+
 int finalize()
 {
     bool passed = TestRunner::getDefault().passed();
@@ -50,10 +56,12 @@ int finalize()
     return passed ? 0 : 1;
 }
 
+
 void runAll()
 {
     TestRunner::getDefault().run();
 }
+
 
 void describe(const std::string& name, std::function<void()> target)
 {
@@ -61,11 +69,13 @@ void describe(const std::string& name, std::function<void()> target)
     TestRunner::getDefault().add(test);
 }
 
+
 void describe(const std::string& name, Test* test)
 {
     test->name = name;
     TestRunner::getDefault().add(test);
 }
+
 
 void expectImpl(bool passed, const char* assert, const char* file, long line)
 {
@@ -83,19 +93,23 @@ void expectImpl(bool passed, const char* assert, const char* file, long line)
     std::cout << ss.str() << std::endl;
 }
 
+
 //
 // Test Runner
 //
+
 
 TestRunner::TestRunner()
     : _current(nullptr)
 {
 }
 
+
 TestRunner::~TestRunner()
 {
     clear();
 }
+
 
 void TestRunner::add(Test* test)
 {
@@ -103,6 +117,7 @@ void TestRunner::add(Test* test)
     Mutex::ScopedLock lock(_mutex);
     _tests.push_back(test);
 }
+
 
 Test* TestRunner::get(const std::string& name) const
 {
@@ -114,17 +129,20 @@ Test* TestRunner::get(const std::string& name) const
     return nullptr;
 }
 
+
 void TestRunner::clear()
 {
     Mutex::ScopedLock lock(_mutex);
     util::clearList<Test>(_tests);
 }
 
+
 TestList TestRunner::tests() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _tests;
 }
+
 
 ErrorMap TestRunner::errors() const
 {
@@ -138,16 +156,19 @@ ErrorMap TestRunner::errors() const
     return errors;
 }
 
+
 bool TestRunner::passed() const
 {
     return errors().empty();
 }
+
 
 Test* TestRunner::current() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _current;
 }
+
 
 void TestRunner::run()
 {
@@ -195,14 +216,17 @@ void TestRunner::run()
     }
 }
 
+
 TestRunner& TestRunner::getDefault()
 {
     return *singleton.get();
 }
 
+
 //
 // Test
 //
+
 
 Test::Test(const std::string& name)
     : name(name)
@@ -210,17 +234,21 @@ Test::Test(const std::string& name)
 {
 }
 
+
 Test::~Test()
 {
     // cout << "destroying " << name << endl;
 }
+
 
 bool Test::passed()
 {
     return errors.empty();
 }
 
+
 } // namespace test
 } // namespace scy
+
 
 /// @\}

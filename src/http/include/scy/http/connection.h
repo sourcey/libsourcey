@@ -8,8 +8,10 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_ServerConnection_H
 #define SCY_HTTP_ServerConnection_H
+
 
 #include "scy/http/parser.h"
 #include "scy/http/request.h"
@@ -20,8 +22,10 @@
 #include "scy/packetqueue.h"
 #include "scy/timer.h"
 
+
 namespace scy {
 namespace http {
+
 
 class ProgressSignal : public Signal<void(const double&)>
 {
@@ -47,6 +51,7 @@ public:
         emit(/*sender ? sender : this, */ progress());
     }
 };
+
 
 class ConnectionAdapter;
 class Connection : public net::SocketAdapter
@@ -142,6 +147,7 @@ protected:
     friend struct std::default_delete<Connection>;
 };
 
+
 //
 // Connection Adapter
 //
@@ -179,6 +185,7 @@ protected:
     Parser _parser;
 };
 
+
 inline bool isExplicitKeepAlive(http::Message* message)
 {
     const std::string& connection =
@@ -188,9 +195,12 @@ inline bool isExplicitKeepAlive(http::Message* message)
                0;
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

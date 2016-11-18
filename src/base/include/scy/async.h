@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Async_H
 #define SCY_Async_H
+
 
 #include "scy/uv/uvpp.h"
 #include <atomic>
@@ -18,10 +20,13 @@
 #include <memory>
 #include <stdexcept>
 
+
 namespace scy {
+
 
 /// Classes for asynchronous programming
 namespace async {
+
 
 /// A generic interface for classes that can be run and cancelled.
 class Runnable
@@ -55,9 +60,11 @@ public:
     };
 };
 
+
 //
 // Runner Interface
 //
+
 
 /// Runner is a virtual interface for implementing
 /// asynchronous objects such as threads and futures.
@@ -173,6 +180,7 @@ protected:
     Runner& operator=(const Runner&);
 };
 
+
 //
 // Concurrent Flag
 //
@@ -204,8 +212,10 @@ public:
     void set(bool flag) { state.store(flag, std::memory_order_release); }
 };
 
+
 /// For C client data callbacks.
 typedef void (*Callable)(void*);
+
 
 /// A generic interface for a classes
 /// that can be started and stopped.
@@ -216,6 +226,7 @@ public:
     virtual void stop() = 0;
 };
 
+
 /// A generic interface for classes
 /// that can be sent and cancelled.
 class Sendable
@@ -225,9 +236,12 @@ public:
     virtual void cancel(){};
 };
 
+
 } // namespace async
 } // namespace scy
 
+
 #endif // SCY_Async_H
+
 
 /// @\}

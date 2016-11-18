@@ -8,6 +8,7 @@
 /// @addtogroup stun
 /// @{
 
+
 #ifdef SCY_WIN
 #include <winsock2.h>
 #endif
@@ -17,16 +18,20 @@
 #include "scy/stun/attributes.h"
 #include "scy/stun/message.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace stun {
+
 
 Attribute::Attribute(std::uint16_t type, std::uint16_t size)
     : _type(type)
     , _size(size)
 {
 }
+
 
 std::string Attribute::typeString(std::uint16_t type)
 {
@@ -107,25 +112,30 @@ std::string Attribute::typeString(std::uint16_t type)
     }
 }
 
+
 std::uint16_t Attribute::size() const
 {
     return _size;
 }
+
 
 std::uint16_t Attribute::type() const // Attribute::Type
 {
     return _type; // static_cast<Attribute::Type>(_type);
 }
 
+
 void Attribute::setLength(std::uint16_t size)
 {
     _size = size;
 }
 
+
 std::string Attribute::typeString()
 {
     return typeString(_type);
 }
+
 
 void Attribute::consumePadding(BitReader& reader) const
 {
@@ -135,6 +145,7 @@ void Attribute::consumePadding(BitReader& reader) const
     }
 }
 
+
 void Attribute::writePadding(BitWriter& writer) const
 {
     int remainder = _size % 4;
@@ -143,6 +154,7 @@ void Attribute::writePadding(BitWriter& writer) const
         writer.put(zeroes, 4 - remainder);
     }
 }
+
 
 Attribute* Attribute::create(std::uint16_t type, std::uint16_t size)
 {
@@ -300,6 +312,7 @@ Attribute* Attribute::create(std::uint16_t type, std::uint16_t size)
     return nullptr;
 }
 
+
 // ---------------------------------------------------------------------------
 //
 AddressAttribute::AddressAttribute(std::uint16_t type, bool ipv4)
@@ -307,6 +320,7 @@ AddressAttribute::AddressAttribute(std::uint16_t type, bool ipv4)
 //_family(0), _port(0), _ip(0)
 {
 }
+
 
 AddressAttribute::AddressAttribute(const AddressAttribute& r)
     : Attribute(r._type, r._size)
@@ -317,15 +331,18 @@ AddressAttribute::AddressAttribute(const AddressAttribute& r)
 {
 }
 
+
 Attribute* AddressAttribute::clone()
 {
     return new AddressAttribute(*this);
 }
 
+
 net::Address AddressAttribute::address() const
 {
     return _address;
 }
+
 
 std::string intToIPv4(std::uint32_t ip)
 {
@@ -348,6 +365,7 @@ std::string intToIPv4(std::uint32_t ip)
     return ost.str();
 #endif
 }
+
 
 void AddressAttribute::read(BitReader& reader)
 {
@@ -390,6 +408,7 @@ void AddressAttribute::read(BitReader& reader)
     }
 }
 
+
 void AddressAttribute::write(BitWriter& writer) const
 {
     writer.putU8(0);
@@ -425,6 +444,7 @@ void AddressAttribute::write(BitWriter& writer) const
     }
 }
 
+
 // ---------------------------------------------------------------------------
 //
 UInt8Attribute::UInt8Attribute(std::uint16_t type)
@@ -433,22 +453,26 @@ UInt8Attribute::UInt8Attribute(std::uint16_t type)
 {
 }
 
+
 UInt8Attribute::UInt8Attribute(const UInt8Attribute& r)
     : Attribute(r._type, Size)
     , _bits(r._bits)
 {
 }
 
+
 Attribute* UInt8Attribute::clone()
 {
     return new UInt8Attribute(*this);
 }
+
 
 bool UInt8Attribute::getBit(int index) const
 {
     assert((0 <= index) && (index < 32));
     return static_cast<bool>((_bits >> index) & 0x1);
 }
+
 
 void UInt8Attribute::setBit(int index, bool value)
 {
@@ -457,15 +481,18 @@ void UInt8Attribute::setBit(int index, bool value)
     _bits |= value ? (1 << index) : 0;
 }
 
+
 void UInt8Attribute::read(BitReader& reader)
 {
     reader.getU8(_bits);
 }
 
+
 void UInt8Attribute::write(BitWriter& writer) const
 {
     writer.putU8(_bits);
 }
+
 
 // ---------------------------------------------------------------------------
 //
@@ -475,16 +502,19 @@ UInt32Attribute::UInt32Attribute(std::uint16_t type)
 {
 }
 
+
 UInt32Attribute::UInt32Attribute(const UInt32Attribute& r)
     : Attribute(r._type, Size)
     , _bits(r._bits)
 {
 }
 
+
 Attribute* UInt32Attribute::clone()
 {
     return new UInt32Attribute(*this);
 }
+
 
 bool UInt32Attribute::getBit(int index) const
 {
@@ -492,12 +522,14 @@ bool UInt32Attribute::getBit(int index) const
     return static_cast<bool>((_bits >> index) & 0x1);
 }
 
+
 void UInt32Attribute::setBit(int index, bool value)
 {
     assert((0 <= index) && (index < 32));
     _bits &= ~(1 << index);
     _bits |= value ? (1 << index) : 0;
 }
+
 
 void UInt32Attribute::read(BitReader& reader)
 {
@@ -509,6 +541,7 @@ void UInt32Attribute::write(BitWriter& writer) const
     writer.putU32(_bits);
 }
 
+
 // ---------------------------------------------------------------------------
 //
 UInt64Attribute::UInt64Attribute(std::uint16_t type)
@@ -517,22 +550,26 @@ UInt64Attribute::UInt64Attribute(std::uint16_t type)
 {
 }
 
+
 UInt64Attribute::UInt64Attribute(const UInt64Attribute& r)
     : Attribute(r._type, Size)
     , _bits(r._bits)
 {
 }
 
+
 Attribute* UInt64Attribute::clone()
 {
     return new UInt64Attribute(*this);
 }
+
 
 bool UInt64Attribute::getBit(int index) const
 {
     assert((0 <= index) && (index < 32));
     return static_cast<bool>((_bits >> index) & 0x1);
 }
+
 
 void UInt64Attribute::setBit(int index, bool value)
 {
@@ -541,15 +578,18 @@ void UInt64Attribute::setBit(int index, bool value)
     _bits |= value ? (1 << index) : 0;
 }
 
+
 void UInt64Attribute::read(BitReader& reader)
 {
     reader.getU64(_bits);
 }
 
+
 void UInt64Attribute::write(BitWriter& writer) const
 {
     writer.putU64(_bits);
 }
+
 
 // ---------------------------------------------------------------------------
 //
@@ -558,10 +598,12 @@ FlagAttribute::FlagAttribute(std::uint16_t type)
 {
 }
 
+
 Attribute* FlagAttribute::clone()
 {
     return new FlagAttribute(type());
 }
+
 
 // ---------------------------------------------------------------------------
 //
@@ -571,6 +613,7 @@ StringAttribute::StringAttribute(std::uint16_t type, std::uint16_t size)
 {
 }
 
+
 StringAttribute::StringAttribute(const StringAttribute& r)
     : Attribute(r._type, r._size)
     , _bytes(0)
@@ -578,16 +621,19 @@ StringAttribute::StringAttribute(const StringAttribute& r)
     copyBytes(r._bytes, r._size);
 }
 
+
 StringAttribute::~StringAttribute()
 {
     if (_bytes)
         delete[] _bytes;
 }
 
+
 Attribute* StringAttribute::clone()
 {
     return new StringAttribute(*this);
 }
+
 
 void StringAttribute::setBytes(char* bytes, unsigned size)
 {
@@ -597,10 +643,12 @@ void StringAttribute::setBytes(char* bytes, unsigned size)
     setLength(size);
 }
 
+
 void StringAttribute::copyBytes(const char* bytes)
 {
     copyBytes(bytes, static_cast<std::uint16_t>(strlen(bytes)));
 }
+
 
 void StringAttribute::copyBytes(const void* bytes, unsigned size)
 {
@@ -609,6 +657,7 @@ void StringAttribute::copyBytes(const void* bytes, unsigned size)
     setBytes(newBytes, size);
 }
 
+
 std::uint8_t StringAttribute::getByte(int index) const
 {
     assert(_bytes != nullptr);
@@ -616,12 +665,14 @@ std::uint8_t StringAttribute::getByte(int index) const
     return static_cast<std::uint8_t>(_bytes[index]);
 }
 
+
 void StringAttribute::setByte(int index, std::uint8_t value)
 {
     assert(_bytes != nullptr);
     assert((0 <= index) && (index < size()));
     _bytes[index] = value;
 }
+
 
 void StringAttribute::read(BitReader& reader)
 {
@@ -633,6 +684,7 @@ void StringAttribute::read(BitReader& reader)
     consumePadding(reader);
 }
 
+
 void StringAttribute::write(BitWriter& writer) const
 {
     if (_bytes)
@@ -641,10 +693,12 @@ void StringAttribute::write(BitWriter& writer) const
     writePadding(writer);
 }
 
+
 string StringAttribute::asString() const
 {
     return std::string(_bytes, size());
 }
+
 
 /*
 //--------------- Fingerprint ----------------
@@ -663,6 +717,7 @@ Fingerprint::Fingerprint() :
 //}
 */
 
+
 /*
 void Fingerprint::write(BitWriter& writer) const {
 writer.putU32(_crc32);
@@ -680,12 +735,14 @@ return true;
 }
 */
 
+
 // ---------------------------------------------------------------------------
 //
 MessageIntegrity::MessageIntegrity()
     : Attribute(Attribute::MessageIntegrity, Size)
 {
 }
+
 
 MessageIntegrity::MessageIntegrity(const MessageIntegrity& r)
     : Attribute(r._type, Size)
@@ -695,14 +752,17 @@ MessageIntegrity::MessageIntegrity(const MessageIntegrity& r)
 {
 }
 
+
 MessageIntegrity::~MessageIntegrity()
 {
 }
+
 
 Attribute* MessageIntegrity::clone()
 {
     return new MessageIntegrity(*this);
 }
+
 
 bool MessageIntegrity::verifyHmac(const std::string& key) const
 {
@@ -723,6 +783,7 @@ bool MessageIntegrity::verifyHmac(const std::string& key) const
 
     return _hmac == hmac;
 }
+
 
 void MessageIntegrity::read(BitReader& reader)
 {
@@ -776,6 +837,7 @@ void MessageIntegrity::read(BitReader& reader)
     reader.seek(originalPos);
 #endif
 }
+
 
 void MessageIntegrity::write(BitWriter& writer) const
 {
@@ -851,6 +913,7 @@ void MessageIntegrity::write(BitWriter& writer) const
     }
 }
 
+
 // ---------------------------------------------------------------------------
 //
 ErrorCode::ErrorCode(std::uint16_t size)
@@ -861,6 +924,7 @@ ErrorCode::ErrorCode(std::uint16_t size)
     assert(size >= MinSize);
 }
 
+
 ErrorCode::ErrorCode(const ErrorCode& r)
     : Attribute(Attribute::ErrorCode, r._size)
     , _class(r._class)
@@ -869,19 +933,23 @@ ErrorCode::ErrorCode(const ErrorCode& r)
 {
 }
 
+
 ErrorCode::~ErrorCode()
 {
 }
+
 
 Attribute* ErrorCode::clone()
 {
     return new ErrorCode(*this);
 }
 
+
 int ErrorCode::errorCode() const
 {
     return _class * 100 + _number;
 }
+
 
 void ErrorCode::setErrorCode(int code)
 {
@@ -889,11 +957,13 @@ void ErrorCode::setErrorCode(int code)
     _number = static_cast<std::uint8_t>(code % 100);
 }
 
+
 void ErrorCode::setReason(const std::string& reason)
 {
     setLength(MinSize + static_cast<std::uint16_t>(reason.size()));
     _reason = reason;
 }
+
 
 void ErrorCode::read(BitReader& reader)
 {
@@ -910,12 +980,14 @@ void ErrorCode::read(BitReader& reader)
     consumePadding(reader);
 }
 
+
 void ErrorCode::write(BitWriter& writer) const
 {
     writer.putU32(_class << 8 | _number); // errorCode());
     writer.put(_reason);
     writePadding(writer);
 }
+
 
 // ---------------------------------------------------------------------------
 //
@@ -924,41 +996,49 @@ UInt16ListAttribute::UInt16ListAttribute(std::uint16_t type, std::uint16_t size)
 {
 }
 
+
 UInt16ListAttribute::UInt16ListAttribute(const UInt16ListAttribute& r)
     : Attribute(r._type, r._size)
     , _attrTypes(r._attrTypes)
 {
 }
 
+
 UInt16ListAttribute::~UInt16ListAttribute()
 {
 }
+
 
 Attribute* UInt16ListAttribute::clone()
 {
     return new UInt16ListAttribute(*this);
 }
 
+
 std::size_t UInt16ListAttribute::size() const
 {
     return _attrTypes.size();
 }
+
 
 std::uint16_t UInt16ListAttribute::getType(int index) const
 {
     return _attrTypes[index];
 }
 
+
 void UInt16ListAttribute::setType(int index, std::uint16_t value)
 {
     _attrTypes[index] = value;
 }
+
 
 void UInt16ListAttribute::addType(std::uint16_t value)
 {
     _attrTypes.push_back(value);
     setLength(static_cast<std::uint16_t>(_attrTypes.size() * 2));
 }
+
 
 void UInt16ListAttribute::read(BitReader& reader)
 {
@@ -984,5 +1064,6 @@ void UInt16ListAttribute::write(BitWriter& writer) const
 }
 }
 } // namespace scy:stun
+
 
 /// @\}

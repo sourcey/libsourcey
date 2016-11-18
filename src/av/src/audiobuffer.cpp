@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audiobuffer.h"
 
 #ifdef HAVE_FFMPEG
@@ -15,10 +16,13 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioBuffer::AudioBuffer()
     : fifo(nullptr)
@@ -26,6 +30,7 @@ AudioBuffer::AudioBuffer()
     TraceS(this) << "Create" << endl;
     assert(!fifo);
 }
+
 
 AudioBuffer::~AudioBuffer()
 {
@@ -54,6 +59,7 @@ void AudioBuffer::alloc(const std::string& sampleFmt, int channels,
     }
 }
 
+
 void AudioBuffer::reset()
 {
     TraceS(this) << "Reset" << endl;
@@ -62,6 +68,7 @@ void AudioBuffer::reset()
         av_audio_fifo_reset(fifo);
     }
 }
+
 
 void AudioBuffer::close()
 {
@@ -72,6 +79,7 @@ void AudioBuffer::close()
         fifo = nullptr;
     }
 }
+
 
 void AudioBuffer::write(void** samples, int numSamples)
 {
@@ -92,6 +100,7 @@ void AudioBuffer::write(void** samples, int numSamples)
         throw std::runtime_error("Cannot write data to FIFO");
     }
 }
+
 
 bool AudioBuffer::read(void** samples, int numSamples)
 {
@@ -116,6 +125,7 @@ bool AudioBuffer::read(void** samples, int numSamples)
     return true;
 }
 
+
 int AudioBuffer::available() const
 {
     if (fifo)
@@ -123,9 +133,12 @@ int AudioBuffer::available() const
     return 0;
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

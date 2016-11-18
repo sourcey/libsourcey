@@ -1,8 +1,10 @@
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 
+
 namespace scy {
 namespace net {
+
 
 template <class SocketT> /// The TCP echo server accepts a template argument
 /// of either a TCPSocket or a SSLSocket.
@@ -86,9 +88,11 @@ public:
     }
 };
 
+
 // Some generic server types
 typedef EchoServer<TCPSocket> TCPEchoServer;
 typedef EchoServer<SSLSocket> SSLEchoServer;
+
 
 } // namespace net
 } // namespace scy

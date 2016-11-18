@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_VideoCapture_H
 #define SCY_AV_VideoCapture_H
+
 
 #include "scy/av/format.h"
 #include "scy/av/fpscounter.h"
@@ -28,8 +30,10 @@
 
 #define HAVE_OPENCV_VIDEOCAPTURE
 
+
 namespace scy {
 namespace av {
+
 
 //
 // Video Capture
@@ -70,12 +74,14 @@ public:
     /// Opens the VideoCapture.
     bool open(bool whiny = true);
 
+
     virtual void start();
     virtual void stop(); /// True when the system device is open.
     bool opened() const;
 
     /// True when the internal thread is running.
     bool running() const;
+
 
     void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
@@ -92,6 +98,7 @@ public:
     cv::VideoCapture&
     capture(); /// Signals that the capture is closed in error.
     Signal<void(const scy::Error&)> Error;
+
 
 protected:
     cv::Mat grab();
@@ -117,11 +124,14 @@ private:
     Thread _thread;
 };
 
+
 typedef std::map<int, VideoCapture::Ptr> VideoCaptureMap;
+
 
 //
 // Matrix Packet
 //
+
 
 class MatrixPacket : public VideoPacket
 {
@@ -148,10 +158,13 @@ public:
     virtual const char* className() const { return "MatrixPacket"; }
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_VideoCapture_H
+
 
 /// @\}

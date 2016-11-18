@@ -8,18 +8,23 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_TCPClientConnection_H
 #define SCY_TURN_TCPClientConnection_H
+
 
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/stun/message.h"
 #include "scy/timer.h"
 
+
 namespace scy {
 namespace turn {
 
+
 class TCPAllocation;
+
 
 class TCPConnectionPair
 {
@@ -92,9 +97,12 @@ private:
     TCPConnectionPair& operator=(TCPConnectionPair&&) = delete;
 };
 
+
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_TCPClientConnection_H
+
 
 /// @\}

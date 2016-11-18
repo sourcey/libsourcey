@@ -8,6 +8,7 @@
 /// @addtogroup crypto
 /// @{
 
+
 #include "scy/crypto/hmac.h"
 #include "scy/util.h"
 #include <assert.h>
@@ -21,8 +22,10 @@
 #endif
 #include <openssl/hmac.h>
 
+
 namespace scy {
 namespace crypto {
+
 
 std::string computeHMAC(const std::string& input, const std::string& key)
 {
@@ -39,7 +42,9 @@ std::string computeHMAC(const std::string& input, const std::string& key)
     return std::string(buf, len);
 }
 
+
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

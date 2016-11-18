@@ -10,6 +10,7 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
+
 #include "scy/datetime.h"
 #include "scy/numeric.h"
 #include "scy/platform.h"
@@ -26,13 +27,17 @@
 #include <sys/time.h>
 #endif
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 //
 // Date Time
 //
+
 
 inline double DateTime::toJulianDay(Timestamp::UtcTimeVal utcTime)
 {
@@ -40,10 +45,12 @@ inline double DateTime::toJulianDay(Timestamp::UtcTimeVal utcTime)
     return utcDays + 2299160.5; // first day of Gregorian reform (Oct 15 1582)
 }
 
+
 inline Timestamp::UtcTimeVal DateTime::toUtcTime(double julianDay)
 {
     return Timestamp::UtcTimeVal((julianDay - 2299160.5) * 864000000000.0);
 }
+
 
 DateTime::DateTime()
 {
@@ -53,12 +60,14 @@ DateTime::DateTime()
     computeDaytime();
 }
 
+
 DateTime::DateTime(const Timestamp& timestamp)
     : _utcTime(timestamp.utcTime())
 {
     computeGregorian(julianDay());
     computeDaytime();
 }
+
 
 DateTime::DateTime(int year, int month, int day, int hour, int minute,
                    int second, int millisecond, int microsecond)
@@ -86,11 +95,13 @@ DateTime::DateTime(int year, int month, int day, int hour, int minute,
                      millisecond * Timespan::MILLISECONDS + microsecond);
 }
 
+
 DateTime::DateTime(double julianDay)
     : _utcTime(toUtcTime(julianDay))
 {
     computeGregorian(julianDay);
 }
+
 
 DateTime::DateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff)
     : _utcTime(utcTime + diff * 10)
@@ -98,6 +109,7 @@ DateTime::DateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff)
     computeGregorian(julianDay());
     computeDaytime();
 }
+
 
 DateTime::DateTime(const DateTime& dateTime)
     : _utcTime(dateTime._utcTime)
@@ -112,9 +124,11 @@ DateTime::DateTime(const DateTime& dateTime)
 {
 }
 
+
 DateTime::~DateTime()
 {
 }
+
 
 DateTime& DateTime::operator=(const DateTime& dateTime)
 {
@@ -132,6 +146,7 @@ DateTime& DateTime::operator=(const DateTime& dateTime)
     return *this;
 }
 
+
 DateTime& DateTime::operator=(const Timestamp& timestamp)
 {
     _utcTime = timestamp.utcTime();
@@ -140,12 +155,14 @@ DateTime& DateTime::operator=(const Timestamp& timestamp)
     return *this;
 }
 
+
 DateTime& DateTime::operator=(double julianDay)
 {
     _utcTime = toUtcTime(julianDay);
     computeGregorian(julianDay);
     return *this;
 }
+
 
 DateTime& DateTime::assign(int year, int month, int day, int hour, int minute,
                            int second, int millisecond, int microsecond)
@@ -175,6 +192,7 @@ DateTime& DateTime::assign(int year, int month, int day, int hour, int minute,
     return *this;
 }
 
+
 void DateTime::swap(DateTime& dateTime)
 {
     std::swap(_utcTime, dateTime._utcTime);
@@ -188,10 +206,12 @@ void DateTime::swap(DateTime& dateTime)
     std::swap(_microsecond, dateTime._microsecond);
 }
 
+
 int DateTime::dayOfWeek() const
 {
     return int((std::floor(julianDay() + 1.5))) % 7;
 }
+
 
 int DateTime::dayOfYear() const
 {
@@ -201,6 +221,7 @@ int DateTime::dayOfYear() const
     doy += _day;
     return doy;
 }
+
 
 int DateTime::daysOfMonth(int year, int month)
 {
@@ -215,6 +236,7 @@ int DateTime::daysOfMonth(int year, int month)
         return daysOfMonthTable[month];
 }
 
+
 bool DateTime::isValid(int year, int month, int day, int hour, int minute,
                        int second, int millisecond, int microsecond)
 {
@@ -225,6 +247,7 @@ bool DateTime::isValid(int year, int month, int day, int hour, int minute,
            (millisecond >= 0 && millisecond <= 999) &&
            (microsecond >= 0 && microsecond <= 999);
 }
+
 
 int DateTime::week(int firstDayOfWeek) const
 {
@@ -243,25 +266,30 @@ int DateTime::week(int firstDayOfWeek) const
         return (doy - baseDay) / 7 + 1 + offs;
 }
 
+
 double DateTime::julianDay() const
 {
     return toJulianDay(_utcTime);
 }
+
 
 DateTime DateTime::operator+(const Timespan& span) const
 {
     return DateTime(_utcTime, span.totalMicroseconds());
 }
 
+
 DateTime DateTime::operator-(const Timespan& span) const
 {
     return DateTime(_utcTime, -span.totalMicroseconds());
 }
 
+
 Timespan DateTime::operator-(const DateTime& dateTime) const
 {
     return Timespan((_utcTime - dateTime._utcTime) / 10);
 }
+
 
 DateTime& DateTime::operator+=(const Timespan& span)
 {
@@ -271,6 +299,7 @@ DateTime& DateTime::operator+=(const Timespan& span)
     return *this;
 }
 
+
 DateTime& DateTime::operator-=(const Timespan& span)
 {
     _utcTime -= span.totalMicroseconds() * 10;
@@ -279,15 +308,18 @@ DateTime& DateTime::operator-=(const Timespan& span)
     return *this;
 }
 
+
 void DateTime::makeUTC(int tzd)
 {
     operator-=(Timespan(((Timestamp::TimeDiff)tzd) * Timespan::SECONDS));
 }
 
+
 void DateTime::makeLocal(int tzd)
 {
     operator+=(Timespan(((Timestamp::TimeDiff)tzd) * Timespan::SECONDS));
 }
+
 
 double DateTime::toJulianDay(int year, int month, int day, int hour, int minute,
                              int second, int millisecond, int microsecond)
@@ -312,6 +344,7 @@ double DateTime::toJulianDay(int year, int month, int day, int hour, int minute,
            std::floor(dyear / 100) + std::floor(dyear / 400) + 1721118.5;
 }
 
+
 void DateTime::checkLimit(short& lower, short& higher, short limit)
 {
     if (lower >= limit) {
@@ -319,6 +352,7 @@ void DateTime::checkLimit(short& lower, short& higher, short limit)
         lower = short(lower % limit);
     }
 }
+
 
 void DateTime::normalize()
 {
@@ -336,6 +370,7 @@ void DateTime::normalize()
         }
     }
 }
+
 
 void DateTime::computeGregorian(double julianDay)
 {
@@ -379,6 +414,7 @@ void DateTime::computeGregorian(double julianDay)
     assert(_microsecond >= 0 && _microsecond <= 999);
 }
 
+
 void DateTime::computeDaytime()
 {
     Timespan span(_utcTime / 10);
@@ -389,14 +425,17 @@ void DateTime::computeDaytime()
     _microsecond = span.microseconds();
 }
 
+
 //
 // LocalDateTime
 //
+
 
 LocalDateTime::LocalDateTime()
 {
     determineTzd(true);
 }
+
 
 LocalDateTime::LocalDateTime(int year, int month, int day, int hour, int minute,
                              int second, int millisecond, int microsecond)
@@ -405,6 +444,7 @@ LocalDateTime::LocalDateTime(int year, int month, int day, int hour, int minute,
 {
     determineTzd();
 }
+
 
 LocalDateTime::LocalDateTime(int tzd, int year, int month, int day, int hour,
                              int minute, int second, int millisecond,
@@ -415,11 +455,13 @@ LocalDateTime::LocalDateTime(int tzd, int year, int month, int day, int hour,
 {
 }
 
+
 LocalDateTime::LocalDateTime(double julianDay)
     : _dateTime(julianDay)
 {
     determineTzd(true);
 }
+
 
 LocalDateTime::LocalDateTime(int tzd, double julianDay)
     : _dateTime(julianDay)
@@ -428,11 +470,13 @@ LocalDateTime::LocalDateTime(int tzd, double julianDay)
     adjustForTzd();
 }
 
+
 LocalDateTime::LocalDateTime(const DateTime& dateTime)
     : _dateTime(dateTime)
 {
     determineTzd(true);
 }
+
 
 LocalDateTime::LocalDateTime(int tzd, const DateTime& dateTime)
     : _dateTime(dateTime)
@@ -440,6 +484,7 @@ LocalDateTime::LocalDateTime(int tzd, const DateTime& dateTime)
 {
     adjustForTzd();
 }
+
 
 LocalDateTime::LocalDateTime(int tzd, const DateTime& dateTime, bool adjust)
     : _dateTime(dateTime)
@@ -449,11 +494,13 @@ LocalDateTime::LocalDateTime(int tzd, const DateTime& dateTime, bool adjust)
         adjustForTzd();
 }
 
+
 LocalDateTime::LocalDateTime(const LocalDateTime& dateTime)
     : _dateTime(dateTime._dateTime)
     , _tzd(dateTime._tzd)
 {
 }
+
 
 LocalDateTime::LocalDateTime(Timestamp::UtcTimeVal utcTime,
                              Timestamp::TimeDiff diff, int tzd)
@@ -463,9 +510,11 @@ LocalDateTime::LocalDateTime(Timestamp::UtcTimeVal utcTime,
     adjustForTzd();
 }
 
+
 LocalDateTime::~LocalDateTime()
 {
 }
+
 
 LocalDateTime& LocalDateTime::operator=(const LocalDateTime& dateTime)
 {
@@ -476,6 +525,7 @@ LocalDateTime& LocalDateTime::operator=(const LocalDateTime& dateTime)
     return *this;
 }
 
+
 LocalDateTime& LocalDateTime::operator=(const Timestamp& timestamp)
 {
     if (timestamp != this->timestamp()) {
@@ -485,12 +535,14 @@ LocalDateTime& LocalDateTime::operator=(const Timestamp& timestamp)
     return *this;
 }
 
+
 LocalDateTime& LocalDateTime::operator=(double julianDay)
 {
     _dateTime = julianDay;
     determineTzd(true);
     return *this;
 }
+
 
 LocalDateTime& LocalDateTime::assign(int year, int month, int day, int hour,
                                      int minute, int second, int millisecond,
@@ -502,6 +554,7 @@ LocalDateTime& LocalDateTime::assign(int year, int month, int day, int hour,
     return *this;
 }
 
+
 LocalDateTime& LocalDateTime::assign(int tzd, int year, int month, int day,
                                      int hour, int minute, int second,
                                      int millisecond, int microseconds)
@@ -512,6 +565,7 @@ LocalDateTime& LocalDateTime::assign(int tzd, int year, int month, int day,
     return *this;
 }
 
+
 LocalDateTime& LocalDateTime::assign(int tzd, double julianDay)
 {
     _tzd = tzd;
@@ -520,11 +574,13 @@ LocalDateTime& LocalDateTime::assign(int tzd, double julianDay)
     return *this;
 }
 
+
 void LocalDateTime::swap(LocalDateTime& dateTime)
 {
     _dateTime.swap(dateTime._dateTime);
     std::swap(_tzd, dateTime._tzd);
 }
+
 
 DateTime LocalDateTime::utc() const
 {
@@ -532,35 +588,42 @@ DateTime LocalDateTime::utc() const
                     -((Timestamp::TimeDiff)_tzd) * Timespan::SECONDS);
 }
 
+
 bool LocalDateTime::operator==(const LocalDateTime& dateTime) const
 {
     return utcTime() == dateTime.utcTime();
 }
+
 
 bool LocalDateTime::operator!=(const LocalDateTime& dateTime) const
 {
     return utcTime() != dateTime.utcTime();
 }
 
+
 bool LocalDateTime::operator<(const LocalDateTime& dateTime) const
 {
     return utcTime() < dateTime.utcTime();
 }
+
 
 bool LocalDateTime::operator<=(const LocalDateTime& dateTime) const
 {
     return utcTime() <= dateTime.utcTime();
 }
 
+
 bool LocalDateTime::operator>(const LocalDateTime& dateTime) const
 {
     return utcTime() > dateTime.utcTime();
 }
 
+
 bool LocalDateTime::operator>=(const LocalDateTime& dateTime) const
 {
     return utcTime() >= dateTime.utcTime();
 }
+
 
 LocalDateTime LocalDateTime::operator+(const Timespan& span) const
 {
@@ -570,6 +633,7 @@ LocalDateTime LocalDateTime::operator+(const Timespan& span) const
     return LocalDateTime(tmp);
 }
 
+
 LocalDateTime LocalDateTime::operator-(const Timespan& span) const
 {
     // First calculate the adjusted UTC time, then calculate the
@@ -578,10 +642,12 @@ LocalDateTime LocalDateTime::operator-(const Timespan& span) const
     return LocalDateTime(tmp);
 }
 
+
 Timespan LocalDateTime::operator-(const LocalDateTime& dateTime) const
 {
     return Timespan((utcTime() - dateTime.utcTime()) / 10);
 }
+
 
 LocalDateTime& LocalDateTime::operator+=(const Timespan& span)
 {
@@ -593,6 +659,7 @@ LocalDateTime& LocalDateTime::operator+=(const Timespan& span)
     return *this;
 }
 
+
 LocalDateTime& LocalDateTime::operator-=(const Timespan& span)
 {
     // Use the same trick as in operator-. Create a UTC time, adjust
@@ -602,6 +669,7 @@ LocalDateTime& LocalDateTime::operator-=(const Timespan& span)
     *this = DateTime(utcTime(), -span.totalMicroseconds());
     return *this;
 }
+
 
 void LocalDateTime::determineTzd(bool adjust)
 {
@@ -630,6 +698,7 @@ void LocalDateTime::determineTzd(bool adjust)
     }
 }
 
+
 std::time_t LocalDateTime::dstOffset(int& dstOffset) const
 {
     std::time_t local;
@@ -652,20 +721,25 @@ std::time_t LocalDateTime::dstOffset(int& dstOffset) const
     return local;
 }
 
+
 //
 // Timezone
 //
+
 
 int Timezone::tzd()
 {
     return utcOffset() + dst();
 }
 
+
 #if defined(_WIN32)
+
 
 //
 // Timezone: Win
 //
+
 
 int Timezone::utcOffset()
 {
@@ -674,12 +748,14 @@ int Timezone::utcOffset()
     return -tzInfo.Bias * 60;
 }
 
+
 int Timezone::dst()
 {
     TIME_ZONE_INFORMATION tzInfo;
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
     return dstFlag == TIME_ZONE_ID_DAYLIGHT ? -tzInfo.DaylightBias * 60 : 0;
 }
+
 
 bool Timezone::isDst(const Timestamp& timestamp)
 {
@@ -690,6 +766,7 @@ bool Timezone::isDst(const Timestamp& timestamp)
             "System error: cannot get local time DST flag");
     return tms->tm_isdst > 0;
 }
+
 
 std::string Timezone::name()
 {
@@ -710,6 +787,7 @@ std::string Timezone::name()
     return result;
 }
 
+
 std::string Timezone::standardName()
 {
     std::string result;
@@ -727,6 +805,7 @@ std::string Timezone::standardName()
     //#endif
     return result;
 }
+
 
 std::string Timezone::dstName()
 {
@@ -746,7 +825,9 @@ std::string Timezone::dstName()
     return result;
 }
 
+
 #else
+
 
 //
 // Timezone: Unix
@@ -776,12 +857,15 @@ public:
     const char* name(bool dst) { return tzname[dst ? 1 : 0]; }
 };
 
+
 static TZInfo tzInfo;
+
 
 int Timezone::utcOffset()
 {
     return tzInfo.timeZone();
 }
+
 
 int Timezone::dst()
 {
@@ -793,6 +877,7 @@ int Timezone::dst()
     return t.tm_isdst == 1 ? 3600 : 0;
 }
 
+
 bool Timezone::isDst(const Timestamp& timestamp)
 {
     std::time_t time = timestamp.epochTime();
@@ -803,26 +888,32 @@ bool Timezone::isDst(const Timestamp& timestamp)
     return tms->tm_isdst > 0;
 }
 
+
 std::string Timezone::name()
 {
     return std::string(tzInfo.name(dst() != 0));
 }
+
 
 std::string Timezone::standardName()
 {
     return std::string(tzInfo.name(false));
 }
 
+
 std::string Timezone::dstName()
 {
     return std::string(tzInfo.name(true));
 }
 
+
 #endif
+
 
 //
 // DateTimeFormat
 //
+
 
 const std::string DateTimeFormat::ISO8601_FORMAT("%Y-%m-%dT%H:%M:%S%z");
 const std::string DateTimeFormat::ISO8601_FRAC_FORMAT("%Y-%m-%dT%H:%M:%s%z");
@@ -834,23 +925,28 @@ const std::string DateTimeFormat::RFC1036_FORMAT("%W, %e %b %y %H:%M:%S %Z");
 const std::string DateTimeFormat::ASCTIME_FORMAT("%w %b %f %H:%M:%S %Y");
 const std::string DateTimeFormat::SORTABLE_FORMAT("%Y-%m-%d %H:%M:%S");
 
+
 const std::string DateTimeFormat::WEEKDAY_NAMES[] = {
     "Sunday",   "Monday", "Tuesday", "Wednesday",
     "Thursday", "Friday", "Saturday"};
+
 
 const std::string DateTimeFormat::MONTH_NAMES[] = {
     "January", "February", "March",     "April",   "May",      "June",
     "July",    "August",   "September", "October", "November", "December"};
 
+
 //
 // DateTimeFormatter
 //
+
 
 void DateTimeFormatter::append(std::string& str, const LocalDateTime& dateTime,
                                const std::string& fmt)
 {
     DateTimeFormatter::append(str, dateTime.utc(), fmt, dateTime.tzd());
 }
+
 
 void DateTimeFormatter::append(std::string& str, const DateTime& dateTime,
                                const std::string& fmt, int timeZoneDifferential)
@@ -958,6 +1054,7 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime,
     }
 }
 
+
 void DateTimeFormatter::append(std::string& str, const Timespan& timespan,
                                const std::string& fmt)
 {
@@ -1011,6 +1108,7 @@ void DateTimeFormatter::append(std::string& str, const Timespan& timespan,
     }
 }
 
+
 void DateTimeFormatter::tzdISO(std::string& str, int timeZoneDifferential)
 {
     if (timeZoneDifferential != UTC) {
@@ -1029,6 +1127,7 @@ void DateTimeFormatter::tzdISO(std::string& str, int timeZoneDifferential)
         str += 'Z';
 }
 
+
 void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
 {
     if (timeZoneDifferential != UTC) {
@@ -1045,21 +1144,26 @@ void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
         str += "GMT";
 }
 
+
 //
 // DateTimeParser
 //
+
 
 #define SKIP_JUNK()                                                            \
     while (it != end && !::isdigit(*it))                                       \
     ++it
 
+
 #define SKIP_DIGITS()                                                          \
     while (it != end && ::isdigit(*it))                                        \
     ++it
 
+
 #define PARSE_NUMBER(var)                                                      \
     while (it != end && ::isdigit(*it))                                        \
     var = var * 10 + ((*it++) - '0')
+
 
 #define PARSE_NUMBER_N(var, n)                                                 \
     {                                                                          \
@@ -1067,6 +1171,7 @@ void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
         while (i++ < n && it != end && ::isdigit(*it))                         \
             var = var * 10 + ((*it++) - '0');                                  \
     }
+
 
 #define PARSE_FRACTIONAL_N(var, n)                                             \
     {                                                                          \
@@ -1078,6 +1183,7 @@ void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
         while (i++ < n)                                                        \
             var *= 10;                                                         \
     }
+
 
 void DateTimeParser::parse(const std::string& fmt, const std::string& str,
                            DateTime& dateTime, int& timeZoneDifferential)
@@ -1211,6 +1317,7 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str,
     timeZoneDifferential = tzd;
 }
 
+
 DateTime DateTimeParser::parse(const std::string& fmt, const std::string& str,
                                int& timeZoneDifferential)
 {
@@ -1218,6 +1325,7 @@ DateTime DateTimeParser::parse(const std::string& fmt, const std::string& str,
     parse(fmt, str, result, timeZoneDifferential);
     return result;
 }
+
 
 bool DateTimeParser::tryParse(const std::string& fmt, const std::string& str,
                               DateTime& dateTime, int& timeZoneDifferential)
@@ -1230,6 +1338,7 @@ bool DateTimeParser::tryParse(const std::string& fmt, const std::string& str,
     return true;
 }
 
+
 void DateTimeParser::parse(const std::string& str, DateTime& dateTime,
                            int& timeZoneDifferential)
 {
@@ -1237,6 +1346,7 @@ void DateTimeParser::parse(const std::string& str, DateTime& dateTime,
         throw std::runtime_error(
             "Syntax error: Unsupported or invalid date/time format");
 }
+
 
 DateTime DateTimeParser::parse(const std::string& str,
                                int& timeZoneDifferential)
@@ -1248,6 +1358,7 @@ DateTime DateTimeParser::parse(const std::string& str,
         throw std::runtime_error(
             "Syntax error: Unsupported or invalid date/time format");
 }
+
 
 bool DateTimeParser::tryParse(const std::string& str, DateTime& dateTime,
                               int& timeZoneDifferential)
@@ -1278,6 +1389,7 @@ bool DateTimeParser::tryParse(const std::string& str, DateTime& dateTime,
     } else
         return false;
 }
+
 
 int DateTimeParser::parseTZD(std::string::const_iterator& it,
                              const std::string::const_iterator& end)
@@ -1358,6 +1470,7 @@ int DateTimeParser::parseTZD(std::string::const_iterator& it,
     return tzd;
 }
 
+
 int DateTimeParser::parseMonth(std::string::const_iterator& it,
                                const std::string::const_iterator& end)
 {
@@ -1383,6 +1496,7 @@ int DateTimeParser::parseMonth(std::string::const_iterator& it,
     }
     throw std::runtime_error("Syntax error: Not a valid month name: " + month);
 }
+
 
 int DateTimeParser::parseDayOfWeek(std::string::const_iterator& it,
                                    const std::string::const_iterator& end)
@@ -1410,6 +1524,7 @@ int DateTimeParser::parseDayOfWeek(std::string::const_iterator& it,
     throw std::runtime_error("Syntax error: Not a valid weekday name: " + dow);
 }
 
+
 int DateTimeParser::parseAMPM(std::string::const_iterator& it,
                               const std::string::const_iterator& end, int hour)
 {
@@ -1435,28 +1550,34 @@ int DateTimeParser::parseAMPM(std::string::const_iterator& it,
             "Syntax error: Not a valid AM/PM designator: " + ampm);
 }
 
+
 //
 // Timestamp
 //
+
 
 Timestamp::Timestamp()
 {
     update();
 }
 
+
 Timestamp::Timestamp(TimeVal tv)
 {
     _ts = tv;
 }
+
 
 Timestamp::Timestamp(const Timestamp& other)
 {
     _ts = other._ts;
 }
 
+
 Timestamp::~Timestamp()
 {
 }
+
 
 Timestamp& Timestamp::operator=(const Timestamp& other)
 {
@@ -1464,21 +1585,25 @@ Timestamp& Timestamp::operator=(const Timestamp& other)
     return *this;
 }
 
+
 Timestamp& Timestamp::operator=(TimeVal tv)
 {
     _ts = tv;
     return *this;
 }
 
+
 void Timestamp::swap(Timestamp& timestamp)
 {
     std::swap(_ts, timestamp._ts);
 }
 
+
 Timestamp Timestamp::fromEpochTime(std::time_t t)
 {
     return Timestamp(TimeVal(t) * resolution());
 }
+
 
 Timestamp Timestamp::fromUtcTime(UtcTimeVal val)
 {
@@ -1486,6 +1611,7 @@ Timestamp Timestamp::fromUtcTime(UtcTimeVal val)
     val /= 10;
     return Timestamp(val);
 }
+
 
 void Timestamp::update()
 {
@@ -1519,9 +1645,11 @@ void Timestamp::update()
 #endif
 }
 
+
 //
 // Timespan
 //
+
 
 const Timespan::TimeDiff Timespan::MILLISECONDS = 1000;
 const Timespan::TimeDiff Timespan::SECONDS = 1000 * Timespan::MILLISECONDS;
@@ -1529,20 +1657,24 @@ const Timespan::TimeDiff Timespan::MINUTES = 60 * Timespan::SECONDS;
 const Timespan::TimeDiff Timespan::HOURS = 60 * Timespan::MINUTES;
 const Timespan::TimeDiff Timespan::DAYS = 24 * Timespan::HOURS;
 
+
 Timespan::Timespan()
     : _span(0)
 {
 }
+
 
 Timespan::Timespan(TimeDiff microseconds)
     : _span(microseconds)
 {
 }
 
+
 Timespan::Timespan(long seconds, long microseconds)
     : _span(TimeDiff(seconds) * SECONDS + microseconds)
 {
 }
+
 
 Timespan::Timespan(int days, int hours, int minutes, int seconds,
                    int microseconds)
@@ -1552,14 +1684,17 @@ Timespan::Timespan(int days, int hours, int minutes, int seconds,
 {
 }
 
+
 Timespan::Timespan(const Timespan& timespan)
     : _span(timespan._span)
 {
 }
 
+
 Timespan::~Timespan()
 {
 }
+
 
 Timespan& Timespan::operator=(const Timespan& timespan)
 {
@@ -1567,11 +1702,13 @@ Timespan& Timespan::operator=(const Timespan& timespan)
     return *this;
 }
 
+
 Timespan& Timespan::operator=(TimeDiff microseconds)
 {
     _span = microseconds;
     return *this;
 }
+
 
 Timespan& Timespan::assign(int days, int hours, int minutes, int seconds,
                            int microseconds)
@@ -1582,26 +1719,31 @@ Timespan& Timespan::assign(int days, int hours, int minutes, int seconds,
     return *this;
 }
 
+
 Timespan& Timespan::assign(long seconds, long microseconds)
 {
     _span = TimeDiff(seconds) * SECONDS + TimeDiff(microseconds);
     return *this;
 }
 
+
 void Timespan::swap(Timespan& timespan)
 {
     std::swap(_span, timespan._span);
 }
+
 
 Timespan Timespan::operator+(const Timespan& d) const
 {
     return Timespan(_span + d._span);
 }
 
+
 Timespan Timespan::operator-(const Timespan& d) const
 {
     return Timespan(_span - d._span);
 }
+
 
 Timespan& Timespan::operator+=(const Timespan& d)
 {
@@ -1609,21 +1751,25 @@ Timespan& Timespan::operator+=(const Timespan& d)
     return *this;
 }
 
+
 Timespan& Timespan::operator-=(const Timespan& d)
 {
     _span -= d._span;
     return *this;
 }
 
+
 Timespan Timespan::operator+(TimeDiff microseconds) const
 {
     return Timespan(_span + microseconds);
 }
 
+
 Timespan Timespan::operator-(TimeDiff microseconds) const
 {
     return Timespan(_span - microseconds);
 }
+
 
 Timespan& Timespan::operator+=(TimeDiff microseconds)
 {
@@ -1631,15 +1777,18 @@ Timespan& Timespan::operator+=(TimeDiff microseconds)
     return *this;
 }
 
+
 Timespan& Timespan::operator-=(TimeDiff microseconds)
 {
     _span -= microseconds;
     return *this;
 }
 
+
 //
 // Timeout
 //
+
 
 Timeout::Timeout(long delay, bool autoStart)
     : _startAt(0)
@@ -1649,11 +1798,13 @@ Timeout::Timeout(long delay, bool autoStart)
         start();
 }
 
+
 Timeout::Timeout(const Timeout& src)
     : _startAt(src._startAt)
     , _delay(src._delay)
 {
 }
+
 
 Timeout& Timeout::operator=(const Timeout& src)
 {
@@ -1662,14 +1813,17 @@ Timeout& Timeout::operator=(const Timeout& src)
     return *this;
 }
 
+
 Timeout::~Timeout()
 {
 }
+
 
 bool Timeout::running() const
 {
     return _startAt != 0;
 }
+
 
 void Timeout::start()
 {
@@ -1677,16 +1831,19 @@ void Timeout::start()
     _startAt = clock();
 }
 
+
 void Timeout::stop()
 {
     _startAt = 0;
 }
+
 
 void Timeout::reset()
 {
     //_startAt = time::ticks();
     _startAt = clock();
 }
+
 
 long Timeout::remaining() const
 {
@@ -1696,6 +1853,7 @@ long Timeout::remaining() const
     return remaining > 0 ? remaining : 0;
 }
 
+
 bool Timeout::expired() const
 {
     if (_delay == 0) // _startAt == 0 ||
@@ -1704,9 +1862,11 @@ bool Timeout::expired() const
     return remaining() == 0;
 }
 
+
 //
 // Stopwatch
 //
+
 
 Stopwatch::Stopwatch()
     : _elapsed(0)
@@ -1714,9 +1874,11 @@ Stopwatch::Stopwatch()
 {
 }
 
+
 Stopwatch::~Stopwatch()
 {
 }
+
 
 void Stopwatch::start()
 {
@@ -1725,6 +1887,7 @@ void Stopwatch::start()
         _running = true;
     }
 }
+
 
 void Stopwatch::stop()
 {
@@ -1735,20 +1898,24 @@ void Stopwatch::stop()
     }
 }
 
+
 int Stopwatch::elapsedSeconds() const
 {
     return int(elapsed() / resolution());
 }
+
 
 int Stopwatch::elapsedMilliseconds() const
 {
     return int(elapsed() / (resolution() / 1000));
 }
 
+
 Timestamp::TimeVal Stopwatch::resolution()
 {
     return Timestamp::resolution();
 }
+
 
 Timestamp::TimeDiff Stopwatch::elapsed() const
 {
@@ -1760,11 +1927,13 @@ Timestamp::TimeDiff Stopwatch::elapsed() const
     }
 }
 
+
 void Stopwatch::reset()
 {
     _elapsed = 0;
     _running = false;
 }
+
 
 void Stopwatch::restart()
 {
@@ -1773,9 +1942,11 @@ void Stopwatch::restart()
     _running = true;
 }
 
+
 //
 // Timed Token
 //
+
 
 TimedToken::TimedToken(long duration)
     : Timeout(duration)
@@ -1783,15 +1954,19 @@ TimedToken::TimedToken(long duration)
 {
 }
 
+
 TimedToken::TimedToken(const std::string& id, long duration)
     : Timeout(duration)
     , _id(id)
 {
 }
 
+
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

@@ -11,6 +11,7 @@
 #ifndef SCY_Logger_H
 #define SCY_Logger_H
 
+
 #include "scy/base.h"
 #include "scy/error.h"
 #include "scy/mutex.h"
@@ -26,7 +27,9 @@
 //#include <time.h>
 #include <string.h>
 
+
 namespace scy {
+
 
 enum LogLevel
 {
@@ -37,6 +40,7 @@ enum LogLevel
     LError = 4,
     LFatal = 5,
 };
+
 
 inline LogLevel getLogLevelFromString(const char* level)
 {
@@ -54,6 +58,7 @@ inline LogLevel getLogLevelFromString(const char* level)
         return LFatal;
     return LDebug;
 }
+
 
 inline const char* getStringFromLogLevel(LogLevel level)
 {
@@ -74,12 +79,15 @@ inline const char* getStringFromLogLevel(LogLevel level)
     return "debug";
 }
 
+
 struct LogStream;
 class LogChannel;
+
 
 //
 // Default Log Writer
 //
+
 
 class LogWriter
 {
@@ -91,9 +99,11 @@ public:
     virtual void write(LogStream* stream);
 };
 
+
 //
 // Asynchronous Log Writer
 //
+
 
 class AsyncLogWriter : public LogWriter, public async::Runnable
 {
@@ -121,9 +131,11 @@ protected:
     mutable Mutex _mutex;
 };
 
+
 //
 // Logger
 //
+
 
 class Logger
 {
@@ -194,9 +206,11 @@ protected:
     LogWriter* _writer;
 };
 
+
 //
 // Log Stream
 //
+
 
 struct LogStream
 {
@@ -260,9 +274,11 @@ struct LogStream
     }
 };
 
+
 //
 // Inline stream accessors
 //
+
 
 // Default output
 inline LogStream& traceL(const char* realm = "", const void* ptr = nullptr)
@@ -294,6 +310,7 @@ inline LogStream& fatalL(const char* realm = "", const void* ptr = nullptr)
 {
     return *new LogStream(LFatal, realm, 0, ptr);
 }
+
 
 // Channel output
 inline LogStream& traceC(const char* channel, const char* realm = "",
@@ -332,6 +349,7 @@ inline LogStream& fatalC(const char* channel, const char* realm = "",
     return *new LogStream(LFatal, realm, 0, ptr, channel);
 }
 
+
 // Level output
 inline LogStream& printL(const char* level = "debug", const char* realm = "",
                          const void* ptr = nullptr,
@@ -345,6 +363,7 @@ inline LogStream& printL(const char* level, const void* ptr,
 {
     return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
 }
+
 
 // Macros for debug logging
 //
@@ -384,9 +403,11 @@ inline std::string _methodName(const std::string& fsig)
 #define WarnN(self) *new LogStream(LWarn, self->className(), __LINE__, self)
 #define ErrorN(self) *new LogStream(LError, self->className(), __LINE__, self)
 
+
 //
 // Log Channel
 //
+
 
 class LogChannel
 {
@@ -415,9 +436,11 @@ protected:
     std::string _filter;
 };
 
+
 //
 // Console Channel
 //
+
 
 class ConsoleChannel : public LogChannel
 {
@@ -429,9 +452,11 @@ public:
     virtual void write(const LogStream& stream);
 };
 
+
 //
 // File Channel
 //
+
 
 class FileChannel : public LogChannel
 {
@@ -454,9 +479,11 @@ protected:
     std::string _path;
 };
 
+
 //
 // Rotating File Channel
 //
+
 
 class RotatingFileChannel : public LogChannel
 {
@@ -488,6 +515,7 @@ protected:
     time_t _rotatedAt;     ///< The time the log was last rotated
 };
 
+
 #if 0
 class EventedFileChannel: public FileChannel
 {
@@ -509,8 +537,11 @@ public:
 };
 #endif
 
+
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

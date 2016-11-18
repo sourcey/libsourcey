@@ -11,8 +11,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Base64_H
 #define SCY_Base64_H
+
 
 #include "scy/interface.h"
 #include "scy/logger.h"
@@ -20,17 +22,22 @@
 #include <iostream>
 #include <memory>
 
+
 namespace scy {
 namespace base64 {
 
+
 const int BUFFER_SIZE = 16384;
 const int LINE_LENGTH = 72;
+
 
 //
 // Base64 Encoder
 //
 
+
 namespace internal {
+
 
 typedef enum { step_A, step_B, step_C } encodestep;
 
@@ -52,7 +59,9 @@ int encode_block(const char* readbuf_in, int length_in, char* code_out,
 
 int encode_blockend(char* code_out, internal::encodestate* state_in);
 
+
 } // namespace internal
+
 
 struct Encoder : public basic::Encoder
 {
@@ -116,6 +125,7 @@ struct Encoder : public basic::Encoder
     int _buffersize;
 };
 
+
 /// Converts a STL container to Base64.
 template <typename T>
 inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
@@ -139,11 +149,14 @@ inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
     return res;
 }
 
+
 //
 // Base64 Decoder
 //
 
+
 namespace internal {
+
 
 typedef enum { step_a, step_b, step_c, step_d } decodestep;
 
@@ -160,7 +173,9 @@ int decode_value(char value_in);
 int decode_block(const char* inbuf, const int nread, char* outbuf,
                  internal::decodestate* state_in);
 
+
 } // namespace internal
+
 
 struct Decoder : public basic::Decoder
 {
@@ -202,6 +217,7 @@ struct Decoder : public basic::Decoder
     int _buffersize;
 };
 
+
 /// Decodes a STL container from Base64.
 template <typename T> inline std::string decode(const T& bytes)
 {
@@ -220,9 +236,12 @@ template <typename T> inline std::string decode(const T& bytes)
     return res;
 }
 
+
 } // namespace base64
 } // namespace scy
 
+
 #endif // SCY_Base64_H
+
 
 /// @\}

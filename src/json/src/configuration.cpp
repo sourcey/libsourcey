@@ -8,28 +8,35 @@
 /// @addtogroup json
 /// @{
 
+
 #include "scy/json/configuration.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace json {
+
 
 Configuration::Configuration()
     : _loaded(false)
 {
 }
 
+
 Configuration::~Configuration()
 {
 }
+
 
 void Configuration::load(const std::string& path, bool create)
 {
     _path = path;
     load(create);
 }
+
 
 void Configuration::load(bool /* create */)
 {
@@ -54,6 +61,7 @@ void Configuration::load(bool /* create */)
     _loaded = true;
 }
 
+
 void Configuration::save()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -62,11 +70,10 @@ void Configuration::save()
         throw std::runtime_error(
             "Cannot save: Configuration file path must be set.");
 
-    DebugL << "save: " << _path << endl;
-
     // Will throw on error
     json::saveFile(_path, root);
 }
+
 
 std::string Configuration::path()
 {
@@ -74,17 +81,20 @@ std::string Configuration::path()
     return _path;
 }
 
+
 bool Configuration::loaded()
 {
     Mutex::ScopedLock lock(_mutex);
     return _loaded;
 }
 
+
 void Configuration::print(std::ostream& ost)
 {
     json::StyledWriter writer;
     ost << writer.write(root);
 }
+
 
 bool Configuration::remove(const std::string& key)
 {
@@ -93,9 +103,9 @@ bool Configuration::remove(const std::string& key)
     return root.removeMember(key) != Json::nullValue;
 }
 
+
 void Configuration::removeAll(const std::string& baseKey)
 {
-    TraceL << "remove all: " << baseKey << endl;
     Mutex::ScopedLock lock(_mutex);
 
     json::Value::Members members = root.getMemberNames();
@@ -104,6 +114,7 @@ void Configuration::removeAll(const std::string& baseKey)
             root.removeMember(members[i]);
     }
 }
+
 
 void Configuration::replace(const std::string& from, const std::string& to)
 {
@@ -119,6 +130,7 @@ void Configuration::replace(const std::string& from, const std::string& to)
     reader.parse(data, root);
 }
 
+
 bool Configuration::getRaw(const std::string& key, std::string& value) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -130,14 +142,16 @@ bool Configuration::getRaw(const std::string& key, std::string& value) const
     return true;
 }
 
+
 void Configuration::setRaw(const std::string& key, const std::string& value)
 {
     {
         Mutex::ScopedLock lock(_mutex);
         (root)[key] = value;
     }
-    PropertyChanged.emit(/*this, */ key, value);
+    PropertyChanged.emit(key, value);
 }
+
 
 void Configuration::keys(std::vector<std::string>& keys,
                          const std::string& baseKey)
@@ -151,7 +165,9 @@ void Configuration::keys(std::vector<std::string>& keys,
     }
 }
 
+
 } // namespace json
 } // namespace scy
+
 
 /// @\}

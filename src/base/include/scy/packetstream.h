@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_PacketStream_H
 #define SCY_PacketStream_H
+
 
 #include "scy/error.h"
 #include "scy/interface.h"
@@ -19,13 +21,17 @@
 #include "scy/stateful.h"
 #include <cstdint>
 
+
 namespace scy {
 
+
 struct PacketStreamState;
+
 
 //
 // Packet Stream Adapter
 //
+
 
 /// This class is a wrapper for integrating external
 /// classes with the a PacketStream's data flow and
@@ -61,7 +67,9 @@ protected:
     PacketSignal& _emitter;
 };
 
+
 typedef PacketStreamAdapter PacketSource; /// For 0.8.x compatibility
+
 
 //
 // PacketProcessor
@@ -96,8 +104,10 @@ public:
     virtual void operator<<(IPacket& packet) { process(packet); };
 };
 
+
 typedef PacketProcessor IPacketizer;
 typedef PacketProcessor IDepacketizer; /// For 0.8.x compatibility
+
 
 //
 // Packet Adapter Reference
@@ -138,7 +148,9 @@ struct PacketAdapterReference
     }
 };
 
+
 typedef std::vector<PacketAdapterReference::Ptr> PacketAdapterVec;
+
 
 /// Flags which determine how the packet is handled by the PacketStream
 enum PacketFlags
@@ -147,9 +159,11 @@ enum PacketFlags
     Final            ///< The final packet in the stream.
 };
 
+
 //
 // Packet Stream State
 //
+
 
 struct PacketStreamState : public State
 {
@@ -192,9 +206,11 @@ struct PacketStreamState : public State
     }
 };
 
+
 //
 // Packet Stream
 //
+
 
 /// This class is used for processing and boradcasting IPackets in a flexible
 /// way.
@@ -454,6 +470,7 @@ protected:
     /// from this method. See synchronizeOutput()
     void emit(IPacket& packet);
 
+
     void attachSource(PacketAdapterReference::Ptr ref);
     void attach(PacketAdapterReference::Ptr ref);
 
@@ -492,11 +509,15 @@ protected:
     void* _clientData;
 };
 
+
 typedef std::vector<PacketStream*> PacketStreamVec;
 typedef std::vector<PacketStream::Ptr> PacketStreamPtrVec;
 
+
 } // namespace scy
 
+
 #endif // SCY_PacketStream_H
+
 
 /// @\}

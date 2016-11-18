@@ -8,14 +8,18 @@
 /// @addtogroup stun
 /// @{
 
+
 #include "scy/stun/message.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace stun {
+
 
 Message::Message()
     : _class(Request)
@@ -26,6 +30,7 @@ Message::Message()
     assert(_transactionID.size() == kTransactionIdLength);
 }
 
+
 Message::Message(ClassType clss, MethodType meth)
     : _class(clss)
     , _method(meth)
@@ -33,6 +38,7 @@ Message::Message(ClassType clss, MethodType meth)
     , _transactionID(util::randomString(kTransactionIdLength))
 {
 }
+
 
 Message::Message(const Message& that)
     : _class(that._class)
@@ -47,6 +53,7 @@ Message::Message(const Message& that)
     for (unsigned i = 0; i < that.attrs().size(); i++)
         _attrs.push_back(that.attrs()[i]->clone());
 }
+
 
 Message& Message::operator=(const Message& that)
 {
@@ -71,16 +78,19 @@ Message& Message::operator=(const Message& that)
     return *this;
 }
 
+
 Message::~Message()
 {
     for (unsigned i = 0; i < _attrs.size(); i++)
         delete _attrs[i];
 }
 
+
 IPacket* Message::clone() const
 {
     return new Message(*this);
 }
+
 
 void Message::add(Attribute* attr)
 {
@@ -91,6 +101,7 @@ void Message::add(Attribute* attr)
     _size += attrLength + kAttributeHeaderSize;
     //_size += attr->size() + kAttributeHeaderSize;
 }
+
 
 Attribute* Message::get(Attribute::Type type, int index) const
 {
@@ -104,6 +115,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
     }
     return nullptr;
 }
+
 
 std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
 {
@@ -198,6 +210,7 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
     return 0;
 }
 
+
 void Message::write(Buffer& buf) const
 {
     // assert(_method);
@@ -218,6 +231,7 @@ void Message::write(Buffer& buf) const
     }
 }
 
+
 std::string Message::classString() const
 {
     switch (_class) {
@@ -233,6 +247,7 @@ std::string Message::classString() const
             return "UnknownState";
     }
 }
+
 
 std::string Message::errorString(std::uint16_t errorCode) const
 {
@@ -266,6 +281,7 @@ std::string Message::errorString(std::uint16_t errorCode) const
     }
 }
 
+
 std::string Message::methodString() const
 {
     switch (_method) {
@@ -294,6 +310,7 @@ std::string Message::methodString() const
     }
 }
 
+
 std::string Message::toString() const
 {
     std::ostringstream os;
@@ -304,6 +321,7 @@ std::string Message::toString() const
     return os.str();
 }
 
+
 void Message::print(std::ostream& os) const
 {
     os << "STUN[" << methodString() << ":" << transactionID();
@@ -312,21 +330,25 @@ void Message::print(std::ostream& os) const
     os << "]";
 }
 
+
 void Message::setTransactionID(const std::string& id)
 {
     assert(id.size() == kTransactionIdLength);
     _transactionID = id;
 }
 
+
 Message::ClassType Message::classType() const
 {
     return static_cast<ClassType>(_class);
 }
 
+
 Message::MethodType Message::methodType() const
 {
     return static_cast<MethodType>(_method);
 }
+
 
 void Message::setClass(ClassType type)
 {
@@ -339,5 +361,6 @@ void Message::setMethod(MethodType type)
 }
 }
 } // namespace scy:stun
+
 
 /// @\}

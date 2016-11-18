@@ -8,6 +8,7 @@
 /// @addtogroup net
 /// @{
 
+
 #include "scy/net/address.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
@@ -15,14 +16,18 @@
 #include <cstdint>
 // #include "uv.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace net {
 
+
 //
 // AddressBase
 //
+
 
 class AddressBase : public SharedObject
 {
@@ -44,9 +49,11 @@ private:
     AddressBase& operator=(const AddressBase&);
 };
 
+
 //
 // IPv4AddressBase
 //
+
 
 class IPv4AddressBase : public AddressBase
 {
@@ -96,11 +103,13 @@ private:
     struct sockaddr_in _addr;
 };
 
+
 //
 // IPv6AddressBase
 //
 
 #if defined(LibSourcey_HAVE_IPv6)
+
 
 class IPv6AddressBase : public AddressBase
 {
@@ -153,26 +162,32 @@ private:
     struct sockaddr_in6 _addr;
 };
 
+
 #endif // LibSourcey_HAVE_IPv6
+
 
 //
 // Address
 //
+
 
 Address::Address()
 {
     _base = new IPv4AddressBase;
 }
 
+
 Address::Address(const std::string& addr, std::uint16_t port)
 {
     init(addr, port);
 }
 
+
 Address::Address(const std::string& addr, const std::string& port)
 {
     init(addr, resolveService(port));
 }
+
 
 Address::Address(const std::string& hostAndPort)
 {
@@ -202,6 +217,7 @@ Address::Address(const std::string& hostAndPort)
     init(host, resolveService(port));
 }
 
+
 Address::Address(const struct sockaddr* addr, socklen_t length)
 {
     if (length == sizeof(struct sockaddr_in))
@@ -216,16 +232,19 @@ Address::Address(const struct sockaddr* addr, socklen_t length)
         throw std::runtime_error("Invalid address length passed to Address()");
 }
 
+
 Address::Address(const Address& addr)
 {
     _base = addr._base;
     _base->duplicate();
 }
 
+
 Address::~Address()
 {
     _base->release();
 }
+
 
 Address& Address::operator=(const Address& addr)
 {
@@ -236,6 +255,7 @@ Address& Address::operator=(const Address& addr)
     }
     return *this;
 }
+
 
 void Address::init(const std::string& host, std::uint16_t port)
 {
@@ -250,40 +270,48 @@ void Address::init(const std::string& host, std::uint16_t port)
         throw std::runtime_error("Invalid IP address format: " + host);
 }
 
+
 std::string Address::host() const
 {
     return _base->host();
 }
+
 
 std::uint16_t Address::port() const
 {
     return ntohs(_base->port());
 }
 
+
 Address::Family Address::family() const
 {
     return _base->family();
 }
+
 
 socklen_t Address::length() const
 {
     return _base->length();
 }
 
+
 const struct sockaddr* Address::addr() const
 {
     return _base->addr();
 }
+
 
 int Address::af() const
 {
     return _base->af();
 }
 
+
 bool Address::valid() const
 {
     return host() != "0.0.0.0" && port() != 0;
 }
+
 
 std::string Address::toString() const
 {
@@ -298,6 +326,7 @@ std::string Address::toString() const
     return result;
 }
 
+
 bool Address::operator<(const Address& addr) const
 {
     if (family() < addr.family())
@@ -305,15 +334,18 @@ bool Address::operator<(const Address& addr) const
     return (port() < addr.port());
 }
 
+
 bool Address::operator==(const Address& addr) const
 {
     return host() == addr.host() && port() == addr.port();
 }
 
+
 bool Address::operator!=(const Address& addr) const
 {
     return host() != addr.host() || port() != addr.port();
 }
+
 
 /*
 void Address::swap(Address& a1, Address& a2)
@@ -322,14 +354,17 @@ void Address::swap(Address& a1, Address& a2)
 }
 */
 
+
 void Address::swap(Address& addr)
 {
     std::swap(_base, addr._base);
 }
 
+
 //
 // Static helpers
 //
+
 
 bool Address::validateIP(const std::string& addr)
 {
@@ -340,6 +375,7 @@ bool Address::validateIP(const std::string& addr)
         return true;
     return false;
 }
+
 
 std::uint16_t Address::resolveService(const std::string& service)
 {
@@ -354,10 +390,13 @@ std::uint16_t Address::resolveService(const std::string& service)
         throw std::runtime_error("Service not found: " + service);
 }
 
+
 } // namespace net
 } // namespace scy
 
+
 /// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

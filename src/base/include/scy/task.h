@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Task_H
 #define SCY_Task_H
+
 
 #include "scy/idler.h"
 #include "scy/interface.h"
@@ -18,9 +20,12 @@
 #include "scy/task.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
 
+
 class TaskRunner;
+
 
 /// This class is for implementing any kind
 /// async task that is compatible with a TaskRunner.
@@ -71,6 +76,7 @@ protected:
     bool _repeating;
     bool _destroyed;
 };
+
 
 /// The TaskRunner is an asynchronous event loop in
 /// charge of running one or many tasks.
@@ -159,8 +165,11 @@ protected:
     async::Runner::Ptr _runner;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Task_H
+
 
 /// @\}

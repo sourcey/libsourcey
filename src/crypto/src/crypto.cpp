@@ -8,6 +8,7 @@
 /// @addtogroup crypto
 /// @{
 
+
 #include "scy/crypto/crypto.h"
 #include "scy/mutex.h"
 #include "scy/random.h"
@@ -23,6 +24,7 @@
 #include <openssl/conf.h>
 #endif
 
+
 extern "C" {
 struct CRYPTO_dynlock_value
 {
@@ -30,9 +32,11 @@ struct CRYPTO_dynlock_value
 };
 }
 
+
 namespace scy {
 namespace crypto {
 namespace internal {
+
 
 void throwError()
 {
@@ -48,6 +52,7 @@ void throwError()
     throw std::runtime_error(msg);
 }
 
+
 void api(int ret, const char* error)
 {
     if (ret == 0) {
@@ -58,14 +63,17 @@ void api(int ret, const char* error)
     }
 }
 
+
 //
 // Private internal methods
 //
+
 
 const int SEEDSIZE = 256;
 static Mutex* _mutexes(0);
 static Mutex _mutex;
 static int _refCount(0);
+
 
 void lock(int mode, int n, const char* /* file */, int /* line */)
 {
@@ -75,16 +83,19 @@ void lock(int mode, int n, const char* /* file */, int /* line */)
         _mutexes[n].unlock();
 }
 
+
 // unsigned long id()
 // {
 //     return Thread::currentID();
 // }
+
 
 struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */,
                                            int /* line */)
 {
     return new CRYPTO_dynlock_value;
 }
+
 
 void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
              const char* /* file */, int /* line */)
@@ -97,11 +108,13 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
         lock->_mutex.unlock();
 }
 
+
 void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */,
                     int /* line */)
 {
     delete lock;
 }
+
 
 void initialize()
 {
@@ -132,6 +145,7 @@ void initialize()
     }
 }
 
+
 void uninitialize()
 {
     // NOTE: crypto::uninitialize() should be called before the app exists
@@ -146,7 +160,9 @@ void uninitialize()
     }
 }
 
+
 } // namespace internal
+
 
 /// Initializes the OpenSSL library.
 void initializeEngine()
@@ -160,7 +176,9 @@ void uninitializeEngine()
     internal::uninitialize();
 }
 
+
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

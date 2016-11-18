@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Buffer_H
 #define SCY_Buffer_H
+
 
 #include "scy/byteorder.h"
 #include "scy/memory.h"
@@ -19,13 +21,17 @@
 #include <string>
 #include <vector>
 
+
 namespace scy {
 
+
 typedef std::vector<char> Buffer;
+
 
 //
 // Mutable Buffer
 //
+
 
 /// The MutableBuffer class provides a safe representation of a
 /// buffer that can be modified. It does not own the underlying
@@ -59,8 +65,10 @@ private:
     std::size_t _size;
 };
 
+
 // Warning: The following functions permit violations of type safety,
 // so uses of it in application code should be carefully considered.
+
 
 template <typename T>
 inline MutableBuffer mutableBuffer(T data, std::size_t size)
@@ -74,11 +82,13 @@ inline MutableBuffer mutableBuffer(std::string& str)
                          str.size()); // std::string is contiguous as of C++11
 }
 
+
 inline MutableBuffer mutableBuffer(const std::string& str)
 {
     return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(&str[0])),
                          str.size()); // careful!
 }
+
 
 template <typename T>
 inline MutableBuffer mutableBuffer(const std::vector<T>& vec)
@@ -87,16 +97,19 @@ inline MutableBuffer mutableBuffer(const std::vector<T>& vec)
                          vec.size()); // careful!
 }
 
+
 inline MutableBuffer mutableBuffer(Buffer& buf)
 {
     return MutableBuffer(reinterpret_cast<void*>(buf.data()), buf.size());
 }
+
 
 inline MutableBuffer mutableBuffer(const Buffer& buf)
 {
     return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
                          buf.size());
 }
+
 
 //
 // Const Buffer
@@ -141,6 +154,7 @@ private:
     std::size_t _size;
 };
 
+
 template <typename T> inline ConstBuffer constBuffer(T data, std::size_t size)
 {
     return ConstBuffer(reinterpret_cast<const void*>(data), size);
@@ -174,9 +188,11 @@ template <typename T> inline ConstBuffer constBuffer(const Buffer& buf)
                        buf.size());
 }
 
+
 //
 // Buffer Cast
 //
+
 
 /// Cast a non-modifiable buffer to a specified pointer to POD type.
 template <typename PointerToPodType>
@@ -185,6 +201,7 @@ inline PointerToPodType bufferCast(const MutableBuffer& b)
     return static_cast<PointerToPodType>(b.data());
 }
 
+
 /// Cast a non-modifiable buffer to a specified pointer to POD type.
 template <typename PointerToPodType>
 inline PointerToPodType bufferCast(const ConstBuffer& b)
@@ -192,9 +209,11 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
     return static_cast<PointerToPodType>(b.data());
 }
 
+
 //
 // Bit Reader
 //
+
 
 /// A BitReader for reading binary streams.
 class BitReader
@@ -279,9 +298,11 @@ private:
     Buffer* _buffer;
 };
 
+
 //
 // Bit Writer
 //
+
 
 /// A BitWriter for reading/writing binary streams.
 ///
@@ -361,8 +382,11 @@ private:
     char* _bytes;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Buffer_H
+
 
 /// @\}

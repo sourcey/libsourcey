@@ -8,14 +8,18 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_Transaction_H
 #define SCY_Net_Transaction_H
+
 
 #include "scy/net/packetsocket.h"
 #include "scy/packettransaction.h"
 
+
 namespace scy {
 namespace net {
+
 
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
@@ -113,9 +117,12 @@ protected:
     // net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_Transaction_H
+
 
 /// @\}

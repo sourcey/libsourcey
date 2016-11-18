@@ -8,26 +8,32 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videoencoder.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 VideoEncoder::VideoEncoder(AVFormatContext* format)
     : format(format)
 {
 }
 
+
 VideoEncoder::~VideoEncoder()
 {
     close();
 }
+
 
 void VideoEncoder::create() //, const VideoCodec& params
 {
@@ -164,6 +170,7 @@ void VideoEncoder::create() //, const VideoCodec& params
     initVideoCodecFromContext(stream, ctx, oparams);
 }
 
+
 void VideoEncoder::close()
 {
     TraceS(this) << "Closing" << endl;
@@ -190,6 +197,7 @@ void VideoEncoder::close()
     }
 #endif
 }
+
 
 bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 {
@@ -220,6 +228,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
     // return encode(ipacket, opacket);
 }
 
+
 // bool VideoEncoder::encode(AVPacket& ipacket, AVPacket& opacket)
 // {
 //     assert(ipacket.data);
@@ -248,6 +257,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 //
 //     return encode(frame, opacket);
 // }
+
 
 void emitPacket(VideoEncoder* enc, AVPacket& opacket)
 {
@@ -278,6 +288,7 @@ void emitPacket(VideoEncoder* enc, AVPacket& opacket)
     video.opaque = enc;
     enc->emitter.emit(/*enc, */ video);
 }
+
 
 bool VideoEncoder::encode(AVFrame* iframe)
 {
@@ -332,6 +343,7 @@ bool VideoEncoder::encode(AVFrame* iframe)
     return false;
 }
 
+
 void VideoEncoder::flush()
 {
     do {
@@ -339,9 +351,12 @@ void VideoEncoder::flush()
     } while (encode(nullptr));
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

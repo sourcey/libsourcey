@@ -8,14 +8,18 @@
 /// @addtogroup symple
 /// @{
 
+
 #ifndef SCY_Symple_Peer_H
 #define SCY_Symple_Peer_H
+
 
 #include "scy/json/json.h"
 #include "scy/symple/address.h"
 
+
 namespace scy {
 namespace smpl {
+
 
 /// This class represents a peer on the network.
 /// A Peer object may also contain arbitrary data set by
@@ -61,9 +65,12 @@ public:
     virtual const char* className() const { return "smpl::Peer"; }
 };
 
+
 } // namespace smpl
 } // namespace scy
 
+
 #endif // SCY_Symple_Peer_H
+
 
 /// @\}

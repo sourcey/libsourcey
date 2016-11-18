@@ -10,16 +10,20 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
+
 #include "scy/net/sslcontext.h"
 #include "scy/crypto/crypto.h"
 #include "scy/datetime.h"
 #include "scy/filesystem.h"
 #include "scy/net/sslmanager.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace net {
+
 
 SSLContext::SSLContext(Usage usage, const std::string& privateKeyFile,
                        const std::string& certificateFile,
@@ -100,6 +104,7 @@ SSLContext::SSLContext(Usage usage, const std::string& privateKeyFile,
     SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
 }
 
+
 SSLContext::SSLContext(Usage usage, const std::string& caLocation,
                        VerificationMode verificationMode, int verificationDepth,
                        bool loadDefaultCAs, const std::string& cipherList)
@@ -152,12 +157,14 @@ SSLContext::SSLContext(Usage usage, const std::string& caLocation,
     SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
 }
 
+
 SSLContext::~SSLContext()
 {
     SSL_CTX_free(_sslContext);
 
     crypto::uninitializeEngine();
 }
+
 
 void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
 {
@@ -170,6 +177,7 @@ void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
     }
 }
 
+
 void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
 {
     int errCode =
@@ -180,6 +188,7 @@ void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
             "SSL Error: Cannot add chain certificate to Context: " + msg);
     }
 }
+
 
 // void SSLContext::usePrivateKey(const crypto::RSAKey& key)
 // {
@@ -192,6 +201,7 @@ void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
 //         Context: " + msg);
 //     }
 // }
+
 
 void SSLContext::addVerificationCertificate(
     const crypto::X509Certificate& certificate)
@@ -206,6 +216,7 @@ void SSLContext::addVerificationCertificate(
     }
 }
 
+
 void SSLContext::enableSessionCache(bool flag)
 {
     if (flag) {
@@ -216,6 +227,7 @@ void SSLContext::enableSessionCache(bool flag)
         SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
     }
 }
+
 
 void SSLContext::enableSessionCache(bool flag,
                                     const std::string& sessionIdContext)
@@ -239,10 +251,12 @@ void SSLContext::enableSessionCache(bool flag,
         throw std::runtime_error("SSL Error: cannot set session ID context");
 }
 
+
 bool SSLContext::sessionCacheEnabled() const
 {
     return SSL_CTX_get_session_cache_mode(_sslContext) != SSL_SESS_CACHE_OFF;
 }
+
 
 void SSLContext::setSessionCacheSize(std::size_t size)
 {
@@ -251,12 +265,14 @@ void SSLContext::setSessionCacheSize(std::size_t size)
     SSL_CTX_sess_set_cache_size(_sslContext, static_cast<long>(size));
 }
 
+
 std::size_t SSLContext::getSessionCacheSize() const
 {
     assert(isForServerUse());
 
     return static_cast<std::size_t>(SSL_CTX_sess_get_cache_size(_sslContext));
 }
+
 
 void SSLContext::setSessionTimeout(long seconds)
 {
@@ -265,12 +281,14 @@ void SSLContext::setSessionTimeout(long seconds)
     SSL_CTX_set_timeout(_sslContext, seconds);
 }
 
+
 long SSLContext::getSessionTimeout() const
 {
     assert(_usage == SERVER_USE);
 
     return SSL_CTX_get_timeout(_sslContext);
 }
+
 
 void SSLContext::flushSessionCache()
 {
@@ -280,12 +298,14 @@ void SSLContext::flushSessionCache()
     SSL_CTX_flush_sessions(_sslContext, static_cast<long>(now.epochTime()));
 }
 
+
 void SSLContext::disableStatelessSessionResumption()
 {
 #if defined(SSL_OP_NO_TICKET)
     SSL_CTX_set_options(_sslContext, SSL_OP_NO_TICKET);
 #endif
 }
+
 
 void SSLContext::createSSLContext()
 {
@@ -318,10 +338,13 @@ void SSLContext::createSSLContext()
     SSL_CTX_set_options(_sslContext, SSL_OP_ALL);
 }
 
+
 } // namespace net
 } // namespace scy
 
+
 /// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

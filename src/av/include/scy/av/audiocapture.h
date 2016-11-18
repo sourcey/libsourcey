@@ -11,11 +11,13 @@
 #ifndef SCY_AV_AudioCapture_H
 #define SCY_AV_AudioCapture_H
 
+
 #include "scy/base.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/mediacapture.h"
+
 
 namespace scy {
 namespace av {
@@ -35,10 +37,13 @@ public:
                       int sampleRate = -1);
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_AudioCapture_H
+
 
 /// @\}

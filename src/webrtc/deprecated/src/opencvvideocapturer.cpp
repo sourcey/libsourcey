@@ -19,9 +19,12 @@
 
 #include "scy/webrtc/opencvvideocapturer.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
     : capture(av::MediaFactory::instance().createVideoCapture(deviceId))
@@ -42,9 +45,11 @@ OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
                              cricket::FOURCC_I420));
 }
 
+
 OpenCVVideoCapturer::~OpenCVVideoCapturer()
 {
 }
+
 
 cricket::CaptureState
 OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
@@ -72,6 +77,7 @@ OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
     return cricket::CS_FAILED;
 }
 
+
 void OpenCVVideoCapturer::Stop()
 {
     try {
@@ -90,6 +96,7 @@ void OpenCVVideoCapturer::Stop()
     }
     return;
 }
+
 
 void OpenCVVideoCapturer::onFrameCaptured(void* sender,
                                           av::MatrixPacket& packet)
@@ -110,10 +117,12 @@ void OpenCVVideoCapturer::onFrameCaptured(void* sender,
     SignalFrameCaptured(this, &frame);
 }
 
+
 bool OpenCVVideoCapturer::IsRunning()
 {
     return capture_state() == cricket::CS_RUNNING;
 }
+
 
 bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
@@ -124,6 +133,7 @@ bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
     fourccs->push_back(cricket::FOURCC_I420);
     return true;
 }
+
 
 bool OpenCVVideoCapturer::GetBestCaptureFormat(
     const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
@@ -140,9 +150,11 @@ bool OpenCVVideoCapturer::GetBestCaptureFormat(
     return true;
 }
 
+
 bool OpenCVVideoCapturer::IsScreencast() const
 {
     return false;
 }
+
 
 } // namespace scy

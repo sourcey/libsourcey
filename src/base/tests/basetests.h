@@ -6,8 +6,10 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
+
 #ifndef SCY_Base_Tests_H
 #define SCY_Base_Tests_H
+
 
 #include "scy/application.h"
 #include "scy/base.h"
@@ -29,12 +31,15 @@
 #include "scy/timer.h"
 #include "scy/util.h"
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 using scy::test::Test;
 
+
 namespace scy {
+
 
 // =============================================================================
 // IPC Test
@@ -82,6 +87,7 @@ class IpcTest : public Test
     }
 };
 
+
 // =============================================================================
 // Timer Test
 //
@@ -120,6 +126,7 @@ class TimerTest : public Test
     }
 };
 
+
 // =============================================================================
 // Idler Test
 //
@@ -151,6 +158,7 @@ class IdlerTest : public Test
         }
     }
 };
+
 
 // =============================================================================
 // Signal Test
@@ -202,6 +210,7 @@ class IdlerTest : public Test
 //     }
 // };
 
+
 struct SignalCounter
 {
     void increment(std::uint64_t& val) { val++; }
@@ -211,83 +220,89 @@ struct SignalCounter
     static void incrementStatic(std::uint64_t& val) { val++; }
 };
 
+
 void signalIncrementFree(std::uint64_t& val)
 {
     val++;
 }
 
+
 bool signalHandlerC(const char* sl, std::size_t ln)
 {
-    std::cout << "signalHandlerC: " << sl << ln << std::endl;
+    // std::cout << "signalHandlerC: " << sl << ln << std::endl;
     return false;
 }
 
-// class SignalTest: public Test
-// {
-//     struct Foo
-//     {
-//         int timesCalled = 0;
-//
-//         bool signalHandlerA(const char* sl, std::size_t ln)
-//         {
-//             std::cout << "signalHandlerA: " << sl << ln << std::endl;
-//             timesCalled++;
-//             return true;
-//         }
-//
-//         // bool signalHandlerB(const char* sl, std::size_t ln) const
-//         // {
-//         //     // std::cout << sl << ln << std::endl;
-//         //     return true;
-//         // }
-//     };
-//     // Signal<int&> TestSignal;
-//
-//     void run()
-//     {
-//         Foo foo;
-//         Signal<void(std::uint64_t&)> signal;
-//
-//         int refid1, refid2, refid3, refid4; //, refid5;
-//
-//         // Attach a lambda function
-//         refid1 = signal.attach([&](const char* arg1, std::size_t arg2) {
-//             std::cout << "lambda: " << arg1 << arg2 << std::endl;
-//
-//             // Detach slots inside callback scope
-//             expect(signal.nslots() == 3);
-//             signal.detach(refid1);
-//             signal.detach(refid2);
-//             expect(signal.nslots() == 1);
-//             return true;
-//         });
-//         expect(refid1 == 1);
-//
-//         // Attach a lambda function via += operator
-//         refid2 = signal += [&](const char* arg1, std::size_t arg2) {
-//             std::cout << "lambda 2: " << arg1 << arg2 << std::endl;
-//             return true;
-//         };
-//         expect(refid2 == 2);
-//
-//         // Attach and disconnect a class member slot
-//         refid3 = signal += slot(&foo, &Foo::signalHandlerA);
-//         expect(refid3 == 3);
-//         expect(signal.nslots() == 3);
-//         bool detached = signal -= slot(&foo, &Foo::signalHandlerA);
-//         expect(detached == true);
-//         expect(signal.nslots() == 2);
-//
-//         // remove slot pointers, add clone method
-//
-//         // Attach a static function via += operator
-//         refid4 = signal += signalHandlerC;
-//         expect(refid4 == 4);
-//
-//         signal.emit("the answer to life the universe and everything is", 42);
-//     }
-// };
 
+class SignalTest: public Test
+{
+    struct Foo
+    {
+        int timesCalled = 0;
+
+        bool signalHandlerA(const char* sl, std::size_t ln)
+        {
+            // std::cout << "signalHandlerA: " << sl << ln << std::endl;
+            timesCalled++;
+            return true;
+        }
+
+        bool signalHandlerB(const char* sl, std::size_t ln) const
+        {
+            // std::cout << "signalHandlerB: " << sl << ln << std::endl;
+            return true;
+        }
+    };
+
+    void run()
+    {
+        Foo foo;
+        Signal<bool(const char*, std::size_t)> signal;
+
+        int refid1, refid2, refid3, refid4, refid5;
+
+        // Attach a lambda function
+        refid1 = signal.attach([&](const char* arg1, std::size_t arg2) {
+            // std::cout << "lambda: " << arg1 << arg2 << std::endl;
+
+            // Detach slots inside callback scope
+            expect(signal.nslots() == 4);
+            signal.detach(refid1);
+            signal.detach(refid2);
+            expect(signal.nslots() == 2);
+            return true;
+        });
+        expect(refid1 == 1);
+
+        // Attach a lambda function via += operator
+        refid2 = signal += [&](const char* arg1, std::size_t arg2) {
+            // std::cout << "lambda 2: " << arg1 << arg2 << std::endl;
+            return true;
+        };
+        expect(refid2 == 2);
+
+        // Attach and disconnect a class member slot
+        refid3 = signal += slot(&foo, &Foo::signalHandlerA);
+        expect(refid3 == 3);
+        expect(signal.nslots() == 3);
+        bool detached = signal -= slot(&foo, &Foo::signalHandlerA);
+        expect(detached == true);
+        expect(signal.nslots() == 2);
+
+        // Attach and disconnect a const class member slot
+        refid4 = signal += slot(&foo, &Foo::signalHandlerB, 100, -1);
+        expect(refid4 == 100);
+
+        // Attach a static function via += operator
+        refid5 = signal += signalHandlerC;
+        expect(refid5 == 4);
+
+        signal.emit("the answer to life the universe and everything is", 42);
+    }
+};
+
+
+#if 0 // TODO: Write cross platfrom process test with file fixtures
 // =============================================================================
 // Process
 //
@@ -298,18 +313,16 @@ class ProcessTest : public Test
         try {
             Process proc;
 
-            // TODO: Write cross platfrom process test
+            char* args[3];
+            args[0] = "C:/Windows/notepad.exe";
+            args[1] = "runspot";
+            args[2] = nullptr_t;
 
-            // char* args[3];
-            // args[0] = "C:/Windows/notepad.exe";
-            // args[1] = "runspot";
-            // args[2] = nullptr_t;
-            //
-            // proc.options.args = args;
-            // proc.options.file = args[0];
-            // proc.onexit = std::bind(&Tests::processExit, this,
-            // std::placeholders::_1);
-            // proc.spawn();
+            proc.options.args = args;
+            proc.options.file = args[0];
+            proc.onexit = std::bind(&Tests::processExit, this,
+            std::placeholders::_1);
+            proc.spawn();
 
             uv::runDefaultLoop();
         } catch (std::exception& exc) {
@@ -323,6 +336,8 @@ class ProcessTest : public Test
         std::cout << "On process exit: " << exitStatus << std::endl;
     }
 };
+#endif
+
 
 // =============================================================================
 // Packet Stream
@@ -344,10 +359,10 @@ struct MockThreadedPacketSource : public PacketSource, public async::Startable
         runner.start(
             [](void* arg) {
                 auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
-                std::cout << "Emitting" << std::endl;
+                // std::cout << "Emitting" << std::endl;
                 RawPacket p("hello", 5);
                 self->emitter.emit(/*self, */ p);
-                std::cout << "Emitting 2" << std::endl;
+                // std::cout << "Emitting 2" << std::endl;
             },
             this);
     }
@@ -372,7 +387,7 @@ struct MockPacketProcessor : public PacketProcessor
 
     void process(IPacket& packet)
     {
-        std::cout << "Process: " << packet.className() << std::endl;
+        // std::cout << "Process: " << packet.className() << std::endl;
         emitter.emit(packet);
     }
 };
@@ -381,9 +396,9 @@ class PacketStreamTest : public Test
 {
     int numPackets;
 
-    void onPacketStreamOutput(IPacket& packet) // void* sender,
+    void onPacketStreamOutput(IPacket& packet)
     {
-        std::cout << "On packet: " << packet.className() << std::endl;
+        // std::cout << "On packet: " << packet.className() << std::endl;
         numPackets++;
     }
 
@@ -404,7 +419,6 @@ class PacketStreamTest : public Test
         // stream.emitter.attach<PacketStreamTest,
         // &PacketStreamTest::onPacketStreamOutput>(this);
 
-        // (*it)->ptr->getEmitter() -= slot(this, &PacketStream::write);
         stream.start();
 
         // TODO: Test pause/resume functionality
@@ -528,8 +542,11 @@ class MultiPacketStreamTest : public Test
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Base_Tests_H
+
 
 /// @\}

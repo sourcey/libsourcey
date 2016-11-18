@@ -3,14 +3,18 @@
 #include "scy/turn/client/tcpclient.h"
 #include "scy/util/streammanager.h"
 
+
 namespace scy {
+
 
 #define RELAY_USERNAME "user"
 #define RELAY_PASSWORD "illusion"
 
+
 //
 // Relayed Streaming Client Allocation
 //
+
 
 class RelayedStreamingAllocation : public turn::TCPClientObserver
 {
@@ -90,7 +94,7 @@ protected:
             case turn::ClientState::Authorizing:
                 break;
             case turn::ClientState::Success:
-                AllocationCreated.emit(/*this, */ this->client);
+                AllocationCreated.emit(this->client);
                 break;
             case turn::ClientState::Failed:
                 // assert(0 && "Allocation failed");
@@ -115,7 +119,7 @@ protected:
 
         try {
             // Notify the outside application
-            ConnectionCreated.emit(/*this, */ client, peerAddr);
+            ConnectionCreated.emit(client, peerAddr);
 
             // Create an output media stream for the new connection
             auto stream = new PacketStream(peerAddr.toString());
@@ -185,9 +189,11 @@ protected:
     }
 };
 
+
 //
 // Relayed Streaming Connection Handler
 //
+
 
 class RelayedStreamingResponder : public http::ServerResponder
 {
@@ -266,5 +272,6 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
+
 
 } // namespace scy

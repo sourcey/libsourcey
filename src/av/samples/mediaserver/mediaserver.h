@@ -1,6 +1,7 @@
 #ifndef SCY_MediaServer_H
 #define SCY_MediaServer_H
 
+
 #include "config.h"
 #include "scy/application.h"
 #include "scy/av/mediafactory.h"
@@ -10,9 +11,12 @@
 #include "scy/packetstream.h"
 #include "scy/util.h"
 
+
 namespace scy {
 
+
 class MediaServer;
+
 
 // ----------------------------------------------------------------------------
 // HTTP Streaming Options
@@ -33,6 +37,7 @@ struct StreamingOptions : public av::EncoderOptions
     virtual ~StreamingOptions();
 };
 
+
 // ----------------------------------------------------------------------------
 // HTTP Media Server
 //
@@ -48,6 +53,7 @@ public:
                                   bool attachPacketizers = false);
 };
 
+
 // ----------------------------------------------------------------------------
 // HTTP Streaming Connection Factory
 //
@@ -61,6 +67,8 @@ public:
     MediaServer* _server;
 };
 
+
 } // namespace scy
+
 
 #endif

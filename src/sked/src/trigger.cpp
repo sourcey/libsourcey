@@ -8,15 +8,19 @@
 /// @addtogroup sked
 /// @{
 
+
 #include "scy/sked/trigger.h"
 #include "scy/datetime.h"
 #include "scy/logger.h"
 #include "scy/sked/scheduler.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace sked {
+
 
 Trigger::Trigger(const std::string& type, const std::string& name)
     : type(type)
@@ -25,6 +29,7 @@ Trigger::Trigger(const std::string& type, const std::string& name)
 {
 }
 
+
 std::int64_t Trigger::remaining()
 {
     DateTime now;
@@ -32,16 +37,19 @@ std::int64_t Trigger::remaining()
     return ts.totalMilliseconds();
 }
 
+
 bool Trigger::timeout()
 {
     DateTime now;
     return now >= scheduleAt;
 }
 
+
 bool Trigger::expired()
 {
     return false;
 }
+
 
 void Trigger::serialize(json::Value& root)
 {
@@ -57,6 +65,7 @@ void Trigger::serialize(json::Value& root)
         DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
     root["timesRun"] = timesRun;
 }
+
 
 void Trigger::deserialize(json::Value& root)
 {
@@ -81,6 +90,7 @@ void Trigger::deserialize(json::Value& root)
     timesRun = root["timesRun"].asInt();
 }
 
+
 // ---------------------------------------------------------------------
 //
 OnceOnlyTrigger::OnceOnlyTrigger()
@@ -88,10 +98,12 @@ OnceOnlyTrigger::OnceOnlyTrigger()
 {
 }
 
+
 bool OnceOnlyTrigger::expired()
 {
     return timesRun > 0;
 }
+
 
 // ---------------------------------------------------------------------
 //
@@ -101,15 +113,18 @@ IntervalTrigger::IntervalTrigger()
 {
 }
 
+
 void IntervalTrigger::update()
 {
     scheduleAt += interval;
 }
 
+
 bool IntervalTrigger::expired()
 {
     return maxTimes > 0 && timesRun >= maxTimes;
 }
+
 
 void IntervalTrigger::serialize(json::Value& root)
 {
@@ -122,6 +137,7 @@ void IntervalTrigger::serialize(json::Value& root)
     root["interval"]["minutes"] = interval.minutes();
     root["interval"]["seconds"] = interval.seconds();
 }
+
 
 void IntervalTrigger::deserialize(json::Value& root)
 {
@@ -149,12 +165,14 @@ void IntervalTrigger::deserialize(json::Value& root)
     scheduleAt += interval;
 }
 
+
 // ---------------------------------------------------------------------
 //
 DailyTrigger::DailyTrigger()
     : Trigger("DailyTrigger", "Daily")
 {
 }
+
 
 void DailyTrigger::update()
 {
@@ -205,7 +223,9 @@ void DailyTrigger::update()
             */
 }
 
+
 } // namespace sked
 } // namespace scy
+
 
 /// @\}

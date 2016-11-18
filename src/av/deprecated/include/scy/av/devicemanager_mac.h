@@ -9,8 +9,10 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
+
 #ifndef SCY_AV_DeviceManager_MAC_H
 #define SCY_AV_DeviceManager_MAC_H
+
 
 #include <string>
 #include <vector>
@@ -20,8 +22,10 @@
 // #include "talk/base/sigslot.h"
 // #include "talk/base/stringencode.h"
 
+
 namespace scy {
 namespace av {
+
 
 class DeviceWatcher;
 
@@ -38,10 +42,13 @@ private
     bool FilterDevice(const Device& d);
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_DeviceManager_MAC_H
+
 
 /*
  * libjingle

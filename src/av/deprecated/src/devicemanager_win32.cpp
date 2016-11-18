@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/devicemanager_win32.h"
 #include "scy/platform.h"
 
@@ -19,10 +20,13 @@
 #include <ksmedia.h> // KSCATEGORY_*
 #include <windows.h>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 static const char* const kFilteredVideoDevicesName[] = {
     "Google Camera Adapter", // Google magiccams
@@ -33,14 +37,17 @@ static const char* const kFilteredVideoDevicesName[] = {
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
 static bool getDevicesWin32(const CLSID& catid, std::vector<Device>& out);
 
+
 IDeviceManager* DeviceManagerFactory::create()
 {
     return new Win32DeviceManager();
 }
 
+
 //
 // Win32 Device Manager
 //
+
 
 Win32DeviceManager::Win32DeviceManager()
     : _needCoUninitialize(false)
@@ -51,10 +58,12 @@ Win32DeviceManager::Win32DeviceManager()
     setWatcher(new Win32DeviceWatcher(this));
 }
 
+
 Win32DeviceManager::~Win32DeviceManager()
 {
     TraceL << "Destroy" << endl;
 }
+
 
 bool Win32DeviceManager::initialize()
 {
@@ -80,6 +89,7 @@ bool Win32DeviceManager::initialize()
     return true;
 }
 
+
 void Win32DeviceManager::uninitialize()
 {
     TraceL << "Uninitializing" << endl;
@@ -96,6 +106,7 @@ void Win32DeviceManager::uninitialize()
     TraceL << "Uninitializing: OK" << endl;
 }
 
+
 bool Win32DeviceManager::getCameras(std::vector<Device>& devices)
 {
     devices.clear();
@@ -105,6 +116,7 @@ bool Win32DeviceManager::getCameras(std::vector<Device>& devices)
 }
 
 #define ARRAY_SIZE(x) (static_cast<int>((sizeof(x) / sizeof(x[0]))))
+
 
 bool Win32DeviceManager::getDefaultCamera(Device& device)
 {
@@ -128,6 +140,7 @@ bool Win32DeviceManager::getDefaultCamera(Device& device)
     return ret;
 }
 
+
 namespace internal { // Windows API stuff
 
 #pragma comment(lib, "strmiids")
@@ -150,6 +163,7 @@ HRESULT enumerateDevices(REFGUID category, IEnumMoniker** ppEnum)
     }
     return hr;
 }
+
 
 void getDeviceInformation(IEnumMoniker* pEnum, REFGUID catid,
                           std::vector<Device>& devices)
@@ -198,6 +212,7 @@ void getDeviceInformation(IEnumMoniker* pEnum, REFGUID catid,
 
 } // namespace internal
 
+
 bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 {
     // Selecting a Capture Device
@@ -213,9 +228,11 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
     return false;
 }
 
+
 //
 // Win32 Device Watcher
 //
+
 
 Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
     : DeviceWatcher(manager)
@@ -225,9 +242,11 @@ Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
 {
 }
 
+
 Win32DeviceWatcher::~Win32DeviceWatcher()
 {
 }
+
 
 bool Win32DeviceWatcher::start()
 {
@@ -250,6 +269,7 @@ bool Win32DeviceWatcher::start()
     return true;
 }
 
+
 void Win32DeviceWatcher::stop()
 {
     UnregisterDeviceNotification(video_notify_);
@@ -258,6 +278,7 @@ void Win32DeviceWatcher::stop()
     audio_notify_ = NULL;
     Destroy();
 }
+
 
 HDEVNOTIFY Win32DeviceWatcher::Register(REFGUID guid)
 {
@@ -280,10 +301,12 @@ HDEVNOTIFY Win32DeviceWatcher::Register(REFGUID guid)
     // DEVICE_NOTIFY_WINDOW_HANDLE);
 }
 
+
 void Win32DeviceWatcher::Unregister(HDEVNOTIFY handle)
 {
     UnregisterDeviceNotification(handle);
 }
+
 
 bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                                    LRESULT& result)
@@ -312,6 +335,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
     return false;
 }
 
+
 //
 // Win32 Window
 //
@@ -325,10 +349,12 @@ Win32Window::Win32Window()
 {
 }
 
+
 Win32Window::~Win32Window()
 {
     assert(NULL == wnd_);
 }
+
 
 bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
                          DWORD exstyle, int x, int y, int cx, int cy)
@@ -365,11 +391,13 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
     return (NULL != wnd_);
 }
 
+
 void Win32Window::Destroy()
 {
     BOOL res = ::DestroyWindow(wnd_);
     assert(res != FALSE);
 }
+
 
 void Win32Window::Shutdown()
 {
@@ -378,6 +406,7 @@ void Win32Window::Shutdown()
         window_class_ = 0;
     }
 }
+
 
 bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                             LRESULT& result)
@@ -392,6 +421,7 @@ bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
     }
     return false;
 }
+
 
 LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -424,6 +454,7 @@ LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
     return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
+
 
 #if 0
 bool getDevices(const CLSID& catid, std::vector<Device>& devices)
@@ -718,7 +749,9 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /*
  * libjingle

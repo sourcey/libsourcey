@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/ffmpeg.h"
 
 #ifdef HAVE_FFMPEG
@@ -17,6 +18,7 @@
 #include <iostream>
 #include <stdexcept>
 
+
 extern "C" {
 #include <libavformat/avformat.h>
 #ifdef HAVE_FFMPEG_AVDEVICE
@@ -24,9 +26,11 @@ extern "C" {
 #endif
 }
 
+
 namespace scy {
 namespace av {
 namespace internal {
+
 
 static int LockManagerOperation(void** lock, enum AVLockOp op)
 {
@@ -53,8 +57,10 @@ static int LockManagerOperation(void** lock, enum AVLockOp op)
     return 1;
 }
 
+
 static Mutex _mutex;
 static int _refCount(0);
+
 
 void initialize()
 {
@@ -77,6 +83,7 @@ void initialize()
     }
 }
 
+
 void uninitialize()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -86,17 +93,21 @@ void uninitialize()
     }
 }
 
+
 } // namespace internal
+
 
 void initializeFFmpeg()
 {
     internal::initialize();
 }
 
+
 void uninitializeFFmpeg()
 {
     internal::uninitialize();
 }
+
 
 std::string averror(const int error)
 {
@@ -104,6 +115,7 @@ std::string averror(const int error)
     av_strerror(error, error_buffer, sizeof(error_buffer));
     return error_buffer;
 }
+
 
 void printInputFormats(std::ostream& ost, const char* delim)
 {
@@ -116,6 +128,7 @@ void printInputFormats(std::ostream& ost, const char* delim)
     uninitializeFFmpeg();
 }
 
+
 void printOutputFormats(std::ostream& ost, const char* delim)
 {
     initializeFFmpeg(); // init here so reference is not held
@@ -126,6 +139,7 @@ void printOutputFormats(std::ostream& ost, const char* delim)
     }
     uninitializeFFmpeg();
 }
+
 
 void printEncoders(std::ostream& ost, const char* delim)
 {
@@ -139,25 +153,32 @@ void printEncoders(std::ostream& ost, const char* delim)
     uninitializeFFmpeg();
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 #else
 
 namespace scy {
 namespace av {
 
+
 void initializeFFmpeg()
 {
 }
+
 
 void uninitializeFFmpeg()
 {
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

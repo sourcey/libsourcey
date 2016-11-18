@@ -8,13 +8,17 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/packetstream.h"
 #include "scy/memory.h"
 #include "scy/packetqueue.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 PacketStream::PacketStream(const std::string& name)
     : _name(name)
@@ -24,6 +28,7 @@ PacketStream::PacketStream(const std::string& name)
 {
     TraceS(this) << "Create" << endl;
 }
+
 
 PacketStream::~PacketStream()
 {
@@ -45,6 +50,7 @@ PacketStream::~PacketStream()
 
     // TraceS(this) << "Destroy: OK" << endl;
 }
+
 
 void PacketStream::start()
 {
@@ -69,6 +75,7 @@ void PacketStream::start()
     // Start synchronized sources
     startSources();
 }
+
 
 void PacketStream::stop()
 {
@@ -95,12 +102,14 @@ void PacketStream::stop()
     TraceS(this) << "Stop: OK" << endl;
 }
 
+
 void PacketStream::pause()
 {
     TraceS(this) << "Pause" << endl;
     // Mutex::ScopedLock lock(_mutex);
     setState(this, PacketStreamState::Paused);
 }
+
 
 void PacketStream::resume()
 {
@@ -114,6 +123,7 @@ void PacketStream::resume()
     setState(this, PacketStreamState::Active);
 }
 
+
 // void PacketStream::reset()
 // {
 //     TraceS(this) << "Reset" << endl;
@@ -122,6 +132,7 @@ void PacketStream::resume()
 //     setState(this, PacketStreamState::Resetting);
 //     setState(this, PacketStreamState::Active);
 // }
+
 
 void PacketStream::close()
 {
@@ -176,11 +187,13 @@ void PacketStream::close()
     TraceS(this) << "Close: OK" << endl;
 }
 
+
 void PacketStream::write(char* data, std::size_t len)
 {
     RawPacket p(data, len);
     process(p);
 }
+
 
 void PacketStream::write(const char* data, std::size_t len)
 {
@@ -193,10 +206,12 @@ void PacketStream::write(IPacket& packet)
     process(packet);
 }
 
+
 bool PacketStream::locked() const
 {
     return stateEquals(PacketStreamState::Locked);
 }
+
 
 #if 0
 void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
@@ -295,6 +310,7 @@ bool PacketStream::async() const
 }
 #endif
 
+
 bool PacketStream::lock()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -305,11 +321,13 @@ bool PacketStream::lock()
     return true;
 }
 
+
 bool PacketStream::active() const
 {
     // Mutex::ScopedLock lock(_mutex);
     return stateEquals(PacketStreamState::Active);
 }
+
 
 bool PacketStream::closed() const
 {
@@ -318,6 +336,7 @@ bool PacketStream::closed() const
            stateEquals(PacketStreamState::Error);
 }
 
+
 bool PacketStream::stopped() const
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -325,11 +344,13 @@ bool PacketStream::stopped() const
            stateEquals(PacketStreamState::Stopped);
 }
 
+
 void PacketStream::setClientData(void* data)
 {
     Mutex::ScopedLock lock(_mutex);
     _clientData = data;
 }
+
 
 void* PacketStream::clientData() const
 {
@@ -337,11 +358,13 @@ void* PacketStream::clientData() const
     return _clientData;
 }
 
+
 void PacketStream::autoStart(bool flag)
 {
     // Mutex::ScopedLock lock(_mutex);
     _autoStart = flag;
 }
+
 
 void PacketStream::closeOnError(bool flag)
 {
@@ -349,15 +372,18 @@ void PacketStream::closeOnError(bool flag)
     _closeOnError = flag;
 }
 
+
 std::string PacketStream::name() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _name;
 }
 
+
 //
 // Packet Stream Base
 //
+
 
 void PacketStream::synchronizeStates()
 {
@@ -385,6 +411,7 @@ void PacketStream::synchronizeStates()
         }
     }
 }
+
 
 void PacketStream::process(IPacket& packet)
 {
@@ -483,6 +510,7 @@ void PacketStream::process(IPacket& packet)
     //     << state() << ": " << packet.className() << endl;
 }
 
+
 void PacketStream::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
@@ -513,7 +541,7 @@ void PacketStream::emit(IPacket& packet)
     try {
         // Emit the result packet
         // if (emitter.enabled()) {
-        emitter.emit(/*this, */ packet);
+        emitter.emit(packet);
         // }
         // else {
         //     TraceS(this) << "Dropping packet: No emitter: " << state() <<
@@ -540,6 +568,7 @@ void PacketStream::emit(IPacket& packet)
 
     TraceS(this) << "Emit: OK: " << packet.size() << endl;
 }
+
 
 void PacketStream::setup()
 {
@@ -582,6 +611,7 @@ void PacketStream::setup()
     }
 }
 
+
 void PacketStream::teardown()
 {
     TraceS(this) << "Teardown" << endl;
@@ -616,6 +646,7 @@ void PacketStream::teardown()
 
     TraceS(this) << "Teardown: OK" << endl;
 }
+
 
 void PacketStream::reset()
 {
@@ -656,6 +687,7 @@ void PacketStream::reset()
     // TraceS(this) << "Cleanup: OK" << endl;
 }
 
+
 void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer,
                                 bool syncState)
 {
@@ -663,9 +695,9 @@ void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer,
     attachSource(std::make_shared<PacketAdapterReference>(
         source, freePointer ? new ScopedRawPointer<PacketStreamAdapter>(source)
                             : nullptr,
-        0,
-        syncState)); // freePointer,
+        0, syncState)); // freePointer,
 }
+
 
 void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 {
@@ -677,6 +709,7 @@ void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
               PacketAdapterReference::compareOrder);
 }
 
+
 void PacketStream::attachSource(PacketSignal& source)
 {
     // TraceS(this) << "Attach source signal: " << &source << endl;
@@ -687,6 +720,7 @@ void PacketStream::attachSource(PacketSignal& source)
     // attachSource(PacketStreamAdapter*)
     attachSource(new PacketStreamAdapter(source), true, false);
 }
+
 
 bool PacketStream::detachSource(PacketStreamAdapter* source)
 {
@@ -713,6 +747,7 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
     }
     return false;
 }
+
 
 bool PacketStream::detachSource(PacketSignal& source)
 {
@@ -742,6 +777,7 @@ bool PacketStream::detachSource(PacketSignal& source)
     return false;
 }
 
+
 void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 {
     // TraceS(this) << "Attach processor: " << proc << endl;
@@ -760,6 +796,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
     sort(_processors.begin(), _processors.end(),
          PacketAdapterReference::compareOrder);
 }
+
 
 bool PacketStream::detach(PacketProcessor* proc)
 {
@@ -780,6 +817,7 @@ bool PacketStream::detach(PacketProcessor* proc)
     return false;
 }
 
+
 void PacketStream::attach(PacketAdapterReference::Ptr ref)
 {
     assertCanModify();
@@ -789,6 +827,7 @@ void PacketStream::attach(PacketAdapterReference::Ptr ref)
     std::sort(_processors.begin(), _processors.end(),
               PacketAdapterReference::compareOrder);
 }
+
 
 void PacketStream::startSources()
 {
@@ -813,6 +852,7 @@ void PacketStream::startSources()
     }
 }
 
+
 void PacketStream::stopSources()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -835,6 +875,7 @@ void PacketStream::stopSources()
         }
     }
 }
+
 
 bool PacketStream::waitForRunner()
 {
@@ -870,6 +911,7 @@ bool PacketStream::waitForRunner()
     return true;
 }
 
+
 bool PacketStream::waitForStateSync(PacketStreamState::ID state)
 {
     int times = 0;
@@ -886,6 +928,7 @@ bool PacketStream::waitForStateSync(PacketStreamState::ID state)
     return true;
 }
 
+
 bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -895,6 +938,7 @@ bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
     }
     return false;
 }
+
 
 void PacketStream::assertCanModify()
 {
@@ -908,6 +952,7 @@ void PacketStream::assertCanModify()
     }
 }
 
+
 void PacketStream::synchronizeOutput(uv::Loop* loop)
 {
     assertCanModify();
@@ -916,6 +961,7 @@ void PacketStream::synchronizeOutput(uv::Loop* loop)
     // packets will be synchronized when they hit the emit() method
     attach(new SyncPacketQueue<>(loop), 101, true);
 }
+
 
 void PacketStream::onStateChange(PacketStreamState& state,
                                  const PacketStreamState& oldState)
@@ -927,11 +973,13 @@ void PacketStream::onStateChange(PacketStreamState& state,
     _states.push_back(state);
 }
 
+
 const std::exception_ptr& PacketStream::error()
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;
 }
+
 
 int PacketStream::numSources() const
 {
@@ -939,17 +987,20 @@ int PacketStream::numSources() const
     return _sources.size();
 }
 
+
 int PacketStream::numProcessors() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _processors.size();
 }
 
+
 int PacketStream::numAdapters() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _sources.size() + _processors.size();
 }
+
 
 PacketAdapterVec PacketStream::adapters() const
 {
@@ -959,11 +1010,13 @@ PacketAdapterVec PacketStream::adapters() const
     return res;
 }
 
+
 PacketAdapterVec PacketStream::sources() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _sources;
 }
+
 
 PacketAdapterVec PacketStream::processors() const
 {
@@ -971,20 +1024,24 @@ PacketAdapterVec PacketStream::processors() const
     return _processors;
 }
 
+
 //
 // Packet Stream Adapter
 //
+
 
 PacketStreamAdapter::PacketStreamAdapter(PacketSignal& emitter)
     : _emitter(emitter)
 {
 }
 
+
 void PacketStreamAdapter::emit(char* data, std::size_t len, unsigned flags)
 {
     RawPacket p(data, len, flags);
     emit(p);
 }
+
 
 void PacketStreamAdapter::emit(const char* data, std::size_t len,
                                unsigned flags)
@@ -993,11 +1050,13 @@ void PacketStreamAdapter::emit(const char* data, std::size_t len,
     emit(p);
 }
 
+
 void PacketStreamAdapter::emit(const std::string& str, unsigned flags)
 {
     RawPacket p(str.c_str(), str.length(), flags);
     emit(p);
 }
+
 
 void PacketStreamAdapter::emit(unsigned flags)
 {
@@ -1005,16 +1064,20 @@ void PacketStreamAdapter::emit(unsigned flags)
     emit(p);
 }
 
+
 void PacketStreamAdapter::emit(IPacket& packet)
 {
-    getEmitter().emit(/*this, */ packet);
+    getEmitter().emit(packet);
 }
+
 
 PacketSignal& PacketStreamAdapter::getEmitter()
 {
     return _emitter;
 }
 
+
 } // namespace scy
+
 
 /// @\}

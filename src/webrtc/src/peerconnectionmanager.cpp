@@ -12,9 +12,12 @@
 
 #include "webrtc/api/test/fakeaudiocapturemodule.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 PeerConnectionManager::PeerConnectionManager(
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
@@ -22,9 +25,11 @@ PeerConnectionManager::PeerConnectionManager(
 {
 }
 
+
 PeerConnectionManager::~PeerConnectionManager()
 {
 }
+
 
 void PeerConnectionManager::sendSDP(PeerConnection* conn,
                                     const std::string& type,
@@ -33,6 +38,7 @@ void PeerConnectionManager::sendSDP(PeerConnection* conn,
     assert(0 && "virtual");
 }
 
+
 void PeerConnectionManager::sendCandidate(PeerConnection* conn,
                                           const std::string& mid,
                                           int mlineindex,
@@ -40,6 +46,7 @@ void PeerConnectionManager::sendCandidate(PeerConnection* conn,
 {
     assert(0 && "virtual");
 }
+
 
 void PeerConnectionManager::recvSDP(const std::string& peerid,
                                     const json::Value& message)
@@ -62,6 +69,7 @@ void PeerConnectionManager::recvSDP(const std::string& peerid,
 
     DebugL << "Received " << type << ": " << sdp << endl;
 }
+
 
 void PeerConnectionManager::recvCandidate(const std::string& peerid,
                                           const json::Value& message)
@@ -86,11 +94,13 @@ void PeerConnectionManager::recvCandidate(const std::string& peerid,
     conn->recvCandidate(mid, mlineindex, sdp);
 }
 
+
 void PeerConnectionManager::onAddRemoteStream(
     PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
+
 
 void PeerConnectionManager::onRemoveRemoteStream(
     PeerConnection* conn, webrtc::MediaStreamInterface* stream)
@@ -98,9 +108,11 @@ void PeerConnectionManager::onRemoveRemoteStream(
     assert(0 && "virtual");
 }
 
+
 void PeerConnectionManager::onStable(PeerConnection* conn)
 {
 }
+
 
 void PeerConnectionManager::onClosed(PeerConnection* conn)
 {
@@ -109,6 +121,7 @@ void PeerConnectionManager::onClosed(PeerConnection* conn)
     if (remove(conn))
         deleteLater<PeerConnection>(conn); // async delete
 }
+
 
 void PeerConnectionManager::onFailure(PeerConnection* conn,
                                       const std::string& error)
@@ -119,11 +132,14 @@ void PeerConnectionManager::onFailure(PeerConnection* conn,
         deleteLater<PeerConnection>(conn); // async delete
 }
 
+
 webrtc::PeerConnectionFactoryInterface* PeerConnectionManager::factory() const
 {
     return _factory.get();
 }
 
+
 } // namespace scy
+
 
 /// @\}

@@ -8,15 +8,19 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_HTTP_Base64PacketEncoder_H
 #define SCY_HTTP_Base64PacketEncoder_H
+
 
 #include "scy/base64.h"
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 #include <sstream>
 
+
 namespace scy {
+
 
 /// @addtogroup util
 class Base64PacketEncoder : public PacketProcessor
@@ -43,6 +47,8 @@ public:
     PacketSignal emitter;
 };
 
+
 } // namespace scy
+
 
 #endif

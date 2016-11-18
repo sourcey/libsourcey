@@ -8,6 +8,7 @@
 /// @addtogroup crypto
 /// @{
 
+
 #include "scy/crypto/x509certificate.h"
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -15,8 +16,10 @@
 #include <openssl/x509v3.h>
 #include <sstream>
 
+
 namespace scy {
 namespace crypto {
+
 
 X509Certificate::X509Certificate(const char* data, std::size_t length)
     : _certificate(0)
@@ -24,11 +27,13 @@ X509Certificate::X509Certificate(const char* data, std::size_t length)
     load(data, length);
 }
 
+
 X509Certificate::X509Certificate(const std::string& path)
     : _certificate(0)
 {
     load(path);
 }
+
 
 X509Certificate::X509Certificate(X509* pCert)
     : _certificate(pCert)
@@ -37,6 +42,7 @@ X509Certificate::X509Certificate(X509* pCert)
 
     init();
 }
+
 
 X509Certificate::X509Certificate(X509* pCert, bool shared)
     : _certificate(pCert)
@@ -49,6 +55,7 @@ X509Certificate::X509Certificate(X509* pCert, bool shared)
     init();
 }
 
+
 X509Certificate::X509Certificate(const X509Certificate& cert)
     : _issuerName(cert._issuerName)
     , _subjectName(cert._subjectName)
@@ -57,12 +64,14 @@ X509Certificate::X509Certificate(const X509Certificate& cert)
     _certificate = X509_dup(_certificate);
 }
 
+
 X509Certificate& X509Certificate::operator=(const X509Certificate& cert)
 {
     X509Certificate tmp(cert);
     swap(tmp);
     return *this;
 }
+
 
 void X509Certificate::swap(X509Certificate& cert)
 {
@@ -71,10 +80,12 @@ void X509Certificate::swap(X509Certificate& cert)
     std::swap(cert._certificate, _certificate);
 }
 
+
 X509Certificate::~X509Certificate()
 {
     X509_free(_certificate);
 }
+
 
 void X509Certificate::load(const char* data, std::size_t length)
 {
@@ -95,6 +106,7 @@ void X509Certificate::load(const char* data, std::size_t length)
 
     init();
 }
+
 
 void X509Certificate::load(const std::string& path)
 {
@@ -122,6 +134,7 @@ void X509Certificate::load(const std::string& path)
     init();
 }
 
+
 void X509Certificate::save(std::ostream& stream) const
 {
     BIO* pBIO = BIO_new(BIO_s_mem());
@@ -143,6 +156,7 @@ void X509Certificate::save(std::ostream& stream) const
     }
     BIO_free(pBIO);
 }
+
 
 void X509Certificate::save(const std::string& path) const
 {
@@ -169,6 +183,7 @@ void X509Certificate::save(const std::string& path) const
     BIO_free(pBIO);
 }
 
+
 void X509Certificate::init()
 {
     char buffer[NAME_BUFFER_SIZE];
@@ -180,10 +195,12 @@ void X509Certificate::init()
     _subjectName = buffer;
 }
 
+
 std::string X509Certificate::commonName() const
 {
     return subjectName(NID_COMMON_NAME);
 }
+
 
 std::string X509Certificate::issuerName(NID nid) const
 {
@@ -195,6 +212,7 @@ std::string X509Certificate::issuerName(NID nid) const
         return std::string();
 }
 
+
 std::string X509Certificate::subjectName(NID nid) const
 {
     if (X509_NAME* subj = X509_get_subject_name(_certificate)) {
@@ -204,6 +222,7 @@ std::string X509Certificate::subjectName(NID nid) const
     } else
         return std::string();
 }
+
 
 void X509Certificate::extractNames(std::string& cmnName,
                                    std::set<std::string>& domainNames) const
@@ -229,6 +248,7 @@ void X509Certificate::extractNames(std::string& cmnName,
     }
 }
 
+
 DateTime X509Certificate::validFrom() const
 {
     ASN1_TIME* certTime = X509_get_notBefore(_certificate);
@@ -237,6 +257,7 @@ DateTime X509Certificate::validFrom() const
     return DateTimeParser::parse("%y%m%d%H%M%S", dateTime, tzd);
 }
 
+
 DateTime X509Certificate::expiresOn() const
 {
     ASN1_TIME* certTime = X509_get_notAfter(_certificate);
@@ -244,6 +265,7 @@ DateTime X509Certificate::expiresOn() const
     int tzd;
     return DateTimeParser::parse("%y%m%d%H%M%S", dateTime, tzd);
 }
+
 
 bool X509Certificate::issuedBy(const X509Certificate& issuerCertificate) const
 {
@@ -257,23 +279,28 @@ bool X509Certificate::issuedBy(const X509Certificate& issuerCertificate) const
     return rc != 0;
 }
 
+
 const std::string& X509Certificate::issuerName() const
 {
     return _issuerName;
 }
+
 
 const std::string& X509Certificate::subjectName() const
 {
     return _subjectName;
 }
 
+
 const X509* X509Certificate::certificate() const
 {
     return _certificate;
 }
 
+
 } // namespace crypto
 } // namespace scy
+
 
 //
 // Copyright (c) 2006-2009, Applied Informatics Software Engineering GmbH.

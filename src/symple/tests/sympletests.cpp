@@ -1,8 +1,10 @@
 #include "sympletests.h"
 
+
 using namespace std;
 using namespace scy;
 using namespace scy::test;
+
 
 #define SERVER_HOST "localhost"
 #define USE_SSL 0
@@ -11,6 +13,7 @@ using namespace scy::test;
 #else
 #define SERVER_PORT 4500
 #endif
+
 
 int main(int argc, char** argv)
 {

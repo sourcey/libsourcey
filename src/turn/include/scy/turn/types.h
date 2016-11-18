@@ -8,19 +8,24 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_Types_H
 #define SCY_TURN_Types_H
+
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/stun/message.h"
 #include "scy/turn/turn.h"
 
+
 namespace scy {
 namespace turn {
 
+
 const int CLIENT_SOCK_BUF_SIZE = 65536;
 const int SERVER_SOCK_BUF_SIZE = CLIENT_SOCK_BUF_SIZE * 32;
+
 
 enum AuthenticationState
 {
@@ -29,6 +34,7 @@ enum AuthenticationState
     QuotaReached = 3,
     NotAuthorized = 4
 };
+
 
 class Request : public stun::Message
 {
@@ -49,11 +55,15 @@ public:
     }
 };
 
+
 typedef std::vector<std::string> IPList;
+
 
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_Types_H
+
 
 /// @\}

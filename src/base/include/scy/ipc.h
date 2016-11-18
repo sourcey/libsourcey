@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_IPC_H
 #define SCY_IPC_H
+
 
 #include "scy/mutex.h"
 #include "scy/synccontext.h"
@@ -17,10 +19,13 @@
 #include <deque>
 #include <string>
 
+
 namespace scy {
+
 
 /// Classes for inter-process communication
 namespace ipc {
+
 
 /// Default action type for executing synchronized callbacks.
 struct Action
@@ -37,6 +42,7 @@ struct Action
     {
     }
 };
+
 
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
@@ -98,6 +104,7 @@ protected:
     std::deque<TAction*> _actions;
 };
 
+
 /// IPC synchronization queue is for passing templated
 /// actions between threads and the event loop we are
 /// synchronizing with.
@@ -122,12 +129,16 @@ protected:
     SyncContext _sync;
 };
 
+
 typedef ipc::Queue<ipc::Action> ActionQueue;
 typedef ipc::SyncQueue<ipc::Action> ActionSyncQueue;
+
 
 } // namespace ipc
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

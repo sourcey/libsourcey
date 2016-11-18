@@ -8,8 +8,10 @@
 /// @addtogroup stun
 /// @{
 
+
 #ifndef SCY_STUN_Attributes_H
 #define SCY_STUN_Attributes_H
+
 
 #include "scy/buffer.h"
 #include "scy/crypto/crypto.h"
@@ -22,8 +24,10 @@
 #include <string>
 #include <vector>
 
+
 namespace scy {
 namespace stun {
+
 
 /// The virtual base class for all STUN/TURN attributes.
 class Attribute
@@ -110,6 +114,7 @@ protected:
     std::uint16_t _size;
 };
 
+
 ///
 /// Implements a STUN/TURN attribute that contains a socket address.
 class AddressAttribute : public Attribute
@@ -160,6 +165,7 @@ private:
     net::Address _address;
 };
 
+
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt8Attribute : public Attribute
@@ -185,6 +191,7 @@ private:
     std::uint8_t _bits;
 };
 
+
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 class UInt32Attribute : public Attribute
@@ -209,6 +216,7 @@ public:
 private:
     std::uint32_t _bits;
 };
+
 
 ///
 /// Implements STUN/TURN attribute that reflects a 64-bit integer.
@@ -249,6 +257,7 @@ public:
     void write(BitWriter&) const { assert(0 && "not implemented"); }
 };
 
+
 ///
 /// Implements STUN/TURN attribute that reflects an arbitrary byte string
 class StringAttribute : public Attribute
@@ -277,6 +286,7 @@ private:
     char* _bytes;
 };
 
+
 ///
 /// Implements STUN/TURN attribute that reflects a list of attribute names.
 class UInt16ListAttribute : public Attribute
@@ -299,6 +309,7 @@ public:
 private:
     std::vector<std::uint16_t> _attrTypes;
 };
+
 
 ///
 /// Implements STUN/TURN attributes that reflects an internet address.
@@ -333,6 +344,7 @@ private:
     std::string _key;
 };
 
+
 ///
 /// Implements STUN/TURN attribute that reflects an error code.
 class ErrorCode : public Attribute
@@ -366,6 +378,7 @@ private:
     std::string _reason;
 };
 
+
 //
 /// Attribute macros
 //
@@ -391,6 +404,7 @@ private:
             : Derives(TypeID, size){};                                         \
         virtual ~Name(){};                                                     \
     };
+
 
 //
 /// Attribute declarations
@@ -445,6 +459,8 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 }
 } // namespace scy:stun
 
+
 #endif // SCY_STUN_Attributes_H
+
 
 /// @\}

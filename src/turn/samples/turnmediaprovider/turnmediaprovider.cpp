@@ -12,12 +12,14 @@
 
 #include <conio.h>
 
+
 using namespace std;
 using namespace Scy;
 using namespace Scy::Net;
 using namespace Scy::Media;
 using namespace Scy::TURN;
 using namespace Scy::Util;
+
 
 // TODO: Simplify this to an echo client.
 // Use the Symple MediaServer for media streaming example.
@@ -31,8 +33,10 @@ CMemLeakDetect memLeakDetect;
 #endif
 */
 
+
 namespace Scy {
 namespace TURN {
+
 
 // ----------------------------------------------------------------------------
 // Media Formats
@@ -69,12 +73,14 @@ Format FLVSpeex16000NoVideo =
 Format MJPEG =
     Format("MJPEG", "mjpeg", VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
 
+
 // Global for now
 class TURNMediaProvider;
 Format ourMediaFormat = MJPEG;
 VideoCapture* ourVideoCapture = NULL;
 AudioCapture* ourAudioCapture = NULL;
 TURNMediaProvider* ourMediaProvider = NULL;
+
 
 // ----------------------------------------------------------------------------
 // TCP TURN Initiator
@@ -180,7 +186,7 @@ protected:
             case TURN::ClientState::Authorizing:
                 break;
             case TURN::ClientState::Success:
-                AllocationCreated.emit(/*this, */ this->client);
+                AllocationCreated.emit(this->client);
                 break;
             case TURN::ClientState::Failed:
                 assert(0 && "Allocation failed");
@@ -198,7 +204,7 @@ protected:
                    << "] Connection Created: " << peerAddr << endl;
         currentPeerAddr = peerAddr; // Current peer
 
-        ConnectionCreated.emit(/*this, */ this->client, peerAddr);
+        ConnectionCreated.emit(this->client, peerAddr);
 
         // Restart the media steram for each new peer
         stopMedia();
@@ -246,6 +252,7 @@ protected:
         }
     }
 };
+
 
 // ----------------------------------------------------------------------------
 // Media Connection
@@ -298,6 +305,7 @@ public:
     Poco::Event wakeUp;
 };
 
+
 // ----------------------------------------------------------------------------
 // HTTP Connection Factory
 //
@@ -344,6 +352,7 @@ public:
     }
 };
 
+
 // ----------------------------------------------------------------------------
 // HTTP Relay Address Service
 //
@@ -358,8 +367,10 @@ public:
     ~RelayAddressService() {}
 };
 
+
 } // namespace TURN
 } // namespace Scy
+
 
 int main(int argc, char** argv)
 {

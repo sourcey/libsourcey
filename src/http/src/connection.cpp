@@ -8,6 +8,7 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/connection.h"
 #include "scy/http/client.h"
 #include "scy/http/server.h"
@@ -16,10 +17,13 @@
 
 #include <assert.h>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace http {
+
 
 Connection::Connection(const net::Socket::Ptr& socket)
     : _socket(socket ? socket : std::make_shared<net::TCPSocket>())
@@ -35,6 +39,7 @@ Connection::Connection(const net::Socket::Ptr& socket)
     Outgoing.autoStart(true);
 }
 
+
 Connection::~Connection()
 {
     TraceS(this) << "Destroy" << endl;
@@ -45,6 +50,7 @@ Connection::~Connection()
              // no need for close() anyway
     TraceS(this) << "Destroy: OK" << endl;
 }
+
 
 int Connection::send(const char* data, std::size_t len, int flags)
 {
@@ -60,6 +66,7 @@ int Connection::send(const char* data, std::size_t len, int flags)
     return len;
 }
 
+
 #if 0
 int Connection::send(const std::string& data, int flags) //
 {
@@ -72,6 +79,7 @@ int Connection::send(const std::string& data, int flags) //
     return data.length(); // fixme
 }
 #endif
+
 
 int Connection::sendHeader()
 {
@@ -92,6 +100,7 @@ int Connection::sendHeader()
     return _socket->send(head.c_str(), head.length());
 }
 
+
 void Connection::close()
 {
     TraceS(this) << "Close: " << _closed << endl;
@@ -108,6 +117,7 @@ void Connection::close()
     // close() may be called via the destructor.
     onClose();
 }
+
 
 void Connection::replaceAdapter(net::SocketAdapter* adapter)
 {
@@ -146,6 +156,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
     }
 }
 
+
 void Connection::setError(const scy::Error& err)
 {
     TraceS(this) << "Set error: " << err.message << endl;
@@ -153,12 +164,14 @@ void Connection::setError(const scy::Error& err)
     _error = err;
 }
 
+
 void Connection::onSocketConnect(net::Socket& socket)
 {
     TraceS(this) << "On socket connect" << endl;
 
     // Only for client connections
 }
+
 
 void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                               const net::Address& peerAddress)
@@ -168,6 +181,7 @@ void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
     // Handle payload data
     onPayload(buffer);
 }
+
 
 void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 {
@@ -183,6 +197,7 @@ void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
     }
 }
 
+
 void Connection::onSocketClose(net::Socket& socket)
 {
     TraceS(this) << "On socket close" << endl;
@@ -191,6 +206,7 @@ void Connection::onSocketClose(net::Socket& socket)
     close();
 }
 
+
 void Connection::onClose()
 {
     TraceS(this) << "On close" << endl;
@@ -198,44 +214,53 @@ void Connection::onClose()
     Close.emit(*this);
 }
 
+
 Request& Connection::request()
 {
     return _request;
 }
+
 
 Response& Connection::response()
 {
     return _response;
 }
 
+
 net::Socket::Ptr& Connection::socket()
 {
     return _socket;
 }
+
 
 bool Connection::closed() const
 {
     return _closed;
 }
 
+
 scy::Error Connection::error() const
 {
     return _error;
 }
+
 
 bool Connection::shouldSendHeader() const
 {
     return _shouldSendHeader;
 }
 
+
 void Connection::shouldSendHeader(bool flag)
 {
     _shouldSendHeader = flag;
 }
 
+
 //
 // HTTP Client Connection Adapter
 //
+
 
 ConnectionAdapter::ConnectionAdapter(Connection& connection,
                                      http_parser_type type)
@@ -251,10 +276,12 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection,
         _parser.setResponse(&connection.response());
 }
 
+
 ConnectionAdapter::~ConnectionAdapter()
 {
     TraceS(this) << "Destroy: " << &_connection << endl;
 }
+
 
 int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
 {
@@ -285,6 +312,7 @@ int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
     return -1;
 }
 
+
 void ConnectionAdapter::onSocketRecv(net::Socket& socket,
                                      const MutableBuffer& buf,
                                      const net::Address& /* peerAddr */)
@@ -305,6 +333,7 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket,
     _parser.parse(bufferCast<const char*>(buf), buf.size());
 }
 
+
 //
 // Parser callbacks
 
@@ -312,6 +341,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */,
                                        const std::string& /* value */)
 {
 }
+
 
 void ConnectionAdapter::onParserHeadersEnd()
 {
@@ -323,8 +353,9 @@ void ConnectionAdapter::onParserHeadersEnd()
     // they have been handled. Subsequent body chunks will
     // now start at the correct position.
     //_connection.incomingBuffer().position(_parser._parser.nread); // should be
-    // redundant
+    //redundant
 }
+
 
 void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 {
@@ -336,6 +367,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
                                      mutableBuffer(const_cast<char*>(buf), len),
                                      sock->peerAddress());
 }
+
 
 void ConnectionAdapter::onParserError(const ParserError& err)
 {
@@ -364,6 +396,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
     _connection.close(); // do we want to force this?
 }
 
+
 void ConnectionAdapter::onParserEnd()
 {
     TraceS(this) << "On parser end" << endl;
@@ -371,17 +404,21 @@ void ConnectionAdapter::onParserEnd()
     _connection.onMessage();
 }
 
+
 Parser& ConnectionAdapter::parser()
 {
     return _parser;
 }
+
 
 Connection& ConnectionAdapter::connection()
 {
     return _connection;
 }
 
+
 } // namespace http
 } // namespace scy
+
 
 /// @\}

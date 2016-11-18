@@ -8,8 +8,10 @@
 /// @addtogroup crypto
 /// @{
 
+
 #ifndef SCY_Crypto_Cipher_H
 #define SCY_Crypto_Cipher_H
+
 
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
@@ -17,8 +19,10 @@
 
 #include <openssl/evp.h>
 
+
 namespace scy {
 namespace crypto {
+
 
 /// Provides symmetric algorithms for encryption and decryption.
 /// The algorithms that are available depend on the particular
@@ -199,6 +203,7 @@ protected:
     ByteVec _iv;
 };
 
+
 template <typename K, typename I>
 std::string encryptString(const std::string& algorithm, const std::string& data,
                           const K& key, const I& iv,
@@ -213,6 +218,7 @@ std::string encryptString(const std::string& algorithm, const std::string& data,
 
     return ciph.encryptString(data, encoding);
 }
+
 
 template <typename K, typename I>
 std::string decryptString(const std::string& algorithm, const std::string& data,
@@ -229,9 +235,12 @@ std::string decryptString(const std::string& algorithm, const std::string& data,
     return ciph.decryptString(data, encoding);
 }
 
+
 } // namespace crypto
 } // namespace scy
 
+
 #endif // SCY_Crypto_Cipher_H
+
 
 /// @\}

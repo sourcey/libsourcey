@@ -8,8 +8,10 @@
 /// @addtogroup sked
 /// @{
 
+
 #ifndef SCY_Sked_TaskFactory_H
 #define SCY_Sked_TaskFactory_H
+
 
 #include "scy/logger.h"
 #include "scy/singleton.h"
@@ -18,10 +20,13 @@
 
 #include <vector>
 
+
 namespace scy {
 namespace sked {
 
+
 class Scheduler;
+
 
 template <typename T> sked::Task* instantiateTask()
 {
@@ -31,6 +36,7 @@ template <typename T> sked::Trigger* instantiateTrigger()
 {
     return new T;
 }
+
 
 /// The TaskFactory can dynamically instantiate
 /// registered sked::Task and sked::Trigger
@@ -122,9 +128,12 @@ protected:
     TriggerMap _triggers;
 };
 
+
 } // namespace sked
 } // namespace scy
 
+
 #endif // SCY_Sked_TaskFactory_H
+
 
 /// @\}

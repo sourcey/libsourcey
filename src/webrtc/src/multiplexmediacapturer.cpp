@@ -8,6 +8,7 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/multiplexmediacapturer.h"
 
 #include "scy/av/audioresampler.h"
@@ -17,7 +18,9 @@
 #include "scy/logger.h"
 #include "scy/webrtc/webrtc.h"
 
+
 namespace scy {
+
 
 MultiplexMediaCapturer::MultiplexMediaCapturer()
     : _capture(std::make_shared<av::MediaCapture>())
@@ -34,6 +37,7 @@ MultiplexMediaCapturer::MultiplexMediaCapturer()
         packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
 }
 
+
 MultiplexMediaCapturer::~MultiplexMediaCapturer()
 {
     // if (_videoTrack)
@@ -42,6 +46,7 @@ MultiplexMediaCapturer::~MultiplexMediaCapturer()
     // if (_audioTrack)
     //     _audioTrack->RemoveSink(this);
 }
+
 
 void MultiplexMediaCapturer::openFile(const std::string& file)
 {
@@ -63,6 +68,7 @@ void MultiplexMediaCapturer::openFile(const std::string& file)
     // TODO: Set the video packet source format from the video
 }
 
+
 VideoPacketSource* MultiplexMediaCapturer::createVideoSource()
 {
     auto videoSource = new VideoPacketSource();
@@ -71,10 +77,12 @@ VideoPacketSource* MultiplexMediaCapturer::createVideoSource()
     return videoSource;
 }
 
+
 rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
 {
     return _audioModule;
 }
+
 
 void MultiplexMediaCapturer::addMediaTracks(
     webrtc::PeerConnectionFactoryInterface* factory,
@@ -94,11 +102,13 @@ void MultiplexMediaCapturer::addMediaTracks(
     }
 }
 
+
 void MultiplexMediaCapturer::start()
 {
     // _capture->start();
     _stream.start();
 }
+
 
 void MultiplexMediaCapturer::stop()
 {
@@ -106,6 +116,8 @@ void MultiplexMediaCapturer::stop()
     _stream.stop();
 }
 
+
 } // namespace scy
+
 
 /// @\}

@@ -8,22 +8,27 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/request.h"
 #include "scy/http/response.h"
 #include "scy/net/socket.h"
 #include <http_parser.h>
 
+
 #ifndef SCY_HTTP_Parser_H
 #define SCY_HTTP_Parser_H
 
+
 namespace scy {
 namespace http {
+
 
 struct ParserError
 {
     http_errno code;
     std::string message;
 };
+
 
 class ParserObserver
 {
@@ -36,6 +41,7 @@ public:
 
     virtual void onParserError(const ParserError& err) = 0;
 };
+
 
 class Parser
 {
@@ -112,9 +118,12 @@ public:
     ParserError* _error;
 };
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_Parser_H
+
 
 /// @\}

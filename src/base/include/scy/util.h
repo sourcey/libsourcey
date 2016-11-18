@@ -10,8 +10,10 @@
 // This file uses some functions from POCO C++ Libraries (license below)
 //
 
+
 #ifndef SCY_Util_H
 #define SCY_Util_H
+
 
 #include "scy/error.h"
 #include <cstdint>
@@ -24,8 +26,10 @@
 #include <string>
 #include <vector>
 
+
 namespace scy {
 namespace util {
+
 
 /// Printf style string formatting for POD types.
 std::string format(const char* fmt, ...);
@@ -67,6 +71,7 @@ bool matchNodes(const std::vector<std::string>& params,
 /// Returns the pointer memory address as a string.
 std::string memAddress(const void* ptr);
 
+
 //
 // Type converters
 //
@@ -102,6 +107,7 @@ float intToFloat(std::int32_t v);
 std::int64_t doubleToInt(double d);
 #endif
 
+
 //
 // Random generators
 //
@@ -114,6 +120,7 @@ std::string randomString(int size);
 
 /// Generates a random (optionally base64 encoded) binary key.
 std::string randomBinaryString(int size, bool doBase64 = false);
+
 
 //
 // String splitters
@@ -130,6 +137,7 @@ void split(const std::string& str, char delim, std::vector<std::string>& elems,
            int limit = -1);
 std::vector<std::string> split(const std::string& str, char delim,
                                int limit = -1);
+
 
 //
 // String replace methods (POCO)
@@ -200,6 +208,7 @@ S replace(const S& str, const typename S::value_type* from,
     replaceInPlace(result, from, to, start);
     return result;
 }
+
 
 //
 // String trimming
@@ -284,6 +293,7 @@ template <class S> S& trimInPlace(S& str)
     return str;
 }
 
+
 //
 // String case conversion
 //
@@ -339,6 +349,7 @@ template <class S> S& toLowerInPlace(S& str)
     }
     return str;
 }
+
 
 //
 // String case-insensative comparators (POCO)
@@ -488,6 +499,7 @@ template <class S> int icompare(const S& str, const typename S::value_type* ptr)
     return icompare(str, 0, str.size(), ptr);
 }
 
+
 //
 // Stream copiers
 //
@@ -497,6 +509,7 @@ std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
                            std::size_t bufferSize = 8192);
 std::streamsize copyToString(std::istream& istr, std::string& str,
                              std::size_t bufferSize = 8192);
+
 
 //
 // Version string helper
@@ -551,6 +564,7 @@ struct Version
 
     int major, minor, revision, build;
 };
+
 
 //
 // Container helpers
@@ -647,12 +661,16 @@ inline void clearMap(std::map<const Key, Val*>& M)
     }
 }
 
+
 } // namespace util
 } // namespace scy
 
+
 #endif // SCY_Util_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

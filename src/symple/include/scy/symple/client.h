@@ -8,8 +8,10 @@
 /// @addtogroup symple
 /// @{
 
+
 #ifndef SCY_Symple_Client_H
 #define SCY_Symple_Client_H
+
 
 #include "scy/bitwise.h"
 #include "scy/http/websocket.h"
@@ -24,14 +26,18 @@
 #include "scy/symple/roster.h"
 #include "scy/util/timedmanager.h"
 
+
 namespace scy {
 namespace smpl {
 
+
 typedef TimedManager<std::string, Message> PersistenceT;
+
 
 //
 // Symple Client
 //
+
 
 class Client : public sockio::Client
 {
@@ -154,6 +160,7 @@ public:
     /// can modify the outgoing Peer JSON object.
     Signal<void(Peer&)> CreatePresence;
 
+
 protected:
     /// Called when a new connection is established
     /// to announce and authenticate the peer on the
@@ -184,12 +191,15 @@ protected:
     int _announceStatus;
 };
 
+
 //
 // TCP Client
 //
 
+
 Client* createTCPClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
+
 
 class TCPClient : public Client
 {
@@ -198,12 +208,15 @@ public:
               uv::Loop* loop = uv::defaultLoop());
 };
 
+
 //
 // SSL Client
 //
 
+
 Client* createSSLClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
+
 
 class SSLClient : public Client
 {
@@ -212,15 +225,18 @@ public:
               uv::Loop* loop = uv::defaultLoop());
 };
 
+
 //
 // Filters
 //
+
 
 enum FilterFlags
 {
     AcceptRequests = 0x01,
     AcceptResponses = 0x02
 };
+
 
 struct Filter //: public Flaggable
 {
@@ -240,9 +256,11 @@ struct Filter //: public Flaggable
     std::string path;
 };
 
+
 //
 // Polymorphic Message Delegates
 //
+
 
 #if 0
 struct MessageDelegate: public PacketDelegateBase
@@ -324,9 +342,12 @@ DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 #endif
 
+
 } // namespace smpl
 } // namespace scy
 
+
 #endif // SCY_Symple_Client_H
+
 
 /// @\}

@@ -8,14 +8,18 @@
 /// @addtogroup socketio
 /// @{
 
+
 #include "scy/socketio/packet.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace sockio {
+
 
 Packet::Packet(Frame frame, Type type, int id, const std::string& nsp,
                const std::string& event, const std::string& message, bool ack)
@@ -30,11 +34,13 @@ Packet::Packet(Frame frame, Type type, int id, const std::string& nsp,
 {
 }
 
+
 Packet::Packet(Type type, const std::string& message, bool ack)
     : Packet(Frame::Message, type, util::randomNumber(), "/", "message",
              message, ack)
 {
 }
+
 
 Packet::Packet(const std::string& message, bool ack)
     : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message",
@@ -42,11 +48,13 @@ Packet::Packet(const std::string& message, bool ack)
 {
 }
 
+
 Packet::Packet(const json::Value& message, bool ack)
     : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message",
              json::stringify(message), ack)
 {
 }
+
 
 Packet::Packet(const std::string& event, const std::string& message, bool ack)
     : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event,
@@ -54,11 +62,13 @@ Packet::Packet(const std::string& event, const std::string& message, bool ack)
 {
 }
 
+
 Packet::Packet(const std::string& event, const json::Value& data, bool ack)
     : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event,
              json::stringify(data), ack)
 {
 }
+
 
 Packet::Packet(const Packet& r)
     : _frame(r._frame)
@@ -71,6 +81,7 @@ Packet::Packet(const Packet& r)
     , _size(r._size)
 {
 }
+
 
 Packet& Packet::operator=(const Packet& r)
 {
@@ -85,14 +96,17 @@ Packet& Packet::operator=(const Packet& r)
     return *this;
 }
 
+
 Packet::~Packet()
 {
 }
+
 
 IPacket* Packet::clone() const
 {
     return new Packet(*this);
 }
+
 
 std::size_t Packet::read(const ConstBuffer& buf)
 {
@@ -122,7 +136,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
         reader.get(type, 1);
         _type = static_cast<Packet::Type>(
             atoi(type)); // std::stoi(std::string(type, 1))
-                         // if (_type < TypeMin || _type > TypeMax) {
+        // if (_type < TypeMin || _type > TypeMax) {
         //     WarnN(this) << "Invalid message type: " << _type << endl;
         //     return false;
         // }
@@ -181,6 +195,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
     return _size;
 }
 
+
 void Packet::write(Buffer& buf) const
 {
     assert(valid());
@@ -190,50 +205,60 @@ void Packet::write(Buffer& buf) const
     buf.insert(buf.end(), str.begin(), str.end());
 }
 
+
 void Packet::setID(int id)
 {
     _id = id;
 }
+
 
 void Packet::setNamespace(const std::string& nsp)
 {
     _nsp = nsp;
 }
 
+
 void Packet::setMessage(const std::string& message)
 {
     _message = message;
 }
+
 
 void Packet::setAck(bool flag)
 {
     _ack = flag;
 }
 
+
 Packet::Frame Packet::frame() const
 {
     return _frame;
 }
+
 
 Packet::Type Packet::type() const
 {
     return _type;
 }
 
+
 int Packet::id() const
 {
     return _id;
 }
+
 
 std::string Packet::nsp() const
 {
     return _nsp;
 }
 
+
 std::string Packet::message() const
 {
     return _message;
 }
+
 
 json::Value Packet::json() const
 {
@@ -246,6 +271,7 @@ json::Value Packet::json() const
     }
     return json::Value();
 }
+
 
 std::string Packet::frameString() const
 {
@@ -270,6 +296,7 @@ std::string Packet::frameString() const
     }
 }
 
+
 std::string Packet::typeString() const
 {
     switch (_type) {
@@ -293,6 +320,7 @@ std::string Packet::typeString() const
     }
 }
 
+
 std::string Packet::toString() const
 {
     std::ostringstream ss;
@@ -301,12 +329,14 @@ std::string Packet::toString() const
     return ss.str();
 }
 
+
 bool Packet::valid() const
 {
     // Check that ID and correct type have been set
     return int(_type) >= int(Type::TypeMin) &&
            int(_type) <= int(Type::TypeMax) && _id > 0;
 }
+
 
 std::size_t Packet::size() const
 {
@@ -315,6 +345,7 @@ std::size_t Packet::size() const
     assert(ss.tellp());
     return static_cast<std::size_t>(ss.tellp());
 }
+
 
 void Packet::print(std::ostream& os) const
 {
@@ -330,7 +361,9 @@ void Packet::print(std::ostream& os) const
     }
 }
 
+
 } // namespace sockio
 } // namespace scy
+
 
 /// @\}

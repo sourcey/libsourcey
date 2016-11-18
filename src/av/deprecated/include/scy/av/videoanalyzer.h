@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_VideoAnalyzer_H
 #define SCY_AV_VideoAnalyzer_H
+
 
 #include "scy/base.h"
 
@@ -28,6 +30,7 @@
 extern "C" {
 #include <libavcodec/avfft.h>
 }
+
 
 namespace scy {
 namespace av {
@@ -111,6 +114,7 @@ public:
     /// Signals on analysis complete
     NullSignal Complete;
 
+
     virtual MediaCapture& reader();
     virtual Options& options();
     virtual std::string error() const;
@@ -135,6 +139,7 @@ protected:
     VideoConverter* _videoConv;
 };
 
+
 // ---------------------------------------------------------------------
 // FFT Helpers
 // Based on http://www.codeproject.com/Articles/6855/FFT-of-waveIn-audio-signals
@@ -151,11 +156,14 @@ inline double GetAmplitudeScaled(double re, double im, int len, int scale);
 inline double log2(double n);
 #endif
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif
+
 
 // virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
 // std::ofstream _ofile;

@@ -8,16 +8,20 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videoencoder.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 VideoConverter::VideoConverter()
     : ctx(nullptr)
@@ -25,10 +29,12 @@ VideoConverter::VideoConverter()
 {
 }
 
+
 VideoConverter::~VideoConverter()
 {
     close();
 }
+
 
 void VideoConverter::create()
 {
@@ -58,6 +64,7 @@ void VideoConverter::create()
     TraceS(this) << "Create: OK: " << ctx << endl;
 }
 
+
 void VideoConverter::close()
 {
     TraceS(this) << "Closing" << endl;
@@ -74,6 +81,7 @@ void VideoConverter::close()
 
     TraceS(this) << "Closing: OK" << endl;
 }
+
 
 AVFrame* VideoConverter::convert(AVFrame* iframe)
 {
@@ -116,9 +124,12 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
     return oframe;
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

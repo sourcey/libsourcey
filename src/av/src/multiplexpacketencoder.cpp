@@ -8,13 +8,17 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/multiplexpacketencoder.h"
 #ifdef HAVE_FFMPEG
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
     : //, bool muxLiveStreams
@@ -25,6 +29,7 @@ MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
 {
 }
 
+
 // MultiplexPacketEncoder::MultiplexPacketEncoder(bool muxLiveStreams) :
 //     MultiplexEncoder(),
 //     PacketProcessor(MultiplexEncoder::emitter),
@@ -33,9 +38,11 @@ MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
 // {
 // }
 
+
 MultiplexPacketEncoder::~MultiplexPacketEncoder()
 {
 }
+
 
 #if 0
 void MultiplexPacketEncoder::process(IPacket& packet)
@@ -104,6 +111,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 }
 #endif
 
+
 void MultiplexPacketEncoder::process(IPacket& packet)
 {
     Mutex::ScopedLock lock(_mutex);
@@ -129,15 +137,18 @@ void MultiplexPacketEncoder::encode(VideoPacket& packet)
                 packet.height, packet.time);
 }
 
+
 void MultiplexPacketEncoder::encode(AudioPacket& packet)
 {
     encodeAudio((std::uint8_t*)packet.data(), packet.numSamples, packet.time);
 }
 
+
 bool MultiplexPacketEncoder::accepts(IPacket& packet)
 {
     return dynamic_cast<av::MediaPacket*>(&packet) != 0;
 }
+
 
 void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
@@ -173,9 +184,12 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     TraceS(this) << "Stream state change: OK: " << state << endl;
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

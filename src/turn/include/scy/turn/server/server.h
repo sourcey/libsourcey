@@ -9,8 +9,10 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_Server_H
 #define SCY_TURN_Server_H
+
 
 #include "scy/net/tcpsocket.h"
 #include "scy/net/udpsocket.h"
@@ -21,13 +23,16 @@
 #include "scy/turn/server/udpallocation.h"
 #include "scy/turn/turn.h"
 
+
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
 #include <string>
 
+
 namespace scy {
 namespace turn {
+
 
 /// Configuration options for the TURN server.
 struct ServerOptions
@@ -64,6 +69,7 @@ struct ServerOptions
     }
 };
 
+
 /// The ServerObserver receives callbacks for and is responsible
 /// for managing allocation and bandwidth quotas, authentication
 /// methods and authentication.
@@ -93,7 +99,9 @@ struct ServerObserver
                                                     Request& request) = 0;
 };
 
+
 typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
+
 
 /// TURN server rfc5766 implementation
 class Server
@@ -147,6 +155,8 @@ private:
 }
 } //  namespace scy::turn
 
+
 #endif // SCY_TURN_Server_H
+
 
 /// @\}

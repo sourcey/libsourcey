@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Stream_H
 #define SCY_Stream_H
+
 
 #include "scy/memory.h"
 #include "scy/uv/uvpp.h"
@@ -18,7 +20,9 @@
 #include "scy/signal.h"
 #include <stdexcept>
 
+
 namespace scy {
+
 
 class Stream : public uv::Handle
 {
@@ -144,6 +148,7 @@ protected:
         // TraceL << "Handle read: " << nread << std::endl;
         auto self = reinterpret_cast<Stream*>(handle->data);
 
+
         if (nread >= 0) {
             self->onRead(buf->base, nread);
         } else {
@@ -160,6 +165,7 @@ protected:
     // {
     //     return this;
     // }
+
 
     ///
     /// UV callbacks
@@ -193,8 +199,11 @@ protected:
     Buffer _buffer;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Stream_H
+
 
 /// @\}

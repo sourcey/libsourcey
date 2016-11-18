@@ -8,8 +8,10 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_DNS_H
 #define SCY_Net_DNS_H
+
 
 #include "scy/net/address.h"
 #include "scy/util.h"
@@ -17,8 +19,10 @@
 #include <cstdint>
 #include <vector>
 
+
 namespace scy {
 namespace net {
+
 
 ///
 /// DNS Resolver
@@ -32,6 +36,7 @@ namespace net {
 /// }
 /// net::resolveDNS("google.com", 80, onDNSResult);
 /// ```
+
 
 struct DNSResult
 {
@@ -56,6 +61,7 @@ struct DNSResult
     /// Client data pointer
     void* opaque;
 
+
     enum Status
     {
         None,
@@ -77,6 +83,7 @@ struct DNSResult
     {
     }
 };
+
 
 inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
                           struct addrinfo* res)
@@ -102,6 +109,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
     delete dns;
 }
 
+
 inline bool resolveDNS(DNSResult* dns)
 {
     // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port <<
@@ -119,6 +127,7 @@ inline bool resolveDNS(DNSResult* dns)
                util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
 }
 
+
 inline bool resolveDNS(const std::string& host, std::uint16_t port,
                        std::function<void(const DNSResult&)> callback,
                        void* opaque = nullptr, struct addrinfo* hints = nullptr)
@@ -132,9 +141,12 @@ inline bool resolveDNS(const std::string& host, std::uint16_t port,
     return resolveDNS(dns);
 }
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_DNS_H
+
 
 /// @\}

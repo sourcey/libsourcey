@@ -8,8 +8,10 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_NET_WebSocket_H
 #define SCY_NET_WebSocket_H
+
 
 #include "scy/base.h"
 #include "scy/buffer.h"
@@ -21,16 +23,19 @@
 #include "scy/net/tcpsocket.h"
 #include "scy/random.h"
 
+
 namespace scy {
 namespace http {
 class Connection;
 namespace ws {
+
 
 enum Mode
 {
     ServerSide, ///< Server-side WebSocket.
     ClientSide  ///< Client-side WebSocket.
 };
+
 
 /// Frame header flags.
 enum class FrameFlags
@@ -40,6 +45,7 @@ enum class FrameFlags
     Rsv2 = 0x20, ///< Reserved for future use. Must be zero.
     Rsv3 = 0x10, ///< Reserved for future use. Must be zero.
 };
+
 
 /// Frame header opcodes.
 enum class Opcode
@@ -53,6 +59,7 @@ enum class Opcode
     Bitmask = 0x0f       ///< Bit mask for opcodes.
 };
 
+
 /// Combined header flags and opcodes for identifying
 /// the payload type of sent frames.
 enum SendFlags
@@ -60,6 +67,7 @@ enum SendFlags
     Text = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Text),
     Binary = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Binary)
 };
+
 
 /// StatusCodes for CLOSE frames sent with shutdown().
 enum StatusCodes
@@ -79,12 +87,13 @@ enum StatusCodes
     StatusReservedTLSFailure = 1015
 };
 
+
 /// These error codes can be obtained from WebSocket exceptions
 /// to determine the exact cause of the error.
 enum ErrorCodes
 {
     ErrorNoHandshake = 1, ///< No Connection: Upgrade or Upgrade: websocket
-                          /// header in handshake request.
+                          ///header in handshake request.
     ErrorHandshakeNoVersion =
         2, ///< No Sec-WebSocket-Version header in handshake request.
     ErrorHandshakeUnsupportedVersion =
@@ -99,10 +108,12 @@ enum ErrorCodes
     ErrorIncompleteFrame = 11 ///< Incomplete frame received.
 };
 
+
 static std::string ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 /// The WebSocket protocol version supported (13).
 static std::string ProtocolVersion = "13";
+
 
 //
 // WebSocket Framer
@@ -181,9 +192,11 @@ private:
     friend class WebSocketAdapter;
 };
 
+
 //
 // WebSocket Adapter
 //
+
 
 class WebSocketAdapter : public net::SocketAdapter
 {
@@ -241,9 +254,11 @@ protected:
     http::Response& _response;
 };
 
+
 //
 // WebSocket
 //
+
 
 /// Standalone WebSocket class.
 class WebSocket : public WebSocketAdapter
@@ -266,9 +281,11 @@ protected:
     http::Response _response;
 };
 
+
 //
 // WebSocket Connection Adapter
 //
+
 
 /// WebSocket class which belongs to a HTTP Connection.
 class ConnectionAdapter : public WebSocketAdapter
@@ -285,10 +302,13 @@ protected:
     Connection& _connection;
 };
 
+
 } // namespace ws
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_NET_WebSocket_H
+
 
 /// @\}

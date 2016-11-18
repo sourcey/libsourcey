@@ -11,11 +11,13 @@
 #ifndef SCY_AV_VideoCapture_H
 #define SCY_AV_VideoCapture_H
 
+
 #include "scy/base.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/mediacapture.h"
+
 
 namespace scy {
 namespace av {
@@ -35,10 +37,13 @@ public:
                       int height = -1, double framerate = -1);
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_VideoCapture_H
+
 
 /// @\}

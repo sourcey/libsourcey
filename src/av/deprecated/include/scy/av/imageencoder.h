@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_ImageEncoder_H
 #define SCY_AV_ImageEncoder_H
+
 
 #include "scy/av/iencoder.h"
 #include "scy/av/types.h"
@@ -19,8 +21,10 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+
 namespace scy {
 namespace av {
+
 
 /// This class is a PacketStreamAdapter which uses OpenCV     /// to encode
 /// images from raw data packets.
@@ -55,10 +59,13 @@ private:
     std::vector<int> _params;
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_ImageEncoder_H
+
 
 /// @\}

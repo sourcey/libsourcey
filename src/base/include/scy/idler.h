@@ -8,15 +8,19 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Idler_H
 #define SCY_Idler_H
+
 
 #include "scy/async.h"
 #include "scy/uv/uvpp.h"
 
 #include <functional>
 
+
 namespace scy {
+
 
 class Idler : public async::Runner
 {
@@ -38,8 +42,11 @@ protected:
     uv::Handle _handle;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Idler_H
+
 
 /// @\}

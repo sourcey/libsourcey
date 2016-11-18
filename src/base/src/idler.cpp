@@ -8,18 +8,23 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/idler.h"
 #include "scy/logger.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 Idler::Idler(uv::Loop* loop)
     : _handle(loop, new uv_async_t)
 {
     init();
 }
+
 
 Idler::Idler(uv::Loop* loop, std::function<void()> target)
     : _handle(loop, new uv_async_t)
@@ -28,6 +33,7 @@ Idler::Idler(uv::Loop* loop, std::function<void()> target)
     start(target);
 }
 
+
 Idler::Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg)
     : _handle(loop, new uv_async_t)
 {
@@ -35,10 +41,12 @@ Idler::Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg)
     start(target, arg);
 }
 
+
 Idler::~Idler()
 {
     // assert(_handle.closed()); // must be dispose()d
 }
+
 
 void Idler::init()
 {
@@ -47,6 +55,7 @@ void Idler::init()
     uv_idle_init(_handle.loop(), _handle.ptr<uv_idle_t>());
     _handle.unref(); // unref by default
 }
+
 
 void Idler::startAsync()
 {
@@ -68,16 +77,20 @@ void Idler::startAsync()
         _handle.setAndThrowError("Cannot initialize idler", r);
 }
 
+
 uv::Handle& Idler::handle()
 {
     return _handle;
 }
+
 
 bool Idler::async() const
 {
     return false;
 }
 
+
 } // namespace scy
+
 
 /// @\}

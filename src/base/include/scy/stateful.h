@@ -8,15 +8,19 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Stateful_H
 #define SCY_Stateful_H
+
 
 #include "scy/signal.h"
 
 #include <iostream>
 #include <string>
 
+
 namespace scy {
+
 
 class State
 {
@@ -56,6 +60,7 @@ protected:
     ID _id;
     std::string _message;
 };
+
 
 //
 // Mutex State
@@ -97,9 +102,11 @@ protected:
     mutable Mutex _mutex;
 };
 
+
 //
 // State Signal
 //
+
 
 class StateSignal : public MutexState
 {
@@ -120,9 +127,11 @@ protected:
     virtual void set(ID id);
 };
 
+
 //
 // Stateful Interface
 //
+
 
 /// This class implements a simple state machine.
 /// T should be a derived State type.
@@ -199,8 +208,11 @@ protected:
     T _state;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Stateful_H
+
 
 /// @\}

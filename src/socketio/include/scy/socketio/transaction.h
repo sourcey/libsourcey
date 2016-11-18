@@ -8,16 +8,21 @@
 /// @addtogroup socketio
 /// @{
 
+
 #ifndef SCY_SocketIO_Transaction_H
 #define SCY_SocketIO_Transaction_H
+
 
 #include "scy/packettransaction.h"
 #include "scy/socketio/packet.h"
 
+
 namespace scy {
 namespace sockio {
 
+
 class Client;
+
 
 struct Transaction : public PacketTransaction<sockio::Packet>
 {
@@ -39,9 +44,12 @@ protected:
     virtual ~Transaction();
 };
 
+
 } // namespace sockio
 } // namespace scy
 
+
 #endif // SCY_SocketIO_Transaction_H
+
 
 /// @\}

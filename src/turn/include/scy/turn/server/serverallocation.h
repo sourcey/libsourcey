@@ -8,16 +8,21 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_ServerAllocation_H
 #define SCY_TURN_ServerAllocation_H
+
 
 #include "scy/turn/fivetuple.h"
 #include "scy/turn/iallocation.h"
 
+
 namespace scy {
 namespace turn {
 
+
 class Server;
+
 
 class ServerAllocation : public IAllocation
 {
@@ -58,9 +63,12 @@ private:
     ServerAllocation& operator=(ServerAllocation&&) = delete;
 };
 
+
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_ServerAllocation_H
+
 
 /// @\}

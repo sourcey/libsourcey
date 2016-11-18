@@ -9,6 +9,7 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
+
 #include "scy/av/devicemanager_linux.h"
 #include "scy/filesystem.h"
 
@@ -40,13 +41,16 @@
 // #include "talk/sound/soundsysteminterface.h"
 using std::endl;
 
+
 namespace scy {
 namespace av {
+
 
 IDeviceManager* DeviceManagerFactory::create()
 {
     return new LinuxDeviceManager();
 }
+
 
 // class LinuxDeviceWatcher
 //     : public DeviceWatcher,
@@ -73,6 +77,7 @@ IDeviceManager* DeviceManagerFactory::create()
 //
 // #define LATE(sym) LATESYM_GET(LibUDevSymbolTable, &libudev_, sym)
 
+
 static const char* const kFilteredAudioDevicesName[] = {
 #if defined(CHROMEOS)
     "surround40:", "surround41:", "surround50:", "surround51:", "surround71:",
@@ -84,15 +89,18 @@ static const char* kFilteredVideoDevicesName[] = {
     NULL,
 };
 
+
 LinuxDeviceManager::LinuxDeviceManager()
 //: sound_system_(new PlatformSoundSystemFactory())
 {
     // setWatcher(new LinuxDeviceWatcher(this));
 }
 
+
 LinuxDeviceManager::~LinuxDeviceManager()
 {
 }
+
 
 // bool LinuxDeviceManager::getAudioDevices(bool input, std::vector<Device>&
 // devs)
@@ -183,8 +191,10 @@ LinuxDeviceManager::~LinuxDeviceManager()
 //     return filterDevices(devs, kFilteredAudioDevicesName);
 // }
 
+
 static const std::string kVideoMetaPathK2_4("/proc/video/dev/");
 static const std::string kVideoMetaPathK2_6("/sys/class/video4linux/");
+
 
 enum MetaType
 {
@@ -192,6 +202,7 @@ enum MetaType
     M2_6,
     NONE
 };
+
 
 bool isV4L2Device(const std::string& devicePath)
 {
@@ -239,6 +250,7 @@ static std::string trim(const std::string& s, const std::string& drop = " \t")
     return s.substr(first, last - first + 1);
 }
 
+
 static void scanDeviceDirectory(const std::string& devdir,
                                 std::vector<Device>& devices)
 {
@@ -251,6 +263,7 @@ static void scanDeviceDirectory(const std::string& devdir,
         }
     }
 }
+
 
 static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath)
 {
@@ -295,6 +308,7 @@ static std::string getVideoDeviceNameK2_4(const std::string& deviceMetaPath)
     return "";
 }
 
+
 static std::string getVideoDeviceName(MetaType meta,
                                       const std::string& deviceFileName)
 {
@@ -329,6 +343,7 @@ static std::string getVideoDeviceName(MetaType meta,
 
     return trim(deviceName);
 }
+
 
 static void scanV4L2Devices(std::vector<Device>& devices)
 {
@@ -375,12 +390,14 @@ static void scanV4L2Devices(std::vector<Device>& devices)
     InfoL << "Total V4L2 devices found : " << devices.size() << endl;
 }
 
+
 bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 {
     devices.clear();
     scanV4L2Devices(devices);
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
+
 
 // LinuxDeviceWatcher::LinuxDeviceWatcher(IDeviceManager* dm)
 //     : DeviceWatcher(dm),
@@ -520,8 +537,10 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     return false;
 // }
 
+
 } // namespace av
 } // namespace scy
+
 
 /*
  * libjingle

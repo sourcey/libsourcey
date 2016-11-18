@@ -15,15 +15,19 @@
 #include <iostream>
 #include <string>
 
+
 #define OUTPUT_FILENAME "webrtcrecorder.mp4"
 #define OUTPUT_FORMAT                                                          \
     av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
                                             48000, 128000, "yuv420p"),         \
                av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 Signaler::Signaler(const smpl::Client::Options& options)
     : _client(options)
@@ -35,9 +39,11 @@ Signaler::Signaler(const smpl::Client::Options& options)
     _client.connect();
 }
 
+
 Signaler::~Signaler()
 {
 }
+
 
 void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
                        const std::string& sdp)
@@ -52,6 +58,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
     postMessage(m);
 }
 
+
 void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
                              int mlineindex, const std::string& sdp)
 {
@@ -64,6 +71,7 @@ void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
 
     postMessage(m);
 }
+
 
 void Signaler::onPeerConnected(smpl::Peer& peer)
 {
@@ -84,6 +92,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     PeerConnectionManager::add(peer.id(), conn);
 }
 
+
 void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
@@ -98,6 +107,7 @@ void Signaler::onPeerMessage(smpl::Message& m)
     // else assert(0 && "unknown event");
 }
 
+
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
     DebugL << "Peer disconnected" << endl;
@@ -108,6 +118,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
         conn->closeConnection(); // will be deleted via callback
     }
 }
+
 
 void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
                                    const sockio::ClientState& oldState)
@@ -129,6 +140,7 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
     }
 }
 
+
 void Signaler::onAddRemoteStream(PeerConnection* conn,
                                  webrtc::MediaStreamInterface* stream)
 {
@@ -149,15 +161,18 @@ void Signaler::onAddRemoteStream(PeerConnection* conn,
         _recorder->setAudioTrack(audioTracks[0]);
 }
 
+
 void Signaler::onRemoveRemoteStream(PeerConnection* conn,
                                     webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "free streams");
 }
 
+
 void Signaler::onStable(PeerConnection* conn)
 {
 }
+
 
 void Signaler::onClosed(PeerConnection* conn)
 {
@@ -165,11 +180,13 @@ void Signaler::onClosed(PeerConnection* conn)
     PeerConnectionManager::onClosed(conn);
 }
 
+
 void Signaler::onFailure(PeerConnection* conn, const std::string& error)
 {
     _recorder.reset(); // shutdown the recorder
     PeerConnectionManager::onFailure(conn, error);
 }
+
 
 void Signaler::postMessage(const smpl::Message& m)
 {
@@ -178,11 +195,13 @@ void Signaler::postMessage(const smpl::Message& m)
         m.clone()));
 }
 
+
 void Signaler::syncMessage(const ipc::Action& action)
 {
     auto m = reinterpret_cast<smpl::Message*>(action.arg);
     _client.send(*m);
     delete m;
 }
+
 
 } // namespace scy

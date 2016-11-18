@@ -8,14 +8,18 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Util_h
 #define SCY_HTTP_Util_h
+
 
 #include "scy/base.h"
 #include "scy/collection.h"
 
+
 namespace scy {
 namespace http {
+
 
 /// Parses the URI part from a HTTP request.
 std::string parseURI(const std::string& request);
@@ -54,9 +58,12 @@ void splitParameters(const std::string::const_iterator& begin,
                      const std::string::const_iterator& end,
                      NVCollection& parameters);
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_Util_H
+
 
 /// @\}

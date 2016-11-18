@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_Thumbnailer_H
 #define SCY_AV_Thumbnailer_H
+
 
 #if 0 // needs updating to latest API
 
@@ -39,6 +41,7 @@ struct ThumbnailerOptions
         int width = 0, int height = 0, double seek = 0.0)
         : ifile(ifile), ofile(ofile), width(width), height(height), seek(seek) {};
 };
+
 
 #ifdef HAVE_FFMPEG
 
@@ -74,6 +77,7 @@ struct Thumbnailer
 
 } // namespace av
 } // namespace scy
+
 
 #endif
 #endif

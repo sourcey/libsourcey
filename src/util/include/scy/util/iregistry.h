@@ -8,14 +8,18 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_IRegistry_H
 #define SCY_IRegistry_H
+
 
 #include "scy/signal.h"
 
 #include <map>
 
+
 namespace scy {
+
 
 /// @addtogroup util
 template <class ItemT> class IRegistry
@@ -39,7 +43,7 @@ public:
     template <typename T> void registerType(const std::string& s)
     {
         _types.insert(std::make_pair(s, &createT<T>));
-        TypeRegistered.emit(/*this, */ s);
+        TypeRegistered.emit(s);
     }
 
     virtual void unregisterType(const std::string& s)
@@ -48,7 +52,7 @@ public:
         if (it == _types.end())
             return;
         _types.erase(it);
-        TypeUnregistered.emit(/*this, */ s);
+        TypeUnregistered.emit(s);
     }
 
     TypeMap types() const { return _types; }
@@ -60,8 +64,11 @@ private:
     TypeMap _types;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_IRegistry_H
+
 
 /// @\}

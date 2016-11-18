@@ -10,12 +10,16 @@
 // This file uses functions from POCO C++ Libraries (license below).
 //
 
+
 #ifndef SCY_Random_H
 #define SCY_Random_H
 
+
 #include <cstdint>
 
+
 namespace scy {
+
 
 /// Random implements a pseudo random number generator (PRNG).
 /// The PRNG is a nonlinear additive feedback random number
@@ -90,11 +94,15 @@ private:
     char* _buffer;
 };
 
+
 } // namespace scy
+
 
 #endif // SCY_Random_H
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

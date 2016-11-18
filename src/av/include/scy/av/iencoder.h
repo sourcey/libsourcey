@@ -8,16 +8,20 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_IEncoder_H
 #define SCY_AV_IEncoder_H
+
 
 #include "scy/av/format.h"
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 #include "scy/stateful.h"
 
+
 namespace scy {
 namespace av {
+
 
 struct EncoderState : public State
 {
@@ -47,6 +51,7 @@ struct EncoderState : public State
         return "undefined";
     };
 };
+
 
 struct EncoderOptions
 {
@@ -103,6 +108,7 @@ public:
     virtual bool isError() const { return stateEquals(EncoderState::Error); };
 };
 
+
 typedef IEncoder IPacketEncoder; /// 0.8.x compatibility
 
 /*/// This class extends the IEncoder interface to add
@@ -116,9 +122,12 @@ public:
 };
 */
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_IEncoder_H
+
 
 /// @\}

@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audioresampler.h"
 
 #ifdef HAVE_FFMPEG
@@ -15,10 +16,13 @@
 #include "scy/logger.h"
 #include "scy/util.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioResampler::AudioResampler(const AudioCodec& iparams,
                                const AudioCodec& oparams)
@@ -34,10 +38,12 @@ AudioResampler::AudioResampler(const AudioCodec& iparams,
 {
 }
 
+
 AudioResampler::~AudioResampler()
 {
     close();
 }
+
 
 void AudioResampler::open()
 {
@@ -106,6 +112,7 @@ void AudioResampler::open()
     TraceS(this) << "Create: OK" << endl;
 }
 
+
 void AudioResampler::close()
 {
     TraceS(this) << "Closing" << endl;
@@ -130,8 +137,8 @@ void AudioResampler::close()
     outBufferSize = 0;
 }
 
-int AudioResampler::resample(std::uint8_t** inSamples,
-                             int inNumSamples) // const
+
+int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // const
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -209,6 +216,7 @@ int AudioResampler::resample(std::uint8_t** inSamples,
     return ret;
 }
 
+
 #if 0
 int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 {
@@ -284,9 +292,12 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 }
 #endif
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

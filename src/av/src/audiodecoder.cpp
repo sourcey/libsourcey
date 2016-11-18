@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audiodecoder.h"
 #include "scy/av/audioresampler.h"
 
@@ -17,20 +18,25 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioDecoder::AudioDecoder(AVStream* stream)
 {
     this->stream = stream;
 }
 
+
 AudioDecoder::~AudioDecoder()
 {
     close();
 }
+
 
 void AudioDecoder::create()
 {
@@ -64,12 +70,14 @@ void AudioDecoder::create()
     oparams.sampleFmt = "s16";
 }
 
+
 void AudioDecoder::close()
 {
     AudioContext::close();
 }
 
-bool emitPacket(AudioDecoder* dec)
+
+bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
 {
     auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
     assert(av_sample_fmt_is_planar(sampleFmt) == 0 &&
@@ -129,6 +137,7 @@ bool emitPacket(AudioDecoder* dec)
     return true;
 }
 
+
 bool AudioDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
@@ -139,6 +148,7 @@ bool AudioDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
         ipacket.stream_index = stream->index;
     return decode(ipacket); //, opacket
 }
+
 
 bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 {
@@ -220,6 +230,7 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     return !!frameDecoded;
 }
 
+
 void AudioDecoder::flush() // AVPacket& opacket
 {
     AVPacket ipacket;
@@ -242,6 +253,7 @@ void AudioDecoder::flush() // AVPacket& opacket
     }
 }
 
+
 // void AudioContext::process(IPacket& packet)
 // {
 //     TraceS(this) << "Process" << endl;
@@ -253,9 +265,12 @@ void AudioDecoder::flush() // AVPacket& opacket
 //     decode(apacket->data(), apacket->size());
 // }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

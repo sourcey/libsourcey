@@ -8,9 +8,12 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/synccontext.h"
 
+
 namespace scy {
+
 
 SyncContext::SyncContext(uv::Loop* loop)
     : _handle(loop, new uv_async_t)
@@ -18,12 +21,14 @@ SyncContext::SyncContext(uv::Loop* loop)
     // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
 }
 
+
 SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target)
     : _handle(loop, new uv_async_t)
 {
     // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
     start(target);
 }
+
 
 SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target,
                          void* arg)
@@ -33,17 +38,20 @@ SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target,
     start(target, arg);
 }
 
+
 SyncContext::~SyncContext()
 {
     // assert(_handle.closed()); // must be dispose()d
     close();
 }
 
+
 void SyncContext::post()
 {
     assert(!_handle.closed());
     uv_async_send(_handle.ptr<uv_async_t>());
 }
+
 
 void SyncContext::startAsync()
 {
@@ -70,10 +78,12 @@ void SyncContext::startAsync()
         _handle.setAndThrowError("Cannot initialize async", r);
 }
 
+
 void SyncContext::cancel()
 {
     async::Runner::cancel();
 }
+
 
 void SyncContext::close()
 {
@@ -84,21 +94,26 @@ void SyncContext::close()
     _handle.close();
 }
 
+
 bool SyncContext::closed()
 {
     return _handle.closed();
 }
+
 
 bool SyncContext::async() const
 {
     return false;
 }
 
+
 uv::Handle& SyncContext::handle()
 {
     return _handle;
 }
 
+
 } // namespace scy
+
 
 /// @\}

@@ -1,6 +1,8 @@
 #include "mediaserver.h"
 
+
 namespace scy {
+
 
 class StreamingRequestHandler : public http::ServerResponder
 {
@@ -48,6 +50,7 @@ public:
                      // assert(!connection().socket()->closed());
                      << packet.size() << ": " << fpsCounter.fps << std::endl;
 
+
         try {
             connection().socket()->send((const char*)packet.data(),
                                         packet.size());
@@ -62,5 +65,6 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
+
 
 } // namespace scy

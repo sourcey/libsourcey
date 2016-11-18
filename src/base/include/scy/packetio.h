@@ -8,20 +8,26 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_PACKET_IO_H
 #define SCY_PACKET_IO_H
+
 
 #include "scy/packetstream.h"
 #include <fstream>
 #include <iostream>
 
+
 namespace scy {
 
+
+///
 /// Threaded stream reader class.
 ///
 /// This class can be connected to a `PacketStream` to read input from any
 /// class that derives from `std::istream`. It's most regularly used for reading
 /// input files.
+///
 class ThreadedStreamReader : public PacketSource, public async::Startable
 {
 public:
@@ -81,11 +87,14 @@ protected:
     std::istream* _istream;
 };
 
+
+///
 /// Packet stream writer class.
 ///
 /// This class can be connected to a `PacketStream` to write output to any
 /// class that derives from `std::ostream`. It's most regularly used for writing
 /// output files.
+///
 class StreamWriter : public PacketProcessor
 {
 public:
@@ -133,8 +142,11 @@ protected:
     std::ostream* _ostream;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_PACKET_IO_H
+
 
 /// @\}

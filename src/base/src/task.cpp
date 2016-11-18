@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/task.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
@@ -18,13 +19,17 @@
 #include <assert.h>
 #include <iostream>
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 //
 // Task
 //
+
 
 Task::Task(bool repeat)
     : _id(util::randomNumber())
@@ -33,34 +38,41 @@ Task::Task(bool repeat)
 {
 }
 
+
 Task::~Task()
 {
     // assert(destroyed());
 }
+
 
 void Task::destroy()
 {
     _destroyed = true;
 }
 
+
 std::uint32_t Task::id() const
 {
     return _id;
 }
+
 
 bool Task::destroyed() const
 {
     return _destroyed;
 }
 
+
 bool Task::repeating() const
 {
     return _repeating;
 }
 
+
 //
 // Task Runner
 //
+
 
 TaskRunner::TaskRunner(async::Runner::Ptr runner)
 {
@@ -70,6 +82,7 @@ TaskRunner::TaskRunner(async::Runner::Ptr runner)
         setRunner(std::make_shared<Thread>());
 }
 
+
 TaskRunner::~TaskRunner()
 {
     Shutdown.emit(/*this*/);
@@ -78,6 +91,7 @@ TaskRunner::~TaskRunner()
         _runner->cancel();
     clear();
 }
+
 
 bool TaskRunner::start(Task* task)
 {
@@ -93,6 +107,7 @@ bool TaskRunner::start(Task* task)
     //}
     // return false;
 }
+
 
 bool TaskRunner::cancel(Task* task)
 {
@@ -116,6 +131,7 @@ bool TaskRunner::cancel(Task* task)
     return false;
 }
 
+
 bool TaskRunner::destroy(Task* task)
 {
     TraceN(this) << "Abort task: " << task << endl;
@@ -135,6 +151,7 @@ bool TaskRunner::destroy(Task* task)
     return true; // hmmm
 }
 
+
 bool TaskRunner::add(Task* task)
 {
     TraceN(this) << "Add task: " << task << endl;
@@ -148,6 +165,7 @@ bool TaskRunner::add(Task* task)
     }
     return false;
 }
+
 
 bool TaskRunner::remove(Task* task)
 {
@@ -166,6 +184,7 @@ bool TaskRunner::remove(Task* task)
     return false;
 }
 
+
 bool TaskRunner::exists(Task* task) const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -175,6 +194,7 @@ bool TaskRunner::exists(Task* task) const
     }
     return false;
 }
+
 
 Task* TaskRunner::get(std::uint32_t id) const
 {
@@ -186,6 +206,7 @@ Task* TaskRunner::get(std::uint32_t id) const
     return nullptr;
 }
 
+
 Task* TaskRunner::next() const
 {
     Mutex::ScopedLock lock(_mutex);
@@ -195,6 +216,7 @@ Task* TaskRunner::next() const
     }
     return nullptr;
 }
+
 
 void TaskRunner::clear()
 {
@@ -206,6 +228,7 @@ void TaskRunner::clear()
     _tasks.clear();
 }
 
+
 void TaskRunner::setRunner(async::Runner::Ptr runner)
 {
     TraceN(this) << "Set async: " << runner << endl;
@@ -216,6 +239,7 @@ void TaskRunner::setRunner(async::Runner::Ptr runner)
     _runner->setRepeating(true);
     _runner->start(*this);
 }
+
 
 void TaskRunner::run()
 {
@@ -263,25 +287,31 @@ void TaskRunner::run()
     scy::sleep(1);
 }
 
+
 void TaskRunner::onAdd(Task*)
 {
 }
+
 
 void TaskRunner::onStart(Task*)
 {
 }
 
+
 void TaskRunner::onCancel(Task*)
 {
 }
+
 
 void TaskRunner::onRemove(Task*)
 {
 }
 
+
 void TaskRunner::onRun(Task*)
 {
 }
+
 
 TaskRunner& TaskRunner::getDefault()
 {
@@ -289,6 +319,8 @@ TaskRunner& TaskRunner::getDefault()
     return *sh.get();
 }
 
+
 } // namespace scy
+
 
 /// @\}

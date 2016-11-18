@@ -8,13 +8,17 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_SharedLibrary_H
 #define SCY_SharedLibrary_H
+
 
 #include "scy/util.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
+
 
 struct SharedLibrary
 {
@@ -62,8 +66,11 @@ protected:
     std::string _error;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_SharedLibrary_H
+
 
 /// @\}

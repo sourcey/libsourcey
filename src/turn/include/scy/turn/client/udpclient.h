@@ -8,8 +8,10 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_UDPClient_H
 #define SCY_TURN_UDPClient_H
+
 
 #include "scy/net/udpsocket.h"
 #include "scy/stateful.h"
@@ -21,8 +23,10 @@
 
 #include <deque>
 
+
 namespace scy {
 namespace turn {
+
 
 class UDPClient : public Client
 {
@@ -33,6 +37,8 @@ public:
 }
 } //  namespace scy::turn
 
+
 #endif // SCY_TURN_Client_H
+
 
 /// @\}

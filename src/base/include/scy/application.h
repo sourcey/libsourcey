@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Application_H
 #define SCY_Application_H
+
 
 #include "scy/util.h"
 #include "scy/uv/uvpp.h"
@@ -17,7 +19,9 @@
 #include <map>
 #include <vector>
 
+
 namespace scy {
+
 
 ///
 /// Main LibSourcey application class.
@@ -70,9 +74,11 @@ protected:
     Application& operator=(Application&&) = delete;
 };
 
+
 //
 /// Command Line Option Parser
 //
+
 
 typedef std::map<std::string, std::string> OptionMap;
 
@@ -101,8 +107,11 @@ struct OptionParser
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Application_H
+
 
 /// @\}

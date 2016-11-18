@@ -8,16 +8,20 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_UDPSocket_H
 #define SCY_Net_UDPSocket_H
+
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/net/types.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
 namespace net {
+
 
 class UDPSocket : public net::Socket, public uv::Handle
 {
@@ -76,9 +80,12 @@ protected:
     Buffer _buffer;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_UDPSocket_H
+
 
 /// @\}

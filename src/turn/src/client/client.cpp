@@ -8,6 +8,7 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/client/client.h"
 #include "scy/application.h"
 #include "scy/crypto/hash.h"
@@ -20,10 +21,13 @@
 #include <assert.h>
 #include <iostream>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 Client::Client(ClientObserver& observer, const Options& options)
     : _observer(observer)
@@ -32,6 +36,7 @@ Client::Client(ClientObserver& observer, const Options& options)
 {
 }
 
+
 Client::~Client()
 {
     TraceL << "Destroy" << endl;
@@ -39,6 +44,7 @@ Client::~Client()
     // assert(_socket->/*base().*/refCount() == 1);
     // assert(closed());
 }
+
 
 void Client::initiate()
 {
@@ -61,6 +67,7 @@ void Client::initiate()
     // else
     //    onSocketConnect(&_socket->base());
 }
+
 
 void Client::shutdown()
 {
@@ -87,6 +94,7 @@ void Client::shutdown()
     }
 }
 
+
 void Client::onSocketConnect(net::Socket& socket)
 {
     TraceL << "Client connected" << endl;
@@ -97,6 +105,7 @@ void Client::onSocketConnect(net::Socket& socket)
 
     sendAllocate();
 }
+
 
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
@@ -125,6 +134,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 #endif
 }
 
+
 void Client::onSocketClose(net::Socket& socket) //, const Error& error
 {
     assert(&socket == _socket.get());
@@ -133,6 +143,7 @@ void Client::onSocketClose(net::Socket& socket) //, const Error& error
     shutdown();
     setState(this, ClientState::Failed, _socket->error().message);
 }
+
 
 void Client::sendRefresh()
 {
@@ -161,6 +172,7 @@ void Client::sendRefresh()
 
     sendAuthenticatedTransaction(transaction);
 }
+
 
 void Client::handleRefreshResponse(const stun::Message& response)
 {
@@ -198,6 +210,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
     // If lifetime is 0 the allocation will be cleaned up by garbage collection.
 }
 
+
 bool Client::removeTransaction(stun::Transaction* transaction)
 {
     TraceL << "Removing transaction: " << transaction << endl;
@@ -213,6 +226,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
     assert(0 && "unknown transaction");
     return false;
 }
+
 
 void Client::authenticateRequest(stun::Message& request)
 {
@@ -257,6 +271,7 @@ void Client::authenticateRequest(stun::Message& request)
     }
 }
 
+
 bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 {
     authenticateRequest(transaction->request());
@@ -264,6 +279,7 @@ bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
            << transaction->request().toString() << endl;
     return transaction->send();
 }
+
 
 stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 {
@@ -276,6 +292,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
     _transactions.push_back(transaction);
     return transaction;
 }
+
 
 bool Client::handleResponse(const stun::Message& response)
 {
@@ -318,6 +335,7 @@ bool Client::handleResponse(const stun::Message& response)
 
     return true;
 }
+
 
 void Client::sendAllocate()
 {
@@ -409,6 +427,7 @@ void Client::sendAllocate()
     sendAuthenticatedTransaction(transaction);
 }
 
+
 //  At this point the response has already been authenticated, but we
 //  have not checked for existing allocations on this 5 tuple.
 void Client::handleAllocateResponse(const stun::Message& response)
@@ -496,6 +515,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
     if (!closed())
         sendCreatePermission();
 }
+
 
 void Client::handleAllocateErrorResponse(const stun::Message& response)
 {
@@ -685,6 +705,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
     }
 }
 
+
 void Client::addPermission(const IPList& peerIPs)
 {
     for (auto it = peerIPs.begin(); it != peerIPs.end(); ++it) {
@@ -692,10 +713,12 @@ void Client::addPermission(const IPList& peerIPs)
     }
 }
 
+
 void Client::addPermission(const std::string& peerIP)
 {
     IAllocation::addPermission(peerIP);
 }
+
 
 void Client::sendCreatePermission()
 {
@@ -731,6 +754,7 @@ void Client::sendCreatePermission()
 
     sendAuthenticatedTransaction(transaction);
 }
+
 
 void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 {
@@ -771,6 +795,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     setState(this, ClientState::Success);
 }
 
+
 void Client::handleCreatePermissionErrorResponse(
     const stun::Message& /* response */)
 {
@@ -780,6 +805,7 @@ void Client::handleCreatePermissionErrorResponse(
 
     setState(this, ClientState::Failed, "Cannot create server permissions.");
 }
+
 
 void Client::sendChannelBind(const std::string& /* peerIP */)
 {
@@ -800,6 +826,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
     // channels.
     assert(0 && "not implemented");
 }
+
 
 void Client::sendData(const char* data, std::size_t size,
                       const net::Address& peerAddress)
@@ -864,6 +891,7 @@ void Client::sendData(const char* data, std::size_t size,
     }
 }
 
+
 void Client::handleDataIndication(const stun::Message& response)
 {
     // When the client receives a Data indication, it checks that the Data
@@ -902,6 +930,7 @@ void Client::handleDataIndication(const stun::Message& response)
                                       dataAttr->size(), peerAttr->address());
     }
 }
+
 
 void Client::onTransactionProgress(void* sender, TransactionState& state,
                                    const TransactionState&)
@@ -948,6 +977,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
     }
 }
 
+
 void Client::onTimer()
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -962,21 +992,25 @@ void Client::onTimer()
     _observer.onTimer(*this);
 }
 
+
 void Client::onStateChange(void* timer, ClientState& state,
                            const ClientState& oldState)
 {
     _observer.onClientStateChange(*this, state, oldState);
 }
 
+
 int Client::transportProtocol()
 {
     return 17; // UDP
 }
 
+
 bool Client::closed() const
 {
     return stateEquals(ClientState::None) || stateEquals(ClientState::Failed);
 }
+
 
 Client::Options& Client::options()
 {
@@ -984,11 +1018,13 @@ Client::Options& Client::options()
     return _options;
 }
 
+
 net::Address Client::mappedAddress() const
 {
     // Mutex::ScopedLock lock(_mutex);
     return _mappedAddress;
 }
+
 
 net::Address Client::relayedAddress() const
 {
@@ -997,5 +1033,6 @@ net::Address Client::relayedAddress() const
 }
 }
 } //  namespace scy::turn
+
 
 /// @\}

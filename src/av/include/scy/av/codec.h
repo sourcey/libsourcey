@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_Codec_H
 #define SCY_AV_Codec_H
+
 
 #include "scy/av/config.h"
 #include "scy/base.h"
@@ -18,8 +20,10 @@
 #include <list>
 #include <string>
 
+
 namespace scy {
 namespace av {
+
 
 // ---------------------------------------------------------------------
 ///// Defines a codec for encoding/decoding media.
@@ -57,6 +61,7 @@ struct Codec
     // Codec& operator=(const Codec& r);
 };
 
+
 // ---------------------------------------------------------------------
 //
 #define DEFAULT_AUDIO_SAMPLE_RATE 44100
@@ -64,11 +69,12 @@ struct Codec
 #define DEFAULT_AUDIO_CHANNELS 2
 #define DEFAULT_AUDIO_SAMPLE_FMT "s16"
 
+
 struct AudioCodec : public Codec
 {
     int channels;
     std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p,
-                           /// fltp, dblp
+                           ///fltp, dblp
     /// int frameSize;  // Frame size (optional value set by encoder/decoder)
     /// /// int bufferSize; // Buffer size (optional value set by
     /// encoder/decoder)
@@ -93,6 +99,7 @@ struct AudioCodec : public Codec
     /// AudioCodec& operator==(const AudioCodec& that);
 };
 
+
 // ---------------------------------------------------------------------
 //
 #define DEFAULT_VIDEO_SAMPLE_RATE                                              \
@@ -100,6 +107,7 @@ struct AudioCodec : public Codec
            // using video compression
 #define DEFAULT_VIDEO_BIT_RATE 400000
 #define DEFAULT_VIDEO_PIXEL_FMT "yuv420p"
+
 
 struct VideoCodec : public Codec
 {
@@ -125,10 +133,13 @@ struct VideoCodec : public Codec
     virtual void print(std::ostream& ost);
 };
 
+
 typedef std::list<Codec> CodecList;
 typedef std::list<Codec*> CodecPList;
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif

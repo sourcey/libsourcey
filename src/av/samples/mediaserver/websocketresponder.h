@@ -1,7 +1,9 @@
 #include "mediaserver.h"
 #include "scy/http/websocket.h"
 
+
 namespace scy {
+
 
 // ----------------------------------------------------------------------------
 //
@@ -43,6 +45,7 @@ public:
                      << &connection() << ": " << packet.size() << ": "
                      << fpsCounter.fps << std::endl;
 
+
         try {
             connection().socket()->send(packet.data(), packet.size(),
                                         http::ws::Binary);
@@ -59,5 +62,6 @@ public:
     StreamingOptions options;
     av::FPSCounter fpsCounter;
 };
+
 
 } // namespace scy

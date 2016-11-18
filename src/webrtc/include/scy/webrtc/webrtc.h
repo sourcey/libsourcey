@@ -12,11 +12,14 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #ifndef SCY_WEBRTC_H
 #define SCY_WEBRTC_H
 
+
 namespace scy {
 // namespace webrtc {
+
 
 /// Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -35,8 +38,11 @@ const char kStreamLabel[] = "stream_label";
 /// Server URIs for ICE candidates.
 const char kGoogleStunServerUri[] = "stun:stun.l.google.com:19302";
 
+
 } // } // namespace scy::webrtc
 
+
 #endif // SCY_WEBRTC_H
+
 
 /// @\}

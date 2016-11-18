@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_SyncContext_H
 #define SCY_SyncContext_H
+
 
 #include "scy/async.h"
 #include "scy/interface.h"
@@ -19,7 +21,9 @@
 
 #include <deque>
 
+
 namespace scy {
+
 
 //
 // Synchronization Context
@@ -57,6 +61,7 @@ protected:
 
     uv::Handle _handle;
 };
+
 
 #if 0
 
@@ -170,8 +175,11 @@ static SyncDelegate<C,
 
 #endif
 
+
 } // namespace scy
 
+
 #endif // SCY_SyncContext_H
+
 
 /// @\}

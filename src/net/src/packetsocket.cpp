@@ -12,12 +12,15 @@
 
 using std::endl;
 
+
 namespace scy {
 namespace net {
+
 
 //
 // Packet Socket Adapter
 //
+
 
 PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
     : SocketAdapter(socket.get())
@@ -25,6 +28,7 @@ PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
 {
     TraceS(this) << "Create: " << socket << endl;
 }
+
 
 void PacketSocketAdapter::onSocketRecv(Socket& socket,
                                        const MutableBuffer& buffer,
@@ -47,11 +51,13 @@ void PacketSocketAdapter::onSocketRecv(Socket& socket,
     }
 }
 
+
 void PacketSocketAdapter::onPacket(IPacket& pkt)
 {
     // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
     PacketSignal::emit(/*socket.get(), */ pkt);
 }
+
 
 #if 0
 //
@@ -137,7 +143,9 @@ void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& sta
 }
 #endif
 
+
 } // namespace net
 } // namespace scy
+
 
 /// @\}

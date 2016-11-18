@@ -8,17 +8,21 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/server/server.h"
 #include "scy/buffer.h"
 #include "scy/logger.h"
 #include <algorithm>
 
+
 using std::endl;
 using std::min;
 using namespace scy::net;
 
+
 namespace scy {
 namespace turn {
+
 
 Server::Server(ServerObserver& observer, const ServerOptions& options)
     : _observer(observer)
@@ -29,6 +33,7 @@ Server::Server(ServerObserver& observer, const ServerOptions& options)
     TraceL << "Create" << endl;
 }
 
+
 Server::~Server()
 {
     TraceL << "Destroy" << endl;
@@ -37,6 +42,7 @@ Server::~Server()
     stop();
     TraceL << "Destroy: OK" << endl;
 }
+
 
 void Server::start()
 {
@@ -62,6 +68,7 @@ void Server::start()
     _timer.Timeout += slot(this, &Server::onTimer);
     _timer.start(_options.timerInterval, _options.timerInterval);
 }
+
 
 void Server::stop()
 {
@@ -93,6 +100,7 @@ void Server::stop()
     }
 }
 
+
 void Server::onTimer()
 {
     ServerAllocationMap allocations = this->allocations();
@@ -105,6 +113,7 @@ void Server::onTimer()
         }
     }
 }
+
 
 void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 {
@@ -122,6 +131,7 @@ void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
     // TODO: make option
 }
 
+
 net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 {
     for (auto& sock : _tcpSockets) {
@@ -134,6 +144,7 @@ net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
     assert(0 && "unknown socket");
     return net::TCPSocket::Ptr();
 }
+
 
 void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
@@ -176,11 +187,13 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 #endif
 }
 
+
 void Server::onTCPSocketClosed(net::Socket& socket)
 {
     TraceL << "TCP socket closed" << endl;
     releaseTCPSocket(&socket);
 }
+
 
 void Server::releaseTCPSocket(net::Socket* socket)
 {
@@ -199,6 +212,7 @@ void Server::releaseTCPSocket(net::Socket* socket)
     }
     assert(0 && "unknown socket");
 }
+
 
 void Server::handleRequest(Request& request, AuthenticationState state)
 {
@@ -224,6 +238,7 @@ void Server::handleRequest(Request& request, AuthenticationState state)
             break;
     }
 }
+
 
 void Server::handleAuthorizedRequest(
     Request& request) //, AuthenticationState state
@@ -279,6 +294,7 @@ void Server::handleAuthorizedRequest(
     }
 }
 
+
 void Server::handleConnectionBindRequest(Request& request)
 {
     auto connAttr = request.get<stun::ConnectionID>();
@@ -298,6 +314,7 @@ void Server::handleConnectionBindRequest(Request& request)
 
     alloc->handleConnectionBindRequest(request);
 }
+
 
 void Server::handleBindingRequest(Request& request)
 {
@@ -323,6 +340,7 @@ void Server::handleBindingRequest(Request& request)
     // request.socket->sendPacket(response, request.remoteAddress);
     respond(request, response);
 }
+
 
 void Server::handleAllocateRequest(Request& request)
 {
@@ -659,6 +677,7 @@ void Server::handleAllocateRequest(Request& request)
     //    the lifetime of allocations "orphaned" in this manner.
 }
 
+
 void Server::respond(Request& request, stun::Message& response)
 {
     // Sign the response message
@@ -726,11 +745,13 @@ void Server::respondError(Request& request, int errorCode,
     respond(request, errorMsg);
 }
 
+
 net::UDPSocket& Server::udpSocket()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _udpSocket;
 }
+
 
 ServerObserver& Server::observer()
 {
@@ -738,11 +759,13 @@ ServerObserver& Server::observer()
     return _observer;
 }
 
+
 ServerOptions& Server::options()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _options;
 }
+
 
 ServerAllocationMap Server::allocations() const
 {
@@ -750,10 +773,12 @@ ServerAllocationMap Server::allocations() const
     return _allocations;
 }
 
+
 Timer& Server::timer()
 {
     return _timer;
 }
+
 
 void Server::addAllocation(ServerAllocation* alloc)
 {
@@ -769,6 +794,7 @@ void Server::addAllocation(ServerAllocation* alloc)
 
     _observer.onServerAllocationCreated(this, alloc);
 }
+
 
 void Server::removeAllocation(ServerAllocation* alloc)
 {
@@ -788,6 +814,7 @@ void Server::removeAllocation(ServerAllocation* alloc)
     _observer.onServerAllocationRemoved(this, alloc);
 }
 
+
 ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
     // Mutex::ScopedLock lock(_mutex);
@@ -797,6 +824,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
         return it->second;
     return nullptr;
 }
+
 
 TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 {
@@ -816,5 +844,6 @@ TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 }
 }
 } //  namespace scy::turn
+
 
 /// @\}

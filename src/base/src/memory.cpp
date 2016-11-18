@@ -8,15 +8,20 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/memory.h"
 #include "scy/util.h"
 
+
 using std::endl;
+
 
 namespace scy {
 
+
 static Singleton<GarbageCollector> singleton;
 static const int GCTimerDelay = 2400;
+
 
 GarbageCollector::GarbageCollector()
     : _handle(uv::defaultLoop(), new uv_timer_t)
@@ -31,6 +36,7 @@ GarbageCollector::GarbageCollector()
                    GCTimerDelay, GCTimerDelay);
     uv_unref(_handle.ptr());
 }
+
 
 GarbageCollector::~GarbageCollector()
 {
@@ -50,6 +56,7 @@ GarbageCollector::~GarbageCollector()
     assert(_pending.empty());
     assert(_ready.empty());
 }
+
 
 void GarbageCollector::finalize()
 {
@@ -78,10 +85,12 @@ void GarbageCollector::finalize()
     TraceL << "Finalize: OK" << std::endl;
 }
 
+
 void onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
     DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
+
 
 void GarbageCollector::runAsync()
 {
@@ -130,26 +139,32 @@ void GarbageCollector::runAsync()
     }
 }
 
+
 void GarbageCollector::onTimer(uv_timer_t* handle)
 {
     static_cast<GarbageCollector*>(handle->data)->runAsync();
 }
+
 
 uv_thread_t GarbageCollector::tid()
 {
     return _tid;
 }
 
+
 void GarbageCollector::destroy()
 {
     singleton.destroy();
 }
+
 
 GarbageCollector& GarbageCollector::instance()
 {
     return *singleton.get();
 }
 
+
 } // namespace scy
+
 
 /// @\}

@@ -8,15 +8,19 @@
 /// @addtogroup socketio
 /// @{
 
+
 #include "scy/socketio/transaction.h"
 #include "scy/logger.h"
 #include "scy/socketio/client.h"
 #include <iostream>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace sockio {
+
 
 Transaction::Transaction(Client& client, long timeout)
     : PacketTransaction<Packet>(timeout, 0,
@@ -26,6 +30,7 @@ Transaction::Transaction(Client& client, long timeout)
     TraceN(this) << "Create" << endl;
 }
 
+
 Transaction::Transaction(Client& client, const Packet& request, long timeout)
     : PacketTransaction<Packet>(request, timeout, 0,
                                 client.ws().socket /*.base()*/->loop())
@@ -34,10 +39,12 @@ Transaction::Transaction(Client& client, const Packet& request, long timeout)
     TraceN(this) << "Create" << endl;
 }
 
+
 Transaction::~Transaction()
 {
     TraceN(this) << "Destroy" << endl;
 }
+
 
 bool Transaction::send()
 {
@@ -49,6 +56,7 @@ bool Transaction::send()
     return false;
 }
 
+
 void Transaction::onPotentialResponse(IPacket& pkt)
 {
     auto packet = dynamic_cast<sockio::Packet*>(&pkt);
@@ -58,11 +66,13 @@ void Transaction::onPotentialResponse(IPacket& pkt)
     }
 }
 
+
 bool Transaction::checkResponse(const Packet& packet)
 {
     TraceN(this) << "Check response: " << packet.id() << endl;
     return _request.id() == packet.id();
 }
+
 
 void Transaction::onResponse()
 {
@@ -71,7 +81,9 @@ void Transaction::onResponse()
     PacketTransaction<Packet>::onResponse();
 }
 
+
 } // namespace sockio
 } // namespace scy
+
 
 /// @\}

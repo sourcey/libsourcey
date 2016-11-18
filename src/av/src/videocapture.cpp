@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videocapture.h"
 #include "scy/util.h"
 
@@ -20,14 +21,18 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
 
+
 VideoCapture::VideoCapture()
 {
 }
+
 
 VideoCapture::VideoCapture(const std::string& device, int width, int height,
                            double framerate)
@@ -35,9 +40,11 @@ VideoCapture::VideoCapture(const std::string& device, int width, int height,
     open(device, width, height, framerate);
 }
 
+
 VideoCapture::~VideoCapture()
 {
 }
+
 
 void VideoCapture::open(const std::string& device, int width, int height,
                         double framerate)
@@ -65,9 +72,12 @@ void VideoCapture::open(const std::string& device, int width, int height,
     av_dict_free(&iparams); // FIXME: possible memory leak
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

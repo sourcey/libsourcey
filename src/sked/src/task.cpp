@@ -8,14 +8,18 @@
 /// @addtogroup sked
 /// @{
 
+
 #include "scy/sked/task.h"
 #include "scy/datetime.h"
 #include "scy/sked/scheduler.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace sked {
+
 
 Task::Task(const std::string& type, const std::string& name)
     : _type(type)
@@ -25,6 +29,7 @@ Task::Task(const std::string& type, const std::string& name)
 {
     TraceL << "Create" << endl;
 }
+
 
 Task::Task(sked::Scheduler& scheduler, const std::string& type,
            const std::string& name)
@@ -36,10 +41,12 @@ Task::Task(sked::Scheduler& scheduler, const std::string& type,
     TraceL << "Create" << endl;
 }
 
+
 Task::~Task()
 {
     TraceL << "Destroy" << endl;
 }
+
 
 /*
 void Task::start()
@@ -48,6 +55,7 @@ void Task::start()
     scy::Task::start();
 }
 */
+
 
 void Task::serialize(json::Value& root)
 {
@@ -59,6 +67,7 @@ void Task::serialize(json::Value& root)
     root["type"] = _type;
     root["name"] = _name;
 }
+
 
 void Task::deserialize(json::Value& root)
 {
@@ -75,11 +84,13 @@ void Task::deserialize(json::Value& root)
     _name = root["name"].asString();
 }
 
+
 bool Task::beforeRun()
 {
     Mutex::ScopedLock lock(_mutex);
     return _trigger && _trigger->timeout() && !_destroyed && !cancelled();
 }
+
 
 bool Task::afterRun()
 {
@@ -91,6 +102,7 @@ bool Task::afterRun()
     return !_trigger->expired();
 }
 
+
 void Task::setTrigger(sked::Trigger* trigger)
 {
     Mutex::ScopedLock lock(_mutex);
@@ -99,17 +111,20 @@ void Task::setTrigger(sked::Trigger* trigger)
     _trigger = trigger;
 }
 
+
 string Task::name() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _name;
 }
 
+
 string Task::type() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _type;
 }
+
 
 std::int64_t Task::remaining() const
 {
@@ -119,6 +134,7 @@ std::int64_t Task::remaining() const
     return _trigger->remaining();
 }
 
+
 sked::Trigger& Task::trigger()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -126,6 +142,7 @@ sked::Trigger& Task::trigger()
         throw std::runtime_error("Tasks must have a Trigger instance.");
     return *_trigger;
 }
+
 
 sked::Scheduler& Task::scheduler()
 {
@@ -136,7 +153,9 @@ sked::Scheduler& Task::scheduler()
     return *_scheduler;
 }
 
+
 } // namespace sked
 } // namespace scy
+
 
 /// @\}

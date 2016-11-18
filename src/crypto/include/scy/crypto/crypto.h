@@ -8,14 +8,18 @@
 /// @addtogroup crypto
 /// @{
 
+
 #ifndef SCY_Crypto_Crypto_H
 #define SCY_Crypto_Crypto_H
+
 
 #include "scy/base64.h"
 #include <vector>
 
+
 namespace scy {
 namespace crypto {
+
 
 /// Initialize the Crypto library, as well as the underlying OpenSSL
 /// libraries.
@@ -94,9 +98,12 @@ template <typename T> struct Raw
 
 } // namespace internal
 
+
 } // namespace crypto
 } // namespace scy
 
+
 #endif // SCY_Crypto_Crypto_H
+
 
 /// @\}

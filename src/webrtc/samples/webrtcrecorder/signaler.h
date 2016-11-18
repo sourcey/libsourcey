@@ -6,8 +6,10 @@
 // SPDX-License-Identifier:	LGPL-2.1+
 //
 
+
 #ifndef SCY_WebRTC_Signaler_H
 #define SCY_WebRTC_Signaler_H
+
 
 #include "scy/application.h"
 #include "scy/ipc.h"
@@ -20,7 +22,9 @@
 #include <iostream>
 #include <string>
 
+
 namespace scy {
+
 
 class Signaler : public PeerConnectionManager, public Application
 {
@@ -62,6 +66,8 @@ protected:
     std::unique_ptr<StreamRecorder> _recorder;
 };
 
+
 } // namespace scy
+
 
 #endif

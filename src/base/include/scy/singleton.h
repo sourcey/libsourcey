@@ -8,12 +8,16 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Singleton_H
 #define SCY_Singleton_H
 
+
 #include <cstdint>
 
+
 namespace scy {
+
 
 /// This is a helper template class for managing
 /// singleton objects allocated on the heap.
@@ -70,8 +74,11 @@ private:
     Mutex _m;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Singleton_H
+
 
 /// @\}

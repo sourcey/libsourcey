@@ -8,16 +8,20 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/server/server.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
 #include <algorithm>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple,
                                    const std::string& username,
@@ -29,10 +33,12 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple,
     _server.addAllocation(this);
 }
 
+
 ServerAllocation::~ServerAllocation()
 {
     _server.removeAllocation(this);
 }
+
 
 bool ServerAllocation::handleRequest(Request& request)
 {
@@ -52,6 +58,7 @@ bool ServerAllocation::handleRequest(Request& request)
 
     return true;
 }
+
 
 void ServerAllocation::handleRefreshRequest(Request& request)
 {
@@ -124,6 +131,7 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     // request.socket->send(response, request.remoteAddress);
 }
 
+
 void ServerAllocation::handleCreatePermission(Request& request)
 {
     TraceL << "Handle Create Permission" << endl;
@@ -179,6 +187,7 @@ void ServerAllocation::handleCreatePermission(Request& request)
     // request.socket->send(response, request.remoteAddress);
 }
 
+
 bool ServerAllocation::onTimer()
 {
     TraceL << "ServerAllocation: On timer: " << IAllocation::deleted() << endl;
@@ -189,11 +198,13 @@ bool ServerAllocation::onTimer()
     return true;
 }
 
+
 std::int64_t ServerAllocation::maxTimeRemaining() const
 {
     std::int64_t elapsed = static_cast<std::int64_t>(time(0) - _createdAt);
     return elapsed > _maxLifetime ? 0 : _maxLifetime - elapsed;
 }
+
 
 std::int64_t ServerAllocation::timeRemaining() const
 {
@@ -201,11 +212,13 @@ std::int64_t ServerAllocation::timeRemaining() const
     return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
+
 Server& ServerAllocation::server()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _server;
 }
+
 
 void ServerAllocation::print(std::ostream& os) const
 {
@@ -221,7 +234,9 @@ void ServerAllocation::print(std::ostream& os) const
        << "\n\tExpired=" << expired() << "]" << endl;
 }
 
+
 } // namespace turn
 } // namespace scy
+
 
 /// @\}

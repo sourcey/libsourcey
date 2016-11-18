@@ -3,11 +3,14 @@
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
 
+
 using std::endl;
 using namespace scy;
 using namespace scy::net;
 
+
 const std::uint16_t HttpPort = 1337;
+
 
 int main(int argc, char** argv)
 {

@@ -10,11 +10,13 @@
 // This file uses functions from POCO C++ Libraries (license below).
 //
 
+
 #include "scy/random.h"
 #include "scy/error.h"
 
 #include <assert.h>
 #include <stdexcept>
+
 
 #include <ctime>
 #if defined(WIN32)
@@ -27,6 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+
 
 /*
  * random.c:
@@ -87,6 +90,7 @@
  * byte buffer it is about 5 percent faster.
  */
 
+
 /*
  * For each of the currently supported random number generators, we have a
  * break value on the amount of state information (you need at least this
@@ -119,7 +123,9 @@
 #define DEG_4 63
 #define SEP_4 1
 
+
 namespace scy {
+
 
 Random::Random(int stateSize)
 {
@@ -133,10 +139,12 @@ Random::Random(int stateSize)
 #endif
 }
 
+
 Random::~Random()
 {
     delete[] _buffer;
 }
+
 
 /*
  * Compute x = (7^5 * x) mod (2^31 - 1)
@@ -160,6 +168,7 @@ std::uint32_t Random::goodRand(std::int32_t x)
 
     return x;
 }
+
 
 /*
  * Initialize the random number generator based on the given seed.  If the
@@ -189,6 +198,7 @@ void Random::seed(std::uint32_t x)
         next();
 }
 
+
 /*
  * Many programs choose the seed value in a totally predictable manner.
  * This often causes problems.  We seed the generator using the much more
@@ -209,6 +219,7 @@ void Random::seed()
 
     getSeed((char*)_state, len);
 }
+
 
 void Random::getSeed(char* seed, unsigned length)
 {
@@ -234,6 +245,7 @@ void Random::getSeed(char* seed, unsigned length)
     if (n == 0)
         throw std::runtime_error("Cannot generate random number seed");
 }
+
 
 /*
  * Initialize the state information in the given array of n bytes for future
@@ -294,6 +306,7 @@ void Random::initState(std::uint32_t s, char* argState, std::int32_t n)
         intArgState[0] = MAX_TYPES * (int)(_rptr - _state) + _randType;
 }
 
+
 /*
  * Next:
  *
@@ -340,34 +353,42 @@ std::uint32_t Random::next()
     return i;
 }
 
+
 std::uint32_t Random::next(std::uint32_t n)
 {
     return next() % n;
 }
+
 
 char Random::nextChar()
 {
     return char((next() >> 3) & 0xFF);
 }
 
+
 bool Random::nextBool()
 {
     return (next() & 0x1000) != 0;
 }
+
 
 float Random::nextFloat()
 {
     return float(next()) / 0x7FFFFFFF;
 }
 
+
 double Random::nextDouble()
 {
     return double(next()) / 0x7FFFFFFF;
 }
 
+
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

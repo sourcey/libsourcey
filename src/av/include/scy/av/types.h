@@ -8,15 +8,19 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_Types_H
 #define SCY_AV_Types_H
+
 
 #include "scy/av/config.h"
 #include "scy/packet.h"
 #include "scy/time.h"
 
+
 namespace scy {
 namespace av {
+
 
 struct MediaPacket : public RawPacket
 {
@@ -40,6 +44,7 @@ struct MediaPacket : public RawPacket
 
     virtual const char* className() const { return "MediaPacket"; }
 };
+
 
 struct VideoPacket : public MediaPacket
 {
@@ -71,6 +76,7 @@ struct VideoPacket : public MediaPacket
     virtual const char* className() const { return "VideoPacket"; }
 };
 
+
 struct AudioPacket : public MediaPacket
 {
     std::size_t numSamples; // number of samples per channel
@@ -96,9 +102,12 @@ struct AudioPacket : public MediaPacket
     virtual const char* className() const { return "AudioPacket"; }
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_Types_H
+
 
 /// @\}

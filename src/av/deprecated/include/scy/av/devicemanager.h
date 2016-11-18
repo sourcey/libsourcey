@@ -9,6 +9,7 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
+
 #ifndef SCY_AV_DeviceManager_H
 #define SCY_AV_DeviceManager_H
 
@@ -17,6 +18,7 @@
 
 #include "scy/base.h"
 #include "scy/signal.h"
+
 
 namespace scy {
 namespace av {
@@ -44,6 +46,7 @@ struct Device
                guid == that.guid;
     }
 };
+
 
 enum MediaCapabilities
 {
@@ -97,8 +100,10 @@ public:
     /// Arg 2 is true when device connects, flase on disconnection
     Signal<void(bool&, bool&)> DevicesChanged;
 
+
     static const char kDefaultDeviceName[];
 };
+
 
 class DeviceWatcher
 {
@@ -109,6 +114,7 @@ public:
     virtual void stop() {}
 };
 
+
 class DeviceManagerFactory
 {
 public:
@@ -117,6 +123,7 @@ public:
 private:
     DeviceManagerFactory();
 };
+
 
 class DeviceManager : public IDeviceManager
 {
@@ -153,6 +160,7 @@ public:
             -1); /// Returns the video capture device at the given system index.
     virtual bool getVideoCaptureDevice(Device& out, int id);
 
+
     virtual bool getDefaultAudioInputDevice(Device& device);
     virtual bool getDefaultAudioOutputDevice(Device& device);
     virtual bool getDefaultVideoCaptureDevice(
@@ -170,6 +178,7 @@ public:
     /// If the ID should not be matched the given ID should be -1.
     static bool matchNameAndID(std::vector<Device>& devices, Device& out,
                                const std::string& name, int id = -1);
+
 
     bool initialized() const { return _initialized; }
 
@@ -195,10 +204,13 @@ private: /// The exclusionList MUST be a nullptr terminated list.
     bool _initialized;
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_DeviceManager_H
+
 
 /*
  * libjingle

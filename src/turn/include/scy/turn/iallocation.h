@@ -8,8 +8,10 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_IAllocation_H
 #define SCY_TURN_IAllocation_H
+
 
 #include "scy/logger.h"
 #include "scy/mutex.h"
@@ -20,8 +22,10 @@
 #include "scy/turn/turn.h"
 #include "scy/turn/types.h"
 
+
 namespace scy {
 namespace turn {
+
 
 /// All TURN operations revolve around allocations, and all TURN messages
 /// are associated with an allocation.  An allocation conceptually
@@ -141,9 +145,12 @@ protected:
     bool _deleted;
 };
 
+
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_IAllocation_H
+
 
 /// @\}

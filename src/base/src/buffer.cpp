@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/buffer.h"
 #include "scy/byteorder.h"
 #include "scy/logger.h"
@@ -17,16 +18,20 @@
 #include <cstring>
 #include <stdexcept>
 
+
 namespace scy {
+
 
 //
 // Bit Reader
 //
 
+
 BitReader::BitReader(const ConstBuffer& pod, ByteOrder order)
 {
     init(bufferCast<const char*>(pod), pod.size(), order); // copied
 }
+
 
 BitReader::BitReader(const Buffer& buf, ByteOrder order)
 {
@@ -34,10 +39,12 @@ BitReader::BitReader(const Buffer& buf, ByteOrder order)
     // _buffer = &buf;
 }
 
+
 BitReader::BitReader(const char* bytes, std::size_t size, ByteOrder order)
 {
     init(bytes, size, order);
 }
+
 
 void BitReader::init(const char* bytes, std::size_t size, ByteOrder order)
 {
@@ -51,9 +58,11 @@ void BitReader::init(const char* bytes, std::size_t size, ByteOrder order)
     //_free = false;
 }
 
+
 BitReader::~BitReader()
 {
 }
+
 
 void BitReader::seek(std::size_t val)
 {
@@ -63,6 +72,7 @@ void BitReader::seek(std::size_t val)
     _position = val;
 }
 
+
 void BitReader::skip(std::size_t val)
 {
     if (val > _limit)
@@ -71,20 +81,24 @@ void BitReader::skip(std::size_t val)
     _position += val;
 }
 
+
 std::string BitReader::toString()
 {
     return std::string(current(), available());
 }
+
 
 std::size_t BitReader::available() const
 {
     return _limit - _position;
 }
 
+
 std::size_t BitReader::limit() const
 {
     return _limit;
 }
+
 
 //
 // Get methods
@@ -95,12 +109,14 @@ void BitReader::getU8(std::uint8_t& val)
     get(reinterpret_cast<char*>(&val), 1);
 }
 
+
 void BitReader::getU16(std::uint16_t& val)
 {
     std::uint16_t v;
     get(reinterpret_cast<char*>(&v), 2);
     val = (_order == ByteOrder::Network) ? networkToHost16(v) : v;
 }
+
 
 void BitReader::getU24(std::uint32_t& val)
 {
@@ -113,6 +129,7 @@ void BitReader::getU24(std::uint32_t& val)
     val = (_order == ByteOrder::Network) ? networkToHost32(v) : v;
 }
 
+
 void BitReader::getU32(std::uint32_t& val)
 {
     std::uint32_t v;
@@ -120,12 +137,14 @@ void BitReader::getU32(std::uint32_t& val)
     val = (_order == ByteOrder::Network) ? networkToHost32(v) : v;
 }
 
+
 void BitReader::getU64(std::uint64_t& val)
 {
     std::uint64_t v;
     get(reinterpret_cast<char*>(&v), 8);
     val = (_order == ByteOrder::Network) ? networkToHost64(v) : v;
 }
+
 
 void BitReader::get(std::string& val, std::size_t len)
 {
@@ -142,6 +161,7 @@ void BitReader::get(std::string& val, std::size_t len)
     _position += len;
 }
 
+
 void BitReader::get(char* val, std::size_t len)
 {
     if (len > available()) {
@@ -157,6 +177,7 @@ void BitReader::get(char* val, std::size_t len)
     _position += len;
 }
 
+
 const char BitReader::peek()
 {
     if (_limit > _position)
@@ -164,6 +185,7 @@ const char BitReader::peek()
     // DebugL << "Peeking next character is NULL" << std::endl;
     return 0;
 }
+
 
 const std::uint8_t BitReader::peekU8()
 {
@@ -177,6 +199,7 @@ const std::uint8_t BitReader::peekU8()
     }
     return 0;
 }
+
 
 const std::uint16_t BitReader::peekU16()
 {
@@ -192,6 +215,7 @@ const std::uint16_t BitReader::peekU16()
     return 0;
 }
 
+
 const std::uint32_t BitReader::peekU24()
 {
     try {
@@ -205,6 +229,7 @@ const std::uint32_t BitReader::peekU24()
 
     return 0;
 }
+
 
 const std::uint32_t BitReader::peekU32()
 {
@@ -220,6 +245,7 @@ const std::uint32_t BitReader::peekU32()
     return 0;
 }
 
+
 const std::uint64_t BitReader::peekU64()
 {
     try {
@@ -233,6 +259,7 @@ const std::uint64_t BitReader::peekU64()
 
     return 0;
 }
+
 
 //
 // String parsing
@@ -250,6 +277,7 @@ int BitReader::skipToChar(char c)
     return len;
 }
 
+
 int BitReader::skipWhitespace()
 {
     std::size_t len = 0;
@@ -261,6 +289,7 @@ int BitReader::skipWhitespace()
         _position = _limit;
     return len;
 }
+
 
 int BitReader::skipToNextLine()
 {
@@ -276,6 +305,7 @@ int BitReader::skipToNextLine()
     return len;
 }
 
+
 int BitReader::skipNextWord()
 {
     std::size_t len = skipWhitespace();
@@ -290,6 +320,7 @@ int BitReader::skipNextWord()
     return len;
 }
 
+
 int BitReader::readToNext(std::string& val, char c)
 {
     std::size_t len = 0;
@@ -302,6 +333,7 @@ int BitReader::readToNext(std::string& val, char c)
         _position = _limit;
     return len;
 }
+
 
 int BitReader::readNextWord(std::string& val)
 {
@@ -318,6 +350,7 @@ int BitReader::readNextWord(std::string& val)
     return len;
 }
 
+
 int BitReader::readNextNumber(unsigned int& val)
 {
     std::size_t len = skipWhitespace();
@@ -333,6 +366,7 @@ int BitReader::readNextNumber(unsigned int& val)
     return len;
 }
 
+
 int BitReader::readLine(std::string& val)
 {
     std::size_t len = 0;
@@ -347,25 +381,30 @@ int BitReader::readLine(std::string& val)
     return len;
 }
 
+
 //
 // Bit Writer
 //
+
 
 BitWriter::BitWriter(MutableBuffer& pod, ByteOrder order)
 {
     init(bufferCast<char*>(pod), pod.size(), order); // copied
 }
 
+
 BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 {
     init(bytes, size, order);
 }
+
 
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
     init(buf.data(), buf.capacity(), order);
     // _buffer = &buf;
 }
+
 
 void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
 {
@@ -379,9 +418,11 @@ void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
     //_free = false;
 }
 
+
 BitWriter::~BitWriter()
 {
 }
+
 
 void BitWriter::skip(std::size_t val)
 {
@@ -397,6 +438,7 @@ void BitWriter::skip(std::size_t val)
     _position += val;
 }
 
+
 void BitWriter::seek(std::size_t val)
 {
     if (val > _limit) {
@@ -411,20 +453,24 @@ void BitWriter::seek(std::size_t val)
     _position = val;
 }
 
+
 std::string BitWriter::toString()
 {
     return std::string(begin(), position());
 }
+
 
 std::size_t BitWriter::available() const
 {
     return _limit - _position;
 }
 
+
 std::size_t BitWriter::limit() const
 {
     return _limit;
 }
+
 
 //
 // Write functions
@@ -435,12 +481,14 @@ void BitWriter::putU8(std::uint8_t val)
     put(reinterpret_cast<const char*>(&val), 1);
 }
 
+
 void BitWriter::putU16(std::uint16_t val)
 {
     std::uint16_t v =
         (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     put(reinterpret_cast<const char*>(&v), 2);
 }
+
 
 void BitWriter::putU24(std::uint32_t val)
 {
@@ -453,12 +501,14 @@ void BitWriter::putU24(std::uint32_t val)
     put(start, 3);
 }
 
+
 void BitWriter::putU32(std::uint32_t val)
 {
     std::uint32_t v =
         (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     put(reinterpret_cast<const char*>(&v), 4);
 }
+
 
 void BitWriter::putU64(std::uint64_t val)
 {
@@ -467,10 +517,12 @@ void BitWriter::putU64(std::uint64_t val)
     put(reinterpret_cast<const char*>(&v), 8);
 }
 
+
 void BitWriter::put(const std::string& val)
 {
     put(val.c_str(), val.size());
 }
+
 
 void BitWriter::put(const char* val, std::size_t len)
 {
@@ -500,14 +552,17 @@ void BitWriter::put(const char* val, std::size_t len)
     // }
 }
 
+
 //
 // Update functions
 //
+
 
 bool BitWriter::updateU8(std::uint8_t val, std::size_t pos)
 {
     return update(reinterpret_cast<const char*>(&val), 1, pos);
 }
+
 
 bool BitWriter::updateU16(std::uint16_t val, std::size_t pos)
 {
@@ -515,6 +570,7 @@ bool BitWriter::updateU16(std::uint16_t val, std::size_t pos)
         (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     return update(reinterpret_cast<const char*>(&v), 2, pos);
 }
+
 
 bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 {
@@ -527,12 +583,14 @@ bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
     return update(start, 3, pos);
 }
 
+
 bool BitWriter::updateU32(std::uint32_t val, std::size_t pos)
 {
     std::uint32_t v =
         (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     return update(reinterpret_cast<const char*>(&v), 4, pos);
 }
+
 
 bool BitWriter::updateU64(std::uint64_t val, std::size_t pos)
 {
@@ -541,10 +599,12 @@ bool BitWriter::updateU64(std::uint64_t val, std::size_t pos)
     return update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 
+
 bool BitWriter::update(const std::string& val, std::size_t pos)
 {
     return update(val.c_str(), val.size(), pos);
 }
+
 
 bool BitWriter::update(const char* val, std::size_t len, std::size_t pos)
 {
@@ -555,6 +615,8 @@ bool BitWriter::update(const char* val, std::size_t len, std::size_t pos)
     return true;
 }
 
+
 } // namespace scy
+
 
 /// @\}

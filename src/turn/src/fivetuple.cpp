@@ -8,17 +8,22 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/fivetuple.h"
+
 
 using namespace std;
 
+
 namespace scy {
 namespace turn {
+
 
 FiveTuple::FiveTuple()
     : _transport(net::UDP)
 {
 }
+
 
 FiveTuple::FiveTuple(const net::Address& remote, const net::Address& local,
                      net::TransportType transport)
@@ -28,6 +33,7 @@ FiveTuple::FiveTuple(const net::Address& remote, const net::Address& local,
 {
 }
 
+
 FiveTuple::FiveTuple(const FiveTuple& r)
     : _remote(r._remote)
     , _local(r._local)
@@ -35,11 +41,13 @@ FiveTuple::FiveTuple(const FiveTuple& r)
 {
 }
 
+
 bool FiveTuple::operator==(const FiveTuple& r) const
 {
     return _remote == r._remote && _local == r._local &&
            _transport == r._transport;
 }
+
 
 bool FiveTuple::operator<(const FiveTuple& r) const
 {
@@ -54,6 +62,7 @@ bool FiveTuple::operator<(const FiveTuple& r) const
     return false;
 }
 
+
 string FiveTuple::toString() const
 {
     ostringstream ost;
@@ -62,7 +71,9 @@ string FiveTuple::toString() const
     return ost.str();
 }
 
+
 } // namespace turn
 } // namespace scy
+
 
 /// @\}

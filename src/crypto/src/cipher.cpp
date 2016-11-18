@@ -8,6 +8,7 @@
 /// @addtogroup crypto
 /// @{
 
+
 #include "scy/crypto/cipher.h"
 #include "scy/base64.h"
 #include "scy/error.h"
@@ -19,10 +20,13 @@
 #include <sstream>
 #include <stdexcept>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace crypto {
+
 
 Cipher::Cipher(const std::string& name, const std::string& passphrase,
                const std::string& salt, int iterationCount)
@@ -45,6 +49,7 @@ Cipher::Cipher(const std::string& name, const std::string& passphrase,
     generateKey(passphrase, salt, iterationCount);
 }
 
+
 Cipher::Cipher(const std::string& name, const ByteVec& key, const ByteVec& iv)
     : _initialized(false)
     , _encrypt(false)
@@ -60,6 +65,7 @@ Cipher::Cipher(const std::string& name, const ByteVec& key, const ByteVec& iv)
         throw std::invalid_argument("Not found: Cipher " + name +
                                     " is unavailable");
 }
+
 
 Cipher::Cipher(const std::string& name)
     : _initialized(false)
@@ -82,6 +88,7 @@ Cipher::Cipher(const std::string& name)
     setRandomIV();
 }
 
+
 Cipher::~Cipher()
 {
     crypto::uninitializeEngine();
@@ -90,15 +97,18 @@ Cipher::~Cipher()
         EVP_CIPHER_CTX_cleanup(&_ctx);
 }
 
+
 void Cipher::initEncryptor()
 {
     initialize(true);
 }
 
+
 void Cipher::initDecryptor()
 {
     initialize(false);
 }
+
 
 void Cipher::initialize(bool encrypt)
 {
@@ -112,6 +122,7 @@ void Cipher::initialize(bool encrypt)
     _initialized = true;
 }
 
+
 int Cipher::update(const unsigned char* input, int inputLength,
                    unsigned char* output, int outputLength)
 {
@@ -121,6 +132,7 @@ int Cipher::update(const unsigned char* input, int inputLength,
     return len;
 }
 
+
 int Cipher::final(unsigned char* output, int length)
 {
     assert(length >= blockSize());
@@ -128,6 +140,7 @@ int Cipher::final(unsigned char* output, int length)
     internal::api(EVP_CipherFinal_ex(&_ctx, output, &len));
     return len;
 }
+
 
 inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 {
@@ -155,6 +168,7 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
             throw std::invalid_argument("Invalid cypher encoding method");
     }
 }
+
 
 int Cipher::encrypt(const unsigned char* inbuf, std::size_t inlen,
                     unsigned char* outbuf, std::size_t outlen,
@@ -195,6 +209,7 @@ int Cipher::encrypt(const unsigned char* inbuf, std::size_t inlen,
     return nwrite;
 }
 
+
 std::string Cipher::encryptString(const std::string& str, Encoding encoding)
 {
 #if 0 // fixme for faster encoding
@@ -216,6 +231,7 @@ std::string Cipher::encryptString(const std::string& str, Encoding encoding)
     return sink.str();
 }
 
+
 std::string Cipher::decryptString(const std::string& str, Encoding encoding)
 {
     std::istringstream source(str);
@@ -225,6 +241,7 @@ std::string Cipher::decryptString(const std::string& str, Encoding encoding)
 
     return sink.str();
 }
+
 
 void Cipher::encryptStream(std::istream& source, std::ostream& sink,
                            Encoding encoding)
@@ -268,6 +285,7 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink,
     }
 }
 
+
 inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
 {
     switch (encoding) {
@@ -286,6 +304,7 @@ inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
             throw std::invalid_argument("Invalid cypher decoding method");
     }
 }
+
 
 void Cipher::decryptStream(std::istream& source, std::ostream& sink,
                            Encoding encoding)
@@ -336,35 +355,42 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink,
         sink.write((const char*)cryptbuf.get(), reslen);
 }
 
+
 int Cipher::setPadding(int padding)
 {
     return EVP_CIPHER_CTX_set_padding(&_ctx, padding);
 }
+
 
 int Cipher::keySize() const
 {
     return EVP_CIPHER_key_length(_cipher);
 }
 
+
 const ByteVec& Cipher::getKey() const
 {
     return _key;
 }
+
 
 const ByteVec& Cipher::getIV() const
 {
     return _iv;
 }
 
+
 int Cipher::blockSize() const
 {
     return EVP_CIPHER_block_size(_cipher);
 }
 
+
 int Cipher::ivSize() const
 {
     return EVP_CIPHER_iv_length(_cipher);
 }
+
 
 inline void getRandomBytes(ByteVec& vec, std::size_t count)
 {
@@ -378,15 +404,18 @@ inline void getRandomBytes(ByteVec& vec, std::size_t count)
         vec.push_back(rnd.nextChar());
 }
 
+
 void Cipher::setRandomIV()
 {
     getRandomBytes(_iv, ivSize());
 }
 
+
 void Cipher::setRandomKey()
 {
     getRandomBytes(_key, keySize());
 }
+
 
 void Cipher::generateKey(const std::string& password, const std::string& salt,
                          int iterationCount)
@@ -421,7 +450,9 @@ void Cipher::generateKey(const std::string& password, const std::string& salt,
         _iv.assign(ivBytes, ivBytes + ivSize());
 }
 
+
 } // namespace crypto
 } // namespace scy
+
 
 /// @\}

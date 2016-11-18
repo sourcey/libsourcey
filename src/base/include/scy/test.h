@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Test_H
 #define SCY_Test_H
+
 
 #include "scy/interface.h"
 #include "scy/mutex.h"
@@ -17,10 +19,13 @@
 #include <list>
 #include <map>
 
+
 namespace scy {
+
 
 /// Modern unit testing framework
 namespace test {
+
 
 class Test;
 class TestRunner;
@@ -56,9 +61,11 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 #define expect(x) test::expectImpl(x, #x, __FILE__, __LINE__)
 #endif
 
+
 //
 // Test
 //
+
 
 /// Test wrapper class.
 ///
@@ -95,6 +102,7 @@ protected:
     friend class TestRunner;
 };
 
+
 // Test class that runs a static or lambda function.
 class FunctionTest : public Test
 {
@@ -114,9 +122,11 @@ protected:
     void run() { target(); }
 };
 
+
 //
 // Test Runner
 //
+
 
 /// The TestRunner is a queue in charge of running one or many tests.
 ///
@@ -163,9 +173,12 @@ protected:
     Test* _current;
 };
 
+
 } // namespace test
 } // namespace scy
 
+
 #endif // SCY_Test_H
+
 
 /// @\}

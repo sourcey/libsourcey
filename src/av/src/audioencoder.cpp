@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audioencoder.h"
 #include "scy/av/audioresampler.h"
 
@@ -16,10 +17,13 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioEncoder::AudioEncoder(AVFormatContext* format)
     : format(format)
@@ -27,11 +31,13 @@ AudioEncoder::AudioEncoder(AVFormatContext* format)
     TraceS(this) << "Create" << endl;
 }
 
+
 AudioEncoder::~AudioEncoder()
 {
     TraceS(this) << "Destroy" << endl;
     close();
 }
+
 
 // Initialize one input frame for writing to the output file.
 // The frame will be exactly frame_size samples large.
@@ -65,6 +71,7 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
 
     return frame;
 }
+
 
 void AudioEncoder::create()
 {
@@ -162,10 +169,12 @@ void AudioEncoder::create()
     // }
 }
 
+
 // void AudioEncoder::open()
 // {
 //     TraceS(this) << "Create" << endl;
 // }
+
 
 void AudioEncoder::close()
 {
@@ -210,6 +219,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
     enc->emitter.emit(/*enc, */ audio);
 }
 
+
 int flushBuffer(AudioEncoder* enc)
 {
     TraceS(enc) << "Flush" << endl;
@@ -229,8 +239,9 @@ int flushBuffer(AudioEncoder* enc)
     return num;
 }
 
-bool AudioEncoder::encode(std::uint8_t* samples, const int numSamples,
-                          const std::int64_t pts)
+
+bool AudioEncoder::encode(/*const */ std::uint8_t* samples,
+                          const int numSamples, const std::int64_t pts)
 {
     TraceS(this) << "Encoding audio packet: " << numSamples << endl;
 
@@ -259,6 +270,7 @@ bool AudioEncoder::encode(std::uint8_t* samples, const int numSamples,
 
     return flushBuffer(this) > 0;
 }
+
 
 bool AudioEncoder::encode(AVFrame* iframe)
 {
@@ -313,6 +325,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
     return frameEncoded > 0;
 }
 
+
 void AudioEncoder::flush()
 {
     TraceS(this) << "Flush" << endl;
@@ -325,9 +338,12 @@ void AudioEncoder::flush()
     } while (encode(nullptr));
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

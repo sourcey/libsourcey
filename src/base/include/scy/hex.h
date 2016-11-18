@@ -11,8 +11,10 @@
 // http://libb64.sourceforge.net/
 //
 
+
 #ifndef SCY_Hex_H
 #define SCY_Hex_H
+
 
 #include "scy/error.h"
 #include "scy/interface.h"
@@ -21,12 +23,15 @@
 #include <cstring>
 #include <iostream>
 
+
 namespace scy {
 namespace hex {
+
 
 //
 // Hex Encoder
 //
+
 
 struct Encoder : public basic::Encoder
 {
@@ -71,6 +76,7 @@ struct Encoder : public basic::Encoder
     int _uppercase;
 };
 
+
 /// Converts the STL container to Hex.
 template <typename T> inline std::string encode(const T& bytes)
 {
@@ -86,9 +92,11 @@ template <typename T> inline std::string encode(const T& bytes)
     return res;
 }
 
+
 //
 // Hex Decoder
 //
+
 
 struct Decoder : public basic::Decoder
 {
@@ -161,9 +169,12 @@ struct Decoder : public basic::Decoder
     char lastbyte;
 };
 
+
 } // namespace hex
 } // namespace scy
 
+
 #endif // SCY_Hex_H
+
 
 /// @\}

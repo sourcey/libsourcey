@@ -8,8 +8,10 @@
 /// @addtogroup socketio
 /// @{
 
+
 #ifndef SCY_SocketIO_Client_H
 #define SCY_SocketIO_Client_H
+
 
 #include "scy/collection.h"
 #include "scy/http/websocket.h"
@@ -17,8 +19,10 @@
 #include "scy/socketio/packet.h"
 #include "scy/socketio/transaction.h"
 
+
 namespace scy {
 namespace sockio {
+
 
 struct ClientState : public State
 {
@@ -50,6 +54,7 @@ struct ClientState : public State
         return "undefined";
     };
 };
+
 
 class Client : public Stateful<ClientState>,
                public net::SocketAdapter,
@@ -180,9 +185,11 @@ protected:
     bool _wasOnline;
 };
 
+
 //
 // TCP Client
 //
+
 
 Client* createTCPClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
@@ -194,9 +201,11 @@ public:
               uv::Loop* loop = uv::defaultLoop());
 };
 
+
 //
 // SSL Client
 //
+
 
 Client* createSSLClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
@@ -208,9 +217,12 @@ public:
               uv::Loop* loop = uv::defaultLoop());
 };
 
+
 } // namespace sockio
 } // namespace scy
 
+
 #endif // SCY_SocketIO_Client_H
+
 
 /// @\}

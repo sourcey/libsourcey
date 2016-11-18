@@ -8,18 +8,23 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/audiocontext.h"
 #include "scy/av/audioresampler.h"
+
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 AudioContext::AudioContext()
     : // PacketProcessor(this->emitter),
@@ -34,11 +39,13 @@ AudioContext::AudioContext()
     initializeFFmpeg();
 }
 
+
 AudioContext::~AudioContext()
 {
     close();
     uninitializeFFmpeg();
 }
+
 
 void AudioContext::open()
 {
@@ -61,6 +68,7 @@ void AudioContext::open()
         recreateResampler();
     }
 }
+
 
 void AudioContext::close()
 {
@@ -90,6 +98,7 @@ void AudioContext::close()
     // error = "";
 }
 
+
 // double AudioContext::ptsSeconds()
 // {
 //     double val = 0.0;
@@ -108,6 +117,7 @@ void AudioContext::close()
 //
 //     return val;
 // }
+
 
 bool AudioContext::recreateResampler()
 {
@@ -151,14 +161,17 @@ bool AudioContext::recreateResampler()
     return true;
 }
 
+
 // bool AudioContext::accepts(IPacket& packet)
 // {
 //     return dynamic_cast<AudioPacket*>(&packet) != 0;
 // }
 
+
 //
 // Helper functions
 //
+
 
 void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params)
 {
@@ -170,6 +183,7 @@ void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params)
     params.bitRate = ctx->bit_rate;
 }
 
+
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 {
     const enum AVSampleFormat* p = codec->sample_fmts;
@@ -180,6 +194,7 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
     }
     return false;
 }
+
 
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 {
@@ -198,9 +213,12 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
     return compatible;
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

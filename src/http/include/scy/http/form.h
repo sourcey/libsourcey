@@ -8,20 +8,25 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Form_H
 #define SCY_HTTP_Form_H
+
 
 #include "scy/collection.h"
 #include "scy/net/types.h"
 #include "scy/packetstream.h"
 #include "scy/thread.h"
 
+
 namespace scy {
 namespace http {
+
 
 class Request;
 class ClientConnection;
 class FormPart;
+
 
 //
 // HTML Form Writer
@@ -134,9 +139,10 @@ public:
     PacketSignal emitter;
 
     static const char* ENCODING_URL; ///< "application/x-www-form-urlencoded"
-    static const char* ENCODING_MULTIPART_FORM;    ///< "multipart/form-data"
-    static const char* ENCODING_MULTIPART_RELATED; ///< "multipart/related"
-    /// http://tools.ietf.org/html/rfc2387
+    static const char* ENCODING_MULTIPART_FORM; ///< "multipart/form-data"
+    static const char*
+        ENCODING_MULTIPART_RELATED; ///< "multipart/related"
+                                    ///http://tools.ietf.org/html/rfc2387
 
 protected:
     /// Creates the FormWriter that uses the given encoding.
@@ -188,6 +194,7 @@ protected:
     bool _complete;
 };
 
+
 //
 // Form Part
 //
@@ -234,6 +241,7 @@ protected:
     NVCollection _headers;
     bool _initialWrite;
 };
+
 
 //
 // File Part
@@ -314,6 +322,7 @@ protected:
     // NVCollection _headers;
 };
 
+
 //
 // String Part
 //
@@ -348,12 +357,16 @@ protected:
     std::string _data;
 };
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_Form_H
 
+
 /// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

@@ -8,6 +8,7 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/streamrecorder.h"
 
 #include "scy/av/ffmpeg.h"
@@ -18,7 +19,9 @@
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
 #include "webrtc/modules/video_capture/video_capture_factory.h"
 
+
 namespace scy {
+
 
 StreamRecorder::StreamRecorder(const av::EncoderOptions& options)
     : _encoder(options)
@@ -30,6 +33,7 @@ StreamRecorder::StreamRecorder(const av::EncoderOptions& options)
     _encoder.options().oformat.audio.enabled = false;
 }
 
+
 StreamRecorder::~StreamRecorder()
 {
     if (_videoTrack)
@@ -38,6 +42,7 @@ StreamRecorder::~StreamRecorder()
     if (_audioTrack)
         _audioTrack->RemoveSink(this);
 }
+
 
 void StreamRecorder::setVideoTrack(webrtc::VideoTrackInterface* track)
 {
@@ -48,6 +53,7 @@ void StreamRecorder::setVideoTrack(webrtc::VideoTrackInterface* track)
     _awaitingVideo = true;
 }
 
+
 void StreamRecorder::setAudioTrack(webrtc::AudioTrackInterface* track)
 {
     assert(!_audioTrack);
@@ -56,6 +62,7 @@ void StreamRecorder::setAudioTrack(webrtc::AudioTrackInterface* track)
     _encoder.options().oformat.audio.enabled = true;
     _awaitingAudio = true;
 }
+
 
 void StreamRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 {
@@ -92,6 +99,7 @@ void StreamRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
         _encoder.encodeVideo(frame);
     }
 }
+
 
 void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
                             int sample_rate, size_t number_of_channels,
@@ -131,6 +139,8 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
         _encoder.encodeAudio((std::uint8_t*)audio_data, number_of_frames);
 }
 
+
 } // namespace scy
+
 
 /// @\}

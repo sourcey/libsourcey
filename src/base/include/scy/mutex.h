@@ -8,12 +8,16 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Mutex_H
 #define SCY_Mutex_H
 
+
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
+
 
 /// ScopedLock simplifies thread synchronization
 /// with a Mutex or similar lockable object.
@@ -38,6 +42,7 @@ private:
 
     T& _m;
 };
+
 
 /// This class is a wrapper around uv_mutex_t.
 ///
@@ -75,11 +80,15 @@ private:
     uv_mutex_t _mx;
 };
 
+
 // TODO: RwLock
 // TODO: Condition
 
+
 } // namespace scy
 
+
 #endif // SCY_Mutex_H
+
 
 /// @\}

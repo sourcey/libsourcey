@@ -8,8 +8,10 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_Client_H
 #define SCY_HTTP_Client_H
+
 
 #include "scy/http/connection.h"
 #include "scy/http/websocket.h"
@@ -20,8 +22,10 @@
 #include "scy/packetio.h"
 #include "scy/timer.h"
 
+
 namespace scy {
 namespace http {
+
 
 class Client;
 class ClientConnection : public Connection
@@ -95,7 +99,7 @@ public:
     /// Status signals
 
     NullSignal Connect; ///< Signals when the client socket is connected and
-                        /// data can flow
+                        ///data can flow
     Signal<void(Response&)>
         Headers; ///< Signals when the response HTTP header has been received
     Signal<void(const MutableBuffer&)>
@@ -123,11 +127,14 @@ protected:
     bool _complete;
 };
 
+
 typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
+
 
 //
 // Client Connection Adapter
 //
+
 
 class ClientAdapter : public ConnectionAdapter
 {
@@ -138,9 +145,11 @@ public:
     }
 };
 
+
 //
 // HTTP Connection Helpers
 //
+
 
 template <class ConnectionT>
 inline ClientConnection::Ptr
@@ -183,9 +192,11 @@ createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
     return conn;
 }
 
+
 //
 // HTTP Client
 //
+
 
 class Client
 {
@@ -236,6 +247,7 @@ protected:
     ClientConnectionPtrVec _connections;
 };
 
+
 inline ClientConnection::Ptr
 createConnection(const URL& url, http::Client* client = nullptr,
                  uv::Loop* loop = uv::defaultLoop())
@@ -246,6 +258,7 @@ createConnection(const URL& url, http::Client* client = nullptr,
 
     return connection;
 }
+
 
 #if 0
 class SecureClientConnection: public ClientConnection
@@ -292,9 +305,12 @@ public:
 };
 #endif
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

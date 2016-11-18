@@ -20,6 +20,7 @@
 #ifndef SCY_OpenCVVideoCapturer_H
 #define SCY_OpenCVVideoCapturer_H
 
+
 #include <iostream>
 #include <string>
 
@@ -28,7 +29,9 @@
 
 #include "webrtc/media/base/videocapturer.h"
 
+
 namespace scy {
+
 
 class OpenCVVideoCapturer : public cricket::VideoCapturer
 /// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
@@ -57,6 +60,7 @@ private:
     av::VideoCapture::Ptr capture;
 };
 
+
 // class OpenCVVideoCapturerFactory : public cricket::VideoDeviceCapturerFactory
 // {
 // public:
@@ -71,6 +75,8 @@ private:
 //     }
 // };
 
+
 } // namespace scy
+
 
 #endif

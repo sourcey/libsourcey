@@ -1,11 +1,14 @@
 #include "scy/http/server.h"
 #include "scy/idler.h"
 
+
 using std::cout;
 using std::cerr;
 using std::endl;
 
+
 namespace scy {
+
 
 /// Basic server responder (make echo?)
 class BasicResponder : public http::ServerResponder
@@ -29,6 +32,7 @@ public:
     }
 };
 
+
 /// Basic echo server responder
 class BasicEchoResponder : public http::ServerResponder
 {
@@ -48,6 +52,7 @@ public:
     }
 };
 
+
 struct RandomDataSource : public Idler
 {
     PacketSignal signal;
@@ -57,9 +62,10 @@ struct RandomDataSource : public Idler
     void onIdle()
     {
         RawPacket packet("hello", 5);
-        signal.emit(/*this, */ packet);
+        signal.emit(packet);
     }
 };
+
 
 /// Chunked responder that broadcasts random data to the client.
 class ChunkedResponder : public http::ServerResponder
@@ -113,6 +119,7 @@ public:
     }
 };
 
+
 class WebSocketResponder : public http::ServerResponder
 {
 public:
@@ -151,6 +158,7 @@ public:
     }
 };
 
+
 /// A Server Responder Factory for testing the HTTP server
 class OurServerResponderFactory : public http::ServerResponderFactory
 {
@@ -174,5 +182,6 @@ public:
             return new BasicResponder(conn);
     }
 };
+
 
 } // namespace scy

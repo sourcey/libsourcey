@@ -8,6 +8,7 @@
 /// @addtogroup sked
 /// @{
 
+
 #include "scy/sked/scheduler.h"
 #include "scy/datetime.h"
 #include "scy/logger.h"
@@ -17,18 +18,23 @@
 #include "assert.h"
 #include <algorithm>
 
+
 using namespace std;
+
 
 namespace scy {
 namespace sked {
+
 
 Scheduler::Scheduler()
 {
 }
 
+
 Scheduler::~Scheduler()
 {
 }
+
 
 void Scheduler::schedule(sked::Task* task)
 {
@@ -36,17 +42,20 @@ void Scheduler::schedule(sked::Task* task)
     //_wakeUp.set();
 }
 
+
 void Scheduler::cancel(sked::Task* task)
 {
     TaskRunner::cancel(task);
     //_wakeUp.set();
 }
 
+
 void Scheduler::clear()
 {
     TaskRunner::clear();
     //_wakeUp.set();
 }
+
 
 void Scheduler::run()
 {
@@ -156,6 +165,7 @@ void Scheduler::run()
     // TraceS(this) << "Exiting" << endl;
 }
 
+
 void Scheduler::update()
 {
     Mutex::ScopedLock lock(_mutex);
@@ -180,6 +190,7 @@ void Scheduler::update()
     sort(_tasks.begin(), _tasks.end(), sked::Task::CompareTimeout);
 }
 
+
 void Scheduler::serialize(json::Value& root)
 {
     TraceS(this) << "Serializing" << endl;
@@ -193,6 +204,7 @@ void Scheduler::serialize(json::Value& root)
         task->trigger().serialize(entry["trigger"]);
     }
 }
+
 
 void Scheduler::deserialize(json::Value& root)
 {
@@ -220,6 +232,7 @@ void Scheduler::deserialize(json::Value& root)
     }
 }
 
+
 void Scheduler::print(std::ostream& ost)
 {
     json::StyledWriter writer;
@@ -228,18 +241,22 @@ void Scheduler::print(std::ostream& ost)
     ost << writer.write(data);
 }
 
+
 Scheduler& Scheduler::getDefault()
 {
     static Singleton<Scheduler> sh;
     return *sh.get();
 }
 
+
 TaskFactory& Scheduler::factory()
 {
     return TaskFactory::getDefault();
 }
 
+
 } // namespace sked
 } // namespace scy
+
 
 /// @\}

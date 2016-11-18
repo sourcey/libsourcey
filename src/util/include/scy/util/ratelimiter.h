@@ -8,12 +8,16 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_RateLimiter_H
 #define SCY_RateLimiter_H
 
+
 #include "scy/logger.h"
 
+
 namespace scy {
+
 
 /// @addtogroup util
 /// A simple message rate limiter based on the token bucket algorithm.
@@ -61,8 +65,11 @@ public:
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_RateLimiter_H
+
 
 /// @\}

@@ -8,14 +8,18 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/timer.h"
 #include "assert.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 Timer::Timer(uv::Loop* loop)
     : _handle(loop, new uv_timer_t)
@@ -24,10 +28,12 @@ Timer::Timer(uv::Loop* loop)
     init();
 }
 
+
 Timer::~Timer()
 {
     // TraceS(this) << "Destroy" << endl;
 }
+
 
 void Timer::init()
 {
@@ -47,10 +53,12 @@ void Timer::init()
     _handle.unref(); // unref by default
 }
 
+
 void Timer::start(std::int64_t interval)
 {
     start(interval, interval);
 }
+
 
 void Timer::start(std::int64_t timeout, std::int64_t interval)
 {
@@ -75,6 +83,7 @@ void Timer::start(std::int64_t timeout, std::int64_t interval)
     assert(active());
 }
 
+
 void Timer::stop()
 {
     // TraceS(this) << "Stopping: " << __handle.ptr << endl;
@@ -89,6 +98,7 @@ void Timer::stop()
     assert(!active());
 }
 
+
 void Timer::restart()
 {
     // TraceS(this) << "Restarting: " << __handle.ptr << endl;
@@ -96,6 +106,7 @@ void Timer::restart()
         return start(_timeout, _interval);
     return again();
 }
+
 
 void Timer::again()
 {
@@ -109,6 +120,7 @@ void Timer::again()
     _count = 0;
 }
 
+
 void Timer::setInterval(std::int64_t interval)
 {
     // TraceS(this) << "Set interval: " << interval << endl;
@@ -117,15 +129,18 @@ void Timer::setInterval(std::int64_t interval)
     uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), interval);
 }
 
+
 bool Timer::active() const
 {
     return _handle.active();
 }
 
+
 std::int64_t Timer::timeout() const
 {
     return _timeout;
 }
+
 
 std::int64_t Timer::interval() const
 {
@@ -134,16 +149,20 @@ std::int64_t Timer::interval() const
         uv_timer_get_repeat(_handle.ptr<uv_timer_t>()), 0);
 }
 
+
 std::int64_t Timer::count()
 {
     return _count;
 }
+
 
 uv::Handle& Timer::handle()
 {
     return _handle;
 }
 
+
 } // namespace scy
+
 
 /// @\}

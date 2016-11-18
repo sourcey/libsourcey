@@ -8,14 +8,18 @@
 /// @addtogroup sked
 /// @{
 
+
 #ifndef SCY_Sked_Trigger_H
 #define SCY_Sked_Trigger_H
+
 
 #include "scy/datetime.h"
 #include "scy/json/iserializable.h"
 
+
 namespace scy {
 namespace sked {
+
 
 /// Days of the week
 enum DaysOfTheWeek
@@ -28,6 +32,7 @@ enum DaysOfTheWeek
     Friday = 5,
     Saturday = 6
 };
+
 
 /// Months of the year
 enum MonthOfTheYeay
@@ -45,6 +50,7 @@ enum MonthOfTheYeay
     November = 10,
     December = 11
 };
+
 
 // ---------------------------------------------------------------------
 //
@@ -92,6 +98,7 @@ struct Trigger : public json::ISerializable
     DateTime lastRunAt;
 };
 
+
 // ---------------------------------------------------------------------
 //
 struct OnceOnlyTrigger : public Trigger
@@ -106,6 +113,7 @@ struct OnceOnlyTrigger : public Trigger
 
     virtual bool expired();
 };
+
 
 // ---------------------------------------------------------------------
 //
@@ -129,6 +137,7 @@ struct IntervalTrigger : public Trigger
     int maxTimes;
 };
 
+
 // ---------------------------------------------------------------------
 //
 struct DailyTrigger : public Trigger
@@ -147,9 +156,12 @@ struct DailyTrigger : public Trigger
     std::vector<DaysOfTheWeek> daysExcluded;
 };
 
+
 } // namespace sked
 } // namespace scy
 
+
 #endif // SCY_Sked_Trigger_H
+
 
 /// @\}

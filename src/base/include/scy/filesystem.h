@@ -8,12 +8,15 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_FileSystem_H
 #define SCY_FileSystem_H
+
 
 #include <cstdint>
 #include <string>
 #include <vector>
+
 
 namespace scy {
 namespace fs {
@@ -90,9 +93,12 @@ bool savefile(const std::string& path, const char* data, std::size_t size,
 
 // TODO: Implement more libuv fs_* types
 
+
 } // namespace fs
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

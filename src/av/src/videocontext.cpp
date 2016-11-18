@@ -8,16 +8,20 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videocontext.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 VideoContext::VideoContext()
     : stream(nullptr)
@@ -32,6 +36,7 @@ VideoContext::VideoContext()
     initializeFFmpeg();
 }
 
+
 VideoContext::~VideoContext()
 {
     TraceS(this) << "Destroy" << endl;
@@ -40,9 +45,11 @@ VideoContext::~VideoContext()
     uninitializeFFmpeg();
 }
 
+
 void VideoContext::create()
 {
 }
+
 
 void VideoContext::open()
 {
@@ -62,6 +69,7 @@ void VideoContext::open()
     // Create the video conversion context if required
     recreateConverter();
 }
+
 
 void VideoContext::close()
 {
@@ -96,6 +104,7 @@ void VideoContext::close()
     TraceS(this) << "Closing: OK" << endl;
 }
 
+
 AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
 {
     // While flushing the input frame may be null
@@ -128,6 +137,7 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
     // Convert the input frame and return the result
     return conv->convert(iframe);
 }
+
 
 bool VideoContext::recreateConverter()
 {
@@ -168,9 +178,11 @@ bool VideoContext::recreateConverter()
     return true;
 }
 
+
 //
 // Helper functions
 //
+
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
 {
@@ -196,6 +208,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     return picture;
 }
 
+
 void initVideoCodecFromContext(const AVStream* stream,
                                const AVCodecContext* ctx, VideoCodec& params)
 {
@@ -211,9 +224,12 @@ void initVideoCodecFromContext(const AVStream* stream,
     }
 }
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

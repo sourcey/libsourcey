@@ -15,17 +15,22 @@
 #include "scy/http/util.h"
 #include "scy/util/base64packetencoder.h"
 
+
 using namespace std;
 using namespace scy;
 using namespace scy::av;
 
+
 #define SERVER_PORT 1328
 
+
 namespace scy {
+
 
 //
 // HTTP Media Server
 //
+
 
 MediaServer::MediaServer(std::uint16_t port)
     : http::Server(port, new HTTPStreamingConnectionFactory(this))
@@ -60,10 +65,12 @@ MediaServer::MediaServer(std::uint16_t port)
     // TODO: Add h264 and newer audio formats when time permits
 }
 
+
 MediaServer::~MediaServer()
 {
     DebugL << "Destroy" << endl;
 }
+
 
 void MediaServer::setupPacketStream(PacketStream& stream,
                                     const StreamingOptions& options,
@@ -156,15 +163,18 @@ void MediaServer::setupPacketStream(PacketStream& stream,
     stream.attach(sync, 20, true);
 }
 
+
 //
 // HTTP Streaming Connection Factory
 //
+
 
 HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(
     MediaServer* server)
     : _server(server)
 {
 }
+
 
 StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(
     http::ServerConnection& conn)
@@ -268,9 +278,11 @@ HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn)
     return new http::BadRequestHandler(conn);
 }
 
+
 //
 // HTTP Streaming Options
 //
+
 
 StreamingOptions::StreamingOptions(MediaServer* server,
                                    av::VideoCapture::Ptr videoCapture,
@@ -287,12 +299,15 @@ StreamingOptions::~StreamingOptions()
     DebugS(this) << "Destroy" << endl;
 }
 
+
 } // namespace scy
+
 
 static void onShutdown1(void* opaque)
 {
     reinterpret_cast<MediaServer*>(opaque)->shutdown();
 }
+
 
 int main(int argc, char** argv)
 {

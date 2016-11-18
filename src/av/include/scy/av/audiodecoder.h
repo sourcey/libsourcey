@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_AudioDecoder_H
 #define SCY_AV_AudioDecoder_H
+
 
 #include "scy/base.h"
 
@@ -27,8 +29,10 @@
 // // #include <libavutil/audio_fifo.h>
 // }
 
+
 namespace scy {
 namespace av {
+
 
 struct AudioDecoder : public AudioContext
 {
@@ -44,14 +48,17 @@ struct AudioDecoder : public AudioContext
     /// Returns true an output packet was returned,    // false otherwise.
 
     virtual void flush(); // AVPacket& opacket
-                          /// Flushes buffered frames.
-                          /// This method should be called once after decoding.
+    /// Flushes buffered frames.
+    /// This method should be called once after decoding.
 };
+
 
 } // namespace av
 } // namespace scy
 
+
 #endif
 #endif // SCY_AV_AudioDecoder_H
+
 
 /// @\}

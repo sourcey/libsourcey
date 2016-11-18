@@ -8,15 +8,19 @@
 /// @addtogroup http
 /// @{
 
+
 #ifndef SCY_HTTP_URL_H
 #define SCY_HTTP_URL_H
+
 
 #include "scy/base.h"
 #include "scy/collection.h"
 #include <http_parser.h>
 
+
 namespace scy {
 namespace http {
+
 
 /// An RFC 3986 based URL which uses an external c
 /// library to do the heavy lifting.
@@ -87,9 +91,12 @@ protected:
     std::string _buf;
 };
 
+
 } // namespace http
 } // namespace scy
 
+
 #endif // SCY_HTTP_URL_H
+
 
 /// @\}

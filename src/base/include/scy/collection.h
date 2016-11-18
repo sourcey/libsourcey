@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Containers_H
 #define SCY_Containers_H
+
 
 #include "scy/logger.h"
 #include "scy/memory.h"
@@ -22,7 +24,9 @@
 #include <stdexcept>
 #include <vector>
 
+
 namespace scy {
+
 
 /// AbstractCollection is an abstract interface for managing a
 /// key-value store of indexed pointers.
@@ -44,9 +48,11 @@ public:
     virtual void clear() = 0;
 };
 
+
 //
 // Pointer Collection
 //
+
 
 /// This collection is used to maintain an map of any pointer
 /// type indexed by key value in a thread-safe way.
@@ -220,9 +226,11 @@ protected:
     mutable Mutex _mutex;
 };
 
+
 //
 // Live Collection
 //
+
 
 template <class TKey, class TValue,
           class TDeleter = std::default_delete<TValue>>
@@ -234,21 +242,23 @@ public:
 public:
     virtual void onAdd(const TKey&, TValue* item)
     {
-        ItemAdded.emit(/*this, */ *item);
+        ItemAdded.emit(*item);
     }
 
     virtual void onRemove(const TKey&, TValue* item)
     {
-        ItemRemoved.emit(/*this, */ *item);
+        ItemRemoved.emit(*item);
     }
 
     Signal<void(TValue&)> ItemAdded;
     Signal<void(const TValue&)> ItemRemoved;
 };
 
+
 //
 // KV Collection
 //
+
 
 /// A reusable stack based unique key-value store for DRY coding.
 template <class TKey, class TValue> class KVCollection
@@ -339,6 +349,7 @@ protected:
     Map _map;
 };
 
+
 //
 // NV Collection
 //
@@ -428,6 +439,7 @@ private:
     Map _map;
 };
 
+
 inline NVCollection& NVCollection::operator=(const NVCollection& nvc)
 {
     if (&nvc != this) {
@@ -435,6 +447,7 @@ inline NVCollection& NVCollection::operator=(const NVCollection& nvc)
     }
     return *this;
 }
+
 
 inline const std::string& NVCollection::
 operator[](const std::string& name) const
@@ -446,6 +459,7 @@ operator[](const std::string& name) const
         throw std::runtime_error("Item not found: " + name);
 }
 
+
 inline void NVCollection::set(const std::string& name, const std::string& value)
 {
     Iterator it = _map.find(name);
@@ -455,10 +469,12 @@ inline void NVCollection::set(const std::string& name, const std::string& value)
         _map.insert(Map::value_type(name, value));
 }
 
+
 inline void NVCollection::add(const std::string& name, const std::string& value)
 {
     _map.insert(Map::value_type(name, value));
 }
+
 
 inline const std::string& NVCollection::get(const std::string& name) const
 {
@@ -468,6 +484,7 @@ inline const std::string& NVCollection::get(const std::string& name) const
     else
         throw std::runtime_error("Item not found: " + name);
 }
+
 
 inline const std::string&
 NVCollection::get(const std::string& name,
@@ -480,10 +497,12 @@ NVCollection::get(const std::string& name,
         return defaultValue;
 }
 
+
 inline bool NVCollection::has(const std::string& name) const
 {
     return _map.find(name) != _map.end();
 }
+
 
 inline NVCollection::ConstIterator
 NVCollection::find(const std::string& name) const
@@ -491,41 +510,51 @@ NVCollection::find(const std::string& name) const
     return _map.find(name);
 }
 
+
 inline NVCollection::ConstIterator NVCollection::begin() const
 {
     return _map.begin();
 }
+
 
 inline NVCollection::ConstIterator NVCollection::end() const
 {
     return _map.end();
 }
 
+
 inline bool NVCollection::empty() const
 {
     return _map.empty();
 }
+
 
 inline int NVCollection::size() const
 {
     return (int)_map.size();
 }
 
+
 inline void NVCollection::erase(const std::string& name)
 {
     _map.erase(name);
 }
+
 
 inline void NVCollection::clear()
 {
     _map.clear();
 }
 
+
 typedef std::map<std::string, std::string> StringMap;
 typedef std::vector<std::string> StringVec;
 
+
 } // namespace scy
 
+
 #endif // SCY_Containers_H
+
 
 /// @\}

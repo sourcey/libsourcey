@@ -8,14 +8,18 @@
 /// @addtogroup turn
 /// @{
 
+
 #include "scy/turn/server/tcpallocation.h"
 #include "scy/logger.h"
 #include "scy/turn/server/server.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace turn {
+
 
 TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
                              const FiveTuple& tuple,
@@ -35,6 +39,7 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
 
     TraceL << "Initializing on " << _acceptor->address() << endl;
 }
+
 
 TCPAllocation::~TCPAllocation()
 {
@@ -56,6 +61,7 @@ TCPAllocation::~TCPAllocation()
 
     TraceL << "Destroy TCP allocation: OK" << endl;
 }
+
 
 void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 {
@@ -117,6 +123,7 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
            << endl;
 }
 
+
 bool TCPAllocation::handleRequest(Request& request)
 {
     TraceL << "Handle request" << endl;
@@ -133,6 +140,7 @@ bool TCPAllocation::handleRequest(Request& request)
     return true;
 }
 
+
 bool TCPAllocation::onTimer()
 {
     TraceL << "TCPAllocation: On timer" << endl;
@@ -148,6 +156,7 @@ bool TCPAllocation::onTimer()
 
     return ServerAllocation::onTimer();
 }
+
 
 void TCPAllocation::handleConnectRequest(Request& request)
 {
@@ -195,6 +204,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
     pair->transactionID = request.transactionID();
     pair->doPeerConnect(peerAttr->address());
 }
+
 
 void TCPAllocation::handleConnectionBindRequest(Request& request)
 {
@@ -277,6 +287,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
     }
 }
 
+
 void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
                                             bool success)
 {
@@ -311,12 +322,14 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
     sendToControl(response);
 }
 
+
 int TCPAllocation::sendToControl(stun::Message& message)
 {
     // Mutex::ScopedLock lock(_mutex);
     TraceL << "Send to control: " << message << endl;
     return _control->sendPacket(message, 0);
 }
+
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
@@ -328,17 +341,20 @@ void TCPAllocation::onControlClosed(net::Socket& socket)
     _deleted = true;
 }
 
+
 net::TCPSocket& TCPAllocation::control()
 {
     // Mutex::ScopedLock lock(_mutex);
     return *_control.get();
 }
 
+
 TCPConnectionPairMap& TCPAllocation::pairs()
 {
     // Mutex::ScopedLock lock(_mutex);
     return _pairs;
 }
+
 
 net::Address TCPAllocation::relayedAddress() const
 {
@@ -347,5 +363,6 @@ net::Address TCPAllocation::relayedAddress() const
 }
 }
 } //  namespace scy::turn
+
 
 /// @\}

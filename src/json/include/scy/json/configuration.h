@@ -57,4 +57,5 @@ protected:
 
 #endif // SCY_JSON_Configuration_H
 
+
 /// @\}

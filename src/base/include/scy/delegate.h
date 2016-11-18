@@ -8,13 +8,17 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Delegate_H
 #define SCY_Delegate_H
+
 
 #include <functional>
 // #include "scy/logger.h"
 
+
 namespace scy {
+
 
 ///
 /// Abstract delegate interface.
@@ -30,6 +34,7 @@ template <typename RT, typename... Args> struct AbstractDelegate
     virtual bool
     operator==(const AbstractDelegate<RT, Args...>& that) const = 0;
 };
+
 
 ///
 /// The `FunctionDelegate` contains a `std::function`.
@@ -54,6 +59,7 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
         return false; // dynamic function delegates cannot be compared
     }
 };
+
 
 ///
 /// The `ClassDelegate` contains a pointer to a class member.
@@ -85,6 +91,7 @@ struct ClassDelegate : AbstractDelegate<RT, Args...>
     }
 };
 
+
 ///
 /// The `ConstClassDelegate` contains a pointer to a `const` class member.
 ///
@@ -114,6 +121,7 @@ struct ConstClassDelegate : AbstractDelegate<RT, Args...>
                other->method == this->method;
     }
 };
+
 
 ///
 /// Polymorphic function delegate.
@@ -149,8 +157,11 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Delegate_H
+
 
 /// @\}

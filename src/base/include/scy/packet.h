@@ -8,8 +8,10 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Packet_H
 #define SCY_Packet_H
+
 
 #include "scy/bitwise.h"
 #include "scy/buffer.h"
@@ -19,7 +21,9 @@
 #include <cstdint>
 #include <cstring> // memcpy
 
+
 namespace scy {
+
 
 /// An abstract interface for packet sources to
 /// provide extra information about packets.
@@ -30,6 +34,7 @@ struct IPacketInfo
 
     virtual IPacketInfo* clone() const = 0;
 };
+
 
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
@@ -128,6 +133,7 @@ public:
     }
 };
 
+
 /// A simple flag packet for sending state flags along the packet stream.
 class FlagPacket : public IPacket
 {
@@ -152,6 +158,7 @@ public:
 
     virtual const char* className() const { return "FlagPacket"; }
 };
+
 
 /// RawPacket is the default data packet type which consists
 /// of an optionally managed char pointer and a size value.
@@ -269,6 +276,7 @@ public:
     bool _free;
 };
 
+
 inline RawPacket rawPacket(const MutableBuffer& buf, unsigned flags = 0,
                            void* source = nullptr, void* opaque = nullptr,
                            IPacketInfo* info = nullptr)
@@ -282,8 +290,7 @@ inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags = 0,
                            IPacketInfo* info = nullptr)
 {
     return RawPacket(bufferCast<const char*>(buf), buf.size(), flags, source,
-                     opaque,
-                     info); // copy const data
+                     opaque, info); // copy const data
 }
 
 inline RawPacket rawPacket(char* data = nullptr, std::size_t size = 0,
@@ -301,8 +308,11 @@ inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0,
                      info); // copy const data
 }
 
+
 } // namespace scy
 
+
 #endif // SCY_Packet_H
+
 
 /// @\}

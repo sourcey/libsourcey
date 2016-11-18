@@ -8,23 +8,28 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/async.h"
 #include "scy/logger.h"
 #include <memory>
 
+
 namespace scy {
 namespace async {
+
 
 Runner::Runner()
 {
     pContext = std::make_shared<Runner::Context>();
 }
 
+
 Runner::~Runner()
 {
     // Always call cancel so the async context can exit ASAP.
     cancel();
 }
+
 
 void Runner::runAsync(Context* c)
 {
@@ -66,6 +71,7 @@ void Runner::runAsync(Context* c)
     }
 }
 
+
 void Runner::start(async::Runnable& target)
 {
     if (started())
@@ -77,6 +83,7 @@ void Runner::start(async::Runnable& target)
     pContext->started = true;
     startAsync();
 }
+
 
 void Runner::start(std::function<void()> target)
 {
@@ -90,6 +97,7 @@ void Runner::start(std::function<void()> target)
     startAsync();
 }
 
+
 void Runner::start(std::function<void(void*)> target, void* arg)
 {
     if (started())
@@ -102,50 +110,60 @@ void Runner::start(std::function<void(void*)> target, void* arg)
     startAsync();
 }
 
+
 void Runner::setRepeating(bool flag)
 {
     assert(!pContext->started);
     pContext->repeating = flag;
 }
 
+
 bool Runner::running() const
 {
     return pContext->running;
 }
+
 
 bool Runner::started() const
 {
     return pContext->started;
 }
 
+
 bool Runner::repeating() const
 {
     return pContext->repeating;
 }
+
 
 void Runner::cancel()
 {
     pContext->cancel();
 }
 
+
 bool Runner::cancelled() const
 {
     return pContext->cancelled();
 }
+
 
 uv_thread_t Runner::tid() const
 {
     return pContext->tid;
 }
 
+
 //
 // Runner Context
 //
+
 
 void Runner::Context::cancel()
 {
     exit.store(true, std::memory_order_release);
 }
+
 
 bool Runner::Context::cancelled() const
 {
@@ -155,7 +173,9 @@ bool Runner::Context::cancelled() const
     return s;
 }
 
+
 } // namespace basic
 } // namespace scy
+
 
 /// @\}

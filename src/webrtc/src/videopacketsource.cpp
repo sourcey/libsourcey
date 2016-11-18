@@ -8,19 +8,25 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/videopacketsource.h"
+
 
 using std::endl;
 
+
 namespace scy {
+
 
 VideoPacketSource::VideoPacketSource()
 {
 }
 
+
 VideoPacketSource::~VideoPacketSource()
 {
 }
+
 
 cricket::CaptureState
 VideoPacketSource::Start(const cricket::VideoFormat& capture_format)
@@ -50,6 +56,7 @@ VideoPacketSource::Start(const cricket::VideoFormat& capture_format)
     return cricket::CS_FAILED;
 }
 
+
 void VideoPacketSource::Stop()
 {
     try {
@@ -69,6 +76,7 @@ void VideoPacketSource::Stop()
     return;
 }
 
+
 void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
 {
     TraceL << "On video frame: " << packet.width << 'x' << packet.height
@@ -87,10 +95,12 @@ void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
     SignalFrameCaptured(this, &frame);
 }
 
+
 bool VideoPacketSource::IsRunning()
 {
     return capture_state() == cricket::CS_RUNNING;
 }
+
 
 bool VideoPacketSource::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
@@ -101,6 +111,7 @@ bool VideoPacketSource::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
     fourccs->push_back(cricket::FOURCC_NV12); // FOURCC_I420
     return true;
 }
+
 
 bool VideoPacketSource::GetBestCaptureFormat(
     const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
@@ -117,11 +128,14 @@ bool VideoPacketSource::GetBestCaptureFormat(
     return true;
 }
 
+
 bool VideoPacketSource::IsScreencast() const
 {
     return false;
 }
 
+
 } // namespace scy
+
 
 /// @\}

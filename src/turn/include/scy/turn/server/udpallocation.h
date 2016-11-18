@@ -8,19 +8,24 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_SERVER_UDPAllocation_H
 #define SCY_TURN_SERVER_UDPAllocation_H
+
 
 #include "scy/net/packetsocket.h"
 #include "scy/net/udpsocket.h"
 #include "scy/turn/server/serverallocation.h"
 #include "scy/turn/types.h"
 
+
 namespace scy {
 namespace turn {
 
+
 class Server;
 class IConnection;
+
 
 class UDPAllocation : public ServerAllocation
 {
@@ -47,6 +52,8 @@ private:
 }
 } //  namespace scy::turn
 
+
 #endif // SCY_TURN_SERVER_UDPAllocation_H
+
 
 /// @\}

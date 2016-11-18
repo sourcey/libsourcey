@@ -9,8 +9,10 @@
 /// @{
 // Implemented from libjingle r116 Feb 16, 2012
 
+
 #ifndef SCY_AV_DeviceManager_FAKE_H
 #define SCY_AV_DeviceManager_FAKE_H
+
 
 #include <string>
 #include <vector>
@@ -19,8 +21,10 @@
 //#include "talk/session/phone/devicemanager.h"
 //#include "talk/session/phone/mediacommon.h"
 
+
 namespace scy {
 namespace av {
+
 
 class FakeDeviceManager : public IDeviceManager
 {
@@ -126,6 +130,7 @@ public:
         vidcap_devices_ = devices;
     }
 
+
     virtual bool getCamera(const std::string& name, Device& out)
     {
         if (vidcap_devices_.empty())
@@ -171,10 +176,13 @@ private:
     std::vector<Device> vidcap_devices_;
 };
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif // SCY_AV_DeviceManager_FAKE_H
+
 
 /*
  * libjingle

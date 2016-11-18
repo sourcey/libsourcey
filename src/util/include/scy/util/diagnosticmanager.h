@@ -8,14 +8,18 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_DiagnosticManager_H
 #define SCY_DiagnosticManager_H
+
 
 #include "scy/collection.h"
 #include "scy/stateful.h"
 #include "scy/thread.h"
 
+
 namespace scy {
+
 
 /// @addtogroup util
 /// @{///
@@ -48,9 +52,11 @@ struct DiagnosticState : public State
     }
 };
 
+
 //
 // Diagnostic Interface
 //
+
 
 class IDiagnostic : public Stateful<DiagnosticState>
 {
@@ -87,11 +93,14 @@ protected:
     virtual void addSummary(const std::string& text);
 };
 
+
 typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
+
 
 //
 // Asynchronous Diagnostic Base
 //
+
 
 class AsyncDiagnostic : public IDiagnostic, public async::Runnable
 {
@@ -108,9 +117,11 @@ protected:
     Thread _thread;
 };
 
+
 //
 // Diagnostic Manager
 //
+
 
 class DiagnosticManager : public DiagnosticStore
 {
@@ -142,10 +153,14 @@ public:
                                          const DiagnosticState&);
 };
 
+
 /// @\}
+
 
 } // namespace scy
 
+
 #endif // SCY_DiagnosticManager_H
+
 
 /// @\}

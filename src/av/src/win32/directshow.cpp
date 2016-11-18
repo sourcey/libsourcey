@@ -8,8 +8,10 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/win32/directshow.h"
 #include "scy/platform.h"
+
 
 #include <dbt.h> // DBT_* & DEV_*
 #include <dshow.h>
@@ -17,11 +19,14 @@
 #include <ksmedia.h> // KSCATEGORY_*
 #include <windows.h>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
 namespace dshow {
+
 
 bool getDeviceCategoryList(Device::Type type, REFGUID category,
                            std::vector<av::Device>& devices)
@@ -102,6 +107,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
     return !devices.empty();
 }
 
+
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     switch (type) {
@@ -122,8 +128,10 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
     return false;
 }
 
+
 } // namespace dshow
 } // namespace av
 } // namespace scy
+
 
 /// @\}

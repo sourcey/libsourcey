@@ -8,6 +8,7 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/websocket.h"
 #include "scy/base64.h"
 #include "scy/crypto/hash.h"
@@ -18,34 +19,42 @@
 #include "scy/random.h"
 #include <stdexcept>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace http {
 namespace ws {
+
 
 WebSocket::WebSocket(const net::Socket::Ptr& socket)
     : WebSocketAdapter(socket, ws::ClientSide, _request, _response)
 {
 }
 
+
 WebSocket::~WebSocket()
 {
 }
+
 
 http::Request& WebSocket::request()
 {
     return _request;
 }
 
+
 http::Response& WebSocket::response()
 {
     return _response;
 }
 
+
 //
 // WebSocket Adapter
 //
+
 
 WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
                                    ws::Mode mode, http::Request& request,
@@ -61,12 +70,14 @@ WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
     socket->addReceiver(this, 100);
 }
 
+
 WebSocketAdapter::~WebSocketAdapter()
 {
     TraceS(this) << "Destroy" << endl;
 
     socket->removeReceiver(this);
 }
+
 
 bool WebSocketAdapter::shutdown(std::uint16_t statusCode,
                                 const std::string& statusMessage)
@@ -82,10 +93,12 @@ bool WebSocketAdapter::shutdown(std::uint16_t statusCode,
                                    unsigned(ws::Opcode::Close)) > 0;
 }
 
+
 int WebSocketAdapter::send(const char* data, std::size_t len, int flags)
 {
     return send(data, len, socket->peerAddress(), flags);
 }
+
 
 int WebSocketAdapter::send(const char* data, std::size_t len,
                            const net::Address& peerAddr, int flags)
@@ -106,6 +119,7 @@ int WebSocketAdapter::send(const char* data, std::size_t len,
     return SocketAdapter::send(writer.begin(), writer.position(), peerAddr, 0);
 }
 
+
 void WebSocketAdapter::sendClientRequest()
 {
     framer.createClientHandshakeRequest(_request);
@@ -117,6 +131,7 @@ void WebSocketAdapter::sendClientRequest()
     assert(socket);
     SocketAdapter::send(oss.str().c_str(), oss.str().length());
 }
+
 
 void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer,
                                             const net::Address& peerAddr)
@@ -150,11 +165,13 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer,
     }
 }
 
+
 void WebSocketAdapter::onHandshakeComplete()
 {
     // Call SocketAdapter::onSocketConnect to notify handlers that data may flow
     SocketAdapter::onSocketConnect(*socket.get());
 }
+
 
 void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer,
                                            const net::Address& peerAddr)
@@ -192,6 +209,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer,
     SocketAdapter::send(oss.str().c_str(), oss.str().length());
 }
 
+
 void WebSocketAdapter::onSocketConnect(net::Socket& socket)
 {
     TraceS(this) << "On connect" << endl;
@@ -201,6 +219,7 @@ void WebSocketAdapter::onSocketConnect(net::Socket& socket)
     // handshake is complete
     sendClientRequest();
 }
+
 
 void WebSocketAdapter::onSocketRecv(net::Socket& socket,
                                     const MutableBuffer& buffer,
@@ -283,6 +302,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket& socket,
     }
 }
 
+
 void WebSocketAdapter::onSocketClose(net::Socket& socket)
 {
     // Reset state so the connection can be reused
@@ -295,9 +315,11 @@ void WebSocketAdapter::onSocketClose(net::Socket& socket)
     SocketAdapter::onSocketClose(socket);
 }
 
+
 //
 // WebSocket Connection Adapter
 //
+
 
 ConnectionAdapter::ConnectionAdapter(Connection& connection, ws::Mode mode)
     : WebSocketAdapter(connection.socket(), mode, connection.request(),
@@ -309,9 +331,11 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, ws::Mode mode)
     _connection.shouldSendHeader(false);
 }
 
+
 ConnectionAdapter::~ConnectionAdapter()
 {
 }
+
 
 void ConnectionAdapter::onHandshakeComplete()
 {
@@ -338,14 +362,17 @@ void ConnectionAdapter::onHandshakeComplete()
 //     _connection.onMessage();
 // }
 
+
 // int ConnectionAdapter::sendHeader()
 // {
 //     WarnL << "Read error: " << exc.what() << endl;
 // }
 
+
 //
 // WebSocket Framer
 //
+
 
 WebSocketFramer::WebSocketFramer(ws::Mode mode)
     : // bool mustMaskPayload
@@ -356,14 +383,17 @@ WebSocketFramer::WebSocketFramer(ws::Mode mode)
 {
 }
 
+
 WebSocketFramer::~WebSocketFramer()
 {
 }
+
 
 std::string createKey()
 {
     return base64::encode(util::randomString(16));
 }
+
 
 std::string computeAccept(const std::string& key)
 {
@@ -372,6 +402,7 @@ std::string computeAccept(const std::string& key)
     engine.update(key + ws::ProtocolGuid);
     return base64::encode(engine.digest());
 }
+
 
 void WebSocketFramer::createClientHandshakeRequest(http::Request& request)
 {
@@ -394,6 +425,7 @@ void WebSocketFramer::createClientHandshakeRequest(http::Request& request)
     // << endl;
     _headerState++;
 }
+
 
 bool WebSocketFramer::checkClientHandshakeResponse(http::Response& response)
 {
@@ -432,6 +464,7 @@ bool WebSocketFramer::checkClientHandshakeResponse(http::Response& response)
     return false;
 }
 
+
 void WebSocketFramer::acceptServerRequest(http::Request& request,
                                           http::Response& response)
 {
@@ -465,6 +498,7 @@ void WebSocketFramer::acceptServerRequest(http::Request& request,
         throw std::runtime_error(
             "WebSocket error: No WebSocket handshake"); // ws::ErrorNoHandshake
 }
+
 
 std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len,
                                         int flags, BitWriter& frame)
@@ -518,6 +552,7 @@ std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len,
 
     return frame.position();
 }
+
 
 std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 {
@@ -587,7 +622,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     if (payloadLength > limit) // length)
         throw std::runtime_error(
             "WebSocket error: Incomplete frame received"); //,
-    // ws::ErrorIncompleteFrame
+                                                           //ws::ErrorIncompleteFrame
 
     // Get a reference to the start of the payload
     payload = reinterpret_cast<char*>(
@@ -609,6 +644,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 
     return payloadLength;
 }
+
 
 void WebSocketFramer::completeClientHandshake(http::Response& response)
 {
@@ -635,28 +671,34 @@ void WebSocketFramer::completeClientHandshake(http::Response& response)
     assert(handshakeComplete());
 }
 
+
 ws::Mode WebSocketFramer::mode() const
 {
     return _mode;
 }
+
 
 bool WebSocketFramer::handshakeComplete() const
 {
     return _headerState == 2;
 }
 
+
 int WebSocketFramer::frameFlags() const
 {
     return _frameFlags;
 }
+
 
 bool WebSocketFramer::mustMaskPayload() const
 {
     return _maskPayload;
 }
 
+
 } // namespace ws
 } // namespace http
 } // namespace scy
+
 
 /// @\}

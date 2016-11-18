@@ -8,8 +8,10 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_Client_H
 #define SCY_TURN_Client_H
+
 
 #include "scy/net/udpsocket.h"
 #include "scy/stateful.h"
@@ -22,8 +24,10 @@
 
 #include <deque>
 
+
 namespace scy {
 namespace turn {
+
 
 struct ClientState : public State
 {
@@ -57,7 +61,9 @@ struct ClientState : public State
     };
 };
 
+
 class Client;
+
 
 struct ClientObserver
 {
@@ -87,6 +93,7 @@ struct ClientObserver
     /// Handy for performing extra async cleanup tasks.
     virtual void onTimer(Client& client){};
 };
+
 
 class Client : public Stateful<ClientState>, protected IAllocation
 {
@@ -203,6 +210,8 @@ protected:
 }
 } //  namespace scy::turn
 
+
 #endif // SCY_TURN_Client_H
+
 
 /// @\}

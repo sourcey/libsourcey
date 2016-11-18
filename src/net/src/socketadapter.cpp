@@ -8,13 +8,17 @@
 /// @addtogroup net
 /// @{
 
+
 #include "scy/net/socketadapter.h"
 #include "scy/net/socket.h"
 
+
 using std::endl;
+
 
 namespace scy {
 namespace net {
+
 
 SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
     : _sender(sender)
@@ -26,6 +30,7 @@ SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
     if (receiver)
         addReceiver(receiver);
 }
+
 
 SocketAdapter::~SocketAdapter()
 {
@@ -42,6 +47,7 @@ SocketAdapter::~SocketAdapter()
 #endif
 }
 
+
 int SocketAdapter::send(const char* data, std::size_t len, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
@@ -49,6 +55,7 @@ int SocketAdapter::send(const char* data, std::size_t len, int flags)
         return -1;
     return _sender->send(data, len, flags);
 }
+
 
 int SocketAdapter::send(const char* data, std::size_t len,
                         const Address& peerAddress, int flags)
@@ -58,6 +65,7 @@ int SocketAdapter::send(const char* data, std::size_t len,
         return -1;
     return _sender->send(data, len, peerAddress, flags);
 }
+
 
 int SocketAdapter::sendPacket(const IPacket& packet, int flags)
 {
@@ -74,6 +82,7 @@ int SocketAdapter::sendPacket(const IPacket& packet, int flags)
         return send(buf.data(), buf.size(), flags);
     }
 }
+
 
 int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress,
                               int flags)
@@ -93,6 +102,7 @@ int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress,
     }
 }
 
+
 void SocketAdapter::sendPacket(IPacket& packet)
 {
     int res = sendPacket(packet, 0);
@@ -100,10 +110,12 @@ void SocketAdapter::sendPacket(IPacket& packet)
         throw std::runtime_error("Invalid socket operation");
 }
 
+
 void SocketAdapter::onSocketConnect(Socket& socket)
 {
     emitSocketConnect(socket);
 }
+
 
 void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer,
                                  const Address& peerAddress)
@@ -111,21 +123,25 @@ void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer,
     emitSocketRecv(socket, buffer, peerAddress);
 }
 
+
 void SocketAdapter::onSocketError(Socket& socket,
                                   const scy::Error& error) // const Error& error
 {
     emitSocketError(socket, error);
 }
 
+
 void SocketAdapter::onSocketClose(Socket& socket)
 {
     emitSocketClose(socket);
 }
 
+
 void SocketAdapter::emitSocketConnect(Socket& socket)
 {
     Connect.emit(socket /*self()*/);
 }
+
 
 void SocketAdapter::emitSocketRecv(Socket& socket, const MutableBuffer& buffer,
                                    const Address& peerAddress)
@@ -133,15 +149,18 @@ void SocketAdapter::emitSocketRecv(Socket& socket, const MutableBuffer& buffer,
     Recv.emit(/*self(), */ socket, buffer, peerAddress);
 }
 
+
 void SocketAdapter::emitSocketError(Socket& socket, const scy::Error& error)
 {
     Error.emit(/*self(), */ socket, error);
 }
 
+
 void SocketAdapter::emitSocketClose(Socket& socket)
 {
     Close.emit(socket /*self()*/);
 }
+
 
 void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
 {
@@ -151,6 +170,7 @@ void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
     Close += slot(adapter, &net::SocketAdapter::onSocketClose, priority);
 }
 
+
 void SocketAdapter::removeReceiver(SocketAdapter* adapter)
 {
     Connect -= slot(adapter, &net::SocketAdapter::onSocketConnect);
@@ -158,6 +178,7 @@ void SocketAdapter::removeReceiver(SocketAdapter* adapter)
     Error -= slot(adapter, &net::SocketAdapter::onSocketError);
     Close -= slot(adapter, &net::SocketAdapter::onSocketClose);
 }
+
 
 void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
 {
@@ -168,7 +189,9 @@ void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
     _sender = adapter;
 }
 
+
 } // namespace net
 } // namespace scy
+
 
 /// @\}

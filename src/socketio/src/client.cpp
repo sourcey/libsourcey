@@ -8,34 +8,42 @@
 /// @addtogroup socketio
 /// @{
 
+
 #include "scy/socketio/client.h"
 #include "scy/http/client.h"
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 #include <stdexcept>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace sockio {
 
+
 //
 // TCP Client
 //
+
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
     return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
 }
 
+
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
 {
 }
 
+
 //
 // SSL Client
 //
+
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
@@ -43,14 +51,17 @@ Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
                       options); //, loop);
 }
 
+
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
     : Client(std::make_shared<net::SSLSocket>(loop), options) //, loop)
 {
 }
 
+
 //
 // Base Client
 //
+
 
 // Client::Client(const net::Socket::Ptr& socket) :
 //     _pingTimer(socket->loop()),
@@ -60,6 +71,7 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
 // {
 //     _ws.addReceiver(this);
 // }
+
 
 Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     : _pingTimer(socket->loop())
@@ -76,6 +88,7 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     _ws.addReceiver(this);
 }
 
+
 Client::~Client()
 {
     _ws.removeReceiver(this);
@@ -84,6 +97,7 @@ Client::~Client()
     close();
     // reset();
 }
+
 
 // void Client::connect(const std::string& host, std::uint16_t port)
 // {
@@ -94,6 +108,7 @@ Client::~Client()
 //     }
 //     connect();
 // }
+
 
 void Client::connect()
 {
@@ -122,6 +137,7 @@ void Client::connect()
     _ws.socket->connect(_options.host, _options.port);
 }
 
+
 void Client::close()
 {
     TraceN(this) << "Closing" << endl;
@@ -133,11 +149,13 @@ void Client::close()
     TraceN(this) << "Closing: OK" << endl;
 }
 
+
 int Client::send(const std::string& message, bool ack)
 {
     Packet packet(message, ack);
     return send(packet);
 }
+
 
 int Client::send(const json::Value& message, bool ack)
 {
@@ -145,10 +163,12 @@ int Client::send(const json::Value& message, bool ack)
     return send(packet);
 }
 
+
 int Client::send(const sockio::Packet& packet)
 {
     return _ws.sendPacket(packet);
 }
+
 
 int Client::send(const std::string& event, const char* message, bool ack)
 {
@@ -156,11 +176,13 @@ int Client::send(const std::string& event, const char* message, bool ack)
     return send(packet);
 }
 
+
 int Client::send(const std::string& event, const std::string& message, bool ack)
 {
     Packet packet(event, message, ack);
     return send(packet);
 }
+
 
 int Client::send(const std::string& event, const json::Value& message, bool ack)
 {
@@ -168,11 +190,13 @@ int Client::send(const std::string& event, const json::Value& message, bool ack)
     return send(packet);
 }
 
+
 Transaction* Client::createTransaction(const sockio::Packet& request,
                                        long timeout)
 {
     return new Transaction(*this, request, timeout);
 }
+
 
 int Client::sendPing()
 {
@@ -183,6 +207,7 @@ int Client::sendPing()
     // TraceN(this) << "Sending ping" << endl;
     return _ws.send("2", 1);
 }
+
 
 void Client::reset()
 {
@@ -209,6 +234,7 @@ void Client::reset()
     // _wasOnline = false; // Reset via onClose()
 }
 
+
 void Client::setError(const scy::Error& error)
 {
     ErrorN(this) << "Set error: " << error.message << std::endl;
@@ -231,6 +257,7 @@ void Client::setError(const scy::Error& error)
     }
 }
 
+
 void Client::onConnect()
 {
     TraceN(this) << "On connect" << endl;
@@ -241,6 +268,7 @@ void Client::onConnect()
     stopReconnectTimer();
 }
 
+
 void Client::startReconnectTimer()
 {
     assert(_options.reconnection);
@@ -249,6 +277,7 @@ void Client::startReconnectTimer()
     _reconnectTimer.handle().ref();
     _reconnecting = true;
 }
+
 
 void Client::stopReconnectTimer()
 {
@@ -259,6 +288,7 @@ void Client::stopReconnectTimer()
         _reconnecting = false;
     }
 }
+
 
 void Client::onOnline()
 {
@@ -277,6 +307,7 @@ void Client::onOnline()
     _pingTimeoutTimer.Timeout += slot(this, &Client::onPingTimeoutTimer);
 }
 
+
 void Client::onClose()
 {
     TraceN(this) << "On close" << endl;
@@ -288,6 +319,7 @@ void Client::onClose()
     _wasOnline = false;
 }
 
+
 //
 // Socket Callbacks
 
@@ -296,12 +328,14 @@ void Client::onSocketConnect(net::Socket& socket)
     onConnect();
 }
 
+
 void Client::onSocketError(net::Socket& socket, const scy::Error& error)
 {
     TraceN(this) << "On socket error: " << error.message << endl;
 
     setError(error);
 }
+
 
 void Client::onSocketClose(net::Socket& socket)
 {
@@ -313,6 +347,7 @@ void Client::onSocketClose(net::Socket& socket)
     // if (!error().any())
     //    setError("Disconnected from the server");
 }
+
 
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
@@ -340,6 +375,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 #endif
 }
 
+
 void Client::onHandshake(sockio::Packet& packet)
 {
     assert(stateEquals(ClientState::Connected));
@@ -359,6 +395,7 @@ void Client::onHandshake(sockio::Packet& packet)
                  << "pingTimeout=" << _pingTimeout << endl;
 }
 
+
 void Client::onMessage(sockio::Packet& packet)
 {
     switch (packet.type()) {
@@ -372,17 +409,17 @@ void Client::onMessage(sockio::Packet& packet)
         case Packet::Packet::Type::Event:
             assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(/*this, */ packet);
+            emit(packet);
             break;
         case Packet::Packet::Type::Ack:
             // assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(/*this, */ packet);
+            emit(packet);
             break;
         case Packet::Packet::Type::Error:
             // assert(stateEquals(ClientState::Online));
             // PacketSignal::
-            emit(/*this, */ packet);
+            emit(packet);
             break;
         case Packet::Packet::Type::BinaryEvent:
             assert(0 && "not implemented");
@@ -394,6 +431,7 @@ void Client::onMessage(sockio::Packet& packet)
             assert(0 && "unknown type");
     }
 }
+
 
 void Client::onPacket(sockio::Packet& packet)
 {
@@ -421,11 +459,13 @@ void Client::onPacket(sockio::Packet& packet)
     }
 }
 
+
 void Client::onPong()
 {
     // Pong received, stop the ping timeout
     _pingTimeoutTimer.stop();
 }
+
 
 void Client::onPingTimer()
 {
@@ -439,10 +479,12 @@ void Client::onPingTimer()
     _pingTimer.again();
 }
 
+
 void Client::onPingTimeoutTimer()
 {
     assert(0 && "implement me");
 }
+
 
 void Client::onReconnectTimer()
 {
@@ -455,15 +497,18 @@ void Client::onReconnectTimer()
     _reconnectTimer.again();
 }
 
+
 http::ws::WebSocket& Client::ws()
 {
     return _ws;
 }
 
+
 std::string Client::sessionID() const
 {
     return _sessionID;
 }
+
 
 Error Client::error() const
 {
@@ -471,20 +516,24 @@ Error Client::error() const
     return _error;
 }
 
+
 bool Client::isOnline() const
 {
     return stateEquals(ClientState::Online);
 }
+
 
 Client::Options& Client::options()
 {
     return _options;
 }
 
+
 bool Client::reconnecting() const
 {
     return _reconnecting;
 }
+
 
 bool Client::wasOnline() const
 {
@@ -492,7 +541,9 @@ bool Client::wasOnline() const
     return _wasOnline;
 }
 
+
 } // namespace sockio
 } // namespace scy
+
 
 /// @\}

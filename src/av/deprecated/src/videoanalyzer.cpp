@@ -8,14 +8,19 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/videoanalyzer.h"
+
 
 #ifdef HAVE_FFMPEG
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 VideoAnalyzer::VideoAnalyzer(const Options& options)
     : _options(options)
@@ -26,11 +31,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options)
     TraceN(this) << "Create" << endl;
 }
 
+
 VideoAnalyzer::~VideoAnalyzer()
 {
     TraceN(this) << "Destroy" << endl;
     uninitialize();
 }
+
 
 void VideoAnalyzer::initialize()
 {
@@ -60,6 +67,7 @@ void VideoAnalyzer::initialize()
     _reader.Closing += sdelegate(this, &VideoAnalyzer::onReadComplete);
 }
 
+
 void VideoAnalyzer::uninitialize()
 {
     // TraceL << "[VideoAnalyzerStream: " << this << ": " << name << "]
@@ -75,6 +83,7 @@ void VideoAnalyzer::uninitialize()
     if (_audio)
         delete _audio;
 }
+
 
 void VideoAnalyzer::start()
 {
@@ -95,6 +104,7 @@ void VideoAnalyzer::start()
     }
 }
 
+
 void VideoAnalyzer::stop()
 {
     // Can't lock here in case we are inside a callback.
@@ -104,6 +114,7 @@ void VideoAnalyzer::stop()
     _reader.emitter.detach(this);
     _reader.stop();
 }
+
 
 void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 {
@@ -146,7 +157,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 
         TraceN(this) << "Video Output: " << pkt.time << ", " << pkt.value
                      << endl;
-        PacketOut.emit(/*this, */ *_video, pkt);
+        PacketOut.emit(*_video, pkt);
     }
 }
 
@@ -187,9 +198,10 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 
         TraceN(this) << "Audio Output: " << pkt.time << ", " << pkt.value
                      << endl;
-        PacketOut.emit(/*this, */ *_audio, pkt);
+        PacketOut.emit(*_audio, pkt);
     }
 }
+
 
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {
@@ -220,6 +232,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
     return _videoConv->convert(video->frame);
 }
 
+
 void VideoAnalyzer::onReadComplete(void* sender)
 {
     TraceN(this) << "On Read Complete" << endl;
@@ -234,11 +247,13 @@ void VideoAnalyzer::onReadComplete(void* sender)
     Complete.emit(/*this*/);
 }
 
+
 MediaCapture& VideoAnalyzer::reader()
 {
     Mutex::ScopedLock lock(_mutex);
     return _reader;
 }
+
 
 VideoAnalyzer::Options& VideoAnalyzer::options()
 {
@@ -246,11 +261,13 @@ VideoAnalyzer::Options& VideoAnalyzer::options()
     return _options;
 }
 
+
 std::string VideoAnalyzer::error() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;
 }
+
 
 // ---------------------------------------------------------------------
 //
@@ -263,9 +280,11 @@ VideoAnalyzer::Packet::Packet(double time, double value)
     // this->max = max;
 }
 
+
 // ---------------------------------------------------------------------
 //
 const int kMaxFFTPow2Size = 24;
+
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     : name(name)
@@ -286,10 +305,12 @@ VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     assert(int(1UL << rdftBits) == rdftSize);
 }
 
+
 VideoAnalyzer::Stream::~Stream()
 {
     uninitialize();
 }
+
 
 void VideoAnalyzer::Stream::initialize()
 {
@@ -307,6 +328,7 @@ void VideoAnalyzer::Stream::initialize()
         throw std::runtime_error("Cannot allocate FFT buffer");
 }
 
+
 void VideoAnalyzer::Stream::uninitialize()
 {
     // TraceL << "[VideoAnalyzerStream: " << this << ": " << name << "]
@@ -318,11 +340,13 @@ void VideoAnalyzer::Stream::uninitialize()
         av_free(rdftData);
 }
 
+
 void VideoAnalyzer::Stream::fft()
 {
     assert(filled == rdftSize);
     av_rdft_calc(rdft, rdftData);
 }
+
 
 // ---------------------------------------------------------------------
 //
@@ -341,6 +365,7 @@ double CalculateCentroidFrequency(VideoAnalyzer::Stream& stream)
     return centroidFnXn / centroidXn;
 }
 
+
 double CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream)
 {
     double intensity = 0.0;
@@ -351,10 +376,12 @@ double CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream)
     return intensity;
 }
 
+
 double GetFrequencyIntensity(double re, double im)
 {
     return sqrt((re * re) + (im * im));
 }
+
 
 double GetDecibels(double re, double im)
 {
@@ -371,6 +398,7 @@ double GetAmplitudeScaled(double re, double im, int len, int scale)
     return static_cast<int>(GetAmplitude(re, im, len)) % scale;
 }
 
+
 #ifdef SCY_WIN
 double log2(double n)
 {
@@ -378,9 +406,12 @@ double log2(double n)
 }
 #endif
 
+
 } // namespace av
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

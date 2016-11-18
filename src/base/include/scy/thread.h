@@ -8,15 +8,19 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Thread_H
 #define SCY_Thread_H
+
 
 #include "scy/async.h"
 #include "scy/mutex.h"
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
 
+
 namespace scy {
+
 
 /// This class implements a platform-independent
 /// wrapper around an operating system thread.
@@ -57,6 +61,7 @@ protected:
 
     uv_thread_t _handle;
 };
+
 
 #if 0
 /// This class is an invisible wrapper around a TStartable instance,
@@ -100,8 +105,11 @@ protected:
 };
 #endif
 
+
 } // namespace scy
 
+
 #endif
+
 
 /// @\}

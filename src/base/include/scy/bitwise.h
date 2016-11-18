@@ -11,7 +11,9 @@
 #ifndef SCY_Flaggable_H
 #define SCY_Flaggable_H
 
+
 namespace scy {
+
 
 struct Bitwise
 {
@@ -32,6 +34,7 @@ struct Bitwise
     virtual void toggle(unsigned flag) { data ^= flag; };
     virtual bool has(unsigned flag) const { return (data & flag) == flag; };
 };
+
 
 #if 0
 class Flaggable
@@ -66,8 +69,11 @@ protected:
 };
 #endif
 
+
 } // namespace scy
 
+
 #endif // SCY_Flaggable_H
+
 
 /// @\}

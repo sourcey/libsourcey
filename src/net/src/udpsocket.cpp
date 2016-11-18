@@ -8,18 +8,23 @@
 /// @addtogroup net
 /// @{
 
+
 #include "scy/net/udpsocket.h"
 #include "scy/logger.h"
 #include "scy/net/types.h"
 
+
 using namespace std;
+
 
 namespace scy {
 namespace net {
 
+
 //
 // UDP Base
 //
+
 
 UDPSocket::UDPSocket(uv::Loop* loop)
     : uv::Handle(loop)
@@ -29,10 +34,12 @@ UDPSocket::UDPSocket(uv::Loop* loop)
     init();
 }
 
+
 UDPSocket::~UDPSocket()
 {
     TraceS(this) << "Destroy" << endl;
 }
+
 
 void UDPSocket::init()
 {
@@ -49,6 +56,7 @@ void UDPSocket::init()
         setUVError("Cannot initialize UDP socket", r);
 }
 
+
 void UDPSocket::connect(const Address& peerAddress)
 {
     _peer = peerAddress;
@@ -59,12 +67,14 @@ void UDPSocket::connect(const Address& peerAddress)
     onSocketConnect(*this);
 }
 
+
 void UDPSocket::close()
 {
     TraceS(this) << "Closing" << endl;
     recvStop();
     uv::Handle::close();
 }
+
 
 void UDPSocket::bind(const Address& address, unsigned flags)
 {
@@ -90,11 +100,13 @@ void UDPSocket::bind(const Address& address, unsigned flags)
     recvStart();
 }
 
+
 int UDPSocket::send(const char* data, std::size_t len, int flags)
 {
     assert(_peer.valid());
     return send(data, len, _peer, flags);
 }
+
 
 namespace internal {
 struct SendRequest
@@ -103,6 +115,7 @@ struct SendRequest
     uv_buf_t buf;
 };
 }
+
 
 int UDPSocket::send(const char* data, std::size_t len,
                     const Address& peerAddress, int /* flags */)
@@ -149,12 +162,14 @@ int UDPSocket::send(const char* data, std::size_t len,
     return r ? r : len;
 }
 
+
 bool UDPSocket::setBroadcast(bool flag)
 {
     if (!ptr())
         return false;
     return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
 }
+
 
 bool UDPSocket::setMulticastLoop(bool flag)
 {
@@ -163,6 +178,7 @@ bool UDPSocket::setMulticastLoop(bool flag)
     return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
 }
 
+
 bool UDPSocket::setMulticastTTL(int ttl)
 {
     assert(ttl > 0 && ttl < 255);
@@ -170,6 +186,7 @@ bool UDPSocket::setMulticastTTL(int ttl)
         return false;
     return uv_udp_set_broadcast(ptr<uv_udp_t>(), ttl) == 0;
 }
+
 
 bool UDPSocket::recvStart()
 {
@@ -185,6 +202,7 @@ bool UDPSocket::recvStart()
     return true;
 }
 
+
 bool UDPSocket::recvStop()
 {
     // This method must not throw since it is called internally via libuv
@@ -194,6 +212,7 @@ bool UDPSocket::recvStop()
     return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 
+
 void UDPSocket::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
     TraceS(this) << "Recv: " << buf.size() << endl;
@@ -201,15 +220,18 @@ void UDPSocket::onRecv(const MutableBuffer& buf, const net::Address& address)
     onSocketRecv(*this, buf, address);
 }
 
+
 void UDPSocket::setError(const scy::Error& err)
 {
     uv::Handle::setError(err);
 }
 
+
 const scy::Error& UDPSocket::error() const
 {
     return uv::Handle::error();
 }
+
 
 net::Address UDPSocket::address() const
 {
@@ -227,6 +249,7 @@ net::Address UDPSocket::address() const
     return Address(&address, addrlen);
 }
 
+
 net::Address UDPSocket::peerAddress() const
 {
     if (!_peer.valid())
@@ -235,15 +258,18 @@ net::Address UDPSocket::peerAddress() const
     return _peer;
 }
 
+
 net::TransportType UDPSocket::transport() const
 {
     return net::UDP;
 }
 
+
 bool UDPSocket::closed() const
 {
     return uv::Handle::closed();
 }
+
 
 //
 // Callbacks
@@ -273,6 +299,7 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
                    net::Address(addr, sizeof(*addr)));
 }
 
+
 void UDPSocket::afterSend(uv_udp_send_t* req, int status)
 {
     auto sr = reinterpret_cast<internal::SendRequest*>(req);
@@ -283,6 +310,7 @@ void UDPSocket::afterSend(uv_udp_send_t* req, int status)
     }
     delete sr;
 }
+
 
 void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
                                 uv_buf_t* buf)
@@ -305,6 +333,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
     // return uv_buf_init(self->_buffer.data(), suggested_size);
 }
 
+
 void UDPSocket::onError(const scy::Error& error)
 {
     ErrorS(this) << "Error: " << error.message << endl;
@@ -312,18 +341,22 @@ void UDPSocket::onError(const scy::Error& error)
     close(); // close on error
 }
 
+
 void UDPSocket::onClose()
 {
     ErrorS(this) << "On close" << endl;
     onSocketClose(*this);
 }
 
+
 uv::Loop* UDPSocket::loop() const
 {
     return uv::Handle::loop();
 }
 
+
 } // namespace net
 } // namespace scy
+
 
 /// @\}

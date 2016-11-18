@@ -1,6 +1,8 @@
 #include "mediaserver.h"
 
+
 namespace scy {
+
 
 class SnapshotRequestHandler : public http::ServerResponder
 {
@@ -43,6 +45,7 @@ public:
         // delete data;
         // unsigned char* data = new unsigned char[buffer.size()];
 
+
         // connection().sendData((const char*)&buffer[0], buffer.size());
         connection().response().set("Access-Control-Allow-Origin", "*");
 
@@ -52,5 +55,6 @@ public:
 
     StreamingOptions options;
 };
+
 
 } // namespace scy

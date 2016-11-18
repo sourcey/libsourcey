@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_DeviceManager_H
 #define SCY_AV_DeviceManager_H
 
@@ -16,6 +17,7 @@
 
 #include "scy/base.h"
 #include "scy/signal.h"
+
 
 #ifdef HAVE_FFMPEG
 
@@ -29,10 +31,13 @@ extern "C" {
 #endif
 }
 
+
 namespace scy {
 namespace av {
 
+
 class DeviceManager;
+
 
 //
 // Device
@@ -67,6 +72,7 @@ struct Device
     }
 };
 
+
 enum MediaCapabilities
 {
     AUDIO_RECV = 1 << 0,
@@ -75,9 +81,11 @@ enum MediaCapabilities
     VIDEO_SEND = 1 << 3,
 };
 
+
 //
 // Device Watcher
 //
+
 
 class DeviceWatcher
 {
@@ -88,9 +96,11 @@ public:
     virtual void stop() {}
 };
 
+
 //
 // Device Manager
 //
+
 
 class DeviceManager
 {
@@ -143,8 +153,10 @@ protected:
     std::unique_ptr<DeviceWatcher> _watcher;
 };
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif // HAVE_FFMPEG
 

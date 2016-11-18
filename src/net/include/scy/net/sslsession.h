@@ -8,16 +8,20 @@
 /// @addtogroup net
 /// @{
 
+
 #ifndef SCY_Net_SSLSession_H
 #define SCY_Net_SSLSession_H
+
 
 #include "scy/memory.h"
 #include "scy/net/types.h"
 
 #include <openssl/ssl.h>
 
+
 namespace scy {
 namespace net {
+
 
 /// This class encapsulates a SSL session object
 /// used with session caching on the client side.
@@ -51,12 +55,16 @@ protected:
     SSL_SESSION* _ptr;
 };
 
+
 } // namespace net
 } // namespace scy
 
+
 #endif // SCY_Net_SSLSession_H
 
+
 /// @\}
+
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

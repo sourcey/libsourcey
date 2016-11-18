@@ -8,15 +8,19 @@
 /// @addtogroup turn
 /// @{
 
+
 #ifndef SCY_TURN_FiveTuple_H
 #define SCY_TURN_FiveTuple_H
+
 
 #include "scy/net/socket.h"
 
 #include <sstream>
 
+
 namespace scy {
 namespace turn {
+
 
 /// The 5-TUPLE consists of a local, a remote address, and the
 /// transport protocol used by the client to communicate with the server.
@@ -95,9 +99,12 @@ private:
     net::TransportType _transport;
 };
 
+
 } // namespace turn
 } // namespace scy
 
+
 #endif // SCY_TURN_FiveTuple_H
+
 
 /// @\}

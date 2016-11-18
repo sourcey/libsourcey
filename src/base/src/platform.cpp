@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/platform.h"
 #include "scy/error.h"
 #include "scy/uv/uvpp.h"
@@ -18,9 +19,12 @@
 #include <unistd.h>
 #endif
 
+
 #define PATHMAX 1024
 
+
 namespace scy {
+
 
 std::string getExePath()
 {
@@ -32,6 +36,7 @@ std::string getExePath()
     return std::string(buf, size);
 }
 
+
 std::string getCwd()
 {
     char buf[PATHMAX];
@@ -42,15 +47,18 @@ std::string getCwd()
     return std::string(buf);
 }
 
+
 std::uint64_t getFreeMemory()
 {
     return uv_get_free_memory();
 }
 
+
 std::uint64_t getTotalMemory()
 {
     return uv_get_total_memory();
 }
+
 
 void sleep(int ms)
 {
@@ -61,11 +69,13 @@ void sleep(int ms)
 #endif
 }
 
+
 void pause()
 {
     std::puts("Press enter to continue...");
     std::getchar();
 }
+
 
 //
 /// Windows helpers
@@ -78,6 +88,7 @@ enum WindowsMajorVersions
     kWindows2000 = 5,
     kWindowsVista = 6,
 };
+
 
 bool getOsVersion(int* major, int* minor, int* build)
 {
@@ -108,8 +119,10 @@ bool isWindowsXpOrLater()
             (major >= kWindowsVista || (major == kWindows2000 && minor >= 1)));
 }
 
+
 #define STACK_ARRAY(TYPE, LEN)                                                 \
     static_cast<TYPE*>(::alloca((LEN) * sizeof(TYPE)))
+
 
 std::wstring toUtf16(const char* utf8, std::size_t len)
 {
@@ -140,6 +153,8 @@ std::string toUtf8(const std::wstring& wstr)
 
 #endif
 
+
 } // namespace scy
+
 
 /// @\}

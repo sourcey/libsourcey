@@ -8,22 +8,27 @@
 /// @addtogroup json
 /// @{
 
+
 #ifndef SCY_JSON_H
 #define SCY_JSON_H
+
 
 #include "scy/error.h"
 #include "json/json.h"
 #include <cstdint>
 #include <fstream>
 
+
 namespace scy {
 namespace json {
 
-typedef Json::Value Value;
-typedef Json::ValueIterator ValueIterator;
-typedef Json::StyledWriter StyledWriter;
-typedef Json::FastWriter FastWriter;
-typedef Json::Reader Reader;
+
+using Json::Value;
+using Json::ValueIterator;
+using Json::StyledWriter;
+using Json::FastWriter;
+using Json::Reader;
+
 
 inline void loadFile(const std::string& path, json::Value& root)
 {
@@ -38,6 +43,7 @@ inline void loadFile(const std::string& path, json::Value& root)
                                  reader.getFormattedErrorMessages());
 }
 
+
 inline void saveFile(const std::string& path, const json::Value& root)
 {
     json::StyledWriter writer;
@@ -48,6 +54,7 @@ inline void saveFile(const std::string& path, const json::Value& root)
     ofs << writer.write(root);
     ofs.close();
 }
+
 
 inline void stringify(const json::Value& root, std::string& output,
                       bool pretty = false)
@@ -64,6 +71,7 @@ inline void stringify(const json::Value& root, std::string& output,
     }
 }
 
+
 inline std::string stringify(const json::Value& root, bool pretty = false)
 {
     std::string output;
@@ -71,11 +79,13 @@ inline std::string stringify(const json::Value& root, bool pretty = false)
     return output;
 }
 
+
 inline void assertMember(const json::Value& root, const std::string& name)
 {
     if (!root.isMember(name))
         throw std::runtime_error("A '" + name + "' member is required.");
 }
+
 
 inline void countNestedKeys(json::Value& root, const std::string& key,
                             int& count, int depth = 0)
@@ -87,6 +97,7 @@ inline void countNestedKeys(json::Value& root, const std::string& key,
         countNestedKeys(*it, key, count, depth);
     }
 }
+
 
 inline bool hasNestedKey(json::Value& root, const std::string& key,
                          int depth = 0)
@@ -100,6 +111,7 @@ inline bool hasNestedKey(json::Value& root, const std::string& key,
     }
     return false;
 }
+
 
 inline bool findNestedObjectWithProperty(
     json::Value& root, json::Value*& result, const std::string& key,
@@ -147,9 +159,12 @@ inline bool findNestedObjectWithProperty(
     return false;
 }
 
+
 } // namespace json
 } // namespace scy
 
+
 #endif // SCY_JSON_H
+
 
 /// @\}

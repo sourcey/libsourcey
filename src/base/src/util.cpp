@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #include "scy/util.h"
 #include "scy/base64.h"
 #include "scy/random.h"
@@ -21,10 +22,13 @@
 #include <sstream>
 #include <string>
 
+
 using std::endl;
+
 
 namespace scy {
 namespace util {
+
 
 std::string string_vprintf(const char* fmt, va_list args)
 {
@@ -53,6 +57,7 @@ std::string string_vprintf(const char* fmt, va_list args)
     }
 }
 
+
 std::string format(const char* fmt, ...)
 {
     va_list args;
@@ -61,6 +66,7 @@ std::string format(const char* fmt, ...)
     va_end(args);
     return ret;
 }
+
 
 bool isNumber(const std::string& str)
 {
@@ -71,11 +77,13 @@ bool isNumber(const std::string& str)
     return true;
 }
 
+
 bool tryParseHex(const std::string& str, unsigned& value)
 {
     char temp;
     return std::sscanf(str.c_str(), "%x%c", &value, &temp) == 1;
 }
+
 
 unsigned parseHex(const std::string& str)
 {
@@ -87,10 +95,12 @@ unsigned parseHex(const std::string& str)
             "Syntax error: Not a valid hexadecimal integer: " + str);
 }
 
+
 std::string memAddress(const void* ptr)
 {
     return itostr<const void*>(ptr);
 }
+
 
 std::string randomBinaryString(int size, bool doBase64)
 {
@@ -109,10 +119,12 @@ std::string randomBinaryString(int size, bool doBase64)
     return res;
 }
 
+
 std::string randomString(int size)
 {
     return randomBinaryString(size, true).substr(0, size);
 }
+
 
 std::uint32_t randomNumber()
 {
@@ -120,6 +132,7 @@ std::uint32_t randomNumber()
     rnd.seed();
     return rnd.next();
 }
+
 
 void split(const std::string& s, const std::string& delim,
            std::vector<std::string>& elems, int limit)
@@ -138,6 +151,7 @@ void split(const std::string& s, const std::string& delim,
         elems.push_back(s.substr(prev, pos - prev));
 }
 
+
 std::vector<std::string> split(const std::string& s, const std::string& delim,
                                int limit)
 {
@@ -145,6 +159,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim,
     split(s, delim, elems, limit);
     return elems;
 }
+
 
 void split(const std::string& s, char delim, std::vector<std::string>& elems,
            int limit)
@@ -162,6 +177,7 @@ void split(const std::string& s, char delim, std::vector<std::string>& elems,
                             static_cast<unsigned int>(s.size() - ss.tellg())));
 }
 
+
 std::vector<std::string> split(const std::string& s, char delim, int limit)
 {
     std::vector<std::string> elems;
@@ -169,10 +185,12 @@ std::vector<std::string> split(const std::string& s, char delim, int limit)
     return elems;
 }
 
+
 bool endsWith(const std::string& str, const std::string& suffix)
 {
     return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
+
 
 #if 0
 double intToDouble(std::int64_t v)
@@ -201,6 +219,7 @@ std::int64_t doubleToInt(double d)
 }
 #endif
 
+
 std::string dumpbin(const char* data, std::size_t len)
 {
     std::string output;
@@ -216,6 +235,7 @@ std::string dumpbin(const char* data, std::size_t len)
     }
     return output;
 }
+
 
 bool compareVersion(const std::string& l, const std::string& r)
 {
@@ -241,6 +261,7 @@ bool compareVersion(const std::string& l, const std::string& r)
     return !equal;
 }
 
+
 void removeSpecialCharacters(std::string& str, bool allowSpaces)
 {
     for (std::size_t i = 0; i < str.length(); ++i)
@@ -248,6 +269,7 @@ void removeSpecialCharacters(std::string& str, bool allowSpaces)
             str[i] != '.')
             str.erase(i, 1);
 }
+
 
 void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
 {
@@ -257,11 +279,13 @@ void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
             str[i] = with;
 }
 
+
 void toUnderscore(std::string& str)
 {
     replaceSpecialCharacters(str, '_', false);
     toLower(str);
 }
+
 
 bool matchNodes(const std::string& node, const std::string& xnode,
                 const std::string& delim)
@@ -272,6 +296,7 @@ bool matchNodes(const std::string& node, const std::string& xnode,
     std::vector<std::string> xparams = util::split(xnode, delim);
     return matchNodes(params, xparams);
 }
+
 
 bool matchNodes(const std::vector<std::string>& params,
                 const std::vector<std::string>& xparams)
@@ -300,6 +325,7 @@ bool matchNodes(const std::vector<std::string>& params,
     return true;
 }
 
+
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
                            std::size_t bufferSize)
 {
@@ -321,6 +347,7 @@ std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
     return len;
 }
 
+
 std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
 {
     char c;
@@ -333,6 +360,7 @@ std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
     }
     return len;
 }
+
 
 std::streamsize copyToString(std::istream& istr, std::string& str,
                              std::size_t bufferSize)
@@ -355,7 +383,9 @@ std::streamsize copyToString(std::istream& istr, std::string& str,
     return len;
 }
 
+
 } // namespace util
 } // namespace scy
+
 
 /// @\}

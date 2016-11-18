@@ -8,13 +8,17 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/util.h"
 #include "scy/util.h"
 
+
 // using std::endl;
+
 
 namespace scy {
 namespace http {
+
 
 std::string parseURI(const std::string& request)
 {
@@ -37,11 +41,13 @@ std::string parseURI(const std::string& request)
     return value;
 }
 
+
 bool matchURL(const std::string& uri, const std::string& expression)
 {
     std::string::size_type index = uri.find("?");
     return util::matchNodes(uri.substr(0, index), expression, "/");
 }
+
 
 std::string parseCookieItem(const std::string& cookie, const std::string& item)
 {
@@ -54,6 +60,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
     }
     return "";
 }
+
 
 bool splitURIParameters(const std::string& uri, NVCollection& out)
 {
@@ -93,6 +100,7 @@ bool splitURIParameters(const std::string& uri, NVCollection& out)
     return out.size() > 0;
 }
 
+
 void splitParameters(const std::string& s, std::string& value,
                      NVCollection& parameters)
 {
@@ -111,6 +119,7 @@ void splitParameters(const std::string& s, std::string& value,
 
     splitParameters(it, end, parameters);
 }
+
 
 void splitParameters(const std::string::const_iterator& begin,
                      const std::string::const_iterator& end,
@@ -161,6 +170,7 @@ void splitParameters(const std::string::const_iterator& begin,
     }
 }
 
+
 #if 0
 string parseHeader(const std::string& request, const std::string& name)
 {
@@ -183,7 +193,9 @@ string parseHeader(const std::string& request, const std::string& name)
 }
 #endif
 
+
 } // namespace http
 } // namespace scy
+
 
 /// @\}

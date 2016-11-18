@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/av/imageencoder.h"
 #include "scy/av/mediacapture.h"
 #include "scy/logger.h"
@@ -16,10 +17,13 @@
 
 #ifdef HAVE_OPENCV
 
+
 using std::endl;
+
 
 namespace scy {
 namespace av {
+
 
 ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams)
     : PacketProcessor(this->emitter)
@@ -37,23 +41,28 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams)
         assert(false);
 }
 
+
 ImageEncoder::~ImageEncoder()
 {
     TraceS(this) << "Destroy" << endl;
 }
 
+
 void ImageEncoder::initialize()
 {
 }
+
 
 void ImageEncoder::uninitialize()
 {
 }
 
+
 bool ImageEncoder::accepts(IPacket& packet)
 {
     return dynamic_cast<VideoPacket*>(&packet) != 0;
 }
+
 
 void ImageEncoder::process(IPacket& packet)
 {
@@ -85,15 +94,18 @@ void ImageEncoder::process(IPacket& packet)
 
     // TraceS(this) << "Broadcasting: " << mpacket << endl;
     emit(*mpacket); // this,
-                    // TraceS(this) << "Broadcasting: OK: " << mpacket << endl;
+    // TraceS(this) << "Broadcasting: OK: " << mpacket << endl;
 }
+
 
 EncoderOptions& ImageEncoder::options()
 {
     return _options;
 }
 
+
 } // namespace av
 } // namespace scy
+
 
 #endif

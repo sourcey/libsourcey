@@ -8,15 +8,19 @@
 /// @addtogroup stun
 /// @{
 
+
 #ifndef SCY_STUN_Transaction_H
 #define SCY_STUN_Transaction_H
+
 
 #include "scy/net/socket.h"
 #include "scy/net/transaction.h"
 #include "scy/stun/message.h"
 
+
 namespace scy {
 namespace stun {
+
 
 class Transaction : public net::Transaction<Message>
 {
@@ -34,6 +38,8 @@ protected:
 }
 } // namespace scy:stun
 
+
 #endif // SCY_STUN_Transaction_H
+
 
 /// @\}

@@ -8,19 +8,24 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Error_H
 #define SCY_Error_H
+
 
 #include "scy/base.h"
 #include <exception> // use std::exception types
 #include <stdexcept>
 #include <string>
 
+
 namespace scy {
+
 
 //
 // Error type
 //
+
 
 struct Error
 {
@@ -67,8 +72,11 @@ struct Error
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Error_H
+
 
 /// @\}

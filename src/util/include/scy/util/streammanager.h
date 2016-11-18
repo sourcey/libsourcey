@@ -8,13 +8,17 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_StreamManager_H
 #define SCY_StreamManager_H
+
 
 #include "scy/collection.h"
 #include "scy/packetstream.h"
 
+
 namespace scy {
+
 
 typedef LiveCollection<std::string, PacketStream,
                        std::default_delete<PacketStream>
@@ -22,6 +26,7 @@ typedef LiveCollection<std::string, PacketStream,
                        // DestroyMethodDeleter<PacketStream>
                        >
     StreamManagerBase;
+
 
 class StreamManager : public StreamManagerBase
 {
@@ -61,8 +66,11 @@ protected:
     bool _freeClosedStreams;
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_StreamManager_H
+
 
 /// @\}

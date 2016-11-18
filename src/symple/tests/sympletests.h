@@ -1,6 +1,7 @@
 #ifndef SCY_Symple_Tests_H
 #define SCY_Symple_Tests_H
 
+
 #include "scy/base.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
@@ -12,7 +13,9 @@ using std::cerr;
 using std::endl;
 using scy::test::Test;
 
+
 namespace scy {
+
 
 // =============================================================================
 // Test Client
@@ -160,8 +163,11 @@ public:
     }
 };
 
+
 } // namespace scy
 
+
 #endif // SCY_Symple_Tests_H
+
 
 /// @\}

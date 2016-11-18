@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+
 /* -----------------------------------------------------------------------------
  FIXME, THIS CODE IS OUT OF DATE!
 ----------------------------------------------------------------------------- */
@@ -16,6 +17,7 @@ using namespace std;
 using namespace Sourcey;
 using namespace Sourcey::Util;
 using namespace Sourcey::Net;
+
 
 class Messenger : public SocketIO::Socket
 {
@@ -61,6 +63,7 @@ public:
 
 //} // namespace SocketIO
 } // namespace Sourcey
+
 
 int main(int argc, char** argv)
 {
@@ -138,8 +141,10 @@ int main(int argc, char** argv)
         }
     }
 
+
     return 0;
 }
+
 
 /*
 // Call Upload Asset Service

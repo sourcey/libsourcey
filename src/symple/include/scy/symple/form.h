@@ -8,16 +8,21 @@
 /// @addtogroup symple
 /// @{
 
+
 #ifndef SCY_Symple_Form_H
 #define SCY_Symple_Form_H
+
 
 #include "scy/json/json.h"
 #include "scy/symple/command.h"
 
+
 namespace scy {
 namespace smpl {
 
+
 class Form;
+
 
 /// Base implementation for form pages, sections and fields.
 class FormField;
@@ -39,6 +44,7 @@ public:
     ///      page, section, text, text-multi,
     ///      list, list-multi, checkbox, media, custom
     void setType(const std::string& type);
+
 
     void setId(const std::string& id);
     void setLabel(const std::string& text);
@@ -99,6 +105,7 @@ protected:
     json::Value* _root;
 };
 
+
 class Form : public FormElement
 {
 public:
@@ -128,6 +135,7 @@ public:
     /// fields such as for auto-complete.
     void setPartial(bool flag);
 };
+
 
 class FormField : public FormElement
 {
@@ -165,9 +173,12 @@ public:
     bool boolValue() const;
 };
 
+
 } // namespace smpl
 } // namespace scy
 
+
 #endif // SCY_Symple_Form_H
+
 
 /// @\}

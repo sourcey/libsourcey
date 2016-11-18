@@ -12,8 +12,10 @@
 /// @addtogroup uv
 /// @{
 
+
 #ifndef SCY_UV_UVPP_H
 #define SCY_UV_UVPP_H
+
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
@@ -29,12 +31,15 @@
 #include <cstdint>
 #include <functional>
 
+
 namespace scy {
 namespace uv {
+
 
 //
 // Helpers
 //
+
 
 inline std::string formatError(const std::string& message, int errorno = 0)
 {
@@ -51,14 +56,17 @@ inline std::string formatError(const std::string& message, int errorno = 0)
     return m;
 }
 
+
 inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 {
     throw std::runtime_error(formatError(message, errorno));
 }
 
+
 //
 // Default Event Loop
 //
+
 
 typedef uv_loop_t Loop;
 
@@ -83,9 +91,11 @@ inline void stopDefaultLoop()
     uv_stop(defaultLoop());
 }
 
+
 //
 /// UV Handle
 //
+
 
 /// A base class for managing a `libuv` handle during it's lifecycle and
 /// safely handling its asynchronous destruction mechanism.
@@ -176,9 +186,11 @@ protected:
     bool _closed;
 };
 
+
 //
 // Shutdown Signal Handler
 //
+
 
 struct ShutdownCmd
 {
@@ -215,9 +227,11 @@ inline void waitForShutdown(std::function<void(void*)> callback,
     uv_run(defaultLoop(), UV_RUN_DEFAULT);
 }
 
+
 //
 // Default Callbacks (Depreciated)
 //
+
 
 #define UVCallback(ClassName, Function, Handle)                                \
                                                                                \
@@ -226,6 +240,7 @@ inline void waitForShutdown(std::function<void(void*)> callback,
         static_cast<ClassName*>(handle->data)->Function();                     \
     };
 
+
 #define UVStatusCallback(ClassName, Function, Handle)                          \
                                                                                \
     static void Function(Handle* handle, int status)                           \
@@ -233,6 +248,7 @@ inline void waitForShutdown(std::function<void(void*)> callback,
         ClassName* self = static_cast<ClassName*>(handle->data);               \
         self->Function(status);                                                \
     }
+
 
 #define UVEmptyStatusCallback(ClassName, Function, Handle)                     \
                                                                                \
@@ -244,6 +260,7 @@ inline void waitForShutdown(std::function<void(void*)> callback,
         self->Function();                                                      \
     }
 
+
 #define UVStatusCallbackWithType(ClassName, Function, Handle)                  \
                                                                                \
     static void Function(Handle* handle, int status)                           \
@@ -252,9 +269,12 @@ inline void waitForShutdown(std::function<void(void*)> callback,
         self->Function(handle, status);                                        \
     }
 
+
 } // namespace uv
 } // namespace scy
 
+
 #endif // SCY_UV_UVPP_H
+
 
 /// @\}

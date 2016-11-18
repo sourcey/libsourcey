@@ -8,15 +8,19 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_PacketTransaction_H
 #define SCY_PacketTransaction_H
+
 
 #include "scy/interface.h"
 #include "scy/packet.h"
 #include "scy/stateful.h"
 #include "scy/timer.h"
 
+
 namespace scy {
+
 
 struct TransactionState : public State
 {
@@ -46,6 +50,7 @@ struct TransactionState : public State
         return "undefined";
     };
 };
+
 
 /// This class provides request/response functionality for IPacket types.
 ///
@@ -194,10 +199,11 @@ protected:
     Timer _timer;
     int _timeout;  ///< The request timeout in milliseconds.
     int _retries;  ///< The maximum number of attempts before the transaction is
-                   /// considered failed.
+                   ///considered failed.
     int _attempts; ///< The number of times the transaction has been sent.
     bool _destroyed;
 };
+
 
 template <class T> inline void PacketTransaction<T>::cancel()
 {
@@ -238,8 +244,11 @@ template <class T> inline T PacketTransaction<T>::response() const
     return _response;
 }
 
+
 } // namespace scy
 
+
 #endif // SCY_PacketTransaction_H
+
 
 /// @\}

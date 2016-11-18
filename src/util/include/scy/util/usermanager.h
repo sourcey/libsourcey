@@ -8,19 +8,26 @@
 /// @addtogroup util
 /// @{
 
+
 #ifndef SCY_UserManager_H
 #define SCY_UserManager_H
 
 #include "scy/collection.h"
 #include <map>
 
+
 namespace scy {
+
+
+/// @addtogroup util
+/// @{///
 
 struct IUser
 {
     virtual std::string username() const = 0;
     virtual std::string password() const = 0;
 };
+
 
 class BasicUser : public IUser
 {
@@ -38,6 +45,7 @@ protected:
     std::string _username;
     std::string _password;
 };
+
 
 typedef std::map<std::string, IUser*> IUserMap;
 
@@ -60,8 +68,14 @@ public:
     };
 };
 
+
+/// @\}
+
+
 } // namespace scy
 
+
 #endif // SCY_UserManager_H
+
 
 /// @\}

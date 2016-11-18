@@ -6,8 +6,10 @@
 #include "scy/net/dns.h"
 #include "scy/packetstream.h"
 
+
 using namespace std;
 using namespace scy;
+
 
 #define USE_AVDEVICE_CAPTURE 0
 
@@ -20,7 +22,9 @@ av::MediaCapture* gVideoCapture;
 av::VideoCapture* gVideoCapture;
 #endif
 
+
 namespace scy {
+
 
 class MPEGResponder : public http::ServerResponder
 {
@@ -104,6 +108,7 @@ public:
     }
 };
 
+
 // -------------------------------------------------------------------
 //
 class StreamingResponderFactory : public http::ServerResponderFactory
@@ -115,12 +120,15 @@ public:
     }
 };
 
+
 } // namespace scy
+
 
 static void onShutdownSignal(void* opaque)
 {
     reinterpret_cast<http::Server*>(opaque)->shutdown();
 }
+
 
 int main(int argc, char** argv)
 {

@@ -8,13 +8,17 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #include "scy/webrtc/peerconnection.h"
 #include "scy/logger.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 
+
 using std::endl;
 
+
 namespace scy {
+
 
 PeerConnection::PeerConnection(PeerConnectionManager* manager,
                                const std::string& peerid, Mode mode)
@@ -35,6 +39,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
     // CreateAnswer
 }
 
+
 PeerConnection::~PeerConnection()
 {
     DebugL << _peerid << ": Destroying" << endl;
@@ -45,6 +50,7 @@ PeerConnection::~PeerConnection()
     }
 }
 
+
 rtc::scoped_refptr<webrtc::MediaStreamInterface>
 PeerConnection::createMediaStream()
 {
@@ -54,6 +60,7 @@ PeerConnection::createMediaStream()
     _stream = _factory->CreateLocalMediaStream(kStreamLabel);
     return _stream;
 }
+
 
 void PeerConnection::createConnection()
 {
@@ -69,6 +76,7 @@ void PeerConnection::createConnection()
     }
 }
 
+
 void PeerConnection::closeConnection()
 {
     DebugL << _peerid << ": Closing" << endl;
@@ -82,6 +90,7 @@ void PeerConnection::closeConnection()
     }
 }
 
+
 void PeerConnection::createOffer()
 {
     assert(_mode == Offer);
@@ -89,6 +98,7 @@ void PeerConnection::createOffer()
 
     _peerConnection->CreateOffer(this, &_constraints);
 }
+
 
 void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
 {
@@ -112,6 +122,7 @@ void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
     }
 }
 
+
 void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
                                    const std::string& sdp)
 {
@@ -124,6 +135,7 @@ void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
     }
     _peerConnection->AddIceCandidate(candidate.get());
 }
+
 
 void PeerConnection::OnSignalingChange(
     webrtc::PeerConnectionInterface::SignalingState new_state)
@@ -145,11 +157,13 @@ void PeerConnection::OnSignalingChange(
     }
 }
 
+
 void PeerConnection::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugL << _peerid << ": On ICE connection change: " << new_state << endl;
 }
+
 
 void PeerConnection::OnIceGatheringChange(
     webrtc::PeerConnectionInterface::IceGatheringState new_state)
@@ -157,10 +171,12 @@ void PeerConnection::OnIceGatheringChange(
     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
 }
 
+
 void PeerConnection::OnRenegotiationNeeded()
 {
     DebugL << _peerid << ": On renegotiation needed" << endl;
 }
+
 
 void PeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
@@ -170,6 +186,7 @@ void PeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
     _manager->onAddRemoteStream(this, stream);
 }
 
+
 void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
@@ -177,6 +194,7 @@ void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
     DebugL << _peerid << ": On remove stream" << endl;
     _manager->onRemoveRemoteStream(this, stream);
 }
+
 
 void PeerConnection::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate)
@@ -191,6 +209,7 @@ void PeerConnection::OnIceCandidate(
     _manager->sendCandidate(this, candidate->sdp_mid(),
                             candidate->sdp_mline_index(), sdp);
 }
+
 
 void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
@@ -209,12 +228,14 @@ void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
     _manager->sendSDP(this, desc->type(), sdp);
 }
 
+
 void PeerConnection::OnFailure(const std::string& error)
 {
     ErrorL << _peerid << ": On failure: " << error << endl;
 
     _manager->onFailure(this, error);
 }
+
 
 void PeerConnection::setPeerConnectionFactory(
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
@@ -223,20 +244,24 @@ void PeerConnection::setPeerConnectionFactory(
     _factory = factory;
 }
 
+
 std::string PeerConnection::peerid() const
 {
     return _peerid;
 }
+
 
 webrtc::FakeConstraints& PeerConnection::constraints()
 {
     return _constraints;
 }
 
+
 webrtc::PeerConnectionFactoryInterface* PeerConnection::factory() const
 {
     return _factory.get();
 }
+
 
 rtc::scoped_refptr<webrtc::PeerConnectionInterface>
 PeerConnection::peerConnection() const
@@ -244,19 +269,23 @@ PeerConnection::peerConnection() const
     return _peerConnection;
 }
 
+
 rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::stream() const
 {
     return _stream;
 }
 
+
 //
 // Dummy Set Session Description Observer
 //
+
 
 void DummySetSessionDescriptionObserver::OnSuccess()
 {
     DebugL << "On SDP parse success" << endl;
 }
+
 
 void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 {
@@ -264,6 +293,8 @@ void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
     assert(0);
 }
 
+
 } // namespace scy
+
 
 /// @\}

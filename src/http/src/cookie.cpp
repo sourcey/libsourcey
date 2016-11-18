@@ -8,12 +8,15 @@
 /// @addtogroup http
 /// @{
 
+
 #include "scy/http/cookie.h"
 #include "scy/datetime.h"
 #include "scy/http/url.h"
 
+
 namespace scy {
 namespace http {
+
 
 Cookie::Cookie()
     : _version(0)
@@ -23,6 +26,7 @@ Cookie::Cookie()
 {
 }
 
+
 Cookie::Cookie(const std::string& name)
     : _version(0)
     , _name(name)
@@ -31,6 +35,7 @@ Cookie::Cookie(const std::string& name)
     , _httpOnly(false)
 {
 }
+
 
 Cookie::Cookie(const NVCollection& nvc)
     : _version(0)
@@ -67,6 +72,7 @@ Cookie::Cookie(const NVCollection& nvc)
     }
 }
 
+
 Cookie::Cookie(const std::string& name, const std::string& value)
     : _version(0)
     , _name(name)
@@ -76,6 +82,7 @@ Cookie::Cookie(const std::string& name, const std::string& value)
     , _httpOnly(false)
 {
 }
+
 
 Cookie::Cookie(const Cookie& cookie)
     : _version(cookie._version)
@@ -90,9 +97,11 @@ Cookie::Cookie(const Cookie& cookie)
 {
 }
 
+
 Cookie::~Cookie()
 {
 }
+
 
 Cookie& Cookie::operator=(const Cookie& cookie)
 {
@@ -110,50 +119,60 @@ Cookie& Cookie::operator=(const Cookie& cookie)
     return *this;
 }
 
+
 void Cookie::setVersion(int version)
 {
     _version = version;
 }
+
 
 void Cookie::setName(const std::string& name)
 {
     _name = name;
 }
 
+
 void Cookie::setValue(const std::string& value)
 {
     _value = value;
 }
+
 
 void Cookie::setComment(const std::string& comment)
 {
     _comment = comment;
 }
 
+
 void Cookie::setDomain(const std::string& domain)
 {
     _domain = domain;
 }
+
 
 void Cookie::setPath(const std::string& path)
 {
     _path = path;
 }
 
+
 void Cookie::setSecure(bool secure)
 {
     _secure = secure;
 }
+
 
 void Cookie::setMaxAge(int maxAge)
 {
     _maxAge = maxAge;
 }
 
+
 void Cookie::setHttpOnly(bool flag)
 {
     _httpOnly = flag;
 }
+
 
 std::string Cookie::toString() const
 {
@@ -220,20 +239,25 @@ std::string Cookie::toString() const
     return res;
 }
 
+
 std::string Cookie::escape(const std::string& str)
 {
     return http::URL::encode(str);
 }
+
 
 std::string Cookie::unescape(const std::string& str)
 {
     return http::URL::decode(str);
 }
 
+
 } // namespace http
 } // namespace scy
 
+
 /// @\}
+
 
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
