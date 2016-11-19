@@ -33,9 +33,9 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 `public  Cipher(const std::string & name)` | 
 `public  Cipher(const std::string & name,const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & key,const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & iv)` | 
 `public  Cipher(const std::string & name,const std::string & passphrase,const std::string & salt,int iterationCount)` | 
-`public  ~Cipher()` | Destroys the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public void initEncryptor()` | Initializes the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher) for encryption.
-`public void initDecryptor()` | Initializes the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher) for decryption.
+`public  ~Cipher()` | Destroys the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public void initEncryptor()` | Initializes the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher) for encryption.
+`public void initDecryptor()` | Initializes the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher) for decryption.
 `public int update(const unsigned char * input,int inputLength,unsigned char * output,int outputLength)` | 
 `public template<typename I,typename O>`  <br/>`inline int update(const I & input,O & output)` | Alias for [update()](#group__crypto_1ga641b7553ec5f282a77d89def7ae54f12) which accepts a range of buffer types.
 `public int final(unsigned char * output,int length)` | 
@@ -46,15 +46,15 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 `public virtual std::string decryptString(const std::string & str,`[`Encoding`](#group__crypto_1ga44fda7872beb30a68bbc8f2cac9271ae)` encoding)` | Decrypts a string that is encoded with the given encoding.
 `public virtual void encryptStream(std::istream & source,std::ostream & sink,`[`Encoding`](#group__crypto_1ga44fda7872beb30a68bbc8f2cac9271ae)` encoding)` | Encrypts an input stream and encodes it using the given encoding.
 `public virtual void decryptStream(std::istream & source,std::ostream & sink,`[`Encoding`](#group__crypto_1ga44fda7872beb30a68bbc8f2cac9271ae)` encoding)` | Decrypts an input stream that is encoded with the given encoding.
-`public template<typename T>`  <br/>`inline void setKey(const T & key)` | Sets the key for the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public template<typename T>`  <br/>`inline void setIV(const T & iv)` | Sets the initialization vector (IV) for the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public template<typename T>`  <br/>`inline void setKey(const T & key)` | Sets the key for the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public template<typename T>`  <br/>`inline void setIV(const T & iv)` | Sets the initialization vector (IV) for the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
 `public int setPadding(int padding)` | 
-`public const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & getKey() const` | Returns the key for the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & getIV() const` | Returns the initialization vector (IV) for the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public const std::string & name() const` | Returns the name of the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public int blockSize() const` | Returns the block size of the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public int keySize() const` | Returns the key size of the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
-`public int ivSize() const` | Returns the IV size of the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & getKey() const` | Returns the key for the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public const `[`ByteVec`](#group__crypto_1ga54c835992b731d8c7ec3e6a3c991ec97)` & getIV() const` | Returns the initialization vector (IV) for the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public const std::string & name() const` | Returns the name of the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public int blockSize() const` | Returns the block size of the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public int keySize() const` | Returns the key size of the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
+`public int ivSize() const` | Returns the IV size of the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher).
 `public const EVP_CIPHER * cipher()` | Returns the cipher object.
 `protected bool _initialized` | 
 `protected bool _encrypt` | 
@@ -66,10 +66,10 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 `protected  Cipher()` | 
 `protected  Cipher(const `[`Cipher`](#classscy_1_1crypto_1_1Cipher)` &)` | 
 `protected `[`Cipher`](#classscy_1_1crypto_1_1Cipher)` & operator=(const `[`Cipher`](#classscy_1_1crypto_1_1Cipher)` &)` | 
-`protected void generateKey(const std::string & passphrase,const std::string & salt,int iterationCount)` | Generates and sets the key and IV from a password and optional salt string.
+`protected void generateKey(const std::string & passphrase,const std::string & salt,int iterationCount)` | 
 `protected void setRandomKey()` | Generates and sets key from random data.
 `protected void setRandomIV()` | Generates and sets IV from random data.
-`protected void initialize(bool encrypt)` | Initializes the [Cipher](api-crypto.md#classscy_1_1crypto_1_1Cipher) using the given direction.
+`protected void initialize(bool encrypt)` | Initializes the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher) using the given direction.
 
 ## Members
 
@@ -295,9 +295,9 @@ Returns the cipher object.
 
 #### `protected void generateKey(const std::string & passphrase,const std::string & salt,int iterationCount)` {#group__crypto_1ga6edba619802b9ca520bc4f8dd1b5d8b2}
 
+
+
 Generates and sets the key and IV from a password and optional salt string.
-
-
 
 #### `protected void setRandomKey()` {#group__crypto_1gad71d5cde5fea40cfeab6b08518ddbc95}
 
@@ -447,7 +447,7 @@ This class represents a X509 Certificate.
 `public  X509Certificate(const `[`X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert)` | Creates the certificate by copying another one.
 `public `[`X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & operator=(const `[`X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert)` | Assigns a certificate.
 `public void swap(`[`X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert)` | Exchanges the certificate with another one.
-`public  ~X509Certificate()` | Destroys the [X509Certificate](api-crypto.md#classscy_1_1crypto_1_1X509Certificate).
+`public  ~X509Certificate()` | Destroys the [X509Certificate](./doc/api-crypto.md#classscy_1_1crypto_1_1X509Certificate).
 `public const std::string & issuerName() const` | Returns the certificate issuer's distinguished name.
 `public std::string issuerName(`[`NID`](#group__crypto_1gaf15888f0ebe57ab7978cb91f7bbd40d7)` nid) const` | 
 `public const std::string & subjectName() const` | Returns the certificate subject's distinguished name.
@@ -619,11 +619,11 @@ Extracts issuer and subject name from the certificate.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`scy::Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`public `[`scy::Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 
 ## Members
 
-#### `public `[`scy::Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__crypto_1ga9bfa006e68b7b9a92ef3ca9db96d9d01}
+#### `public `[`scy::Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__crypto_1ga9bfa006e68b7b9a92ef3ca9db96d9d01}
 
 
 

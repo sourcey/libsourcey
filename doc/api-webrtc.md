@@ -41,7 +41,7 @@ Note P postfix of a function indicates that it should only be called by the proc
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public void onAudioCaptured(void * sender,`[`av::AudioPacket`](#structscy_1_1av_1_1AudioPacket)` & packet)` | Handles input packets from the capture for sending.
+`public void onAudioCaptured(`[`av::AudioPacket`](#structscy_1_1av_1_1AudioPacket)` & packet)` | Handles input packets from the capture for sending.
 `public int64_t TimeUntilNextProcess()` | 
 `public void Process()` | 
 `public int32_t ActiveAudioLayer(AudioLayer * audio_layer) const` | 
@@ -136,7 +136,7 @@ Note P postfix of a function indicates that it should only be called by the proc
 
 ## Members
 
-#### `public void onAudioCaptured(void * sender,`[`av::AudioPacket`](#structscy_1_1av_1_1AudioPacket)` & packet)` {#group__webrtc_1ga8c63541c4bc64a1bc0f577b826a56b50}
+#### `public void onAudioCaptured(`[`av::AudioPacket`](#structscy_1_1av_1_1AudioPacket)` & packet)` {#group__webrtc_1gad7c60bf9656ed57f4f52d9d87b8d0795}
 
 Handles input packets from the capture for sending.
 
@@ -848,9 +848,9 @@ VideoSinkInterface implementation.
 `public virtual void stop()` | 
 `public virtual rtc::scoped_refptr< `[`AudioPacketModule`](#classscy_1_1AudioPacketModule)` > getAudioModule()` | 
 `public virtual `[`VideoPacketSource`](#classscy_1_1VideoPacketSource)` * createVideoSource()` | 
-`protected `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` _stream` | 
+`protected `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` _stream` | 
 `protected av::MediaCapture::Ptr _capture` | 
-`protected rtc::scoped_refptr< `[`AudioPacketModule`](api-webrtc.md#classscy_1_1AudioPacketModule)` > _audioModule` | 
+`protected rtc::scoped_refptr< `[`AudioPacketModule`](./doc/api-webrtc.md#classscy_1_1AudioPacketModule)` > _audioModule` | 
 
 ## Members
 
@@ -902,7 +902,7 @@ VideoSinkInterface implementation.
 
 
 
-#### `protected `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` _stream` {#group__webrtc_1gac7d182c62a7274dcc483b6011910d8d1}
+#### `protected `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` _stream` {#group__webrtc_1gac7d182c62a7274dcc483b6011910d8d1}
 
 
 
@@ -914,7 +914,7 @@ VideoSinkInterface implementation.
 
 
 
-#### `protected rtc::scoped_refptr< `[`AudioPacketModule`](api-webrtc.md#classscy_1_1AudioPacketModule)` > _audioModule` {#group__webrtc_1ga9ac6e39ec05db58fd218ee52bd844018}
+#### `protected rtc::scoped_refptr< `[`AudioPacketModule`](./doc/api-webrtc.md#classscy_1_1AudioPacketModule)` > _audioModule` {#group__webrtc_1ga9ac6e39ec05db58fd218ee52bd844018}
 
 
 
@@ -950,7 +950,7 @@ class scy::PeerConnection
 `public webrtc::PeerConnectionFactoryInterface * factory() const` | 
 `public rtc::scoped_refptr< webrtc::PeerConnectionInterface > peerConnection() const` | 
 `public rtc::scoped_refptr< webrtc::MediaStreamInterface > stream() const` | 
-`protected `[`PeerConnectionManager`](api-webrtc.md#classscy_1_1PeerConnectionManager)` * _manager` | 
+`protected `[`PeerConnectionManager`](./doc/api-webrtc.md#classscy_1_1PeerConnectionManager)` * _manager` | 
 `protected std::string _peerid` | 
 `protected `[`Mode`](#group__webrtc_1ga574415d63d860395230c8d596c679c08)` _mode` | 
 `protected webrtc::PeerConnectionInterface::RTCConfiguration _config` | 
@@ -1056,7 +1056,7 @@ Set a custom PeerConnectionFactory object Must be done before any streams are in
 
 
 
-#### `protected `[`PeerConnectionManager`](api-webrtc.md#classscy_1_1PeerConnectionManager)` * _manager` {#group__webrtc_1ga51f57fc701e28fa4d3662a7bce74c406}
+#### `protected `[`PeerConnectionManager`](./doc/api-webrtc.md#classscy_1_1PeerConnectionManager)` * _manager` {#group__webrtc_1ga51f57fc701e28fa4d3662a7bce74c406}
 
 
 
@@ -1405,7 +1405,7 @@ class scy::VideoPacketSource
 `public virtual bool GetPreferredFourccs(std::vector< uint32_t > * fourccs)` | 
 `public virtual bool GetBestCaptureFormat(const cricket::VideoFormat & desired,cricket::VideoFormat * best_format)` | 
 `public virtual bool IsScreencast() const` | 
-`public void onVideoCaptured(void * sender,`[`av::VideoPacket`](#structscy_1_1av_1_1VideoPacket)` & packet)` | 
+`public void onVideoCaptured(`[`av::VideoPacket`](#structscy_1_1av_1_1VideoPacket)` & packet)` | 
 
 ## Members
 
@@ -1457,7 +1457,7 @@ cricket::VideoCapturer implementation.
 
 
 
-#### `public void onVideoCaptured(void * sender,`[`av::VideoPacket`](#structscy_1_1av_1_1VideoPacket)` & packet)` {#group__webrtc_1gae4d952af8305951cdb2a1bfb4dd46ca2}
+#### `public void onVideoCaptured(`[`av::VideoPacket`](#structscy_1_1av_1_1VideoPacket)` & packet)` {#group__webrtc_1gaf1223ac602f6aa556835445b3963b93d}
 
 
 

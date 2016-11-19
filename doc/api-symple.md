@@ -7,6 +7,7 @@
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `namespace `[`scy::smpl`](#namespacescy_1_1smpl)    | 
+`struct `[`scy::smpl::Client::Options`](#structscy_1_1smpl_1_1Client_1_1Options)    | 
 # namespace `scy::smpl` {#namespacescy_1_1smpl}
 
 
@@ -28,11 +29,7 @@
 `class `[`scy::smpl::SSLClient`](#classscy_1_1smpl_1_1SSLClient)    | 
 `class `[`scy::smpl::TCPClient`](#classscy_1_1smpl_1_1TCPClient)    | 
 `struct `[`scy::smpl::Address`](#structscy_1_1smpl_1_1Address)    | 
-`struct `[`scy::smpl::CommandDelegate`](#structscy_1_1smpl_1_1CommandDelegate)    | 
-`struct `[`scy::smpl::EventDelegate`](#structscy_1_1smpl_1_1EventDelegate)    | 
 `struct `[`scy::smpl::Filter`](#structscy_1_1smpl_1_1Filter)    | 
-`struct `[`scy::smpl::MessageDelegate`](#structscy_1_1smpl_1_1MessageDelegate)    | 
-`struct `[`scy::smpl::PresenceDelegate`](#structscy_1_1smpl_1_1PresenceDelegate)    | 
 # class `scy::smpl::Client` {#classscy_1_1smpl_1_1Client}
 
 ```
@@ -48,13 +45,13 @@ class scy::smpl::Client
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const int & > Announce` | 
-`public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > PeerConnected` | Signals when a peer connects.
-`public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > PeerDisconnected` | Signals when a peer disconnects.
-`public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > CreatePresence` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const int &)`> Announce` | 
+`public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> PeerConnected` | Signals when a peer connects.
+`public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> PeerDisconnected` | Signals when a peer disconnects.
+`public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> CreatePresence` | 
 `public  Client(const net::Socket::Ptr & socket,const `[`Options`](#structscy_1_1smpl_1_1Client_1_1Options)` & options)` | 
 `public virtual  ~Client()` | 
-`public virtual void connect()` | virtual void connect(const std::string& host, std::uint16_t port);
+`public virtual void connect()` | 
 `public virtual void close()` | 
 `public virtual int send(`[`Message`](#classscy_1_1smpl_1_1Message)` & message,bool ack)` | 
 `public virtual int send(const std::string & message,bool ack)` | 
@@ -72,22 +69,22 @@ class scy::smpl::Client
 `public `[`Client::Options`](#structscy_1_1smpl_1_1Client_1_1Options)` & options()` | Return a reference to the client options object.
 `public virtual `[`Client`](#classscy_1_1smpl_1_1Client)` & operator>>(`[`Message`](#classscy_1_1smpl_1_1Message)` & message)` | [Stream](#classscy_1_1Stream) operator alias for [send()](#group__symple_1ga4dffb71d16288852dbeb54e38ce9cc82).
 `public virtual void onPresenceData(const json::Value & data,bool whiny)` | Update the roster from the given client object.
-`protected `[`Roster`](api-symple.md#classscy_1_1smpl_1_1Roster)` _roster` | 
+`protected `[`Roster`](./doc/api-symple.md#classscy_1_1smpl_1_1Roster)` _roster` | 
 `protected std::string _ourID` | 
-`protected `[`PersistenceT`](api-util.md#classscy_1_1TimedManager)` _persistence` | 
-`protected `[`Client::Options`](api-symple.md#structscy_1_1smpl_1_1Client_1_1Options)` _options` | 
+`protected `[`PersistenceT`](./doc/api-util.md#classscy_1_1TimedManager)` _persistence` | 
+`protected `[`Client::Options`](./doc/api-symple.md#structscy_1_1smpl_1_1Client_1_1Options)` _options` | 
 `protected StringVec _rooms` | 
 `protected int _announceStatus` | 
 `protected virtual int announce()` | 
 `protected virtual void reset()` | 
-`protected virtual void createPresence(`[`Presence`](#classscy_1_1smpl_1_1Presence)` & p)` | Creates a [Presence](api-symple.md#classscy_1_1smpl_1_1Presence) object.
-`protected virtual void emit(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & packet)` | Override PacketSignal::emit.
+`protected virtual void createPresence(`[`Presence`](#classscy_1_1smpl_1_1Presence)` & p)` | Creates a [Presence](./doc/api-symple.md#classscy_1_1smpl_1_1Presence) object.
+`protected virtual void emit(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | Override PacketSignal::emit.
 `protected virtual void onOnline()` | 
 `protected virtual void onAnnounceState(void * sender,`[`TransactionState`](#structscy_1_1TransactionState)` & state,const `[`TransactionState`](#structscy_1_1TransactionState)` &)` | 
 
 ## Members
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const int & > Announce` {#group__symple_1ga1f54542193fbd01b5756b8261bac93c3}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const int &)`> Announce` {#group__symple_1ga0228d93d0cedc21b61f12a580bb7c6b9}
 
 
 
@@ -101,19 +98,19 @@ SignalsNotifies the outside application about the response status code of our [a
 
 * 500: Server not found
 
-#### `public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > PeerConnected` {#group__symple_1ga161ea84495858d41142131f2e603618a}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> PeerConnected` {#group__symple_1ga01d918d49dcf259d612543a353a7e98e}
 
 Signals when a peer connects.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > PeerDisconnected` {#group__symple_1ga3a482a00abd5459ab09b35285142ea4c}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> PeerDisconnected` {#group__symple_1ga317fcf03f379f086db4b77bbc58ba7f6}
 
 Signals when a peer disconnects.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< [Peer`](#classscy_1_1smpl_1_1Peer)` & > CreatePresence` {#group__symple_1ga00ac1b6f73f1eda66913c3f72151d885}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Peer`](#classscy_1_1smpl_1_1Peer) &)`> CreatePresence` {#group__symple_1ga026c3952b78bd1b4b4f18d9bd815e94e}
 
 
 
@@ -133,7 +130,7 @@ Called by [createPresence()](#group__symple_1gace2ee9e3f211f1fb9979953c6d0dfa34)
 
 #### `public virtual void connect()` {#group__symple_1gaa8c97bf06d3fc80ceea252a2a611c5c7}
 
-virtual void connect(const std::string& host, std::uint16_t port);
+
 
 
 
@@ -239,7 +236,7 @@ Update the roster from the given client object.
 
 
 
-#### `protected `[`Roster`](api-symple.md#classscy_1_1smpl_1_1Roster)` _roster` {#group__symple_1ga8a6dc184e85eb02e1180a6ff11af402f}
+#### `protected `[`Roster`](./doc/api-symple.md#classscy_1_1smpl_1_1Roster)` _roster` {#group__symple_1ga8a6dc184e85eb02e1180a6ff11af402f}
 
 
 
@@ -251,13 +248,13 @@ Update the roster from the given client object.
 
 
 
-#### `protected `[`PersistenceT`](api-util.md#classscy_1_1TimedManager)` _persistence` {#group__symple_1ga0ecdbbbdc4f57cac6e7b5fda9072f5fa}
+#### `protected `[`PersistenceT`](./doc/api-util.md#classscy_1_1TimedManager)` _persistence` {#group__symple_1ga0ecdbbbdc4f57cac6e7b5fda9072f5fa}
 
 
 
 
 
-#### `protected `[`Client::Options`](api-symple.md#structscy_1_1smpl_1_1Client_1_1Options)` _options` {#group__symple_1gadfb98483f4d159dc718c788f787d6adf}
+#### `protected `[`Client::Options`](./doc/api-symple.md#structscy_1_1smpl_1_1Client_1_1Options)` _options` {#group__symple_1gadfb98483f4d159dc718c788f787d6adf}
 
 
 
@@ -293,7 +290,7 @@ Creates a [Presence](#classscy_1_1smpl_1_1Presence) object.
 
 
 
-#### `protected virtual void emit(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & packet)` {#group__symple_1ga6407aa6d29b5a2a009a595edbfe5413e}
+#### `protected virtual void emit(`[`IPacket`](#classscy_1_1IPacket)` & packet)` {#group__symple_1gae43d7d98d83566304f5de257d0049190}
 
 Override PacketSignal::emit.
 
@@ -1662,84 +1659,6 @@ The [Address](#structscy_1_1smpl_1_1Address) structure is an endpoint identifier
 
 
 
-# struct `scy::smpl::CommandDelegate` {#structscy_1_1smpl_1_1CommandDelegate}
-
-```
-struct scy::smpl::CommandDelegate
-  : public scy::smpl::MessageDelegate
-```  
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  CommandDelegate(const `[`Filter`](#structscy_1_1smpl_1_1Filter)` & filter)` | 
-`public inline  CommandDelegate(const `[`CommandDelegate`](#structscy_1_1smpl_1_1CommandDelegate)` & r)` | 
-`public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` | 
-
-## Members
-
-#### `public inline  CommandDelegate(const `[`Filter`](#structscy_1_1smpl_1_1Filter)` & filter)` {#group__symple_1ga66dc8e6c990b7d47088dba04a5e4611c}
-
-
-
-
-
-#### `public inline  CommandDelegate(const `[`CommandDelegate`](#structscy_1_1smpl_1_1CommandDelegate)` & r)` {#group__symple_1ga7d7fdd0117410d83a27ea8012bdba9ce}
-
-
-
-
-
-#### `public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` {#group__symple_1ga772356c2f89cd68becc53b39d95ddac0}
-
-
-
-
-
-# struct `scy::smpl::EventDelegate` {#structscy_1_1smpl_1_1EventDelegate}
-
-```
-struct scy::smpl::EventDelegate
-  : public scy::smpl::MessageDelegate
-```  
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  EventDelegate()` | 
-`public inline  EventDelegate(const `[`EventDelegate`](#structscy_1_1smpl_1_1EventDelegate)` & r)` | 
-`public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` | 
-
-## Members
-
-#### `public inline  EventDelegate()` {#group__symple_1gab4d0b3d7359c5cd79fc7e78a24e17b69}
-
-
-
-
-
-#### `public inline  EventDelegate(const `[`EventDelegate`](#structscy_1_1smpl_1_1EventDelegate)` & r)` {#group__symple_1ga6f9f19b7587134b2702752cc16e33615}
-
-
-
-
-
-#### `public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` {#group__symple_1ga25d80b68408244edc49a0815037b8c85}
-
-
-
-
-
 # struct `scy::smpl::Filter` {#structscy_1_1smpl_1_1Filter}
 
 
@@ -1751,14 +1670,14 @@ struct scy::smpl::EventDelegate
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Bitwise`](api-base.md#structscy_1_1Bitwise)` flags` | 
+`public `[`Bitwise`](./doc/api-base.md#structscy_1_1Bitwise)` flags` | 
 `public std::string path` | 
 `public inline  Filter(const std::string & path,unsigned flags)` | 
 `public inline  Filter(unsigned flags)` | 
 
 ## Members
 
-#### `public `[`Bitwise`](api-base.md#structscy_1_1Bitwise)` flags` {#group__symple_1ga84b2f5acb1cf965cae191acd953dfad4}
+#### `public `[`Bitwise`](./doc/api-base.md#structscy_1_1Bitwise)` flags` {#group__symple_1ga84b2f5acb1cf965cae191acd953dfad4}
 
 
 
@@ -1782,12 +1701,8 @@ struct scy::smpl::EventDelegate
 
 
 
-# struct `scy::smpl::MessageDelegate` {#structscy_1_1smpl_1_1MessageDelegate}
+# struct `scy::smpl::Client::Options` {#structscy_1_1smpl_1_1Client_1_1Options}
 
-```
-struct scy::smpl::MessageDelegate
-  : public scy::DelegateBase< IPacket & >
-```  
 
 
 
@@ -1797,71 +1712,67 @@ struct scy::smpl::MessageDelegate
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Filter`](api-symple.md#structscy_1_1smpl_1_1Filter)` filter` | 
-`public inline  MessageDelegate(const `[`Filter`](#structscy_1_1smpl_1_1Filter)` & filter)` | 
-`public inline  MessageDelegate(const `[`MessageDelegate`](#structscy_1_1smpl_1_1MessageDelegate)` & r)` | 
-`public inline virtual bool accepts(void *,`[`IPacket`](#classscy_1_1IPacket)` & data,void *,void *,void *)` | 
+`public std::string host` | 
+`public std::uint16_t port` | 
+`public bool reconnection` | Weather or not to reconnect if disconnected from the server.
+`public int reconnectAttempts` | 
+`public std::string user` | 
+`public std::string name` | 
+`public std::string type` | 
+`public std::string token` | 
+`public inline  Options()` | 
 
 ## Members
 
-#### `public `[`Filter`](api-symple.md#structscy_1_1smpl_1_1Filter)` filter` {#group__symple_1ga8341a4ffaf78f779e07326402f2873cc}
+#### `public std::string host` {#group__symple_1ga05d0bdf5ab5eeefec7d0019bb110bb58}
 
 
 
 
 
-#### `public inline  MessageDelegate(const `[`Filter`](#structscy_1_1smpl_1_1Filter)` & filter)` {#group__symple_1ga0bc490de86547ecfba6434baac4ac06b}
+#### `public std::uint16_t port` {#group__symple_1ga9e10345420629ea8ebf3bb06dd46ece8}
 
 
 
 
 
-#### `public inline  MessageDelegate(const `[`MessageDelegate`](#structscy_1_1smpl_1_1MessageDelegate)` & r)` {#group__symple_1gad2d1a0f83617474b46dfb4ff316a4cbe}
+#### `public bool reconnection` {#group__symple_1ga8388c0e51b717793da8e136f24ef4df6}
+
+Weather or not to reconnect if disconnected from the server.
+
+
+
+#### `public int reconnectAttempts` {#group__symple_1gaad73b34182da94bd80d394d6c2cf8d59}
+
+
+
+The number of times to attempt to reconnect if disconnected from the server. (0 = unlimited)
+
+#### `public std::string user` {#group__symple_1gace5d72442ca0ddd400242766dcbe0075}
 
 
 
 
 
-#### `public inline virtual bool accepts(void *,`[`IPacket`](#classscy_1_1IPacket)` & data,void *,void *,void *)` {#group__symple_1gaccf87467af16c49e9738b6e73225fee2}
+#### `public std::string name` {#group__symple_1ga937a706d0ff802b29881200dd0f9b140}
 
 
 
 
 
-# struct `scy::smpl::PresenceDelegate` {#structscy_1_1smpl_1_1PresenceDelegate}
-
-```
-struct scy::smpl::PresenceDelegate
-  : public scy::smpl::MessageDelegate
-```  
+#### `public std::string type` {#group__symple_1ga3a94f72a2f8e72b1bb84f11630f9cd9a}
 
 
 
 
 
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  PresenceDelegate()` | 
-`public inline  PresenceDelegate(const `[`PresenceDelegate`](#structscy_1_1smpl_1_1PresenceDelegate)` & r)` | 
-`public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` | 
-
-## Members
-
-#### `public inline  PresenceDelegate()` {#group__symple_1ga51b3a9b3cabb708407300c62b211a69b}
+#### `public std::string token` {#group__symple_1gae46b1ce6b2a9c5e8ae983cf36137d18d}
 
 
 
 
 
-#### `public inline  PresenceDelegate(const `[`PresenceDelegate`](#structscy_1_1smpl_1_1PresenceDelegate)` & r)` {#group__symple_1gae689af71954fb944014c026263733cb8}
-
-
-
-
-
-#### `public inline virtual bool accepts(void * sender,`[`IPacket`](#classscy_1_1IPacket)` & data,void * empty2,void * empty3,void * empty4)` {#group__symple_1ga53ce079680b7b49e3155ccc473e574c4}
+#### `public inline  Options()` {#group__symple_1ga7dd4fee81e4318912e9d82a1e35c6550}
 
 
 

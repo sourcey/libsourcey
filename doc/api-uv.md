@@ -48,13 +48,13 @@ A base class for managing a `libuv` handle during it's lifecycle and safely hand
 `public void assertThread() const` | Make sure we are calling from the event loop thread.
 `protected uv_loop_t * _loop` | 
 `protected uv_handle_t * _ptr` | 
-`protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` | 
+`protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` | 
 `protected uv_thread_t _tid` | 
 `protected bool _closed` | 
 `protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` &)` | 
 `protected virtual void onClose()` | Override to handle closure.
-`protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &)` | 
-`protected `[`Handle`](#classscy_1_1uv_1_1Handle)` & operator=(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &)` | 
+`protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` | 
+`protected `[`Handle`](#classscy_1_1uv_1_1Handle)` & operator=(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` | 
 
 ## Members
 
@@ -178,7 +178,7 @@ Make sure we are calling from the event loop thread.
 
 
 
-#### `protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` {#group__uv_1gac0e5b3021a4588cb29786d1552981b74}
+#### `protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` {#group__uv_1gac0e5b3021a4588cb29786d1552981b74}
 
 
 
@@ -208,13 +208,13 @@ Override to handle closure.
 
 
 
-#### `protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &)` {#group__uv_1ga1f258c7f7e1331bd54d57ce7060414c4}
+#### `protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` {#group__uv_1ga72d5f4f38d49b8c839c4235fa91f3ed0}
 
 
 
 
 
-#### `protected `[`Handle`](#classscy_1_1uv_1_1Handle)` & operator=(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &)` {#group__uv_1ga83ba9fc3f18a22452194317c044ae34b}
+#### `protected `[`Handle`](#classscy_1_1uv_1_1Handle)` & operator=(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` {#group__uv_1ga140a2ace8f69014729fa6d725f410c22}
 
 
 

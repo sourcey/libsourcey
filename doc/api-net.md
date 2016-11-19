@@ -44,15 +44,15 @@
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  Address()` | Creates a wildcard (all zero) IPv4 [Address](api-net.md#classscy_1_1net_1_1Address).
+`public  Address()` | Creates a wildcard (all zero) IPv4 [Address](./doc/api-net.md#classscy_1_1net_1_1Address).
 `public  Address(const std::string & host,std::uint16_t port)` | 
-`public  Address(const `[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Creates a [Address](api-net.md#classscy_1_1net_1_1Address) by copying another one.
-`public  Address(const struct sockaddr * addr,socklen_t length)` | Creates a [Address](api-net.md#classscy_1_1net_1_1Address) from a native socket address.
+`public  Address(const `[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Creates a [Address](./doc/api-net.md#classscy_1_1net_1_1Address) by copying another one.
+`public  Address(const struct sockaddr * addr,socklen_t length)` | Creates a [Address](./doc/api-net.md#classscy_1_1net_1_1Address) from a native socket address.
 `public  Address(const std::string & host,const std::string & port)` | 
 `public  explicit Address(const std::string & hostAndPort)` | 
-`public  ~Address()` | Destroys the [Address](api-net.md#classscy_1_1net_1_1Address).
-`public `[`Address`](#classscy_1_1net_1_1Address)` & operator=(const `[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Assigns another [Address](api-net.md#classscy_1_1net_1_1Address).
-`public void swap(`[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Swaps the [Address](api-net.md#classscy_1_1net_1_1Address) with another one.
+`public  ~Address()` | Destroys the [Address](./doc/api-net.md#classscy_1_1net_1_1Address).
+`public `[`Address`](#classscy_1_1net_1_1Address)` & operator=(const `[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Assigns another [Address](./doc/api-net.md#classscy_1_1net_1_1Address).
+`public void swap(`[`Address`](#classscy_1_1net_1_1Address)` & addr)` | Swaps the [Address](./doc/api-net.md#classscy_1_1net_1_1Address) with another one.
 `public std::string host() const` | Returns the host IP address.
 `public std::uint16_t port() const` | Returns the port number.
 `public socklen_t length() const` | Returns the length of the internal native socket address.
@@ -364,7 +364,7 @@ class scy::net::IPv4AddressBase
 ```
 class scy::net::PacketSocketAdapter
   : public scy::net::SocketAdapter
-  : public scy::SignalBase< PacketDelegateBase, IPacket & >
+  : public scy::Signal< void(IPacket &)>
 ```  
 
 
@@ -375,33 +375,33 @@ class scy::net::PacketSocketAdapter
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public net::Socket::Ptr socket` | 
-`public `[`PacketFactory`](api-base.md#classscy_1_1PacketFactory)` factory` | 
-`public  PacketSocketAdapter(const net::Socket::Ptr & socket)` | 
-`public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public Socket::Ptr socket` | 
+`public `[`PacketFactory`](./doc/api-base.md#classscy_1_1PacketFactory)` factory` | 
+`public  PacketSocketAdapter(const Socket::Ptr & socket)` | 
+`public virtual void onSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `public virtual void onPacket(`[`IPacket`](#classscy_1_1IPacket)` & pkt)` | 
 
 ## Members
 
-#### `public net::Socket::Ptr socket` {#group__net_1ga4ecd22b35e86bfa526f982c0f73a76a7}
+#### `public Socket::Ptr socket` {#group__net_1ga9a80638bbd778f5b92b425fc0f659ba1}
 
 
 
 Pointer to the underlying socket. Sent data will be proxied to this socket.
 
-#### `public `[`PacketFactory`](api-base.md#classscy_1_1PacketFactory)` factory` {#group__net_1ga0b65ad8c24a9b68dd027ea2a33e83e2c}
+#### `public `[`PacketFactory`](./doc/api-base.md#classscy_1_1PacketFactory)` factory` {#group__net_1ga0b65ad8c24a9b68dd027ea2a33e83e2c}
 
 
 
 
 
-#### `public  PacketSocketAdapter(const net::Socket::Ptr & socket)` {#group__net_1ga242693e5ca3e772eab15f72f182d1042}
+#### `public  PacketSocketAdapter(const Socket::Ptr & socket)` {#group__net_1gaaffa3af9e2fb97f6401d52c0c920c2ce}
 
 
 
 Creates the [PacketSocketAdapter](#classscy_1_1net_1_1PacketSocketAdapter) This class should have a higher priority than standard sockets so we can parse data packets first. Creates and dispatches a packet utilizing the available creation strategies. For best performance the most used strategies should have the highest priority.
 
-#### `public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1ga7f7c74c03abd6ed125e5e0eb1022c268}
+#### `public virtual void onSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1gadcd2cc1b5b293f84c573a3930cba63e6}
 
 
 
@@ -585,31 +585,31 @@ This class also be extended to implement custom processing for received socket d
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public void * opaque` | 
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Connect` | Signals that the socket is connected.
-`public `[`Signal2](#classscy_1_1Signal2)< const [MutableBuffer](#classscy_1_1MutableBuffer) &, const [Address`](#classscy_1_1net_1_1Address)` & > Recv` | Signals when data is received by the socket.
-`public `[`Signal](#classscy_1_1Signal)< const [scy::Error`](#structscy_1_1Error)` & > Error` | 
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Close` | Signals that the underlying socket is closed.
-`public  SocketAdapter(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * sender,`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * receiver)` | Creates the [SocketAdapter](api-net.md#classscy_1_1net_1_1SocketAdapter).
-`public virtual  ~SocketAdapter()` | Destroys the [SocketAdapter](api-net.md#classscy_1_1net_1_1SocketAdapter).
+`public `[`Signal](#classscy_1_1Signal)< void([Socket`](#classscy_1_1net_1_1Socket) &)`> Connect` | Signals that the socket is connected.
+`public `[`Signal](#classscy_1_1Signal)< void([Socket](#classscy_1_1net_1_1Socket) &, const [MutableBuffer](#classscy_1_1MutableBuffer) &, const [Address`](#classscy_1_1net_1_1Address) &)`> Recv` | Signals when data is received by the socket.
+`public `[`Signal](#classscy_1_1Signal)< void([Socket](#classscy_1_1net_1_1Socket) &, const [scy::Error`](#structscy_1_1Error) &)`> Error` | 
+`public `[`Signal](#classscy_1_1Signal)< void([Socket`](#classscy_1_1net_1_1Socket) &)`> Close` | Signals that the underlying socket is closed.
+`public  SocketAdapter(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * sender,`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * receiver)` | Creates the [SocketAdapter](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter).
+`public virtual  ~SocketAdapter()` | Destroys the [SocketAdapter](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter).
 `public virtual int send(const char * data,std::size_t len,int flags)` | 
 `public virtual int send(const char * data,std::size_t len,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress,int flags)` | 
 `public virtual int sendPacket(const `[`IPacket`](#classscy_1_1IPacket)` & packet,int flags)` | 
 `public virtual int sendPacket(const `[`IPacket`](#classscy_1_1IPacket)` & packet,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress,int flags)` | 
 `public virtual void sendPacket(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
-`public virtual void onSocketConnect()` | 
-`public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public virtual void onSocketError(const `[`Error`](#structscy_1_1Error)` & error)` | 
-`public virtual void onSocketClose()` | 
+`public virtual void onSocketConnect(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`public virtual void onSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public virtual void onSocketError(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` | 
+`public virtual void onSocketClose(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `public void setSender(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * adapter,bool freeExisting)` | 
-`public `[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * sender()` | Returns the output [SocketAdapter](api-net.md#classscy_1_1net_1_1SocketAdapter) pointer.
-`public void addReceiver(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * adapter,int priority)` | Adds an input [SocketAdapter](api-net.md#classscy_1_1net_1_1SocketAdapter) for receiving socket callbacks.
-`public void removeReceiver(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * adapter)` | Removes an input [SocketAdapter](api-net.md#classscy_1_1net_1_1SocketAdapter).
-`protected `[`SocketAdapter`](api-net.md#classscy_1_1net_1_1SocketAdapter)` * _sender` | 
+`public `[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * sender()` | Returns the output [SocketAdapter](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter) pointer.
+`public void addReceiver(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * adapter,int priority)` | Adds an input [SocketAdapter](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter) for receiving socket callbacks.
+`public void removeReceiver(`[`SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)` * adapter)` | Removes an input [SocketAdapter](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter).
+`protected `[`SocketAdapter`](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter)` * _sender` | 
 `protected inline virtual void * self()` | 
-`protected virtual void emitSocketConnect()` | 
-`protected virtual void emitSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`protected virtual void emitSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`protected virtual void emitSocketClose()` | 
+`protected virtual void emitSocketConnect(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`protected virtual void emitSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`protected virtual void emitSocketError(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
+`protected virtual void emitSocketClose(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 
 ## Members
 
@@ -621,25 +621,25 @@ Optional client data pointer.
 
 The pointer is not initialized or managed by the socket base.
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Connect` {#group__net_1gaa8e77af3d289d0b39caa6bd415e90ea0}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Socket`](#classscy_1_1net_1_1Socket) &)`> Connect` {#group__net_1gaf17d4734454424856c0b633bd9541088}
 
 Signals that the socket is connected.
 
 
 
-#### `public `[`Signal2](#classscy_1_1Signal2)< const [MutableBuffer](#classscy_1_1MutableBuffer) &, const [Address`](#classscy_1_1net_1_1Address)` & > Recv` {#group__net_1gafabf665fc7c3d45b765ecd65b6d7f5e2}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Socket](#classscy_1_1net_1_1Socket) &, const [MutableBuffer](#classscy_1_1MutableBuffer) &, const [Address`](#classscy_1_1net_1_1Address) &)`> Recv` {#group__net_1ga595ba3e14f06eed1f02f015a728c2d70}
 
 Signals when data is received by the socket.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< const [scy::Error`](#structscy_1_1Error)` & > Error` {#group__net_1ga874825e61656d02632ef0e1caf1236d2}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Socket](#classscy_1_1net_1_1Socket) &, const [scy::Error`](#structscy_1_1Error) &)`> Error` {#group__net_1gaf32bb1d5e97abc31fd973d49d6c04839}
 
 
 
 Signals that the socket is closed in error. This signal will be sent just before the Closed signal.
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Close` {#group__net_1ga0c3f3df356ba615bc9dfb170f8eb138b}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Socket`](#classscy_1_1net_1_1Socket) &)`> Close` {#group__net_1gaf96db2932c4615e6498cc9feabb881fa}
 
 Signals that the underlying socket is closed.
 
@@ -687,25 +687,25 @@ Sends the given packet to the connected peer. Returns the number of bytes sent o
 
 Sends the given packet to the connected peer. This method provides delegate compatability, and unlike other send methods throws an exception if the underlying socket is closed.
 
-#### `public virtual void onSocketConnect()` {#group__net_1ga4ced9486e2a3b40a23cd67790aa60ed5}
+#### `public virtual void onSocketConnect(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__net_1ga8dae1c179274b0571d1b5d8040f5afd8}
 
 
 
 These virtual methods can be overridden as necessary to intercept socket events before they hit the application.
 
-#### `public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1gaf4760a35776b5846d190d10cb71f002b}
+#### `public virtual void onSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1ga48f8129547ba9eaac88094e059205529}
 
 
 
 
 
-#### `public virtual void onSocketError(const `[`Error`](#structscy_1_1Error)` & error)` {#group__net_1ga1d4980af05e21c7515eced99ff473f48}
+#### `public virtual void onSocketError(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` {#group__net_1ga5658d5b01a3ff4cbad6010190aefe3b7}
 
 
 
 
 
-#### `public virtual void onSocketClose()` {#group__net_1ga3efec454408ef0bd2445ee980a640ecc}
+#### `public virtual void onSocketClose(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__net_1gab5d5c13b628ba6a010785f447f9e4fdc}
 
 
 
@@ -735,7 +735,7 @@ Removes an input [SocketAdapter](#classscy_1_1net_1_1SocketAdapter).
 
 
 
-#### `protected `[`SocketAdapter`](api-net.md#classscy_1_1net_1_1SocketAdapter)` * _sender` {#group__net_1ga17dc4823b85f24d94b5127681006439f}
+#### `protected `[`SocketAdapter`](./doc/api-net.md#classscy_1_1net_1_1SocketAdapter)` * _sender` {#group__net_1ga17dc4823b85f24d94b5127681006439f}
 
 
 
@@ -747,25 +747,25 @@ Removes an input [SocketAdapter](#classscy_1_1net_1_1SocketAdapter).
 
 Returns the polymorphic instance pointer for signal delegate callbacks.
 
-#### `protected virtual void emitSocketConnect()` {#group__net_1gaa1857a7b5824f467f212972286632ab1}
+#### `protected virtual void emitSocketConnect(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__net_1ga966260cfba01b3ca969b832f31261dfc}
 
 
 
 
 
-#### `protected virtual void emitSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1gaa7915048b401096b310a1c3a22fb01db}
+#### `protected virtual void emitSocketRecv(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__net_1gac4a4fe72a1b8485102de481b2544c7ef}
 
 
 
 
 
-#### `protected virtual void emitSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__net_1ga4c04d211a6c73c60821570b0502dab44}
+#### `protected virtual void emitSocketError(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__net_1gaac26c63c41c7f302df628faf706f4233}
 
 
 
 
 
-#### `protected virtual void emitSocketClose()` {#group__net_1gaaf2388ab81734728af0dc966a617900f}
+#### `protected virtual void emitSocketClose(`[`Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__net_1gaa0adb99c95f2c8f5255f43739d46845c}
 
 
 
@@ -788,7 +788,7 @@ The referenced packet buffer lifetime is only guaranteed for the duration of the
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketInfo`](api-net.md#structscy_1_1net_1_1PacketInfo)` * info` | [PacketInfo](api-net.md#structscy_1_1net_1_1PacketInfo) pointer.
+`public `[`PacketInfo`](./doc/api-net.md#structscy_1_1net_1_1PacketInfo)` * info` | [PacketInfo](./doc/api-net.md#structscy_1_1net_1_1PacketInfo) pointer.
 `public inline  SocketPacket(const Socket::Ptr & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `public inline  SocketPacket(const `[`SocketPacket`](#classscy_1_1net_1_1SocketPacket)` & that)` | 
 `public inline virtual  ~SocketPacket()` | 
@@ -800,7 +800,7 @@ The referenced packet buffer lifetime is only guaranteed for the duration of the
 
 ## Members
 
-#### `public `[`PacketInfo`](api-net.md#structscy_1_1net_1_1PacketInfo)` * info` {#group__net_1ga80fa02b6b62e44c85ba7f4bf954cea78}
+#### `public `[`PacketInfo`](./doc/api-net.md#structscy_1_1net_1_1PacketInfo)` * info` {#group__net_1ga80fa02b6b62e44c85ba7f4bf954cea78}
 
 [PacketInfo](#structscy_1_1net_1_1PacketInfo) pointer.
 
@@ -882,7 +882,7 @@ virtual std::size_t write(MutableBuffer&) const = 0;
 `public void addIncomingData(const char * data,std::size_t len)` | 
 `public void addOutgoingData(const std::string & data)` | 
 `public void addOutgoingData(const char * data,std::size_t len)` | 
-`protected `[`net::SSLSocket`](api-net.md#classscy_1_1net_1_1SSLSocket)` * _socket` | 
+`protected `[`net::SSLSocket`](./doc/api-net.md#classscy_1_1net_1_1SSLSocket)` * _socket` | 
 `protected SSL * _ssl` | 
 `protected BIO * _readBIO` | The incoming buffer we write encrypted SSL data into.
 `protected BIO * _writeBIO` | The outgoing buffer we write to the socket.
@@ -971,7 +971,7 @@ Flushes the SSL read/write buffers.
 
 
 
-#### `protected `[`net::SSLSocket`](api-net.md#classscy_1_1net_1_1SSLSocket)` * _socket` {#group__net_1gae207495c52da9720625af1c1a8234ca0}
+#### `protected `[`net::SSLSocket`](./doc/api-net.md#classscy_1_1net_1_1SSLSocket)` * _socket` {#group__net_1gae207495c52da9720625af1c1a8234ca0}
 
 
 
@@ -1271,30 +1271,30 @@ The feature can be disabled by calling this method.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal](#classscy_1_1Signal)< [VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails)` & > ServerVerificationError` | Fired whenever a certificate verification error is detected by the server during a handshake.
-`public `[`Signal](#classscy_1_1Signal)< [VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails)` & > ClientVerificationError` | Fired whenever a certificate verification error is detected by the client during a handshake.
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< std::string & > PrivateKeyPassphraseRequired` | 
+`public `[`Signal](#classscy_1_1Signal)< void([VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails) &)`> ServerVerificationError` | 
+`public `[`Signal](#classscy_1_1Signal)< void([VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails) &)`> ClientVerificationError` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(std::string &)`> PrivateKeyPassphraseRequired` | 
 `public void initializeServer(SSLContext::Ptr ptrContext)` | Initializes the server side of the [SSLManager](#classscy_1_1net_1_1SSLManager) server-side [SSLContext](#classscy_1_1net_1_1SSLContext).
-`public void initializeClient(SSLContext::Ptr ptrContext)` | Initializes the client side of the [SSLManager](#classscy_1_1net_1_1SSLManager) with a default client-side [SSLContext](#classscy_1_1net_1_1SSLContext).
+`public void initializeClient(SSLContext::Ptr ptrContext)` | 
 `public SSLContext::Ptr defaultServerContext()` | Returns the default Context used by the server if initialized.
 `public SSLContext::Ptr defaultClientContext()` | Returns the default Context used by the client if initialized.
 `public void shutdown()` | 
 
 ## Members
 
-#### `public `[`Signal](#classscy_1_1Signal)< [VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails)` & > ServerVerificationError` {#group__net_1gadaeb89e3d9d710dbc0acab5368ae6373}
+#### `public `[`Signal](#classscy_1_1Signal)< void([VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails) &)`> ServerVerificationError` {#group__net_1ga5c8d1a58ad63cfe7fd8c6ef8da2bc7bc}
+
+
 
 Fired whenever a certificate verification error is detected by the server during a handshake.
 
+#### `public `[`Signal](#classscy_1_1Signal)< void([VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails) &)`> ClientVerificationError` {#group__net_1ga79cecc2be9b8293b79f9dc92b3ab967d}
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< [VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails)` & > ClientVerificationError` {#group__net_1ga9e476170138302458fdefa7717f8601c}
 
 Fired whenever a certificate verification error is detected by the client during a handshake.
 
-
-
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< std::string & > PrivateKeyPassphraseRequired` {#group__net_1ga4a535b54309610a4898255e6393e170f}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(std::string &)`> PrivateKeyPassphraseRequired` {#group__net_1gac92a4d1a788ac605e000055f0c2d1f0b}
 
 
 
@@ -1308,9 +1308,9 @@ Initializes the server side of the [SSLManager](#classscy_1_1net_1_1SSLManager) 
 
 #### `public void initializeClient(SSLContext::Ptr ptrContext)` {#group__net_1ga4472c80b8b9152947333589515621051}
 
+
+
 Initializes the client side of the [SSLManager](#classscy_1_1net_1_1SSLManager) with a default client-side [SSLContext](#classscy_1_1net_1_1SSLContext).
-
-
 
 #### `public SSLContext::Ptr defaultServerContext()` {#group__net_1ga5888698b042c4c4a16d69fc98cb0e582}
 
@@ -1427,7 +1427,7 @@ class scy::net::SSLSocket
 `public virtual void onRead(const char * data,std::size_t len)` | Reads raw encrypted SSL data.
 `protected net::SSLContext::Ptr _context` | virtual bool readStart();
 `protected net::SSLSession::Ptr _session` | 
-`protected `[`net::SSLAdapter`](api-net.md#classscy_1_1net_1_1SSLAdapter)` _sslAdapter` | 
+`protected `[`net::SSLAdapter`](./doc/api-net.md#classscy_1_1net_1_1SSLAdapter)` _sslAdapter` | 
 
 ## Members
 
@@ -1565,7 +1565,7 @@ virtual bool readStart();
 
 
 
-#### `protected `[`net::SSLAdapter`](api-net.md#classscy_1_1net_1_1SSLAdapter)` _sslAdapter` {#group__net_1ga6d18c18a5cf420456474c9e55736a1ac}
+#### `protected `[`net::SSLAdapter`](./doc/api-net.md#classscy_1_1net_1_1SSLAdapter)` _sslAdapter` {#group__net_1ga6d18c18a5cf420456474c9e55736a1ac}
 
 
 
@@ -1587,7 +1587,7 @@ class scy::net::TCPSocket
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const net::TCPSocket::Ptr & > AcceptConnection` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const net::TCPSocket::Ptr &)`> AcceptConnection` | 
 `public  TCPSocket(uv::Loop * loop)` | 
 `public virtual  ~TCPSocket()` | 
 `public virtual bool shutdown()` | 
@@ -1621,7 +1621,7 @@ class scy::net::TCPSocket
 
 ## Members
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const net::TCPSocket::Ptr & > AcceptConnection` {#group__net_1gacdea4b47dd9b28205d2a7f59c826e273}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const net::TCPSocket::Ptr &)`> AcceptConnection` {#group__net_1ga22c24cb537c35dbdd0443b5b2d96b374}
 
 
 
@@ -1838,7 +1838,7 @@ This class provides request/response functionality for [IPacket](#classscy_1_1IP
 `public inline virtual void cancel()` | 
 `public inline virtual void dispose()` | 
 `public inline `[`Address`](#classscy_1_1net_1_1Address)` peerAddress() const` | 
-`protected `[`Address`](api-net.md#classscy_1_1net_1_1Address)` _peerAddress` | 
+`protected `[`Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _peerAddress` | 
 `protected inline virtual  ~Transaction()` | 
 `protected inline virtual void onPacket(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 `protected inline virtual void onResponse()` | Called when a successful response match is received.
@@ -1880,7 +1880,7 @@ Protected by the base implementation as this is called by the internal state mac
 
 
 
-#### `protected `[`Address`](api-net.md#classscy_1_1net_1_1Address)` _peerAddress` {#group__net_1ga267322b198b169cb769dbc3b74432592}
+#### `protected `[`Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _peerAddress` {#group__net_1ga267322b198b169cb769dbc3b74432592}
 
 
 
@@ -1944,7 +1944,7 @@ class scy::net::UDPSocket
 `public virtual bool closed() const` | 
 `public virtual uv::Loop * loop() const` | Returns the socket event loop.
 `public virtual void onRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buf,const `[`net::Address`](#classscy_1_1net_1_1Address)` & address)` | 
-`protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _peer` | 
+`protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _peer` | 
 `protected Buffer _buffer` | 
 `protected virtual void init()` | Initializes the underlying socket context.
 `protected virtual bool recvStart()` | 
@@ -2072,7 +2072,7 @@ Returns the socket event loop.
 
 
 
-#### `protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _peer` {#group__net_1ga4b6e88e303adb6fc54a6d496e04d6d7e}
+#### `protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _peer` {#group__net_1ga4b6e88e303adb6fc54a6d496e04d6d7e}
 
 
 
@@ -2125,22 +2125,22 @@ A utility class for certificate error handling.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  VerificationErrorDetails(const `[`crypto::X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert,int errDepth,int errNum,const std::string & errMsg)` | Creates the [VerificationErrorDetails](api-net.md#classscy_1_1net_1_1VerificationErrorDetails). _ignoreError is per default set to false.
-`public  ~VerificationErrorDetails()` | Destroys the [VerificationErrorDetails](api-net.md#classscy_1_1net_1_1VerificationErrorDetails).
+`public  VerificationErrorDetails(const `[`crypto::X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert,int errDepth,int errNum,const std::string & errMsg)` | 
+`public  ~VerificationErrorDetails()` | Destroys the [VerificationErrorDetails](./doc/api-net.md#classscy_1_1net_1_1VerificationErrorDetails).
 `public inline const `[`crypto::X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & certificate() const` | Returns the certificate that caused the error.
 `public inline int errorDepth() const` | Returns the position of the certificate in the certificate chain.
 `public inline int errorNumber() const` | Returns the id of the error.
 `public inline const std::string & errorMessage() const` | Returns the textual presentation of the errorNumber.
-`public inline void setIgnoreError(bool ignoreError)` | setIgnoreError to true, if a verification error is judged non-fatal by the user.
+`public inline void setIgnoreError(bool ignoreError)` | 
 `public inline bool getIgnoreError() const` | returns the value of _ignoreError
 
 ## Members
 
 #### `public  VerificationErrorDetails(const `[`crypto::X509Certificate`](#classscy_1_1crypto_1_1X509Certificate)` & cert,int errDepth,int errNum,const std::string & errMsg)` {#group__net_1ga6149cde284d053bbb8ea7f7d4febf260}
 
+
+
 Creates the [VerificationErrorDetails](#classscy_1_1net_1_1VerificationErrorDetails). _ignoreError is per default set to false.
-
-
 
 #### `public  ~VerificationErrorDetails()` {#group__net_1ga341d067a4369d88415b30f9d6acf9516}
 
@@ -2174,9 +2174,9 @@ Returns the textual presentation of the errorNumber.
 
 #### `public inline void setIgnoreError(bool ignoreError)` {#group__net_1ga762c71561020eb2eae6842f5cfc6dcd4}
 
+
+
 setIgnoreError to true, if a verification error is judged non-fatal by the user.
-
-
 
 #### `public inline bool getIgnoreError() const` {#group__net_1ga682fc13cdc647b176d2e0d3ef3e783fb}
 
@@ -2208,7 +2208,7 @@ net::resolveDNS("google.com", 80, onDNSResult);
 --------------------------------|---------------------------------------------
 `public std::string host` | The host to resolve.
 `public std::uint16_t port` | The host port to resolve.
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` addr` | The resolved address.
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` addr` | The resolved address.
 `public struct addrinfo * info` | The libuv uv_getaddrinfo result.
 `public struct addrinfo * hints` | libuv uv_getaddrinfo hints (optional)
 `public std::function< void(const `[`DNSResult`](#structscy_1_1net_1_1DNSResult) &)`> callback` | Result callback function.
@@ -2234,7 +2234,7 @@ The host port to resolve.
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` addr` {#group__net_1ga27835a425b986ef37186c1f9eb5673ef}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` addr` {#group__net_1ga27835a425b986ef37186c1f9eb5673ef}
 
 The resolved address.
 
@@ -2316,7 +2316,7 @@ Provides information about packets emitted from a socket. See [SocketPacket](#cl
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public Socket::Ptr socket` | The source socket.
-`public `[`Address`](api-net.md#classscy_1_1net_1_1Address)` peerAddress` | 
+`public `[`Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` peerAddress` | 
 `public inline  PacketInfo(const Socket::Ptr & socket,const `[`Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `public inline  PacketInfo(const `[`PacketInfo`](#structscy_1_1net_1_1PacketInfo)` & r)` | 
 `public inline virtual `[`IPacketInfo`](#structscy_1_1IPacketInfo)` * clone() const` | 
@@ -2330,7 +2330,7 @@ The source socket.
 
 
 
-#### `public `[`Address`](api-net.md#classscy_1_1net_1_1Address)` peerAddress` {#group__net_1ga41acad06a100d281506e6bf269b13799}
+#### `public `[`Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` peerAddress` {#group__net_1ga41acad06a100d281506e6bf269b13799}
 
 
 

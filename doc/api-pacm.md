@@ -7,6 +7,9 @@
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `namespace `[`scy::pacm`](#namespacescy_1_1pacm)    | 
+`struct `[`scy::pacm::Package::Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)    | 
+`struct `[`scy::pacm::LocalPackage::Manifest`](#structscy_1_1pacm_1_1LocalPackage_1_1Manifest)    | 
+`struct `[`scy::pacm::PackageManager::Options`](#structscy_1_1pacm_1_1PackageManager_1_1Options)    | [Package](#structscy_1_1pacm_1_1Package) manager initialization options.
 # namespace `scy::pacm` {#namespacescy_1_1pacm}
 
 
@@ -35,10 +38,10 @@
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal3](#classscy_1_1Signal3)< [InstallTask](#classscy_1_1pacm_1_1InstallTask) &, const [InstallationState](#structscy_1_1pacm_1_1InstallationState) &, const [InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & > InstallStateChange` | Proxies state change events from managed packages.
-`public `[`Signal](#classscy_1_1Signal)< [LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & > InstallComplete` | Signals when a managed install task completes.
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< int & > Progress` | Signals on overall progress update [0-100].
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< LocalPackageVec & > Complete` | Signals on all tasks complete.
+`public `[`Signal](#classscy_1_1Signal)< void([InstallTask](#classscy_1_1pacm_1_1InstallTask) &, const [InstallationState](#structscy_1_1pacm_1_1InstallationState) &, const [InstallationState`](#structscy_1_1pacm_1_1InstallationState) &)`> InstallStateChange` | Proxies state change events from managed packages.
+`public `[`Signal](#classscy_1_1Signal)< void([LocalPackage`](#structscy_1_1pacm_1_1LocalPackage) &)`> InstallComplete` | Signals when a managed install task completes.
+`public `[`Signal`](#classscy_1_1Signal)< void(int &)`> Progress` | Signals on overall progress update [0-100].
+`public `[`Signal`](#classscy_1_1Signal)< void(LocalPackageVec &)`> Complete` | Signals on all tasks complete.
 `public  InstallMonitor()` | 
 `public virtual  ~InstallMonitor()` | 
 `public virtual void addTask(InstallTask::Ptr task)` | Adds a task to monitor.
@@ -47,35 +50,35 @@
 `public virtual bool isComplete() const` | 
 `public virtual InstallTaskPtrVec tasks() const` | Returns the list of monitored package tasks.
 `public virtual LocalPackageVec packages() const` | Returns the list of monitored packages.
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected InstallTaskPtrVec _tasks` | 
 `protected LocalPackageVec _packages` | 
 `protected int _progress` | 
 `protected virtual void onInstallStateChange(void * sender,`[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & state,const `[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & oldState)` | 
-`protected virtual void onInstallComplete(void * sender)` | 
+`protected virtual void onInstallComplete(`[`InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & task)` | 
 `protected virtual void setProgress(int value)` | 
 
 ## Members
 
-#### `public `[`Signal3](#classscy_1_1Signal3)< [InstallTask](#classscy_1_1pacm_1_1InstallTask) &, const [InstallationState](#structscy_1_1pacm_1_1InstallationState) &, const [InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & > InstallStateChange` {#group__pacm_1ga90913971a93b501e524f928105628829}
+#### `public `[`Signal](#classscy_1_1Signal)< void([InstallTask](#classscy_1_1pacm_1_1InstallTask) &, const [InstallationState](#structscy_1_1pacm_1_1InstallationState) &, const [InstallationState`](#structscy_1_1pacm_1_1InstallationState) &)`> InstallStateChange` {#group__pacm_1ga5f7cb24385268ab5d2b50da72730d10a}
 
 Proxies state change events from managed packages.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< [LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & > InstallComplete` {#group__pacm_1ga569e84bdf138d9b434471998fcc44fef}
+#### `public `[`Signal](#classscy_1_1Signal)< void([LocalPackage`](#structscy_1_1pacm_1_1LocalPackage) &)`> InstallComplete` {#group__pacm_1ga081f4bd707b531dfd4d38f2233588bf8}
 
 Signals when a managed install task completes.
 
 
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< int & > Progress` {#group__pacm_1ga9f0bc6b0369a34191da0cac422aa426e}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(int &)`> Progress` {#group__pacm_1ga293627c638d0d1f70e82546be766219a}
 
 Signals on overall progress update [0-100].
 
 
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< LocalPackageVec & > Complete` {#group__pacm_1gab6b8daeb032249e84b6f1e6ab83e8839}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(LocalPackageVec &)`> Complete` {#group__pacm_1ga9bdc4dad951bb031a861bb53efa411b4}
 
 Signals on all tasks complete.
 
@@ -129,7 +132,7 @@ Returns the list of monitored packages.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1gadaa11ca20c7096e8a56feb1c48c7efff}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1gadaa11ca20c7096e8a56feb1c48c7efff}
 
 
 
@@ -159,7 +162,7 @@ Returns the list of monitored packages.
 
 
 
-#### `protected virtual void onInstallComplete(void * sender)` {#group__pacm_1ga557f622420a813c67ded137045f077f8}
+#### `protected virtual void onInstallComplete(`[`InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & task)` {#group__pacm_1ga3fee590aa5c73808d0f36de1c70f5b0d}
 
 
 
@@ -187,8 +190,8 @@ This class implements the package installation procedure.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< int & > Progress` | Signals on progress update [0-100].
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Complete` | 
+`public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &, int &)`> Progress` | Signals on progress update [0-100].
+`public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> Complete` | 
 `public  InstallTask(`[`PackageManager`](#classscy_1_1pacm_1_1PackageManager)` & manager,`[`LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` * local,`[`RemotePackage`](#structscy_1_1pacm_1_1RemotePackage)` * remote,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options,uv::Loop * loop)` | 
 `public virtual  ~InstallTask()` | 
 `public virtual void start()` | 
@@ -208,31 +211,31 @@ This class implements the package installation procedure.
 `public virtual bool success() const` | 
 `public virtual bool complete() const` | 
 `public virtual int progress() const` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
-`protected `[`Idler`](api-base.md#classscy_1_1Idler)` _runner` | 
-`protected `[`PackageManager`](api-pacm.md#classscy_1_1pacm_1_1PackageManager)` & _manager` | 
-`protected `[`LocalPackage`](api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * _local` | 
-`protected `[`RemotePackage`](api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * _remote` | 
-`protected `[`InstallOptions`](api-pacm.md#structscy_1_1pacm_1_1InstallOptions)` _options` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
+`protected `[`Idler`](./doc/api-base.md#classscy_1_1Idler)` _runner` | 
+`protected `[`PackageManager`](./doc/api-pacm.md#classscy_1_1pacm_1_1PackageManager)` & _manager` | 
+`protected `[`LocalPackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * _local` | 
+`protected `[`RemotePackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * _remote` | 
+`protected `[`InstallOptions`](./doc/api-pacm.md#structscy_1_1pacm_1_1InstallOptions)` _options` | 
 `protected int _progress` | 
 `protected bool _downloading` | 
 `protected http::ClientConnection::Ptr _dlconn` | 
 `protected uv::Loop * _loop` | 
 `protected virtual void run()` | 
 `protected virtual void onStateChange(`[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & state,const `[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & oldState)` | 
-`protected virtual void onDownloadProgress(void * sender,const double & progress)` | 
-`protected virtual void onDownloadComplete(void * sender,const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` | 
+`protected virtual void onDownloadProgress(const double & progress)` | 
+`protected virtual void onDownloadComplete(const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` | 
 `protected virtual void setProgress(int value)` | 
 
 ## Members
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< int & > Progress` {#group__pacm_1ga46726879d9b14890836cb1335afd0227}
+#### `public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &, int &)`> Progress` {#group__pacm_1gaf703cf11a21b644acc7e59c1ebf26485}
 
 Signals on progress update [0-100].
 
 
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Complete` {#group__pacm_1ga833716b09f3ade9228372a6b66aee3a6}
+#### `public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> Complete` {#group__pacm_1gaccf8591e8208940a4ad7c8133e3ec0ad}
 
 
 
@@ -352,37 +355,37 @@ True when the task has been cancelled.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1ga55b4143cc2cd3c86d140fbd4152ff264}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1ga55b4143cc2cd3c86d140fbd4152ff264}
 
 
 
 
 
-#### `protected `[`Idler`](api-base.md#classscy_1_1Idler)` _runner` {#group__pacm_1gaf178666e39b153b95d05945e47602099}
+#### `protected `[`Idler`](./doc/api-base.md#classscy_1_1Idler)` _runner` {#group__pacm_1gaf178666e39b153b95d05945e47602099}
 
 
 
 
 
-#### `protected `[`PackageManager`](api-pacm.md#classscy_1_1pacm_1_1PackageManager)` & _manager` {#group__pacm_1ga75bf291aa5b026cc178ba1361d44ec92}
+#### `protected `[`PackageManager`](./doc/api-pacm.md#classscy_1_1pacm_1_1PackageManager)` & _manager` {#group__pacm_1ga75bf291aa5b026cc178ba1361d44ec92}
 
 
 
 
 
-#### `protected `[`LocalPackage`](api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * _local` {#group__pacm_1gaed93e1d4951c6672b7f2ce7a91469cfd}
+#### `protected `[`LocalPackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * _local` {#group__pacm_1gaed93e1d4951c6672b7f2ce7a91469cfd}
 
 
 
 
 
-#### `protected `[`RemotePackage`](api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * _remote` {#group__pacm_1ga39c422153b97c6aa95a1b2fe74a4c0b5}
+#### `protected `[`RemotePackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * _remote` {#group__pacm_1ga39c422153b97c6aa95a1b2fe74a4c0b5}
 
 
 
 
 
-#### `protected `[`InstallOptions`](api-pacm.md#structscy_1_1pacm_1_1InstallOptions)` _options` {#group__pacm_1ga3d6b1dbf5dc37e7aaf8d012f37d2c2cf}
+#### `protected `[`InstallOptions`](./doc/api-pacm.md#structscy_1_1pacm_1_1InstallOptions)` _options` {#group__pacm_1ga3d6b1dbf5dc37e7aaf8d012f37d2c2cf}
 
 
 
@@ -424,13 +427,13 @@ Called asynchronously by the thread to do the work.
 
 
 
-#### `protected virtual void onDownloadProgress(void * sender,const double & progress)` {#group__pacm_1gafa8dc46664f1ecccb3f3dd60d8bae7ab}
+#### `protected virtual void onDownloadProgress(const double & progress)` {#group__pacm_1ga5a9f8befa6682fc5b725bab29d9cf60f}
 
 
 
 
 
-#### `protected virtual void onDownloadComplete(void * sender,const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` {#group__pacm_1ga7ace8d46e079de52e30f428cdbbd3c35}
+#### `protected virtual void onDownloadComplete(const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` {#group__pacm_1ga9c58cacb35a5d15d143c329b404e2b76}
 
 
 
@@ -453,13 +456,13 @@ The [Package](#structscy_1_1pacm_1_1Package) Manager provides an interface for m
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal](#classscy_1_1Signal)< const [http::Response`](#classscy_1_1http_1_1Response)` & > RemotePackageResponse` | 
-`public `[`Signal](#classscy_1_1Signal)< [LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & > PackageUninstalled` | Signals when a package is uninstalled.
-`public `[`Signal](#classscy_1_1Signal)< [InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & > InstallTaskCreated` | 
-`public `[`Signal](#classscy_1_1Signal)< const [InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & > InstallTaskComplete` | 
+`public `[`Signal](#classscy_1_1Signal)< void(const [http::Response`](#classscy_1_1http_1_1Response) &)`> RemotePackageResponse` | Events.
+`public `[`Signal](#classscy_1_1Signal)< void([LocalPackage`](#structscy_1_1pacm_1_1LocalPackage) &)`> PackageUninstalled` | Signals when a package is uninstalled.
+`public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> InstallTaskCreated` | 
+`public `[`Signal](#classscy_1_1Signal)< void(const [InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> InstallTaskComplete` | 
 `public  PackageManager(const `[`Options`](#structscy_1_1pacm_1_1PackageManager_1_1Options)` & options)` | 
 `public virtual  ~PackageManager()` | 
-`public virtual void initialize()` | 
+`public virtual void initialize()` | Initialization Methods.
 `public virtual void uninitialize()` | 
 `public virtual bool initialized() const` | 
 `public virtual void createDirectories()` | 
@@ -468,7 +471,8 @@ The [Package](#structscy_1_1pacm_1_1Package) Manager provides an interface for m
 `public virtual void loadLocalPackages(const std::string & dir)` | 
 `public virtual bool saveLocalPackages(bool whiny)` | 
 `public virtual bool saveLocalPackage(`[`LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & package,bool whiny)` | Saves the local package manifest to the file system.
-`public virtual InstallTask::Ptr installPackage(const std::string & name,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options)` | 
+`public virtual void parseRemotePackages(const std::string & data)` | Parse the remote packages from the given JSON data string.
+`public virtual InstallTask::Ptr installPackage(const std::string & name,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options)` | [Package](./doc/api-pacm.md#structscy_1_1pacm_1_1Package) Installation Methods.
 `public virtual bool installPackages(const StringVec & ids,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options,`[`InstallMonitor`](#classscy_1_1pacm_1_1InstallMonitor)` * monitor,bool whiny)` | 
 `public virtual InstallTask::Ptr updatePackage(const std::string & name,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options)` | 
 `public virtual bool updatePackages(const StringVec & ids,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options,`[`InstallMonitor`](#classscy_1_1pacm_1_1InstallMonitor)` * monitor,bool whiny)` | 
@@ -477,56 +481,55 @@ The [Package](#structscy_1_1pacm_1_1Package) Manager provides an interface for m
 `public virtual bool uninstallPackage(const std::string & id,bool whiny)` | Uninstalls a single package.
 `public virtual bool hasUnfinalizedPackages()` | 
 `public virtual bool finalizeInstallations(bool whiny)` | 
-`public virtual InstallTask::Ptr getInstallTask(const std::string & id) const` | Gets the install task for the given package ID.
+`public virtual InstallTask::Ptr getInstallTask(const std::string & id) const` | [Task](./doc/api-base.md#classscy_1_1Task) Helper Methods.
 `public virtual InstallTaskPtrVec tasks() const` | Returns a list of all tasks.
 `public virtual void cancelAllTasks()` | 
-`public virtual PackagePairVec getPackagePairs() const` | 
+`public virtual PackagePairVec getPackagePairs() const` | [Package](./doc/api-pacm.md#structscy_1_1pacm_1_1Package) Helper Methods.
 `public virtual PackagePairVec getUpdatablePackagePairs() const` | 
 `public virtual `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` getPackagePair(const std::string & id,bool whiny) const` | 
 `public virtual `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` getOrCreatePackagePair(const std::string & id)` | 
 `public virtual InstallTask::Ptr createInstallTask(`[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` & pair,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options)` | Creates a package installation task for the given pair.
 `public virtual std::string installedPackageVersion(const std::string & id) const` | 
 `public virtual `[`Package::Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` getLatestInstallableAsset(const `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` & pair,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options) const` | 
-`public virtual bool hasAvailableUpdates(const `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` & pair) const` | Returns true if there are updates available for this package, false otherwise.
-`public void clearCache()` | Clears all files in the cache directory.
+`public virtual bool hasAvailableUpdates(const `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` & pair) const` | 
+`public void clearCache()` | File Helper Methods.
 `public bool clearPackageCache(`[`LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & package)` | Clears a package archive from the local cache.
 `public bool clearCacheFile(const std::string & fileName,bool whiny)` | Clears a file from the local cache.
 `public bool hasCachedFile(`[`Package::Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & asset)` | Checks if a package archive exists in the local cache.
 `public bool isSupportedFileType(const std::string & fileName)` | Checks if the file type is a supported package archive.
 `public std::string getCacheFilePath(const std::string & fileName)` | 
 `public std::string getPackageDataDir(const std::string & id)` | 
-`public virtual `[`Options`](#structscy_1_1pacm_1_1PackageManager_1_1Options)` & options()` | 
+`public virtual `[`Options`](#structscy_1_1pacm_1_1PackageManager_1_1Options)` & options()` | Accessors.
 `public virtual `[`RemotePackageStore`](#classscy_1_1LiveCollection)` & remotePackages()` | 
 `public virtual `[`LocalPackageStore`](#classscy_1_1LiveCollection)` & localPackages()` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
-`protected `[`LocalPackageStore`](api-base.md#classscy_1_1LiveCollection)` _localPackages` | 
-`protected `[`RemotePackageStore`](api-base.md#classscy_1_1LiveCollection)` _remotePackages` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
+`protected `[`LocalPackageStore`](./doc/api-base.md#classscy_1_1LiveCollection)` _localPackages` | 
+`protected `[`RemotePackageStore`](./doc/api-base.md#classscy_1_1LiveCollection)` _remotePackages` | 
 `protected InstallTaskPtrVec _tasks` | 
-`protected `[`Options`](api-pacm.md#structscy_1_1pacm_1_1PackageManager_1_1Options)` _options` | 
-`protected void onPackageInstallComplete(void * sender)` | 
-`protected void onPackageQueryResponse(void * sender,const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` | 
+`protected `[`Options`](./doc/api-pacm.md#structscy_1_1pacm_1_1PackageManager_1_1Options)` _options` | 
+`protected void onPackageInstallComplete(`[`InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & task)` | Callbacks.
 
 ## Members
 
-#### `public `[`Signal](#classscy_1_1Signal)< const [http::Response`](#classscy_1_1http_1_1Response)` & > RemotePackageResponse` {#group__pacm_1ga79c68a803a124d22a2326ed0212b2ec0}
+#### `public `[`Signal](#classscy_1_1Signal)< void(const [http::Response`](#classscy_1_1http_1_1Response) &)`> RemotePackageResponse` {#group__pacm_1gac9bfa675fc261bd38052ae17bae25356}
 
-
+Events.
 
 Signals when the remote package list have been downloaded from the server.
 
-#### `public `[`Signal](#classscy_1_1Signal)< [LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & > PackageUninstalled` {#group__pacm_1ga788cc22bf777e6cc2ce2e86e2c35fe5e}
+#### `public `[`Signal](#classscy_1_1Signal)< void([LocalPackage`](#structscy_1_1pacm_1_1LocalPackage) &)`> PackageUninstalled` {#group__pacm_1gab05d4bd29a2c2ecc7579e58f919d43c5}
 
 Signals when a package is uninstalled.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< [InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & > InstallTaskCreated` {#group__pacm_1ga1f42238e60256cabd77d8b62b84294f5}
+#### `public `[`Signal](#classscy_1_1Signal)< void([InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> InstallTaskCreated` {#group__pacm_1ga7fbc7057386ad4ec58af8223d56c7bef}
 
 
 
 Signals when an installation task is created, before it is started.
 
-#### `public `[`Signal](#classscy_1_1Signal)< const [InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & > InstallTaskComplete` {#group__pacm_1gacc945a87497e47cfdb985210b1723712}
+#### `public `[`Signal](#classscy_1_1Signal)< void(const [InstallTask`](#classscy_1_1pacm_1_1InstallTask) &)`> InstallTaskComplete` {#group__pacm_1ga4e0d38796a84080bbf09756a553503c7}
 
 
 
@@ -546,7 +549,7 @@ Signals when a package installation tasks completes, either successfully or in e
 
 #### `public virtual void initialize()` {#group__pacm_1gad2aa7211618560cec5cadf2d2b935e3f}
 
-
+Initialization Methods.
 
 
 
@@ -598,9 +601,15 @@ Saves the local package manifest to the file system.
 
 
 
+#### `public virtual void parseRemotePackages(const std::string & data)` {#group__pacm_1ga5a84f69090718da9af13247e64e28156}
+
+Parse the remote packages from the given JSON data string.
+
+
+
 #### `public virtual InstallTask::Ptr installPackage(const std::string & name,const `[`InstallOptions`](#structscy_1_1pacm_1_1InstallOptions)` & options)` {#group__pacm_1gad295633f0783292623a120b227685090}
 
-
+[Package](#structscy_1_1pacm_1_1Package) Installation Methods.
 
 Installs a single package. The returned [InstallTask](#classscy_1_1pacm_1_1InstallTask) must be started. If the package is already up-to-date, a nullptr will be returned. Any other error will throw a std::runtime_error.
 
@@ -654,9 +663,9 @@ Finalizes active installations by moving all package files to their target desti
 
 #### `public virtual InstallTask::Ptr getInstallTask(const std::string & id) const` {#group__pacm_1gad2d2c89ce41a9e620bdb0abfb005c369}
 
+[Task](#classscy_1_1Task) Helper Methods.
+
 Gets the install task for the given package ID.
-
-
 
 #### `public virtual InstallTaskPtrVec tasks() const` {#group__pacm_1ga06761269e2391f30c5e0564156af8374}
 
@@ -672,7 +681,7 @@ Aborts all package installation tasks. All tasks must be aborted before clearing
 
 #### `public virtual PackagePairVec getPackagePairs() const` {#group__pacm_1ga11c411f6e676fb723561f8dc0c7bab4c}
 
-
+[Package](#structscy_1_1pacm_1_1Package) Helper Methods.
 
 Returns all package pairs, valid or invalid. Some pairs may not have both local and remote package pointers.
 
@@ -714,15 +723,15 @@ Returns the best asset to install, or throws a descriptive exception if no updat
 
 #### `public virtual bool hasAvailableUpdates(const `[`PackagePair`](#structscy_1_1pacm_1_1PackagePair)` & pair) const` {#group__pacm_1ga994577213392b7452e0cc4f49893295a}
 
+
+
 Returns true if there are updates available for this package, false otherwise.
-
-
 
 #### `public void clearCache()` {#group__pacm_1gae83f81efc6fac83c6b1feff2ab5dcc9f}
 
+File Helper Methods.
+
 Clears all files in the cache directory.
-
-
 
 #### `public bool clearPackageCache(`[`LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` & package)` {#group__pacm_1gad57a7658f320091a47c9f592d34daf7f}
 
@@ -762,7 +771,7 @@ Returns the package data directory for the given package ID.
 
 #### `public virtual `[`Options`](#structscy_1_1pacm_1_1PackageManager_1_1Options)` & options()` {#group__pacm_1ga2f058814ce88bd8f906fd1a0798ee3dd}
 
-
+Accessors.
 
 
 
@@ -778,19 +787,19 @@ Returns the package data directory for the given package ID.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1ga90184aa68ff6cb316279af53a1eae05a}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__pacm_1ga90184aa68ff6cb316279af53a1eae05a}
 
 
 
 
 
-#### `protected `[`LocalPackageStore`](api-base.md#classscy_1_1LiveCollection)` _localPackages` {#group__pacm_1ga1f7e142696d6a5cace81ff92036d5079}
+#### `protected `[`LocalPackageStore`](./doc/api-base.md#classscy_1_1LiveCollection)` _localPackages` {#group__pacm_1ga1f7e142696d6a5cace81ff92036d5079}
 
 
 
 
 
-#### `protected `[`RemotePackageStore`](api-base.md#classscy_1_1LiveCollection)` _remotePackages` {#group__pacm_1ga8cc192fdcf6a3aafd15a9083504e37da}
+#### `protected `[`RemotePackageStore`](./doc/api-base.md#classscy_1_1LiveCollection)` _remotePackages` {#group__pacm_1ga8cc192fdcf6a3aafd15a9083504e37da}
 
 
 
@@ -802,21 +811,15 @@ Returns the package data directory for the given package ID.
 
 
 
-#### `protected `[`Options`](api-pacm.md#structscy_1_1pacm_1_1PackageManager_1_1Options)` _options` {#group__pacm_1ga6883f4d86ccd9d91baf44e737b4e3913}
+#### `protected `[`Options`](./doc/api-pacm.md#structscy_1_1pacm_1_1PackageManager_1_1Options)` _options` {#group__pacm_1ga6883f4d86ccd9d91baf44e737b4e3913}
 
 
 
 
 
-#### `protected void onPackageInstallComplete(void * sender)` {#group__pacm_1gac9f695e2c9cb7af25bef8ae008863573}
+#### `protected void onPackageInstallComplete(`[`InstallTask`](#classscy_1_1pacm_1_1InstallTask)` & task)` {#group__pacm_1ga51dc83f2084498013b72c545d9ec5124}
 
-
-
-
-
-#### `protected void onPackageQueryResponse(void * sender,const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` {#group__pacm_1gaab70a7b7c4b610f1d2241590d0a0f4fd}
-
-
+Callbacks.
 
 
 
@@ -1200,8 +1203,8 @@ This class provides pairing of a local and a remote package.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`LocalPackage`](api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * local` | 
-`public `[`RemotePackage`](api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * remote` | 
+`public `[`LocalPackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * local` | 
+`public `[`RemotePackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * remote` | 
 `public  PackagePair(`[`LocalPackage`](#structscy_1_1pacm_1_1LocalPackage)` * local,`[`RemotePackage`](#structscy_1_1pacm_1_1RemotePackage)` * remote)` | 
 `public virtual bool valid() const` | 
 `public std::string id() const` | 
@@ -1211,13 +1214,13 @@ This class provides pairing of a local and a remote package.
 
 ## Members
 
-#### `public `[`LocalPackage`](api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * local` {#group__pacm_1gadbaaae13eaaf203a08d8321bf0ca9bb0}
+#### `public `[`LocalPackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1LocalPackage)` * local` {#group__pacm_1gadbaaae13eaaf203a08d8321bf0ca9bb0}
 
 
 
 Returns true if there are no possible updates for this package, false otherwise.
 
-#### `public `[`RemotePackage`](api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * remote` {#group__pacm_1ga64dacf8c8eafba27426e2f9a85cbd4b7}
+#### `public `[`RemotePackage`](./doc/api-pacm.md#structscy_1_1pacm_1_1RemotePackage)` * remote` {#group__pacm_1ga64dacf8c8eafba27426e2f9a85cbd4b7}
 
 
 
@@ -1325,4 +1328,256 @@ Returns the latest asset for the given package version. Throws an exception if n
 
 
 Returns the latest asset for the given SDK version. This method is for safely installing plug-ins which must be compiled against a specific SDK version. The package JSON must have a "sdk-version" member for this function to work as intended. Throws an exception if no asset exists.
+
+# struct `scy::pacm::Package::Asset` {#structscy_1_1pacm_1_1Package_1_1Asset}
+
+
+
+
+This class represents a archived file asset containing files belonging to the parent package.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public json::Value & root` | 
+`public  Asset(json::Value & src)` | 
+`public virtual  ~Asset()` | 
+`public virtual std::string fileName() const` | 
+`public virtual std::string version() const` | 
+`public virtual std::string sdkVersion() const` | 
+`public virtual std::string checksum() const` | 
+`public virtual std::string url(int index) const` | 
+`public virtual int fileSize() const` | 
+`public virtual bool valid() const` | 
+`public virtual void print(std::ostream & ost) const` | 
+`public virtual `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & operator=(const `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & r)` | 
+`public virtual bool operator==(const `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & r) const` | 
+
+## Members
+
+#### `public json::Value & root` {#group__pacm_1ga259b6a7ae9ef17c65cafe104161f951f}
+
+
+
+
+
+#### `public  Asset(json::Value & src)` {#group__pacm_1ga83de2a74e72e53964fdfeba0868b926d}
+
+
+
+
+
+#### `public virtual  ~Asset()` {#group__pacm_1ga9555259d3bcd6750e24f1c5cef5bd441}
+
+
+
+
+
+#### `public virtual std::string fileName() const` {#group__pacm_1ga9a79ee260434ba1b30489d1d6e9dd421}
+
+
+
+
+
+#### `public virtual std::string version() const` {#group__pacm_1ga6f83300447f0b5c1f7c4ec43cba3a5da}
+
+
+
+
+
+#### `public virtual std::string sdkVersion() const` {#group__pacm_1gabed743e99c221cc89bc4531db63b1e38}
+
+
+
+
+
+#### `public virtual std::string checksum() const` {#group__pacm_1gab4c084cccb50ec5c9597cf441cfe5a39}
+
+
+
+
+
+#### `public virtual std::string url(int index) const` {#group__pacm_1gafbad31de39ae32ca71a513142d4b6ded}
+
+
+
+
+
+#### `public virtual int fileSize() const` {#group__pacm_1ga6a460e9ddb8c78f258a5ad16f6ef07e6}
+
+
+
+
+
+#### `public virtual bool valid() const` {#group__pacm_1ga20d7328f063017efa5e8b5221361a51b}
+
+
+
+
+
+#### `public virtual void print(std::ostream & ost) const` {#group__pacm_1ga3d847d7913a955228cf0a4600e8e9452}
+
+
+
+
+
+#### `public virtual `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & operator=(const `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & r)` {#group__pacm_1gae5c60ffe2dd0ff7459182a5ba32ff8f8}
+
+
+
+
+
+#### `public virtual bool operator==(const `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` & r) const` {#group__pacm_1ga11abf75c67f982309036a02d79d3084b}
+
+
+
+
+
+# struct `scy::pacm::LocalPackage::Manifest` {#structscy_1_1pacm_1_1LocalPackage_1_1Manifest}
+
+
+
+
+This class provides a list of all package files and their location on the file system.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public json::Value & root` | 
+`public  Manifest(json::Value & src)` | 
+`public virtual  ~Manifest()` | 
+`public virtual bool empty() const` | 
+`public virtual void addFile(const std::string & path)` | 
+
+## Members
+
+#### `public json::Value & root` {#group__pacm_1ga7a2c9aa2955ced26646680f538ef6140}
+
+
+
+
+
+#### `public  Manifest(json::Value & src)` {#group__pacm_1ga22abf418916161577ca5c3e5614059a8}
+
+
+
+
+
+#### `public virtual  ~Manifest()` {#group__pacm_1ga9d7098ebc7d12fc1dbabd8c2d07aa05b}
+
+
+
+
+
+#### `public virtual bool empty() const` {#group__pacm_1gaa767187173b460a6ed903ad7b5237b87}
+
+
+
+
+
+#### `public virtual void addFile(const std::string & path)` {#group__pacm_1ga46bf1459f6d73eb846287739d0b0c2f2}
+
+
+
+
+
+# struct `scy::pacm::PackageManager::Options` {#structscy_1_1pacm_1_1PackageManager_1_1Options}
+
+
+[Package](#structscy_1_1pacm_1_1Package) manager initialization options.
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::string endpoint` | The HTTP server endpoint.
+`public std::string indexURI` | The HTTP server URI for querying packages JSON.
+`public std::string httpUsername` | Username for HTTP basic auth.
+`public std::string httpPassword` | PAssword for HTTP basic auth.
+`public std::string httpOAuthToken` | Will be used instead of HTTP basic if provided.
+`public std::string tempDir` | 
+`public std::string dataDir` | Directory where package manifests will be kept.
+`public std::string installDir` | Directory where packages will be installed.
+`public std::string platform` | Platform (win32, linux, mac)
+`public std::string checksumAlgorithm` | Checksum algorithm (MDS/SHA1)
+`public bool clearFailedCache` | to clear the package cache if installation fails.
+`public inline  Options(const std::string & root)` | 
+
+## Members
+
+#### `public std::string endpoint` {#group__pacm_1ga17eaf31ffc1fc663c74715c0861feaa7}
+
+The HTTP server endpoint.
+
+
+
+#### `public std::string indexURI` {#group__pacm_1gaeaf07e705ed06b76a6e6da069b06933a}
+
+The HTTP server URI for querying packages JSON.
+
+
+
+#### `public std::string httpUsername` {#group__pacm_1ga2d4089adeb8ea1b332289aa912f9670d}
+
+Username for HTTP basic auth.
+
+
+
+#### `public std::string httpPassword` {#group__pacm_1gad72b21a0fd0afc7d0afbe79a267977c9}
+
+PAssword for HTTP basic auth.
+
+
+
+#### `public std::string httpOAuthToken` {#group__pacm_1ga3ae63176c907fe93eafb52451c55aa5d}
+
+Will be used instead of HTTP basic if provided.
+
+
+
+#### `public std::string tempDir` {#group__pacm_1ga9baae9668ea2afb09d479bc4e1622059}
+
+
+
+Directory where package files will be downloaded and extracted
+
+#### `public std::string dataDir` {#group__pacm_1ga2983a9e79dab4c044b56a53c3bec3ba0}
+
+Directory where package manifests will be kept.
+
+
+
+#### `public std::string installDir` {#group__pacm_1ga18001156609c5fe9845f4d0c259964ff}
+
+Directory where packages will be installed.
+
+
+
+#### `public std::string platform` {#group__pacm_1gaa9e36a87975600551306e8551065414b}
+
+Platform (win32, linux, mac)
+
+
+
+#### `public std::string checksumAlgorithm` {#group__pacm_1gaa458d98644fdde252a9562c01028ad47}
+
+Checksum algorithm (MDS/SHA1)
+
+
+
+#### `public bool clearFailedCache` {#group__pacm_1ga791221a28415eff06ee9a162e950e9dd}
+
+to clear the package cache if installation fails.
+
+This flag tells the package manager weather or not
+
+#### `public inline  Options(const std::string & root)` {#group__pacm_1ga5bf57541a7fc15cae0283c80543060fb}
+
+
+
+
 

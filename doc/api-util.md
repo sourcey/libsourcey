@@ -49,7 +49,7 @@ class scy::AsyncDiagnostic
 --------------------------------|---------------------------------------------
 `public inline virtual  ~AsyncDiagnostic()` | 
 `public inline virtual void check()` | 
-`protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` | 
+`protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` | 
 
 ## Members
 
@@ -65,7 +65,7 @@ class scy::AsyncDiagnostic
 
 
 
-#### `protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` {#group__util_1ga86a906cd8701f49e2f2065c9e8e3c1f3}
+#### `protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` {#group__util_1ga86a906cd8701f49e2f2065c9e8e3c1f3}
 
 
 
@@ -86,13 +86,13 @@ class scy::Base64PacketEncoder
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  Base64PacketEncoder()` | 
 `public inline virtual void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__util_1ga2d3eededaa9fe67484a81fb7a346dc03}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__util_1ga2d3eededaa9fe67484a81fb7a346dc03}
 
 
 
@@ -180,11 +180,11 @@ class scy::DiagnosticManager
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` DiagnosticsComplete` | 
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` DiagnosticsComplete` | 
 `public  DiagnosticManager()` | 
 `public virtual  ~DiagnosticManager()` | 
 `public bool freeDiagnostic(const std::string & name)` | 
-`public bool addDiagnostic(`[`IDiagnostic`](#classscy_1_1IDiagnostic)` * test)` | Adds a [IDiagnostic](api-util.md#classscy_1_1IDiagnostic) test instance.
+`public bool addDiagnostic(`[`IDiagnostic`](#classscy_1_1IDiagnostic)` * test)` | Adds a [IDiagnostic](./doc/api-util.md#classscy_1_1IDiagnostic) test instance.
 `public virtual `[`IDiagnostic`](#classscy_1_1IDiagnostic)` * getDiagnostic(const std::string & name)` | 
 `public virtual void resetAll()` | 
 `public virtual void checkAll()` | 
@@ -193,7 +193,7 @@ class scy::DiagnosticManager
 
 ## Members
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` DiagnosticsComplete` {#group__util_1gae4bffe1d36c1087a6456bdc124740968}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` DiagnosticsComplete` {#group__util_1gae4bffe1d36c1087a6456bdc124740968}
 
 
 
@@ -271,7 +271,7 @@ class scy::IDiagnostic
 `public std::string name` | The name of the diagnostic.
 `public std::string description` | The diagnostic description.
 `public std::vector< std::string > summary` | 
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > SummaryUpdated` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> SummaryUpdated` | 
 `public  IDiagnostic()` | 
 `public virtual  ~IDiagnostic()` | 
 `public virtual void check()` | 
@@ -304,7 +304,7 @@ The diagnostic description.
 
 The diagnostic summary, maybe including troubleshooting information on failure.
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > SummaryUpdated` {#group__util_1ga0688716571fe932a387cbf0b09911483}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> SummaryUpdated` {#group__util_1ga0383aed91dd872f4f1d6326a882e8922}
 
 
 
@@ -387,8 +387,8 @@ The StateChange signal will dispatch diagnostic test results to delegates.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > TypeRegistered` | 
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > TypeUnregistered` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> TypeRegistered` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> TypeUnregistered` | 
 `public inline  IRegistry()` | 
 `public inline virtual  ~IRegistry()` | 
 `public inline virtual ItemT * createInstance(const std::string & s)` | 
@@ -398,13 +398,13 @@ The StateChange signal will dispatch diagnostic test results to delegates.
 
 ## Members
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > TypeRegistered` {#group__util_1gacbce18cbab3d0de2deec13695a69ec6e}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> TypeRegistered` {#group__util_1gafea9585c6ff2924b3217fa26cb1a6c83}
 
 
 
 
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::string & > TypeUnregistered` {#group__util_1gab03caae1fb2324bb6520b2c924cffe04}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const std::string &)`> TypeUnregistered` {#group__util_1gab4b972dc17709d48a418073e33e264b8}
 
 
 
@@ -507,7 +507,6 @@ Last time canSend() was called.
 ```
 class scy::StreamManager
   : public scy::LiveCollection< PacketStream > >
-  : public scy::basic::Polymorphic
 ```  
 
 
@@ -640,13 +639,13 @@ class scy::TimedManager
 `public inline virtual bool expires(const TKey & key,long timeout)` | Update the item expiry timeout.
 `public inline virtual bool expires(TValue * item,long timeout)` | Update the item expiry timeout.
 `public inline virtual void clear()` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _tmutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _tmutex` | 
 `protected TimeoutMap _timeouts` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` | 
 `protected inline virtual bool setTimeout(TValue * item,long timeout)` | 
 `protected inline virtual void onRemove(const TKey & key,TValue * item)` | 
 `protected inline virtual void onTimeout(TValue * item)` | 
-`protected inline void onTimerUpdate(void *)` | 
+`protected inline void onTimerUpdate()` | 
 
 ## Members
 
@@ -686,7 +685,7 @@ Update the item expiry timeout.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _tmutex` {#group__util_1ga4e858af645ee34e91e300b9f83536eeb}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _tmutex` {#group__util_1ga4e858af645ee34e91e300b9f83536eeb}
 
 
 
@@ -698,7 +697,7 @@ Update the item expiry timeout.
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` {#group__util_1ga3cb60024293e87939b487cfbeb4095ab}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` {#group__util_1ga3cb60024293e87939b487cfbeb4095ab}
 
 
 
@@ -722,7 +721,7 @@ Update the item expiry timeout.
 
 
 
-#### `protected inline void onTimerUpdate(void *)` {#group__util_1ga57d8c4cc4fd5d21d20d8f27615db3567}
+#### `protected inline void onTimerUpdate()` {#group__util_1ga0728a21103c8421233a76e1198edb056}
 
 
 

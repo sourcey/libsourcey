@@ -7,6 +7,7 @@ The `turn` module contains TURN (rfc5766) client and server implementations.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `namespace `[`scy::turn`](#namespacescy_1_1turn)    | 
+`struct `[`scy::turn::Client::Options`](#structscy_1_1turn_1_1Client_1_1Options)    | 
 # namespace `scy::turn` {#namespacescy_1_1turn}
 
 
@@ -77,22 +78,22 @@ class scy::turn::Client
 `public bool closed() const` | 
 `public `[`ClientObserver`](#structscy_1_1turn_1_1ClientObserver)` & observer()` | 
 `public `[`Options`](#structscy_1_1turn_1_1Client_1_1Options)` & options()` | 
-`public virtual void onSocketRecv(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public virtual void onSocketConnect(void * sender)` | 
-`public virtual void onSocketClose(void * sender)` | 
+`public virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`public virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `public virtual void onTransactionProgress(void * sender,`[`TransactionState`](#structscy_1_1TransactionState)` & state,const `[`TransactionState`](#structscy_1_1TransactionState)` &)` | 
-`public virtual void onStateChange(`[`ClientState`](#structscy_1_1turn_1_1ClientState)` & state,const `[`ClientState`](#structscy_1_1turn_1_1ClientState)` & oldState)` | 
-`public virtual void onTimer(void *)` | 
-`protected `[`ClientObserver`](api-turn.md#structscy_1_1turn_1_1ClientObserver)` & _observer` | 
-`protected `[`Options`](api-turn.md#structscy_1_1turn_1_1Client_1_1Options)` _options` | 
+`public virtual void onStateChange(void * sender,`[`ClientState`](#structscy_1_1turn_1_1ClientState)` & state,const `[`ClientState`](#structscy_1_1turn_1_1ClientState)` & oldState)` | 
+`public virtual void onTimer()` | 
+`protected `[`ClientObserver`](./doc/api-turn.md#structscy_1_1turn_1_1ClientObserver)` & _observer` | 
+`protected `[`Options`](./doc/api-turn.md#structscy_1_1turn_1_1Client_1_1Options)` _options` | 
 `protected net::Socket::Ptr _socket` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` | 
-`protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _mappedAddress` | 
-`protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _relayedAddress` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` | 
+`protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _mappedAddress` | 
+`protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _relayedAddress` | 
 `protected std::string _realm` | 
 `protected std::string _nonce` | 
-`protected std::deque< `[`stun::Message`](api-stun.md#classscy_1_1stun_1_1Message)` > _pendingIndications` | A list of queued Send indication packets awaiting server permissions.
-`protected std::vector< `[`stun::Transaction`](api-stun.md#classscy_1_1stun_1_1Transaction)` * > _transactions` | A list containing currently active transactions.
+`protected std::deque< `[`stun::Message`](./doc/api-stun.md#classscy_1_1stun_1_1Message)` > _pendingIndications` | A list of queued Send indication packets awaiting server permissions.
+`protected std::vector< `[`stun::Transaction`](./doc/api-stun.md#classscy_1_1stun_1_1Transaction)` * > _transactions` | A list containing currently active transactions.
 
 ## Members
 
@@ -264,19 +265,19 @@ A CreatePermission request will be sent as soon as the Allocation is created, an
 
 
 
-#### `public virtual void onSocketRecv(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga2d54a105093178fe90c9b8b0a4480380}
+#### `public virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1ga926f40e036ce12b00f365ae387b2102b}
 
 
 
 
 
-#### `public virtual void onSocketConnect(void * sender)` {#group__turn_1ga0a490e4cbc25e657cab472aaf9941a67}
+#### `public virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gaf226ce27add87f373131003383569b20}
 
 
 
 
 
-#### `public virtual void onSocketClose(void * sender)` {#group__turn_1ga7abef610a195d068ba673eaae1fb1199}
+#### `public virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1gacfb499500c58c0392df68342e5aa59e7}
 
 
 
@@ -288,25 +289,25 @@ A CreatePermission request will be sent as soon as the Allocation is created, an
 
 
 
-#### `public virtual void onStateChange(`[`ClientState`](#structscy_1_1turn_1_1ClientState)` & state,const `[`ClientState`](#structscy_1_1turn_1_1ClientState)` & oldState)` {#group__turn_1ga35a6d685c1ddb38d29e1467278b7bedc}
+#### `public virtual void onStateChange(void * sender,`[`ClientState`](#structscy_1_1turn_1_1ClientState)` & state,const `[`ClientState`](#structscy_1_1turn_1_1ClientState)` & oldState)` {#group__turn_1gae4b785946f5be2ae08030c0f951e9a59}
 
 
 
 
 
-#### `public virtual void onTimer(void *)` {#group__turn_1gaead5d8d574c5d1a1627119b232e72f4f}
+#### `public virtual void onTimer()` {#group__turn_1ga7fb62ec5f7d6748b7ba6549b86709344}
 
 
 
 
 
-#### `protected `[`ClientObserver`](api-turn.md#structscy_1_1turn_1_1ClientObserver)` & _observer` {#group__turn_1gab2775eacd7fff57764950d54e7383306}
+#### `protected `[`ClientObserver`](./doc/api-turn.md#structscy_1_1turn_1_1ClientObserver)` & _observer` {#group__turn_1gab2775eacd7fff57764950d54e7383306}
 
 
 
 
 
-#### `protected `[`Options`](api-turn.md#structscy_1_1turn_1_1Client_1_1Options)` _options` {#group__turn_1ga7baa7e34fb78a93ed627c6a3b36740ba}
+#### `protected `[`Options`](./doc/api-turn.md#structscy_1_1turn_1_1Client_1_1Options)` _options` {#group__turn_1ga7baa7e34fb78a93ed627c6a3b36740ba}
 
 
 
@@ -318,19 +319,19 @@ A CreatePermission request will be sent as soon as the Allocation is created, an
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` {#group__turn_1ga1704ecb1572601a2f2863ce70cc4fb97}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` {#group__turn_1ga1704ecb1572601a2f2863ce70cc4fb97}
 
 
 
 
 
-#### `protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _mappedAddress` {#group__turn_1ga21a746dd56680daa4e14d19630ba4ecf}
+#### `protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _mappedAddress` {#group__turn_1ga21a746dd56680daa4e14d19630ba4ecf}
 
 
 
 
 
-#### `protected `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` _relayedAddress` {#group__turn_1ga1f3592858503ccb9efc59cad55ce3041}
+#### `protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _relayedAddress` {#group__turn_1ga1f3592858503ccb9efc59cad55ce3041}
 
 
 
@@ -348,13 +349,13 @@ A CreatePermission request will be sent as soon as the Allocation is created, an
 
 
 
-#### `protected std::deque< `[`stun::Message`](api-stun.md#classscy_1_1stun_1_1Message)` > _pendingIndications` {#group__turn_1ga269602d5f2c548df6a654ad9e7c17144}
+#### `protected std::deque< `[`stun::Message`](./doc/api-stun.md#classscy_1_1stun_1_1Message)` > _pendingIndications` {#group__turn_1ga269602d5f2c548df6a654ad9e7c17144}
 
 A list of queued Send indication packets awaiting server permissions.
 
 
 
-#### `protected std::vector< `[`stun::Transaction`](api-stun.md#classscy_1_1stun_1_1Transaction)` * > _transactions` {#group__turn_1ga9d80bebccf3f7cdf8d34d1246bf6fb02}
+#### `protected std::vector< `[`stun::Transaction`](./doc/api-stun.md#classscy_1_1stun_1_1Transaction)` * > _transactions` {#group__turn_1ga9d80bebccf3f7cdf8d34d1246bf6fb02}
 
 A list containing currently active transactions.
 
@@ -558,7 +559,7 @@ The time-to-expiry is the time in seconds left until the allocation expires. Eac
 `public virtual void removeExpiredPermissions()` | 
 `public virtual bool hasPermission(const std::string & peerIP)` | 
 `public inline virtual void print(std::ostream & os) const` | 
-`protected `[`FiveTuple`](api-turn.md#classscy_1_1turn_1_1FiveTuple)` _tuple` | 
+`protected `[`FiveTuple`](./doc/api-turn.md#classscy_1_1turn_1_1FiveTuple)` _tuple` | 
 `protected std::string _username` | 
 `protected PermissionList _permissions` | 
 `protected std::int64_t _lifetime` | 
@@ -710,7 +711,7 @@ This signifies that the allocation is ready to be destroyed via async garbage co
 
 
 
-#### `protected `[`FiveTuple`](api-turn.md#classscy_1_1turn_1_1FiveTuple)` _tuple` {#group__turn_1ga7c8695af0fa8d476fd2b3395c0e7acda}
+#### `protected `[`FiveTuple`](./doc/api-turn.md#classscy_1_1turn_1_1FiveTuple)` _tuple` {#group__turn_1ga7c8695af0fa8d476fd2b3395c0e7acda}
 
 
 
@@ -780,8 +781,8 @@ class scy::turn::Request
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public net::TransportType transport` | 
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` localAddress` | 
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` remoteAddress` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` localAddress` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` remoteAddress` | 
 `public std::string hash` | 
 `public inline  Request(const `[`stun::Message`](#classscy_1_1stun_1_1Message)` & message,net::TransportType transport,const `[`net::Address`](#classscy_1_1net_1_1Address)` & localAddress,const `[`net::Address`](#classscy_1_1net_1_1Address)` & remoteAddress)` | 
 
@@ -793,13 +794,13 @@ class scy::turn::Request
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` localAddress` {#group__turn_1gaa5eaa3335646687346a79d16bf44d500}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` localAddress` {#group__turn_1gaa5eaa3335646687346a79d16bf44d500}
 
 
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` remoteAddress` {#group__turn_1ga063c2acad8fd94c729479e6ad8b3b9f7}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` remoteAddress` {#group__turn_1ga063c2acad8fd94c729479e6ad8b3b9f7}
 
 
 
@@ -851,10 +852,10 @@ TURN server rfc5766 implementation.
 `public `[`net::UDPSocket`](#classscy_1_1net_1_1UDPSocket)` & udpSocket()` | 
 `public `[`net::TCPSocket`](#classscy_1_1net_1_1TCPSocket)` & tcpSocket()` | 
 `public `[`Timer`](#classscy_1_1Timer)` & timer()` | 
-`public void onTCPAcceptConnection(void * sender,const net::TCPSocket::Ptr & sock)` | 
-`public void onTCPSocketClosed(void * sender)` | 
-`public void onSocketRecv(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public void onTimer(void *)` | 
+`public void onTCPAcceptConnection(const net::TCPSocket::Ptr & sock)` | 
+`public void onTCPSocketClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`public void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public void onTimer()` | 
 
 ## Members
 
@@ -996,25 +997,25 @@ TURN server rfc5766 implementation.
 
 
 
-#### `public void onTCPAcceptConnection(void * sender,const net::TCPSocket::Ptr & sock)` {#group__turn_1ga13220d7ec6b46c142a2dc3fd268a12ac}
+#### `public void onTCPAcceptConnection(const net::TCPSocket::Ptr & sock)` {#group__turn_1gac7e0f1a43edbd4c6fb38536454e09825}
 
 
 
 
 
-#### `public void onTCPSocketClosed(void * sender)` {#group__turn_1ga5c1d674d6d9f1e2af501310e8a7070d3}
+#### `public void onTCPSocketClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1ga0795966f2c9e6d86f5d3ed508409958f}
 
 
 
 
 
-#### `public void onSocketRecv(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga252bc8a22834cbe46196822035bedd26}
+#### `public void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga54e3e322a963a2a51287a650f76d7826}
 
 
 
 
 
-#### `public void onTimer(void *)` {#group__turn_1gabc9a40fbd2519961cc44968b93418d94}
+#### `public void onTimer()` {#group__turn_1gad98e27c134b19c27bd2fc446aa927694}
 
 
 
@@ -1045,7 +1046,7 @@ class scy::turn::ServerAllocation
 `public virtual `[`Server`](#classscy_1_1turn_1_1Server)` & server()` | 
 `public virtual void print(std::ostream & os) const` | 
 `protected std::uint32_t _maxLifetime` | 
-`protected `[`Server`](api-turn.md#classscy_1_1turn_1_1Server)` & _server` | 
+`protected `[`Server`](./doc/api-turn.md#classscy_1_1turn_1_1Server)` & _server` | 
 `protected virtual  ~ServerAllocation()` | 
 
 ## Members
@@ -1110,7 +1111,7 @@ Asynchronous timer callback for updating the allocation permissions and state et
 
 
 
-#### `protected `[`Server`](api-turn.md#classscy_1_1turn_1_1Server)` & _server` {#group__turn_1ga8c62f3c453e32f9c710ac172ad633aca}
+#### `protected `[`Server`](./doc/api-turn.md#classscy_1_1turn_1_1Server)` & _server` {#group__turn_1ga8c62f3c453e32f9c710ac172ad633aca}
 
 
 
@@ -1148,11 +1149,11 @@ class scy::turn::TCPAllocation
 `public virtual `[`net::Address`](#classscy_1_1net_1_1Address)` relayedAddress() const` | 
 `public `[`TCPConnectionPairMap`](#classscy_1_1PointerCollection)` & pairs()` | 
 `public virtual bool onTimer()` | 
-`public void onPeerAccept(void * sender,const net::TCPSocket::Ptr & sock)` | Accepts incoming peer sockets for ConnectionBind requests.
-`public void onControlClosed(void * sender)` | 
+`public void onPeerAccept(const net::TCPSocket::Ptr & sock)` | Accepts incoming peer sockets for ConnectionBind requests.
+`public void onControlClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `protected net::TCPSocket::Ptr _control` | 
 `protected net::TCPSocket::Ptr _acceptor` | 
-`protected `[`TCPConnectionPairMap`](api-base.md#classscy_1_1PointerCollection)` _pairs` | 
+`protected `[`TCPConnectionPairMap`](./doc/api-base.md#classscy_1_1PointerCollection)` _pairs` | 
 
 ## Members
 
@@ -1222,13 +1223,13 @@ Sends a Connect request response to control.
 
 Asynchronous timer callback for updating the allocation permissions and state etc. If this call returns false the allocation will be deleted.
 
-#### `public void onPeerAccept(void * sender,const net::TCPSocket::Ptr & sock)` {#group__turn_1ga347369134065f120d99727dd78251cf7}
+#### `public void onPeerAccept(const net::TCPSocket::Ptr & sock)` {#group__turn_1ga9c6c658f89aa5c1ebc89a80f12d0a570}
 
 Accepts incoming peer sockets for ConnectionBind requests.
 
 
 
-#### `public void onControlClosed(void * sender)` {#group__turn_1gac2b5cc1ae3dc5e8de13f09a50197a61d}
+#### `public void onControlClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1gad7d9a3b524c3439fc19642ce621d306c}
 
 
 
@@ -1246,7 +1247,7 @@ Callback for handling controll connection destruction. The allocation will be de
 
 
 
-#### `protected `[`TCPConnectionPairMap`](api-base.md#classscy_1_1PointerCollection)` _pairs` {#group__turn_1ga865b233b3ce8e50c49c91c9fccc27920}
+#### `protected `[`TCPConnectionPairMap`](./doc/api-base.md#classscy_1_1PointerCollection)` _pairs` {#group__turn_1ga865b233b3ce8e50c49c91c9fccc27920}
 
 
 
@@ -1280,16 +1281,16 @@ class scy::turn::TCPClient
 `public virtual void handleConnectionBindErrorResponse(const `[`stun::Message`](#classscy_1_1stun_1_1Message)` & response)` | 
 `public virtual void handleConnectionAttemptIndication(const `[`stun::Message`](#classscy_1_1stun_1_1Message)` & response)` | 
 `public virtual bool createAndBindConnection(std::uint32_t connectionID,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public virtual void onRelayConnectionConnect(void * sender)` | 
-`public virtual void onRelayDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public virtual void onRelayConnectionError(void * sender,const `[`Error`](#structscy_1_1Error)` & error)` | 
-`public virtual void onRelayConnectionClosed(void * sender)` | 
+`public virtual void onRelayConnectionConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`public virtual void onRelayDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public virtual void onRelayConnectionError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` | 
+`public virtual void onRelayConnectionClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `public void freeConnection(const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `public virtual int transportProtocol()` | 
 `public `[`ConnectionManager`](#classscy_1_1KVCollection)` & connections()` | 
 `public inline virtual const char * className() const` | 
-`protected `[`TCPClientObserver`](api-turn.md#structscy_1_1turn_1_1TCPClientObserver)` & _observer` | 
-`protected `[`ConnectionManager`](api-base.md#classscy_1_1KVCollection)` _connections` | 
+`protected `[`TCPClientObserver`](./doc/api-turn.md#structscy_1_1turn_1_1TCPClientObserver)` & _observer` | 
+`protected `[`ConnectionManager`](./doc/api-base.md#classscy_1_1KVCollection)` _connections` | 
 
 ## Members
 
@@ -1371,25 +1372,25 @@ Shutdown the client and destroy the active allocation.
 
 
 
-#### `public virtual void onRelayConnectionConnect(void * sender)` {#group__turn_1ga419cd636742250d2b76b5cd614bc5fa0}
+#### `public virtual void onRelayConnectionConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1ga9434e3aa4723ad58c16e197d12824031}
 
 
 
 
 
-#### `public virtual void onRelayDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga00407070ef0b93367cc25e3145679010}
+#### `public virtual void onRelayDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga3c4890ab6d10d4f3766a70ea4c6c12aa}
 
 
 
 
 
-#### `public virtual void onRelayConnectionError(void * sender,const `[`Error`](#structscy_1_1Error)` & error)` {#group__turn_1ga4e1250cc9283efdb37fa4b3dc2fe5891}
+#### `public virtual void onRelayConnectionError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` {#group__turn_1ga12267279e5f527ecbe401f5bc3c96066}
 
 
 
 
 
-#### `public virtual void onRelayConnectionClosed(void * sender)` {#group__turn_1gaaaf9bf9afd40d724053537763944f8f8}
+#### `public virtual void onRelayConnectionClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1gad643fdeeeb3355f0df9bd946029a5791}
 
 
 
@@ -1419,13 +1420,13 @@ Shutdown the client and destroy the active allocation.
 
 
 
-#### `protected `[`TCPClientObserver`](api-turn.md#structscy_1_1turn_1_1TCPClientObserver)` & _observer` {#group__turn_1ga07f4b77e0079d379c598ed2dd7fccb1c}
+#### `protected `[`TCPClientObserver`](./doc/api-turn.md#structscy_1_1turn_1_1TCPClientObserver)` & _observer` {#group__turn_1ga07f4b77e0079d379c598ed2dd7fccb1c}
 
 
 
 
 
-#### `protected `[`ConnectionManager`](api-base.md#classscy_1_1KVCollection)` _connections` {#group__turn_1ga35cdf1b381e1516ae904410722e6bbb1}
+#### `protected `[`ConnectionManager`](./doc/api-base.md#classscy_1_1KVCollection)` _connections` {#group__turn_1ga35cdf1b381e1516ae904410722e6bbb1}
 
 
 
@@ -1442,13 +1443,13 @@ Shutdown the client and destroy the active allocation.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`TCPAllocation`](api-turn.md#classscy_1_1turn_1_1TCPAllocation)` & allocation` | 
+`public `[`TCPAllocation`](./doc/api-turn.md#classscy_1_1turn_1_1TCPAllocation)` & allocation` | 
 `public net::TCPSocket::Ptr client` | The client socket, nullptr to start.
 `public net::TCPSocket::Ptr peer` | The client socket, nullptr to start.
 `public Buffer earlyPeerData` | Stores early peer > client data.
 `public std::uint32_t connectionID` | The unique connection ID.
 `public bool isDataConnection` | True when p2p relay is flowing.
-`public `[`Timeout`](api-base.md#classscy_1_1Timeout)` timeout` | The ConnectionBind request timeout counter.
+`public `[`Timeout`](./doc/api-base.md#classscy_1_1Timeout)` timeout` | The ConnectionBind request timeout counter.
 `public stun::TransactionID transactionID` | 
 `public  TCPConnectionPair(`[`TCPAllocation`](#classscy_1_1turn_1_1TCPAllocation)` & allocation)` | 
 `public virtual  ~TCPConnectionPair()` | 
@@ -1456,17 +1457,17 @@ Shutdown the client and destroy the active allocation.
 `public bool makeDataConnection()` | 
 `public void setPeerSocket(const net::TCPSocket::Ptr & socket)` | 
 `public void setClientSocket(const net::TCPSocket::Ptr & socket)` | 
-`public void onPeerConnectSuccess(void * sender)` | Connection success callback for Connect request.
-`public void onPeerConnectError(void * sender,const `[`Error`](#structscy_1_1Error)` & error)` | Connection error callback for Connect request.
-`public void onClientDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public void onPeerDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public void onConnectionClosed(void * sender)` | 
+`public void onPeerConnectSuccess(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | Connection success callback for Connect request.
+`public void onPeerConnectError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` | Connection error callback for Connect request.
+`public void onClientDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public void onPeerDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public void onConnectionClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `public void startTimeout()` | 
 `public bool expired() const` | Return true if the peer ConnectionBind request timed out.
 
 ## Members
 
-#### `public `[`TCPAllocation`](api-turn.md#classscy_1_1turn_1_1TCPAllocation)` & allocation` {#group__turn_1ga5f8ce0ee36a5bc87f55d76a95d4ffdc6}
+#### `public `[`TCPAllocation`](./doc/api-turn.md#classscy_1_1turn_1_1TCPAllocation)` & allocation` {#group__turn_1ga5f8ce0ee36a5bc87f55d76a95d4ffdc6}
 
 
 
@@ -1502,7 +1503,7 @@ True when p2p relay is flowing.
 
 
 
-#### `public `[`Timeout`](api-base.md#classscy_1_1Timeout)` timeout` {#group__turn_1gad2382d7f6eabb79e3ddd8b5ae7fe17f1}
+#### `public `[`Timeout`](./doc/api-base.md#classscy_1_1Timeout)` timeout` {#group__turn_1gad2382d7f6eabb79e3ddd8b5ae7fe17f1}
 
 The ConnectionBind request timeout counter.
 
@@ -1550,31 +1551,31 @@ Binds the client <> peer relay pipe once the ConnectionBind request is successfu
 
 
 
-#### `public void onPeerConnectSuccess(void * sender)` {#group__turn_1ga5a895c0a30cb5553cba6ed6acfdd20f0}
+#### `public void onPeerConnectSuccess(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1ga5a5912bc68b1a4c405a1347ea8fb82bb}
 
 Connection success callback for Connect request.
 
 
 
-#### `public void onPeerConnectError(void * sender,const `[`Error`](#structscy_1_1Error)` & error)` {#group__turn_1gaaab8def0bb4ba0a4c2e722f20612c13c}
+#### `public void onPeerConnectError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`Error`](#structscy_1_1Error)` & error)` {#group__turn_1gabcbaa9d2da0811338030f6368c5eecea}
 
 Connection error callback for Connect request.
 
 
 
-#### `public void onClientDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gae62cc0ddedaa29da681be6c53410e8c7}
+#### `public void onClientDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga7850f0162f9bdd3d1d7b853a59324ddd}
 
 
 
 
 
-#### `public void onPeerDataReceived(void * sender,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gaa9668c33061734e3cb9eac4bf06bf06f}
+#### `public void onPeerDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gae93b12998cb75c2784b8b4a83b8ed78e}
 
 
 
 
 
-#### `public void onConnectionClosed(void * sender)` {#group__turn_1ga096266ce03908f4ff33a5139ccaf929e}
+#### `public void onConnectionClosed(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__turn_1ga4f90949f22078df17775d5907451fa47}
 
 
 
@@ -1611,7 +1612,7 @@ class scy::turn::UDPAllocation
 --------------------------------|---------------------------------------------
 `public  UDPAllocation(`[`Server`](#classscy_1_1turn_1_1Server)` & server,const `[`FiveTuple`](#classscy_1_1turn_1_1FiveTuple)` & tuple,const std::string & username,const std::uint32_t & lifetime)` | 
 `public virtual  ~UDPAllocation()` | 
-`public void onPeerDataReceived(void *,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public void onPeerDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `public virtual bool handleRequest(`[`Request`](#classscy_1_1turn_1_1Request)` & request)` | 
 `public void handleSendIndication(`[`Request`](#classscy_1_1turn_1_1Request)` & request)` | 
 `public int send(const char * data,std::size_t size,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
@@ -1631,7 +1632,7 @@ class scy::turn::UDPAllocation
 
 
 
-#### `public void onPeerDataReceived(void *,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1ga93fb7d907b32e74aac823857d9d47ce5}
+#### `public void onPeerDataReceived(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gaf3723305361367129ac0dbcaad73b8dd}
 
 
 
@@ -1800,7 +1801,7 @@ TURN permission for a user session.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public std::string ip` | 
-`public `[`Timeout`](api-base.md#classscy_1_1Timeout)` timeout` | 
+`public `[`Timeout`](./doc/api-base.md#classscy_1_1Timeout)` timeout` | 
 `public inline  Permission(const std::string & ip)` | 
 `public inline void refresh()` | 
 `public inline bool operator==(const std::string & r) const` | 
@@ -1813,7 +1814,7 @@ TURN permission for a user session.
 
 
 
-#### `public `[`Timeout`](api-base.md#classscy_1_1Timeout)` timeout` {#group__turn_1ga7f9706e123e06bacdfc229e9f2d4b503}
+#### `public `[`Timeout`](./doc/api-base.md#classscy_1_1Timeout)` timeout` {#group__turn_1ga7f9706e123e06bacdfc229e9f2d4b503}
 
 
 
@@ -1849,7 +1850,7 @@ TURN permission for a user session.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public std::uint32_t connectionID` | 
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` peerAddress` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` peerAddress` | 
 
 ## Members
 
@@ -1859,7 +1860,7 @@ TURN permission for a user session.
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` peerAddress` {#group__turn_1gab40590fa9feb9154fbd96678304cf5ce}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` peerAddress` {#group__turn_1gab40590fa9feb9154fbd96678304cf5ce}
 
 
 
@@ -1920,7 +1921,7 @@ To mitigate either intentional or unintentional denial-of-service attacks agains
 `public int allocationMaxPermissions` | 
 `public int timerInterval` | 
 `public int earlyMediaBufferSize` | 
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` listenAddr` | The TCP and UDP bind() address.
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` listenAddr` | The TCP and UDP bind() address.
 `public std::string externalIP` | The external public facing IP address of the server.
 `public bool enableTCP` | 
 `public bool enableUDP` | 
@@ -1970,7 +1971,7 @@ To mitigate either intentional or unintentional denial-of-service attacks agains
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` listenAddr` {#group__turn_1gabd4aa0f66ce2fc218e80810f3c762d76}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` listenAddr` {#group__turn_1gabd4aa0f66ce2fc218e80810f3c762d76}
 
 The TCP and UDP bind() address.
 
@@ -2048,6 +2049,76 @@ struct scy::turn::TCPClientObserver
 
 
 #### `public inline virtual bool onPeerConnectionAttempt(`[`TCPClient`](#classscy_1_1turn_1_1TCPClient)` & client,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__turn_1gad6938fba6074bc0e1ca499cf90bb84ca}
+
+
+
+
+
+# struct `scy::turn::Client::Options` {#structscy_1_1turn_1_1Client_1_1Options}
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::string software` | 
+`public std::string username` | 
+`public std::string password` | 
+`public long timeout` | 
+`public std::int64_t lifetime` | 
+`public std::int64_t timerInterval` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` serverAddr` | 
+`public inline  Options()` | 
+
+## Members
+
+#### `public std::string software` {#group__turn_1ga5353220869e0f09239060488ecdb7fef}
+
+
+
+
+
+#### `public std::string username` {#group__turn_1gac72217fb6b73d1d050c84379189354a5}
+
+
+
+
+
+#### `public std::string password` {#group__turn_1ga90e75f93e08bd392b9def185c4f29ec1}
+
+
+
+
+
+#### `public long timeout` {#group__turn_1ga3b36f9f68df1b465c1046b88529ccf69}
+
+
+
+
+
+#### `public std::int64_t lifetime` {#group__turn_1ga7dc6b1fc053f08ec22d0f2f97084d996}
+
+
+
+
+
+#### `public std::int64_t timerInterval` {#group__turn_1ga50b1abb4fea151715d0c93b5ac675f30}
+
+
+
+
+
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` serverAddr` {#group__turn_1gaca69ae3e4cb351a623def3f8ca67a950}
+
+
+
+
+
+#### `public inline  Options()` {#group__turn_1gae926546e19d8fd9a7fab86271b96a54f}
 
 
 

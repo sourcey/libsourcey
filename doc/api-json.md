@@ -32,9 +32,9 @@ class scy::json::Configuration
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public json::Value root` | See IConfiguration for data accessors.
+`public json::Value root` | See base [Configuration](./doc/api-json.md#classscy_1_1json_1_1Configuration) for all accessors.
 `public  Configuration()` | 
-`public virtual  ~Configuration()` | Destroys the [Configuration](api-json.md#classscy_1_1json_1_1Configuration).
+`public virtual  ~Configuration()` | Destroys the [Configuration](./doc/api-json.md#classscy_1_1json_1_1Configuration).
 `public virtual void load(const std::string & path,bool create)` | 
 `public virtual void load(bool create)` | 
 `public virtual void save()` | 
@@ -47,7 +47,7 @@ class scy::json::Configuration
 `public virtual bool loaded()` | 
 `protected bool _loaded` | 
 `protected std::string _path` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected virtual bool getRaw(const std::string & key,std::string & value) const` | 
 `protected virtual void setRaw(const std::string & key,const std::string & value)` | 
 
@@ -55,7 +55,7 @@ class scy::json::Configuration
 
 #### `public json::Value root` {#group__json_1ga65f130ba02d9aa9d19f78531c4209bbf}
 
-See IConfiguration for data accessors.
+See base [Configuration](#classscy_1_1json_1_1Configuration) for all accessors.
 
 
 
@@ -143,7 +143,7 @@ Destroys the [Configuration](#classscy_1_1json_1_1Configuration).
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__json_1ga909b4a58f1164ff9ee8748aaf32d6294}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__json_1ga909b4a58f1164ff9ee8748aaf32d6294}
 
 
 

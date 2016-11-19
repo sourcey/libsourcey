@@ -30,7 +30,7 @@
 `class `[`scy::av::LinuxDeviceManager`](#classscy_1_1av_1_1LinuxDeviceManager)    | 
 `class `[`scy::av::MacDeviceManager`](#classscy_1_1av_1_1MacDeviceManager)    | 
 `class `[`scy::av::MacDeviceWatcher`](#classscy_1_1av_1_1MacDeviceWatcher)    | 
-`class `[`scy::av::RealtimePacketQueue`](#classscy_1_1av_1_1RealtimePacketQueue)    | This class emits media packets based on their realtime pts value.
+`class `[`scy::av::RealtimePacketQueue`](#classscy_1_1av_1_1RealtimePacketQueue)    | 
 `struct `[`scy::av::AudioCodec`](#structscy_1_1av_1_1AudioCodec)    | 
 `struct `[`scy::av::AudioPacket`](#structscy_1_1av_1_1AudioPacket)    | 
 `struct `[`scy::av::Codec`](#structscy_1_1av_1_1Codec)    | 
@@ -61,7 +61,7 @@ class scy::av::DeviceManager
 `public virtual bool initialize()` | Initialization.
 `public virtual void uninitialize()` | 
 `public virtual int getCapabilities()` | Capabilities.
-`public virtual bool getAudioInputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | [Device](api-av.md#structscy_1_1av_1_1Device) enumeration.
+`public virtual bool getAudioInputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | [Device](./doc/api-av.md#structscy_1_1av_1_1Device) enumeration.
 `public virtual bool getAudioOutputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | 
 `public virtual bool getAudioInputDevice(`[`Device`](#structscy_1_1av_1_1Device)` & out,const std::string & name,int id)` | 
 `public virtual bool getAudioInputDevice(`[`Device`](#structscy_1_1av_1_1Device)` & out,int id)` | 
@@ -437,7 +437,7 @@ This adapter is useful for multicast situations where we don't have the option o
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public  IPacketizer(this-> emitter)` | 
 `public  _format(format)` | 
 `public  _initial(true)` | 
@@ -454,16 +454,16 @@ This adapter is useful for multicast situations where we don't have the option o
 `public inline virtual void writeAMFSring(`[`BitWriter`](#classscy_1_1BitWriter)` & writer,const char * val)` | AMF Helpers.
 `public inline virtual void writeAMFDouble(`[`BitWriter`](#classscy_1_1BitWriter)` & writer,double val)` | 
 `public inline virtual void writeAMFBool(`[`BitWriter`](#classscy_1_1BitWriter)` & writer,bool val)` | 
-`protected `[`Format`](api-av.md#structscy_1_1av_1_1Format)` _format` | 
+`protected `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` _format` | 
 `protected bool _initial` | 
 `protected bool _modifyingStream` | 
 `protected bool _waitingForKeyframe` | 
 `protected std::uint32_t _timestampOffset` | 
-`protected `[`legacy::FPSCounter`](api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _fpsCounter` | 
+`protected `[`legacy::FPSCounter`](./doc/api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _fpsCounter` | 
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__av_1ga8b361da8e252816c458d4987247a06c0}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__av_1ga8b361da8e252816c458d4987247a06c0}
 
 
 
@@ -567,7 +567,7 @@ AMF Helpers.
 
 
 
-#### `protected `[`Format`](api-av.md#structscy_1_1av_1_1Format)` _format` {#group__av_1gad846cf859e5cea50a984de6f9544b165}
+#### `protected `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` _format` {#group__av_1gad846cf859e5cea50a984de6f9544b165}
 
 
 
@@ -597,7 +597,7 @@ AMF Helpers.
 
 
 
-#### `protected `[`legacy::FPSCounter`](api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _fpsCounter` {#group__av_1ga73a76b5f863b967f49a85cdc8c72e433}
+#### `protected `[`legacy::FPSCounter`](./doc/api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _fpsCounter` {#group__av_1ga73a76b5f863b967f49a85cdc8c72e433}
 
 
 
@@ -767,17 +767,17 @@ Note that revious processors must not fragment packets otherwise this class will
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  FPSLimiter(int max,bool videoOnly)` | 
 `public inline virtual void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 `public inline virtual void onStreamStateChange(const `[`PacketStreamState`](#structscy_1_1PacketStreamState)` &)` | 
 `protected int _max` | 
 `protected bool _videoOnly` | 
-`protected `[`legacy::FPSCounter`](api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _counter` | 
+`protected `[`legacy::FPSCounter`](./doc/api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _counter` | 
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__av_1ga59db66b46321468598d83db2a52b5495}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__av_1ga59db66b46321468598d83db2a52b5495}
 
 
 
@@ -815,7 +815,7 @@ Called by the [PacketStream](#classscy_1_1PacketStream) to notify when the inter
 
 
 
-#### `protected `[`legacy::FPSCounter`](api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _counter` {#group__av_1ga5eb5923a12182c1c97382cf9da35f938}
+#### `protected `[`legacy::FPSCounter`](./doc/api-av.md#structscy_1_1av_1_1legacy_1_1FPSCounter)` _counter` {#group__av_1ga5eb5923a12182c1c97382cf9da35f938}
 
 
 
@@ -837,7 +837,7 @@ class scy::av::ICapture
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  ICapture()` | 
 `public inline virtual  ~ICapture()` | 
 `public void start()` | 
@@ -847,7 +847,7 @@ class scy::av::ICapture
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__av_1ga3a2c153ddf81cd8be57efe0a784a2339}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__av_1ga3a2c153ddf81cd8be57efe0a784a2339}
 
 
 
@@ -900,11 +900,11 @@ A platform independent interface to enumerate audio and video devices on the sys
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< bool &, bool & > DevicesChanged` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(bool &, bool &)`> DevicesChanged` | 
 `public inline virtual  ~IDeviceManager()` | 
 `public bool initialize()` | Initialization.
 `public void uninitialize()` | 
-`public bool getAudioInputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | [Device](api-av.md#structscy_1_1av_1_1Device) enumeration.
+`public bool getAudioInputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | [Device](./doc/api-av.md#structscy_1_1av_1_1Device) enumeration.
 `public bool getAudioOutputDevices(std::vector< `[`Device`](#structscy_1_1av_1_1Device)` > & devices)` | 
 `public bool getAudioInputDevice(`[`Device`](#structscy_1_1av_1_1Device)` & out,const std::string & name,int id)` | 
 `public bool getAudioInputDevice(`[`Device`](#structscy_1_1av_1_1Device)` & out,int id)` | 
@@ -921,7 +921,7 @@ A platform independent interface to enumerate audio and video devices on the sys
 
 ## Members
 
-#### `public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< bool &, bool & > DevicesChanged` {#group__av_1gae339411ebcd03142a5f64ecea18360ba}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(bool &, bool &)`> DevicesChanged` {#group__av_1ga69dbbe5f5c10c8aba8aac57c9a94e511}
 
 
 
@@ -1241,9 +1241,9 @@ class scy::av::RealtimePacketQueue
   : public scy::AsyncPacketQueue< PacketT >
 ```  
 
+
+
 This class emits media packets based on their realtime pts value.
-
-
 
 ## Summary
 
@@ -1311,7 +1311,7 @@ struct scy::av::AudioCodec
 --------------------------------|---------------------------------------------
 `public int channels` | 
 `public std::string sampleFmt` | 
-`public  AudioCodec()` | int frameSize; // Frame size (optional value set by encoder/decoder) /// int bufferSize; // Buffer size (optional value set by encoder/decoder)
+`public  AudioCodec()` | 
 `public  AudioCodec(const std::string & name,int channels,int sampleRate,int bitRate,const std::string & sampleFmt)` | 
 `public  AudioCodec(const std::string & name,const std::string & encoder,int channels,int sampleRate,int bitRate,const std::string & sampleFmt)` | 
 `public virtual  ~AudioCodec()` | AudioCodec(const AudioCodec& r);.
@@ -1334,9 +1334,9 @@ One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
 
 #### `public  AudioCodec()` {#group__av_1gac7015ec1976fd68879c0af8e22c14de0}
 
+
+
 int frameSize; // Frame size (optional value set by encoder/decoder) /// int bufferSize; // Buffer size (optional value set by encoder/decoder)
-
-
 
 #### `public  AudioCodec(const std::string & name,int channels,int sampleRate,int bitRate,const std::string & sampleFmt)` {#group__av_1ga3c0da0a206873c832f0f7fdd83ac4ca4}
 
@@ -1621,8 +1621,8 @@ Represents a system audio, video or render device.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Format`](api-av.md#structscy_1_1av_1_1Format)` iformat` | 
-`public `[`Format`](api-av.md#structscy_1_1av_1_1Format)` oformat` | 
+`public `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` iformat` | 
+`public `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` oformat` | 
 `public std::string ifile` | 
 `public std::string ofile` | 
 `public long duration` | 
@@ -1631,13 +1631,13 @@ Represents a system audio, video or render device.
 
 ## Members
 
-#### `public `[`Format`](api-av.md#structscy_1_1av_1_1Format)` iformat` {#group__av_1ga54c813e9943c855171e8279e8085548a}
+#### `public `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` iformat` {#group__av_1ga54c813e9943c855171e8279e8085548a}
 
 
 
 
 
-#### `public `[`Format`](api-av.md#structscy_1_1av_1_1Format)` oformat` {#group__av_1gaaa1c4adc23b0755d9633cff732d931e9}
+#### `public `[`Format`](./doc/api-av.md#structscy_1_1av_1_1Format)` oformat` {#group__av_1gaaa1c4adc23b0755d9633cff732d931e9}
 
 
 
@@ -1709,10 +1709,10 @@ Defines a media container format which is available through the [Format](#struct
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public std::string name` | Base [Format](api-av.md#structscy_1_1av_1_1Format) Variables.
+`public std::string name` | Base [Format](./doc/api-av.md#structscy_1_1av_1_1Format) Variables.
 `public std::string id` | The short name of this format.
-`public `[`VideoCodec`](api-av.md#structscy_1_1av_1_1VideoCodec)` video` | The video codec.
-`public `[`AudioCodec`](api-av.md#structscy_1_1av_1_1AudioCodec)` audio` | The audio codec.
+`public `[`VideoCodec`](./doc/api-av.md#structscy_1_1av_1_1VideoCodec)` video` | The video codec.
+`public `[`AudioCodec`](./doc/api-av.md#structscy_1_1av_1_1AudioCodec)` audio` | The audio codec.
 `public int priority` | The priority this format will be displayed on the list.
 `public  Format()` | Ctors/Dtors.
 `public  Format(const std::string & name,const std::string & id,const `[`VideoCodec`](#structscy_1_1av_1_1VideoCodec)` & video,const `[`AudioCodec`](#structscy_1_1av_1_1AudioCodec)` & audio,int priority)` | 
@@ -1737,13 +1737,13 @@ The short name of this format.
 
 
 
-#### `public `[`VideoCodec`](api-av.md#structscy_1_1av_1_1VideoCodec)` video` {#group__av_1ga8c72beb62c31705f7954bb74941165f8}
+#### `public `[`VideoCodec`](./doc/api-av.md#structscy_1_1av_1_1VideoCodec)` video` {#group__av_1ga8c72beb62c31705f7954bb74941165f8}
 
 The video codec.
 
 
 
-#### `public `[`AudioCodec`](api-av.md#structscy_1_1av_1_1AudioCodec)` audio` {#group__av_1ga2d7a7c6b006a17245c5e232d059f59be}
+#### `public `[`AudioCodec`](./doc/api-av.md#structscy_1_1av_1_1AudioCodec)` audio` {#group__av_1ga2d7a7c6b006a17245c5e232d059f59be}
 
 The audio codec.
 

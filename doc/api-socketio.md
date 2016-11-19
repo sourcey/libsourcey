@@ -7,6 +7,7 @@
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `namespace `[`scy::sockio`](#namespacescy_1_1sockio)    | 
+`struct `[`scy::sockio::Client::Options`](#structscy_1_1sockio_1_1Client_1_1Options)    | 
 # namespace `scy::sockio` {#namespacescy_1_1sockio}
 
 
@@ -27,7 +28,7 @@
 class scy::sockio::Client
   : public scy::Stateful< ClientState >
   : public scy::net::SocketAdapter
-  : public scy::SignalBase< PacketDelegateBase, IPacket & >
+  : public scy::Signal< void(IPacket &)>
 ```  
 
 
@@ -40,7 +41,7 @@ class scy::sockio::Client
 --------------------------------|---------------------------------------------
 `public  Client(const net::Socket::Ptr & socket,const `[`Options`](#structscy_1_1sockio_1_1Client_1_1Options)` & options)` | Client(const net::Socket::Ptr& socket);.
 `public virtual  ~Client()` | 
-`public virtual void connect()` | virtual void connect(const std::string& host, std::uint16_t port);
+`public virtual void connect()` | 
 `public virtual void close()` | 
 `public virtual int send(const std::string & message,bool ack)` | Send a default message packet.
 `public virtual int send(const json::Value & message,bool ack)` | 
@@ -57,13 +58,13 @@ class scy::sockio::Client
 `public bool reconnecting() const` | Return true if currently reconnecting.
 `public bool wasOnline() const` | 
 `public inline virtual const char * className() const` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _pingTimer` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _pingTimeoutTimer` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _reconnectTimer` | 
-`protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _pingTimer` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _pingTimeoutTimer` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _reconnectTimer` | 
+`protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` | 
 `protected std::string _sessionID` | 
-`protected `[`Client::Options`](api-socketio.md#structscy_1_1sockio_1_1Client_1_1Options)` _options` | 
-`protected `[`http::ws::WebSocket`](api-http.md#classscy_1_1http_1_1ws_1_1WebSocket)` _ws` | 
+`protected `[`Client::Options`](./doc/api-socketio.md#structscy_1_1sockio_1_1Client_1_1Options)` _options` | 
+`protected `[`http::ws::WebSocket`](./doc/api-http.md#classscy_1_1http_1_1ws_1_1WebSocket)` _ws` | 
 `protected int _pingTimeout` | 
 `protected int _pingInterval` | 
 `protected bool _reconnecting` | 
@@ -76,10 +77,10 @@ class scy::sockio::Client
 `protected virtual void onPacket(`[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` | 
 `protected virtual void onHandshake(`[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` | 
 `protected virtual void onMessage(`[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` | 
-`protected virtual void onSocketConnect()` | 
-`protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`protected virtual void onSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`protected virtual void onSocketClose()` | 
+`protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`protected virtual void onSocketError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
+`protected virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `protected virtual void onPingTimer()` | 
 `protected virtual void onPingTimeoutTimer()` | 
 `protected virtual void startReconnectTimer()` | 
@@ -104,7 +105,7 @@ Client(const net::Socket::Ptr& socket);.
 
 #### `public virtual void connect()` {#group__socketio_1ga4cae0ae6454ca86d3f8e621855f04711}
 
-virtual void connect(const std::string& host, std::uint16_t port);
+
 
 
 
@@ -204,25 +205,25 @@ Return true if the client was previously in the Online state. Useful for delegat
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _pingTimer` {#group__socketio_1ga416988803a0fc305de3962455e7b0b29}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _pingTimer` {#group__socketio_1ga416988803a0fc305de3962455e7b0b29}
 
 
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _pingTimeoutTimer` {#group__socketio_1ga0793683d8d28021add17a90913f81479}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _pingTimeoutTimer` {#group__socketio_1ga0793683d8d28021add17a90913f81479}
 
 
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _reconnectTimer` {#group__socketio_1gab5956064197e289fef9f3b5d095d20de}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _reconnectTimer` {#group__socketio_1gab5956064197e289fef9f3b5d095d20de}
 
 
 
 
 
-#### `protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` {#group__socketio_1gadd9c82f068158700490b50da7a6ba560}
+#### `protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` {#group__socketio_1gadd9c82f068158700490b50da7a6ba560}
 
 
 
@@ -234,13 +235,13 @@ Return true if the client was previously in the Online state. Useful for delegat
 
 
 
-#### `protected `[`Client::Options`](api-socketio.md#structscy_1_1sockio_1_1Client_1_1Options)` _options` {#group__socketio_1ga5c5a2501f0bdea875cd3822f9e0f98ce}
+#### `protected `[`Client::Options`](./doc/api-socketio.md#structscy_1_1sockio_1_1Client_1_1Options)` _options` {#group__socketio_1ga5c5a2501f0bdea875cd3822f9e0f98ce}
 
 
 
 
 
-#### `protected `[`http::ws::WebSocket`](api-http.md#classscy_1_1http_1_1ws_1_1WebSocket)` _ws` {#group__socketio_1ga440dc05a637acef15f4a9d35da1a26f2}
+#### `protected `[`http::ws::WebSocket`](./doc/api-http.md#classscy_1_1http_1_1ws_1_1WebSocket)` _ws` {#group__socketio_1ga440dc05a637acef15f4a9d35da1a26f2}
 
 
 
@@ -318,25 +319,25 @@ Reset variables and timers at the beginning and end of each session.
 
 
 
-#### `protected virtual void onSocketConnect()` {#group__socketio_1ga6aa005f194d3e945fd87962fd4811d34}
+#### `protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__socketio_1ga29f7adb373ba2dc4293aec6f12860013}
 
 
 
 These virtual methods can be overridden as necessary to intercept socket events before they hit the application.
 
-#### `protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__socketio_1gaac63d76f879ffcde98ff81f36e48cfcb}
+#### `protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__socketio_1gab9fe59d4b92667d7e0faaca91ff1b2d8}
 
 
 
 
 
-#### `protected virtual void onSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__socketio_1ga7bb57992f58af7b05bad32e5de10c730}
+#### `protected virtual void onSocketError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__socketio_1ga6d14fa2719fe63e64e949ce34fd57d08}
 
 
 
 
 
-#### `protected virtual void onSocketClose()` {#group__socketio_1ga89ed5f3741c27265219bda1cd82fb44f}
+#### `protected virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__socketio_1ga5a49524007953a27b4f275b022f58d27}
 
 
 
@@ -757,19 +758,19 @@ struct scy::sockio::Transaction
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`sockio::Client`](api-socketio.md#classscy_1_1sockio_1_1Client)` & client` | 
+`public `[`sockio::Client`](./doc/api-socketio.md#classscy_1_1sockio_1_1Client)` & client` | 
 `public  Transaction(`[`sockio::Client`](#classscy_1_1sockio_1_1Client)` & client,long timeout)` | 
 `public  Transaction(`[`sockio::Client`](#classscy_1_1sockio_1_1Client)` & client,const `[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & request,long timeout)` | 
 `public virtual bool send()` | 
 `public virtual bool checkResponse(const `[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` | 
-`public virtual void onPotentialResponse(void *,`[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` | 
+`public virtual void onPotentialResponse(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 `public virtual void onResponse()` | Called when a successful response is received.
 `public inline virtual const char * className() const` | 
 `protected virtual  ~Transaction()` | 
 
 ## Members
 
-#### `public `[`sockio::Client`](api-socketio.md#classscy_1_1sockio_1_1Client)` & client` {#group__socketio_1ga96048abc4d5da1b2c1255e1199979cfe}
+#### `public `[`sockio::Client`](./doc/api-socketio.md#classscy_1_1sockio_1_1Client)` & client` {#group__socketio_1ga96048abc4d5da1b2c1255e1199979cfe}
 
 
 
@@ -799,7 +800,7 @@ Starts the transaction timer and sends the request. Overriding classes should im
 
 Checks a potential response candidate and returns true on successful match.
 
-#### `public virtual void onPotentialResponse(void *,`[`sockio::Packet`](#classscy_1_1sockio_1_1Packet)` & packet)` {#group__socketio_1ga22b7351290bd8e667eef1ebac40481ce}
+#### `public virtual void onPotentialResponse(`[`IPacket`](#classscy_1_1IPacket)` & packet)` {#group__socketio_1ga8ceb3c096bb11fbd2208131a59ffe28b}
 
 
 
@@ -818,6 +819,62 @@ Called when a successful response is received.
 
 
 #### `protected virtual  ~Transaction()` {#group__socketio_1gadb5419dcd87210b93fb4512602fe0759}
+
+
+
+
+
+# struct `scy::sockio::Client::Options` {#structscy_1_1sockio_1_1Client_1_1Options}
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::string host` | 
+`public std::uint16_t port` | 
+`public bool reconnection` | Weather or not to reconnect if disconnected from the server.
+`public int reconnectAttempts` | 
+`public int reconnectDelay` | 
+`public inline  Options()` | 
+
+## Members
+
+#### `public std::string host` {#group__socketio_1ga15595c39bb6d88429d510155d0f7049e}
+
+
+
+
+
+#### `public std::uint16_t port` {#group__socketio_1gafb0434165f130b31c21627e79995e849}
+
+
+
+
+
+#### `public bool reconnection` {#group__socketio_1ga5b1a3052766e66251787032346a7bc9d}
+
+Weather or not to reconnect if disconnected from the server.
+
+
+
+#### `public int reconnectAttempts` {#group__socketio_1ga82fcd418aa146d5354a20bf56808ee88}
+
+
+
+The number of times to attempt to reconnect if disconnected from the server. (0 = unlimited)
+
+#### `public int reconnectDelay` {#group__socketio_1ga16255a17f3446cc835d33fd9957c4f0a}
+
+
+
+
+
+#### `public inline  Options()` {#group__socketio_1gabafe537e29ba40814b05b4fc36ab37dd}
 
 
 

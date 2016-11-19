@@ -398,7 +398,7 @@ class scy::stun::Message
 `protected std::uint16_t _method` | 
 `protected std::uint16_t _size` | 
 `protected TransactionID _transactionID` | 
-`protected std::vector< `[`Attribute`](api-stun.md#classscy_1_1stun_1_1Attribute)` * > _attrs` | 
+`protected std::vector< `[`Attribute`](./doc/api-stun.md#classscy_1_1stun_1_1Attribute)` * > _attrs` | 
 
 ## Members
 
@@ -578,7 +578,7 @@ Writes this object into a STUN/TURN packet.
 
 
 
-#### `protected std::vector< `[`Attribute`](api-stun.md#classscy_1_1stun_1_1Attribute)` * > _attrs` {#group__stun_1ga782bc1c8f90278aa447d27c83e797f8a}
+#### `protected std::vector< `[`Attribute`](./doc/api-stun.md#classscy_1_1stun_1_1Attribute)` * > _attrs` {#group__stun_1ga782bc1c8f90278aa447d27c83e797f8a}
 
 
 

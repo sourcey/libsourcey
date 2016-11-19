@@ -13,8 +13,10 @@ The `base` module contains reusable cross platform tools and utilities.
 `namespace `[`scy::basic`](#namespacescy_1_1basic)    | 
 `namespace `[`scy::ipc`](#namespacescy_1_1ipc)    | Classes for inter-process communication.
 `namespace `[`scy::deleter`](#namespacescy_1_1deleter)    | Deleter Functors.
-`namespace `[`scy::test`](#namespacescy_1_1test)    | Modern unit testing classes.
+`namespace `[`scy::test`](#namespacescy_1_1test)    | Modern unit testing framework.
 `namespace `[`scy::util`](#namespacescy_1_1util)    | 
+`struct `[`scy::async::Runner::Context`](#structscy_1_1async_1_1Runner_1_1Context)    | 
+`struct `[`scy::NVCollection::ILT`](#structscy_1_1NVCollection_1_1ILT)    | 
 # namespace `scy` {#namespacescy}
 
 
@@ -28,7 +30,6 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::AsyncLogWriter`](#classscy_1_1AsyncLogWriter)    | 
 `class `[`scy::AsyncPacketQueue`](#classscy_1_1AsyncPacketQueue)    | 
 `class `[`scy::AsyncQueue`](#classscy_1_1AsyncQueue)    | 
-`class `[`scy::AsyncStartable`](#classscy_1_1AsyncStartable)    | 
 `class `[`scy::BitReader`](#classscy_1_1BitReader)    | A [BitReader](#classscy_1_1BitReader) for reading binary streams.
 `class `[`scy::BitWriter`](#classscy_1_1BitWriter)    | 
 `class `[`scy::Configuration`](#classscy_1_1Configuration)    | 
@@ -38,7 +39,6 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::DateTimeFormat`](#classscy_1_1DateTimeFormat)    | 
 `class `[`scy::DateTimeFormatter`](#classscy_1_1DateTimeFormatter)    | 
 `class `[`scy::DateTimeParser`](#classscy_1_1DateTimeParser)    | 
-`class `[`scy::Delegate`](#classscy_1_1Delegate)    | 
 `class `[`scy::FileChannel`](#classscy_1_1FileChannel)    | 
 `class `[`scy::FlagPacket`](#classscy_1_1FlagPacket)    | A simple flag packet for sending state flags along the packet stream.
 `class `[`scy::GarbageCollector`](#classscy_1_1GarbageCollector)    | Simple garbage collector for deferred pointer deletion.
@@ -52,8 +52,8 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::Logger`](#classscy_1_1Logger)    | 
 `class `[`scy::LogWriter`](#classscy_1_1LogWriter)    | 
 `class `[`scy::MutableBuffer`](#classscy_1_1MutableBuffer)    | 
+`class `[`scy::Mutex`](#classscy_1_1Mutex)    | 
 `class `[`scy::MutexState`](#classscy_1_1MutexState)    | 
-`class `[`scy::NullSignal`](#classscy_1_1NullSignal)    | 
 `class `[`scy::NVCollection`](#classscy_1_1NVCollection)    | 
 `class `[`scy::PacketFactory`](#classscy_1_1PacketFactory)    | 
 `class `[`scy::PacketProcessor`](#classscy_1_1PacketProcessor)    | For 0.8.x compatibility.
@@ -68,20 +68,17 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::RotatingFileChannel`](#classscy_1_1RotatingFileChannel)    | 
 `class `[`scy::RunnableQueue`](#classscy_1_1RunnableQueue)    | 
 `class `[`scy::ScopedConfiguration`](#classscy_1_1ScopedConfiguration)    | 
+`class `[`scy::ScopedLock`](#classscy_1_1ScopedLock)    | 
 `class `[`scy::ScopedPointer`](#classscy_1_1ScopedPointer)    | Scoped Pointer Classes.
 `class `[`scy::ScopedRawPointer`](#classscy_1_1ScopedRawPointer)    | 
 `class `[`scy::ScopedSharedPointer`](#classscy_1_1ScopedSharedPointer)    | 
 `class `[`scy::SharedObject`](#classscy_1_1SharedObject)    | 
 `class `[`scy::Signal`](#classscy_1_1Signal)    | 
-`class `[`scy::Signal2`](#classscy_1_1Signal2)    | 
-`class `[`scy::Signal3`](#classscy_1_1Signal3)    | 
-`class `[`scy::Signal4`](#classscy_1_1Signal4)    | 
-`class `[`scy::SignalBase`](#classscy_1_1SignalBase)    | 
+`class `[`scy::Signal< RT(Args...)>`](#classscy_1_1Signal_3_01RT_07Args_8_8_8_08_4)    | 
 `class `[`scy::Singleton`](#classscy_1_1Singleton)    | 
 `class `[`scy::State`](#classscy_1_1State)    | 
 `class `[`scy::Stateful`](#classscy_1_1Stateful)    | 
 `class `[`scy::StateSignal`](#classscy_1_1StateSignal)    | 
-`class `[`scy::StopPropagation`](#classscy_1_1StopPropagation)    | This exception is used to break out of a [Signal](#classscy_1_1Signal) callback scope.
 `class `[`scy::Stopwatch`](#classscy_1_1Stopwatch)    | 
 `class `[`scy::Stream`](#classscy_1_1Stream)    | 
 `class `[`scy::StreamWriter`](#classscy_1_1StreamWriter)    | 
@@ -99,28 +96,19 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::Timestamp`](#classscy_1_1Timestamp)    | 
 `class `[`scy::Timezone`](#classscy_1_1Timezone)    | This class provides information about the current timezone.
 `class `[`scy::TZInfo`](#classscy_1_1TZInfo)    | 
+`struct `[`scy::AbstractDelegate`](#structscy_1_1AbstractDelegate)    | 
 `struct `[`scy::Bitwise`](#structscy_1_1Bitwise)    | 
-`struct `[`scy::DelegateBase`](#structscy_1_1DelegateBase)    | 
-`struct `[`scy::DelegateCallback`](#structscy_1_1DelegateCallback)    | 
-`struct `[`scy::DelegateCallback< C, 0, false >`](#structscy_1_1DelegateCallback_3_01C_00_010_00_01false_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 0, true >`](#structscy_1_1DelegateCallback_3_01C_00_010_00_01true_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 1, false, P >`](#structscy_1_1DelegateCallback_3_01C_00_011_00_01false_00_01P_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 1, true, P >`](#structscy_1_1DelegateCallback_3_01C_00_011_00_01true_00_01P_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 2, false, P, P2 >`](#structscy_1_1DelegateCallback_3_01C_00_012_00_01false_00_01P_00_01P2_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 2, true, P, P2 >`](#structscy_1_1DelegateCallback_3_01C_00_012_00_01true_00_01P_00_01P2_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 3, false, P, P2, P3 >`](#structscy_1_1DelegateCallback_3_01C_00_013_00_01false_00_01P_00_01P2_00_01P3_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 3, true, P, P2, P3 >`](#structscy_1_1DelegateCallback_3_01C_00_013_00_01true_00_01P_00_01P2_00_01P3_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 4, false, P, P2, P3, P4 >`](#structscy_1_1DelegateCallback_3_01C_00_014_00_01false_00_01P_00_01P2_00_01P3_00_01P4_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 4, true, P, P2, P3, P4 >`](#structscy_1_1DelegateCallback_3_01C_00_014_00_01true_00_01P_00_01P2_00_01P3_00_01P4_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 8, false, PolymorphicT >`](#structscy_1_1DelegateCallback_3_01C_00_018_00_01false_00_01PolymorphicT_01_4)    | 
-`struct `[`scy::DelegateCallback< C, 8, true, PolymorphicT >`](#structscy_1_1DelegateCallback_3_01C_00_018_00_01true_00_01PolymorphicT_01_4)    | 
+`struct `[`scy::ClassDelegate`](#structscy_1_1ClassDelegate)    | 
+`struct `[`scy::ConstClassDelegate`](#structscy_1_1ConstClassDelegate)    | 
 `struct `[`scy::Error`](#structscy_1_1Error)    | 
+`struct `[`scy::FunctionDelegate`](#structscy_1_1FunctionDelegate)    | 
 `struct `[`scy::IPacketInfo`](#structscy_1_1IPacketInfo)    | 
 `struct `[`scy::LogStream`](#structscy_1_1LogStream)    | 
 `struct `[`scy::OptionParser`](#structscy_1_1OptionParser)    | 
 `struct `[`scy::PacketAdapterReference`](#structscy_1_1PacketAdapterReference)    | For 0.8.x compatibility.
 `struct `[`scy::PacketCreationStrategy`](#structscy_1_1PacketCreationStrategy)    | 
 `struct `[`scy::PacketStreamState`](#structscy_1_1PacketStreamState)    | 
+`struct `[`scy::PolymorphicDelegate`](#structscy_1_1PolymorphicDelegate)    | 
 `struct `[`scy::SharedLibrary`](#structscy_1_1SharedLibrary)    | 
 `struct `[`scy::TransactionState`](#structscy_1_1TransactionState)    | 
 # class `scy::AbstractCollection` {#classscy_1_1AbstractCollection}
@@ -226,9 +214,25 @@ The `base` module contains reusable cross platform tools and utilities.
 
 
 
-A simple event based application which runs until the internal event loop is terminated.
+Main LibSourcey application class.
 
-The [Application](#classscy_1_1Application) class provides shutdown handling (Ctrl-C).
+This class exposes basic features required by most applications:
+
+
+
+* Running the event loop
+
+
+* Command line option parsing 
+**See also**: [OptionParser](#structscy_1_1OptionParser)
+
+
+
+
+* Shutdown signal (Ctrl-C) handling
+
+
+* Garbage collection
 
 ## Summary
 
@@ -240,12 +244,12 @@ The [Application](#classscy_1_1Application) class provides shutdown handling (Ct
 `public void run()` | 
 `public void stop()` | 
 `public void finalize()` | 
-`public void bindShutdownSignal(std::function< void(void *)> callback,void * opaque)` | Bind the shutdown signal.
+`public void bindShutdownSignal(std::function< void(void *)> callback,void * opaque)` | Shutdown handling.
 `public void waitForShutdown(std::function< void(void *)> callback,void * opaque)` | Bind the shutdown signal and run the main event loop.
-`protected  Application(const `[`Application`](#classscy_1_1Application)` &)` | 
-`protected  Application(`[`Application`](#classscy_1_1Application)` &&)` | 
-`protected `[`Application`](#classscy_1_1Application)` & operator=(const `[`Application`](#classscy_1_1Application)` &)` | 
-`protected `[`Application`](#classscy_1_1Application)` & operator=(`[`Application`](#classscy_1_1Application)` &&)` | 
+`protected  Application(const `[`Application`](#classscy_1_1Application)` &) = delete` | 
+`protected  Application(`[`Application`](#classscy_1_1Application)` &&) = delete` | 
+`protected `[`Application`](#classscy_1_1Application)` & operator=(const `[`Application`](#classscy_1_1Application)` &) = delete` | 
+`protected `[`Application`](#classscy_1_1Application)` & operator=(`[`Application`](#classscy_1_1Application)` &&) = delete` | 
 
 ## Members
 
@@ -253,7 +257,7 @@ The [Application](#classscy_1_1Application) class provides shutdown handling (Ct
 
 
 
-The active event loop. May be assigned at construction, otherwise the default event loop is used.
+The active event loop. May be assigned at construction, otherwise the default event loop will be used.
 
 #### `public  Application(uv::Loop * loop)` {#group__base_1gadb808e26528e18856d2896a3ce7947ca}
 
@@ -287,9 +291,9 @@ The active event loop. May be assigned at construction, otherwise the default ev
 
 #### `public void bindShutdownSignal(std::function< void(void *)> callback,void * opaque)` {#group__base_1ga80ca3367db09fde58ffec5b3b17ce960}
 
-Bind the shutdown signal.
+Shutdown handling.
 
-Shutdown handling
+Bind the shutdown signal.
 
 #### `public void waitForShutdown(std::function< void(void *)> callback,void * opaque)` {#group__base_1ga648ccd97eb0acd73cb4dc0b2b4ae030a}
 
@@ -297,25 +301,25 @@ Bind the shutdown signal and run the main event loop.
 
 
 
-#### `protected  Application(const `[`Application`](#classscy_1_1Application)` &)` {#group__base_1gaf35e66236b350dc80aabc6c721d81459}
+#### `protected  Application(const `[`Application`](#classscy_1_1Application)` &) = delete` {#group__base_1gad2a86916a222902d29c639cc5daa9d5b}
 
 
 
 
 
-#### `protected  Application(`[`Application`](#classscy_1_1Application)` &&)` {#group__base_1ga733b14143f30c98d7e73815e05523f24}
+#### `protected  Application(`[`Application`](#classscy_1_1Application)` &&) = delete` {#group__base_1gac16016d42a586f2d0defef72769c327b}
 
 
 
 
 
-#### `protected `[`Application`](#classscy_1_1Application)` & operator=(const `[`Application`](#classscy_1_1Application)` &)` {#group__base_1gacc683343ef14eb0899b29dfa5c75b820}
+#### `protected `[`Application`](#classscy_1_1Application)` & operator=(const `[`Application`](#classscy_1_1Application)` &) = delete` {#group__base_1ga62bac67db74a499f898f4399df87078f}
 
 
 
 
 
-#### `protected `[`Application`](#classscy_1_1Application)` & operator=(`[`Application`](#classscy_1_1Application)` &&)` {#group__base_1gab9a81a8272daa858d1ddf5c294badb86}
+#### `protected `[`Application`](#classscy_1_1Application)` & operator=(`[`Application`](#classscy_1_1Application)` &&) = delete` {#group__base_1ga45b6f939a23ecc69feeb47cecf479ce8}
 
 
 
@@ -343,9 +347,9 @@ class scy::AsyncLogWriter
 `public void flush()` | Flushes queued messages.
 `public virtual void run()` | Writes queued messages asynchronously.
 `public void clear()` | Clears all queued messages.
-`protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` | 
-`protected std::deque< `[`LogStream`](api-base.md#structscy_1_1LogStream)` * > _pending` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` | 
+`protected std::deque< `[`LogStream`](./doc/api-base.md#structscy_1_1LogStream)` * > _pending` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected bool writeNext()` | 
 
 ## Members
@@ -386,19 +390,19 @@ Clears all queued messages.
 
 
 
-#### `protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` {#group__base_1ga75dcded0c2370591afb489f4892b7b54}
+#### `protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` {#group__base_1ga75dcded0c2370591afb489f4892b7b54}
 
 
 
 
 
-#### `protected std::deque< `[`LogStream`](api-base.md#structscy_1_1LogStream)` * > _pending` {#group__base_1gaa09529c75e1bbe57025b72be87dfd41c}
+#### `protected std::deque< `[`LogStream`](./doc/api-base.md#structscy_1_1LogStream)` * > _pending` {#group__base_1gaa09529c75e1bbe57025b72be87dfd41c}
 
 
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga043a2de2b895ee38829901de0e1d6d43}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga043a2de2b895ee38829901de0e1d6d43}
 
 
 
@@ -426,7 +430,7 @@ class scy::AsyncPacketQueue
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  AsyncPacketQueue(int maxSize)` | 
 `public inline virtual  ~AsyncPacketQueue()` | 
 `public inline virtual void close()` | 
@@ -437,7 +441,7 @@ class scy::AsyncPacketQueue
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__base_1gaf462c1a658ea10a25f0159c3adf22054}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__base_1gaf462c1a658ea10a25f0159c3adf22054}
 
 
 
@@ -508,7 +512,7 @@ The thread will call the [RunnableQueue](#classscy_1_1RunnableQueue)'s [run()](#
 --------------------------------|---------------------------------------------
 `public inline  AsyncQueue(int limit)` | 
 `public inline virtual void cancel()` | 
-`protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` | 
+`protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` | 
 `protected inline virtual  ~AsyncQueue()` | 
 
 ## Members
@@ -525,66 +529,13 @@ The thread will call the [RunnableQueue](#classscy_1_1RunnableQueue)'s [run()](#
 
 
 
-#### `protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` {#group__base_1ga43d70d35f82a4c1286108cc14b6b8066}
+#### `protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _thread` {#group__base_1ga43d70d35f82a4c1286108cc14b6b8066}
 
 
 
 
 
 #### `protected inline virtual  ~AsyncQueue()` {#group__base_1gad02ee332589a016e4864aba8e75b3194}
-
-
-
-
-
-# class `scy::AsyncStartable` {#classscy_1_1AsyncStartable}
-
-```
-class scy::AsyncStartable
-  : public TStartable
-```  
-
-
-
-Depreciated: This class is an invisible wrapper around a TStartable instance, which provides asynchronous access to the TStartable start() and stop() methods. TStartable is an instance of [async::Startable](#classscy_1_1async_1_1Startable).
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  AsyncStartable()` | 
-`public inline virtual  ~AsyncStartable()` | 
-`public inline virtual bool start()` | 
-`public inline virtual void stop()` | 
-`protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` | 
-
-## Members
-
-#### `public inline  AsyncStartable()` {#group__base_1gab4fc448d9f475b84cb7277ead544f306}
-
-
-
-
-
-#### `public inline virtual  ~AsyncStartable()` {#group__base_1ga3ab3aff431dfe7935bbeeaedd328dffb}
-
-
-
-
-
-#### `public inline virtual bool start()` {#group__base_1ga08d56cb961c9e50feed8334e4870c518}
-
-
-
-
-
-#### `public inline virtual void stop()` {#group__base_1ga3edf32524ceb24b9144f82a8a4544b96}
-
-
-
-
-
-#### `protected `[`Thread`](api-base.md#classscy_1_1Thread)` _thread` {#group__base_1ga7745888e6f3cde6363e9eba4a1d60a4a}
 
 
 
@@ -630,7 +581,7 @@ A [BitReader](#classscy_1_1BitReader) for reading binary streams.
 `public void skip(std::size_t size)` | 
 `public std::size_t limit() const` | Returns the read limit.
 `public inline std::size_t position() const` | Returns the current read position.
-`public std::size_t available() const` | Returns the number of elements between the current position and the limit.
+`public std::size_t available() const` | 
 `public inline const char * begin() const` | 
 `public inline const char * current() const` | 
 `public inline `[`ByteOrder`](#group__base_1gaa934c0972c743983462716b01df7dc32)` order() const` | 
@@ -814,9 +765,9 @@ Returns the current read position.
 
 #### `public std::size_t available() const` {#group__base_1gab87ea4c096e614cdb3f5e4db340ca176}
 
+
+
 Returns the number of elements between the current position and the limit.
-
-
 
 #### `public inline const char * begin() const` {#group__base_1ga6ee4105efc2e18f5b31eceafd959c0d3}
 
@@ -877,7 +828,7 @@ Note that when using the constructor with the Buffer reference as an argument, t
 `public void skip(std::size_t size)` | 
 `public std::size_t limit() const` | Returns the write limit.
 `public inline std::size_t position() const` | Returns the current write position.
-`public std::size_t available() const` | Returns the number of elements between the current write position and the limit.
+`public std::size_t available() const` | 
 `public inline char * begin()` | 
 `public inline char * current()` | 
 `public inline const char * begin() const` | 
@@ -1021,9 +972,9 @@ Returns the current write position.
 
 #### `public std::size_t available() const` {#group__base_1ga33ec3bf3c9676230958e5082248204bb}
 
+
+
 Returns the number of elements between the current write position and the limit.
-
-
 
 #### `public inline char * begin()` {#group__base_1ga5f4e9d6f4804cd95536a8aaa5191d79d}
 
@@ -1076,9 +1027,9 @@ This class is safe for multithreaded use.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< const std::string &, const std::string & > PropertyChanged` | The Key and Value of the changed configuration property.
-`public  Configuration()` | Creates the [Configuration](api-base.md#classscy_1_1Configuration).
-`public virtual  ~Configuration()` | Destroys the [Configuration](api-base.md#classscy_1_1Configuration).
+`public `[`Signal`](#classscy_1_1Signal)< void(const std::string &, const std::string &)`> PropertyChanged` | The Key and Value of the changed configuration property.
+`public  Configuration()` | Creates the [Configuration](./doc/api-base.md#classscy_1_1Configuration).
+`public virtual  ~Configuration()` | Destroys the [Configuration](./doc/api-base.md#classscy_1_1Configuration).
 `public bool exists(const std::string & key) const` | Returns true if the property with the given key exists.
 `public std::string getString(const std::string & key) const` | 
 `public std::string getString(const std::string & key,const std::string & defaultValue) const` | 
@@ -1102,7 +1053,7 @@ This class is safe for multithreaded use.
 
 ## Members
 
-#### `public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< const std::string &, const std::string & > PropertyChanged` {#group__base_1ga7cc246aa31150df064501e3df11e4976}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const std::string &, const std::string &)`> PropertyChanged` {#group__base_1ga885286a3a5e03556d0aab503afa8952d}
 
 The Key and Value of the changed configuration property.
 
@@ -1395,18 +1346,18 @@ For more information, please see:
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  DateTime()` | Creates a [DateTime](api-base.md#classscy_1_1DateTime) for the current date and time.
+`public  DateTime()` | Creates a [DateTime](./doc/api-base.md#classscy_1_1DateTime) for the current date and time.
 `public  DateTime(const `[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | 
 `public  DateTime(int year,int month,int day,int hour,int minute,int second,int millisecond,int microsecond)` | 
-`public  DateTime(double julianDay)` | Creates a [DateTime](api-base.md#classscy_1_1DateTime) for the given Julian day.
+`public  DateTime(double julianDay)` | Creates a [DateTime](./doc/api-base.md#classscy_1_1DateTime) for the given Julian day.
 `public  DateTime(`[`Timestamp::UtcTimeVal`](#group__base_1gaec8ace0f25db0ce91c10b30270c3dc24)` utcTime,`[`Timestamp::TimeDiff`](#group__base_1ga9f06831e4e9b9cbc6f061cc61dc91fd0)` diff)` | 
-`public  DateTime(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Copy constructor. Creates the [DateTime](api-base.md#classscy_1_1DateTime) from another one.
-`public  ~DateTime()` | Destroys the [DateTime](api-base.md#classscy_1_1DateTime).
-`public `[`DateTime`](#classscy_1_1DateTime)` & operator=(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Assigns another [DateTime](api-base.md#classscy_1_1DateTime).
-`public `[`DateTime`](#classscy_1_1DateTime)` & operator=(const `[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | Assigns a [Timestamp](api-base.md#classscy_1_1Timestamp).
+`public  DateTime(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Copy constructor. Creates the [DateTime](./doc/api-base.md#classscy_1_1DateTime) from another one.
+`public  ~DateTime()` | Destroys the [DateTime](./doc/api-base.md#classscy_1_1DateTime).
+`public `[`DateTime`](#classscy_1_1DateTime)` & operator=(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Assigns another [DateTime](./doc/api-base.md#classscy_1_1DateTime).
+`public `[`DateTime`](#classscy_1_1DateTime)` & operator=(const `[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | Assigns a [Timestamp](./doc/api-base.md#classscy_1_1Timestamp).
 `public `[`DateTime`](#classscy_1_1DateTime)` & operator=(double julianDay)` | Assigns a Julian day.
 `public `[`DateTime`](#classscy_1_1DateTime)` & assign(int year,int month,int day,int hour,int minute,int second,int millisecond,int microseconds)` | 
-`public void swap(`[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Swaps the [DateTime](api-base.md#classscy_1_1DateTime) with another one.
+`public void swap(`[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | Swaps the [DateTime](./doc/api-base.md#classscy_1_1DateTime) with another one.
 `public inline int year() const` | Returns the year.
 `public inline int month() const` | Returns the month (1 to 12).
 `public int week(int firstDayOfWeek) const` | 
@@ -1422,7 +1373,7 @@ For more information, please see:
 `public inline int millisecond() const` | Returns the millisecond (0 to 999)
 `public inline int microsecond() const` | Returns the microsecond (0 to 999)
 `public double julianDay() const` | Returns the julian day for the date and time.
-`public inline `[`Timestamp`](#classscy_1_1Timestamp)` timestamp() const` | Returns the date and time expressed as a [Timestamp](api-base.md#classscy_1_1Timestamp).
+`public inline `[`Timestamp`](#classscy_1_1Timestamp)` timestamp() const` | Returns the date and time expressed as a [Timestamp](./doc/api-base.md#classscy_1_1Timestamp).
 `public inline `[`Timestamp::UtcTimeVal`](#group__base_1gaec8ace0f25db0ce91c10b30270c3dc24)` utcTime() const` | 
 `public inline bool operator==(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime) const` | 
 `public inline bool operator!=(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime) const` | 
@@ -1435,10 +1386,10 @@ For more information, please see:
 `public `[`Timespan`](#classscy_1_1Timespan)` operator-(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime) const` | 
 `public `[`DateTime`](#classscy_1_1DateTime)` & operator+=(const `[`Timespan`](#classscy_1_1Timespan)` & span)` | 
 `public `[`DateTime`](#classscy_1_1DateTime)` & operator-=(const `[`Timespan`](#classscy_1_1Timespan)` & span)` | 
-`public void makeUTC(int tzd)` | Converts a local time into UTC, by applying the given time zone differential.
-`public void makeLocal(int tzd)` | Converts a UTC time into a local time, by applying the given time zone differential.
+`public void makeUTC(int tzd)` | 
+`public void makeLocal(int tzd)` | 
 `protected void computeGregorian(double julianDay)` | 
-`protected void computeDaytime()` | Extracts the daytime (hours, minutes, seconds, etc.) from the stored utcTime.
+`protected void computeDaytime()` | 
 
 ## Members
 
@@ -1736,15 +1687,15 @@ Returns the date and time expressed in UTC-based time. UTC base time is midnight
 
 #### `public void makeUTC(int tzd)` {#group__base_1gaef85751cde47a0e909aeddae1775b805}
 
+
+
 Converts a local time into UTC, by applying the given time zone differential.
-
-
 
 #### `public void makeLocal(int tzd)` {#group__base_1ga82ce62343d007567544418aed404dcd9}
 
+
+
 Converts a UTC time into a local time, by applying the given time zone differential.
-
-
 
 #### `protected void computeGregorian(double julianDay)` {#group__base_1ga6f59bebcde64cc028cdbcde61b7eb619}
 
@@ -1754,9 +1705,9 @@ Computes the Gregorian date for the given Julian day. See [http://vsg.cape.com/~
 
 #### `protected void computeDaytime()` {#group__base_1ga57cdba4dec7b53c448c56545d0c0a8fb}
 
+
+
 Extracts the daytime (hours, minutes, seconds, etc.) from the stored utcTime.
-
-
 
 # class `scy::DateTimeFormat` {#classscy_1_1DateTimeFormat}
 
@@ -1809,123 +1760,6 @@ See the [DateTimeFormatter](#classscy_1_1DateTimeFormatter) class for a list of 
 --------------------------------|---------------------------------------------
 
 ## Members
-
-# class `scy::Delegate` {#classscy_1_1Delegate}
-
-```
-class scy::Delegate
-  : public BaseT
-  : public CallbackT
-```  
-
-
-
-This template class implements an adapter that sits between an [DelegateBase](#structscy_1_1DelegateBase) and an object receiving notifications from it.
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  Delegate(C * object,Method method,int priority)` | 
-`public inline  Delegate(C * object,Method method,DataT filter,int priority)` | 
-`public inline  Delegate(const `[`Delegate`](#classscy_1_1Delegate)` & r)` | 
-`public inline virtual  ~Delegate()` | 
-`public inline BaseT * clone() const` | 
-`public inline void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4)` | 
-`public inline bool equals(const `[`DerivedT`](#structscy_1_1DelegateBase)` * r) const` | 
-`public inline void cancel()` | 
-`public inline bool cancelled() const` | 
-`public inline int priority() const` | 
-`public inline void * object() const` | 
-`protected int _priority` | 
-`protected bool _cancelled` | 
-`protected  Delegate()` | 
-
-## Members
-
-#### `public inline  Delegate(C * object,Method method,int priority)` {#group__base_1gab8fe434bb87b6b0af083e6b2331c3a48}
-
-
-
-
-
-#### `public inline  Delegate(C * object,Method method,DataT filter,int priority)` {#group__base_1ga1f6f4c4d6274b7afcae81b5d9dc8332f}
-
-
-
-
-
-#### `public inline  Delegate(const `[`Delegate`](#classscy_1_1Delegate)` & r)` {#group__base_1ga33c8e032c356077eb029f90f0770b045}
-
-
-
-
-
-#### `public inline virtual  ~Delegate()` {#group__base_1ga3bb9af8606a2d631c79c1ad34800f9d6}
-
-
-
-
-
-#### `public inline BaseT * clone() const` {#group__base_1ga9bf5e7c29c855ed535c10f06db950f07}
-
-
-
-
-
-#### `public inline void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4)` {#group__base_1ga14f53a982107849b9c71b2d720f0559e}
-
-
-
-
-
-#### `public inline bool equals(const `[`DerivedT`](#structscy_1_1DelegateBase)` * r) const` {#group__base_1ga8118703891230eac10c0d9e4243d2a81}
-
-
-
-
-
-#### `public inline void cancel()` {#group__base_1ga8b06fc982a682495cab824fc14f4dc4d}
-
-
-
-
-
-#### `public inline bool cancelled() const` {#group__base_1ga49dfcd3ecd11317d902ec8c396719720}
-
-
-
-
-
-#### `public inline int priority() const` {#group__base_1ga9c200a7f249213114e87e66c9e7f83ed}
-
-
-
-
-
-#### `public inline void * object() const` {#group__base_1gaf6b4d37aff53862519fc4839105632b5}
-
-
-
-
-
-#### `protected int _priority` {#group__base_1ga1cd6d173a1a436bf69f186acc86ff22e}
-
-
-
-
-
-#### `protected bool _cancelled` {#group__base_1ga15434e40cf6c6e6a7a7857a75cf05794}
-
-
-
-
-
-#### `protected  Delegate()` {#group__base_1gab4e199da6d67e1ab2fc447b94f556ded}
-
-
-
-
 
 # class `scy::FileChannel` {#classscy_1_1FileChannel}
 
@@ -2096,10 +1930,10 @@ Simple garbage collector for deferred pointer deletion.
 `public template<class C>`  <br/>`inline void deleteLater(std::shared_ptr< C > ptr)` | Schedules a shared pointer for deferred deletion.
 `public void finalize()` | 
 `public uv_thread_t tid()` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
-`protected std::vector< `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * > _pending` | 
-`protected std::vector< `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * > _ready` | 
-`protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
+`protected std::vector< `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * > _pending` | 
+`protected std::vector< `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * > _ready` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
 `protected bool _finalize` | 
 `protected uv_thread_t _tid` | 
 `protected void runAsync()` | 
@@ -2142,25 +1976,25 @@ Frees all scheduled pointers now. This method must be called from the main threa
 
 Returns the TID of the garbage collector event loop thread. The garbage collector must be running.
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1gacee5187f4d83b8d963e7f731fda5037a}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1gacee5187f4d83b8d963e7f731fda5037a}
 
 
 
 
 
-#### `protected std::vector< `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * > _pending` {#group__base_1gaa199630597b6523bc7903ef432780389}
+#### `protected std::vector< `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * > _pending` {#group__base_1gaa199630597b6523bc7903ef432780389}
 
 
 
 
 
-#### `protected std::vector< `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * > _ready` {#group__base_1ga547d312fc9d30911593ff2139dac4486}
+#### `protected std::vector< `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * > _ready` {#group__base_1ga547d312fc9d30911593ff2139dac4486}
 
 
 
 
 
-#### `protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1gabdb091600aa01b7a04295b6e6282dfb4}
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1gabdb091600aa01b7a04295b6e6282dfb4}
 
 
 
@@ -2204,7 +2038,7 @@ class scy::Idler
 `public  Idler(uv::Loop * loop,std::function< void(void *)> target,void * arg)` | 
 `public virtual  ~Idler()` | 
 `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
 `protected virtual void init()` | 
 `protected virtual void startAsync()` | Start the context from the control thread.
 `protected virtual bool async() const` | 
@@ -2241,7 +2075,7 @@ Create the idler context the given event loop and method.
 
 
 
-#### `protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1gaedd4a0fb85911ee27eb0c1caa38fca80}
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1gaedd4a0fb85911ee27eb0c1caa38fca80}
 
 
 
@@ -2267,10 +2101,6 @@ Returns true if the implementation is thread-based, or false if it belongs to an
 
 # class `scy::IPacket` {#classscy_1_1IPacket}
 
-```
-class scy::IPacket
-  : public scy::basic::Polymorphic
-```  
 
 
 
@@ -2282,8 +2112,8 @@ The basic packet type which is passed around the LibSourcey system. [IPacket](#c
 --------------------------------|---------------------------------------------
 `public void * source` | 
 `public void * opaque` | 
-`public `[`IPacketInfo`](api-base.md#structscy_1_1IPacketInfo)` * info` | 
-`public `[`Bitwise`](api-base.md#structscy_1_1Bitwise)` flags` | Provides basic information about the packet.
+`public `[`IPacketInfo`](./doc/api-base.md#structscy_1_1IPacketInfo)` * info` | 
+`public `[`Bitwise`](./doc/api-base.md#structscy_1_1Bitwise)` flags` | Provides basic information about the packet.
 `public inline  IPacket(void * source,void * opaque,`[`IPacketInfo`](#structscy_1_1IPacketInfo)` * info,unsigned flags)` | 
 `public inline  IPacket(const `[`IPacket`](#classscy_1_1IPacket)` & r)` | 
 `public inline `[`IPacket`](#classscy_1_1IPacket)` & operator=(const `[`IPacket`](#classscy_1_1IPacket)` & r)` | 
@@ -2312,13 +2142,13 @@ Packet source pointer reference which enables processors along the signal chain 
 
 Optional client data pointer. This pointer is not managed by the packet.
 
-#### `public `[`IPacketInfo`](api-base.md#structscy_1_1IPacketInfo)` * info` {#group__base_1gaa1d28787c49a63b8390561fbfe520ca0}
+#### `public `[`IPacketInfo`](./doc/api-base.md#structscy_1_1IPacketInfo)` * info` {#group__base_1gaa1d28787c49a63b8390561fbfe520ca0}
 
 
 
 Optional extra information about the packet. This pointer is managed by the packet.
 
-#### `public `[`Bitwise`](api-base.md#structscy_1_1Bitwise)` flags` {#group__base_1ga9eb92d88fc9705ff304ddd382c7588fa}
+#### `public `[`Bitwise`](./doc/api-base.md#structscy_1_1Bitwise)` flags` {#group__base_1ga9eb92d88fc9705ff304ddd382c7588fa}
 
 Provides basic information about the packet.
 
@@ -2563,20 +2393,20 @@ class scy::LiveCollection
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< TValue & > ItemAdded` | 
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const TValue & > ItemRemoved` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(TValue &)`> ItemAdded` | 
+`public `[`Signal`](#classscy_1_1Signal)< void(const TValue &)`> ItemRemoved` | 
 `public inline virtual void onAdd(const TKey &,TValue * item)` | 
 `public inline virtual void onRemove(const TKey &,TValue * item)` | 
 
 ## Members
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< TValue & > ItemAdded` {#group__base_1ga2bce4b14de9a35658465803125cd90b9}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(TValue &)`> ItemAdded` {#group__base_1gad112e2092e104a7641224abd5a607cc4}
 
 
 
 
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const TValue & > ItemRemoved` {#group__base_1gaa5dc0ee0647127d7e19d4a677c5c4dc0}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const TValue &)`> ItemRemoved` {#group__base_1ga01e3ea78555d50716ed0be0e09763ad6}
 
 
 
@@ -2601,7 +2431,9 @@ class scy::LiveCollection
 
 This class represents an instant in local time (as opposed to UTC), expressed in years, months, days, hours, minutes, seconds and milliseconds based on the Gregorian calendar.
 
-In addition to the date and time, the class also maintains a time zone differential, which denotes the difference in seconds from UTC to local time, i.e. UTC = local time - time zone differential. Although [LocalDateTime](#classscy_1_1LocalDateTime) supports relational and arithmetic operators, all date/time comparisons and date/time arithmetics should be done in UTC, using the [DateTime](#classscy_1_1DateTime) or [Timestamp](#classscy_1_1Timestamp) class for better performance. The relational operators normalize the dates/times involved to UTC before carrying out the comparison.
+In addition to the date and time, the class also maintains a time zone differential, which denotes the difference in seconds from UTC to local time, i.e. UTC = local time - time zone differential.
+
+Although [LocalDateTime](#classscy_1_1LocalDateTime) supports relational and arithmetic operators, all date/time comparisons and date/time arithmetics should be done in UTC, using the [DateTime](#classscy_1_1DateTime) or [Timestamp](#classscy_1_1Timestamp) class for better performance. The relational operators normalize the dates/times involved to UTC before carrying out the comparison.
 
 The time zone differential is based on the input date and time and current time zone. A number of constructors accept an explicit time zone differential parameter. These should not be used since daylight savings time processing is impossible since the time zone is unknown. Each of the constructors accepting a tzd parameter have been marked as deprecated and may be removed in a future revision.
 
@@ -2615,17 +2447,17 @@ The time zone differential is based on the input date and time and current time 
 `public  LocalDateTime(const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | 
 `public  LocalDateTime(int tzd,const `[`DateTime`](#classscy_1_1DateTime)` & dateTime)` | 
 `public  LocalDateTime(int tzd,const `[`DateTime`](#classscy_1_1DateTime)` & dateTime,bool adjust)` | 
-`public  LocalDateTime(double julianDay)` | Creates a [LocalDateTime](api-base.md#classscy_1_1LocalDateTime) for the given Julian day in the local time zone.
+`public  LocalDateTime(double julianDay)` | Creates a [LocalDateTime](./doc/api-base.md#classscy_1_1LocalDateTime) for the given Julian day in the local time zone.
 `public  LocalDateTime(int tzd,double julianDay)` | 
-`public  LocalDateTime(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Copy constructor. Creates the [LocalDateTime](api-base.md#classscy_1_1LocalDateTime) from another one.
-`public  ~LocalDateTime()` | Destroys the [LocalDateTime](api-base.md#classscy_1_1LocalDateTime).
-`public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & operator=(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Assigns another [LocalDateTime](api-base.md#classscy_1_1LocalDateTime).
+`public  LocalDateTime(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Copy constructor. Creates the [LocalDateTime](./doc/api-base.md#classscy_1_1LocalDateTime) from another one.
+`public  ~LocalDateTime()` | Destroys the [LocalDateTime](./doc/api-base.md#classscy_1_1LocalDateTime).
+`public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & operator=(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Assigns another [LocalDateTime](./doc/api-base.md#classscy_1_1LocalDateTime).
 `public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & operator=(const `[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | Assigns a timestamp.
 `public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & operator=(double julianDay)` | Assigns a Julian day in the local time zone.
 `public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & assign(int year,int month,int day,int hour,int minute,int second,int millisecond,int microseconds)` | 
 `public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & assign(int tzd,int year,int month,int day,int hour,int minute,int second,int millisecond,int microseconds)` | 
 `public `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & assign(int tzd,double julianDay)` | 
-`public void swap(`[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Swaps the [LocalDateTime](api-base.md#classscy_1_1LocalDateTime) with another one.
+`public void swap(`[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime)` | Swaps the [LocalDateTime](./doc/api-base.md#classscy_1_1LocalDateTime) with another one.
 `public inline int year() const` | Returns the year.
 `public inline int month() const` | Returns the month (1 to 12).
 `public inline int week(int firstDayOfWeek) const` | 
@@ -2643,7 +2475,7 @@ The time zone differential is based on the input date and time and current time 
 `public inline double julianDay() const` | Returns the julian day for the date.
 `public inline int tzd() const` | Returns the time zone differential.
 `public `[`DateTime`](#classscy_1_1DateTime)` utc() const` | Returns the UTC equivalent for the local date and time.
-`public inline `[`Timestamp`](#classscy_1_1Timestamp)` timestamp() const` | Returns the date and time expressed as a [Timestamp](api-base.md#classscy_1_1Timestamp).
+`public inline `[`Timestamp`](#classscy_1_1Timestamp)` timestamp() const` | Returns the date and time expressed as a [Timestamp](./doc/api-base.md#classscy_1_1Timestamp).
 `public inline `[`Timestamp::UtcTimeVal`](#group__base_1gaec8ace0f25db0ce91c10b30270c3dc24)` utcTime() const` | Returns the UTC equivalent for the local date and time.
 `public bool operator==(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime) const` | 
 `public bool operator!=(const `[`LocalDateTime`](#classscy_1_1LocalDateTime)` & dateTime) const` | 
@@ -3212,14 +3044,14 @@ Determine the DST offset for the current date/time.
 `public void write(const `[`LogStream`](#structscy_1_1LogStream)` & stream)` | 
 `public void write(`[`LogStream`](#structscy_1_1LogStream)` * stream)` | 
 `public `[`LogStream`](#structscy_1_1LogStream)` & send(const char * level,const char * realm,const void * ptr,const char * channel) const` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected LogChannelMap _channels` | 
-`protected `[`LogChannel`](api-base.md#classscy_1_1LogChannel)` * _defaultChannel` | 
-`protected `[`LogWriter`](api-base.md#classscy_1_1LogWriter)` * _writer` | 
-`protected  Logger(const `[`Logger`](#classscy_1_1Logger)` &)` | Non-copyable and non-movable.
-`protected  Logger(`[`Logger`](#classscy_1_1Logger)` &&)` | 
-`protected `[`Logger`](#classscy_1_1Logger)` & operator=(const `[`Logger`](#classscy_1_1Logger)` &)` | 
-`protected `[`Logger`](#classscy_1_1Logger)` & operator=(`[`Logger`](#classscy_1_1Logger)` &&)` | 
+`protected `[`LogChannel`](./doc/api-base.md#classscy_1_1LogChannel)` * _defaultChannel` | 
+`protected `[`LogWriter`](./doc/api-base.md#classscy_1_1LogWriter)` * _writer` | 
+`protected  Logger(const `[`Logger`](#classscy_1_1Logger)` &) = delete` | Non-copyable and non-movable.
+`protected  Logger(`[`Logger`](#classscy_1_1Logger)` &&) = delete` | 
+`protected `[`Logger`](#classscy_1_1Logger)` & operator=(const `[`Logger`](#classscy_1_1Logger)` &) = delete` | 
+`protected `[`Logger`](#classscy_1_1Logger)` & operator=(`[`Logger`](#classscy_1_1Logger)` &&) = delete` | 
 
 ## Members
 
@@ -3289,7 +3121,7 @@ Writes the given message to the default log channel. The stream pointer will be 
 
 Sends to the default log using the given class instance. Recommend using write(LogStream&) to avoid copying data.
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1gab7cc378d72a27279827f0875a226251c}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1gab7cc378d72a27279827f0875a226251c}
 
 
 
@@ -3301,37 +3133,37 @@ Sends to the default log using the given class instance. Recommend using write(L
 
 
 
-#### `protected `[`LogChannel`](api-base.md#classscy_1_1LogChannel)` * _defaultChannel` {#group__base_1ga0bc50bd2da990173ed15e251b7df2e9c}
+#### `protected `[`LogChannel`](./doc/api-base.md#classscy_1_1LogChannel)` * _defaultChannel` {#group__base_1ga0bc50bd2da990173ed15e251b7df2e9c}
 
 
 
 
 
-#### `protected `[`LogWriter`](api-base.md#classscy_1_1LogWriter)` * _writer` {#group__base_1ga7faa46b191ca0f6f851ff759c93bbec4}
+#### `protected `[`LogWriter`](./doc/api-base.md#classscy_1_1LogWriter)` * _writer` {#group__base_1ga7faa46b191ca0f6f851ff759c93bbec4}
 
 
 
 
 
-#### `protected  Logger(const `[`Logger`](#classscy_1_1Logger)` &)` {#group__base_1gacf89b6148e147b8b074e03217107c265}
+#### `protected  Logger(const `[`Logger`](#classscy_1_1Logger)` &) = delete` {#group__base_1gae25ba15fd8c92541a296f5be97f0ece8}
 
 Non-copyable and non-movable.
 
 
 
-#### `protected  Logger(`[`Logger`](#classscy_1_1Logger)` &&)` {#group__base_1gaa7f7e21d2eea736305511f667641f729}
+#### `protected  Logger(`[`Logger`](#classscy_1_1Logger)` &&) = delete` {#group__base_1ga946e9a48afb178d5761f0b8082a7ed20}
 
 
 
 
 
-#### `protected `[`Logger`](#classscy_1_1Logger)` & operator=(const `[`Logger`](#classscy_1_1Logger)` &)` {#group__base_1ga6df04064715806676c20e744e9bf29d5}
+#### `protected `[`Logger`](#classscy_1_1Logger)` & operator=(const `[`Logger`](#classscy_1_1Logger)` &) = delete` {#group__base_1gacd3c812a9b449698e94379f79d833717}
 
 
 
 
 
-#### `protected `[`Logger`](#classscy_1_1Logger)` & operator=(`[`Logger`](#classscy_1_1Logger)` &&)` {#group__base_1gad15f5a6b760f84ac89f7821bdd01bfb5}
+#### `protected `[`Logger`](#classscy_1_1Logger)` & operator=(`[`Logger`](#classscy_1_1Logger)` &&) = delete` {#group__base_1ga87d34e8853f82f145d52986159cc8648}
 
 
 
@@ -3428,6 +3260,59 @@ String methods.
 
 
 
+# class `scy::Mutex` {#classscy_1_1Mutex}
+
+
+
+
+This class is a wrapper around uv_mutex_t.
+
+A [Mutex](#classscy_1_1Mutex) (mutual exclusion) is a synchronization mechanism used to control access to a shared resource in a concurrent (multithreaded) scenario.
+
+The [ScopedLock](#classscy_1_1ScopedLock) class is usually used to obtain a [Mutex](#classscy_1_1Mutex) lock, since it makes locking exception-safe.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public  Mutex()` | 
+`public  ~Mutex()` | 
+`public void lock()` | 
+`public bool tryLock()` | 
+`public void unlock()` | 
+
+## Members
+
+#### `public  Mutex()` {#group__base_1gaa505afade5fc6228c6a216ce4f8d750d}
+
+
+
+
+
+#### `public  ~Mutex()` {#group__base_1ga3fc093fe6b2e41a1b22028c5f730a419}
+
+
+
+
+
+#### `public void lock()` {#group__base_1gad2e904ac86fe7a3a369fb1f74e2068f7}
+
+
+
+Locks the mutex. Blocks if the mutex is held by another thread.
+
+#### `public bool tryLock()` {#group__base_1gaff9cac1980829d00d00e52a8a1e68e84}
+
+
+
+Tries to lock the mutex. Returns false if the mutex is already held by another thread. Returns true if the mutex was successfully locked.
+
+#### `public void unlock()` {#group__base_1ga2791e24445092c0ded771c148b6ee4b5}
+
+
+
+Unlocks the mutex so that it can be acquired by other threads.
+
 # class `scy::MutexState` {#classscy_1_1MutexState}
 
 ```
@@ -3450,7 +3335,7 @@ class scy::MutexState
 `public inline virtual void set(ID id)` | 
 `public inline virtual std::string message() const` | 
 `public inline virtual void setMessage(const std::string & message)` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 
 ## Members
 
@@ -3496,29 +3381,11 @@ class scy::MutexState
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga3c3eba92c1a058aa46cf9f58ac76c859}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga3c3eba92c1a058aa46cf9f58ac76c859}
 
 
 
 
-
-# class `scy::NullSignal` {#classscy_1_1NullSignal}
-
-```
-class scy::NullSignal
-  : public scy::SignalBase< DelegateBase<> >
-```  
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-
-## Members
 
 # class `scy::NVCollection` {#classscy_1_1NVCollection}
 
@@ -3534,7 +3401,7 @@ A storage container for a name value collections. This collection can store mult
 `public inline  NVCollection()` | 
 `public inline  NVCollection(const `[`NVCollection`](#classscy_1_1NVCollection)` & nvc)` | 
 `public inline virtual  ~NVCollection()` | 
-`public inline `[`NVCollection`](#classscy_1_1NVCollection)` & operator=(const `[`NVCollection`](#classscy_1_1NVCollection)` & nvc)` | Assigns the name-value pairs of another [NVCollection](api-base.md#classscy_1_1NVCollection) to this one.
+`public inline `[`NVCollection`](#classscy_1_1NVCollection)` & operator=(const `[`NVCollection`](#classscy_1_1NVCollection)` & nvc)` | Assigns the name-value pairs of another [NVCollection](./doc/api-base.md#classscy_1_1NVCollection) to this one.
 `public inline const std::string & operator[](const std::string & name) const` | 
 `public inline void set(const std::string & name,const std::string & value)` | Sets the value of the (first) name-value pair with the given name.
 `public inline void add(const std::string & name,const std::string & value)` | Adds a new name-value pair with the given name and value.
@@ -3763,14 +3630,14 @@ This class is a virtual interface for creating PacketStreamAdapters which proces
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public inline  PacketProcessor(`[`PacketSignal`](#classscy_1_1SignalBase)` & emitter)` | 
+`public inline  PacketProcessor(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & emitter)` | 
 `public void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 `public inline virtual bool accepts(`[`IPacket`](#classscy_1_1IPacket)` &)` | 
 `public inline virtual void operator<<(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | [Stream](#classscy_1_1Stream) operator alias for [process()](#group__base_1gad7adc3fd78dce41f0f96744dfe6d1d50)
 
 ## Members
 
-#### `public inline  PacketProcessor(`[`PacketSignal`](#classscy_1_1SignalBase)` & emitter)` {#group__base_1gaf3ab7df2c2416fdb3bd4e2b313c8b772}
+#### `public inline  PacketProcessor(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & emitter)` {#group__base_1gaf3ab7df2c2416fdb3bd4e2b313c8b772}
 
 
 
@@ -3819,9 +3686,9 @@ In order to synchronize output packets with the application event loop take a lo
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | Signals to delegates on outgoing packets.
-`public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::exception_ptr & > Error` | 
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Close` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | Signals to delegates on outgoing packets.
+`public `[`Signal](#classscy_1_1Signal)< void([PacketStream`](#classscy_1_1PacketStream) &, const std::exception_ptr &)`> Error` | 
+`public `[`Signal](#classscy_1_1Signal)< void([PacketStream`](#classscy_1_1PacketStream) &)`> Close` | 
 `public  PacketStream(const std::string & name)` | 
 `public virtual  ~PacketStream()` | 
 `public virtual void start()` | Start the stream and synchronized sources.
@@ -3832,16 +3699,16 @@ In order to synchronize output packets with the application event loop take a lo
 `public virtual void reset()` | Cleanup all managed stream adapters and reset the stream state.
 `public virtual bool active() const` | Returns true when the stream is in the Active state.
 `public virtual bool stopped() const` | Returns true when the stream is in the Stopping or Stopped state.
-`public virtual bool closed() const` | Returns true when the stream is in the Closed or [Error](api-base.md#structscy_1_1Error) state.
+`public virtual bool closed() const` | Returns true when the stream is in the Closed or [Error](./doc/api-base.md#structscy_1_1Error) state.
 `public virtual bool lock()` | 
 `public virtual bool locked() const` | Returns true is the stream is currently locked.
 `public virtual void write(char * data,std::size_t len)` | Writes data to the stream (nocopy).
 `public virtual void write(const char * data,std::size_t len)` | Writes data to the stream (copied).
 `public virtual void write(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | Writes an incoming packet onto the stream.
-`public virtual void attachSource(`[`PacketSignal`](#classscy_1_1SignalBase)` & source)` | 
+`public virtual void attachSource(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & source)` | 
 `public virtual void attachSource(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` * source,bool freePointer,bool syncState)` | 
 `public template<class C>`  <br/>`inline void attachSource(std::shared_ptr< C > ptr,bool syncState)` | 
-`public virtual bool detachSource(`[`PacketSignal`](#classscy_1_1SignalBase)` & source)` | Detaches the given source packet signal from the stream.
+`public virtual bool detachSource(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & source)` | Detaches the given source packet signal from the stream.
 `public virtual bool detachSource(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` * source)` | 
 `public virtual void attach(`[`PacketProcessor`](#classscy_1_1PacketProcessor)` * proc,int order,bool freePointer)` | 
 `public template<class C>`  <br/>`inline void attach(std::shared_ptr< C > ptr,bool syncState)` | 
@@ -3863,13 +3730,13 @@ In order to synchronize output packets with the application event loop take a lo
 `public int numAdapters() const` | 
 `public template<class AdapterT>`  <br/>`inline AdapterT * getSource(int index)` | 
 `public template<class AdapterT>`  <br/>`inline AdapterT * getProcessor(int index)` | 
-`public inline `[`PacketProcessor`](#classscy_1_1PacketProcessor)` * getProcessor(int order)` | Returns the [PacketProcessor](api-base.md#classscy_1_1PacketProcessor) at the given position.
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _procMutex` | 
+`public inline `[`PacketProcessor`](#classscy_1_1PacketProcessor)` * getProcessor(int order)` | Returns the [PacketProcessor](./doc/api-base.md#classscy_1_1PacketProcessor) at the given position.
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _procMutex` | 
 `protected std::string _name` | 
 `protected PacketAdapterVec _sources` | 
 `protected PacketAdapterVec _processors` | 
-`protected std::deque< `[`PacketStreamState`](api-base.md#structscy_1_1PacketStreamState)` > _states` | 
+`protected std::deque< `[`PacketStreamState`](./doc/api-base.md#structscy_1_1PacketStreamState)` > _states` | 
 `protected std::exception_ptr _error` | 
 `protected bool _autoStart` | 
 `protected bool _closeOnError` | 
@@ -3879,7 +3746,7 @@ In order to synchronize output packets with the application event loop take a lo
 `protected void emit(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
 `protected void attachSource(PacketAdapterReference::Ptr ref)` | 
 `protected void attach(PacketAdapterReference::Ptr ref)` | 
-`protected void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | [Process](api-base.md#classscy_1_1Process) incoming packets.
+`protected void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | [Process](./doc/api-base.md#classscy_1_1Process) incoming packets.
 `protected void startSources()` | Start synchronized sources.
 `protected void stopSources()` | Stop synchronized sources.
 `protected void synchronizeStates()` | Synchronize queued states with adapters.
@@ -3889,19 +3756,19 @@ In order to synchronize output packets with the application event loop take a lo
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__base_1ga3d4fa2d39446cd24ce5d8281834b70db}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__base_1ga3d4fa2d39446cd24ce5d8281834b70db}
 
 Signals to delegates on outgoing packets.
 
 
 
-#### `public `[`Signal`](api-base.md#classscy_1_1Signal)`< const std::exception_ptr & > Error` {#group__base_1ga2723c4adbc983393808117913b4aefe1}
+#### `public `[`Signal](#classscy_1_1Signal)< void([PacketStream`](#classscy_1_1PacketStream) &, const std::exception_ptr &)`> Error` {#group__base_1ga91c28709d238b0cfa21ba0929296d981}
 
 
 
 Signals that the [PacketStream](#classscy_1_1PacketStream) is in [Error](#structscy_1_1Error) state. If stream output is synchronized then the [Error](#structscy_1_1Error) signal will be sent from the synchronization context, otherwise it will be sent from the async processor context. See [synchronizeOutput()](#group__base_1ga27a797846a098946cf73d80726302a9e)
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Close` {#group__base_1gad79c7a7a6f86fc9e4a5d19198daab658}
+#### `public `[`Signal](#classscy_1_1Signal)< void([PacketStream`](#classscy_1_1PacketStream) &)`> Close` {#group__base_1ga1a7296d92dbedd388ea99ff6436e5037}
 
 
 
@@ -4003,7 +3870,7 @@ Writes an incoming packet onto the stream.
 
 
 
-#### `public virtual void attachSource(`[`PacketSignal`](#classscy_1_1SignalBase)` & source)` {#group__base_1ga16adec5b00a33070556dd8531e1825c0}
+#### `public virtual void attachSource(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & source)` {#group__base_1ga16adec5b00a33070556dd8531e1825c0}
 
 
 
@@ -4013,7 +3880,7 @@ Attaches a source packet emitter to the stream. The source packet adapter can be
 
 
 
-Attaches a source packet emitter to the stream. If freePointer is true, the pointer will be deleted when the stream is closed. If syncState is true and the source is a basic::Stratable, then the source's [start()](#group__base_1gaa07075299f2271e58f78de3fd7e62b10)/stop() methods will be synchronized when calling [startSources()](#group__base_1gaeb9605f5d35a6aaa92bf427e0989827c)/stopSources().
+Attaches a source packet emitter to the stream. If freePointer is true, the pointer will be deleted when the stream is closed. If syncState is true and the source is a async::Stratable, then the source's [start()](#group__base_1gaa07075299f2271e58f78de3fd7e62b10)/stop() methods will be synchronized when calling [startSources()](#group__base_1gaeb9605f5d35a6aaa92bf427e0989827c)/stopSources().
 
 #### `public template<class C>`  <br/>`inline void attachSource(std::shared_ptr< C > ptr,bool syncState)` {#group__base_1gae6f1bb5accd371bd151cfbabc141b331}
 
@@ -4021,7 +3888,7 @@ Attaches a source packet emitter to the stream. If freePointer is true, the poin
 
 Attaches a source packet emitter to the stream. This method enables compatibility with shared_ptr managed adapter instances.
 
-#### `public virtual bool detachSource(`[`PacketSignal`](#classscy_1_1SignalBase)` & source)` {#group__base_1ga06e1aa0b843f233d6dc71ca293a24945}
+#### `public virtual bool detachSource(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & source)` {#group__base_1ga06e1aa0b843f233d6dc71ca293a24945}
 
 Detaches the given source packet signal from the stream.
 
@@ -4163,13 +4030,13 @@ Returns the [PacketProcessor](#classscy_1_1PacketProcessor) at the given positio
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga40b214c2a390ede8aafa541e05af73c9}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga40b214c2a390ede8aafa541e05af73c9}
 
 
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _procMutex` {#group__base_1gac4ad9ab7d9abd4924b932c1d6b2502c9}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _procMutex` {#group__base_1gac4ad9ab7d9abd4924b932c1d6b2502c9}
 
 
 
@@ -4193,7 +4060,7 @@ Returns the [PacketProcessor](#classscy_1_1PacketProcessor) at the given positio
 
 
 
-#### `protected std::deque< `[`PacketStreamState`](api-base.md#structscy_1_1PacketStreamState)` > _states` {#group__base_1ga6cdb9717a975c66542a88ce34586265b}
+#### `protected std::deque< `[`PacketStreamState`](./doc/api-base.md#structscy_1_1PacketStreamState)` > _states` {#group__base_1ga6cdb9717a975c66542a88ce34586265b}
 
 
 
@@ -4308,24 +4175,24 @@ This class is a wrapper for integrating external classes with the a [PacketStrea
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  PacketStreamAdapter(`[`PacketSignal`](#classscy_1_1SignalBase)` & emitter)` | 
+`public  PacketStreamAdapter(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & emitter)` | 
 `public inline virtual  ~PacketStreamAdapter()` | 
 `public virtual void emit(char * data,std::size_t len,unsigned flags)` | 
 `public virtual void emit(const char * data,std::size_t len,unsigned flags)` | 
 `public virtual void emit(const std::string & str,unsigned flags)` | 
 `public virtual void emit(unsigned flags)` | 
 `public virtual void emit(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
-`public `[`PacketSignal`](#classscy_1_1SignalBase)` & getEmitter()` | Returns a reference to the outgoing packet signal.
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & getEmitter()` | Returns a reference to the outgoing packet signal.
 `public inline virtual void onStreamStateChange(const `[`PacketStreamState`](#structscy_1_1PacketStreamState)` &)` | 
-`protected `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` & _emitter` | 
-`protected  PacketStreamAdapter(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &)` | 
-`protected  PacketStreamAdapter(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&)` | 
-`protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &)` | 
-`protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&)` | 
+`protected `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & _emitter` | 
+`protected  PacketStreamAdapter(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &) = delete` | 
+`protected  PacketStreamAdapter(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&) = delete` | 
+`protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &) = delete` | 
+`protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&) = delete` | 
 
 ## Members
 
-#### `public  PacketStreamAdapter(`[`PacketSignal`](#classscy_1_1SignalBase)` & emitter)` {#group__base_1ga33639caa7975d01430b01643da0f3ddb}
+#### `public  PacketStreamAdapter(`[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & emitter)` {#group__base_1ga33639caa7975d01430b01643da0f3ddb}
 
 
 
@@ -4367,7 +4234,7 @@ This class is a wrapper for integrating external classes with the a [PacketStrea
 
 
 
-#### `public `[`PacketSignal`](#classscy_1_1SignalBase)` & getEmitter()` {#group__base_1ga3c56e12afc6c4863d9f70258dfe6c2a5}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & getEmitter()` {#group__base_1ga3c56e12afc6c4863d9f70258dfe6c2a5}
 
 Returns a reference to the outgoing packet signal.
 
@@ -4379,31 +4246,31 @@ Returns a reference to the outgoing packet signal.
 
 Called by the [PacketStream](#classscy_1_1PacketStream) to notify when the internal [Stream](#classscy_1_1Stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
 
-#### `protected `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` & _emitter` {#group__base_1ga080cfd0707ca633ed93b77aa066c6e8b}
+#### `protected `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` & _emitter` {#group__base_1ga080cfd0707ca633ed93b77aa066c6e8b}
 
 
 
 
 
-#### `protected  PacketStreamAdapter(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &)` {#group__base_1ga082704d9ef37c5cc5e267f95438053bb}
+#### `protected  PacketStreamAdapter(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &) = delete` {#group__base_1ga2e52c68e66f76569dacf29a41cf8a73b}
 
 
 
 
 
-#### `protected  PacketStreamAdapter(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&)` {#group__base_1ga27b994fb11a53d66db06b6d29b66921c}
+#### `protected  PacketStreamAdapter(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&) = delete` {#group__base_1ga42a4055c064613c2ae0a5e81e93ba7eb}
 
 
 
 
 
-#### `protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &)` {#group__base_1gae8cdb3cddd4b5df3ad9f3cf4d55c287b}
+#### `protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(const `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &) = delete` {#group__base_1ga3a07e7cc77a044543df3b6674f8734ab}
 
 
 
 
 
-#### `protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&)` {#group__base_1ga20a029ecd3bedeaa7c70f3ca4d2b3763}
+#### `protected `[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` & operator=(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` &&) = delete` {#group__base_1ga5ea60095fe9111ec7c7cc58247ab9046}
 
 
 
@@ -4442,9 +4309,9 @@ PacketTransactions are fire and forget. The object will be deleted after a succe
 `public inline PacketT response() const` | 
 `protected PacketT _request` | 
 `protected PacketT _response` | 
-`protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` | 
+`protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` | 
 `protected int _timeout` | The request timeout in milliseconds.
-`protected int _retries` | The maximum number of attempts before the transaction is considered failed.
+`protected int _retries` | 
 `protected int _attempts` | The number of times the transaction has been sent.
 `protected bool _destroyed` | 
 `protected inline virtual  ~PacketTransaction()` | 
@@ -4452,7 +4319,7 @@ PacketTransactions are fire and forget. The object will be deleted after a succe
 `protected inline virtual bool handlePotentialResponse(const PacketT & packet)` | 
 `protected bool checkResponse(const PacketT & packet)` | 
 `protected inline virtual void onResponse()` | Called when a successful response is received.
-`protected inline virtual void onTimeout(void *)` | 
+`protected inline virtual void onTimeout()` | 
 
 ## Members
 
@@ -4550,7 +4417,7 @@ Protected by the base implementation as this is called by the internal state mac
 
 
 
-#### `protected `[`Timer`](api-base.md#classscy_1_1Timer)` _timer` {#group__base_1ga56cf3ef1cde1ed234a81adbc534a4d0c}
+#### `protected `[`Timer`](./doc/api-base.md#classscy_1_1Timer)` _timer` {#group__base_1ga56cf3ef1cde1ed234a81adbc534a4d0c}
 
 
 
@@ -4564,9 +4431,9 @@ The request timeout in milliseconds.
 
 #### `protected int _retries` {#group__base_1ga3c72d7ce16d3b6defff73f7fb572ed2b}
 
+
+
 The maximum number of attempts before the transaction is considered failed.
-
-
 
 #### `protected int _attempts` {#group__base_1ga15a0177855becd97f06df6f4b24d59a9}
 
@@ -4610,7 +4477,7 @@ Called when a successful response is received.
 
 
 
-#### `protected inline virtual void onTimeout(void *)` {#group__base_1ga587ddc82d2f9e3b6cf93b50c538190a5}
+#### `protected inline virtual void onTimeout()` {#group__base_1ga6c44b73210c0d856a72380a00403c486}
 
 
 
@@ -4651,7 +4518,7 @@ This class allows for custom memory handling of managed pointers via the TDelete
 `public inline virtual void onAdd(const TKey &,TValue *)` | 
 `public inline virtual void onRemove(const TKey &,TValue *)` | 
 `protected Map _map` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 
 ## Members
 
@@ -4763,7 +4630,7 @@ This class allows for custom memory handling of managed pointers via the TDelete
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1gadf9570794ed77aa862bd1f5744a1d015}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1gadf9570794ed77aa862bd1f5744a1d015}
 
 
 
@@ -4786,7 +4653,7 @@ class scy::Process
 --------------------------------|---------------------------------------------
 `public std::vector< std::string > args` | 
 `public std::function< void(std::int64_t)> onexit` | Exit callback; returns the exit status.
-`public ProcessOptions options` | [Process](api-base.md#classscy_1_1Process) options.
+`public ProcessOptions options` | [Process](./doc/api-base.md#classscy_1_1Process) options.
 `public  Process(uv::Loop * loop)` | 
 `public void spawn()` | 
 `public bool kill(int signum)` | Kills the process.
@@ -5316,10 +5183,10 @@ class scy::RunnableQueue
 `public inline virtual void run()` | 
 `public inline virtual void runTimeout()` | 
 `public inline virtual void dispatch(T & item)` | 
-`public inline void setTimeout(int milliseconds)` | int timeout() /// { /// Mutex::ScopedLock lock(_mutex); /// return _timeout; /// }
+`public inline void setTimeout(int milliseconds)` | 
 `protected int _limit` | 
 `protected int _timeout` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | queue_t _queue;
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | queue_t _queue;
 `protected  RunnableQueue(const `[`RunnableQueue`](#classscy_1_1RunnableQueue)` &)` | 
 `protected `[`RunnableQueue`](#classscy_1_1RunnableQueue)` & operator=(const `[`RunnableQueue`](#classscy_1_1RunnableQueue)` &)` | 
 `protected inline virtual T * popNext()` | 
@@ -5383,9 +5250,9 @@ until the queue is empty or the timeout expires. Pseudo protected for std::bind 
 
 #### `public inline void setTimeout(int milliseconds)` {#group__base_1gad0dfa024d9a58c4d98191c2fa52b8778}
 
+
+
 int timeout() /// { /// Mutex::ScopedLock lock(_mutex); /// return _timeout; /// }
-
-
 
 #### `protected int _limit` {#group__base_1gac4231be4ccc33b05adef9052c6b70938}
 
@@ -5399,7 +5266,7 @@ int timeout() /// { /// Mutex::ScopedLock lock(_mutex); /// return _timeout; ///
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga5b6ef24633663c2660805b302dd82a1e}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga5b6ef24633663c2660805b302dd82a1e}
 
 queue_t _queue;
 
@@ -5442,7 +5309,7 @@ Example scoping: Module: channels.[name].modes.[name].[value] Default: modes.[na
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Configuration`](api-base.md#classscy_1_1Configuration)` & config` | 
+`public `[`Configuration`](./doc/api-base.md#classscy_1_1Configuration)` & config` | 
 `public std::string currentScope` | 
 `public std::string defaultScope` | 
 `public  ScopedConfiguration(`[`Configuration`](#classscy_1_1Configuration)` & config,const std::string & currentScope,const std::string & defaultScope)` | 
@@ -5461,7 +5328,7 @@ Example scoping: Module: channels.[name].modes.[name].[value] Default: modes.[na
 
 ## Members
 
-#### `public `[`Configuration`](api-base.md#classscy_1_1Configuration)` & config` {#group__base_1gab789db5bbe6952f38128f6a477b6cb45}
+#### `public `[`Configuration`](./doc/api-base.md#classscy_1_1Configuration)` & config` {#group__base_1gab789db5bbe6952f38128f6a477b6cb45}
 
 
 
@@ -5552,6 +5419,34 @@ Example scoping: Module: channels.[name].modes.[name].[value] Default: modes.[na
 
 
 #### `public std::string getScopedKey(const std::string & key,bool defaultScope) const` {#group__base_1ga1b6e232dfd5b13c1eaff4408adc03b77}
+
+
+
+
+
+# class `scy::ScopedLock` {#classscy_1_1ScopedLock}
+
+
+
+
+[ScopedLock](#classscy_1_1ScopedLock) simplifies thread synchronization with a [Mutex](#classscy_1_1Mutex) or similar lockable object. The given [Mutex](#classscy_1_1Mutex) is locked in the constructor, and unlocked it in the destructor. T can be any class with lock() and unlock() functions.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public inline  explicit ScopedLock(T & m)` | 
+`public inline  ~ScopedLock()` | 
+
+## Members
+
+#### `public inline  explicit ScopedLock(T & m)` {#group__base_1gaec7c41fcc3e238b4c5c7bc58cf409498}
+
+
+
+
+
+#### `public inline  ~ScopedLock()` {#group__base_1ga93e842e5274e111fa60d77c0ce8ab3d1}
 
 
 
@@ -5751,10 +5646,76 @@ Destroys the [SharedObject](#classscy_1_1SharedObject). The destructor should ne
 
 # class `scy::Signal` {#classscy_1_1Signal}
 
-```
-class scy::Signal
-  : public scy::SignalBase< DelegateBase< P >, P >
-```  
+
+
+
+[Signal](#classscy_1_1Signal) and slots implementation.
+
+To create a signal, declare member variables of type `[Signal](#classscy_1_1Signal)<...>` in your class. The template parameter is the argument types that will be passed to the callback functions.
+
+Here's a simple example with a class `MyClass` that has a single signal `my_signal` which takes a single `int` argument: class MyClass
+{
+public:
+    Signal<int> my_signal;
+    ...
+};
+
+
+To connect to a signal, call its `attach()` member function, passing a function (in the `std::function` sense) as the argument. The function can be a function pointer, a functor object, or an anonymous lambda function.
+
+Here's an example connecting to the above signal to a lambda function: MyClass my_class;
+my_class.my_signal.attach([](int x) {
+    cout << "value: " << x << endl;
+});
+
+
+The `attach()` function returns a unique ID of type `int` which can be used later to disconnect the callback function.
+
+Here's an example using the above code to then immediately disconnect the signal connection with the `detach()` member function: MyClass my_class;
+auto id = my_class.my_signal.attach([](int x) {
+    cout << "value: " << x << endl;
+});
+my_class.my_signal.detach(id);
+
+
+The `detach()` function is passed the callback ID and will return `true` if a callback was disconnected or `false` if the ID wasn't found. Note that `detach()` can be safely called from within the callback scope.
+
+In the case of class members there is a `slot()` helper that can be used to bind the signal like so: class TargetClass
+{
+public:
+    Signal<int> my_signal;
+
+    int print(int x)
+    {
+        cout << "say: " << x << endl;
+    }
+};
+
+MyClass my_class;
+
+TargetClass target_class;
+my_class.my_signal += slot(&target_class, &TargetClass::print)
+
+
+The `slot()` helper can also be used to disconnect class member callbacks like so: my_class.my_signal -= slot(&target_class, &TargetClass::print)
+
+
+To emit the signal, call its `emit()` member function passing arguments matching the types of those in the signal variable declaration.
+
+Using the above example code, here's an example showing how to emit `my_signal`: my_class.my_signal.emit(42);
+
+
+Since the signal was declared to take a single `int` argument, this will cause any callbacks connected to the signal to be called, passing the integer `42` as the only argument.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+
+## Members
+
+# class `scy::Signal< RT(Args...)>` {#classscy_1_1Signal_3_01RT_07Args_8_8_8_08_4}
+
 
 
 
@@ -5764,247 +5725,102 @@ class scy::Signal
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
+`public inline int attach(Function const & func,void * instance,int id,int priority) const` | 
+`public inline int attach(SlotPtr slot) const` | 
+`public inline bool detach(int id) const` | Detaches a previously attached slot.
+`public inline bool detach(const void * instance) const` | Detaches all slots for the given instance.
+`public inline bool detach(SlotPtr other) const` | Detaches all attached functions for the given instance.
+`public inline void detachAll() const` | Detaches all previously attached functions.
+`public inline void emit(Args... args) const` | Emits the signal to all attached functions.
+`public inline std::vector< SlotPtr > slots() const` | Returns the managed slot list.
+`public inline std::size_t nslots() const` | Returns the number of active slots.
+`public inline int operator+=(Function const & func)` | Convenience operators.
+`public inline int operator+=(SlotPtr slot)` | 
+`public inline bool operator-=(int id)` | 
+`public inline bool operator-=(const void * instance)` | 
+`public inline bool operator-=(SlotPtr slot)` | 
 
 ## Members
 
-# class `scy::Signal2` {#classscy_1_1Signal2}
+#### `public inline int attach(Function const & func,void * instance,int id,int priority) const` {#group__base_1gac2a3756f75e8e9a1bccb3303ec491dff}
 
-```
-class scy::Signal2
-  : public scy::SignalBase< DelegateBase< P, P2 >, P, P2 >
-```  
 
 
+Connects a lambda or `std::function` to the `[Signal](#classscy_1_1Signal)`. The returned value can be used to detach the slot.
 
+#### `public inline int attach(SlotPtr slot) const` {#group__base_1ga77af5fd67dc1c8929ce0041fa1b573d0}
 
 
-## Summary
 
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
+Connects a `SlotPtr` instance to the `[Signal](#classscy_1_1Signal)`. The returned value can be used to detach the slot.
 
-## Members
+#### `public inline bool detach(int id) const` {#group__base_1gaea38b0b03fb3e5a21d5d9514964e7608}
 
-# class `scy::Signal3` {#classscy_1_1Signal3}
+Detaches a previously attached slot.
 
-```
-class scy::Signal3
-  : public scy::SignalBase< DelegateBase< P, P2, P3 >, P, P2, P3 >
-```  
 
 
+#### `public inline bool detach(const void * instance) const` {#group__base_1ga80430b9e160632b7227a1eabfca56213}
 
+Detaches all slots for the given instance.
 
 
-## Summary
 
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
+#### `public inline bool detach(SlotPtr other) const` {#group__base_1ga2450e3597bcba5e05d70d99d4e8da569}
 
-## Members
+Detaches all attached functions for the given instance.
 
-# class `scy::Signal4` {#classscy_1_1Signal4}
 
-```
-class scy::Signal4
-  : public scy::SignalBase< DelegateBase< P, P2, P3, P4 >, P, P2, P3, P4 >
-```  
 
+#### `public inline void detachAll() const` {#group__base_1ga587e054f0a2a0c5c478d418490d53972}
 
+Detaches all previously attached functions.
 
 
 
-## Summary
+#### `public inline void emit(Args... args) const` {#group__base_1ga3584c949654aabac7ec9a44489011132}
 
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
+Emits the signal to all attached functions.
 
-## Members
 
-# class `scy::SignalBase` {#classscy_1_1SignalBase}
 
+#### `public inline std::vector< SlotPtr > slots() const` {#group__base_1ga603fe687211aac0968f38389d4c46a0b}
 
+Returns the managed slot list.
 
 
-This class implements a thread-safe signal which broadcasts arbitrary data to multiple receiver delegates.
 
-## Summary
+#### `public inline std::size_t nslots() const` {#group__base_1ga5a45cd1ceee89b7cf1d27ac67854a6f9}
 
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline  SignalBase()` | 
-`public inline virtual  ~SignalBase()` | 
-`public inline void operator+=(const DelegateT & delegate)` | 
-`public inline void operator-=(const DelegateT & delegate)` | 
-`public inline void operator-=(const void * klass)` | 
-`public inline void attach(const DelegateT & delegate)` | 
-`public inline bool detach(const DelegateT & delegate)` | 
-`public inline void detach(const void * klass)` | Detaches all delegates associated with the given class instance.
-`public inline void cleanup()` | Deletes cancelled delegates.
-`public inline void obtain(DelegateList & active)` | 
-`public inline virtual void emit(void * sender)` | 
-`public inline virtual void emit(void * sender,P arg)` | 
-`public inline virtual void emit(void * sender,P arg,P2 arg2)` | 
-`public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3)` | 
-`public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4)` | 
-`public inline void clear()` | 
-`public inline void enable(bool flag)` | 
-`public inline bool enabled() const` | 
-`public inline DelegateList delegates() const` | 
-`public inline int ndelegates() const` | 
-`protected DelegateList _delegates` | 
-`protected bool _enabled` | 
-`protected bool _dirty` | 
-`protected int _count` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+Returns the number of active slots.
 
-## Members
 
-#### `public inline  SignalBase()` {#group__base_1gaf59fa7dc8dd8aa11f0a3b52cd6a70442}
 
+#### `public inline int operator+=(Function const & func)` {#group__base_1ga7711cffea5254d8c5ef372f0343e40af}
 
+Convenience operators.
 
 
 
-#### `public inline virtual  ~SignalBase()` {#group__base_1gaf1d5c65bde4637359b62230b2b366210}
+#### `public inline int operator+=(SlotPtr slot)` {#group__base_1ga4eb920126905b5f6d5f2bb7fcf8c4477}
 
 
 
 
 
-#### `public inline void operator+=(const DelegateT & delegate)` {#group__base_1ga7e10d74e636632a19975570c4b198f4f}
+#### `public inline bool operator-=(int id)` {#group__base_1gab4fd251624562e056ef80c3d15dd5688}
 
 
 
 
 
-#### `public inline void operator-=(const DelegateT & delegate)` {#group__base_1ga3612e81c0441de63c64c4a109b783a68}
+#### `public inline bool operator-=(const void * instance)` {#group__base_1ga710960eba97189f8a7981ede5d8b96a2}
 
 
 
 
 
-#### `public inline void operator-=(const void * klass)` {#group__base_1ga6550c3f81bea0d4a0cd0aa8162705dfa}
-
-
-
-
-
-#### `public inline void attach(const DelegateT & delegate)` {#group__base_1ga38e483d2d752c5c6999d55a8a0aa07c3}
-
-
-
-Attaches a delegate to the signal. If the delegate already exists it will overwrite the previous delegate.
-
-#### `public inline bool detach(const DelegateT & delegate)` {#group__base_1ga1cd2c449fd0ecfa89dbc56174a6139c1}
-
-
-
-Detaches a delegate from the signal. Returns true if the delegate was detached, false otherwise.
-
-#### `public inline void detach(const void * klass)` {#group__base_1ga781e801f45b7679e767f5977d52d5262}
-
-Detaches all delegates associated with the given class instance.
-
-
-
-#### `public inline void cleanup()` {#group__base_1gab5007309eccbd4c7faa6b41420fc10da}
-
-Deletes cancelled delegates.
-
-
-
-#### `public inline void obtain(DelegateList & active)` {#group__base_1gabf0d710eb0ad8b6cc5c52fb2245c3a59}
-
-
-
-Retrieves a list of active delegates while simultaneously deleting any redundant delegates.
-
-#### `public inline virtual void emit(void * sender)` {#group__base_1ga0e1385097955d44c3df2330f7b44074f}
-
-
-
-
-
-#### `public inline virtual void emit(void * sender,P arg)` {#group__base_1ga18ddc31b671b097c84b433894657b0d8}
-
-
-
-
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2)` {#group__base_1gafa1225e73367a3671e614f9c83afdd87}
-
-
-
-
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3)` {#group__base_1gaae055444fca242b18f030950458e354c}
-
-
-
-
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4)` {#group__base_1ga1239308100dbb8410e0df88f54af0455}
-
-
-
-
-
-#### `public inline void clear()` {#group__base_1ga5b8b00d4f6789e62162e391150e6a2e4}
-
-
-
-
-
-#### `public inline void enable(bool flag)` {#group__base_1ga636d9306d7c507c754732a7a71450cc6}
-
-
-
-
-
-#### `public inline bool enabled() const` {#group__base_1ga81035ff58a89ba5a887843856a0c211f}
-
-
-
-
-
-#### `public inline DelegateList delegates() const` {#group__base_1ga312d51d3f8f2afa5f1702273ae5191fc}
-
-
-
-
-
-#### `public inline int ndelegates() const` {#group__base_1ga778ea872541e59894fdba9d89864b9d5}
-
-
-
-Returns the number of delegates connected to the signal. Use this instead of delegates().size() since the container is not updated in real time.
-
-#### `protected DelegateList _delegates` {#group__base_1gad533551492e7e01158abffa68837a248}
-
-
-
-
-
-#### `protected bool _enabled` {#group__base_1ga29d24530639efd2101c32fdd3f3a41e8}
-
-
-
-
-
-#### `protected bool _dirty` {#group__base_1gaa470afedc3badb45c39fbc8f74b58e34}
-
-
-
-
-
-#### `protected int _count` {#group__base_1gac6f8ca597b88ce1b7b6e117b2eb5c5b1}
-
-
-
-
-
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga77737ea2ca1576cbdcd29f1f668313ff}
+#### `public inline bool operator-=(SlotPtr slot)` {#group__base_1ga1379909a60fe721c20b601b9f1cd5f62}
 
 
 
@@ -6021,7 +5837,7 @@ This is a helper template class for managing singleton objects allocated on the 
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public inline  Singleton()` | Creates the [Singleton](api-base.md#classscy_1_1Singleton) wrapper.
+`public inline  Singleton()` | Creates the [Singleton](./doc/api-base.md#classscy_1_1Singleton) wrapper.
 `public inline  ~Singleton()` | 
 `public inline S * get()` | 
 `public inline S * swap(S * newPtr)` | 
@@ -6182,7 +5998,7 @@ This class implements a simple state machine. T should be a derived [State](#cla
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< T &, const T & > StateChange` | Signals when the state changes.
+`public `[`Signal`](#classscy_1_1Signal)< void(void *, T &, const T &)`> StateChange` | Signals when the state changes.
 `public inline  Stateful()` | 
 `public inline virtual  ~Stateful()` | 
 `public inline virtual bool stateEquals(unsigned int id) const` | 
@@ -6198,7 +6014,7 @@ This class implements a simple state machine. T should be a derived [State](#cla
 
 ## Members
 
-#### `public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< T &, const T & > StateChange` {#group__base_1ga87c05d98e9c7ed230e65617895a12ab1}
+#### `public `[`Signal`](#classscy_1_1Signal)< void(void *, T &, const T &)`> StateChange` {#group__base_1ga822472b26b7dcdce4e5d1b2095983ca9}
 
 Signals when the state changes.
 
@@ -6343,31 +6159,6 @@ class scy::StateSignal
 
 Fired when the state changes to signal the new and previous states.
 
-# class `scy::StopPropagation` {#classscy_1_1StopPropagation}
-
-```
-class scy::StopPropagation
-  : public exception
-```  
-
-This exception is used to break out of a [Signal](#classscy_1_1Signal) callback scope.
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual  ~StopPropagation()` | 
-
-## Members
-
-#### `public inline virtual  ~StopPropagation()` {#group__base_1ga4b88cfd276388776d7c3384b64bdb39d}
-
-
-
-
-
 # class `scy::Stopwatch` {#classscy_1_1Stopwatch}
 
 
@@ -6462,7 +6253,7 @@ class scy::Stream
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< const char *, const int & > Read` | Signals when data can be read from the stream.
+`public `[`Signal](#classscy_1_1Signal)< void([Stream`](#classscy_1_1Stream) &, const char *, const int &)`> Read` | Signals when data can be read from the stream.
 `public inline  Stream(uv::Loop * loop,void * stream)` | 
 `public inline virtual void close()` | 
 `public inline bool shutdown()` | 
@@ -6474,11 +6265,10 @@ class scy::Stream
 `protected inline virtual bool readStop()` | 
 `protected inline virtual void onRead(const char * data,std::size_t len)` | 
 `protected inline virtual  ~Stream()` | 
-`protected inline virtual void * self()` | 
 
 ## Members
 
-#### `public `[`Signal2`](api-base.md#classscy_1_1Signal2)`< const char *, const int & > Read` {#group__base_1ga44340acfa09938bfef60507153be4ee3}
+#### `public `[`Signal](#classscy_1_1Signal)< void([Stream`](#classscy_1_1Stream) &, const char *, const int &)`> Read` {#group__base_1ga6397992954a23dee30cad5809b20a7a7}
 
 Signals when data can be read from the stream.
 
@@ -6554,12 +6344,6 @@ Returns true if the native socket handle is closed.
 
 
 
-#### `protected inline virtual void * self()` {#group__base_1ga5199b21fa4be2c0b2e6f160f1c85d617}
-
-
-
-
-
 # class `scy::StreamWriter` {#classscy_1_1StreamWriter}
 
 ```
@@ -6569,13 +6353,15 @@ class scy::StreamWriter
 
 
 
+Packet stream writer class.
 
+This class can be connected to a `[PacketStream](#classscy_1_1PacketStream)` to write output to any class that derives from `std::ostream`. It's most regularly used for writing output files.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  StreamWriter(std::ostream * stream)` | 
 `public inline virtual  ~StreamWriter()` | 
 `public inline virtual void process(`[`IPacket`](#classscy_1_1IPacket)` & packet)` | 
@@ -6585,7 +6371,7 @@ class scy::StreamWriter
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__base_1ga1996908eb8e6301955ff4df97c5a22a7}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__base_1ga1996908eb8e6301955ff4df97c5a22a7}
 
 
 
@@ -6653,7 +6439,7 @@ class scy::SyncContext
 `public virtual void close()` | 
 `public virtual bool closed()` | 
 `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
 `protected virtual void startAsync()` | Start the context from the control thread.
 `protected virtual bool async() const` | 
 
@@ -6713,7 +6499,7 @@ Send a synchronization request to the event loop. Call this each time you want t
 
 
 
-#### `protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1ga83a319d3ca515ba644f59d0c470950c9}
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1ga83a319d3ca515ba644f59d0c470950c9}
 
 
 
@@ -6747,7 +6533,7 @@ class scy::SyncPacketQueue
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  SyncPacketQueue(uv::Loop * loop,int maxSize)` | 
 `public inline  SyncPacketQueue(int maxSize)` | 
 `public inline virtual  ~SyncPacketQueue()` | 
@@ -6758,7 +6544,7 @@ class scy::SyncPacketQueue
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__base_1ga9cb2e51e85e32907283c98c62fc5967d}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__base_1ga9cb2e51e85e32907283c98c62fc5967d}
 
 
 
@@ -6825,10 +6611,10 @@ class scy::SyncQueue
 --------------------------------|---------------------------------------------
 `public inline  SyncQueue(uv::Loop * loop,int limit,int timeout)` | 
 `public inline virtual  ~SyncQueue()` | time for all callbacks to return.
-`public inline virtual void push(T * item)` | Item pointers are now managed by the [SyncQueue](api-base.md#classscy_1_1SyncQueue).
+`public inline virtual void push(T * item)` | Item pointers are now managed by the [SyncQueue](./doc/api-base.md#classscy_1_1SyncQueue).
 `public inline virtual void cancel()` | 
 `public inline `[`SyncContext`](#classscy_1_1SyncContext)` & sync()` | 
-`protected `[`SyncContext`](api-base.md#classscy_1_1SyncContext)` _sync` | 
+`protected `[`SyncContext`](./doc/api-base.md#classscy_1_1SyncContext)` _sync` | 
 
 ## Members
 
@@ -6862,7 +6648,7 @@ Item pointers are now managed by the [SyncQueue](#classscy_1_1SyncQueue).
 
 
 
-#### `protected `[`SyncContext`](api-base.md#classscy_1_1SyncContext)` _sync` {#group__base_1ga2c448333acaf9de512e8487deb4b7eab}
+#### `protected `[`SyncContext`](./doc/api-base.md#classscy_1_1SyncContext)` _sync` {#group__base_1ga2c448333acaf9de512e8487deb4b7eab}
 
 
 
@@ -6987,8 +6773,8 @@ The [TaskRunner](#classscy_1_1TaskRunner) continually loops through each task in
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Idle` | Fires after completing an iteration of all tasks.
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` | Signals when the [TaskRunner](api-base.md#classscy_1_1TaskRunner) is shutting down.
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Idle` | Fires after completing an iteration of all tasks.
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` | Signals when the [TaskRunner](./doc/api-base.md#classscy_1_1TaskRunner) is shutting down.
 `public  TaskRunner(async::Runner::Ptr runner)` | 
 `public virtual  ~TaskRunner()` | 
 `public virtual bool start(`[`Task`](#classscy_1_1Task)` * task)` | Starts a task, adding it if it doesn't exist.
@@ -6998,7 +6784,7 @@ The [TaskRunner](#classscy_1_1TaskRunner) continually loops through each task in
 `public virtual `[`Task`](#classscy_1_1Task)` * get(std::uint32_t id) const` | 
 `public virtual void setRunner(async::Runner::Ptr runner)` | 
 `public inline virtual const char * className() const` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected TaskList _tasks` | 
 `protected async::Runner::Ptr _runner` | 
 `protected virtual void run()` | Called by the async context to run the next task.
@@ -7014,13 +6800,13 @@ The [TaskRunner](#classscy_1_1TaskRunner) continually loops through each task in
 
 ## Members
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Idle` {#group__base_1gabf058e5fccd90bd4c65e22a5bc542ddf}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Idle` {#group__base_1gabf058e5fccd90bd4c65e22a5bc542ddf}
 
 Fires after completing an iteration of all tasks.
 
 
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` {#group__base_1gaf3afae0333fb5b248c320f07a876c682}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` {#group__base_1gaf3afae0333fb5b248c320f07a876c682}
 
 Signals when the [TaskRunner](#classscy_1_1TaskRunner) is shutting down.
 
@@ -7080,7 +6866,7 @@ Set the asynchronous context for packet processing. This may be a [Thread](#clas
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1gaad6506a080eff59878e0bfe7aa1f3264}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1gaad6506a080eff59878e0bfe7aa1f3264}
 
 
 
@@ -7182,8 +6968,8 @@ This class implements a platform-independent wrapper around an operating system 
 `public bool waitForExit(int timeout)` | 
 `public uv_thread_t id() const` | Returns the native thread handle.
 `protected uv_thread_t _handle` | 
-`protected  Thread(const `[`Thread`](#classscy_1_1Thread)` &)` | 
-`protected `[`Thread`](#classscy_1_1Thread)` & operator=(const `[`Thread`](#classscy_1_1Thread)` &)` | 
+`protected  Thread(const `[`Thread`](#classscy_1_1Thread)` &) = delete` | 
+`protected `[`Thread`](#classscy_1_1Thread)` & operator=(const `[`Thread`](#classscy_1_1Thread)` &) = delete` | 
 `protected virtual bool async() const` | 
 `protected virtual void startAsync()` | Start the context from the control thread.
 
@@ -7243,13 +7029,13 @@ Returns the native thread handle.
 
 
 
-#### `protected  Thread(const `[`Thread`](#classscy_1_1Thread)` &)` {#group__base_1gab16fbe0e53ba88c12055f346b13aa83d}
+#### `protected  Thread(const `[`Thread`](#classscy_1_1Thread)` &) = delete` {#group__base_1ga2db47dac5c43119f6254de56f3c1c7ad}
 
 
 
 
 
-#### `protected `[`Thread`](#classscy_1_1Thread)` & operator=(const `[`Thread`](#classscy_1_1Thread)` &)` {#group__base_1gab22acc3ad4419d060be247ac23548bab}
+#### `protected `[`Thread`](#classscy_1_1Thread)` & operator=(const `[`Thread`](#classscy_1_1Thread)` &) = delete` {#group__base_1ga5609719993226b978a2604940250a01d}
 
 
 
@@ -7277,25 +7063,27 @@ class scy::ThreadedStreamReader
 
 
 
+Threaded stream reader class.
 
+This class can be connected to a `[PacketStream](#classscy_1_1PacketStream)` to read input from any class that derives from `std::istream`. It's most regularly used for reading input files.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  ThreadedStreamReader(std::istream * is)` | 
 `public inline  ~ThreadedStreamReader()` | 
 `public inline virtual void start()` | 
 `public inline virtual void stop()` | 
 `public template<class StreamT>`  <br/>`inline StreamT & stream()` | 
 `public inline std::istream & stream()` | 
-`protected `[`Thread`](api-base.md#classscy_1_1Thread)` _runner` | 
+`protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _runner` | 
 `protected std::istream * _istream` | 
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__base_1ga567cb288d73e8913f61ba6d76008b22f}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__base_1ga567cb288d73e8913f61ba6d76008b22f}
 
 
 
@@ -7337,7 +7125,7 @@ class scy::ThreadedStreamReader
 
 
 
-#### `protected `[`Thread`](api-base.md#classscy_1_1Thread)` _runner` {#group__base_1ga209b1d5e46545ea7ed88bc0f0492f22d}
+#### `protected `[`Thread`](./doc/api-base.md#classscy_1_1Thread)` _runner` {#group__base_1ga209b1d5e46545ea7ed88bc0f0492f22d}
 
 
 
@@ -7539,7 +7327,7 @@ Simple millisecond timeout counter which expires after a given delay.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Timeout` | 
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Timeout` | 
 `public  Timer(uv::Loop * loop)` | 
 `public virtual  ~Timer()` | 
 `public virtual void start(std::int64_t interval)` | 
@@ -7553,7 +7341,7 @@ Simple millisecond timeout counter which expires after a given delay.
 `public std::int64_t interval() const` | 
 `public std::int64_t count()` | 
 `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
 `protected std::int64_t _timeout` | 
 `protected std::int64_t _interval` | 
 `protected std::int64_t _count` | 
@@ -7563,7 +7351,7 @@ Simple millisecond timeout counter which expires after a given delay.
 
 ## Members
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Timeout` {#group__base_1ga70ab283148e5fb200fe84f75ea9ea138}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Timeout` {#group__base_1ga70ab283148e5fb200fe84f75ea9ea138}
 
 
 
@@ -7647,7 +7435,7 @@ Set the repeat value. Note that if the repeat value is set from a timer callback
 
 
 
-#### `protected `[`uv::Handle`](api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1ga28d2ed75952cde3696854ce23f11fcc1}
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` {#group__base_1ga28d2ed75952cde3696854ce23f11fcc1}
 
 
 
@@ -7700,17 +7488,17 @@ A class that represents time spans up to microsecond resolution.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  Timespan()` | Creates a zero [Timespan](api-base.md#classscy_1_1Timespan).
-`public  Timespan(TimeDiff microseconds)` | Creates a [Timespan](api-base.md#classscy_1_1Timespan).
+`public  Timespan()` | Creates a zero [Timespan](./doc/api-base.md#classscy_1_1Timespan).
+`public  Timespan(TimeDiff microseconds)` | Creates a [Timespan](./doc/api-base.md#classscy_1_1Timespan).
 `public  Timespan(long seconds,long microseconds)` | 
-`public  Timespan(int days,int hours,int minutes,int seconds,int microseconds)` | Creates a [Timespan](api-base.md#classscy_1_1Timespan).
-`public  Timespan(const `[`Timespan`](#classscy_1_1Timespan)` & timespan)` | Creates a [Timespan](api-base.md#classscy_1_1Timespan) from another one.
-`public  ~Timespan()` | Destroys the [Timespan](api-base.md#classscy_1_1Timespan).
+`public  Timespan(int days,int hours,int minutes,int seconds,int microseconds)` | Creates a [Timespan](./doc/api-base.md#classscy_1_1Timespan).
+`public  Timespan(const `[`Timespan`](#classscy_1_1Timespan)` & timespan)` | Creates a [Timespan](./doc/api-base.md#classscy_1_1Timespan) from another one.
+`public  ~Timespan()` | Destroys the [Timespan](./doc/api-base.md#classscy_1_1Timespan).
 `public `[`Timespan`](#classscy_1_1Timespan)` & operator=(const `[`Timespan`](#classscy_1_1Timespan)` & timespan)` | Assignment operator.
 `public `[`Timespan`](#classscy_1_1Timespan)` & operator=(TimeDiff microseconds)` | Assignment operator.
 `public `[`Timespan`](#classscy_1_1Timespan)` & assign(int days,int hours,int minutes,int seconds,int microseconds)` | Assigns a new span.
 `public `[`Timespan`](#classscy_1_1Timespan)` & assign(long seconds,long microseconds)` | 
-`public void swap(`[`Timespan`](#classscy_1_1Timespan)` & timespan)` | Swaps the [Timespan](api-base.md#classscy_1_1Timespan) with another one.
+`public void swap(`[`Timespan`](#classscy_1_1Timespan)` & timespan)` | Swaps the [Timespan](./doc/api-base.md#classscy_1_1Timespan) with another one.
 `public inline bool operator==(const `[`Timespan`](#classscy_1_1Timespan)` & ts) const` | 
 `public inline bool operator!=(const `[`Timespan`](#classscy_1_1Timespan)` & ts) const` | 
 `public inline bool operator>(const `[`Timespan`](#classscy_1_1Timespan)` & ts) const` | 
@@ -8025,8 +7813,8 @@ Timestamps are UTC (Coordinated Universal Time) based and thus independent of th
 `public  ~Timestamp()` | Destroys the timestamp.
 `public `[`Timestamp`](#classscy_1_1Timestamp)` & operator=(const `[`Timestamp`](#classscy_1_1Timestamp)` & other)` | 
 `public `[`Timestamp`](#classscy_1_1Timestamp)` & operator=(`[`TimeVal`](#group__base_1ga7da2b2da9cd1e096cbb146da027f17dc)` tv)` | 
-`public void swap(`[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | Swaps the [Timestamp](api-base.md#classscy_1_1Timestamp) with another one.
-`public void update()` | Updates the [Timestamp](api-base.md#classscy_1_1Timestamp) with the current time.
+`public void swap(`[`Timestamp`](#classscy_1_1Timestamp)` & timestamp)` | Swaps the [Timestamp](./doc/api-base.md#classscy_1_1Timestamp) with another one.
+`public void update()` | Updates the [Timestamp](./doc/api-base.md#classscy_1_1Timestamp) with the current time.
 `public inline bool operator==(const `[`Timestamp`](#classscy_1_1Timestamp)` & ts) const` | 
 `public inline bool operator!=(const `[`Timestamp`](#classscy_1_1Timestamp)` & ts) const` | 
 `public inline bool operator>(const `[`Timestamp`](#classscy_1_1Timestamp)` & ts) const` | 
@@ -8239,6 +8027,36 @@ This class provides information about the current timezone.
 
 
 
+# struct `scy::AbstractDelegate` {#structscy_1_1AbstractDelegate}
+
+
+
+
+Abstract delegate interface.
+
+The `Delegate` class contains a pointer to a function. This wrapper class is used instead of `std::function` since it is interchangable with fast delegates and also provides an equality operator for comparing the underlying function where supported.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public RT operator()(Args... args) const` | 
+`public bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` | 
+
+## Members
+
+#### `public RT operator()(Args... args) const` {#group__base_1ga3b6d651d76d2b08df99ea910dcc102d2}
+
+
+
+
+
+#### `public bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` {#group__base_1ga1680a6dd4d3a54f5e52189e3d7d043bd}
+
+
+
+
+
 # struct `scy::Bitwise` {#structscy_1_1Bitwise}
 
 
@@ -8309,309 +8127,111 @@ This class provides information about the current timezone.
 
 
 
-# struct `scy::DelegateBase` {#structscy_1_1DelegateBase}
+# struct `scy::ClassDelegate` {#structscy_1_1ClassDelegate}
+
+```
+struct scy::ClassDelegate
+  : public scy::AbstractDelegate< RT, Args... >
+```  
 
 
 
+The `[ClassDelegate](#structscy_1_1ClassDelegate)` contains a pointer to a class member.
 
-The abstract base for all instantiations of the [Delegate](#classscy_1_1Delegate) template classes.
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public void * data` | 
-`public inline  DelegateBase(DataT data)` | 
-`public inline  DelegateBase(const `[`DelegateBase`](#structscy_1_1DelegateBase)` & r)` | 
-`public inline virtual  ~DelegateBase()` | 
-
-## Members
-
-#### `public void * data` {#group__base_1ga1b13b62fdacf39658c42fa1906e64cf6}
-
-
-
-
-
-#### `public inline  DelegateBase(DataT data)` {#group__base_1gad572668d65141668a27d5e87a81bdb3c}
-
-
-
-
-
-#### `public inline  DelegateBase(const `[`DelegateBase`](#structscy_1_1DelegateBase)` & r)` {#group__base_1ga228ce4c702fe131aa131bb2fb30e7d27}
-
-
-
-
-
-#### `public inline virtual  ~DelegateBase()` {#group__base_1ga74b06c87e214b19d4c25a81a703fbff6}
-
-
-
-
-
-# struct `scy::DelegateCallback` {#structscy_1_1DelegateCallback}
-
-
-
-
-
+This class implements fast delegates and function comparison.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
+`public Class * instance` | 
+`public RT(Class::* method` | 
+`public inline  ClassDelegate(Class * instance,RT(Class::*)(Args...) method)` | 
+`public inline virtual RT operator()(Args... args) const` | 
+`public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` | 
 
 ## Members
 
-# struct `scy::DelegateCallback< C, 0, false >` {#structscy_1_1DelegateCallback_3_01C_00_010_00_01false_01_4}
+#### `public Class * instance` {#group__base_1gaa13b69a5686d1236aa09f96ed2fe35e2}
 
 
 
 
 
+#### `public RT(Class::* method` {#group__base_1ga48f7cfa04f8bce9a3a4361015f5572a8}
+
+
+
+
+
+#### `public inline  ClassDelegate(Class * instance,RT(Class::*)(Args...) method)` {#group__base_1ga1e015d5de17fee08ea68dd5718984608}
+
+
+
+
+
+#### `public inline virtual RT operator()(Args... args) const` {#group__base_1gac7e54237c6d235c7f1cbb29080f25316}
+
+
+
+
+
+#### `public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` {#group__base_1ga7f413136a4557d0a9d79670832e063dd}
+
+
+
+
+
+# struct `scy::ConstClassDelegate` {#structscy_1_1ConstClassDelegate}
+
+```
+struct scy::ConstClassDelegate
+  : public scy::AbstractDelegate< RT, Args... >
+```  
+
+
+
+The `[ConstClassDelegate](#structscy_1_1ConstClassDelegate)` contains a pointer to a `const` class member.
+
+This class implements fast delegates and function comparison.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,void *,void *,void *,void *) const` | 
+`public Class * instance` | 
+`public RT(Class::* method` | 
+`public inline  ConstClassDelegate(Class * instance,RT(Class::*)(Args...) const method)` | 
+`public inline virtual RT operator()(Args... args) const` | 
+`public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` | 
 
 ## Members
 
-#### `public inline virtual void emit(void * sender,void *,void *,void *,void *) const` {#group__base_1ga43ffa9615285b7c85bbaeaa9b7fc875f}
+#### `public Class * instance` {#group__base_1ga4bee6cef9aa2f40ca5e2135acb7792a4}
 
 
 
 
 
-# struct `scy::DelegateCallback< C, 0, true >` {#structscy_1_1DelegateCallback_3_01C_00_010_00_01true_01_4}
+#### `public RT(Class::* method` {#group__base_1ga6a3575991488c6157ecb7b8136259bbe}
 
 
 
 
 
+#### `public inline  ConstClassDelegate(Class * instance,RT(Class::*)(Args...) const method)` {#group__base_1ga5fac63979562f15b65f25a483ab0f169}
 
-## Summary
 
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,void *,void *,void *,void *) const` | 
 
-## Members
 
-#### `public inline virtual void emit(void * sender,void *,void *,void *,void *) const` {#group__base_1ga0e71e422423be34abcb368cab200bfdc}
 
+#### `public inline virtual RT operator()(Args... args) const` {#group__base_1gaffb55a4bc361c34d953f7ddad3bdbee4}
 
 
 
 
-# struct `scy::DelegateCallback< C, 1, false, P >` {#structscy_1_1DelegateCallback_3_01C_00_011_00_01false_00_01P_01_4}
 
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void *,P arg,void *,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void *,P arg,void *,void *,void *) const` {#group__base_1gad6c32cc9256c77540a2bcdfb6f18bd8a}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 1, true, P >` {#structscy_1_1DelegateCallback_3_01C_00_011_00_01true_00_01P_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,P arg,void *,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void * sender,P arg,void *,void *,void *) const` {#group__base_1ga8fa88106ac1a31826440f152570787f6}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 2, false, P, P2 >` {#structscy_1_1DelegateCallback_3_01C_00_012_00_01false_00_01P_00_01P2_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void *,P arg,P2 arg2,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void *,P arg,P2 arg2,void *,void *) const` {#group__base_1gafd22870c7ad8f20f5c7c6d67341c15ae}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 2, true, P, P2 >` {#structscy_1_1DelegateCallback_3_01C_00_012_00_01true_00_01P_00_01P2_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,P arg,P2 arg2,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2,void *,void *) const` {#group__base_1gac5ad828bfb0a76222d92b564cef42e06}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 3, false, P, P2, P3 >` {#structscy_1_1DelegateCallback_3_01C_00_013_00_01false_00_01P_00_01P2_00_01P3_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void *,P arg,P2 arg2,P3 arg3,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void *,P arg,P2 arg2,P3 arg3,void *) const` {#group__base_1ga167499a98081b0a9268cbd962023f0a0}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 3, true, P, P2, P3 >` {#structscy_1_1DelegateCallback_3_01C_00_013_00_01true_00_01P_00_01P2_00_01P3_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,void *) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,void *) const` {#group__base_1ga1bf55048047ead3e3986773028872d09}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 4, false, P, P2, P3, P4 >` {#structscy_1_1DelegateCallback_3_01C_00_014_00_01false_00_01P_00_01P2_00_01P3_00_01P4_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void *,P arg,P2 arg2,P3 arg3,P4 arg4) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void *,P arg,P2 arg2,P3 arg3,P4 arg4) const` {#group__base_1ga386e5d9048abdc6c504ee1253a210224}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 4, true, P, P2, P3, P4 >` {#structscy_1_1DelegateCallback_3_01C_00_014_00_01true_00_01P_00_01P2_00_01P3_00_01P4_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4) const` | 
-
-## Members
-
-#### `public inline virtual void emit(void * sender,P arg,P2 arg2,P3 arg3,P4 arg4) const` {#group__base_1ga83e5c853574ee2dfc008a08ccd95bee9}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 8, false, PolymorphicT >` {#structscy_1_1DelegateCallback_3_01C_00_018_00_01false_00_01PolymorphicT_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual DefineCallbackFields void emit(void *,`[`basic::Polymorphic`](#classscy_1_1basic_1_1Polymorphic)` & data,void *,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual DefineCallbackFields void emit(void *,`[`basic::Polymorphic`](#classscy_1_1basic_1_1Polymorphic)` & data,void *,void *,void *) const` {#group__base_1gaf640d5053772ac2780374815deea6a9b}
-
-
-
-
-
-# struct `scy::DelegateCallback< C, 8, true, PolymorphicT >` {#structscy_1_1DelegateCallback_3_01C_00_018_00_01true_00_01PolymorphicT_01_4}
-
-
-
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual DefineCallbackFields void emit(void * sender,`[`basic::Polymorphic`](#classscy_1_1basic_1_1Polymorphic)` & data,void *,void *,void *) const` | 
-
-## Members
-
-#### `public inline virtual DefineCallbackFields void emit(void * sender,`[`basic::Polymorphic`](#classscy_1_1basic_1_1Polymorphic)` & data,void *,void *,void *) const` {#group__base_1gae472abfa68c1f1920d2344bb0dfa896a}
+#### `public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` {#group__base_1ga2f6e0db3bb1e034ede061235a49962f4}
 
 
 
@@ -8694,6 +8314,52 @@ The abstract base for all instantiations of the [Delegate](#classscy_1_1Delegate
 
 
 
+# struct `scy::FunctionDelegate` {#structscy_1_1FunctionDelegate}
+
+```
+struct scy::FunctionDelegate
+  : public scy::AbstractDelegate< RT, Args... >
+```  
+
+
+
+The `[FunctionDelegate](#structscy_1_1FunctionDelegate)` contains a `std::function`.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::function< RT(Args...)> func` | 
+`public inline  FunctionDelegate(std::function< RT(Args...)> func)` | 
+`public inline virtual RT operator()(Args... args) const` | 
+`public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` | 
+
+## Members
+
+#### `public std::function< RT(Args...)> func` {#group__base_1gaca57bf731778089faea714a0a8fcf078}
+
+
+
+
+
+#### `public inline  FunctionDelegate(std::function< RT(Args...)> func)` {#group__base_1gafcbadf834f7a4d0a40ca4e5db7e34f14}
+
+
+
+
+
+#### `public inline virtual RT operator()(Args... args) const` {#group__base_1ga5b1003b812a1c8ebe7bec44f15726aad}
+
+
+
+
+
+#### `public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, Args... > & that) const` {#group__base_1gae110ceda3391fdc261a525139a0bc4b9}
+
+
+
+
+
 # struct `scy::IPacketInfo` {#structscy_1_1IPacketInfo}
 
 
@@ -8746,7 +8412,7 @@ An abstract interface for packet sources to provide extra information about pack
 `public std::string address` | 
 `public std::ostringstream message` | 
 `public std::time_t ts` | 
-`public `[`LogChannel`](api-base.md#classscy_1_1LogChannel)` * channel` | 
+`public `[`LogChannel`](./doc/api-base.md#classscy_1_1LogChannel)` * channel` | 
 `public  LogStream(LogLevel level,const std::string & realm,int line,const void * ptr,const char * channel)` | 
 `public  LogStream(LogLevel level,const std::string & realm,const std::string & address)` | 
 `public  LogStream(const `[`LogStream`](#structscy_1_1LogStream)` & that)` | 
@@ -8794,7 +8460,7 @@ An abstract interface for packet sources to provide extra information about pack
 
 
 
-#### `public `[`LogChannel`](api-base.md#classscy_1_1LogChannel)` * channel` {#group__base_1gab30b5106bdb89ddddcd5c51011e5965e}
+#### `public `[`LogChannel`](./doc/api-base.md#classscy_1_1LogChannel)` * channel` {#group__base_1gab30b5106bdb89ddddcd5c51011e5965e}
 
 
 
@@ -8860,7 +8526,7 @@ Handle std::endl flags. This method flushes the log message and queues it for wr
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public std::string exepath` | 
-`public OptionMap args` | 
+`public `[`OptionMap`](#group__base_1gafa6d19403eb9f91c90706b10170f0f75)` args` | 
 `public  OptionParser(int argc,char * argv,const char * delim)` | 
 `public inline bool has(const char * key)` | 
 `public inline std::string get(const char * key)` | 
@@ -8874,7 +8540,7 @@ Handle std::endl flags. This method flushes the log message and queues it for wr
 
 
 
-#### `public OptionMap args` {#group__base_1ga3f72252b7f830d90de66dcefa2372585}
+#### `public `[`OptionMap`](#group__base_1gafa6d19403eb9f91c90706b10170f0f75)` args` {#group__base_1ga3f72252b7f830d90de66dcefa2372585}
 
 
 
@@ -8915,8 +8581,8 @@ Provides a reference to a PacketSignal instance.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketStreamAdapter`](api-base.md#classscy_1_1PacketStreamAdapter)` * ptr` | 
-`public `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * deleter` | 
+`public `[`PacketStreamAdapter`](./doc/api-base.md#classscy_1_1PacketStreamAdapter)` * ptr` | 
+`public `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * deleter` | 
 `public int order` | 
 `public bool syncState` | 
 `public inline  PacketAdapterReference(`[`PacketStreamAdapter`](#classscy_1_1PacketStreamAdapter)` * ptr,`[`ScopedPointer`](#classscy_1_1ScopedPointer)` * deleter,int order,bool syncState)` | 
@@ -8924,13 +8590,13 @@ Provides a reference to a PacketSignal instance.
 
 ## Members
 
-#### `public `[`PacketStreamAdapter`](api-base.md#classscy_1_1PacketStreamAdapter)` * ptr` {#group__base_1ga91ef0542de1409ffa2a4a55d735abc99}
+#### `public `[`PacketStreamAdapter`](./doc/api-base.md#classscy_1_1PacketStreamAdapter)` * ptr` {#group__base_1ga91ef0542de1409ffa2a4a55d735abc99}
 
 
 
 
 
-#### `public `[`ScopedPointer`](api-base.md#classscy_1_1ScopedPointer)` * deleter` {#group__base_1ga6e45237650bc2f174d331b0010f9a636}
+#### `public `[`ScopedPointer`](./doc/api-base.md#classscy_1_1ScopedPointer)` * deleter` {#group__base_1ga6e45237650bc2f174d331b0010f9a636}
 
 
 
@@ -8969,7 +8635,7 @@ struct scy::PacketCreationStrategy
 
 
 
-This template class implements an adapter that sits between an [SignalBase](#classscy_1_1SignalBase) and an object receiving notifications from it.
+This template class implements an adapter that sits between an SignalBase and an object receiving notifications from it.
 
 ## Summary
 
@@ -9033,6 +8699,61 @@ struct scy::PacketStreamState
 ## Members
 
 #### `public inline virtual std::string str(unsigned int id) const` {#group__base_1gaaee1b46215fbe13176a0de4c4b926cc4}
+
+
+
+
+
+# struct `scy::PolymorphicDelegate` {#structscy_1_1PolymorphicDelegate}
+
+```
+struct scy::PolymorphicDelegate
+  : public scy::AbstractDelegate< RT, IT &>
+```  
+
+
+
+Polymorphic function delegate.
+
+Theis class contains a pointer to a class member that receices a derived subclass (`PT`) of the base type specified by the `IT` param.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public Class * instance` | 
+`public RT(Class::* method` | 
+`public inline  PolymorphicDelegate(Class * instance,RT(Class::*)(PT &) method)` | 
+`public inline virtual RT operator()(IT & object) const` | 
+`public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, IT &> & that) const` | 
+
+## Members
+
+#### `public Class * instance` {#group__base_1gad74b599904e1a50cc05d2a4ab2f20a03}
+
+
+
+
+
+#### `public RT(Class::* method` {#group__base_1ga8efb24a32f5f596d1aeefba40af69b3d}
+
+
+
+
+
+#### `public inline  PolymorphicDelegate(Class * instance,RT(Class::*)(PT &) method)` {#group__base_1ga053ed6d6ff8aaaf7a3d5e5f890470877}
+
+
+
+
+
+#### `public inline virtual RT operator()(IT & object) const` {#group__base_1gad8af7ec465d4e30b6e2c6a8a5f3267c3}
+
+
+
+
+
+#### `public inline virtual bool operator==(const `[`AbstractDelegate`](#structscy_1_1AbstractDelegate)`< RT, IT &> & that) const` {#group__base_1ga6fe96494874991983e061c30db17190e}
 
 
 
@@ -9135,7 +8856,7 @@ Classes for asynchronous programming.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `class `[`scy::async::Flag`](#classscy_1_1async_1_1Flag)    | 
-`class `[`scy::async::Runnable`](#classscy_1_1async_1_1Runnable)    | 
+`class `[`scy::async::Runnable`](#classscy_1_1async_1_1Runnable)    | A generic interface for classes that can be run and cancelled.
 `class `[`scy::async::Runner`](#classscy_1_1async_1_1Runner)    | 
 `class `[`scy::async::Sendable`](#classscy_1_1async_1_1Sendable)    | 
 `class `[`scy::async::Startable`](#classscy_1_1async_1_1Startable)    | 
@@ -9177,9 +8898,9 @@ A concurrent flag which can be used to request task cancellation.
 # class `scy::async::Runnable` {#classscy_1_1async_1_1Runnable}
 
 
-
-
 A generic interface for classes that can be run and cancelled.
+
+
 
 ## Summary
 
@@ -9243,11 +8964,11 @@ True when the task has been cancelled.
 `public bool running() const` | Returns true if the async context is currently running.
 `public void cancel()` | Cancels the async context.
 `public bool cancelled() const` | 
-`public bool repeating() const` | Returns true if the [Runner](api-base.md#classscy_1_1async_1_1Runner) is operating in repeating mode.
+`public bool repeating() const` | Returns true if the [Runner](./doc/api-base.md#classscy_1_1async_1_1Runner) is operating in repeating mode.
 `public uv_thread_t tid() const` | Return the native thread ID.
 `public void setRepeating(bool flag)` | 
 `public bool async() const` | 
-`protected Context::ptr pContext` | Shared pointer to the internal [Runner::Context](api-base.md#structscy_1_1async_1_1Runner_1_1Context).
+`protected Context::ptr pContext` | Shared pointer to the internal [Runner::Context](./doc/api-base.md#structscy_1_1async_1_1Runner_1_1Context).
 `protected void startAsync()` | Start the context from the control thread.
 `protected  Runner(const `[`Runner`](#classscy_1_1async_1_1Runner)` &)` | 
 `protected `[`Runner`](#classscy_1_1async_1_1Runner)` & operator=(const `[`Runner`](#classscy_1_1async_1_1Runner)` &)` | 
@@ -9724,7 +9445,6 @@ struct scy::hex::Encoder
 --------------------------------|---------------------------------------------
 `class `[`scy::basic::Decoder`](#classscy_1_1basic_1_1Decoder)    | 
 `class `[`scy::basic::Encoder`](#classscy_1_1basic_1_1Encoder)    | 
-`class `[`scy::basic::Polymorphic`](#classscy_1_1basic_1_1Polymorphic)    | A base module class for C++ callback polymorphism.
 # class `scy::basic::Decoder` {#classscy_1_1basic_1_1Decoder}
 
 
@@ -9809,55 +9529,6 @@ struct scy::hex::Encoder
 
 
 
-# class `scy::basic::Polymorphic` {#classscy_1_1basic_1_1Polymorphic}
-
-
-A base module class for C++ callback polymorphism.
-
-
-
-## Summary
-
- Members                        | Descriptions                                
---------------------------------|---------------------------------------------
-`public inline virtual  ~Polymorphic()` | 
-`public template<class T>`  <br/>`inline bool is()` | 
-`public template<class T>`  <br/>`inline T * as(bool whiny)` | 
-`public `[`scy::LogStream`](#structscy_1_1LogStream)` & log(const char * level) const` | 
-`public const char * className() const` | 
-
-## Members
-
-#### `public inline virtual  ~Polymorphic()` {#group__base_1gadd2e064e08321befa2791a86c728284b}
-
-
-
-
-
-#### `public template<class T>`  <br/>`inline bool is()` {#group__base_1ga8a806c748396e94182adddf4581f1319}
-
-
-
-
-
-#### `public template<class T>`  <br/>`inline T * as(bool whiny)` {#group__base_1ga04c451f467024606700e4ad8588383b7}
-
-
-
-
-
-#### `public `[`scy::LogStream`](#structscy_1_1LogStream)` & log(const char * level) const` {#group__base_1gaa6975647c67722fa4e537b6ccca2d5e8}
-
-
-
-
-
-#### `public const char * className() const` {#group__base_1gad57198d84a39e99e2acd7d7436af925d}
-
-
-
-
-
 # namespace `scy::ipc` {#namespacescy_1_1ipc}
 
 Classes for inter-process communication.
@@ -9888,7 +9559,7 @@ IPC queue is for safely passing templated actions between threads and processes.
 `public inline virtual void close()` | 
 `public inline virtual void post()` | 
 `public inline void waitForSync()` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected std::deque< TAction * > _actions` | 
 
 ## Members
@@ -9941,7 +9612,7 @@ IPC queue is for safely passing templated actions between threads and processes.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1gad45c34ad8611c7694110e41e2b2a1756}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1gad45c34ad8611c7694110e41e2b2a1756}
 
 
 
@@ -9973,7 +9644,7 @@ IPC synchronization queue is for passing templated actions between threads and t
 `public inline virtual void close()` | 
 `public inline virtual void post()` | 
 `public inline virtual `[`SyncContext`](#classscy_1_1SyncContext)` & sync()` | 
-`protected `[`SyncContext`](api-base.md#classscy_1_1SyncContext)` _sync` | 
+`protected `[`SyncContext`](./doc/api-base.md#classscy_1_1SyncContext)` _sync` | 
 
 ## Members
 
@@ -10007,7 +9678,7 @@ IPC synchronization queue is for passing templated actions between threads and t
 
 
 
-#### `protected `[`SyncContext`](api-base.md#classscy_1_1SyncContext)` _sync` {#group__base_1gac1bd3d9add3c68968054787288c53f47}
+#### `protected `[`SyncContext`](./doc/api-base.md#classscy_1_1SyncContext)` _sync` {#group__base_1gac1bd3d9add3c68968054787288c53f47}
 
 
 
@@ -10131,7 +9802,7 @@ Deleter Functors.
 
 # namespace `scy::test` {#namespacescy_1_1test}
 
-Modern unit testing classes.
+Modern unit testing framework.
 
 ## Summary
 
@@ -10155,20 +9826,20 @@ class scy::test::FunctionTest
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public voidfunc_t target` | 
-`public inline  FunctionTest(voidfunc_t target,const std::string & name)` | 
+`public std::function< void()> target` | 
+`public inline  FunctionTest(std::function< void()> target,const std::string & name)` | 
 `protected inline virtual  ~FunctionTest()` | 
-`protected inline virtual void run()` | Called by the [TestRunner](api-base.md#classscy_1_1test_1_1TestRunner) to run the test.
+`protected inline virtual void run()` | Called by the [TestRunner](./doc/api-base.md#classscy_1_1test_1_1TestRunner) to run the test.
 
 ## Members
 
-#### `public voidfunc_t target` {#group__base_1ga80f8d710c844c7d7ad7629c2e970113b}
+#### `public std::function< void()> target` {#group__base_1gabc68dd3cfbefe5af9544fb34b9edb6d7}
 
 
 
 
 
-#### `public inline  FunctionTest(voidfunc_t target,const std::string & name)` {#group__base_1ga54a462e27f52346fd94636bb2457bf72}
+#### `public inline  FunctionTest(std::function< void()> target,const std::string & name)` {#group__base_1gac840656d94f9442624c1b15f4d72bf78}
 
 
 
@@ -10191,21 +9862,23 @@ Called by the [TestRunner](#classscy_1_1test_1_1TestRunner) to run the test.
 
 
 
-This class is for implementing any kind async test that is compatible with a [TestRunner](#classscy_1_1test_1_1TestRunner).
+[Test](#classscy_1_1test_1_1Test) wrapper class.
+
+This class is for implementing any kind of unit test that can be executed by a `[TestRunner](#classscy_1_1test_1_1TestRunner)`.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public std::string name` | The name of the test.
-`public error_list_t errors` | A list of test errors.
+`public ErrorList errors` | A list of test errors.
 `public double duration` | The test run duration for benchmarking.
 `public  Test(const std::string & name)` | 
 `public virtual  ~Test()` | Should remain protected.
-`public void run()` | Called by the [TestRunner](api-base.md#classscy_1_1test_1_1TestRunner) to run the test.
+`public void run()` | Called by the [TestRunner](./doc/api-base.md#classscy_1_1test_1_1TestRunner) to run the test.
 `public bool passed()` | Return true when the test passed without errors.
-`protected  Test(const `[`Test`](#classscy_1_1test_1_1Test)` & test)` | 
-`protected `[`Test`](#classscy_1_1test_1_1Test)` & operator=(`[`Test`](#classscy_1_1test_1_1Test)` const &)` | 
+`protected  Test(const `[`Test`](#classscy_1_1test_1_1Test)` & test) = delete` | 
+`protected `[`Test`](#classscy_1_1test_1_1Test)` & operator=(`[`Test`](#classscy_1_1test_1_1Test)` const &) = delete` | 
 
 ## Members
 
@@ -10215,7 +9888,7 @@ The name of the test.
 
 
 
-#### `public error_list_t errors` {#group__base_1gaa25c01102de7399acdc3181445cb3073}
+#### `public ErrorList errors` {#group__base_1gab36a690716d7c562510760dbba547ec7}
 
 A list of test errors.
 
@@ -10251,13 +9924,13 @@ Return true when the test passed without errors.
 
 
 
-#### `protected  Test(const `[`Test`](#classscy_1_1test_1_1Test)` & test)` {#group__base_1ga6635c765383ab00f182e7bfcc03a2fa5}
+#### `protected  Test(const `[`Test`](#classscy_1_1test_1_1Test)` & test) = delete` {#group__base_1ga53e1fc6fb63e2228193a074b44f2ae8c}
 
 
 
 
 
-#### `protected `[`Test`](#classscy_1_1test_1_1Test)` & operator=(`[`Test`](#classscy_1_1test_1_1Test)` const &)` {#group__base_1gaad1bf3675df71fac8cf5f3260bd6b991}
+#### `protected `[`Test`](#classscy_1_1test_1_1Test)` & operator=(`[`Test`](#classscy_1_1test_1_1Test)` const &) = delete` {#group__base_1ga923fb88bb5588545dcd7306efcf1831e}
 
 
 
@@ -10282,13 +9955,13 @@ The [TestRunner](#classscy_1_1test_1_1TestRunner) continually loops through each
 `public `[`Test`](#classscy_1_1test_1_1Test)` * get(const std::string & name) const` | 
 `public void run()` | Called by the async context to run the next test.
 `public void clear()` | Destroy and clears all managed tests.
-`public `[`Test`](#classscy_1_1test_1_1Test)` * current() const` | Return the currently active [Test](api-base.md#classscy_1_1test_1_1Test) or nullptr.
-`public test_list_t tests() const` | Return the list of tests.
-`public error_map_t errors() const` | Return a map of tests and errors.
+`public `[`Test`](#classscy_1_1test_1_1Test)` * current() const` | Return the currently active [Test](./doc/api-base.md#classscy_1_1test_1_1Test) or nullptr.
+`public TestList tests() const` | Return the list of tests.
+`public ErrorMap errors() const` | Return a map of tests and errors.
 `public bool passed() const` | Return true if all tests passed.
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
-`protected std::list< `[`Test`](api-base.md#classscy_1_1test_1_1Test)` * > _tests` | 
-`protected `[`Test`](api-base.md#classscy_1_1test_1_1Test)` * _current` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
+`protected TestList _tests` | 
+`protected `[`Test`](./doc/api-base.md#classscy_1_1test_1_1Test)` * _current` | 
 
 ## Members
 
@@ -10334,13 +10007,13 @@ Return the currently active [Test](#classscy_1_1test_1_1Test) or nullptr.
 
 
 
-#### `public test_list_t tests() const` {#group__base_1ga82580d13c7625f7ceb0fe07dba1a9da4}
+#### `public TestList tests() const` {#group__base_1ga63d7bb169e8987b0ef42e032a5c15dec}
 
 Return the list of tests.
 
 
 
-#### `public error_map_t errors() const` {#group__base_1ga5fd610a35291b0b13e39d9f0024cc745}
+#### `public ErrorMap errors() const` {#group__base_1ga3f6c0d4bd8239546c2ffb09baf3c6d17}
 
 Return a map of tests and errors.
 
@@ -10352,19 +10025,19 @@ Return true if all tests passed.
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga99eb18cc606b0187d055e7faf20e9b95}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__base_1ga99eb18cc606b0187d055e7faf20e9b95}
 
 
 
 
 
-#### `protected std::list< `[`Test`](api-base.md#classscy_1_1test_1_1Test)` * > _tests` {#group__base_1ga96216808dfb4a1e3af39abb3933c728c}
+#### `protected TestList _tests` {#group__base_1ga07642f477365332784394b083e0878ec}
 
 
 
 
 
-#### `protected `[`Test`](api-base.md#classscy_1_1test_1_1Test)` * _current` {#group__base_1ga3e5f349d8600497eca5acacd6e853ad7}
+#### `protected `[`Test`](./doc/api-base.md#classscy_1_1test_1_1Test)` * _current` {#group__base_1ga3e5f349d8600497eca5acacd6e853ad7}
 
 
 
@@ -10437,6 +10110,132 @@ Return true if all tests passed.
 
 
 #### `public inline bool operator==(const `[`Version`](#structscy_1_1util_1_1Version)` & other)` {#group__base_1ga11b1e27149c742ffb0b9c6b3fe2405a9}
+
+
+
+
+
+# struct `scy::async::Runner::Context` {#structscy_1_1async_1_1Runner_1_1Context}
+
+
+
+
+The context which we send to the thread context. This allows us to garecefully handle late callbacks and avoid the need for deferred destruction of [Runner](#classscy_1_1async_1_1Runner) objects.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public uv_thread_t tid` | 
+`public bool started` | 
+`public bool running` | 
+`public bool repeating` | 
+`public std::atomic< bool > exit` | 
+`public std::function< void()> target` | 
+`public std::function< void(void *)> target1` | 
+`public void * arg` | 
+`public void * handle` | private implementation data
+`public void cancel()` | 
+`public bool cancelled() const` | 
+`public inline void reset()` | 
+`public inline  Context()` | 
+
+## Members
+
+#### `public uv_thread_t tid` {#group__base_1gaf78197f63d9ac442a709626fb404a9ea}
+
+
+
+Thread-safe POD members May be accessed at any time
+
+#### `public bool started` {#group__base_1ga5171d55ab3eacf4563adc98f0efd2cc8}
+
+
+
+
+
+#### `public bool running` {#group__base_1ga82efd2f446163ed2623ec930ad9525e6}
+
+
+
+
+
+#### `public bool repeating` {#group__base_1gaf1ecd202a8cf027a5bb07ad89e1e7b20}
+
+
+
+
+
+#### `public std::atomic< bool > exit` {#group__base_1gaeecc269b29f5b75f060c690ee388995d}
+
+
+
+
+
+#### `public std::function< void()> target` {#group__base_1gabb49053ccb4adf8661d209b85a9d40fc}
+
+
+
+Non thread-safe members Should not be accessed once the [Runner](#classscy_1_1async_1_1Runner) is started
+
+#### `public std::function< void(void *)> target1` {#group__base_1ga4d73f008eab55eb987cce5a877917dfa}
+
+
+
+
+
+#### `public void * arg` {#group__base_1ga55883183b6405d070445a0b4316f7a17}
+
+
+
+
+
+#### `public void * handle` {#group__base_1gad81282a2476e5553793d302ba50389f6}
+
+private implementation data
+
+
+
+#### `public void cancel()` {#group__base_1ga81e087250567ff06d7402cac301746c4}
+
+
+
+
+
+#### `public bool cancelled() const` {#group__base_1ga653235a698a906f4cd6197e02e23596f}
+
+
+
+
+
+#### `public inline void reset()` {#group__base_1ga4e842ca9709356efc0c24b95a74cb47e}
+
+
+
+
+
+#### `public inline  Context()` {#group__base_1ga0d144527698ea0966f2088df135fdbaf}
+
+
+
+
+
+# struct `scy::NVCollection::ILT` {#structscy_1_1NVCollection_1_1ILT}
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public inline bool operator()(const std::string & s1,const std::string & s2) const` | 
+
+## Members
+
+#### `public inline bool operator()(const std::string & s1,const std::string & s2) const` {#group__base_1ga966ae0464dd2d1011bcd55702729b5eb}
 
 
 

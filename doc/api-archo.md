@@ -7,6 +7,7 @@
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `namespace `[`scy::archo`](#namespacescy_1_1archo)    | 
+`struct `[`scy::archo::ZipFile::FileInfo`](#structscy_1_1archo_1_1ZipFile_1_1FileInfo)    | 
 # namespace `scy::archo` {#namespacescy_1_1archo}
 
 
@@ -27,7 +28,7 @@
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public std::vector< `[`FileInfo`](api-archo.md#structscy_1_1archo_1_1ZipFile_1_1FileInfo)` > info` | 
+`public std::vector< `[`FileInfo`](./doc/api-archo.md#structscy_1_1archo_1_1ZipFile_1_1FileInfo)` > info` | 
 `public unzFile fp` | 
 `public  ZipFile()` | 
 `public  ZipFile(const std::string & file)` | 
@@ -45,7 +46,7 @@
 
 ## Members
 
-#### `public std::vector< `[`FileInfo`](api-archo.md#structscy_1_1archo_1_1ZipFile_1_1FileInfo)` > info` {#group__archo_1ga031d3193c306c10b0092e5815aead8cb}
+#### `public std::vector< `[`FileInfo`](./doc/api-archo.md#structscy_1_1archo_1_1ZipFile_1_1FileInfo)` > info` {#group__archo_1ga031d3193c306c10b0092e5815aead8cb}
 
 
 
@@ -130,6 +131,41 @@ Extracts the archive contents to the given directory path.
 
 
 #### `public std::string currentFileName()` {#group__archo_1ga4ed5731ad68cd4a8be42342963f245ac}
+
+
+
+
+
+# struct `scy::archo::ZipFile::FileInfo` {#structscy_1_1archo_1_1ZipFile_1_1FileInfo}
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::string path` | 
+`public std::size_t compressedSize` | 
+`public std::size_t uncompressedSize` | 
+
+## Members
+
+#### `public std::string path` {#group__archo_1gae91e44aaf9e8629c002ed91ac4e3f8d8}
+
+
+
+
+
+#### `public std::size_t compressedSize` {#group__archo_1ga8e0f34b9586c94dc3e25a54fe7797cb1}
+
+
+
+
+
+#### `public std::size_t uncompressedSize` {#group__archo_1ga40331195400009ed73443efc1ddd74cf}
 
 
 

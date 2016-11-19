@@ -141,9 +141,9 @@ This class extends the [Task](#classscy_1_1sked_1_1Task) class to implement sche
 `public void setName(const std::string & name)` | 
 `protected std::string _type` | 
 `protected std::string _name` | 
-`protected `[`sked::Scheduler`](api-sked.md#classscy_1_1sked_1_1Scheduler)` * _scheduler` | 
-`protected `[`sked::Trigger`](api-sked.md#structscy_1_1sked_1_1Trigger)` * _trigger` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected `[`sked::Scheduler`](./doc/api-sked.md#classscy_1_1sked_1_1Scheduler)` * _scheduler` | 
+`protected `[`sked::Trigger`](./doc/api-sked.md#structscy_1_1sked_1_1Trigger)` * _trigger` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected virtual  ~Task()` | Should remain protected.
 `protected virtual bool beforeRun()` | 
 `protected void run()` | 
@@ -235,19 +235,19 @@ Returns the milliseconds remaining until the next scheduled timeout. An [sked::T
 
 
 
-#### `protected `[`sked::Scheduler`](api-sked.md#classscy_1_1sked_1_1Scheduler)` * _scheduler` {#group__sked_1ga7a67dcc93b0781f5e8579bb888951c6d}
+#### `protected `[`sked::Scheduler`](./doc/api-sked.md#classscy_1_1sked_1_1Scheduler)` * _scheduler` {#group__sked_1ga7a67dcc93b0781f5e8579bb888951c6d}
 
 
 
 
 
-#### `protected `[`sked::Trigger`](api-sked.md#structscy_1_1sked_1_1Trigger)` * _trigger` {#group__sked_1ga29d12af7fc6b09ae0ea2120a21179f4a}
+#### `protected `[`sked::Trigger`](./doc/api-sked.md#structscy_1_1sked_1_1Trigger)` * _trigger` {#group__sked_1ga29d12af7fc6b09ae0ea2120a21179f4a}
 
 
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__sked_1gacc6e9cb2c3332ce7e3856ad20053fd4f}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__sked_1gacc6e9cb2c3332ce7e3856ad20053fd4f}
 
 
 
@@ -296,7 +296,7 @@ The [TaskFactory](#classscy_1_1sked_1_1TaskFactory) can dynamically instantiate 
 `public template<typename T>`  <br/>`inline void registerTrigger(const std::string & type)` | 
 `public inline void unregisterTrigger(const std::string & type)` | 
 `public inline TriggerMap triggers() const` | 
-`protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` | 
+`protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` | 
 `protected TaskMap _tasks` | 
 `protected TriggerMap _triggers` | 
 
@@ -350,7 +350,7 @@ The [TaskFactory](#classscy_1_1sked_1_1TaskFactory) can dynamically instantiate 
 
 
 
-#### `protected mutable `[`Mutex`](api-thread.md#classscy_1_1Mutex)` _mutex` {#group__sked_1gaba4115abe13876bea87f674ce7354295}
+#### `protected mutable `[`Mutex`](./doc/api-base.md#classscy_1_1Mutex)` _mutex` {#group__sked_1gaba4115abe13876bea87f674ce7354295}
 
 
 
@@ -383,14 +383,14 @@ struct scy::sked::DailyTrigger
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`DateTime`](api-base.md#classscy_1_1DateTime)` timeOfDay` | 
+`public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` timeOfDay` | 
 `public std::vector< `[`DaysOfTheWeek`](#group__sked_1gafaf09924bf11ff91312d278879efc364)` > daysExcluded` | 
 `public  DailyTrigger()` | 
 `public virtual void update()` | 
 
 ## Members
 
-#### `public `[`DateTime`](api-base.md#classscy_1_1DateTime)` timeOfDay` {#group__sked_1ga0f50994338086f658223bb591aaa855b}
+#### `public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` timeOfDay` {#group__sked_1ga0f50994338086f658223bb591aaa855b}
 
 
 
@@ -429,7 +429,7 @@ struct scy::sked::IntervalTrigger
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Timespan`](api-base.md#classscy_1_1Timespan)` interval` | 
+`public `[`Timespan`](./doc/api-base.md#classscy_1_1Timespan)` interval` | 
 `public int maxTimes` | 
 `public  IntervalTrigger()` | 
 `public virtual void update()` | 
@@ -439,7 +439,7 @@ struct scy::sked::IntervalTrigger
 
 ## Members
 
-#### `public `[`Timespan`](api-base.md#classscy_1_1Timespan)` interval` {#group__sked_1ga8f86f84623d9cdd251cb596d1b9cd7ea}
+#### `public `[`Timespan`](./doc/api-base.md#classscy_1_1Timespan)` interval` {#group__sked_1ga8f86f84623d9cdd251cb596d1b9cd7ea}
 
 
 
@@ -538,9 +538,9 @@ struct scy::sked::Trigger
 `public std::string type` | The type of this trigger class.
 `public std::string name` | The display name of this trigger class.
 `public int timesRun` | 
-`public `[`DateTime`](api-base.md#classscy_1_1DateTime)` createdAt` | The time the task was created.
-`public `[`DateTime`](api-base.md#classscy_1_1DateTime)` scheduleAt` | The time the task is scheduled to run.
-`public `[`DateTime`](api-base.md#classscy_1_1DateTime)` lastRunAt` | The time the task was last run.
+`public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` createdAt` | The time the task was created.
+`public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` scheduleAt` | The time the task is scheduled to run.
+`public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` lastRunAt` | The time the task was last run.
 `public  Trigger(const std::string & type,const std::string & name)` | 
 `public void update()` | 
 `public virtual std::int64_t remaining()` | 
@@ -569,19 +569,19 @@ The display name of this trigger class.
 
 The number of times the task has run since creation;
 
-#### `public `[`DateTime`](api-base.md#classscy_1_1DateTime)` createdAt` {#group__sked_1gaf0f5c1e386f877fd8f2d099d441093f3}
+#### `public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` createdAt` {#group__sked_1gaf0f5c1e386f877fd8f2d099d441093f3}
 
 The time the task was created.
 
 
 
-#### `public `[`DateTime`](api-base.md#classscy_1_1DateTime)` scheduleAt` {#group__sked_1ga1063f958b835c6d033c8ff389b2e94f0}
+#### `public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` scheduleAt` {#group__sked_1ga1063f958b835c6d033c8ff389b2e94f0}
 
 The time the task is scheduled to run.
 
 
 
-#### `public `[`DateTime`](api-base.md#classscy_1_1DateTime)` lastRunAt` {#group__sked_1ga3fdacd4cae9a26840ff138aa48bbe4e1}
+#### `public `[`DateTime`](./doc/api-base.md#classscy_1_1DateTime)` lastRunAt` {#group__sked_1ga3fdacd4cae9a26840ff138aa48bbe4e1}
 
 The time the task was last run.
 

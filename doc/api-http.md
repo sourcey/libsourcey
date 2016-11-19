@@ -8,6 +8,7 @@
 --------------------------------|---------------------------------------------
 `namespace `[`scy::http`](#namespacescy_1_1http)    | 
 `namespace `[`scy::http::ws`](#namespacescy_1_1http_1_1ws)    | 
+`struct `[`scy::http::FormWriter::Part`](#structscy_1_1http_1_1FormWriter_1_1Part)    | 
 # namespace `scy::http` {#namespacescy_1_1http}
 
 
@@ -58,9 +59,9 @@ Note: Do not forget to read the entire response stream from the 401 response bef
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  Authenticator()` | Creates an empty [Authenticator](api-http.md#classscy_1_1http_1_1Authenticator) object.
-`public  Authenticator(const std::string & username,const std::string & password)` | Creates an [Authenticator](api-http.md#classscy_1_1http_1_1Authenticator) object with the given username and password.
-`public  ~Authenticator()` | Destroys the [Authenticator](api-http.md#classscy_1_1http_1_1Authenticator).
+`public  Authenticator()` | Creates an empty [Authenticator](./doc/api-http.md#classscy_1_1http_1_1Authenticator) object.
+`public  Authenticator(const std::string & username,const std::string & password)` | Creates an [Authenticator](./doc/api-http.md#classscy_1_1http_1_1Authenticator) object with the given username and password.
+`public  ~Authenticator()` | Destroys the [Authenticator](./doc/api-http.md#classscy_1_1http_1_1Authenticator).
 `public void fromUserInfo(const std::string & userInfo)` | 
 `public void fromURI(const `[`http::URL`](#classscy_1_1http_1_1URL)` & uri)` | 
 `public inline void setUsername(const std::string & username)` | Sets the username.
@@ -199,11 +200,11 @@ This is a utility class for working with HTTP Basic Authentication in [http::Req
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  BasicAuthenticator()` | Creates an empty [BasicAuthenticator](api-http.md#classscy_1_1http_1_1BasicAuthenticator) object.
-`public  BasicAuthenticator(const std::string & username,const std::string & password)` | Creates a [BasicAuthenticator](api-http.md#classscy_1_1http_1_1BasicAuthenticator) object with the given username and password.
+`public  BasicAuthenticator()` | Creates an empty [BasicAuthenticator](./doc/api-http.md#classscy_1_1http_1_1BasicAuthenticator) object.
+`public  BasicAuthenticator(const std::string & username,const std::string & password)` | 
 `public  explicit BasicAuthenticator(const `[`http::Request`](#classscy_1_1http_1_1Request)` & request)` | 
 `public  explicit BasicAuthenticator(const std::string & authInfo)` | 
-`public  ~BasicAuthenticator()` | Destroys the [BasicAuthenticator](api-http.md#classscy_1_1http_1_1BasicAuthenticator).
+`public  ~BasicAuthenticator()` | Destroys the [BasicAuthenticator](./doc/api-http.md#classscy_1_1http_1_1BasicAuthenticator).
 `public void setUsername(const std::string & username)` | Sets the username.
 `public const std::string & username() const` | Returns the username.
 `public void setPassword(const std::string & password)` | Sets the password.
@@ -222,9 +223,9 @@ Creates an empty [BasicAuthenticator](#classscy_1_1http_1_1BasicAuthenticator) o
 
 #### `public  BasicAuthenticator(const std::string & username,const std::string & password)` {#group__http_1gad6de1b1584d452ed7e06bedc87ca1021}
 
+
+
 Creates a [BasicAuthenticator](#classscy_1_1http_1_1BasicAuthenticator) object with the given username and password.
-
-
 
 #### `public  explicit BasicAuthenticator(const `[`http::Request`](#classscy_1_1http_1_1Request)` & request)` {#group__http_1gaf36d893fa18c895ad0b2fe1f8316de10}
 
@@ -303,12 +304,12 @@ class scy::http::ChunkedAdapter
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` * connection` | 
+`public `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` * connection` | 
 `public std::string contentType` | 
 `public std::string frameSeparator` | 
 `public bool initial` | 
 `public bool nocopy` | 
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  ChunkedAdapter(`[`Connection`](#classscy_1_1http_1_1Connection)` * connection,const std::string & frameSeparator,bool nocopy)` | 
 `public inline  ChunkedAdapter(const std::string & contentType,const std::string & frameSeparator,bool nocopy)` | 
 `public inline virtual  ~ChunkedAdapter()` | 
@@ -317,7 +318,7 @@ class scy::http::ChunkedAdapter
 
 ## Members
 
-#### `public `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` * connection` {#group__http_1ga41a3be6fd0d95c90588e24662aecdbcb}
+#### `public `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` * connection` {#group__http_1ga41a3be6fd0d95c90588e24662aecdbcb}
 
 
 
@@ -347,7 +348,7 @@ class scy::http::ChunkedAdapter
 
 
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__http_1gabcc47b70a4402dcdf6544143881fed7d}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__http_1gabcc47b70a4402dcdf6544143881fed7d}
 
 
 
@@ -396,20 +397,20 @@ Note: If packet processing is async (the packet is not in the current thread sco
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` | 
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` | 
 `public  Client()` | 
 `public virtual  ~Client()` | 
-`public void shutdown()` | Shutdown the [Client](api-http.md#classscy_1_1http_1_1Client) and close all connections.
+`public void shutdown()` | Shutdown the [Client](./doc/api-http.md#classscy_1_1http_1_1Client) and close all connections.
 `public template<class ConnectionT>`  <br/>`inline ClientConnection::Ptr createConnectionT(const `[`URL`](#classscy_1_1http_1_1URL)` & url,uv::Loop * loop)` | 
 `public inline ClientConnection::Ptr createConnection(const `[`URL`](#classscy_1_1http_1_1URL)` & url,uv::Loop * loop)` | 
 `public virtual void addConnection(ClientConnection::Ptr conn)` | 
 `public virtual void removeConnection(`[`ClientConnection`](#classscy_1_1http_1_1ClientConnection)` * conn)` | 
 `protected ClientConnectionPtrVec _connections` | 
-`protected void onConnectionClose(void *)` | 
+`protected void onConnectionClose(`[`Connection`](#classscy_1_1http_1_1Connection)` & conn)` | 
 
 ## Members
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` {#group__http_1ga49e55ffb75fdb1ce32bcf826e01c3833}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` {#group__http_1ga49e55ffb75fdb1ce32bcf826e01c3833}
 
 
 
@@ -463,7 +464,7 @@ Shutdown the [Client](#classscy_1_1http_1_1Client) and close all connections.
 
 
 
-#### `protected void onConnectionClose(void *)` {#group__http_1ga33a394476a0dc8eb06e9ec0410b8918a}
+#### `protected void onConnectionClose(`[`Connection`](#classscy_1_1http_1_1Connection)` & conn)` {#group__http_1gaf084fc0713c300f05031fe1bad9cac49}
 
 
 
@@ -510,24 +511,24 @@ class scy::http::ClientConnection
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public void * opaque` | Optional unmanaged client data pointer.
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Connect` | [Signal](api-base.md#classscy_1_1Signal) when the client socket is connected and data can flow.
-`public `[`Signal](#classscy_1_1Signal)< [Response`](#classscy_1_1http_1_1Response)` & > Headers` | [Signal](api-base.md#classscy_1_1Signal) when the response HTTP header has been received.
-`public `[`Signal](#classscy_1_1Signal)< const [MutableBuffer`](#classscy_1_1MutableBuffer)` & > Payload` | [Signal](api-base.md#classscy_1_1Signal) when raw data is received.
-`public `[`Signal](#classscy_1_1Signal)< const [Response`](#classscy_1_1http_1_1Response)` & > Complete` | [Signal](api-base.md#classscy_1_1Signal) when the HTTP transaction is complete.
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Connect` | Status signals.
+`public `[`Signal](#classscy_1_1Signal)< void([Response`](#classscy_1_1http_1_1Response) &)`> Headers` | Signals when the response HTTP header has been received.
+`public `[`Signal](#classscy_1_1Signal)< void(const [MutableBuffer`](#classscy_1_1MutableBuffer) &)`> Payload` | Signals when raw data is received.
+`public `[`Signal](#classscy_1_1Signal)< void(const [Response`](#classscy_1_1http_1_1Response) &)`> Complete` | Signals when the HTTP transaction is complete.
 `public  ClientConnection(const `[`URL`](#classscy_1_1http_1_1URL)` & url,const net::Socket::Ptr & socket)` | Create a standalone connection with the given host.
 `public virtual  ~ClientConnection()` | 
 `public virtual void send()` | 
 `public virtual void send(`[`http::Request`](#classscy_1_1http_1_1Request)` & req)` | 
-`public virtual int send(const char * data,std::size_t len,int flags)` | Send raw data to the peer.
+`public virtual int send(const char * data,std::size_t len,int flags)` | 
 `public virtual void close()` | Forcefully closes the HTTP connection.
 `public virtual void setReadStream(std::ostream * os)` | 
 `public template<class StreamT>`  <br/>`inline StreamT & readStream()` | Return the cast read stream pointer or nullptr.
-`public virtual void onHeaders()` | 
+`public virtual void onHeaders()` | Internal callbacks.
 `public virtual void onPayload(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer)` | 
 `public virtual void onMessage()` | 
 `public virtual void onComplete()` | 
 `public virtual void onClose()` | 
-`protected `[`URL`](api-http.md#classscy_1_1http_1_1URL)` _url` | 
+`protected `[`URL`](./doc/api-http.md#classscy_1_1http_1_1URL)` _url` | 
 `protected std::vector< std::string > _outgoingBuffer` | 
 `protected bool _connect` | 
 `protected bool _active` | 
@@ -536,7 +537,7 @@ class scy::http::ClientConnection
 `protected `[`http::Client`](#classscy_1_1http_1_1Client)` * client()` | 
 `protected virtual `[`http::Message`](#classscy_1_1http_1_1Message)` * incomingHeader()` | 
 `protected virtual `[`http::Message`](#classscy_1_1http_1_1Message)` * outgoingHeader()` | 
-`protected virtual void onSocketConnect()` | 
+`protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `protected void onHostResolved(void *,const `[`net::DNSResult`](#structscy_1_1net_1_1DNSResult)` & result)` | 
 
 ## Members
@@ -547,27 +548,27 @@ Optional unmanaged client data pointer.
 
 
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Connect` {#group__http_1ga8818169eb311460d7c88ccbe4f64e1da}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Connect` {#group__http_1ga8818169eb311460d7c88ccbe4f64e1da}
 
-[Signal](#classscy_1_1Signal) when the client socket is connected and data can flow.
+Status signals.
 
+Signals when the client socket is connected and data can flow
 
+#### `public `[`Signal](#classscy_1_1Signal)< void([Response`](#classscy_1_1http_1_1Response) &)`> Headers` {#group__http_1ga7a53d8d574783ef7863640c44c42784e}
 
-#### `public `[`Signal](#classscy_1_1Signal)< [Response`](#classscy_1_1http_1_1Response)` & > Headers` {#group__http_1gac6f3eecfd9e2584501a710d78951ea50}
-
-[Signal](#classscy_1_1Signal) when the response HTTP header has been received.
-
-
-
-#### `public `[`Signal](#classscy_1_1Signal)< const [MutableBuffer`](#classscy_1_1MutableBuffer)` & > Payload` {#group__http_1ga946d1c55f3bd2f53340fa2cb14691284}
-
-[Signal](#classscy_1_1Signal) when raw data is received.
+Signals when the response HTTP header has been received.
 
 
 
-#### `public `[`Signal](#classscy_1_1Signal)< const [Response`](#classscy_1_1http_1_1Response)` & > Complete` {#group__http_1ga1f1fa0913908319ab3a29172d50d7d03}
+#### `public `[`Signal](#classscy_1_1Signal)< void(const [MutableBuffer`](#classscy_1_1MutableBuffer) &)`> Payload` {#group__http_1gaf1db56f2d086c0c21ad31cc27a82c4bb}
 
-[Signal](#classscy_1_1Signal) when the HTTP transaction is complete.
+Signals when raw data is received.
+
+
+
+#### `public `[`Signal](#classscy_1_1Signal)< void(const [Response`](#classscy_1_1http_1_1Response) &)`> Complete` {#group__http_1gac8c65bf400e2ab26443afd5e100b19ef}
+
+Signals when the HTTP transaction is complete.
 
 
 
@@ -601,9 +602,11 @@ Calls [connect()](#group__http_1ga3fe2e8385f1720882a418cbd6aa59766) internally i
 
 #### `public virtual int send(const char * data,std::size_t len,int flags)` {#group__http_1ga0391c2cbf6f6e30388c0169461b4c4c7}
 
-Send raw data to the peer.
 
 
+Send raw data to the peer. Calls [send()](#group__http_1ga4129126653843e0ee325ecac057e58fd) internally.
+
+Throws an exception if the socket is not already or connected.
 
 #### `public virtual void close()` {#group__http_1gab3966dace415a2d8850117fd665e9da2}
 
@@ -625,9 +628,9 @@ Return the cast read stream pointer or nullptr.
 
 #### `public virtual void onHeaders()` {#group__http_1gad4a7417ccb56097b0469675b79c3ca7f}
 
+Internal callbacks.
 
 
-Return true if the server did not give us a proper response within the allotted time. bool expired() const;
 
 #### `public virtual void onPayload(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer)` {#group__http_1gac1ba202df43a460dbaec2698f1480cea}
 
@@ -653,7 +656,7 @@ Return true if the server did not give us a proper response within the allotted 
 
 
 
-#### `protected `[`URL`](api-http.md#classscy_1_1http_1_1URL)` _url` {#group__http_1ga3f89a543b05fb16639adcc46729b8ee2}
+#### `protected `[`URL`](./doc/api-http.md#classscy_1_1http_1_1URL)` _url` {#group__http_1ga3f89a543b05fb16639adcc46729b8ee2}
 
 
 
@@ -707,7 +710,7 @@ Connects to the server endpoint. All sent data is buffered until the connection 
 
 
 
-#### `protected virtual void onSocketConnect()` {#group__http_1ga1ad8f8ca9d6ccbe7fa40c8d68c1c2d03}
+#### `protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1gaf90d5fe1830521ae3053ef6672843f71}
 
 
 
@@ -734,10 +737,11 @@ class scy::http::Connection
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` Outgoing` | 
-`public `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` Incoming` | 
-`public `[`ProgressSignal`](api-http.md#classscy_1_1http_1_1ProgressSignal)` IncomingProgress` | Fired on download progress.
-`public `[`ProgressSignal`](api-http.md#classscy_1_1http_1_1ProgressSignal)` OutgoingProgress` | Fired on upload progress.
+`public `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` Outgoing` | 
+`public `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` Incoming` | 
+`public `[`ProgressSignal`](./doc/api-http.md#classscy_1_1http_1_1ProgressSignal)` IncomingProgress` | Fired on download progress.
+`public `[`ProgressSignal`](./doc/api-http.md#classscy_1_1http_1_1ProgressSignal)` OutgoingProgress` | Fired on upload progress.
+`public `[`Signal](#classscy_1_1Signal)< void([Connection`](#classscy_1_1http_1_1Connection) &)`> Close` | 
 `public  Connection(const net::Socket::Ptr & socket)` | 
 `public virtual  ~Connection()` | 
 `public virtual int send(const char * data,std::size_t len,int flags)` | Send raw data to the peer.
@@ -759,26 +763,26 @@ class scy::http::Connection
 `public `[`http::Message`](#classscy_1_1http_1_1Message)` * outgoingHeader()` | 
 `protected net::Socket::Ptr _socket` | 
 `protected `[`SocketAdapter`](#group__net_1gaf9ced47f3c1aa08ccea3042997a2a320)` * _adapter` | 
-`protected `[`Request`](api-http.md#classscy_1_1http_1_1Request)` _request` | 
-`protected `[`Response`](api-http.md#classscy_1_1http_1_1Response)` _response` | 
-`protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` | 
+`protected `[`Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` _request` | 
+`protected `[`Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` _response` | 
+`protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` | 
 `protected bool _closed` | 
 `protected bool _shouldSendHeader` | 
-`protected virtual void onSocketConnect()` | 
-`protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`protected virtual void onSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`protected virtual void onSocketClose()` | 
-`protected virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` | Set the internal error.
+`protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`protected virtual void onSocketError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
+`protected virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`protected virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` | 
 
 ## Members
 
-#### `public `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` Outgoing` {#group__http_1ga55b968b2e008641e8dbc5f6a4ac5507c}
+#### `public `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` Outgoing` {#group__http_1ga55b968b2e008641e8dbc5f6a4ac5507c}
 
 
 
 The Outgoing stream is responsible for packetizing raw application data into the agreed upon HTTP format and sending it to the peer.
 
-#### `public `[`PacketStream`](api-base.md#classscy_1_1PacketStream)` Incoming` {#group__http_1gafc445ad6bf4dbb79edfff267fef6fb19}
+#### `public `[`PacketStream`](./doc/api-base.md#classscy_1_1PacketStream)` Incoming` {#group__http_1gafc445ad6bf4dbb79edfff267fef6fb19}
 
 
 
@@ -786,15 +790,21 @@ The Incoming stream emits incoming HTTP packets for processing by the applicatio
 
 This is useful for example when writing incoming data to a file.
 
-#### `public `[`ProgressSignal`](api-http.md#classscy_1_1http_1_1ProgressSignal)` IncomingProgress` {#group__http_1ga867abecb125b3505e8c1987d170890a4}
+#### `public `[`ProgressSignal`](./doc/api-http.md#classscy_1_1http_1_1ProgressSignal)` IncomingProgress` {#group__http_1ga867abecb125b3505e8c1987d170890a4}
 
 Fired on download progress.
 
 
 
-#### `public `[`ProgressSignal`](api-http.md#classscy_1_1http_1_1ProgressSignal)` OutgoingProgress` {#group__http_1ga901259e61a69f7f248382e8e18472d99}
+#### `public `[`ProgressSignal`](./doc/api-http.md#classscy_1_1http_1_1ProgressSignal)` OutgoingProgress` {#group__http_1ga901259e61a69f7f248382e8e18472d99}
 
 Fired on upload progress.
+
+
+
+#### `public `[`Signal](#classscy_1_1Signal)< void([Connection`](#classscy_1_1http_1_1Connection) &)`> Close` {#group__http_1ga07721462a2bf8648c8378a264abc01e2}
+
+
 
 
 
@@ -924,19 +934,19 @@ The HTTP response headers.
 
 
 
-#### `protected `[`Request`](api-http.md#classscy_1_1http_1_1Request)` _request` {#group__http_1gaa8acc765dd7da86268d4534053be3497}
+#### `protected `[`Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` _request` {#group__http_1gaa8acc765dd7da86268d4534053be3497}
 
 
 
 
 
-#### `protected `[`Response`](api-http.md#classscy_1_1http_1_1Response)` _response` {#group__http_1ga6bce4856f6f0f6daba2ae58e620dd392}
+#### `protected `[`Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` _response` {#group__http_1ga6bce4856f6f0f6daba2ae58e620dd392}
 
 
 
 
 
-#### `protected `[`scy::Error`](api-base.md#structscy_1_1Error)` _error` {#group__http_1ga65dddb1c2b352b6e129457c70f762b7c}
+#### `protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` {#group__http_1ga65dddb1c2b352b6e129457c70f762b7c}
 
 
 
@@ -954,25 +964,25 @@ The HTTP response headers.
 
 
 
-#### `protected virtual void onSocketConnect()` {#group__http_1gae592493f7c7272e5bc38258eae6ce2ff}
+#### `protected virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1gaa75f67bb69ac9ace3e6715abec3ce4af}
 
 
 
 These virtual methods can be overridden as necessary to intercept socket events before they hit the application.
 
-#### `protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1gaf40946b5949a50c30ab3a85eb96f0568}
+#### `protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1gab91f2cbe3aceb285e67469af0893135f}
 
 
 
 
 
-#### `protected virtual void onSocketError(const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__http_1ga17dac1f6204f7138eefe7b10c47bd376}
+#### `protected virtual void onSocketError(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`scy::Error`](#structscy_1_1Error)` & error)` {#group__http_1gab7e5a89654355ad1679ed933f5aab469}
 
 
 
 
 
-#### `protected virtual void onSocketClose()` {#group__http_1gaff0ed7540682fd39f56a312af8f18798}
+#### `protected virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1gaea7315f5a4619a851a23c652b8db23d8}
 
 
 
@@ -980,9 +990,9 @@ These virtual methods can be overridden as necessary to intercept socket events 
 
 #### `protected virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` {#group__http_1gaebeaf7cb7d32b02026a0f608d4ffd4a9}
 
-Set the internal error.
 
 
+Set the internal error. Note: Setting the error does not `[close()](#group__http_1ga7c40813c43b7e09e0b52ec8f33378dc9)` the connection.
 
 # class `scy::http::ConnectionAdapter` {#classscy_1_1http_1_1ConnectionAdapter}
 
@@ -1005,9 +1015,9 @@ Default HTTP socket adapter for reading and writing HTTP messages.
 `public virtual int send(const char * data,std::size_t len,int flags)` | 
 `public `[`Parser`](#classscy_1_1http_1_1Parser)` & parser()` | 
 `public `[`Connection`](#classscy_1_1http_1_1Connection)` & connection()` | 
-`protected `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` & _connection` | 
-`protected `[`Parser`](api-http.md#classscy_1_1http_1_1Parser)` _parser` | 
-`protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`protected `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` & _connection` | 
+`protected `[`Parser`](./doc/api-http.md#classscy_1_1http_1_1Parser)` _parser` | 
+`protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
 `protected virtual void onParserHeader(const std::string & name,const std::string & value)` | 
 `protected virtual void onParserHeadersEnd()` | 
 `protected virtual void onParserChunk(const char * buf,std::size_t len)` | 
@@ -1046,19 +1056,19 @@ Sends the given data buffer to the connected peer. Returns the number of bytes s
 
 
 
-#### `protected `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` & _connection` {#group__http_1gafbaca6a50ce7e935a7a3ad9b0f12c173}
+#### `protected `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` & _connection` {#group__http_1gafbaca6a50ce7e935a7a3ad9b0f12c173}
 
 
 
 
 
-#### `protected `[`Parser`](api-http.md#classscy_1_1http_1_1Parser)` _parser` {#group__http_1ga02352190d724739060c896e0acc743c0}
+#### `protected `[`Parser`](./doc/api-http.md#classscy_1_1http_1_1Parser)` _parser` {#group__http_1ga02352190d724739060c896e0acc743c0}
 
 
 
 
 
-#### `protected virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1gab56ef772a6f0d110cd39a1fbeb960301}
+#### `protected virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1gaf675696c310d06f65e3110c206b1991c}
 
 
 
@@ -1111,12 +1121,12 @@ This class supports both the Version 0 (by Netscape) and Version 1 (by RFC 2109)
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  Cookie()` | Creates an empty [Cookie](api-http.md#classscy_1_1http_1_1Cookie).
+`public  Cookie()` | Creates an empty [Cookie](./doc/api-http.md#classscy_1_1http_1_1Cookie).
 `public  explicit Cookie(const std::string & name)` | 
-`public  explicit Cookie(const `[`NVCollection`](#classscy_1_1NVCollection)` & nvc)` | Creates a cookie from the given [NVCollection](api-base.md#classscy_1_1NVCollection).
+`public  explicit Cookie(const `[`NVCollection`](#classscy_1_1NVCollection)` & nvc)` | Creates a cookie from the given [NVCollection](./doc/api-base.md#classscy_1_1NVCollection).
 `public  Cookie(const std::string & name,const std::string & value)` | 
-`public  Cookie(const `[`Cookie`](#classscy_1_1http_1_1Cookie)` & cookie)` | Creates the [Cookie](api-http.md#classscy_1_1http_1_1Cookie) by copying another one.
-`public  ~Cookie()` | Destroys the [Cookie](api-http.md#classscy_1_1http_1_1Cookie).
+`public  Cookie(const `[`Cookie`](#classscy_1_1http_1_1Cookie)` & cookie)` | Creates the [Cookie](./doc/api-http.md#classscy_1_1http_1_1Cookie) by copying another one.
+`public  ~Cookie()` | Destroys the [Cookie](./doc/api-http.md#classscy_1_1http_1_1Cookie).
 `public `[`Cookie`](#classscy_1_1http_1_1Cookie)` & operator=(const `[`Cookie`](#classscy_1_1http_1_1Cookie)` & cookie)` | Assigns a cookie.
 `public void setVersion(int version)` | 
 `public inline int getVersion() const` | 
@@ -1328,7 +1338,7 @@ An implementation of [FilePart](#classscy_1_1http_1_1FilePart) for plain files.
 `public  FilePart(const std::string & path)` | 
 `public  FilePart(const std::string & path,const std::string & contentType)` | 
 `public  FilePart(const std::string & path,const std::string & filename,const std::string & contentType)` | 
-`public virtual  ~FilePart()` | Destroys the [FilePart](api-http.md#classscy_1_1http_1_1FilePart).
+`public virtual  ~FilePart()` | Destroys the [FilePart](./doc/api-http.md#classscy_1_1http_1_1FilePart).
 `public virtual void open()` | 
 `public virtual void reset()` | Reset the internal state and write position to the start.
 `public virtual bool writeChunk(`[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & writer)` | 
@@ -1461,8 +1471,8 @@ An implementation of [FormPart](#classscy_1_1http_1_1FormPart).
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  FormPart(const std::string & contentType)` | Creates the [FormPart](api-http.md#classscy_1_1http_1_1FormPart) with the given MIME type.
-`public virtual  ~FormPart()` | Destroys the [FormPart](api-http.md#classscy_1_1http_1_1FormPart).
+`public  FormPart(const std::string & contentType)` | Creates the [FormPart](./doc/api-http.md#classscy_1_1http_1_1FormPart) with the given MIME type.
+`public virtual  ~FormPart()` | Destroys the [FormPart](./doc/api-http.md#classscy_1_1http_1_1FormPart).
 `public virtual void reset()` | Reset the internal state and write position to the start.
 `public bool writeChunk(`[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & writer)` | 
 `public void write(`[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & writer)` | Writes the form data to the given HTTP client connection.
@@ -1473,7 +1483,7 @@ An implementation of [FormPart](#classscy_1_1http_1_1FormPart).
 `public std::uint64_t length() const` | Returns the length of the current part.
 `protected std::string _contentType` | 
 `protected std::uint64_t _length` | 
-`protected `[`NVCollection`](api-base.md#classscy_1_1NVCollection)` _headers` | 
+`protected `[`NVCollection`](./doc/api-base.md#classscy_1_1NVCollection)` _headers` | 
 `protected bool _initialWrite` | 
 
 ## Members
@@ -1550,7 +1560,7 @@ Returns the length of the current part.
 
 
 
-#### `protected `[`NVCollection`](api-base.md#classscy_1_1NVCollection)` _headers` {#group__http_1ga1610eaa082d3154399710dba0bc4b1e4}
+#### `protected `[`NVCollection`](./doc/api-base.md#classscy_1_1NVCollection)` _headers` {#group__http_1ga1610eaa082d3154399710dba0bc4b1e4}
 
 
 
@@ -1581,8 +1591,8 @@ This class runs in its own thread so as not to block the event loop while upload
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | The outgoing packet emitter.
-`public virtual  ~FormWriter()` | Destroys the [FormWriter](api-http.md#classscy_1_1http_1_1FormWriter).
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | The outgoing packet emitter.
+`public virtual  ~FormWriter()` | Destroys the [FormWriter](./doc/api-http.md#classscy_1_1http_1_1FormWriter).
 `public void addPart(const std::string & name,`[`FormPart`](#classscy_1_1http_1_1FormPart)` * part)` | 
 `public virtual void start()` | Starts the sending thread.
 `public virtual void stop()` | Stops the sending thread.
@@ -1598,7 +1608,7 @@ This class runs in its own thread so as not to block the event loop while upload
 `public void setBoundary(const std::string & boundary)` | 
 `public const std::string & boundary() const` | Returns the MIME boundary used for writing multipart form data.
 `public `[`ClientConnection`](#classscy_1_1http_1_1ClientConnection)` & connection()` | The associated HTTP client connection.
-`protected `[`ClientConnection`](api-http.md#classscy_1_1http_1_1ClientConnection)` & _connection` | 
+`protected `[`ClientConnection`](./doc/api-http.md#classscy_1_1http_1_1ClientConnection)` & _connection` | 
 `protected async::Runner::Ptr _runner` | 
 `protected std::string _encoding` | 
 `protected std::string _boundary` | 
@@ -1616,7 +1626,7 @@ This class runs in its own thread so as not to block the event loop while upload
 
 ## Members
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__http_1gab2466a31197f14952d9591b1d5c4a1ad}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__http_1gab2466a31197f14952d9591b1d5c4a1ad}
 
 The outgoing packet emitter.
 
@@ -1735,7 +1745,7 @@ The associated HTTP client connection.
 
 
 
-#### `protected `[`ClientConnection`](api-http.md#classscy_1_1http_1_1ClientConnection)` & _connection` {#group__http_1ga9f79b8365fab747d1e1cee3cea0e2ac4}
+#### `protected `[`ClientConnection`](./doc/api-http.md#classscy_1_1http_1_1ClientConnection)` & _connection` {#group__http_1ga9f79b8365fab747d1e1cee3cea0e2ac4}
 
 
 
@@ -1858,9 +1868,9 @@ Defines the common properties of all HTTP messages. These are version, content l
 `public void setKeepAlive(bool keepAlive)` | 
 `public bool getKeepAlive() const` | 
 `public virtual void write(std::ostream & ostr) const` | 
-`protected  Message()` | Creates the [Message](api-http.md#classscy_1_1http_1_1Message) with version HTTP/1.0.
+`protected  Message()` | Creates the [Message](./doc/api-http.md#classscy_1_1http_1_1Message) with version HTTP/1.0.
 `protected  Message(const std::string & version)` | 
-`protected virtual  ~Message()` | Destroys the [Message](api-http.md#classscy_1_1http_1_1Message).
+`protected virtual  ~Message()` | Destroys the [Message](./doc/api-http.md#classscy_1_1http_1_1Message).
 
 ## Members
 
@@ -2000,11 +2010,11 @@ class scy::http::MultipartAdapter
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` * connection` | 
+`public `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` * connection` | 
 `public std::string contentType` | 
 `public bool isBase64` | 
 `public bool initial` | 
-`public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` | 
+`public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` | 
 `public inline  MultipartAdapter(`[`Connection`](#classscy_1_1http_1_1Connection)` * connection,bool base64)` | 
 `public inline  MultipartAdapter(const std::string & contentType,bool base64)` | 
 `public inline virtual  ~MultipartAdapter()` | 
@@ -2014,7 +2024,7 @@ class scy::http::MultipartAdapter
 
 ## Members
 
-#### `public `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` * connection` {#group__http_1ga48eac4fef04680408a5952fd69fdd91c}
+#### `public `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` * connection` {#group__http_1ga48eac4fef04680408a5952fd69fdd91c}
 
 
 
@@ -2038,7 +2048,7 @@ class scy::http::MultipartAdapter
 
 
 
-#### `public `[`PacketSignal`](api-base.md#classscy_1_1SignalBase)` emitter` {#group__http_1ga73a88cc955c203e10227dc1e72319fc6}
+#### `public `[`PacketSignal`](#group__base_1ga3ffb5bda6133fac97f3bed2b567b9b6a)` emitter` {#group__http_1ga73a88cc955c203e10227dc1e72319fc6}
 
 
 
@@ -2093,17 +2103,17 @@ Note: If packet processing is async (the packet is not in the current thread sco
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`ParserObserver`](api-http.md#classscy_1_1http_1_1ParserObserver)` * _observer` | 
-`public `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` * _request` | 
-`public `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` * _response` | 
-`public `[`http::Message`](api-http.md#classscy_1_1http_1_1Message)` * _message` | 
+`public `[`ParserObserver`](./doc/api-http.md#classscy_1_1http_1_1ParserObserver)` * _observer` | 
+`public `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` * _request` | 
+`public `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` * _response` | 
+`public `[`http::Message`](./doc/api-http.md#classscy_1_1http_1_1Message)` * _message` | 
 `public http_parser _parser` | 
 `public http_parser_settings _settings` | 
 `public bool _wasHeaderValue` | 
 `public std::string _lastHeaderField` | 
 `public std::string _lastHeaderValue` | 
 `public bool _complete` | 
-`public `[`ParserError`](api-http.md#structscy_1_1http_1_1ParserError)` * _error` | 
+`public `[`ParserError`](./doc/api-http.md#structscy_1_1http_1_1ParserError)` * _error` | 
 `public  Parser(`[`http::Response`](#classscy_1_1http_1_1Response)` * response)` | 
 `public  Parser(`[`http::Request`](#classscy_1_1http_1_1Request)` * request)` | 
 `public  Parser(http_parser_type type)` | 
@@ -2129,25 +2139,25 @@ Note: If packet processing is async (the packet is not in the current thread sco
 
 ## Members
 
-#### `public `[`ParserObserver`](api-http.md#classscy_1_1http_1_1ParserObserver)` * _observer` {#group__http_1gab42977a9639b8058d82de95625466afc}
+#### `public `[`ParserObserver`](./doc/api-http.md#classscy_1_1http_1_1ParserObserver)` * _observer` {#group__http_1gab42977a9639b8058d82de95625466afc}
 
 
 
 
 
-#### `public `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` * _request` {#group__http_1ga4981cb205d6bb8d818da9f83335894ec}
+#### `public `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` * _request` {#group__http_1ga4981cb205d6bb8d818da9f83335894ec}
 
 
 
 
 
-#### `public `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` * _response` {#group__http_1ga65ae85b18c21ebe24f566e625e1fa649}
+#### `public `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` * _response` {#group__http_1ga65ae85b18c21ebe24f566e625e1fa649}
 
 
 
 
 
-#### `public `[`http::Message`](api-http.md#classscy_1_1http_1_1Message)` * _message` {#group__http_1gad783cae492f8af491ac50f84ed46a0ba}
+#### `public `[`http::Message`](./doc/api-http.md#classscy_1_1http_1_1Message)` * _message` {#group__http_1gad783cae492f8af491ac50f84ed46a0ba}
 
 
 
@@ -2189,7 +2199,7 @@ Note: If packet processing is async (the packet is not in the current thread sco
 
 
 
-#### `public `[`ParserError`](api-http.md#structscy_1_1http_1_1ParserError)` * _error` {#group__http_1gad8036bbc353e3caa83656131716a8416}
+#### `public `[`ParserError`](./doc/api-http.md#structscy_1_1http_1_1ParserError)` * _error` {#group__http_1gad8036bbc353e3caa83656131716a8416}
 
 
 
@@ -2382,7 +2392,7 @@ Returns true if parsing is complete, either in success or error.
 
 ```
 class scy::http::ProgressSignal
-  : public scy::Signal< const double &>
+  : public scy::Signal< void(const double &)>
 ```  
 
 
@@ -2459,7 +2469,7 @@ In addition to the properties common to all HTTP messages, a HTTP request has a 
 `public  Request(const std::string & version)` | 
 `public  Request(const std::string & method,const std::string & uri)` | Creates a HTTP/1.0 request with the given method and URI.
 `public  Request(const std::string & method,const std::string & uri,const std::string & version)` | Creates a HTTP request with the given method, URI and version.
-`public virtual  ~Request()` | Destroys the [Request](api-http.md#classscy_1_1http_1_1Request).
+`public virtual  ~Request()` | Destroys the [Request](./doc/api-http.md#classscy_1_1http_1_1Request).
 `public void setMethod(const std::string & method)` | Sets the method.
 `public const std::string & getMethod() const` | Returns the method.
 `public void setURI(const std::string & uri)` | Sets the request URI.
@@ -2652,11 +2662,11 @@ This class encapsulates an HTTP response message.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public  Response()` | typedef std::shared_ptr<Response> Ptr;
-`public  Response(`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status,const std::string & reason)` | Creates the [Response](api-http.md#classscy_1_1http_1_1Response) with the given status and reason phrase.
-`public  Response(const std::string & version,`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status,const std::string & reason)` | Creates the [Response](api-http.md#classscy_1_1http_1_1Response) with the given version, status and reason phrase.
+`public  Response(`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status,const std::string & reason)` | Creates the [Response](./doc/api-http.md#classscy_1_1http_1_1Response) with the given status and reason phrase.
+`public  Response(const std::string & version,`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status,const std::string & reason)` | Creates the [Response](./doc/api-http.md#classscy_1_1http_1_1Response) with the given version, status and reason phrase.
 `public  Response(`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status)` | 
 `public  Response(const std::string & version,`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status)` | 
-`public virtual  ~Response()` | Destroys the [Response](api-http.md#classscy_1_1http_1_1Response).
+`public virtual  ~Response()` | Destroys the [Response](./doc/api-http.md#classscy_1_1http_1_1Response).
 `public void setStatus(`[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` status)` | 
 `public `[`StatusCode`](#group__http_1ga557c5bc8f0990c42f31cbaca9b756f2b)` getStatus() const` | Returns the HTTP status code.
 `public void setReason(const std::string & reason)` | Sets the HTTP reason phrase.
@@ -2796,10 +2806,10 @@ TODO:
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public net::TCPSocket::Ptr socket` | 
-`public `[`ServerResponderFactory`](api-http.md#classscy_1_1http_1_1ServerResponderFactory)` * factory` | 
+`public `[`ServerResponderFactory`](./doc/api-http.md#classscy_1_1http_1_1ServerResponderFactory)` * factory` | 
 `public ServerConnectionList connections` | 
-`public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` address` | 
-`public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` address` | 
+`public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` | 
 `public  Server(short port,`[`ServerResponderFactory`](#classscy_1_1http_1_1ServerResponderFactory)` * factory)` | 
 `public virtual  ~Server()` | 
 `public void start()` | 
@@ -2809,9 +2819,9 @@ TODO:
 `protected `[`ServerResponder`](#classscy_1_1http_1_1ServerResponder)` * createResponder(`[`ServerConnection`](#classscy_1_1http_1_1ServerConnection)` & conn)` | 
 `protected virtual void addConnection(ServerConnection::Ptr conn)` | 
 `protected virtual void removeConnection(`[`ServerConnection`](#classscy_1_1http_1_1ServerConnection)` * conn)` | 
-`protected void onAccept(const net::TCPSocket::Ptr & sock)` | 
-`protected void onClose()` | 
-`protected void onConnectionClose(void *)` | 
+`protected void onSocketAccept(const net::TCPSocket::Ptr & socket)` | 
+`protected void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`protected void onConnectionClose(`[`Connection`](#classscy_1_1http_1_1Connection)` & socket)` | 
 
 ## Members
 
@@ -2821,7 +2831,7 @@ TODO:
 
 
 
-#### `public `[`ServerResponderFactory`](api-http.md#classscy_1_1http_1_1ServerResponderFactory)` * factory` {#group__http_1ga144741437940605b8d5dd3f70644e09c}
+#### `public `[`ServerResponderFactory`](./doc/api-http.md#classscy_1_1http_1_1ServerResponderFactory)` * factory` {#group__http_1ga144741437940605b8d5dd3f70644e09c}
 
 
 
@@ -2833,13 +2843,13 @@ TODO:
 
 
 
-#### `public `[`net::Address`](api-net.md#classscy_1_1net_1_1Address)` address` {#group__http_1gaddbdac8f55bfe0c23ce967fd1574e259}
+#### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` address` {#group__http_1gaddbdac8f55bfe0c23ce967fd1574e259}
 
 
 
 
 
-#### `public `[`NullSignal`](api-base.md#classscy_1_1NullSignal)` Shutdown` {#group__http_1ga7cf8f08eb3f78b6f9b2f220ee579ec43}
+#### `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` {#group__http_1ga7cf8f08eb3f78b6f9b2f220ee579ec43}
 
 
 
@@ -2899,19 +2909,19 @@ TODO:
 
 
 
-#### `protected void onAccept(const net::TCPSocket::Ptr & sock)` {#group__http_1ga57737d3688f0f3019a1d9dfff3973a3c}
+#### `protected void onSocketAccept(const net::TCPSocket::Ptr & socket)` {#group__http_1ga53de55e2e742d9e5206e22ac3c6f7d89}
 
 
 
 
 
-#### `protected void onClose()` {#group__http_1ga68fa2a71c75f58e9bfb07ae255d62232}
+#### `protected void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1gaf63edf7f8001f9ebbbb10f089166f983}
 
 
 
 
 
-#### `protected void onConnectionClose(void *)` {#group__http_1gaed220289bdadaf8319c52b9ca6b84762}
+#### `protected void onConnectionClose(`[`Connection`](#classscy_1_1http_1_1Connection)` & socket)` {#group__http_1gaed2fb3b9898de149eab8643426af3258}
 
 
 
@@ -2960,8 +2970,8 @@ class scy::http::ServerConnection
 `public  ServerConnection(`[`Server`](#classscy_1_1http_1_1Server)` & server,net::Socket::Ptr socket)` | 
 `public virtual  ~ServerConnection()` | 
 `public virtual void close()` | Sends the HTTP response.
-`protected `[`Server`](api-http.md#classscy_1_1http_1_1Server)` & _server` | 
-`protected `[`ServerResponder`](api-http.md#classscy_1_1http_1_1ServerResponder)` * _responder` | 
+`protected `[`Server`](./doc/api-http.md#classscy_1_1http_1_1Server)` & _server` | 
+`protected `[`ServerResponder`](./doc/api-http.md#classscy_1_1http_1_1ServerResponder)` * _responder` | 
 `protected bool _upgrade` | 
 `protected bool _requestComplete` | 
 `protected virtual void onHeaders()` | 
@@ -2992,13 +3002,13 @@ Sends the HTTP response.
 
 Closes the HTTP connection
 
-#### `protected `[`Server`](api-http.md#classscy_1_1http_1_1Server)` & _server` {#group__http_1gaad54c14cb297b6ff031f35e08fc5d054}
+#### `protected `[`Server`](./doc/api-http.md#classscy_1_1http_1_1Server)` & _server` {#group__http_1gaad54c14cb297b6ff031f35e08fc5d054}
 
 
 
 
 
-#### `protected `[`ServerResponder`](api-http.md#classscy_1_1http_1_1ServerResponder)` * _responder` {#group__http_1gad1b0f70d5b87251947942913d9aa4deb}
+#### `protected `[`ServerResponder`](./doc/api-http.md#classscy_1_1http_1_1ServerResponder)` * _responder` {#group__http_1gad1b0f70d5b87251947942913d9aa4deb}
 
 
 
@@ -3082,7 +3092,7 @@ A new HTTPServerResponder object will be created for each new HTTP request that 
 `public inline `[`ServerConnection`](#classscy_1_1http_1_1ServerConnection)` & connection()` | 
 `public inline `[`Request`](#classscy_1_1http_1_1Request)` & request()` | 
 `public inline `[`Response`](#classscy_1_1http_1_1Response)` & response()` | 
-`protected `[`ServerConnection`](api-http.md#classscy_1_1http_1_1ServerConnection)` & _connection` | 
+`protected `[`ServerConnection`](./doc/api-http.md#classscy_1_1http_1_1ServerConnection)` & _connection` | 
 
 ## Members
 
@@ -3140,7 +3150,7 @@ A new HTTPServerResponder object will be created for each new HTTP request that 
 
 
 
-#### `protected `[`ServerConnection`](api-http.md#classscy_1_1http_1_1ServerConnection)` & _connection` {#group__http_1ga23b4b87c41034983a2116b90ed31c0b3}
+#### `protected `[`ServerConnection`](./doc/api-http.md#classscy_1_1http_1_1ServerConnection)` & _connection` {#group__http_1ga23b4b87c41034983a2116b90ed31c0b3}
 
 
 
@@ -3196,9 +3206,9 @@ An implementation of [StringPart](#classscy_1_1http_1_1StringPart) for plain fil
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  StringPart(const std::string & path)` | Creates the [StringPart](api-http.md#classscy_1_1http_1_1StringPart) for the given string.
-`public  StringPart(const std::string & data,const std::string & contentType)` | Creates the [StringPart](api-http.md#classscy_1_1http_1_1StringPart) for the given string and MIME type.
-`public virtual  ~StringPart()` | Destroys the [StringPart](api-http.md#classscy_1_1http_1_1StringPart).
+`public  StringPart(const std::string & path)` | Creates the [StringPart](./doc/api-http.md#classscy_1_1http_1_1StringPart) for the given string.
+`public  StringPart(const std::string & data,const std::string & contentType)` | Creates the [StringPart](./doc/api-http.md#classscy_1_1http_1_1StringPart) for the given string and MIME type.
+`public virtual  ~StringPart()` | Destroys the [StringPart](./doc/api-http.md#classscy_1_1http_1_1StringPart).
 `public virtual bool writeChunk(`[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & writer)` | 
 `public virtual void write(`[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & writer)` | Writes the form data to the given HTTP client connection.
 `public virtual void write(std::ostream & ostr)` | Writes the form data to the given output stream.
@@ -3558,7 +3568,7 @@ class scy::http::ws::ConnectionAdapter
 `public  ConnectionAdapter(`[`Connection`](#classscy_1_1http_1_1Connection)` & connection,`[`ws::Mode`](#group__http_1gaa9edb02676fb90927487e1de2afa287e)` mode)` | 
 `public virtual  ~ConnectionAdapter()` | 
 `public virtual void onHandshakeComplete()` | virtual int sendHeader();
-`protected `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` & _connection` | 
+`protected `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` & _connection` | 
 
 ## Members
 
@@ -3580,7 +3590,7 @@ virtual int sendHeader();
 
 
 
-#### `protected `[`Connection`](api-http.md#classscy_1_1http_1_1Connection)` & _connection` {#group__http_1gaa2280f7bfbdcade89c6df528b8360a33}
+#### `protected `[`Connection`](./doc/api-http.md#classscy_1_1http_1_1Connection)` & _connection` {#group__http_1gaa2280f7bfbdcade89c6df528b8360a33}
 
 
 
@@ -3605,8 +3615,8 @@ Standalone [WebSocket](#classscy_1_1http_1_1ws_1_1WebSocket) class.
 `public virtual  ~WebSocket()` | 
 `public `[`http::Request`](#classscy_1_1http_1_1Request)` & request()` | 
 `public `[`http::Response`](#classscy_1_1http_1_1Response)` & response()` | 
-`protected `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` _request` | 
-`protected `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` _response` | 
+`protected `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` _request` | 
+`protected `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` _response` | 
 
 ## Members
 
@@ -3634,13 +3644,13 @@ Creates the [WebSocket](#classscy_1_1http_1_1ws_1_1WebSocket) with the given Soc
 
 
 
-#### `protected `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` _request` {#group__http_1gabe420b6263836453b99dd0b333f80da7}
+#### `protected `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` _request` {#group__http_1gabe420b6263836453b99dd0b333f80da7}
 
 
 
 
 
-#### `protected `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` _response` {#group__http_1ga54257ef6c009b7d41e6849a3211fd0fc}
+#### `protected `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` _response` {#group__http_1ga54257ef6c009b7d41e6849a3211fd0fc}
 
 
 
@@ -3666,16 +3676,16 @@ class scy::http::ws::WebSocketAdapter
 `public virtual int send(const char * data,std::size_t len,int flags)` | 
 `public virtual int send(const char * data,std::size_t len,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddr,int flags)` | 
 `public virtual bool shutdown(std::uint16_t statusCode,const std::string & statusMessage)` | 
-`public virtual void sendClientRequest()` | 
+`public virtual void sendClientRequest()` | [Client](./doc/api-http.md#classscy_1_1http_1_1Client) side.
 `public virtual void handleClientResponse(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddr)` | 
-`public virtual void handleServerRequest(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddr)` | 
-`public virtual void onSocketConnect()` | 
-`public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
-`public virtual void onSocketClose()` | 
+`public virtual void handleServerRequest(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddr)` | [Server](./doc/api-http.md#classscy_1_1http_1_1Server) side.
+`public virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
+`public virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` | 
+`public virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` | 
 `public virtual void onHandshakeComplete()` | 
-`protected `[`WebSocketFramer`](api-http.md#classscy_1_1http_1_1ws_1_1WebSocketFramer)` framer` | 
-`protected `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` & _request` | 
-`protected `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` & _response` | 
+`protected `[`WebSocketFramer`](./doc/api-http.md#classscy_1_1http_1_1ws_1_1WebSocketFramer)` framer` | 
+`protected `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` & _request` | 
+`protected `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` & _response` | 
 `protected virtual  ~WebSocketAdapter()` | 
 
 ## Members
@@ -3712,7 +3722,7 @@ Sends the given data buffer to the connected peer. Returns the number of bytes s
 
 #### `public virtual void sendClientRequest()` {#group__http_1ga5b2297be10b0728276e95325cb49dd87}
 
-
+[Client](#classscy_1_1http_1_1Client) side.
 
 
 
@@ -3724,23 +3734,23 @@ Sends the given data buffer to the connected peer. Returns the number of bytes s
 
 #### `public virtual void handleServerRequest(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddr)` {#group__http_1ga2df61cf3b5dfb720cff8d61c88eebbc5}
 
+[Server](#classscy_1_1http_1_1Server) side.
 
 
 
-
-#### `public virtual void onSocketConnect()` {#group__http_1ga837ac6acdaf1aea75d5691614484a06f}
+#### `public virtual void onSocketConnect(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1ga0134364a09e37e939ff44f7d3aa7ea39}
 
 
 
 These virtual methods can be overridden as necessary to intercept socket events before they hit the application.
 
-#### `public virtual void onSocketRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1ga8625854da7f1228d20e8fc43ef597a59}
+#### `public virtual void onSocketRecv(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket,const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buffer,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress)` {#group__http_1gae617802894aa5c20d0e636bbdf15d09e}
 
 
 
 
 
-#### `public virtual void onSocketClose()` {#group__http_1ga2a3525d1ab7dab7295e904063f7857ed}
+#### `public virtual void onSocketClose(`[`net::Socket`](#classscy_1_1net_1_1Socket)` & socket)` {#group__http_1ga02a8a98e9741e90a5ef0906e1380205b}
 
 
 
@@ -3752,19 +3762,19 @@ These virtual methods can be overridden as necessary to intercept socket events 
 
 
 
-#### `protected `[`WebSocketFramer`](api-http.md#classscy_1_1http_1_1ws_1_1WebSocketFramer)` framer` {#group__http_1ga5b9dd45fd977d97d4bed67c41d85337c}
+#### `protected `[`WebSocketFramer`](./doc/api-http.md#classscy_1_1http_1_1ws_1_1WebSocketFramer)` framer` {#group__http_1ga5b9dd45fd977d97d4bed67c41d85337c}
 
 
 
 
 
-#### `protected `[`http::Request`](api-http.md#classscy_1_1http_1_1Request)` & _request` {#group__http_1ga38efeb718ff37412f94f07e69abe837f}
+#### `protected `[`http::Request`](./doc/api-http.md#classscy_1_1http_1_1Request)` & _request` {#group__http_1ga38efeb718ff37412f94f07e69abe837f}
 
 
 
 
 
-#### `protected `[`http::Response`](api-http.md#classscy_1_1http_1_1Response)` & _response` {#group__http_1ga68e67b65349a7f1a1c9c916185192368}
+#### `protected `[`http::Response`](./doc/api-http.md#classscy_1_1http_1_1Response)` & _response` {#group__http_1ga68e67b65349a7f1a1c9c916185192368}
 
 
 
@@ -3789,7 +3799,7 @@ This class implements a [WebSocket](#classscy_1_1http_1_1ws_1_1WebSocket) parser
 --------------------------------|---------------------------------------------
 `public  WebSocketFramer(`[`ws::Mode`](#group__http_1gaa9edb02676fb90927487e1de2afa287e)` mode)` | Creates a Socket using the given Socket.
 `public virtual  ~WebSocketFramer()` | 
-`public virtual std::size_t writeFrame(const char * data,std::size_t len,int flags,`[`BitWriter`](#classscy_1_1BitWriter)` & frame)` | Writes a [WebSocket](api-http.md#classscy_1_1http_1_1ws_1_1WebSocket) protocol frame from the given data.
+`public virtual std::size_t writeFrame(const char * data,std::size_t len,int flags,`[`BitWriter`](#classscy_1_1BitWriter)` & frame)` | Writes a [WebSocket](./doc/api-http.md#classscy_1_1http_1_1ws_1_1WebSocket) protocol frame from the given data.
 `public virtual std::uint64_t readFrame(`[`BitReader`](#classscy_1_1BitReader)` & frame,char *& payload)` | 
 `public bool handshakeComplete() const` | 
 `public void acceptServerRequest(`[`http::Request`](#classscy_1_1http_1_1Request)` & request,`[`http::Response`](#classscy_1_1http_1_1Response)` & response)` | 
@@ -3873,6 +3883,34 @@ Returns the frame flags of the most recently received frame. Set by [readFrame()
 Returns true if the payload must be masked. Used by [writeFrame()](#group__http_1ga33423fa89193d26b9d18d08ec62906a4)
 
 #### `protected `[`ws::Mode`](#group__http_1gaa9edb02676fb90927487e1de2afa287e)` mode() const` {#group__http_1ga7f7b3086af7abd333e0d1403d9e1f046}
+
+
+
+
+
+# struct `scy::http::FormWriter::Part` {#structscy_1_1http_1_1FormWriter_1_1Part}
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public std::string name` | 
+`public `[`FormPart`](./doc/api-http.md#classscy_1_1http_1_1FormPart)` * part` | 
+
+## Members
+
+#### `public std::string name` {#group__http_1ga59be331e36d604c25ef7d780cc814e85}
+
+
+
+
+
+#### `public `[`FormPart`](./doc/api-http.md#classscy_1_1http_1_1FormPart)` * part` {#group__http_1gac1cd7abd9bb03fd415b1667a90af74c5}
 
 
 
