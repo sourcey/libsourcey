@@ -17,7 +17,7 @@
 #include "scy/av/mediacapture.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/types.h"
-#include "scy/mutex.h"
+#include <mutex>
 
 #if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
 
@@ -119,7 +119,7 @@ protected:
     friend class Singleton<MediaFactory>;
     friend class VideoCapture;
 
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 
     IDeviceManager* _devices;
     FormatRegistry _formats;

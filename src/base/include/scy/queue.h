@@ -30,66 +30,66 @@ template <typename T> class Queue
 {
 private:
     std::deque<T> _queue;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 
 public:
     void push(const T& data)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _queue.push_back(data);
     }
 
     bool empty() const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _queue.empty();
     }
 
     T& front()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.front();
     }
 
     T const& front() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.front();
     }
 
     T& back()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.back();
     }
 
     T const& back() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.back();
     }
 
     void pop()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _queue.pop_front();
     }
 
     template <typename Compare> std::size_t sort()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return std::sort(_queue.begin(), _queue.end(), Compare());
     }
 
     std::size_t size()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.size();
     }
 
     std::deque<T>& queue()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue;
     }
 };
@@ -120,7 +120,7 @@ public:
     virtual void push(T* item) // Push an item onto the queue.
     /// The queue takes ownership of the item pointer.
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
 
         while (_limit > 0 && static_cast<int>(queue_t::size()) >= _limit) {
             WarnS(this) << "Purging: " << queue_t::size() << std::endl;
@@ -147,7 +147,7 @@ public:
 
     void clear() // Clears all queued items.
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         while (!queue_t::empty()) {
             delete queue_t::front();
             queue_t::pop();
@@ -190,12 +190,12 @@ public:
         if (ondispatch)
             ondispatch(item);
     }
-    /// int timeout()    /// {    ///     Mutex::ScopedLock lock(_mutex);    ///
+    /// int timeout()    /// {    ///     std::lock_guard<std::mutex> guard(_mutex);    ///
     /// return _timeout;    /// }
 
     void setTimeout(int milliseconds)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         assert(queue_t::empty() && "queue must not be active");
         _timeout = milliseconds;
     }
@@ -208,7 +208,7 @@ protected:
     {
         T* next;
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             if (queue_t::empty())
                 return nullptr;
 
@@ -231,7 +231,7 @@ protected:
 
     int _limit;
     int _timeout; /// queue_t _queue;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 
@@ -339,13 +339,13 @@ class ConcurrentQueue
 {
 private:
     std::queue<T> _queue;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     Poco::Condition _condition;
 
 public:
     void push(T const& data)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _queue.push(data);
         lock.unlock();
         _condition.signal();
@@ -353,13 +353,13 @@ public:
 
     bool empty() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _queue.empty();
     }
 
     bool tryPop(T& out)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (_queue.empty())
             return false;
 
@@ -370,7 +370,7 @@ public:
 
     void waitAndPop(T& out)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         while (_queue.empty())
             _cond.wait(_mutex);
 

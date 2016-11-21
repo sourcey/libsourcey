@@ -14,7 +14,7 @@
 
 
 #include "scy/async.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
 

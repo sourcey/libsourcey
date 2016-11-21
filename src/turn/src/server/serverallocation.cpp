@@ -208,14 +208,14 @@ std::int64_t ServerAllocation::maxTimeRemaining() const
 
 std::int64_t ServerAllocation::timeRemaining() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
 
 Server& ServerAllocation::server()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _server;
 }
 

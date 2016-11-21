@@ -52,7 +52,7 @@ IAllocation::~IAllocation()
 
 void IAllocation::updateUsage(std::int64_t numBytes)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;
     _updatedAt = time(0);
     _bandwidthUsed += numBytes;
@@ -61,7 +61,7 @@ void IAllocation::updateUsage(std::int64_t numBytes)
 
 std::int64_t IAllocation::timeRemaining() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     // std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0)
     // - _updatedAt));
     std::int64_t remaining =
@@ -84,7 +84,7 @@ bool IAllocation::deleted() const
 
 void IAllocation::setLifetime(std::int64_t lifetime)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     _lifetime = lifetime;
     _updatedAt = static_cast<std::int64_t>(time(0));
     TraceL << "Updating Lifetime: " << _lifetime << endl;
@@ -93,28 +93,28 @@ void IAllocation::setLifetime(std::int64_t lifetime)
 
 void IAllocation::setBandwidthLimit(std::int64_t numBytes)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     _bandwidthLimit = numBytes;
 }
 
 
 std::int64_t IAllocation::bandwidthLimit() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _bandwidthLimit;
 }
 
 
 std::int64_t IAllocation::bandwidthUsed() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _bandwidthUsed;
 }
 
 
 std::int64_t IAllocation::bandwidthRemaining() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _bandwidthLimit > 0 ? (_bandwidthLimit > _bandwidthUsed
                                       ? _bandwidthLimit - _bandwidthUsed
                                       : 0)
@@ -124,35 +124,35 @@ std::int64_t IAllocation::bandwidthRemaining() const
 
 FiveTuple& IAllocation::tuple()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _tuple;
 }
 
 
 std::string IAllocation::username() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _username;
 }
 
 
 std::int64_t IAllocation::lifetime() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _lifetime;
 }
 
 
 PermissionList IAllocation::permissions() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _permissions;
 }
 
 
 void IAllocation::addPermission(const std::string& ip)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     // If the permission is already in the list then refresh it.
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
@@ -179,7 +179,7 @@ void IAllocation::addPermissions(const IPList& ips)
 
 void IAllocation::removePermission(const std::string& ip)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).ip == ip) {
@@ -193,14 +193,14 @@ void IAllocation::removePermission(const std::string& ip)
 
 void IAllocation::removeAllPermissions()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     _permissions.clear();
 }
 
 
 void IAllocation::removeExpiredPermissions()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).timeout.expired()) {
             InfoL << "Removing Expired Permission: " << (*it).ip << endl;

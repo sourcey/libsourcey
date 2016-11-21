@@ -260,14 +260,14 @@ void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 
 void TCPConnectionPair::startTimeout()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     timeout.reset();
 }
 
 
 bool TCPConnectionPair::expired() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return timeout.running() && timeout.expired();
 }
 

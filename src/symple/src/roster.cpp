@@ -34,7 +34,7 @@ Roster::~Roster()
 
 Peer* Roster::getByHost(const std::string& host)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _map.begin(); it != _map.end(); ++it) {
         if (it->second->host() == host)
             return it->second;
@@ -45,14 +45,14 @@ Peer* Roster::getByHost(const std::string& host)
 
 Roster::PeerMap Roster::peers() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _map;
 }
 
 
 void Roster::print(std::ostream& os) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     os << "Roster[";
     for (auto it = _map.begin(); it != _map.end(); ++it) {

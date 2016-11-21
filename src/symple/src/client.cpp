@@ -450,7 +450,7 @@ void Client::reset()
 
 Roster& Client::roster()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _roster;
 }
 

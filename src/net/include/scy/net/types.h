@@ -13,16 +13,19 @@
 #define SCY_Net_Types_H
 
 
-#include "scy/stateful.h"
+#include "scy/base.h"
 
-
-// Conflicts with WebRTC: webrtc/base/socket.h:116
-// #if defined(UNIX) && !defined(INVALID_SOCKET)
-// #define INVALID_SOCKET -1
-// #endif
-
-#if defined(WIN32)
+#if defined(SCY_WIN32)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 typedef int socklen_t;
+// typedef SOCKET scy_socket_t;
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
+// typedef int scy_socket_t;
+// Conflicts with WebRTC: webrtc/base/socket.h:116
+// #define INVALID_SOCKET -1
 #endif
 
 #define LibSourcey_HAVE_IPv6 1 // fixme

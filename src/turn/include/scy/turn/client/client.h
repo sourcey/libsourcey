@@ -192,7 +192,7 @@ protected:
     virtual void onTimer();
 
 protected:
-    // mutable Mutex _mutex;
+    // mutable std::mutex _mutex;
     ClientObserver& _observer;
     Options _options;
     net::Socket::Ptr _socket;

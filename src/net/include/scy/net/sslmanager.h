@@ -118,7 +118,7 @@ private:
 
     SSLContext::Ptr _defaultServerContext;
     SSLContext::Ptr _defaultClientContext;
-    Mutex _mutex;
+    std::mutex _mutex;
 
     friend class Singleton<SSLManager>;
     friend class SSLContext;

@@ -72,7 +72,7 @@ void Client::initiate()
 void Client::shutdown()
 {
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         _timer.stop();
 
         for (auto it = _transactions.begin(); it != _transactions.end();) {
@@ -215,7 +215,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 {
     TraceL << "Removing transaction: " << transaction << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
     for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
         if (*it == transaction) {
             (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
@@ -230,7 +230,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 
 void Client::authenticateRequest(stun::Message& request)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     // Authenticate messages once the server provides us with realm and noonce
     if (_realm.empty())
@@ -283,7 +283,7 @@ bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 
 stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     // socket = socket ? socket : _socket;
     // assert(socket && !socket->isNull());
     auto transaction = new stun::Transaction(
@@ -436,7 +436,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 
     assert(response.methodType() == stun::Message::Allocate);
 
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     // If the client receives an Allocate success response, then it MUST
     // check that the mapped address and the relayed transport address are
@@ -574,7 +574,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         // NOT send any further requests to this server until it believes the
         // problem has been fixed.
         case 401: {
-            // Mutex::ScopedLock lock(_mutex);
+           
             if (_realm.empty() || _nonce.empty()) {
 
                 // REALM
@@ -772,7 +772,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     // Send all queued requests...
     // TODO: To via onStateChange Success callback
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         while (!_pendingIndications.empty()) {
             _socket->sendPacket(_pendingIndications.front());
             _pendingIndications.pop_front();
@@ -883,7 +883,7 @@ void Client::sendData(const char* data, std::size_t size,
     // callback is received from the server.
     else if (stateEquals(ClientState::Authorizing)) {
         TraceL << "Queueing outgoing request: " << request.toString() << endl;
-        // Mutex::ScopedLock lock(_mutex);
+       
         _pendingIndications.push_back(request);
         assert(_pendingIndications.size() < 100); // something is wrong...
     }
@@ -984,7 +984,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
 
 void Client::onTimer()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     if (expired())
         // Attempt to re-allocate
@@ -1018,21 +1018,21 @@ bool Client::closed() const
 
 Client::Options& Client::options()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _options;
 }
 
 
 net::Address Client::mappedAddress() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _mappedAddress;
 }
 
 
 net::Address Client::relayedAddress() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _relayedAddress;
 }
 }

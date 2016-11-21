@@ -17,7 +17,6 @@
 
 #include "scy/error.h"
 #include <cstdint>
-
 #include <cstring>
 #include <list>
 #include <map>
@@ -25,6 +24,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 
 namespace scy {

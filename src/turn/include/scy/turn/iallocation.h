@@ -14,7 +14,7 @@
 
 
 #include "scy/logger.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/net/address.h"
 #include "scy/timer.h"
 #include "scy/turn/fivetuple.h"
@@ -133,7 +133,7 @@ public:
     }
 
 protected:
-    // mutable Mutex _mutex;
+    // mutable std::mutex _mutex;
     FiveTuple _tuple;
     std::string _username;
     PermissionList _permissions;

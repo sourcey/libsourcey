@@ -90,7 +90,7 @@ protected:
     std::string _name;
     sked::Scheduler* _scheduler;
     sked::Trigger* _trigger;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 

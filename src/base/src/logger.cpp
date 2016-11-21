@@ -64,7 +64,7 @@ void Logger::destroy()
 
 void Logger::add(LogChannel* channel)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     // The first channel added will be the default channel.
     if (_defaultChannel == nullptr)
         _defaultChannel = channel;
@@ -74,7 +74,7 @@ void Logger::add(LogChannel* channel)
 
 void Logger::remove(const std::string& name, bool freePointer)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     LogChannelMap::iterator it = _channels.find(name);
     assert(it != _channels.end());
     if (it != _channels.end()) {
@@ -89,7 +89,7 @@ void Logger::remove(const std::string& name, bool freePointer)
 
 LogChannel* Logger::get(const std::string& name, bool whiny) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     LogChannelMap::const_iterator it = _channels.find(name);
     if (it != _channels.end())
         return it->second;
@@ -101,21 +101,21 @@ LogChannel* Logger::get(const std::string& name, bool whiny) const
 
 void Logger::setDefault(const std::string& name)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _defaultChannel = get(name, true);
 }
 
 
 LogChannel* Logger::getDefault() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _defaultChannel;
 }
 
 
 void Logger::setWriter(LogWriter* writer)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (_writer)
         delete _writer;
     _writer = writer;
@@ -131,7 +131,7 @@ void Logger::write(const LogStream& stream)
 
 void Logger::write(LogStream* stream)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (stream->channel == nullptr)
         stream->channel = _defaultChannel;
 
@@ -207,14 +207,14 @@ AsyncLogWriter::~AsyncLogWriter()
 
 void AsyncLogWriter::write(LogStream* stream)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _pending.push_back(stream);
 }
 
 
 void AsyncLogWriter::clear()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     LogStream* next = nullptr;
     while (!_pending.empty()) {
         next = _pending.front();
@@ -243,7 +243,7 @@ bool AsyncLogWriter::writeNext()
 {
     LogStream* next;
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (_pending.empty())
             return false;
 

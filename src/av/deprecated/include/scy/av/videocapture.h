@@ -19,7 +19,7 @@
 #include "scy/av/types.h"
 #include "scy/bitwise.h"
 #include "scy/interface.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include <cstdint>
 
 #ifdef HAVE_OPENCV
@@ -109,7 +109,7 @@ protected:
     friend class MediaFactory;
 
 private:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 
     std::string _filename; // Source file to capture from if any
     int _deviceId;         // Source device to capture from

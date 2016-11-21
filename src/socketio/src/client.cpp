@@ -184,7 +184,7 @@ int Client::sendPing()
 
 void Client::reset()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
@@ -510,7 +510,7 @@ bool Client::reconnecting() const
 
 bool Client::wasOnline() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _wasOnline;
 }
 

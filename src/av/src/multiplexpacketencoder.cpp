@@ -21,9 +21,9 @@ namespace av {
 
 
 MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
-    : //, bool muxLiveStreams
-    MultiplexEncoder(options)
+    : MultiplexEncoder(options)
     , PacketProcessor(MultiplexEncoder::emitter) //,
+    //, bool muxLiveStreams
 // _muxLiveStreams(muxLiveStreams),
 // _lastVideoPacket(nullptr)
 {
@@ -47,7 +47,7 @@ MultiplexPacketEncoder::~MultiplexPacketEncoder()
 #if 0
 void MultiplexPacketEncoder::process(IPacket& packet)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     TraceS(this) << "processing" << std::endl;
 
@@ -114,7 +114,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 
 void MultiplexPacketEncoder::process(IPacket& packet)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     TraceS(this) << "Processing" << std::endl;
 
@@ -154,7 +154,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "On stream state change: " << state << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     switch (state.id()) {
         case PacketStreamState::Active:

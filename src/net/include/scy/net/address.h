@@ -14,6 +14,7 @@
 
 
 #include "scy/net/types.h"
+#include <memory>
 
 
 namespace scy {

@@ -129,7 +129,7 @@ protected:
     const char* className() const { return "VideoAnalyzer"; }
 
 protected:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 
     Options _options;
     std::string _error;

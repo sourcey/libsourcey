@@ -44,7 +44,7 @@ public:
     /// the singleton.
     S* get()
     {
-        Mutex::ScopedLock lock(_m);
+        std::lock_guard<std::mutex> guard(_m);
         if (!_ptr)
             _ptr = new S;
         return _ptr;
@@ -54,7 +54,7 @@ public:
     /// returns the old instance.
     S* swap(S* newPtr)
     {
-        Mutex::ScopedLock lock(_m);
+        std::lock_guard<std::mutex> guard(_m);
         S* oldPtr = _ptr;
         _ptr = newPtr;
         return oldPtr;
@@ -63,7 +63,7 @@ public:
     /// Destroys the managed singleton instance.
     void destroy()
     {
-        Mutex::ScopedLock lock(_m);
+        std::lock_guard<std::mutex> guard(_m);
         if (_ptr)
             delete _ptr;
         _ptr = nullptr;
@@ -71,7 +71,7 @@ public:
 
 private:
     S* _ptr;
-    Mutex _m;
+    std::mutex _m;
 };
 
 

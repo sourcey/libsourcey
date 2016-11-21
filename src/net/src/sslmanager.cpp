@@ -163,14 +163,14 @@ void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _defaultServerContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _defaultClientContext;
 }
 

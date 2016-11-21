@@ -13,7 +13,7 @@
 #define SCY_IPC_H
 
 
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/synccontext.h"
 
 #include <deque>
@@ -56,7 +56,7 @@ public:
     virtual void push(TAction* action)
     {
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             _actions.push_back(action);
         }
         post();
@@ -66,7 +66,7 @@ public:
     {
         if (_actions.empty())
             return nullptr;
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         TAction* next = _actions.front();
         _actions.pop_front();
         return next;
@@ -90,7 +90,7 @@ public:
         // TODO: Impose a time limit
         while (true) {
             {
-                Mutex::ScopedLock lock(_mutex);
+                std::lock_guard<std::mutex> guard(_mutex);
                 if (_actions.empty())
                     return;
             }
@@ -100,7 +100,7 @@ public:
     }
 
 protected:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     std::deque<TAction*> _actions;
 };
 

@@ -204,7 +204,7 @@ int UDPAllocation::send(const char* data, std::size_t size,
 
 net::Address UDPAllocation::relayedAddress() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _relaySocket.address();
 }
 }

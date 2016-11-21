@@ -83,7 +83,7 @@ public:
             return false;
         }
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             _map[key] = item;
         }
         onAdd(key, item);
@@ -94,7 +94,7 @@ public:
     {
         /// Note: This method will not delete existing values.
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             _map[key] = item;
         }
         onAdd(key, item);
@@ -102,7 +102,7 @@ public:
 
     virtual TValue* get(const TKey& key, bool whiny = true) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         typename Map::const_iterator it = _map.find(key);
         if (it != _map.end()) {
             return it->second;
@@ -130,7 +130,7 @@ public:
     {
         TValue* item = nullptr;
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             typename Map::iterator it = _map.find(key);
             if (it != _map.end()) {
                 item = it->second;
@@ -147,7 +147,7 @@ public:
         TKey key;
         TValue* ptr = nullptr;
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             for (typename Map::iterator it = _map.begin(); it != _map.end();
                  ++it) {
                 if (item == it->second) {
@@ -165,14 +165,14 @@ public:
 
     virtual bool exists(const TKey& key) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         typename Map::const_iterator it = _map.find(key);
         return it != _map.end();
     }
 
     virtual bool exists(const TValue* item) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (typename Map::const_iterator it = _map.begin(); it != _map.end();
              ++it) {
             if (item == it->second)
@@ -183,31 +183,31 @@ public:
 
     virtual bool empty() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _map.empty();
     }
 
     virtual int size() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _map.size();
     }
 
     virtual void clear()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         util::clearMap<TDeleter>(_map);
     }
 
     virtual Map map() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _map;
     }
 
     virtual Map& map()
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _map;
     }
 
@@ -223,7 +223,7 @@ public:
 
 protected:
     Map _map;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 
@@ -279,14 +279,14 @@ public:
                 throw std::runtime_error("Item already exists");
             return false;
         }
-        // Mutex::ScopedLock lock(_mutex);
+       
         _map[key] = item;
         return true;
     }
 
     virtual TValue& get(const TKey& key)
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         typename Map::iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -296,7 +296,7 @@ public:
 
     virtual const TValue& get(const TKey& key, const TValue& defaultValue) const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         typename Map::const_iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -305,7 +305,7 @@ public:
 
     virtual bool remove(const TKey& key)
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         typename Map::iterator it = _map.find(key);
         if (it != _map.end()) {
             _map.erase(it);
@@ -316,36 +316,36 @@ public:
 
     virtual bool has(const TKey& key) const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _map.find(key) != _map.end();
     }
 
     virtual bool empty() const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _map.empty();
     }
 
     virtual int size() const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _map.size();
     }
 
     virtual void clear()
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         _map.clear();
     }
 
     virtual Map& map()
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _map;
     }
 
 protected:
-    // mutable Mutex _mutex;
+    // mutable std::mutex _mutex;
     Map _map;
 };
 

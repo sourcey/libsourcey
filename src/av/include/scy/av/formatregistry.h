@@ -14,8 +14,7 @@
 
 
 #include "scy/av/format.h"
-#include "scy/mutex.h"
-
+#include <mutex>
 #include <vector>
 
 
@@ -51,19 +50,18 @@ public:
     /// Sets the default fallback media format.
     virtual void setDefault(const std::string& name);
 
-
     virtual bool exists(const std::string& name);
     virtual void clear();
 
     virtual FormatList formats() const;
 
 private:
-    FormatRegistry(FormatRegistry const&){};
-    // FormatRegistry& operator=(FormatRegistry const&) {};
+    FormatRegistry(FormatRegistry const&) = delete;
+    FormatRegistry& operator=(FormatRegistry const&) = delete;
 
     FormatList _formats;
     std::string _default;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 

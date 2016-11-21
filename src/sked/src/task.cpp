@@ -61,7 +61,7 @@ void Task::serialize(json::Value& root)
 {
     TraceL << "Serializing" << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     root["id"] = _id;
     root["type"] = _type;
@@ -73,7 +73,7 @@ void Task::deserialize(json::Value& root)
 {
     TraceL << "Deserializing" << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     json::assertMember(root, "id");
     json::assertMember(root, "type");
@@ -87,14 +87,14 @@ void Task::deserialize(json::Value& root)
 
 bool Task::beforeRun()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _trigger && _trigger->timeout() && !_destroyed && !cancelled();
 }
 
 
 bool Task::afterRun()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     DateTime now;
     _trigger->update();
     _trigger->timesRun++;
@@ -105,7 +105,7 @@ bool Task::afterRun()
 
 void Task::setTrigger(sked::Trigger* trigger)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (_trigger)
         delete _trigger;
     _trigger = trigger;
@@ -114,21 +114,21 @@ void Task::setTrigger(sked::Trigger* trigger)
 
 string Task::name() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _name;
 }
 
 
 string Task::type() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _type;
 }
 
 
 std::int64_t Task::remaining() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (!_trigger)
         throw std::runtime_error("Tasks must be have a Trigger instance.");
     return _trigger->remaining();
@@ -137,7 +137,7 @@ std::int64_t Task::remaining() const
 
 sked::Trigger& Task::trigger()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (!_trigger)
         throw std::runtime_error("Tasks must have a Trigger instance.");
     return *_trigger;
@@ -146,7 +146,7 @@ sked::Trigger& Task::trigger()
 
 sked::Scheduler& Task::scheduler()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (!_scheduler)
         throw std::runtime_error(
             "Tasks must be started with a sked::Scheduler instance.");

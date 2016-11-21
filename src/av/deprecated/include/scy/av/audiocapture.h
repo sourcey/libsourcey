@@ -88,7 +88,7 @@ protected:
 
 
 private:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     int _deviceId;
     int _channels;
     int _sampleRate;

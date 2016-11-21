@@ -90,7 +90,7 @@ void VideoCapture::start()
 {
     TraceS(this) << "Starting" << std::endl;
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
 
         if (!_started) { //
             TraceS(this) << "Initializing thread" << std::endl;
@@ -148,7 +148,7 @@ void VideoCapture::stop()
 bool VideoCapture::open(bool whiny)
 {
     TraceS(this) << "Open" << std::endl;
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     assert(Thread::currentID() != _thread.tid());
 
     if (_opened && _capture.isOpened())
@@ -231,7 +231,7 @@ cv::Mat VideoCapture::grab()
 {
     assert(Thread::currentID() == _thread.tid());
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     // Grab a frame from the capture source
     // If the capture source is invalid, it will set an invalid frame here
@@ -267,7 +267,7 @@ cv::Mat VideoCapture::grab()
 
 cv::Mat VideoCapture::lastFrame() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (!_opened)
         throw std::runtime_error(
@@ -320,14 +320,14 @@ void VideoCapture::getEncoderFormat(Format& iformat)
 #if 0
 void VideoCapture::addEmitter(PacketSignal* emitter)
 {
-    Mutex::ScopedLock lock(_emitMutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _emitters.push_back(emitter);
 }
 
 
 void VideoCapture::removeEmitter(PacketSignal* emitter)
 {
-    Mutex::ScopedLock lock(_emitMutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (PacketSignalVec::iterator it = _emitters.begin(); it != _emitters.end(); ++it) {
         if (*it == emitter) {
             _emitters.erase(it);
@@ -343,7 +343,7 @@ void VideoCapture::setError(const std::string& error)
 {
     ErrorS(this) << "Set error: " << error << std::endl;
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _error.message = error;
     }
     Error.emit(_error);
@@ -352,49 +352,49 @@ void VideoCapture::setError(const std::string& error)
 
 int VideoCapture::width()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return int(_capture.get(CV_CAP_PROP_FRAME_WIDTH)); // not const
 }
 
 
 int VideoCapture::height()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return int(_capture.get(CV_CAP_PROP_FRAME_HEIGHT)); // not const
 }
 
 
 bool VideoCapture::opened() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _opened;
 }
 
 
 bool VideoCapture::running() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _thread.running();
 }
 
 
 int VideoCapture::deviceId() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _deviceId;
 }
 
 
 std::string VideoCapture::filename() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _filename;
 }
 
 
 std::string VideoCapture::name() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     std::stringstream ss;
     _filename.empty() ? (ss << _deviceId) : (ss << _filename);
     return ss.str();
@@ -403,21 +403,21 @@ std::string VideoCapture::name() const
 
 const scy::Error& VideoCapture::error() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _error;
 }
 
 
 double VideoCapture::fps() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _counter.fps;
 }
 
 
 cv::VideoCapture& VideoCapture::capture()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _capture;
 }
 

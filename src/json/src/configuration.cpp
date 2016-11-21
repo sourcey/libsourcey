@@ -40,7 +40,7 @@ void Configuration::load(const std::string& path, bool create)
 
 void Configuration::load(bool /* create */)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (_path.empty())
         throw std::runtime_error(
@@ -64,7 +64,7 @@ void Configuration::load(bool /* create */)
 
 void Configuration::save()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (_path.empty())
         throw std::runtime_error(
@@ -77,14 +77,14 @@ void Configuration::save()
 
 std::string Configuration::path()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _path;
 }
 
 
 bool Configuration::loaded()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _loaded;
 }
 
@@ -98,7 +98,7 @@ void Configuration::print(std::ostream& ost)
 
 bool Configuration::remove(const std::string& key)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     return root.removeMember(key) != Json::nullValue;
 }
@@ -106,7 +106,7 @@ bool Configuration::remove(const std::string& key)
 
 void Configuration::removeAll(const std::string& baseKey)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     json::Value::Members members = root.getMemberNames();
     for (unsigned i = 0; i < members.size(); i++) {
@@ -118,7 +118,7 @@ void Configuration::removeAll(const std::string& baseKey)
 
 void Configuration::replace(const std::string& from, const std::string& to)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::stringstream ss;
     json::StyledWriter writer;
@@ -133,7 +133,7 @@ void Configuration::replace(const std::string& from, const std::string& to)
 
 bool Configuration::getRaw(const std::string& key, std::string& value) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (!root.isMember(key))
         return false;
@@ -146,7 +146,7 @@ bool Configuration::getRaw(const std::string& key, std::string& value) const
 void Configuration::setRaw(const std::string& key, const std::string& value)
 {
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         (root)[key] = value;
     }
     PropertyChanged.emit(key, value);
@@ -156,7 +156,7 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
 void Configuration::keys(std::vector<std::string>& keys,
                          const std::string& baseKey)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     json::Value::Members members = root.getMemberNames();
     for (unsigned i = 0; i < members.size(); i++) {

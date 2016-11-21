@@ -114,14 +114,14 @@ TestRunner::~TestRunner()
 void TestRunner::add(Test* test)
 {
     cout << test->name << " added" << endl;
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _tests.push_back(test);
 }
 
 
 Test* TestRunner::get(const std::string& name) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tests.begin(); it != _tests.end(); ++it) {
         if ((*it)->name == name)
             return *it;
@@ -132,14 +132,14 @@ Test* TestRunner::get(const std::string& name) const
 
 void TestRunner::clear()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     util::clearList<Test>(_tests);
 }
 
 
 TestList TestRunner::tests() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _tests;
 }
 
@@ -165,7 +165,7 @@ bool TestRunner::passed() const
 
 Test* TestRunner::current() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _current;
 }
 
@@ -181,7 +181,7 @@ void TestRunner::run()
     TestList tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             _current = *it;
         }
         cout

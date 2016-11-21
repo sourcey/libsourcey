@@ -96,7 +96,7 @@ void GarbageCollector::runAsync()
 {
     std::vector<ScopedPointer*> deletable;
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (!_tid) {
             _tid = uv_thread_self();
         }
@@ -119,7 +119,7 @@ void GarbageCollector::runAsync()
 
     // Handle finalization
     if (_finalize) {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (_ready.empty() && _pending.empty()) {
             // Stop and close the timer handle.
             // This should cause the loop to return after

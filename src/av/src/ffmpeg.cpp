@@ -13,8 +13,7 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/mutex.h"
-
+#include <mutex>
 #include <iostream>
 #include <stdexcept>
 
@@ -36,21 +35,21 @@ static int LockManagerOperation(void** lock, enum AVLockOp op)
 {
     switch (op) {
         case AV_LOCK_CREATE:
-            *lock = new Mutex();
+            *lock = new std::mutex();
             if (!*lock)
                 return 1;
             return 0;
 
         case AV_LOCK_OBTAIN:
-            static_cast<Mutex*>(*lock)->lock();
+            static_cast<std::mutex*>(*lock)->lock();
             return 0;
 
         case AV_LOCK_RELEASE:
-            static_cast<Mutex*>(*lock)->unlock();
+            static_cast<std::mutex*>(*lock)->unlock();
             return 0;
 
         case AV_LOCK_DESTROY:
-            delete static_cast<Mutex*>(*lock);
+            delete static_cast<std::mutex*>(*lock);
             *lock = NULL;
             return 0;
     }
@@ -58,13 +57,13 @@ static int LockManagerOperation(void** lock, enum AVLockOp op)
 }
 
 
-static Mutex _mutex;
+static std::mutex _mutex;
 static int _refCount(0);
 
 
 void initialize()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (++_refCount == 1) {
         // Optionally disable logging.
@@ -86,7 +85,7 @@ void initialize()
 
 void uninitialize()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (--_refCount == 0) {
         av_lockmgr_register(NULL);

@@ -60,14 +60,14 @@ MediaFactory::~MediaFactory()
 
 IDeviceManager& MediaFactory::devices()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return *_devices;
 }
 
 
 FormatRegistry& MediaFactory::formats()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _formats;
 }
 
@@ -125,14 +125,14 @@ void MediaFactory::reloadFailedVideoCaptures()
 
 std::map<int, VideoCapture::Ptr> MediaFactory::videoCaptures() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _videoCaptures;
 }
 
 
 void MediaFactory::unloadVideoCaptures()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _videoCaptures.clear();
 }
 
@@ -145,7 +145,7 @@ MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
     if (deviceId < 0)
         throw std::runtime_error("Invalid video device ID");
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     auto it = _videoCaptures.find(deviceId);
     if (it != _videoCaptures.end())

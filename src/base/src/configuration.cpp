@@ -29,7 +29,7 @@ Configuration::~Configuration()
 
 bool Configuration::exists(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string tmp;
     return getRaw(key, tmp);
@@ -38,7 +38,7 @@ bool Configuration::exists(const std::string& key) const
 
 std::string Configuration::getString(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -51,7 +51,7 @@ std::string Configuration::getString(const std::string& key) const
 std::string Configuration::getString(const std::string& key,
                                      const std::string& defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -63,7 +63,7 @@ std::string Configuration::getString(const std::string& key,
 
 std::string Configuration::getRawString(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -76,7 +76,7 @@ std::string Configuration::getRawString(const std::string& key) const
 std::string Configuration::getRawString(const std::string& key,
                                         const std::string& defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -88,7 +88,7 @@ std::string Configuration::getRawString(const std::string& key,
 
 int Configuration::getInt(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -100,7 +100,7 @@ int Configuration::getInt(const std::string& key) const
 
 int Configuration::getInt(const std::string& key, int defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -112,7 +112,7 @@ int Configuration::getInt(const std::string& key, int defaultValue) const
 
 std::int64_t Configuration::getLargeInt(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -125,7 +125,7 @@ std::int64_t Configuration::getLargeInt(const std::string& key) const
 std::int64_t Configuration::getLargeInt(const std::string& key,
                                         std::int64_t defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -137,7 +137,7 @@ std::int64_t Configuration::getLargeInt(const std::string& key,
 
 double Configuration::getDouble(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -150,7 +150,7 @@ double Configuration::getDouble(const std::string& key) const
 double Configuration::getDouble(const std::string& key,
                                 double defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -162,7 +162,7 @@ double Configuration::getDouble(const std::string& key,
 
 bool Configuration::getBool(const std::string& key) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -174,7 +174,7 @@ bool Configuration::getBool(const std::string& key) const
 
 bool Configuration::getBool(const std::string& key, bool defaultValue) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     std::string value;
     if (getRaw(key, value))
@@ -186,7 +186,7 @@ bool Configuration::getBool(const std::string& key, bool defaultValue) const
 
 void Configuration::setString(const std::string& key, const std::string& value)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     setRaw(key, value);
 }
@@ -194,7 +194,7 @@ void Configuration::setString(const std::string& key, const std::string& value)
 
 void Configuration::setInt(const std::string& key, int value)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     setRaw(key, util::itostr<int>(value));
 }
@@ -202,7 +202,7 @@ void Configuration::setInt(const std::string& key, int value)
 
 void Configuration::setLargeInt(const std::string& key, std::int64_t value)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     setRaw(key, util::itostr<std::int64_t>(value));
 }
@@ -210,7 +210,7 @@ void Configuration::setLargeInt(const std::string& key, std::int64_t value)
 
 void Configuration::setDouble(const std::string& key, double value)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     setRaw(key, util::itostr<double>(value));
 }
@@ -218,7 +218,7 @@ void Configuration::setDouble(const std::string& key, double value)
 
 void Configuration::setBool(const std::string& key, bool value)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     setRaw(key, value ? "true" : "false");
 }

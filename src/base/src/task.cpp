@@ -156,7 +156,7 @@ bool TaskRunner::add(Task* task)
 {
     TraceN(this) << "Add task: " << task << endl;
     if (!exists(task)) {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _tasks.push_back(task);
         // uv_ref(Idler::handle.ptr()); // reference the idler handle when a
         // task is added
@@ -171,7 +171,7 @@ bool TaskRunner::remove(Task* task)
 {
     TraceN(this) << "Remove task: " << task << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task) {
             _tasks.erase(it);
@@ -187,7 +187,7 @@ bool TaskRunner::remove(Task* task)
 
 bool TaskRunner::exists(Task* task) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task)
             return true;
@@ -198,7 +198,7 @@ bool TaskRunner::exists(Task* task) const
 
 Task* TaskRunner::get(std::uint32_t id) const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if ((*it)->id() == id)
             return *it;
@@ -209,7 +209,7 @@ Task* TaskRunner::get(std::uint32_t id) const
 
 Task* TaskRunner::next() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (!(*it)->cancelled())
             return *it;
@@ -220,7 +220,7 @@ Task* TaskRunner::next() const
 
 void TaskRunner::clear()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         TraceN(this) << "Clear: Destroying task: " << *it << endl;
         delete *it;
@@ -233,7 +233,7 @@ void TaskRunner::setRunner(async::Runner::Ptr runner)
 {
     TraceN(this) << "Set async: " << runner << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     assert(!_runner);
     _runner = runner;
     _runner->setRepeating(true);
@@ -265,7 +265,7 @@ void TaskRunner::run()
 
         // Advance the task queue
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             Task* t = _tasks.front();
             _tasks.pop_front();
             _tasks.push_back(t);

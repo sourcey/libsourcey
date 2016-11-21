@@ -65,7 +65,7 @@ void TCPClient::shutdown()
     Client::shutdown();
 
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         auto connections = _connections.map();
         TraceL << "Shutdown: Active connections: " << connections.size()
                << endl;
@@ -297,7 +297,7 @@ bool TCPClient::createAndBindConnection(std::uint32_t connectionID,
                                         const net::Address& peerAddress)
 {
     // assert (!closed());
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     TraceL << "Create and bind connection: " << peerAddress << endl;
 
@@ -425,7 +425,7 @@ void TCPClient::freeConnection(
 
 ConnectionManager& TCPClient::connections()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _connections;
 }
 

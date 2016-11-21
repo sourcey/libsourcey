@@ -29,8 +29,7 @@ class MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
 {
 public:
     MultiplexPacketEncoder(
-        const EncoderOptions& options =
-            EncoderOptions()); //, bool muxLiveStreams = false
+        const EncoderOptions& options = EncoderOptions());
     /// MultiplexPacketEncoder(bool muxLiveStreams = false);
     virtual ~MultiplexPacketEncoder();
 
@@ -45,8 +44,9 @@ protected:
 
     friend class PacketStream;
 
-    mutable Mutex
-        _mutex; /// bool _muxLiveStreams;    /// VideoPacket* _lastVideoPacket;
+    mutable std::mutex _mutex;
+    // bool _muxLiveStreams;
+    // VideoPacket* _lastVideoPacket;
 };
 
 
@@ -90,7 +90,7 @@ struct PTSCalculator
             << std::endl;
     }
 
-    std::int64_t tick() {    
+    std::int64_t tick() {
     /// Initializing
         if (frameTime == 0) {
             assert(!frameDuration);

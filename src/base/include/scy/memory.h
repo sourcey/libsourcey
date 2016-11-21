@@ -14,7 +14,7 @@
 
 
 #include "scy/logger.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/singleton.h"
 #include "scy/uv/uvpp.h"
 #include <atomic>
@@ -65,7 +65,7 @@ protected:
     static void onTimer(uv_timer_t* handle);
     void runAsync();
 
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     std::vector<ScopedPointer*> _pending;
     std::vector<ScopedPointer*> _ready;
     uv::Handle _handle;
@@ -199,7 +199,7 @@ public:
 /// Schedules a pointer for deferred deletion.
 template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _pending.push_back(new ScopedRawPointer<C>(ptr));
 }
 
@@ -208,7 +208,7 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 template <class C>
 inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _pending.push_back(new ScopedSharedPointer<C>(ptr));
 }
 

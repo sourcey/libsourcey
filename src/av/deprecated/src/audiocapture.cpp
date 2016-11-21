@@ -61,7 +61,7 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
     if (isOpen())
         close();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     TraceS(this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 
     // 1024 is a common frame size for many codecs.
@@ -94,7 +94,7 @@ void AudioCapture::close()
 {
     TraceS(this) << "Closing" << endl;
     try {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _opened = false;
         if (_audio.isStreamOpen())
             _audio.closeStream();
@@ -113,7 +113,7 @@ void AudioCapture::start()
 
     if (!running()) {
         try {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             _audio.startStream();
             _error = "";
             TraceS(this) << "Starting: OK" << endl;
@@ -132,7 +132,7 @@ void AudioCapture::stop()
 
     if (running()) {
         try {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             TraceS(this) << "Stopping: Before" << endl;
             _audio.stopStream();
             TraceS(this) << "Stopping: OK" << endl;
@@ -186,7 +186,7 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     }
 
     {
-        Mutex::ScopedLock lock(self->_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         packet.setData((char*)inputBuffer,
                        nBufferFrames * self->_channels * sizeof(RtAudioFormat));
         packet.numSamples = nBufferFrames;
@@ -223,42 +223,42 @@ void AudioCapture::setError(const std::string& message, bool throwExec)
 
 RtAudioFormat AudioCapture::format() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _format;
 }
 
 
 bool AudioCapture::isOpen() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _opened;
 }
 
 
 bool AudioCapture::running() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _audio.isStreamRunning();
 }
 
 
 int AudioCapture::deviceId() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _deviceId;
 }
 
 
 int AudioCapture::sampleRate() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _sampleRate;
 }
 
 
 int AudioCapture::channels() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _channels;
 }
 

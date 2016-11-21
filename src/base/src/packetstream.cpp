@@ -56,7 +56,7 @@ void PacketStream::start()
 {
     TraceS(this) << "Start" << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
     if (stateEquals(PacketStreamState::Active)) {
         TraceS(this) << "Start: Already active" << endl;
         // assert(0);
@@ -70,7 +70,7 @@ void PacketStream::start()
     setState(this, PacketStreamState::Active);
 
     // Lock the processor mutex to synchronize multi source streams
-    Mutex::ScopedLock lock(_procMutex);
+    std::lock_guard<std::mutex> guard(_procMutex);
 
     // Start synchronized sources
     startSources();
@@ -81,7 +81,7 @@ void PacketStream::stop()
 {
     TraceS(this) << "Stop" << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
     if (stateEquals(PacketStreamState::Stopped) ||
         stateEquals(PacketStreamState::Stopping) ||
         stateEquals(PacketStreamState::Closed)) {
@@ -94,7 +94,7 @@ void PacketStream::stop()
     setState(this, PacketStreamState::Stopped);
 
     // Lock the processor mutex to synchronize multi source streams
-    Mutex::ScopedLock lock(_procMutex);
+    std::lock_guard<std::mutex> guard(_procMutex);
 
     // Stop synchronized sources
     stopSources();
@@ -128,7 +128,7 @@ void PacketStream::reset()
     assert(stateEquals(PacketStreamState::None) ||
            stateEquals(PacketStreamState::Closed));
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _sources.clear(); // not detaching here
     _processors.clear(); // not detaching here
 }
@@ -136,7 +136,7 @@ void PacketStream::reset()
 
 void PacketStream::close()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     if (stateEquals(PacketStreamState::None) ||
         stateEquals(PacketStreamState::Closed)) {
         // TraceS(this) << "Already closed" << endl;
@@ -156,7 +156,7 @@ void PacketStream::close()
 
     {
         // Lock the processor mutex to synchronize multi source streams
-        Mutex::ScopedLock lock(_procMutex);
+        std::lock_guard<std::mutex> guard(_procMutex);
 
         // Teardown the adapter delegate chain
         teardown();
@@ -241,7 +241,7 @@ bool PacketStream::stopped() const
 void PacketStream::autoStart(bool flag)
 {
     assertCanModify();
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _autoStart = flag;
 }
 
@@ -249,14 +249,14 @@ void PacketStream::autoStart(bool flag)
 void PacketStream::closeOnError(bool flag)
 {
     assertCanModify();
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _closeOnError = flag;
 }
 
 
 std::string PacketStream::name() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _name;
 }
 
@@ -272,7 +272,7 @@ void PacketStream::synchronizeStates()
     while (!_states.empty()) {
         PacketStreamState state;
         {
-            Mutex::ScopedLock lock(_mutex);
+            std::lock_guard<std::mutex> guard(_mutex);
             state.set(_states.front().id());
             _states.pop_front();
         }
@@ -308,7 +308,7 @@ void PacketStream::process(IPacket& packet)
         if (stateEquals(PacketStreamState::Active) &&
             !packet.flags.has(PacketFlags::NoModify)) {
             {
-                Mutex::ScopedLock lock(_mutex);
+                std::lock_guard<std::mutex> guard(_mutex);
                 firstProc = !_processors.empty()
                                 ? reinterpret_cast<PacketProcessor*>(
                                       _processors[0]->ptr)
@@ -317,7 +317,7 @@ void PacketStream::process(IPacket& packet)
             if (firstProc) {
 
                 // Lock the processor mutex to synchronize multi source streams
-                Mutex::ScopedLock lock(_procMutex);
+                std::lock_guard<std::mutex> guard(_procMutex);
 
                 // Sync queued states
                 synchronizeStates();
@@ -396,7 +396,7 @@ void PacketStream::emit(IPacket& packet)
 void PacketStream::setup()
 {
     try {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
 
         // Setup the processor chain
         PacketProcessor* lastProc = nullptr;
@@ -429,7 +429,7 @@ void PacketStream::setup()
 void PacketStream::teardown()
 {
     TraceS(this) << "Teardown" << endl;
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     // Detach the processor chain first
     PacketProcessor* lastProc = nullptr;
@@ -467,7 +467,7 @@ void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 {
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _sources.push_back(ref);
     std::sort(_sources.begin(), _sources.end(),
               PacketAdapterReference::compareOrder);
@@ -491,7 +491,7 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
     // TraceS(this) << "Detach source adapter: " << source << endl;
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if ((*it)->ptr == source) {
             (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
@@ -508,7 +508,7 @@ bool PacketStream::detachSource(PacketSignal& source)
     // TraceS(this) << "Detach source signal: " << &source << endl;
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if (&(*it)->ptr->getEmitter() == &source) {
             (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
@@ -525,7 +525,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
     assert(order >= -1 && order <= 101);
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _processors.push_back(std::make_shared<PacketAdapterReference>(proc,
         freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr,
         order == -1 ? _processors.size() : order));
@@ -540,7 +540,7 @@ bool PacketStream::detach(PacketProcessor* proc)
     // TraceS(this) << "Detach processor: " << proc << endl;
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _processors.begin(); it != _processors.end(); ++it) {
         if ((*it)->ptr == proc) {
             TraceS(this) << "Detached processor: " << proc << endl;
@@ -556,7 +556,7 @@ void PacketStream::attach(PacketAdapterReference::Ptr ref)
 {
     assertCanModify();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _processors.push_back(ref);
     std::sort(_processors.begin(), _processors.end(),
               PacketAdapterReference::compareOrder);
@@ -565,7 +565,7 @@ void PacketStream::attach(PacketAdapterReference::Ptr ref)
 
 void PacketStream::startSources()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
@@ -589,7 +589,7 @@ void PacketStream::startSources()
 
 void PacketStream::stopSources()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
@@ -661,42 +661,42 @@ void PacketStream::onStateChange(PacketStreamState& state,
     TraceS(this) << "On state change: " << oldState << " => " << state << endl;
 
     // Queue state for passing to adapters
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     _states.push_back(state);
 }
 
 
 const std::exception_ptr& PacketStream::error()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _error;
 }
 
 
 int PacketStream::numSources() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _sources.size();
 }
 
 
 int PacketStream::numProcessors() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _processors.size();
 }
 
 
 int PacketStream::numAdapters() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _sources.size() + _processors.size();
 }
 
 
 PacketAdapterVec PacketStream::adapters() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     PacketAdapterVec res(_sources);
     res.insert(res.end(), _processors.begin(), _processors.end());
     return res;
@@ -705,14 +705,14 @@ PacketAdapterVec PacketStream::adapters() const
 
 PacketAdapterVec PacketStream::sources() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _sources;
 }
 
 
 PacketAdapterVec PacketStream::processors() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _processors;
 }
 
@@ -776,7 +776,7 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 
 // bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
 // {
-//     Mutex::ScopedLock lock(_mutex);
+//     std::lock_guard<std::mutex> guard(_mutex);
 //     for (auto const& st : _states) {
 //         if (st.id() == state)
 //             return true;

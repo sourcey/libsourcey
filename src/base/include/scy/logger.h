@@ -14,7 +14,7 @@
 
 #include "scy/base.h"
 #include "scy/error.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/singleton.h"
 #include "scy/thread.h"
 
@@ -128,7 +128,7 @@ protected:
 
     Thread _thread;
     std::deque<LogStream*> _pending;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 
@@ -200,7 +200,7 @@ protected:
     friend class Singleton<Logger>;
     friend class Thread;
 
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     LogChannelMap _channels;
     LogChannel* _defaultChannel;
     LogWriter* _writer;

@@ -712,7 +712,7 @@ void Server::respondError(Request& request, int errorCode,
 {
     TraceL << "Send STUN error: " << errorCode << ": " << errorDesc << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
     errorMsg.setTransactionID(request.transactionID());
@@ -748,28 +748,28 @@ void Server::respondError(Request& request, int errorCode,
 
 net::UDPSocket& Server::udpSocket()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _udpSocket;
 }
 
 
 ServerObserver& Server::observer()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _observer;
 }
 
 
 ServerOptions& Server::options()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _options;
 }
 
 
 ServerAllocationMap Server::allocations() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _allocations;
 }
 
@@ -783,7 +783,7 @@ Timer& Server::timer()
 void Server::addAllocation(ServerAllocation* alloc)
 {
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
 
         assert(_allocations.find(alloc->tuple()) == _allocations.end());
         _allocations[alloc->tuple()] = alloc;
@@ -799,7 +799,7 @@ void Server::addAllocation(ServerAllocation* alloc)
 void Server::removeAllocation(ServerAllocation* alloc)
 {
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
 
         auto it = _allocations.find(alloc->tuple());
         if (it != _allocations.end()) {
@@ -817,7 +817,7 @@ void Server::removeAllocation(ServerAllocation* alloc)
 
 ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     auto it = _allocations.find(tuple);
     if (it != _allocations.end())
@@ -828,7 +828,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 
 TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
         auto alloc = dynamic_cast<TCPAllocation*>(it->second);

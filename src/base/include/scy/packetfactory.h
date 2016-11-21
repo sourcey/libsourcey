@@ -83,7 +83,7 @@ public:
     template <class PacketT> void registerPacketType(int priority)
     {
         unregisterPacketType<PacketT>(); // ensure unique values
-        // Mutex::ScopedLock lock(_mutex);
+       
         _types.push_back(new PacketCreationStrategy<PacketT>(priority));
         sort(_types.begin(), _types.end(),
              IPacketCreationStrategy::compareProiroty);
@@ -91,7 +91,7 @@ public:
 
     template <class PacketT> void unregisterPacketType()
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
                 delete *it;
@@ -104,7 +104,7 @@ public:
     template <class StrategyT> void registerStrategy(int priority)
     {
         unregisterStrategy<StrategyT>(); // ensure unique values
-        // Mutex::ScopedLock lock(_mutex);
+       
         _types.push_back(new StrategyT(priority));
         std::sort(_types.begin(), _types.end(),
                   IPacketCreationStrategy::compareProiroty);
@@ -112,7 +112,7 @@ public:
 
     template <class StrategyT> void unregisterStrategy()
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<StrategyT*>(*it) != 0) {
                 delete *it;
@@ -124,13 +124,13 @@ public:
 
     PacketCreationStrategyList& types()
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _types;
     }
 
     PacketCreationStrategyList types() const
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         return _types;
     }
 
@@ -139,7 +139,7 @@ public:
 
     virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread)
     {
-        // Mutex::ScopedLock lock(_mutex);
+       
         // std::size_t offset = reader.position();
         assert(!_types.empty() && "no packet types registered");
 

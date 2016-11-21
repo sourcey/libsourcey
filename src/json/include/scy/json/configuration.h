@@ -13,7 +13,7 @@
 
 #include "scy/configuration.h"
 #include "scy/json/json.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/util.h"
 
 namespace scy {
@@ -49,7 +49,7 @@ protected:
 
     bool _loaded;
     std::string _path;
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 } // namespace json

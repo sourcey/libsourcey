@@ -168,7 +168,7 @@ void Scheduler::run()
 
 void Scheduler::update()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     // TraceS(this) << "Updating: " << _tasks.size() << endl;
 
@@ -195,7 +195,7 @@ void Scheduler::serialize(json::Value& root)
 {
     TraceS(this) << "Serializing" << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sked::Task* task = reinterpret_cast<sked::Task*>(*it);
         TraceS(this) << "Serializing: " << task << endl;

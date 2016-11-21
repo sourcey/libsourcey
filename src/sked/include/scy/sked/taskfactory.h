@@ -57,7 +57,7 @@ public:
 
     sked::Task* createTask(const std::string& type /*, Scheduler& scheduler*/)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             throw std::runtime_error("Failed to create scheduled task: " +
@@ -67,13 +67,13 @@ public:
 
     template <typename T> void registerTask(const std::string& type)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _tasks[type] = &instantiateTask<T>;
     }
 
     void unregisterTask(const std::string& type)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             return;
@@ -82,7 +82,7 @@ public:
 
     TaskMap tasks() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _tasks;
     }
 
@@ -92,7 +92,7 @@ public:
 
     sked::Trigger* createTrigger(const std::string& type)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             throw std::runtime_error("Failed to create scheduled trigger: " +
@@ -102,13 +102,13 @@ public:
 
     template <typename T> void registerTrigger(const std::string& type)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         _triggers[type] = &instantiateTrigger<T>;
     }
 
     void unregisterTrigger(const std::string& type)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             return;
@@ -117,12 +117,12 @@ public:
 
     TriggerMap triggers() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _triggers;
     }
 
 protected:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 
     TaskMap _tasks;
     TriggerMap _triggers;

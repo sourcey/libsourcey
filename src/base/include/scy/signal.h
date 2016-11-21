@@ -14,7 +14,7 @@
 
 
 #include "scy/delegate.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include <atomic>
 #include <memory>
 #include <vector>
@@ -135,7 +135,7 @@ public:
     int attach(SlotPtr slot) const
     {
         detach(slot); // clear duplicates
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (slot->id == -1)
             slot->id = ++_lastId; // TODO: assert unique?
         _slots.push_back(slot);
@@ -145,7 +145,7 @@ public:
     /// Detaches a previously attached slot.
     bool detach(int id) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (auto it = _slots.begin(); it != _slots.end();) {
             auto& slot = *it;
             if (slot->alive() && slot->id == id) {
@@ -161,7 +161,7 @@ public:
     /// Detaches all slots for the given instance.
     bool detach(const void* instance) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         bool removed = true;
         for (auto it = _slots.begin(); it != _slots.end();) {
             auto& slot = *it;
@@ -178,7 +178,7 @@ public:
     /// Detaches all attached functions for the given instance.
     bool detach(SlotPtr other) const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (auto it = _slots.begin(); it != _slots.end();) {
             auto& slot = *it;
             if (slot->alive() && (*slot->delegate == *other->delegate)) {
@@ -194,7 +194,7 @@ public:
     /// Detaches all previously attached functions.
     void detachAll() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         while (!_slots.empty()) {
             _slots.back()->kill();
             _slots.pop_back();
@@ -214,14 +214,14 @@ public:
     /// Returns the managed slot list.
     std::vector<SlotPtr> slots() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _slots;
     }
 
     /// Returns the number of active slots.
     std::size_t nslots() const
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         return _slots.size();
     }
 
@@ -237,7 +237,7 @@ private:
     // Signal(const Signal&) = delete;
     // Signal& operator=(const Signal&) = delete;
 
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     mutable std::vector<SlotPtr> _slots;
     mutable int _lastId = 0;
 };
@@ -356,7 +356,7 @@ template <typename RT, typename... Args> struct Slot
 //     void attach(const DelegateT& delegate)
 //     {
 //         detach(delegate);
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         _delegates.push_back(delegate.clone());
 //         _delegates.sort(DelegateT::ComparePrioroty);
 //         _count++;
@@ -366,7 +366,7 @@ template <typename RT, typename... Args> struct Slot
 //     /// Returns true if the delegate was detached, false otherwise.
 //     bool detach(const DelegateT& delegate)
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it)
 //         {
 //             if (delegate.equals(*it) && !(*it)->cancelled()) {
@@ -383,7 +383,7 @@ template <typename RT, typename... Args> struct Slot
 //     void detach(const void* klass)
 //     {
 //         {
-//             Mutex::ScopedLock lock(_mutex);
+//             std::lock_guard<std::mutex> guard(_mutex);
 //             for (Iterator it = _delegates.begin(); it != _delegates.end();
 //             ++it) {
 //                 if (klass == (*it)->object() && !(*it)->cancelled()) {
@@ -400,7 +400,7 @@ template <typename RT, typename... Args> struct Slot
 //     /// Deletes cancelled delegates.
 //     void cleanup()
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         if (_dirty) {
 //             _dirty = false;
 //             Iterator it = _delegates.begin();
@@ -420,7 +420,7 @@ template <typename RT, typename... Args> struct Slot
 //     /// simultaneously deleting any redundant delegates.
 //     void obtain(DelegateList& active)
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         if (!_enabled) // skip if disabled
 //             return;
 //         Iterator it = _delegates.begin();
@@ -481,26 +481,26 @@ template <typename RT, typename... Args> struct Slot
 //
 //     void clear()
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         util::clearList(_delegates);
 //         _count = 0;
 //     }
 //
 //     void enable(bool flag = true)
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         _enabled = flag;
 //     }
 //
 //     bool enabled() const
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         return _enabled;
 //     }
 //
 //     DelegateList delegates() const
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         return _delegates;
 //     }
 //
@@ -509,7 +509,7 @@ template <typename RT, typename... Args> struct Slot
 //     /// is not updated in real time.
 //     int nslots() const
 //     {
-//         Mutex::ScopedLock lock(_mutex);
+//         std::lock_guard<std::mutex> guard(_mutex);
 //         return _count;
 //     }
 //

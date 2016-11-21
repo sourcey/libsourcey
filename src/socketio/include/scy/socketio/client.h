@@ -169,7 +169,7 @@ protected:
     virtual void onPong();
 
 protected:
-    // mutable Mutex _mutex;
+    // mutable std::mutex _mutex;
     Timer _pingTimer;
     Timer _pingTimeoutTimer;
     Timer _reconnectTimer;

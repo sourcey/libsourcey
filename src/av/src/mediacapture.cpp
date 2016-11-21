@@ -176,7 +176,7 @@ void MediaCapture::start()
 {
     TraceS(this) << "Starting" << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     assert(_video || _audio);
 
     if ((_video || _audio) && !_thread.running()) {
@@ -193,7 +193,7 @@ void MediaCapture::stop()
 {
     TraceS(this) << "Stopping" << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     _stopping = true;
     if (_thread.running()) {
@@ -287,7 +287,7 @@ void MediaCapture::getEncoderFormat(Format& format)
 
 void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (_audio) {
         params = _audio->oparams;
     }
@@ -296,7 +296,7 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 
 void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     if (_video) {
         params = _video->oparams;
     }
@@ -305,35 +305,35 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 
 AVFormatContext* MediaCapture::formatCtx() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _formatCtx;
 }
 
 
 VideoDecoder* MediaCapture::video() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _video;
 }
 
 
 AudioDecoder* MediaCapture::audio() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _audio;
 }
 
 
 bool MediaCapture::stopping() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _stopping;
 }
 
 
 std::string MediaCapture::error() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _error;
 }
 

@@ -22,7 +22,7 @@
 #include "scy/av/iencoder.h"
 #include "scy/av/types.h"
 #include "scy/av/videoencoder.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/packetstream.h"
 #include <fstream>
 

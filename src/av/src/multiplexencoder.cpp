@@ -244,21 +244,21 @@ void MultiplexEncoder::flush()
 
 EncoderOptions& MultiplexEncoder::options()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _options;
 }
 
 
 VideoEncoder* MultiplexEncoder::video()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _video;
 }
 
 
 AudioEncoder* MultiplexEncoder::audio()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _audio;
 }
 
@@ -317,7 +317,7 @@ void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
 
 void MultiplexEncoder::createVideo()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     assert(!_video);
     assert(_options.oformat.video.enabled);
     assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
@@ -332,7 +332,7 @@ void MultiplexEncoder::createVideo()
 
 void MultiplexEncoder::freeVideo()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     if (_video) {
         delete _video;
@@ -438,7 +438,7 @@ void MultiplexEncoder::createAudio()
 {
     TraceS(this) << "Create Audio" << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
     assert(!_audio);
     assert(_options.oformat.audio.enabled);
     assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);
@@ -454,7 +454,7 @@ void MultiplexEncoder::createAudio()
 
 void MultiplexEncoder::freeAudio()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     if (_audio) {
         delete _audio;

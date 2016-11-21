@@ -14,7 +14,7 @@
 
 
 #include "scy/interface.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include <iostream>
 #include <list>
 #include <map>
@@ -168,7 +168,7 @@ public:
     static TestRunner& getDefault();
 
 protected:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     TestList _tests;
     Test* _current;
 };

@@ -73,7 +73,7 @@ public:
     virtual void clear()
     {
         Base::clear();
-        Mutex::ScopedLock lock(_tmutex);
+        std::lock_guard<std::mutex> guard(_tmutex);
         _timeouts.clear();
     }
 
@@ -81,7 +81,7 @@ protected:
     virtual bool setTimeout(TValue* item, long timeout)
     {
         if (item) {
-            Mutex::ScopedLock lock(_tmutex);
+            std::lock_guard<std::mutex> guard(_tmutex);
             if (timeout > 0) {
                 TraceS(this) << "Set timeout: " << item << ": " << timeout
                              << std::endl;
@@ -103,7 +103,7 @@ protected:
     virtual void onRemove(const TKey& key, TValue* item)
     {
         // Remove timeout entry
-        Mutex::ScopedLock lock(_tmutex);
+        std::lock_guard<std::mutex> guard(_tmutex);
         auto it = _timeouts.find(item);
         if (it != _timeouts.end())
             _timeouts.erase(it);
@@ -141,7 +141,7 @@ protected:
         }
     }
 
-    mutable Mutex _tmutex;
+    mutable std::mutex _tmutex;
     TimeoutMap _timeouts;
     Timer _timer;
 };

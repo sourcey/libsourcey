@@ -74,7 +74,7 @@ void VideoAnalyzer::uninitialize()
     // Uninitializing" << endl;
     stop();
 
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     if (_video)
         delete _video;
@@ -87,7 +87,7 @@ void VideoAnalyzer::uninitialize()
 
 void VideoAnalyzer::start()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     try {
         if (!_reader.audio() && !_reader.video())
@@ -108,7 +108,7 @@ void VideoAnalyzer::start()
 void VideoAnalyzer::stop()
 {
     // Can't lock here in case we are inside a callback.
-    // Mutex::ScopedLock lock(_mutex);
+   
 
     _reader.Closing -= sdelegate(this, &VideoAnalyzer::onReadComplete);
     _reader.emitter.detach(this);
@@ -129,7 +129,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
     int frames = 0;
     // VideoDecoder* video = _reader.video();
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     // Prepeare FFT input data array
     //    http://stackoverflow.com/questions/7790877/forward-fft-an-image-and-backward-fft-an-image-to-get-the-same-result
@@ -166,7 +166,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
     // TraceN(this) << "On Audio: "
     //  << packet.size() << ": " << packet.time << endl;
 
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     VideoAnalyzer::Packet pkt(packet.time);
     short const* data = reinterpret_cast<short*>(packet.data());
@@ -205,7 +205,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     VideoDecoder* video = _reader.video();
 
     // TODO: Conversion via decoder?
@@ -239,7 +239,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
     MediaCapture* reader = reinterpret_cast<MediaCapture*>(sender);
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         if (_error.empty())
             _error = reader->error();
     }
@@ -250,21 +250,21 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 MediaCapture& VideoAnalyzer::reader()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _reader;
 }
 
 
 VideoAnalyzer::Options& VideoAnalyzer::options()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _options;
 }
 
 
 std::string VideoAnalyzer::error() const
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
     return _error;
 }
 

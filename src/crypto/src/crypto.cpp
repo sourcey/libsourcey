@@ -10,9 +10,9 @@
 
 
 #include "scy/crypto/crypto.h"
-#include "scy/mutex.h"
 #include "scy/random.h"
 #include "scy/thread.h"
+#include <mutex>
 #include <stdexcept>
 
 #include <openssl/crypto.h>
@@ -28,7 +28,7 @@
 extern "C" {
 struct CRYPTO_dynlock_value
 {
-    scy::Mutex _mutex;
+    std::mutex _mutex;
 };
 }
 
@@ -70,8 +70,8 @@ void api(int ret, const char* error)
 
 
 const int SEEDSIZE = 256;
-static Mutex* _mutexes(0);
-static Mutex _mutex;
+static std::mutex* _mutexes(0);
+static std::mutex _mutex;
 static int _refCount(0);
 
 
@@ -118,7 +118,7 @@ void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */,
 
 void initialize()
 {
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (++_refCount == 1) {
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
@@ -133,7 +133,7 @@ void initialize()
         RAND_seed(seed, SEEDSIZE);
 
         int nMutexes = CRYPTO_num_locks();
-        _mutexes = new Mutex[nMutexes];
+        _mutexes = new std::mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
         // #ifndef WIN32 // SF# 1828231: random unhandled exceptions when
         // linking with ssl
@@ -150,7 +150,7 @@ void uninitialize()
 {
     // NOTE: crypto::uninitialize() should be called before the app exists
     // to endure the mutex is still in memory.
-    Mutex::ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> guard(_mutex);
 
     if (--_refCount == 0) {
         EVP_cleanup();

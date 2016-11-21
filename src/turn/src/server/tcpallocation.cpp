@@ -45,7 +45,7 @@ TCPAllocation::~TCPAllocation()
 {
     TraceL << "Destroy TCP allocation" << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+   
     _acceptor->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
     _acceptor->close();
 
@@ -325,7 +325,7 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
 
 int TCPAllocation::sendToControl(stun::Message& message)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     TraceL << "Send to control: " << message << endl;
     return _control->sendPacket(message, 0);
 }
@@ -333,7 +333,7 @@ int TCPAllocation::sendToControl(stun::Message& message)
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     TraceL << "Control socket disconnected" << endl;
 
     // The allocation will be destroyed on the
@@ -344,21 +344,21 @@ void TCPAllocation::onControlClosed(net::Socket& socket)
 
 net::TCPSocket& TCPAllocation::control()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return *_control.get();
 }
 
 
 TCPConnectionPairMap& TCPAllocation::pairs()
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _pairs;
 }
 
 
 net::Address TCPAllocation::relayedAddress() const
 {
-    // Mutex::ScopedLock lock(_mutex);
+   
     return _acceptor->address();
 }
 }

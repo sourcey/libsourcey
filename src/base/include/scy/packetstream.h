@@ -405,7 +405,7 @@ public:
     template <class AdapterT> AdapterT* getSource(int index = 0)
     {
         int x = 0;
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (unsigned i = 0; i < _sources.size(); i++) {
             AdapterT* source = dynamic_cast<AdapterT*>(_sources[i]->ptr);
             if (source) {
@@ -421,7 +421,7 @@ public:
     template <class AdapterT> AdapterT* getProcessor(int index = 0)
     {
         int x = 0;
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (unsigned i = 0; i < _processors.size(); i++) {
             AdapterT* processor = dynamic_cast<AdapterT*>(_processors[i]->ptr);
             if (processor) {
@@ -437,7 +437,7 @@ public:
     /// Returns the PacketProcessor at the given position.
     PacketProcessor* getProcessor(int order = 0)
     {
-        Mutex::ScopedLock lock(_mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         for (unsigned i = 0; i < _processors.size(); i++) {
             PacketProcessor* processor =
                 dynamic_cast<PacketProcessor*>(_processors[i]->ptr);
@@ -493,8 +493,8 @@ protected:
     /// Handle an internal exception.
     void handleException(std::exception& exc);
 
-    mutable Mutex _mutex;
-    mutable Mutex _procMutex;
+    mutable std::mutex _mutex;
+    mutable std::mutex _procMutex;
     std::string _name;
     PacketAdapterVec _sources;
     PacketAdapterVec _processors;

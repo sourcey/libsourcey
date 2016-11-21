@@ -23,7 +23,7 @@
 #include "scy/av/types.h"
 #include "scy/av/videodecoder.h"
 #include "scy/interface.h"
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/packetsignal.h"
 
 
@@ -75,7 +75,7 @@ protected:
     void emit(IPacket& packet);
 
 protected:
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
     Thread _thread;
     AVFormatContext* _formatCtx;
     VideoDecoder* _video;

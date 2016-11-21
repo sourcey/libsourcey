@@ -13,7 +13,7 @@
 #define SCY_Configuration_H
 
 
-#include "scy/mutex.h"
+#include <mutex>
 #include "scy/signal.h"
 
 
@@ -166,7 +166,7 @@ private:
     Configuration(const Configuration&);
     Configuration& operator=(const Configuration&);
 
-    mutable Mutex _mutex;
+    mutable std::mutex _mutex;
 };
 
 
