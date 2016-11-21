@@ -63,27 +63,13 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
 //
 
 
-// Client::Client(const net::Socket::Ptr& socket) :
-//     _pingTimer(socket->loop()),
-//     _ws(socket),
-//     _wasOnline(false),
-//     // _reconnection(false)
-// {
-//     _ws.addReceiver(this);
-// }
-
-
 Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     : _pingTimer(socket->loop())
     , _pingTimeoutTimer(socket->loop())
     , _reconnectTimer(socket->loop())
-    ,
-    // _options.host(host),
-    // _options.port(port),
-    _options(options)
+    , _options(options)
     , _ws(socket)
     , _wasOnline(false)
-// _reconnection(false)
 {
     _ws.addReceiver(this);
 }
@@ -92,22 +78,9 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
 Client::~Client()
 {
     _ws.removeReceiver(this);
-    //_ws.remove(this);
-    //_ws.adapter = nullptr;
+
     close();
-    // reset();
 }
-
-
-// void Client::connect(const std::string& host, std::uint16_t port)
-// {
-//     {
-//         //Mutex::ScopedLock lock(_mutex);
-//         _options.host = host;
-//         _options.port = port;
-//     }
-//     connect();
-// }
 
 
 void Client::connect()
@@ -244,7 +217,7 @@ void Client::setError(const scy::Error& error)
         _wasOnline = true;
 
     _error = error;
-    setState(this, ClientState::Error, error.message);
+    setState(this, ClientState::Error);
 
     // Start the reconnection timer if required
     if (_options.reconnection) {

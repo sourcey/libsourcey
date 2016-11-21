@@ -18,10 +18,23 @@ using std::endl;
 namespace scy {
 
 
-State::State(State::ID id, const std::string& message)
+State::State(State::ID id) //, const std::string& message
     : _id(id)
-    , _message(message)
+    // , _message(message)
 {
+}
+
+
+State::State(const State& that)
+    : _id(that._id.load())
+{
+}
+
+
+State& State::operator=(const State& that)
+{
+    _id = that._id.load();
+    return *this;
 }
 
 
@@ -37,16 +50,29 @@ void State::set(State::ID id)
 }
 
 
-std::string State::message() const
+bool State::equals(ID id) const
 {
-    return _message;
+    return this->id() == id;
 }
 
 
-void State::setMessage(const std::string& message)
+bool State::between(ID lid, ID rid) const
 {
-    _message = message;
+    ID id = this->id();
+    return id >= lid && id <= rid;
 }
+
+
+// std::string State::message() const
+// {
+//     return _message;
+// }
+//
+//
+// void State::setMessage(const std::string& message)
+// {
+//     _message = message;
+// }
 
 
 std::string State::str(State::ID id) const
@@ -68,10 +94,10 @@ std::string State::toString() const
 //
 
 
-MutexState::MutexState(State::ID id)
-    : State(id)
-{
-}
+// MutexState::MutexState(State::ID id)
+//     : State(id)
+// {
+// }
 
 
 //
@@ -79,44 +105,44 @@ MutexState::MutexState(State::ID id)
 //
 
 
-StateSignal::StateSignal(State::ID id)
-    : MutexState(id)
-{
-}
-
-
-bool StateSignal::change(State::ID id)
-{
-    if (canChange(id)) {
-        unsigned int old = this->id();
-        MutexState::set(id);
-        onChange(id, old);
-        return true;
-    }
-    return false;
-}
-
-
-bool StateSignal::canChange(State::ID id)
-{
-    // Can be overridden
-    if (this->id() != id)
-        return true;
-    return false;
-}
-
-
-void StateSignal::onChange(ID id, ID prev)
-{
-    // Can be overridden
-    // Change.emit(/*this, */id, prev);
-}
-
-
-void StateSignal::set(State::ID id)
-{
-    MutexState::set(id);
-}
+// StateSignal::StateSignal(State::ID id)
+//     : MutexState(id)
+// {
+// }
+//
+//
+// bool StateSignal::change(State::ID id)
+// {
+//     if (canChange(id)) {
+//         unsigned int old = this->id();
+//         MutexState::set(id);
+//         onChange(id, old);
+//         return true;
+//     }
+//     return false;
+// }
+//
+//
+// bool StateSignal::canChange(State::ID id)
+// {
+//     // Can be overridden
+//     if (this->id() != id)
+//         return true;
+//     return false;
+// }
+//
+//
+// void StateSignal::onChange(ID id, ID prev)
+// {
+//     // Can be overridden
+//     // Change.emit(/*this, */id, prev);
+// }
+//
+//
+// void StateSignal::set(State::ID id)
+// {
+//     MutexState::set(id);
+// }
 
 
 } // namespace scy

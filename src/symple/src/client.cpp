@@ -269,7 +269,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state,
 
         case TransactionState::Failed:
             Announce.emit(_announceStatus);
-            setError(state.message());
+            setError("Announce failed");
             break;
     }
 }

@@ -21,10 +21,10 @@ namespace scy {
 
 
 PacketStream::PacketStream(const std::string& name)
-    : _name(name)
+    : opaque(nullptr)
+    , _name(name)
     , _autoStart(false)
     , _closeOnError(true)
-    , _clientData(nullptr)
 {
     TraceS(this) << "Create" << endl;
 }
@@ -106,7 +106,6 @@ void PacketStream::stop()
 void PacketStream::pause()
 {
     TraceS(this) << "Pause" << endl;
-    // Mutex::ScopedLock lock(_mutex);
     setState(this, PacketStreamState::Paused);
 }
 
@@ -114,7 +113,6 @@ void PacketStream::pause()
 void PacketStream::resume()
 {
     TraceS(this) << "Resume" << endl;
-    // Mutex::ScopedLock lock(_mutex);
     if (!stateEquals(PacketStreamState::Paused)) {
         TraceS(this) << "Resume: Not paused" << endl;
         return;
@@ -124,14 +122,16 @@ void PacketStream::resume()
 }
 
 
-// void PacketStream::reset()
-// {
-//     TraceS(this) << "Reset" << endl;
-//
-//     //Mutex::ScopedLock lock(_mutex);
-//     setState(this, PacketStreamState::Resetting);
-//     setState(this, PacketStreamState::Active);
-// }
+void PacketStream::reset()
+{
+    TraceS(this) << "Reset" << endl;
+    assert(stateEquals(PacketStreamState::None) ||
+           stateEquals(PacketStreamState::Closed));
+
+    Mutex::ScopedLock lock(_mutex);
+    _sources.clear(); // not detaching here
+    _processors.clear(); // not detaching here
+}
 
 
 void PacketStream::close()
@@ -160,11 +160,6 @@ void PacketStream::close()
 
         // Teardown the adapter delegate chain
         teardown();
-
-        // Wait for thread-based runners to stop running in order
-        // to ensure safe destruction of stream adapters.
-        // This call does nothing for non thread-based runners.
-        // waitForRunner();
 
         // Synchronize any pending states
         // This should be safe since the adapters won't be receiving
@@ -213,107 +208,8 @@ bool PacketStream::locked() const
 }
 
 
-#if 0
-void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    attachSource(source, freePointer, syncState);
-}
-
-
-void PacketStream::attachSource(PacketSignal& source)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    attachSource(new PacketStreamAdapter(source), true, false);
-}
-
-
-bool PacketStream::detachSource(PacketStreamAdapter* source)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    return detachSource(source);
-}
-
-
-bool PacketStream::detachSource(PacketSignal& source)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    return detachSource(source);
-}
-
-
-void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    attach(proc, order, freePointer);
-}
-
-
-bool PacketStream::detach(PacketProcessor* proc)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    return detach(proc);
-}
-
-
-void PacketStream::synchronizeOutput(uv::Loop* loop)
-{
-    //Mutex::ScopedLock lock(_mutex);
-    synchronizeOutput(loop);
-}
-
-
-PacketStream& PacketStream::base() const
-{
-    Mutex::ScopedLock lock(_mutex);
-    if (!_base)
-        throw std::runtime_error("Packet stream context not initialized.");
-    return *_base;
-}
-
-
-PacketStream::PacketStream(PacketStream* stream) :
-    _stream(stream),
-    _closeOnError(false)
-{
-    TraceS(this) << "Create" << endl;
-}
-
-
-PacketStream::~PacketStream()
-{
-    TraceS(this) << "Destroy" << endl;
-
-    // The event machine should always be complete
-    assert(stateEquals(PacketStreamState::None)
-        || stateEquals(PacketStreamState::Closed)
-        || stateEquals(PacketStreamState::Error));
-
-    // Make sure all adapters have been cleaned up
-    assert(_sources.empty());
-    assert(_processors.empty());
-
-    TraceS(this) << "Destroy: OK" << endl;
-}
-
-
-const std::exception_ptr& PacketStream::error()
-{
-    //Mutex::ScopedLock lock(_mutex);
-    return error();
-}
-
-
-bool PacketStream::async() const
-{
-   return _runner && _runner->async();
-}
-#endif
-
-
 bool PacketStream::lock()
 {
-    // Mutex::ScopedLock lock(_mutex);
     if (!stateEquals(PacketStreamState::None))
         return false;
 
@@ -324,14 +220,12 @@ bool PacketStream::lock()
 
 bool PacketStream::active() const
 {
-    // Mutex::ScopedLock lock(_mutex);
     return stateEquals(PacketStreamState::Active);
 }
 
 
 bool PacketStream::closed() const
 {
-    // Mutex::ScopedLock lock(_mutex);
     return stateEquals(PacketStreamState::Closed) ||
            stateEquals(PacketStreamState::Error);
 }
@@ -339,36 +233,23 @@ bool PacketStream::closed() const
 
 bool PacketStream::stopped() const
 {
-    // Mutex::ScopedLock lock(_mutex);
     return stateEquals(PacketStreamState::Stopping) ||
            stateEquals(PacketStreamState::Stopped);
 }
 
 
-void PacketStream::setClientData(void* data)
-{
-    Mutex::ScopedLock lock(_mutex);
-    _clientData = data;
-}
-
-
-void* PacketStream::clientData() const
-{
-    Mutex::ScopedLock lock(_mutex);
-    return _clientData;
-}
-
-
 void PacketStream::autoStart(bool flag)
 {
-    // Mutex::ScopedLock lock(_mutex);
+    assertCanModify();
+    Mutex::ScopedLock lock(_mutex);
     _autoStart = flag;
 }
 
 
 void PacketStream::closeOnError(bool flag)
 {
-    // Mutex::ScopedLock lock(_mutex);
+    assertCanModify();
+    Mutex::ScopedLock lock(_mutex);
     _closeOnError = flag;
 }
 
@@ -392,7 +273,7 @@ void PacketStream::synchronizeStates()
         PacketStreamState state;
         {
             Mutex::ScopedLock lock(_mutex);
-            state = _states.front();
+            state.set(_states.front().id());
             _states.pop_front();
         }
 
@@ -403,11 +284,8 @@ void PacketStream::synchronizeStates()
         // packet adapters do not need to consider thread safety.
         auto adapters = this->adapters();
         for (auto& ref : adapters) {
-            auto adapter = dynamic_cast<PacketStreamAdapter*>(ref->ptr);
-            if (adapter)
-                adapter->onStreamStateChange(state);
-            else
-                assert(0);
+            reinterpret_cast<PacketStreamAdapter*>(
+                ref->ptr)->onStreamStateChange(state);
         }
     }
 }
@@ -422,9 +300,7 @@ void PacketStream::process(IPacket& packet)
     try {
 
         // Auto start the stream if required and currently inactive
-        if (_autoStart && stateEquals(PacketStreamState::None) // &&
-            // stateEquals(PacketStreamState::Locked)
-            )
+        if (_autoStart && stateEquals(PacketStreamState::None))
             start();
 
         // Process the packet if the stream is active
@@ -488,22 +364,7 @@ void PacketStream::process(IPacket& packet)
 
     // Catch any exceptions thrown within the processor
     catch (std::exception& exc) {
-        ErrorS(this) << "Processor error: " << exc.what() << endl;
-
-        // Set the stream Error state. No need for queueState
-        // as we are currently inside the processor context.
-        setState(this, PacketStreamState::Error, exc.what());
-
-        // Capture the exception so it can be rethrown elsewhere.
-        // The Error signal will be sent on next call to emit()
-        _error = std::current_exception();
-        /*stream()->*/ Error.emit(*this, _error);
-
-        //_syncError = true;
-        if (_closeOnError) {
-            TraceS(this) << "Close on error" << endl;
-            this->close();
-        }
+        handleException(exc);
     }
 
     // TraceS(this) << "End process chain: "
@@ -515,22 +376,6 @@ void PacketStream::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
 
-    // PacketStream* stream = this->stream();
-    // const PacketStreamState& state = this->state();
-
-    // Synchronize the error if required
-    // if (_syncError && state.equals(PacketStreamState::Error)) {
-    //     _syncError = false;
-    //     if (stream)
-    //         stream->Error.emit(stream, error());
-    //
-    //     if (_closeOnError) {
-    //         TraceS(this) << "Close on error" << endl;
-    //         stream->close();
-    //         return;
-    //     }
-    // }
-
     // Ensure the stream is still running
     if (!stateEquals(PacketStreamState::Active)) {
         TraceS(this) << "Dropping packet on inactive stream: " << state()
@@ -539,31 +384,9 @@ void PacketStream::emit(IPacket& packet)
     }
 
     try {
-        // Emit the result packet
-        // if (emitter.enabled()) {
         emitter.emit(packet);
-        // }
-        // else {
-        //     TraceS(this) << "Dropping packet: No emitter: " << state() <<
-        //     endl;
-        // }
     } catch (std::exception& exc) {
-        ErrorL << "Emit error: " << exc.what() << std::endl;
-
-        // Set the stream Error state. No need for queueState
-        // as we are currently inside the processor context.
-        setState(this, PacketStreamState::Error, exc.what());
-
-        // Capture the exception so it can be rethrown elsewhere.
-        // The Error signal will be sent on next call to emit()
-        _error = std::current_exception();
-        /*stream()->*/ Error.emit(*this, _error);
-
-        //_syncError = true;
-        if (_closeOnError) {
-            TraceS(this) << "Close on error" << endl;
-            this->close();
-        }
+        handleException(exc);
     }
 
     TraceS(this) << "Emit: OK: " << packet.size() << endl;
@@ -581,8 +404,6 @@ void PacketStream::setup()
         for (auto& proc : _processors) {
             thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
             if (lastProc) {
-                // lastProc->getEmitter().attach<PacketProcessor,
-                // &PacketProcessor::process>(thisProc);
                 lastProc->getEmitter() +=
                     slot(thisProc, &PacketProcessor::process);
             }
@@ -591,22 +412,15 @@ void PacketStream::setup()
 
         // The last processor will emit the packet to the application
         if (lastProc)
-            // lastProc->getEmitter().attach<PacketStream,
-            // &PacketStream::emit>(this);
             lastProc->getEmitter() += slot(this, &PacketStream::emit);
-        // lastProc->getEmitter().attach(packetSlot(this, &PacketStream::emit));
 
         // Attach source emitters to the PacketStream::process method
         for (auto& source : _sources) {
             source->ptr->getEmitter() += slot(this, &PacketStream::process);
-            // source->ptr->getEmitter().attach<PacketStream,
-            // &PacketStream::process>(this);
-            // source->ptr->getEmitter().attach(packetSlot(this,
-            // &PacketStream::process));
         }
     } catch (std::exception& exc) {
         ErrorS(this) << "Cannot start stream: " << exc.what() << endl;
-        setState(this, PacketStreamState::Error, exc.what());
+        setState(this, PacketStreamState::Error); //, exc.what()
         throw exc;
     }
 }
@@ -624,67 +438,17 @@ void PacketStream::teardown()
         thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
         if (lastProc)
             lastProc->getEmitter() -= slot(thisProc, &PacketProcessor::process);
-        // lastProc->getEmitter().detach<PacketProcessor,
-        // &PacketProcessor::process>(this);
-        // lastProc->getEmitter().detach(packetSlot(thisProc,
-        // &PacketProcessor::process));
         lastProc = thisProc;
     }
     if (lastProc)
         lastProc->getEmitter() -= slot(this, &PacketStream::emit);
-    // lastProc->getEmitter().detach<PacketStream, &PacketStream::emit>(this);
-    // lastProc->getEmitter().detach(packetSlot(this, &PacketStream::emit));
 
     // Detach sources
     for (auto& source : _sources) {
         source->ptr->getEmitter() -= slot(this, &PacketStream::process);
-        // source->ptr->getEmitter().detach<PacketStream,
-        // &PacketStream::process>(this);
-        // source->ptr->getEmitter().detach(packetSlot(this,
-        // &PacketStream::process));
     }
 
     TraceS(this) << "Teardown: OK" << endl;
-}
-
-
-void PacketStream::reset()
-{
-    TraceS(this) << "Reset" << endl;
-
-    assert(stateEquals(PacketStreamState::None) ||
-           stateEquals(PacketStreamState::Closed));
-
-    Mutex::ScopedLock lock(_mutex);
-    auto sit = _sources.begin();
-    while (sit != _sources.end()) {
-        // TraceS(this) << "Remove source: " << (*sit)->ptr << endl; // << ": "
-        // << (*sit).freePointer
-        // if ((*sit).freePointer) {
-        //#ifdef _DEBUG
-        // delete (*sit)->ptr;
-        //#else
-        //            deleteLater<PacketStreamAdapter>((*sit)->ptr);
-        //#endif
-        //}
-        sit = _sources.erase(sit);
-    }
-
-    auto pit = _processors.begin();
-    while (pit != _processors.end()) {
-        // TraceS(this) << "Remove processor: " << (*pit)->ptr << endl; //<< ":
-        // " << (*pit).freePointer
-        // if ((*pit).freePointer) {
-        //#ifdef _DEBUG
-        // delete (*pit)->ptr;
-        //#else
-        //            deleteLater<PacketStreamAdapter>((*pit)->ptr);
-        //#endif
-        //}
-        pit = _processors.erase(pit);
-    }
-
-    // TraceS(this) << "Cleanup: OK" << endl;
 }
 
 
@@ -695,7 +459,7 @@ void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer,
     attachSource(std::make_shared<PacketAdapterReference>(
         source, freePointer ? new ScopedRawPointer<PacketStreamAdapter>(source)
                             : nullptr,
-        0, syncState)); // freePointer,
+        0, syncState));
 }
 
 
@@ -717,7 +481,7 @@ void PacketStream::attachSource(PacketSignal& source)
 
     // TODO: unique_ptr for exception safe pointer creation so we
     // don't need to do state checks here as well as
-    // attachSource(PacketStreamAdapter*)
+    // `attachSource(PacketStreamAdapter*)`
     attachSource(new PacketStreamAdapter(source), true, false);
 }
 
@@ -731,16 +495,6 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if ((*it)->ptr == source) {
             (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
-            // (*it)->ptr->getEmitter() -= slot(this,
-            // static_cast<void(PacketStream::*)(IPacket&)>(&PacketStream::write));
-            // (*it)->ptr->getEmitter().detach<PacketStream,
-            // &PacketStream::write>(this);
-            // (*it)->ptr->getEmitter().detach(packetSlot(this,
-            // &PacketStream::write));
-            TraceS(this) << "Detached source adapter: " << source << endl;
-
-            // Note: The PacketStream is no longer responsible
-            // for deleting the managed pointer.
             _sources.erase(it);
             return true;
         }
@@ -758,19 +512,6 @@ bool PacketStream::detachSource(PacketSignal& source)
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
         if (&(*it)->ptr->getEmitter() == &source) {
             (*it)->ptr->getEmitter() -= slot(this, &PacketStream::process);
-            // (*it)->ptr->getEmitter() -= slot(this,
-            // static_cast<void(PacketStream::*)(IPacket&)>(&PacketStream::write));
-            // (*it)->ptr->getEmitter().detach<PacketStream,
-            // &PacketStream::write>(this);
-            // (*it)->ptr->getEmitter().detach(packetSlot(this,
-            // &PacketStream::write));
-            TraceS(this) << "Detached source signal: " << &source << endl;
-
-            // Free the PacketStreamAdapter wrapper instance,
-            // not the referenced PacketSignal.
-            // assert((*it).freePointer);
-            // delete (*it)->ptr;
-            _sources.erase(it);
             return true;
         }
     }
@@ -785,13 +526,9 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
     assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
-    //_processors.push_back(std::make_shared<PacketAdapterReference>(proc,
-    //    order == 0 ? _processors.size() : order, freePointer));
-
-    _processors.push_back(std::make_shared<PacketAdapterReference>(
-        proc,
+    _processors.push_back(std::make_shared<PacketAdapterReference>(proc,
         freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr,
-        order == -1 ? _processors.size() : order)); // freePointer,
+        order == -1 ? _processors.size() : order));
 
     sort(_processors.begin(), _processors.end(),
          PacketAdapterReference::compareOrder);
@@ -807,9 +544,6 @@ bool PacketStream::detach(PacketProcessor* proc)
     for (auto it = _processors.begin(); it != _processors.end(); ++it) {
         if ((*it)->ptr == proc) {
             TraceS(this) << "Detached processor: " << proc << endl;
-
-            // Note: The PacketStream is not responsible
-            // for deleting the managed pointer.
             _processors.erase(it);
             return true;
         }
@@ -877,66 +611,24 @@ void PacketStream::stopSources()
 }
 
 
-bool PacketStream::waitForRunner()
+void PacketStream::handleException(std::exception& exc)
 {
-    /*
-    TraceS(this) << "Wait for sync: "
-        << times << ": "
-        << !_runner->cancelled() << ": "
-        << _runner->running()
-        << endl;
+    ErrorS(this) << "Error: " << exc.what() << endl;
 
-    if (!_runner || !_runner->async())
-        return false;
+    // Set the stream Error state. No need for queueState
+    // as we are currently inside the processor context.
+    setState(this, PacketStreamState::Error); //, exc.what()
 
-    //assert(Thread::currentID() != _runner->tid());
+    // Capture the exception so it can be rethrown elsewhere.
+    // The Error signal will be sent on next call to emit()
+    _error = std::current_exception();
+    Error.emit(*this, _error);
 
-    TraceS(this) << "Wait for sync" << endl;
-    int times = 0;
-    while (!_runner->cancelled() || _runner->running()) {
-    //!_runner->cancelled() ||
-        TraceS(this) << "Wait for sync: "
-            << times << ": "
-            << !_runner->cancelled() << ": "
-            << _runner->running()
-            << endl;
-        scy::sleep(10);
-        if (times++ > 500) {
-            assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
-        }
+    //_syncError = true;
+    if (_closeOnError) {
+        TraceS(this) << "Close on error" << endl;
+        this->close();
     }
-        */
-
-    TraceS(this) << "Wait for sync: OK" << endl;
-    return true;
-}
-
-
-bool PacketStream::waitForStateSync(PacketStreamState::ID state)
-{
-    int times = 0;
-    TraceS(this) << "Wait for sync state: " << state << endl;
-    while (!stateEquals(state) || hasQueuedState(state)) {
-        TraceS(this) << "Wait for sync state: " << state << ": " << times
-                     << endl;
-        scy::sleep(10);
-        if (times++ > 500) {
-            assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
-        }
-    }
-    TraceS(this) << "Wait for sync state: " << state << ": OK" << endl;
-    return true;
-}
-
-
-bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
-{
-    Mutex::ScopedLock lock(_mutex);
-    for (auto const& st : _states) {
-        if (st.id() == state)
-            return true;
-    }
-    return false;
 }
 
 
@@ -1075,6 +767,39 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 {
     return _emitter;
 }
+
+
+//
+// Helper Functions
+//
+
+
+// bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
+// {
+//     Mutex::ScopedLock lock(_mutex);
+//     for (auto const& st : _states) {
+//         if (st.id() == state)
+//             return true;
+//     }
+//     return false;
+// }
+
+
+// bool waitForStateSync(PacketStream* stream, PacketStreamState::ID state)
+// {
+//     int times = 0;
+//     TraceS(stream) << "Wait for sync state: " << state << endl;
+//     while (!stream->stateEquals(state) || stream->hasQueuedState(state)) {
+//         TraceS(stream) << "Wait for sync state: " << state << ": " << times
+//                      << endl;
+//         scy::sleep(5);
+//         if (times++ > 1000) {
+//             assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
+//         }
+//     }
+//     TraceS(stream) << "Wait for sync state: " << state << ": OK" << endl;
+//     return true;
+// }
 
 
 } // namespace scy

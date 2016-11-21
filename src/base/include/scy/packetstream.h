@@ -39,7 +39,7 @@ struct PacketStreamState;
 class PacketStreamAdapter
 {
 public:
-    PacketStreamAdapter(PacketSignal& emitter); // = nullptr
+    PacketStreamAdapter(PacketSignal& emitter);
     virtual ~PacketStreamAdapter(){};
 
     virtual void emit(char* data, std::size_t len, unsigned flags = 0);
@@ -68,7 +68,7 @@ protected:
 };
 
 
-typedef PacketStreamAdapter PacketSource; /// For 0.8.x compatibility
+typedef PacketStreamAdapter PacketSource; ///< For 0.8.x compatibility
 
 
 //
@@ -82,8 +82,7 @@ class PacketProcessor : public PacketStreamAdapter
 {
 public:
     PacketProcessor(PacketSignal& emitter)
-        : // = nullptr
-        PacketStreamAdapter(emitter)
+        : PacketStreamAdapter(emitter)
     {
     }
 
@@ -121,17 +120,15 @@ struct PacketAdapterReference
     PacketStreamAdapter* ptr;
     ScopedPointer* deleter;
     int order;
-    // bool freePointer;
     bool syncState;
 
     PacketAdapterReference(PacketStreamAdapter* ptr = nullptr,
                            ScopedPointer* deleter = nullptr, int order = 0,
                            bool syncState = false)
-        : // bool freePointer = true
-        ptr(ptr)
+        : ptr(ptr)
         , deleter(deleter)
         , order(order)
-        , syncState(syncState) // freePointer(freePointer),
+        , syncState(syncState)
     {
     }
 
@@ -172,7 +169,8 @@ struct PacketStreamState : public State
         None = 0,
         Locked,
         Active,
-        Paused, // Resetting,
+        Paused,
+        // Resetting,
         Stopping,
         Stopped,
         Closed,
@@ -188,7 +186,8 @@ struct PacketStreamState : public State
                 return "Locked";
             case Active:
                 return "Active";
-            // case Resetting:     return "Resetting";
+            // case Resetting:
+            //    return "Resetting";
             case Paused:
                 return "Paused";
             case Stopping:
@@ -367,8 +366,8 @@ public:
     virtual void closeOnError(bool flag);
 
     /// Accessors for the unmanaged client data pointer.
-    virtual void setClientData(void* data);
-    virtual void* clientData() const;
+    // virtual void setClientData(void* data);
+    // virtual void* clientData() const;
 
     /// Returns the stream error (if any).
     const std::exception_ptr& error();
@@ -398,14 +397,6 @@ public:
 
     /// Returns a list of all stream processors.
     PacketAdapterVec processors() const;
-
-    /// Block the calling thread until all packets have been flushed,
-    /// and internal states have been synchronized.
-    /// This function is only useful after calling stop() or pause().
-    bool waitForRunner();
-
-    /// Block the calling thread until the given state is synchronized.
-    bool waitForStateSync(PacketStreamState::ID state);
 
     int numSources() const;
     int numProcessors() const;
@@ -457,6 +448,9 @@ public:
         return nullptr;
     }
 
+    // Client data pointer
+    void* opaque;
+
 protected:
     /// Attach the source and processor delegate chain.
     void setup();
@@ -469,7 +463,6 @@ protected:
     /// Synchronized signals such as Close and Error are sent
     /// from this method. See synchronizeOutput()
     void emit(IPacket& packet);
-
 
     void attachSource(PacketAdapterReference::Ptr ref);
     void attach(PacketAdapterReference::Ptr ref);
@@ -491,11 +484,14 @@ protected:
                                const PacketStreamState& oldState);
 
     /// Returns true if the given state ID is queued.
-    bool hasQueuedState(PacketStreamState::ID state) const;
+    // bool hasQueuedState(PacketStreamState::ID state) const;
 
     /// Asserts that the stream can be modified, ie is not in the Locked,
     /// Stopping or Active states.
     void assertCanModify();
+
+    /// Handle an internal exception.
+    void handleException(std::exception& exc);
 
     mutable Mutex _mutex;
     mutable Mutex _procMutex;
@@ -506,12 +502,20 @@ protected:
     std::exception_ptr _error;
     bool _autoStart;
     bool _closeOnError;
-    void* _clientData;
 };
 
 
 typedef std::vector<PacketStream*> PacketStreamVec;
 typedef std::vector<PacketStream::Ptr> PacketStreamPtrVec;
+
+
+//
+// Helpers Functions
+//
+
+
+/// Block the calling thread until the given state is synchronized.
+// bool waitForStateSync(PacketStream* stream, PacketStreamState::ID state);
 
 
 } // namespace scy

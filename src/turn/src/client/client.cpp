@@ -135,13 +135,13 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 }
 
 
-void Client::onSocketClose(net::Socket& socket) //, const Error& error
+void Client::onSocketClose(net::Socket& socket)
 {
     assert(&socket == _socket.get());
     TraceL << "Control socket closed" << endl;
     assert(_socket->closed());
     shutdown();
-    setState(this, ClientState::Failed, _socket->error().message);
+    setError(_socket->error());
 }
 
 
@@ -694,8 +694,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
     }
 
-    setState(this, ClientState::Failed,
-             util::format("(%d) %s", (int)errorAttr->errorCode(),
+    setError(util::format("(%d) %s", (int)errorAttr->errorCode(),
                           errorAttr->reason().c_str()));
 
     if (!closed()) {
@@ -703,6 +702,13 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             *this, errorAttr->errorCode(),
             errorAttr->reason()); // may result in deletion
     }
+}
+
+
+void Client::setError(const scy::Error& error)
+{
+    _error = error;
+    setState(this, ClientState::Failed);
 }
 
 
@@ -776,17 +782,15 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     if (!closed()) {
         _observer.onAllocationPermissionsCreated(*this, _permissions);
 
-        /*
-        auto transaction =
-        reinterpret_cast<stun::Transaction*>(response.opaque);
-        for (int i = 0; i < 100; i++) {
-            auto peerAttr = transaction->request().get<stun::XorPeerAddress>(i);
-            if (!peerAttr || (peerAttr && peerAttr->family() != 1))
-                break;
-            _observer.onAllocationPermissionsCreated(*this,
-        std::string(peerAttr->address().host()));
-        }
-        */
+        // auto transaction =
+        // reinterpret_cast<stun::Transaction*>(response.opaque);
+        // for (int i = 0; i < 100; i++) {
+        //     auto peerAttr = transaction->request().get<stun::XorPeerAddress>(i);
+        //     if (!peerAttr || (peerAttr && peerAttr->family() != 1))
+        //         break;
+        //     _observer.onAllocationPermissionsCreated(*this,
+        // std::string(peerAttr->address().host()));
+        // }
     }
 
     // Once permissions have been created the allocation
@@ -803,7 +807,7 @@ void Client::handleCreatePermissionErrorResponse(
 
     removeAllPermissions();
 
-    setState(this, ClientState::Failed, "Cannot create server permissions.");
+    setError("Cannot create server permissions.");
 }
 
 
@@ -971,7 +975,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
 
             // TODO: More flexible response error handling
             if (removeTransaction(transaction)) {
-                setState(this, ClientState::Failed, state.message());
+                setError("Transaction failed");
             }
             break;
     }

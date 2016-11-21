@@ -198,23 +198,15 @@ class Flag
     Flag& operator=(Flag&&) = delete;
 
 public:
-    Flag()
-        : state(false){};
+    Flag() : state(false) {};
 
-    bool get() const
-    {
-        bool s = state.load(std::memory_order_relaxed);
-        if (s)
-            std::atomic_thread_fence(std::memory_order_acquire);
-        return s;
-    }
-
-    void set(bool flag) { state.store(flag, std::memory_order_release); }
+    bool get() const { return state.load(); }
+    void set(bool flag) { state = flag; }
 };
 
 
 /// For C client data callbacks.
-typedef void (*Callable)(void*);
+// typedef void (*Callable)(void*);
 
 
 /// A generic interface for a classes

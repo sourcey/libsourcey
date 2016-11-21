@@ -186,7 +186,7 @@ protected:
             //    setState(this, TransactionState::Failed, "Transaction
             //    timeout");
             // dispose();
-            setState(this, TransactionState::Failed, "Transaction timeout");
+            setState(this, TransactionState::Failed); // Timeout
         } else
             send();
     }
@@ -199,7 +199,7 @@ protected:
     Timer _timer;
     int _timeout;  ///< The request timeout in milliseconds.
     int _retries;  ///< The maximum number of attempts before the transaction is
-                   ///considered failed.
+                   ///< considered failed.
     int _attempts; ///< The number of times the transaction has been sent.
     bool _destroyed;
 };

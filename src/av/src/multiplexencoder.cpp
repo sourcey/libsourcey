@@ -160,7 +160,7 @@ void MultiplexEncoder::initialize()
         setState(this, EncoderState::Ready);
     } catch (std::exception& exc) {
         ErrorS(this) << "Error: " << exc.what() << endl;
-        setState(this, EncoderState::Error, exc.what());
+        setState(this, EncoderState::Error); //, exc.what()
         cleanup();
         throw exc; //.rethrow()
     }

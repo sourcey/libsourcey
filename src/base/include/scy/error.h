@@ -22,11 +22,7 @@
 namespace scy {
 
 
-//
-// Error type
-//
-
-
+/// Basic error type.
 struct Error
 {
     int errorno;

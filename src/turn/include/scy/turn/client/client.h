@@ -178,6 +178,9 @@ public:
     ClientObserver& observer();
     Options& options();
 
+protected:
+    virtual void setError(const scy::Error& error);
+
     virtual void onSocketConnect(net::Socket& socket);
     virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                               const net::Address& peerAddress);
@@ -194,7 +197,7 @@ protected:
     Options _options;
     net::Socket::Ptr _socket;
     Timer _timer;
-
+    scy::Error _error;
     net::Address _mappedAddress;
     net::Address _relayedAddress;
 
