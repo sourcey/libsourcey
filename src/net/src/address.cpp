@@ -14,7 +14,6 @@
 #include "scy/memory.h"
 #include "scy/util.h"
 #include <cstdint>
-// #include "uv.h"
 
 
 using std::endl;
@@ -29,7 +28,7 @@ namespace net {
 //
 
 
-class AddressBase : public SharedObject
+class AddressBase
 {
 public:
     virtual std::string host() const = 0;
@@ -41,12 +40,11 @@ public:
 
 protected:
     AddressBase() {}
-
     virtual ~AddressBase() {}
 
 private:
-    AddressBase(const AddressBase&);
-    AddressBase& operator=(const AddressBase&);
+    AddressBase(const AddressBase&) = delete;
+    AddressBase& operator=(const AddressBase&) = delete;
 };
 
 
@@ -171,9 +169,9 @@ private:
 //
 
 
-Address::Address()
+Address::Address() :
+    _base(std::make_shared<IPv4AddressBase>())
 {
-    _base = new IPv4AddressBase;
 }
 
 
@@ -221,12 +219,12 @@ Address::Address(const std::string& hostAndPort)
 Address::Address(const struct sockaddr* addr, socklen_t length)
 {
     if (length == sizeof(struct sockaddr_in))
-        _base = new IPv4AddressBase(
-            reinterpret_cast<const struct sockaddr_in*>(addr));
+        _base = std::make_shared<IPv4AddressBase>(
+                reinterpret_cast<const struct sockaddr_in*>(addr));
 #if defined(LibSourcey_HAVE_IPv6)
     else if (length == sizeof(struct sockaddr_in6))
-        _base = new IPv6AddressBase(
-            reinterpret_cast<const struct sockaddr_in6*>(addr));
+        _base = std::make_shared<IPv6AddressBase>(
+                reinterpret_cast<const struct sockaddr_in6*>(addr));
 #endif
     else
         throw std::runtime_error("Invalid address length passed to Address()");
@@ -236,22 +234,22 @@ Address::Address(const struct sockaddr* addr, socklen_t length)
 Address::Address(const Address& addr)
 {
     _base = addr._base;
-    _base->duplicate();
+    // _base->duplicate();
 }
 
 
 Address::~Address()
 {
-    _base->release();
+    // _base->release();
 }
 
 
 Address& Address::operator=(const Address& addr)
 {
     if (&addr != this) {
-        _base->release();
+        // _base->release();
         _base = addr._base;
-        _base->duplicate();
+        // _base->duplicate();
     }
     return *this;
 }
@@ -263,9 +261,9 @@ void Address::init(const std::string& host, std::uint16_t port)
 
     char ia[sizeof(struct in6_addr)];
     if (uv_inet_pton(AF_INET, host.c_str(), &ia) == 0)
-        _base = new IPv4AddressBase(&ia, htons(port));
+        _base = std::make_shared<IPv4AddressBase>(&ia, htons(port));
     else if (uv_inet_pton(AF_INET6, host.c_str(), &ia) == 0)
-        _base = new IPv6AddressBase(&ia, htons(port));
+        _base = std::make_shared<IPv6AddressBase>(&ia, htons(port));
     else
         throw std::runtime_error("Invalid IP address format: " + host);
 }
@@ -347,12 +345,10 @@ bool Address::operator!=(const Address& addr) const
 }
 
 
-/*
-void Address::swap(Address& a1, Address& a2)
-{
-    a1.swap(a2);
-}
-*/
+// void Address::swap(Address& a1, Address& a2)
+// {
+//     a1.swap(a2);
+// }
 
 
 void Address::swap(Address& addr)

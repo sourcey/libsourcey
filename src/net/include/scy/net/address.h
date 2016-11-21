@@ -134,7 +134,7 @@ protected:
     void init(const std::string& host, std::uint16_t port);
 
 private:
-    AddressBase* _base;
+    std::shared_ptr<AddressBase> _base;
 };
 
 

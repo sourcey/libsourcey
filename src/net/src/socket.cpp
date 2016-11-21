@@ -44,33 +44,29 @@ void Socket::connect(const std::string& host, std::uint16_t port)
     else {
         init();
         assert(!closed());
-        net::resolveDNS(
-            host, port,
-            [](const net::DNSResult& dns) {
-                auto* sock = reinterpret_cast<Socket*>(dns.opaque);
-                TraceL << "DNS resolved: " << dns.success() << endl;
+        net::resolveDNS(host, port, [&](const net::DNSResult& dns) {
+            TraceL << "DNS resolved: " << dns.success() << endl;
 
-                // Return if the socket was closed while resolving
-                if (sock->closed()) {
-                    WarnL << "DNS resolved but socket closed" << endl;
-                    return;
-                }
+            // Return if the socket was closed while resolving
+            if (closed()) {
+                WarnL << "DNS resolved but socket closed" << endl;
+                return;
+            }
 
-                // Set the connection error if DNS failed
-                if (!dns.success()) {
-                    sock->setError("Failed to resolve DNS for " + dns.host);
-                    return;
-                }
+            // Set the connection error if DNS failed
+            if (!dns.success()) {
+                setError("Failed to resolve DNS for " + dns.host);
+                return;
+            }
 
-                try {
-                    // Connect to resolved host
-                    sock->connect(dns.addr);
-                } catch (...) {
-                    // Swallow errors
-                    // Can be handled by Socket::Error signal
-                }
-            },
-            this);
+            try {
+                // Connect to resolved host
+                connect(dns.addr);
+            } catch (...) {
+                // Swallow errors
+                // Errors can be handled by Socket::Error signal
+            }
+        });
     }
 }
 

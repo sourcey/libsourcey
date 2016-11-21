@@ -26,9 +26,9 @@ namespace scy {
 namespace net {
 
 
-/// Helper method for instantiating Sockets wrapped in a std::shared_ptr
-/// which will be garbage collected on destruction.
-/// It is always recommended to use deferred deletion for Sockets.
+/// Helper method for instantiating Sockets wrapped in a `std::shared_ptr`
+/// that will be garbage collected on destruction.
+/// It's recommended to use deferred deletion for Sockets.
 template <class SocketT>
 inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 {
@@ -37,8 +37,7 @@ inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 }
 
 
-/// Socket is the base socket implementation
-/// from which all sockets derive.
+/// Socket is the base socket implementation from which all sockets derive.
 class Socket : public SocketAdapter
 {
 public:
@@ -119,7 +118,7 @@ protected:
     virtual void init() = 0;
 
     /// Resets the socket context for reuse.
-    virtual void reset(){};
+    virtual void reset() {};
 
     /// Returns the derived instance pointer for casting SocketAdapter
     /// signal callback sender arguments from void* to Socket.

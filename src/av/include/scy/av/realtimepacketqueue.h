@@ -22,17 +22,15 @@ namespace scy {
 namespace av {
 
 
-template <class PacketT> /// This class emits media packets based on their
-                         /// realtime pts value.
-                         class RealtimePacketQueue
+/// This class emits media packets based on their realtime pts value.
+template <class PacketT> class RealtimePacketQueue
     : public AsyncPacketQueue<PacketT>
 {
 public:
-    typedef std::shared_ptr<RealtimePacketQueue> ptr_t;
-    typedef AsyncPacketQueue<PacketT> base_t;
+    typedef AsyncPacketQueue<PacketT> BaseQueue;
 
     RealtimePacketQueue(int maxSize = 1024)
-        : base_t(maxSize)
+        : BaseQueue(maxSize)
     {
     }
 
@@ -44,18 +42,16 @@ public:
 protected:
     virtual PacketT* popNext()
     {
-        if (base_t::empty())
+        if (BaseQueue::empty())
             return nullptr;
 
-        // WarnS(this) << "popNext: " << base_t::size() << ": " << realTime() <<
-        // " < " <<  next->time << std::endl;
-        auto next = base_t::front();
+        auto next = BaseQueue::front();
         if (next->time > realTime())
             return nullptr;
-        base_t::pop();
+        BaseQueue::pop();
 
-        WarnS(this) << "popNext: " << base_t::size() << ": " << realTime()
-                    << " > " << next->time << std::endl;
+        // TraceS(this) << "popNext: " << BaseQueue::size() << ": " << realTime()
+        //             << " > " << next->time << std::endl;
         return next;
     }
 
@@ -67,7 +63,7 @@ protected:
             _startTime = time::hrtime();
         }
 
-        base_t::onStreamStateChange(state);
+        BaseQueue::onStreamStateChange(state);
     }
 
     std::int64_t _startTime;

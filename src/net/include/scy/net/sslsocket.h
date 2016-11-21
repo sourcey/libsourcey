@@ -104,7 +104,6 @@ public:
     /// Reads raw encrypted SSL data
     virtual void onRead(const char* data, std::size_t len);
 
-
 protected:
     /// virtual bool readStart();
 

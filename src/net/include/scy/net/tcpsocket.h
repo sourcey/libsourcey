@@ -89,7 +89,6 @@ public:
 
 protected:
     virtual void init();
-    // virtual void* self() { return this; }
 
     // std::unique_ptr<uv_connect_t> _connectReq;
     uv_connect_t* _connectReq;

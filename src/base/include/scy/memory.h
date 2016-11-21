@@ -227,11 +227,7 @@ template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
 }
 
 
-//
-// Memory and Reference Counted Objects
-//
-
-
+#if 0 // deprecated in favour of std::shared_ptr with custom deleters
 /// SharedObject is the base class for objects that
 /// employ reference counting based garbage collection.
 ///
@@ -291,6 +287,7 @@ protected:
     std::atomic<unsigned> count;
     bool deferred;
 };
+#endif
 
 
 } // namespace scy

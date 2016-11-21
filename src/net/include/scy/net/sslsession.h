@@ -29,7 +29,7 @@ namespace net {
 /// For session caching to work, a client must
 /// save the session object from an existing connection,
 /// if it wants to reuse it with a future connection.
-class SSLSession : public SharedObject
+class SSLSession
 {
 public:
     typedef std::shared_ptr<SSLSession> Ptr;
