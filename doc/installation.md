@@ -2,11 +2,13 @@
 
 LibSourcey uses `CMake` to generate the project files for your compiler, and the codebase is cross platform so it should compile on any system with a modern C++11 compiler. LibSourcey has been successfully compiled and used on the following platforms:
 
-* Linux (`gcc`)
+* Linux (`gcc` >= 4.9)
 * OS X (`Xcode`, `gcc`)
 * Windows (`msys`, `vs`)
 * Android
 * iOS
+
+**Note**: If using `gcc` then version >= 4.9 is required because older versions have a bug and that doesn't accept parameters pack in lambdas. See here: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55914
 
 Please refer to the platform specific installation guides:
 
@@ -16,8 +18,8 @@ Please refer to the platform specific installation guides:
 
 ## Dependencies
 
-* **LibUV** (>= 1.8.0, required, internal)  
-  Networking, filesystem and cross platform utilities
+<!-- * **LibUV** (>= 1.8.0, required, internal)  
+  Networking, filesystem and cross platform utilities -->
 * **OpenSSL** (>= 1.0.1g, required, external)  
   Required by the `net` and `crypto` modules for SSL networking, encryption and cryptography
 * **FFmpeg** (>= 2.8.3, optional, external)  
@@ -26,11 +28,8 @@ Please refer to the platform specific installation guides:
   Peer-to-peer video conferencing
 * **OpenCV** (>= 3.0, optional, external)  
   Video capture and computer vision algorithms
-
-<!--
-* **RtAudio** (>= 4.1.2, optional, internal)
-Audio capture
--->
+<!-- * **RtAudio** (>= 4.1.2, optional, internal)
+Audio capture -->
 
 ## CMake Build Options
 

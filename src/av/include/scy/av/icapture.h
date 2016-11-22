@@ -23,7 +23,7 @@ namespace av {
 struct Format;
 
 
-class ICapture : public PacketSource, public async::Startable
+class ICapture : public PacketSource, public basic::Startable
 {
 public:
     ICapture()

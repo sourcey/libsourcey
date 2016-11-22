@@ -14,6 +14,7 @@
 
 
 #include <cstdint>
+#include <mutex>
 
 
 namespace scy {

@@ -556,7 +556,7 @@ class AudioCaptureResamplerTest : public Test
 // =============================================================================
 // Realtime Media Queue Test
 //
-struct MockMediaPacketSource : public PacketSource, public async::Startable
+struct MockMediaPacketSource : public PacketSource, public basic::Startable
 {
     Thread runner;
     PacketSignal emitter;
@@ -714,7 +714,7 @@ class RealtimeMediaQueueTest : public Test
 //     // ---------------------------------------------------------------------
 //     // Video Capture Thread Test
 //     //
-//     class VideoCaptureThread: public async::Runnable
+//     class VideoCaptureThread: public basic::Runnable
 //     {
 //     public:
 //         VideoCaptureThread(int deviceID, const std::string& name = "Capture

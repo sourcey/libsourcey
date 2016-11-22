@@ -78,8 +78,8 @@ inline MutableBuffer mutableBuffer(T data, std::size_t size)
 
 inline MutableBuffer mutableBuffer(std::string& str)
 {
-    return MutableBuffer(reinterpret_cast<void*>(&str[0]),
-                         str.size()); // std::string is contiguous as of C++11
+    // std::string is contiguous as of C++11
+    return MutableBuffer(reinterpret_cast<void*>(&str[0]), str.size());
 }
 
 

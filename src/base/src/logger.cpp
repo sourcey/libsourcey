@@ -182,7 +182,7 @@ void LogWriter::write(LogStream* stream)
 
 AsyncLogWriter::AsyncLogWriter()
 {
-    _thread.start(*this);
+    _thread.start(std::bind(&AsyncLogWriter::run, this));
 }
 
 

@@ -1,16 +1,4 @@
-if (WIN32 AND CMAKE_GENERATOR MATCHES "(MinGW)|(MSYS)")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" CACHE STRING "")
-endif()
-
-if(MSVC)
-  if(CMAKE_CXX_FLAGS STREQUAL CMAKE_CXX_FLAGS_INIT)
-    # override cmake default exception handling option
-    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}"  CACHE STRING "Flags used by the compiler during all build types." FORCE)
-  endif()
-endif()
-
-
+# Initialize flags
 set(LibSourcey_EXTRA_C_FLAGS "")
 set(LibSourcey_EXTRA_C_FLAGS_RELEASE "")
 set(LibSourcey_EXTRA_C_FLAGS_DEBUG "")
@@ -18,11 +6,23 @@ set(LibSourcey_EXTRA_EXE_LINKER_FLAGS "")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE "")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "")
 
+# Set processor flags
+if(CMAKE_SYSTEM_PROCESSOR MATCHES amd64.*|x86_64.*)
+    set(X86_64 1)
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES i686.*|i386.*|x86.*)
+    set(X86 1)
+endif()
 
 # Using c++11 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
+  message(STATUS "Detected version of GNU GCC: ${CMAKE_CXX_COMPILER_VERSION})")
+
+  # Require at least gcc 4.9
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+    message(FATAL_ERROR "GCC version must be at least 4.9!")
+  endif()
 
   # High level of warnings.
   set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wall")
@@ -37,13 +37,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -pthread")
   endif()
 
-  #if(BUILD_SHARED_LIBS)
+  # if(BUILD_SHARED_LIBS)
   #  set(LibSourcey_EXTRA_C_FLAGS "-shared ${LibSourcey_EXTRA_C_FLAGS}")
-  #else()
+  # else()
   #  set(LibSourcey_EXTRA_C_FLAGS "-static ${LibSourcey_EXTRA_C_FLAGS}")
-  #endif()
+  # endif()
 
-  if(LibSourcey_WARNINGS_ARE_ERRORS)
+  if(ENABLE_WARNINGS_ARE_ERRORS)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Werror")
   endif()
 
@@ -76,27 +76,22 @@ if(CMAKE_COMPILER_IS_GNUCXX)
       set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -msse3")
     endif()
 
-    if(${CMAKE_LibSourcey_GCC_VERSION_NUM} GREATER 402)
-      set(HAVE_GCC43_OR_NEWER 1)
-    endif()
-    if(${CMAKE_LibSourcey_GCC_VERSION_NUM} GREATER 401)
-      set(HAVE_GCC42_OR_NEWER 1)
-    endif()
-
-    if(HAVE_GCC42_OR_NEWER OR APPLE)
+    if(APPLE)
       if(ENABLE_SSSE3)
         set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -mssse3")
       endif()
-      if(HAVE_GCC43_OR_NEWER)
-        if(ENABLE_SSE41)
-           set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -msse4.1")
-        endif()
-        if(ENABLE_SSE42)
-           set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -msse4.2")
-        endif()
+      if(ENABLE_SSE41)
+         set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -msse4.1")
+      endif()
+      if(ENABLE_SSE42)
+         set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -msse4.2")
       endif()
     endif()
   endif(NOT MINGW)
+
+  if (CMAKE_GENERATOR MATCHES "(MinGW)|(MSYS)")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" CACHE STRING "")
+  endif()
 
   if(X86 OR X86_64)
     if(NOT APPLE AND CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -134,8 +129,27 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   endif()
 endif()
 
-
+# Visual Studio
 if(MSVC)
+
+  # Ensure >= 2012 Update 4 for C++11 and Windows XP build support
+  if( MSVC_VERSION LESS 1700 )       # VC10-/VS2010-
+    message(FATAL_ERROR "The project requires C++11 features. "
+      "You need at least Visual Studio 11 (Microsoft Visual Studio 2012), "
+      "with Microsoft Visual C++ Compiler 2012 CTP (v110_xp).")
+  elseif( MSVC_VERSION EQUAL 1700 )  # VC11/VS2012
+    #message( "VC11: use Microsoft Visual Studio 2012 "
+    #  "with Microsoft Visual C++ Compiler 2012 CTP (v110_xp)" )
+    set(CMAKE_GENERATOR_TOOLSET "v110_xp" CACHE STRING "Platform Toolset" FORCE)
+  else() # VC12+, assuming C++11 supported.
+  endif()
+
+  if(CMAKE_CXX_FLAGS STREQUAL CMAKE_CXX_FLAGS_INIT)
+    # override cmake default exception handling option
+    string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}"  CACHE STRING "Flags used by the compiler during all build types." FORCE)
+  endif()
+
   set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS")
   # 64-bit portability warnings, in MSVC80
   if(MSVC80)
@@ -181,14 +195,6 @@ if(MSVC)
       set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /fp:fast")# !! important - be on the same wave with x64 compilers
     endif()
   endif()
-
-  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  # when compiling with certain externally compiled libraries with VS2012,
-  # such as http://ffmpeg.zeranoe.com/builds/
-  # This disables safe exception handling by default.
-  SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-  SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
 
 # Extra link libs if the user selects building static libs:
@@ -219,13 +225,21 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${LibSourc
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG}")
 
 if(MSVC)
-  # avoid warnings from MSVC about overriding the /W* option
-  # we replace /W3 with /W4 only for C++ files,
+  # Avoid warnings from MSVC about overriding the /W* option
+  # We replace /W3 with /W4 only for C++ files,
   # since all the 3rd-party libraries LibSourcey uses are in C,
   # and we do not care about their warnings.
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+
+  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
+  # when compiling with certain externally compiled libraries with VS2012,
+  # such as http://ffmpeg.zeranoe.com/builds/
+  # This disables safe exception handling by default.
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 
   # allow extern "C" functions throw exceptions
   foreach(flags CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG)

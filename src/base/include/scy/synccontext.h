@@ -13,7 +13,7 @@
 #define SCY_SyncContext_H
 
 
-#include "scy/async.h"
+#include "scy/interface.h"
 #include "scy/interface.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
@@ -31,14 +31,23 @@ namespace scy {
 
 /// SyncContext enables any thread to communicate with
 /// the associated event loop via synchronized callbacks.
-class SyncContext : public async::Runner
+class SyncContext : public Runner
 {
 public:
     /// Create the synchronization context the given event loop and method.
     /// The target method will be called from the event loop context.
     SyncContext(uv::Loop* loop);
-    SyncContext(uv::Loop* loop, std::function<void()> target);
-    SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg);
+
+    SyncContext(std::function<void()> target,
+                uv::Loop* loop = uv::defaultLoop());
+
+    template<class Function, class... Args>
+    explicit SyncContext(Function func, Args... args,
+                         uv::Loop* loop = uv::defaultLoop())
+        : _handle(loop, new uv_async_t)
+    {
+        start(func, args...);
+    }
 
     virtual ~SyncContext();
 
@@ -48,6 +57,40 @@ public:
     /// This is not atomic, so do not expect a callback for every request.
     void post();
 
+    template<class Function, class... Args>
+    void start(Function func, Args... args)
+    {
+        assert(!_handle.active());
+        assert(!_handle.active());
+        assert(!_context->running);
+
+        _context->reset();
+        _context->running = true;
+        _context->repeating = true; // always repeating
+
+        // Use a FunctionWrap instance since we can't pass the capture lambda
+        // to the libuv callback without compiler trickery.
+        _handle.ptr()->data = new FunctionWrap<Function, Args...>(func, args..., _context);
+        int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
+            auto wrap = reinterpret_cast<FunctionWrap<Function, Args...>*>(req->data);
+            if (!wrap->ctx->cancelled) {
+                wrap->call();
+            }
+            else {
+                req->data = nullptr;
+                wrap->ctx->running = false;
+                delete wrap;
+            }
+        });
+
+        if (r < 0)
+            _handle.setAndThrowError("Cannot initialize async", r);
+
+        assert(_handle.active());
+    }
+
+    virtual void start(std::function<void()> target);
+
     virtual void cancel();
 
     virtual void close();
@@ -56,7 +99,7 @@ public:
     uv::Handle& handle();
 
 protected:
-    virtual void startAsync();
+    // virtual void startAsync();
     virtual bool async() const;
 
     uv::Handle _handle;

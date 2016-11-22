@@ -13,7 +13,7 @@
 #define SCY_Timer_H
 
 
-#include "scy/async.h"
+#include "scy/interface.h"
 #include "scy/datetime.h"
 #include "scy/memory.h"
 #include "scy/signal.h"

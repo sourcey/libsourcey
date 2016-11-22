@@ -28,7 +28,8 @@ namespace scy {
 /// delegates and also provides an equality operator for comparing the
 /// underlying function where supported.
 ///
-template <typename RT, typename... Args> struct AbstractDelegate
+template <typename RT, typename... Args>
+struct AbstractDelegate
 {
     virtual RT operator()(Args... args) const = 0;
     virtual bool

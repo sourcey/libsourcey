@@ -16,6 +16,7 @@
 
 
 #include "scy/error.h"
+
 #include <cstdint>
 #include <cstring>
 #include <list>
@@ -497,6 +498,34 @@ int icompare(const S& str, typename S::size_type pos,
 template <class S> int icompare(const S& str, const typename S::value_type* ptr)
 {
     return icompare(str, 0, str.size(), ptr);
+}
+
+
+//
+// Function helpers
+//
+
+/// Call a function with the given argument tuple.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple, size_t ... I>
+auto call(Function f, Tuple t, std::index_sequence<I ...>)
+{
+     return f(std::get<I>(t)...);
+}
+
+
+/// Call a function with the given argument tuple.
+///
+/// Create an index sequence for the array, and pass it to the
+/// implementation `call` function.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple>
+auto call(Function f, Tuple t)
+{
+    static constexpr auto size = std::tuple_size<Tuple>::value;
+    return call(f, t, std::make_index_sequence<size>{});
 }
 
 

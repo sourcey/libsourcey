@@ -8,6 +8,7 @@
 /// @addtogroup uv
 /// @{
 
+
 #include "scy/uv/uvpp.h"
 
 
@@ -16,11 +17,9 @@ namespace uv {
 
 
 Handle::Handle(uv_loop_t* loop, void* handle)
-    : _loop(loop ? loop : uv_default_loop())
-    , // nullptr will be uv_default_loop
-    _ptr((uv_handle_t*)handle)
-    , // nullptr or instance of uv_handle_t
-    _tid(uv_thread_self())
+    : _loop(loop ? loop : uv_default_loop()) // nullptr will be uv_default_loop
+    , _ptr((uv_handle_t*)handle) // nullptr or instance of uv_handle_t
+    , _tid(uv_thread_self())
     , _closed(false)
 {
     if (_ptr)

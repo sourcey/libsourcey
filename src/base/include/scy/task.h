@@ -13,8 +13,7 @@
 #define SCY_Task_H
 
 
-#include "scy/idler.h"
-#include "scy/interface.h"
+#include "scy/runner.h"
 #include "scy/memory.h"
 #include "scy/signal.h"
 #include "scy/task.h"
@@ -29,7 +28,7 @@ class TaskRunner;
 
 /// This class is for implementing any kind
 /// async task that is compatible with a TaskRunner.
-class Task : public async::Runnable
+class Task : public basic::Runnable
 {
 public:
     Task(bool repeat = false);
@@ -48,7 +47,7 @@ public:
     /// Unique task ID.
     virtual std::uint32_t id() const;
 
-    // Inherits async::Runnable:
+    // Inherits basic::Runnable:
     //
     // virtual void run();
     // virtual void cancel();
@@ -83,10 +82,10 @@ protected:
 ///
 /// The TaskRunner continually loops through each task in
 /// the task list calling the task's run() method.
-class TaskRunner : public async::Runnable
+class TaskRunner : public basic::Runnable
 {
 public:
-    TaskRunner(async::Runner::Ptr runner = nullptr);
+    TaskRunner(Runner::Ptr runner = nullptr);
     virtual ~TaskRunner();
 
     /// Starts a task, adding it if it doesn't exist.
@@ -110,7 +109,7 @@ public:
     /// Set the asynchronous context for packet processing.
     /// This may be a Thread or another derivative of Async.
     /// Must be set before the stream is activated.
-    virtual void setRunner(async::Runner::Ptr runner);
+    virtual void setRunner(Runner::Ptr runner);
 
     /// Returns the default TaskRunner singleton, although
     /// TaskRunner instances may be initialized individually.
@@ -160,9 +159,9 @@ protected:
 protected:
     typedef std::deque<Task*> TaskList;
 
+    Runner::Ptr _runner;
     mutable std::mutex _mutex;
     TaskList _tasks;
-    async::Runner::Ptr _runner;
 };
 
 

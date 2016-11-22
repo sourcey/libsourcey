@@ -31,18 +31,18 @@ template <class T = IPacket>
 class SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
 {
 public:
-    typedef SyncQueue<T> base_t;
-    typedef PacketProcessor proc_t;
+    typedef SyncQueue<T> Queue;
+    typedef PacketProcessor Processor;
 
     SyncPacketQueue(uv::Loop* loop, int maxSize = 1024)
-        : base_t(loop, maxSize)
-        , proc_t(this->emitter)
+        : Queue(loop, maxSize)
+        , Processor(this->emitter)
     {
     }
 
     SyncPacketQueue(int maxSize = 1024)
-        : base_t(uv::defaultLoop(), maxSize)
-        , proc_t(this->emitter)
+        : Queue(uv::defaultLoop(), maxSize)
+        , Processor(this->emitter)
     {
     }
 
@@ -84,13 +84,13 @@ protected:
 
 template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
 {
-    if (base_t::cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
         assert(0);
         return;
     }
 
-    base_t::push(reinterpret_cast<T*>(packet.clone()));
+    Queue::push(reinterpret_cast<T*>(packet.clone()));
 }
 
 
@@ -99,13 +99,13 @@ template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
 /// and dropped by the run() function.
 template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
 {
-    if (base_t::cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Dispatch late packet" << std::endl;
         assert(0);
         return;
     }
 
-    proc_t::emit(packet);
+    Processor::emit(packet);
 }
 
 
@@ -129,7 +129,7 @@ SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
         // case PacketStreamState::Stopped:
         case PacketStreamState::Closed:
         case PacketStreamState::Error:
-            base_t::cancel();
+            Queue::cancel();
             break;
     }
 }
@@ -144,12 +144,12 @@ template <class T = IPacket>
 class AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
 {
 public:
-    typedef AsyncQueue<T> base_t;
-    typedef PacketProcessor proc_t;
+    typedef AsyncQueue<T> Queue;
+    typedef PacketProcessor Processor;
 
     AsyncPacketQueue(int maxSize = 1024)
-        : base_t(maxSize)
-        , proc_t(this->emitter)
+        : Queue(maxSize)
+        , Processor(this->emitter)
     {
     }
 
@@ -172,34 +172,34 @@ protected:
 template <class T> inline void AsyncPacketQueue<T>::close()
 {
     // Flush queued items, some protocols can't afford dropped packets
-    base_t::flush();
-    assert(base_t::empty());
-    base_t::cancel();
-    base_t::_thread.join();
+    Queue::flush();
+    assert(Queue::empty());
+    Queue::cancel();
+    Queue::_thread.join();
 }
 
 
 template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
 {
-    if (base_t::cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Dispatch late packet" << std::endl;
         assert(0);
         return;
     }
 
-    proc_t::emit(packet);
+    Processor::emit(packet);
 }
 
 
 template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
-    if (base_t::cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
         assert(0);
         return;
     }
 
-    base_t::push(reinterpret_cast<T*>(packet.clone()));
+    Queue::push(reinterpret_cast<T*>(packet.clone()));
 }
 
 

@@ -8,13 +8,14 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Logger_H
 #define SCY_Logger_H
 
 
 #include "scy/base.h"
 #include "scy/error.h"
-#include <mutex>
+#include "scy/interface.h"
 #include "scy/singleton.h"
 #include "scy/thread.h"
 
@@ -24,7 +25,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-//#include <time.h>
+#include <mutex>
 #include <string.h>
 
 
@@ -105,7 +106,7 @@ public:
 //
 
 
-class AsyncLogWriter : public LogWriter, public async::Runnable
+class AsyncLogWriter : public LogWriter, public basic::Runnable
 {
 public:
     AsyncLogWriter();

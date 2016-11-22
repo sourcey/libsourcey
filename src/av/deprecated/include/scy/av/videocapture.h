@@ -56,7 +56,7 @@ namespace av {
 /// VI_COM_MULTI_THREADED
 /// defined otherwise capture there will be CoInitialize conflicts
 /// with the DeviceManager.
-class VideoCapture : public ICapture, public async::Runnable
+class VideoCapture : public ICapture, public basic::Runnable
 {
 public:
     typedef std::shared_ptr<VideoCapture>

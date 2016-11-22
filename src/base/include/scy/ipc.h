@@ -13,9 +13,9 @@
 #define SCY_IPC_H
 
 
-#include <mutex>
 #include "scy/synccontext.h"
 
+#include <mutex>
 #include <deque>
 #include <string>
 
@@ -113,7 +113,7 @@ class SyncQueue : public Queue<TAction>
 {
 public:
     SyncQueue(uv::Loop* loop = uv::defaultLoop())
-        : _sync(loop, std::bind(&Queue<TAction>::runSync, this))
+        : _sync(std::bind(&Queue<TAction>::runSync, this), loop)
     {
     }
 

@@ -14,7 +14,8 @@
 
 
 #include "scy/base.h"
-#include <exception> // use std::exception types
+
+#include <exception>
 #include <stdexcept>
 #include <string>
 

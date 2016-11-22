@@ -13,60 +13,107 @@
 #define SCY_Thread_H
 
 
-#include "scy/async.h"
-#include <mutex>
+#include "scy/runner.h"
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
+// #include "scy/logger.h"
+#include "scy/util.h"
+#include <thread>
+#include <tuple>
+#include <utility>
+#include <mutex>
 
 
 namespace scy {
 
 
+/// Helper function for running an async context.
+template<class Function, class... Args>
+void runAsync(Runner::Context::Ptr c, Function func, Args... args)
+{
+    // std::cout << "Runner::runAsync" << std::endl;
+    c->tid = std::this_thread::get_id();
+    c->running = true;
+    do {
+        try {
+            func(std::forward<Args>(args)...);
+        } catch (std::exception& exc) {
+            // ErrorL << "Runner error: " << exc.what() << std::endl;
+    #ifdef _DEBUG
+            throw exc;
+    #endif
+        }
+        scy::sleep(1);
+    } while (c->repeating && !c->cancelled);
+    c->running = false;
+}
+
+
 /// This class implements a platform-independent
 /// wrapper around an operating system thread.
-class Thread : public async::Runner
+class Thread : public Runner
 {
 public:
-    typedef std::shared_ptr<Thread> ptr;
+    typedef std::shared_ptr<Thread> Ptr;
 
+    /// Default constructor.
     Thread();
-    Thread(async::Runnable& target);
-    Thread(std::function<void()> target);
-    Thread(std::function<void(void*)> target, void* arg);
+
+    /// Templated constructor.
+    ///
+    /// This constructor starts the thread with the given function.
+    template<class Function, class... Args>
+    explicit Thread(Function func, Args... args) :
+        _thread(runAsync<Function, Args...>, _context, func,
+                std::forward<Args>(args)...)
+    {
+    }
+
+    /// Destructor.
     virtual ~Thread();
 
-    /// Waits until the thread exits.
+    /// Start a function with veradic arguments.
+    ///
+    /// This method starts the thread with the given function.
+    template<class Function, class... Args>
+    void start(Function func, Args... args)
+    {
+        _thread = std::thread(runAsync<Function, Args...>, _context, func,
+                              std::forward<Args>(args)...);
+    }
+
+    /// Start a `Runnable` target.
+    ///
+    /// The target `Runnable` instance must outlive the thread.
+    virtual void start(std::function<void()> target);
+
+    /// Wait until the thread exits.
     void join();
 
-    /// Waits until the thread exits.
-    /// The thread should be cancelled beore calling this method.
-    /// This method must be called from outside the current thread
-    /// context or deadlock will ensue.
-    bool waitForExit(int timeout = 5000);
+    /// Return the native thread handle.
+    std::thread::id id() const;
 
-    /// Returns the native thread handle.
-    uv_thread_t id() const;
+    /// Return the native thread ID of the current thread.
+    static std::thread::id currentID();
 
-    /// Returns the native thread ID of the current thread.
-    static uv_thread_t currentID();
-
-    static const uv_thread_t mainID;
+    /// Accessor for the main thread ID.
+    static const std::thread::id mainID;
 
 protected:
+    /// NonCopyable and NonMovable
     Thread(const Thread&) = delete;
     Thread& operator=(const Thread&) = delete;
 
-    virtual bool async() const;
-    virtual void startAsync();
+    bool async() const;
 
-    uv_thread_t _handle;
+    std::thread _thread;
 };
 
 
 #if 0
 /// This class is an invisible wrapper around a TStartable instance,
 /// which provides asynchronous access to the TStartable start() and
-/// stop() methods. TStartable is an instance of async::Startable.
+/// stop() methods. TStartable is an instance of basic::Startable.
 /// @deprecated
 template <class TStartable>
 class AsyncStartable: public TStartable

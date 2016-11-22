@@ -41,7 +41,7 @@ public:
 
     bool empty() const
     {
-       
+
         return _queue.empty();
     }
 
@@ -101,10 +101,12 @@ public:
 
 
 template <class T>
-class RunnableQueue : public Queue<T*>, public async::Runnable
+class RunnableQueue : public Queue<T*>, public basic::Runnable
 {
 public:
-    typedef Queue<T*> queue_t; /// The default dispatch function.
+    typedef Queue<T*> queue_t;
+
+    /// The default dispatch function.
     /// Must be set before the queue is running.
     std::function<void(T&)> ondispatch;
 
@@ -117,8 +119,9 @@ public:
 
     virtual ~RunnableQueue() { clear(); }
 
-    virtual void push(T* item) // Push an item onto the queue.
+    /// Push an item onto the queue.
     /// The queue takes ownership of the item pointer.
+    virtual void push(T* item)
     {
         std::lock_guard<std::mutex> guard(_mutex);
 
@@ -131,12 +134,9 @@ public:
         queue_t::push(reinterpret_cast<T*>(item));
     }
 
-    virtual void flush() // Flushes all outgoing items.
+    /// Flush all outgoing items.
+    virtual void flush()
     {
-        /// do {
-        /// }    // while (dispatchNext());    //     // scy::sleep(1);
-
-
         while (!queue_t::empty()) {
             auto next = queue_t::front();
             dispatch(*next);
@@ -145,7 +145,8 @@ public:
         }
     }
 
-    void clear() // Clears all queued items.
+    // Clear all queued items.
+    void clear()
     {
         std::lock_guard<std::mutex> guard(_mutex);
         while (!queue_t::empty()) {
@@ -153,14 +154,12 @@ public:
             queue_t::pop();
         }
     }
-    /// bool empty()    /// {    ///     // Disabling mutex lock for bool check.
-    ///     //Mutex::ScopedLock lock(_mutex);    ///     return empty();    ///
-    ///     }
 
-    virtual void run() // Called asynchronously to dispatch queued items.
-    /// If not timeout is set this method blocks until cancel()    // is called,
+    /// Called asynchronously to dispatch queued items.
+    /// If not timeout is set this method blocks until cancel() is called,
     /// otherwise runTimeout() will be called.
     /// Pseudo protected for std::bind compatability.
+    virtual void run()
     {
         if (_timeout) {
             runTimeout();
@@ -173,9 +172,10 @@ public:
         }
     }
 
-    virtual void runTimeout() // Called asynchronously to dispatch queued items
+    /// Called asynchronously to dispatch queued items
     /// until the queue is empty or the timeout expires.
     /// Pseudo protected for std::bind compatability.
+    virtual void runTimeout()
     {
         Stopwatch sw;
         sw.start();
@@ -185,13 +185,18 @@ public:
                  dispatchNext());
     }
 
-    virtual void dispatch(T& item) // Dispatch a single item to listeners.
+    /// Dispatch a single item to listeners.
+    virtual void dispatch(T& item)
     {
         if (ondispatch)
             ondispatch(item);
     }
-    /// int timeout()    /// {    ///     std::lock_guard<std::mutex> guard(_mutex);    ///
-    /// return _timeout;    /// }
+
+    int timeout()
+    {
+        std::lock_guard<std::mutex> guard(_mutex);
+        return _timeout;
+    }
 
     void setTimeout(int milliseconds)
     {
@@ -230,7 +235,7 @@ protected:
     }
 
     int _limit;
-    int _timeout; /// queue_t _queue;
+    int _timeout;
     mutable std::mutex _mutex;
 };
 
@@ -240,41 +245,40 @@ protected:
 //
 
 
-template <class T>
-
 /// SyncQueue extends SyncContext to implement a synchronized FIFO
 /// queue which receives T objects from any thread and synchronizes
 /// them for safe consumption by the associated event loop.
+template <class T>
 class SyncQueue : public RunnableQueue<T>
 {
 public:
-    typedef RunnableQueue<T> base_t;
+    typedef RunnableQueue<T> Queue;
 
     SyncQueue(uv::Loop* loop, int limit = 2048, int timeout = 20)
-        : base_t(limit, timeout)
-        , // Note: The SyncQueue instance must not be destroyed
-          /// while the RunnableQueue is still dispatching items.
-        _sync(loop, std::bind(&base_t::run, this))
+        : Queue(limit, timeout)
+        , _sync(std::bind(&SyncQueue::run, this), loop)
     {
     }
 
-    virtual ~SyncQueue() // Destruction is deferred to allow enough
+    /// Destruction is deferred to allow enough
     /// time for all callbacks to return.
+    virtual ~SyncQueue()
     {
     }
 
-    virtual void push(T* item) // Pushes an item onto the queue.
+    /// Pushes an item onto the queue.
     /// Item pointers are now managed by the SyncQueue.
+    virtual void push(T* item)
     {
-        base_t::push(item);
+        Queue::push(item);
         _sync.post();
     }
 
     virtual void cancel()
     {
-        base_t::cancel();
-        _sync.cancel(); /// Call uv_close on the handle if calling from
-                        /// the event loop thread or we deadlock.
+        Queue::cancel();
+        _sync.cancel(); // Call uv_close on the handle if calling from
+                        // the event loop thread or we deadlock.
         if (_sync.tid() == Thread::currentID())
             _sync.close();
     }
@@ -304,17 +308,17 @@ template <class T>
 class AsyncQueue : public RunnableQueue<T>
 {
 public:
-    typedef RunnableQueue<T> base_t;
+    typedef RunnableQueue<T> Queue;
 
     AsyncQueue(int limit = 2048)
-        : base_t(limit)
-        , _thread(std::bind(&base_t::run, this))
+        : Queue(limit)
+        , _thread(std::bind(&Queue::run, this))
     {
     }
 
     virtual void cancel()
     {
-        base_t::cancel();
+        Queue::cancel();
         _thread.cancel();
     }
 

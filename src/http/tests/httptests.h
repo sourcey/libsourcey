@@ -2,7 +2,7 @@
 #define SCY_HTTP_Tests_H
 
 
-#include "scy/async.h"
+#include "scy/interface.h"
 #include "scy/base.h"
 #include "scy/crypto/hash.h"
 #include "scy/filesystem.h"

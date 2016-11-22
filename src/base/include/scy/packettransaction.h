@@ -57,7 +57,7 @@ struct TransactionState : public State
 /// PacketTransactions are fire and forget. The object will be deleted
 /// after a successful response or a timeout.
 template <class PacketT>
-class PacketTransaction : public async::Sendable,
+class PacketTransaction : public basic::Sendable,
                           public Stateful<TransactionState>
 {
 public:

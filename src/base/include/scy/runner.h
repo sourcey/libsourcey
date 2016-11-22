@@ -1,0 +1,143 @@
+///
+//
+// LibSourcey
+// Copyright (c) 2005, Sourcey <http://sourcey.com>
+//
+// SPDX-License-Identifier:	LGPL-2.1+
+//
+/// @addtogroup base
+/// @{
+
+
+#ifndef SCY_Runner_H
+#define SCY_Runner_H
+
+
+#include "scy/interface.h"
+#include "scy/uv/uvpp.h"
+#include "scy/util.h"
+#include <cstdint>
+#include <thread>
+#include <atomic>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+
+
+namespace scy {
+
+
+/// Runner is a virtual interface for implementing
+/// asynchronous objects such as threads and futures.
+class Runner
+{
+public:
+    Runner();
+    virtual ~Runner();
+
+    /// Start a `Runnable` target.
+    ///
+    /// The target `Runnable` instance must outlive the `Runner`.
+    virtual void start(std::function<void()> target) = 0;
+
+    /// Returns true if the async context is currently running.
+    bool running() const;
+
+    /// Cancels the async context.
+    void cancel();
+
+    /// True when the task has been cancelled.
+    /// It is up to the implementation to return at the
+    /// earliest possible time.
+    bool cancelled() const;
+
+    /// Returns true if the Runner is operating in repeating mode.
+    bool repeating() const;
+
+    /// This setting means the implementation should call the
+    /// target function repeatedly until cancelled. The importance
+    /// of this method to normalize the functionality of threadded
+    /// and event loop driven Runner models.
+    void setRepeating(bool flag);
+
+    /// Returns true if the implementation is thread-based, or false
+    /// if it belongs to an event loop.
+    virtual bool async() const = 0;
+
+    /// Return the native thread ID.
+    std::thread::id tid() const;
+
+    /// Wait until the thread exits.
+    ///
+    /// The thread should be cancelled beore calling this method.
+    /// This method must be called from outside the current thread
+    /// context or deadlock will ensue.
+    bool waitForExit(int timeout = 5000);
+
+    /// Shared pointer type
+    typedef std::shared_ptr<Runner> Ptr;
+
+    /// Context object which we send to the thread context.
+    ///
+    /// This intermediate object allows us to garecefully handle late callbacks
+    /// and so avoid the need for deferred destruction of `Runner` objects.
+    struct Context
+    {
+        typedef std::shared_ptr<Context> Ptr;
+
+        std::thread::id tid;
+        std::atomic<bool> running;
+        std::atomic<bool> cancelled;
+        bool repeating = false;
+
+        // The implementation is responsible for resetting
+        // the context if it is to be reused.
+        void reset()
+        {
+            running = false;
+            cancelled = false;
+        }
+
+        Context()
+        {
+            reset();
+        }
+    };
+
+protected:
+    /// Shared pointer to the internal Runner::Context.
+    Context::Ptr _context;
+
+    /// NonCopyable and NonMovable
+    Runner(const Runner&) = delete;
+    Runner& operator=(const Runner&) = delete;
+};
+
+
+/// Helper class for working with async libuv types and veradic arguments.
+template<class Function, class... Args>
+struct FunctionWrap
+{
+    Function func;
+    std::tuple<Args...> args;
+    Runner::Context::Ptr ctx;
+
+    FunctionWrap(Function f, Args... a, Runner::Context::Ptr c)
+        : func(f), args(a...), ctx(c)
+    {
+    }
+
+    void call()
+    {
+        util::call(func, args);
+    }
+};
+
+
+} // namespace scy
+
+
+#endif // SCY_Runner_H
+
+
+/// @\}

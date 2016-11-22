@@ -29,6 +29,7 @@
 #include "scy/test.h"
 #include "scy/time.h"
 #include "scy/timer.h"
+#include "scy/thread.h"
 #include "scy/util.h"
 
 
@@ -130,34 +131,34 @@ class TimerTest : public Test
 // =============================================================================
 // Idler Test
 //
-class IdlerTest : public Test
-{
-    int wantIdlerTicks;
-    int numIdlerTicks;
-    Idler idler;
-
-    void run()
-    {
-        wantIdlerTicks = 5;
-        numIdlerTicks = 0;
-
-        idler.start(std::bind(&IdlerTest::idlerCallback, this));
-        idler.handle().ref();
-
-        uv::runDefaultLoop();
-
-        expect(numIdlerTicks == wantIdlerTicks);
-    }
-
-    void idlerCallback()
-    {
-        // std::cout << "On idle" << std::endl;
-        if (++numIdlerTicks == wantIdlerTicks) {
-            idler.handle().unref();
-            idler.cancel(); // event loop will be released
-        }
-    }
-};
+// class IdlerTest : public Test
+// {
+//     int wantIdlerTicks;
+//     int numIdlerTicks;
+//     Idler idler;
+//
+//     void run()
+//     {
+//         wantIdlerTicks = 5;
+//         numIdlerTicks = 0;
+//
+//         idler.start(std::bind(&IdlerTest::idlerCallback, this));
+//         idler.handle().ref();
+//
+//         uv::runDefaultLoop();
+//
+//         expect(numIdlerTicks == wantIdlerTicks);
+//     }
+//
+//     void idlerCallback()
+//     {
+//         // std::cout << "On idle" << std::endl;
+//         if (++numIdlerTicks == wantIdlerTicks) {
+//             idler.handle().unref();
+//             idler.cancel(); // event loop will be released
+//         }
+//     }
+// };
 
 
 // =============================================================================
@@ -342,7 +343,7 @@ class ProcessTest : public Test
 // =============================================================================
 // Packet Stream
 //
-struct MockThreadedPacketSource : public PacketSource, public async::Startable
+struct MockThreadedPacketSource : public PacketSource, public basic::Startable
 {
     Thread runner;
     PacketSignal emitter;

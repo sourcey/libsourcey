@@ -40,7 +40,7 @@ class FormPart;
 /// would be any reason to do so.
 class FormWriter : public NVCollection,
                    public PacketSource,
-                   public async::Startable
+                   public basic::Startable
 {
 public:
     /// Creates the FormWriter that uses the given connection and
@@ -149,7 +149,7 @@ protected:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    FormWriter(ClientConnection& conn, async::Runner::Ptr runner,
+    FormWriter(ClientConnection& conn, Runner::Ptr runner,
                const std::string& encoding = FormWriter::ENCODING_URL);
     FormWriter(const FormWriter&);
     FormWriter& operator=(const FormWriter&);
@@ -184,7 +184,7 @@ protected:
     typedef std::deque<Part> PartQueue;
 
     ClientConnection& _connection;
-    async::Runner::Ptr _runner;
+    Runner::Ptr _runner;
     std::string _encoding;
     std::string _boundary;
     PartQueue _parts;

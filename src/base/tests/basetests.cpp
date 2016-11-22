@@ -10,7 +10,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
     // describe("signal class member benchmark", []() {
@@ -355,31 +355,83 @@ int main(int argc, char** argv)
 
 
     // =========================================================================
+    // Idler
+    //
+    describe("idler", []() {
+        int counter = 0;
+        bool ran = false;
+
+        // Create the idler with a lambda
+        Idler idler([&]() {
+            std::cout << "On idle: " << counter << std::endl;
+            if (++counter == 10) {
+                ran = true;
+                expect(idler.running() == true);
+                idler.cancel();
+                expect(idler.cancelled() == true);
+            }
+        }); //, uv::defaultLoop()
+
+        // Make the idler reference the event loop
+        idler.handle().ref();
+
+        // Run the loop
+        uv::runDefaultLoop();
+
+        // Check variables
+        expect(ran == true);
+        expect(counter == 10);
+        expect(idler.running() == false);
+
+        // Reinitialize the idler with veradic args
+        ran = false;
+        idler.start([](Idler* idler, bool* ran) {
+            *ran = true;
+            expect(idler->running() == true);
+            idler->cancel();
+        }, &idler, &ran);
+
+        // Run the loop again
+        uv::runDefaultLoop();
+
+        // Check variables
+        expect(ran == true);
+        expect(idler.running() == false);
+
+        // Bind to class member
+        // idler.start(std::bind(&IdlerTest::idlerCallback, this));
+    });
+
+
+    // =========================================================================
     // Thread
     //
     describe("thread", []() {
         bool ran = false;
 
-        Thread async([](void* arg) {
-            auto ran = reinterpret_cast<bool*>(arg);
-            scy::sleep(1); // prevent race condition
-            *ran = true;
-        }, &ran);
-
-        expect(async.started() == true);
-
-        async.join();
-
+        Thread t1([&]() {
+            ran = true;
+            expect(t1.running() == true);
+        });
+        t1.join();
         expect(ran == true);
-        expect(async.running() == false);
-        expect(async.started() == false);
+        expect(t1.running() == false);
+
+        // Reuse the same thread container
+        ran = false;
+        t1.start([&]() {
+            ran = true;
+            expect(t1.running() == true);
+        });
+        t1.join();
+        expect(ran == true);
+        expect(t1.running() == false);
     });
 
     // Define class based tests
     describe("signal", new SignalTest);
     describe("ipc", new IpcTest);
     describe("timer", new TimerTest);
-    describe("idler", new IdlerTest);
     describe("packet stream", new PacketStreamTest);
     describe("packet stream file io", new PacketStreamIOTest);
     // // describe("multi packet stream", new MultiPacketStreamTest);

@@ -2,8 +2,8 @@
 # CMake file for LibSourcey
 # ============================================================================
 
-# C++ standard 11 minimum is required
-set(CMAKE_CXX_STANDARD 11)
+# C++ standard 14 minimum is required
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # Tell CMake where to locate our .cmake files
@@ -16,7 +16,6 @@ include(CMakeFindExtensions REQUIRED)
 include(LibSourceyUtilities REQUIRED)
 include(LibSourceyIncludes REQUIRED)
 include(LibSourceyModules REQUIRED)
-include(LibSourceyDetectCXXCompiler REQUIRED)
 include(LibSourceyVersion REQUIRED)
 
 # ----------------------------------------------------------------------------
@@ -47,7 +46,7 @@ set_option(ENABLE_SSSE3               "Enable SSSE3 instructions"               
 set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
-set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"                             OFF )
+set_option(ENABLE_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
 
 # ----------------------------------------------------------------------------
 # LibSourcey internal options

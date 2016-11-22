@@ -290,7 +290,7 @@ public:
     /// Attaches a source packet emitter to the stream.
     /// If freePointer is true, the pointer will be deleted when the stream is
     /// closed.
-    /// If syncState is true and the source is a async::Stratable, then
+    /// If syncState is true and the source is a basic::Stratable, then
     /// the source's start()/stop() methods will be synchronized when
     /// calling startSources()/stopSources().
     virtual void attachSource(PacketStreamAdapter* source,

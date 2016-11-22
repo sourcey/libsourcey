@@ -53,7 +53,7 @@ FormWriter* FormWriter::create(ClientConnection& conn,
 }
 
 
-FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner,
+FormWriter::FormWriter(ClientConnection& connection, Runner::Ptr runner,
                        const std::string& encoding)
     : PacketSource(this->emitter)
     , _connection(connection)

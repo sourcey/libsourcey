@@ -28,7 +28,7 @@ namespace scy {
 /// class that derives from `std::istream`. It's most regularly used for reading
 /// input files.
 ///
-class ThreadedStreamReader : public PacketSource, public async::Startable
+class ThreadedStreamReader : public PacketSource, public basic::Startable
 {
 public:
     ThreadedStreamReader(std::istream* is)

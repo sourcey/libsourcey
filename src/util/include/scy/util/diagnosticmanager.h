@@ -102,7 +102,7 @@ typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
 //
 
 
-class AsyncDiagnostic : public IDiagnostic, public async::Runnable
+class AsyncDiagnostic : public IDiagnostic, public basic::Runnable
 {
 public:
     virtual ~AsyncDiagnostic(){};

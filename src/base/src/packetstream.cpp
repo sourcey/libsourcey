@@ -569,14 +569,14 @@ void PacketStream::startSources()
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
-            auto startable = dynamic_cast<async::Startable*>(source->ptr);
+            auto startable = dynamic_cast<basic::Startable*>(source->ptr);
             if (startable) {
                 TraceS(this) << "Start source: " << startable << endl;
                 startable->start();
             } else
                 assert(0 && "unknown synchronizable");
 #if 0
-            auto runnable = dynamic_cast<async::Runnable*>(source);
+            auto runnable = dynamic_cast<basic::Runnable*>(source);
             if (runnable) {
                 TraceS(this) << "Starting runnable: " << source << endl;
                 runnable->run();
@@ -593,14 +593,14 @@ void PacketStream::stopSources()
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
-            auto startable = dynamic_cast<async::Startable*>(source->ptr);
+            auto startable = dynamic_cast<basic::Startable*>(source->ptr);
             if (startable) {
                 TraceS(this) << "Stop source: " << startable << endl;
                 startable->stop();
             } else
                 assert(0 && "unknown synchronizable");
 #if 0
-            auto runnable = dynamic_cast<async::Runnable*>(source);
+            auto runnable = dynamic_cast<basic::Runnable*>(source);
             if (runnable) {
                 TraceS(this) << "Stop runnable: " << source << endl;
                 runnable->cancel();

@@ -74,7 +74,7 @@ bool Task::repeating() const
 //
 
 
-TaskRunner::TaskRunner(async::Runner::Ptr runner)
+TaskRunner::TaskRunner(Runner::Ptr runner)
 {
     if (runner)
         setRunner(runner);
@@ -229,7 +229,7 @@ void TaskRunner::clear()
 }
 
 
-void TaskRunner::setRunner(async::Runner::Ptr runner)
+void TaskRunner::setRunner(Runner::Ptr runner)
 {
     TraceN(this) << "Set async: " << runner << endl;
 
@@ -237,7 +237,7 @@ void TaskRunner::setRunner(async::Runner::Ptr runner)
     assert(!_runner);
     _runner = runner;
     _runner->setRepeating(true);
-    _runner->start(*this);
+    _runner->start(std::bind(&TaskRunner::run, this));
 }
 
 

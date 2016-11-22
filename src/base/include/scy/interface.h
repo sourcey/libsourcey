@@ -23,11 +23,8 @@
 namespace scy {
 
 
-/// Forward the LogStream for logger.h
-struct LogStream;
-
-
-namespace basic { // interface pieces
+/// Interface classes
+namespace basic {
 
 
 class Decoder
@@ -49,6 +46,58 @@ public:
     virtual std::size_t encode(const char* inbuf, std::size_t nread,
                                char* outbuf) = 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
+};
+
+
+/// A generic interface for classes that can be run and cancelled.
+class Runnable
+{
+public:
+    Runnable()
+        : exit(false)
+    {
+    }
+
+    virtual ~Runnable() {}
+
+    /// The run method will be called by the async context.
+    virtual void run() = 0;
+
+    /// Cancel the current task.
+    /// The run() method should return ASAP.
+    virtual void cancel(bool flag = true)
+    {
+        exit = flag;
+    }
+
+    /// True when the task has been cancelled.
+    virtual bool cancelled() const
+    {
+        return exit.load();
+    };
+
+protected:
+    std::atomic<bool> exit;
+};
+
+
+/// A generic interface for a classes
+/// that can be started and stopped.
+class Startable
+{
+public:
+    virtual void start() = 0;
+    virtual void stop() = 0;
+};
+
+
+/// A generic interface for classes
+/// that can be sent and cancelled.
+class Sendable
+{
+public:
+    virtual bool send() = 0;
+    virtual void cancel(){};
 };
 
 
@@ -78,12 +127,6 @@ public:
     virtual const char* className() const = 0;
 };
 #endif
-
-
-/// The LibSourcey base module type.
-/// May become a class type in the future.
-/// depreciated
-// typedef Polymorphic Module;
 
 
 } // namespace basic
