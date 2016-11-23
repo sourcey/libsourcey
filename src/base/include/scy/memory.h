@@ -30,7 +30,7 @@ namespace scy {
 class ScopedPointer;
 
 
-/// Simple garbage collector for deferred pointer deletion.
+/// Garbage collector for safe memory management and deferred pointer deletion.
 class GarbageCollector
 {
 public:

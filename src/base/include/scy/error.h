@@ -24,6 +24,8 @@ namespace scy {
 
 
 /// Basic error type.
+///
+/// Errors contain an error code, message, and exception pointer.
 struct Error
 {
     int errorno;

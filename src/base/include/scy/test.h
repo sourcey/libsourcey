@@ -23,7 +23,7 @@
 namespace scy {
 
 
-/// Modern unit testing framework
+/// Modern unit testing framework.
 namespace test {
 
 
@@ -71,6 +71,7 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 ///
 /// This class is for implementing any kind of unit
 /// test that can be executed by a `TestRunner`.
+///
 class Test
 {
 public:
@@ -128,10 +129,13 @@ protected:
 //
 
 
-/// The TestRunner is a queue in charge of running one or many tests.
+/// Test manager queue.
 ///
-/// The TestRunner continually loops through each test in
-/// the test list calling the test's run() method.
+/// The `TestRunner` is a queue in charge of running one or many tests.
+///
+/// When `run()` the `TestRunner` loops through each test in the list calling
+/// the test's `run()` method.
+///
 class TestRunner
 {
 public:
@@ -163,8 +167,8 @@ public:
     /// Return true if all tests passed.
     bool passed() const;
 
-    /// Return the default TestRunner singleton, although
-    /// TestRunner instances may be initialized individually.
+    /// Return the default `TestRunner` singleton, although
+    /// `TestRunner` instances may also be initialized individually.
     static TestRunner& getDefault();
 
 protected:

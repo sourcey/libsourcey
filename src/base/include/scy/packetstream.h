@@ -59,10 +59,9 @@ public:
     virtual void onStreamStateChange(const PacketStreamState&){};
 
 protected:
+    /// NonCopyable and NonMovable
     PacketStreamAdapter(const PacketStreamAdapter&) = delete;
-    PacketStreamAdapter(PacketStreamAdapter&&) = delete;
     PacketStreamAdapter& operator=(const PacketStreamAdapter&) = delete;
-    PacketStreamAdapter& operator=(PacketStreamAdapter&&) = delete;
 
     PacketSignal& _emitter;
 };

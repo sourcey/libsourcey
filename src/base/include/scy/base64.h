@@ -63,6 +63,7 @@ int encode_blockend(char* code_out, internal::encodestate* state_in);
 } // namespace internal
 
 
+/// Base64 encoder.
 struct Encoder : public basic::Encoder
 {
     Encoder(int buffersize = BUFFER_SIZE)
@@ -126,7 +127,7 @@ struct Encoder : public basic::Encoder
 };
 
 
-/// Converts a STL container to Base64.
+/// Convert an STL container to Base64.
 template <typename T>
 inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
 {
@@ -177,6 +178,7 @@ int decode_block(const char* inbuf, const int nread, char* outbuf,
 } // namespace internal
 
 
+/// Base64 decoder.
 struct Decoder : public basic::Decoder
 {
     Decoder(int buffersize = BUFFER_SIZE)
@@ -218,8 +220,9 @@ struct Decoder : public basic::Decoder
 };
 
 
-/// Decodes a STL container from Base64.
-template <typename T> inline std::string decode(const T& bytes)
+/// Decode an STL container from Base64.
+template <typename T>
+inline std::string decode(const T& bytes)
 {
     std::string res;
     res.reserve(bytes.size() * 2);

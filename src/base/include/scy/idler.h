@@ -22,12 +22,18 @@
 namespace scy {
 
 
-class Idler : public /*basic::*/Runner
+/// Asynchronous type that triggers callbacks when the event loop is idle.
+///
+/// This class inherits the `Runner` interface and may be used with any
+/// implementation that's powered by an asynchronous `Runner`.
+///
+class Idler : public Runner
 {
 public:
-    /// Create the Idler context the given event loop and method.
+    /// Create the idler with the given event loop.
     Idler(uv::Loop* loop = uv::defaultLoop());
 
+    /// Create and start the idler with the given callback and event loop.
     template<class Function, class... Args>
     explicit Idler(Function func, Args... args,
                     uv::Loop* loop = uv::defaultLoop())
@@ -37,6 +43,7 @@ public:
         start(func, args...);
     }
 
+    /// Start the idler with the given callback.
     template<class Function, class... Args>
     void start(Function func, Args... args)
     {
@@ -69,9 +76,7 @@ public:
         assert(_handle.active());
     }
 
-    /// Start a `Runnable` target.
-    ///
-    /// The target `Runnable` instance must outlive the idler.
+    /// Start the idler with the given callback.
     virtual void start(std::function<void()> target);
 
     virtual ~Idler();

@@ -54,10 +54,9 @@ public:
     static const uv_thread_t mainID;
 
 protected:
+    /// NonCopyable and NonMovable
     Thread(const Thread&) = delete;
-    Thread(Thread&&) = delete;
     Thread& operator=(const Thread&) = delete;
-    Thread& operator=(Thread&&) = delete;
 
     virtual bool async() const;
     virtual void startAsync();

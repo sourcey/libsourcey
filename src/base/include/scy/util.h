@@ -5,10 +5,10 @@
 //
 // SPDX-License-Identifier:	LGPL-2.1+
 //
-/// @addtogroup base
-/// @{
 // This file uses some functions from POCO C++ Libraries (license below)
 //
+/// @addtogroup base
+/// @{
 
 
 #ifndef SCY_Util_H

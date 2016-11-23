@@ -21,6 +21,7 @@
 namespace scy {
 namespace fs {
 
+
 /// The platform specific path split separator:
 /// "/" on unix and '\\' on windows.
 extern const char* separator;

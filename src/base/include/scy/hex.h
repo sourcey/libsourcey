@@ -33,6 +33,7 @@ namespace hex {
 //
 
 
+/// Hex encoder.
 struct Encoder : public basic::Encoder
 {
     Encoder()
@@ -98,6 +99,7 @@ template <typename T> inline std::string encode(const T& bytes)
 //
 
 
+/// Hex decoder.
 struct Decoder : public basic::Decoder
 {
     Decoder()

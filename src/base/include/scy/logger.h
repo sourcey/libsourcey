@@ -190,11 +190,9 @@ public:
                     const char* channel = nullptr) const;
 
 protected:
-    /// Non-copyable and non-movable
+    /// NonCopyable and NonMovable
     Logger(const Logger&) = delete;
-    Logger(Logger&&) = delete;
     Logger& operator=(const Logger&) = delete;
-    Logger& operator=(Logger&&) = delete;
 
     typedef std::map<std::string, LogChannel*> LogChannelMap;
 

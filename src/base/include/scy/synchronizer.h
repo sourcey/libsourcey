@@ -31,16 +31,22 @@ namespace scy {
 
 /// Synchronizer enables any thread to communicate with
 /// the associated event loop via synchronized callbacks.
+///
+/// This class inherits the `Runner` interface and may be used with any
+/// implementation that's powered by an asynchronous `Runner`.
+///
 class Synchronizer : public Runner
 {
 public:
-    /// Create the synchronization context the given event loop and method.
-    /// The target method will be called from the event loop context.
+    /// Create the synchronization context the given event loop.
     Synchronizer(uv::Loop* loop);
 
+    /// Create the synchronization context the given event loop and method.
+    /// The target method will be called from the event loop context.
     Synchronizer(std::function<void()> target,
                 uv::Loop* loop = uv::defaultLoop());
 
+    /// Create the synchronization context the given event loop and method.
     template<class Function, class... Args>
     explicit Synchronizer(Function func, Args... args,
                          uv::Loop* loop = uv::defaultLoop())
@@ -49,6 +55,7 @@ public:
         start(func, args...);
     }
 
+    /// Destructor.
     virtual ~Synchronizer();
 
     /// Send a synchronization request to the event loop.
@@ -57,6 +64,7 @@ public:
     /// This is not atomic, so do not expect a callback for every request.
     void post();
 
+    /// Start the synchronizer with the given callback.
     template<class Function, class... Args>
     void start(Function func, Args... args)
     {
@@ -89,6 +97,7 @@ public:
         assert(_handle.active());
     }
 
+    /// Start the synchronizer with the given callback.
     virtual void start(std::function<void()> target);
 
     virtual void cancel();

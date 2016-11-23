@@ -26,11 +26,13 @@ namespace scy {
 class TaskRunner;
 
 
-/// This class is for implementing any kind
-/// async task that is compatible with a TaskRunner.
+/// Abstract class is for implementing any kind asyncronous task.
+///
+/// Tasks are designed to be run by a TaskRunner.
 class Task : public basic::Runnable
 {
 public:
+    /// Constructor.
     Task(bool repeat = false);
 
     /// Sets the task to destroyed state.
@@ -77,11 +79,14 @@ protected:
 };
 
 
-/// The TaskRunner is an asynchronous event loop in
-/// charge of running one or many tasks.
+/// Runner for tasks that inherit the `Task` interface.
 ///
-/// The TaskRunner continually loops through each task in
-/// the task list calling the task's run() method.
+/// The `TaskRunner` continually loops through each task in
+/// the task list calling the task's `run()` method.
+///
+/// The `TaskRunner` is powered by an abstract `Runner` instance, which means
+/// that tasks can be executed in a thread or event loop context.
+///
 class TaskRunner : public basic::Runnable
 {
 public:
@@ -92,6 +97,7 @@ public:
     virtual bool start(Task* task);
 
     /// Cancels a task.
+    ///
     /// The task reference will be managed the TaskRunner
     /// until the task is destroyed.
     virtual bool cancel(Task* task);
@@ -111,7 +117,7 @@ public:
     /// Must be set before the stream is activated.
     virtual void setRunner(Runner::Ptr runner);
 
-    /// Returns the default TaskRunner singleton, although
+    /// Returns the default `TaskRunner` singleton, although
     /// TaskRunner instances may be initialized individually.
     /// The default runner should be kept for short running
     /// tasks such as timers in order to maintain performance.
@@ -120,7 +126,7 @@ public:
     /// Fires after completing an iteration of all tasks.
     NullSignal Idle;
 
-    /// Signals when the TaskRunner is shutting down.
+    /// Signals when the `TaskRunner` is shutting down.
     NullSignal Shutdown;
 
     virtual const char* className() const { return "TaskRunner"; }
@@ -159,8 +165,8 @@ protected:
 protected:
     typedef std::deque<Task*> TaskList;
 
-    Runner::Ptr _runner;
     mutable std::mutex _mutex;
+    Runner::Ptr _runner;
     TaskList _tasks;
 };
 

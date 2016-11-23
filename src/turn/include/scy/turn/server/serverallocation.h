@@ -57,10 +57,9 @@ protected:
     Server& _server;
 
 private:
+    /// NonCopyable and NonMovable
     ServerAllocation(const ServerAllocation&) = delete;
-    ServerAllocation(ServerAllocation&&) = delete;
     ServerAllocation& operator=(const ServerAllocation&) = delete;
-    ServerAllocation& operator=(ServerAllocation&&) = delete;
 };
 
 

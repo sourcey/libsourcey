@@ -25,6 +25,7 @@
 namespace scy {
 
 
+/// Asynchronous callback timer.
 class Timer
 {
 public:

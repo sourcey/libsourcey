@@ -260,7 +260,7 @@ public:
 //
 
 
-/// A reusable stack based unique key-value store for DRY coding.
+/// Reusable stack based unique key-value store for DRY coding.
 template <class TKey, class TValue> class KVCollection
 {
 public:
@@ -279,14 +279,14 @@ public:
                 throw std::runtime_error("Item already exists");
             return false;
         }
-       
+
         _map[key] = item;
         return true;
     }
 
     virtual TValue& get(const TKey& key)
     {
-       
+
         typename Map::iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -296,7 +296,7 @@ public:
 
     virtual const TValue& get(const TKey& key, const TValue& defaultValue) const
     {
-       
+
         typename Map::const_iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -305,7 +305,7 @@ public:
 
     virtual bool remove(const TKey& key)
     {
-       
+
         typename Map::iterator it = _map.find(key);
         if (it != _map.end()) {
             _map.erase(it);
@@ -316,31 +316,31 @@ public:
 
     virtual bool has(const TKey& key) const
     {
-       
+
         return _map.find(key) != _map.end();
     }
 
     virtual bool empty() const
     {
-       
+
         return _map.empty();
     }
 
     virtual int size() const
     {
-       
+
         return _map.size();
     }
 
     virtual void clear()
     {
-       
+
         _map.clear();
     }
 
     virtual Map& map()
     {
-       
+
         return _map;
     }
 
@@ -353,6 +353,7 @@ protected:
 //
 // NV Collection
 //
+
 
 /// A storage container for a name value collections.
 /// This collection can store multiple entries for each

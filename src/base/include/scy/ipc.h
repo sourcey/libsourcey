@@ -23,19 +23,20 @@
 namespace scy {
 
 
-/// Classes for inter-process communication
+/// Classes for inter-process communication.
 namespace ipc {
 
 
 /// Default action type for executing synchronized callbacks.
 struct Action
 {
-    typedef std::function<void(const Action&)> callback_t;
-    callback_t target;
+    typedef std::function<void(const Action&)> Callback;
+
+    Callback target;
     void* arg;
     std::string data;
 
-    Action(callback_t target, void* arg = nullptr, const std::string& data = "")
+    Action(Callback target, void* arg = nullptr, const std::string& data = "")
         : target(target)
         , arg(arg)
         , data(data)
@@ -46,7 +47,8 @@ struct Action
 
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
-template <typename TAction = ipc::Action> class Queue
+template <typename TAction = ipc::Action>
+class Queue
 {
 public:
     Queue() {}
@@ -87,7 +89,7 @@ public:
 
     void waitForSync()
     {
-        // TODO: Impose a time limit
+        // TODO: impose a time limit
         while (true) {
             {
                 std::lock_guard<std::mutex> guard(_mutex);
@@ -108,6 +110,7 @@ protected:
 /// IPC synchronization queue is for passing templated
 /// actions between threads and the event loop we are
 /// synchronizing with.
+///
 template <typename TAction = ipc::Action>
 class SyncQueue : public Queue<TAction>
 {

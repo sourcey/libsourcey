@@ -73,7 +73,7 @@ public:
     /// The client socket, nullptr to start.
     net::TCPSocket::Ptr peer;
 
-    /// Return true if the peer ConnectionBind request timed out.
+    /// Return true if the peer `ConnectionBind` request timed out.
     bool expired() const;
 
     /// Stores early peer > client data.
@@ -91,10 +91,9 @@ public:
     stun::TransactionID transactionID;
 
 private:
+    /// NonCopyable and NonMovable
     TCPConnectionPair(const TCPConnectionPair&) = delete;
-    TCPConnectionPair(TCPConnectionPair&&) = delete;
     TCPConnectionPair& operator=(const TCPConnectionPair&) = delete;
-    TCPConnectionPair& operator=(TCPConnectionPair&&) = delete;
 };
 
 

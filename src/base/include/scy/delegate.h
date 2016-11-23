@@ -14,13 +14,11 @@
 
 
 #include <functional>
-// #include "scy/logger.h"
 
 
 namespace scy {
 
 
-///
 /// Abstract delegate interface.
 ///
 /// The `Delegate` class contains a pointer to a function. This wrapper class
@@ -37,7 +35,6 @@ struct AbstractDelegate
 };
 
 
-///
 /// The `FunctionDelegate` contains a `std::function`.
 ///
 template <typename RT, typename... Args>
@@ -62,7 +59,6 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
 };
 
 
-///
 /// The `ClassDelegate` contains a pointer to a class member.
 ///
 /// This class implements fast delegates and function comparison.
@@ -93,7 +89,6 @@ struct ClassDelegate : AbstractDelegate<RT, Args...>
 };
 
 
-///
 /// The `ConstClassDelegate` contains a pointer to a `const` class member.
 ///
 /// This class implements fast delegates and function comparison.
@@ -124,7 +119,6 @@ struct ConstClassDelegate : AbstractDelegate<RT, Args...>
 };
 
 
-///
 /// Polymorphic function delegate.
 ///
 /// Theis class contains a pointer to a class member that receices a derived

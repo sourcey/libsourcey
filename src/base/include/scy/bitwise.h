@@ -8,6 +8,7 @@
 /// @addtogroup base
 /// @{
 
+
 #ifndef SCY_Flaggable_H
 #define SCY_Flaggable_H
 
@@ -15,6 +16,7 @@
 namespace scy {
 
 
+/// Container for smart management of bitwise integer flags.
 struct Bitwise
 {
     unsigned data; // storage integer
@@ -23,6 +25,7 @@ struct Bitwise
         : data(flags)
     {
     }
+
     virtual void reset() { data = 0; };
     virtual void set(unsigned flag)
     {

@@ -16,7 +16,6 @@
 #include "scy/runner.h"
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
-// #include "scy/logger.h"
 #include "scy/util.h"
 #include <thread>
 #include <tuple>
@@ -27,30 +26,11 @@
 namespace scy {
 
 
-/// Helper function for running an async context.
-template<class Function, class... Args>
-void runAsync(Runner::Context::Ptr c, Function func, Args... args)
-{
-    // std::cout << "Runner::runAsync" << std::endl;
-    c->tid = std::this_thread::get_id();
-    c->running = true;
-    do {
-        try {
-            func(std::forward<Args>(args)...);
-        } catch (std::exception& exc) {
-            // ErrorL << "Runner error: " << exc.what() << std::endl;
-    #ifdef _DEBUG
-            throw exc;
-    #endif
-        }
-        scy::sleep(1);
-    } while (c->repeating && !c->cancelled);
-    c->running = false;
-}
-
-
-/// This class implements a platform-independent
-/// wrapper around an operating system thread.
+/// Platform-independent wrapper around an operating system thread.
+///
+/// This class inherits the `Runner` interface and may be used with any
+/// implementation that's powered by an asynchronous `Runner`.
+///
 class Thread : public Runner
 {
 public:
@@ -82,7 +62,7 @@ public:
                               std::forward<Args>(args)...);
     }
 
-    /// Start a `Runnable` target.
+    /// Start the asynchronous context with the given callback.
     ///
     /// The target `Runnable` instance must outlive the thread.
     virtual void start(std::function<void()> target);

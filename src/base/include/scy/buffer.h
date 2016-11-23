@@ -25,6 +25,7 @@
 namespace scy {
 
 
+/// Core buffer type.
 typedef std::vector<char> Buffer;
 
 
@@ -56,8 +57,10 @@ public:
     void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
-    /// String methods
+    /// Cast the buffer as a char pointer.
     char* cstr() const { return reinterpret_cast<char*>(_data); }
+
+    /// Returns the buffer as a string.
     std::string str() const { return std::string(cstr(), size()); }
 
 private:
@@ -115,6 +118,7 @@ inline MutableBuffer mutableBuffer(const Buffer& buf)
 // Const Buffer
 //
 
+
 /// The ConstBuffer class provides a safe representation of a
 /// buffer that cannot be modified. It does not own the underlying
 /// data, and so is cheap to copy or assign.
@@ -145,8 +149,10 @@ public:
     const void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
-    /// String methods
+    /// Cast the buffer as a const char pointer.
     const char* cstr() const { return reinterpret_cast<const char*>(_data); }
+
+    /// Returns the buffer as a string.
     std::string str() const { return std::string(cstr(), size()); }
 
 private:
@@ -155,7 +161,8 @@ private:
 };
 
 
-template <typename T> inline ConstBuffer constBuffer(T data, std::size_t size)
+template <typename T>
+inline ConstBuffer constBuffer(T data, std::size_t size)
 {
     return ConstBuffer(reinterpret_cast<const void*>(data), size);
 }
@@ -166,7 +173,8 @@ inline ConstBuffer constBuffer(const std::string& str)
                        str.size()); // careful!
 }
 
-template <typename T> inline ConstBuffer constBuffer(const std::vector<T>& vec)
+template <typename T>
+inline ConstBuffer constBuffer(const std::vector<T>& vec)
 {
     return ConstBuffer(reinterpret_cast<const void*>(&vec[0]),
                        vec.size()); // careful!
@@ -177,12 +185,14 @@ inline ConstBuffer constBuffer(const MutableBuffer& buf)
     return ConstBuffer(buf.data(), buf.size());
 }
 
-template <typename T> inline ConstBuffer constBuffer(Buffer& buf)
+template <typename T>
+inline ConstBuffer constBuffer(Buffer& buf)
 {
     return ConstBuffer(reinterpret_cast<void*>(buf.data()), buf.size());
 }
 
-template <typename T> inline ConstBuffer constBuffer(const Buffer& buf)
+template <typename T>
+inline ConstBuffer constBuffer(const Buffer& buf)
 {
     return ConstBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
                        buf.size());
@@ -215,7 +225,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 //
 
 
-/// A BitReader for reading binary streams.
+/// Class for reading binary streams.
 class BitReader
 {
 public:
@@ -247,7 +257,9 @@ public:
     /// -1 is returned if reading past boundary.
     const std::uint64_t peekU64();
 
-    /// String parsing methods.
+    //
+    // String parsing methods.
+    //
 
     int skipToChar(char c);
     int skipWhitespace();
@@ -304,7 +316,7 @@ private:
 //
 
 
-/// A BitWriter for reading/writing binary streams.
+/// Class for reading/writing binary streams.
 ///
 /// Note that when using the constructor with the Buffer reference
 /// as an argument, the writer will dynamically expand the given buffer
@@ -321,7 +333,7 @@ public:
     ~BitWriter();
 
     /// Append bytes to the buffer.
-    /// Throws a std::out_of_range exception if reading past the limit.
+    /// Throws a `std::out_of_range` exception if reading past the limit.
     void put(const char* val, std::size_t len);
     void put(const std::string& val);
     void putU8(std::uint8_t val);
@@ -331,7 +343,7 @@ public:
     void putU64(std::uint64_t val);
 
     /// Update a byte range.
-    /// Throws a std::out_of_range exception if reading past the limit.
+    /// Throws a `std::out_of_range` exception if reading past the limit.
     bool update(const char* val, std::size_t len, std::size_t pos);
     bool update(const std::string& val, std::size_t pos);
     bool updateU8(std::uint8_t val, std::size_t pos);
@@ -341,11 +353,11 @@ public:
     bool updateU64(std::uint64_t val, std::size_t pos);
 
     /// Set position pointer to absolute position.
-    /// Throws a std::out_of_range exception if the value exceeds the limit.
+    /// Throws a `std::out_of_range` exception if the value exceeds the limit.
     void seek(std::size_t val);
 
     /// Set position pointer to relative position.
-    /// Throws a std::out_of_range exception if the value exceeds the limit.
+    /// Throws a `std::out_of_range` exception if the value exceeds the limit.
     void skip(std::size_t size);
 
     /// Returns the write limit.
@@ -364,8 +376,9 @@ public:
     const char* begin() const { return _bytes; }
     const char* current() const { return _bytes + _position; }
 
-    /// Returns written bytes as a string.
     ByteOrder order() const { return _order; }
+
+    /// Returns written bytes as a string.
     std::string toString();
 
     friend std::ostream& operator<<(std::ostream& stream, const BitWriter& wr)

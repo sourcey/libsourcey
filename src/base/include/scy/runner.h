@@ -35,7 +35,7 @@ public:
     Runner();
     virtual ~Runner();
 
-    /// Start a `Runnable` target.
+    /// Start the asynchronous context with the given callback.
     ///
     /// The target `Runnable` instance must outlive the `Runner`.
     virtual void start(std::function<void()> target) = 0;
@@ -132,6 +132,28 @@ struct FunctionWrap
         util::call(func, args);
     }
 };
+
+
+/// Helper function for running an async context.
+template<class Function, class... Args>
+inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
+{
+    // std::cout << "Runner::runAsync" << std::endl;
+    c->tid = std::this_thread::get_id();
+    c->running = true;
+    do {
+        try {
+            func(std::forward<Args>(args)...);
+        } catch (std::exception& exc) {
+            // std::cout << "Runner error: " << exc.what() << std::endl;
+#ifdef _DEBUG
+            throw exc;
+#endif
+        }
+        scy::sleep(1);
+    } while (c->repeating && !c->cancelled);
+    c->running = false;
+}
 
 
 } // namespace scy

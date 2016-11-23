@@ -103,7 +103,6 @@ public:
     /// instead of buffer input, but the current codebase requires
     /// that the buffer be dynamically resizable for some protocols...
     ///
-    /// virtual std::size_t write(MutableBuffer&) const = 0;
     virtual void write(Buffer&) const = 0;
 
     /// The size of the packet in bytes.
@@ -210,9 +209,9 @@ public:
     virtual void setData(char* data, std::size_t size)
     {
         assert(size > 0);
-        if (_free) // Copy data if reuqests
+        if (_free) // copy data if reuqested
             copyData(data, size);
-        else { // Otherwise just assign the pointer
+        else { // otherwise just assign the pointer
             _data = data;
             _size = size;
         }
@@ -239,27 +238,12 @@ public:
         return buf.size();
     }
 
-    // Old Read API
-    //
-    // virtual bool read(const ConstBuffer& buf)
-    // {
-    //     return true;
-    // }
-
     virtual void write(Buffer& buf) const
     {
         // buf.insert(a.end(), b.begin(), b.end());
         // buf.append(_data, _size);
         buf.insert(buf.end(), _data, _data + _size);
     }
-
-    // Future Write API
-    //
-    // virtual void write(MutableBuffer& buf) const
-    // {
-    //     assert(buf.size() >= _size);
-    //     std::memcpy(buf.data(), _data, _size);
-    // }
 
     virtual char* data() const { return _data; }
 

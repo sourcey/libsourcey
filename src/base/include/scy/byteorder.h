@@ -15,7 +15,6 @@
 
 #include <cstdint>
 
-
 #ifdef POSIX
 #include <arpa/inet.h>
 #endif

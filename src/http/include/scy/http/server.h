@@ -116,10 +116,9 @@ protected:
     ServerConnection& _connection;
 
 private:
+    /// NonCopyable and NonMovable
     ServerResponder(const ServerResponder&) = delete;
-    ServerResponder(ServerResponder&&) = delete;
     ServerResponder& operator=(const ServerResponder&) = delete;
-    ServerResponder& operator=(ServerResponder&&) = delete;
 };
 
 

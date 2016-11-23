@@ -49,7 +49,7 @@ public:
 };
 
 
-/// A generic interface for classes that can be run and cancelled.
+/// Abstract interface for classes that can be run and cancelled.
 class Runnable
 {
 public:
@@ -60,7 +60,7 @@ public:
 
     virtual ~Runnable() {}
 
-    /// The run method will be called by the async context.
+    /// The run method will be called by the asynchronous context.
     virtual void run() = 0;
 
     /// Cancel the current task.
@@ -70,7 +70,7 @@ public:
         exit = flag;
     }
 
-    /// True when the task has been cancelled.
+    /// Returns true when the task has been cancelled.
     virtual bool cancelled() const
     {
         return exit.load();
@@ -81,8 +81,7 @@ protected:
 };
 
 
-/// A generic interface for a classes
-/// that can be started and stopped.
+/// Abstract interface for a classes that can be started and stopped.
 class Startable
 {
 public:
@@ -91,13 +90,12 @@ public:
 };
 
 
-/// A generic interface for classes
-/// that can be sent and cancelled.
+/// Abstract interface for classes that can be sent and cancelled.
 class Sendable
 {
 public:
     virtual bool send() = 0;
-    virtual void cancel(){};
+    virtual void cancel() {};
 };
 
 

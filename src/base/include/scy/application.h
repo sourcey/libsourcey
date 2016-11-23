@@ -23,7 +23,6 @@
 namespace scy {
 
 
-///
 /// Main LibSourcey application class.
 ///
 /// This class exposes basic features required by most applications:
@@ -36,42 +35,54 @@ namespace scy {
 class Application
 {
 public:
+    /// Constructor.
+    Application(uv::Loop* loop = uv::defaultLoop());
+
+    /// Destructor.
+    ~Application();
+
     /// Returns the default Application singleton, although
     /// Application instances may be initialized individually.
     static Application& getDefault();
 
-    /// The active event loop.
-    /// May be assigned at construction, otherwise the default
+    /// Active event loop.
+    ///
+    /// The event loop may be assigned on construction, otherwise the default
     /// event loop will be used.
     uv::Loop* loop;
 
-    Application(uv::Loop* loop = uv::defaultLoop());
-    ~Application();
+    //
+    // Event Loop
+    //
 
+    /// Run the application event loop.
     void run();
+
+    /// Stop the application event loop.
     void stop();
+
+    /// Finalize and free any remaining pointers still held by the
+    /// application event loop.
     void finalize();
 
     //
-    /// Shutdown handling
+    // Shutdown Signal
     //
-
-    /// Bind the shutdown signal.
-    void bindShutdownSignal(std::function<void(void*)> callback = nullptr,
-                            void* opaque = nullptr);
 
     /// Bind the shutdown signal and run the main event loop.
     void waitForShutdown(std::function<void(void*)> callback = nullptr,
                          void* opaque = nullptr);
 
-    static void onShutdownSignal(uv_signal_t* req, int signum);
-    static void onPrintHandle(uv_handle_t* handle, void* arg);
+    /// Bind the shutdown signal.
+    void bindShutdownSignal(std::function<void(void*)> callback = nullptr,
+                            void* opaque = nullptr);
 
 protected:
     Application(const Application&) = delete;
-    Application(Application&&) = delete;
     Application& operator=(const Application&) = delete;
-    Application& operator=(Application&&) = delete;
+
+    static void onShutdownSignal(uv_signal_t* req, int signum);
+    static void onPrintHandle(uv_handle_t* handle, void* arg);
 };
 
 
