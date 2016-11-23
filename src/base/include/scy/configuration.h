@@ -20,8 +20,8 @@
 namespace scy {
 
 
-/// Configuration is an abstract base class for managing /// different kinds of
-/// configuration storage back ends such as /// JSON, XML, or database.
+/// Configuration is an abstract base class for managing different kinds of
+/// configuration storage back ends such as JSON, XML, or database.
 ///
 /// Subclasses must override the getRaw() and setRaw() and methods.
 ///
@@ -43,8 +43,7 @@ public:
     std::string getString(const std::string& key) const;
 
     /// If a property with the given key exists, returns the property's string
-    /// value,
-    /// otherwise returns the given default value.
+    /// value, otherwise returns the given default value.
     std::string getString(const std::string& key,
                           const std::string& defaultValue) const;
 
@@ -54,8 +53,7 @@ public:
     std::string getRawString(const std::string& key) const;
 
     /// If a property with the given key exists, returns the property's raw
-    /// string value,
-    /// otherwise returns the given default value.
+    /// string value, otherwise returns the given default value.
     /// References to other properties are not expanded.
     std::string getRawString(const std::string& key,
                              const std::string& defaultValue) const;
@@ -68,8 +66,7 @@ public:
     int getInt(const std::string& key) const;
 
     /// If a property with the given key exists, returns the property's int
-    /// value,
-    /// otherwise returns the given default value.
+    /// value, otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to an int.
     /// Numbers starting with 0x are treated as hexadecimal.
@@ -98,8 +95,7 @@ public:
     double getDouble(const std::string& key) const;
 
     /// If a property with the given key exists, returns the property's double
-    /// value,
-    /// otherwise returns the given default value.
+    /// value, otherwise returns the given default value.
     /// Throws a SyntaxException if the property can not be converted
     /// to an double.
     double getDouble(const std::string& key, double defaultValue) const;

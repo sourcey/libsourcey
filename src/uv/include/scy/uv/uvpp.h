@@ -19,10 +19,11 @@
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
-#pragma warning(                                                               \
-    disable : 4201) // nonstandard extension used : nameless struct/union
+#pragma warning(disable : 4201) // nonstandard extension used : nameless
+                                // struct/union
 #pragma warning(disable : 4505) // unreferenced local function has been removed
-// Todo: depreciate once we replace static functions with lambdas
+                                // Todo: depreciate once we replace static
+                                // functions with lambdas
 #endif
 
 #include "scy/error.h"
@@ -30,6 +31,7 @@
 #include <assert.h>
 #include <cstdint>
 #include <functional>
+#include <thread>
 
 
 namespace scy {
@@ -43,8 +45,7 @@ namespace uv {
 
 inline std::string formatError(const std::string& message, int errorno = 0)
 {
-    std::string m(
-        message); // prefix the message, since libuv errors are very brisk
+    std::string m(message); // prefix the message since libuv errors are brisk
     if (errorno != UV_UNKNOWN && errorno != 0) {
         // err.code = (uv_err_code)errorno;
         // uv_err_s err;
@@ -114,7 +115,7 @@ public:
     /// Returns a typecasted pointer to the managed `libuv` handle.
     template <class T> T* ptr() const
     {
-        assertThread(); // conflict with uv_async_send in SyncContext
+        assertThread(); // conflict with uv_async_send in Synchronizer
         return reinterpret_cast<T*>(_ptr);
     }
 
@@ -136,7 +137,7 @@ public:
     bool unref();
 
     /// Returns the parent thread ID.
-    uv_thread_t tid() const;
+    std::thread::id tid() const;
 
     /// Returns the error context if any.
     const scy::Error& error() const;
@@ -182,7 +183,7 @@ protected:
     uv_loop_t* _loop;
     uv_handle_t* _ptr;
     scy::Error _error;
-    uv_thread_t _tid;
+    std::thread::id _tid;
     bool _closed;
 };
 

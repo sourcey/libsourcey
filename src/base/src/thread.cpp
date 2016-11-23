@@ -61,7 +61,7 @@ Thread::~Thread()
 
 void Thread::start(std::function<void()> target)
 {
-    start(target); //std::bind(&basic::Runnable::run, &target)
+    start<std::function<void()>>(target);
 }
 
 

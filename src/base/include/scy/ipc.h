@@ -13,7 +13,7 @@
 #define SCY_IPC_H
 
 
-#include "scy/synccontext.h"
+#include "scy/synchronizer.h"
 
 #include <mutex>
 #include <deque>
@@ -123,10 +123,10 @@ public:
 
     virtual void post() { _sync.post(); }
 
-    virtual SyncContext& sync() { return _sync; }
+    virtual Synchronizer& sync() { return _sync; }
 
 protected:
-    SyncContext _sync;
+    Synchronizer _sync;
 };
 
 

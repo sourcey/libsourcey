@@ -158,8 +158,6 @@ bool TaskRunner::add(Task* task)
     if (!exists(task)) {
         std::lock_guard<std::mutex> guard(_mutex);
         _tasks.push_back(task);
-        // uv_ref(Idler::handle.ptr()); // reference the idler handle when a
-        // task is added
         onAdd(task);
         return true;
     }
@@ -175,8 +173,6 @@ bool TaskRunner::remove(Task* task)
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task) {
             _tasks.erase(it);
-            // dereference the idler handle when a task is removed
-            // uv_unref(Idler::handle.ptr());
             onRemove(task);
             return true;
         }
@@ -231,7 +227,7 @@ void TaskRunner::clear()
 
 void TaskRunner::setRunner(Runner::Ptr runner)
 {
-    TraceN(this) << "Set async: " << runner << endl;
+    TraceN(this) << "Set async: " << runner.get() << endl;
 
     std::lock_guard<std::mutex> guard(_mutex);
     assert(!_runner);

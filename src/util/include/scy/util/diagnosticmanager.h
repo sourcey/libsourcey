@@ -21,9 +21,6 @@
 namespace scy {
 
 
-/// @addtogroup util
-/// @{///
-
 struct DiagnosticState : public State
 {
     enum Type
@@ -107,10 +104,12 @@ class AsyncDiagnostic : public IDiagnostic, public basic::Runnable
 public:
     virtual ~AsyncDiagnostic(){};
 
+    virtual void run() = 0;
+
     virtual void check()
     {
         reset();
-        _thread.start(*this);
+        _thread.start(std::bind(&AsyncDiagnostic::run, this));
     };
 
 protected:
@@ -152,9 +151,6 @@ public:
     virtual void onDiagnosticStateChange(void*, DiagnosticState& state,
                                          const DiagnosticState&);
 };
-
-
-/// @\}
 
 
 } // namespace scy

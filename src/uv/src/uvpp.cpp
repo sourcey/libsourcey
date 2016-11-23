@@ -19,7 +19,7 @@ namespace uv {
 Handle::Handle(uv_loop_t* loop, void* handle)
     : _loop(loop ? loop : uv_default_loop()) // nullptr will be uv_default_loop
     , _ptr((uv_handle_t*)handle) // nullptr or instance of uv_handle_t
-    , _tid(uv_thread_self())
+    , _tid(std::this_thread::get_id())
     , _closed(false)
 {
     if (_ptr)
@@ -90,7 +90,7 @@ bool Handle::unref()
 }
 
 
-uv_thread_t Handle::tid() const
+std::thread::id Handle::tid() const
 {
     return _tid;
 }
@@ -155,10 +155,9 @@ void Handle::close()
 
 void Handle::assertThread() const
 {
-#ifdef _DEBUG
-    uv_thread_t current = uv_thread_self();
-    assert(uv_thread_equal(&_tid, &current));
-#endif
+    // uv_thread_t current = uv_thread_self();
+    // assert(uv_thread_equal(&_tid, &current));
+    assert(std::this_thread::get_id() == _tid);
 }
 
 

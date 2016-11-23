@@ -182,7 +182,7 @@ void MediaCapture::start()
     if ((_video || _audio) && !_thread.running()) {
         TraceS(this) << "Initializing Thread" << endl;
         _stopping = false;
-        _thread.start(*this);
+        _thread.start(std::bind(&MediaCapture::run, this));
     }
 
     TraceS(this) << "Starting: OK" << endl;

@@ -9,54 +9,45 @@
 /// @{
 
 
-#include "scy/synccontext.h"
+#include "scy/synchronizer.h"
 
 
 namespace scy {
 
 
-SyncContext::SyncContext(uv::Loop* loop)
+Synchronizer::Synchronizer(uv::Loop* loop)
     : _handle(loop, new uv_async_t)
 {
 }
 
 
-SyncContext::SyncContext(std::function<void()> target, uv::Loop* loop)
+Synchronizer::Synchronizer(std::function<void()> target, uv::Loop* loop)
     : _handle(loop, new uv_async_t)
 {
     start(target);
 }
 
 
-// SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target,
-//                          void* arg)
-//     : _handle(loop, new uv_async_t)
-// {
-//     start(target, arg);
-// }
-
-
-SyncContext::~SyncContext()
+Synchronizer::~Synchronizer()
 {
-    // assert(_handle.closed()); // must be dispose()d
     close();
 }
 
 
-void SyncContext::start(std::function<void()> target)
+void Synchronizer::start(std::function<void()> target)
 {
-    start(target);
+    start<std::function<void()>>(target);
 }
 
 
-void SyncContext::post()
+void Synchronizer::post()
 {
     assert(!_handle.closed());
     uv_async_send(_handle.ptr<uv_async_t>());
 }
 
 
-// void SyncContext::startAsync() // FIXME
+// void Synchronizer::startAsync() // FIXME
 // {
 //     // assert(!_handle.active()); // active() can be unreliable when called
 //     // inside thread
@@ -82,13 +73,13 @@ void SyncContext::post()
 // }
 
 
-void SyncContext::cancel()
+void Synchronizer::cancel()
 {
     Runner::cancel();
 }
 
 
-void SyncContext::close()
+void Synchronizer::close()
 {
     if (closed())
         return;
@@ -98,19 +89,19 @@ void SyncContext::close()
 }
 
 
-bool SyncContext::closed()
+bool Synchronizer::closed()
 {
     return _handle.closed();
 }
 
 
-bool SyncContext::async() const
+bool Synchronizer::async() const
 {
     return false;
 }
 
 
-uv::Handle& SyncContext::handle()
+uv::Handle& Synchronizer::handle()
 {
     return _handle;
 }

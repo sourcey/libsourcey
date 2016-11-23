@@ -16,7 +16,7 @@
 #include "scy/base.h"
 #include "scy/packetstream.h"
 #include "scy/queue.h"
-#include "scy/synccontext.h"
+#include "scy/synchronizer.h"
 
 
 namespace scy {

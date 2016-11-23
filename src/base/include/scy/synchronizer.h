@@ -9,8 +9,8 @@
 /// @{
 
 
-#ifndef SCY_SyncContext_H
-#define SCY_SyncContext_H
+#ifndef SCY_Synchronizer_H
+#define SCY_Synchronizer_H
 
 
 #include "scy/interface.h"
@@ -29,27 +29,27 @@ namespace scy {
 // Synchronization Context
 //
 
-/// SyncContext enables any thread to communicate with
+/// Synchronizer enables any thread to communicate with
 /// the associated event loop via synchronized callbacks.
-class SyncContext : public Runner
+class Synchronizer : public Runner
 {
 public:
     /// Create the synchronization context the given event loop and method.
     /// The target method will be called from the event loop context.
-    SyncContext(uv::Loop* loop);
+    Synchronizer(uv::Loop* loop);
 
-    SyncContext(std::function<void()> target,
+    Synchronizer(std::function<void()> target,
                 uv::Loop* loop = uv::defaultLoop());
 
     template<class Function, class... Args>
-    explicit SyncContext(Function func, Args... args,
+    explicit Synchronizer(Function func, Args... args,
                          uv::Loop* loop = uv::defaultLoop())
         : _handle(loop, new uv_async_t)
     {
         start(func, args...);
     }
 
-    virtual ~SyncContext();
+    virtual ~Synchronizer();
 
     /// Send a synchronization request to the event loop.
     /// Call this each time you want the target method called synchronously.
@@ -222,7 +222,7 @@ static SyncDelegate<C,
 } // namespace scy
 
 
-#endif // SCY_SyncContext_H
+#endif // SCY_Synchronizer_H
 
 
 /// @\}

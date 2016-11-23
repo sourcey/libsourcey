@@ -52,9 +52,8 @@ public:
     /// Set the repeat value. Note that if the repeat value is set from
     /// a timer callback it does not immediately take effect. If the timer
     /// was non-repeating before, it will have been stopped. If it was
-    /// repeating,
-    /// then the old repeat value will have been used to schedule the next
-    /// timeout.
+    /// repeating, then the old repeat value will have been used to schedule
+    /// the next timeout.
     virtual void setInterval(std::int64_t interval);
 
     bool active() const;

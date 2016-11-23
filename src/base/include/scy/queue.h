@@ -16,7 +16,7 @@
 #include "scy/datetime.h"
 #include "scy/interface.h"
 #include "scy/platform.h"
-#include "scy/synccontext.h"
+#include "scy/synchronizer.h"
 #include "scy/thread.h"
 #include <queue>
 
@@ -104,12 +104,9 @@ template <class T>
 class RunnableQueue : public Queue<T*>, public basic::Runnable
 {
 public:
-    typedef Queue<T*> queue_t;
-
     /// The default dispatch function.
     /// Must be set before the queue is running.
     std::function<void(T&)> ondispatch;
-
 
     RunnableQueue(int limit = 2048, int timeout = 0)
         : _limit(limit)
@@ -125,22 +122,22 @@ public:
     {
         std::lock_guard<std::mutex> guard(_mutex);
 
-        while (_limit > 0 && static_cast<int>(queue_t::size()) >= _limit) {
-            WarnS(this) << "Purging: " << queue_t::size() << std::endl;
-            delete queue_t::front();
-            queue_t::pop();
+        while (_limit > 0 && static_cast<int>(Queue<T*>::size()) >= _limit) {
+            WarnS(this) << "Purging: " << Queue<T*>::size() << std::endl;
+            delete Queue<T*>::front();
+            Queue<T*>::pop();
         }
 
-        queue_t::push(reinterpret_cast<T*>(item));
+        Queue<T*>::push(reinterpret_cast<T*>(item));
     }
 
     /// Flush all outgoing items.
     virtual void flush()
     {
-        while (!queue_t::empty()) {
-            auto next = queue_t::front();
+        while (!Queue<T*>::empty()) {
+            auto next = Queue<T*>::front();
             dispatch(*next);
-            queue_t::pop();
+            Queue<T*>::pop();
             delete next;
         }
     }
@@ -149,9 +146,9 @@ public:
     void clear()
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        while (!queue_t::empty()) {
-            delete queue_t::front();
-            queue_t::pop();
+        while (!Queue<T*>::empty()) {
+            delete Queue<T*>::front();
+            Queue<T*>::pop();
         }
     }
 
@@ -201,7 +198,7 @@ public:
     void setTimeout(int milliseconds)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        assert(queue_t::empty() && "queue must not be active");
+        assert(Queue<T*>::empty() && "queue must not be active");
         _timeout = milliseconds;
     }
 
@@ -214,11 +211,11 @@ protected:
         T* next;
         {
             std::lock_guard<std::mutex> guard(_mutex);
-            if (queue_t::empty())
+            if (Queue<T*>::empty())
                 return nullptr;
 
-            next = queue_t::front();
-            queue_t::pop();
+            next = Queue<T*>::front();
+            Queue<T*>::pop();
         }
         return next;
     }
@@ -245,7 +242,7 @@ protected:
 //
 
 
-/// SyncQueue extends SyncContext to implement a synchronized FIFO
+/// SyncQueue extends Synchronizer to implement a synchronized FIFO
 /// queue which receives T objects from any thread and synchronizes
 /// them for safe consumption by the associated event loop.
 template <class T>
@@ -283,10 +280,10 @@ public:
             _sync.close();
     }
 
-    SyncContext& sync() { return _sync; }
+    Synchronizer& sync() { return _sync; }
 
 protected:
-    SyncContext _sync;
+    Synchronizer _sync;
 };
 
 

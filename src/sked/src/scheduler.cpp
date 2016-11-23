@@ -39,30 +39,23 @@ Scheduler::~Scheduler()
 void Scheduler::schedule(sked::Task* task)
 {
     TaskRunner::start(task);
-    //_wakeUp.set();
 }
 
 
 void Scheduler::cancel(sked::Task* task)
 {
     TaskRunner::cancel(task);
-    //_wakeUp.set();
 }
 
 
 void Scheduler::clear()
 {
     TaskRunner::clear();
-    //_wakeUp.set();
 }
 
 
 void Scheduler::run()
 {
-    // TraceS(this) << "Running" << endl;
-    // while (!_stopped)
-    //{
-
     // Update and sort the task list bringing the
     // next scheduled task to the front of the list.
     // TODO: Call only after task run, and when the
@@ -105,9 +98,7 @@ void Scheduler::run()
         // duration, or the current task deleted, so we need
         // to ensure that the next pending task matches the
         // current pending task.
-        if ( // task == next() &&
-            // task->trigger().timeout() &&
-            task->beforeRun()) {
+        if (task->beforeRun()) {
 #if _DEBUG
             {
                 DateTime now;
@@ -144,25 +135,8 @@ void Scheduler::run()
         // TraceS(this) << "Running: OK: " << task << endl;
     }
 
-    // Go to sleep if we have no tasks
-    // else {
-    //    TraceS(this) << "Sleeping" << endl;
-    //    _wakeUp.wait();
-    //    TraceS(this) << "Waking up" << endl;
-    //}
-
     // Prevent 100% CPU
     scy::sleep(3);
-
-    // Dispatch the Idle signal
-    // TODO: Send Idle complete iteration of all tasks,
-    // rather than after each task.
-    // Idle.emit(/*this*/);
-    //}
-
-    // TraceS(this) << "Shutdown" << endl;
-    // Shutdown.emit(/*this*/);
-    // TraceS(this) << "Exiting" << endl;
 }
 
 
