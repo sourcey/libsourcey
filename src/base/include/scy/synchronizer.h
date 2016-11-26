@@ -66,7 +66,7 @@ public:
 
     /// Start the synchronizer with the given callback.
     template<class Function, class... Args>
-    void start(Function func, Args... args)
+    void start(Function&& func, Args&&... args)
     {
         assert(!_handle.active());
         assert(!_handle.active());
@@ -78,9 +78,12 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data = new FunctionWrap<Function, Args...>(func, args..., _context);
+        _handle.ptr()->data =
+            new internal::FunctionWrap<Function, Args...>(std::forward<Function>(func),
+                                                std::forward<Args>(args)...,
+                                                _context);
         int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
-            auto wrap = reinterpret_cast<FunctionWrap<Function, Args...>*>(req->data);
+            auto wrap = reinterpret_cast<internal::FunctionWrap<Function, Args...>*>(req->data);
             if (!wrap->ctx->cancelled) {
                 wrap->call();
             }
@@ -98,7 +101,7 @@ public:
     }
 
     /// Start the synchronizer with the given callback.
-    virtual void start(std::function<void()> target);
+    virtual void start(std::function<void()> func);
 
     virtual void cancel();
 

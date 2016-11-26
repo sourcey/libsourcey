@@ -36,7 +36,7 @@ public:
     /// Create and start the idler with the given callback and event loop.
     template<class Function, class... Args>
     explicit Idler(Function func, Args... args,
-                    uv::Loop* loop = uv::defaultLoop())
+                   uv::Loop* loop = uv::defaultLoop())
         : _handle(loop, new uv_idle_t)
     {
         init();
@@ -45,7 +45,7 @@ public:
 
     /// Start the idler with the given callback.
     template<class Function, class... Args>
-    void start(Function func, Args... args)
+    void start(Function&& func, Args&&... args)
     {
         assert(!_handle.active());
         assert(!_handle.active());
@@ -57,9 +57,12 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data = new FunctionWrap<Function, Args...>(func, args..., _context);
+        _handle.ptr()->data =
+            new internal::FunctionWrap<Function, Args...>(std::forward<Function>(func),
+                                                std::forward<Args>(args)...,
+                                                _context);
         int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req) {
-            auto wrap = reinterpret_cast<FunctionWrap<Function, Args...>*>(req->data);
+            auto wrap = reinterpret_cast<internal::FunctionWrap<Function, Args...>*>(req->data);
             if (!wrap->ctx->cancelled) {
                 wrap->call();
             }
@@ -77,7 +80,7 @@ public:
     }
 
     /// Start the idler with the given callback.
-    virtual void start(std::function<void()> target);
+    virtual void start(std::function<void()> func);
 
     virtual ~Idler();
 
@@ -90,27 +93,6 @@ protected:
 
     uv::Handle _handle;
 };
-
-
-// class Idler : public Runner
-// {
-// public:
-//     /// Create the idler context the given event loop and method.
-//     Idler(uv::Loop* loop = uv::defaultLoop());
-//     Idler(std::function<void()> target, uv::Loop* loop = uv::defaultLoop());
-//     Idler(std::function<void(void*)> target, void* arg, uv::Loop* loop = uv::defaultLoop());
-//
-//     virtual ~Idler();
-//
-//     uv::Handle& handle();
-//
-// protected:
-//     virtual void init();
-//     virtual void startAsync();
-//     virtual bool async() const;
-//
-//     uv::Handle _handle;
-// };
 
 
 } // namespace scy

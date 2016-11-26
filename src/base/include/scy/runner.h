@@ -114,6 +114,37 @@ protected:
 };
 
 
+//
+// Internal Helpers
+//
+
+
+namespace internal {
+
+/// Call a function with the given argument tuple.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple, size_t ... I>
+auto call(Function f, Tuple t, std::index_sequence<I ...>)
+{
+     return f(std::get<I>(t)...);
+}
+
+
+/// Call a function with the given argument tuple.
+///
+/// Create an index sequence for the array, and pass it to the
+/// implementation `call` function.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple>
+auto call(Function f, Tuple t)
+{
+    static constexpr auto size = std::tuple_size<Tuple>::value;
+    return call(f, t, std::make_index_sequence<size>{});
+}
+
+
 /// Helper class for working with async libuv types and veradic arguments.
 template<class Function, class... Args>
 struct FunctionWrap
@@ -123,13 +154,13 @@ struct FunctionWrap
     Runner::Context::Ptr ctx;
 
     FunctionWrap(Function f, Args... a, Runner::Context::Ptr c)
-        : func(f), args(a...), ctx(c)
+        : func(f), args(std::make_tuple(a...)), ctx(c)
     {
     }
 
     void call()
     {
-        util::call(func, args);
+        internal::call(func, args);
     }
 };
 
@@ -153,6 +184,8 @@ inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
         scy::sleep(1);
     } while (c->repeating && !c->cancelled);
     c->running = false;
+}
+
 }
 
 

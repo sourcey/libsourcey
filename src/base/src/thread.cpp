@@ -61,7 +61,7 @@ Thread::~Thread()
 
 void Thread::start(std::function<void()> target)
 {
-    start<std::function<void()>>(target);
+    start(std::forward<std::function<void()>>(target));
 }
 
 

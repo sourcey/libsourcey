@@ -16,6 +16,7 @@
 #include "scy/runner.h"
 #include "scy/uv/uvpp.h"
 #include "scy/util.h"
+
 #include <thread>
 #include <tuple>
 #include <utility>
@@ -42,8 +43,9 @@ public:
     ///
     /// This constructor starts the thread with the given function.
     template<class Function, class... Args>
-    explicit Thread(Function func, Args... args) :
-        _thread(runAsync<Function, Args...>, _context, func,
+    explicit Thread(Function&& func, Args&&... args) :
+        _thread(internal::runAsync<Function, Args...>, _context,
+                std::forward<Function>(func),
                 std::forward<Args>(args)...)
     {
     }
@@ -55,16 +57,15 @@ public:
     ///
     /// This method starts the thread with the given function.
     template<class Function, class... Args>
-    void start(Function func, Args... args)
+    void start(Function&& func, Args&&... args)
     {
-        _thread = std::thread(runAsync<Function, Args...>, _context, func,
+        _thread = std::thread(internal::runAsync<Function, Args...>, _context,
+                              std::forward<Function>(func),
                               std::forward<Args>(args)...);
     }
 
-    /// Start the asynchronous context with the given callback.
-    ///
-    /// The target `Runnable` instance must outlive the thread.
-    virtual void start(std::function<void()> target);
+    /// Start the asynchronous context with the given void function.
+    virtual void start(std::function<void()> func);
 
     /// Wait until the thread exits.
     void join();

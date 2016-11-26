@@ -24,7 +24,7 @@ Synchronizer::Synchronizer(uv::Loop* loop)
 Synchronizer::Synchronizer(std::function<void()> target, uv::Loop* loop)
     : _handle(loop, new uv_async_t)
 {
-    start(target);
+    start(std::forward<std::function<void()>>(target));
 }
 
 
@@ -36,7 +36,7 @@ Synchronizer::~Synchronizer()
 
 void Synchronizer::start(std::function<void()> target)
 {
-    start<std::function<void()>>(target);
+    start(std::forward<std::function<void()>>(target));
 }
 
 
