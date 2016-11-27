@@ -24,6 +24,7 @@ public:
 
     TCPResponder(int id)
         : id(id)
+        , timer(1000, 1000)
     {
         // net::SocketAdapter::socket = &socket;
         DebugS(this) << id << ": Creating" << endl;
@@ -66,7 +67,7 @@ public:
 
         // Start the send timer
         timer.Timeout += slot(this, &TCPResponder::onSendTimer);
-        timer.start(1000, 1000);
+        timer.start();
     }
 
     void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,

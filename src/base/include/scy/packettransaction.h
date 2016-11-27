@@ -63,8 +63,7 @@ class PacketTransaction : public basic::Sendable,
 public:
     PacketTransaction(long timeout = 10000, int retries = 0,
                       uv::Loop* loop = uv::defaultLoop())
-        : _timer(loop)
-        , _timeout(timeout)
+        : _timer(timeout, loop)
         , _retries(retries)
         , _attempts(0)
         , _destroyed(false)
@@ -74,8 +73,7 @@ public:
     PacketTransaction(const PacketT& request, long timeout = 10000,
                       int retries = 0, uv::Loop* loop = uv::defaultLoop())
         : _request(request)
-        , _timer(loop)
-        , _timeout(timeout)
+        , _timer(timeout, loop)
         , _retries(retries)
         , _attempts(0)
         , _destroyed(false)
@@ -93,7 +91,7 @@ public:
         if (_timer.active())
             _timer.stop();
         _timer.Timeout += slot(this, &PacketTransaction::onTimeout);
-        _timer.start(_timeout, 0);
+        _timer.start();
 
         return setState(this, TransactionState::Running);
     }
@@ -196,8 +194,7 @@ protected:
 
     PacketT _request;
     PacketT _response;
-    Timer _timer;
-    int _timeout;  ///< The request timeout in milliseconds.
+    Timer _timer;  ///< The request timeout callback.
     int _retries;  ///< The maximum number of attempts before the transaction is
                    ///< considered failed.
     int _attempts; ///< The number of times the transaction has been sent.

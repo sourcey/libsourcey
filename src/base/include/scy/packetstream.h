@@ -280,7 +280,7 @@ public:
     virtual void write(const char* data, std::size_t len);
 
     /// Writes an incoming packet onto the stream.
-    virtual void write(IPacket& packet);
+    virtual void write(IPacket&& packet);
 
     /// Attaches a source packet emitter to the stream.
     /// The source packet adapter can be another PacketStream::emitter.

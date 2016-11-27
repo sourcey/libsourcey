@@ -58,21 +58,16 @@ void Client::initiate()
         // udpSocket->setBroadcast(true);
     }
 
-    _socket->Recv += slot(this, &Client::onSocketRecv, -1,
-                          -1); // using PacketSocket for STUN transactions
+    _socket->Recv += slot(this, &Client::onSocketRecv, -1, -1);
     _socket->Connect += slot(this, &Client::onSocketConnect);
     _socket->Close += slot(this, &Client::onSocketClose);
     _socket->connect(_options.serverAddr);
-    //_socket
-    // else
-    //    onSocketConnect(&_socket->base());
 }
 
 
 void Client::shutdown()
 {
     {
-       
         _timer.stop();
 
         for (auto it = _transactions.begin(); it != _transactions.end();) {
@@ -100,8 +95,8 @@ void Client::onSocketConnect(net::Socket& socket)
     TraceL << "Client connected" << endl;
     // _socket->Connect -= slot(this, &Client::onSocketConnect);
 
-    _timer.Timeout += slot(this, &Client::onTimer);
-    _timer.start(_options.timerInterval, _options.timerInterval);
+    _timer.setInterval(_options.timerInterval);
+    _timer.start(std::bind(&Client::onTimer, this));
 
     sendAllocate();
 }
@@ -215,7 +210,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 {
     TraceL << "Removing transaction: " << transaction << endl;
 
-   
+
     for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
         if (*it == transaction) {
             (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
@@ -230,7 +225,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 
 void Client::authenticateRequest(stun::Message& request)
 {
-   
+
 
     // Authenticate messages once the server provides us with realm and noonce
     if (_realm.empty())
@@ -283,7 +278,7 @@ bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 
 stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 {
-   
+
     // socket = socket ? socket : _socket;
     // assert(socket && !socket->isNull());
     auto transaction = new stun::Transaction(
@@ -436,7 +431,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 
     assert(response.methodType() == stun::Message::Allocate);
 
-   
+
 
     // If the client receives an Allocate success response, then it MUST
     // check that the mapped address and the relayed transport address are
@@ -574,7 +569,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         // NOT send any further requests to this server until it believes the
         // problem has been fixed.
         case 401: {
-           
+
             if (_realm.empty() || _nonce.empty()) {
 
                 // REALM
@@ -772,7 +767,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     // Send all queued requests...
     // TODO: To via onStateChange Success callback
     {
-       
+
         while (!_pendingIndications.empty()) {
             _socket->sendPacket(_pendingIndications.front());
             _pendingIndications.pop_front();
@@ -883,7 +878,7 @@ void Client::sendData(const char* data, std::size_t size,
     // callback is received from the server.
     else if (stateEquals(ClientState::Authorizing)) {
         TraceL << "Queueing outgoing request: " << request.toString() << endl;
-       
+
         _pendingIndications.push_back(request);
         assert(_pendingIndications.size() < 100); // something is wrong...
     }
@@ -984,7 +979,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
 
 void Client::onTimer()
 {
-   
+
 
     if (expired())
         // Attempt to re-allocate
@@ -1018,21 +1013,21 @@ bool Client::closed() const
 
 Client::Options& Client::options()
 {
-   
+
     return _options;
 }
 
 
 net::Address Client::mappedAddress() const
 {
-   
+
     return _mappedAddress;
 }
 
 
 net::Address Client::relayedAddress() const
 {
-   
+
     return _relayedAddress;
 }
 }

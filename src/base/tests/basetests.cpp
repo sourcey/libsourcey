@@ -13,28 +13,28 @@ int main(int argc, char** argv)
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
-    // describe("signal class member benchmark", []() {
-    //     Signal<void(std::uint64_t&)> signal;
-    //     SignalCounter counter;
-    //     signal += slot(&counter, &SignalCounter::increment);
-    //     const std::uint64_t benchstart = time::hrtime();
-    //     std::uint64_t i, value = 0;
-    //     for (i = 0; i < 999999; i++) {
-    //         signal.emit(value);
-    //     }
-    //     const std::uint64_t benchdone = time::hrtime();
-    //     expect(value == i);
-    //
-    //     std::cout << "signal class member benchmark: "
-    //         << ((benchdone - benchstart) * 1.0 / i) << "ns "
-    //         << "per emission (sz=" << sizeof (signal) << ")"
-    //         << std::endl;
-    // });
-
 
     // =========================================================================
     // Signal Benchmarks
     //
+    describe("signal class member benchmark", []() {
+        Signal<void(std::uint64_t&)> signal;
+        SignalCounter counter;
+        signal += slot(&counter, &SignalCounter::increment);
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
+            signal.emit(value);
+        }
+        const std::uint64_t benchdone = time::hrtime();
+        expect(value == i);
+
+        std::cout << "signal class member benchmark: "
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof (signal) << ")"
+            << std::endl;
+    });
+
     describe("signal const class member benchmark", []() {
         Signal<void(std::uint64_t&)> signal;
         SignalCounter counter;

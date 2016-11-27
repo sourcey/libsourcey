@@ -35,18 +35,21 @@ public:
 
     /// Create and start the idler with the given callback and event loop.
     template<class Function, class... Args>
-    explicit Idler(Function func, Args... args,
+    explicit Idler(Function&& func, Args&&... args,
                    uv::Loop* loop = uv::defaultLoop())
         : _handle(loop, new uv_idle_t)
     {
         init();
-        start(func, args...);
+        start(std::forward<Function>(func),
+              std::forward<Args>(args)...);
     }
 
-    /// Start the idler with the given callback.
+    /// Start the idler with the given callback function.
     template<class Function, class... Args>
     void start(Function&& func, Args&&... args)
     {
+        typedef internal::FunctionWrap<Function, Args...> FunctionWrap;
+
         assert(!_handle.active());
         assert(!_handle.active());
         assert(!_context->running);
@@ -57,12 +60,11 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data =
-            new internal::FunctionWrap<Function, Args...>(std::forward<Function>(func),
-                                                std::forward<Args>(args)...,
-                                                _context);
+        _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func),
+                                               std::forward<Args>(args)...,
+                                               _context);
         int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req) {
-            auto wrap = reinterpret_cast<internal::FunctionWrap<Function, Args...>*>(req->data);
+            auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
             if (!wrap->ctx->cancelled) {
                 wrap->call();
             }
@@ -79,7 +81,7 @@ public:
         assert(_handle.active());
     }
 
-    /// Start the idler with the given callback.
+    /// Start the idler with the given callback function.
     virtual void start(std::function<void()> func);
 
     virtual ~Idler();

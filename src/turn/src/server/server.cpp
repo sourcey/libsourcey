@@ -65,8 +65,8 @@ void Server::start()
         TraceL << "TCP listening on " << _options.listenAddr << endl;
     }
 
-    _timer.Timeout += slot(this, &Server::onTimer);
-    _timer.start(_options.timerInterval, _options.timerInterval);
+    _timer.setInterval(_options.timerInterval);
+    _timer.start(std::bind(&Server::onTimer, this));
 }
 
 
@@ -712,7 +712,7 @@ void Server::respondError(Request& request, int errorCode,
 {
     TraceL << "Send STUN error: " << errorCode << ": " << errorDesc << endl;
 
-   
+
 
     stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
     errorMsg.setTransactionID(request.transactionID());
@@ -748,28 +748,28 @@ void Server::respondError(Request& request, int errorCode,
 
 net::UDPSocket& Server::udpSocket()
 {
-   
+
     return _udpSocket;
 }
 
 
 ServerObserver& Server::observer()
 {
-   
+
     return _observer;
 }
 
 
 ServerOptions& Server::options()
 {
-   
+
     return _options;
 }
 
 
 ServerAllocationMap Server::allocations() const
 {
-   
+
     return _allocations;
 }
 
@@ -783,7 +783,7 @@ Timer& Server::timer()
 void Server::addAllocation(ServerAllocation* alloc)
 {
     {
-       
+
 
         assert(_allocations.find(alloc->tuple()) == _allocations.end());
         _allocations[alloc->tuple()] = alloc;
@@ -799,7 +799,7 @@ void Server::addAllocation(ServerAllocation* alloc)
 void Server::removeAllocation(ServerAllocation* alloc)
 {
     {
-       
+
 
         auto it = _allocations.find(alloc->tuple());
         if (it != _allocations.end()) {
@@ -817,7 +817,7 @@ void Server::removeAllocation(ServerAllocation* alloc)
 
 ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
-   
+
 
     auto it = _allocations.find(tuple);
     if (it != _allocations.end())
@@ -828,7 +828,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 
 TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 {
-   
+
 
     for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
         auto alloc = dynamic_cast<TCPAllocation*>(it->second);

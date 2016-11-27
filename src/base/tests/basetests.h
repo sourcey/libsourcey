@@ -102,10 +102,8 @@ class TimerTest : public Test
         int wantTimerTicks = 10;
         bool timerRestarted = false;
 
-        Timer timer;
-        timer.start(10, 10);
-        timer.handle().ref();
-        timer.Timeout += [&]() {
+        Timer timer(10, 10);
+        timer.start([&]() {
             // std::cout << "On timeout: " << timer->count() << std::endl;
 
             numTimerTicks++;
@@ -118,7 +116,22 @@ class TimerTest : public Test
                     timer.stop(); // event loop will be released
                 }
             }
-        };
+        });
+        timer.handle().ref();
+        // timer.Timeout += [&]() {
+        //     // std::cout << "On timeout: " << timer->count() << std::endl;
+        //
+        //     numTimerTicks++;
+        //     if (timer.count() == wantTimerTicks / 2) {
+        //         if (!timerRestarted) {
+        //             timerRestarted = true;
+        //             timer.restart(); // restart once, count returns to 0
+        //         } else {
+        //             timer.handle().unref();
+        //             timer.stop(); // event loop will be released
+        //         }
+        //     }
+        // };
 
         // std::cout << "Ending" << std::endl;
         uv::runDefaultLoop();

@@ -27,6 +27,7 @@ public:
 
     UDPResponder(int id)
         : id(id)
+        , timer(1000, 1000)
     {
         // net::SocketAdapter::socket = &socket;
         DebugS(this) << id << ": Creating" << endl;
@@ -81,7 +82,7 @@ public:
     {
 #if TEST_RESPONDER_TO_INITIATOR_LATENCY
         timer.Timeout += sdelegate(this, &UDPResponder::onSendTimer);
-        timer.start(0, 100);
+        timer.start();
 #endif
     }
 

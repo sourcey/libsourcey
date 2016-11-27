@@ -33,24 +33,6 @@ Thread::Thread() :
 }
 
 
-// Thread::Thread(basic::Runnable& target)
-// {
-//     start(target);
-// }
-//
-//
-// Thread::Thread(std::function<void()> target)
-// {
-//     start(target);
-// }
-//
-//
-// Thread::Thread(std::function<void(void*)> target, void* arg)
-// {
-//     start(target, arg);
-// }
-
-
 Thread::~Thread()
 {
     cancel();
@@ -61,7 +43,7 @@ Thread::~Thread()
 
 void Thread::start(std::function<void()> target)
 {
-    start(std::forward<std::function<void()>>(target));
+    start<std::function<void()>>(std::forward<std::function<void()>>(target));
 }
 
 

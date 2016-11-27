@@ -36,6 +36,7 @@ public:
     UDPInitiator(int id, const Client::Options& opts)
         : id(id)
         , client(*this, opts)
+        , timer(1000, 1000)
     {
     }
     virtual ~UDPInitiator() {}
@@ -70,7 +71,7 @@ protected:
                 AllocationCreated.emit(/*this*/);
 #ifdef TEST_INITIATOR_TO_RESPONDER
                 timer.Timeout += slot(this, &UDPInitiator::onSendTimer);
-                timer.start(0, 1000);
+                timer.start();
 #endif
                 break;
             case ClientState::Failed:

@@ -17,7 +17,7 @@ endif()
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  message(STATUS "Detected version of GNU GCC: ${CMAKE_CXX_COMPILER_VERSION})")
+  # message(STATUS "Detected version of GNU GCC: ${CMAKE_CXX_COMPILER_VERSION}")
 
   # Require at least gcc 4.9
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)

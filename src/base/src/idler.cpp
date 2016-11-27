@@ -40,7 +40,7 @@ void Idler::init()
 
 void Idler::start(std::function<void()> target)
 {
-    start(std::forward<std::function<void()>>(target));
+    start<std::function<void()>>(std::forward<std::function<void()>>(target));
 }
 
 

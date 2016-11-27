@@ -153,7 +153,7 @@ struct FunctionWrap
     std::tuple<Args...> args;
     Runner::Context::Ptr ctx;
 
-    FunctionWrap(Function f, Args... a, Runner::Context::Ptr c)
+    FunctionWrap(Function&& f, Args&&... a, Runner::Context::Ptr c)
         : func(f), args(std::make_tuple(a...)), ctx(c)
     {
     }

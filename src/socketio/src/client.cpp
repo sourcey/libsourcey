@@ -175,7 +175,8 @@ int Client::sendPing()
 {
     // Start the ping timeout
     _pingTimeoutTimer.stop();
-    _pingTimeoutTimer.start(_pingTimeout);
+    _pingTimeoutTimer.setTimeout(_pingTimeout);
+    _pingTimeoutTimer.start();
 
     // TraceN(this) << "Sending ping" << endl;
     return _ws.send("2", 1);
@@ -184,7 +185,7 @@ int Client::sendPing()
 
 void Client::reset()
 {
-   
+
 
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
@@ -246,7 +247,8 @@ void Client::startReconnectTimer()
 {
     assert(_options.reconnection);
     _reconnectTimer.Timeout += slot(this, &Client::onReconnectTimer);
-    _reconnectTimer.start(_options.reconnectDelay);
+    _reconnectTimer.setTimeout(_options.reconnectDelay);
+    _reconnectTimer.start();
     _reconnectTimer.handle().ref();
     _reconnecting = true;
 }
@@ -273,7 +275,8 @@ void Client::onOnline()
     // Setup and start the ping timer
     assert(_pingInterval);
     _pingTimer.Timeout += slot(this, &Client::onPingTimer);
-    _pingTimer.start(_pingInterval); //, _pingInterval
+    _pingTimer.setTimeout(_pingInterval);
+    _pingTimer.start();
 
     // Setup the ping timeout timer
     assert(_pingTimeout);
@@ -510,7 +513,7 @@ bool Client::reconnecting() const
 
 bool Client::wasOnline() const
 {
-   
+
     return _wasOnline;
 }
 

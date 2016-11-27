@@ -20,8 +20,8 @@
 
 namespace scy {
 
-
-/// @addtogroup util
+/// Timed pointer manager
+///
 /// Provides timed persistent data storage for class instances.
 /// TValue must implement the clone() method.
 template <class TKey, class TValue,
@@ -33,15 +33,13 @@ public:
     typedef std::map<TValue*, Timeout> TimeoutMap;
 
     TimedManager(uv::Loop* loop = uv::defaultLoop())
-        : _timer(loop)
+        : _timer(100, 100, loop) // check every 100ms
     {
-        _timer.Timeout += slot(this, &TimedManager::onTimerUpdate);
-        _timer.start(100); // check every 100ms
+        _timer.start(std::bind(&TimedManager::onTimerUpdate, this));
     }
 
     virtual ~TimedManager()
     {
-        _timer.Timeout -= slot(this, &TimedManager::onTimerUpdate);
     }
 
     /// Add an item which will expire (and be deleted) after the

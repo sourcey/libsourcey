@@ -56,7 +56,7 @@ void PacketStream::start()
 {
     TraceS(this) << "Start" << endl;
 
-   
+
     if (stateEquals(PacketStreamState::Active)) {
         TraceS(this) << "Start: Already active" << endl;
         // assert(0);
@@ -81,7 +81,7 @@ void PacketStream::stop()
 {
     TraceS(this) << "Stop" << endl;
 
-   
+
     if (stateEquals(PacketStreamState::Stopped) ||
         stateEquals(PacketStreamState::Stopping) ||
         stateEquals(PacketStreamState::Closed)) {
@@ -136,7 +136,7 @@ void PacketStream::reset()
 
 void PacketStream::close()
 {
-   
+
     if (stateEquals(PacketStreamState::None) ||
         stateEquals(PacketStreamState::Closed)) {
         // TraceS(this) << "Already closed" << endl;
@@ -185,18 +185,16 @@ void PacketStream::close()
 
 void PacketStream::write(char* data, std::size_t len)
 {
-    RawPacket p(data, len);
-    process(p);
+    write(RawPacket(data, len));
 }
 
 
 void PacketStream::write(const char* data, std::size_t len)
 {
-    RawPacket p(data, len);
-    process(p);
+    write(RawPacket(data, len));
 }
 
-void PacketStream::write(IPacket& packet)
+void PacketStream::write(IPacket&& packet)
 {
     process(packet);
 }
@@ -565,7 +563,7 @@ void PacketStream::attach(PacketAdapterReference::Ptr ref)
 
 void PacketStream::startSources()
 {
-   
+
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
@@ -589,7 +587,7 @@ void PacketStream::startSources()
 
 void PacketStream::stopSources()
 {
-   
+
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {
