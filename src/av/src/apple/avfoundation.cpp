@@ -9,6 +9,7 @@
 /// @{
 
 
+#include <ostream>
 #include "scy/av/apple/avfoundation.h"
 
 
