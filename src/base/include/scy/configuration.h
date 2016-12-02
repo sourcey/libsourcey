@@ -13,6 +13,7 @@
 #define SCY_Configuration_H
 
 
+#include <string>
 #include <mutex>
 #include "scy/signal.h"
 
