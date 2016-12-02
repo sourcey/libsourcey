@@ -9,10 +9,8 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_av))
 
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_library(AVFOUNDATION AVFoundation)
-    # find_library(FOUNDATION Foundation)
-    # find_library(QTKIT QTKit)
 
-    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${AVFOUNDATION}) # ${AVFOUNDATION} ${QTKIT}
+    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${AVFOUNDATION})
   endif()
 
   include_dependency(FFmpeg)

@@ -7,12 +7,7 @@
 #include "scy/av/devicemanager.h"
 
 #import <assert.h>
-#ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-  #import <AVFoundation/AVFoundation.h>
-#endif
-#endif
-#import <QTKit/QTKit.h>
+#import <AVFoundation/AVFoundation.h>
 
 
 namespace scy {
@@ -20,61 +15,8 @@ namespace av {
 namespace avfoundation {
 
 
-bool GetQTKitVideoDevices(Device::Type type, std::vector<Device>* devices) {
-#if !__has_feature(objc_arc)
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-#else
-  @autoreleasepool
-#endif
-  {
-    // NSArray* qt_capture_devices =
-    //     [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeVideo];
-    NSArray* qt_capture_devices;
-    if (type == Device::VideoInput) {
-        qt_capture_devices = [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeVideo];
-    }
-    else if(type == Device::AudioInput) {
-        qt_capture_devices = [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeSound];
-    }
-    else {
-        return false;
-    }
-
-    NSUInteger count = [qt_capture_devices count];
-    DebugL << count << " capture device(s) found:" << std::endl;
-    for (QTCaptureDevice* qt_capture_device in qt_capture_devices) {
-      static NSString* const kFormat = @"localizedDisplayName: \"%@\", "
-          @"modelUniqueID: \"%@\", uniqueID \"%@\", isConnected: %d, "
-          @"isOpen: %d, isInUseByAnotherApplication: %d";
-      NSString* info = [NSString
-          stringWithFormat:kFormat,
-                           [qt_capture_device localizedDisplayName],
-                           [qt_capture_device modelUniqueID],
-                           [qt_capture_device uniqueID],
-                           [qt_capture_device isConnected],
-                           [qt_capture_device isOpen],
-                           [qt_capture_device isInUseByAnotherApplication]];
-      DebugL << '\t' << [info UTF8String] << std::endl;
-
-      std::string uniqueID([[qt_capture_device uniqueID] UTF8String]);
-      std::string name([[qt_capture_device localizedDisplayName] UTF8String]);
-      devices->push_back(Device(type, uniqueID, name));
-    }
-  }
-#if !__has_feature(objc_arc)
-  [pool drain];
-#endif
-  return true;
-}
-
-
-bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices) {
-#ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-  if (![AVCaptureDevice class]) {
-    // Fallback to using QTKit if AVFoundation is not available
-    return GetQTKitVideoDevices(type, devices);
-  }
+bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices)
+{
 #if !__has_feature(objc_arc)
   NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 #else
@@ -110,12 +52,6 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
   [pool drain];
 #endif
   return true;
-#else  // __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-  return GetQTKitVideoDevices(type, devices);
-#endif  // __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-#else  // __MAC_OS_X_VERSION_MAX_ALLOWED
-  return GetQTKitVideoDevices(type, devices);
-#endif  // __MAC_OS_X_VERSION_MAX_ALLOWED
 }
 
 
