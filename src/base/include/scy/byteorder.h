@@ -14,6 +14,7 @@
 
 
 #include <cstdint>
+#include <cstring>
 
 #ifdef POSIX
 #include <arpa/inet.h>
