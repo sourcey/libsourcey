@@ -219,3 +219,16 @@ function(status text)
     message(STATUS "${text}")
   endif()
 endfunction()
+
+#
+### Macro: messageV
+#
+# Prints message only with MSG_VERBOSE=ON
+# Usage:
+#   messageV(<msg>)
+#
+macro(messageV msg)
+  if(${MSG_VERBOSE})
+    message(STATUS msg)
+  endif()
+endmacro()
