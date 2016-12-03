@@ -24,6 +24,8 @@
 #  FFmpeg_<component>_DEFINITIONS  - Compiler switches required for using <component>
 #  FFmpeg_<component>_VERSION      - The components version
 
+message("Starting Find FFmpeg")
+
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
   set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL AVDEVICE SWSCALE SWRESAMPLE)
@@ -147,9 +149,9 @@ endif()
 set(FFmpeg_FOUND 1)
 foreach (_component ${FFmpeg_FIND_COMPONENTS})
 if (FFmpeg_${_component}_FOUND)
-  message(STATUS "Required component ${_component} present.")
+  messageV( "Required component ${_component} present.")
 else ()
-  message(STATUS "Required component ${_component} missing.")
+  message(WARNING "Required component ${_component} missing.")
   set(FFmpeg_FOUND 0)
 endif ()
 endforeach ()
@@ -162,7 +164,7 @@ endif ()
 # Now set the noncached _FOUND vars for the components.
  foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROC SWSCALE) #AVFILTER
   set_component_found(FFmpeg ${_component})
-  message(STATUS "FFmpeg component ${_component} FOUND? ${FFmpeg_${_component}_FOUND}")
+  messageV("FFmpeg component ${_component} FOUND? ${FFmpeg_${_component}_FOUND}")
  endforeach ()
 
 # Compile the list of required vars
@@ -173,11 +175,10 @@ endif ()
 
 # Give a nice error message if some of the required vars are missing.
 include(FindPackageHandleStandardArgs)
-message(STATUS ${_FFmpeg_REQUIRED_VARS})
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
 mark_as_advanced(FFmpeg_INCLUDE_DIRS
                 FFmpeg_LIBRARIES
                 FFmpeg_DEFINITIONS
                 FFmpeg_FOUND)
 
-message(STATUS "Finished Find FFmpeg")
+message("Finished Find FFmpeg")
