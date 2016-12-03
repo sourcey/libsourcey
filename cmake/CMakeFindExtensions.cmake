@@ -43,16 +43,16 @@ macro(find_library_extended prefix)
 
   # print_module_variables(${prefix})
 
-  # message(STATUS "*** Find library for ${prefix}")
-  # message(STATUS "Debug Library: ${${prefix}_LIBRARY_DEBUG}")
-  # message(STATUS "Release Library: ${${prefix}_LIBRARY_RELEASE}")
-  # message(STATUS "Library: ${${prefix}_LIBRARY}")
-  # message(STATUS "Debug Paths: ${${prefix}_PATHS_RELEASE}")
-  # message(STATUS "Release Paths: ${${prefix}_PATHS_DEBUG}")
-  # message(STATUS "Paths: ${${prefix}_PATHS}")
-  # message(STATUS "Debug Names: ${${prefix}_NAMES_RELEASE}")
-  # message(STATUS "Release Names: ${${prefix}_NAMES_DEBUG}")
-  # message(STATUS "Names: ${${prefix}_NAMES}")
+  # messageV("*** Find library for ${prefix}")
+  # messageV("Debug Library: ${${prefix}_LIBRARY_DEBUG}")
+  # messageV("Release Library: ${${prefix}_LIBRARY_RELEASE}")
+  # messageV("Library: ${${prefix}_LIBRARY}")
+  # messageV("Debug Paths: ${${prefix}_PATHS_RELEASE}")
+  # messageV("Release Paths: ${${prefix}_PATHS_DEBUG}")
+  # messageV("Paths: ${${prefix}_PATHS}")
+  # messageV("Debug Names: ${${prefix}_NAMES_RELEASE}")
+  # messageV("Release Names: ${${prefix}_NAMES_DEBUG}")
+  # messageV("Names: ${${prefix}_NAMES}")
 
 endmacro(find_library_extended)
 
@@ -91,7 +91,7 @@ macro(set_module_found module)
     if (NOT ${module}_${component}_FOUND)
       message(FATAL_ERROR "Required ${module} component ${component} missing. Please recompile ${module} with ${component} enabled.")
     #else()
-      message(STATUS "  - Required ${module} component ${component} found.")
+      messageV("  - Required ${module} component ${component} found.")
     endif()
   endforeach()
 
@@ -134,13 +134,13 @@ endmacro()
 macro(set_component_found module component)
   set_component_alias(${module} ${component})
 
-  message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
-  message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
-  message(STATUS "${ALIAS_LIBRARY_DIRS}=${${ALIAS_LIBRARY_DIRS}}")
+  messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
+  messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
+  messageV("${ALIAS_LIBRARY_DIRS}=${${ALIAS_LIBRARY_DIRS}}")
 
   #if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
   if (${ALIAS_LIBRARIES}) # AND ${ALIAS_INCLUDE_DIRS} (XXX_INCLUDE_DIRS may be empty)
-    message(STATUS "  - ${module} ${component} found.")
+    messageV("  - ${module} ${component} found.")
     set(${ALIAS_FOUND} TRUE)
     # set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
 
@@ -155,13 +155,13 @@ macro(set_component_found module component)
     # set(${module}_LIBRARIES  ${${module}_LIBRARIES}  PARENT_SCOPE)
     # set(${module}_DEFINITIONS  ${${module}_DEFINITIONS}  PARENT_SCOPE)
 
-    # message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
-    # message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
-    # message(STATUS "${ALIAS_RELEASE_LIBRARIES}=${${ALIAS_RELEASE_LIBRARIES}}")
-    # message(STATUS "${ALIAS_DEBUG_LIBRARIES}=${${ALIAS_DEBUG_LIBRARIES}}")
-    # message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
-    # message(STATUS "${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}")
-    # message(STATUS "${module}_LIBRARIES=${${module}_LIBRARIES}")
+    # messageV("Find Component Paths=${module}:${component}:${library}:${header}")
+    # messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
+    # messageV("${ALIAS_RELEASE_LIBRARIES}=${${ALIAS_RELEASE_LIBRARIES}}")
+    # messageV("${ALIAS_DEBUG_LIBRARIES}=${${ALIAS_DEBUG_LIBRARIES}}")
+    # messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
+    # messageV("${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}")
+    # messageV("${module}_LIBRARIES=${${module}_LIBRARIES}")
 
     # Only mark as advanced when found
     mark_as_advanced(${ALIAS_INCLUDE_DIRS}
@@ -170,7 +170,7 @@ macro(set_component_found module component)
   else()
     # NOTE: an error message will be displayed in set_module_found
     # if the module is REQUIRED
-    # message(STATUS "  - ${module} ${component} not found.")
+    # messageV("  - ${module} ${component} not found.")
   endif()
 
   set(HAVE_${ALIAS} ${${ALIAS_FOUND}})
@@ -195,7 +195,7 @@ endmacro()
 # Marks the given component as not found, and resets the cache for find_path and find_library results.
 #
 macro(set_module_notfound module)
-  #message(STATUS "  - Setting ${module} not found.")
+  #messageV("  - Setting ${module} not found.")
   set(${module}_FOUND FALSE)
   #set(${module}_FOUND FALSE PARENT_SCOPE)
 
@@ -222,7 +222,7 @@ endmacro()
 macro(set_component_notfound module component)
   set_component_alias(${module} ${component})
 
-  #message(STATUS "  - Setting ${module} ${component} not found.")
+  #messageV("  - Setting ${module} ${component} not found.")
   set(${ALIAS_FOUND} FALSE)
   #set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
   set(${ALIAS_INCLUDE_DIRS} ${ALIAS_INCLUDE_DIRS}-NOTFOUND)
@@ -248,8 +248,8 @@ endmacro()
 # Finds the given component library and include paths.
 #
 macro(find_component_paths module component library header)
-  message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
-  message(STATUS "INCLUDE_DIR: ${${module}_INCLUDE_DIR} HINTS: ${${module}_INCLUDE_HINTS}")
+  messageV("Find Component Paths=${module}:${component}:${library}:${header}")
+  messageV("INCLUDE_DIR: ${${module}_INCLUDE_DIR} HINTS: ${${module}_INCLUDE_HINTS}")
 
   # Reset alias namespace (force recheck)
   set_component_alias(${module} ${component})
@@ -324,7 +324,7 @@ endmacro()
 # libraries and include directories.
 #
 macro(find_component module component pkgconfig library header)
-   message(STATUS "Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
+   messageV("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
 
   # Reset component alias values (force recheck)
   set_component_alias(${module} ${component})
@@ -332,21 +332,21 @@ macro(find_component module component pkgconfig library header)
   find_component_paths(${module} ${component} ${library} ${header})
 
   if(NOT ${ALIAS_FOUND})
-    message(STATUS "  - ${module} ${component} not found, searching with pkg-config...")
+    messageV("  - ${module} ${component} not found, searching with pkg-config...")
 
     # Use pkg-config to obtain directories for the find_path() and find_library() calls.
     find_package(PkgConfig QUIET)
     if (PKG_CONFIG_FOUND)
       pkg_search_module(${ALIAS} ${pkgconfig} QUIET)
-       message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
+       messageV("Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
     endif()
   else()
-    message(STATUS "  - ${module} ${component} found without pkg-config.")
+    messageV("  - ${module} ${component} found without pkg-config.")
   endif()
 
-  message(STATUS "${ALIAS_FOUND}=${${ALIAS_FOUND}}")
-  message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
-  message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
+  messageV("${ALIAS_FOUND}=${${ALIAS_FOUND}}")
+  messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
+  messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
 
   if( ${ALIAS_FOUND})
     set_component_found(${module} ${component})

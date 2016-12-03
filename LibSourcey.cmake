@@ -18,6 +18,8 @@ include(LibSourceyIncludes REQUIRED)
 include(LibSourceyModules REQUIRED)
 include(LibSourceyVersion REQUIRED)
 
+option(MSG_VERBOSE "Print more status messages in order to help debug." OFF)
+
 # ----------------------------------------------------------------------------
 # LibSourcey build components
 # ----------------------------------------------------------------------------
@@ -204,7 +206,6 @@ find_package(FFmpeg)
 
 # print_module_variables(FFmpeg)
 # print_module_variables(FFMPEG)
-message("FFMPEG_FOUND: ${FFMPEG_FOUND}, WITH_FFMPEG: ${WITH_FFMPEG}")
 # message(FATAL_ERROR "BUILD_SAMPLES ${BUILD_SAMPLES}")
 # message(FATAL_ERROR "LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES}")
 
