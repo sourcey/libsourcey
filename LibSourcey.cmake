@@ -187,7 +187,8 @@ if(MSVC)
 endif()
 
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation -framework QTKit")
+  message("Including APPLE's foundation and AVFoundation frameworks")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation")
   #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
   #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
@@ -203,7 +204,7 @@ find_package(FFmpeg)
 
 # print_module_variables(FFmpeg)
 # print_module_variables(FFMPEG)
-# message(FATAL_ERROR "FFMPEG_FOUND: ${FFMPEG_FOUND}, WITH_FFMPEG: ${WITH_FFMPEG}")
+message("FFMPEG_FOUND: ${FFMPEG_FOUND}, WITH_FFMPEG: ${WITH_FFMPEG}")
 # message(FATAL_ERROR "BUILD_SAMPLES ${BUILD_SAMPLES}")
 # message(FATAL_ERROR "LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES}")
 

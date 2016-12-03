@@ -18,11 +18,11 @@
 #   - POSTPROC
 #
 # the following variables will be defined
-#  <component>_FOUND        - System has <component>
-#  <component>_INCLUDE_DIRS - Include directory necessary for using the <component> headers
-#  <component>_LIBRARIES    - Link these to use <component>
-#  <component>_DEFINITIONS  - Compiler switches required for using <component>
-#  <component>_VERSION      - The components version
+#  FFmpeg_<component>_FOUND        - System has <component>
+#  FFmpeg_<component>_INCLUDE_DIRS - Include directory necessary for using the <component> headers
+#  FFmpeg_<component>_LIBRARIES    - Link these to use <component>
+#  FFmpeg_<component>_DEFINITIONS  - Compiler switches required for using <component>
+#  FFmpeg_<component>_VERSION      - The components version
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
@@ -35,14 +35,17 @@ if (NOT FFmpeg_FOUND)
   # The FFmpeg compilation guide stores files in an unusual location,
   # so let's support that out of the box
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+
+  option(FFMPEGDIR "User definable FFMPEG Root build directory" "/tmp/ffmpeg_build")
+
   set(FFmpeg_LIBRARY_HINTS
+    ${FFMPEGDIR}/lib
     $ENV{HOME}/tmp/ffmpeg_build/lib
-    $ENV{HOME}/ffmpeg_build/lib
-    /tmp/ffmpeg_build/lib)
+    $ENV{HOME}/ffmpeg_build/lib)
   set(FFmpeg_INCLUDE_HINTS
+    ${FFMPEGDIR}/include
     $ENV{HOME}/tmp/ffmpeg_build/include
-    $ENV{HOME}/ffmpeg_build/include
-    /tmp/ffmpeg_build/include)
+    $ENV{HOME}/ffmpeg_build/include)
 
   # Check for all components
   find_component(FFmpeg SWRESAMPLE libswresample swresample libswresample/swresample.h)
@@ -135,43 +138,46 @@ if (NOT FFmpeg_FOUND)
 endif()
 
 # Cache the vars.
-# set(FFmpeg_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS} CACHE STRING   "The FFmpeg include directories." FORCE)
-# set(FFmpeg_LIBRARIES    ${FFmpeg_LIBRARIES}    CACHE STRING   "The FFmpeg libraries." FORCE)
-# set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
-# set(FFmpeg_FOUND        ${FFmpeg_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
+ set(FFmpeg_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS} CACHE STRING   "The FFmpeg include directories." FORCE)
+ set(FFmpeg_LIBRARIES    ${FFmpeg_LIBRARIES}    CACHE STRING   "The FFmpeg libraries." FORCE)
+ set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
+ set(FFmpeg_FOUND        ${FFmpeg_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
 
 # Check that the required components were found.
-# set(FFmpeg_FOUND 1)
-# foreach (_component ${FFmpeg_FIND_COMPONENTS})
-#  if (FFmpeg_${_component}_FOUND)
-#    message(STATUS "Required component ${_component} present.")
-#  else ()
-#    message(STATUS "Required component ${_component} missing.")
-#    set(FFmpeg_FOUND 0)
-#  endif ()
-# endforeach ()
+set(FFmpeg_FOUND 1)
+foreach (_component ${FFmpeg_FIND_COMPONENTS})
+if (FFmpeg_${_component}_FOUND)
+  message(STATUS "Required component ${_component} present.")
+else ()
+  message(STATUS "Required component ${_component} missing.")
+  set(FFmpeg_FOUND 0)
+endif ()
+endforeach ()
 
 # Build the include path with duplicates removed.
-# if (FFmpeg_INCLUDE_DIRS)
-#  list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
-# endif ()
+if (FFmpeg_INCLUDE_DIRS)
+  list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
+endif ()
 
 # Now set the noncached _FOUND vars for the components.
-# foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE) #AVFILTER
-#  set_component_found(${_component})
-# endforeach ()
+ foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROC SWSCALE) #AVFILTER
+  set_component_found(FFmpeg ${_component})
+  message(STATUS "FFmpeg component ${_component} FOUND? ${FFmpeg_${_component}_FOUND}")
+ endforeach ()
 
 # Compile the list of required vars
-# set(_FFmpeg_REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS)
-# foreach (_component ${FFmpeg_FIND_COMPONENTS})
-#   list(APPEND _FFmpeg_REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS)
-# endforeach ()
+ set(_FFmpeg_REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS)
+ foreach (_component ${FFmpeg_FIND_COMPONENTS})
+   list(APPEND _FFmpeg_REQUIRED_VARS FFmpeg_${_component}_LIBRARIES FFmpeg_${_component}_INCLUDE_DIRS)
+ endforeach ()
 
 # Give a nice error message if some of the required vars are missing.
-# include(FindPackageHandleStandardArgs)
-# find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
-#
-# mark_as_advanced(FFmpeg_INCLUDE_DIRS
-#                  FFmpeg_LIBRARIES
-#                  FFmpeg_DEFINITIONS
-#                  FFmpeg_FOUND)
+include(FindPackageHandleStandardArgs)
+message(STATUS ${_FFmpeg_REQUIRED_VARS})
+find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
+mark_as_advanced(FFmpeg_INCLUDE_DIRS
+                FFmpeg_LIBRARIES
+                FFmpeg_DEFINITIONS
+                FFmpeg_FOUND)
+
+message(STATUS "Finished Find FFmpeg")
