@@ -13,6 +13,7 @@
 #define SCY_Net_Address_H
 
 
+#include <string>
 #include "scy/net/types.h"
 #include <memory>
 

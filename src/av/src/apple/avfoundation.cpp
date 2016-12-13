@@ -9,6 +9,7 @@
 /// @{
 
 
+#include "scy/logger.h"
 #include <ostream>
 #include "scy/av/apple/avfoundation.h"
 
