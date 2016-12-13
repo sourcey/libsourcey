@@ -5,8 +5,8 @@
 //
 // SPDX-License-Identifier:	LGPL-2.1+
 //
-/// @addtogroup webrtc
-/// @{
+///
+
 
 #ifndef SCY_WebRTC_WebRTCStreamer_Signaler_H
 #define SCY_WebRTC_WebRTCStreamer_Signaler_H
