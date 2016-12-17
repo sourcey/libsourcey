@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include "filepeerconnection.h"
+#include "scy/webrtc/filepeerconnection.h"
 #include "scy/webrtc/audiopacketmodule.h"
 #include "scy/webrtc/multiplexmediacapturer.h"
 #include "scy/webrtc/videopacketsource.h"
@@ -87,7 +87,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    auto conn = new FilePeerConnection(this, peer.id(), PeerConnection::Offer);
+    auto conn = new FilePeerConnection(this, peer.id(), "test.mp4");
     // conn->constraints().SetMandatoryReceiveAudio(false);
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();

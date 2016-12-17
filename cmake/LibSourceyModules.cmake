@@ -44,6 +44,8 @@ macro(define_sourcey_module name)
   filter_list(lib_srcs "${lib_srcs}" ${lib_srcs_exclude_regex})
   filter_list(lib_hdrs "${lib_hdrs}" ${lib_hdrs_exclude_regex})
 
+  list(APPEND LibSourcey_INCLUDE_DIRS ${dir}/include)
+
   # string(REGEX REPLACE ${lib_srcs_exclude_regex} "" lib_srcs "${lib_srcs}")
   # string(REGEX REPLACE ${lib_hdrs_exclude_regex} "" lib_hdrs "${lib_hdrs}")
 
@@ -63,11 +65,8 @@ macro(define_sourcey_module name)
   set_default_project_dependencies(${name} ${ARGN})
 
   message(STATUS "Including module ${name}")
-  # message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
-  # message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-  # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-  # message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
-  # message(STATUS "    Include Vendor Dirs: ${LibSourcey_VENDOR_INCLUDE_DIRS}")
+  # message(STATUS "    Dependencies: ${LibSourcey_
+  #list(APPEND LibSourcey_INCLUDE_DIRS ${dir}/include)y_VENDOR_INCLUDE_DIRS}")
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
@@ -103,6 +102,10 @@ macro(define_sourcey_module name)
 
   # Set HAVE_SOURCEY_XXX at parent scope for use in libsourcey.h
   set(HAVE_SOURCEY_${name} ON PARENT_SCOPE)
+
+  # set(LibSourcey_MODULE_LIBRARY_DIRS ${LibSourcey_MODULE_LIBRARY_DIRS} ${LibSourcey_BUILD_DIR}/src/${name} PARENT_SCOPE)
+  set(LibSourcey_MODULE_INCLUDE_DIRS ${LibSourcey_MODULE_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+  set(LibSourcey_MODULE_INCLUDE_LIBRARIES ${LibSourcey_MODULE_INCLUDE_LIBRARIES} ${name} PARENT_SCOPE)
 
   # Build samples
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)

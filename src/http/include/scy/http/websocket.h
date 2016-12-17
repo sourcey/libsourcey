@@ -169,7 +169,7 @@ protected:
     /// Set by readFrame()
     int frameFlags() const;
 
-    /// Returns true if the payload must be masked.
+    /// Returns true if the payload must be masched.
     /// Used by writeFrame()
     bool mustMaskPayload() const;
 

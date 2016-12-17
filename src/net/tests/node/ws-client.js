@@ -8,7 +8,7 @@ ws.on('open', function() {
 });
 ws.on('message', function(data, flags) {
     // flags.binary will be set if a binary data is received
-    // flags.masked will be set if the data was masked
+    // flags.masched will be set if the data was masched
     console.log('message', data, flags)
 });
 ws.on('error', function(error, code) {

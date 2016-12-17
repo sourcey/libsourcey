@@ -6,19 +6,33 @@
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-# Tell CMake where to locate our .cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake)
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake)
+# ----------------------------------------------------------------------------
+# LibSourcey Build paths
+# ----------------------------------------------------------------------------
+set(LibSourcey_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src)
+set(LibSourcey_VENDOR_SOURCE_DIR ${LibSourcey_DIR}/vendor)
+set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LibSourcey_VENDOR_BUILD_DIR ${CMAKE_BINARY_DIR}/vendor)
 
-# Include required cmake files
+set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
+set(LibSourcey_VENDOR_INSTALL_DIR ${LibSourcey_SHARED_INSTALL_DIR}/vendor)
+set(LibSourcey_PKGCONFIG_DIR ${LibSourcey_INSTALL_DIR}/lib/pkgconfig)
+
+# Set CMake defaults
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LibSourcey_DIR}/cmake)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${LibSourcey_DIR}/cmake)
+set(CMAKE_LIBRARY_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/lib ${CMAKE_LIBRARY_PATH})
+set(CMAKE_SYSTEM_PREFIX_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/include ${CMAKE_SYSTEM_PREFIX_PATH})
+
+# Include CMake extensions
 include(CMakeHelpers REQUIRED)
 include(CMakeFindExtensions REQUIRED)
 include(LibSourceyUtilities REQUIRED)
 include(LibSourceyIncludes REQUIRED)
 include(LibSourceyModules REQUIRED)
 include(LibSourceyVersion REQUIRED)
-
-option(MSG_VERBOSE "Print more status messages in order to help debug." OFF)
 
 # ----------------------------------------------------------------------------
 # LibSourcey build components
@@ -32,6 +46,10 @@ set_option(BUILD_SAMPLES              "Build module sample applications?"       
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
 set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
 set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
+
+set(BUILD_APPLICATIONS OFF CACHE BOOL "Disable applications" FORCE)
+set(BUILD_SAMPLES OFF CACHE BOOL "Disable samples" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "Disable tests" FORCE)
 
 # ----------------------------------------------------------------------------
 # LibSourcey build options
@@ -49,6 +67,7 @@ set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"              
 set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
 set_option(ENABLE_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
+set_option(MSG_VERBOSE                "Print verbose debug status messages"                      OFF )
 
 # ----------------------------------------------------------------------------
 # LibSourcey internal options
@@ -62,28 +81,6 @@ set(LibSourcey_BUILD_MODULES          "" CACHE INTERNAL "Modules to build" FORCE
 set(LibSourcey_BUILD_SAMPLES          "" CACHE INTERNAL "Samples to build" FORCE)
 set(LibSourcey_BUILD_TESTS            "" CACHE INTERNAL "Tests to build" FORCE)
 set(LibSourcey_BUILD_APPLICATIONS     "" CACHE INTERNAL "Applications to build" FORCE)
-
-# ----------------------------------------------------------------------------
-# LibSourcey Build paths
-# ----------------------------------------------------------------------------
-set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
-set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
-set(LibSourcey_VENDOR_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor)
-set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
-set(LibSourcey_VENDOR_BUILD_DIR ${CMAKE_BINARY_DIR}/vendor)
-
-set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
-set(LibSourcey_VENDOR_INSTALL_DIR ${LibSourcey_SHARED_INSTALL_DIR}/vendor)
-set(LibSourcey_PKGCONFIG_DIR ${LibSourcey_INSTALL_DIR}/lib/pkgconfig)
-
-# Set CMake defaults
-set(CMAKE_LIBRARY_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/lib ${CMAKE_LIBRARY_PATH})
-set(CMAKE_SYSTEM_PREFIX_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/include ${CMAKE_SYSTEM_PREFIX_PATH})
-link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
-
-list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
-list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
 # ----------------------------------------------------------------------------
 # Solution folders:
@@ -199,15 +196,16 @@ endif()
 # Include third party dependencies
 # ----------------------------------------------------------------------------
 
+# Set some required vendor variables
+link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
+list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+
 # Prefind external dependencies so we can set defaults
 find_package(OpenSSL)
 find_package(OpenCV)
 find_package(FFmpeg)
-
-# print_module_variables(FFmpeg)
-# print_module_variables(FFMPEG)
-# message(FATAL_ERROR "BUILD_SAMPLES ${BUILD_SAMPLES}")
-# message(FATAL_ERROR "LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES}")
 
 # set_option(WITH_LIBUV           "Include LibUV support"                ON)
 # set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
@@ -222,14 +220,6 @@ set_option(WITH_POCO            "Include Poco support"                 OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # Build dependencies
-if(WITH_JSONCPP)
-  add_vendor_dependency(ZLIB zlib)
-  add_vendor_dependency(MINIZIP minizip)
-endif()
-if(WITH_JSONCPP)
-  add_vendor_dependency(JSONCPP jsoncpp)
-endif()
-add_vendor_dependency(HTTPPARSER http_parser)
 
 # Include libuv dependency
 # set(BUILD_TESTS OFF) # don't build libuv tests
@@ -237,6 +227,16 @@ set(LIB_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
 set(BIN_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
 set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
 add_vendor_dependency(LIBUV libuv)
+#set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname})
+
+if(WITH_ZLIB)
+  add_vendor_dependency(ZLIB zlib)
+  add_vendor_dependency(MINIZIP minizip)
+endif()
+if(WITH_JSONCPP)
+  add_vendor_dependency(JSONCPP jsoncpp)
+endif()
+add_vendor_dependency(HTTPPARSER http_parser)
 
 # External dependencies
 if(WITH_OPENSSL)
@@ -292,9 +292,14 @@ foreach(name ${subdirs})
   set(HAVE_LibSourcey_${name} 0)
   set(dir "${LibSourcey_SOURCE_DIR}/${name}")
   if (EXISTS "${dir}/CMakeLists.txt")
-    add_subdirectory(${dir})
+    add_subdirectory(${dir} ${LibSourcey_BUILD_DIR}/${name})
   endif()
 endforeach()
+
+# Condense related sublists into main variables
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_MODULE_INCLUDE_DIRS} ${LibSourcey_VENDOR_INCLUDE_DIRS})
+list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_MODULE_LIBRARY_DIRS})
+list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_MODULE_INCLUDE_LIBRARIES})
 
 # Remove any duplicates from our lists
 if(LibSourcey_LINK_LIBRARIES)
@@ -311,6 +316,7 @@ endif()
 # not overwritten if CMake generates code in the same path.
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_BUILD_DIR})
 
 # Variables for libsourcey.h.cmake
 set(PACKAGE "LibSourcey")
@@ -320,16 +326,10 @@ set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-# set(HAVE_FFMPEG CACHE TRUE FORCE)
-# set(SCY_BUILD_SHARED 1)
-# set(BUILD_SHARED_LIBS 1)
-# set(WTFFF 1)
-
-# HAVE_FFMPEG
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 status("Parsing 'libsourcey.h.cmake'")
 configure_file(
-  ${CMAKE_SOURCE_DIR}/cmake/libsourcey.h.cmake
+  ${LibSourcey_DIR}/cmake/libsourcey.h.cmake
   ${LibSourcey_CONFIG_FILE})
 install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include)
 
@@ -338,6 +338,6 @@ install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/in
 # ----------------------------------------------------------------------------
 set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
 configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/libsourcey.pc.cmake.in
+    ${LibSourcey_DIR}/cmake/libsourcey.pc.cmake.in
 		${LibSourcey_PC} @ONLY)
 install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR})
