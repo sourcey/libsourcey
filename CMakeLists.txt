@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 2.8.10)
 
-# This must go before `project(LibSourcey)`` in order to work
+# This must go before `project(LibSourcey)` in order to work
 if(WIN32)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
 # else()
@@ -31,10 +31,10 @@ include(LibSourcey.cmake REQUIRED)
 # ----------------------------------------------------------------------------
 #  Include test target
 # ----------------------------------------------------------------------------
-if (BUILD_TESTS)
+# if (BUILD_TESTS)
   set(CMAKE_CTEST_COMMAND ctest -V)
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
-endif()
+# endif()
 
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"

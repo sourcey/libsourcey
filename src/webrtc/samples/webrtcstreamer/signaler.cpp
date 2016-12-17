@@ -88,19 +88,6 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     // conn->constraints().SetAllowDtlsSctpDataChannels();
 
     auto conn = new FilePeerConnection(this, peer.id(), "test.mp4");
-    // conn->constraints().SetMandatoryReceiveAudio(false);
-    // conn->constraints().SetMandatoryReceiveVideo(false);
-    // conn->constraints().SetAllowDtlsSctpDataChannels();
-
-    // conn->setPeerConnectionFactory(
-    //     webrtc::CreatePeerConnectionFactory(
-    //         rtc::Thread::Current(),
-    //         rtc::Thread::Current(),
-    //         rtc::Thread::Current(),
-    //         AudioPacketModule::Create(),
-    //         nullptr, nullptr));
-
-    // av::Device device;
 
     // Create the media stream
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =
