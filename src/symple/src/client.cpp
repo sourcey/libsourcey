@@ -291,6 +291,7 @@ void Client::onOnline()
 void Client::emit(/*void* sender, */ IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
+    TraceL << "Emit packet: " << packet.toString() << endl;
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
@@ -298,8 +299,7 @@ void Client::emit(/*void* sender, */ IPacket& raw)
 
         json::Value data = packet.json();
 #ifdef _DEBUG
-        TraceL << "Received " << json::stringify(data, true)
-               << endl; // type << ": " <<
+        TraceL << "Received " << json::stringify(data, true) << endl;
 #endif
         assert(data.isObject());
         if (data.isMember("type")) {
@@ -450,7 +450,7 @@ void Client::reset()
 
 Roster& Client::roster()
 {
-   
+
     return _roster;
 }
 

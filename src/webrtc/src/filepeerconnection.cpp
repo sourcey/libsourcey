@@ -24,20 +24,24 @@ namespace scy {
 FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
                                        const std::string& peerid,
                                        const std::string& file)
-    : PeerConnection(manager, peerid, PeerConnection::Offer),
-    _file(file)
+    : PeerConnection(manager, peerid, PeerConnection::Offer)
+    , _file(file)
+    , _networkThread(rtc::Thread::CreateWithSocketServer())
+    , _workerThread(rtc::Thread::Create())
 {
     // Setup a PeerConnectionFactory with our custom ADM
     // TODO: Setup threads properly:
-    auto networkThread = rtc::Thread::CreateWithSocketServer().release();
-    auto workerThread = rtc::Thread::Create().release();
-    auto signalingThread = rtc::Thread::Current();
+    // _networkThread = rtc::Thread::CreateWithSocketServer(); //.release();
+    // _workerThread = rtc::Thread::Create(); //.release();
+    // _signalingThread = rtc::Thread::Current();
+
+    if (!_networkThread->Start() || !_workerThread->Start()) {
+        throw std::runtime_error("Failed to start threads");
+    }
+
     _factory = webrtc::CreatePeerConnectionFactory(
-        networkThread, workerThread, signalingThread,
+        _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
         _capturer.getAudioModule(), nullptr, nullptr);
-    networkThread->Start();
-    workerThread->Start();
-    // signalingThread->Start();
 
     _constraints.SetMandatoryReceiveAudio(false);
     _constraints.SetMandatoryReceiveVideo(false);

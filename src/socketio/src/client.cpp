@@ -354,7 +354,8 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 
 void Client::onHandshake(sockio::Packet& packet)
 {
-    assert(stateEquals(ClientState::Connected));
+    TraceN(this) << "On handshake: " << state() << endl;
+    // assert(stateEquals(ClientState::Connected));
     assert(packet.frame() == sockio::Packet::Frame::Open);
 
     json::Value json = packet.json();
@@ -369,11 +370,14 @@ void Client::onHandshake(sockio::Packet& packet)
                  << "sid=" << _sessionID << ", "
                  << "pingInterval=" << _pingInterval << ", "
                  << "pingTimeout=" << _pingTimeout << endl;
+
 }
 
 
 void Client::onMessage(sockio::Packet& packet)
 {
+    TraceL << "On message: " << packet.toString() << endl;
+
     switch (packet.type()) {
         case Packet::Packet::Type::Connect:
             // Transition to online state
@@ -384,17 +388,14 @@ void Client::onMessage(sockio::Packet& packet)
             break;
         case Packet::Packet::Type::Event:
             assert(stateEquals(ClientState::Online));
-            // PacketSignal::
             emit(packet);
             break;
         case Packet::Packet::Type::Ack:
             // assert(stateEquals(ClientState::Online));
-            // PacketSignal::
             emit(packet);
             break;
         case Packet::Packet::Type::Error:
             // assert(stateEquals(ClientState::Online));
-            // PacketSignal::
             emit(packet);
             break;
         case Packet::Packet::Type::BinaryEvent:
@@ -458,7 +459,7 @@ void Client::onPingTimer()
 
 void Client::onPingTimeoutTimer()
 {
-    assert(0 && "implement me");
+    // assert(0 && "implement me");
 }
 
 

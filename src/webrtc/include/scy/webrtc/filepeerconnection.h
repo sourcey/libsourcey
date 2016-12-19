@@ -38,6 +38,10 @@ public:
 protected:
     std::string _file;
     MultiplexMediaCapturer _capturer;
+
+    std::unique_ptr<rtc::Thread> _networkThread;
+    std::unique_ptr<rtc::Thread> _workerThread;
+    // std::unique_ptr<rtc::Thread> _signalingThread;
 };
 
 

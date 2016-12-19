@@ -19,8 +19,7 @@ using std::endl;
 namespace scy {
 
 
-PeerConnectionManager::PeerConnectionManager(
-    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+PeerConnectionManager::PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
     : _factory(factory) // ? factory : webrtc::CreatePeerConnectionFactory()
 {
 }
@@ -48,10 +47,10 @@ void PeerConnectionManager::sendCandidate(PeerConnection* conn,
 }
 
 
-void PeerConnectionManager::recvSDP(const std::string& peerid,
+void PeerConnectionManager::recvSDP(const std::string& token,
                                     const json::Value& message)
 {
-    auto conn = PeerConnectionManager::get(peerid, false);
+    auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
         assert(0 && "peer mismath");
         return;
@@ -71,10 +70,10 @@ void PeerConnectionManager::recvSDP(const std::string& peerid,
 }
 
 
-void PeerConnectionManager::recvCandidate(const std::string& peerid,
+void PeerConnectionManager::recvCandidate(const std::string& token,
                                           const json::Value& message)
 {
-    auto conn = PeerConnectionManager::get(peerid, false);
+    auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
         assert(0 && "peer mismath");
         return;

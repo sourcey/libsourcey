@@ -88,8 +88,7 @@ public:
 public:
     /// Client(const net::Socket::Ptr& socket);
     Client(const net::Socket::Ptr& socket,
-           const Options& options =
-               Options()); //, const std::string& host, std::uint16_t port
+           const Options& options = Options());
     virtual ~Client();
 
     // virtual void connect(const std::string& host, std::uint16_t port);
@@ -101,19 +100,15 @@ public:
     virtual int send(const json::Value& message, bool ack = false);
 
     /// Send an event packet.
-    virtual int send(const std::string& event, const char* message,
-                     bool ack = false);
-    virtual int send(const std::string& event, const std::string& message,
-                     bool ack = false);
-    virtual int send(const std::string& event, const json::Value& message,
-                     bool ack = false);
+    virtual int send(const std::string& event, const char* message, bool ack = false);
+    virtual int send(const std::string& event, const std::string& message, bool ack = false);
+    virtual int send(const std::string& event, const json::Value& message, bool ack = false);
 
     /// Send the given packet.
     virtual int send(const sockio::Packet& packet);
 
     /// Create a packet transaction.
-    Transaction* createTransaction(const sockio::Packet& request,
-                                   long timeout = 10000);
+    Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 
     /// Return a reference to the client options object.
     Client::Options& options();
@@ -153,8 +148,7 @@ protected:
     virtual void onMessage(sockio::Packet& packet);
 
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
-                              const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     virtual void onSocketError(net::Socket& socket, const scy::Error& error);
     virtual void onSocketClose(net::Socket& socket);
 
@@ -175,8 +169,6 @@ protected:
     Timer _reconnectTimer;
     scy::Error _error;
     std::string _sessionID;
-    // std::string _host;
-    // std::uint16_t _port;
     Client::Options _options;
     http::ws::WebSocket _ws;
     int _pingTimeout;

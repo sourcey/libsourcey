@@ -149,7 +149,7 @@ void Timer::again()
     if (err < 0)
         _handle.setAndThrowError("Invalid timer", err);
 
-    assert(active());
+    // assert(active());
     _count = 0;
 }
 

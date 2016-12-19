@@ -30,15 +30,13 @@ public:
     Signaler(const smpl::Client::Options& options);
     ~Signaler();
 
-protected: /// PeerConnectionManager interface
-    void sendSDP(PeerConnection* conn, const std::string& type,
-                 const std::string& sdp);
-    void sendCandidate(PeerConnection* conn, const std::string& mid,
-                       int mlineindex, const std::string& sdp);
-    void onAddRemoteStream(PeerConnection* conn,
-                           webrtc::MediaStreamInterface* stream);
-    void onRemoveRemoteStream(PeerConnection* conn,
-                              webrtc::MediaStreamInterface* stream);
+protected:
+
+    /// PeerConnectionManager interface
+    void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
+    void sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp);
+    void onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
+    void onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
 
     void postMessage(const smpl::Message& m);
     void syncMessage(const ipc::Action& action);

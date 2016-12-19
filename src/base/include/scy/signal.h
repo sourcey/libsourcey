@@ -202,7 +202,7 @@ public:
     }
 
     /// Emits the signal to all attached functions.
-    void emit(Args... args) const
+    virtual void emit(Args... args) //const
     {
         for (auto const& slot : slots()) {
             if (slot->alive()) {
