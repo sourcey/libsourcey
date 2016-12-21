@@ -11,8 +11,9 @@
 
 #include "scy/av/win32/directshow.h"
 #include "scy/platform.h"
+#include "scy/logger.h"
 
-
+#include <windows.h>
 #include <dbt.h> // DBT_* & DEV_*
 #include <dshow.h>
 #include <ks.h>

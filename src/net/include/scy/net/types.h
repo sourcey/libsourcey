@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 
-#if defined(SCY_WIN32)
+#if defined(SCY_WIN)
 #include <winsock2.h>
 #include <ws2tcpip.h>
 typedef int socklen_t;

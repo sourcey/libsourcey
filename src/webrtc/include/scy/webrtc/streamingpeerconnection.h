@@ -9,8 +9,8 @@
 /// @{
 
 
-#ifndef SCY_WebRTC_FilePeerConnection_H
-#define SCY_WebRTC_FilePeerConnection_H
+#ifndef SCY_WebRTC_StreamingPeerConnection_H
+#define SCY_WebRTC_StreamingPeerConnection_H
 
 
 #include "scy/av/mediacapture.h"
@@ -21,14 +21,15 @@
 namespace scy {
 
 
-class FilePeerConnection : public PeerConnection
+class StreamingPeerConnection : public PeerConnection
 {
 public:
-    /// Create the local file media stream.
-    FilePeerConnection(PeerConnectionManager* manager,
-                       const std::string& peerid,
-                       const std::string& file);
-    virtual ~FilePeerConnection();
+    /// Create the streaming peer connection.
+    StreamingPeerConnection(PeerConnectionManager* manager,
+                            const std::string& peerid,
+                            const std::string& token,
+                            const std::string& file);
+    virtual ~StreamingPeerConnection();
     virtual rtc::scoped_refptr<webrtc::MediaStreamInterface>
     createMediaStream();
 

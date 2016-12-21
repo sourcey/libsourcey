@@ -20,10 +20,10 @@
 
 #include <ctime>
 #if defined(WIN32)
-#include <wincrypt.h>
 #include <windows.h>
+#include <wincrypt.h>
 #if defined(_WIN32_WCE)
-#include "wce_time.h"
+#include <wce_time.h>
 #endif
 #else
 #include <fcntl.h>

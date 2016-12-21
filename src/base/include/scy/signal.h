@@ -296,7 +296,7 @@ template <typename RT, typename... Args> struct Slot
     void* instance;
     int id;
     int priority;
-    std::atomic_flag flag;
+    std::atomic_flag flag = ATOMIC_FLAG_INIT;
 
     Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr,
          int id = -1, int priority = -1)
@@ -304,7 +304,6 @@ template <typename RT, typename... Args> struct Slot
         , instance(instance)
         , id(id)
         , priority(priority)
-        , flag(ATOMIC_FLAG_INIT)
     {
         flag.test_and_set();
     }

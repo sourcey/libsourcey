@@ -8,6 +8,7 @@
 /// @addtogroup webrtc
 /// @{
 
+
 #ifndef SCY_PeerConnection_H
 #define SCY_PeerConnection_H
 
@@ -33,14 +34,15 @@ public:
         Answer ///< Operating as answerer
     };
 
-    PeerConnection(PeerConnectionManager* manager, const std::string& peerid,
+    PeerConnection(PeerConnectionManager* manager,
+                   const std::string& peerid,
+                   const std::string& token,
                    Mode mode);
     virtual ~PeerConnection();
 
     /// Create the local media stream.
     /// Only necessary when we are creating the offer.
-    virtual rtc::scoped_refptr<webrtc::MediaStreamInterface>
-    createMediaStream();
+    virtual rtc::scoped_refptr<webrtc::MediaStreamInterface> createMediaStream();
 
     /// Create the peer connection once configuration, constraints and
     /// streams have been set.
@@ -58,8 +60,7 @@ public:
     virtual void recvSDP(const std::string& type, const std::string& sdp);
 
     /// Receive a remote candidate.
-    virtual void recvCandidate(const std::string& mid, int mlineindex,
-                               const std::string& sdp);
+    virtual void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
 
     /// Set a custom PeerConnectionFactory object
     /// Must be done before any streams are initiated
@@ -67,6 +68,7 @@ public:
         rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
 
     std::string peerid() const;
+    std::string token() const;
     webrtc::FakeConstraints& constraints();
     webrtc::PeerConnectionFactoryInterface* factory() const;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;
@@ -77,12 +79,9 @@ protected:
     virtual void OnAddStream(webrtc::MediaStreamInterface* stream);
     virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream);
     virtual void OnIceCandidate(const webrtc::IceCandidateInterface* candidate);
-    virtual void OnSignalingChange(
-        webrtc::PeerConnectionInterface::SignalingState new_state);
-    virtual void OnIceConnectionChange(
-        webrtc::PeerConnectionInterface::IceConnectionState new_state);
-    virtual void OnIceGatheringChange(
-        webrtc::PeerConnectionInterface::IceGatheringState new_state);
+    virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state);
+    virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
+    virtual void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state);
     virtual void OnRenegotiationNeeded();
 
     /// inherited from CreateSessionDescriptionObserver
@@ -95,6 +94,7 @@ protected:
 protected:
     PeerConnectionManager* _manager;
     std::string _peerid;
+    std::string _token;
     Mode _mode;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;

@@ -19,6 +19,8 @@
 #include "scy/signal.h"
 
 
+// #ifdef HAVE_FFMPEG
+
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/ffmpeg.h"
@@ -30,6 +32,8 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 #endif
 }
+
+#endif
 
 
 namespace scy {
@@ -145,9 +149,11 @@ public:
     /// This signal is emitted by the platform specific `DeviceWatcher`.
     NullSignal DevicesChanged;
 
-    /// Find base FFmpeg formats
-    AVInputFormat* findVideoInputFormat();
-    AVInputFormat* findAudioInputFormat();
+#ifdef HAVE_FFMPEG
+	/// Find base FFmpeg formats
+	AVInputFormat* findVideoInputFormat();
+	AVInputFormat* findAudioInputFormat();
+#endif
 
 protected:
     std::unique_ptr<DeviceWatcher> _watcher;
@@ -158,6 +164,6 @@ protected:
 } // namespace scy
 
 
-#endif // HAVE_FFMPEG
+// #endif // HAVE_FFMPEG
 
 #endif // SCY_AV_DeviceManager_H

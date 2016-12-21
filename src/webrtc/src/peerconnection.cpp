@@ -21,9 +21,12 @@ namespace scy {
 
 
 PeerConnection::PeerConnection(PeerConnectionManager* manager,
-                               const std::string& peerid, Mode mode)
+                               const std::string& peerid,
+                               const std::string& token,
+                               Mode mode)
     : _manager(manager)
     , _peerid(peerid)
+    , _token(token)
     , _mode(mode)
     , _factory(manager->factory())
     , _peerConnection(nullptr)
@@ -35,8 +38,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
 
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
-    // _constraints.SetAllowDtlsSctpDataChannels(); // triggers error on
-    // CreateAnswer
+    // _constraints.SetAllowDtlsSctpDataChannels(); // triggers error if CreateAnswer
 }
 
 
@@ -248,6 +250,12 @@ void PeerConnection::setPeerConnectionFactory(
 std::string PeerConnection::peerid() const
 {
     return _peerid;
+}
+
+
+std::string PeerConnection::token() const
+{
+    return _token;
 }
 
 

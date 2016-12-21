@@ -9,7 +9,7 @@
 /// @{
 
 
-#include "scy/webrtc/filepeerconnection.h"
+#include "scy/webrtc/streamingpeerconnection.h"
 #include "scy/logger.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/webrtc/videopacketsource.h"
@@ -21,10 +21,11 @@ using std::endl;
 namespace scy {
 
 
-FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
+StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
                                        const std::string& peerid,
+                                       const std::string& token,
                                        const std::string& file)
-    : PeerConnection(manager, peerid, PeerConnection::Offer)
+    : PeerConnection(manager, peerid, token, PeerConnection::Offer)
     , _file(file)
     , _networkThread(rtc::Thread::CreateWithSocketServer())
     , _workerThread(rtc::Thread::Create())
@@ -49,12 +50,12 @@ FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager,
 }
 
 
-FilePeerConnection::~FilePeerConnection()
+StreamingPeerConnection::~StreamingPeerConnection()
 {
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMediaStream()
+rtc::scoped_refptr<webrtc::MediaStreamInterface> StreamingPeerConnection::createMediaStream()
 {
     assert(_mode == Offer);
     assert(_factory);
@@ -69,7 +70,7 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMedia
 }
 
 
-// void FilePeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
+// void StreamingPeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
 // {
 //     switch(new_state) {
 //     case webrtc::PeerConnectionInterface::kStable:
@@ -99,7 +100,7 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMedia
 // }
 
 
-void FilePeerConnection::OnIceConnectionChange(
+void StreamingPeerConnection::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;

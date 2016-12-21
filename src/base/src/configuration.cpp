@@ -348,30 +348,30 @@ bool ScopedConfiguration::getBool(const std::string& key, bool defaultValue,
 
 
 void ScopedConfiguration::setString(const std::string& key,
-                                    const std::string& value, bool defaultScope)
+                                    const std::string& value, bool forceDefaultScope)
 {
-    config.setString(getScopedKey(key, defaultScope), value);
+    config.setString(getScopedKey(key, forceDefaultScope), value);
 }
 
 
 void ScopedConfiguration::setInt(const std::string& key, int value,
-                                 bool defaultScope)
+                                 bool forceDefaultScope)
 {
-    config.setInt(getScopedKey(key, defaultScope), value);
+    config.setInt(getScopedKey(key, forceDefaultScope), value);
 }
 
 
 void ScopedConfiguration::setDouble(const std::string& key, double value,
-                                    bool defaultScope)
+                                    bool forceDefaultScope)
 {
-    config.setDouble(getScopedKey(key, defaultScope), value);
+    config.setDouble(getScopedKey(key, forceDefaultScope), value);
 }
 
 
 void ScopedConfiguration::setBool(const std::string& key, bool value,
-                                  bool defaultScope)
+                                  bool forceDefaultScope)
 {
-    config.setBool(getScopedKey(key, defaultScope), value);
+    config.setBool(getScopedKey(key, forceDefaultScope), value);
 }
 
 
@@ -388,9 +388,9 @@ std::string ScopedConfiguration::getDafaultKey(const std::string& key) const
 
 
 std::string ScopedConfiguration::getScopedKey(const std::string& key,
-                                              bool defaultScope) const
+                                              bool forceDefaultScope) const
 {
-    return defaultScope ? getDafaultKey(key) : getCurrentScope(key);
+    return forceDefaultScope ? getDafaultKey(key) : getCurrentScope(key);
 }
 
 

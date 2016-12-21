@@ -89,7 +89,9 @@ macro(set_module_found module)
     # NOTE: Not including XXX_INCLUDE_DIRS as required var since it may be empty
     list(APPEND _${module}_REQUIRED_VARS ${module}_${component}_LIBRARIES) # ${module}_${component}_INCLUDE_DIRS
     if (NOT ${module}_${component}_FOUND)
-      message(FATAL_ERROR "Required ${module} component ${component} missing. Please recompile ${module} with ${component} enabled.")
+      if (${module}_FIND_REQUIRED)
+        message(FATAL_ERROR "Required ${module} component ${component} missing. Please recompile ${module} with ${component} enabled.")
+      endif()
     #else()
       messageV("  - Required ${module} component ${component} found.")
     endif()
