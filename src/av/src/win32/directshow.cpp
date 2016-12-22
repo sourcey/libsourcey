@@ -29,8 +29,7 @@ namespace av {
 namespace dshow {
 
 
-bool getDeviceCategoryList(Device::Type type, REFGUID category,
-                           std::vector<av::Device>& devices)
+bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::Device>& devices)
 {
     IMoniker* m = nullptr;
 
@@ -51,8 +50,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
         return false;
 
     IEnumMoniker* classenum = nullptr;
-    if (devenum->CreateClassEnumerator(category, (IEnumMoniker**)&classenum,
-                                       0) != S_OK)
+    if (devenum->CreateClassEnumerator(category, (IEnumMoniker**)&classenum, 0) != S_OK)
         return false;
 
     while (classenum->Next(1, &m, nullptr) == S_OK) {
@@ -79,8 +77,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category,
                 devId[i] = '_';
 
         // Get a human friendly name/description
-        if (m->BindToStorage(nullptr, nullptr, IID_IPropertyBag,
-                             (void**)&bag) != S_OK)
+        if (m->BindToStorage(nullptr, nullptr, IID_IPropertyBag, (void**)&bag) != S_OK)
             goto fail;
 
         var.vt = VT_BSTR;
@@ -113,11 +110,9 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     switch (type) {
         case Device::VideoInput:
-            return getDeviceCategoryList(type, CLSID_VideoInputDeviceCategory,
-                                         devices);
+            return getDeviceCategoryList(type, CLSID_VideoInputDeviceCategory, devices);
         case Device::AudioInput:
-            return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory,
-                                         devices);
+            return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory, devices);
         default:
             // assert(0 && "unknown dshow device type");
             DebugL

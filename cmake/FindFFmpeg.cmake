@@ -36,14 +36,14 @@ if (NOT FFmpeg_FOUND)
   # so let's support that out of the box
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
-  option(FFMPEGDIR "User definable FFMPEG Root build directory" "/tmp/ffmpeg_build")
+  option(FFMPEG_ROOT_DIR "FFmpeg root directory (containing `lib` and `include` dirs)" "/tmp/ffmpeg_build")
 
   set(FFmpeg_LIBRARY_HINTS
-    ${FFMPEGDIR}/lib
+    ${FFMPEG_ROOT_DIR}/lib
     $ENV{HOME}/tmp/ffmpeg_build/lib
     $ENV{HOME}/ffmpeg_build/lib)
   set(FFmpeg_INCLUDE_HINTS
-    ${FFMPEGDIR}/include
+    ${FFMPEG_ROOT_DIR}/include
     $ENV{HOME}/tmp/ffmpeg_build/include
     $ENV{HOME}/ffmpeg_build/include)
 
@@ -175,8 +175,6 @@ endif ()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
 mark_as_advanced(FFmpeg_INCLUDE_DIRS
-                FFmpeg_LIBRARIES
-                FFmpeg_DEFINITIONS
-                FFmpeg_FOUND)
-
-message("Finished Find FFmpeg")
+                 FFmpeg_LIBRARIES
+                 FFmpeg_DEFINITIONS
+                 FFmpeg_FOUND)

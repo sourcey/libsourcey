@@ -65,8 +65,10 @@ macro(define_sourcey_module name)
   set_default_project_dependencies(${name} ${ARGN})
 
   message(STATUS "Including module ${name}")
-  # message(STATUS "    Dependencies: ${LibSourcey_
-  #list(APPEND LibSourcey_INCLUDE_DIRS ${dir}/include)y_VENDOR_INCLUDE_DIRS}")
+  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+  #message(STATUS "    Dependencies: ${LibSourcey__VENDOR_INCLUDE_DIRS}")
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk

@@ -53,7 +53,6 @@ macro(find_library_extended prefix)
   # messageV("Debug Names: ${${prefix}_NAMES_RELEASE}")
   # messageV("Release Names: ${${prefix}_NAMES_DEBUG}")
   # messageV("Names: ${${prefix}_NAMES}")
-
 endmacro(find_library_extended)
 
 
@@ -72,6 +71,7 @@ macro(set_component_alias module component)
   set(ALIAS_LIBRARY_DIRS      ${ALIAS}_LIBRARY_DIRS)
   set(ALIAS_DEFINITIONS       ${ALIAS}_CFLAGS_OTHER)
   set(ALIAS_VERSION           ${ALIAS}_VERSION)
+  string(TOUPPER ${ALIAS} ALIAS_UPPER)
 endmacro()
 
 
@@ -92,7 +92,7 @@ macro(set_module_found module)
       if (${module}_FIND_REQUIRED)
         message(FATAL_ERROR "Required ${module} component ${component} missing. Please recompile ${module} with ${component} enabled.")
       endif()
-    #else()
+    else()
       messageV("  - Required ${module} component ${component} found.")
     endif()
   endforeach()
@@ -143,6 +143,7 @@ macro(set_component_found module component)
   #if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
   if (${ALIAS_LIBRARIES}) # AND ${ALIAS_INCLUDE_DIRS} (XXX_INCLUDE_DIRS may be empty)
     messageV("  - ${module} ${component} found.")
+    message("  - ${ALIAS} found.")
     set(${ALIAS_FOUND} TRUE)
     # set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
 
@@ -172,14 +173,16 @@ macro(set_component_found module component)
   else()
     # NOTE: an error message will be displayed in set_module_found
     # if the module is REQUIRED
-    # messageV("  - ${module} ${component} not found.")
+    messageV("  - ${module} ${component} not found.")
   endif()
 
   set(HAVE_${ALIAS} ${${ALIAS_FOUND}})
+  set(HAVE_${ALIAS_UPPER} ${${ALIAS_FOUND}})
 
   get_directory_property(hasParent PARENT_DIRECTORY)
   if(hasParent)
     set(HAVE_${ALIAS} ${${ALIAS_FOUND}} PARENT_SCOPE)
+    set(HAVE_${ALIAS_UPPER} ${${ALIAS_FOUND}} PARENT_SCOPE)
   endif()
 
   mark_as_advanced(${ALIAS_FOUND}
@@ -326,7 +329,7 @@ endmacro()
 # libraries and include directories.
 #
 macro(find_component module component pkgconfig library header)
-   messageV("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
+  messageV("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
 
   # Reset component alias values (force recheck)
   set_component_alias(${module} ${component})
@@ -350,7 +353,7 @@ macro(find_component module component pkgconfig library header)
   messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
   messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
 
-  if( ${ALIAS_FOUND})
+  if(${ALIAS_FOUND})
     set_component_found(${module} ${component})
   endif()
 endmacro()

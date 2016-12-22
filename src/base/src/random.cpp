@@ -7,6 +7,7 @@
 //
 /// @addtogroup base
 /// @{
+//
 // This file uses functions from POCO C++ Libraries (license below).
 //
 

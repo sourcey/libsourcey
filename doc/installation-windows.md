@@ -19,9 +19,9 @@ Here we use CMake to generate project for Visual Studio.
 Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).
 Don't forget to set system path if you download `zip` file version, or if the OpenSSL Installer failed to set the properly:
 
-* `OPENSSL_INCLUDE_DIR` => `{PATH_TO_OPENSSL_INSTALL_DIR}\include`
-* `OPENSSL_LIBRARIES` => `{PATH_TO_OPENSSL_INSTALL_DIR}\lib`
-* `OPENSSL_ROOT_DIR` => `{PATH_TO_OPENSSL_INSTALL_DIR}\openssl`
+* `<PATH_TO_OPENSSL_INSTALL_DIR>\bin`
+
+You can set the `OPENSSL_ROOT_DIR` CMake variable to point to your OpenSSL installation directory and the build system will do the rest.
 
 ### Install FFmpeg
 
@@ -29,8 +29,15 @@ Download and install [FFmpeg for Windows](https://ffmpeg.zeranoe.com/builds/).
 Notice that you need to download both `Shared` and `Dev` version.
 Extract zip files and set them to head of your system's `PATH` (you can just add new item in Windows 10):
 
-* `{PATH_TO_FFMPEG_DEV_DIR}\bin`
-* `{PATH_TO_FFMPEG_SHARED_DIR}\bin`
+* `<PATH_TO_FFMPEG_SHARED_DIR>\bin`
+
+Now you can set the `FFMPEG_ROOT_DIR` CMake variable to point to your FFmpeg dev installation directory and the build system will do the rest.
+
+For example, if you want to build LibSourcey with FFmpeg enabled your CMake command might look something like this:
+
+~~~ bash
+cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\OpenSSL-Win64 -DWITH_FFMPEG=ON -DFFMPEG_ROOT_DIR=E:\dev\vendor\ffmpeg-3.2.2-win64-dev
+~~~
 
 ### Download LibSourcey
 
