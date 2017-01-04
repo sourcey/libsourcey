@@ -47,10 +47,6 @@ set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"      
 set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
 set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
 
-set(BUILD_APPLICATIONS OFF CACHE BOOL "Disable applications" FORCE)
-set(BUILD_SAMPLES OFF CACHE BOOL "Disable samples" FORCE)
-set(BUILD_TESTS OFF CACHE BOOL "Disable tests" FORCE)
-
 # ----------------------------------------------------------------------------
 # LibSourcey build options
 # ----------------------------------------------------------------------------

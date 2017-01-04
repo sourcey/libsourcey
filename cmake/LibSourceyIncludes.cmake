@@ -95,7 +95,7 @@ endmacro()
 # Adds a dependency variables the LibSourcey build variables.
 #
 macro(add_dependency_build_variables name)
-  # print_module_variables(${name})
+  #print_module_variables(${name})
 
   if(${name}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${name}_INCLUDE_DIR}")
@@ -193,9 +193,6 @@ macro(set_default_project_dependencies name)
   set(${name}_LIBRARIES ${ARGN})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
-  if(${name}_LIBRARIES)
-    list(REMOVE_DUPLICATES ${name}_LIBRARIES)
-  endif()
 
   # Allow exclusion of specific libraries
   if (${name}_EXCLUDE_LIBRARIES)
@@ -206,7 +203,7 @@ macro(set_default_project_dependencies name)
     endforeach()
   endif()
 
-  target_link_libraries(${name} "${${name}_LIBRARIES}")
+  target_link_libraries(${name} ${${name}_LIBRARIES})
 endmacro()
 
 

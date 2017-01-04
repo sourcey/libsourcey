@@ -28,7 +28,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 0
+#define USE_SSL 1
 
 
 class SympleApplication : public scy::Application
@@ -339,7 +339,7 @@ int main(int argc, char** argv)
 
         Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LDebug
 
-// Init SSL client context
+		// Init SSL client context
 #if USE_SSL
         net::SSLManager::initNoVerifyClient();
 #endif
@@ -351,10 +351,9 @@ int main(int argc, char** argv)
             app.start();
         }
 
-// Cleanup all singletons
-// http::Client::destroy();
+		// Cleanup all singletons
+		// http::Client::destroy();
 #if USE_SSL
-        // SSLManager::instance().shutdown();
         net::SSLManager::destroy();
 #endif
         GarbageCollector::destroy();

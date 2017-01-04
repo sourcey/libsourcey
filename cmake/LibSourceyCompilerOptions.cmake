@@ -133,7 +133,7 @@ endif()
 if(MSVC)
 
   # Ensure >= 2012 Update 4 for C++11 and Windows XP build support
-  if( MSVC_VERSION LESS 1700 )       # VC10-/VS2010-
+  if(MSVC_VERSION LESS 1700)         # VC10-/VS2010-
     message(FATAL_ERROR "The project requires C++11 features. "
       "You need at least Visual Studio 11 (Microsoft Visual Studio 2012), "
       "with Microsoft Visual C++ Compiler 2012 CTP (v110_xp).")
@@ -240,6 +240,10 @@ if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+
+  # Use x64 by default. This prevents conflicts with dependencies such as OpenSSL
+  # and FFmpeg on Windows.
+  set(CMAKE_GENERATOR_PLATFORM x64)
 
   # allow extern "C" functions throw exceptions
   foreach(flags CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG)

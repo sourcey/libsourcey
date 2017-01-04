@@ -145,14 +145,14 @@ endif()
 
 # Check that the required components were found.
 set(FFmpeg_FOUND 1)
-foreach (_component ${FFmpeg_FIND_COMPONENTS})
-if (FFmpeg_${_component}_FOUND)
-  messageV( "Required component ${_component} present.")
-else ()
-  message(WARNING "Required component ${_component} missing.")
-  set(FFmpeg_FOUND 0)
-endif ()
-endforeach ()
+foreach(_component ${FFmpeg_FIND_COMPONENTS})
+  if (FFmpeg_${_component}_FOUND)
+    messageV( "Required component ${_component} present.")
+  else ()
+    message(WARNING "Required component ${_component} missing.")
+    set(FFmpeg_FOUND 0)
+  endif()
+endforeach()
 
 # Build the include path with duplicates removed.
 if (FFmpeg_INCLUDE_DIRS)
@@ -160,16 +160,16 @@ if (FFmpeg_INCLUDE_DIRS)
 endif ()
 
 # Now set the noncached _FOUND vars for the components.
- foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROC SWSCALE) #AVFILTER
+foreach(_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROC SWSCALE) #AVFILTER
   set_component_found(FFmpeg ${_component})
   messageV("FFmpeg component ${_component} FOUND? ${FFmpeg_${_component}_FOUND}")
- endforeach ()
+endforeach()
 
 # Compile the list of required vars
- set(_FFmpeg_REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS)
- foreach (_component ${FFmpeg_FIND_COMPONENTS})
-   list(APPEND _FFmpeg_REQUIRED_VARS FFmpeg_${_component}_LIBRARIES FFmpeg_${_component}_INCLUDE_DIRS)
- endforeach ()
+set(_FFmpeg_REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS)
+foreach (_component ${FFmpeg_FIND_COMPONENTS})
+  list(APPEND _FFmpeg_REQUIRED_VARS FFmpeg_${_component}_LIBRARIES FFmpeg_${_component}_INCLUDE_DIRS)
+endforeach()
 
 # Give a nice error message if some of the required vars are missing.
 include(FindPackageHandleStandardArgs)

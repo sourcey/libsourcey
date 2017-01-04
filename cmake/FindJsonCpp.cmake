@@ -12,6 +12,7 @@ find_path(JSONCPP_INCLUDE_DIR
   NAMES json/json.h
   PATHS ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp
   NO_DEFAULT_PATH)
+  
 find_library(JSONCPP_LIBRARY
   NAMES jsoncpp libjsoncpp
   PATHS ${LibSourcey_BUILD_DIR}/src/json/vendor/jsoncpp

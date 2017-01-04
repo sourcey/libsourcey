@@ -155,7 +155,7 @@ macro(define_sourcey_module_sample name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  # message(STATUS "Including module sample ${name}")
+  message(STATUS "Including module sample ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -168,6 +168,7 @@ macro(define_sourcey_module_sample name)
   install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/samples/${name}" COMPONENT main)
 endmacro()
 
+
 #
 ### Macro: define_libsourcey_test
 #
@@ -179,8 +180,7 @@ macro(define_libsourcey_test name)
 
   # Add source files
   file(GLOB lib_hdrs "*.h*")
-  #file(GLOB lib_srcs "*.cpp")
-  set(lib_srcs "${name}.cpp")
+  file(GLOB lib_srcs "*.cpp")
 
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
@@ -251,6 +251,7 @@ macro(define_libsourcey_library name)
   install(TARGETS ${name} DESTINATION "bin/${name}" COMPONENT main)
 endmacro()
 
+
 #
 ### Macro: define_sourcey_application
 #
@@ -282,7 +283,7 @@ macro(define_sourcey_application name)
   #  ${CMAKE_SOURCE_DIR}/projects/AnionuPrivate/SpotImpl/include
   # link_directories(${LibSourcey_LIBRARY_DIRS})
 
-  # status("  Linking application ${name}")
+  status("Linking application ${name}")
   # status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")
   # status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")
   # status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")
@@ -300,18 +301,6 @@ macro(define_sourcey_application name)
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
-
-  #if(MSVC)
-  #  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  #  # when compiling with certain externally compiled libraries with VS2012,
-  #  # such as http://ffmpeg.zeranoe.com/builds/
-  #  # This disables safe exception handling by default.
-  #  if(${_MACHINE_ARCH_FLAG} MATCHES X86)
-  #    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-  #    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  #    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
-  #  endif()
-  #endif()
 
   # Add external dependencies and required libraries for linking.
   # target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
@@ -339,6 +328,7 @@ macro(define_sourcey_application name)
     RUNTIME DESTINATION ${${name}_INSTALL_DESTINATION} COMPONENT main)
 
 endmacro()
+
 
 #
 ### Macro: define_sourcey_dependency

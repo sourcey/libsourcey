@@ -143,7 +143,6 @@ macro(set_component_found module component)
   #if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
   if (${ALIAS_LIBRARIES}) # AND ${ALIAS_INCLUDE_DIRS} (XXX_INCLUDE_DIRS may be empty)
     messageV("  - ${module} ${component} found.")
-    message("  - ${ALIAS} found.")
     set(${ALIAS_FOUND} TRUE)
     # set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
 
