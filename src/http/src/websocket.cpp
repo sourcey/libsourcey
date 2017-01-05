@@ -210,7 +210,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer,
 }
 
 
-void WebSocketAdapter::onSocketConnect(net::Socket& socket)
+void WebSocketAdapter::onSocketConnect(net::Socket&)
 {
     TraceS(this) << "On connect" << endl;
 
@@ -221,7 +221,7 @@ void WebSocketAdapter::onSocketConnect(net::Socket& socket)
 }
 
 
-void WebSocketAdapter::onSocketRecv(net::Socket& socket,
+void WebSocketAdapter::onSocketRecv(net::Socket&,
                                     const MutableBuffer& buffer,
                                     const net::Address& peerAddress)
 {
@@ -276,15 +276,15 @@ void WebSocketAdapter::onSocketRecv(net::Socket& socket,
                 }
             } catch (std::exception& exc) {
                 ErrorS(this) << "Parser error: " << exc.what() << endl;
-                socket.setError(exc.what());
+                socket->setError(exc.what());
                 return;
             }
 
             // Emit the result packet
             assert(payload);
             assert(payloadLength);
-            SocketAdapter::onSocketRecv(
-                socket, mutableBuffer(payload, (std::size_t)payloadLength),
+            SocketAdapter::onSocketRecv(*socket.get(), 
+				mutableBuffer(payload, (std::size_t)payloadLength),
                 peerAddress);
         }
         assert(offset == total);
@@ -296,7 +296,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket& socket,
                 handleServerRequest(buffer, peerAddress);
         } catch (std::exception& exc) {
             ErrorS(this) << "Read error: " << exc.what() << endl;
-            socket.setError(exc.what());
+            socket->setError(exc.what());
         }
         return;
     }

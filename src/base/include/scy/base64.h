@@ -231,9 +231,8 @@ inline std::string decode(const T& bytes)
     internal::decodestate state;
     internal::init_decodestate(&state);
 
-    int enclen =
-        internal::decode_block(reinterpret_cast<const char*>(&bytes[0]),
-                               bytes.size(), encbuf.get(), &state);
+    int enclen = internal::decode_block(reinterpret_cast<const char*>(&bytes[0]),
+                                        int(bytes.size()), encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
 
     return res;

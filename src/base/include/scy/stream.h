@@ -84,7 +84,7 @@ public:
 
         int r;
         uv_write_t* req = new uv_write_t;
-        uv_buf_t buf = uv_buf_init((char*)data, len);
+        uv_buf_t buf = uv_buf_init((char*)data, (int)len);
         uv_stream_t* stream = this->ptr<uv_stream_t>();
         bool isIPC = stream->type == UV_NAMED_PIPE &&
                      reinterpret_cast<uv_pipe_t*>(stream)->ipc;
@@ -139,7 +139,7 @@ protected:
     virtual void onRead(const char* data, std::size_t len)
     {
         // TraceL << "On read: " << len << std::endl;
-        Read.emit(*this, data, len);
+        Read.emit(*this, data, (const int)len);
     }
 
     static void handleReadCommon(uv_stream_t* handle, ssize_t nread,
@@ -155,7 +155,7 @@ protected:
             // The stream was closed in error
             // The value of nread is the error number
             // ie. UV_ECONNRESET or UV_EOF etc ...
-            self->setUVError("Stream error", nread);
+            self->setUVError("Stream error", (int)nread);
         }
     }
 

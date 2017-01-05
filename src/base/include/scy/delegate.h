@@ -52,7 +52,7 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
         return func(std::forward<Args>(args)...);
     }
 
-    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& /* that */) const
     {
         return false; // dynamic function delegates cannot be compared
     }

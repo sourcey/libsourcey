@@ -266,8 +266,7 @@ void BasicAuthenticator::setPassword(const std::string& password)
 
 void BasicAuthenticator::authenticate(http::Request& request) const
 {
-    request.setCredentials("Basic",
-                           base64::encode(_username + ":" + _password, 0));
+    request.setCredentials("Basic", base64::encode(_username + ":" + _password, 0));
 }
 
 

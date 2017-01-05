@@ -13,6 +13,7 @@
 #define SCY_Runner_H
 
 
+#include "scy/base.h"
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"

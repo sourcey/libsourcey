@@ -172,8 +172,7 @@ Test* TestRunner::current() const
 
 void TestRunner::run()
 {
-    cout << "==============================================================="
-         << endl;
+    cout << "===============================================================" << endl;
     // cout << "running all tests" << endl;
 
     std::uint64_t start = time::hrtime();
@@ -185,8 +184,7 @@ void TestRunner::run()
             _current = *it;
         }
         cout
-            << "---------------------------------------------------------------"
-            << endl;
+            << "---------------------------------------------------------------" << endl;
         cout << _current->name << " starting" << endl;
         std::uint64_t test_start = time::hrtime();
         try {
@@ -196,14 +194,12 @@ void TestRunner::run()
             cout << "exception thrown: " << exc.what() << endl;
         }
         _current->duration = (time::hrtime() - test_start) / 1e9;
-        cout << _current->name << " ended after " << _current->duration
-             << " seconds" << endl;
+        cout << _current->name << " ended after " << _current->duration << " seconds" << endl;
     }
 
     duration = (time::hrtime() - start) / 1e9;
 
-    cout << "---------------------------------------------------------------"
-         << endl;
+    cout << "---------------------------------------------------------------" << endl;
     cout << "all tests completed after " << duration << " seconds" << endl;
     // cout << "summary: " << endl;
 

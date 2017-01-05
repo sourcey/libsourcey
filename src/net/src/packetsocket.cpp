@@ -30,7 +30,7 @@ PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
 }
 
 
-void PacketSocketAdapter::onSocketRecv(Socket& socket,
+void PacketSocketAdapter::onSocketRecv(Socket& sock,
                                        const MutableBuffer& buffer,
                                        const Address& peerAddress)
 {
@@ -40,8 +40,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& socket,
     const char* buf = bufferCast<const char*>(buffer);
     std::size_t len = buffer.size();
     std::size_t nread = 0;
-    while (len > 0 &&
-           (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
+    while (len > 0 && (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
         assert(nread > 0);
         pkt->info = new PacketInfo(this->socket, peerAddress);
         onPacket(*pkt);

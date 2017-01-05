@@ -30,9 +30,8 @@ ClientConnection::ClientConnection(const URL& url,
                                    const net::Socket::Ptr& socket)
     : Connection(socket)
     , _url(url)
-    ,
-    // _readStream(nullptr),
-    _connect(false)
+    //, _readStream(nullptr)
+    , _connect(false)
     , _active(false)
     , _complete(false)
 {
@@ -94,7 +93,7 @@ int ClientConnection::send(const char* data, std::size_t len, int flags)
         return Connection::send(data, len);
     else
         _outgoingBuffer.push_back(std::string(data, len));
-    return len;
+    return (int)len;
     // return Connection::send(data, len, flags);
 }
 
@@ -210,8 +209,6 @@ void ClientConnection::onHeaders()
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
     TraceS(this) << "On payload: " << buffer.size() << endl;
-    // TraceS(this) << "@@@@@@@@@@@@@@@@@ payload: " << buffer.size() << ": "
-    //   << std::string(bufferCast<const char*>(buffer), 100) << endl;
 
     // Update download progress
     IncomingProgress.update(buffer.size());
@@ -307,7 +304,7 @@ void Client::shutdown()
     Shutdown.emit(/*this*/);
 
     //_connections.clear();
-    auto conns = _connections;
+	auto conns = _connections;
     for (auto conn : conns) {
         TraceS(this) << "Shutdown: " << conn << endl;
         conn->close(); // close and remove via callback
@@ -324,8 +321,7 @@ void Client::addConnection(ClientConnection::Ptr conn)
     //     removeConnection(conn.get());
     // };
 
-    conn->Close +=
-        slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
+    conn->Close += slot(this, &Client::onConnectionClose, -1, -1); // lowest priority
     _connections.push_back(conn);
 }
 

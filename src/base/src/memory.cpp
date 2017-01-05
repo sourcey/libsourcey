@@ -60,7 +60,7 @@ GarbageCollector::~GarbageCollector()
 
 void GarbageCollector::finalize()
 {
-    TraceL << "Finalize" << std::endl;
+    // TraceL << "Finalize" << std::endl;
 
     // Ensure the loop is not running and that the
     // calling thread is the main thread.
@@ -83,12 +83,6 @@ void GarbageCollector::finalize()
     assert(_ready.empty());
 
     TraceL << "Finalize: OK" << std::endl;
-}
-
-
-void onPrintHandle(uv_handle_t* handle, void* /* arg */)
-{
-    DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
 
@@ -132,8 +126,10 @@ void GarbageCollector::runAsync()
 
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left
-            uv_walk(_handle.loop(), onPrintHandle, nullptr);
-// assert(_handle.loop()->active_handles <= 1);
+            uv_walk(_handle.loop(), [](uv_handle_t* handle, void* /* arg */) {
+				DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
+			}, nullptr);
+            // assert(_handle.loop()->active_handles <= 1);
 #endif
         }
     }

@@ -98,15 +98,13 @@
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
-#pragma warning(disable : 4201) // nonstandard extension used : nameless
-                                // struct/union
+#pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union
 #pragma warning(disable : 4251) // ... needs to have dll-interface warning
 #pragma warning(disable : 4355) // 'this' : used in base member initializer list
 #pragma warning(disable : 4996) // VC++ 8.0 deprecation warnings
-#pragma warning(disable : 4351) // new behavior: elements of array '...' will be
-                                // default initialized
-#pragma warning(disable : 4675) // resolved overload was found by
-                                // argument-dependent lookup
+#pragma warning(disable : 4351) // new behavior: elements of array '...' will be default initialized
+#pragma warning(disable : 4675) // resolved overload was found by argument-dependent lookup
+#pragma warning(disable : 4100) // MSVS 'unreferenced formal parameter' warnings showing false positives
 #endif
 
 #endif // SCY_WIN

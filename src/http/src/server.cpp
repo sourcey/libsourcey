@@ -66,12 +66,13 @@ void Server::shutdown()
         socket->close();
     }
 
-    Shutdown.emit(/*this*/);
-
-    for (auto conn : this->connections) {
+	auto conns = this->connections;
+    for (auto conn : conns) {
         conn->close(); // close and remove via callback
     }
     assert(this->connections.empty());
+
+	Shutdown.emit(/*this*/);
 }
 
 
@@ -133,7 +134,7 @@ void Server::onSocketAccept(const net::TCPSocket::Ptr& sock)
 }
 
 
-void Server::onSocketClose(net::Socket& socket)
+void Server::onSocketClose(net::Socket&)
 {
     TraceS(this) << "On server socket close" << endl;
 }

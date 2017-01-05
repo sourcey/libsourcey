@@ -120,15 +120,14 @@ bool isWindowsXpOrLater()
 }
 
 
-#define STACK_ARRAY(TYPE, LEN)                                                 \
-    static_cast<TYPE*>(::alloca((LEN) * sizeof(TYPE)))
+#define STACK_ARRAY(TYPE, LEN) static_cast<TYPE*>(::alloca((LEN) * sizeof(TYPE)))
 
 
 std::wstring toUtf16(const char* utf8, std::size_t len)
 {
-    int len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
+    auto len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, int(len), NULL, 0);
     wchar_t* ws = STACK_ARRAY(wchar_t, len16);
-    ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, ws, len16);
+    ::MultiByteToWideChar(CP_UTF8, 0, utf8, int(len), ws, len16);
     return std::wstring(ws, len16);
 }
 
@@ -139,10 +138,9 @@ std::wstring toUtf16(const std::string& str)
 
 std::string toUtf8(const wchar_t* wide, std::size_t len)
 {
-    int len8 =
-        ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
+	auto len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), NULL, 0, NULL, NULL);
     char* ns = STACK_ARRAY(char, len8);
-    ::WideCharToMultiByte(CP_UTF8, 0, wide, len, ns, len8, NULL, NULL);
+    ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), ns, len8, NULL, NULL);
     return std::string(ns, len8);
 }
 

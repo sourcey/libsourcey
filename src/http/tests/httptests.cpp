@@ -60,8 +60,7 @@ int main(int argc, char** argv)
         expect(url6.authority() == "user@www.sourcey.com:80");
         expect(url6.path() == "/index.html");
 
-        http::URL url7("http", "www.sourcey.com", "/index.html", "query=test",
-                       "fragment");
+        http::URL url7("http", "www.sourcey.com", "/index.html", "query=test", "fragment");
         expect(url7.scheme() == "http");
         expect(url7.authority() == "www.sourcey.com");
         expect(url7.path() == "/index.html");
@@ -69,8 +68,7 @@ int main(int argc, char** argv)
         expect(url7.query() == "query=test");
         expect(url7.fragment() == "fragment");
 
-        http::URL url8("http", "www.sourcey.com",
-                       "/index.html?query=test#fragment");
+        http::URL url8("http", "www.sourcey.com", "/index.html?query=test#fragment");
         expect(url8.scheme() == "http");
         expect(url8.authority() == "www.sourcey.com");
         expect(url8.path() == "/index.html");
@@ -89,10 +87,8 @@ int main(int argc, char** argv)
                                  "encoding=Base64&packetizer=chunked&rand=0."
                                  "09983996045775712",
                                  params);
-        for (NVCollection::ConstIterator it = params.begin();
-             it != params.end(); ++it) {
-            DebugL << "URL Parameter: " << it->first << ": " << it->second
-                   << endl;
+        for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
+            DebugL << "URL Parameter: " << it->first << ": " << it->second << endl;
         }
 
         expect(params.get("format") == "MJPEG");
@@ -113,47 +109,39 @@ int main(int argc, char** argv)
     //
 
     describe("client connection download", []() {
-        std::string filename("zlib-1.2.8.tar.gz");
-        auto conn = http::Client::instance().createConnection(
-            "http://zlib.net/zlib-1.2.8.tar.gz");
+		std::string path(SCY_BUILD_DIR);
+		fs::addnode(path, "zlib-1.2.8.tar.gz");
+        auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
         // std::string filename("7z920.tar.bz2");
-        // auto conn =
-        // http::Client::instance().createConnection("http://d.7-zip.org/a/7z920.tar.bz2");
+        // auto conn = http::Client::instance().createConnection("http://d.7-zip.org/a/7z920.tar.bz2");
         conn->Complete += [&](const http::Response& response) {
             std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
-        conn->setReadStream(new std::ofstream(
-            filename, std::ios_base::out | std::ios_base::binary));
+        conn->setReadStream(new std::ofstream(path, std::ios_base::out | std::ios_base::binary));
         conn->send();
         uv::runDefaultLoop();
-        expect(fs::exists(filename));
-        expect(crypto::checksum("MD5", filename) ==
-               "44d667c142d7cda120332623eab69f40");
-        fs::unlink(filename);
+        expect(fs::exists(path));
+        expect(crypto::checksum("MD5", path) == "44d667c142d7cda120332623eab69f40");
+        fs::unlink(path);
     });
 
     // describe("secure client connection download", []() {
-    //     auto conn =
-    //     http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
-    //     conn->Complete += sdelegate(&context,
-    //     &CallbackContext::onClientConnectionDownloadComplete);
+    //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
+    //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
     //     conn->request().setMethod("GET");
     //     conn->request().setKeepAlive(false);
-    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe",
-    //     std::ios_base::out | std::ios_base::binary));
+    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
     //     conn->send();
     //     uv::runDefaultLoop();
     // });
 
     describe("client connection", []() {
-        auto conn =
-            http::Client::instance().createConnection("http://google.com/");
-        // conn->Complete += sdelegate(&context,
-        // &CallbackContext::onClientConnectionComplete);
+        auto conn = http::Client::instance().createConnection("http://google.com/");
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->Complete += [&](const http::Response& response) {
-            std::cout << "Server response: " << response << endl;
+            // std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
@@ -167,10 +155,9 @@ int main(int argc, char** argv)
     describe("secure client connection", []() {
         auto conn =
             http::Client::instance().createConnection("https://google.com/");
-        // conn->Complete += sdelegate(&context,
-        // &CallbackContext::onClientConnectionComplete);
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->Complete += [&](const http::Response& response) {
-            std::cout << "Server response: " << response << endl;
+            // std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
@@ -188,15 +175,14 @@ int main(int argc, char** argv)
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://sourcey.com");
         conn.Headers += [&](http::Response& response) {
-            std::cout << "On response headers: " << response << endl;
+			// std::cout << "On response headers: " << response << endl;
         };
         conn.Payload += [&](const MutableBuffer& buffer) {
-            std::cout << "On payload: " << buffer.size() << ": " << buffer.str()
-                      << endl;
+			// std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
         };
         conn.Complete += [&](const http::Response& response) {
-            std::cout << "On response complete: " << response
-                      << conn.readStream<std::stringstream>().str() << endl;
+			// std::cout << "On response complete: " << response
+			//           << conn.readStream<std::stringstream>().str() << endl;
 
             // Force connection closure if the other side hasn't already
             conn.close();
@@ -303,5 +289,6 @@ int main(int argc, char** argv)
 
     test::runAll();
 
+	http::Client::destroy();
     return test::finalize();
 }

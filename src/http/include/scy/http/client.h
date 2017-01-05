@@ -60,8 +60,7 @@ public:
     /// Throws an exception if the socket is not already or connected.
     virtual int send(const char* data, std::size_t len, int flags = 0);
     // virtual int send(const std::string& buf, int flags = 0);
-    // virtual void sendData(const char* buf, std::size_t len); //, int flags =
-    // 0
+    // virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
     // virtual void sendData(const std::string& buf); //, int flags = 0
 
     /// Forcefully closes the HTTP connection.
@@ -98,14 +97,10 @@ public:
     //
     /// Status signals
 
-    NullSignal Connect; ///< Signals when the client socket is connected and
-                        ///data can flow
-    Signal<void(Response&)>
-        Headers; ///< Signals when the response HTTP header has been received
-    Signal<void(const MutableBuffer&)>
-        Payload; ///< Signals when raw data is received
-    Signal<void(const Response&)>
-        Complete; ///< Signals when the HTTP transaction is complete
+    NullSignal Connect;                         ///< Signals when the client socket is connected and data can flow
+    Signal<void(Response&)> Headers;            ///< Signals when the response HTTP header has been received
+    Signal<void(const MutableBuffer&)> Payload; ///< Signals when raw data is received
+    Signal<void(const Response&)>  Complete;    ///< Signals when the HTTP transaction is complete
 
 protected:
     /// Connects to the server endpoint.
@@ -186,8 +181,7 @@ createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
             deleter::Deferred<ConnectionT>());
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
     } else
-        throw std::runtime_error("Unknown connection type for URL: " +
-                                 url.str());
+        throw std::runtime_error("Unknown connection type for URL: " + url.str());
 
     return conn;
 }
