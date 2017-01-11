@@ -36,7 +36,7 @@ if (NOT FFmpeg_FOUND)
   # so let's support that out of the box
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
-  option(FFMPEG_ROOT_DIR "FFmpeg root directory (containing `lib` and `include` dirs)" "/tmp/ffmpeg_build")
+  set(FFMPEG_ROOT_DIR "/tmp/ffmpeg_build" CACHE STRING "FFmpeg root directory (containing `lib` and `include` dirs)")
 
   set(FFmpeg_LIBRARY_HINTS
     ${FFMPEG_ROOT_DIR}/lib
