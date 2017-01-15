@@ -13,6 +13,7 @@
 #define SCY_PACKET_IO_H
 
 
+#include "scy/base.h"
 #include "scy/packetstream.h"
 #include <fstream>
 #include <iostream>
@@ -28,7 +29,7 @@ namespace scy {
 /// class that derives from `std::istream`. It's most regularly used for reading
 /// input files.
 ///
-class ThreadedStreamReader : public PacketSource, public basic::Startable
+class SCY_EXTERN ThreadedStreamReader : public PacketSource, public basic::Startable
 {
 public:
     ThreadedStreamReader(std::istream* is)
@@ -95,7 +96,7 @@ protected:
 /// class that derives from `std::ostream`. It's most regularly used for writing
 /// output files.
 ///
-class StreamWriter : public PacketProcessor
+class SCY_EXTERN StreamWriter : public PacketProcessor
 {
 public:
     StreamWriter(std::ostream* stream)

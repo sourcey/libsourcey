@@ -26,6 +26,8 @@
                                 // functions with lambdas
 #endif
 
+
+#include "scy/base.h"
 #include "scy/error.h"
 #include "uv.h"
 #include <assert.h>
@@ -100,7 +102,7 @@ inline void stopDefaultLoop()
 
 /// A base class for managing a `libuv` handle during it's lifecycle and
 /// safely handling its asynchronous destruction mechanism.
-class Handle
+class SCY_EXTERN Handle
 {
 public:
     Handle(uv_loop_t* loop = nullptr, void* handle = nullptr);

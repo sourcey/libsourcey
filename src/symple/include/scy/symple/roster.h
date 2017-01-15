@@ -24,7 +24,7 @@ namespace smpl {
 
 /// The Roster provides a registry for active network
 /// peers indexed by session ID.
-class Roster : public LiveCollection<std::string, Peer>
+class SCY_EXTERN Roster : public LiveCollection<std::string, Peer>
 {
 public:
     typedef LiveCollection<std::string, Peer> Manager;

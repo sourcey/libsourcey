@@ -19,7 +19,7 @@
 namespace scy {
 namespace json {
 
-class Configuration : public scy::Configuration
+class SCY_EXTERN Configuration : public scy::Configuration
 {
 public:
     Configuration();

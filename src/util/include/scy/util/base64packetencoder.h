@@ -23,7 +23,7 @@ namespace scy {
 
 
 /// @addtogroup util
-class Base64PacketEncoder : public PacketProcessor
+class SCY_EXTERN Base64PacketEncoder : public PacketProcessor
 {
 public:
     Base64PacketEncoder()

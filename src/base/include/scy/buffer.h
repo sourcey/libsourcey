@@ -13,6 +13,7 @@
 #define SCY_Buffer_H
 
 
+#include "scy/base.h"
 #include "scy/byteorder.h"
 #include "scy/memory.h"
 
@@ -37,7 +38,7 @@ typedef std::vector<char> Buffer;
 /// The MutableBuffer class provides a safe representation of a
 /// buffer that can be modified. It does not own the underlying
 /// data, and so is cheap to copy or assign.
-class MutableBuffer
+class SCY_EXTERN MutableBuffer
 {
 public:
     /// Construct an empty buffer.
@@ -122,7 +123,7 @@ inline MutableBuffer mutableBuffer(const Buffer& buf)
 /// The ConstBuffer class provides a safe representation of a
 /// buffer that cannot be modified. It does not own the underlying
 /// data, and so is cheap to copy or assign.
-class ConstBuffer
+class SCY_EXTERN ConstBuffer
 {
 public:
     /// Construct an empty buffer.
@@ -226,7 +227,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 
 
 /// Class for reading binary streams.
-class BitReader
+class SCY_EXTERN BitReader
 {
 public:
     BitReader(const char* bytes, std::size_t size,
@@ -323,7 +324,7 @@ private:
 /// when writing passed the buffer capacity.
 /// All other cases will throw a std::out_of_range error when writing
 /// past the buffer capacity.
-class BitWriter
+class SCY_EXTERN BitWriter
 {
 public:
     BitWriter(char* bytes, std::size_t size,

@@ -240,15 +240,14 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 
         // Filter elements
         if (members[i] == "elements") {
-            for (unsigned i = 0; i < root()["elements"].size(); i++) {
-                json::Value& element = root()["elements"][i];
+            for (unsigned x = 0; x < root()["elements"].size(); x++) {
+                json::Value& element = root()["elements"][x];
                 std::string curID = element["id"].asString();
-                if ( // element.isObject() &&
+                if (// element.isObject() &&
                     // element.isMember("id") &&
                     partial ? curID.find(id) != std::string::npos
                             : curID == id) {
-                    TraceL << "Symple form: Removing redundant: " << curID
-                           << endl;
+                    TraceL << "Symple form: Removing redundant: " << curID << endl;
                     match = true;
                 } else {
                     TraceL << "Symple form: Keeping: " << curID << endl;

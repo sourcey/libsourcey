@@ -32,7 +32,7 @@ namespace scy {
 ///   * Shutdown signal (Ctrl-C) handling
 ///   * Garbage collection
 ///
-class Application
+class SCY_EXTERN Application
 {
 public:
     /// Constructor.

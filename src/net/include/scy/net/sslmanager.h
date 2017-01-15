@@ -27,13 +27,13 @@ namespace scy {
 namespace net {
 
 
-class VerificationErrorDetails;
+class SCY_EXTERN VerificationErrorDetails;
 
 
 /// SSLManager is a singleton for holding the default server/client
 /// Context and handling callbacks for certificate verification errors
 /// and private key passphrases.
-class SSLManager
+class SCY_EXTERN SSLManager
 {
 public:
     /// Initializes the server side of the SSLManager server-side SSLContext.
@@ -130,7 +130,7 @@ private:
 //
 
 /// A utility class for certificate error handling.
-class VerificationErrorDetails
+class SCY_EXTERN VerificationErrorDetails
 {
 public:
     /// Creates the VerificationErrorDetails. _ignoreError is per default set to

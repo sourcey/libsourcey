@@ -35,7 +35,7 @@ namespace net {
 ///
 /// The Context class is also used to control
 /// SSL session caching on the server and client side.
-class SSLContext
+class SCY_EXTERN SSLContext
 {
 public:
     typedef std::shared_ptr<SSLContext> Ptr;

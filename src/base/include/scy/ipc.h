@@ -13,6 +13,7 @@
 #define SCY_IPC_H
 
 
+#include "scy/base.h"
 #include "scy/synchronizer.h"
 
 #include <mutex>
@@ -48,7 +49,7 @@ struct Action
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
 template <typename TAction = ipc::Action>
-class Queue
+class SCY_EXTERN Queue
 {
 public:
     Queue() {}
@@ -112,7 +113,7 @@ protected:
 /// synchronizing with.
 ///
 template <typename TAction = ipc::Action>
-class SyncQueue : public Queue<TAction>
+class SCY_EXTERN SyncQueue : public Queue<TAction>
 {
 public:
     SyncQueue(uv::Loop* loop = uv::defaultLoop())

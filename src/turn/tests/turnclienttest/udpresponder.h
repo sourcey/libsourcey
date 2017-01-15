@@ -48,20 +48,19 @@ public:
         stop();
     }
 
-    void start(const net::Address& relayedAddr)
+    void start(const net::Address& relayAddr)
     {
-        DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
+        DebugS(this) << id << ": Starting on: " << relayAddr << endl;
 
         try {
-            this->relayedAddr = relayedAddr;
+            this->relayedAddr = relayAddr;
 
             // socket.bind(net::Address("0.0.0.0", 0));
             // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
             // socket.bind(net::Address("0.0.0.0", 4020));
-            socket.connect(relayedAddr);
+            socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            errorL("UDPResponder", this) << id << ": ERROR: " << exc.what()
-                                         << endl;
+            errorL("UDPResponder", this) << id << ": ERROR: " << exc.what() << endl;
             assert(false);
         }
     }

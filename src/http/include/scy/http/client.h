@@ -27,8 +27,8 @@ namespace scy {
 namespace http {
 
 
-class Client;
-class ClientConnection : public Connection
+class SCY_EXTERN Client;
+class SCY_EXTERN ClientConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ClientConnection> Ptr;
@@ -112,7 +112,6 @@ protected:
     http::Message* outgoingHeader();
 
     void onSocketConnect(net::Socket& socket);
-    void onHostResolved(void*, const net::DNSResult& result);
 
 protected:
     URL _url;
@@ -131,7 +130,7 @@ typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
 //
 
 
-class ClientAdapter : public ConnectionAdapter
+class SCY_EXTERN ClientAdapter : public ConnectionAdapter
 {
 public:
     ClientAdapter(ClientConnection& connection)
@@ -192,7 +191,7 @@ createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 //
 
 
-class Client
+class SCY_EXTERN Client
 {
 public:
     Client();
@@ -255,7 +254,7 @@ createConnection(const URL& url, http::Client* client = nullptr,
 
 
 #if 0
-class SecureClientConnection: public ClientConnection
+class SCY_EXTERN SecureClientConnection: public ClientConnection
 {
 public:
     SecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
@@ -269,7 +268,7 @@ public:
 };
 
 
-class WebSocketClientConnection: public ClientConnection
+class SCY_EXTERN WebSocketClientConnection: public ClientConnection
 {
 public:
     WebSocketClientConnection(Client* client, const URL& url) : //, const net::Address& address
@@ -284,7 +283,7 @@ public:
 };
 
 
-class WebSocketSecureClientConnection: public ClientConnection
+class SCY_EXTERN WebSocketSecureClientConnection: public ClientConnection
 {
 public:
     WebSocketSecureClientConnection(Client* client, const URL& url) : //, const net::Address& address

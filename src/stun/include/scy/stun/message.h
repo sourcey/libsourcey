@@ -25,7 +25,7 @@ namespace stun {
 typedef std::string TransactionID;
 
 
-class Message : public IPacket
+class SCY_EXTERN Message : public IPacket
 {
 public:
     enum MethodType

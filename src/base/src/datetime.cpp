@@ -833,7 +833,7 @@ std::string Timezone::dstName()
 // Timezone: Unix
 //
 
-class TZInfo
+class SCY_EXTERN TZInfo
 {
 public:
     TZInfo() { tzset(); }

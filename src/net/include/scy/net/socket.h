@@ -32,13 +32,12 @@ namespace net {
 template <class SocketT>
 inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 {
-    return std::shared_ptr<SocketT>(new SocketT(loop),
-                                    deleter::Deferred<SocketT>());
+    return std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
 }
 
 
 /// Socket is the base socket implementation from which all sockets derive.
-class Socket : public SocketAdapter
+class SCY_EXTERN Socket : public SocketAdapter
 {
 public:
     typedef std::shared_ptr<Socket> Ptr;
@@ -173,7 +172,7 @@ struct PacketInfo : public IPacketInfo
 ///
 /// The referenced packet buffer lifetime is only guaranteed
 /// for the duration of the receiver callback.
-class SocketPacket : public RawPacket
+class SCY_EXTERN SocketPacket : public RawPacket
 {
 public:
     /// PacketInfo pointer

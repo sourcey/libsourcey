@@ -25,7 +25,7 @@ namespace scy {
 namespace net {
 
 
-class TCPSocket : public Stream, public net::Socket
+class SCY_EXTERN TCPSocket : public Stream, public net::Socket
 {
 public:
     typedef std::shared_ptr<TCPSocket> Ptr;

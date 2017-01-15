@@ -13,6 +13,7 @@
 #define SCY_PacketTransaction_H
 
 
+#include "scy/base.h"
 #include "scy/interface.h"
 #include "scy/packet.h"
 #include "scy/stateful.h"
@@ -57,7 +58,7 @@ struct TransactionState : public State
 /// PacketTransactions are fire and forget. The object will be deleted
 /// after a successful response or a timeout.
 template <class PacketT>
-class PacketTransaction : public basic::Sendable,
+class SCY_EXTERN PacketTransaction : public basic::Sendable,
                           public Stateful<TransactionState>
 {
 public:

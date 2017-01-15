@@ -23,7 +23,7 @@ namespace scy {
 namespace net {
 
 
-class UDPSocket : public net::Socket, public uv::Handle
+class SCY_EXTERN UDPSocket : public net::Socket, public uv::Handle
 {
 public:
     typedef std::shared_ptr<UDPSocket> Ptr;

@@ -41,7 +41,7 @@ public:
         stop();
     }
 
-    void start(const net::Address& relayedAddr)
+    void start(const net::Address& /* relayedAddr */)
     {
         DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
 
@@ -52,15 +52,14 @@ public:
             // will be received below.
             socket.connect(relayedAddr);
         } catch (std::exception& exc) {
-            errorL("TCPResponder", this) << id << ": ERROR: " << exc.what()
-                                         << endl;
+            errorL("TCPResponder", this) << id << ": ERROR: " << exc.what() << endl;
             assert(false);
         }
     }
 
     void stop() { timer.stop(); }
 
-    void onSocketConnect(net::Socket& socket)
+    void onSocketConnect(net::Socket& /* socket */)
     {
         // Send some early media to client
         sendLatencyCheck();
@@ -70,13 +69,12 @@ public:
         timer.start();
     }
 
-    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
+    void onSocketRecv(net::Socket& /* socket */, const MutableBuffer& buffer,
                       const net::Address& peerAddress)
     {
         // assert(&packet.info->socket == &socket);
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload
-                     << std::endl;
+        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
 
         // assert(0 && "ok");
         // assert(payload == "hello peer");
@@ -85,12 +83,12 @@ public:
         // socket.send(payload.c_str(), payload.size());
     }
 
-    void onSocketError(net::Socket& socket, const scy::Error& error)
+    void onSocketError(net::Socket& /* socket */, const scy::Error& error)
     {
         DebugS(this) << id << ": On error: " << error.message << std::endl;
     }
 
-    void onSocketClose(net::Socket& socket)
+    void onSocketClose(net::Socket& /* socket */)
     {
         DebugS(this) << id << ": On close" << std::endl;
         stop();

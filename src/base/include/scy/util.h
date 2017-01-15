@@ -15,6 +15,7 @@
 #define SCY_Util_H
 
 
+#include "scy/base.h"
 #include "scy/error.h"
 
 #include <cstdint>

@@ -22,7 +22,7 @@ namespace scy {
 namespace av {
 
 
-class FormatRegistry
+class SCY_EXTERN FormatRegistry
 {
 public:
     static FormatRegistry& instance();

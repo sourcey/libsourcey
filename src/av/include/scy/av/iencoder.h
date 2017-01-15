@@ -75,7 +75,7 @@ struct EncoderOptions
 };
 
 /// This is the abstract class for all encoders.
-class IEncoder : public Stateful<EncoderState>
+class SCY_EXTERN IEncoder : public Stateful<EncoderState>
 {
 public:
     enum Type
@@ -113,7 +113,7 @@ typedef IEncoder IPacketEncoder; /// 0.8.x compatibility
 
 /*/// This class extends the IEncoder interface to add
 /// PacketStream compatibility.
-class IPacketEncoder: public IEncoder, public PacketProcessor
+class SCY_EXTERN IPacketEncoder: public IEncoder, public PacketProcessor
 {
 public:
     /// Encodes the packet, and pushes it downstream.

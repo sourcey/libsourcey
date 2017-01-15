@@ -28,7 +28,7 @@ namespace scy {
 
 
 template <class T = IPacket>
-class SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
+class SCY_EXTERN SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
 {
 public:
     typedef SyncQueue<T> Queue;
@@ -141,7 +141,7 @@ SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 
 
 template <class T = IPacket>
-class AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
+class SCY_EXTERN AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
 {
 public:
     typedef AsyncQueue<T> Queue;

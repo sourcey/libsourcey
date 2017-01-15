@@ -52,7 +52,7 @@ struct TCPInitiator : public TCPClientObserver
         }
     }
 
-    void onClientStateChange(turn::Client& client, turn::ClientState& state,
+    void onClientStateChange(turn::Client& /* client */, turn::ClientState& state,
                              const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
@@ -83,7 +83,7 @@ struct TCPInitiator : public TCPClientObserver
     }
 
     void onRelayConnectionCreated(
-        TCPClient& client, const net::TCPSocket& socket,
+        TCPClient& /* client */, const net::TCPSocket& socket,
         const net::Address& peerAddr) // std::uint32_t connectionID,
     {
         DebugS(this) << id << ": Connection Created: " << peerAddr << endl;
@@ -94,14 +94,14 @@ struct TCPInitiator : public TCPClientObserver
         ConnectionCreated.emit(peerAddr);
     }
 
-    void onRelayConnectionClosed(TCPClient& client,
+    void onRelayConnectionClosed(TCPClient& /* client */,
                                  const net::TCPSocket& socket,
                                  const net::Address& peerAddr)
     {
         DebugS(this) << id << ": Connection Closed" << endl;
     }
 
-    void onRelayDataReceived(turn::Client& client, const char* data,
+    void onRelayDataReceived(turn::Client& /* client */, const char* data,
                              std::size_t size, const net::Address& peerAddr)
     {
         std::string payload(data, size);
@@ -140,7 +140,7 @@ struct TCPInitiator : public TCPClientObserver
         client.sendData(data, size, peerAddr);
     }
 
-    void onAllocationPermissionsCreated(turn::Client& client,
+    void onAllocationPermissionsCreated(turn::Client& /* client */,
                                         const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;

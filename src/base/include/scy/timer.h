@@ -13,6 +13,7 @@
 #define SCY_Timer_H
 
 
+#include "scy/base.h"
 #include "scy/runner.h"
 #include "scy/datetime.h"
 #include "scy/memory.h"
@@ -26,7 +27,7 @@ namespace scy {
 
 
 /// Asynchronous event based timer.
-class Timer : public Runner
+class SCY_EXTERN Timer : public Runner
 {
 public:
     /// Create a timer.

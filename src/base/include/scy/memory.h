@@ -13,6 +13,7 @@
 #define SCY_Memory_H
 
 
+#include "scy/base.h"
 #include "scy/logger.h"
 #include <mutex>
 #include "scy/singleton.h"
@@ -27,11 +28,11 @@
 namespace scy {
 
 
-class ScopedPointer;
+class SCY_EXTERN ScopedPointer;
 
 
 /// Garbage collector for safe memory management and deferred pointer deletion.
-class GarbageCollector
+class SCY_EXTERN GarbageCollector
 {
 public:
     GarbageCollector();
@@ -139,7 +140,7 @@ template <class T> struct Array
 
 /// ScopedPointer provides an interface for holding
 /// and ansynchronously deleting a pointer in various ways.
-class ScopedPointer
+class SCY_EXTERN ScopedPointer
 {
 public:
     ScopedPointer() {}
@@ -150,7 +151,7 @@ public:
 /// ScopedRawPointer implements the ScopedPointer interface
 /// to provide a method for deleting a raw pointer.
 template <class T, typename D = std::default_delete<T>>
-class ScopedRawPointer : public ScopedPointer
+class SCY_EXTERN ScopedRawPointer : public ScopedPointer
 {
 public:
     void* ptr;
@@ -176,7 +177,7 @@ public:
 /// the ScopedSharedPointer instance is deleted, which makes it useful
 /// for certain asyncronous scenarios.
 template <class T> //, typename D = std::default_delete<T>
-class ScopedSharedPointer : public ScopedPointer
+class SCY_EXTERN ScopedSharedPointer : public ScopedPointer
 {
 public:
     std::shared_ptr<T> ptr;
@@ -233,7 +234,7 @@ template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
 ///
 /// Reference-counted objects inhibit construction by
 /// copying and assignment.
-class SharedObject
+class SCY_EXTERN SharedObject
 {
 public:
     /// Creates the SharedObject with an

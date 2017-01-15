@@ -13,6 +13,7 @@
 #define SCY_Stateful_H
 
 
+#include "scy/base.h"
 #include "scy/signal.h"
 
 #include <iostream>
@@ -28,7 +29,7 @@ namespace scy {
 /// extended and passed to implementations of the `Stateful` template.
 ///
 /// For an example @see PacketStreamState
-class State
+class SCY_EXTERN State
 {
 public:
     typedef std::uint32_t ID;

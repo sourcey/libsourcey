@@ -162,8 +162,8 @@ int main(int argc, char** argv)
             writer.put(write_bytes, 3);
             char read_bytes[3];
             reader.get(read_bytes, 3);
-            for (int i = 0; i < 3; ++i) {
-              expect(write_bytes[i] == read_bytes[i]);
+            for (int x = 0; x < 3; ++x) {
+              expect(write_bytes[x] == read_bytes[x]);
             }
             expect(writer.position() == 26);
             expect(reader.position() == 26);
@@ -362,7 +362,8 @@ int main(int argc, char** argv)
         bool ran = false;
 
         // Create the idler with a lambda
-        Idler idler([&]() {
+		Idler idler;
+        idler.start([&]() {
             std::cout << "On idle: " << counter << std::endl;
             if (++counter == 10) {
                 ran = true;
@@ -370,7 +371,7 @@ int main(int argc, char** argv)
                 idler.cancel();
                 expect(idler.cancelled() == true);
             }
-        }); //, uv::defaultLoop()
+        });
 
         // Make the idler reference the event loop
         idler.handle().ref();
@@ -409,7 +410,8 @@ int main(int argc, char** argv)
     describe("thread", []() {
         bool ran = false;
 
-        Thread t1([&]() {
+		Thread t1;
+		t1.start([&]() {
             ran = true;
             expect(t1.running() == true);
         });

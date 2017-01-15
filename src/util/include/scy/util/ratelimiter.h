@@ -21,7 +21,7 @@ namespace scy {
 
 /// @addtogroup util
 /// A simple message rate limiter based on the token bucket algorithm.
-class RateLimiter
+class SCY_EXTERN RateLimiter
 {
 public:
     double rate;       ///< How many messages

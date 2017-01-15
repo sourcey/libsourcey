@@ -30,7 +30,7 @@ struct ParserError
 };
 
 
-class ParserObserver
+class SCY_EXTERN ParserObserver
 {
 public:
     virtual void onParserHeader(const std::string& name,
@@ -43,7 +43,7 @@ public:
 };
 
 
-class Parser
+class SCY_EXTERN Parser
 {
 public:
     Parser(http::Response* response);

@@ -82,7 +82,7 @@ inline const char* getStringFromLogLevel(LogLevel level)
 
 
 struct LogStream;
-class LogChannel;
+class SCY_EXTERN LogChannel;
 
 
 //
@@ -90,7 +90,7 @@ class LogChannel;
 //
 
 
-class LogWriter
+class SCY_EXTERN LogWriter
 {
 public:
     LogWriter();
@@ -106,7 +106,7 @@ public:
 //
 
 
-class AsyncLogWriter : public LogWriter, public basic::Runnable
+class SCY_EXTERN AsyncLogWriter : public LogWriter, public basic::Runnable
 {
 public:
     AsyncLogWriter();
@@ -138,7 +138,7 @@ protected:
 //
 
 
-class Logger
+class SCY_EXTERN Logger
 {
 public:
     Logger();
@@ -408,7 +408,7 @@ inline std::string _methodName(const std::string& fsig)
 //
 
 
-class LogChannel
+class SCY_EXTERN LogChannel
 {
 public:
     LogChannel(const std::string& name, LogLevel level = LDebug,
@@ -441,7 +441,7 @@ protected:
 //
 
 
-class ConsoleChannel : public LogChannel
+class SCY_EXTERN ConsoleChannel : public LogChannel
 {
 public:
     ConsoleChannel(const std::string& name, LogLevel level = LDebug,
@@ -457,7 +457,7 @@ public:
 //
 
 
-class FileChannel : public LogChannel
+class SCY_EXTERN FileChannel : public LogChannel
 {
 public:
     FileChannel(const std::string& name, const std::string& path,
@@ -484,7 +484,7 @@ protected:
 //
 
 
-class RotatingFileChannel : public LogChannel
+class SCY_EXTERN RotatingFileChannel : public LogChannel
 {
 public:
     RotatingFileChannel(const std::string& name, const std::string& dir,
@@ -516,7 +516,7 @@ protected:
 
 
 #if 0
-class EventedFileChannel: public FileChannel
+class SCY_EXTERN EventedFileChannel: public FileChannel
 {
 public:
     EventedFileChannel(

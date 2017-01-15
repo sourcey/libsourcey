@@ -23,14 +23,14 @@ namespace scy {
 namespace turn {
 
 
-class Server;
+class SCY_EXTERN Server;
 
 
 typedef PointerCollection<std::uint32_t, TCPConnectionPair>
     TCPConnectionPairMap;
 
 
-class TCPAllocation : public ServerAllocation
+class SCY_EXTERN TCPAllocation : public ServerAllocation
 {
 public:
     TCPAllocation(Server& server, const net::Socket::Ptr& control,
@@ -65,8 +65,9 @@ protected:
     net::TCPSocket::Ptr _acceptor;
     TCPConnectionPairMap _pairs;
 };
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 #endif // SCY_TURN_SERVER_TCPAllocation_H

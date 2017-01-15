@@ -31,8 +31,8 @@ namespace net {
 /// TODO: Decouple from SSLSocket implementation
 
 /// A wrapper for the OpenSSL SSL connection context
-class SSLSocket;
-class SSLAdapter
+class SCY_EXTERN SSLSocket;
+class SCY_EXTERN SSLAdapter
 {
 public:
     SSLAdapter(net::SSLSocket* socket);

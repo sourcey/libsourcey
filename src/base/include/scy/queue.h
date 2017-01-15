@@ -13,6 +13,7 @@
 #define SCY_Queue_H
 
 
+#include "scy/base.h"
 #include "scy/datetime.h"
 #include "scy/interface.h"
 #include "scy/platform.h"
@@ -101,7 +102,7 @@ public:
 
 
 template <class T>
-class RunnableQueue : public Queue<T*>, public basic::Runnable
+class SCY_EXTERN RunnableQueue : public Queue<T*>, public basic::Runnable
 {
 public:
     /// The default dispatch function.
@@ -246,7 +247,7 @@ protected:
 /// queue which receives T objects from any thread and synchronizes
 /// them for safe consumption by the associated event loop.
 template <class T>
-class SyncQueue : public RunnableQueue<T>
+class SCY_EXTERN SyncQueue : public RunnableQueue<T>
 {
 public:
     typedef RunnableQueue<T> Queue;
@@ -302,7 +303,7 @@ template <class T>
 ///
 /// The thread will call the RunnableQueue's run() method to
 /// constantly flush outgoing packets until cancel() is called.
-class AsyncQueue : public RunnableQueue<T>
+class SCY_EXTERN AsyncQueue : public RunnableQueue<T>
 {
 public:
     typedef RunnableQueue<T> Queue;
@@ -336,7 +337,7 @@ protected:
 template<typename T>
 
     /// Implements a simple thread-safe multiple producer,    /// multiple consumer queue.
-class ConcurrentQueue
+class SCY_EXTERN ConcurrentQueue
 {
 private:
     std::queue<T> _queue;

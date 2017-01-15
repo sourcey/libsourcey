@@ -13,6 +13,7 @@
 #define SCY_Packet_H
 
 
+#include "scy/base.h"
 #include "scy/bitwise.h"
 #include "scy/buffer.h"
 #include "scy/interface.h"
@@ -39,7 +40,7 @@ struct IPacketInfo
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
 /// processing and callbacks using PacketStream and friends.
-class IPacket //: public basic::Polymorphic
+class SCY_EXTERN IPacket //: public basic::Polymorphic
 {
 public:
     IPacket(void* source = nullptr, void* opaque = nullptr,
@@ -134,7 +135,7 @@ public:
 
 
 /// A simple flag packet for sending state flags along the packet stream.
-class FlagPacket : public IPacket
+class SCY_EXTERN FlagPacket : public IPacket
 {
 public:
     FlagPacket(unsigned flags = 0)
@@ -161,7 +162,7 @@ public:
 
 /// RawPacket is the default data packet type which consists
 /// of an optionally managed char pointer and a size value.
-class RawPacket : public IPacket
+class SCY_EXTERN RawPacket : public IPacket
 {
 public:
     RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0,

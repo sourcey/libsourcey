@@ -13,6 +13,7 @@
 #define SCY_Stream_H
 
 
+#include "scy/base.h"
 #include "scy/memory.h"
 #include "scy/uv/uvpp.h"
 
@@ -24,7 +25,7 @@
 namespace scy {
 
 
-class Stream : public uv::Handle
+class SCY_EXTERN Stream : public uv::Handle
 {
 public:
     Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr)
@@ -186,12 +187,14 @@ protected:
     static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size,
                                 uv_buf_t* buf)
     {
-        auto self = reinterpret_cast<Stream*>(
-            handle->data); // Reserve the recommended buffer size
-        // if (suggested_size > self->_buffer.capacity())    //
+        auto self = reinterpret_cast<Stream*>( handle->data); 
+		
+		// Reserve the recommended buffer size
+        // if (suggested_size > self->_buffer.capacity())
         // self->_buffer.capacity(suggested_size);
-        assert(self->_buffer.size() >=
-               suggested_size); /// Reset the buffer position on each read
+        assert(self->_buffer.size() >= suggested_size); 
+		
+		// Reset the buffer position on each read
         buf->base = self->_buffer.data();
         buf->len = self->_buffer.size();
     }

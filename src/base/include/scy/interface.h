@@ -13,6 +13,7 @@
 #define SCY_Interfaces_H
 
 
+#include "scy/base.h"
 #include <atomic>
 #include <cstdint>
 #include <functional>
@@ -27,7 +28,7 @@ namespace scy {
 namespace basic {
 
 
-class Decoder
+class SCY_EXTERN Decoder
 {
 public:
     Decoder() {}
@@ -38,7 +39,7 @@ public:
 };
 
 
-class Encoder
+class SCY_EXTERN Encoder
 {
 public:
     Encoder() {}
@@ -50,7 +51,7 @@ public:
 
 
 /// Abstract interface for classes that can be run and cancelled.
-class Runnable
+class SCY_EXTERN Runnable
 {
 public:
     Runnable()
@@ -82,7 +83,7 @@ protected:
 
 
 /// Abstract interface for a classes that can be started and stopped.
-class Startable
+class SCY_EXTERN Startable
 {
 public:
     virtual void start() = 0;
@@ -91,7 +92,7 @@ public:
 
 
 /// Abstract interface for classes that can be sent and cancelled.
-class Sendable
+class SCY_EXTERN Sendable
 {
 public:
     virtual bool send() = 0;
@@ -102,7 +103,7 @@ public:
 #if 0
 /// A base module class for C++ callback polymorphism.
 /// @deprecated
-class Polymorphic
+class SCY_EXTERN Polymorphic
 {
 public:
     virtual ~Polymorphic() {};

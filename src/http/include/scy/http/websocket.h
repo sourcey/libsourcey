@@ -26,7 +26,7 @@
 
 namespace scy {
 namespace http {
-class Connection;
+class SCY_EXTERN Connection;
 namespace ws {
 
 
@@ -121,7 +121,7 @@ static std::string ProtocolVersion = "13";
 
 /// This class implements a WebSocket parser according
 /// to the WebSocket protocol described in RFC 6455.
-class WebSocketFramer
+class SCY_EXTERN WebSocketFramer
 {
 public:
     /// Creates a Socket using the given Socket.
@@ -198,7 +198,7 @@ private:
 //
 
 
-class WebSocketAdapter : public net::SocketAdapter
+class SCY_EXTERN WebSocketAdapter : public net::SocketAdapter
 {
 public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
@@ -261,7 +261,7 @@ protected:
 
 
 /// Standalone WebSocket class.
-class WebSocket : public WebSocketAdapter
+class SCY_EXTERN WebSocket : public WebSocketAdapter
 {
 public:
     typedef std::vector<WebSocket> Vec;
@@ -288,7 +288,7 @@ protected:
 
 
 /// WebSocket class which belongs to a HTTP Connection.
-class ConnectionAdapter : public WebSocketAdapter
+class SCY_EXTERN ConnectionAdapter : public WebSocketAdapter
 {
 public:
     ConnectionAdapter(Connection& connection, ws::Mode mode);

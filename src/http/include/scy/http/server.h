@@ -27,9 +27,9 @@ namespace scy {
 namespace http {
 
 
-class Server;
-class ServerResponder;
-class ServerConnection : public Connection
+class SCY_EXTERN Server;
+class SCY_EXTERN ServerResponder;
+class SCY_EXTERN ServerConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ServerConnection> Ptr;
@@ -70,7 +70,7 @@ typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
 
 // -------------------------------------------------------------------
 //
-class ServerAdapter : public ConnectionAdapter
+class SCY_EXTERN ServerAdapter : public ConnectionAdapter
 {
 public:
     ServerAdapter(ServerConnection& connection)
@@ -91,7 +91,7 @@ public:
 /// A new HTTPServerResponder object will be created for
 /// each new HTTP request that is received by the HTTP Server.
 ///
-class ServerResponder
+class SCY_EXTERN ServerResponder
 {
 public:
     ServerResponder(ServerConnection& connection)
@@ -127,7 +127,7 @@ private:
 
 /// This implementation of a ServerResponderFactory
 /// is used by HTTPServer to create ServerResponder objects.
-class ServerResponderFactory
+class SCY_EXTERN ServerResponderFactory
 {
 public:
     ServerResponderFactory(){};
@@ -149,7 +149,7 @@ public:
 /// TODO:
 /// - SSL Server
 /// - Enable responders (controllers?) to be instantiated via registered routes.
-class Server
+class SCY_EXTERN Server
 {
 public:
     net::TCPSocket::Ptr socket;
@@ -185,7 +185,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class BadRequestHandler : public ServerResponder
+class SCY_EXTERN BadRequestHandler : public ServerResponder
 {
 public:
     BadRequestHandler(ServerConnection& connection)

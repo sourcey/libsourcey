@@ -30,7 +30,7 @@ namespace scy {
 
 /// Runner is a virtual interface for implementing
 /// asynchronous objects such as threads and futures.
-class Runner
+class SCY_EXTERN Runner
 {
 public:
     Runner();

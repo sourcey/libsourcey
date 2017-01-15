@@ -70,7 +70,7 @@ namespace turn {
 /// allocation. When an allocation expires, the state data associated
 /// with the allocation can be freed.
 ///
-class IAllocation
+class SCY_EXTERN IAllocation
 {
 public:
     IAllocation(const FiveTuple& tuple = FiveTuple(),

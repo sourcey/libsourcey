@@ -26,7 +26,7 @@ namespace net {
 
 
 struct PacketInfo;
-class PacketSocket;
+class SCY_EXTERN PacketSocket;
 
 
 //
@@ -34,7 +34,7 @@ class PacketSocket;
 //
 
 
-class PacketSocketAdapter : public SocketAdapter, public PacketSignal
+class SCY_EXTERN PacketSocketAdapter : public SocketAdapter, public PacketSignal
 {
 public:
     /// Pointer to the underlying socket.
@@ -64,7 +64,7 @@ public:
 //
 
 
-class PacketSocket: public PacketSocketAdapter
+class SCY_EXTERN PacketSocket: public PacketSocketAdapter
 {
 public:
     PacketSocket(Socket* socket);
@@ -85,7 +85,7 @@ public:
 /// Proxies arbitrary PacketStream packets to an output Socket,
 /// ensuring the Socket MTU is not exceeded.
 /// Oversize packets will be split before sending.
-class PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
+class SCY_EXTERN PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
 {
 public:
     PacketStreamSocketAdapter(Socket& socket);

@@ -13,6 +13,9 @@
 #define SCY_Flaggable_H
 
 
+#include "scy/base.h"
+
+
 namespace scy {
 
 
@@ -40,7 +43,7 @@ struct Bitwise
 
 
 #if 0
-class Flaggable
+class SCY_EXTERN Flaggable
 {
 public:
     Flaggable(unsigned flags = 0) : _flags(flags) {}

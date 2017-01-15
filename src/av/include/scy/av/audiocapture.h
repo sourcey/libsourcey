@@ -23,7 +23,7 @@ namespace scy {
 namespace av {
 
 /// This class implements a cross platform audio capturer.
-class AudioCapture : public MediaCapture
+class SCY_EXTERN AudioCapture : public MediaCapture
 {
 public:
     typedef std::shared_ptr<AudioCapture> Ptr;

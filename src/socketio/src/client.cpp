@@ -30,12 +30,12 @@ namespace sockio {
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
-    return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
+    return new Client(std::make_shared<net::TCPSocket>(loop), options);
 }
 
 
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
-    : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
+    : Client(std::make_shared<net::TCPSocket>(loop), options)
 {
 }
 
@@ -47,13 +47,12 @@ TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
-    return new Client(std::make_shared<net::SSLSocket>(loop),
-                      options); //, loop);
+    return new Client(std::make_shared<net::SSLSocket>(loop), options);
 }
 
 
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop)
-    : Client(std::make_shared<net::SSLSocket>(loop), options) //, loop)
+    : Client(std::make_shared<net::SSLSocket>(loop), options)
 {
 }
 
@@ -96,8 +95,7 @@ void Client::connect()
 
     // Build the request
     // TODO: Allow custom URI params
-    std::ostringstream url;
-    url << "/socket.io/?EIO=4&transport=websocket";
+    std::ostringstream url("/socket.io/?EIO=4&transport=websocket");
     if (!_sessionID.empty()) {
         url << "&sid=";
         url << _sessionID;
@@ -164,8 +162,7 @@ int Client::send(const std::string& event, const json::Value& message, bool ack)
 }
 
 
-Transaction* Client::createTransaction(const sockio::Packet& request,
-                                       long timeout)
+Transaction* Client::createTransaction(const sockio::Packet& request, long timeout)
 {
     return new Transaction(*this, request, timeout);
 }
@@ -185,8 +182,6 @@ int Client::sendPing()
 
 void Client::reset()
 {
-
-
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
 

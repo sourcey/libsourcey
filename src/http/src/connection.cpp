@@ -28,9 +28,8 @@ namespace http {
 Connection::Connection(const net::Socket::Ptr& socket)
     : _socket(socket ? socket : std::make_shared<net::TCPSocket>())
     , _adapter(nullptr)
-    ,
-    //_timeout(30 * 60 * 1000), // 30 secs
-    _closed(false)
+    //, _timeout(30 * 60 * 1000),
+    , _closed(false)
     , _shouldSendHeader(true)
 {
     TraceS(this) << "Create: " << _socket << endl;
@@ -45,9 +44,7 @@ Connection::~Connection()
     TraceS(this) << "Destroy" << endl;
     replaceAdapter(nullptr);
     // assert(_closed);
-    close(); // don't want pure virtual on onClose.
-             // the shared pointer is being destroyed,
-             // no need for close() anyway
+    close();
     TraceS(this) << "Destroy: OK" << endl;
 }
 
@@ -148,9 +145,8 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
         // The Outgoing stream pumps data into the ConnectionAdapter,
         // which in turn proxies to the output Socket.
-        Outgoing.emitter +=
-            slot(adapter, static_cast<void (net::SocketAdapter::*)(IPacket&)>(
-                              &net::SocketAdapter::sendPacket));
+        Outgoing.emitter += slot(adapter, static_cast<void (net::SocketAdapter::*)(IPacket&)>(
+                                 &net::SocketAdapter::sendPacket));
 
         _adapter = adapter;
     }
@@ -352,8 +348,7 @@ void ConnectionAdapter::onParserHeadersEnd()
     // Set the position to the end of the headers once
     // they have been handled. Subsequent body chunks will
     // now start at the correct position.
-    //_connection.incomingBuffer().position(_parser._parser.nread); // should be
-    //redundant
+    // _connection.incomingBuffer().position(_parser._parser.nread);
 }
 
 

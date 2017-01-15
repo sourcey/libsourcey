@@ -13,6 +13,7 @@
 #define SCY_Containers_H
 
 
+#include "scy/base.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
 #include "scy/signal.h"
@@ -43,7 +44,7 @@ public:
     virtual bool exists(const TValue* item) const = 0;
     virtual bool free(const TKey& key) = 0;
     virtual bool empty() const = 0;
-    virtual int size() const = 0;
+    virtual std::size_t size() const = 0;
     virtual TValue* get(const TKey& key, bool whiny = true) const = 0;
     virtual void clear() = 0;
 };
@@ -61,7 +62,7 @@ public:
 /// pointers via the TDeleter argument.
 template <class TKey, class TValue,
           class TDeleter = std::default_delete<TValue>>
-class PointerCollection : public AbstractCollection<TKey, TValue>
+class SCY_EXTERN PointerCollection : public AbstractCollection<TKey, TValue>
 {
 public:
     typedef std::map<TKey, TValue*> Map;
@@ -187,7 +188,7 @@ public:
         return _map.empty();
     }
 
-    virtual int size() const
+    virtual std::size_t size() const
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _map.size();
@@ -234,7 +235,7 @@ protected:
 
 template <class TKey, class TValue,
           class TDeleter = std::default_delete<TValue>>
-class LiveCollection : public PointerCollection<TKey, TValue, TDeleter>
+class SCY_EXTERN LiveCollection : public PointerCollection<TKey, TValue, TDeleter>
 {
 public:
     typedef PointerCollection<TKey, TValue> Base;
@@ -326,7 +327,7 @@ public:
         return _map.empty();
     }
 
-    virtual int size() const
+    virtual std::size_t size() const
     {
 
         return _map.size();
@@ -358,7 +359,7 @@ protected:
 /// A storage container for a name value collections.
 /// This collection can store multiple entries for each
 /// name, and it's getters are case-insensitive.
-class NVCollection
+class SCY_EXTERN NVCollection
 {
 public:
     struct ILT

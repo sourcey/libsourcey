@@ -40,7 +40,7 @@ namespace scy {
 namespace av {
 
 
-class DeviceManager;
+class SCY_EXTERN DeviceManager;
 
 
 //
@@ -91,7 +91,7 @@ enum MediaCapabilities
 //
 
 
-class DeviceWatcher
+class SCY_EXTERN DeviceWatcher
 {
 public:
     explicit DeviceWatcher(DeviceManager*) {}
@@ -106,7 +106,7 @@ public:
 //
 
 
-class DeviceManager
+class SCY_EXTERN DeviceManager
 {
 public:
     DeviceManager();

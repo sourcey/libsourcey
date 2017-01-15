@@ -22,9 +22,9 @@ namespace scy {
 
 
 StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
-                                       const std::string& peerid,
-                                       const std::string& token,
-                                       const std::string& file)
+                                                 const std::string& peerid,
+                                                 const std::string& token,
+                                                 const std::string& file)
     : PeerConnection(manager, peerid, token, PeerConnection::Offer)
     , _file(file)
     , _networkThread(rtc::Thread::CreateWithSocketServer())

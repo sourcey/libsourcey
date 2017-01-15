@@ -26,7 +26,7 @@ namespace http {
 /// library to do the heavy lifting.
 /// Constructors and assignment operators will throw
 /// a SyntaxException if the URL is invalid.
-class URL
+class SCY_EXTERN URL
 {
 public:
     URL();

@@ -25,7 +25,7 @@ namespace scy {
 namespace turn {
 
 
-class TCPClient;
+class SCY_EXTERN TCPClient;
 
 
 struct TCPClientObserver : public ClientObserver
@@ -61,7 +61,7 @@ typedef KVCollection<net::Address, net::TCPSocket::Ptr> ConnectionManager;
 typedef ConnectionManager::Map ConnectionManagerMap;
 
 
-class TCPClient : public Client
+class SCY_EXTERN TCPClient : public Client
 {
 public:
     TCPClient(TCPClientObserver& observer,

@@ -36,7 +36,7 @@ enum AuthenticationState
 };
 
 
-class Request : public stun::Message
+class SCY_EXTERN Request : public stun::Message
 {
 public:
     net::TransportType transport;

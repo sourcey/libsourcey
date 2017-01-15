@@ -13,6 +13,7 @@
 #define SCY_Test_H
 
 
+#include "scy/base.h"
 #include "scy/interface.h"
 #include <mutex>
 #include <iostream>
@@ -27,8 +28,8 @@ namespace scy {
 namespace test {
 
 
-class Test;
-class TestRunner;
+class SCY_EXTERN Test;
+class SCY_EXTERN TestRunner;
 
 typedef std::list<Test*> TestList;
 typedef std::list<std::string> ErrorList;
@@ -72,7 +73,7 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 /// This class is for implementing any kind of unit
 /// test that can be executed by a `TestRunner`.
 ///
-class Test
+class SCY_EXTERN Test
 {
 public:
     Test(const std::string& name = "Unnamed Test");
@@ -105,7 +106,7 @@ protected:
 
 
 // Test class that runs a static or lambda function.
-class FunctionTest : public Test
+class SCY_EXTERN FunctionTest : public Test
 {
 public:
     std::function<void()> target;
@@ -136,7 +137,7 @@ protected:
 /// When `run()` the `TestRunner` loops through each test in the list calling
 /// the test's `run()` method.
 ///
-class TestRunner
+class SCY_EXTERN TestRunner
 {
 public:
     TestRunner();

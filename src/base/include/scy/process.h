@@ -13,6 +13,7 @@
 #define SCY_Process_H
 
 
+#include "scy/base.h"
 #include "scy/uv/uvpp.h"
 #include <functional>
 #include <vector>
@@ -24,7 +25,7 @@ namespace scy {
 typedef uv_process_options_t ProcessOptions;
 
 
-class Process : public uv::Handle
+class SCY_EXTERN Process : public uv::Handle
 {
 public:
     Process(uv::Loop* loop = uv::defaultLoop());

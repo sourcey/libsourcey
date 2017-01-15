@@ -21,10 +21,10 @@ namespace scy {
 namespace turn {
 
 
-class Server;
+class SCY_EXTERN Server;
 
 
-class ServerAllocation : public IAllocation
+class SCY_EXTERN ServerAllocation : public IAllocation
 {
 public:
     ServerAllocation(Server& server, const FiveTuple& tuple,

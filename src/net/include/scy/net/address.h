@@ -26,8 +26,8 @@ namespace net {
 /// address. The address can belong either to the
 /// IPv4 or the IPv6 address family and consists of a
 /// host address and a port number.
-class AddressBase;
-class Address
+class SCY_EXTERN AddressBase;
+class SCY_EXTERN Address
 {
 public:
     /// Possible address families for IP addresses.

@@ -15,6 +15,7 @@
 #define SCY_Random_H
 
 
+#include "scy/base.h"
 #include <cstdint>
 
 
@@ -25,7 +26,7 @@ namespace scy {
 /// The PRNG is a nonlinear additive feedback random number
 /// generator using 256 bytes of state information
 /// and a period of up to 2^69.
-class Random
+class SCY_EXTERN Random
 {
 public:
     enum Type

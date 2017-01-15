@@ -26,7 +26,7 @@ namespace scy {
 namespace net {
 
 
-class Socket;
+class SCY_EXTERN Socket;
 
 
 /// SocketAdapter is the abstract interface for all socket classes.
@@ -37,7 +37,7 @@ class Socket;
 /// This class also be extended to implement custom processing
 /// for received socket data before it is dispatched to the application
 /// (see PacketSocketAdapter and Transaction classes).
-class SocketAdapter
+class SCY_EXTERN SocketAdapter
 {
 public:
     /// Creates the SocketAdapter.

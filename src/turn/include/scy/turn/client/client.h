@@ -62,7 +62,7 @@ struct ClientState : public State
 };
 
 
-class Client;
+class SCY_EXTERN Client;
 
 
 struct ClientObserver
@@ -95,7 +95,7 @@ struct ClientObserver
 };
 
 
-class Client : public Stateful<ClientState>, protected IAllocation
+class SCY_EXTERN Client : public Stateful<ClientState>, protected IAllocation
 {
 public:
     struct Options

@@ -55,8 +55,7 @@ public:
     }
 
 protected:
-    void onClientStateChange(turn::Client& client, turn::ClientState& state,
-                             const turn::ClientState&)
+    void onClientStateChange(turn::Client& /* client */, turn::ClientState& state, const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
 
@@ -91,7 +90,7 @@ protected:
         // client.sendData(data, size, peerAddr);
     }
 
-    void onRelayDataReceived(turn::Client& client, const char* data,
+    void onRelayDataReceived(turn::Client& /* client */, const char* data,
                              std::size_t size, const net::Address& peerAddr)
     {
 #ifdef TEST_RESPONDER_TO_INITIATOR
@@ -127,8 +126,7 @@ protected:
 #endif
     }
 
-    void onAllocationPermissionsCreated(turn::Client& client,
-                                        const turn::PermissionList& permissions)
+    void onAllocationPermissionsCreated(turn::Client& /* client */, const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;
     }

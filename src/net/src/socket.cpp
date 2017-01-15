@@ -39,6 +39,7 @@ Socket::~Socket()
 void Socket::connect(const std::string& host, std::uint16_t port)
 {
     TraceS(this) << "Connect to host: " << host << ":" << port << endl;
+
     if (Address::validateIP(host))
         connect(Address(host, port));
     else {

@@ -104,7 +104,7 @@ typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 
 
 /// TURN server rfc5766 implementation
-class Server
+class SCY_EXTERN Server
 {
 public:
     Server(ServerObserver& observer,

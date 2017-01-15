@@ -13,6 +13,7 @@
 #define SCY_Task_H
 
 
+#include "scy/base.h"
 #include "scy/runner.h"
 #include "scy/memory.h"
 #include "scy/signal.h"
@@ -23,13 +24,13 @@
 namespace scy {
 
 
-class TaskRunner;
+class SCY_EXTERN TaskRunner;
 
 
 /// Abstract class is for implementing any kind asyncronous task.
 ///
 /// Tasks are designed to be run by a TaskRunner.
-class Task : public basic::Runnable
+class SCY_EXTERN Task : public basic::Runnable
 {
 public:
     /// Constructor.
@@ -87,7 +88,7 @@ protected:
 /// The `TaskRunner` is powered by an abstract `Runner` instance, which means
 /// that tasks can be executed in a thread or event loop context.
 ///
-class TaskRunner : public basic::Runnable
+class SCY_EXTERN TaskRunner : public basic::Runnable
 {
 public:
     TaskRunner(Runner::Ptr runner = nullptr);

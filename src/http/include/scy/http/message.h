@@ -25,7 +25,7 @@ namespace http {
 /// Defines the common properties of all HTTP messages.
 /// These are version, content length, content type
 /// and transfer encoding.
-class Message : public NVCollection
+class SCY_EXTERN Message : public NVCollection
 {
 public:
     /// Sets the HTTP version for this message.

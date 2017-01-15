@@ -13,6 +13,7 @@
 #define SCY_PacketFactory_H
 
 
+#include "scy/base.h"
 #include "scy/buffer.h"
 #include "scy/packetsignal.h"
 #include "scy/util.h"
@@ -21,7 +22,7 @@
 namespace scy {
 
 
-class IPacketCreationStrategy
+class SCY_EXTERN IPacketCreationStrategy
 {
 public:
     IPacketCreationStrategy() {}
@@ -74,7 +75,7 @@ protected:
 //
 
 
-class PacketFactory
+class SCY_EXTERN PacketFactory
 {
 public:
     PacketFactory() {}

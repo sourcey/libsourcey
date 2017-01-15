@@ -55,7 +55,7 @@ struct DiagnosticState : public State
 //
 
 
-class IDiagnostic : public Stateful<DiagnosticState>
+class SCY_EXTERN IDiagnostic : public Stateful<DiagnosticState>
 {
 public:
     IDiagnostic();
@@ -99,7 +99,7 @@ typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
 //
 
 
-class AsyncDiagnostic : public IDiagnostic, public basic::Runnable
+class SCY_EXTERN AsyncDiagnostic : public IDiagnostic, public basic::Runnable
 {
 public:
     virtual ~AsyncDiagnostic(){};
@@ -122,7 +122,7 @@ protected:
 //
 
 
-class DiagnosticManager : public DiagnosticStore
+class SCY_EXTERN DiagnosticManager : public DiagnosticStore
 {
 public:
     DiagnosticManager();

@@ -27,7 +27,7 @@ namespace scy {
 namespace http {
 
 
-class ProgressSignal : public Signal<void(const double&)>
+class SCY_EXTERN ProgressSignal : public Signal<void(const double&)>
 {
 public:
     void* sender;
@@ -53,8 +53,8 @@ public:
 };
 
 
-class ConnectionAdapter;
-class Connection : public net::SocketAdapter
+class SCY_EXTERN ConnectionAdapter;
+class SCY_EXTERN Connection : public net::SocketAdapter
 {
 public:
     Connection(const net::Socket::Ptr& socket);
@@ -153,7 +153,7 @@ protected:
 //
 
 /// Default HTTP socket adapter for reading and writing HTTP messages
-class ConnectionAdapter : public ParserObserver, public net::SocketAdapter
+class SCY_EXTERN ConnectionAdapter : public ParserObserver, public net::SocketAdapter
 {
 public:
     ConnectionAdapter(Connection& connection, http_parser_type type);

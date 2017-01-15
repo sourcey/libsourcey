@@ -23,10 +23,10 @@ namespace scy {
 namespace turn {
 
 
-class TCPAllocation;
+class SCY_EXTERN TCPAllocation;
 
 
-class TCPConnectionPair
+class SCY_EXTERN TCPConnectionPair
 {
 public:
     TCPConnectionPair(TCPAllocation& allocation);

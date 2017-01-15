@@ -41,18 +41,18 @@ struct TestServer : public turn::ServerObserver
 
     void stop() { server->stop(); }
 
-    AuthenticationState authenticateRequest(Server* server,
+    AuthenticationState authenticateRequest(Server* /* server */,
                                             const Request& request)
     {
         return Authorized;
     }
 
-    void onServerAllocationCreated(Server* server, IAllocation* alloc)
+    void onServerAllocationCreated(Server* /* server */, IAllocation* alloc)
     {
         DebugS(this) << "Allocation created" << endl;
     }
 
-    void onServerAllocationRemoved(Server* server, IAllocation* alloc)
+    void onServerAllocationRemoved(Server* /* server */, IAllocation* alloc)
     {
         DebugS(this) << "Allocation removed" << endl;
     }

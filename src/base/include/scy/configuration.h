@@ -13,6 +13,7 @@
 #define SCY_Configuration_H
 
 
+#include "scy/base.h"
 #include <string>
 #include <mutex>
 #include "scy/signal.h"
@@ -27,7 +28,7 @@ namespace scy {
 /// Subclasses must override the getRaw() and setRaw() and methods.
 ///
 /// This class is safe for multithreaded use.
-class Configuration
+class SCY_EXTERN Configuration
 {
 public:
     /// Creates the Configuration.
@@ -182,7 +183,7 @@ private:
 /// Example scoping:
 ///        Module: channels.[name].modes.[name].[value]
 ///        Default: modes.[name].[value]
-class ScopedConfiguration
+class SCY_EXTERN ScopedConfiguration
 {
 public:
     ScopedConfiguration(Configuration& config, const std::string& currentScope,

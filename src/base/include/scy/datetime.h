@@ -15,6 +15,7 @@
 #define SCY_DateTime_H
 
 
+#include "scy/base.h"
 #include "scy/packetsignal.h"
 #include "scy/uv/uvpp.h"
 #include <ctime>
@@ -35,7 +36,7 @@ namespace scy {
 /// Timestamps are UTC (Coordinated Universal Time)
 /// based and thus independent of the timezone
 /// in effect on the system.
-class Timestamp
+class SCY_EXTERN Timestamp
 {
 public:
     typedef std::int64_t
@@ -122,7 +123,7 @@ private:
 //
 
 /// A class that represents time spans up to microsecond resolution.
-class Timespan
+class SCY_EXTERN Timespan
 {
 public:
     typedef Timestamp::TimeDiff TimeDiff;
@@ -270,7 +271,7 @@ private:
 ///   * http://en.wikipedia.org/wiki/Julian_day
 ///   * http://en.wikipedia.org/wiki/UTC
 ///   * http://en.wikipedia.org/wiki/ISO_8601
-class DateTime
+class SCY_EXTERN DateTime
 {
 public:
     /// Symbolic names for month numbers (1 to 12).
@@ -645,7 +646,7 @@ inline void swap(DateTime& d1, DateTime& d2)
 //
 
 /// This class provides information about the current timezone.
-class Timezone
+class SCY_EXTERN Timezone
 {
 public:
     /// Returns the offset of local time to UTC, in seconds.
@@ -707,7 +708,7 @@ public:
 /// since the time zone is unknown. Each of the constructors
 /// accepting a tzd parameter have been marked as deprecated and
 /// may be removed in a future revision.
-class LocalDateTime
+class SCY_EXTERN LocalDateTime
 {
 public:
     /// Creates a LocalDateTime with the current date/time
@@ -1059,7 +1060,7 @@ inline void swap(LocalDateTime& d1, LocalDateTime& d2)
 
 /// Definition of date/time formats and various
 /// constants used by DateTimeFormatter and DateTimeParser.
-class DateTimeFormat
+class SCY_EXTERN DateTimeFormat
 {
 public:
     /// predefined date formats
@@ -1146,7 +1147,7 @@ public:
 ///      the formatted value.
 ///    * append* functions append the formatted value to
 ///      an existing string.
-class DateTimeFormatter
+class SCY_EXTERN DateTimeFormatter
 {
 public:
     enum
@@ -1300,7 +1301,7 @@ public:
 /// additional specifier is supported: %r will parse a year given by either
 /// two or four digits. Years 69-00 are interpreted in the 20th century
 /// (1969-2000), years 01-68 in the 21th century (2001-2068).
-class DateTimeParser
+class SCY_EXTERN DateTimeParser
 {
 public:
     /// Parses a date and time in the given format from the given string.
@@ -1741,7 +1742,7 @@ inline std::string DateTimeFormatter::tzdRFC(int timeZoneDifferential)
 ///
 /// The Stopwatch uses the current system time, so if the
 /// system time changes the measured time will be incorrect.
-class Stopwatch
+class SCY_EXTERN Stopwatch
 {
 public:
     Stopwatch();
@@ -1790,7 +1791,7 @@ private:
 
 
 /// Simple millisecond timeout counter which expires after a given delay.
-class Timeout
+class SCY_EXTERN Timeout
 {
 public:
     Timeout(long delay = 0, bool autoStart = false);
@@ -1823,7 +1824,7 @@ protected:
 
 
 /// A token that expires after the specified duration.
-class TimedToken : public Timeout
+class SCY_EXTERN TimedToken : public Timeout
 {
 public:
     TimedToken(long duration = 1000);

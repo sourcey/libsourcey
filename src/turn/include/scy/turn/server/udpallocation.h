@@ -23,11 +23,11 @@ namespace scy {
 namespace turn {
 
 
-class Server;
-class IConnection;
+class SCY_EXTERN Server;
+class SCY_EXTERN IConnection;
 
 
-class UDPAllocation : public ServerAllocation
+class SCY_EXTERN UDPAllocation : public ServerAllocation
 {
 public:
     UDPAllocation(Server& server, const FiveTuple& tuple,

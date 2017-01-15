@@ -12,6 +12,7 @@
 #ifndef SCY_UserManager_H
 #define SCY_UserManager_H
 
+
 #include "scy/collection.h"
 #include <map>
 
@@ -29,7 +30,7 @@ struct IUser
 };
 
 
-class BasicUser : public IUser
+class SCY_EXTERN BasicUser : public IUser
 {
 public:
     BasicUser(const std::string& username, const std::string& password = "")
@@ -52,7 +53,7 @@ typedef std::map<std::string, IUser*> IUserMap;
 /// @deprecated
 /// This class contains a list of users that have access
 /// on the system.
-class UserManager : public LiveCollection<std::string, IUser>
+class SCY_EXTERN UserManager : public LiveCollection<std::string, IUser>
 {
 public:
     typedef LiveCollection<std::string, IUser> Manager;

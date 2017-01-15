@@ -79,8 +79,7 @@ WebSocketAdapter::~WebSocketAdapter()
 }
 
 
-bool WebSocketAdapter::shutdown(std::uint16_t statusCode,
-                                const std::string& statusMessage)
+bool WebSocketAdapter::shutdown(std::uint16_t statusCode, const std::string& statusMessage)
 {
     char buffer[256];
     BitWriter writer(buffer, 256);
@@ -375,8 +374,7 @@ void ConnectionAdapter::onHandshakeComplete()
 
 
 WebSocketFramer::WebSocketFramer(ws::Mode mode)
-    : // bool mustMaskPayload
-    _mode(mode)
+    : _mode(mode)
     , _frameFlags(0)
     , _headerState(0)
     , _maskPayload(mode == ws::ClientSide)
@@ -419,10 +417,6 @@ void WebSocketFramer::createClientHandshakeRequest(http::Request& request)
     assert(request.has("Sec-WebSocket-Version"));
     request.set("Sec-WebSocket-Key", _key);
     assert(request.has("Sec-WebSocket-Key"));
-    // TraceS(this) << "Sec-WebSocket-Version: " <<
-    // request.get("Sec-WebSocket-Version") << endl;
-    // TraceS(this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key")
-    // << endl;
     _headerState++;
 }
 
@@ -460,8 +454,6 @@ bool WebSocketFramer::checkClientHandshakeResponse(http::Response& response)
                 "WebSocket error: Cannot upgrade to WebSocket connection: " +
                 response.getReason()); // ws::ErrorNoHandshake
     }
-
-    return false;
 }
 
 

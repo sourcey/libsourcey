@@ -62,7 +62,7 @@ namespace turn {
 ///                            Internal                External
 ///                            5-Tuple                 5-tuple
 ///
-class FiveTuple
+class SCY_EXTERN FiveTuple
 {
 public:
     FiveTuple();

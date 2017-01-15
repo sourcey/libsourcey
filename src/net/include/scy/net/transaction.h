@@ -24,7 +24,7 @@ namespace net {
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
 template <class PacketT>
-class Transaction : public PacketTransaction<PacketT>,
+class SCY_EXTERN Transaction : public PacketTransaction<PacketT>,
                     public PacketSocketAdapter
 {
 public:
