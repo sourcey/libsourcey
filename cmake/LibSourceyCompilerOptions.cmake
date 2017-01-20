@@ -243,7 +243,7 @@ if(MSVC)
 
   # Use x64 by default. This prevents conflicts with dependencies such as OpenSSL
   # and FFmpeg on Windows.
-  set(CMAKE_GENERATOR_PLATFORM x64)
+  # set(CMAKE_GENERATOR_PLATFORM x64)
 
   # allow extern "C" functions throw exceptions
   foreach(flags CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG)

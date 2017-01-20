@@ -268,8 +268,6 @@ macro(find_component_paths module component library header)
       ${${module}_INCLUDE_SUFFIXES} # try find from root module include suffixes
   )
 
-  # print_module_variables(LibSourcey)
-
   # Create a Debug and a Release list for multi configuration builds.
   # NOTE: <module>_CONFIGURATION_TYPES must be set to use this.
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
@@ -295,18 +293,29 @@ macro(find_component_paths module component library header)
       PATH_SUFFIXES
         ${${module}_LIBRARY_SUFFIXES}
     )
-    # if (${ALIAS_RELEASE_LIBRARIES})
-    #   list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
-    # endif()
-    # if (${ALIAS_DEBUG_LIBRARIES})
-    #   list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
-    # endif()
-    include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-    select_library_configurations(${ALIAS})
+
+    if (${ALIAS_RELEASE_LIBRARIES})
+      list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
+    endif()
+    if (${ALIAS_DEBUG_LIBRARIES})
+      list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
+    endif()
+    # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+    # select_library_configurations(${ALIAS})
+  
+    # message(STATUS "ALIAS_DEBUG_LIBRARIES: ${${ALIAS_DEBUG_LIBRARIES}}")
+    # message(STATUS "ALIAS_INCLUDE_DIRS: ${${ALIAS_INCLUDE_DIRS}}")
+    # message(STATUS "ALIAS_LIBRARY: ${${ALIAS_LIBRARY}}")
+    # message(STATUS "ALIAS_LIBRARIES: ${${ALIAS_LIBRARIES}}")
+    # message(STATUS "ALIAS_LIBRARY_DIRS: ${${ALIAS_LIBRARY_DIRS}}")
+    # message(STATUS "LIBRARY_HINTS: ${${module}_LIBRARY_DIR}")
+    # message(STATUS "INCLUDE_DIR: ${${module}_INCLUDE_DIR}")
+    # message(STATUS "LIBRARY_SUFFIXES: ${${module}_LIBRARY_SUFFIXES}")
   else()
     find_library(${ALIAS_LIBRARIES}
       NAMES
         ${library}
+        ${library}d
       HINTS
         ${${module}_LIBRARY_HINTS}
       PATHS
@@ -316,7 +325,8 @@ macro(find_component_paths module component library header)
         ${${module}_LIBRARY_SUFFIXES}
     )
   endif()
-
+    
+  # print_module_variables(${module})
   set_component_found(${module} ${component})
 endmacro()
 
@@ -348,9 +358,9 @@ macro(find_component module component pkgconfig library header)
     messageV("  - ${module} ${component} found without pkg-config.")
   endif()
 
-  messageV("${ALIAS_FOUND}=${${ALIAS_FOUND}}")
-  messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
-  messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
+  # messageV("${ALIAS_FOUND}=${${ALIAS_FOUND}}")
+  # messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
+  # messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
 
   if(${ALIAS_FOUND})
     set_component_found(${module} ${component})

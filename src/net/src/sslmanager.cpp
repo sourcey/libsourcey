@@ -179,17 +179,15 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 {
     if (!ok) {
         X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
-        crypto::X509Certificate x509(pCert, true);
+         crypto::X509Certificate x509(pCert, true);
         int depth = X509_STORE_CTX_get_error_depth(pStore);
         int err = X509_STORE_CTX_get_error(pStore);
         std::string error(X509_verify_cert_error_string(err));
         VerificationErrorDetails args(x509, depth, err, error);
         if (server)
-            SSLManager::instance().ServerVerificationError.emit(
-                /*&SSLManager::instance(), */ args);
+            SSLManager::instance().ServerVerificationError.emit(args);
         else
-            SSLManager::instance().ClientVerificationError.emit(
-                /*&SSLManager::instance(), */ args);
+            SSLManager::instance().ClientVerificationError.emit(args);
         ok = args.getIgnoreError() ? 1 : 0;
     }
 

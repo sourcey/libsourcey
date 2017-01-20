@@ -7,7 +7,7 @@ function(set_scy_libname module_name output_var)
   set(temp_name)
   if(WIN32)
     # Postfix of DLLs:
-    string(TOLOWER "scy_${module_name}_${LibSourcey_DLLVERSION}" temp_name)
+    string(TOLOWER "scy_${module_name}" temp_name) #_${LibSourcey_DLLVERSION}
   else()
     # Postfix of so's:
     string(TOLOWER "scy_${module_name}" temp_name)
@@ -37,7 +37,7 @@ endmacro()
 ### Macro: ask_build_sourcey_module
 #
 # Optionally build a LibSourcey module.
-# This should be called before  include_dependency and
+# This should be called before include_dependency and
 # define_sourcey_module for each module.
 #
 macro(ask_build_sourcey_module name)
@@ -56,7 +56,7 @@ endmacro()
 ### Macro: ask_build_sourcey_test
 #
 # Optionally build a LibSourcey test.
-# This should be called before  include_dependency and
+# This should be called before include_dependency and
 # define_sourcey_test for each test.
 #
 macro(ask_build_sourcey_test name)
@@ -69,6 +69,7 @@ macro(ask_build_sourcey_test name)
   endif()
   mark_as_advanced(FORCE BUILD_TESTS_${name})
 endmacro()
+
 
 #
 ### Macro: ask_build_sourcey_sample

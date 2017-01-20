@@ -197,8 +197,8 @@ protected:
     bool _initialized;
     bool _encrypt;
     const EVP_CIPHER* _cipher;
+	EVP_CIPHER_CTX* _ctx;
     std::string _name;
-    EVP_CIPHER_CTX _ctx;
     ByteVec _key;
     ByteVec _iv;
 };

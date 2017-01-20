@@ -302,7 +302,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&,
 }
 
 
-void WebSocketAdapter::onSocketClose(net::Socket& socket)
+void WebSocketAdapter::onSocketClose(net::Socket&)
 {
     // Reset state so the connection can be reused
     _request.clear();
@@ -311,7 +311,7 @@ void WebSocketAdapter::onSocketClose(net::Socket& socket)
     framer._frameFlags = 0;
 
     // Emit closed event
-    SocketAdapter::onSocketClose(socket);
+    SocketAdapter::onSocketClose(*socket.get());
 }
 
 

@@ -227,8 +227,8 @@ endfunction()
 # Usage:
 #   messageV(<msg>)
 #
-macro(messageV msg)
+function(messageV text)
   if(${MSG_VERBOSE})
-    message(STATUS msg)
+    message(STATUS "${text}")
   endif()
-endmacro()
+endfunction()

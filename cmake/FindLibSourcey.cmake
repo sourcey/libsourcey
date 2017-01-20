@@ -31,7 +31,17 @@
 # Set required variables
 set(LibSourcey_ROOT_DIR "" CACHE STRING "Where is the LibSourcey root directory located?")
 set(LibSourcey_INCLUDE_DIR "${LibSourcey_ROOT_DIR}/src" CACHE STRING "Where are the LibSourcey headers (.h) located?")
-set(LibSourcey_LIBRARY_DIR "${LibSourcey_ROOT_DIR}/build/src" CACHE STRING "Where are the LibSourcey libraries (.dll/.so) located?")
+set(LibSourcey_LIBRARY_DIR "${LibSourcey_ROOT_DIR}/build" CACHE STRING "Where are the LibSourcey libraries (.dll/.so) located?") #/src
+
+# Set path variables (used in .cmake files)
+set(LibSourcey_DIR ${LibSourcey_ROOT_DIR})
+set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src)
+set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build)
+
+# message("LibSourcey_SOURCE_DIR=${LibSourcey_SOURCE_DIR}")
+# message("LibSourcey_ROOT_DIR=${LibSourcey_ROOT_DIR}")
+# message("LibSourcey_LIBRARY_DIR=${LibSourcey_ROOT_DIR}")
+# message("LibSourcey_INCLUDE_DIR=${LibSourcey_INCLUDE_DIR}")
 
 # Include the LibSourcey cmake helpers (if included from third party library)
 # if (LibSourcey_ROOT_DIR AND EXISTS ${LibSourcey_ROOT_DIR})
@@ -79,6 +89,8 @@ if (NOT LibSourcey_FOUND)
   foreach(component ${LibSourcey_FIND_COMPONENTS})
     list(APPEND LibSourcey_INCLUDE_SUFFIXES ${component}/include)
     list(APPEND LibSourcey_LIBRARY_SUFFIXES ${component})
+    list(APPEND LibSourcey_LIBRARY_SUFFIXES ${component}/Release)
+    list(APPEND LibSourcey_LIBRARY_SUFFIXES ${component}/Debug)
   endforeach()
 
   # Check for all available components
@@ -99,8 +111,11 @@ if (NOT LibSourcey_FOUND)
   find_component(LibSourcey util     util     scy_util     scy/util/ratelimiter.h)
   find_component(LibSourcey uv       uv       scy_uv       scy/uv/uvpp.h)
   find_component(LibSourcey webrtc   webrtc   scy_webrtc   scy/webrtc/webrtc.h)
+  
+  # Include the dir with libsourcey.h
+  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_LIBRARY_DIR})
 
   # Set LibSourcey as found or not
-  # print_module_variables(LibSourcey)
+  #print_module_variables(LibSourcey)
   set_module_found(LibSourcey)
 endif()

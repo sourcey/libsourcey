@@ -8,13 +8,15 @@
 #  LIBUV_LIBRARY
 #
 
+
 find_path(LIBUV_INCLUDE_DIR
   NAMES uv.h
-  PATHS ${LibSourcey_SOURCE_DIR}/src/uv/vendor/libuv
+  PATHS ${LibSourcey_DIR}/vendor/libuv/include
   NO_DEFAULT_PATH)
 find_library(LIBUV_LIBRARY
   NAMES libuv uv
-  PATHS ${LibSourcey_BUILD_DIR}/src/uv/vendor/libuv
+  PATHS ${LibSourcey_BUILD_DIR}/vendor/libuv
+  PATH_SUFFIXES Debug Release
   NO_DEFAULT_PATH)
 
 include(FindPackageHandleStandardArgs)

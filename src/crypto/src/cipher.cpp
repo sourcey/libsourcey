@@ -33,6 +33,7 @@ Cipher::Cipher(const std::string& name, const std::string& passphrase,
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
+	, _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key()
     , _iv()
@@ -54,6 +55,7 @@ Cipher::Cipher(const std::string& name, const ByteVec& key, const ByteVec& iv)
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
+	, _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key(key)
     , _iv(iv)
@@ -71,6 +73,7 @@ Cipher::Cipher(const std::string& name)
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
+	, _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key()
     , _iv()
@@ -94,7 +97,8 @@ Cipher::~Cipher()
     crypto::uninitializeEngine();
 
     if (_initialized)
-        EVP_CIPHER_CTX_cleanup(&_ctx);
+        EVP_CIPHER_CTX_cleanup(_ctx);
+	EVP_CIPHER_CTX_free(_ctx);
 }
 
 
@@ -113,9 +117,9 @@ void Cipher::initDecryptor()
 void Cipher::initialize(bool encrypt)
 {
     if (_initialized)
-        EVP_CIPHER_CTX_cleanup(&_ctx);
+        EVP_CIPHER_CTX_cleanup(_ctx);
 
-    EVP_CipherInit(&_ctx, _cipher, &_key[0], _iv.empty() ? 0 : &_iv[0],
+    EVP_CipherInit(_ctx, _cipher, &_key[0], _iv.empty() ? 0 : &_iv[0],
                    encrypt ? 1 : 0);
 
     _encrypt = encrypt;
@@ -128,7 +132,7 @@ int Cipher::update(const unsigned char* input, int inputLength,
 {
     assert(outputLength >= (inputLength + blockSize() - 1));
     int len;
-    internal::api(EVP_CipherUpdate(&_ctx, output, &len, input, inputLength));
+    internal::api(EVP_CipherUpdate(_ctx, output, &len, input, inputLength));
     return len;
 }
 
@@ -137,7 +141,7 @@ int Cipher::final(unsigned char* output, int length)
 {
     assert(length >= blockSize());
     int len;
-    internal::api(EVP_CipherFinal_ex(&_ctx, output, &len));
+    internal::api(EVP_CipherFinal_ex(_ctx, output, &len));
     return len;
 }
 
@@ -265,8 +269,7 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink,
 
         reslen = update(readbuf.get(), nread, cryptbuf.get(), cryptsize);
         if (encoder) {
-            enclen = encoder.get()->encode((const char*)cryptbuf.get(), reslen,
-                                           encbuf.get());
+            enclen = encoder.get()->encode((const char*)cryptbuf.get(), reslen, encbuf.get());
             sink.write((const char*)encbuf.get(), enclen);
         } else {
             sink.write((const char*)cryptbuf.get(), reslen);
@@ -275,8 +278,7 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink,
 
     reslen = final(cryptbuf.get(), cryptsize);
     if (encoder) {
-        enclen = encoder.get()->encode((const char*)cryptbuf.get(), reslen,
-                                       encbuf.get());
+        enclen = encoder.get()->encode((const char*)cryptbuf.get(), reslen, encbuf.get());
         sink.write((const char*)encbuf.get(), enclen);
         enclen = encoder.get()->finalize(encbuf.get());
         sink.write((const char*)encbuf.get(), enclen);
@@ -306,8 +308,7 @@ inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
 }
 
 
-void Cipher::decryptStream(std::istream& source, std::ostream& sink,
-                           Encoding encoding)
+void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding encoding)
 {
     initDecryptor();
 
@@ -327,8 +328,7 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink,
         nread = static_cast<int>(source.gcount());
 
         if (decoder) {
-            declen = decoder->decode((const char*)readbuf.get(), nread,
-                                     decbuf.get());
+            declen = decoder->decode((const char*)readbuf.get(), nread, decbuf.get());
             if (declen == 0)
                 continue;
             reslen = update((const unsigned char*)decbuf.get(), declen,
@@ -358,7 +358,7 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink,
 
 int Cipher::setPadding(int padding)
 {
-    return EVP_CIPHER_CTX_set_padding(&_ctx, padding);
+    return EVP_CIPHER_CTX_set_padding(_ctx, padding);
 }
 
 

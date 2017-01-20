@@ -39,12 +39,9 @@ namespace scy {
 class SCY_EXTERN Timestamp
 {
 public:
-    typedef std::int64_t
-        TimeVal; ///< monotonic UTC time value in microsecond resolution
-    typedef std::int64_t
-        UtcTimeVal; ///< monotonic UTC time value in 100 nanosecond resolution
-    typedef std::int64_t
-        TimeDiff; ///< difference between two timestamps in microseconds
+    typedef std::int64_t TimeVal;    ///< monotonic UTC time value in microsecond resolution
+    typedef std::int64_t UtcTimeVal; ///< monotonic UTC time value in 100 nanosecond resolution
+    typedef std::int64_t TimeDiff;   ///< difference between two timestamps in microseconds
 
     /// Creates a timestamp with the current time.
     Timestamp();
@@ -226,8 +223,7 @@ public:
     /// Returns the total number of microseconds.
     TimeDiff totalMicroseconds() const;
 
-    static const TimeDiff
-        MILLISECONDS; ///< The number of microseconds in a millisecond.
+    static const TimeDiff MILLISECONDS; ///< The number of microseconds in a millisecond.
     static const TimeDiff SECONDS; ///< The number of microseconds in a second.
     static const TimeDiff MINUTES; ///< The number of microseconds in a minute.
     static const TimeDiff HOURS;   ///< The number of microseconds in a hour.
@@ -1833,7 +1829,6 @@ public:
     std::string id() const { return _id; }
 
     bool operator==(const TimedToken& r) const { return id() == r.id(); }
-
     bool operator==(const std::string& r) const { return id() == r; }
 
 protected:

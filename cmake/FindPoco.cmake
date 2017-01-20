@@ -39,6 +39,10 @@ set(Poco_INCLUDE_DIR "${Poco_ROOT_DIR}" CACHE STRING "Where are the Poco headers
 set(Poco_LIBRARY_DIR "${Poco_ROOT_DIR}/lib" CACHE STRING "Where are the Poco libraries (.dll/.so) located?")
 set(Poco_LINK_SHARED_LIBS FALSE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")
 
+#message("Poco_ROOT_DIR=${Poco_ROOT_DIR}")
+#message(FATAL_ERROR "Poco_INCLUDE_DIR=${Poco_INCLUDE_DIR}")
+#message("Poco_LIBRARY_DIR=${Poco_LIBRARY_DIR}")
+
 # Check for cached results. If there are then skip the costly part.
 # set_module_notfound(Poco)
 if (NOT Poco_FOUND)
@@ -53,7 +57,7 @@ if (NOT Poco_FOUND)
       add_definitions(-DPoco_DLL)
     else()
       add_definitions(-DPoco_STATIC)
-      if(BUILD_WITH_STATIC_CRT)
+      if(BUILD_WITH_STATIC_CRT) 
         set(Poco_LIB_SUFFIX "mt")
       else()
         set(Poco_LIB_SUFFIX "md")
@@ -66,6 +70,7 @@ if (NOT Poco_FOUND)
     CppUnit/include
     CppParser/include
     Data/include
+    Data/ODBC/include
     Foundation/include
     Crypto/include
     Net/include
@@ -93,6 +98,7 @@ if (NOT Poco_FOUND)
   find_component(Poco XML          XML          PocoXML${Poco_LIB_SUFFIX}          Poco/XML/XML.h)
   find_component(Poco Zip          Zip          PocoZip${Poco_LIB_SUFFIX}          Poco/Zip/Zip.h)
   find_component(Poco Data         Data         PocoData${Poco_LIB_SUFFIX}         Poco/Data/Data.h)
+  find_component(Poco ODBC         ODBC         PocoDataODBC${Poco_LIB_SUFFIX}     Poco/Data/ODBC/Data.h)
   find_component(Poco PageCompiler PageCompiler PocoPageCompiler${Poco_LIB_SUFFIX} Poco/PageCompiler/PageCompiler.h)
   find_component(Poco Foundation   Foundation   PocoFoundation${Poco_LIB_SUFFIX}   Poco/Foundation.h)
 

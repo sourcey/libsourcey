@@ -24,6 +24,7 @@ namespace crypto {
 
 Hash::Hash(const std::string& algorithm)
     : _algorithm(algorithm)
+	, _ctx(EVP_MD_CTX_new())
 {
     crypto::initializeEngine();
 
@@ -31,7 +32,7 @@ Hash::Hash(const std::string& algorithm)
     if (!_md)
         throw std::runtime_error("Algorithm not supported: " + algorithm);
 
-    EVP_DigestInit(&_ctx, _md);
+    EVP_DigestInit(_ctx, _md);
 }
 
 
@@ -39,21 +40,24 @@ Hash::~Hash()
 {
     crypto::uninitializeEngine();
 
-    EVP_MD_CTX_cleanup(&_ctx);
+    //EVP_MD_CTX_cleanup(_ctx);
+	EVP_MD_CTX_free(_ctx);
 }
 
 
 void Hash::reset()
 {
-    internal::api(EVP_MD_CTX_cleanup(&_ctx));
-    internal::api(EVP_DigestInit(&_ctx, _md));
+	EVP_MD_CTX_free(_ctx);
+	_ctx = EVP_MD_CTX_new();
+    //internal::api(EVP_MD_CTX_cleanup(_ctx));
+    internal::api(EVP_DigestInit(_ctx, _md));
     _digest.clear();
 }
 
 
 void Hash::update(const void* data, unsigned length)
 {
-    internal::api(EVP_DigestUpdate(&_ctx, data, length));
+    internal::api(EVP_DigestUpdate(_ctx, data, length));
 }
 
 
@@ -75,7 +79,7 @@ const ByteVec& Hash::digest()
     if (_digest.size() == 0) {
         _digest.resize(EVP_MAX_MD_SIZE); // TODO: Get actual algorithm size
         unsigned int len = 0;
-        internal::api(EVP_DigestFinal(&_ctx, &_digest[0], &len));
+        internal::api(EVP_DigestFinal(_ctx, &_digest[0], &len));
         _digest.resize(len);
     }
     return _digest;
