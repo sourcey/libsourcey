@@ -7,6 +7,7 @@
 //
 /// @addtogroup base
 /// @{
+//
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
@@ -682,13 +683,13 @@ public:
 
 /// This class represents an instant in local time
 /// (as opposed to UTC), expressed in years, months, days,
-//// hours, minutes, seconds and milliseconds based on the
+/// hours, minutes, seconds and milliseconds based on the
 /// Gregorian calendar.
 ///
 /// In addition to the date and time, the class also
 /// maintains a time zone differential, which denotes
 /// the difference in seconds from UTC to local time,
-//// i.e. UTC = local time - time zone differential.
+/// i.e. UTC = local time - time zone differential.
 ///
 /// Although LocalDateTime supports relational and arithmetic
 /// operators, all date/time comparisons and date/time arithmetics
@@ -1138,7 +1139,8 @@ public:
 /// This class converts dates and times into strings, supporting a
 /// variety of standard and custom formats.
 ///
-/// There are two kind of static member functions:    ///    * format* functions
+/// There are two kind of static member functions:    
+///    * format* functions
 /// return a std::string containing
 ///      the formatted value.
 ///    * append* functions append the formatted value to
@@ -1148,7 +1150,7 @@ class SCY_EXTERN DateTimeFormatter
 public:
     enum
     {
-        UTC = 0xFFFF /// Special value for timeZoneDifferential denoting UTC.
+        UTC = 0xFFFF ///< Special value for timeZoneDifferential denoting UTC.
     };
 
     /// Formats the given timestamp according to the given format.
@@ -1284,13 +1286,13 @@ public:
 /// strings.
 ///
 /// The returned DateTime will always contain a time in the same
-/// timezone as the time in the string. Call DateTime::makeUTC()    /// with the
-/// timeZoneDifferential returned by parse() to convert
+/// timezone as the time in the string. Call DateTime::makeUTC()    
+/// with the timeZoneDifferential returned by parse() to convert
 /// the DateTime to UTC.
 ///
 /// Note: When parsing a time in 12-hour (AM/PM) format, the hour
 /// (%h) must be parsed before the AM/PM designator (%a, %A),
-//// otherwise the AM/PM designator will be ignored.
+/// otherwise the AM/PM designator will be ignored.
 ///
 /// See the DateTimeFormatter class for a list of supported format specifiers.
 /// In addition to the format specifiers supported by DateTimeFormatter, an
@@ -1773,7 +1775,7 @@ public:
 
 private:
     Stopwatch(const Stopwatch&);
-    Stopwatch& operator=(const Stopwatch&);
+    Stopwatch& operator=(const Stopwatch&) = delete;
 
     Timestamp _start;
     Timestamp::TimeDiff _elapsed;

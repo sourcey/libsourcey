@@ -66,4 +66,4 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
 } // namespace scy
 
 
-#endif // SCY_JSON_ISerializable.h
+#endif // SCY_JSON_ISerializable_h

@@ -8,17 +8,24 @@
 /// @addtogroup json
 /// @{
 
+
 #ifndef SCY_JSON_Configuration_H
 #define SCY_JSON_Configuration_H
+
 
 #include "scy/configuration.h"
 #include "scy/json/json.h"
 #include <mutex>
 #include "scy/util.h"
 
+
 namespace scy {
 namespace json {
 
+
+/// JSON configuration file
+///
+/// See base Configuration for all accessors
 class SCY_EXTERN Configuration : public scy::Configuration
 {
 public:
@@ -32,14 +39,11 @@ public:
     virtual bool remove(const std::string& key);
     virtual void removeAll(const std::string& baseKey);
     virtual void replace(const std::string& from, const std::string& to);
-    virtual void keys(std::vector<std::string>& keys,
-                      const std::string& baseKey = "");
+    virtual void keys(std::vector<std::string>& keys, const std::string& baseKey = "");
     virtual void print(std::ostream& ost);
 
     virtual std::string path();
     virtual bool loaded();
-
-    /// See base Configuration for all accessors
 
     json::Value root;
 
@@ -52,8 +56,10 @@ protected:
     mutable std::mutex _mutex;
 };
 
+
 } // namespace json
 } // namespace scy
+
 
 #endif // SCY_JSON_Configuration_H
 

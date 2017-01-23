@@ -56,16 +56,15 @@ inline void saveFile(const std::string& path, const json::Value& root)
 }
 
 
-inline void stringify(const json::Value& root, std::string& output,
-                      bool pretty = false)
+inline void stringify(const json::Value& root, std::string& output, bool pretty = false)
 {
     if (pretty) {
         json::StyledWriter writer;
         output = writer.write(root);
     } else {
         json::FastWriter writer;
-        output = writer.write(root); /// NOTE: The FastWriter appends a newline
-                                     /// character which we don't want.
+        output = writer.write(root); // NOTE: The FastWriter appends a newline
+                                     // character which we don't want.
         if (output.size() > 0)
             output.resize(output.size() - 1);
     }
@@ -99,8 +98,7 @@ inline void countNestedKeys(json::Value& root, const std::string& key,
 }
 
 
-inline bool hasNestedKey(json::Value& root, const std::string& key,
-                         int depth = 0)
+inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 0)
 {
     depth++;
     for (auto it = root.begin(); it != root.end(); it++) {
@@ -113,15 +111,16 @@ inline bool hasNestedKey(json::Value& root, const std::string& key,
 }
 
 
-inline bool findNestedObjectWithProperty(
-    json::Value& root, json::Value*& result, const std::string& key,
-    const std::string& value, bool partial = true, int index = 0,
-    int depth = 0) /// Only works for objects with string values.
+/// Only works for objects with string values.
 /// Key or value may be empty for selecting wildcard values.
 /// If partial is false substring matches will be accepted.
 /// Result must be a reference to a pointer or the root value's
 /// internal reference will also be changed when the result is
 /// assigned. Further investigation into jsoncpp is required.
+inline bool findNestedObjectWithProperty(
+    json::Value& root, json::Value*& result, const std::string& key,
+    const std::string& value, bool partial = true, int index = 0,
+    int depth = 0) 
 {
     depth++;
     if (root.isObject()) {

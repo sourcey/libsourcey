@@ -10,12 +10,13 @@
 
 find_path(JSONCPP_INCLUDE_DIR
   NAMES json/json.h
-  PATHS ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp
+  PATHS ${LibSourcey_DIR}/vendor/jsoncpp
   NO_DEFAULT_PATH)
   
 find_library(JSONCPP_LIBRARY
-  NAMES jsoncpp libjsoncpp
-  PATHS ${LibSourcey_BUILD_DIR}/src/json/vendor/jsoncpp
+  NAMES jsoncpp jsoncppd libjsoncpp
+  PATHS ${LibSourcey_BUILD_DIR}/vendor/jsoncpp
+  PATH_SUFFIXES Debug Release
   NO_DEFAULT_PATH)
 
 include(FindPackageHandleStandardArgs)

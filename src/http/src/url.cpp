@@ -25,14 +25,12 @@ URL::URL()
 
 URL::URL(const char* url)
 {
-    DebugL << "Parse char: " << url << std::endl;
     parse(url);
 }
 
 
 URL::URL(const std::string& url)
 {
-    DebugL << "Parse string: " << url << std::endl;
     parse(url);
 }
 
@@ -87,7 +85,7 @@ URL& URL::operator=(const char* uri)
 
 bool URL::parse(const std::string& url, bool whiny)
 {
-    DebugL << "Parsing: " << url << std::endl;
+    TraceL << "Parsing: " << url << std::endl;
     std::string src(util::trim(url));
     _buf = src;
     if (http_parser_parse_url(src.c_str(), src.length(), 0, &_parser) == 0)

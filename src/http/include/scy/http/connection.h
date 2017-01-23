@@ -48,7 +48,7 @@ public:
         // assert(current <= total);
         current += nread;
 
-        emit(/*sender ? sender : this, */ progress());
+        emit(progress());
     }
 };
 

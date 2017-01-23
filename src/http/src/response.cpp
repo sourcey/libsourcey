@@ -86,8 +86,7 @@ void Response::setStatusAndReason(StatusCode status, const std::string& reason)
 
 void Response::setDate(const Timestamp& dateTime)
 {
-    set("Date",
-        DateTimeFormatter::format(dateTime, DateTimeFormat::HTTP_FORMAT));
+    set("Date", DateTimeFormatter::format(dateTime, DateTimeFormat::HTTP_FORMAT));
 }
 
 
@@ -120,8 +119,7 @@ void Response::getCookies(std::vector<Cookie>& cookies) const
 
 void Response::write(std::ostream& ostr) const
 {
-    ostr << getVersion() << " " << static_cast<int>(_status) << " " << _reason
-         << "\r\n";
+    ostr << getVersion() << " " << static_cast<int>(_status) << " " << _reason << "\r\n";
     http::Message::write(ostr);
     ostr << "\r\n";
 }
@@ -221,8 +219,10 @@ const char* getStatusCodeReason(StatusCode status)
             return "Requested range not satisfiable";
         case StatusCode::ExpectationFailed:
             return "Expectation Failed";
-        case StatusCode::UpgradeRequired:
-            return "Upgrade Required";
+		case StatusCode::UnprocessableEntity:
+			return "Unprocessable Entity";
+		case StatusCode::UpgradeRequired:
+			return "Upgrade Required";
 
         // 500 range: server errors
         case StatusCode::InternalServerError:

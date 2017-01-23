@@ -10,12 +10,13 @@
 
 find_path(HTTPPARSER_INCLUDE_DIR
   NAMES http_parser.h
-  PATHS ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser
+  PATHS ${LibSourcey_DIR}/vendor/http_parser
   NO_DEFAULT_PATH)
 
 find_library(HTTPPARSER_LIBRARY
-  NAMES http_parser libhttp_parser
-  PATHS ${LibSourcey_BUILD_DIR}/src/http/vendor/http_parser
+  NAMES http_parser http_parserd libhttp_parser
+  PATHS ${LibSourcey_BUILD_DIR}/vendor/http_parser
+  PATH_SUFFIXES Debug Release
   NO_DEFAULT_PATH)
 
 include(FindPackageHandleStandardArgs)

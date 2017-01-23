@@ -33,8 +33,7 @@ struct ParserError
 class SCY_EXTERN ParserObserver
 {
 public:
-    virtual void onParserHeader(const std::string& name,
-                                const std::string& value) = 0;
+    virtual void onParserHeader(const std::string& name, const std::string& value) = 0;
     virtual void onParserHeadersEnd() = 0;
     virtual void onParserChunk(const char* data, std::size_t len) = 0;
     virtual void onParserEnd() = 0;
@@ -53,8 +52,7 @@ public:
 
     void init(http_parser_type type);
 
-    std::size_t parse(const char* data,
-                      std::size_t length); //, bool expectComplete = false
+    std::size_t parse(const char* data, std::size_t length);
 
     /// Feed data read from socket into the http_parser.
     ///
@@ -66,8 +64,7 @@ public:
     /// in success or error.
     bool complete() const;
 
-    void setParserError(
-        const std::string& message = ""); // bool throwException = true,
+    void setParserError(const std::string& message = "");
 
     void setRequest(http::Request* request);
     void setResponse(http::Response* response);
@@ -79,7 +76,7 @@ public:
     bool upgrade() const;
     bool shouldKeepAlive() const;
 
-    ///// Callbacks
+    /// Callbacks
     void onURL(const std::string& value);
     void onHeader(const std::string& name, const std::string& value);
     void onHeadersEnd();
@@ -88,14 +85,12 @@ public:
     void onError(const ParserError& err);
 
 public:
-    ///// http_parser callbacks
+    /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
     static int on_url(http_parser* parser, const char* at, std::size_t len);
     static int on_status(http_parser* parser, const char* at, std::size_t len);
-    static int on_header_field(http_parser* parser, const char* at,
-                               std::size_t len);
-    static int on_header_value(http_parser* parser, const char* at,
-                               std::size_t len);
+    static int on_header_field(http_parser* parser, const char* at, std::size_t len);
+    static int on_header_value(http_parser* parser, const char* at, std::size_t len);
     static int on_headers_complete(http_parser* parser);
     static int on_body(http_parser* parser, const char* at, std::size_t len);
     static int on_message_complete(http_parser* parser);

@@ -14,9 +14,9 @@
 
 
 #include "scy/base.h"
+#include "scy/signal.h"
 #include <string>
 #include <mutex>
-#include "scy/signal.h"
 
 
 namespace scy {
@@ -160,10 +160,11 @@ protected:
     static std::int64_t parseLargeInt(const std::string& value);
     static bool parseBool(const std::string& value);
 
-private:
-    Configuration(const Configuration&);
-    Configuration& operator=(const Configuration&);
+protected:
+    Configuration(const Configuration&) = delete;
+    Configuration& operator=(const Configuration&) = delete;
 
+private:
     mutable std::mutex _mutex;
 };
 

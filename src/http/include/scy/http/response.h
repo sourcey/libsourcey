@@ -65,7 +65,8 @@ enum class StatusCode
     UnsupportedMediaType = 415,
     RangeNotSatisfiable = 416,
     ExpectationFailed = 417,
-    UpgradeRequired = 426,
+	UnprocessableEntity = 422,
+	UpgradeRequired = 426,
 
     InternalServerError = 500,
     NotImplemented = 501,

@@ -146,35 +146,29 @@ public:
 
 
 template <class ConnectionT>
-inline ClientConnection::Ptr
-createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
+inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 {
     ClientConnection::Ptr conn;
 
     if (url.scheme() == "http") {
-        // conn = std::make_shared<ConnectionT>(url,
-        // std::make_shared<net::TCPSocket>(loop));
+        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
             deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "https") {
-        // conn = std::make_shared<ConnectionT>(url,
-        // std::make_shared<net::SSLSocket>(loop));
+        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
             deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "ws") {
-        // conn = std::make_shared<ConnectionT>(url,
-        // std::make_shared<net::TCPSocket>(loop));
+        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
             deleter::Deferred<ConnectionT>());
         // replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
-
     } else if (url.scheme() == "wss") {
-        // conn = std::make_shared<ConnectionT>(url,
-        // std::make_shared<net::SSLSocket>(loop));
+        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
             new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
             deleter::Deferred<ConnectionT>());
@@ -207,8 +201,7 @@ public:
     void shutdown();
 
     template <class ConnectionT>
-    ClientConnection::Ptr createConnectionT(const URL& url,
-                                            uv::Loop* loop = uv::defaultLoop())
+    ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
     {
         auto connection = http::createConnectionT<ConnectionT>(url, loop);
         if (connection) {
@@ -217,8 +210,7 @@ public:
         return connection;
     }
 
-    ClientConnection::Ptr createConnection(const URL& url,
-                                           uv::Loop* loop = uv::defaultLoop())
+    ClientConnection::Ptr createConnection(const URL& url, uv::Loop* loop = uv::defaultLoop())
     {
         auto connection = http::createConnectionT<ClientConnection>(url, loop);
         if (connection) {

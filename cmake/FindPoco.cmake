@@ -44,19 +44,19 @@ set(Poco_LINK_SHARED_LIBS FALSE CACHE BOOL "Link with shared Poco libraries (.dl
 #message("Poco_LIBRARY_DIR=${Poco_LIBRARY_DIR}")
 
 # Check for cached results. If there are then skip the costly part.
-# set_module_notfound(Poco)
+set_module_notfound(Poco)
 if (NOT Poco_FOUND)
 
   # Set the library suffix for our build type
   set(Poco_LIB_SUFFIX "")
   if(WIN32 AND MSVC)
     set(Poco_MULTI_CONFIGURATION TRUE)
-    # add_definitions(-DPoco_NO_AUTOMATIC_LIBS)
-    # add_definitions(-DPoco_NO_UNWINDOWS)
+    # add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+    # add_definitions(-DPOCO_NO_UNWINDOWS)
     if(Poco_LINK_SHARED_LIBS)
-      add_definitions(-DPoco_DLL)
+      add_definitions(-DPOCO_DLL)
     else()
-      add_definitions(-DPoco_STATIC)
+      add_definitions(-DPOCO_STATIC)
       if(BUILD_WITH_STATIC_CRT) 
         set(Poco_LIB_SUFFIX "mt")
       else()
@@ -98,7 +98,7 @@ if (NOT Poco_FOUND)
   find_component(Poco XML          XML          PocoXML${Poco_LIB_SUFFIX}          Poco/XML/XML.h)
   find_component(Poco Zip          Zip          PocoZip${Poco_LIB_SUFFIX}          Poco/Zip/Zip.h)
   find_component(Poco Data         Data         PocoData${Poco_LIB_SUFFIX}         Poco/Data/Data.h)
-  find_component(Poco ODBC         ODBC         PocoDataODBC${Poco_LIB_SUFFIX}     Poco/Data/ODBC/Data.h)
+  find_component(Poco ODBC         ODBC         PocoDataODBC${Poco_LIB_SUFFIX}     Poco/Data/ODBC/Connector.h)
   find_component(Poco PageCompiler PageCompiler PocoPageCompiler${Poco_LIB_SUFFIX} Poco/PageCompiler/PageCompiler.h)
   find_component(Poco Foundation   Foundation   PocoFoundation${Poco_LIB_SUFFIX}   Poco/Foundation.h)
 

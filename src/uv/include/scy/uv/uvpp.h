@@ -201,7 +201,7 @@ struct ShutdownCmd
     std::function<void(void*)> callback;
 };
 
-inline void onShutdownSignal(std::function<void(void*)> callback,
+inline void onShutdownSignal(std::function<void(void*)> callback = nullptr,
                              void* opaque = nullptr, Loop* loop = defaultLoop())
 {
     auto cmd = new ShutdownCmd;
@@ -211,19 +211,16 @@ inline void onShutdownSignal(std::function<void(void*)> callback,
     auto sig = new uv_signal_t;
     sig->data = cmd;
     uv_signal_init(loop, sig);
-    uv_signal_start(sig,
-                    [](uv_signal_t* req, int /* signum */) {
-                        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
-                        uv_close((uv_handle_t*)req,
-                                 [](uv_handle_t* handle) { delete handle; });
-                        if (cmd->callback)
-                            cmd->callback(cmd->opaque);
-                        delete cmd;
-                    },
-                    SIGINT);
+    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
+        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
+        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) { delete handle; });
+        if (cmd->callback)
+            cmd->callback(cmd->opaque);
+        delete cmd;
+    }, SIGINT);
 }
 
-inline void waitForShutdown(std::function<void(void*)> callback,
+inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
                             void* opaque = nullptr, Loop* loop = defaultLoop())
 {
     onShutdownSignal(callback, opaque, loop);

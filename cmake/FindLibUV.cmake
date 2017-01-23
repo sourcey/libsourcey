@@ -13,6 +13,7 @@ find_path(LIBUV_INCLUDE_DIR
   NAMES uv.h
   PATHS ${LibSourcey_DIR}/vendor/libuv/include
   NO_DEFAULT_PATH)
+  
 find_library(LIBUV_LIBRARY
   NAMES libuv uv
   PATHS ${LibSourcey_BUILD_DIR}/vendor/libuv
