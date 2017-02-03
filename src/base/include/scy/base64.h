@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:    LGPL-2.1+
+// SPDX-License-Identifier: LGPL-2.1+
 //
 // This file uses parts of the public domain libb64 library:
 // http://libb64.sourceforge.net/
