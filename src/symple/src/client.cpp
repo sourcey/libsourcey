@@ -110,8 +110,7 @@ void assertCanSend(Client* client, Message& m)
 
     if (m.to().id == m.from().id) {
         assert(0);
-        throw std::runtime_error(
-            "Cannot send message with matching sender and recipient.");
+        throw std::runtime_error("Cannot send message with matching sender and recipient.");
     }
 
     if (!m.valid()) {

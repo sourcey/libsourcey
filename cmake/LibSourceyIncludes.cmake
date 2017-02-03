@@ -95,7 +95,7 @@ endmacro()
 # Adds a dependency variables the LibSourcey build variables.
 #
 macro(add_dependency_build_variables name)
-  print_module_variables(${name})
+  # print_module_variables(${name})
 
   if(${name}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${name}_INCLUDE_DIR}")

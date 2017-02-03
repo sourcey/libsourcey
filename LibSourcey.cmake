@@ -37,15 +37,15 @@ include(LibSourceyVersion REQUIRED)
 # ----------------------------------------------------------------------------
 # LibSourcey build components
 # ----------------------------------------------------------------------------
-set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
-set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
-set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON   IF CMAKE_COMPILER_IS_GNUCXX)
-set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
-set_option(BUILD_TESTS                "Build module test applications?"                          ON   IF CMAKE_COMPILER_IS_GNUCXX)
+#set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
+#set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
+#set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON   IF CMAKE_COMPILER_IS_GNUCXX)
+#set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
+#set_option(BUILD_TESTS                "Build module test applications?"                          ON   IF CMAKE_COMPILER_IS_GNUCXX)
 set_option(BUILD_SAMPLES              "Build module sample applications?"                        ON   IF CMAKE_COMPILER_IS_GNUCXX)
-set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
-set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
-set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
+#set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
+#set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
+#set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
 
 # ----------------------------------------------------------------------------
 # LibSourcey build options

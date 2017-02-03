@@ -21,14 +21,12 @@ using namespace scy::util;
 //
 // Examples:
 // symple -help
-// symple -host localhost -port 4500 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42
-// -name Somedude
-// symple -host mydomain.com -port 80 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42
-// -name Somedude
+// symple -host localhost -port 4500 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42 -name Somedude
+// symple -host mydomain.com -port 80 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42 -name Somedude
 //
 
 
-#define USE_SSL 1
+#define USE_SSL 0
 
 
 class SympleApplication : public scy::Application
@@ -94,8 +92,7 @@ public:
             } else if (key == "type") {
                 client.options().type = value;
             } else if (key == "logfile") {
-                auto log = dynamic_cast<FileChannel*>(
-                    scy::Logger::instance().get("Symple"));
+                auto log = dynamic_cast<FileChannel*>(scy::Logger::instance().get("Symple"));
                 log->setPath(value);
             } else {
                 cerr << "Unrecognized command: " << key << "=" << value << endl;
@@ -124,91 +121,82 @@ public:
             client += slot(this, &SympleApplication::onRecvPacket);
             // client += slot(this, &SympleApplication::onRecvMessage);
             client.Announce += slot(this, &SympleApplication::onClientAnnounce);
-            client.StateChange +=
-                slot(this, &SympleApplication::onClientStateChange);
-            client.CreatePresence +=
-                slot(this, &SympleApplication::onCreatePresence);
+            client.StateChange += slot(this, &SympleApplication::onClientStateChange);
+            client.CreatePresence += slot(this, &SympleApplication::onCreatePresence);
             client.connect();
 
             // Start the console thread
-            Thread console(
-                [](void* arg) {
-                    auto app = reinterpret_cast<SympleApplication*>(arg);
+            Thread console([](void* arg) {
+                auto app = reinterpret_cast<SympleApplication*>(arg);
 
-                    char o = 0;
-                    while (o != 'Q') {
-                        cout << "COMMANDS:\n"
-                                "  M	Send a message.\n"
-                                "  J	Join a room.\n"
-                                "  L	Leave a room.\n"
-                                "  C	Print contacts list.\n"
-                                "  Q	Quit.\n";
+                char o = 0;
+                while (o != 'Q') {
+                    cout << "COMMANDS:\n"
+                            "  M	Send a message.\n"
+                            "  J	Join a room.\n"
+                            "  L	Leave a room.\n"
+                            "  C	Print contacts list.\n"
+                            "  Q	Quit.\n";
 
-                        o = toupper(std::getchar());
-                        std::cin.ignore();
+                    o = toupper(std::getchar());
+                    std::cin.ignore();
 
-                        // Send a message
-                        if (o == 'M') {
-                            cout << "Compose your message: " << endl;
-                            std::string data;
-                            std::getline(std::cin, data);
+                    // Send a message
+                    if (o == 'M') {
+                        cout << "Compose your message: " << endl;
+                        std::string data;
+                        std::getline(std::cin, data);
 
-                            auto message = new smpl::Message();
-                            message->setData(data);
+                        auto message = new smpl::Message();
+                        message->setData(data);
 
-                            cout << "Sending message: " << data << endl;
-                            // app->client.send(message, true);
+                        cout << "Sending message: " << data << endl;
+                        // app->client.send(message, true);
 
-                            // Synchronize the message with the main thread
-                            app->ipc.push(new ipc::Action(
-                                std::bind(&SympleApplication::onSyncMessage,
-                                          app, std::placeholders::_1),
-                                message));
-                        }
-
-                        // Join a room
-                        else if (o == 'J') {
-                            cout << "Join a room: " << endl;
-                            auto data = new std::string();
-                            std::getline(std::cin, *data);
-
-                            app->ipc.push(new ipc::Action(
-                                std::bind(&SympleApplication::onSyncCommand,
-                                          app, std::placeholders::_1),
-                                data, "join"));
-                        }
-
-                        // Leave a room
-                        else if (o == 'L') {
-                            cout << "Leave a room: " << endl;
-                            auto data = new std::string();
-                            std::getline(std::cin, *data);
-
-                            app->ipc.push(new ipc::Action(
-                                std::bind(&SympleApplication::onSyncCommand,
-                                          app, std::placeholders::_1),
-                                data, "leave"));
-                        }
-
-                        // List contacts
-                        else if (o == 'C') {
-                            cout << "Listing contacts:" << endl;
-                            app->client.roster().print(cout);
-                            cout << endl;
-                        }
+                        // Synchronize the message with the main thread
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncMessage, app, std::placeholders::_1),
+                            message));
                     }
 
-                    cout << "Quiting" << endl;
-                    app->shutdown();
-                },
-                this);
+                    // Join a room
+                    else if (o == 'J') {
+                        cout << "Join a room: " << endl;
+                        auto data = new std::string();
+                        std::getline(std::cin, *data);
+
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1),
+                            data, "join"));
+                    }
+
+                    // Leave a room
+                    else if (o == 'L') {
+                        cout << "Leave a room: " << endl;
+                        auto data = new std::string();
+                        std::getline(std::cin, *data);
+
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1),
+                            data, "leave"));
+                    }
+
+                    // List contacts
+                    else if (o == 'C') {
+                        cout << "Listing contacts:" << endl;
+                        app->client.roster().print(cout);
+                        cout << endl;
+                    }
+                }
+
+                cout << "Quiting" << endl;
+                app->shutdown();
+            }, this);
 
             // Run the event loop
-            waitForShutdown(
-                [](void* opaque) {
-                    reinterpret_cast<SympleApplication*>(opaque)->shutdown();
-                },
-                this);
+            waitForShutdown([](void* opaque) {
+                reinterpret_cast<SympleApplication*>(opaque)->shutdown();
+            }, this);
         } catch (std::exception& exc) {
             cerr << "Symple runtime error: " << exc.what() << endl;
         }

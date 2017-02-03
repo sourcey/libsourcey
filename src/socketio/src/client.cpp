@@ -95,13 +95,14 @@ void Client::connect()
 
     // Build the request
     // TODO: Allow custom URI params
-    std::ostringstream url("/socket.io/?EIO=4&transport=websocket");
+	std::ostringstream url;
+	url << "/socket.io/?EIO=4&transport=websocket";
     if (!_sessionID.empty()) {
         url << "&sid=";
         url << _sessionID;
     }
     url << "&t=";
-    url << time(NULL);
+    url << std::time(NULL);
 
     _ws.request().setURI(url.str());
     _ws.request().setHost(_options.host, _options.port);

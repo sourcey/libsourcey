@@ -329,12 +329,9 @@ double DateTime::toJulianDay(int year, int month, int day, int hour, int minute,
                            153, 184, 214, 245, 275, 306, 337};
 
     // day to double
-    double dday =
-        double(day) +
+    double dday = double(day) +
         ((double((hour * 60 + minute) * 60 + second) * 1000 + millisecond) *
-             1000 +
-         microsecond) /
-            86400000000.0;
+             1000 + microsecond) / 86400000000.0;
     if (month < 3) {
         month += 12;
         --year;
@@ -958,14 +955,11 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime,
             if (++it != end) {
                 switch (*it) {
                     case 'w':
-                        str.append(
-                            DateTimeFormat::WEEKDAY_NAMES[dateTime.dayOfWeek()],
-                            0, 3);
+                        str.append(DateTimeFormat::WEEKDAY_NAMES[dateTime.dayOfWeek()], 0, 3);
                         break;
                     case 'W':
                         str.append(
-                            DateTimeFormat::WEEKDAY_NAMES[dateTime
-                                                              .dayOfWeek()]);
+                            DateTimeFormat::WEEKDAY_NAMES[dateTime.dayOfWeek()]);
                         break;
                     case 'b':
                         str.append(
@@ -1021,10 +1015,8 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime,
                     case 's':
                         scy::numeric::format0(str, dateTime.second(), 2);
                         str += '.';
-                        scy::numeric::format0(str,
-                                              dateTime.millisecond() * 1000 +
-                                                  dateTime.microsecond(),
-                                              6);
+                        scy::numeric::format0(str, dateTime.millisecond() * 1000 +
+                                                   dateTime.microsecond(), 6);
                         break;
                     case 'i':
                         scy::numeric::format0(str, dateTime.millisecond(), 3);
@@ -1033,10 +1025,8 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime,
                         scy::numeric::format(str, dateTime.millisecond() / 100);
                         break;
                     case 'F':
-                        scy::numeric::format0(str,
-                                              dateTime.millisecond() * 1000 +
-                                                  dateTime.microsecond(),
-                                              6);
+                        scy::numeric::format0(str, dateTime.millisecond() * 1000 +
+                                                   dateTime.microsecond(), 6);
                         break;
                     case 'z':
                         tzdISO(str, timeZoneDifferential);
@@ -1089,14 +1079,11 @@ void DateTimeFormatter::append(std::string& str, const Timespan& timespan,
                         scy::numeric::format0(str, timespan.milliseconds(), 3);
                         break;
                     case 'c':
-                        scy::numeric::format(str,
-                                             timespan.milliseconds() / 100);
+                        scy::numeric::format(str, timespan.milliseconds() / 100);
                         break;
                     case 'F':
-                        scy::numeric::format0(str,
-                                              timespan.milliseconds() * 1000 +
-                                                  timespan.microseconds(),
-                                              6);
+                        scy::numeric::format0(str, timespan.milliseconds() * 1000 +
+                                                   timespan.microseconds(), 6);
                         break;
                     default:
                         str += *it;
@@ -1308,12 +1295,10 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str,
         month = 1;
     if (day == 0)
         day = 1;
-    if (DateTime::isValid(year, month, day, hour, minute, second, millis,
-                          micros))
+    if (DateTime::isValid(year, month, day, hour, minute, second, millis, micros))
         dateTime.assign(year, month, day, hour, minute, second, millis, micros);
     else
-        throw std::runtime_error(
-            "Syntax error: date/time component out of range");
+        throw std::runtime_error("Syntax error: date/time component out of range");
     timeZoneDifferential = tzd;
 }
 
@@ -1343,8 +1328,7 @@ void DateTimeParser::parse(const std::string& str, DateTime& dateTime,
                            int& timeZoneDifferential)
 {
     if (!tryParse(str, dateTime, timeZoneDifferential))
-        throw std::runtime_error(
-            "Syntax error: Unsupported or invalid date/time format");
+        throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
 
@@ -1355,8 +1339,7 @@ DateTime DateTimeParser::parse(const std::string& str,
     if (tryParse(str, result, timeZoneDifferential))
         return result;
     else
-        throw std::runtime_error(
-            "Syntax error: Unsupported or invalid date/time format");
+        throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
 
@@ -1488,8 +1471,7 @@ int DateTimeParser::parseMonth(std::string::const_iterator& it,
     }
     if (month.length() < 3)
         throw std::runtime_error("Syntax error: Month name must be at least "
-                                 "three characters long: " +
-                                 month);
+                                 "three characters long: " + month);
     for (int i = 0; i < 12; ++i) {
         if (DateTimeFormat::MONTH_NAMES[i].find(month) == 0)
             return i + 1;
