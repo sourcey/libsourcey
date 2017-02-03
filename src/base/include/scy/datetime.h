@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup base
 /// @{
@@ -111,7 +111,6 @@ public:
     /// the returned value is always 1000000.
     static TimeVal resolution();
 
-
 private:
     TimeVal _ts;
 };
@@ -152,8 +151,7 @@ public:
     Timespan& operator=(TimeDiff microseconds);
 
     /// Assigns a new span.
-    Timespan& assign(int days, int hours, int minutes, int seconds,
-                     int microseconds);
+    Timespan& assign(int days, int hours, int minutes, int seconds, int microseconds);
 
     /// Assigns a new span. Useful for assigning
     /// from a struct timeval.

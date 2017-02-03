@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup av
 /// @{
@@ -150,9 +150,9 @@ public:
     NullSignal DevicesChanged;
 
 #ifdef HAVE_FFMPEG
-	/// Find base FFmpeg formats
-	AVInputFormat* findVideoInputFormat();
-	AVInputFormat* findAudioInputFormat();
+    /// Find base FFmpeg formats
+    AVInputFormat* findVideoInputFormat();
+    AVInputFormat* findAudioInputFormat();
 #endif
 
 protected:

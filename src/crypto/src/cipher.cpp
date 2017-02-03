@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup crypto
 /// @{
@@ -33,7 +33,7 @@ Cipher::Cipher(const std::string& name, const std::string& passphrase,
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
-	, _ctx(EVP_CIPHER_CTX_new())
+    , _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key()
     , _iv()
@@ -55,7 +55,7 @@ Cipher::Cipher(const std::string& name, const ByteVec& key, const ByteVec& iv)
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
-	, _ctx(EVP_CIPHER_CTX_new())
+    , _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key(key)
     , _iv(iv)
@@ -73,7 +73,7 @@ Cipher::Cipher(const std::string& name)
     : _initialized(false)
     , _encrypt(false)
     , _cipher(nullptr)
-	, _ctx(EVP_CIPHER_CTX_new())
+    , _ctx(EVP_CIPHER_CTX_new())
     , _name(name)
     , _key()
     , _iv()
@@ -98,7 +98,7 @@ Cipher::~Cipher()
 
     if (_initialized)
         EVP_CIPHER_CTX_cleanup(_ctx);
-	EVP_CIPHER_CTX_free(_ctx);
+    EVP_CIPHER_CTX_free(_ctx);
 }
 
 

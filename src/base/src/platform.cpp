@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup base
 /// @{
@@ -138,7 +138,7 @@ std::wstring toUtf16(const std::string& str)
 
 std::string toUtf8(const wchar_t* wide, std::size_t len)
 {
-	auto len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), NULL, 0, NULL, NULL);
+    auto len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), NULL, 0, NULL, NULL);
     char* ns = STACK_ARRAY(char, len8);
     ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), ns, len8, NULL, NULL);
     return std::string(ns, len8);

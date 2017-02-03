@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup crypto
 /// @{
@@ -24,7 +24,7 @@ namespace crypto {
 
 Hash::Hash(const std::string& algorithm)
     : _algorithm(algorithm)
-	//, _ctx(EVP_MD_CTX_new())
+    //, _ctx(EVP_MD_CTX_new())
 {
     crypto::initializeEngine();
 
@@ -41,14 +41,14 @@ Hash::~Hash()
     crypto::uninitializeEngine();
 
     EVP_MD_CTX_cleanup(&_ctx);
-	//EVP_MD_CTX_free(_ctx);
+    //EVP_MD_CTX_free(_ctx);
 }
 
 
 void Hash::reset()
 {
-	//EVP_MD_CTX_free(_ctx);
-	//_ctx = EVP_MD_CTX_new();
+    //EVP_MD_CTX_free(_ctx);
+    //_ctx = EVP_MD_CTX_new();
     internal::api(EVP_MD_CTX_cleanup(&_ctx));
     internal::api(EVP_DigestInit(&_ctx, _md));
     _digest.clear();

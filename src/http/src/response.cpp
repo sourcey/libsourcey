@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup http
 /// @{
@@ -219,10 +219,10 @@ const char* getStatusCodeReason(StatusCode status)
             return "Requested range not satisfiable";
         case StatusCode::ExpectationFailed:
             return "Expectation Failed";
-		case StatusCode::UnprocessableEntity:
-			return "Unprocessable Entity";
-		case StatusCode::UpgradeRequired:
-			return "Upgrade Required";
+        case StatusCode::UnprocessableEntity:
+            return "Unprocessable Entity";
+        case StatusCode::UpgradeRequired:
+            return "Upgrade Required";
 
         // 500 range: server errors
         case StatusCode::InternalServerError:

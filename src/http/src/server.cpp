@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup http
 /// @{
@@ -66,13 +66,13 @@ void Server::shutdown()
         socket->close();
     }
 
-	auto conns = this->connections;
+    auto conns = this->connections;
     for (auto conn : conns) {
         conn->close(); // close and remove via callback
     }
     assert(this->connections.empty());
 
-	Shutdown.emit(/*this*/);
+    Shutdown.emit(/*this*/);
 }
 
 

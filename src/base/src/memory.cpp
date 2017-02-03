@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup base
 /// @{
@@ -127,8 +127,8 @@ void GarbageCollector::runAsync()
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left
             uv_walk(_handle.loop(), [](uv_handle_t* handle, void* /* arg */) {
-				DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
-			}, nullptr);
+                DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
+            }, nullptr);
             // assert(_handle.loop()->active_handles <= 1);
 #endif
         }

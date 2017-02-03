@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup http
 /// @{
@@ -304,7 +304,7 @@ void Client::shutdown()
     Shutdown.emit(/*this*/);
 
     //_connections.clear();
-	auto conns = _connections;
+    auto conns = _connections;
     for (auto conn : conns) {
         TraceS(this) << "Shutdown: " << conn << endl;
         conn->close(); // close and remove via callback

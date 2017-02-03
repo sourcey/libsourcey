@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup crypto
 /// @{
@@ -197,7 +197,7 @@ protected:
     bool _initialized;
     bool _encrypt;
     const EVP_CIPHER* _cipher;
-	EVP_CIPHER_CTX* _ctx;
+    EVP_CIPHER_CTX* _ctx;
     std::string _name;
     ByteVec _key;
     ByteVec _iv;

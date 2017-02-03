@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup http
 /// @{
@@ -67,7 +67,7 @@ void Authenticator::authenticate(http::Request& request, const http::Response& r
         }
         // else if (isDigestCredentials(iter->second))
         //    ; 
-		// TODO
+        // TODO
     }
 }
 
@@ -82,7 +82,7 @@ void Authenticator::updateAuthInfo(http::Request& request)
         }
         // else if (isDigestCredentials(authorization))
         //    ; 
-		// TODO
+        // TODO
     }
 }
 

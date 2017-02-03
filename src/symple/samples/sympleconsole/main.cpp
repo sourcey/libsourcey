@@ -132,11 +132,11 @@ public:
                 char o = 0;
                 while (o != 'Q') {
                     cout << "COMMANDS:\n"
-                            "  M	Send a message.\n"
-                            "  J	Join a room.\n"
-                            "  L	Leave a room.\n"
-                            "  C	Print contacts list.\n"
-                            "  Q	Quit.\n";
+                            "  M    Send a message.\n"
+                            "  J    Join a room.\n"
+                            "  L    Leave a room.\n"
+                            "  C    Print contacts list.\n"
+                            "  Q    Quit.\n";
 
                     o = toupper(std::getchar());
                     std::cin.ignore();
@@ -327,7 +327,7 @@ int main(int argc, char** argv)
 
         Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LDebug
 
-		// Init SSL client context
+        // Init SSL client context
 #if USE_SSL
         net::SSLManager::initNoVerifyClient();
 #endif
@@ -339,8 +339,8 @@ int main(int argc, char** argv)
             app.start();
         }
 
-		// Cleanup all singletons
-		// http::Client::destroy();
+        // Cleanup all singletons
+        // http::Client::destroy();
 #if USE_SSL
         net::SSLManager::destroy();
 #endif

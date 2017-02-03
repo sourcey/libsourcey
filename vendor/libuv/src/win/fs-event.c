@@ -65,7 +65,7 @@ static void uv_fs_event_queue_readdirchanges(uv_loop_t* loop,
 
 static int uv_relative_path(const WCHAR* filename,
                             const WCHAR* dir,
-	                    WCHAR** relpath) {
+                        WCHAR** relpath) {
   int dirlen = wcslen(dir);
   int filelen = wcslen(filename);
   if (dir[dirlen - 1] == '\\')

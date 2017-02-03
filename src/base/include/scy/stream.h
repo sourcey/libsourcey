@@ -3,7 +3,7 @@
 // LibSourcey
 // Copyright (c) 2005, Sourcey <http://sourcey.com>
 //
-// SPDX-License-Identifier:	LGPL-2.1+
+// SPDX-License-Identifier:    LGPL-2.1+
 //
 /// @addtogroup base
 /// @{
@@ -188,13 +188,13 @@ protected:
                                 uv_buf_t* buf)
     {
         auto self = reinterpret_cast<Stream*>( handle->data); 
-		
-		// Reserve the recommended buffer size
+        
+        // Reserve the recommended buffer size
         // if (suggested_size > self->_buffer.capacity())
         // self->_buffer.capacity(suggested_size);
         assert(self->_buffer.size() >= suggested_size); 
-		
-		// Reset the buffer position on each read
+        
+        // Reset the buffer position on each read
         buf->base = self->_buffer.data();
         buf->len = self->_buffer.size();
     }
