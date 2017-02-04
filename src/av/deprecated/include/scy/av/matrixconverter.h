@@ -52,7 +52,7 @@ public:
         }
     }
 
-    virtual bool accepts(IPacket& packet)
+    virtual bool accepts(IPacket* packet)
     {
         return dynamic_cast<const av::VideoPacket*>(&packet) != 0;
     }

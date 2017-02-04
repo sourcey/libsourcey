@@ -229,10 +229,19 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
 
 
 //
-// Default Callbacks (Depreciated)
+// Macro Helpers
 //
 
 
+#define UVCallOrThrow(message, func, ...)                                      \
+    {                                                                          \
+       int err = func(__VA_ARGS__);                                            \
+       if (err)                                                                \
+           setAndThrowError(message, err);                                     \
+    }
+
+
+/// @deprecated
 #define UVCallback(ClassName, Function, Handle)                                \
                                                                                \
     static void _Function(Handle* handle)                                      \
@@ -241,6 +250,7 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
     };
 
 
+/// @deprecated
 #define UVStatusCallback(ClassName, Function, Handle)                          \
                                                                                \
     static void Function(Handle* handle, int status)                           \
@@ -250,6 +260,7 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
     }
 
 
+/// @deprecated
 #define UVEmptyStatusCallback(ClassName, Function, Handle)                     \
                                                                                \
     static void Function(Handle* handle, int status)                           \
@@ -261,6 +272,7 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
     }
 
 
+/// @deprecated
 #define UVStatusCallbackWithType(ClassName, Function, Handle)                  \
                                                                                \
     static void Function(Handle* handle, int status)                           \

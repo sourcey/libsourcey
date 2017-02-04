@@ -36,7 +36,7 @@ public:
     virtual void encode(VideoPacket& packet);
     virtual void encode(AudioPacket& packet);
 
-    virtual bool accepts(IPacket& packet);
+    virtual bool accepts(IPacket* packet);
     virtual void process(IPacket& packet);
 
 protected:

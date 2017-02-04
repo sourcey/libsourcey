@@ -26,6 +26,7 @@ Server::Server(short port, ServerResponderFactory* factory)
     : socket(net::makeSocket<net::TCPSocket>())
     , factory(factory)
     , address("0.0.0.0", port)
+    , timer(5000, 5000)
 {
     TraceS(this) << "Create" << endl;
 }
@@ -49,10 +50,10 @@ void Server::start()
     socket->bind(address);
     socket->listen();
 
-    TraceS(this) << "Server listening on " << port() << endl;
+    DebugS(this) << "HTTP server listening on " << port() << endl;
 
-    // timer.Timeout += slot(this, &Server::onTimer);
-    // timer.start(5000, 5000);
+    timer.Timeout += slot(this, &Server::onTimer);
+    timer.start();
 }
 
 
@@ -72,7 +73,9 @@ void Server::shutdown()
     }
     assert(this->connections.empty());
 
-    Shutdown.emit(/*this*/);
+    timer.stop();
+
+    Shutdown.emit();
 }
 
 
@@ -84,9 +87,8 @@ std::uint16_t Server::port()
 
 ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
 {
-    auto conn = std::shared_ptr<ServerConnection>(
-        new ServerConnection(*this, sock),
-        deleter::Deferred<ServerConnection>());
+    auto conn = std::shared_ptr<ServerConnection>(new ServerConnection(*this, sock),
+                                                  deleter::Deferred<ServerConnection>());
     addConnection(conn);
     return conn; // return new ServerConnection(*this, sock);
 }
@@ -104,8 +106,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 void Server::addConnection(ServerConnection::Ptr conn)
 {
     TraceS(this) << "Adding connection: " << conn << endl;
-    conn->Close +=
-        slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
+    conn->Close += slot(this, &Server::onConnectionClose, -1, -1); // lowest priority
     connections.push_back(conn);
 }
 
@@ -119,6 +120,7 @@ void Server::removeConnection(ServerConnection* conn)
             return;
         }
     }
+
     assert(0 && "unknown connection");
 }
 
@@ -144,6 +146,14 @@ void Server::onConnectionClose(Connection& conn)
 {
     TraceS(this) << "On connection close" << endl;
     removeConnection(reinterpret_cast<ServerConnection*>(&conn));
+}
+
+
+void Server::onTimer()
+{
+    DebugS(this) << "Num active HTTP server connections: " << connections.size() << endl;
+
+    // TODO: cleanup timedout connection
 }
 
 
@@ -203,7 +213,6 @@ void ServerConnection::onHeaders()
         TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
         _upgrade = true;
 
-
         auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
 
         // Note: To upgrade the connection we need to replace the
@@ -223,8 +232,7 @@ void ServerConnection::onHeaders()
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
         auto sock = socket().get();
-        wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer),
-                                sock->peerAddress());
+        wsAdapter->onSocketRecv(*sock, mutableBuffer(buffer), sock->peerAddress());
     }
 
     // Instantiate the responder when request headers have been parsed

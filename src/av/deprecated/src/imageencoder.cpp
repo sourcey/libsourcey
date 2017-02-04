@@ -58,7 +58,7 @@ void ImageEncoder::uninitialize()
 }
 
 
-bool ImageEncoder::accepts(IPacket& packet)
+bool ImageEncoder::accepts(IPacket* packet)
 {
     return dynamic_cast<VideoPacket*>(&packet) != 0;
 }

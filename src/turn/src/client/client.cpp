@@ -979,8 +979,6 @@ void Client::onTransactionProgress(void* sender, TransactionState& state,
 
 void Client::onTimer()
 {
-
-
     if (expired())
         // Attempt to re-allocate
         sendAllocate();
@@ -1013,25 +1011,23 @@ bool Client::closed() const
 
 Client::Options& Client::options()
 {
-
     return _options;
 }
 
 
 net::Address Client::mappedAddress() const
 {
-
     return _mappedAddress;
 }
 
 
 net::Address Client::relayedAddress() const
 {
-
     return _relayedAddress;
 }
-}
-} //  namespace scy::turn
+
+
+}} // namespace scy::turn
 
 
 /// @\}

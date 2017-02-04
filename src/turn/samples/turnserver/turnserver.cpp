@@ -31,10 +31,12 @@ public:
 
     virtual ~RelayServer() {}
 
-    void start() { server.start(); }
+    void start()
+    {
+      server.start();
+    }
 
-    virtual AuthenticationState authenticateRequest(Server* server,
-                                                    Request& request)
+    virtual AuthenticationState authenticateRequest(Server* server, Request& request)
     {
         DebugL << "Authenticating: " << request.transactionID() << endl;
 
@@ -111,7 +113,7 @@ int main(void)
 #endif
 
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    // Logger::instance().setWriter(new AsyncLogWriter);
+    Logger::instance().setWriter(new AsyncLogWriter);
     {
         Application app;
         {

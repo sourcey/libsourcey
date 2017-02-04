@@ -36,7 +36,6 @@ Audio capture -->
 The main build options you will want to configure are as follows:
 
 * `BUILD_SHARED_LIBS`: Build shared libraries (.dll/.so) instead of static ones (.lib/.a). _default: NOT (WIN32 OR ANDROID OR IOS)_  
-* `BUILD_SHARED_LIBS`: Build shared libraries (.dll/.so) instead of static ones (.lib/.a). _default: NOT (WIN32 OR ANDROID OR IOS)_  
 * `BUILD_DEPENDENCIES`: Build LibSourcey in source third-party dependencies. _default: ON_  
 * `BUILD_MODULES`: Build LibSourcey modules. _default: ON_  
 * `BUILD_MODULE_xxx`: Enable or disable a specific module replacing `xxx` with the module name.  

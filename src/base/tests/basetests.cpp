@@ -410,8 +410,8 @@ int main(int argc, char** argv)
     describe("thread", []() {
         bool ran = false;
 
-		Thread t1;
-		t1.start([&]() {
+    		Thread t1;
+    		t1.start([&]() {
             ran = true;
             expect(t1.running() == true);
         });

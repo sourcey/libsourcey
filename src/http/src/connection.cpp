@@ -121,8 +121,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
     TraceS(this) << "Replace adapter: " << adapter << endl;
 
     if (_adapter) {
-        TraceS(this) << "Replace adapter: Delete existing: " << _adapter
-                     << endl;
+        TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
         Outgoing.emitter.detach(_adapter);
         _socket->removeReceiver(_adapter);
         _adapter->removeReceiver(this);
@@ -181,8 +180,7 @@ void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 
 void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 {
-    TraceS(this) << "On socket error: " << error.errorno << ": "
-                 << error.message << endl;
+    DebugS(this) << "On socket error: " << error.errorno << ": " << error.message << endl;
 
     if (error.errorno == UV_EOF) {
         // Close the connection when the other side does

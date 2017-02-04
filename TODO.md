@@ -4,7 +4,7 @@ Refactor Timer to use async pattern
 Add move arguments to packetstream for inline packet args
 Describe how to build WebRTC for use with LibSourcey in README
 Improve av module documentation
-
+Support multicore servers starting with `httpechoserver` sample
 
 # Tests
 

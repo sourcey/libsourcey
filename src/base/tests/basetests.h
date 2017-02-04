@@ -370,15 +370,13 @@ struct MockThreadedPacketSource : public PacketSource, public basic::Startable
     void start()
     {
         std::cout << "Start" << std::endl;
-        runner.start(
-            [](void* arg) {
-                auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
-                // std::cout << "Emitting" << std::endl;
-                RawPacket p("hello", 5);
-                self->emitter.emit(/*self, */ p);
-                // std::cout << "Emitting 2" << std::endl;
-            },
-            this);
+        runner.start([](void* arg) {
+            auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
+            // std::cout << "Emitting" << std::endl;
+            RawPacket p("hello", 5);
+            self->emitter.emit(/*self, */ p);
+            // std::cout << "Emitting 2" << std::endl;
+        }, this);
     }
 
     void stop()
@@ -468,11 +466,8 @@ struct PacketStreamIOTest : public Test
     {
         numPackets = 0;
         PacketStream stream;
-        stream.attachSource(
-            new ThreadedStreamReader(new std::ifstream("input.txt")), true,
-            true);
-        stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1,
-                      true);
+        stream.attachSource(new ThreadedStreamReader(new std::ifstream("input.txt")), true, true);
+        stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1, true);
         stream.start();
         // Run the thread for 100ms
         scy::sleep(100);

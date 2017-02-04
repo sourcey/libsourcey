@@ -125,7 +125,7 @@ public:
     enum
     {
         MAX_ADDRESS_LENGTH =
-#if defined(LibSourcey_HAVE_IPv6)
+#if defined(SCY_HAVE_IPv6)
             sizeof(struct sockaddr_in6)
 #else
             sizeof(struct sockaddr_in)

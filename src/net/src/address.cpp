@@ -106,7 +106,7 @@ private:
 // IPv6AddressBase
 //
 
-#if defined(LibSourcey_HAVE_IPv6)
+#if defined(SCY_HAVE_IPv6)
 
 
 class SCY_EXTERN IPv6AddressBase : public AddressBase
@@ -161,7 +161,7 @@ private:
 };
 
 
-#endif // LibSourcey_HAVE_IPv6
+#endif // SCY_HAVE_IPv6
 
 
 //
@@ -221,7 +221,7 @@ Address::Address(const struct sockaddr* addr, socklen_t length)
     if (length == sizeof(struct sockaddr_in))
         _base = std::make_shared<IPv4AddressBase>(
                 reinterpret_cast<const struct sockaddr_in*>(addr));
-#if defined(LibSourcey_HAVE_IPv6)
+#if defined(SCY_HAVE_IPv6)
     else if (length == sizeof(struct sockaddr_in6))
         _base = std::make_shared<IPv6AddressBase>(
                 reinterpret_cast<const struct sockaddr_in6*>(addr));

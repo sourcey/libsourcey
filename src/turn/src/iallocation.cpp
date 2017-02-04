@@ -52,7 +52,6 @@ IAllocation::~IAllocation()
 
 void IAllocation::updateUsage(std::int64_t numBytes)
 {
-   
     TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;
     _updatedAt = time(0);
     _bandwidthUsed += numBytes;
@@ -61,11 +60,8 @@ void IAllocation::updateUsage(std::int64_t numBytes)
 
 std::int64_t IAllocation::timeRemaining() const
 {
-   
-    // std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0)
-    // - _updatedAt));
-    std::int64_t remaining =
-        _lifetime - static_cast<std::int64_t>(time(0) - _updatedAt);
+    // std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));
+    std::int64_t remaining = _lifetime - static_cast<std::int64_t>(time(0) - _updatedAt);
     return remaining > 0 ? remaining : 0;
 }
 
@@ -84,7 +80,6 @@ bool IAllocation::deleted() const
 
 void IAllocation::setLifetime(std::int64_t lifetime)
 {
-   
     _lifetime = lifetime;
     _updatedAt = static_cast<std::int64_t>(time(0));
     TraceL << "Updating Lifetime: " << _lifetime << endl;
@@ -93,67 +88,56 @@ void IAllocation::setLifetime(std::int64_t lifetime)
 
 void IAllocation::setBandwidthLimit(std::int64_t numBytes)
 {
-   
     _bandwidthLimit = numBytes;
 }
 
 
 std::int64_t IAllocation::bandwidthLimit() const
 {
-   
     return _bandwidthLimit;
 }
 
 
 std::int64_t IAllocation::bandwidthUsed() const
 {
-   
     return _bandwidthUsed;
 }
 
 
 std::int64_t IAllocation::bandwidthRemaining() const
 {
-   
     return _bandwidthLimit > 0 ? (_bandwidthLimit > _bandwidthUsed
                                       ? _bandwidthLimit - _bandwidthUsed
-                                      : 0)
-                               : 99999999;
+                                      : 0) : 99999999;
 }
 
 
 FiveTuple& IAllocation::tuple()
 {
-   
     return _tuple;
 }
 
 
 std::string IAllocation::username() const
 {
-   
     return _username;
 }
 
 
 std::int64_t IAllocation::lifetime() const
 {
-   
     return _lifetime;
 }
 
 
 PermissionList IAllocation::permissions() const
 {
-   
     return _permissions;
 }
 
 
 void IAllocation::addPermission(const std::string& ip)
 {
-   
-
     // If the permission is already in the list then refresh it.
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
         if ((*it).ip == ip) {
@@ -179,8 +163,6 @@ void IAllocation::addPermissions(const IPList& ips)
 
 void IAllocation::removePermission(const std::string& ip)
 {
-   
-
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).ip == ip) {
             it = _permissions.erase(it);
@@ -193,14 +175,14 @@ void IAllocation::removePermission(const std::string& ip)
 
 void IAllocation::removeAllPermissions()
 {
-   
+
     _permissions.clear();
 }
 
 
 void IAllocation::removeExpiredPermissions()
 {
-   
+
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).timeout.expired()) {
             InfoL << "Removing Expired Permission: " << (*it).ip << endl;
@@ -220,9 +202,7 @@ bool IAllocation::hasPermission(const std::string& peerIP)
 
 #if ENABLE_LOCAL_IPS
     if (peerIP.find("192.168.") == 0 || peerIP.find("127.") == 0) {
-        WarnL
-            << "Granting permission for local IP without explicit permission: "
-            << peerIP << endl;
+        WarnL << "Granting permission for local IP without explicit permission: " << peerIP << endl;
         return true;
     }
 #endif

@@ -49,7 +49,7 @@ public:
     virtual ~SyncPacketQueue() {}
 
     virtual void process(IPacket& packet);
-    virtual bool accepts(IPacket& packet);
+    virtual bool accepts(IPacket* packet);
 
     PacketSignal emitter;
 
@@ -109,9 +109,9 @@ template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
 }
 
 
-template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket& packet)
+template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
 {
-    return dynamic_cast<T*>(&packet) != 0;
+    return dynamic_cast<T*>(packet) != 0;
 }
 
 
@@ -158,7 +158,7 @@ public:
     virtual void close();
 
     virtual void process(IPacket& packet);
-    virtual bool accepts(IPacket& packet);
+    virtual bool accepts(IPacket* packet);
 
     PacketSignal emitter;
 
@@ -203,9 +203,9 @@ template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
 }
 
 
-template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket& packet)
+template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket* packet)
 {
-    return dynamic_cast<T*>(&packet) != 0;
+    return dynamic_cast<T*>(packet) != 0;
 }
 
 

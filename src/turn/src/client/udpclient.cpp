@@ -25,8 +25,7 @@ UDPClient::UDPClient(ClientObserver& observer, const Options& options)
 {
     TraceL << "Create" << endl;
 
-    _socket = net::makeSocket<
-        net::UDPSocket>(); // std::make_shared<net::UDPSocket>();
+    _socket = net::makeSocket<net::UDPSocket>();
     //_socket.assign(new net::UDPSocket, false);
 }
 
@@ -35,8 +34,9 @@ UDPClient::~UDPClient()
 {
     TraceL << "Destroy" << endl;
 }
-}
-} //  namespace scy::turn
+
+
+}} // namespace scy::turn
 
 
 /// @\}

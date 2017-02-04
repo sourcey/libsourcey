@@ -40,12 +40,12 @@ public:
     BasicEchoResponder(http::ServerConnection& conn)
         : http::ServerResponder(conn)
     {
-        DebugL << "Creating" << endl;
+        // DebugL << "Creating" << endl;
     }
 
     virtual void onPayload(const MutableBuffer& body)
     {
-        DebugL << "On payload: " << body.size() << endl;
+        // DebugL << "On payload: " << body.size() << endl;
 
         // Echo the request back to the client
         connection().send(body.cstr(), body.size());
@@ -136,7 +136,8 @@ public:
 
     virtual ~WebSocketResponder()
     {
-        DebugL << "destroy" << endl;
+        DebugL << "Destroy" << endl;
+
         assert(gotPayload);
         assert(gotClose);
     }
@@ -168,7 +169,7 @@ public:
         std::ostringstream os;
         conn.request().write(os);
         std::string headers(os.str().data(), os.str().length());
-        DebugL << "Incoming Request: " << headers << endl;
+        // DebugL << "Incoming Request: " << headers << endl;
 
         std::string uri(conn.request().getURI());
 

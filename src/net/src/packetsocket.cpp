@@ -113,7 +113,7 @@ void PacketStreamSocketAdapter::process(IPacket& packet)
 }
 
 
-bool PacketStreamSocketAdapter::accepts(IPacket& packet)
+bool PacketStreamSocketAdapter::accepts(IPacket* packet)
 {
     return dynamic_cast<RawPacket*>(&packet) != 0;
 }

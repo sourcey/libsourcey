@@ -54,7 +54,7 @@ protected:
     http::Message* incomingHeader();
     http::Message* outgoingHeader();
 
-    ///// Server callbacks
+    /// Server callbacks
     // void onServerShutdown(void*);
 
 protected:
@@ -122,8 +122,8 @@ private:
 };
 
 
-/// -------------------------------------------------------------------
-///
+// -------------------------------------------------------------------
+//
 
 /// This implementation of a ServerResponderFactory
 /// is used by HTTPServer to create ServerResponder objects.
@@ -156,7 +156,7 @@ public:
     ServerResponderFactory* factory;
     ServerConnectionList connections;
     net::Address address;
-    // Timer timer;
+    Timer timer;
 
     Server(short port, ServerResponderFactory* factory);
     virtual ~Server();
@@ -178,6 +178,7 @@ protected:
     void onSocketAccept(const net::TCPSocket::Ptr& socket);
     void onSocketClose(net::Socket& socket);    // main socket close
     void onConnectionClose(Connection& socket); // connection socket close
+    void onTimer();
 
     friend class ServerConnection;
 };

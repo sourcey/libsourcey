@@ -50,8 +50,6 @@ public:
     Parser(http_parser_type type);
     ~Parser();
 
-    void init(http_parser_type type);
-
     std::size_t parse(const char* data, std::size_t length);
 
     /// Feed data read from socket into the http_parser.
@@ -76,6 +74,9 @@ public:
     bool upgrade() const;
     bool shouldKeepAlive() const;
 
+protected:
+    void init(http_parser_type type);
+
     /// Callbacks
     void onURL(const std::string& value);
     void onHeader(const std::string& name, const std::string& value);
@@ -84,7 +85,6 @@ public:
     void onMessageEnd();
     void onError(const ParserError& err);
 
-public:
     /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
     static int on_url(http_parser* parser, const char* at, std::size_t len);
@@ -95,7 +95,7 @@ public:
     static int on_body(http_parser* parser, const char* at, std::size_t len);
     static int on_message_complete(http_parser* parser);
 
-public:
+protected:
     ParserObserver* _observer;
     http::Request* _request;
     http::Response* _response;

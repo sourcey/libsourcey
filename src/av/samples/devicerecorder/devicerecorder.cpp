@@ -73,11 +73,10 @@ int main(int argc, char** argv)
         stream.start();
 
         // Keep recording until Ctrl-C is pressed
-        uv::waitForShutdown(
-            [](void* opaque) {
-                reinterpret_cast<PacketStream*>(opaque)->stop();
-            },
-            &stream);
+        uv::waitForShutdown([](void* opaque) {
+            reinterpret_cast<PacketStream*>(opaque)->stop();
+        },
+        &stream);
     }
 
     // av::DeviceManager::shutdown();

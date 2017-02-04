@@ -144,7 +144,7 @@ void MultiplexPacketEncoder::encode(AudioPacket& packet)
 }
 
 
-bool MultiplexPacketEncoder::accepts(IPacket& packet)
+bool MultiplexPacketEncoder::accepts(IPacket* packet)
 {
     return dynamic_cast<av::MediaPacket*>(&packet) != 0;
 }

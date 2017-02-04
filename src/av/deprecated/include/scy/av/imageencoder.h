@@ -46,7 +46,7 @@ public:
     virtual void initialize();
     virtual void uninitialize();
 
-    virtual bool accepts(IPacket& packet);
+    virtual bool accepts(IPacket* packet);
     virtual void process(IPacket& packet);
 
     virtual EncoderOptions& options();

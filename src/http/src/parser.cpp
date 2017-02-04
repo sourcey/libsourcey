@@ -65,8 +65,6 @@ void Parser::init(http_parser_type type)
 {
     TraceS(this) << "Init: " << type << endl;
 
-    assert(_parser.data != this);
-
     ::http_parser_init(&_parser, type);
     _parser.data = this;
     _settings.on_message_begin = on_message_begin;
@@ -85,8 +83,7 @@ void Parser::init(http_parser_type type)
 std::size_t Parser::parse(const char* data, std::size_t len)
 {
     TraceS(this) << "Parse: " << len << endl;
-    // TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) <<
-    // endl;
+    // TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) << endl;
 
     assert(!complete());
     assert(_parser.data == this);
@@ -96,8 +93,7 @@ std::size_t Parser::parse(const char* data, std::size_t len)
     }
 
     // Parse and handle errors
-    std::size_t nparsed =
-        ::http_parser_execute(&_parser, &_settings, data, len);
+    std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
     if (_parser.http_errno != HPE_OK) { // && !_parser.upgrade
         TraceS(this) << "Parse: nparsed=" << nparsed << endl;
         setParserError();

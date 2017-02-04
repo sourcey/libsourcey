@@ -162,7 +162,7 @@ bool AudioContext::recreateResampler()
 }
 
 
-// bool AudioContext::accepts(IPacket& packet)
+// bool AudioContext::accepts(IPacket* packet)
 // {
 //     return dynamic_cast<AudioPacket*>(&packet) != 0;
 // }

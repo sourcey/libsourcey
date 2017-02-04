@@ -92,7 +92,7 @@ public:
     virtual ~PacketStreamSocketAdapter();
 
 protected:
-    virtual bool accepts(IPacket& packet);
+    virtual bool accepts(IPacket* packet);
     virtual void process(IPacket& packet);
     virtual void onStreamStateChange(const PacketStreamState& state);
 

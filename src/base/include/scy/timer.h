@@ -42,8 +42,7 @@ public:
     ///
     /// The interval timer will trigger once after `timeout` milliseconds, and
     /// continue to trigger after the `interval` milliseconds.
-    Timer(std::int64_t timeout, std::int64_t interval,
-          uv::Loop* loop = uv::defaultLoop());
+    Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop = uv::defaultLoop());
 
     /// Destructor.
     virtual ~Timer();
