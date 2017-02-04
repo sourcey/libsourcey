@@ -22,11 +22,11 @@ namespace scy {
 namespace http {
 
 
-Server::Server(short port, ServerResponderFactory* factory)
-    : socket(net::makeSocket<net::TCPSocket>())
-    , factory(factory)
+Server::Server(short port, ServerResponderFactory* factory, net::TCPSocket::Ptr socket)
+    : factory(factory)
+    , socket(socket)
     , address("0.0.0.0", port)
-    , timer(5000, 5000)
+    , timer(5000, 5000, socket->loop())
 {
     TraceS(this) << "Create" << endl;
 }
@@ -151,7 +151,7 @@ void Server::onConnectionClose(Connection& conn)
 
 void Server::onTimer()
 {
-    DebugS(this) << "Num active HTTP server connections: " << connections.size() << endl;
+    // DebugS(this) << "Num active HTTP server connections: " << connections.size() << endl;
 
     // TODO: cleanup timedout connection
 }

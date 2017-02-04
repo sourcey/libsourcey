@@ -94,6 +94,18 @@ inline void stopDefaultLoop()
     uv_stop(defaultLoop());
 }
 
+inline Loop* createLoop()
+{
+    auto loop = new uv_loop_t;
+    uv_loop_init(loop);
+    return loop;
+}
+
+inline bool closeLoop(Loop* loop)
+{
+    return uv_loop_close(loop) == 0;
+}
+
 
 //
 /// UV Handle

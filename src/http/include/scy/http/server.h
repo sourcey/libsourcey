@@ -152,13 +152,14 @@ public:
 class SCY_EXTERN Server
 {
 public:
-    net::TCPSocket::Ptr socket;
     ServerResponderFactory* factory;
-    ServerConnectionList connections;
+    net::TCPSocket::Ptr socket;
     net::Address address;
     Timer timer;
+    ServerConnectionList connections;
 
-    Server(short port, ServerResponderFactory* factory);
+    Server(short port, ServerResponderFactory* factory,
+           net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());
     virtual ~Server();
 
     void start();

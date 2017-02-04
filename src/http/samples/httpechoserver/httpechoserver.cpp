@@ -14,23 +14,38 @@ const std::uint16_t HttpPort = 1337;
 
 void raiseServer()
 {
+    auto loop = uv::createLoop();
+
+    http::Server srv(HttpPort, new OurServerResponderFactory, net::makeSocket<net::TCPSocket>(loop));
+    srv.start();
+
+    uv::waitForShutdown([&](void*) {
+        srv.shutdown();
+    }, nullptr, loop);
+
+    uv::closeLoop(loop);
+    delete loop;
+}
+
+
+void raiseStandaloneServer()
+{
     http::Server srv(HttpPort, new OurServerResponderFactory);
     srv.start();
 
-    uv::waitForShutdown([](void* opaque) {
-        auto srv = reinterpret_cast<http::Server*>(opaque);
-        srv->shutdown();
-    }, &srv);
+    uv::waitForShutdown([&](void*) {
+        srv.shutdown();
+    });
 }
 
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LDebug));
     Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
-        raiseServer();
+        raiseStandaloneServer();
 
         // TODO: Test multicore server implementation
         // https://github.com/libuv/libuv/issues/730
