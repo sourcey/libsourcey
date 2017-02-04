@@ -138,7 +138,7 @@ public:
                             "  C    Print contacts list.\n"
                             "  Q    Quit.\n";
 
-                    o = toupper(std::getchar());
+                    o = char(toupper(std::getchar()));
                     std::cin.ignore();
 
                     // Send a message

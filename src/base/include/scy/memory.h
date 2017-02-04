@@ -198,7 +198,8 @@ public:
 
 
 /// Schedules a pointer for deferred deletion.
-template <class C> inline void GarbageCollector::deleteLater(C* ptr)
+template <class C> 
+inline void GarbageCollector::deleteLater(C* ptr)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     _pending.push_back(new ScopedRawPointer<C>(ptr));
@@ -215,14 +216,16 @@ inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
-template <class C> inline void deleteLater(C* ptr)
+template <class C> 
+inline void deleteLater(C* ptr)
 {
     GarbageCollector::instance().deleteLater(ptr);
 }
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
-template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
+template <class C> 
+inline void deleteLater(std::shared_ptr<C> ptr)
 {
     GarbageCollector::instance().deleteLater(ptr);
 }

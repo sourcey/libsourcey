@@ -40,21 +40,17 @@ public:
 
     void onAcceptConnection(const TCPSocket::Ptr& sock)
     {
-        /// std::static_pointer_cast<SocketT>(ptr)
         sockets.push_back(sock);
-        auto& socket = sockets.back();
-        DebugL << "On accept: " << socket << std::endl;
-        socket->Recv += slot(this, &EchoServer::onClientSocketRecv);
-        socket->Error += slot(this, &EchoServer::onClientSocketError);
-        socket->Close += slot(this, &EchoServer::onClientSocketClose);
+        DebugL << "On accept: " << sock << std::endl;
+        sock->Recv += slot(this, &EchoServer::onClientSocketRecv);
+        sock->Error += slot(this, &EchoServer::onClientSocketError);
+        sock->Close += slot(this, &EchoServer::onClientSocketClose);
     }
 
     void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer,
                             const Address& peerAddress)
     {
-        // auto socket = reinterpret_cast<net::Socket*>(sender);
-        DebugL << "On recv: " << &socket << ": " << buffer.str()
-               << std::endl; /// Echo it back
+        DebugL << "On recv: " << &socket << ": " << buffer.str() << std::endl; // Echo it back
         socket.send(bufferCast<const char*>(buffer), buffer.size());
     }
 

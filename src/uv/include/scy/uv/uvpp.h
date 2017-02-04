@@ -236,7 +236,7 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
                             void* opaque = nullptr, Loop* loop = defaultLoop())
 {
     onShutdownSignal(callback, opaque, loop);
-    uv_run(defaultLoop(), UV_RUN_DEFAULT);
+    uv_run(loop, UV_RUN_DEFAULT);
 }
 
 

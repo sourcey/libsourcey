@@ -43,13 +43,11 @@ public:
 
     /// Create the synchronization context the given event loop and method.
     /// The target method will be called from the event loop context.
-    Synchronizer(std::function<void()> target,
-                uv::Loop* loop = uv::defaultLoop());
+    Synchronizer(std::function<void()> target, uv::Loop* loop = uv::defaultLoop());
 
     /// Create the synchronization context the given event loop and method.
     template<class Function, class... Args>
-    explicit Synchronizer(Function&& func, Args&&... args,
-                         uv::Loop* loop = uv::defaultLoop())
+    explicit Synchronizer(Function&& func, Args&&... args, uv::Loop* loop = uv::defaultLoop())
         : _handle(loop, new uv_async_t)
     {
         start(std::forward<Function>(func),
@@ -80,11 +78,8 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func),
-                                               std::forward<Args>(args)...,
-                                               _context);
-        int r = uv_async_init(_handle.loop(),
-                              _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
+        _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., _context);
+        int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
             auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
             if (!wrap->ctx->cancelled) {
                 wrap->call();
@@ -113,7 +108,6 @@ public:
     uv::Handle& handle();
 
 protected:
-    // virtual void startAsync();
     virtual bool async() const;
 
     uv::Handle _handle;

@@ -47,8 +47,7 @@ void TCPSocket::init()
     _closed = false;
     _error.reset();
 
-    // UVCallOrThrow("Cannot initialize TCP socket",
-    //               uv_tcp_init, loop(), tcp)
+     UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), tcp)
 }
 
 
@@ -65,13 +64,11 @@ void TCPSocket::connect(const net::Address& peerAddress)
     TraceS(this) << "Connecting to " << peerAddress << endl;
     init();
 
-    UVCallOrThrow("Cannot initialize TCP socket",
-                  uv_tcp_init, loop(), ptr<uv_tcp_t>())
+    UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), ptr<uv_tcp_t>())
 
     auto req = new uv_connect_t;
     req->data = this;
-    UVCallOrThrow("TCP connect failed",
-                  uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect)
+    UVCallOrThrow("TCP connect failed", uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect)
 }
 
 
@@ -93,12 +90,10 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
 
     switch (address.af()) {
         case AF_INET:
-            UVCallOrThrow("TCP bind failed",
-                          uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags)
+            UVCallOrThrow("TCP bind failed", uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags)
             break;
         case AF_INET6:
-            UVCallOrThrow("TCP bind IPv6 failed",
-                          uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags |= UV_TCP_IPV6ONLY)
+            UVCallOrThrow("TCP bind IPv6 failed",  uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags |= UV_TCP_IPV6ONLY)
             break;
         default:
             throw std::runtime_error("Unexpected address family");
@@ -111,11 +106,7 @@ void TCPSocket::listen(int backlog)
     TraceS(this) << "Listening" << endl;
     init();
 
-    UVCallOrThrow("TCP listen failed",
-                  uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection)
-    // int r = uv_listen(ptr<uv_stream_t>(), backlog, internal::onAcceptConnection);
-    // if (r)
-    //     setAndThrowError("TCP listen failed", r);
+    UVCallOrThrow("TCP listen failed", uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection)
 }
 
 
@@ -154,7 +145,7 @@ void TCPSocket::setSimultaneousAccepts(bool enable)
 {
     init();
 
-    UVCallOrThrow("TCP socket error", uv_tcp_keepalive, ptr<uv_tcp_t>(), enable ? 1 : 0)
+    UVCallOrThrow("TCP socket error", uv_tcp_simultaneous_accepts, ptr<uv_tcp_t>(), enable)
 }
 #endif
 
@@ -165,13 +156,14 @@ int TCPSocket::send(const char* data, std::size_t len, int flags)
 }
 
 
-int TCPSocket::send(const char* data, std::size_t len,
-                    const net::Address& /* peerAddress */, int /* flags */)
+int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     TraceS(this) << "Send: " << len << endl;
     // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(Thread::currentID() == tid());
-    // assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
+
+    // NOTE: libuv handles this for us
+    // assert(len <= net::MAX_TCP_PACKET_SIZE); 
 
     if (!Stream::write(data, len)) {
         WarnL << "Send error" << endl;
@@ -192,6 +184,7 @@ void TCPSocket::acceptConnection()
 
     UVCallOrThrow("Cannot initialize TCP socket",
                   uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
+
     uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
     socket->readStart();
     AcceptConnection.emit(socket);

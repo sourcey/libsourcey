@@ -121,7 +121,8 @@ public:
             _timer.Timeout -= slot(this, &PacketTransaction::onTimeout);
             _timer.stop();
 
-            deleteLater<PacketTransaction>(this);
+            //deleteLater<PacketTransaction>(this);
+            delete this;
         }
     }
 

@@ -36,7 +36,7 @@ public:
       server.start();
     }
 
-    virtual AuthenticationState authenticateRequest(Server* server, Request& request)
+    virtual AuthenticationState authenticateRequest(Server*, Request& request)
     {
         DebugL << "Authenticating: " << request.transactionID() << endl;
 
@@ -94,12 +94,12 @@ public:
 #endif
     }
 
-    virtual void onServerAllocationCreated(Server* server, IAllocation* alloc)
+    virtual void onServerAllocationCreated(Server*, IAllocation* alloc)
     {
         DebugL << "Allocation Created" << endl;
     }
 
-    virtual void onServerAllocationRemoved(Server* server, IAllocation* alloc)
+    virtual void onServerAllocationRemoved(Server*, IAllocation* alloc)
     {
         DebugL << "Allocation Removed" << endl;
     }
