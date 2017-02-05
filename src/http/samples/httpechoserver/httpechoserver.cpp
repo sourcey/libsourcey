@@ -41,28 +41,29 @@ void raiseLoadBalancedServer()
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    Logger::instance().setWriter(new AsyncLogWriter);
+    Logger::instance().add(new ConsoleChannel("debug", LDebug));
+    //Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
-#if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
-        Thread t1;
-        Thread t2;
-        Thread t3;
-        Thread t4;
-
-        t1.start(std::bind(raiseLoadBalancedServer));
-        t2.start(std::bind(raiseLoadBalancedServer));
-        t3.start(std::bind(raiseLoadBalancedServer));
-        t4.start(std::bind(raiseLoadBalancedServer));
-
-        t1.join();
-        t2.join();
-        t3.join();
-        t4.join();
-#else
-        raiseServer();
-#endif
+          raiseServer();
+// #if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
+//         Thread t1;
+//         Thread t2;
+//         // Thread t3;
+//         // Thread t4;
+//
+//         t1.start(std::bind(raiseLoadBalancedServer));
+//         t2.start(std::bind(raiseLoadBalancedServer));
+//         // t3.start(std::bind(raiseLoadBalancedServer));
+//         // t4.start(std::bind(raiseLoadBalancedServer));
+//
+//         t1.join();
+//         t2.join();
+//         // t3.join();
+//         // t4.join();
+// #else
+//         raiseServer();
+// #endif
     }
     net::SSLManager::instance().shutdown();
     Logger::destroy();

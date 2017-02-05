@@ -126,8 +126,8 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _socket->removeReceiver(_adapter);
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
-        delete _adapter;
-        //deleteLater<net::SocketAdapter>(_adapter);
+        //delete _adapter;
+        deleteLater<net::SocketAdapter>(_adapter);
         _adapter = nullptr;
     }
 
