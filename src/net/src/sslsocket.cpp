@@ -25,12 +25,8 @@ namespace net {
 
 
 SSLSocket::SSLSocket(uv::Loop* loop)
-    : //, SocketMode mode
-    TCPSocket(loop)
-    , _context(nullptr // mode == Client ?
-               // SSLManager::instance().defaultClientContext() //:
-               // SSLManager::instance().defaultServerContext()
-               )
+    : TCPSocket(loop)
+    , _context(nullptr)
     , _session(nullptr)
     , _sslAdapter(this)
 {
@@ -48,8 +44,7 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
 }
 
 
-SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session,
-                     uv::Loop* loop)
+SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop)
     : TCPSocket(loop)
     , _context(context)
     , _session(session)
@@ -95,8 +90,7 @@ int SSLSocket::send(const char* data, std::size_t len, int flags)
 }
 
 
-int SSLSocket::send(const char* data, std::size_t len,
-                    const net::Address& /* peerAddress */, int /* flags */)
+int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     TraceS(this) << "Send: " << len << endl;
     assert(Thread::currentID() == tid());
@@ -123,20 +117,22 @@ void SSLSocket::acceptConnection()
 
     // Create the shared socket pointer so the if the socket handle is not
     // incremented the accepted socket will be destroyed.
-    // auto socket = net::makeSocket<net::SSLSocket>(loop());
-    auto socket =
-        std::shared_ptr<net::SSLSocket>(new SSLSocket(_context, loop()));
+    //auto socket = net::makeSocket<net::SSLSocket>(_context, loop());
+    auto socket = std::make_shared<net::SSLSocket>(_context, loop());
 
     TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
-    uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
-    socket->readStart();
+    UVCallOrThrow("Cannot initialize SSL socket",
+                  uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
 
-    socket->_sslAdapter.initServer();
-    // socket->_sslAdapter.start();
+    if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
+        socket->readStart();
+        socket->_sslAdapter.initServer();
 
-    TraceS(this) << "Accept SSL connection: OK: " << socket->ptr() << endl;
-
-    AcceptConnection.emit(/*Socket::self(), */ socket);
+        AcceptConnection.emit(socket);
+    }
+    else {
+        assert(0 && "uv_accept should not fail");
+    }
 }
 
 
@@ -199,8 +195,7 @@ net::TransportType SSLSocket::transport() const
 
 void SSLSocket::onRead(const char* data, std::size_t len)
 {
-    TraceS(this) << "On SSL read: " << len
-                 << endl; // << ": " << std::string(data, len)
+    TraceS(this) << "On SSL read: " << len << endl;
 
     // SSL encrypted data is sent to the SSL context
     _sslAdapter.addIncomingData(data, len);
