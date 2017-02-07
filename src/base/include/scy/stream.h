@@ -28,16 +28,8 @@ namespace scy {
 class SCY_EXTERN Stream : public uv::Handle
 {
 public:
-    Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr)
-        : uv::Handle(loop, stream)
-        , _buffer(65536)
-    {
-    }
-
-    Stream::~Stream()
-    {
-        close(); // must close underlying stream
-    }
+    Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr);
+    ~Stream();
 
     /// Closes and resets the stream handle.
     /// This will close the active socket/pipe
@@ -45,161 +37,39 @@ public:
     ///
     /// If the stream is already closed this call
     /// will have no side-effects.
-    virtual void close()
-    {
-        TraceL << "Close: " << ptr() << std::endl;
-        if (active())
-            readStop();
-        uv::Handle::close();
-    }
+    virtual void close();
 
     /// Sends a shutdown packet to the connected peer.
     /// Returns true if the shutdown packet was sent.
-    bool shutdown()
-    {
-        assertThread();
-
-        TraceL << "Send shutdown" << std::endl;
-        if (!active()) {
-            WarnL << "Cannot shutdown a closed stream" << std::endl;
-            return false;
-        }
-
-        // XXX: Sending shutdown causes an eof error to be
-        // returned via handleRead() which sets the stream
-        // to error state. This is not really an error,
-        // perhaps it should be handled differently?
-        int r = uv_shutdown(new uv_shutdown_t, ptr<uv_stream_t>(), [](uv_shutdown_t* req, int) { 
-            delete req; 
-        });
-
-        return r == 0;
-    }
+    bool shutdown();
 
     /// Writes data to the stream.
     ///
     /// Returns false if the underlying socket is closed.
     /// This method does not throw an exception.
-    bool write(const char* data, std::size_t len)
-    {
-        assertThread();
-
-        // if (closed())
-        //    throw std::runtime_error("IO error: Cannot write to closed stream");
-        if (!active())
-            return false;
-
-        int r;
-        uv_write_t* req = new uv_write_t;
-        uv_buf_t buf = uv_buf_init((char*)data, (int)len);
-        uv_stream_t* stream = this->ptr<uv_stream_t>();
-        bool isIPC = stream->type == UV_NAMED_PIPE &&
-                     reinterpret_cast<uv_pipe_t*>(stream)->ipc;
-
-        if (!isIPC) {
-            r = uv_write(req, stream, &buf, 1, [](uv_write_t* req, int) {
-                delete req; 
-            });
-        } else {
-            r = uv_write2(req, stream, &buf, 1, nullptr, [](uv_write_t* req, int) { 
-                delete req; 
-            });
-        }
-
-        if (r) {
-            delete req;
-            assert(0);
-            // setAndThrowError(r, "Stream write error");
-        }
-        return r == 0;
-    }
+    bool write(const char* data, std::size_t len);
 
     /// Returns the read buffer.
-    Buffer& buffer() 
-    {
-        assertThread();
-        return _buffer;
-    }
+    Buffer& buffer();
 
     /// Returns true if the native socket handle is closed.
-    virtual bool closed() const 
-    { 
-        return uv::Handle::closed(); 
-    }
+    virtual bool closed() const;
 
     /// Signals when data can be read from the stream.
     Signal<void(Stream&, const char*, const int&)> Read;
 
 protected:
-    virtual bool readStart()
-    {
-        // TraceL << "Read start: " << ptr() << std::endl;
-        int r = uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer, handleRead);
-        if (r)
-            setUVError("Stream read error", r);
-        return r == 0;
-    }
-
-    virtual bool readStop()
-    {
-        //std::cout << _ptr << " stream read stop" << std::endl;
-        // TraceL << "Read stop: " << ptr() << std::endl;
-        int r = uv_read_stop(ptr<uv_stream_t>());
-        if (r)
-            setUVError("Stream read error", r);
-        return r == 0;
-    }
-
-    virtual void onRead(const char* data, std::size_t len)
-    {
-        // TraceL << "On read: " << len << std::endl;
-        Read.emit(*this, data, (const int)len);
-    }
-
-    static void handleReadCommon(uv_stream_t* handle, ssize_t nread,
-                                 const uv_buf_t* buf, uv_handle_type pending)
-    {
-        // TraceL << "Handle read: " << nread << std::endl;
-        auto self = reinterpret_cast<Stream*>(handle->data);
-
-        if (nread >= 0) {
-            self->onRead(buf->base, nread);
-        } else {
-            // The stream was closed in error
-            // The value of nread is the error number
-            // ie. UV_ECONNRESET or UV_EOF etc ...
-            self->setUVError("Stream error", (int)nread);
-        }
-    }
-
+    virtual bool readStart();
+    virtual bool readStop();
+    virtual void onRead(const char* data, std::size_t len);
 
     //
     /// UV callbacks
-    //
 
-    static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
-    {
-        handleReadCommon(handle, nread, buf, UV_UNKNOWN_HANDLE);
-    }
-
-    static void handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
-    {
-        handleReadCommon((uv_stream_t*)handle, nread, buf, pending);
-    }
-
-    static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
-    {
-        auto self = reinterpret_cast<Stream*>( handle->data); 
-        
-        // Reserve the recommended buffer size
-        // if (suggested_size > self->_buffer.capacity())
-        // self->_buffer.capacity(suggested_size);
-        assert(self->_buffer.size() >= suggested_size); 
-        
-        // Reset the buffer position on each read
-        buf->base = self->_buffer.data();
-        buf->len = self->_buffer.size();
-    }
+    static void handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending);
+    static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf);
+    static void handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending);
+    static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf);
 
     Buffer _buffer;
 };

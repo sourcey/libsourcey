@@ -28,9 +28,7 @@ namespace av {
 class SCY_EXTERN MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
 {
 public:
-    MultiplexPacketEncoder(
-        const EncoderOptions& options = EncoderOptions());
-    /// MultiplexPacketEncoder(bool muxLiveStreams = false);
+    MultiplexPacketEncoder(const EncoderOptions& options = EncoderOptions());
     virtual ~MultiplexPacketEncoder();
 
     virtual void encode(VideoPacket& packet);

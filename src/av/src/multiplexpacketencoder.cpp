@@ -22,21 +22,9 @@ namespace av {
 
 MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options)
     : MultiplexEncoder(options)
-    , PacketProcessor(MultiplexEncoder::emitter) //,
-    //, bool muxLiveStreams
-// _muxLiveStreams(muxLiveStreams),
-// _lastVideoPacket(nullptr)
+    , PacketProcessor(MultiplexEncoder::emitter)
 {
 }
-
-
-// MultiplexPacketEncoder::MultiplexPacketEncoder(bool muxLiveStreams) :
-//     MultiplexEncoder(),
-//     PacketProcessor(MultiplexEncoder::emitter),
-//     _muxLiveStreams(muxLiveStreams),
-//     _lastVideoPacket(nullptr)
-// {
-// }
 
 
 MultiplexPacketEncoder::~MultiplexPacketEncoder()
@@ -146,7 +134,7 @@ void MultiplexPacketEncoder::encode(AudioPacket& packet)
 
 bool MultiplexPacketEncoder::accepts(IPacket* packet)
 {
-    return dynamic_cast<av::MediaPacket*>(&packet) != 0;
+    return dynamic_cast<av::MediaPacket*>(packet) != 0;
 }
 
 
