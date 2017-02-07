@@ -116,10 +116,10 @@ public:
                 return;
             }
 
-            //client.options().host = "chat.mytommy.com";
-            //client.options().port = 443;
-            //client.options().token = "HGrOPG4DXd8RKI8GTtJrHgtt";
-            //client.options().user = "2";
+            client.options().host = "chat.mytommy.com";
+            client.options().port = 443;
+            client.options().token = "HGrOPG4DXd8RKI8GTtJrHgtt";
+            client.options().user = "2";
 
             // Setup the client
             client += packetSlot(this, &SympleApplication::onRecvMessage);

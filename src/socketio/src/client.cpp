@@ -271,6 +271,7 @@ void Client::onOnline()
     assert(_pingInterval);
     _pingTimer.Timeout += slot(this, &Client::onPingTimer);
     _pingTimer.setTimeout(_pingInterval);
+    _pingTimer.setInterval(_pingInterval);
     _pingTimer.start();
 
     // Setup the ping timeout timer
@@ -449,7 +450,7 @@ void Client::onPingTimer()
         return;
 
     sendPing();
-    _pingTimer.again();
+    //_pingTimer.again();
 }
 
 

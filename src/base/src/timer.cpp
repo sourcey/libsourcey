@@ -142,14 +142,14 @@ void Timer::restart()
 
 void Timer::again()
 {
-    // TraceS(this) << "Again: " << __handle.ptr << endl;
+    TraceS(this) << "Again" << endl;
 
     assert(_handle.ptr());
     int err = uv_timer_again(_handle.ptr<uv_timer_t>());
     if (err < 0)
         _handle.setAndThrowError("Invalid timer", err);
 
-    // assert(active());
+    //assert(active());
     _count = 0;
 }
 
@@ -164,6 +164,7 @@ void Timer::setTimeout(std::int64_t timeout)
 void Timer::setInterval(std::int64_t interval)
 {
     assert(_handle.ptr());
+    _interval = interval;
     uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), interval);
 }
 

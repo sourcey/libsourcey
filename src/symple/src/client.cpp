@@ -377,20 +377,17 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
             if (!peer) {
                 peer = new Peer(data);
                 _roster.add(id, peer);
-                InfoL << "Peer connected: " << peer->address().toString()
-                      << endl;
+                DebugL << "Peer connected: " << peer->address().toString() << endl;
                 PeerConnected.emit(*peer);
             } else
                 static_cast<json::Value&>(*peer) = data;
         } else {
             if (peer) {
-                InfoL << "Peer disconnected: " << peer->address().toString()
-                      << endl;
+                DebugL << "Peer disconnected: " << peer->address().toString() << endl;
                 PeerDisconnected.emit(*peer);
                 _roster.free(id);
             } else {
-                WarnL << "Got peer disconnected for unknown peer: " << id
-                      << endl;
+                WarnL << "Got peer disconnected for unknown peer: " << id << endl;
             }
         }
     } else {
