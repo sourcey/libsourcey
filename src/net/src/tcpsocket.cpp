@@ -31,7 +31,6 @@ TCPSocket::TCPSocket(uv::Loop* loop)
 TCPSocket::~TCPSocket()
 {
     TraceS(this) << "Destroy" << endl;
-    close();
 }
 
 
@@ -47,7 +46,7 @@ void TCPSocket::init()
     _closed = false;
     _error.reset();
 
-     UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), tcp)
+     // UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), tcp)
 }
 
 
@@ -69,6 +68,12 @@ void TCPSocket::connect(const net::Address& peerAddress)
     auto req = new uv_connect_t;
     req->data = this;
     UVCallOrThrow("TCP connect failed", uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect)
+}
+
+
+void TCPSocket::connect(const std::string& host, std::uint16_t port)
+{
+    Socket::connect(host, port);
 }
 
 
@@ -185,9 +190,13 @@ void TCPSocket::acceptConnection()
     UVCallOrThrow("Cannot initialize TCP socket",
                   uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
 
-    uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
-    socket->readStart();
-    AcceptConnection.emit(socket);
+    if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
+        socket->readStart();
+        AcceptConnection.emit(socket);
+    }
+    else {
+        assert(0 && "uv_accept should not fail");
+    }
 }
 
 
@@ -286,7 +295,7 @@ void TCPSocket::onRead(const char* data, std::size_t len)
 
 void TCPSocket::onRecv(const MutableBuffer& buf)
 {
-    TraceS(this) << "Recv: " << buf.size() << endl;
+    TraceS(this) << "On recv: " << buf.size() << endl;
     onSocketRecv(*this, buf, peerAddress());
 }
 
@@ -295,13 +304,13 @@ void TCPSocket::onConnect(uv_connect_t* handle, int status)
 {
     TraceS(this) << "On connect" << endl;
 
-    // Error handled by static callback proxy
     if (status == 0) {
         if (readStart())
             onSocketConnect(*this);
-    } else {
+    } 
+    else {
+        // Error handled by callback proxy
         setUVError("Connection failed", status);
-        // ErrorS(this) << "Connection failed: " << error().message << endl;
     }
     delete handle;
 }
@@ -312,8 +321,10 @@ void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
     if (status == 0) {
         TraceS(this) << "On accept connection" << endl;
         acceptConnection();
-    } else
-        ErrorS(this) << "Accept connection failed" << endl;
+    }
+    else {
+        ErrorS(this) << "Accept connection failed: " << uv_strerror(status) << endl;
+    }
 }
 
 

@@ -146,8 +146,8 @@ struct FSReq
 {
     FSReq() {}
     ~FSReq() { uv_fs_req_cleanup(&req); }
-    FSReq(const FSReq& req);
-    FSReq& operator=(const FSReq& req);
+    FSReq(const FSReq& req) = delete;
+    FSReq& operator=(const FSReq& req) = delete;
     uv_fs_t req;
 };
 
@@ -157,8 +157,7 @@ struct FSReq
         uv_fs_##func(uv_default_loop(), &wrap.req, __VA_ARGS__, nullptr);      \
     if (err < 0)                                                               \
         uv::throwError(std::string("Filesystem error: ") + #func +             \
-                           std::string(" failed"),                             \
-                       err);
+                       std::string(" failed"), err);
 
 } // namespace internal
 
@@ -167,7 +166,7 @@ void readdir(const std::string& path, std::vector<std::string>& res)
 {
     internal::FSapi(scandir, path.c_str(), 0)
 
-        uv_dirent_t dent;
+    uv_dirent_t dent;
     while (UV_EOF != uv_fs_scandir_next(&wrap.req, &dent)) {
         res.push_back(dent.name);
     }

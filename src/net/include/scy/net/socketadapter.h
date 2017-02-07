@@ -74,8 +74,7 @@ public:
     /// These virtual methods can be overridden as necessary
     /// to intercept socket events before they hit the application.
     virtual void onSocketConnect(Socket& socket);
-    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                              const Address& peerAddress);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
     virtual void onSocketError(Socket& socket, const Error& error);
     virtual void onSocketClose(Socket& socket);
 
@@ -83,16 +82,16 @@ public:
     /// Send methods proxy data to this adapter by default.
     /// Note that we only keep a simple pointer so
     /// as to avoid circular references preventing destruction.
-    void setSender(SocketAdapter* adapter, bool freeExisting = false);
+    virtual void setSender(SocketAdapter* adapter, bool freeExisting = false);
 
     /// Returns the output SocketAdapter pointer
     SocketAdapter* sender();
 
     /// Adds an input SocketAdapter for receiving socket callbacks.
-    void addReceiver(SocketAdapter* adapter, int priority = 0);
+    virtual void addReceiver(SocketAdapter* adapter, int priority = 0);
 
     /// Removes an input SocketAdapter.
-    void removeReceiver(SocketAdapter* adapter);
+    virtual void removeReceiver(SocketAdapter* adapter);
 
     /// Optional client data pointer.
     ///
@@ -120,8 +119,7 @@ protected:
     virtual void* self() { return this; };
 
     virtual void emitSocketConnect(Socket& socket);
-    virtual void emitSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                                const Address& peerAddress);
+    virtual void emitSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
     virtual void emitSocketError(Socket& socket, const scy::Error& error);
     virtual void emitSocketClose(Socket& socket);
 

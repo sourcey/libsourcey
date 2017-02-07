@@ -43,8 +43,8 @@ public:
 
     void stop()
     {
-        // socket.close();
-        socket.shutdown();
+        socket.close();
+        //socket.shutdown();
     }
 
     void onConnect(Socket& socket)
@@ -57,11 +57,8 @@ public:
         socket.send("client > server", 15);
     }
 
-    void onRecv(Socket& socket, const MutableBuffer& buffer,
-                const Address& peerAddress)
+    void onRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
     {
-        // assert(sender == &socket);
-        // auto socket = reinterpret_cast<net::Socket*>(sender);
         std::string data(bufferCast<const char*>(buffer), buffer.size());
         DebugL << "On recv: " << &socket << ": " << data << std::endl;
         // Check for return packet echoing sent data

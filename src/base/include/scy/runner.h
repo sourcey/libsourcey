@@ -17,6 +17,7 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
+#include "scy/uv/uvpp.h"
 #include <cstdint>
 #include <thread>
 #include <atomic>
@@ -187,6 +188,26 @@ inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
     c->running = false;
 }
 
+} // namespace internal
+
+
+/// Run the given function at the beginning of the next event loop iteration.
+template<class Function, class... Args>
+void runOnce(uv::Loop* loop, Function&& func, Args&&... args)
+{
+    typedef internal::FunctionWrap<Function, Args...> FunctionWrap;
+
+    auto prepare = new uv_prepare_t;
+    prepare->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., nullptr);
+
+    uv_prepare_init(loop, prepare);
+    uv_prepare_start(prepare, [](uv_prepare_t *req) {
+        auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
+        wrap->call();
+        delete wrap;
+        uv_prepare_stop(req);
+        delete req;
+    });
 }
 
 

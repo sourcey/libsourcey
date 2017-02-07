@@ -35,13 +35,10 @@ const char* FormWriter::ENCODING_MULTIPART_RELATED = "multipart/related";
 const int FILE_CHUNK_SIZE = 65536; // 32384;
 
 
-FormWriter* FormWriter::create(ClientConnection& conn,
-                               const std::string& encoding)
+FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encoding)
 {
-    auto wr = new http::FormWriter(
-        conn, std::make_shared<Idler>(
-                  conn.socket()->loop()) /*std::make_shared<Thread>()*/,
-        encoding);
+#if 0
+    auto wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket()->loop()), encoding);
     conn.Outgoing.attachSource(wr, true, true);
     if (conn.request().isChunkedTransferEncoding()) {
         assert(encoding != http::FormWriter::ENCODING_URL);
@@ -50,11 +47,12 @@ FormWriter* FormWriter::create(ClientConnection& conn,
     }
     conn.Outgoing.lock();
     return wr;
+#endif
+    return nullptr;
 }
 
 
-FormWriter::FormWriter(ClientConnection& connection, Runner::Ptr runner,
-                       const std::string& encoding)
+FormWriter::FormWriter(ClientConnection& connection, Runner::Ptr runner, const std::string& encoding)
     : PacketSource(this->emitter)
     , _connection(connection)
     , _runner(runner)
@@ -122,7 +120,7 @@ void FormWriter::prepareSubmit()
             // factor chunk headers.
             if (!_parts.empty()) {
                 assert(_filesLength);
-                _connection.OutgoingProgress.total = _filesLength;
+                // _connection.OutgoingProgress.total = _filesLength;
             }
 
             // Set Content-Length for non-chunked transfers
@@ -399,7 +397,7 @@ void FormWriter::writeEnd(std::ostream& ostr)
 
 void FormWriter::updateProgress(int nread)
 {
-    _connection.OutgoingProgress.update(nread);
+    // _connection.OutgoingProgress.update(nread);
 }
 
 

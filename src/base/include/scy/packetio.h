@@ -50,18 +50,16 @@ public:
 
     void start()
     {
-        _runner.start(
-            [](void* arg) {
-                auto self = reinterpret_cast<ThreadedStreamReader*>(arg);
-                std::string line;
-                if (getline(self->stream(), line)) {
-                    self->emit(line);
-                }
-                if (self->stream().eof()) {
-                    self->emit(PacketFlags::Final);
-                }
-            },
-            this);
+        _runner.start([](void* arg) {
+            auto self = reinterpret_cast<ThreadedStreamReader*>(arg);
+            std::string line;
+            if (getline(self->stream(), line)) {
+                self->emit(line);
+            }
+            if (self->stream().eof()) {
+                self->emit(PacketFlags::Final);
+            }
+        }, this);
     }
 
     void stop()
@@ -135,7 +133,32 @@ public:
         return *stream;
     }
 
-    std::ostream& stream() { return *_ostream; }
+    void onStreamStateChange(const PacketStreamState& state)
+    {
+        //TraceS(this) << "Stream state: " << state << std::endl;
+
+        switch (state.id()) {
+        // case PacketStreamState::None:
+        // case PacketStreamState::Active:
+        // case PacketStreamState::Resetting:
+        // case PacketStreamState::Stopping:
+        // case PacketStreamState::Stopped:
+        case PacketStreamState::Closed:
+        case PacketStreamState::Error:
+            // Close file handles
+            auto fstream = dynamic_cast<std::ofstream*>(_ostream);
+            if (fstream)
+                fstream->close();
+            break;
+        }
+    }
+
+    std::ostream& stream() 
+    {
+        if (!_ostream)
+            throw std::runtime_error("Cannot cast internal stream type.");
+        return *_ostream;
+    }
 
     PacketSignal emitter;
 

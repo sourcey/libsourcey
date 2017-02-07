@@ -37,71 +37,6 @@ namespace scy {
 
 
 //
-/// Generic Callback Context
-//
-
-
-// struct CallbackContext
-// {
-//     void onClientConnectionComplete(void* sender, const http::Response&
-//     response)
-//     {
-//         // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-//         // << conn->readStream<std::stringstream>()->str()
-//         TraceL << "Server response: " << response  << endl;
-//     }
-//
-//     void onClientConnectionDownloadComplete(void* sender, const
-//     http::Response& response)
-//     {
-//         // auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-//         TraceL << "Server response: " << response << endl;
-//     }
-//
-//     void onStandaloneHTTPClientConnectionHeaders(void*, http::Response& res)
-//     {
-//         DebugL << "On response headers: " << res << endl;
-//     }
-//
-//     void onStandaloneHTTPClientConnectionPayload(void* sender, const
-//     MutableBuffer& buffer)
-//     {
-//         DebugL << "On payload: " << buffer.size() << ": " << buffer.str() <<
-//         endl;
-//     }
-//
-//     void onStandaloneHTTPClientConnectionComplete(void* sender, const
-//     http::Response& response)
-//     {
-//         auto self = reinterpret_cast<http::ClientConnection*>(sender);
-//         // << self->readStream<std::stringstream>()->str()
-//         DebugL << "On response complete: " << response << endl;
-//
-//         // Force the connection closure if the other side hasn't already
-//         self->close();
-//     }
-//
-//     void onAssetUploadProgress(void* sender, const double& progress)
-//     {
-//         DebugL << "Upload Progress:" << progress << endl;
-//     }
-//
-//     void onAssetUploadComplete(void* sender, const http::Response& response)
-//     {
-//         auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-//
-//         DebugL << "Transaction Complete:"
-//             << "\n\tRequest Head: " << conn->request()
-//             << "\n\tResponse Head: " << response
-//             //<< "\n\tResponse Body: " << trans->incomingBuffer()
-//             << endl;
-//
-//         //expect(response.success());
-//     }
-// };
-
-
-//
 /// HTTP Client Tests
 //
 
@@ -112,36 +47,43 @@ struct HTTPEchoTest
     http::Server server;
     http::Client client;
     http::ClientConnection::Ptr conn;
-    RandomDataSource dataSource;
     int numSuccess;
     int numWanted;
 
     HTTPEchoTest(int numWanted = 1)
-        : server(TEST_HTTP_PORT, new OurServerResponderFactory)
+        : server(net::Address("0.0.0.0", TEST_HTTP_PORT))
         , numSuccess(0)
         , numWanted(numWanted)
     {
     }
 
-    void raiseServer() { server.start(); }
+    void raiseServer() 
+    { 
+        server.start();
+        server.Connection += [](http::ServerConnection::Ptr conn) {
+            conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+                conn.send(bufferCast<const char*>(buffer), buffer.size());
+            };
+        };
+    }
 
-    http::ClientConnection::Ptr createConnection(const std::string& protocol,
-                                                 const std::string& query)
+    http::ClientConnection::Ptr createConnection(const std::string& protocol, const std::string& query)
     {
         std::ostringstream url;
         url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << endl;
         conn = client.createConnection(url.str());
         conn->Connect += slot(this, &HTTPEchoTest::onConnect);
         conn->Headers += slot(this, &HTTPEchoTest::onHeaders);
-        // conn->Payload += slot(this, &HTTPEchoTest::onPayload);
-        conn->Incoming.emitter += slot(this, &HTTPEchoTest::onPayload);
-
+        conn->Payload += slot(this, &HTTPEchoTest::onPayload);
         conn->Complete += slot(this, &HTTPEchoTest::onComplete);
         conn->Close += slot(this, &HTTPEchoTest::onClose);
         return conn;
     }
 
-    void start() { conn->send("PING", 4); }
+    void start() 
+    { 
+        conn->send("PING", 4); 
+    }
 
     void shutdown()
     {
@@ -155,18 +97,11 @@ struct HTTPEchoTest
     void onConnect()
     {
         DebugL << "On connect" << endl;
-
-        // Bounce backwards and forwards
-        // conn->send("PING", 4);
     }
 
     void onHeaders(http::Response& res)
     {
         DebugL << "On headers" << endl;
-
-        // Start the output stream when the socket connects.
-        // dataSource.start();
-        // dataSource.conn = this->conn;
     }
 
     void onComplete(const http::Response& res)
@@ -176,11 +111,10 @@ struct HTTPEchoTest
         DebugL << "Response complete: " << os.str() << endl;
     }
 
-    void onPayload(IPacket& pkt)
+    void onPayload(const MutableBuffer& buffer)
     {
-        auto packet = dynamic_cast<RawPacket*>(&pkt);
-        std::string data(packet->data(), packet->size());
-        DebugL << "On payload: " << packet->size() << ": " << data << endl;
+        std::string data(bufferCast<const char*>(buffer), buffer.size());
+        DebugL << "On payload: " << buffer.size() << ": " << data << endl;
 
         if (data == "PING")
             numSuccess++;

@@ -116,8 +116,7 @@ template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
 
 
 template <class T>
-inline void
-SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
+inline void SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "Stream state: " << state << std::endl;
 

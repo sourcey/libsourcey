@@ -90,6 +90,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     LIST(APPEND UV_SOURCES
         src/win/async.c
         src/win/core.c
+        src/win/detect-wakeup.c
         src/win/dl.c
         src/win/error.c
         src/win/fs-event.c

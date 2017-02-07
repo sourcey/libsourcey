@@ -38,10 +38,10 @@ public:
     virtual void close();
 
     virtual void connect(const net::Address& peerAddress);
+    virtual void connect(const std::string& host, std::uint16_t port);
 
     virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len,
-                     const net::Address& peerAddress, int flags = 0);
+    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
 
     virtual void bind(const net::Address& address, unsigned flags = 0);
     virtual void listen(int backlog = 64);
@@ -73,7 +73,7 @@ public:
     /// Returns the TCP transport protocol.
     net::TransportType transport() const;
 
-#ifdef _WIN32
+#ifdef SCY_WIN
     void setSimultaneousAccepts(bool enable);
 #endif
 

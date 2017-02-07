@@ -10,6 +10,8 @@ using std::endl;
 namespace scy {
 
 
+#if 0
+
 /// Basic server responder (make echo?)
 class BasicResponder : public http::ServerResponder
 {
@@ -183,6 +185,8 @@ public:
             return new BasicResponder(conn);
     }
 };
+
+#endif
 
 
 } // namespace scy

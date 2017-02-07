@@ -57,8 +57,7 @@ int SocketAdapter::send(const char* data, std::size_t len, int flags)
 }
 
 
-int SocketAdapter::send(const char* data, std::size_t len,
-                        const Address& peerAddress, int flags)
+int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
     if (!_sender)
@@ -117,15 +116,13 @@ void SocketAdapter::onSocketConnect(Socket& socket)
 }
 
 
-void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                                 const Address& peerAddress)
+void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     emitSocketRecv(socket, buffer, peerAddress);
 }
 
 
-void SocketAdapter::onSocketError(Socket& socket,
-                                  const scy::Error& error) // const Error& error
+void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error) // const Error& error
 {
     emitSocketError(socket, error);
 }
@@ -139,26 +136,25 @@ void SocketAdapter::onSocketClose(Socket& socket)
 
 void SocketAdapter::emitSocketConnect(Socket& socket)
 {
-    Connect.emit(socket /*self()*/);
+    Connect.emit(socket);
 }
 
 
-void SocketAdapter::emitSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                                   const Address& peerAddress)
+void SocketAdapter::emitSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
-    Recv.emit(/*self(), */ socket, buffer, peerAddress);
+    Recv.emit(socket, buffer, peerAddress);
 }
 
 
 void SocketAdapter::emitSocketError(Socket& socket, const scy::Error& error)
 {
-    Error.emit(/*self(), */ socket, error);
+    Error.emit(socket, error);
 }
 
 
 void SocketAdapter::emitSocketClose(Socket& socket)
 {
-    Close.emit(socket /*self()*/);
+    Close.emit(socket);
 }
 
 

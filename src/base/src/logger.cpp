@@ -131,6 +131,7 @@ void Logger::write(const LogStream& stream)
 
 void Logger::write(LogStream* stream)
 {
+#ifndef SCY_DISABLE_LOGGING
     std::lock_guard<std::mutex> guard(_mutex);
     if (stream->channel == nullptr)
         stream->channel = _defaultChannel;
@@ -141,6 +142,7 @@ void Logger::write(LogStream* stream)
         return;
     }
     _writer->write(stream);
+#endif
 }
 
 
@@ -168,10 +170,12 @@ LogWriter::~LogWriter()
 
 void LogWriter::write(LogStream* stream)
 {
+#ifndef SCY_DISABLE_LOGGING
     // TODO: Make safer; if the app exists and async stuff
     // is still logging we can end up with a crash here.
     stream->channel->write(*stream);
     delete stream;
+#endif
 }
 
 
@@ -241,6 +245,7 @@ void AsyncLogWriter::run()
 
 bool AsyncLogWriter::writeNext()
 {
+#ifndef SCY_DISABLE_LOGGING
     LogStream* next;
     {
         std::lock_guard<std::mutex> guard(_mutex);
@@ -252,6 +257,7 @@ bool AsyncLogWriter::writeNext()
     }
     next->channel->write(*next);
     delete next;
+#endif
     return true;
 }
 
@@ -260,6 +266,8 @@ bool AsyncLogWriter::writeNext()
 // Log Stream
 //
 
+
+#ifndef SCY_DISABLE_LOGGING
 
 LogStream::LogStream(LogLevel level, const std::string& realm, int line,
                      const void* ptr, const char* channel)
@@ -270,10 +278,8 @@ LogStream::LogStream(LogLevel level, const std::string& realm, int line,
     , ts(time::now())
     , channel(nullptr)
 {
-#ifndef SCY_DISABLE_LOGGING
     if (channel)
         this->channel = Logger::instance().get(channel, false);
-#endif
 }
 
 
@@ -304,6 +310,8 @@ LogStream::LogStream(const LogStream& that)
 LogStream::~LogStream()
 {
 }
+
+#endif
 
 
 //
@@ -337,6 +345,7 @@ void LogChannel::write(const LogStream& stream)
 
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 {
+#ifndef SCY_DISABLE_LOGGING
     if (!_timeFormat.empty())
         ost << time::print(time::toLocal(stream.ts), _timeFormat.c_str());
     ost << " [" << getStringFromLogLevel(stream.level) << "] ";
@@ -352,6 +361,7 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
     }
     ost << stream.message.str();
     ost.flush();
+#endif
 }
 
 
@@ -369,6 +379,7 @@ ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level,
 
 void ConsoleChannel::write(const LogStream& stream)
 {
+#ifndef SCY_DISABLE_LOGGING
     if (_level > stream.level)
         return;
 
@@ -385,6 +396,7 @@ void ConsoleChannel::write(const LogStream& stream)
     std::wstring temp(s.length(), L' ');
     std::copy(s.begin(), s.end(), temp.begin());
     OutputDebugString(temp.c_str());
+#endif
 #endif
 }
 
@@ -435,6 +447,7 @@ void FileChannel::close()
 
 void FileChannel::write(const LogStream& stream)
 {
+#ifndef SCY_DISABLE_LOGGING
     if (this->level() > stream.level)
         return;
 
@@ -454,6 +467,7 @@ void FileChannel::write(const LogStream& stream)
     std::wstring temp(s.length(), L' ');
     std::copy(s.begin(), s.end(), temp.begin());
     OutputDebugString(temp.c_str());
+#endif
 #endif
 }
 
@@ -503,6 +517,7 @@ RotatingFileChannel::~RotatingFileChannel()
 
 void RotatingFileChannel::write(const LogStream& stream)
 {
+#ifndef SCY_DISABLE_LOGGING
     if (this->level() > stream.level)
         return;
 
@@ -522,6 +537,7 @@ void RotatingFileChannel::write(const LogStream& stream)
     std::wstring temp(s.length(), L' ');
     std::copy(s.begin(), s.end(), temp.begin());
     OutputDebugString(temp.c_str());
+#endif
 #endif
 }
 

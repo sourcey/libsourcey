@@ -24,8 +24,7 @@ namespace scy {
 ///
 /// Provides timed persistent data storage for class instances.
 /// TValue must implement the clone() method.
-template <class TKey, class TValue,
-          class TDeleter = std::default_delete<TValue>>
+template <class TKey, class TValue, class TDeleter = std::default_delete<TValue>>
 class SCY_EXTERN TimedManager : public PointerCollection<TKey, TValue, TDeleter>
 {
 public:
@@ -81,8 +80,7 @@ protected:
         if (item) {
             std::lock_guard<std::mutex> guard(_tmutex);
             if (timeout > 0) {
-                TraceS(this) << "Set timeout: " << item << ": " << timeout
-                             << std::endl;
+                TraceS(this) << "Set timeout: " << item << ": " << timeout << std::endl;
                 auto& t = _timeouts[item];
                 t.setDelay(timeout);
                 t.start();

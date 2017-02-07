@@ -106,13 +106,11 @@ void ZipFile::open(const std::string& file)
                       unzGetCurrentFileInfo(this->fp, &fileInfo, fileName, 1024,
                                             nullptr, 0, nullptr, 0));
 
-        FileInfo info;
-        info.path = fileName;
-        info.compressedSize =
-            static_cast<std::size_t>(fileInfo.uncompressed_size);
-        info.uncompressedSize =
-            static_cast<std::size_t>(fileInfo.compressed_size);
-        this->info.push_back(info);
+        FileInfo finfo;
+        finfo.path = fileName;
+        finfo.compressedSize = static_cast<std::size_t>(fileInfo.uncompressed_size);
+        finfo.uncompressedSize = static_cast<std::size_t>(fileInfo.compressed_size);
+        this->info.push_back(finfo);
 
         TraceL << "Zip file contains: " << fileName << endl;
     }
@@ -151,12 +149,12 @@ void ZipFile::extract(const std::string& path)
 bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 {
     int ret;
-    unz_file_info info;
+    unz_file_info finfo;
     char fname[1024];
 
     try {
         internal::api("unzGetCurrentFileInfo",
-                      unzGetCurrentFileInfo(this->fp, &info, fname, 1024,
+                      unzGetCurrentFileInfo(this->fp, &finfo, fname, 1024,
                                             nullptr, 0, nullptr, 0));
 
         std::string outPath(path);
@@ -168,7 +166,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 #if !WIN32
         const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
 #endif
-        if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
+        if (finfo.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
             fname[strlen(fname) - 1] == fs::delimiter) {
             TraceL << "Create directory: " << outPath << endl;
             fs::mkdirr(outPath);
@@ -193,8 +191,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
             }
 
             if (!ofs.is_open())
-                throw std::runtime_error("Cannot open zip output file: " +
-                                         outPath);
+                throw std::runtime_error("Cannot open zip output file: " + outPath);
 
             char buffer[16384];
             while ((ret = unzReadCurrentFile(this->fp, buffer, 16384)) > 0)

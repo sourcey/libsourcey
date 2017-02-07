@@ -94,16 +94,11 @@ enum ErrorCodes
 {
     ErrorNoHandshake = 1, ///< No Connection: Upgrade or Upgrade: websocket
                           ///header in handshake request.
-    ErrorHandshakeNoVersion =
-        2, ///< No Sec-WebSocket-Version header in handshake request.
-    ErrorHandshakeUnsupportedVersion =
-        3, ///< Unsupported WebSocket version requested by client.
-    ErrorHandshakeNoKey =
-        4, ///< No Sec-WebSocket-Key header in handshake request.
-    ErrorHandshakeAccept =
-        5, ///< No Sec-WebSocket-Accept header or wrong value.
-    ErrorUnauthorized =
-        6, ///< The server rejected the username or password for authentication.
+    ErrorHandshakeNoVersion = 2, ///< No Sec-WebSocket-Version header in handshake request.
+    ErrorHandshakeUnsupportedVersion = 3, ///< Unsupported WebSocket version requested by client.
+    ErrorHandshakeNoKey = 4, ///< No Sec-WebSocket-Key header in handshake request.
+    ErrorHandshakeAccept = 5, ///< No Sec-WebSocket-Accept header or wrong value.
+    ErrorUnauthorized = 6, ///< The server rejected the username or password for authentication.
     ErrorPayloadTooBig = 10,  ///< Payload too big for supplied buffer.
     ErrorIncompleteFrame = 11 ///< Incomplete frame received.
 };
@@ -130,8 +125,7 @@ public:
     virtual ~WebSocketFramer();
 
     /// Writes a WebSocket protocol frame from the given data.
-    virtual std::size_t writeFrame(const char* data, std::size_t len, int flags,
-                                   BitWriter& frame);
+    virtual std::size_t writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame);
 
     /// Reads a single WebSocket frame from the given buffer (frame).
     ///
@@ -145,11 +139,14 @@ public:
 
     bool handshakeComplete() const;
 
-    ///// Server side
+    //
+    /// Server side
 
     void acceptServerRequest(http::Request& request, http::Response& response);
 
-    ///// Client side
+    //
+    /// Client side
+
     /// Sends the initial WS handshake HTTP request.
     /// void sendHandshakeRequest();
 
@@ -206,14 +203,10 @@ public:
     // WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response&
     // response);
 
-    virtual int send(const char* data, std::size_t len,
-                     int flags = 0); // flags = ws::Text || ws::Binary
-    virtual int send(const char* data, std::size_t len,
-                     const net::Address& peerAddr,
-                     int flags = 0); // flags = ws::Text || ws::Binary
+    virtual int send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual int send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
 
-    virtual bool shutdown(std::uint16_t statusCode,
-                          const std::string& statusMessage);
+    virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);
 
     /// Pointer to the underlying socket.
     /// Sent data will be proxied to this socket.
@@ -223,23 +216,20 @@ public:
     /// Client side
 
     virtual void sendClientRequest();
-    virtual void handleClientResponse(const MutableBuffer& buffer,
-                                      const net::Address& peerAddr);
+    virtual void handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr);
     // virtual void prepareClientRequest(http::Request& request);
     // virtual void verifyClientResponse(http::Response& response);
 
     //
     /// Server side
 
-    virtual void handleServerRequest(const MutableBuffer& buffer,
-                                     const net::Address& peerAddr);
+    virtual void handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr);
     // virtual void sendConnectResponse();
     // virtual void verifyServerRequest(http::Request& request);
     // virtual void prepareClientResponse(http::Response& response);
 
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
-                              const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     virtual void onSocketClose(net::Socket& socket);
 
     virtual void onHandshakeComplete();

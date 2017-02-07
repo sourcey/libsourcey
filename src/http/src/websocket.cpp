@@ -99,8 +99,7 @@ int WebSocketAdapter::send(const char* data, std::size_t len, int flags)
 }
 
 
-int WebSocketAdapter::send(const char* data, std::size_t len,
-                           const net::Address& peerAddr, int flags)
+int WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags)
 {
     TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(framer.handshakeComplete());
@@ -132,8 +131,7 @@ void WebSocketAdapter::sendClientRequest()
 }
 
 
-void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer,
-                                            const net::Address& peerAddr)
+void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
     TraceS(this) << "Client response: " << buffer.str() << endl;
 
@@ -172,15 +170,13 @@ void WebSocketAdapter::onHandshakeComplete()
 }
 
 
-void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer,
-                                           const net::Address& peerAddr)
+void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
     TraceS(this) << "Server request: " << buffer.str() << endl;
 
     http::Parser parser(&_request);
     if (!parser.parse(bufferCast<char*>(buffer), buffer.size())) {
-        throw std::runtime_error(
-            "WebSocket error: Cannot parse request: Incomplete HTTP message");
+        throw std::runtime_error("WebSocket error: Cannot parse request: Incomplete HTTP message");
     }
 
     TraceS(this) << "Verifying handshake: " << _request << endl;
@@ -220,9 +216,7 @@ void WebSocketAdapter::onSocketConnect(net::Socket&)
 }
 
 
-void WebSocketAdapter::onSocketRecv(net::Socket&,
-                                    const MutableBuffer& buffer,
-                                    const net::Address& peerAddress)
+void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceS(this) << "On recv: " << buffer.size() << endl;
 
@@ -341,6 +335,7 @@ void ConnectionAdapter::onHandshakeComplete()
     SocketAdapter::onSocketConnect(*socket.get());
 }
 
+
 // void ConnectionAdapter::onParserHeadersEnd()
 // {
 //     TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
@@ -354,14 +349,15 @@ void ConnectionAdapter::onHandshakeComplete()
 //     be redundant
 // }
 //
+//
 // void ConnectionAdapter::onParserEnd()
 // {
 //     TraceS(this) << "On parser end" << endl;
 //
 //     _connection.onMessage();
 // }
-
-
+//
+//
 // int ConnectionAdapter::sendHeader()
 // {
 //     WarnL << "Read error: " << exc.what() << endl;

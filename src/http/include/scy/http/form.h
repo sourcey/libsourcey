@@ -38,9 +38,10 @@ class SCY_EXTERN FormPart;
 /// while uploading big files. Class members are not synchronized hence
 /// they should not be accessed while the form is sending, not that there
 /// would be any reason to do so.
-class SCY_EXTERN FormWriter : public NVCollection,
-                   public PacketSource,
-                   public basic::Startable
+class SCY_EXTERN FormWriter : 
+    public NVCollection,
+    public PacketSource,
+    public basic::Startable
 {
 public:
     /// Creates the FormWriter that uses the given connection and
@@ -48,9 +49,7 @@ public:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    static FormWriter*
-    create(ClientConnection& conn,
-           const std::string& encoding = FormWriter::ENCODING_URL);
+    static FormWriter* create(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
 
     /// Destroys the FormWriter.
     virtual ~FormWriter();
@@ -140,9 +139,7 @@ public:
 
     static const char* ENCODING_URL; ///< "application/x-www-form-urlencoded"
     static const char* ENCODING_MULTIPART_FORM; ///< "multipart/form-data"
-    static const char*
-        ENCODING_MULTIPART_RELATED; ///< "multipart/related"
-                                    ///http://tools.ietf.org/html/rfc2387
+    static const char* ENCODING_MULTIPART_RELATED; ///< "multipart/related" http://tools.ietf.org/html/rfc2387
 
 protected:
     /// Creates the FormWriter that uses the given encoding.
@@ -151,8 +148,9 @@ protected:
     /// (which is the default) or "multipart/form-data".
     FormWriter(ClientConnection& conn, Runner::Ptr runner,
                const std::string& encoding = FormWriter::ENCODING_URL);
-    FormWriter(const FormWriter&);
-    FormWriter& operator=(const FormWriter&);
+
+    FormWriter(const FormWriter&) = delete;
+    FormWriter& operator=(const FormWriter&) = delete;
 
     /// Writes the message boundary std::string, followed
     /// by the message header to the output stream.

@@ -34,7 +34,7 @@ public:
     typedef std::shared_ptr<ClientConnection> Ptr;
 
     /// Create a standalone connection with the given host.
-    ClientConnection(const URL& url, const net::Socket::Ptr& socket = nullptr);
+    ClientConnection(const URL& url, const net::TCPSocket::Ptr& socket = std::make_shared<net::TCPSocket>());
 
     virtual ~ClientConnection();
 
@@ -64,7 +64,7 @@ public:
     // virtual void sendData(const std::string& buf); //, int flags = 0
 
     /// Forcefully closes the HTTP connection.
-    virtual void close();
+    //virtual void close();
 
     /// Set the output stream for writing response data to.
     /// The stream pointer is managed internally,
@@ -74,23 +74,20 @@ public:
     /// Return the cast read stream pointer or nullptr.
     template <class StreamT> StreamT& readStream()
     {
-        auto adapter = Incoming.getProcessor<StreamWriter>();
-        if (!adapter)
-            throw std::runtime_error(
-                "No stream reader associated with HTTP client.");
+        if (!_readStream)
+            throw std::runtime_error("No stream reader associated with HTTP client.");
 
-        return adapter->stream<StreamT>();
+        return *dynamic_cast<StreamT*>(_readStream.get());
     }
 
     /// Optional unmanaged client data pointer.
     void* opaque;
 
     //
-    /// Internal callbacks
+    /// Connection interface
 
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
-    virtual void onMessage();
     virtual void onComplete();
     virtual void onClose();
 
@@ -100,14 +97,14 @@ public:
     NullSignal Connect;                         ///< Signals when the client socket is connected and data can flow
     Signal<void(Response&)> Headers;            ///< Signals when the response HTTP header has been received
     Signal<void(const MutableBuffer&)> Payload; ///< Signals when raw data is received
-    Signal<void(const Response&)>  Complete;    ///< Signals when the HTTP transaction is complete
+    Signal<void(const Response&)> Complete;     ///< Signals when the HTTP transaction is complete
+    Signal<void(Connection&)> Close;            ///< Signals when the connection is closed
 
 protected:
     /// Connects to the server endpoint.
     /// All sent data is buffered until the connection is made.
     virtual void connect();
 
-    http::Client* client();
     http::Message* incomingHeader();
     http::Message* outgoingHeader();
 
@@ -115,10 +112,11 @@ protected:
 
 protected:
     URL _url;
-    std::vector<std::string> _outgoingBuffer;
     bool _connect;
     bool _active;
     bool _complete;
+    std::vector<std::string> _outgoingBuffer;
+    std::unique_ptr<std::ostream> _readStream;
 };
 
 
@@ -130,14 +128,14 @@ typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
 //
 
 
-class SCY_EXTERN ClientAdapter : public ConnectionAdapter
-{
-public:
-    ClientAdapter(ClientConnection& connection)
-        : ConnectionAdapter(connection, HTTP_RESPONSE)
-    {
-    }
-};
+//class SCY_EXTERN ClientAdapter : public ConnectionAdapter
+//{
+//public:
+//    ClientAdapter(ClientConnection* connection)
+//        : ConnectionAdapter(connection, HTTP_RESPONSE)
+//    {
+//    }
+//};
 
 
 //
@@ -151,27 +149,26 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = 
     ClientConnection::Ptr conn;
 
     if (url.scheme() == "http") {
-        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
-        conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
-            deleter::Deferred<ConnectionT>());
+        conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
+        // conn = std::shared_ptr<ConnectionT>(
+        //     new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
+        //     deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "https") {
-        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
-        conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
-            deleter::Deferred<ConnectionT>());
+        conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
+        // conn = std::shared_ptr<ConnectionT>(
+        //    new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
+        //     deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "ws") {
-        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
-        conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
-            deleter::Deferred<ConnectionT>());
-        // replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
+        conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
+        // conn = std::shared_ptr<ConnectionT>(
+        //     new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
+        //    deleter::Deferred<ConnectionT>());
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
     } else if (url.scheme() == "wss") {
-        // conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
-        conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
-            deleter::Deferred<ConnectionT>());
+        conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
+        // conn = std::shared_ptr<ConnectionT>(
+        //     new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
+        //     deleter::Deferred<ConnectionT>());
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
     } else
         throw std::runtime_error("Unknown connection type for URL: " + url.str());

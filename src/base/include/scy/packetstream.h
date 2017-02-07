@@ -305,8 +305,7 @@ public:
         auto source = dynamic_cast<PacketStreamAdapter*>(ptr.get());
         if (!source) {
             assert(0 && "invalid adapter");
-            throw std::runtime_error(
-                "Cannot attach incompatible packet source.");
+            throw std::runtime_error("Cannot attach incompatible packet source.");
         }
 
         attachSource(std::make_shared<PacketAdapterReference>(

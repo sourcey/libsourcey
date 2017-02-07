@@ -149,13 +149,11 @@ protected:
     ///
     /// Throws a NotAuthenticatedException if no authentication information
     /// is contained in the request.
-    void getCredentials(const std::string& header, std::string& scheme,
-                        std::string& authInfo) const;
+    void getCredentials(const std::string& header, std::string& scheme, std::string& authInfo) const;
 
     /// Writes the authentication scheme and information for
     /// this request to the given header.
-    void setCredentials(const std::string& header, const std::string& scheme,
-                        const std::string& authInfo);
+    void setCredentials(const std::string& header, const std::string& scheme, const std::string& authInfo);
 
 private:
     std::string _method;

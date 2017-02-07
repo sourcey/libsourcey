@@ -1,4 +1,5 @@
 #include "httpechoserver.h"
+#include "libuvechoserver.h"
 #include "scy/application.h"
 #include "scy/logger.h"
 #include "scy/net/sslmanager.h"
@@ -11,6 +12,8 @@ using namespace scy::net;
 
 const std::uint16_t HttpPort = 1337;
 
+
+#if 0
 
 void raiseServer()
 {
@@ -38,14 +41,48 @@ void raiseLoadBalancedServer()
     delete loop;
 }
 
+#endif
+
+
+void raiseEchoServer()
+{
+    http::Server srv(net::Address("0.0.0.0", HttpPort));
+    srv.start();
+
+    srv.Connection += [](http::ServerConnection::Ptr conn) {
+        conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+            conn.send(bufferCast<const char*>(buffer), buffer.size());
+        };
+    };
+
+    uv::waitForShutdown();
+}
+
+
+void raiseBenchmarkServer()
+{
+    http::Server srv(net::Address("0.0.0.0", HttpPort));
+    srv.start();
+
+    srv.Connection += [&](http::ServerConnection::Ptr conn) {
+        conn->send("hello universe", 14);
+        conn->close();
+    };
+
+    uv::waitForShutdown();
+}
+
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LDebug));
+    //Logger::instance().add(new LogChannel("debug", LTrace));
+    //Logger::instance().add(new ConsoleChannel("debug", LTrace));
     //Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
-          raiseServer();
+        //raiseServer();
+        raiseBenchmarkServer();
+        //libuv::raiseLibuvEchoServer();
 // #if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
 //         Thread t1;
 //         Thread t2;

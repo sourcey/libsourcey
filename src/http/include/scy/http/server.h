@@ -14,6 +14,7 @@
 
 
 #include "scy/base.h"
+#include "scy/datetime.h"
 #include "scy/http/connection.h"
 #include "scy/http/parser.h"
 #include "scy/http/request.h"
@@ -21,6 +22,7 @@
 #include "scy/logger.h"
 #include "scy/net/socket.h"
 #include "scy/timer.h"
+#include <ctime>
 
 
 namespace scy {
@@ -28,179 +30,101 @@ namespace http {
 
 
 class SCY_EXTERN Server;
-class SCY_EXTERN ServerResponder;
+
+/// HTTP server connection.
 class SCY_EXTERN ServerConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ServerConnection> Ptr;
 
-    ServerConnection(Server& server, net::Socket::Ptr socket);
+    ServerConnection(Server& server, net::TCPSocket::Ptr socket);
     virtual ~ServerConnection();
 
-    /// Sends the HTTP response
-    // virtual bool send();
+    Server& server();
 
-    /// Closes the HTTP connection
-    virtual void close();
+    Signal<void(ServerConnection&, const MutableBuffer&)> Payload; ///< Signals when raw data is received
+    Signal<void(ServerConnection&)> Close;     ///< Signals when the connection is closed
 
 protected:
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
-    virtual void onMessage();
+    virtual void onComplete();
     virtual void onClose();
-
-    Server& server();
 
     http::Message* incomingHeader();
     http::Message* outgoingHeader();
 
-    /// Server callbacks
-    // void onServerShutdown(void*);
-
 protected:
     Server& _server;
-    ServerResponder* _responder;
     bool _upgrade;
-    bool _requestComplete;
 };
-
-
-typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
 
 
 // -------------------------------------------------------------------
 //
-class SCY_EXTERN ServerAdapter : public ConnectionAdapter
+
+/// This implementation of a ServerConnectionFactory
+/// is used by HTTP Server to create ServerConnection objects.
+class SCY_EXTERN ServerConnectionFactory
 {
 public:
-    ServerAdapter(ServerConnection& connection)
-        : ConnectionAdapter(connection, HTTP_REQUEST)
+    ServerConnectionFactory() {};
+    virtual ~ServerConnectionFactory() {};
+
+    /// Factory method for instantiating the ServerConnection
+    /// instance using the given Socket.
+    ServerConnection::Ptr createConnection(Server& server, const net::TCPSocket::Ptr& socket)
     {
-    }
+        return std::make_shared<ServerConnection>(server, socket);
+    };
 };
 
 
 // -------------------------------------------------------------------
 //
 
-/// The abstract base class for HTTP ServerResponders
-/// created by HTTP Server.
+/// HTTP server implementation.
 ///
-/// Derived classes must override the handleRequest() method.
-///
-/// A new HTTPServerResponder object will be created for
-/// each new HTTP request that is received by the HTTP Server.
-///
-class SCY_EXTERN ServerResponder
-{
-public:
-    ServerResponder(ServerConnection& connection)
-        : _connection(connection)
-    {
-    }
-
-    virtual ~ServerResponder() {}
-
-    virtual void onHeaders(Request& /* request */) {}
-    virtual void onPayload(const MutableBuffer& /* body */) {}
-    virtual void onRequest(Request& /* request */, Response& /* response */) {}
-    virtual void onClose(){};
-
-    ServerConnection& connection() { return _connection; }
-
-    Request& request() { return _connection.request(); }
-
-    Response& response() { return _connection.response(); }
-
-protected:
-    ServerConnection& _connection;
-
-private:
-    /// NonCopyable and NonMovable
-    ServerResponder(const ServerResponder&) = delete;
-    ServerResponder& operator=(const ServerResponder&) = delete;
-};
-
-
-// -------------------------------------------------------------------
-//
-
-/// This implementation of a ServerResponderFactory
-/// is used by HTTPServer to create ServerResponder objects.
-class SCY_EXTERN ServerResponderFactory
-{
-public:
-    ServerResponderFactory(){};
-    virtual ~ServerResponderFactory(){};
-
-    /// Factory method for instantiating the ServerResponder
-    /// instance using the given ServerConnection.
-    virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
-};
-
-
-// -------------------------------------------------------------------
-//
-
-/// DISCLAIMER: This HTTP server is not standards compliant.
+/// This HTTP server is not strictly standards compliant.
 /// It was created to be a fast (nocopy where possible)
-/// solution for streaming video to web browsers.
-///
-/// TODO:
-/// - SSL Server
-/// - Enable responders (controllers?) to be instantiated via registered routes.
+/// solution for streaming media to web browsers.
 class SCY_EXTERN Server
 {
 public:
-    ServerResponderFactory* factory;
-    net::TCPSocket::Ptr socket;
-    net::Address address;
-    Timer timer;
-    ServerConnectionList connections;
-
-    Server(short port, ServerResponderFactory* factory,
-           net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());
+    Server(const net::Address& address, net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());
     virtual ~Server();
 
+    /// Start the HTTP server.
     void start();
+
+    /// Shutdown the HTTP server.
     void shutdown();
 
-    std::uint16_t port();
+    /// Return the server bind address.
+    net::Address& address();
 
+    /// Signals when a new connection has been created.
+    /// A reference to the new connection object is provided.
+    Signal<void(ServerConnection::Ptr)> Connection;
+
+    /// Signals when the server is shutting down.
     NullSignal Shutdown;
 
 protected:
-    ServerConnection::Ptr createConnection(const net::Socket::Ptr& sock);
-    ServerResponder* createResponder(ServerConnection& conn);
-
-    virtual void addConnection(ServerConnection::Ptr conn);
-    virtual void removeConnection(ServerConnection* conn);
-
-    void onSocketAccept(const net::TCPSocket::Ptr& socket);
-    void onSocketClose(net::Socket& socket);    // main socket close
-    void onConnectionClose(Connection& socket); // connection socket close
+    void onClientSocketAccept(const net::TCPSocket::Ptr& socket);
+    void onConnectionReady(ServerConnection& conn);
+    void onConnectionClose(ServerConnection& conn);
+    void onSocketClose(net::Socket& socket);
     void onTimer();
 
+protected:
+    net::Address _address;
+    net::TCPSocket::Ptr _socket;
+    Timer _timer;
+    ServerConnectionFactory* _factory;
+    std::vector<ServerConnection::Ptr> _connections;
+
     friend class ServerConnection;
-};
-
-
-// ---------------------------------------------------------------------
-//
-class SCY_EXTERN BadRequestHandler : public ServerResponder
-{
-public:
-    BadRequestHandler(ServerConnection& connection)
-        : ServerResponder(connection)
-    {
-    }
-
-    void onRequest(Request&, Response& response)
-    {
-        response.setStatus(http::StatusCode::BadRequest);
-        connection().sendHeader();
-        connection().close();
-    }
 };
 
 

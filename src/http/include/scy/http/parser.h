@@ -23,13 +23,6 @@ namespace scy {
 namespace http {
 
 
-struct ParserError
-{
-    http_errno code;
-    std::string message;
-};
-
-
 class SCY_EXTERN ParserObserver
 {
 public:
@@ -38,7 +31,7 @@ public:
     virtual void onParserChunk(const char* data, std::size_t len) = 0;
     virtual void onParserEnd() = 0;
 
-    virtual void onParserError(const ParserError& err) = 0;
+    virtual void onParserError(const Error& err) = 0;
 };
 
 
@@ -50,19 +43,21 @@ public:
     Parser(http_parser_type type);
     ~Parser();
 
-    std::size_t parse(const char* data, std::size_t length);
-
-    /// Feed data read from socket into the http_parser.
+    /// Parse a HTTP packet.
     ///
     /// Returns true of the message is complete, false if incomplete.
     /// Reset the parser state for a new message
+    std::size_t parse(const char* data, std::size_t length);
+
+    /// Reset the internal state.
     void reset();
 
     /// Returns true if parsing is complete, either
     /// in success or error.
     bool complete() const;
 
-    void setParserError(const std::string& message = "");
+    /// Returns true if the connection should be upgraded.
+    bool upgrade() const;
 
     void setRequest(http::Request* request);
     void setResponse(http::Response* response);
@@ -71,11 +66,8 @@ public:
     http::Message* message();
     ParserObserver* observer() const;
 
-    bool upgrade() const;
-    bool shouldKeepAlive() const;
-
 protected:
-    void init(http_parser_type type);
+    void init();
 
     /// Callbacks
     void onURL(const std::string& value);
@@ -83,7 +75,7 @@ protected:
     void onHeadersEnd();
     void onBody(const char* buf, std::size_t len);
     void onMessageEnd();
-    void onError(const ParserError& err);
+    void onError(unsigned errnum, const std::string& message = "");
 
     /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
@@ -103,14 +95,16 @@ protected:
 
     http_parser _parser;
     http_parser_settings _settings;
+    http_parser_type _type;
 
     bool _wasHeaderValue;
     std::string _lastHeaderField;
     std::string _lastHeaderValue;
 
     bool _complete;
-
-    ParserError* _error;
+    bool _upgrade;
+    
+    Error _error;
 };
 
 

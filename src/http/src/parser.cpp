@@ -28,9 +28,10 @@ Parser::Parser(http::Response* response)
     : _observer(nullptr)
     , _request(nullptr)
     , _response(response)
-    , _error(nullptr)
+    , _type(HTTP_RESPONSE)
 {
-    init(HTTP_RESPONSE);
+    init();
+    reset();
 }
 
 
@@ -38,9 +39,10 @@ Parser::Parser(http::Request* request)
     : _observer(nullptr)
     , _request(request)
     , _response(nullptr)
-    , _error(nullptr)
+    , _type(HTTP_REQUEST)
 {
-    init(HTTP_REQUEST);
+    init();
+    reset();
 }
 
 
@@ -48,24 +50,23 @@ Parser::Parser(http_parser_type type)
     : _observer(nullptr)
     , _request(nullptr)
     , _response(nullptr)
-    , _error(nullptr)
+    , _type(type)
 {
-    init(type);
+    init();
+    reset();
 }
 
 
 Parser::~Parser()
 {
-    TraceS(this) << "Destroy" << endl;
-    reset();
 }
 
 
-void Parser::init(http_parser_type type)
+void Parser::init()
 {
-    TraceS(this) << "Init: " << type << endl;
+    TraceS(this) << "Init: " << _type << endl;
 
-    ::http_parser_init(&_parser, type);
+    ::http_parser_init(&_parser, _type);
     _parser.data = this;
     _settings.on_message_begin = on_message_begin;
     _settings.on_url = on_url;
@@ -83,48 +84,35 @@ void Parser::init(http_parser_type type)
 std::size_t Parser::parse(const char* data, std::size_t len)
 {
     TraceS(this) << "Parse: " << len << endl;
-    // TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) << endl;
 
-    assert(!complete());
-    assert(_parser.data == this);
-
-    if (complete()) {
-        setParserError("Parsing already complete");
+    if (_complete) {
+        throw std::runtime_error("HTTP parser already complete");
     }
 
-    // Parse and handle errors
     std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
-    if (_parser.http_errno != HPE_OK) { // && !_parser.upgrade
-        TraceS(this) << "Parse: nparsed=" << nparsed << endl;
-        setParserError();
+    
+    if (_parser.upgrade) {
+        // The parser has only parsed the HTTP headers, there
+        // may still be unread data from the request body in the buffer.
+    }
+    else if (nparsed != len) { // parser.http_errno == HPE_OK && !parser.upgrade
+        WarnS(this) << "HTTP parse failed: " << len << " != "<< nparsed << endl;
+
+        // Handle error. Usually just close the connection.
+        onError(_parser.http_errno);
+        //assert(0);
     }
 
-    return nparsed; // complete();
+    return nparsed;
 }
 
 
 void Parser::reset()
 {
     _complete = false;
-    if (_error) {
-        delete _error;
-        _error = nullptr;
-    }
-
-    // TODO: Reset parser internal state?
-}
-
-
-void Parser::setParserError(const std::string& message) // bool throwException,
-{
-    assert(_parser.http_errno != HPE_OK);
-    ParserError err;
-    err.code = HTTP_PARSER_ERRNO(&_parser);
-    err.message = message.empty() ? http_errno_name(err.code) : message;
-    onError(err);
-
-    // if (throwException)
-    //    throw std::runtime_error(err.message);
+    _upgrade = false;
+    //_shouldKeepAlive = false;
+    _error.reset();
 }
 
 
@@ -132,7 +120,7 @@ void Parser::setRequest(http::Request* request)
 {
     assert(!_request);
     assert(!_response);
-    assert(_parser.type == HTTP_REQUEST);
+    assert(_type == HTTP_REQUEST);
     _request = request;
 }
 
@@ -141,7 +129,7 @@ void Parser::setResponse(http::Response* response)
 {
     assert(!_request);
     assert(!_response);
-    assert(_parser.type == HTTP_RESPONSE);
+    assert(_type == HTTP_RESPONSE);
     _response = response;
 }
 
@@ -174,13 +162,7 @@ bool Parser::complete() const
 
 bool Parser::upgrade() const
 {
-    return _parser.upgrade > 0;
-}
-
-
-bool Parser::shouldKeepAlive() const
-{
-    return http_should_keep_alive(&_parser) > 0;
+    return _upgrade; // parser.upgrade > 0;
 }
 
 
@@ -211,16 +193,7 @@ void Parser::onHeader(const std::string& name, const std::string& value)
 
 void Parser::onHeadersEnd()
 {
-    /// HTTP version
-    // start_line_.version(parser_.http_major, parser_.http_minor);
-
-    /// KeepAlive
-    // headers->setKeepAlive(http_should_keep_alive(parser) > 0);
-
-    /// Request HTTP method
-    if (_request)
-        _request->setMethod(
-            http_method_str(static_cast<http_method>(_parser.method)));
+    _upgrade = _parser.upgrade > 0;
 
     if (_observer)
         _observer->onParserHeadersEnd();
@@ -244,21 +217,26 @@ void Parser::onMessageEnd()
 }
 
 
-void Parser::onError(const ParserError& err)
+
+void Parser::onError(unsigned errorno, const std::string& message)
 {
-    TraceS(this) << "On error: " << err.code << ": " << err.message << endl;
+    assert(errorno != HPE_OK);
+    TraceS(this) << "Parse error: "
+        << ::http_errno_name((::http_errno)errorno) << ": "
+        << ::http_errno_description((::http_errno)errorno) << endl;
+
     _complete = true;
-    _error = new ParserError;
-    _error->code = err.code;
-    _error->message = err.message;
+    _error.errorno = (http_errno)errorno; // HTTP_PARSER_ERRNO((http_errno)errno);
+    _error.message = message.empty() ? http_errno_name((::http_errno)errorno) : message;
     if (_observer)
-        _observer->onParserError(err);
+        _observer->onParserError(_error);
 }
 
 
 //
 // http_parser callbacks
 //
+
 
 int Parser::on_message_begin(http_parser* parser)
 {
@@ -286,7 +264,7 @@ int Parser::on_status(http_parser* parser, const char* at, size_t length)
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
 
-    /// Handle response status line
+    // Handle response status line
     if (self->_response)
         self->_response->setStatus((http::StatusCode)parser->status_code);
 
@@ -294,8 +272,7 @@ int Parser::on_status(http_parser* parser, const char* at, size_t length)
 }
 
 
-int Parser::on_header_field(http_parser* parser, const char* at,
-                            std::size_t len)
+int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -315,8 +292,7 @@ int Parser::on_header_field(http_parser* parser, const char* at,
 }
 
 
-int Parser::on_header_value(http_parser* parser, const char* at,
-                            std::size_t len)
+int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -336,12 +312,22 @@ int Parser::on_headers_complete(http_parser* parser)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
-    assert(&self->_parser == parser);
 
     // Add last entry if any
     if (!self->_lastHeaderField.empty()) {
         self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
     }
+
+    /// HTTP version
+    // start_line_.version(parser_.http_major, parser_.http_minor);
+
+    /// KeepAlive
+    //self->_message->setKeepAlive(http_should_keep_alive(&parser) > 0);
+    //self->_shouldKeepAlive = http_should_keep_alive(&parser) > 0;
+
+    /// Request HTTP method
+    if (self->_request)
+        self->_request->setMethod(http_method_str(static_cast<http_method>(parser->method)));
 
     self->onHeadersEnd();
     return 0;

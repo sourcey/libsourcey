@@ -26,7 +26,10 @@
 #define SCY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 
 /* Version number of package */
-#cmakedefine SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}"
+#define SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}"
+
+/* Disable logging */
+#cmakedefine SCY_DISABLE_LOGGING
 
 /* LibSourcey modules
 # cmakedefine HAVE_SCY_base

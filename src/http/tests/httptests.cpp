@@ -8,7 +8,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    //Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
     net::SSLManager::initNoVerifyClient();
 
@@ -110,9 +110,8 @@ int main(int argc, char** argv)
     describe("client connection download", []() {
 		std::string path(SCY_BUILD_DIR);
 		fs::addnode(path, "zlib-1.2.8.tar.gz");
+
         auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
-        // std::string filename("7z920.tar.bz2");
-        // auto conn = http::Client::instance().createConnection("http://d.7-zip.org/a/7z920.tar.bz2");
         conn->Complete += [&](const http::Response& response) {
             std::cout << "Server response: " << response << endl;
         };
@@ -120,7 +119,9 @@ int main(int argc, char** argv)
         conn->request().setKeepAlive(false);
         conn->setReadStream(new std::ofstream(path, std::ios_base::out | std::ios_base::binary));
         conn->send();
+
         uv::runDefaultLoop();
+
         expect(fs::exists(path));
         expect(crypto::checksum("MD5", path) == "44d667c142d7cda120332623eab69f40");
         fs::unlink(path);
@@ -152,8 +153,7 @@ int main(int argc, char** argv)
     });
 
     describe("secure client connection", []() {
-        auto conn =
-            http::Client::instance().createConnection("https://google.com/");
+        auto conn = http::Client::instance().createConnection("https://google.com/");
         // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->Complete += [&](const http::Response& response) {
             // std::cout << "Server response: " << response << endl;
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://sourcey.com");
         conn.Headers += [&](http::Response& response) {
-			// std::cout << "On response headers: " << response << endl;
+			std::cout << "On response headers: " << response << endl;
         };
         conn.Payload += [&](const MutableBuffer& buffer) {
-			// std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+			std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
         };
         conn.Complete += [&](const http::Response& response) {
-			// std::cout << "On response complete: " << response
-			//           << conn.readStream<std::stringstream>().str() << endl;
+			std::cout << "On response complete: " << response
+			          << conn.readStream<std::stringstream>().str() << endl;
 
             // Force connection closure if the other side hasn't already
             conn.close();

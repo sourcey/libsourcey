@@ -37,15 +37,15 @@ include(LibSourceyVersion REQUIRED)
 # ----------------------------------------------------------------------------
 # LibSourcey build components
 # ----------------------------------------------------------------------------
-#set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
-#set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
-#set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON   IF CMAKE_COMPILER_IS_GNUCXX)
-#set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
-#set_option(BUILD_TESTS                "Build module test applications?"                          ON   IF CMAKE_COMPILER_IS_GNUCXX)
+set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
+set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
+set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON   IF CMAKE_COMPILER_IS_GNUCXX)
+set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
+set_option(BUILD_TESTS                "Build module test applications?"                          ON   IF CMAKE_COMPILER_IS_GNUCXX)
 set_option(BUILD_SAMPLES              "Build module sample applications?"                        ON   IF CMAKE_COMPILER_IS_GNUCXX)
-#set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
-#set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
-#set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
+set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
+set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
+set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
 
 # ----------------------------------------------------------------------------
 # LibSourcey build options
@@ -63,6 +63,7 @@ set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"              
 set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
 set_option(ENABLE_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
+set_option(DISABLE_LOGGING            "Disable internal logging for a speed increase"            ON   IF (CMAKE_BUILD_TYPE MATCHES RELEASE) )
 set_option(MSG_VERBOSE                "Print verbose debug status messages"                      OFF )
 
 # ----------------------------------------------------------------------------
@@ -321,6 +322,8 @@ set(PACKAGE_NAME "LibSourcey")
 set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
+set(SCY_DISABLE_LOGGING "${DISABLE_LOGGING}")
+
 
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 status("Parsing 'libsourcey.h.cmake'")

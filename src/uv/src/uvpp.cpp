@@ -10,6 +10,7 @@
 
 
 #include "scy/uv/uvpp.h"
+#include <iostream>
 
 
 namespace scy {
@@ -17,7 +18,7 @@ namespace uv {
 
 
 Handle::Handle(uv_loop_t* loop, void* handle)
-    : _loop(loop ? loop : uv_default_loop()) // nullptr will be uv_default_loop
+    : _loop(loop ? loop : uv::defaultLoop()) // nullptr will be uv_default_loop
     , _ptr((uv_handle_t*)handle) // nullptr or instance of uv_handle_t
     , _tid(std::this_thread::get_id())
     , _closed(false)
@@ -72,7 +73,7 @@ bool Handle::closed() const
 
 bool Handle::ref()
 {
-    if (!active())
+    if (uv_has_ref(ptr()))
         return false;
 
     uv_ref(ptr());
@@ -82,7 +83,7 @@ bool Handle::ref()
 
 bool Handle::unref()
 {
-    if (active())
+    if (!uv_has_ref(ptr()))
         return false;
 
     uv_unref(ptr());
@@ -139,7 +140,9 @@ void Handle::close()
     assertThread();
     if (!_closed) {
         if (_ptr && !uv_is_closing(_ptr)) {
-            uv_close(_ptr, [](uv_handle_t* handle) { delete handle; });
+            uv_close(_ptr, [](uv_handle_t* handle) { 
+                delete handle; 
+            });
         }
 
         // We no longer know about the handle.
@@ -147,7 +150,7 @@ void Handle::close()
         _ptr = nullptr;
         _closed = true;
 
-        // Send the local onClose to run final callbacks.
+        // Call onClose to run final callbacks.
         onClose();
     }
 }

@@ -282,8 +282,7 @@ void PacketStream::synchronizeStates()
         // packet adapters do not need to consider thread safety.
         auto adapters = this->adapters();
         for (auto& ref : adapters) {
-            reinterpret_cast<PacketStreamAdapter*>(
-                ref->ptr)->onStreamStateChange(state);
+            reinterpret_cast<PacketStreamAdapter*>(ref->ptr)->onStreamStateChange(state);
         }
     }
 }
@@ -307,10 +306,8 @@ void PacketStream::process(IPacket& packet)
             !packet.flags.has(PacketFlags::NoModify)) {
             {
                 std::lock_guard<std::mutex> guard(_mutex);
-                firstProc = !_processors.empty()
-                                ? reinterpret_cast<PacketProcessor*>(
-                                      _processors[0]->ptr)
-                                : nullptr;
+                firstProc = !_processors.empty() ? 
+                    reinterpret_cast<PacketProcessor*>(_processors[0]->ptr) : nullptr;
             }
             if (firstProc) {
 
@@ -376,8 +373,7 @@ void PacketStream::emit(IPacket& packet)
 
     // Ensure the stream is still running
     if (!stateEquals(PacketStreamState::Active)) {
-        TraceS(this) << "Dropping packet on inactive stream: " << state()
-                     << endl;
+        TraceS(this) << "Dropping packet on inactive stream: " << state() << endl;
         return;
     }
 
@@ -450,14 +446,11 @@ void PacketStream::teardown()
 }
 
 
-void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer,
-                                bool syncState)
+void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
 {
     // TraceS(this) << "Attach source: " << source << endl;
     attachSource(std::make_shared<PacketAdapterReference>(
-        source, freePointer ? new ScopedRawPointer<PacketStreamAdapter>(source)
-                            : nullptr,
-        0, syncState));
+        source, freePointer ? new ScopedRawPointer<PacketStreamAdapter>(source) : nullptr, 0, syncState));
 }
 
 
@@ -467,8 +460,7 @@ void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 
     std::lock_guard<std::mutex> guard(_mutex);
     _sources.push_back(ref);
-    std::sort(_sources.begin(), _sources.end(),
-              PacketAdapterReference::compareOrder);
+    std::sort(_sources.begin(), _sources.end(), PacketAdapterReference::compareOrder);
 }
 
 
@@ -528,8 +520,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
         freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr,
         order == -1 ? _processors.size() : order));
 
-    sort(_processors.begin(), _processors.end(),
-         PacketAdapterReference::compareOrder);
+    sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
 }
 
 
@@ -556,8 +547,7 @@ void PacketStream::attach(PacketAdapterReference::Ptr ref)
 
     std::lock_guard<std::mutex> guard(_mutex);
     _processors.push_back(ref);
-    std::sort(_processors.begin(), _processors.end(),
-              PacketAdapterReference::compareOrder);
+    std::sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
 }
 
 
@@ -635,8 +625,7 @@ void PacketStream::assertCanModify()
     if (stateEquals(PacketStreamState::Locked) ||
         stateEquals(PacketStreamState::Stopping) ||
         stateEquals(PacketStreamState::Active)) {
-        ErrorS(this) << "Cannot modify an " << state() << " packet stream"
-                     << endl;
+        ErrorS(this) << "Cannot modify an " << state() << " packet stream" << endl;
         assert(0 && "cannot modify active packet stream");
         throw std::runtime_error("Cannot modify an active packet stream.");
     }
@@ -653,8 +642,7 @@ void PacketStream::synchronizeOutput(uv::Loop* loop)
 }
 
 
-void PacketStream::onStateChange(PacketStreamState& state,
-                                 const PacketStreamState& oldState)
+void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {
     TraceS(this) << "On state change: " << oldState << " => " << state << endl;
 

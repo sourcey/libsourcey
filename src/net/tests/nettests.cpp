@@ -20,7 +20,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
     net::SSLManager::initNoVerifyServer();
@@ -86,8 +86,8 @@ int main(int argc, char** argv)
     //
     describe("tcp socket test", []() {
         net::TCPEchoServer srv;
-        srv.socket->unref();
         srv.start("127.0.0.1", 1337);
+        srv.socket->unref();
 
         net::ClientSocketTest<net::TCPSocket> test(1337);
         test.run();
@@ -101,8 +101,8 @@ int main(int argc, char** argv)
     //
     describe("ssl socket test", []() {
         net::SSLEchoServer srv;
-        srv.socket->unref();
         srv.start("127.0.0.1", 1338);
+        srv.socket->unref();
 
         net::ClientSocketTest<net::SSLSocket> test(1338);
         test.run();

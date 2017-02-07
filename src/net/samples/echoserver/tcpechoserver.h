@@ -6,8 +6,9 @@ namespace scy {
 namespace net {
 
 
-template <class SocketT> /// The TCP echo server accepts a template argument
+/// The TCP echo server accepts a template argument
 /// of either a TCPSocket or a SSLSocket.
+template <class SocketT>
 class EchoServer
 {
 public:
@@ -47,8 +48,7 @@ public:
         sock->Close += slot(this, &EchoServer::onClientSocketClose);
     }
 
-    void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                            const Address& peerAddress)
+    void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
     {
         DebugL << "On recv: " << &socket << ": " << buffer.str() << std::endl; // Echo it back
         socket.send(bufferCast<const char*>(buffer), buffer.size());
@@ -56,8 +56,7 @@ public:
 
     void onClientSocketError(Socket& socket, const Error& error)
     {
-        InfoL << "On error: " << error.errorno << ": " << error.message
-              << std::endl;
+        InfoL << "On error: " << error.errorno << ": " << error.message << std::endl;
     }
 
     void onClientSocketClose(Socket& socket)

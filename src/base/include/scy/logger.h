@@ -211,6 +211,8 @@ protected:
 //
 
 
+#ifndef SCY_DISABLE_LOGGING
+
 struct LogStream
 {
     LogLevel level;
@@ -222,34 +224,28 @@ struct LogStream
     LogChannel* channel;
 
     LogStream(LogLevel level = LDebug, const std::string& realm = "",
-              int line = 0, const void* ptr = nullptr,
-              const char* channel = nullptr);
+        int line = 0, const void* ptr = nullptr,
+        const char* channel = nullptr);
     LogStream(LogLevel level, const std::string& realm = "",
-              const std::string& address = "");
+        const std::string& address = "");
     LogStream(const LogStream& that);
     ~LogStream();
 
     LogStream& operator<<(const LogLevel data)
     {
-#ifndef SCY_DISABLE_LOGGING
         level = data;
-#endif
         return *this;
     }
 
     LogStream& operator<<(LogChannel* data)
     {
-#ifndef SCY_DISABLE_LOGGING
         channel = data;
-#endif
         return *this;
     }
 
     template <typename T> LogStream& operator<<(const T& data)
     {
-#ifndef SCY_DISABLE_LOGGING
         message << data;
-#endif
         return *this;
     }
 
@@ -259,19 +255,49 @@ struct LogStream
     /// should not be accessed.
     LogStream& operator<<(std::ostream& (*f)(std::ostream&))
     {
-#ifndef SCY_DISABLE_LOGGING
         message << f;
 
         /// Send to default channel
         /// Channel flag or stream operation
         Logger::instance().write(this);
-#else
-        /// Free the pointer
-        delete this;
-#endif
         return *this;
     }
 };
+
+#else
+
+struct LogStream
+{
+    LogStream(LogLevel level = LDebug, const std::string& realm = "",
+        int line = 0, const void* ptr = nullptr,
+        const char* channel = nullptr) {};
+    LogStream(LogLevel level, const std::string& realm = "",
+        const std::string& address = "") {};
+    LogStream(const LogStream& that) {};
+    ~LogStream() {};
+
+    LogStream& operator<<(const LogLevel data)
+    {
+        return *this;
+    }
+
+    LogStream& operator<<(LogChannel* data)
+    {
+        return *this;
+    }
+
+    template <typename T> LogStream& operator<<(const T& data)
+    {
+        return *this;
+    }
+
+    LogStream& operator<<(std::ostream& (*f)(std::ostream&))
+    {
+        return *this;
+    }
+};
+
+#endif
 
 
 //
