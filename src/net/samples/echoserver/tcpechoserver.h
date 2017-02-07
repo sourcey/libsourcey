@@ -12,11 +12,11 @@ template <class SocketT>
 class EchoServer
 {
 public:
-    typename SocketT::Ptr socket;
+    typename SocketT::Ptr server;
     typename Socket::Vec sockets;
 
     EchoServer()
-        : socket(std::make_shared<SocketT>())
+        : server(std::make_shared<SocketT>())
     {
     }
 
@@ -24,28 +24,28 @@ public:
 
     void start(const std::string& host, std::uint16_t port)
     {
-        auto ssl = dynamic_cast<SSLSocket*>(socket.get());
+        auto ssl = dynamic_cast<SSLSocket*>(server.get());
         if (ssl)
             ssl->useContext(SSLManager::instance().defaultServerContext());
 
-        socket->bind(Address(host, port));
-        socket->listen();
-        socket->AcceptConnection += slot(this, &EchoServer::onAcceptConnection);
+        server->bind(Address(host, port));
+        server->listen();
+        server->AcceptConnection += slot(this, &EchoServer::onAcceptConnection);
     }
 
     void shutdown()
     {
-        socket->close();
+        server->close();
         sockets.clear();
     }
 
-    void onAcceptConnection(const TCPSocket::Ptr& sock)
+    void onAcceptConnection(const TCPSocket::Ptr& socket)
     {
-        sockets.push_back(sock);
-        DebugL << "On accept: " << sock << std::endl;
-        sock->Recv += slot(this, &EchoServer::onClientSocketRecv);
-        sock->Error += slot(this, &EchoServer::onClientSocketError);
-        sock->Close += slot(this, &EchoServer::onClientSocketClose);
+        sockets.push_back(socket);
+        DebugL << "On accept: " << socket << std::endl;
+        socket->Recv += slot(this, &EchoServer::onClientSocketRecv);
+        socket->Error += slot(this, &EchoServer::onClientSocketError);
+        socket->Close += slot(this, &EchoServer::onClientSocketClose);
     }
 
     void onClientSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)

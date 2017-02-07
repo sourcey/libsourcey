@@ -176,7 +176,7 @@ int Client::sendPing()
     _pingTimeoutTimer.setTimeout(_pingTimeout);
     _pingTimeoutTimer.start();
 
-    // TraceN(this) << "Sending ping" << endl;
+    TraceN(this) << "Sending ping" << endl;
     return _ws.send("2", 1);
 }
 
@@ -220,8 +220,7 @@ void Client::setError(const scy::Error& error)
     if (_options.reconnection) {
         startReconnectTimer();
 
-        // Note: Do not call close() here, since we will be trying to
-        // reconnect...
+        // Note: Do not call close() here, since we will be trying to reconnect...
     } else {
         close();
     }
@@ -321,8 +320,7 @@ void Client::onSocketClose(net::Socket& socket)
 }
 
 
-void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
-                          const net::Address& peerAddress)
+void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceN(this) << "On socket recv: " << buffer.size() << endl;
 
@@ -435,6 +433,8 @@ void Client::onPacket(sockio::Packet& packet)
 
 void Client::onPong()
 {
+    TraceN(this) << "On pong" << endl;
+
     // Pong received, stop the ping timeout
     _pingTimeoutTimer.stop();
 }
@@ -455,6 +455,8 @@ void Client::onPingTimer()
 
 void Client::onPingTimeoutTimer()
 {
+    TraceN(this) << "On ping timeout" << endl;
+
     // assert(0 && "implement me");
 }
 

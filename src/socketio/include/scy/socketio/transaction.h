@@ -27,13 +27,12 @@ class SCY_EXTERN Client;
 struct Transaction : public PacketTransaction<sockio::Packet>
 {
     Transaction(sockio::Client& client, long timeout = 10000);
-    Transaction(sockio::Client& client, const sockio::Packet& request,
-                long timeout = 10000);
+    Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
 
     virtual bool send();
     virtual bool checkResponse(const sockio::Packet& packet);
 
-    virtual void onPotentialResponse(IPacket& packet);
+    virtual void onPotentialResponse(sockio::Packet& packet);
     virtual void onResponse();
 
     virtual const char* className() const { return "SocketIO::Transaction"; }

@@ -123,8 +123,7 @@ public:
 
     /// Connects a lambda or `std::function` to the `Signal`.
     /// The returned value can be used to detach the slot.
-    int attach(Function const& func, void* instance = nullptr, int id = -1,
-               int priority = -1) const
+    int attach(Function const& func, void* instance = nullptr, int id = -1, int priority = -1) const
     {
         return attach(std::make_shared<internal::Slot<RT, Args...>>(
             new FunctionDelegate<RT, Args...>(func), instance, id, priority));
@@ -254,23 +253,19 @@ typedef Signal<void()> NullSignal;
 // Class member function slot
 template <class Class, class RT, class... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
-slot(Class* instance, RT (Class::*method)(Args...), int id = -1,
-     int priority = -1)
+slot(Class* instance, RT (Class::*method)(Args...), int id = -1, int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, Args...>>(
-        new ClassDelegate<Class, RT, Args...>(instance, method), instance, id,
-        priority);
+        new ClassDelegate<Class, RT, Args...>(instance, method), instance, id, priority);
 }
 
 // Const class member function slot
 template <class Class, class RT, class... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
-slot(Class* instance, RT (Class::*method)(Args...) const, int id = -1,
-     int priority = -1)
+slot(Class* instance, RT (Class::*method)(Args...) const, int id = -1, int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, Args...>>(
-        new ConstClassDelegate<Class, RT, Args...>(instance, method), instance,
-        id, priority);
+        new ConstClassDelegate<Class, RT, Args...>(instance, method), instance, id, priority);
 }
 
 // Static function slot
@@ -298,8 +293,7 @@ template <typename RT, typename... Args> struct Slot
     int priority;
     std::atomic_flag flag = ATOMIC_FLAG_INIT;
 
-    Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr,
-         int id = -1, int priority = -1)
+    Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr, int id = -1, int priority = -1)
         : delegate(delegate)
         , instance(instance)
         , id(id)

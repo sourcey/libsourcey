@@ -28,12 +28,10 @@ typedef Signal<void(IPacket&)> PacketSignal;
 /// Signal slot that allows listeners to filter polymorphic `IPacket` types.
 template <class Class, class RT, class PT, class IT = IPacket>
 std::shared_ptr<internal::Slot<RT, IT&>>
-packetSlot(Class* instance, RT (Class::*method)(PT&), int id = -1,
-           int priority = -1)
+packetSlot(Class* instance, RT (Class::*method)(PT&), int id = -1, int priority = -1)
 {
     return std::make_shared<internal::Slot<RT, IT&>>(
-        new PolymorphicDelegate<Class, RT, PT, IT>(instance, method), instance,
-        id, priority);
+        new PolymorphicDelegate<Class, RT, PT, IT>(instance, method), instance, id, priority);
 }
 
 

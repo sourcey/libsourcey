@@ -23,8 +23,7 @@ namespace sockio {
 
 
 Transaction::Transaction(Client& client, long timeout)
-    : PacketTransaction<Packet>(timeout, 0,
-                                client.ws().socket /*.base()*/->loop())
+    : PacketTransaction<Packet>(timeout, 0, client.ws().socket->loop())
     , client(client)
 {
     TraceN(this) << "Create" << endl;
@@ -32,8 +31,7 @@ Transaction::Transaction(Client& client, long timeout)
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout)
-    : PacketTransaction<Packet>(request, timeout, 0,
-                                client.ws().socket /*.base()*/->loop())
+    : PacketTransaction<Packet>(request, timeout, 0, client.ws().socket->loop())
     , client(client)
 {
     TraceN(this) << "Create" << endl;
@@ -50,20 +48,17 @@ bool Transaction::send()
 {
     TraceN(this) << "Send: " << _request.id() << endl;
     _request.setAck(true);
-    client += slot(this, &Transaction::onPotentialResponse, -1, 100);
+    client += packetSlot(this, &Transaction::onPotentialResponse, -1, 100);
     if (client.send(_request))
         return PacketTransaction<Packet>::send();
     return false;
 }
 
 
-void Transaction::onPotentialResponse(IPacket& pkt)
+void Transaction::onPotentialResponse(sockio::Packet& packet)
 {
-    auto packet = dynamic_cast<sockio::Packet*>(&pkt);
-    if (packet) {
-        TraceN(this) << "On potential response: " << packet->id() << endl;
-        PacketTransaction<Packet>::handlePotentialResponse(*packet);
-    }
+    TraceN(this) << "On potential response: " << packet.id() << endl;
+    PacketTransaction<Packet>::handlePotentialResponse(packet);
 }
 
 
@@ -77,7 +72,7 @@ bool Transaction::checkResponse(const Packet& packet)
 void Transaction::onResponse()
 {
     TraceN(this) << "On success" << endl;
-    client -= slot(this, &Transaction::onPotentialResponse);
+    client -= packetSlot(this, &Transaction::onPotentialResponse);
     PacketTransaction<Packet>::onResponse();
 }
 

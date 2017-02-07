@@ -26,7 +26,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 0
+#define USE_SSL 1
 
 
 class SympleApplication : public scy::Application
@@ -64,8 +64,7 @@ public:
                "\n  -token          Session token to authenticate with"
                "\n  -user           User ID to register on the server with"
                "\n  -name           Display name to register on the server with"
-               "\n  -type           User type to register on the server with "
-               "(optional)"
+               "\n  -type           User type to register on the server with (optional)"
             << endl;
     }
 
@@ -117,9 +116,13 @@ public:
                 return;
             }
 
+            //client.options().host = "chat.mytommy.com";
+            //client.options().port = 443;
+            //client.options().token = "HGrOPG4DXd8RKI8GTtJrHgtt";
+            //client.options().user = "2";
+
             // Setup the client
-            client += slot(this, &SympleApplication::onRecvPacket);
-            // client += slot(this, &SympleApplication::onRecvMessage);
+            client += packetSlot(this, &SympleApplication::onRecvMessage);
             client.Announce += slot(this, &SympleApplication::onClientAnnounce);
             client.StateChange += slot(this, &SympleApplication::onClientStateChange);
             client.CreatePresence += slot(this, &SympleApplication::onCreatePresence);
@@ -229,8 +232,7 @@ public:
         }
     }
 
-    void onAckState(void* sender, TransactionState& state,
-                    const TransactionState&)
+    void onAckState(void* sender, TransactionState& state, const TransactionState&)
     {
         DebugL << "####### On announce response: " << state << endl;
 
@@ -246,22 +248,22 @@ public:
         }
     }
 
-    void onRecvPacket(IPacket& raw)
-    {
-        auto message = dynamic_cast<smpl::Message*>(&raw);
-        if (message) {
-            return onRecvMessage(*message);
-        }
+    //void onRecvPacket(IPacket& raw)
+    //{
+    //    DebugL << "####### On raw packet: " << raw.className() << endl;
 
-        auto packet = dynamic_cast<sockio::Packet*>(&raw);
-        if (packet) {
-            return onRecvPacket(*packet);
-        }
+    //    auto message = dynamic_cast<smpl::Message*>(&raw);
+    //    if (message) {
+    //        return onRecvMessage(*message);
+    //    }
 
-        DebugL << "####### On raw packet: " << raw.className() << endl;
+    //    auto packet = dynamic_cast<sockio::Packet*>(&raw);
+    //    if (packet) {
+    //        return onRecvPacket(*packet);
+    //    }
 
-        // Handle incoming raw packets here
-    }
+    //    // Handle incoming raw packets here
+    //}
 
     void onRecvMessage(smpl::Message& message)
     {
@@ -276,8 +278,7 @@ public:
         assert(status == 200);
     }
 
-    void onClientStateChange(void*, sockio::ClientState& state,
-                             const sockio::ClientState& oldState)
+    void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
         DebugL << "Client state changed: " << state << ": "
                << client.ws().socket->address() << endl;

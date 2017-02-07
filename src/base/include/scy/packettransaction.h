@@ -59,7 +59,7 @@ struct TransactionState : public State
 /// after a successful response or a timeout.
 template <class PacketT>
 class SCY_EXTERN PacketTransaction : public basic::Sendable,
-                          public Stateful<TransactionState>
+                                     public Stateful<TransactionState>
 {
 public:
     PacketTransaction(long timeout = 10000, int retries = 0,
@@ -114,15 +114,14 @@ public:
     /// by the internal state machine.
     virtual void dispose()
     {
-        traceL("PacketTransaction", this) << "Dispose" << std::endl;
+        TraceL << "Dispose" << std::endl;
 
         if (!_destroyed) {
             _destroyed = true;
             _timer.Timeout -= slot(this, &PacketTransaction::onTimeout);
             _timer.stop();
 
-            //deleteLater<PacketTransaction>(this);
-            delete this;
+            deleteLater<PacketTransaction>(this);
         }
     }
 
@@ -145,8 +144,7 @@ protected:
     /// Override to handle post state change logic.
     virtual void onStateChange(TransactionState& state, const TransactionState&)
     {
-        traceL("PacketTransaction", this)
-            << "On state change: " << state.toString() << std::endl;
+        TraceL << "On state change: " << state.toString() << std::endl;
 
         if (state.equals(TransactionState::Success) ||
             state.equals(TransactionState::Failed))
@@ -173,18 +171,16 @@ protected:
     /// Called when a successful response is received.
     virtual void onResponse()
     {
-        traceL("PacketTransaction", this) << "Success: " << _response.toString()
-                                          << std::endl;
+        TraceL << "Success: " << _response.toString() << std::endl;
     }
 
     virtual void onTimeout()
     {
-        debugL("PacketTransaction", this) << "Timeout" << std::endl;
+        DebugL << "Timeout" << std::endl;
 
         if (!canResend()) {
             // if (!cancelled())
-            //    setState(this, TransactionState::Failed, "Transaction
-            //    timeout");
+            //    setState(this, TransactionState::Failed, "Transaction timeout");
             // dispose();
             setState(this, TransactionState::Failed); // Timeout
         } else

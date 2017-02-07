@@ -51,7 +51,7 @@ int main(int argc, char** argv)
         expect(sa8.port() == 88);
 
         try {
-            net::Address sa3("192.168.1.100", "f00bar");
+            net::Address sa4("192.168.1.100", "f00bar");
             expect(0 && "bad service name - must throw");
         } catch (std::exception&) {
         }
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     describe("tcp socket test", []() {
         net::TCPEchoServer srv;
         srv.start("127.0.0.1", 1337);
-        srv.socket->unref();
+        srv.server->unref();
 
         net::ClientSocketTest<net::TCPSocket> test(1337);
         test.run();
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     describe("ssl socket test", []() {
         net::SSLEchoServer srv;
         srv.start("127.0.0.1", 1338);
-        srv.socket->unref();
+        srv.server->unref();
 
         net::ClientSocketTest<net::SSLSocket> test(1338);
         test.run();

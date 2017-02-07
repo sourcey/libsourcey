@@ -10,32 +10,34 @@ namespace net {
 class UDPEchoServer : public SocketAdapter
 {
 public:
-    UDPSocket::Ptr socket;
+    UDPSocket::Ptr server;
 
     UDPEchoServer()
-        : socket(std::make_shared<UDPSocket>())
+        : server(std::make_shared<UDPSocket>())
     {
-        socket->addReceiver(this);
+        server->addReceiver(this);
     }
 
     virtual ~UDPEchoServer()
     {
-        socket->removeReceiver(this);
+        server->removeReceiver(this);
         shutdown();
     }
 
     void start(const std::string& host, std::uint16_t port)
     {
-        socket->bind(Address(host, port));
+        server->bind(Address(host, port));
     }
 
-    void shutdown() { socket->close(); }
+    void shutdown() 
+    { 
+        server->close();
+    }
 
     void onSocketRecv(const MutableBuffer& buffer,
                       const net::Address& peerAddress)
     {
-        DebugL << "On recv: " << peerAddress << ": " << buffer.size()
-               << std::endl;
+        DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
 
 #if 0        
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
@@ -51,8 +53,7 @@ public:
         }
 #endif
         /// Echo back to client
-        socket->send(bufferCast<const char*>(buffer), buffer.size(),
-                     peerAddress);
+        server->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
     }
 
     void onSocketError(const scy::Error& error)
@@ -60,7 +61,10 @@ public:
         ErrorL << "On error: " << error.message << std::endl;
     }
 
-    void onSocketClose() { DebugL << "On close" << std::endl; }
+    void onSocketClose() 
+    { 
+        DebugL << "On close" << std::endl; 
+    }
 };
 
 

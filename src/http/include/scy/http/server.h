@@ -43,7 +43,7 @@ public:
     Server& server();
 
     Signal<void(ServerConnection&, const MutableBuffer&)> Payload; ///< Signals when raw data is received
-    Signal<void(ServerConnection&)> Close;     ///< Signals when the connection is closed
+    Signal<void(ServerConnection&)> Close; ///< Signals when the connection is closed
 
 protected:
     virtual void onHeaders();

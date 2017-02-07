@@ -46,7 +46,6 @@ void Socket::connect(const std::string& host, std::uint16_t port)
         init();
         assert(!closed());
         net::resolveDNS(host, port, [&](const net::DNSResult& dns) {
-            TraceL << "DNS resolved: " << dns.success() << endl;
 
             // Return if the socket was closed while resolving
             if (closed()) {
@@ -64,8 +63,8 @@ void Socket::connect(const std::string& host, std::uint16_t port)
                 // Connect to resolved host
                 connect(dns.addr);
             } catch (...) {
-                // Swallow errors
-                // Errors can be handled by Socket::Error signal
+                // Swallow exceptions
+                // Errors can be handled via Error signal
             }
         });
     }

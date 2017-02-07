@@ -28,12 +28,12 @@ namespace smpl {
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
-    return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
+    return new Client(std::make_shared<net::TCPSocket>(loop), options);
 }
 
 
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop)
-    : Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
+    : Client(std::make_shared<net::TCPSocket>(loop), options)
 {
 }
 
@@ -227,8 +227,7 @@ int Client::leaveRoom(const std::string& room)
 }
 
 
-void Client::onAnnounceState(void* sender, TransactionState& state,
-                             const TransactionState&)
+void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
 {
     TraceL << "On announce response: " << state << endl;
 
@@ -236,14 +235,13 @@ void Client::onAnnounceState(void* sender, TransactionState& state,
     switch (state.id()) {
         case TransactionState::Success:
             try {
-                json::Value data =
-                    transaction->response().json(); //[(unsigned)0];
+                json::Value data = transaction->response().json();
                 _announceStatus = data["status"].asInt();
 
                 if (_announceStatus != 200)
                     throw std::runtime_error(data["message"].asString());
 
-                _ourID = data["data"]["id"].asString(); // Address();
+                _ourID = data["data"]["id"].asString();
                 if (_ourID.empty())
                     throw std::runtime_error("Invalid announce response.");
 
@@ -276,7 +274,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state,
 
 void Client::onOnline()
 {
-    // TraceL << "On online" << endl;
+    TraceL << "On online" << endl;
 
     // NOTE: Do not transition to Online state until the Announce
     // callback is successful
@@ -360,7 +358,7 @@ void Client::emit(/*void* sender, */ IPacket& raw)
 
     // Other packet types are proxied directly
     else {
-        TraceL << "Proxying packet" << endl;
+        TraceL << "Proxying packet: " << PacketSignal::nslots() << endl;
         PacketSignal::emit(packet);
     }
 }
@@ -482,7 +480,7 @@ Peer* Client::ourPeer()
 {
     if (_ourID.empty())
         return nullptr;
-    // throw std::runtime_error("No active peer session is available.");
+        // throw std::runtime_error("No active peer session is available.");
     return _roster.get(_ourID, false);
 }
 
