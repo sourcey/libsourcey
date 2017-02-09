@@ -194,6 +194,12 @@ net::TCPSocket::Ptr& Connection::socket()
 }
 
 
+net::SocketAdapter* Connection::adapter() const
+{
+    return _adapter;
+}
+
+
 bool Connection::closed() const
 {
     return _closed;
@@ -409,17 +415,20 @@ ConnectionStream::ConnectionStream(Connection& connection)
 
     // The Outgoing stream pumps data into the ConnectionAdapter,
     // which in turn proxies to the output Socket.
-    Outgoing.emitter += slot(_connection._adapter, static_cast<void (net::SocketAdapter::*)(IPacket&)>(
-                             &net::SocketAdapter::sendPacket));
+    Outgoing.emitter += slot(_connection.adapter(), 
+        static_cast<void (net::SocketAdapter::*)(IPacket&)>(&net::SocketAdapter::sendPacket));
 
-    // TODO: attach to PacketStream::write
-    //_connection._adapter->Recv += slot(&Incoming, &PacketStream::write);
+    // The Incoming stream receives data from the ConnectionAdapter.
+    _connection.adapter()->Recv += slot(this, &ConnectionStream::onRecv);
 }
 
 
 ConnectionStream::~ConnectionStream()
 {
     TraceS(this) << "Destroy" << endl;
+
+    Outgoing.close();
+    Incoming.close();
 }
 
 
@@ -427,6 +436,8 @@ int ConnectionStream::send(const char* data, std::size_t len, int flags)
 {
     TraceS(this) << "Send: " << len << endl;
 
+    // Send outgoing data to the stream if adapters are attached, 
+    // or just proxy to the connection.
     if (Outgoing.numAdapters() > 0) {
         Outgoing.write(data, len);
     } else {
@@ -436,12 +447,10 @@ int ConnectionStream::send(const char* data, std::size_t len, int flags)
 }
 
 
-void ConnectionStream::close()
+void ConnectionStream::onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceS(this) << "Close" << endl;
-
-    Outgoing.close();
-    Incoming.close();
+    // Push received dada onto the Incoming stream.
+    Incoming.write(bufferCast<const char*>(buffer), buffer.size());
 }
 
 
@@ -449,7 +458,6 @@ Connection& ConnectionStream::connection()
 {
     return _connection;
 }
-
 
 
 } // namespace http

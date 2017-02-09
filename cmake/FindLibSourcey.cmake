@@ -84,6 +84,9 @@ set(LibSourcey_ALL_MODULES
 # Check for cached results. If there are then skip the costly part.
 # set_module_notfound(LibSourcey)
 if (NOT LibSourcey_FOUND)
+  if(WIN32 AND MSVC)
+    set(LibSourcey_MULTI_CONFIGURATION TRUE)
+  endif()
 
   # Set search path suffixes
   foreach(component ${LibSourcey_FIND_COMPONENTS})
@@ -116,6 +119,6 @@ if (NOT LibSourcey_FOUND)
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_LIBRARY_DIR})
 
   # Set LibSourcey as found or not
-  #print_module_variables(LibSourcey)
+  # print_module_variables(LibSourcey)
   set_module_found(LibSourcey)
 endif()

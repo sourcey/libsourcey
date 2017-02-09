@@ -163,13 +163,13 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = 
         // conn = std::shared_ptr<ConnectionT>(
         //     new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
         //    deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
+        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
     } else if (url.scheme() == "wss") {
         conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
         // conn = std::shared_ptr<ConnectionT>(
         //     new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
         //     deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
+        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
     } else
         throw std::runtime_error("Unknown connection type for URL: " + url.str());
 

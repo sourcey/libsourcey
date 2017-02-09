@@ -172,7 +172,7 @@ void ServerConnection::onHeaders()
         // scope we just swap the SocketAdapter instance pointers and do
         // a deferred delete on the old adapter. No more callbacks will be
         // received from the old adapter after replaceAdapter is called.
-        auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
+        auto wsAdapter = new ws::ConnectionAdapter(this, ws::ServerSide);
         replaceAdapter(wsAdapter);
 
         // Send the handshake request to the WS adapter for handling.

@@ -24,7 +24,7 @@ namespace http {
 
 
 class SCY_EXTERN Request;
-class SCY_EXTERN ClientConnection;
+class SCY_EXTERN ConnectionStream;
 class SCY_EXTERN FormPart;
 
 
@@ -49,7 +49,7 @@ public:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    static FormWriter* create(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
+    static FormWriter* create(ConnectionStream& conn, const std::string& encoding = FormWriter::ENCODING_URL);
 
     /// Destroys the FormWriter.
     virtual ~FormWriter();
@@ -132,7 +132,7 @@ public:
     const std::string& boundary() const;
 
     /// The associated HTTP client connection.
-    ClientConnection& connection();
+    ConnectionStream& connection();
 
     /// The outgoing packet emitter.
     PacketSignal emitter;
@@ -146,7 +146,7 @@ protected:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    FormWriter(ClientConnection& conn, Runner::Ptr runner,
+    FormWriter(ConnectionStream& conn, Runner::Ptr runner,
                const std::string& encoding = FormWriter::ENCODING_URL);
 
     FormWriter(const FormWriter&) = delete;
@@ -166,7 +166,7 @@ protected:
     static std::string createBoundary();
 
     /// Updates the upload progress via the associated
-    /// ClientConnection object.
+    /// ConnectionStream object.
     virtual void updateProgress(int nread);
 
     friend class FormPart;
@@ -181,7 +181,7 @@ protected:
 
     typedef std::deque<Part> PartQueue;
 
-    ClientConnection& _connection;
+    ConnectionStream& _stream;
     Runner::Ptr _runner;
     std::string _encoding;
     std::string _boundary;

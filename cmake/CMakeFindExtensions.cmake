@@ -41,7 +41,7 @@ macro(find_library_extended prefix)
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   select_library_configurations(${prefix})
 
-  # print_module_variables(${prefix})
+  print_module_variables(${prefix})
 
   # messageV("*** Find library for ${prefix}")
   # messageV("Debug Library: ${${prefix}_LIBRARY_DEBUG}")
@@ -65,8 +65,8 @@ macro(set_component_alias module component)
   set(ALIAS                   ${module}_${component})
   set(ALIAS_FOUND             ${ALIAS}_FOUND)
   set(ALIAS_LIBRARIES         ${ALIAS}_LIBRARIES)
-  set(ALIAS_RELEASE_LIBRARIES ${ALIAS}_RELEASE_LIBRARIES)
-  set(ALIAS_DEBUG_LIBRARIES   ${ALIAS}_DEBUG_LIBRARIES)
+  set(ALIAS_LIBRARY_RELEASE ${ALIAS}_LIBRARIES_RELEASE)
+  set(ALIAS_LIBRARY_DEBUG   ${ALIAS}_LIBRARIES_DEBUG)
   set(ALIAS_INCLUDE_DIRS      ${ALIAS}_INCLUDE_DIRS)
   set(ALIAS_LIBRARY_DIRS      ${ALIAS}_LIBRARY_DIRS)
   set(ALIAS_DEFINITIONS       ${ALIAS}_CFLAGS_OTHER)
@@ -159,8 +159,8 @@ macro(set_component_found module component)
 
     # messageV("Find Component Paths=${module}:${component}:${library}:${header}")
     # messageV("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
-    # messageV("${ALIAS_RELEASE_LIBRARIES}=${${ALIAS_RELEASE_LIBRARIES}}")
-    # messageV("${ALIAS_DEBUG_LIBRARIES}=${${ALIAS_DEBUG_LIBRARIES}}")
+    # messageV("${ALIAS_LIBRARY_RELEASE}=${${ALIAS_LIBRARY_RELEASE}}")
+    # messageV("${ALIAS_LIBRARY_DEBUG}=${${ALIAS_LIBRARY_DEBUG}}")
     # messageV("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
     # messageV("${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}")
     # messageV("${module}_LIBRARIES=${${module}_LIBRARIES}")
@@ -185,8 +185,8 @@ macro(set_component_found module component)
   endif()
 
   mark_as_advanced(${ALIAS_FOUND}
-                   ${ALIAS_DEBUG_LIBRARIES}
-                   ${ALIAS_RELEASE_LIBRARIES}
+                   ${ALIAS_LIBRARY_DEBUG}
+                   ${ALIAS_LIBRARY_RELEASE}
                    ${ALIAS_LIBRARIES}
                    ${ALIAS_DEFINITIONS}
                    ${ALIAS_VERSION})
@@ -204,11 +204,11 @@ macro(set_module_notfound module)
   #set(${module}_FOUND FALSE PARENT_SCOPE)
 
   if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    set(${module}_RELEASE_LIBRARIES "")
-    set(${module}_DEBUG_LIBRARIES "")
+    set(${module}_LIBRARIES_RELEASE "")
+    set(${module}_LIBRARIES_DEBUG "")
     set(${module}_LIBRARIES "")
-    #set(${module}_RELEASE_LIBRARIES "" PARENT_SCOPE)
-    #set(${module}_DEBUG_LIBRARIES "" PARENT_SCOPE)
+    #set(${module}_LIBRARIES_RELEASE "" PARENT_SCOPE)
+    #set(${module}_LIBRARIES_DEBUG "" PARENT_SCOPE)
     #set(${module}_LIBRARIES "" PARENT_SCOPE)
   else()
     set(${module}_LIBRARIES ${ALIAS_LIBRARIES}-NOTFOUND)
@@ -232,11 +232,11 @@ macro(set_component_notfound module component)
   set(${ALIAS_INCLUDE_DIRS} ${ALIAS_INCLUDE_DIRS}-NOTFOUND)
 
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
-    set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)
-    set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND)
+    set(${ALIAS_LIBRARY_RELEASE} ${ALIAS_LIBRARY_RELEASE}-NOTFOUND)
+    set(${ALIAS_LIBRARY_DEBUG} ${ALIAS_LIBRARY_DEBUG}-NOTFOUND)
     set(${ALIAS_LIBRARIES} "") #${module}_${component}_LIBRARIES-NOTFOUND)
-    #set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND PARENT_SCOPE)
-    #set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND PARENT_SCOPE)
+    #set(${ALIAS_LIBRARY_RELEASE} ${ALIAS_LIBRARY_RELEASE}-NOTFOUND PARENT_SCOPE)
+    #set(${ALIAS_LIBRARY_DEBUG} ${ALIAS_LIBRARY_DEBUG}-NOTFOUND PARENT_SCOPE)
     #set(${ALIAS_LIBRARIES} "") #${module}_${component}_LIBRARIES-NOTFOUND PARENT_SCOPE)
   else()
     set(${ALIAS_LIBRARIES} ${ALIAS_LIBRARIES}-NOTFOUND)
@@ -255,9 +255,14 @@ macro(find_component_paths module component library header)
   messageV("Find Component Paths=${module}:${component}:${library}:${header}")
   messageV("INCLUDE_DIR: ${${module}_INCLUDE_DIR} HINTS: ${${module}_INCLUDE_HINTS}")
 
+  #unset(${ALIAS_LIBRARY} CACHE)
+  #unset(${ALIAS_LIBRARIES} CACHE)
+  #unset(${ALIAS_LIBRARY_RELEASE} CACHE)
+  #unset(${ALIAS_LIBRARY_DEBUG} CACHE)
+
   # Reset alias namespace (force recheck)
-  set_component_alias(${module} ${component})
-  set_component_notfound(${module} ${component})
+  #set_component_alias(${module} ${component})
+  #set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
     HINTS
@@ -271,7 +276,7 @@ macro(find_component_paths module component library header)
   # Create a Debug and a Release list for multi configuration builds.
   # NOTE: <module>_CONFIGURATION_TYPES must be set to use this.
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
-    find_library(${ALIAS_RELEASE_LIBRARIES}
+    find_library(${ALIAS_LIBRARY_RELEASE}
       NAMES
         ${library}
       HINTS
@@ -282,7 +287,7 @@ macro(find_component_paths module component library header)
       PATH_SUFFIXES
         ${${module}_LIBRARY_SUFFIXES}
     )
-    find_library(${ALIAS_DEBUG_LIBRARIES}
+    find_library(${ALIAS_LIBRARY_DEBUG}
       NAMES
         ${library}d
       HINTS
@@ -294,19 +299,21 @@ macro(find_component_paths module component library header)
         ${${module}_LIBRARY_SUFFIXES}
     )
 
-    if (${ALIAS_RELEASE_LIBRARIES})
-      list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
+    if (${ALIAS_LIBRARY_RELEASE})
+      list(APPEND ${ALIAS_LIBRARIES} optimized ${${ALIAS_LIBRARY_RELEASE}})
     endif()
-    if (${ALIAS_DEBUG_LIBRARIES})
-      list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
+    if (${ALIAS_LIBRARY_DEBUG})
+      list(APPEND ${ALIAS_LIBRARIES} debug ${${ALIAS_LIBRARY_DEBUG}})
     endif()
-    # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-    # select_library_configurations(${ALIAS})
+
+    #include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+    #select_library_configurations(${ALIAS})
   
-    # message(STATUS "ALIAS_DEBUG_LIBRARIES: ${${ALIAS_DEBUG_LIBRARIES}}")
     # message(STATUS "ALIAS_INCLUDE_DIRS: ${${ALIAS_INCLUDE_DIRS}}")
+    # message(STATUS "ALIAS_LIBRARY_DEBUG: ${${ALIAS_LIBRARY_DEBUG}}")
+    # message(STATUS "ALIAS_LIBRARY_RELEASE: ${${ALIAS_LIBRARY_RELEASE}}")
+    # message(STATUS "ALIAS_LIBRARIES: ${ALIAS_LIBRARIES}: ${${ALIAS_LIBRARIES}}")
     # message(STATUS "ALIAS_LIBRARY: ${${ALIAS_LIBRARY}}")
-    # message(STATUS "ALIAS_LIBRARIES: ${${ALIAS_LIBRARIES}}")
     # message(STATUS "ALIAS_LIBRARY_DIRS: ${${ALIAS_LIBRARY_DIRS}}")
     # message(STATUS "LIBRARY_HINTS: ${${module}_LIBRARY_DIR}")
     # message(STATUS "INCLUDE_DIR: ${${module}_INCLUDE_DIR}")

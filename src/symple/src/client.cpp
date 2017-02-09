@@ -430,8 +430,8 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
 
 void Client::reset()
 {
-    // Note: Not clearing persisted messages just in case
-    // they are still in use by the outside application
+    // Note: Not clearing persisted messages as they 
+    // may still be in use by the application
     //_persistence.clear();
 
     _roster.clear();

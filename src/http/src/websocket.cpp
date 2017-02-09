@@ -88,8 +88,7 @@ bool WebSocketAdapter::shutdown(std::uint16_t statusCode, const std::string& sta
 
     assert(socket);
     return SocketAdapter::send(buffer, writer.position(),
-                               unsigned(ws::FrameFlags::Fin) |
-                                   unsigned(ws::Opcode::Close)) > 0;
+                               unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Close)) > 0;
 }
 
 
@@ -157,8 +156,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
     // it back through the socket recv method.
     std::size_t remaining = buffer.size() - nparsed;
     if (remaining) {
-        onSocketRecv(*socket.get(), MutableBuffer(&data[nparsed], remaining),
-                     peerAddr);
+        onSocketRecv(*socket.get(), MutableBuffer(&data[nparsed], remaining), peerAddr);
     }
 }
 
@@ -259,8 +257,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                 // Update the next frame offset
                 offset = reader.position(); // + payloadLength;
                 if (offset < total)
-                    TraceS(this) << "Splitting joined packet at " << offset
-                                 << " of " << total << endl;
+                    TraceS(this) << "Splitting joined packet at " << offset << " of " << total << endl;
 
                 // Drop empty packets
                 if (!payloadLength) {
@@ -314,14 +311,13 @@ void WebSocketAdapter::onSocketClose(net::Socket&)
 //
 
 
-ConnectionAdapter::ConnectionAdapter(Connection& connection, ws::Mode mode)
-    : WebSocketAdapter(connection.socket(), mode, connection.request(),
-                       connection.response())
+ConnectionAdapter::ConnectionAdapter(Connection* connection, ws::Mode mode)
+    : WebSocketAdapter(connection->socket(), mode, connection->request(), connection->response())
     , _connection(connection)
 {
-    // Don't send the default header as the websocket upgrade will be sent via
-    // WebSocketAdapter::onSocketConnect()
-    _connection.shouldSendHeader(false);
+    // Don't send the default header as the websocket upgrade will
+    // be sent via WebSocketAdapter::onSocketConnect()
+    _connection->shouldSendHeader(false);
 }
 
 
@@ -433,8 +429,7 @@ bool WebSocketFramer::checkClientHandshakeResponse(http::Response& response)
         }
         case http::StatusCode::Unauthorized: {
             assert(0 && "authentication not implemented");
-            throw std::runtime_error("WebSocket error: Authentication not "
-                                     "implemented"); // ws::ErrorNoHandshake
+            throw std::runtime_error("WebSocket error: Authentication not implemented"); // ws::ErrorNoHandshake
         }
         // case http::StatusCode::UpgradeRequired: {
         //     // The latest node `ws` package always returns a 426 Upgrade
@@ -446,9 +441,7 @@ bool WebSocketFramer::checkClientHandshakeResponse(http::Response& response)
         //     return false;
         // }
         default:
-            throw std::runtime_error(
-                "WebSocket error: Cannot upgrade to WebSocket connection: " +
-                response.getReason()); // ws::ErrorNoHandshake
+            throw std::runtime_error("WebSocket error: Cannot upgrade to WebSocket connection: " + response.getReason()); // ws::ErrorNoHandshake
     }
 }
 
@@ -462,18 +455,12 @@ void WebSocketFramer::acceptServerRequest(http::Request& request,
         util::icompare(request.get("Upgrade", ""), "websocket") == 0) {
         std::string version = request.get("Sec-WebSocket-Version", "");
         if (version.empty())
-            throw std::runtime_error("WebSocket error: Missing "
-                                     "Sec-WebSocket-Version in handshake "
-                                     "request"); //, ws::ErrorHandshakeNoVersion
+            throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Version in handshake request"); //, ws::ErrorHandshakeNoVersion
         if (version != ws::ProtocolVersion)
-            throw std::runtime_error(
-                "WebSocket error: Unsupported WebSocket version requested: " +
-                version); //, ws::ErrorHandshakeUnsupportedVersion
+            throw std::runtime_error( "WebSocket error: Unsupported WebSocket version requested: " + version); //, ws::ErrorHandshakeUnsupportedVersion
         std::string key = util::trim(request.get("Sec-WebSocket-Key", ""));
         if (key.empty())
-            throw std::runtime_error(
-                "WebSocket error: Missing Sec-WebSocket-Key in handshake "
-                "request"); //, ws::ErrorHandshakeNoKey
+            throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Key in handshake request"); //, ws::ErrorHandshakeNoKey
 
         response.setStatus(http::StatusCode::SwitchingProtocols);
         response.set("Upgrade", "websocket");
@@ -483,8 +470,7 @@ void WebSocketFramer::acceptServerRequest(http::Request& request,
         // Set headerState 2 since the handshake was accepted.
         _headerState = 2;
     } else
-        throw std::runtime_error(
-            "WebSocket error: No WebSocket handshake"); // ws::ErrorNoHandshake
+        throw std::runtime_error("WebSocket error: No WebSocket handshake"); // ws::ErrorNoHandshake
 }
 
 
@@ -580,9 +566,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         headerReader.getU64(l);
         if (l > limit)
             throw std::runtime_error(
-                util::format("WebSocket error: Insufficient buffer for payload "
-                             "size %" I64_FMT "u",
-                             l)); //, ws::ErrorPayloadTooBig
+                util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 8;
     } else if ((lengthByte & 0x7f) == 126) {
@@ -590,16 +574,14 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         headerReader.getU16(l);
         if (l > limit)
             throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %u",
-                unsigned(l))); //, ws::ErrorPayloadTooBig
+                "WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 2;
     } else {
         std::uint8_t l = lengthByte & 0x7f;
         if (l > limit)
             throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %u",
-                unsigned(l))); //, ws::ErrorPayloadTooBig
+                "WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
         payloadLength = l;
     }
     if (lengthByte & FRAME_FLAG_MASK) {
@@ -607,10 +589,9 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         payloadOffset += 4;
     }
 
-    if (payloadLength > limit) // length)
+    if (payloadLength > limit)
         throw std::runtime_error(
-            "WebSocket error: Incomplete frame received"); //,
-                                                           //ws::ErrorIncompleteFrame
+            "WebSocket error: Incomplete frame received"); //ws::ErrorIncompleteFrame
 
     // Get a reference to the start of the payload
     payload = reinterpret_cast<char*>(
@@ -641,19 +622,13 @@ void WebSocketFramer::completeClientHandshake(http::Response& response)
 
     std::string connection = response.get("Connection", "");
     if (util::icompare(connection, "Upgrade") != 0)
-        throw std::runtime_error(
-            "WebSocket error: No \"Connection: Upgrade\" header in handshake "
-            "response"); //, ws::ErrorNoHandshake
+        throw std::runtime_error("WebSocket error: No \"Connection: Upgrade\" header in handshake response"); //, ws::ErrorNoHandshake
     std::string upgrade = response.get("Upgrade", "");
     if (util::icompare(upgrade, "websocket") != 0)
-        throw std::runtime_error(
-            "WebSocket error: No \"Upgrade: websocket\" header in handshake "
-            "response"); //, ws::ErrorNoHandshake
+        throw std::runtime_error("WebSocket error: No \"Upgrade: websocket\" header in handshake response"); //, ws::ErrorNoHandshake
     std::string accept = response.get("Sec-WebSocket-Accept", "");
     if (accept != computeAccept(_key))
-        throw std::runtime_error("WebSocket error: Invalid or missing "
-                                 "Sec-WebSocket-Accept header in handshake "
-                                 "response"); //, ws::ErrorNoHandshake
+        throw std::runtime_error("WebSocket error: Invalid or missing Sec-WebSocket-Accept header in handshake esponse"); //, ws::ErrorNoHandshake
 
     _headerState++;
     assert(handshakeComplete());

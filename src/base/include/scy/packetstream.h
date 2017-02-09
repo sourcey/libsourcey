@@ -293,8 +293,7 @@ public:
     /// If syncState is true and the source is a basic::Stratable, then
     /// the source's start()/stop() methods will be synchronized when
     /// calling startSources()/stopSources().
-    virtual void attachSource(PacketStreamAdapter* source,
-                              bool freePointer = true, bool syncState = false);
+    virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
 
     /// Attaches a source packet emitter to the stream.
     /// This method enables compatibility with shared_ptr managed adapter
@@ -324,8 +323,7 @@ public:
     /// Order determines the position of the processor in the stream queue.
     /// If freePointer is true, the pointer will be deleted when the stream
     /// closes.
-    virtual void attach(PacketProcessor* proc, int order = 0,
-                        bool freePointer = true);
+    virtual void attach(PacketProcessor* proc, int order = 0, bool freePointer = true);
 
     /// Attaches a packet processor to the stream.
     /// This method enables compatibility with shared_ptr managed adapter
@@ -457,23 +455,23 @@ protected:
     /// Detach the source and processor delegate chain.
     void teardown();
 
-    /// Emit the final packet to listeners.
-    ///
-    /// Synchronized signals such as Close and Error are sent
-    /// from this method. See synchronizeOutput()
-    void emit(IPacket& packet);
-
     void attachSource(PacketAdapterReference::Ptr ref);
     void attach(PacketAdapterReference::Ptr ref);
-
-    /// Process incoming packets.
-    void process(IPacket& packet);
 
     /// Start synchronized sources.
     void startSources();
 
     /// Stop synchronized sources.
     void stopSources();
+
+    /// Process incoming packets.
+    virtual void process(IPacket& packet);
+
+    /// Emit the final packet to listeners.
+    ///
+    /// Synchronized signals such as Close and Error are sent
+    /// from this method. See synchronizeOutput()
+    void emit(IPacket& packet);
 
     /// Synchronize queued states with adapters.
     void synchronizeStates();

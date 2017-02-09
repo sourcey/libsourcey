@@ -36,8 +36,7 @@ public:
     bool initial;
     bool nocopy;
 
-    ChunkedAdapter(Connection* connection = nullptr,
-                   const std::string& frameSeparator = "", bool nocopy = true)
+    ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true)
         : PacketProcessor(this->emitter)
         , connection(connection)
         , contentType(connection->outgoingHeader()->getContentType())
@@ -45,8 +44,7 @@ public:
     {
     }
 
-    ChunkedAdapter(const std::string& contentType,
-                   const std::string& frameSeparator = "", bool nocopy = true)
+    ChunkedAdapter(const std::string& contentType, const std::string& frameSeparator = "", bool nocopy = true)
         : PacketProcessor(this->emitter)
         , connection(nullptr)
         , contentType(contentType)
@@ -66,11 +64,8 @@ public:
         if (connection) {
             connection->shouldSendHeader(true);
             connection->response().setChunkedTransferEncoding(true);
-            connection->response().set(
-                "Cache-Control",
-                "no-store, no-cache, max-age=0, must-revalidate");
-            connection->response().set("Cache-Control",
-                                       "post-check=0, pre-check=0, FALSE");
+            connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
+            connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
             connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Content-Type", contentType);
@@ -108,14 +103,17 @@ public:
 
         if (!packet.hasData())
             throw std::invalid_argument("Incompatible packet type");
+
         // Emit HTTP response header
         if (initial) {
             initial = false;
             emitHeader();
         }
+
         // Get hex stream length
         std::ostringstream ost;
         ost << std::hex << packet.size();
+
         // Emit separate packets for nocopy
         if (nocopy) {
             emit(ost.str());
@@ -125,6 +123,7 @@ public:
             emit(packet.data(), packet.size());
             emit("\r\n", 2);
         }
+
         // Concat pieces for non fragmented
         else {
             ost << "\r\n";
@@ -178,13 +177,9 @@ public:
         // Flush connection headers if the connection is set.
         if (connection) {
             connection->shouldSendHeader(true);
-            connection->response().set(
-                "Content-Type", "multipart/x-mixed-replace; boundary=end");
-            connection->response().set(
-                "Cache-Control",
-                "no-store, no-cache, max-age=0, must-revalidate");
-            connection->response().set("Cache-Control",
-                                       "post-check=0, pre-check=0, FALSE");
+            connection->response().set("Content-Type", "multipart/x-mixed-replace; boundary=end");
+            connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
+            connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
             connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Connection", "keep-alive");
@@ -230,6 +225,7 @@ public:
             initial = false;
             emitHeader();
         }
+
         // Broadcast the HTTP header separately
         // so we don't need to copy any data.
         emitChunkHeader();

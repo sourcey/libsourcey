@@ -40,7 +40,7 @@ set(Poco_LIBRARY_DIR "${Poco_ROOT_DIR}/lib" CACHE STRING "Where are the Poco lib
 set(Poco_LINK_SHARED_LIBS FALSE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")
 
 #message("Poco_ROOT_DIR=${Poco_ROOT_DIR}")
-#message(FATAL_ERROR "Poco_INCLUDE_DIR=${Poco_INCLUDE_DIR}")
+#message("Poco_INCLUDE_DIR=${Poco_INCLUDE_DIR}")
 #message("Poco_LIBRARY_DIR=${Poco_LIBRARY_DIR}")
 
 # Check for cached results. If there are then skip the costly part.

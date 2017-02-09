@@ -5,7 +5,7 @@
 #
 #  HTTPPARSER_FOUND
 #  HTTPPARSER_INCLUDE_DIR
-#  HTTPPARSER_LIBRARY
+#  HTTPPARSER_LIBRARIES
 #
 
 find_path(HTTPPARSER_INCLUDE_DIR
@@ -13,11 +13,20 @@ find_path(HTTPPARSER_INCLUDE_DIR
   PATHS ${LibSourcey_DIR}/vendor/http_parser
   NO_DEFAULT_PATH)
 
-find_library(HTTPPARSER_LIBRARY
-  NAMES http_parser http_parserd libhttp_parser
+find_library(HTTPPARSER_LIBRARY_DEBUG
+  NAMES http_parserd libhttp_parserd
   PATHS ${LibSourcey_BUILD_DIR}/vendor/http_parser
-  PATH_SUFFIXES Debug Release
+  PATH_SUFFIXES Debug
   NO_DEFAULT_PATH)
 
+find_library(HTTPPARSER_LIBRARY_RELEASE
+  NAMES http_parser libhttp_parser
+  PATHS ${LibSourcey_BUILD_DIR}/vendor/http_parser
+  PATH_SUFFIXES Release
+  NO_DEFAULT_PATH)
+
+include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+select_library_configurations(HTTPPARSER)
+
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(HTTPPARSER DEFAULT_MSG HTTPPARSER_LIBRARY HTTPPARSER_INCLUDE_DIR)
+find_package_handle_standard_args(HTTPPARSER DEFAULT_MSG HTTPPARSER_LIBRARIES HTTPPARSER_INCLUDE_DIR)

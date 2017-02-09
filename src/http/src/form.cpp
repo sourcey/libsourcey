@@ -35,26 +35,26 @@ const char* FormWriter::ENCODING_MULTIPART_RELATED = "multipart/related";
 const int FILE_CHUNK_SIZE = 65536; // 32384;
 
 
-FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encoding)
+FormWriter* FormWriter::create(ConnectionStream& stream, const std::string& encoding)
 {
-#if 0
-    auto wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket()->loop()), encoding);
-    conn.Outgoing.attachSource(wr, true, true);
-    if (conn.request().isChunkedTransferEncoding()) {
+    auto wr = new http::FormWriter(stream, std::make_shared<Idler>(stream.connection().socket()->loop()), encoding);
+    stream.Outgoing.attachSource(wr, true, true);
+    if (stream.connection().request().isChunkedTransferEncoding()) {
         assert(encoding != http::FormWriter::ENCODING_URL);
-        assert(conn.request().getVersion() != http::Message::HTTP_1_0);
-        conn.Outgoing.attach(new http::ChunkedAdapter(&conn), -1, true);
+        assert(stream.connection().request().getVersion() != http::Message::HTTP_1_0);
+        stream.Outgoing.attach(new http::ChunkedAdapter(&stream.connection()), -1, true);
     }
-    conn.Outgoing.lock();
+    stream.Outgoing.lock();
     return wr;
-#endif
+#if 0
     return nullptr;
+#endif
 }
 
 
-FormWriter::FormWriter(ClientConnection& connection, Runner::Ptr runner, const std::string& encoding)
+FormWriter::FormWriter(ConnectionStream& connection, Runner::Ptr runner, const std::string& encoding)
     : PacketSource(this->emitter)
-    , _connection(connection)
+    , _stream(connection)
     , _runner(runner)
     , _encoding(encoding)
     , _filesLength(0)
@@ -96,7 +96,7 @@ void FormWriter::prepareSubmit()
 {
     TraceS(this) << "Prepare submit" << std::endl;
 
-    http::Request& request = _connection.request();
+    http::Request& request = _stream.connection().request();
     if (request.getMethod() == http::Method::Post ||
         request.getMethod() == http::Method::Put) {
         if (_encoding == ENCODING_URL) {
@@ -120,7 +120,7 @@ void FormWriter::prepareSubmit()
             // factor chunk headers.
             if (!_parts.empty()) {
                 assert(_filesLength);
-                // _connection.OutgoingProgress.total = _filesLength;
+                // _stream.OutgoingProgress.total = _filesLength;
             }
 
             // Set Content-Length for non-chunked transfers
@@ -343,7 +343,7 @@ void FormWriter::writeMultipartChunk()
             // HACK: Write chunked end code here.
             // The ChunkedAdapter should really be doing this.
 
-            if (_connection.request().isChunkedTransferEncoding()) {
+            if (_stream.connection().request().isChunkedTransferEncoding()) {
                 emit("0\r\n\r\n", 5,
                      PacketFlags::NoModify | PacketFlags::Final);
             }
@@ -397,7 +397,7 @@ void FormWriter::writeEnd(std::ostream& ostr)
 
 void FormWriter::updateProgress(int nread)
 {
-    // _connection.OutgoingProgress.update(nread);
+    _stream.OutgoingProgress.update(nread);
 }
 
 
@@ -431,9 +431,9 @@ const std::string& FormWriter::boundary() const
 }
 
 
-ClientConnection& FormWriter::connection()
+ConnectionStream& FormWriter::connection()
 {
-    return _connection;
+    return _stream;
 }
 
 

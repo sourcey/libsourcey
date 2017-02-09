@@ -281,15 +281,15 @@ protected:
 class SCY_EXTERN ConnectionAdapter : public WebSocketAdapter
 {
 public:
-    ConnectionAdapter(Connection& connection, ws::Mode mode);
+    ConnectionAdapter(Connection* connection, ws::Mode mode);
     virtual ~ConnectionAdapter();
 
-    /// virtual int sendHeader();
+    // virtual int sendHeader();
 
     virtual void onHandshakeComplete();
 
 protected:
-    Connection& _connection;
+    Connection* _connection;
 };
 
 

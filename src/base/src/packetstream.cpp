@@ -47,8 +47,6 @@ PacketStream::~PacketStream()
     // Make sure all adapters have been cleaned up
     assert(_sources.empty());
     assert(_processors.empty());
-
-    // TraceS(this) << "Destroy: OK" << endl;
 }
 
 
@@ -98,8 +96,6 @@ void PacketStream::stop()
 
     // Stop synchronized sources
     stopSources();
-
-    TraceS(this) << "Stop: OK" << endl;
 }
 
 
@@ -136,7 +132,6 @@ void PacketStream::reset()
 
 void PacketStream::close()
 {
-
     if (stateEquals(PacketStreamState::None) ||
         stateEquals(PacketStreamState::Closed)) {
         // TraceS(this) << "Already closed" << endl;
@@ -178,8 +173,6 @@ void PacketStream::close()
 
     // Send the Closed signal
     Close.emit(*this);
-
-    TraceS(this) << "Close: OK" << endl;
 }
 
 
@@ -382,8 +375,6 @@ void PacketStream::emit(IPacket& packet)
     } catch (std::exception& exc) {
         handleException(exc);
     }
-
-    TraceS(this) << "Emit: OK: " << packet.size() << endl;
 }
 
 
@@ -441,8 +432,6 @@ void PacketStream::teardown()
     for (auto& source : _sources) {
         source->ptr->getEmitter() -= slot(this, &PacketStream::process);
     }
-
-    TraceS(this) << "Teardown: OK" << endl;
 }
 
 

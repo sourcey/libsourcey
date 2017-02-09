@@ -98,6 +98,9 @@ public:
     /// Return the underlying socket pointer.
     net::TCPSocket::Ptr& socket();
 
+    /// Return the underlying adapter pointer.
+    net::SocketAdapter* adapter() const;
+
     /// The HTTP request headers.
     Request& request();
 
@@ -121,7 +124,7 @@ protected:
 
 protected:
     net::TCPSocket::Ptr _socket;
-    SocketAdapter* _adapter;
+    net::SocketAdapter* _adapter;
     Request _request;
     Response _response;
     scy::Error _error;
@@ -178,16 +181,17 @@ protected:
 //
 
 
+/// Packet stream wrapper for a HTTP connection.
 class SCY_EXTERN ConnectionStream
 {
 public:
     ConnectionStream(Connection& connection);
     virtual ~ConnectionStream();
 
+    /// Send data via the Outgoing stream.
     int send(const char* data, std::size_t len, int flags = 0);
-    
-    void close();
 
+    /// Return a reference to the underlying connection.
     Connection& connection();
 
     /// The Outgoing stream is responsible for packetizing
@@ -205,15 +209,10 @@ public:
     ProgressSignal OutgoingProgress; ///< Fired on upload progress
 
 protected:
+    void onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+
     Connection& _connection;
 };
-
-
-//inline bool isExplicitKeepAlive(http::Message* message)
-//{
-//    const std::string& connection = message->get(http::Message::CONNECTION, http::Message::EMPTY);
-//    return !connection.empty() && util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) == 0;
-//}
 
 
 } // namespace http
