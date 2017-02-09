@@ -174,14 +174,14 @@ int main(int argc, char** argv)
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://sourcey.com");
         conn.Headers += [&](http::Response& response) {
-			std::cout << "On response headers: " << response << endl;
+			      std::cout << "On response headers: " << response << endl;
         };
         conn.Payload += [&](const MutableBuffer& buffer) {
-			std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+			      std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
         };
         conn.Complete += [&](const http::Response& response) {
-			std::cout << "On response complete: " << response
-			          << conn.readStream<std::stringstream>().str() << endl;
+      			std::cout << "On response complete: " << response
+      			          << conn.readStream<std::stringstream>().str() << endl;
 
             // Force connection closure if the other side hasn't already
             conn.close();
@@ -233,8 +233,8 @@ int main(int argc, char** argv)
     //     describe("google drive multipart upload", []() {
     //
     //         // https://developers.google.com/drive/web/manage-uploads
-    //         // Need a current OAuth2 access_token with https://www.googleapis.com/auth/drive.file 
-	//         // access scope for this to work
+    //         // Need a current OAuth2 access_token with https://www.googleapis.com/auth/drive.file
+	  //         // access scope for this to work
     //         std::string accessToken("ya29.1.AADtN_WY53y0jEgN_SWcmfp6VvAQ6asnYqbDi5CKEfzwL7lfNqtbUiLeL4v07b_I");
     //         std::string metadata("{ \"title\": \"My File\" }");
     //

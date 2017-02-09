@@ -96,12 +96,13 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-        auto oldAdapter = _adapter;
-        runOnce(_socket->loop(), [oldAdapter]() {
-            delete oldAdapter;
-        });
+        // auto oldAdapter = _adapter;
+        // runOnce(_socket->loop(), [oldAdapter]() {
+        //     delete oldAdapter;
+        // });
 
-        //deleteLater<net::SocketAdapter>(_adapter);
+        // FIXME: Remove this, get ConnectionAdapter to take shared_ptr instaed
+        deleteLater<net::SocketAdapter>(_adapter);
         //_adapter->_connection = nullptr;
         _adapter = nullptr;
     }
@@ -302,7 +303,7 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
 void ConnectionAdapter::removeReceiver(net::SocketAdapter* adapter)
 {
     // Set the parent connection instance to null
-    if (_connection && 
+    if (_connection &&
         _connection == adapter)
         _connection = nullptr;
 
@@ -415,7 +416,7 @@ ConnectionStream::ConnectionStream(Connection& connection)
 
     // The Outgoing stream pumps data into the ConnectionAdapter,
     // which in turn proxies to the output Socket.
-    Outgoing.emitter += slot(_connection.adapter(), 
+    Outgoing.emitter += slot(_connection.adapter(),
         static_cast<void (net::SocketAdapter::*)(IPacket&)>(&net::SocketAdapter::sendPacket));
 
     // The Incoming stream receives data from the ConnectionAdapter.
@@ -436,7 +437,7 @@ int ConnectionStream::send(const char* data, std::size_t len, int flags)
 {
     TraceS(this) << "Send: " << len << endl;
 
-    // Send outgoing data to the stream if adapters are attached, 
+    // Send outgoing data to the stream if adapters are attached,
     // or just proxy to the connection.
     if (Outgoing.numAdapters() > 0) {
         Outgoing.write(data, len);

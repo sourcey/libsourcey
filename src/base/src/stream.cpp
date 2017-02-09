@@ -21,6 +21,7 @@ namespace scy {
 Stream::Stream(uv::Loop* loop, void* stream)
     : uv::Handle(loop, stream)
     , _buffer(65536)
+    , _started(false)
 {
 }
 
@@ -34,7 +35,8 @@ Stream::~Stream()
 void Stream::close()
 {
     TraceL << "Close: " << ptr() << std::endl;
-    if (active())
+    
+    if (_started)
         readStop();
     uv::Handle::close();
 }
@@ -112,7 +114,10 @@ bool Stream::closed() const
 
 bool Stream::readStart()
 {
-    // TraceL << "Read start: " << ptr() << std::endl;
+    TraceL << "Read start: " << ptr() << std::endl;
+    assert(!_started);
+    _started = true;
+
     int r = uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer, handleRead);
     if (r)
         setUVError("Stream read error", r);
@@ -122,8 +127,10 @@ bool Stream::readStart()
 
 bool Stream::readStop()
 {
-    //std::cout << _ptr << " stream read stop" << std::endl;
-    // TraceL << "Read stop: " << ptr() << std::endl;
+    TraceL << "Read stop: " << ptr() << std::endl;
+    assert(_started);
+    _started = false;
+
     int r = uv_read_stop(ptr<uv_stream_t>());
     if (r)
         setUVError("Stream read error", r);

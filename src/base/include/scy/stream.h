@@ -72,6 +72,7 @@ protected:
     static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf);
 
     Buffer _buffer;
+    bool _started;
 };
 
 

@@ -33,7 +33,8 @@ Handle::~Handle()
     assertThread();
     if (!_closed)
         close();
-    assert(_ptr == nullptr);
+    if (_ptr)
+        delete _ptr;
 }
 
 
@@ -140,8 +141,8 @@ void Handle::close()
     assertThread();
     if (!_closed) {
         if (_ptr && !uv_is_closing(_ptr)) {
-            uv_close(_ptr, [](uv_handle_t* handle) { 
-                delete handle; 
+            uv_close(_ptr, [](uv_handle_t* handle) {
+                delete handle;
             });
 
             // We no longer know about the handle.
