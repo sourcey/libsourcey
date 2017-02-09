@@ -159,6 +159,8 @@ ELSE()
         src/unix/pipe.c
         src/unix/poll.c
         src/unix/process.c
+		src/unix/pthread-barrier.c
+		src/unix/pthread-fixes.c
         src/unix/signal.c
         src/unix/stream.c
         src/unix/tcp.c
