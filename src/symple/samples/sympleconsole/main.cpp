@@ -314,40 +314,32 @@ public:
 
 int main(int argc, char** argv)
 {
+    // Setup the logger
+    // std::string logPath(getCwd());
+    // fs::addnode(logPath, util::format("Symple_%Ld.log",
+    // static_cast<long>(Timestamp().epochTime())));
+    // cout << "Log path: " << logPath << endl;
+    // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LDebug
+
+    // Init SSL client context
+#if USE_SSL
+    net::SSLManager::initNoVerifyClient();
+#endif
+
+    // Run the application
     {
-#ifdef _MSC_VER
-        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
-        // Setup the logger
-        // std::string logPath(getCwd());
-        // fs::addnode(logPath, util::format("Symple_%Ld.log",
-        // static_cast<long>(Timestamp().epochTime())));
-        // cout << "Log path: " << logPath << endl;
-        // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
-
-        Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LDebug
-
-        // Init SSL client context
-#if USE_SSL
-        net::SSLManager::initNoVerifyClient();
-#endif
-
-        // Run the application
-        {
-            SympleApplication app;
-            app.parseOptions(argc, argv);
-            app.start();
-        }
-
-        // Cleanup all singletons
-        // http::Client::destroy();
-#if USE_SSL
-        net::SSLManager::destroy();
-#endif
-        GarbageCollector::destroy();
-        Logger::destroy();
+        SympleApplication app;
+        app.parseOptions(argc, argv);
+        app.start();
     }
 
+    // Cleanup all singletons
+    // http::Client::destroy();
+#if USE_SSL
+    net::SSLManager::destroy();
+#endif
+    GarbageCollector::destroy();
+    Logger::destroy();
     return 0;
 }

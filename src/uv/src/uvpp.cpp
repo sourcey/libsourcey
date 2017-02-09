@@ -143,15 +143,15 @@ void Handle::close()
             uv_close(_ptr, [](uv_handle_t* handle) { 
                 delete handle; 
             });
+
+            // We no longer know about the handle.
+            // The handle pointer will be deleted on afterClose.
+            _ptr = nullptr;
+            _closed = true;
+
+            // Call onClose to run final callbacks.
+            onClose();
         }
-
-        // We no longer know about the handle.
-        // The handle pointer will be deleted on afterClose.
-        _ptr = nullptr;
-        _closed = true;
-
-        // Call onClose to run final callbacks.
-        onClose();
     }
 }
 
