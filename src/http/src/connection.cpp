@@ -48,6 +48,9 @@ int Connection::send(const char* data, std::size_t len, int flags)
 {
     TraceS(this) << "Send: " << len << endl;
     assert(!_closed);
+    if (_closed)
+        return -1;
+
     return _adapter->send(data, len, flags);
 }
 
@@ -57,15 +60,14 @@ int Connection::sendHeader()
     if (!_shouldSendHeader)
         return 0;
     _shouldSendHeader = false;
-
     assert(outgoingHeader());
-    // assert(outgoingHeader()->has("Host"));
 
     std::ostringstream os;
     outgoingHeader()->write(os);
     std::string head(os.str().c_str(), os.str().length());
 
-    // Send to Socket to bypass the ConnectionAdapter
+    // Send headers directly to the Socket,
+    // bypassing the ConnectionAdapter
     return _socket->send(head.c_str(), head.length());
 }
 
@@ -95,14 +97,12 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-         auto oldAdapter = _adapter;
-         runOnce(_socket->loop(), [oldAdapter]() {
-             delete oldAdapter;
-         });
+        //auto oldAdapter = _adapter;
+        //runOnce(_socket->loop(), [oldAdapter]() {
+        //    delete oldAdapter;
+        //});
 
-        // FIXME: Remove this, get ConnectionAdapter to take shared_ptr instaed
-        //deleteLater<net::SocketAdapter>(_adapter);
-        //_adapter->_connection = nullptr;
+        deleteLater<net::SocketAdapter>(_adapter);
         _adapter = nullptr;
     }
 
@@ -135,7 +135,7 @@ void Connection::onSocketConnect(net::Socket& socket)
 {
     TraceS(this) << "On socket connect" << endl;
 
-    // Only for client connections
+    // Only useful for client connections
 }
 
 

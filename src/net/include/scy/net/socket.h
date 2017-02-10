@@ -179,10 +179,9 @@ public:
     /// PacketInfo pointer
     PacketInfo* info;
 
-    SocketPacket(const Socket::Ptr& socket, const MutableBuffer& buffer,
-                 const Address& peerAddress)
-        : RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, socket.get(),
-                    nullptr, new PacketInfo(socket, peerAddress))
+    SocketPacket(const Socket::Ptr& socket, const MutableBuffer& buffer, const Address& peerAddress)
+        : RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, socket.get(), nullptr, 
+                                      new PacketInfo(socket, peerAddress))
     {
         info = (PacketInfo*)RawPacket::info;
     }
@@ -237,14 +236,16 @@ int uv___stream_fd(const uv_stream_t* handle);
 #endif
 
 
-template <class NativeT> int getServerSocketSendBufSize(uv::Handle& handle)
+template <class NativeT> 
+int getServerSocketSendBufSize(uv::Handle& handle)
 {
     int val = 0;
     return uv_send_buffer_size(handle.ptr(), &val);
 }
 
 
-template <class NativeT> int getServerSocketRecvBufSize(uv::Handle& handle)
+template <class NativeT> 
+int getServerSocketRecvBufSize(uv::Handle& handle)
 {
     int val = 0;
     return uv_recv_buffer_size(handle.ptr(), &val);

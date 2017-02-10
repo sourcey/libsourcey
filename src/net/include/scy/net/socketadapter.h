@@ -53,8 +53,7 @@ public:
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
     virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len,
-                     const Address& peerAddress, int flags = 0);
+    virtual int send(const char* data, std::size_t len, const Address& peerAddress, int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// Returns the number of bytes sent or -1 on error.
@@ -62,8 +61,7 @@ public:
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
     virtual int sendPacket(const IPacket& packet, int flags = 0);
-    virtual int sendPacket(const IPacket& packet, const Address& peerAddress,
-                           int flags = 0);
+    virtual int sendPacket(const IPacket& packet, const Address& peerAddress, int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// This method provides delegate compatability, and unlike
