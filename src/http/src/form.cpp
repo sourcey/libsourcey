@@ -37,12 +37,12 @@ const int FILE_CHUNK_SIZE = 65536; // 32384;
 
 FormWriter* FormWriter::create(ConnectionStream& stream, const std::string& encoding)
 {
-    auto wr = new http::FormWriter(stream, std::make_shared<Idler>(stream.connection().socket()->loop()), encoding);
+    auto wr = new http::FormWriter(stream, std::make_shared<Idler>(stream.connection()->socket()->loop()), encoding);
     stream.Outgoing.attachSource(wr, true, true);
-    if (stream.connection().request().isChunkedTransferEncoding()) {
+    if (stream.connection()->request().isChunkedTransferEncoding()) {
         assert(encoding != http::FormWriter::ENCODING_URL);
-        assert(stream.connection().request().getVersion() != http::Message::HTTP_1_0);
-        stream.Outgoing.attach(new http::ChunkedAdapter(&stream.connection()), -1, true);
+        assert(stream.connection()->request().getVersion() != http::Message::HTTP_1_0);
+        stream.Outgoing.attach(new http::ChunkedAdapter(stream.connection()), -1, true);
     }
     stream.Outgoing.lock();
     return wr;
@@ -96,7 +96,7 @@ void FormWriter::prepareSubmit()
 {
     TraceS(this) << "Prepare submit" << std::endl;
 
-    http::Request& request = _stream.connection().request();
+    http::Request& request = _stream.connection()->request();
     if (request.getMethod() == http::Method::Post ||
         request.getMethod() == http::Method::Put) {
         if (_encoding == ENCODING_URL) {
@@ -343,7 +343,7 @@ void FormWriter::writeMultipartChunk()
             // HACK: Write chunked end code here.
             // The ChunkedAdapter should really be doing this.
 
-            if (_stream.connection().request().isChunkedTransferEncoding()) {
+            if (_stream.connection()->request().isChunkedTransferEncoding()) {
                 emit("0\r\n\r\n", 5,
                      PacketFlags::NoModify | PacketFlags::Final);
             }

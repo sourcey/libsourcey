@@ -91,18 +91,17 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
     if (_adapter) {
         TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
-        // Outgoing.emitter.detach(_adapter);
         _socket->removeReceiver(_adapter);
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-        // auto oldAdapter = _adapter;
-        // runOnce(_socket->loop(), [oldAdapter]() {
-        //     delete oldAdapter;
-        // });
+         auto oldAdapter = _adapter;
+         runOnce(_socket->loop(), [oldAdapter]() {
+             delete oldAdapter;
+         });
 
         // FIXME: Remove this, get ConnectionAdapter to take shared_ptr instaed
-        deleteLater<net::SocketAdapter>(_adapter);
+        //deleteLater<net::SocketAdapter>(_adapter);
         //_adapter->_connection = nullptr;
         _adapter = nullptr;
     }
@@ -118,11 +117,6 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         // The adapter will process raw packets into HTTP or WebSocket
         // frames depending on the adapter type.
         _socket->addReceiver(adapter);
-
-        // The Outgoing stream pumps data into the ConnectionAdapter,
-        // which in turn proxies to the output Socket.
-        // Outgoing.emitter += slot(adapter, static_cast<void (net::SocketAdapter::*)(IPacket&)>(
-        //                          &net::SocketAdapter::sendPacket));
 
         _adapter = adapter;
     }
@@ -235,7 +229,7 @@ ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type ty
     , _connection(connection)
     , _parser(type)
 {
-    TraceS(this) << "Create: " << &connection << endl;
+    TraceS(this) << "Create: " << connection << endl;
     _parser.setObserver(this);
     if (type == HTTP_REQUEST)
         _parser.setRequest(&connection->request());
@@ -403,10 +397,10 @@ Connection* ConnectionAdapter::connection()
 //
 
 
-ConnectionStream::ConnectionStream(Connection& connection)
+ConnectionStream::ConnectionStream(Connection::Ptr connection)
     : _connection(connection)
 {
-    TraceS(this) << "Create: " << &connection << endl;
+    TraceS(this) << "Create: " << connection << endl;
 
     IncomingProgress.sender = this;
     OutgoingProgress.sender = this;
@@ -416,11 +410,11 @@ ConnectionStream::ConnectionStream(Connection& connection)
 
     // The Outgoing stream pumps data into the ConnectionAdapter,
     // which in turn proxies to the output Socket.
-    Outgoing.emitter += slot(_connection.adapter(),
+    Outgoing.emitter += slot(_connection->adapter(),
         static_cast<void (net::SocketAdapter::*)(IPacket&)>(&net::SocketAdapter::sendPacket));
 
     // The Incoming stream receives data from the ConnectionAdapter.
-    _connection.adapter()->Recv += slot(this, &ConnectionStream::onRecv);
+    _connection->adapter()->Recv += slot(this, &ConnectionStream::onRecv);
 }
 
 
@@ -442,7 +436,7 @@ int ConnectionStream::send(const char* data, std::size_t len, int flags)
     if (Outgoing.numAdapters() > 0) {
         Outgoing.write(data, len);
     } else {
-        return _connection.send(data, len, flags);
+        return _connection->send(data, len, flags);
     }
     return len;
 }
@@ -450,12 +444,12 @@ int ConnectionStream::send(const char* data, std::size_t len, int flags)
 
 void ConnectionStream::onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    // Push received dada onto the Incoming stream.
+    // Push received data onto the Incoming stream.
     Incoming.write(bufferCast<const char*>(buffer), buffer.size());
 }
 
 
-Connection& ConnectionStream::connection()
+Connection::Ptr ConnectionStream::connection()
 {
     return _connection;
 }

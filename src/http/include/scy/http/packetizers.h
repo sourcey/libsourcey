@@ -30,13 +30,13 @@ namespace http {
 class SCY_EXTERN ChunkedAdapter : public IPacketizer
 {
 public:
-    Connection* connection;
+    Connection::Ptr connection;
     std::string contentType;
     std::string frameSeparator;
     bool initial;
     bool nocopy;
 
-    ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true)
+    ChunkedAdapter(Connection::Ptr connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true)
         : PacketProcessor(this->emitter)
         , connection(connection)
         , contentType(connection->outgoingHeader()->getContentType())
@@ -147,12 +147,12 @@ public:
 class SCY_EXTERN MultipartAdapter : public IPacketizer
 {
 public:
-    Connection* connection;
+    Connection::Ptr connection;
     std::string contentType;
     bool isBase64;
     bool initial;
 
-    MultipartAdapter(Connection* connection, bool base64 = false)
+    MultipartAdapter(Connection::Ptr connection, bool base64 = false)
         : IPacketizer(this->emitter)
         , connection(connection)
         , contentType(connection->outgoingHeader()->getContentType())

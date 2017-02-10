@@ -161,9 +161,9 @@ void ServerConnection::onHeaders()
     TraceS(this) << "On headers" << endl;
 
     // Upgrade the connection if required
-    if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 &&
-        util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {
-        TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
+    if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
+        util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+        TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
         _upgrade = true;
 
         // Note: To upgrade the connection we need to replace the
@@ -179,16 +179,15 @@ void ServerConnection::onHeaders()
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
         std::ostringstream oss;
-        _request.write(oss);
-        _request.clear();
+        request().write(oss);
+        request().clear();
         std::string buffer(oss.str());
 
-        wsAdapter->onSocketRecv(*_socket.get(), mutableBuffer(buffer), _socket->peerAddress());
+        wsAdapter->onSocketRecv(*socket().get(), mutableBuffer(buffer), socket()->peerAddress());
     }
 
-    //void onConnectionReady(ServerConnection& conn);
     //if (!_upgrade)
-    _server.onConnectionReady(*this);
+        _server.onConnectionReady(*this);
 
     // Upgraded connections don't receive the onHeaders callback
     //if (!_upgrade)

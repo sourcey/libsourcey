@@ -27,37 +27,13 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN ProgressSignal : public Signal<void(const double&)>
-{
-public:
-    void* sender;
-    std::uint64_t current;
-    std::uint64_t total;
-
-    ProgressSignal()
-        : sender(nullptr)
-        , current(0)
-        , total(0)
-    {
-    }
-
-    double progress() const { return (current / (total * 1.0)) * 100; }
-
-    void update(int nread)
-    {
-        // assert(current <= total);
-        current += nread;
-
-        emit(progress());
-    }
-};
-
-
 class SCY_EXTERN ConnectionStream;
 class SCY_EXTERN ConnectionAdapter;
 class SCY_EXTERN Connection : public net::SocketAdapter
 {
 public:
+    typedef std::shared_ptr<Connection> Ptr;
+
     Connection(const net::TCPSocket::Ptr& socket = std::make_shared<net::TCPSocket>());
     virtual ~Connection();
 
@@ -177,6 +153,37 @@ protected:
 
 
 //
+// Progress Signal
+//
+
+
+// HTTP progress signal for upload and download progress notifications. 
+class SCY_EXTERN ProgressSignal : public Signal<void(const double&)>
+{
+public:
+    void* sender;
+    std::uint64_t current;
+    std::uint64_t total;
+
+    ProgressSignal()
+        : sender(nullptr)
+        , current(0)
+        , total(0)
+    {
+    }
+
+    double progress() const { return (current / (total * 1.0)) * 100; }
+
+    void update(int nread)
+    {
+        assert(current <= total);
+        current += nread;
+        emit(progress());
+    }
+};
+
+
+//
 // Connection Stream
 //
 
@@ -185,14 +192,14 @@ protected:
 class SCY_EXTERN ConnectionStream
 {
 public:
-    ConnectionStream(Connection& connection);
+    ConnectionStream(Connection::Ptr connection);
     virtual ~ConnectionStream();
 
     /// Send data via the Outgoing stream.
     int send(const char* data, std::size_t len, int flags = 0);
 
     /// Return a reference to the underlying connection.
-    Connection& connection();
+    Connection::Ptr connection();
 
     /// The Outgoing stream is responsible for packetizing
     /// raw application data into the agreed upon HTTP
@@ -211,7 +218,7 @@ public:
 protected:
     void onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
 
-    Connection& _connection;
+    Connection::Ptr _connection;
 };
 
 

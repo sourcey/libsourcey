@@ -124,21 +124,6 @@ typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
 
 
 //
-// Client Connection Adapter
-//
-
-
-//class SCY_EXTERN ClientAdapter : public ConnectionAdapter
-//{
-//public:
-//    ClientAdapter(ClientConnection* connection)
-//        : ConnectionAdapter(connection, HTTP_RESPONSE)
-//    {
-//    }
-//};
-
-
-//
 // HTTP Connection Helpers
 //
 
@@ -150,26 +135,28 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = 
 
     if (url.scheme() == "http") {
         conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
+        // conn->replaceAdapter(new ConnectionAdapter(conn, HTTP_RESPONSE));
         // conn = std::shared_ptr<ConnectionT>(
         //     new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
         //     deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "https") {
         conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
+        // conn->replaceAdapter(new ConnectionAdapter(conn, HTTP_RESPONSE));
         // conn = std::shared_ptr<ConnectionT>(
         //    new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
         //     deleter::Deferred<ConnectionT>());
     } else if (url.scheme() == "ws") {
         conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
+        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
         // conn = std::shared_ptr<ConnectionT>(
         //     new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
         //    deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
     } else if (url.scheme() == "wss") {
         conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
+        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
         // conn = std::shared_ptr<ConnectionT>(
         //     new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
         //     deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(conn.get(), ws::ClientSide));
     } else
         throw std::runtime_error("Unknown connection type for URL: " + url.str());
 
@@ -230,9 +217,8 @@ protected:
 };
 
 
-inline ClientConnection::Ptr
-createConnection(const URL& url, http::Client* client = nullptr,
-                 uv::Loop* loop = uv::defaultLoop())
+inline ClientConnection::Ptr createConnection(const URL& url, http::Client* client = nullptr,
+                                              uv::Loop* loop = uv::defaultLoop())
 {
     auto connection = createConnectionT<ClientConnection>(url, loop);
     if (client && connection)

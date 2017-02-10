@@ -18,6 +18,7 @@
 #include "scy/http/parser.h"
 #include "scy/http/request.h"
 #include "scy/http/response.h"
+#include "scy/http/connection.h"
 #include "scy/net/socket.h"
 #include "scy/net/socketadapter.h"
 #include "scy/net/tcpsocket.h"
@@ -26,7 +27,7 @@
 
 namespace scy {
 namespace http {
-class SCY_EXTERN Connection;
+//class SCY_EXTERN Connection;
 namespace ws {
 
 
