@@ -16,7 +16,6 @@
 #include "scy/base.h"
 #include "scy/runner.h"
 #include "scy/datetime.h"
-#include "scy/memory.h"
 #include "scy/signal.h"
 #include "scy/uv/uvpp.h"
 #include <cstdint>
@@ -36,13 +35,13 @@ public:
     /// Create a timeout timer.
     ///
     /// The timeout timer will trigger once after `timeout` milliseconds.
-    Timer(std::int64_t timeout, uv::Loop* loop = uv::defaultLoop());
+    Timer(std::int64_t timeout, uv::Loop* loop = uv::defaultLoop(), std::function<void()> func = nullptr);
 
     /// Create a repeating interval timer.
     ///
-    /// The interval timer will trigger once after `timeout` milliseconds, and
-    /// continue to trigger after the `interval` milliseconds.
-    Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop = uv::defaultLoop());
+    /// The interval timer will trigger once after `timeout` milliseconds, 
+    /// and continue to trigger after the `interval` milliseconds.
+    Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop = uv::defaultLoop(), std::function<void()> func = nullptr);
 
     /// Destructor.
     virtual ~Timer();
@@ -95,8 +94,8 @@ public:
     NullSignal Timeout;
 
 protected:
-    Timer(const Timer&);
-    Timer& operator=(const Timer&);
+    Timer(const Timer&) = delete;
+    Timer& operator=(const Timer&) = delete;
 
     virtual void init();
 

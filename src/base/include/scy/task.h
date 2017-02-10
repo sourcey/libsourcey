@@ -15,7 +15,6 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-#include "scy/memory.h"
 #include "scy/signal.h"
 #include "scy/task.h"
 #include "scy/uv/uvpp.h"

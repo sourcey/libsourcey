@@ -59,20 +59,15 @@ class IpcTest : public Test
 
         ipc::SyncQueue<> ipc;
         ipc.push(new ipc::Action(
-            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
-            "test1"));
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test1"));
         ipc.push(new ipc::Action(
-            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
-            "test2"));
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test2"));
         ipc.push(new ipc::Action(
-            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
-            "test3"));
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test3"));
         ipc.push(new ipc::Action(
-            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
-            "test4"));
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test4"));
         ipc.push(new ipc::Action(
-            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,
-            "test5"));
+            std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,  "test5"));
 
         // std::cout << "Test IPC: OK" << std::endl;
         uv::runDefaultLoop();

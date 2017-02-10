@@ -92,32 +92,25 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
     TraceS(this) << "Replace adapter: " << adapter << endl;
 
     if (_adapter) {
-        TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
+        // Detach the old adapter form all callbacks.
         _socket->removeReceiver(_adapter);
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-        //auto oldAdapter = _adapter;
-        //runOnce(_socket->loop(), [oldAdapter]() {
-        //    delete oldAdapter;
-        //});
-
-        deleteLater<net::SocketAdapter>(_adapter);
+        TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
+        deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
         _adapter = nullptr;
     }
 
     if (adapter) {
-        // Attach ourselves to the given ConnectionAdapter
+        // Setup the data flow: Connection <-> ConnectionAdapter <-> Socket
         adapter->addReceiver(this);
-
-        // ConnectionAdapter output goes to the Socket
         adapter->setSender(_socket.get());
 
-        // Attach the ConnectionAdapter to receive Socket callbacks
-        // The adapter will process raw packets into HTTP or WebSocket
-        // frames depending on the adapter type.
+        // Attach the ConnectionAdapter to receive Socket callbacks.
+        // The given adapter will process raw packets into HTTP or 
+        // WebSocket frames depending on the adapter type.
         _socket->addReceiver(adapter);
-
         _adapter = adapter;
     }
 }

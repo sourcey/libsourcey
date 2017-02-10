@@ -15,7 +15,6 @@
 
 #include "scy/base.h"
 #include "scy/logger.h"
-#include "scy/memory.h"
 #include "scy/signal.h"
 #include "scy/util.h"
 

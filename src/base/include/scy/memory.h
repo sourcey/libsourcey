@@ -15,9 +15,10 @@
 
 #include "scy/base.h"
 #include "scy/logger.h"
-#include <mutex>
+#include "scy/timer.h"
 #include "scy/singleton.h"
 #include "scy/uv/uvpp.h"
+#include <mutex>
 #include <atomic>
 #include <cstdint>
 #include <exception>
@@ -48,30 +49,50 @@ public:
     static void destroy();
 
     /// Schedules a pointer for deferred deletion.
-    template <class C> void deleteLater(C* ptr);
+    template <class C> 
+    void deleteLater(C* ptr, uv::Loop* loop = uv::defaultLoop());
 
     /// Schedules a shared pointer for deferred deletion.
-    template <class C> void deleteLater(std::shared_ptr<C> ptr);
+    template <class C> 
+    void deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop = uv::defaultLoop());
 
     /// Frees all scheduled pointers now.
     /// This method must be called from the main thread
     /// while the event loop is inactive.
     void finalize();
 
-    /// Returns the TID of the garbage collector event loop thread.
-    /// The garbage collector must be running.
-    uv_thread_t tid();
+    /// Returns the TID of the main garbage collector thread.
+    std::thread::id tid();
 
 protected:
-    static void onTimer(uv_timer_t* handle);
-    void runAsync();
+    /// Garbage collector cleaner context.
+    ///
+    /// The grabage collector maintains a single cleaner  
+    /// context per event loop.
+    class SCY_EXTERN Cleaner
+    {
+    public:
+        Cleaner(uv::Loop* loop = uv::defaultLoop());
+        ~Cleaner();
 
+        void work();
+        void finalize();
+
+        mutable std::mutex _mutex;
+        std::vector<ScopedPointer*> _pending;
+        std::vector<ScopedPointer*> _ready;
+        Timer _timer;
+        uv::Loop* _loop;
+        bool _finalize;
+    };
+
+    /// Get the cleaner context for the given loop.
+    Cleaner* getCleaner(uv::Loop* loop = uv::defaultLoop());
+
+protected:
     mutable std::mutex _mutex;
-    std::vector<ScopedPointer*> _pending;
-    std::vector<ScopedPointer*> _ready;
-    uv::Handle _handle;
-    bool _finalize;
-    uv_thread_t _tid;
+    std::vector<Cleaner*> _cleaners;
+    std::thread::id _tid;
 };
 
 
@@ -88,8 +109,7 @@ template<class T> struct Default
     void operator()(T *ptr)
     {
         assert(ptr);
-        static_assert(0 < sizeof(T),
-            "can't delete an incomplete type");
+        static_assert(0 < sizeof(T), "can't delete an incomplete type");
         delete ptr;
     }
 };
@@ -199,35 +219,37 @@ public:
 
 /// Schedules a pointer for deferred deletion.
 template <class C> 
-inline void GarbageCollector::deleteLater(C* ptr)
+inline void GarbageCollector::deleteLater(C* ptr, uv::Loop* loop)
 {
-    std::lock_guard<std::mutex> guard(_mutex);
-    _pending.push_back(new ScopedRawPointer<C>(ptr));
+    auto cleaner = getCleaner(loop);
+    std::lock_guard<std::mutex> guard(cleaner->_mutex);
+    cleaner->_pending.push_back(new ScopedRawPointer<C>(ptr));
 }
 
 
 /// Schedules a shared pointer for deferred deletion.
 template <class C>
-inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
+inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop)
 {
-    std::lock_guard<std::mutex> guard(_mutex);
-    _pending.push_back(new ScopedSharedPointer<C>(ptr));
+    auto cleaner = getCleaner(loop);
+    std::lock_guard<std::mutex> guard(cleaner->_mutex);
+    cleaner->_pending.push_back(new ScopedSharedPointer<C>(ptr));
 }
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
 template <class C> 
-inline void deleteLater(C* ptr)
+inline void deleteLater(C* ptr, uv::Loop* loop = uv::defaultLoop())
 {
-    GarbageCollector::instance().deleteLater(ptr);
+    GarbageCollector::instance().deleteLater(ptr, loop);
 }
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
 template <class C> 
-inline void deleteLater(std::shared_ptr<C> ptr)
+inline void deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop = uv::defaultLoop())
 {
-    GarbageCollector::instance().deleteLater(ptr);
+    GarbageCollector::instance().deleteLater(ptr, loop);
 }
 
 
@@ -258,8 +280,7 @@ public:
     /// calls delete if the count reaches zero.
     void release()
     {
-        if (std::atomic_fetch_sub_explicit(&count, 1u,
-                                           std::memory_order_release) == 1) {
+        if (std::atomic_fetch_sub_explicit(&count, 1u, std::memory_order_release) == 1) {
             std::atomic_thread_fence(std::memory_order_acquire);
             freeMemory();
         }
@@ -282,8 +303,8 @@ protected:
     /// The destructor should never be called directly.
     virtual ~SharedObject() {}
 
-    SharedObject(const SharedObject&);
-    SharedObject& operator=(const SharedObject&);
+    SharedObject(const SharedObject&) = delete;
+    SharedObject& operator=(const SharedObject&) = delete;
 
     friend struct std::default_delete<SharedObject>;
     // friend struct deleter::Deferred<SharedObject>;

@@ -204,8 +204,8 @@ public:
     }
 
 protected:
-    RunnableQueue(const RunnableQueue&);
-    RunnableQueue& operator=(const RunnableQueue&);
+    RunnableQueue(const RunnableQueue&) = delete;
+    RunnableQueue& operator=(const RunnableQueue&) = delete;
 
     virtual T* popNext() // Pops the next waiting item.
     {

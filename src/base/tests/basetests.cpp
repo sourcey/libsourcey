@@ -15,6 +15,39 @@ int main(int argc, char** argv)
 
 
     // =========================================================================
+    // Garbage Collector
+    //
+    describe("garbage collector", []() {
+        GarbageCollector gc;
+        auto loop = uv::defaultLoop();
+        auto loop1 = uv::createLoop();
+
+        // delete running idler on default loop
+        auto idler = new Idler(loop, []() {});
+        idler->handle().ref();
+        gc.deleteLater(idler, loop);
+
+        // delete running idler on loop1
+        auto idler1 = new Idler(loop1, []() {});
+        idler1->handle().ref();
+        gc.deleteLater(idler1, loop1);
+
+        // run the default loop which will return 
+        // once the idler is deleted
+        uv::runDefaultLoop();
+
+        // finalize deletion of all pointers
+        gc.finalize();
+
+        expect(loop->active_handles == 0);
+        expect(loop1->active_handles == 0);
+
+        // free the created loop1
+        uv::closeLoop(loop1);
+    });
+
+
+    // =========================================================================
     // Signal Benchmarks
     //
     describe("signal class member benchmark", []() {
@@ -31,7 +64,7 @@ int main(int argc, char** argv)
 
         std::cout << "signal class member benchmark: "
             << ((benchdone - benchstart) * 1.0 / i) << "ns "
-            << "per emission (sz=" << sizeof (signal) << ")"
+            << "per emission (sz=" << sizeof(signal) << ")"
             << std::endl;
     });
 
@@ -48,8 +81,8 @@ int main(int argc, char** argv)
         expect(value == i);
 
         std::cout << "signal const class member benchmark: "
-                  << ((benchdone - benchstart) * 1.0 / i) << "ns "
-                  << "per emission (sz=" << sizeof(signal) << ")" << std::endl;
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof(signal) << ")" << std::endl;
     });
 
     describe("signal static member benchmark", []() {
@@ -235,8 +268,7 @@ int main(int argc, char** argv)
         std::string v2 = it->second;
         expect(it->first == "name3");
 
-        expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2
-        == "value3"));
+        expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
 
         nvc.erase("name3");
         expect(!nvc.has("name3"));
@@ -290,16 +322,14 @@ int main(int argc, char** argv)
         clock_t start = clock();
         for (unsigned i = 0; i < 1000; i++)
             TraceL << "test: " << i << endl;
-        cout << "logger: synchronous test completed after: " << (clock() -
-        start) << endl;
+        cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
 
         // Test asynchronous writer (approx 10x faster)
         logger.setWriter(new AsyncLogWriter);
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
             TraceL << "test: " << i << endl;
-        cout << "logger: asynchronous test completed after: " << (clock() -
-        start) << endl;
+        cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
 
         // // Test function logging
         // start = clock();
@@ -409,9 +439,8 @@ int main(int argc, char** argv)
     //
     describe("thread", []() {
         bool ran = false;
-
-    		Thread t1;
-    		t1.start([&]() {
+    	Thread t1;
+    	t1.start([&]() {
             ran = true;
             expect(t1.running() == true);
         });

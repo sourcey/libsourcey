@@ -30,8 +30,8 @@ namespace scy {
 /// provide extra information about packets.
 struct IPacketInfo
 {
-    IPacketInfo(){};
-    virtual ~IPacketInfo(){};
+    IPacketInfo() {};
+    virtual ~IPacketInfo() {};
 
     virtual IPacketInfo* clone() const = 0;
 };
@@ -40,7 +40,7 @@ struct IPacketInfo
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
 /// processing and callbacks using PacketStream and friends.
-class SCY_EXTERN IPacket //: public basic::Polymorphic
+class SCY_EXTERN IPacket
 {
 public:
     IPacket(void* source = nullptr, void* opaque = nullptr,

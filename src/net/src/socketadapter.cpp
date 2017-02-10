@@ -34,7 +34,7 @@ SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
 
 SocketAdapter::~SocketAdapter()
 {
-// TraceS(this) << "Destroy" << endl;
+    // TraceS(this) << "Destroy" << endl;
 
 #if 0
     // Delete child adapters
@@ -83,8 +83,7 @@ int SocketAdapter::sendPacket(const IPacket& packet, int flags)
 }
 
 
-int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress,
-                              int flags)
+int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
 {
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
@@ -183,6 +182,12 @@ void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
     if (_sender && freeExisting)
         delete _sender;
     _sender = adapter;
+}
+
+
+SocketAdapter* SocketAdapter::sender()
+{
+    return _sender;
 }
 
 

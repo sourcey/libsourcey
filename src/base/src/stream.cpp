@@ -10,6 +10,7 @@
 
 
 #include "scy/stream.h"
+#include "scy/logger.h"
 
 
 using std::endl;

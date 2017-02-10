@@ -15,7 +15,6 @@
 
 #include "scy/base.h"
 #include "scy/byteorder.h"
-#include "scy/memory.h"
 
 #include <algorithm>
 #include <cstdint>

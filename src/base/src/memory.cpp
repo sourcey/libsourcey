@@ -20,41 +20,40 @@ namespace scy {
 
 
 static Singleton<GarbageCollector> singleton;
-static const int GCTimerDelay = 2400;
+static const int GCTimerDelay = 2000;
+
 
 
 GarbageCollector::GarbageCollector()
-    : _handle(uv::defaultLoop(), new uv_timer_t)
-    , _finalize(false)
-    , _tid(0)
+    : _tid(std::this_thread::get_id())
 {
     TraceL << "Create" << std::endl;
-
-    _handle.ptr()->data = this;
-    uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
-    uv_timer_start(_handle.ptr<uv_timer_t>(), GarbageCollector::onTimer,
-                   GCTimerDelay, GCTimerDelay);
-    uv_unref(_handle.ptr());
 }
 
 
 GarbageCollector::~GarbageCollector()
 {
-    TraceL << "Destroy: "
-           << "ready=" << _ready.size() << ", "
-           << "pending=" << _pending.size() << ", "
-           << "finalize=" << _finalize << std::endl;
+    //if (!_finalize)
+    //    finalize();
+    finalize();
 
-    // NOTE: Calling finalize() here is dangerous since more handles may be
-    // queued to the garbage collector during finalization causing a deadlock.
-    // Because of this finalize() should always be called before the application
-    // exists and the garbage collector singleton is destroyed.
-    if (!_finalize)
-        finalize();
+    util::clearVector(_cleaners);
+}
 
-    // The queue should be empty on shutdown if finalized correctly.
-    assert(_pending.empty());
-    assert(_ready.empty());
+
+
+GarbageCollector::Cleaner* GarbageCollector::getCleaner(uv::Loop* loop)
+{
+    std::lock_guard<std::mutex> guard(_mutex);
+
+    for (auto cleaner : _cleaners) {
+        if (loop == cleaner->_loop)
+            return cleaner;
+    }
+
+    auto clnr = new Cleaner(loop);
+    _cleaners.push_back(clnr);
+    return clnr;
 }
 
 
@@ -62,42 +61,104 @@ void GarbageCollector::finalize()
 {
     // TraceL << "Finalize" << std::endl;
 
-    // Ensure the loop is not running and that the
-    // calling thread is the main thread.
-    _handle.assertThread();
-    // assert(_handle.loop()->active_handles <= 1);
-    assert(!_handle.closed());
-    assert(!_finalize);
-    _finalize = true;
+    std::lock_guard<std::mutex> guard(_mutex);
 
-    // Make sure uv_stop doesn't prevent cleanup.
-    _handle.loop()->stop_flag = 0;
+    assert(std::this_thread::get_id() == _tid);
+    for (auto cleaner : _cleaners) {
+        if (!cleaner->_finalize)
+            cleaner->finalize();
+    }
 
-    // Run the loop until managed pointers have been deleted,
-    // and the internal timer has also been deleted.
-    uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), 1);
-    uv_ref(_handle.ptr());
-    uv_run(_handle.loop(), UV_RUN_DEFAULT);
+    //// Ensure the loop is not running and that the
+    //// calling thread is the main thread.
+    //_handle.assertThread();
+    //// assert(_handle.loop()->active_handles <= 1);
+    //assert(!_handle.closed());
+    //assert(!_finalize);
+    //_finalize = true;
 
-    assert(_pending.empty());
-    assert(_ready.empty());
+    //// Run the loop until managed pointers have been deleted,
+    //// and the internal timer has also been deleted.
+    //uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), 1);
+    //uv_ref(_handle.ptr());
+    //uv_run(_handle.loop(), UV_RUN_DEFAULT);
 
-    TraceL << "Finalize: OK" << std::endl;
+    //TraceL << "Finalize: OK" << std::endl;
 }
 
 
-void GarbageCollector::runAsync()
+std::thread::id GarbageCollector::tid()
+{
+    return _tid;
+}
+
+
+void GarbageCollector::destroy()
+{
+    singleton.destroy();
+}
+
+
+GarbageCollector& GarbageCollector::instance()
+{
+    return *singleton.get();
+}
+
+
+//
+// Garbage Collector Cleaner
+//
+
+
+GarbageCollector::Cleaner::Cleaner(uv::Loop* loop)
+    : _timer(GCTimerDelay, GCTimerDelay, loop,
+        std::bind(&GarbageCollector::Cleaner::work, this))
+    , _loop(loop)
+    , _finalize(false)
+{
+    TraceL << "Create: " << loop << std::endl;
+}
+
+
+GarbageCollector::Cleaner::~Cleaner()
+{
+    if (!_finalize)
+        finalize();
+
+    // The queue should be empty on shutdown if finalized correctly.
+    assert(_pending.empty());
+    assert(_ready.empty());
+
+    //util::clearVector(_ready);
+    //util::clearVector(_pending);
+}
+
+
+void GarbageCollector::Cleaner::finalize()
+{
+    _finalize = true;
+
+    // Ensure previous calls to uv_stop don't prevent cleanup.
+    //_loop->stop_flag = 0;
+
+    _timer.setInterval(1);
+    _timer.handle().ref(); // ref until complete
+    uv_run(_loop, UV_RUN_DEFAULT);
+
+    assert(_pending.empty());
+    assert(_ready.empty());
+}
+
+
+void GarbageCollector::Cleaner::work()
 {
     std::vector<ScopedPointer*> deletable;
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        if (!_tid) {
-            _tid = uv_thread_self();
-        }
         if (!_ready.empty() || !_pending.empty()) {
             TraceL << "Deleting: "
-                   << "ready=" << _ready.size() << ", "
-                   << "pending=" << _pending.size() << std::endl;
+                << "ready=" << _ready.size() << ", "
+                << "pending=" << _pending.size() << std::endl;
 
             // Delete waiting pointers
             deletable = _ready;
@@ -115,48 +176,19 @@ void GarbageCollector::runAsync()
     if (_finalize) {
         std::lock_guard<std::mutex> guard(_mutex);
         if (_ready.empty() && _pending.empty()) {
-            // Stop and close the timer handle.
-            // This should cause the loop to return after
-            // uv_close has been called on the timer handle.
-            uv_timer_stop(_handle.ptr<uv_timer_t>());
-            //_handle.close();
+            // Stop and close the timer handle allowing the finalize() method to return.
+            _timer.stop();
 
-            TraceL << "Finalization complete: "
-                   << _handle.loop()->active_handles << std::endl;
-
+            TraceL << "Finalization complete: " << _loop->active_handles << std::endl;
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left
-            uv_walk(_handle.loop(), [](uv_handle_t* handle, void* /* arg */) {
+            uv_walk(_loop, [](uv_handle_t* handle, void* /* arg */) {
                 DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
             }, nullptr);
             // assert(_handle.loop()->active_handles <= 1);
 #endif
         }
     }
-}
-
-
-void GarbageCollector::onTimer(uv_timer_t* handle)
-{
-    static_cast<GarbageCollector*>(handle->data)->runAsync();
-}
-
-
-uv_thread_t GarbageCollector::tid()
-{
-    return _tid;
-}
-
-
-void GarbageCollector::destroy()
-{
-    singleton.destroy();
-}
-
-
-GarbageCollector& GarbageCollector::instance()
-{
-    return *singleton.get();
 }
 
 

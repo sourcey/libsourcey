@@ -91,12 +91,6 @@ public:
     /// Removes an input SocketAdapter.
     virtual void removeReceiver(SocketAdapter* adapter);
 
-    /// Optional client data pointer.
-    ///
-    /// The pointer is not initialized or managed
-    /// by the socket base.
-    void* opaque;
-
     /// Signals that the socket is connected.
     Signal<void(Socket&)> Connect;
 
@@ -110,6 +104,12 @@ public:
 
     /// Signals that the underlying socket is closed.
     Signal<void(Socket&)> Close;
+
+    /// Optional client data pointer.
+    ///
+    /// The pointer is not initialized or managed
+    /// by the socket base.
+    void* opaque;
 
 protected:
     /// Returns the polymorphic instance pointer

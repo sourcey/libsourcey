@@ -34,9 +34,18 @@ public:
     /// Create the idler with the given event loop.
     Idler(uv::Loop* loop = uv::defaultLoop());
 
+    /// Create and start the idler with the given callback.
+    template<class Function, class... Args>
+    explicit Idler(Function&& func, Args&&... args)
+        : _handle(uv::defaultLoop(), new uv_idle_t)
+    {
+        init();
+        start(std::forward<Function>(func), std::forward<Args>(args)...);
+    }
+
     /// Create and start the idler with the given callback and event loop.
     template<class Function, class... Args>
-    explicit Idler(Function&& func, Args&&... args, uv::Loop* loop = uv::defaultLoop())
+    explicit Idler(uv::Loop* loop, Function&& func, Args&&... args)
         : _handle(loop, new uv_idle_t)
     {
         init();

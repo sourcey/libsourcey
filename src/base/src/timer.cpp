@@ -32,7 +32,7 @@ Timer::Timer(uv::Loop* loop)
 }
 
 
-Timer::Timer(std::int64_t timeout, uv::Loop* loop)
+Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
     : _handle(loop, new uv_timer_t)
     , _timeout(timeout)
     , _interval(0)
@@ -40,10 +40,12 @@ Timer::Timer(std::int64_t timeout, uv::Loop* loop)
 {
     // TraceS(this) << "Create" << endl;
     init();
+    if (func)
+        start(func);
 }
 
 
-Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop)
+Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::function<void()> func)
     : _handle(loop, new uv_timer_t)
     , _timeout(timeout)
     , _interval(interval)
@@ -51,6 +53,8 @@ Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop)
 {
     // TraceS(this) << "Create" << endl;
     init();
+    if (func)
+        start(func);
 }
 
 

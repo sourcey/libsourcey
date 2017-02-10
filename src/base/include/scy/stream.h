@@ -14,7 +14,6 @@
 
 
 #include "scy/base.h"
-#include "scy/memory.h"
 #include "scy/uv/uvpp.h"
 
 #include "scy/buffer.h"

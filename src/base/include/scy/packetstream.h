@@ -16,8 +16,8 @@
 #include "scy/base.h"
 #include "scy/error.h"
 #include "scy/interface.h"
-#include "scy/logger.h"
 #include "scy/memory.h"
+#include "scy/logger.h"
 #include "scy/packetsignal.h"
 #include "scy/stateful.h"
 #include <cstdint>
