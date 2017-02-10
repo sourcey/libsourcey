@@ -17,6 +17,7 @@
 #include "scy/byteorder.h"
 
 #include <algorithm>
+#include <ostream>
 #include <cstdint>
 #include <string>
 #include <vector>

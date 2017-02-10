@@ -16,6 +16,7 @@
 #include "scy/base.h"
 #include "scy/interface.h"
 #include "scy/packet.h"
+#include "scy/memory.h"
 #include "scy/stateful.h"
 #include "scy/timer.h"
 
