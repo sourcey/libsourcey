@@ -46,7 +46,7 @@ The main build options you will want to configure are as follows:
 * `BUILD_SAMPLES`: Build module test applications _default: ON_  
 * `BUILD_SAMPLE_xxx`: Enable or disable a specific test replacing `xxx` with the module name.
 * `BUILD_MODULE_SAMPLES`: Build module sample applications _default: ON_
-* `DISABLE_LOGGING`: Disable internal loggin for speed increase _default: OFF_
+* `ENABLE_LOGGING`: Enable internal debug logging _default: OFF_
 
 
 If you are using third-party libraries is custom locations then make sure you update the CMake include paths: `CMAKE_SYSTEM_PREFIX_PATH` and `CMAKE_LIBRARY_PATH`.

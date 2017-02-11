@@ -131,7 +131,7 @@ void Logger::write(const LogStream& stream)
 
 void Logger::write(LogStream* stream)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     std::lock_guard<std::mutex> guard(_mutex);
     if (stream->channel == nullptr)
         stream->channel = _defaultChannel;
@@ -170,7 +170,7 @@ LogWriter::~LogWriter()
 
 void LogWriter::write(LogStream* stream)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     // TODO: Make safer; if the app exists and async stuff
     // is still logging we can end up with a crash here.
     stream->channel->write(*stream);
@@ -245,7 +245,7 @@ void AsyncLogWriter::run()
 
 bool AsyncLogWriter::writeNext()
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     LogStream* next;
     {
         std::lock_guard<std::mutex> guard(_mutex);
@@ -267,7 +267,7 @@ bool AsyncLogWriter::writeNext()
 //
 
 
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
 
 LogStream::LogStream(LogLevel level, const std::string& realm, int line,
                      const void* ptr, const char* channel)
@@ -345,7 +345,7 @@ void LogChannel::write(const LogStream& stream)
 
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     if (!_timeFormat.empty())
         ost << time::print(time::toLocal(stream.ts), _timeFormat.c_str());
     ost << " [" << getStringFromLogLevel(stream.level) << "] ";
@@ -379,7 +379,7 @@ ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level,
 
 void ConsoleChannel::write(const LogStream& stream)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     if (_level > stream.level)
         return;
 
@@ -447,7 +447,7 @@ void FileChannel::close()
 
 void FileChannel::write(const LogStream& stream)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     if (this->level() > stream.level)
         return;
 
@@ -517,7 +517,7 @@ RotatingFileChannel::~RotatingFileChannel()
 
 void RotatingFileChannel::write(const LogStream& stream)
 {
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
     if (this->level() > stream.level)
         return;
 

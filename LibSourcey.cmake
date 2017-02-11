@@ -63,7 +63,7 @@ set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"              
 set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
 set_option(ENABLE_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
-set_option(DISABLE_LOGGING            "Disable internal logging for a speed increase"            ON   IF (CMAKE_BUILD_TYPE MATCHES RELEASE) )
+set_option(ENABLE_LOGGING             "Enable internal debug logging"                            ON   IF (CMAKE_BUILD_TYPE MATCHES DEBUG) )
 set_option(MSG_VERBOSE                "Print verbose debug status messages"                      OFF )
 
 # ----------------------------------------------------------------------------
@@ -322,7 +322,7 @@ set(PACKAGE_NAME "LibSourcey")
 set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
-set(SCY_DISABLE_LOGGING "${DISABLE_LOGGING}")
+set(SCY_ENABLE_LOGGING "${ENABLE_LOGGING}")
 
 
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)

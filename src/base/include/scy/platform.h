@@ -36,6 +36,9 @@ std::uint64_t getFreeMemory();
 /// Returns the current amount of used memory.
 std::uint64_t getTotalMemory();
 
+/// Returns the number of CPU cores.
+int numCpuCores();
+
 /// Pause the current thread for the given ms duration.
 void sleep(int ms);
 

@@ -60,6 +60,16 @@ std::uint64_t getTotalMemory()
 }
 
 
+int numCpuCores()
+{
+    uv_cpu_info_t *info;
+    int cpu_count;
+    uv_cpu_info(&info, &cpu_count);
+    uv_free_cpu_info(info, cpu_count);
+    return cpu_count;
+}
+
+
 void sleep(int ms)
 {
 #ifdef SCY_WIN

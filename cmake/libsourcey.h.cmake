@@ -29,7 +29,7 @@
 #define SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}"
 
 /* Disable logging */
-#cmakedefine SCY_DISABLE_LOGGING
+#cmakedefine SCY_ENABLE_LOGGING
 
 /* LibSourcey modules
 # cmakedefine HAVE_SCY_base

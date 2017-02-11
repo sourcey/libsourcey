@@ -84,36 +84,32 @@ void raiseMulticoreBenchmarkServer()
 }
 
 
-
+// Raise a server instance for each CPU core
 void runMulticoreBenchmarkServers()
 {
-    Thread t1;
-    Thread t2;
-    Thread t3;
-    Thread t4;
+    std::vector<Thread*> threads;
+    int ncpus = std::thread::hardware_concurrency();
+    for (int i = 0; i < ncpus; ++i) {
+        threads.push_back(new Thread(std::bind(raiseMulticoreBenchmarkServer)));
+    }
 
-    t1.start(std::bind(raiseMulticoreBenchmarkServer));
-    t2.start(std::bind(raiseMulticoreBenchmarkServer));
-    t3.start(std::bind(raiseMulticoreBenchmarkServer));
-    t4.start(std::bind(raiseMulticoreBenchmarkServer));
+    std::cout << "HTTP multicore(" << ncpus << ") server listening on " << address << endl;
 
-    std::cout << "HTTP multicore server listening on " << address << endl;
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
+    for (auto thread : threads) {
+        thread->join();
+    }
 }
 
 
 int main(int argc, char** argv)
 {
     //Logger::instance().add(new LogChannel("debug", LTrace));
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    //Logger::instance().add(new ConsoleChannel("debug", LTrace));
     //Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
         // NOTE: For best performance the http server should be compiled on
-        // linux kernel 3.9 or newer, and with DISABLE_LOGGING=ON.
+        // linux kernel 3.9 or newer, and with ENABLE_LOGGING=OFF.
 #if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
         runMulticoreBenchmarkServers();
 #else

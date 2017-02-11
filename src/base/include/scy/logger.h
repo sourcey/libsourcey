@@ -211,7 +211,7 @@ protected:
 //
 
 
-#ifndef SCY_DISABLE_LOGGING
+#ifdef SCY_ENABLE_LOGGING
 
 struct LogStream
 {
@@ -224,10 +224,8 @@ struct LogStream
     LogChannel* channel;
 
     LogStream(LogLevel level = LDebug, const std::string& realm = "",
-        int line = 0, const void* ptr = nullptr,
-        const char* channel = nullptr);
-    LogStream(LogLevel level, const std::string& realm = "",
-        const std::string& address = "");
+              int line = 0, const void* ptr = nullptr, const char* channel = nullptr);
+    LogStream(LogLevel level, const std::string& realm = "", const std::string& address = "");
     LogStream(const LogStream& that);
     ~LogStream();
 
@@ -251,14 +249,14 @@ struct LogStream
 
     /// Handle std::endl flags.
     /// This method flushes the log message and queues it for write.
-    /// WARNING: After using std::endl to flush the message pointer
-    /// should not be accessed.
+    /// WARNING: After using std::endl to flush the LogStream pointer
+    /// should not be user.
     LogStream& operator<<(std::ostream& (*f)(std::ostream&))
     {
         message << f;
 
-        /// Send to default channel
-        /// Channel flag or stream operation
+        // Send to default channel
+        // Channel flag or stream operation
         Logger::instance().write(this);
         return *this;
     }
