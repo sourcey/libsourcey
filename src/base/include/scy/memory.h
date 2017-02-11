@@ -49,11 +49,11 @@ public:
     static void destroy();
 
     /// Schedules a pointer for deferred deletion.
-    template <class C> 
+    template <class C>
     void deleteLater(C* ptr, uv::Loop* loop = uv::defaultLoop());
 
     /// Schedules a shared pointer for deferred deletion.
-    template <class C> 
+    template <class C>
     void deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop = uv::defaultLoop());
 
     /// Frees all scheduled pointers now.
@@ -67,7 +67,7 @@ public:
 protected:
     /// Garbage collector cleaner context.
     ///
-    /// The grabage collector maintains a single cleaner  
+    /// The grabage collector maintains a single cleaner
     /// context per event loop.
     class SCY_EXTERN Cleaner
     {
@@ -196,7 +196,7 @@ public:
 /// pointer; all it does is copy the shared_ptr and release it when
 /// the ScopedSharedPointer instance is deleted, which makes it useful
 /// for certain asyncronous scenarios.
-template <class T> //, typename D = std::default_delete<T>
+template <class T>
 class SCY_EXTERN ScopedSharedPointer : public ScopedPointer
 {
 public:
@@ -218,7 +218,7 @@ public:
 
 
 /// Schedules a pointer for deferred deletion.
-template <class C> 
+template <class C>
 inline void GarbageCollector::deleteLater(C* ptr, uv::Loop* loop)
 {
     auto cleaner = getCleaner(loop);
@@ -238,7 +238,7 @@ inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
-template <class C> 
+template <class C>
 inline void deleteLater(C* ptr, uv::Loop* loop = uv::defaultLoop())
 {
     GarbageCollector::instance().deleteLater(ptr, loop);
@@ -246,7 +246,7 @@ inline void deleteLater(C* ptr, uv::Loop* loop = uv::defaultLoop())
 
 
 /// Convenience function for accessing GarbageCollector::deleteLater
-template <class C> 
+template <class C>
 inline void deleteLater(std::shared_ptr<C> ptr, uv::Loop* loop = uv::defaultLoop())
 {
     GarbageCollector::instance().deleteLater(ptr, loop);
