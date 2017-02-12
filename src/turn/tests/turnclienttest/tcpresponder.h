@@ -3,6 +3,8 @@
 
 
 #include "scy/logger.h"
+#include "scy/time.h"
+#include "scy/util.h"
 #include "scy/net/tcpsocket.h"
 #include <string>
 
@@ -11,7 +13,6 @@ using namespace std;
 
 
 namespace scy {
-namespace turn {
 
 
 class TCPResponder : public net::SocketAdapter
@@ -26,7 +27,6 @@ public:
         : id(id)
         , timer(1000, 1000)
     {
-        // net::SocketAdapter::socket = &socket;
         DebugS(this) << id << ": Creating" << endl;
 
         socket.addReceiver(this);
@@ -34,84 +34,85 @@ public:
 
     virtual ~TCPResponder()
     {
-        // socket.base().removeObserver(this);
         DebugS(this) << id << ": Destroying" << endl;
-
-        socket.removeReceiver(this);
-        stop();
     }
 
-    void start(const net::Address& /* relayedAddr */)
+    void connect(const net::Address& relayAddr)
     {
-        DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
+        DebugS(this) << id << ": Starting on: " << relayAddr << endl;
 
         try {
-            this->relayedAddr = relayedAddr;
+            this->relayedAddr = relayAddr;
 
             // Since we extend SocketAdapter socket callbacks
             // will be received below.
-            socket.connect(relayedAddr);
+            socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            errorL("TCPResponder", this) << id << ": ERROR: " << exc.what() << endl;
+            ErrorS(this) << id << ": ERROR: " << exc.what() << endl;
             assert(false);
         }
     }
 
-    void stop() { timer.stop(); }
-
-    void onSocketConnect(net::Socket& /* socket */)
+    void shutdown()
+    {
+        socket.close();
+        timer.stop();
+    }
+    
+    void onSocketConnect(net::Socket&)
     {
         // Send some early media to client
-        sendLatencyCheck();
+        // sendPacketToInitiator();
 
         // Start the send timer
-        timer.Timeout += slot(this, &TCPResponder::onSendTimer);
-        timer.start();
+        // timer.Timeout += slot(this, &TCPResponder::onSendTimer);
+        // timer.start();
     }
 
-    void onSocketRecv(net::Socket& /* socket */, const MutableBuffer& buffer,
-                      const net::Address& peerAddress)
+    void onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
     {
-        // assert(&packet.info->socket == &socket);
-        std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
+        DebugS(this) << id << ": On recv: " << peerAddress << ": " << buffer.size() << endl;
 
-        // assert(0 && "ok");
-        // assert(payload == "hello peer");
-
-        // Echo back to client
-        // socket.send(payload.c_str(), payload.size());
+        // Echo data back to client
+        socket.send(bufferCast<const char*>(buffer), buffer.size());
     }
 
-    void onSocketError(net::Socket& /* socket */, const scy::Error& error)
+    void onSocketError(net::Socket&, const scy::Error& error)
     {
         DebugS(this) << id << ": On error: " << error.message << std::endl;
     }
 
-    void onSocketClose(net::Socket& /* socket */)
+    void onSocketClose(net::Socket&)
     {
         DebugS(this) << id << ": On close" << std::endl;
-        stop();
     }
 
-    void sendLatencyCheck()
+#if 0
+    void sendPacketToInitiator()
     {
         std::string payload;
 
-        // // Send the unix ticks milisecond for checking latency
-        // //payload.append(":");
+        // Send the unix ticks milisecond for checking latency
+        // payload.append(":");
         // payload.append(util::itostr(time::ticks()));
 
-        // Send a large packets to test throttling
+        // Send large packets to test throttling
         // payload.append(65536, 'x');
-        payload.append(10000, 'x'); /// Send it
+
+        payload.append(10000, 'x');
         socket.send(payload.c_str(), payload.length());
     }
 
-    void onSendTimer() { sendLatencyCheck(); }
+    void onSendTimer() 
+    { 
+        sendPacketToInitiator();
+        timer.stop();
+    }
+#endif
 };
-}
-} //  namespace scy::turn
+
+
+} //  namespace scy
 
 
 #endif // TURN_TCPresponder_TEST_H

@@ -51,8 +51,7 @@ public:
     /// strategies should have the highest priority.
     PacketSocketAdapter(const Socket::Ptr& socket = nullptr);
 
-    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer,
-                              const Address& peerAddress);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
 
     virtual void onPacket(IPacket& pkt);
 };
@@ -103,7 +102,7 @@ protected:
 #endif
 
 
-} // namespace Net
+} // namespace net
 } // namespace scy
 
 

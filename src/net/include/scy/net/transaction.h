@@ -37,8 +37,7 @@ public:
     {
         TraceS(this) << "Create" << std::endl;
 
-        PacketSocketAdapter::socket->addReceiver(this,
-                                                 100); // highest prioority
+        PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
     }
 
     virtual bool send()
@@ -47,8 +46,7 @@ public:
         // assert(PacketSocketAdapter::socket->recvAdapter() == this);
         assert(PacketSocketAdapter::socket);
 
-        if (PacketSocketAdapter::socket->sendPacket(
-                PacketTransaction<PacketT>::_request, _peerAddress) > 0)
+        if (PacketSocketAdapter::socket->sendPacket(_request, _peerAddress) > 0)
             return PacketTransaction<PacketT>::send();
         PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
         return false;

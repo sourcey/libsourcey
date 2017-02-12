@@ -33,7 +33,7 @@ public:
 
     void start()
     {
-      server.start();
+        server.start();
     }
 
     virtual AuthenticationState authenticateRequest(Server*, Request& request)
@@ -75,8 +75,7 @@ public:
 
         // Determine authentication status and return either Authorized,
         // Unauthorized or Authenticating.
-        std::string credentials(SERVER_USERNAME + ":" + SERVER_REALM + ":" +
-                                SERVER_PASSWORD);
+        std::string credentials(SERVER_USERNAME + ":" + SERVER_REALM + ":" + SERVER_PASSWORD);
         crypto::Hash engine("md5");
         engine.update(credentials);
         request.hash = engine.digestStr();
@@ -125,15 +124,13 @@ int main(void)
             opts.allocationDefaultLifetime = 2 * 60 * 1000;
             opts.allocationMaxLifetime = 10 * 60 * 1000;
             opts.timerInterval = 5 * 1000;
-            // opts.enableUDP                      = false;
+            // opts.enableUDP = false;
 
             RelayServer srv(opts);
             srv.start();
-            app.waitForShutdown(
-                [](void* opaque) {
-                    reinterpret_cast<RelayServer*>(opaque)->server.stop();
-                },
-                &srv);
+            app.waitForShutdown([](void* opaque) {
+                reinterpret_cast<RelayServer*>(opaque)->server.stop();
+            }, &srv);
         }
     }
     Logger::destroy();

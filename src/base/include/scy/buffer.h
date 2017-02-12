@@ -89,16 +89,14 @@ inline MutableBuffer mutableBuffer(std::string& str)
 
 inline MutableBuffer mutableBuffer(const std::string& str)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(&str[0])),
-                         str.size()); // careful!
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(&str[0])), str.size()); // careful!
 }
 
 
 template <typename T>
 inline MutableBuffer mutableBuffer(const std::vector<T>& vec)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<T>(&vec[0])),
-                         vec.size()); // careful!
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<T>(&vec[0])), vec.size()); // careful!
 }
 
 
@@ -110,8 +108,7 @@ inline MutableBuffer mutableBuffer(Buffer& buf)
 
 inline MutableBuffer mutableBuffer(const Buffer& buf)
 {
-    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
-                         buf.size());
+    return MutableBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())), buf.size());
 }
 
 
@@ -170,15 +167,13 @@ inline ConstBuffer constBuffer(T data, std::size_t size)
 
 inline ConstBuffer constBuffer(const std::string& str)
 {
-    return ConstBuffer(reinterpret_cast<const void*>(&str[0]),
-                       str.size()); // careful!
+    return ConstBuffer(reinterpret_cast<const void*>(&str[0]), str.size()); // careful!
 }
 
 template <typename T>
 inline ConstBuffer constBuffer(const std::vector<T>& vec)
 {
-    return ConstBuffer(reinterpret_cast<const void*>(&vec[0]),
-                       vec.size()); // careful!
+    return ConstBuffer(reinterpret_cast<const void*>(&vec[0]), vec.size()); // careful!
 }
 
 inline ConstBuffer constBuffer(const MutableBuffer& buf)
@@ -195,8 +190,7 @@ inline ConstBuffer constBuffer(Buffer& buf)
 template <typename T>
 inline ConstBuffer constBuffer(const Buffer& buf)
 {
-    return ConstBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())),
-                       buf.size());
+    return ConstBuffer(reinterpret_cast<void*>(const_cast<char*>(buf.data())), buf.size());
 }
 
 
@@ -230,8 +224,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 class SCY_EXTERN BitReader
 {
 public:
-    BitReader(const char* bytes, std::size_t size,
-              ByteOrder order = ByteOrder::Network);
+    BitReader(const char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
     BitReader(const Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitReader(const ConstBuffer& pod, ByteOrder order = ByteOrder::Network);
     ~BitReader();
@@ -327,8 +320,7 @@ private:
 class SCY_EXTERN BitWriter
 {
 public:
-    BitWriter(char* bytes, std::size_t size,
-              ByteOrder order = ByteOrder::Network);
+    BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
     BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
     ~BitWriter();
@@ -393,6 +385,7 @@ private:
     std::size_t _position;
     std::size_t _limit;
     ByteOrder _order;
+    Buffer* _buffer;
     char* _bytes;
 };
 

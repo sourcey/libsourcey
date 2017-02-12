@@ -47,8 +47,7 @@ struct ServerOptions
     int earlyMediaBufferSize;
 
     net::Address listenAddr; ///< The TCP and UDP bind() address
-    std::string
-        externalIP; ///< The external public facing IP address of the server
+    std::string externalIP; ///< The external public facing IP address of the server
 
     bool enableTCP;
     bool enableUDP;
@@ -75,10 +74,8 @@ struct ServerOptions
 /// methods and authentication.
 struct ServerObserver
 {
-    virtual void onServerAllocationCreated(Server* server,
-                                           IAllocation* alloc) = 0;
-    virtual void onServerAllocationRemoved(Server* server,
-                                           IAllocation* alloc) = 0;
+    virtual void onServerAllocationCreated(Server* server, IAllocation* alloc) = 0;
+    virtual void onServerAllocationRemoved(Server* server, IAllocation* alloc) = 0;
 
     /// The observer class can implement authentication
     /// using the long-term credential mechanism of [RFC5389].
@@ -95,8 +92,7 @@ struct ServerObserver
     /// allowed number of allocations active at one time with a 486
     /// (Allocation Quota Exceeded) (see Section 6.2), and should discard
     /// application data traffic that exceeds the bandwidth quota.
-    virtual AuthenticationState authenticateRequest(Server* server,
-                                                    Request& request) = 0;
+    virtual AuthenticationState authenticateRequest(Server* server, Request& request) = 0;
 };
 
 
@@ -107,8 +103,7 @@ typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 class SCY_EXTERN Server
 {
 public:
-    Server(ServerObserver& observer,
-           const ServerOptions& options = ServerOptions());
+    Server(ServerObserver& observer, const ServerOptions& options = ServerOptions());
     virtual ~Server();
 
     virtual void start();

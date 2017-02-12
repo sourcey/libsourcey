@@ -26,7 +26,6 @@ UDPClient::UDPClient(ClientObserver& observer, const Options& options)
     TraceL << "Create" << endl;
 
     _socket = net::makeSocket<net::UDPSocket>();
-    //_socket.assign(new net::UDPSocket, false);
 }
 
 
@@ -36,7 +35,7 @@ UDPClient::~UDPClient()
 }
 
 
-}} // namespace scy::turn
+} } // namespace scy::turn
 
 
 /// @\}

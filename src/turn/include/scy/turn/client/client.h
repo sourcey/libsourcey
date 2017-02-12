@@ -50,10 +50,10 @@ struct ClientState : public State
                 return "Allocating";
             case Authorizing:
                 return "Authorizing";
-            // case Terminated:      return "Terminated";
             case Success:
                 return "Success";
-
+            // case Terminated:     
+            //    return "Terminated";
             case Failed:
                 return "Failed";
         }
@@ -67,31 +67,22 @@ class SCY_EXTERN Client;
 
 struct ClientObserver
 {
-    virtual void onClientStateChange(Client& client, ClientState& state,
-                                     const ClientState& oldState) = 0;
+    virtual void onClientStateChange(Client& client, ClientState& state, const ClientState& oldState) = 0;
 
-    virtual void onRelayDataReceived(Client& client, const char* data,
-                                     std::size_t size,
-                                     const net::Address& peerAddress) = 0;
+    virtual void onRelayDataReceived(Client& client, const char* data, std::size_t size, const net::Address& peerAddress) = 0;
 
-    virtual void onAllocationCreated(Client& client,
-                                     const stun::Transaction& transaction){};
-    virtual void onAllocationFailed(Client& client, int errorCode,
-                                    const std::string& reason){};
-    virtual void onAllocationDeleted(Client& client,
-                                     const stun::Transaction& transaction){};
-    virtual void
-    onAllocationPermissionsCreated(Client& client,
-                                   const PermissionList& permissions){};
+    // virtual void onAllocationCreated(Client& client, const stun::Transaction& transaction) {};
+    virtual void onAllocationFailed(Client& client, int errorCode, const std::string& reason) {};
+    virtual void onAllocationDeleted(Client& client, const stun::Transaction& transaction) {};
+    virtual void onAllocationPermissionsCreated(Client& client, const PermissionList& permissions) {};
 
     /// All received transaction responses will be routed here after local
     /// processing so the observer can easily implement extra functionality.
-    virtual void onTransactionResponse(Client& client,
-                                       const stun::Transaction& transaction){};
+    virtual void onTransactionResponse(Client& client, const stun::Transaction& transaction) {};
 
     /// Fires after the client's internal timer callback.
     /// Handy for performing extra async cleanup tasks.
-    virtual void onTimer(Client& client){};
+    virtual void onTimer(Client& client) {};
 };
 
 
@@ -123,8 +114,7 @@ public:
     };
 
 public:
-    Client(ClientObserver& observer,
-           const Options& options = Options()); // net::Socket* socket,
+    Client(ClientObserver& observer, const Options& options = Options());
     virtual ~Client();
 
     /// Initiates the allocation sequence.
@@ -151,21 +141,18 @@ public:
 
     virtual void sendChannelBind(const std::string& peerIP);
     virtual void sendRefresh();
-    virtual void sendData(const char* data, std::size_t size,
-                          const net::Address& peerAddress);
+    virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);
 
     virtual bool handleResponse(const stun::Message& response);
     virtual void handleAllocateResponse(const stun::Message& response);
     virtual void handleAllocateErrorResponse(const stun::Message& response);
     virtual void handleCreatePermissionResponse(const stun::Message& response);
-    virtual void
-    handleCreatePermissionErrorResponse(const stun::Message& response);
+    virtual void handleCreatePermissionErrorResponse(const stun::Message& response);
     virtual void handleRefreshResponse(const stun::Message& response);
     virtual void handleDataIndication(const stun::Message& response);
 
     virtual int transportProtocol();
-    virtual stun::Transaction*
-    createTransaction(const net::Socket::Ptr& socket = nullptr);
+    virtual stun::Transaction* createTransaction(const net::Socket::Ptr& socket = nullptr);
     virtual void authenticateRequest(stun::Message& request);
     virtual bool sendAuthenticatedTransaction(stun::Transaction* transaction);
     virtual bool removeTransaction(stun::Transaction* transaction);
@@ -182,17 +169,13 @@ protected:
     virtual void setError(const scy::Error& error);
 
     virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
-                              const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     virtual void onSocketClose(net::Socket& socket);
-    virtual void onTransactionProgress(void* sender, TransactionState& state,
-                                       const TransactionState&);
-    virtual void onStateChange(void* sender, ClientState& state,
-                               const ClientState& oldState);
+    virtual void onTransactionProgress(void* sender, TransactionState& state, const TransactionState&);
+    virtual void onStateChange(ClientState& state, const ClientState& oldState);
     virtual void onTimer();
 
 protected:
-    // mutable std::mutex _mutex;
     ClientObserver& _observer;
     Options _options;
     net::Socket::Ptr _socket;
@@ -210,8 +193,9 @@ protected:
     /// A list containing currently active transactions
     std::vector<stun::Transaction*> _transactions;
 };
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 #endif // SCY_TURN_Client_H

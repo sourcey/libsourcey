@@ -32,7 +32,7 @@ namespace turn {
 Client::Client(ClientObserver& observer, const Options& options)
     : _observer(observer)
     , _options(options)
-    , _socket(nullptr) //, false
+    , _socket(nullptr)
 {
 }
 
@@ -102,8 +102,7 @@ void Client::onSocketConnect(net::Socket& socket)
 }
 
 
-void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
-                          const net::Address& peerAddress)
+void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     TraceL << "Control socket recv: " << buffer.size() << endl;
 
@@ -225,8 +224,6 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 
 void Client::authenticateRequest(stun::Message& request)
 {
-
-
     // Authenticate messages once the server provides us with realm and noonce
     if (_realm.empty())
         return;
@@ -428,10 +425,7 @@ void Client::sendAllocate()
 void Client::handleAllocateResponse(const stun::Message& response)
 {
     TraceL << "Allocate success response" << endl;
-
     assert(response.methodType() == stun::Message::Allocate);
-
-
 
     // If the client receives an Allocate success response, then it MUST
     // check that the mapped address and the relayed transport address are
@@ -464,9 +458,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
         assert(0);
         return;
     }
-    _mappedAddress =
-        mappedAttr->address(); // net::Address(mappedAttr->address().host(),
-                               // mappedAttr->address().port());
+    _mappedAddress = mappedAttr->address(); 
 
     // The client must also remember the 5-tuple used for the request and
     // the username and password it used to authenticate the request to
@@ -795,8 +787,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 }
 
 
-void Client::handleCreatePermissionErrorResponse(
-    const stun::Message& /* response */)
+void Client::handleCreatePermissionErrorResponse(const stun::Message& /* response */)
 {
     WarnL << "Permission Creation Failed" << endl;
 
@@ -827,8 +818,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
 }
 
 
-void Client::sendData(const char* data, std::size_t size,
-                      const net::Address& peerAddress)
+void Client::sendData(const char* data, std::size_t size, const net::Address& peerAddress)
 {
     TraceL << "Send Data Indication to peer: " << peerAddress << endl;
 
@@ -868,8 +858,7 @@ void Client::sendData(const char* data, std::size_t size,
     // Ensure permissions exist for the peer.
     if (!hasPermission(peerAddress.host())) {
         // delete request;
-        throw std::runtime_error("No permission exists for peer IP: " +
-                                 peerAddress.host());
+        throw std::runtime_error("No permission exists for peer IP: " + peerAddress.host());
     }
 
     // If permission exists and is currently being negotiated with
@@ -925,14 +914,12 @@ void Client::handleDataIndication(const stun::Message& response)
     TraceL << "Handle Data indication: " << response.toString() << endl;
 
     if (!closed()) {
-        _observer.onRelayDataReceived(*this, dataAttr->bytes(),
-                                      dataAttr->size(), peerAttr->address());
+        _observer.onRelayDataReceived(*this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
     }
 }
 
 
-void Client::onTransactionProgress(void* sender, TransactionState& state,
-                                   const TransactionState&)
+void Client::onTransactionProgress(void* sender, TransactionState& state, const TransactionState&)
 {
     TraceL << "Transaction state change: " << sender << ": " << state << endl;
 
@@ -990,8 +977,7 @@ void Client::onTimer()
 }
 
 
-void Client::onStateChange(void* timer, ClientState& state,
-                           const ClientState& oldState)
+void Client::onStateChange(ClientState& state, const ClientState& oldState)
 {
     _observer.onClientStateChange(*this, state, oldState);
 }
@@ -1027,7 +1013,7 @@ net::Address Client::relayedAddress() const
 }
 
 
-}} // namespace scy::turn
+} } // namespace scy::turn
 
 
 /// @\}

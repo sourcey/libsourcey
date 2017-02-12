@@ -10,7 +10,7 @@ Stress test AsyncLoggerWriter
 # Tests
 
 Test fixtures should be installed relative to compiled test binaries
-Integrate TURN tests with `make check`
+Integrate TURN, SocketIO and Symple tests with `make check`
 Video encoder test changing input resolution
 
 

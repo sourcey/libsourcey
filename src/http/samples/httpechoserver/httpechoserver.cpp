@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 #if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
         runMulticoreBenchmarkServers();
 #else
-        raiseServer();
+        raiseEchoServer();
         // raiseBenchmarkServer();
         // libuv::raiseLibuvEchoServer();
 #endif

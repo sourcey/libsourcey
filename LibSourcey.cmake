@@ -324,7 +324,6 @@ set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 set(SCY_ENABLE_LOGGING "${ENABLE_LOGGING}")
 
-
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 status("Parsing 'libsourcey.h.cmake'")
 configure_file(

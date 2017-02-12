@@ -11,6 +11,7 @@
 #define SCY_Base_Tests_H
 
 
+#include "scy/test.h"
 #include "scy/application.h"
 #include "scy/base.h"
 #include "scy/buffer.h"
@@ -26,7 +27,6 @@
 #include "scy/process.h"
 #include "scy/sharedlibrary.h"
 #include "scy/signal.h"
-#include "scy/test.h"
 #include "scy/time.h"
 #include "scy/timer.h"
 #include "scy/thread.h"

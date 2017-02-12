@@ -1,10 +1,13 @@
-#ifndef TURN_TCPinitiator_TEST_H
-#define TURN_TCPinitiator_TEST_H
+#ifndef TURN_TCPInitiator_TEST_H
+#define TURN_TCPInitiator_TEST_H
 
 
 #include "scy/logger.h"
 #include "scy/signal.h"
 #include "scy/timer.h"
+#include "scy/time.h"
+#include "scy/util.h"
+#include "scy/net/tcpsocket.h"
 #include "scy/turn/client/tcpclient.h"
 
 #include <iostream>
@@ -14,30 +17,37 @@ using namespace std;
 
 
 namespace scy {
-namespace turn {
 
 
-struct TCPInitiator : public TCPClientObserver
+struct TCPInitiator : public turn::TCPClientObserver
 {
     int id;
-    int frames;
-    TCPClient client;
+    int nFramesSent;
+    int nFramesWanted;
+    turn::TCPClient client;
     net::Address lastPeerAddr;
     bool success;
-
     NullSignal AllocationCreated;
     Signal<void(const net::Address&)> ConnectionCreated;
     Signal<void(bool)> TestComplete;
 
-    TCPInitiator(int id, const Client::Options opts)
+    const std::string payload = "initiator > responder";
+
+
+    TCPInitiator(int id, const turn::Client::Options opts)
         : id(id)
+        , nFramesSent(0)
+        , nFramesWanted(NUM_ECHO_PACKETS)
         , client(*this, opts)
         , success(false)
     {
         DebugS(this) << id << ": Creating" << endl;
     }
 
-    virtual ~TCPInitiator() { DebugS(this) << id << ": Destroying" << endl; }
+    virtual ~TCPInitiator() 
+    { 
+        DebugS(this) << id << ": Destroying" << endl; 
+    }
 
     void initiate(const std::string& peerIP)
     {
@@ -52,149 +62,114 @@ struct TCPInitiator : public TCPClientObserver
         }
     }
 
-    void onClientStateChange(turn::Client& /* client */, turn::ClientState& state,
-                             const turn::ClientState&)
+    void shutdown()
+    {
+        client.shutdown();
+    }
+
+    void sendPacketToResponder()
+    {
+        if (nFramesSent++ == nFramesWanted) {
+            success = true;
+            TestComplete.emit(success);
+            return;
+        }
+
+        // Send the unix ticks milisecond for checking latency
+        // std::string payload;
+        // payload.append(":");
+        // payload.append(util::itostr(time::ticks()));
+
+        // Send large packets to test throttling
+        // payload.append(65536, 'x');
+        // payload.append(10000, 'x');
+
+        //std::string payload("initiator > responder");
+        client.sendData(payload.c_str(), payload.length(), lastPeerAddr);
+    }
+
+    void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch (state.id()) {
-            case ClientState::None:
+            case turn::ClientState::None:
                 break;
-            case ClientState::Allocating:
+            case turn::ClientState::Allocating:
                 break;
-            case ClientState::Authorizing:
-                // success = true;
-                // TestComplete.emit(/*this, */success);
-                // client.terminate();
+            case turn::ClientState::Authorizing:
                 break;
-            case ClientState::Success:
-                AllocationCreated.emit(/*this*/); //, *this->client
-                success = true;
-                // TestComplete.emit(/*this, */success);
-                // client.terminate();
+            case turn::ClientState::Success:
+                AllocationCreated.emit();
                 break;
-            case ClientState::Failed:
+            case turn::ClientState::Failed:
                 // assert(false);
                 success = false;
-                TestComplete.emit(success);
-                // case ClientState::Terminated:                    //    break;
+                TestComplete.emit(success);                 
                 break;
         }
     }
 
-    void onRelayConnectionCreated(
-        TCPClient& /* client */, const net::TCPSocket& socket,
-        const net::Address& peerAddr) // std::uint32_t connectionID,
+    void onRelayConnectionCreated(turn::TCPClient&, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr)
     {
         DebugS(this) << id << ": Connection Created: " << peerAddr << endl;
-        // Send the intial data packet to peer
-        // client.sendData("hello peer", 10, peerAddr);    /// Remember the last
-        // peer
+        
+        // Remember the last peer
         lastPeerAddr = peerAddr;
         ConnectionCreated.emit(peerAddr);
+
+        // Send the intial data packet to responder 
+        sendPacketToResponder();
     }
 
-    void onRelayConnectionClosed(TCPClient& /* client */,
-                                 const net::TCPSocket& socket,
-                                 const net::Address& peerAddr)
+    void onRelayConnectionClosed(turn::TCPClient&, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr)
     {
         DebugS(this) << id << ": Connection Closed" << endl;
     }
 
-    void onRelayDataReceived(turn::Client& /* client */, const char* data,
-                             std::size_t size, const net::Address& peerAddr)
+    void onRelayDataReceived(turn::Client&, const char* data, std::size_t size, const net::Address& peerAddr)
     {
+#if 0
         std::string payload(data, size);
-
-        /*
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'),
         payload.end());
         if (payload.length() == 8) {
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugS(this) << id << ": Received data from " << peerAddr << ":
-        payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr 
+                << ": payload=" << payload << ", latency=" << latency << endl;
         }
-        */
 
-        /*
         if (size < 150) {
             //std::string payload(data, size);
-            std::string payload(data, 8); // read the first packet from joined
-        packets
+            std::string payload(data, 8); // read the first packet from joined packets
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugS(this) << id << ": Received data from " << peerAddr << ":
-        payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr 
+                << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else
-            DebugS(this) << id << ": Received dummy data from " << peerAddr <<
-        ": size=" << size << endl;
-        */
+            DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+
         // Echo back to peer
-        DebugS(this) << id << ": Received data from  " << peerAddr << ": "
-                     << std::string(data, size) << endl;
+        DebugS(this) << id << ": Received data from  " << peerAddr << ": " << size << endl;
 
         client.sendData(data, size, peerAddr);
+#endif
+
+        sendPacketToResponder();
     }
 
-    void onAllocationPermissionsCreated(turn::Client& /* client */,
-                                        const turn::PermissionList& permissions)
+    void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;
     }
 };
-}
-} //  namespace scy::turn
 
 
-#endif // TURN_TCPinitiator_TEST_H
+} //  namespace scy
 
 
-/*
-bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const
-net::Address& peerAddr)
-{
-    DebugS(this) << "TCPInitiator: " << id << ": Connection Attempt: " <<
-peerAddr << endl;
-    return true;
-};
-*/
-
-/*
-void onConnectionBindError(TCPClient& client, std::uint32_t connectionID)
-{
-    DebugS(this) << "TCPInitiator: " << id << ": Connection Error: " <<
-connectionID << endl;
-    if (_dataSocket) {
-        _dataSocket->StateChange -= sdelegate(this,
-&TCPInitiator::onDataSocketStateChange);
-        _dataSocket->detach(packetSlot<TCPInitiator, RawPacket>(this,
-&TCPInitiator::onRawPacketReceived, 102));
-        _dataSocket = NULL;
-    }
-}
-
-void onRawPacketReceived(void* sender, RawPacket& packet)
-{
-    //DebugS(this) << "TCPInitiator: " << id << ": Data Packet Received: " <<
-std::string(packet.data, packet.size) << endl;
-    DebugS(this) << "TCPInitiator: " << id << ": Data Packet Received: " <<
-packet.size << endl;
-}
-
-void onDataSocketStateChange(void* sender, Net::ClientState& state, const
-Net::ClientState&)
-{
-    DebugS(this) << "Connection state change: " << state.toString() << endl;
-
-    switch (state.id()) {
-    case Net::ClientState::Disconnected:
-    //case Net::ClientState::Error:
-        _dataSocket = NULL;
-        break;
-    }
-}
-*/
+#endif // TURN_TCPInitiator_TEST_H

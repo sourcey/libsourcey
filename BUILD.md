@@ -34,23 +34,6 @@ npm install gitbook-cli
 
 https://github.com/contao/docs/blob/master/cookbook/book.json
 
-
-funcs
-replace '(    *.+);\n((        \/\/.*\n)+)' '$2\n$1;' . -r --include="*.h"
-(    *.+);\n((        \/\/.*\n)+)
-$2$1;\n
-
-inline funcs
-replace '(    [a-z]*.+\n)((        \/*.+\n)+)    {' '$2$1    {' ./uv -r --include="*.h"
-(    [a-z]*.+\n)((        \/*.+\n)+)    {
-$2$1    {
-
-
-class
-replace '// Module: (.*)\n//' '' . -r --include="*.h"
-\n(class | struct )(.*\n)((    \/\/.*\n)+)
-\n$3$1$2
-
 ## Default debug build
 cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_MODULES=ON -DBUILD_APPLICATIONS=ON \
@@ -129,3 +112,6 @@ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_MODULE_net=ON -DBUILD_MODULE_stun=ON \
          -DBUILD_MODULE_turn=ON -DBUILD_MODULE_util=OFF \
          -DBUILD_MODULE_uv=ON
+
+## WebRTC (Win64)
+cmake  -G "Visual Studio 14 Win64" .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF -DBUILD_MODULES=OFF -DBUILD_APPLICATIONS=OFF -DBUILD_SAMPLES=ON -DBUILD_TESTS=ON -DWITH_WEBRTC=ON -DWITH_FFMPEG=ON -DBUILD_MODULE_base=ON -DBUILD_MODULE_crypto=ON -DBUILD_MODULE_http=ON -DBUILD_MODULE_json=ON -DBUILD_MODULE_av=ON -DBUILD_MODULE_net=ON -DBUILD_MODULE_socketio=ON -DBUILD_MODULE_symple=ON -DBUILD_MODULE_util=ON -DBUILD_MODULE_uv=ON -DBUILD_MODULE_stun=ON -DBUILD_MODULE_turn=ON -DBUILD_MODULE_webrtc=ON

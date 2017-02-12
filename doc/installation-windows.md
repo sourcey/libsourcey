@@ -16,7 +16,7 @@ Here we use CMake to generate project for Visual Studio.
 
 ### Install OpenSSL
 
-Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).
+Download and install the 1.0.x branch [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).
 Don't forget to set system path if you download `zip` file version, or if the OpenSSL Installer failed to set the properly:
 
 * `<PATH_TO_OPENSSL_INSTALL_DIR>\bin`

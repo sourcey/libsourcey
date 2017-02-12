@@ -169,6 +169,15 @@ if(MSVC)
     set(LibSourcey_EXTRA_C_FLAGS_RELEASE "${LibSourcey_EXTRA_C_FLAGS_RELEASE} /Zi")
   endif()
 
+  # Getting bitten by this bug: https://public.kitware.com/Bug/view.php?id=15496
+  if(${CMAKE_GENERATOR} MATCHES "Win64")
+    #set(CMAKE_GENERATOR_PLATFORM x64)
+    set(CMAKE_MODULE_LINKER_FLAGS "/machine:x64")
+    set(CMAKE_SHARED_LINKER_FLAGS "/machine:x64")
+    set(CMAKE_STATIC_LINKER_FLAGS "/machine:x64")
+    set(CMAKE_EXE_LINKER_FLAGS "/machine:x64")
+  endif()
+
   if(NOT MSVC64)
     # 64-bit MSVC compiler uses SSE/SSE2 by default
     if(ENABLE_SSE)

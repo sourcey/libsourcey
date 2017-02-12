@@ -360,7 +360,7 @@ void Server::handleAllocateRequest(Request& request)
     //
     auto usernameAttr = request.get<stun::Username>();
     if (!usernameAttr) {
-        TraceL << "NotAuthorized STUN Request" << endl;
+        TraceL << "STUN Request not authorized " << endl;
         respondError(request, 401, "NotAuthorized");
         return;
     }
@@ -532,8 +532,7 @@ void Server::handleAllocateRequest(Request& request)
         allocation = new UDPAllocation(*this, tuple, username, lifetime);
     }
 
-    else if (protocol == 6) {
-        /// TCP
+    else if (protocol == 6) { /// TCP
 
         // 5.1. Receiving a TCP Allocate Request
         //
@@ -567,13 +566,11 @@ void Server::handleAllocateRequest(Request& request)
         // connections on the relayed transport address.  Refer to Section 5.3
         // for details.
 
-        // net::TCPSocket& socket =
-        // static_cast<net::TCPSocket&>(request.socket);
+        // net::TCPSocket& socket = static_cast<net::TCPSocket&>(request.socket);
         // static_cast<net::TCPSocket&>(request.socket)
         // assert(request.socket->/*base().*/refCount() == 1);
-        allocation =
-            new TCPAllocation(*this, getTCPSocket(request.remoteAddress), tuple,
-                              username, lifetime); // request.socket
+        allocation = new TCPAllocation(*this, getTCPSocket(request.remoteAddress), tuple,
+                                       username, lifetime); // request.socket
         // assert(request.socket->/*base().*/refCount() == 2);
     }
 
@@ -712,8 +709,6 @@ void Server::respondError(Request& request, int errorCode,
 {
     TraceL << "Send STUN error: " << errorCode << ": " << errorDesc << endl;
 
-
-
     stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
     errorMsg.setTransactionID(request.transactionID());
 
@@ -753,6 +748,13 @@ net::UDPSocket& Server::udpSocket()
 }
 
 
+net::TCPSocket& Server::tcpSocket()
+{
+
+    return _tcpSocket;
+}
+
+
 ServerObserver& Server::observer()
 {
 
@@ -783,8 +785,6 @@ Timer& Server::timer()
 void Server::addAllocation(ServerAllocation* alloc)
 {
     {
-
-
         assert(_allocations.find(alloc->tuple()) == _allocations.end());
         _allocations[alloc->tuple()] = alloc;
 
@@ -799,8 +799,6 @@ void Server::addAllocation(ServerAllocation* alloc)
 void Server::removeAllocation(ServerAllocation* alloc)
 {
     {
-
-
         auto it = _allocations.find(alloc->tuple());
         if (it != _allocations.end()) {
             _allocations.erase(it);
@@ -817,8 +815,6 @@ void Server::removeAllocation(ServerAllocation* alloc)
 
 ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
-
-
     auto it = _allocations.find(tuple);
     if (it != _allocations.end())
         return it->second;
@@ -828,8 +824,6 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 
 TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
 {
-
-
     for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
         auto alloc = dynamic_cast<TCPAllocation*>(it->second);
         if (alloc && alloc->pairs().exists(connectionID))
@@ -842,8 +836,9 @@ TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
     // assert(0 && "allocation mismatch");
     return nullptr;
 }
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 /// @\}

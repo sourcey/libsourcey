@@ -14,32 +14,31 @@ using namespace std;
 
 
 namespace scy {
-namespace turn {
 
 
-class UDPInitiator : public scy::turn::ClientObserver
+class UDPInitiator : public turn::ClientObserver
 {
 public:
     int id;
-    UDPClient client;
+    int nFramesSent;
+    int nFramesWanted;
+    turn::UDPClient client;
     Timer timer;
-
-    /// The responder local socket address for Send indications
-    net::Address responderAddress;
-
-    // Client::Options    opts;
-    // Signal<const net::Address&>    ConnectionCreated;
-
+    bool success;
     NullSignal AllocationCreated;
     Signal<void(bool)> TestComplete; // unused
+    net::Address responderAddress; ///< The responder local socket address for Send indications
+    const std::string payload = "initiator > responder";
 
-    UDPInitiator(int id, const Client::Options& opts)
+    UDPInitiator(int id, const turn::Client::Options& opts)
         : id(id)
+        , nFramesSent(0)
+        , nFramesWanted(NUM_ECHO_PACKETS)
         , client(*this, opts)
         , timer(1000, 1000)
+        , success(false)
     {
     }
-    virtual ~UDPInitiator() {}
 
     void initiate(const std::string& peerIP)
     {
@@ -54,49 +53,61 @@ public:
         }
     }
 
+    void shutdown()
+    {
+        client.shutdown();
+        timer.stop();
+    }
+
+    void sendPacketToResponder()
+    {
+        if (nFramesSent++ == nFramesWanted) {
+            success = true;
+            TestComplete.emit(success);
+            return;
+        }
+
+        DebugS(this) << id << ": Senidng to responder: " << responderAddress << endl;
+
+        // Send large packets to test throttling
+        // payload.append(65536, 'x');
+        assert(responderAddress.valid());
+        std::string payload(createLatencyCheck(1024));
+        client.sendData(payload.c_str(), payload.length(), responderAddress);
+    }
+
 protected:
-    void onClientStateChange(turn::Client& /* client */, turn::ClientState& state, const turn::ClientState&)
+    void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
         DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch (state.id()) {
-            case ClientState::None:
+            case turn::ClientState::None:
                 break;
-            case ClientState::Allocating:
+            case turn::ClientState::Allocating:
                 break;
-            case ClientState::Authorizing:
+            case turn::ClientState::Authorizing:
                 break;
-            case ClientState::Success:
-                AllocationCreated.emit(/*this*/);
-#ifdef TEST_INITIATOR_TO_RESPONDER
-                timer.Timeout += slot(this, &UDPInitiator::onSendTimer);
-                timer.start();
-#endif
+            case turn::ClientState::Success:
+                AllocationCreated.emit();
+
+                // Send the intial data packet to responder 
+                sendPacketToResponder();
+//#ifdef TEST_INITIATOR_TO_RESPONDER
+//                timer.Timeout += slot(this, &UDPInitiator::onSendTimer);
+//                timer.start();
+//#endif
                 break;
-            case ClientState::Failed:
-                // case ClientState::Terminated:                    //    break;
+            case turn::ClientState::Failed:
                 break;
         }
     }
 
-    void onSendTimer()
+    void onRelayDataReceived(turn::Client&, const char* data, std::size_t size, const net::Address& peerAddr)
     {
-        assert(responderAddress.valid());
-        std::string payload(createLatencyCheck(1024));
-        client.sendData(payload.c_str(), payload.length(), responderAddress);
-
-        // socket.send(payload.c_str(), payload.length());    /// Echo back to
-        // peer
-        // client.sendData(data, size, peerAddr);
-    }
-
-    void onRelayDataReceived(turn::Client& /* client */, const char* data,
-                             std::size_t size, const net::Address& peerAddr)
-    {
-#ifdef TEST_RESPONDER_TO_INITIATOR
+#if 0 && TEST_RESPONDER_TO_INITIATOR
         std::string payload(data, size);
-        payload.erase(std::remove(payload.begin(), payload.end(), 'x'),
-                      payload.end());
+        payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() == 9) {
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
@@ -108,7 +119,6 @@ protected:
             DebugS(this) << id << ": Received dummy data from " << peerAddr
                          << ": payloadLength=" << payload.length() << endl;
 
-            /*
         if (size < 150) {
             std::string payload(data, size);
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
@@ -118,38 +128,30 @@ protected:
         }
         else
             DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
-        */ /// Echo back to peer
-               // client.sendData(data, size, peerAddr);
-#else          // if TEST_INITIATOR_TO_RESPONDER
-        DebugS(this) << id << ": Received response data from " << peerAddr
-                     << ": size=" << size << endl;
+        
+        // Echo back to peer
+        // client.sendData(data, size, peerAddr);
 #endif
+        DebugS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
+
+        // Send the intial data packet to responder 
+        sendPacketToResponder();
     }
 
-    void onAllocationPermissionsCreated(turn::Client& /* client */, const turn::PermissionList& permissions)
+    void onAllocationCreated(turn::Client& client, const stun::Transaction& transaction) 
+    {
+        DebugS(this) << id << ": Permissions Created" << endl;
+        // AllocationCreated
+    }
+
+    void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
         DebugS(this) << id << ": Permissions Created" << endl;
     }
 };
-}
-} //  namespace scy::turn
+
+
+} //  namespace scy
 
 
 #endif // TURN_UDPinitiator_TEST_H
-
-
-/*
-void initiate(const Client::Options opts, const std::string& peerIP)
-{
-    try    {
-        client = new UDPClient(*this, opts); //, reactor, runner
-        //client.StateChange += slot(this, &UDPInitiator::onStateChange);
-        client.addPermission(peerIP);
-        client.initiate();
-    }
-    catch (std::exception& exc) {
-        errorL() << "UDPInitiator: " << id << ": Error: " << exc.what() <<
-std::endl;
-    }
-}
-*/

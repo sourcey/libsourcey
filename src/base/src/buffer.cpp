@@ -402,14 +402,14 @@ BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
     init(buf.data(), buf.capacity(), order);
-    // _buffer = &buf;
+    _buffer = &buf; // using dynamic buffer
 }
 
 
 void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
 {
     //_vector = nullptr;
-    // _buffer = nullptr;
+    _buffer = nullptr;
     _position = 0;
     _limit = size;
     //_capacity = size;
@@ -484,16 +484,14 @@ void BitWriter::putU8(std::uint8_t val)
 
 void BitWriter::putU16(std::uint16_t val)
 {
-    std::uint16_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     put(reinterpret_cast<const char*>(&v), 2);
 }
 
 
 void BitWriter::putU24(std::uint32_t val)
 {
-    std::uint32_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     char* start = reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
@@ -504,16 +502,14 @@ void BitWriter::putU24(std::uint32_t val)
 
 void BitWriter::putU32(std::uint32_t val)
 {
-    std::uint32_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     put(reinterpret_cast<const char*>(&v), 4);
 }
 
 
 void BitWriter::putU64(std::uint64_t val)
 {
-    std::uint64_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     put(reinterpret_cast<const char*>(&v), 8);
 }
 
@@ -526,30 +522,30 @@ void BitWriter::put(const std::string& val)
 
 void BitWriter::put(const char* val, std::size_t len)
 {
-    // // Write to dynamic buffer (not compatible with BitReader methods)
-    // if (_buffer) {;
-    //
-    //     //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
-    //     _buffer->insert(_buffer->end(), val, val + len);
-    //     _bytes = _buffer->data();
-    //     _limit = _buffer->size();
-    //     _position += len;
-    // }
-    //
-    // Write to fixed size buffer
-    // else {
-    if ((_position + len) > _limit) {
-        ErrorS(this) << "insufficient buffer capacity: "
-                     << "len=" << len << ", "
-                     << "available=" << available() << ", "
-                     << "position=" << position() << ", "
-                     << "limit=" << limit() << std::endl;
-        throw std::out_of_range("insufficient buffer capacity");
+    // Write to dynamic buffer (not compatible with BitReader methods)
+    if (_buffer) {
+    
+        //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
+        _buffer->insert(_buffer->end(), val, val + len);
+        _bytes = _buffer->data();
+        _limit = _buffer->size();
+        _position += len;
     }
 
-    memcpy(_bytes + _position, val, len);
-    _position += len;
-    // }
+    // Write to fixed size buffer
+    else {
+        if ((_position + len) > _limit) {
+            ErrorS(this) << "insufficient buffer capacity: "
+                         << "len=" << len << ", "
+                         << "available=" << available() << ", "
+                         << "position=" << position() << ", "
+                         << "limit=" << limit() << std::endl;
+            throw std::out_of_range("insufficient buffer capacity");
+        }
+
+        memcpy(_bytes + _position, val, len);
+        _position += len;
+    }
 }
 
 
@@ -566,16 +562,14 @@ bool BitWriter::updateU8(std::uint8_t val, std::size_t pos)
 
 bool BitWriter::updateU16(std::uint16_t val, std::size_t pos)
 {
-    std::uint16_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     return update(reinterpret_cast<const char*>(&v), 2, pos);
 }
 
 
 bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 {
-    std::uint32_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     char* start = reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
@@ -586,16 +580,14 @@ bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 
 bool BitWriter::updateU32(std::uint32_t val, std::size_t pos)
 {
-    std::uint32_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     return update(reinterpret_cast<const char*>(&v), 4, pos);
 }
 
 
 bool BitWriter::updateU64(std::uint64_t val, std::size_t pos)
 {
-    std::uint64_t v =
-        (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     return update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 

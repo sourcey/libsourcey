@@ -117,7 +117,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
 }
 
 
-std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
+std::size_t Message::read(const ConstBuffer& buf)
 {
     TraceL << "Parse STUN packet: " << buf.size() << endl;
 
@@ -128,8 +128,7 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
         std::uint16_t type;
         reader.getU16(type);
         if (type & 0x8000) {
-            // RTP and RTCP set MSB of first byte, since first two bits are
-            // version,
+            // RTP and RTCP set MSB of first byte, since first two bits are version,
             // and version is always 2 (10). If set, this is not a STUN packet.
             WarnL << "Not STUN packet" << endl;
             return 0;
@@ -140,7 +139,6 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
 
         std::uint16_t classType = type & 0x0110;
         std::uint16_t methodType = type & 0x000F;
-
         if (!isValidMethod(methodType)) {
             WarnL << "STUN message unknown method: " << methodType << endl;
             return 0;
@@ -152,8 +150,7 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
         // Message length
         reader.getU16(_size);
         if (_size > buf.size()) {
-            WarnL << "STUN message larger than buffer: " << _size << " > "
-                  << buf.size() << endl;
+            WarnL << "STUN message larger than buffer: " << _size << " > " << buf.size() << endl;
             return 0;
         }
 
@@ -187,9 +184,8 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
                 attr->read(reader); // parse or throw
                 _attrs.push_back(attr);
 
-                // TraceL << "Parse attribute: " <<
-                // Attribute::typeString(attrType) << ": " << attrLength <<
-                // endl; //  << ": " << rest
+                // TraceL << "Parse attribute: " << Attribute::typeString(attrType) << ": " 
+                //    << attrLength << endl;
             } else
                 WarnL << "Failed to parse attribute: "
                       << Attribute::typeString(attrType) << ": " << attrLength
@@ -198,8 +194,7 @@ std::size_t Message::read(const ConstBuffer& buf) // BitReader& reader
             rest -= (attrLength + kAttributeHeaderSize + padLength);
         }
 
-        TraceL << "Parse success: " << reader.position() << ": " << buf.size()
-               << endl;
+        TraceL << "Parse success: " << reader.position() << ": " << buf.size() << endl;
         assert(rest == 0);
         assert(reader.position() == _size + kMessageHeaderSize);
         return reader.position();
@@ -229,6 +224,8 @@ void Message::write(Buffer& buf) const
         writer.putU16(_attrs[i]->size());
         _attrs[i]->write(writer);
     }
+
+
 }
 
 

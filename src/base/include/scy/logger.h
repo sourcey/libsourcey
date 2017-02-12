@@ -90,6 +90,7 @@ class SCY_EXTERN LogChannel;
 //
 
 
+/// Log output stream writer.
 class SCY_EXTERN LogWriter
 {
 public:
@@ -106,6 +107,7 @@ public:
 //
 
 
+/// Thread based log output stream writer.
 class SCY_EXTERN AsyncLogWriter : public LogWriter, public basic::Runnable
 {
 public:

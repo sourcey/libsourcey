@@ -25,16 +25,13 @@ namespace scy {
 namespace turn {
 
 
-TCPClient::TCPClient(TCPClientObserver& observer,
-                     const Client::Options& options)
+TCPClient::TCPClient(TCPClientObserver& observer, const Client::Options& options)
     : Client(observer, options)
     , _observer(observer)
 {
     TraceL << "Create" << endl;
 
     _socket = net::makeSocket<net::TCPSocket>();
-    // std::make_shared<net::TCPSocket>();
-    //_socket.assign(new net::TCPSocket, false);
 }
 
 
@@ -108,8 +105,7 @@ void TCPClient::sendConnectRequest(const net::Address& peerAddress)
 }
 
 
-void TCPClient::sendData(const char* data, std::size_t size,
-                         const net::Address& peerAddress)
+void TCPClient::sendData(const char* data, std::size_t size, const net::Address& peerAddress)
 {
     TraceL << "Send data to " << peerAddress << endl;
 
@@ -158,8 +154,8 @@ bool TCPClient::handleResponse(const stun::Message& response)
 void TCPClient::handleConnectResponse(const stun::Message& response)
 {
     // If the connection is successfully established, the client will
-    // receive a success response.  That response will contain a
-    // CONNECTION-ID attribute.  The client MUST initiate a new TCP
+    // receive a success response. That response will contain a
+    // CONNECTION-ID attribute. The client MUST initiate a new TCP
     // connection to the server, utilizing the same destination transport
     // address to which the control connection was established.  This
     // connection MUST be made using a different local transport address.
@@ -286,8 +282,7 @@ void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 }
 
 
-bool TCPClient::createAndBindConnection(std::uint32_t connectionID,
-                                        const net::Address& peerAddress)
+bool TCPClient::createAndBindConnection(std::uint32_t connectionID, const net::Address& peerAddress)
 {
     TraceL << "Create and bind connection: " << peerAddress << endl;
 

@@ -136,6 +136,7 @@ GarbageCollector::Cleaner::~Cleaner()
 
 void GarbageCollector::Cleaner::finalize()
 {
+    assert(!_finalize && "finalizing twice");
     _finalize = true;
 
     // Ensure previous calls to uv_stop don't prevent cleanup.
@@ -176,12 +177,12 @@ void GarbageCollector::Cleaner::work()
     if (_finalize) {
         std::lock_guard<std::mutex> guard(_mutex);
         if (_ready.empty() && _pending.empty()) {
-            // Stop and close the timer handle allowing the finalize() method to return.
+            // Stop the timer handle allowing the finalize() method to return.
             _timer.stop();
 
             TraceL << "Finalization complete: " << _loop->active_handles << std::endl;
 #ifdef _DEBUG
-            // Print active handles, there should only be 1 left
+            // Print active handles, there should only be 1 left (our timer)
             uv_walk(_loop, [](uv_handle_t* handle, void* /* arg */) {
                 DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
             }, nullptr);
