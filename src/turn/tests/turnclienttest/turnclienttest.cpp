@@ -36,37 +36,37 @@ int main(int argc, char** argv)
     // =========================================================================
     // TURN TCP Client
     //
-//    describe("TURN TCP client", [&]() {
-//#if RAISE_LOCAL_SERVER
-//        RunTestServer()
-//#endif
-//        TCPInitiator initiator(0, co);
-//        TCPResponder responder(0);
-//
-//        initiator.AllocationCreated += [&]()
-//        {
-//            DebugL << "Initiator allocation created" << endl;
-//
-//            // Start the responder when the allocation is created
-//            responder.connect(initiator.client.relayedAddress());
-//        };
-//
-//        initiator.TestComplete += [&](bool success)
-//        {
-//            DebugL << "Test complete: " << success << endl;
-//            expect(success);
-//            initiator.shutdown();
-//            responder.shutdown();
-//#if RAISE_LOCAL_SERVER
-//            srv.stop();
-//#endif
-//        };
-//
-//        // TODO: Use STUN binding request to get IP
-//        initiator.initiate(TURN_AUTHORIZE_PEER_IP);
-//
-//        uv::runDefaultLoop();
-//    });
+    describe("TURN TCP client", [&]() {
+#if RAISE_LOCAL_SERVER
+        RunTestServer()
+#endif
+        TCPInitiator initiator(0, co);
+        TCPResponder responder(0);
+
+        initiator.AllocationCreated += [&]()
+        {
+            DebugL << "Initiator allocation created" << endl;
+
+            // Start the responder when the allocation is created
+            responder.connect(initiator.client.relayedAddress());
+        };
+
+        initiator.TestComplete += [&](bool success)
+        {
+            DebugL << "Test complete: " << success << endl;
+            expect(success);
+            initiator.shutdown();
+            responder.shutdown();
+#if RAISE_LOCAL_SERVER
+            srv.stop();
+#endif
+        };
+
+        // TODO: Use STUN binding request to get IP
+        initiator.initiate(TURN_AUTHORIZE_PEER_IP);
+
+        uv::runDefaultLoop();
+    });
 
 
     // =========================================================================
@@ -110,6 +110,5 @@ int main(int argc, char** argv)
 
 
     test::runAll();
-
     return test::finalize();
 }

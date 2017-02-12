@@ -32,6 +32,14 @@ template <typename RT, typename... Args> struct Slot;
 } // namespace internal
 
 
+/// Exception to break out of the current Signal callback scope.
+class StopPropagation : public std::exception
+{
+public:
+    virtual ~StopPropagation() throw() {};
+};
+
+
 /// Signal and slots implementation.
 ///
 /// To create a signal, declare member variables of type
@@ -121,13 +129,18 @@ public:
     typedef std::function<RT(Args...)> Function;
     typedef std::shared_ptr<internal::Slot<RT, Args...>> SlotPtr;
 
-    /// Connects a lambda or `std::function` to the `Signal`.
+    /// Connects a `lambda` or `std::function` to the `Signal`.
     /// The returned value can be used to detach the slot.
     int attach(Function const& func, void* instance = nullptr, int id = -1, int priority = -1) const
     {
         return attach(std::make_shared<internal::Slot<RT, Args...>>(
             new FunctionDelegate<RT, Args...>(func), instance, id, priority));
     }
+
+    //static bool ComparePrioroty(const SlotPtr* l, const SlotPtr* r)
+    //{
+    //    return l->priority > r->priority;
+    //}
 
     /// Connects a `SlotPtr` instance to the `Signal`.
     /// The returned value can be used to detach the slot.
@@ -138,6 +151,9 @@ public:
         if (slot->id == -1)
             slot->id = ++_lastId; // TODO: assert unique?
         _slots.push_back(slot);
+        //_slots.sort(Slot::ComparePrioroty);
+        std::sort(_slots.begin(), _slots.end(),
+            [](SlotPtr const& l, SlotPtr const& r) { return l->priority > r->priority; });
         return slot->id;
     }
 
@@ -203,10 +219,14 @@ public:
     /// Emits the signal to all attached functions.
     virtual void emit(Args... args) //const
     {
-        for (auto const& slot : slots()) {
-            if (slot->alive()) {
-                (*slot->delegate)(std::forward<Args>(args)...);
+        try {
+            for (auto const& slot : slots()) {
+                if (slot->alive()) {
+                    (*slot->delegate)(std::forward<Args>(args)...);
+                }
             }
+        }
+        catch (StopPropagation&) {
         }
     }
 
@@ -276,8 +296,7 @@ slot(RT (*method)(Args...), int id = -1, int priority = -1)
     return std::make_shared<internal::Slot<RT, Args...>>(
         new FunctionDelegate<RT, Args...>([method](Args... args) {
             return (*method)(std::forward<Args>(args)...);
-        }),
-        nullptr, id, priority);
+        }), nullptr, id, priority);
 }
 
 
@@ -302,9 +321,15 @@ template <typename RT, typename... Args> struct Slot
         flag.test_and_set();
     }
 
-    void kill() { flag.clear(); }
+    void kill() 
+    { 
+        flag.clear(); 
+    }
 
-    bool alive() { return flag.test_and_set(); }
+    bool alive() 
+    { 
+        return flag.test_and_set(); 
+    }
 
     /// NonCopyable and NonMovable
     Slot(const Slot&) = delete;

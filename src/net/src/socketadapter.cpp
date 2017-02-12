@@ -159,10 +159,10 @@ void SocketAdapter::emitSocketClose(Socket& socket)
 
 void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
 {
-    Connect += slot(adapter, &net::SocketAdapter::onSocketConnect, priority);
-    Recv += slot(adapter, &net::SocketAdapter::onSocketRecv, priority);
-    Error += slot(adapter, &net::SocketAdapter::onSocketError, priority);
-    Close += slot(adapter, &net::SocketAdapter::onSocketClose, priority);
+    Connect += slot(adapter, &net::SocketAdapter::onSocketConnect, -1, priority);
+    Recv += slot(adapter, &net::SocketAdapter::onSocketRecv, -1, priority);
+    Error += slot(adapter, &net::SocketAdapter::onSocketError, -1, priority);
+    Close += slot(adapter, &net::SocketAdapter::onSocketClose, -1, priority);
 }
 
 

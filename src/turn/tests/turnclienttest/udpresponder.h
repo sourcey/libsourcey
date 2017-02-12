@@ -47,7 +47,7 @@ public:
 
     void connect(const net::Address& relayAddr)
     {
-        DebugS(this) << id << ": ####################################################################### Starting on: " << relayAddr << endl;
+        DebugS(this) << id << ": Starting on: " << relayAddr << endl;
 
         try {
             this->relayedAddr = relayAddr;
@@ -74,7 +74,7 @@ public:
         socket.send(payload.c_str(), payload.length());
     }
 
-    void onSocketConnect(net::Socket& socket)
+    void onSocketConnect(net::Socket&)
     {
 //#if TEST_RESPONDER_TO_INITIATOR_LATENCY
 //        timer.Timeout += slot(this, &UDPResponder::onSendTimer);
@@ -82,7 +82,7 @@ public:
 //#endif
     }
 
-    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddr)
+    void onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddr)
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
         DebugS(this) << id << ": On recv: " << peerAddr << ": " << buffer.size() << std::endl;
@@ -91,12 +91,12 @@ public:
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
     }
 
-    void onSocketError(net::Socket& socket, const scy::Error& error)
+    void onSocketError(net::Socket&, const scy::Error& error)
     {
         DebugS(this) << id << ": On error: " << error.message << std::endl;
     }
 
-    void onSocketClose(net::Socket& socket)
+    void onSocketClose(net::Socket&)
     {
         DebugS(this) << id << ": On close" << std::endl;
         shutdown();

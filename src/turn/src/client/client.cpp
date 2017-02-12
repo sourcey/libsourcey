@@ -148,10 +148,10 @@ void Client::sendRefresh()
     // allocation.
     //
     // If a client wishes to continue using an allocation, then the client
-    // MUST refresh it before it expires.  It is suggested that the client
-    // refresh the allocation roughly 1 minute before it expires.  If a
+    // MUST refresh it before it expires. It is suggested that the client
+    // refresh the allocation roughly 1 minute before it expires. If a
     // client no longer wishes to use an allocation, then it SHOULD
-    // explicitly delete the allocation.  A client MAY refresh an allocation
+    // explicitly delete the allocation. A client MAY refresh an allocation
     // at any time for other reasons.
 
     TraceL << "Send refresh allocation request" << endl;
@@ -340,23 +340,23 @@ void Client::sendAllocate()
 
     // The client forms an Allocate request as follows.
     //
-    // The client first picks a host transport address.  It is RECOMMENDED
+    // The client first picks a host transport address. It is RECOMMENDED
     // that the client pick a currently unused transport address, typically
     // by allowing the underlying OS to pick a currently unused port for a
     // new socket.
     //
     // The client then picks a transport protocol to use between the client
-    // and the server.  The transport protocol MUST be one of UDP, TCP, or
-    // TLS-over-TCP.  Since this specification only allows UDP between the
+    // and the server. The transport protocol MUST be one of UDP, TCP, or
+    // TLS-over-TCP. Since this specification only allows UDP between the
     // server and the peers, it is RECOMMENDED that the client pick UDP
-    // unless it has a reason to use a different transport.  One reason to
+    // unless it has a reason to use a different transport. One reason to
     // pick a different transport would be that the client believes, either
     // through configuration or by experiment, that it is unable to contact
-    // any TURN server using UDP.  See Section 2.1 for more discussion.
+    // any TURN server using UDP. See Section 2.1 for more discussion.
     //
     // The client also picks a server transport address, which SHOULD be
-    // done as follows.  The client receives (perhaps through configuration)
-    // a domain name for a TURN server.  The client then uses the DNS
+    // done as follows. The client receives (perhaps through configuration)
+    // a domain name for a TURN server. The client then uses the DNS
     // procedures described in [RFC5389], but using an SRV service name of
     // "turn" (or "turns" for TURN over TLS) instead of "stun" (or "stuns").
     // For example, to find servers in the example.com domain, the client
@@ -371,7 +371,7 @@ void Client::sendAllocate()
     transaction->request().setMethod(stun::Message::Allocate);
 
     // The client MUST include a REQUESTED-TRANSPORT attribute in the
-    // request.  This attribute specifies the transport protocol between the
+    // request. This attribute specifies the transport protocol between the
     // server and the peers (note that this is NOT the transport protocol
     // that appears in the 5-tuple).
     //
@@ -382,8 +382,8 @@ void Client::sendAllocate()
     // If the client wishes the server to initialize the time-to-expiry
     // field of the allocation to some value other than the default
     // lifetime, then it MAY include a LIFETIME attribute specifying its
-    // desired value.  This is just a request, and the server may elect to
-    // use a different value.  Note that the server will ignore requests to
+    // desired value. This is just a request, and the server may elect to
+    // use a different value. Note that the server will ignore requests to
     // initialize the field to less than the default value.
     //
     if (_options.lifetime) {
@@ -395,21 +395,21 @@ void Client::sendAllocate()
     // If the client wishes to later use the DONT-FRAGMENT attribute in one
     // or more Send indications on this allocation, then the client SHOULD
     // include the DONT-FRAGMENT attribute in the Allocate
-    // transaction->request().  This
+    // transaction->request(). This
     // allows the client to test whether this attribute is supported by the
     // server.
     //
     // If the client requires the port number of the relayed transport
-    // address be even, the client includes the EVEN-PORT attribute.  If
-    // this attribute is not included, then the port can be even or odd.  By
+    // address be even, the client includes the EVEN-PORT attribute. If
+    // this attribute is not included, then the port can be even or odd. By
     // setting the R bit in the EVEN-PORT attribute to 1, the client can
     // request that the server reserve the next highest port number (on the
-    // same IP address) for a subsequent allocation.  If the R bit is 0, no
+    // same IP address) for a subsequent allocation. If the R bit is 0, no
     // such request is made.
     //
     // The client MAY also include a RESERVATION-TOKEN attribute in the
     // request to ask the server to use a previously reserved port for the
-    // allocation.  If the RESERVATION-TOKEN attribute is included, then the
+    // allocation. If the RESERVATION-TOKEN attribute is included, then the
     // client MUST omit the EVEN-PORT attribute.
     //
     // Once constructed, the client sends the Allocate request on the
@@ -430,8 +430,8 @@ void Client::handleAllocateResponse(const stun::Message& response)
     // If the client receives an Allocate success response, then it MUST
     // check that the mapped address and the relayed transport address are
     // in an address family that the client understands and is prepared to
-    // handle.  This specification only covers the case where these two
-    // addresses are IPv4 addresses.  If these two addresses are not in an
+    // handle. This specification only covers the case where these two
+    // addresses are IPv4 addresses. If these two addresses are not in an
     // address family which the client is prepared to handle, then the
     // client MUST delete the allocation (Section 7) and MUST NOT attempt to
     // create another allocation on that server until it believes the
@@ -443,7 +443,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
     //    server over IPv4, or vice versa.
     //
     // Otherwise, the client creates its own copy of the allocation data
-    // structure to track what is happening on the server.  In particular,
+    // structure to track what is happening on the server. In particular,
     // the client needs to remember the actual lifetime received back from
     // the server, rather than the value sent to the server in the request.
     //
@@ -462,13 +462,13 @@ void Client::handleAllocateResponse(const stun::Message& response)
 
     // The client must also remember the 5-tuple used for the request and
     // the username and password it used to authenticate the request to
-    // ensure that it reuses them for subsequent messages.  The client also
+    // ensure that it reuses them for subsequent messages. The client also
     // needs to track the channels and permissions it establishes on the
     // server.
     //
     // The client will probably wish to send the relayed transport address
     // to peers (using some method not specified here) so the peers can
-    // communicate with it.  The client may also wish to use the server-
+    // communicate with it. The client may also wish to use the server-
     // reflexive address it receives in the XOR-MAPPED-ADDRESS attribute in
     // its ICE processing.
     //
@@ -524,18 +524,18 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
     // processing depends on the actual error code returned:
 
     // o  (Request timed out): There is either a problem with the server, or
-    //    a problem reaching the server with the chosen transport.  The
+    //    a problem reaching the server with the chosen transport. The
     //    client considers the current transaction as having failed but MAY
     //    choose to retry the Allocate request using a different transport
     //    (e.g., TCP instead of UDP).
 
     switch (errorAttr->errorCode()) {
         // 300 (Try Alternate): The server would like the client to use the
-        // server specified in the ALTERNATE-SERVER attribute instead.  The
+        // server specified in the ALTERNATE-SERVER attribute instead. The
         // client considers the current transaction as having failed, but
         // SHOULD try the Allocate request with the alternate server before
         // trying any other servers (e.g., other servers discovered using the
-        // SRV procedures).  When trying the Allocate request with the
+        // SRV procedures). When trying the Allocate request with the
         // alternate server, the client follows the ALTERNATE-SERVER
         // procedures specified in [RFC5389].
         case 300:
@@ -544,8 +544,8 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
 
         // 400 (Bad Request): The server believes the client's request is
-        // malformed for some reason.  The client considers the current
-        // transaction as having failed.  The client MAY notify the client or
+        // malformed for some reason. The client considers the current
+        // transaction as having failed. The client MAY notify the client or
         // operator and SHOULD NOT retry the request with this server until
         // it believes the problem has been fixed.
         case 400:
@@ -555,9 +555,9 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
 
         // 401 (NotAuthorized): If the client has followed the procedures of
         // the long-term credential mechanism and still gets this error, then
-        // the server is not accepting the client's credentials.  In this
+        // the server is not accepting the client's credentials. In this
         // case, the client considers the current transaction as having
-        // failed and SHOULD notify the client or operator.  The client SHOULD
+        // failed and SHOULD notify the client or operator. The client SHOULD
         // NOT send any further requests to this server until it believes the
         // problem has been fixed.
         case 401: {
@@ -579,7 +579,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
                 // Now that our realm and nonce are set we can re-send the
                 // allocate request.
                 if (_realm.size() && _nonce.size()) {
-                    TraceL << "Resending allocation request" << endl;
+                    TraceL << "Resending authenticated allocation request" << endl;
                     sendAllocate();
                     return;
                 }
@@ -589,8 +589,8 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         break;
 
         // 403 (Forbidden): The request is valid, but the server is refusing
-        // to perform it, likely due to administrative restrictions.  The
-        // client considers the current transaction as having failed.  The
+        // to perform it, likely due to administrative restrictions. The
+        // client considers the current transaction as having failed. The
         // client MAY notify the client or operator and SHOULD NOT retry the
         // same request with this server until it believes the problem has
         // been fixed.
@@ -604,7 +604,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         // a 420 error code and listed the DONT-FRAGMENT attribute in the
         // UNKNOWN-ATTRIBUTES attribute in the error response, then the
         // client now knows that the server does not support the DONT-
-        // FRAGMENT attribute.  The client considers the current transaction
+        // FRAGMENT attribute. The client considers the current transaction
         // as having failed but MAY choose to retry the Allocate request
         // without the DONT-FRAGMENT attribute.
         case 420:
@@ -612,14 +612,14 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
 
         // 437 (Allocation Mismatch): This indicates that the client has
-        // picked a 5-tuple that the server sees as already in use.  One way
+        // picked a 5-tuple that the server sees as already in use. One way
         // this could happen is if an intervening NAT assigned a mapped
         // transport address that was used by another client that recently
-        // crashed.  The client considers the current transaction as having
-        // failed.  The client SHOULD pick another client transport address
+        // crashed. The client considers the current transaction as having
+        // failed. The client SHOULD pick another client transport address
         // and retry the Allocate request (using a different transaction id).
         // The client SHOULD try three different client transport addresses
-        // before giving up on this server.  Once the client gives up on the
+        // before giving up on this server. Once the client gives up on the
         // server, it SHOULD NOT try to create another allocation on the
         // server for 2 minutes.
         case 437:
@@ -633,7 +633,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
 
         // 441 (Wrong Credentials): The client should not receive this error
-        // in response to a Allocate request.  The client MAY notify the client
+        // in response to a Allocate request. The client MAY notify the client
         // or operator and SHOULD NOT retry the same request with this server
         // until it believes the problem has been fixed.
         case 441:
@@ -641,7 +641,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
 
         // 442 (Unsupported Transport Address): The client should not receive
-        // this error in response to a request for a UDP allocation.  The
+        // this error in response to a request for a UDP allocation. The
         // client MAY notify the client or operator and SHOULD NOT reattempt
         // the request with this server until it believes the problem has
         // been fixed.
@@ -650,8 +650,8 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
             break;
 
         // 486 (Allocation Quota Reached): The server is currently unable to
-        // create any more allocations with this username.  The client
-        // considers the current transaction as having failed.  The client
+        // create any more allocations with this username. The client
+        // considers the current transaction as having failed. The client
         // SHOULD wait at least 1 minute before trying to create any more
         // allocations on the server.
         case 486:
@@ -663,10 +663,10 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         // 508 (Insufficient Capacity): The server has no more relayed
         // transport addresses available, or has none with the requested
         // properties, or the one that was reserved is no longer available.
-        // The client considers the current operation as having failed.  If
+        // The client considers the current operation as having failed. If
         // the client is using either the EVEN-PORT or the RESERVATION-TOKEN
         // attribute, then the client MAY choose to remove or modify this
-        // attribute and try again immediately.  Otherwise, the client SHOULD
+        // attribute and try again immediately. Otherwise, the client SHOULD
         // wait at least 1 minute before trying to create any more
         // allocations on this server.
         case 508:
@@ -687,7 +687,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
     if (!closed()) {
         _observer.onAllocationFailed(
             *this, errorAttr->errorCode(),
-            errorAttr->reason()); // may result in deletion
+            errorAttr->reason()); // may result in instance deletion
     }
 }
 
@@ -724,10 +724,10 @@ void Client::sendCreatePermission()
     //
     // When forming a CreatePermission request, the client MUST include at
     // least one XOR-PEER-ADDRESS attribute, and MAY include more than one
-    // such attribute.  The IP address portion of each XOR-PEER-ADDRESS
+    // such attribute. The IP address portion of each XOR-PEER-ADDRESS
     // attribute contains the IP address for which a permission should be
-    // installed or refreshed.  The port portion of each XOR-PEER-ADDRESS
-    // attribute will be ignored and can be any arbitrary value.  The
+    // installed or refreshed. The port portion of each XOR-PEER-ADDRESS
+    // attribute will be ignored and can be any arbitrary value. The
     // various XOR-PEER-ADDRESS attributes can appear in any order.
 
     auto transaction = createTransaction();
@@ -804,14 +804,14 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
     // permission towards the peer (see Section 8).
     //
     // To initiate the ChannelBind transaction, the client forms a
-    // ChannelBind request.  The channel to be bound is specified in a
+    // ChannelBind request. The channel to be bound is specified in a
     // CHANNEL-NUMBER attribute, and the peer's transport address is
-    // specified in an XOR-PEER-ADDRESS attribute.  Section 11.2 describes
+    // specified in an XOR-PEER-ADDRESS attribute. Section 11.2 describes
     // the restrictions on these attributes.
     //
     // Rebinding a channel to the same transport address that it is already
     // bound to provides a way to refresh a channel binding and the
-    // corresponding permission without sending data to the peer.  Note
+    // corresponding permission without sending data to the peer. Note
     // however, that permissions need to be refreshed more frequently than
     // channels.
     assert(0 && "not implemented");
@@ -828,14 +828,14 @@ void Client::sendData(const char* data, std::size_t size, const net::Address& pe
     request.setMethod(stun::Message::SendIndication);
 
     // The client can use a Send indication to pass data to the server for
-    // relaying to a peer.  A client may use a Send indication even if a
-    // channel is bound to that peer.  However, the client MUST ensure that
+    // relaying to a peer. A client may use a Send indication even if a
+    // channel is bound to that peer. However, the client MUST ensure that
     // there is a permission installed for the IP address of the peer to
     // which the Send indication is being sent; this prevents a third party
     // from using a TURN server to send data to arbitrary destinations.
     //
     // When forming a Send indication, the client MUST include an XOR-PEER-
-    // ADDRESS attribute and a DATA attribute.  The XOR-PEER-ADDRESS
+    // ADDRESS attribute and a DATA attribute. The XOR-PEER-ADDRESS
     // attribute contains the transport address of the peer to which the
     // data is to be sent, and the DATA attribute contains the actual
     // application data to be sent to the peer.
@@ -884,10 +884,10 @@ void Client::handleDataIndication(const stun::Message& response)
 {
     // When the client receives a Data indication, it checks that the Data
     // indication contains both an XOR-PEER-ADDRESS and a DATA attribute,
-    // and discards the indication if it does not.  The client SHOULD also
+    // and discards the indication if it does not. The client SHOULD also
     // check that the XOR-PEER-ADDRESS attribute value contains an IP
     // address with which the client believes there is an active permission,
-    // and discard the Data indication otherwise.  Note that the DATA
+    // and discard the Data indication otherwise. Note that the DATA
     // attribute is allowed to contain zero bytes of data.
     //
     //    NOTE: The latter check protects the client against an attacker who

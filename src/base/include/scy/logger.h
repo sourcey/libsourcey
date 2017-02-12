@@ -140,6 +140,7 @@ protected:
 //
 
 
+/// Logger class.
 class SCY_EXTERN Logger
 {
 public:

@@ -282,13 +282,13 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
 
     if (nread < 0) {
         // assert(0 && "unexpected error");
-        TraceL << "Recv error: " << uv_err_name(nread) << endl;
+        DebugL << "Recv error: " << uv_err_name(nread) << endl;
         socket->setUVError("UDP error", nread);
         return;
     }
 
     if (nread == 0) {
-        assert(addr == NULL);
+        assert(addr == nullptr);
         // Returning unused buffer, this is not an error
         // 11/12/13: This happens on linux but not windows
         // socket->setUVError("End of file", UV_EOF);
@@ -312,8 +312,7 @@ void UDPSocket::afterSend(uv_udp_send_t* req, int status)
 }
 
 
-void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
-                                uv_buf_t* buf)
+void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
 {
     auto self = static_cast<UDPSocket*>(handle->data);
     // TraceL << "Allocating Buffer: " << suggested_size << endl;
@@ -344,7 +343,7 @@ void UDPSocket::onError(const scy::Error& error)
 
 void UDPSocket::onClose()
 {
-    ErrorS(this) << "On close" << endl;
+    DebugS(this) << "On close" << endl;
     onSocketClose(*this);
 }
 

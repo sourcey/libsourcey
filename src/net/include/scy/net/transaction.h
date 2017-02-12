@@ -80,22 +80,19 @@ protected:
     {
         TraceS(this) << "On packet: " << packet.size() << std::endl;
         if (PacketTransaction<PacketT>::handlePotentialResponse(
-                static_cast<PacketT&>(packet))) {
+            static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
             // we have handled the packet
-            // throw StopPropagation();
+            throw StopPropagation();
         }
     }
 
     /// Called when a successful response match is received.
     virtual void onResponse()
     {
-        TraceS(this) << "On success: "
-                     << PacketTransaction<PacketT>::_response.toString()
-                     << std::endl;
-        PacketSignal::emit(
-            /*socket.get(), */ PacketTransaction<PacketT>::_response);
+        TraceS(this) << "On success: " << _response.toString() << std::endl;
+        PacketSignal::emit(_response);
     }
 
     /// Sub classes should derive this method to implement
@@ -112,7 +109,6 @@ protected:
     }
 
     Address _peerAddress;
-    // net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
 

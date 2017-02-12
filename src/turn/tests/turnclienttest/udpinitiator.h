@@ -28,7 +28,6 @@ public:
     NullSignal AllocationCreated;
     Signal<void(bool)> TestComplete; // unused
     net::Address responderAddress; ///< The responder local socket address for Send indications
-    const std::string payload = "initiator > responder";
 
     UDPInitiator(int id, const turn::Client::Options& opts)
         : id(id)
@@ -138,7 +137,7 @@ protected:
         sendPacketToResponder();
     }
 
-    void onAllocationCreated(turn::Client& client, const stun::Transaction& transaction) 
+    void onAllocationCreated(turn::Client&, const stun::Transaction& transaction) 
     {
         DebugS(this) << id << ": Permissions Created" << endl;
         // AllocationCreated

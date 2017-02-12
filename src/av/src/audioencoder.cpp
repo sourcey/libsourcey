@@ -76,14 +76,13 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
 void AudioEncoder::create()
 {
     TraceS(this) << "Create" << endl;
-    int error;
+    int err;
 
     // Find the audio encoder
     if (!(codec = avcodec_find_encoder_by_name(oparams.encoder.c_str()))) {
         if (!format ||
             !(codec = avcodec_find_encoder(format->oformat->audio_codec)))
-            throw std::runtime_error("Cannot find an audio encoder for: " +
-                                     oparams.encoder);
+            throw std::runtime_error("Cannot find an audio encoder for: " + oparams.encoder);
     }
 
     // Allocate stream and AVCodecContext from the AVFormatContext if available
@@ -141,9 +140,8 @@ void AudioEncoder::create()
         ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
     // Open the encoder for the audio stream to use it later.
-    if ((error = avcodec_open2(ctx, codec, nullptr)) < 0) {
-        throw std::runtime_error("Cannot open the audio codec: " +
-                                 averror(error));
+    if ((err = avcodec_open2(ctx, codec, nullptr)) < 0) {
+        throw std::runtime_error("Cannot open the audio codec: " + averror(err));
     }
 
     // Use the encoder's desired frame size for processing.
@@ -240,8 +238,7 @@ int flushBuffer(AudioEncoder* enc)
 }
 
 
-bool AudioEncoder::encode(/*const */ std::uint8_t* samples,
-                          const int numSamples, const std::int64_t pts)
+bool AudioEncoder::encode(/*const */ std::uint8_t* samples, const int numSamples, const std::int64_t pts)
 {
     TraceS(this) << "Encoding audio packet: " << numSamples << endl;
 
