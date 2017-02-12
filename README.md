@@ -44,13 +44,29 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 
 ## Example
 
-A good starting point is the `PacketStream`, which lets you create a dynamic delegate chain for piping, processing and outputting arbitrary data packets. This method of layering packet processors and dynamic functionality makes it possible to develop complex data processing applications quickly and easily.
+Lets start with a classic HTTP echo server, which looks like so with LibSourcey:
+
+~~~cpp
+http::Server srv(net::Address("0.0.0.0", 1337));
+srv.start();
+
+srv.Connection += [](http::ServerConnection::Ptr conn) {
+    conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+        conn.send(bufferCast<const char*>(buffer), buffer.size());
+        conn.close();
+    };
+};
+~~~
+
+Pretty neat right? Its bloody fast too, especially on Linux kernel 3.9 or newer as it will make use of kernel level multicore socket load balancing. Check the `httpechoserver` for the full code.
+
+Another good starting point is the `PacketStream`, which lets you create a dynamic delegate chain for piping, processing and outputting arbitrary data packets. This method of layering packet processors and dynamic functionality makes it possible to develop complex data processing applications quickly and easily.
 
 For example, this is how you would capture a live webcam stream, encode it into H.264, and broadcast it in realtime over the internet:
 
 ~~~cpp
 // Create a PacketStream to pass packets from the
-// input device captures => encoder => socket
+// input device captures -> encoder -> socket
 PacketStream stream;
 
 // Setup the encoder options
