@@ -463,6 +463,13 @@ protected:
 };
 
 
+/// Null log channel.
+///
+/// Redifine the base `LogChannel` as `NullChannel` so it can be logically used
+/// as a disabled log channel.
+typedef LogChannel NullChannel;
+
+
 //
 // Console Channel
 //

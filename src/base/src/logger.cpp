@@ -283,8 +283,7 @@ LogStream::LogStream(LogLevel level, const std::string& realm, int line,
 }
 
 
-LogStream::LogStream(LogLevel level, const std::string& realm,
-                     const std::string& address)
+LogStream::LogStream(LogLevel level, const std::string& realm, const std::string& address)
     : level(level)
     , realm(realm)
     , address(address)
@@ -331,9 +330,11 @@ LogChannel::LogChannel(const std::string& name, LogLevel level,
 void LogChannel::write(const std::string& message, LogLevel level,
                        const char* realm, const void* ptr)
 {
+#ifdef SCY_ENABLE_LOGGING
     LogStream stream(level, realm, 0, ptr);
     stream << message;
     write(stream);
+#endif
 }
 
 

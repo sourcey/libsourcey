@@ -62,9 +62,6 @@ public:
 
     virtual void dispose()
     {
-        // if (!BaseT::_destroyed) {
-        //    PacketSocketAdapter::socket->setAdapter(nullptr);
-        //}
         TraceS(this) << "Dispose" << std::endl;
 
         PacketSocketAdapter::socket->removeReceiver(this);

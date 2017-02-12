@@ -6,11 +6,11 @@
 #include "uv.h"
 #include "http_parser.h"
 
-// stl
 #include <string>
 #include <sstream>
 #include <string>
 #include <iostream>
+
 
 #ifdef DEBUG
 #define CHECK(status, msg) \
@@ -33,6 +33,7 @@
 
 namespace scy {
 namespace libuv {
+
 
 static int request_num = 1;
 static uv_loop_t* uv_loop;
@@ -128,65 +129,67 @@ void render(uv_work_t* req) {
     closure->result = "hello universe";
     closure->response_code = "200 OK";
 
-    //std::string filepath(".");
-    //filepath += client->path;
-    //std::string index_path = (filepath + "index.html");
-    //bool has_index = (access(index_path.c_str(), R_OK) != -1);
-    //if (/*!has_index &&*/ filepath[filepath.size() - 1] == '/') {
-    //    uv_fs_t scandir_req;
-    //    int r = uv_fs_scandir(uv_loop, &scandir_req, filepath.c_str(), 0, NULL);
-    //    uv_dirent_t dent;
-    //    closure->content_type = "text/html";
-    //    closure->result = "<html><body><ul>";
-    //    while (UV_EOF != uv_fs_scandir_next(&scandir_req, &dent)) {
-    //        std::string name = dent.name;
-    //        if (dent.type == UV_DIRENT_DIR) {
-    //            name += "/";
-    //        }
-    //        closure->result += "<li><a href='";
-    //        closure->result += name;
-    //        closure->result += "'>";
-    //        closure->result += name;
-    //        closure->result += "</a></li>";
-    //        closure->result += "\n";
-    //    }
-    //    closure->result += "</ul></body></html>";
-    //    uv_fs_req_cleanup(&scandir_req);
-    //}
-    //else {
-    //    std::string file_to_open = filepath;
-    //    if (has_index) {
-    //        file_to_open = index_path;
-    //    }
-    //    bool exists = (access(file_to_open.c_str(), R_OK) != -1);
-    //    if (!exists) {
-    //        closure->result = "no access";
-    //        closure->response_code = "404 Not Found";
-    //        return;
-    //    }
-    //    FILE * f = fopen(file_to_open.c_str(), "rb");
-    //    if (f) {
-    //        std::fseek(f, 0, SEEK_END);
-    //        unsigned size = std::ftell(f);
-    //        std::fseek(f, 0, SEEK_SET);
-    //        closure->result.resize(size);
-    //        std::fread(&closure->result[0], size, 1, f);
-    //        fclose(f);
-    //        if (endswith(file_to_open, "html")) {
-    //            closure->content_type = "text/html";
-    //        }
-    //        else if (endswith(file_to_open, "css")) {
-    //            closure->content_type = "text/css";
-    //        }
-    //        else if (endswith(file_to_open, "js")) {
-    //            closure->content_type = "application/javascript";
-    //        }
-    //    }
-    //    else {
-    //        closure->result = "failed to open";
-    //        closure->response_code = "404 Not Found";
-    //    }
-    //}
+#if 0
+    std::string filepath(".");
+    filepath += client->path;
+    std::string index_path = (filepath + "index.html");
+    bool has_index = (access(index_path.c_str(), R_OK) != -1);
+    if (/*!has_index &&*/ filepath[filepath.size() - 1] == '/') {
+       uv_fs_t scandir_req;
+       int r = uv_fs_scandir(uv_loop, &scandir_req, filepath.c_str(), 0, NULL);
+       uv_dirent_t dent;
+       closure->content_type = "text/html";
+       closure->result = "<html><body><ul>";
+       while (UV_EOF != uv_fs_scandir_next(&scandir_req, &dent)) {
+           std::string name = dent.name;
+           if (dent.type == UV_DIRENT_DIR) {
+               name += "/";
+           }
+           closure->result += "<li><a href='";
+           closure->result += name;
+           closure->result += "'>";
+           closure->result += name;
+           closure->result += "</a></li>";
+           closure->result += "\n";
+       }
+       closure->result += "</ul></body></html>";
+       uv_fs_req_cleanup(&scandir_req);
+    }
+    else {
+       std::string file_to_open = filepath;
+       if (has_index) {
+           file_to_open = index_path;
+       }
+       bool exists = (access(file_to_open.c_str(), R_OK) != -1);
+       if (!exists) {
+           closure->result = "no access";
+           closure->response_code = "404 Not Found";
+           return;
+       }
+       FILE * f = fopen(file_to_open.c_str(), "rb");
+       if (f) {
+           std::fseek(f, 0, SEEK_END);
+           unsigned size = std::ftell(f);
+           std::fseek(f, 0, SEEK_SET);
+           closure->result.resize(size);
+           std::fread(&closure->result[0], size, 1, f);
+           fclose(f);
+           if (endswith(file_to_open, "html")) {
+               closure->content_type = "text/html";
+           }
+           else if (endswith(file_to_open, "css")) {
+               closure->content_type = "text/css";
+           }
+           else if (endswith(file_to_open, "js")) {
+               closure->content_type = "application/javascript";
+           }
+       }
+       else {
+           closure->result = "failed to open";
+           closure->response_code = "404 Not Found";
+       }
+    }
+#endif
 }
 
 void after_render(uv_work_t* req) {
@@ -213,9 +216,7 @@ void after_render(uv_work_t* req) {
     // https://github.com/joyent/libuv/issues/344
     int r = uv_write(&client->write_req,
         (uv_stream_t*)&client->handle,
-        &resbuf,
-        1,
-        after_write);
+        &resbuf, 1, after_write);
     CHECK(r, "write buff");
 }
 
@@ -306,13 +307,14 @@ void on_connect(uv_stream_t* server_handle, int status) {
 
 #define MAX_WRITE_HANDLES 1000
 
-void raiseLibuvEchoServer() {
+void raiseBenchmarkServer() {
     //signal(SIGPIPE, SIG_IGN);
     //int cores = sysconf(_SC_NPROCESSORS_ONLN);
     //printf("number of cores %d\n", cores);
     //char cores_string[10];
     //sprintf(cores_string, "%d", cores);
     //setenv("UV_THREADPOOL_SIZE", cores_string, 1);
+
     parser_settings.on_url = on_url;
     // notification callbacks
     parser_settings.on_message_begin = on_message_begin;

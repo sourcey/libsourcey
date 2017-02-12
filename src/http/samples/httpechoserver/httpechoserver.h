@@ -1,192 +1,82 @@
 #include "scy/http/server.h"
-#include "scy/idler.h"
-
-
-using std::cout;
-using std::cerr;
-using std::endl;
 
 
 namespace scy {
 
 
-#if 0
+const std::uint16_t HttpPort = 1337;
+const net::Address address("0.0.0.0", HttpPort);
 
-/// Basic server responder (make echo?)
-class BasicResponder : public http::ServerResponder
+
+void raiseEchoServer()
 {
-public:
-    BasicResponder(http::ServerConnection& conn)
-        : http::ServerResponder(conn)
-    {
-        DebugL << "Creating" << endl;
-    }
+    http::Server srv(address);
+    srv.start();
 
-    void onRequest(http::Request& request, http::Response& response)
-    {
-        DebugL << "On complete" << endl;
+    srv.Connection += [](http::ServerConnection::Ptr conn) {
+        conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+            conn.send(bufferCast<const char*>(buffer), buffer.size());
+            conn.close();
+        };
+    };
 
-        response.setContentLength(14);
-
-        // headers will be auto flushed
-        connection().send("hello universe", 14);
-        connection().close();
-    }
-};
+    std::cout << "HTTP server listening on " << address << std::endl;
+    uv::waitForShutdown();
+}
 
 
-/// Basic echo server responder
-class BasicEchoResponder : public http::ServerResponder
+void raiseBenchmarkServer()
 {
-public:
-    BasicEchoResponder(http::ServerConnection& conn)
-        : http::ServerResponder(conn)
-    {
-        // DebugL << "Creating" << endl;
-    }
+    http::Server srv(address);
+    srv.start();
 
-    virtual void onPayload(const MutableBuffer& body)
-    {
-        // DebugL << "On payload: " << body.size() << endl;
+    srv.Connection += [&](http::ServerConnection::Ptr conn) {
+        conn->send("hello universe", 14);
+        conn->close();
+    };
 
-        // Echo the request back to the client
-        connection().send(body.cstr(), body.size());
-    }
-};
+    std::cout << "HTTP server listening on " << address << std::endl;
+    uv::waitForShutdown();
+}
 
 
-struct RandomDataSource : public Idler
+void raiseMulticoreBenchmarkServer()
 {
-    PacketSignal signal;
+    auto loop = uv::createLoop();
+    std::thread::id tid(std::this_thread::get_id());
 
-    void init() { start(std::bind(&RandomDataSource::onIdle, this)); }
+    http::Server srv(address, net::makeSocket<net::TCPSocket>(loop));
+    srv.start();
 
-    void onIdle()
-    {
-        RawPacket packet("hello", 5);
-        signal.emit(packet);
-    }
-};
+    srv.Connection += [&](http::ServerConnection::Ptr conn) {
+        conn->send("hello universe", 14);
+        conn->close();
+    };
+
+    uv::waitForShutdown([&](void*) {
+        srv.shutdown();
+    }, nullptr, loop);
+
+    uv::closeLoop(loop);
+    delete loop;
+}
 
 
-/// Chunked responder that broadcasts random data to the client.
-class ChunkedResponder : public http::ServerResponder
+// Raise a server instance for each CPU core
+void runMulticoreBenchmarkServers()
 {
-public:
-    RandomDataSource dataSource;
-    bool gotHeaders;
-    bool gotRequest;
-    bool gotClose;
-
-    ChunkedResponder(http::ServerConnection& conn)
-        : http::ServerResponder(conn)
-        , gotHeaders(false)
-        , gotRequest(false)
-        , gotClose(false)
-    {
-        // conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
-        // dataSource.signal += sdelegate(&conn.socket(), &Socket::send);
-        // conn.Outgoing.attachSource(&dataSource.signal, false);
+    std::vector<Thread*> threads;
+    int ncpus = std::thread::hardware_concurrency();
+    for (int i = 0; i < ncpus; ++i) {
+        threads.push_back(new Thread(std::bind(raiseMulticoreBenchmarkServer)));
     }
 
-    ~ChunkedResponder()
-    {
-        assert(gotHeaders);
-        assert(gotRequest);
-        assert(gotClose);
+    std::cout << "HTTP multicore(" << ncpus << ") server listening on " << address << std::endl;
+
+    for (auto thread : threads) {
+        thread->join();
     }
-
-    void onHeaders(http::Request& request) { gotHeaders = true; }
-
-    void onRequest(http::Request& request, http::Response& response)
-    {
-        gotRequest = true;
-
-        connection().response().set("Access-Control-Allow-Origin", "*");
-        connection().response().set("Content-Type", "text/html");
-        connection().response().set("Transfer-Encoding", "chunked");
-
-        // headers pushed through automatically
-        // connection().sendHeader();
-
-        // Start shooting data at the client
-        dataSource.init();
-    }
-
-    void onClose()
-    {
-        DebugL << "On connection close" << endl;
-        gotClose = true;
-        dataSource.cancel();
-    }
-};
-
-
-class WebSocketResponder : public http::ServerResponder
-{
-public:
-    bool gotPayload;
-    bool gotClose;
-
-    WebSocketResponder(http::ServerConnection& conn)
-        : http::ServerResponder(conn)
-        , gotPayload(false)
-        , gotClose(false)
-    {
-        DebugL << "Creating" << endl;
-    }
-
-    virtual ~WebSocketResponder()
-    {
-        DebugL << "Destroy" << endl;
-
-        assert(gotPayload);
-        assert(gotClose);
-    }
-
-    virtual void onPayload(const MutableBuffer& body)
-    {
-        DebugL << "On payload: " << body.size() << endl;
-
-        gotPayload = true;
-
-        // Echo the request back to the client
-        connection().send(body.cstr(), body.size());
-    }
-
-    virtual void onClose()
-    {
-        DebugL << "On connection close" << endl;
-        gotClose = true;
-    }
-};
-
-
-/// A Server Responder Factory for testing the HTTP server
-class OurServerResponderFactory : public http::ServerResponderFactory
-{
-public:
-    http::ServerResponder* createResponder(http::ServerConnection& conn)
-    {
-        std::ostringstream os;
-        conn.request().write(os);
-        std::string headers(os.str().data(), os.str().length());
-        // DebugL << "Incoming Request: " << headers << endl;
-
-        std::string uri(conn.request().getURI());
-
-        if (uri == "/chunked")
-            return new ChunkedResponder(conn);
-        else if (uri == "/websocket")
-            return new WebSocketResponder(conn);
-        else if (uri == "/echo")
-            return new BasicEchoResponder(conn);
-        else
-            return new BasicResponder(conn);
-    }
-};
-
-#endif
+}
 
 
 } // namespace scy
