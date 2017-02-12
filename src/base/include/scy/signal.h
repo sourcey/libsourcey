@@ -18,6 +18,7 @@
 #include <atomic>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 
 namespace scy {
@@ -321,14 +322,14 @@ template <typename RT, typename... Args> struct Slot
         flag.test_and_set();
     }
 
-    void kill() 
-    { 
-        flag.clear(); 
+    void kill()
+    {
+        flag.clear();
     }
 
-    bool alive() 
-    { 
-        return flag.test_and_set(); 
+    bool alive()
+    {
+        return flag.test_and_set();
     }
 
     /// NonCopyable and NonMovable

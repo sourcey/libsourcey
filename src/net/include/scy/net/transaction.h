@@ -25,9 +25,11 @@ namespace net {
 /// types emitted from a Socket.
 template <class PacketT>
 class SCY_EXTERN Transaction : public PacketTransaction<PacketT>,
-                    public PacketSocketAdapter
+                               public PacketSocketAdapter
 {
 public:
+	  typedef PacketTransaction<PacketT> BaseT;
+
     Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
                 int timeout = 10000, int retries = 1,
                 uv::Loop* loop = uv::defaultLoop())
@@ -46,27 +48,27 @@ public:
         // assert(PacketSocketAdapter::socket->recvAdapter() == this);
         assert(PacketSocketAdapter::socket);
 
-        if (PacketSocketAdapter::socket->sendPacket(_request, _peerAddress) > 0)
-            return PacketTransaction<PacketT>::send();
-        PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
+        if (PacketSocketAdapter::socket->sendPacket(BaseT::_request, _peerAddress) > 0)
+            return BaseT::send();
+        BaseT::setState(this, TransactionState::Failed);
         return false;
     }
 
     virtual void cancel()
     {
         TraceS(this) << "Cancel" << std::endl;
-        PacketTransaction<PacketT>::cancel();
+        BaseT::cancel();
     }
 
     virtual void dispose()
     {
-        // if (!PacketTransaction<PacketT>::_destroyed) {
+        // if (!BaseT::_destroyed) {
         //    PacketSocketAdapter::socket->setAdapter(nullptr);
         //}
         TraceS(this) << "Dispose" << std::endl;
 
         PacketSocketAdapter::socket->removeReceiver(this);
-        PacketTransaction<PacketT>::dispose(); // gc
+        BaseT::dispose(); // gc
     }
 
     Address peerAddress() const { return _peerAddress; }
@@ -79,7 +81,7 @@ protected:
     virtual void onPacket(IPacket& packet)
     {
         TraceS(this) << "On packet: " << packet.size() << std::endl;
-        if (PacketTransaction<PacketT>::handlePotentialResponse(
+        if (BaseT::handlePotentialResponse(
             static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
@@ -91,8 +93,8 @@ protected:
     /// Called when a successful response match is received.
     virtual void onResponse()
     {
-        TraceS(this) << "On success: " << _response.toString() << std::endl;
-        PacketSignal::emit(_response);
+        TraceS(this) << "On success: " << BaseT::_response.toString() << std::endl;
+        PacketSignal::emit(BaseT::_response);
     }
 
     /// Sub classes should derive this method to implement
