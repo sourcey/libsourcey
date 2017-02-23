@@ -322,14 +322,14 @@ int main(int argc, char** argv)
         logger.setWriter(new LogWriter);
         clock_t start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "test: " << i << endl;
+            TraceL << "sync log: " << i << endl;
         cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
 
         // Test asynchronous writer (approx 10x faster)
         logger.setWriter(new AsyncLogWriter);
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "test: " << i << endl;
+            TraceL << "async log: " << i << endl;
         cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
 
         // // Test function logging
@@ -347,12 +347,14 @@ int main(int argc, char** argv)
         //      << (clock() - start) << endl;
 
         logger.setWriter(nullptr);
+        cout << "logger: synchronous test: 3" << endl;
 
         // TODO: Test log filtering
         // logger.getDefault()->setFilter("scy::*");
 
         // Destory the current Logger instance to ensure no crash
         Logger::destroy();
+        cout << "logger: synchronous test: 4" << endl;
     });
 
 
