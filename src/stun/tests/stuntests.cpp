@@ -46,6 +46,7 @@ int main(int argc, char** argv)
         response.read(constBuffer(buf));
 
         integrityAttr = response.get<stun::MessageIntegrity>();
+        expect(integrityAttr != nullptr);
         expect(integrityAttr->verifyHmac(password));
     });
 
@@ -53,11 +54,7 @@ int main(int argc, char** argv)
     // Request Types
     //
     describe("request types", []() {
-        std::uint16_t type =
-            stun::Message::Indication | stun::Message::SendIndication;
-
-        // expect(IS_STUN_INDICATION(type));
-
+        std::uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
         std::uint16_t classType = type & 0x0110;
         std::uint16_t methodType = type & 0x000F;
 
@@ -85,7 +82,7 @@ int main(int argc, char** argv)
         expect((5555 ^ (stun::kMagicCookie >> 16)) == 0x34A1);
 
         net::Address addr("192.168.1.1", 5555);
-        DebugL << "Source Address: " << addr << endl;
+        // DebugL << "Source Address: " << addr << endl;
 
         stun::Message request(stun::Message::Request, stun::Message::Allocate);
         // stun::Message request;
@@ -94,7 +91,7 @@ int main(int argc, char** argv)
         auto addrAttr = new stun::XorRelayedAddress;
         addrAttr->setAddress(addr);
         request.add(addrAttr);
-        DebugL << "Request Address: " << addrAttr->address() << endl;
+        // DebugL << "Request Address: " << addrAttr->address() << endl;
 
         Buffer buf(1024);
         request.write(buf);
@@ -104,13 +101,10 @@ int main(int argc, char** argv)
 
         addrAttr = response.get<stun::XorRelayedAddress>();
 
-        DebugL << "Response Address: " << addrAttr->address() << endl;
+        // DebugL << "Response Address: " << addrAttr->address() << endl;
         expect(addrAttr->address() == addr);
     });
 
     test::runAll();
-
-    Logger::destroy();
-
     return test::finalize();
 }

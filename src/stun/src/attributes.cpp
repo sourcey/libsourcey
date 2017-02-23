@@ -850,8 +850,7 @@ void MessageIntegrity::write(BitWriter& writer) const
         // field from the STUN message header.
         // Prior to performing the hash, the MESSAGE-INTEGRITY attribute MUST be
         // inserted into the message (with dummy content).
-        int sizeBeforeMessageIntegrity =
-            writer.position() - kAttributeHeaderSize;
+        int sizeBeforeMessageIntegrity = writer.position() - kAttributeHeaderSize;
 
         // Get the message prior to the current attribute and
         // fill the attribute with dummy content.
@@ -859,6 +858,7 @@ void MessageIntegrity::write(BitWriter& writer) const
         Buffer hmacBuf(sizeBeforeMessageIntegrity);
         BitWriter hmacWriter(hmacBuf);
         hmacWriter.put(writer.begin(), sizeBeforeMessageIntegrity);
+
         // hmacWriter.put("00000000000000000000");
 
         // The length MUST then
@@ -872,13 +872,10 @@ void MessageIntegrity::write(BitWriter& writer) const
         // the end of the MESSAGE-INTEGRITY attribute prior to calculating the
         // HMAC.  Such adjustment is necessary when attributes, such as
         // FINGERPRINT, appear after MESSAGE-INTEGRITY.
-        hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity +
-                                 MessageIntegrity::Size,
-                             2);
+        hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
 
         std::string input(hmacWriter.begin(), hmacWriter.position());
-        assert(input.size() ==
-               sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
+        assert(input.size() == sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
 
         // std::string input(writer.begin(), sizeBeforeMessageIntegrity);
         std::string hmac(crypto::computeHMAC(input, _key));

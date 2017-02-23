@@ -211,7 +211,7 @@ void Message::write(Buffer& buf) const
     // assert(_method);
     // assert(_size);
 
-    //BitWriter writer(buf);
+    // BitWriter writer(buf);
     DynamicBitWriter writer(buf);
     writer.putU16((std::uint16_t)(_class | _method));
     writer.putU16(_size);
