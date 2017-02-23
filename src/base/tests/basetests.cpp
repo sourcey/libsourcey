@@ -86,11 +86,16 @@ int main(int argc, char** argv)
     });
 
     describe("signal static member benchmark", []() {
+
+        std::cout << "signal static member benchmark: 1" << std::endl;
         Signal<void(std::uint64_t&)> signal;
         // SignalCounter counter;
+        std::cout << "signal static member benchmark: 2" << std::endl;
         signal += slot(&SignalCounter::incrementStatic);
+        std::cout << "signal static member benchmark: 3" << std::endl;
         // signal += &SignalCounter::incrementStatic;
         const std::uint64_t benchstart = time::hrtime();
+        std::cout << "signal static member benchmark: 4" << std::endl;
         std::uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
             signal.emit(value);
