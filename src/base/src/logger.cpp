@@ -242,6 +242,7 @@ void AsyncLogWriter::clear()
 
 void AsyncLogWriter::flush()
 {
+    std::cout << "AsyncLogWriter flush" << std::endl;
     while (writeNext())
         scy::sleep(1);
 }
@@ -249,16 +250,19 @@ void AsyncLogWriter::flush()
 
 void AsyncLogWriter::run()
 {
+    std::cout << "AsyncLogWriter run 1" << std::endl;
     while (!cancelled()) {
         std::cout << "AsyncLogWriter run" << std::endl;
         scy::sleep(writeNext() ? 1 : 50);
     }
+    std::cout << "AsyncLogWriter run CANCELLED" << std::endl;
 }
 
 
 bool AsyncLogWriter::writeNext()
 {
 #ifdef SCY_ENABLE_LOGGING
+    std::cout << "AsyncLogWriter writeNext" << std::endl;
     LogStream* next;
     {
         std::lock_guard<std::mutex> guard(_mutex);
@@ -270,8 +274,11 @@ bool AsyncLogWriter::writeNext()
     }
     next->channel->write(*next);
     delete next;
-#endif
     return true;
+#else
+    std::cout << "AsyncLogWriter writeNext DISABLED" << std::endl;
+    return false;
+#endif
 }
 
 
