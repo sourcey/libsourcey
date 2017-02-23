@@ -116,7 +116,9 @@ LogChannel* Logger::getDefault() const
 
 void Logger::setWriter(LogWriter* writer)
 {
-    std::lock_guard<std::mutex> guard(_mutex);
+    // NOTE: Cannot lock here as writer may
+    // attempt to flush pending on destruction.
+    // std::lock_guard<std::mutex> guard(_mutex);
     std::cout << "setWriter" << std::endl;
     if (_writer) {
         std::cout << "setWriter 1" << std::endl;
