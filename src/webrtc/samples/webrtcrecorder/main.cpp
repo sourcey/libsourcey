@@ -59,13 +59,11 @@ int main(int argc, char** argv)
 
         Signaler app(options);
 
-        Idler rtc(app.loop,
-                  [](void* arg) {
-                      // TraceL << "Running WebRTC loop" << endl;
-                      auto thread = reinterpret_cast<rtc::Thread*>(arg);
-                      thread->ProcessMessages(10);
-                  },
-                  rtc::Thread::Current());
+        Idler rtc(app.loop, [](void* arg) {
+            // TraceL << "Running WebRTC loop" << endl;
+            auto thread = reinterpret_cast<rtc::Thread*>(arg);
+            thread->ProcessMessages(10);
+        }, rtc::Thread::Current());
 
         app.waitForShutdown();
     }

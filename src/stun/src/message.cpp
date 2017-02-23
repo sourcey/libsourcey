@@ -211,11 +211,12 @@ void Message::write(Buffer& buf) const
     // assert(_method);
     // assert(_size);
 
-    BitWriter writer(buf);
+    //BitWriter writer(buf);
+    DynamicBitWriter writer(buf);
     writer.putU16((std::uint16_t)(_class | _method));
     writer.putU16(_size);
     writer.putU32(kMagicCookie);
-    writer.put(_transactionID);
+    writer.put(_transactionID.c_str(), _transactionID.size());
 
     // Note: MessageIntegrity must be at the end
 
@@ -224,8 +225,6 @@ void Message::write(Buffer& buf) const
         writer.putU16(_attrs[i]->size());
         _attrs[i]->write(writer);
     }
-
-
 }
 
 

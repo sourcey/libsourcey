@@ -21,7 +21,7 @@
 namespace scy {
 
 
-class StreamRecorder : public rtc::VideoSinkInterface<cricket::VideoFrame>,
+class StreamRecorder : public rtc::VideoSinkInterface<webrtc::VideoFrame>,
                        public webrtc::AudioTrackSinkInterface
 {
 public:
@@ -31,10 +31,8 @@ public:
     void setVideoTrack(webrtc::VideoTrackInterface* track);
     void setAudioTrack(webrtc::AudioTrackInterface* track);
 
-    void onPacketEncoded(av::MediaPacket& packet);
-
     /// VideoSinkInterface implementation
-    void OnFrame(const cricket::VideoFrame& frame) override;
+    void OnFrame(const webrtc::VideoFrame& frame) override;
 
     /// AudioTrackSinkInterface implementation
     void OnData(const void* audio_data, int bits_per_sample, int sample_rate,

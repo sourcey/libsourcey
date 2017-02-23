@@ -47,8 +47,7 @@ Signaler::~Signaler()
 }
 
 
-void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
-                       const std::string& sdp)
+void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
@@ -61,8 +60,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
 }
 
 
-void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
-                             int mlineindex, const std::string& sdp)
+void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
     Json::Value desc;
@@ -86,7 +84,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnection(this, peer.id(), PeerConnection::Answer);
+    auto conn = new PeerConnection(this, peer.id(), "", PeerConnection::Answer);
     conn->constraints().SetMandatoryReceiveVideo(true);
     conn->constraints().SetMandatoryReceiveAudio(true);
     conn->createConnection();
@@ -122,8 +120,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 }
 
 
-void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
-                                   const sockio::ClientState& oldState)
+void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState)
 {
     DebugL << "Client state changed from " << oldState << " to " << state
            << endl;
@@ -143,8 +140,7 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
 }
 
 
-void Signaler::onAddRemoteStream(PeerConnection* conn,
-                                 webrtc::MediaStreamInterface* stream)
+void Signaler::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     // TODO: StreamRecorder should be a member of PeerConnection
 
@@ -164,8 +160,7 @@ void Signaler::onAddRemoteStream(PeerConnection* conn,
 }
 
 
-void Signaler::onRemoveRemoteStream(PeerConnection* conn,
-                                    webrtc::MediaStreamInterface* stream)
+void Signaler::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "free streams");
 }

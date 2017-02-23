@@ -59,8 +59,15 @@ function(find_dependency name)
 
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
-    message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
-    return()
+
+    # NOTE: find_package does not always honour REQUIRED flag, so make 
+    # sure the build is cancelled if the dependency wasnt found. 
+    if (${ARGN} MATCHES REQUIRED)
+      message(FATAL_ERROR "Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
+    else()
+      message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
+      return()
+    endif()
   endif()
 
   # Set a HAVE_XXX variable at parent scope for the libsourcey.h config sile
@@ -464,8 +471,6 @@ endmacro(find_library_extended)
 #   #   include(FindPackageHandleStandardArgs)
 #   #   find_package_handle_standard_args(${module} DEFAULT_MSG ${_${module}_REQUIRED_VARS})
 #   # endif()
-#
-#   # message(ERROR "$$$$$$$$$$$ ${Poco_INCLUDE_DIRS}")
 #
 #   # Set the module as found.
 #   if (${module}_LIBRARIES)

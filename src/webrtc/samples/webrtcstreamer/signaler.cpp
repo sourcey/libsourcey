@@ -96,7 +96,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    auto conn = new StreamingPeerConnection(this, peer.id(), "test.mp4");
+    auto conn = new StreamingPeerConnection(this, peer.id(), "test.mp4", "");
 
     // Create the media stream
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =

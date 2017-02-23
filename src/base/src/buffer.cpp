@@ -36,7 +36,7 @@ BitReader::BitReader(const ConstBuffer& pod, ByteOrder order)
 BitReader::BitReader(const Buffer& buf, ByteOrder order)
 {
     init(buf.data(), buf.size(), order);
-    // _buffer = &buf;
+    //_buffer = &buf;
 }
 
 
@@ -402,20 +402,17 @@ BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
     init(buf.data(), buf.capacity(), order);
-    _buffer = &buf; // using dynamic buffer
+    //_buffer = &buf; // using dynamic buffer
 }
 
 
 void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
 {
-    //_vector = nullptr;
-    _buffer = nullptr;
+    //_buffer = nullptr;
     _position = 0;
     _limit = size;
-    //_capacity = size;
     _order = order;
     _bytes = bytes;
-    //_free = false;
 }
 
 
@@ -523,17 +520,17 @@ void BitWriter::put(const std::string& val)
 void BitWriter::put(const char* val, std::size_t len)
 {
     // Write to dynamic buffer (not compatible with BitReader methods)
-    if (_buffer) {
-    
-        //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
-        _buffer->insert(_buffer->end(), val, val + len);
-        _bytes = _buffer->data();
-        _limit = _buffer->size();
-        _position += len;
-    }
+    //if (_buffer) {
+    //
+    //    //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
+    //    _buffer->insert(_buffer->end(), val, val + len);
+    //    _bytes = _buffer->data();
+    //    _limit = _buffer->size();
+    //    _position += len;
+    //}
 
-    // Write to fixed size buffer
-    else {
+    //// Write to fixed size buffer
+    //else {
         if ((_position + len) > _limit) {
             ErrorS(this) << "insufficient buffer capacity: "
                          << "len=" << len << ", "
@@ -545,7 +542,7 @@ void BitWriter::put(const char* val, std::size_t len)
 
         memcpy(_bytes + _position, val, len);
         _position += len;
-    }
+    //}
 }
 
 
@@ -599,6 +596,75 @@ bool BitWriter::update(const std::string& val, std::size_t pos)
 
 
 bool BitWriter::update(const char* val, std::size_t len, std::size_t pos)
+{
+    if ((pos + len) > available())
+        return false;
+
+    memcpy(_bytes + pos, val, len);
+    return true;
+}
+
+
+//
+// Dynamic Bit Writer
+//
+
+
+DynamicBitWriter::DynamicBitWriter(MutableBuffer& pod, ByteOrder order)
+    : BitWriter(pod, order)
+    , _buffer(nullptr)
+{
+}
+
+
+DynamicBitWriter::DynamicBitWriter(char* bytes, std::size_t size, ByteOrder order)
+    : BitWriter(bytes, size, order)
+    , _buffer(nullptr)
+{
+}
+
+
+DynamicBitWriter::DynamicBitWriter(Buffer& buf, ByteOrder order)
+    : BitWriter(buf, order)
+    , _buffer(&buf)
+{
+}
+
+
+DynamicBitWriter::~DynamicBitWriter()
+{
+}
+
+
+void DynamicBitWriter::put(const char* val, std::size_t len)
+{
+    // Write to dynamic buffer (not compatible with BitReader methods)
+    //if (_buffer) {
+    //
+        //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
+        _buffer->insert(_buffer->end(), val, val + len);
+        _bytes = _buffer->data();
+        _limit = _buffer->size();
+        _position += len;
+    //}
+
+    //// Write to fixed size buffer
+    //else {
+    //if ((_position + len) > _limit) {
+    //    ErrorS(this) << "insufficient buffer capacity: "
+    //        << "len=" << len << ", "
+    //        << "available=" << available() << ", "
+    //        << "position=" << position() << ", "
+    //        << "limit=" << limit() << std::endl;
+    //    throw std::out_of_range("insufficient buffer capacity");
+    //}
+
+    //memcpy(_bytes + _position, val, len);
+    //_position += len;
+    //}
+}
+
+bool DynamicBitWriter::update(const char* val, std::size_t len, std::size_t pos)
 {
     if ((pos + len) > available())
         return false;

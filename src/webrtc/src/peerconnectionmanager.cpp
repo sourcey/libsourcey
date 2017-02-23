@@ -9,6 +9,7 @@
 /// @{
 
 #include "scy/webrtc/peerconnectionmanager.h"
+#include "scy/memory.h"
 
 #include "webrtc/api/test/fakeaudiocapturemodule.h"
 
@@ -30,25 +31,19 @@ PeerConnectionManager::~PeerConnectionManager()
 }
 
 
-void PeerConnectionManager::sendSDP(PeerConnection* conn,
-                                    const std::string& type,
-                                    const std::string& sdp)
+void PeerConnectionManager::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::sendCandidate(PeerConnection* conn,
-                                          const std::string& mid,
-                                          int mlineindex,
-                                          const std::string& sdp)
+void PeerConnectionManager::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::recvSDP(const std::string& token,
-                                    const json::Value& message)
+void PeerConnectionManager::recvSDP(const std::string& token, const json::Value& message)
 {
     auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
@@ -70,8 +65,7 @@ void PeerConnectionManager::recvSDP(const std::string& token,
 }
 
 
-void PeerConnectionManager::recvCandidate(const std::string& token,
-                                          const json::Value& message)
+void PeerConnectionManager::recvCandidate(const std::string& token, const json::Value& message)
 {
     auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
@@ -94,15 +88,13 @@ void PeerConnectionManager::recvCandidate(const std::string& token,
 }
 
 
-void PeerConnectionManager::onAddRemoteStream(
-    PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::onRemoveRemoteStream(
-    PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
@@ -122,8 +114,7 @@ void PeerConnectionManager::onClosed(PeerConnection* conn)
 }
 
 
-void PeerConnectionManager::onFailure(PeerConnection* conn,
-                                      const std::string& error)
+void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& error)
 {
     DebugL << "Deleting peer connection: " << conn->peerid() << endl;
 

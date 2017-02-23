@@ -64,7 +64,7 @@ public:
     /// Returns the buffer as a string.
     std::string str() const { return std::string(cstr(), size()); }
 
-private:
+protected:
     void* _data;
     std::size_t _size;
 };
@@ -153,7 +153,7 @@ public:
     /// Returns the buffer as a string.
     std::string str() const { return std::string(cstr(), size()); }
 
-private:
+protected:
     const void* _data;
     std::size_t _size;
 };
@@ -294,14 +294,14 @@ public:
         return stream.write(buf.current(), buf.position());
     }
 
-private:
+protected:
     void init(const char* bytes, std::size_t size, ByteOrder order); // nocopy
 
     std::size_t _position;
     std::size_t _limit;
-    const char* _bytes;
     ByteOrder _order;
-    Buffer* _buffer;
+    // Buffer* _buffer;
+    const char* _bytes;
 };
 
 
@@ -323,11 +323,11 @@ public:
     BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
     BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
-    ~BitWriter();
+    virtual ~BitWriter();
 
     /// Append bytes to the buffer.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    void put(const char* val, std::size_t len);
+    virtual void put(const char* val, std::size_t len);
     void put(const std::string& val);
     void putU8(std::uint8_t val);
     void putU16(std::uint16_t val);
@@ -337,7 +337,7 @@ public:
 
     /// Update a byte range.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    bool update(const char* val, std::size_t len, std::size_t pos);
+    virtual bool update(const char* val, std::size_t len, std::size_t pos);
     bool update(const std::string& val, std::size_t pos);
     bool updateU8(std::uint8_t val, std::size_t pos);
     bool updateU16(std::uint16_t val, std::size_t pos);
@@ -379,14 +379,42 @@ public:
         return stream.write(wr.begin(), wr.position());
     }
 
-private:
-    void init(char* bytes, std::size_t size, ByteOrder order); // nocopy
+protected:
+    virtual void init(char* bytes, std::size_t size, ByteOrder order); // nocopy
 
     std::size_t _position;
     std::size_t _limit;
     ByteOrder _order;
-    Buffer* _buffer;
+    // Buffer* _buffer;
     char* _bytes;
+};
+
+
+/// Class for reading/writing dynamically resizable binary streams.
+///
+/// Note that when using the constructor with the Buffer reference
+/// as an argument, the writer will dynamically expand the given buffer
+/// when writing passed the buffer capacity.
+/// All other cases will throw a std::out_of_range error when writing
+/// past the buffer capacity.
+class SCY_EXTERN DynamicBitWriter : public BitWriter
+{
+public:
+    DynamicBitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
+    DynamicBitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
+    DynamicBitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
+    virtual ~DynamicBitWriter();
+
+    /// Append bytes to the buffer.
+    /// Throws a `std::out_of_range` exception if reading past the limit.
+    virtual void put(const char* val, std::size_t len);
+
+    /// Update a byte range.
+    /// Throws a `std::out_of_range` exception if reading past the limit.
+    virtual bool update(const char* val, std::size_t len, std::size_t pos);
+
+protected:
+    Buffer* _buffer;
 };
 
 

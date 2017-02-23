@@ -43,6 +43,13 @@ public:
     virtual bool IsScreencast() const;
 
     void onVideoCaptured(av::VideoPacket& packet);
+
+protected:
+    bool running_;
+    int64_t initial_timestamp_;
+    int64_t next_timestamp_;
+    // const bool is_screencast_;
+    webrtc::VideoRotation rotation_;
 };
 
 

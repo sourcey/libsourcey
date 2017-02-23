@@ -28,9 +28,10 @@ struct MediaPacket : public RawPacket
 
     MediaPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
                 std::int64_t time = 0)
-        : // = time::clockSecs()
-        RawPacket(reinterpret_cast<char*>(data), size)
-        , time(time){};
+        : RawPacket(reinterpret_cast<char*>(data), size)
+        , time(time)
+    {
+    }
 
     MediaPacket(const MediaPacket& r)
         : RawPacket(r)
@@ -38,7 +39,7 @@ struct MediaPacket : public RawPacket
     {
     }
 
-    virtual ~MediaPacket(){};
+    virtual ~MediaPacket() {}
 
     virtual IPacket* clone() const { return new MediaPacket(*this); }
 
@@ -55,11 +56,12 @@ struct VideoPacket : public MediaPacket
     VideoPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
                 int width = 0, int height = 0,
                 std::int64_t time = 0)
-        : // = time::clockSecs()
-        MediaPacket(data, size, time)
+        : MediaPacket(data, size, time)
         , width(width)
         , height(height)
-        , iframe(false){};
+        , iframe(false)
+    {
+    }
 
     VideoPacket(const VideoPacket& r)
         : MediaPacket(r)
@@ -84,11 +86,10 @@ struct AudioPacket : public MediaPacket
     AudioPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
                 std::size_t numSamples = 0,
                 std::int64_t time = 0)
-        : // = time::clockSecs()
-        MediaPacket(data, size, time)
-        , numSamples(numSamples){};
-
-    /// AudioPacket(const AudioPacket& r) :    ///     MediaPacket(r) {}
+        : MediaPacket(data, size, time)
+        , numSamples(numSamples)
+    {
+    }
 
     virtual ~AudioPacket(){};
 

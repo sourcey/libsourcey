@@ -54,7 +54,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock,
 void PacketSocketAdapter::onPacket(IPacket& pkt)
 {
     // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
-    PacketSignal::emit(/*socket.get(), */ pkt);
+    PacketSignal::emit(pkt);
 }
 
 
