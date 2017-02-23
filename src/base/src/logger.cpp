@@ -35,8 +35,9 @@ Logger::Logger()
 
 
 Logger::~Logger()
-{
-    delete _writer;
+  {
+  if (_writer)
+      delete _writer;
     util::clearMap(_channels);
     _defaultChannel = nullptr;
 }
@@ -116,8 +117,13 @@ LogChannel* Logger::getDefault() const
 void Logger::setWriter(LogWriter* writer)
 {
     std::lock_guard<std::mutex> guard(_mutex);
-    if (_writer)
+    std::cout << "setWriter" << std::endl;
+    if (_writer) {
+        std::cout << "setWriter 1" << std::endl;
         delete _writer;
+        std::cout << "setWriter 2" << std::endl;
+
+    }
     _writer = writer;
 }
 
@@ -192,18 +198,22 @@ AsyncLogWriter::AsyncLogWriter()
 
 AsyncLogWriter::~AsyncLogWriter()
 {
+    std::cout << "~AsyncLogWriter" << std::endl;
     // Cancel and wait for the thread
     cancel();
 
+    std::cout << "~AsyncLogWriter 1" << std::endl;
     // Note: Not using join here as it is causing a deadlock
     // when unloading shared libraries when the logger is not
     // explicitly shutdown().
     // while (_thread.running())
     //    scy::sleep(10);
     _thread.join();
+    std::cout << "~AsyncLogWriter 2" << std::endl;
 
     // Flush remaining items synchronously
     flush();
+    std::cout << "~AsyncLogWriter 3" << std::endl;
 
     assert(_pending.empty());
 }
@@ -238,6 +248,7 @@ void AsyncLogWriter::flush()
 void AsyncLogWriter::run()
 {
     while (!cancelled()) {
+        std::cout << "AsyncLogWriter run" << std::endl;
         scy::sleep(writeNext() ? 1 : 50);
     }
 }
