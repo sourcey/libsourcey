@@ -17,34 +17,34 @@ int main(int argc, char** argv)
     // =========================================================================
     // Garbage Collector
     //
-    describe("garbage collector", []() {
-        GarbageCollector gc;
-        auto loop = uv::defaultLoop();
-        auto loop1 = uv::createLoop();
-
-        // delete running idler on default loop
-        auto idler = new Idler(loop, []() {});
-        idler->handle().ref();
-        gc.deleteLater(idler, loop);
-
-        // delete running idler on loop1
-        auto idler1 = new Idler(loop1, []() {});
-        idler1->handle().ref();
-        gc.deleteLater(idler1, loop1);
-
-        // run the default loop which will return 
-        // once the idler is deleted
-        uv::runDefaultLoop();
-
-        // finalize deletion of all pointers
-        gc.finalize();
-
-        expect(loop->active_handles == 0);
-        expect(loop1->active_handles == 0);
-
-        // free the created loop1
-        uv::closeLoop(loop1);
-    });
+    // describe("garbage collector", []() {
+    //     GarbageCollector gc;
+    //     auto loop = uv::defaultLoop();
+    //     auto loop1 = uv::createLoop();
+    //
+    //     // delete running idler on default loop
+    //     auto idler = new Idler(loop, []() {});
+    //     idler->handle().ref();
+    //     gc.deleteLater(idler, loop);
+    //
+    //     // delete running idler on loop1
+    //     auto idler1 = new Idler(loop1, []() {});
+    //     idler1->handle().ref();
+    //     gc.deleteLater(idler1, loop1);
+    //
+    //     // run the default loop which will return
+    //     // once the idler is deleted
+    //     uv::runDefaultLoop();
+    //
+    //     // finalize deletion of all pointers
+    //     gc.finalize();
+    //
+    //     expect(loop->active_handles == 0);
+    //     expect(loop1->active_handles == 0);
+    //
+    //     // free the created loop1
+    //     uv::closeLoop(loop1);
+    // });
 
 
     // =========================================================================
