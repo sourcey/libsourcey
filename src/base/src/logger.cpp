@@ -257,8 +257,10 @@ bool AsyncLogWriter::writeNext()
     }
     next->channel->write(*next);
     delete next;
-#endif
     return true;
+#else
+    return false;
+#endif
 }
 
 
