@@ -17,10 +17,10 @@
 
 # unset(WEBRTC_INCLUDE_DIR)
 # unset(WEBRTC_INCLUDE_DIR CACHE)
-unset(WEBRTC_LIBRARIES)
-unset(WEBRTC_LIBRARIES CACHE)
-unset(WEBRTC_LIBRARIES_DEBUG)
-unset(WEBRTC_LIBRARIES_DEBUG CACHE)
+# unset(WEBRTC_LIBRARIES)
+# unset(WEBRTC_LIBRARIES CACHE)
+# unset(WEBRTC_LIBRARIES_DEBUG)
+# unset(WEBRTC_LIBRARIES_DEBUG CACHE)
 # unset(WEBRTC_LIBRARIES_RELEASE)
 # unset(WEBRTC_LIBRARIES_RELEASE CACHE)
 
@@ -29,10 +29,7 @@ set(WEBRTC_ROOT_DIR "" CACHE STRING "Where is the WebRTC root directory located?
 set(WEBRTC_BUILD_DIR_SUFFIX_DEBUG "out/Debug" CACHE STRING "What is the WebRTC debug build directory suffix?")
 set(WEBRTC_BUILD_DIR_SUFFIX_RELEASE "out/Release" CACHE STRING "What is the WebRTC release build directory suffix?")
 
-set(WEBRTC_BUILD_DIR_DEBUG ${WEBRTC_INCLUDE_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG})
-set(WEBRTC_BUILD_DIR_RELEASE ${WEBRTC_INCLUDE_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE})
-
-set(_WEBRTC_DEPENDENCY_EXCLUDES "jsoncpp")
+# set(_WEBRTC_DEPENDENCY_EXCLUDES "jsoncpp")
 
 
 # ----------------------------------------------------------------------
@@ -51,33 +48,35 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
+  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" PATH)
+  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" PATH)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC
     NAMES webrtc_full
-    PATHS_DEBUG ${WEBRTC_BUILD_DIR_DEBUG}
-    PATHS_RELEASE ${WEBRTC_BUILD_DIR_RELEASE}
+    PATHS_DEBUG ${debug_dir}
+    PATHS_RELEASE ${release_dir}
   )
 
   # # Otherwise generate a library from available .o objects
   # if(NOT WEBRTC_LIBRARY)
-  #   if(EXISTS ${WEBRTC_BUILD_DIR_DEBUG})
+  #   if(EXISTS ${_WEBRTC_BUILD_DIR_DEBUG})
   #     message("Generating WebRTC Debug library")
-  #     set(lib_cmd "${LibSourcey_DIR}/cmake/webrtc_lib_generator.sh" -o ${WEBRTC_BUILD_DIR_DEBUG} -x ${_WEBRTC_GENERATOR_EXCLUDES})
+  #     set(lib_cmd "${LibSourcey_DIR}/cmake/webrtc_lib_generator.sh" -o ${_WEBRTC_BUILD_DIR_DEBUG} -x ${_WEBRTC_GENERATOR_EXCLUDES})
   #     execute_process(COMMAND ${lib_cmd})
   #   endif()
   #
-  #   if(EXISTS ${WEBRTC_BUILD_DIR_RELEASE})
+  #   if(EXISTS ${_WEBRTC_BUILD_DIR_RELEASE})
   #     message("Generating WebRTC Release library")
-  #     set(lib_cmd "${LibSourcey_DIR}/cmake/webrtc_lib_generator.sh" -o ${WEBRTC_BUILD_DIR_RELEASE} -x ${_WEBRTC_GENERATOR_EXCLUDES})
+  #     set(lib_cmd "${LibSourcey_DIR}/cmake/webrtc_lib_generator.sh" -o ${_WEBRTC_BUILD_DIR_RELEASE} -x ${_WEBRTC_GENERATOR_EXCLUDES})
   #     execute_process(COMMAND ${lib_cmd})
   #   endif()
   #
   #   # Attempt to find our library again...
   #   find_library_extended(WEBRTC
   #     NAMES webrtc_scy
-  #     PATHS_DEBUG ${WEBRTC_BUILD_DIR_DEBUG}
-  #     PATHS_RELEASE ${WEBRTC_BUILD_DIR_RELEASE}
+  #     PATHS_DEBUG ${_WEBRTC_BUILD_DIR_DEBUG}
+  #     PATHS_RELEASE ${_WEBRTC_BUILD_DIR_RELEASE}
   #   )
   # endif()
 
@@ -91,14 +90,12 @@ if(WEBRTC_INCLUDE_DIR)
     endif()
 
     # Debug
-    if (EXISTS ${WEBRTC_BUILD_DIR_DEBUG})
-      get_filename_component(debug_dir ${WEBRTC_BUILD_DIR_DEBUG} PATH)
+    if (EXISTS ${debug_dir})
       file(GLOB_RECURSE debug_libs "${debug_dir}/*.${lib_suffix}")
       foreach(lib ${debug_libs})
-        #message("lib: ${lib}")
-        #if(${lib} NOT MATCHES ${_WEBRTC_DEPENDENCY_EXCLUDES})
+        # if(${lib} NOT MATCHES ${_WEBRTC_DEPENDENCY_EXCLUDES})
           list(APPEND WEBRTC_LIBRARIES_DEBUG ${lib})
-        #endif()
+        # endif()
       endforeach()
       foreach(lib ${WEBRTC_LIBRARIES_DEBUG})
         if(WIN32 AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
@@ -110,15 +107,14 @@ if(WEBRTC_INCLUDE_DIR)
     endif()
 
     # Release
-    if (EXISTS ${WEBRTC_BUILD_DIR_RELEASE})
-      get_filename_component(release_dir ${WEBRTC_LIBRARIES_DIR_RELEASE} PATH)
+    if (EXISTS ${release_dir})
       file(GLOB_RECURSE release_libs "${release_dir}/*.${lib_suffix}")
       foreach(lib ${release_libs})
-        #if(${lib} NOT MATCHES ${_WEBRTC_DEPENDENCY_EXCLUDES})
+        # if(${lib} NOT MATCHES ${_WEBRTC_DEPENDENCY_EXCLUDES})
           list(APPEND WEBRTC_LIBRARIES_RELEASE ${lib})
-        #endif()
+        # endif()
       endforeach()
-      foreach(lib ${WEBRTC_LIBRARIES_DEBUG})
+      foreach(lib ${WEBRTC_LIBRARIES_RELEASE})
         if(WIN32 AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
           list(APPEND WEBRTC_LIBRARIES "optimized" ${lib}) 
         else()
@@ -126,12 +122,7 @@ if(WEBRTC_INCLUDE_DIR)
         endif()
       endforeach()
     endif()
-
-    message("WEBRTC_LIBRARIES_DEBUG: ${WEBRTC_LIBRARIES_DEBUG}")
-    #message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
   endif()
-
-  #message(FATAL_ERROR "Generating WebRTC Release library")
 
   # Add required system libraries
   if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND MSVC)
@@ -145,9 +136,9 @@ if(WEBRTC_INCLUDE_DIR)
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")
   endif()
 
-  #include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  #select_library_configurations(WEBRTC)
-  message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
+  # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+  # select_library_configurations(WEBRTC)
+  # message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
 
   # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
   # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
@@ -156,14 +147,19 @@ if(WEBRTC_INCLUDE_DIR)
   set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
 endif()
 
-print_module_variables(WEBRTC)
+# print_module_variables(WEBRTC)
 
 # ----------------------------------------------------------------------
 # Display status
 # ----------------------------------------------------------------------
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
+if(WIN32 AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+  find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
+else()
+  find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR)
+endif()
 
-mark_as_advanced(WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR
+mark_as_advanced(WEBRTC_LIBRARIES WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR
                  WEBRTC_LIBRARIES_DEBUG WEBRTC_LIBRARIES_RELEASE
-                 WEBRTC_LIBRARIES_DIR_DEBUG WEBRTC_LIBRARIES_DIR_RELEASE)
+                 WEBRTC_BUILD_DIR_SUFFIX_DEBUG WEBRTC_BUILD_DIR_SUFFIX_RELEASE 
+                 WEBRTC_DEPENDENCIES)

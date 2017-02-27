@@ -18,7 +18,6 @@
 #include "signaler.h"
 
 #include "webrtc/api/mediastreamtrackproxy.h"
-#include "webrtc/api/peerconnectionfactory.h"
 
 
 using std::endl;

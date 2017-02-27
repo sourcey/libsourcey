@@ -63,15 +63,13 @@ int main(int argc, char** argv)
 
         stun::Message request(stun::Message::Indication,
                               stun::Message::SendIndication);
-        // expect(IS_STUN_INDICATION(request.classType() |
-        // request.methodType()));
+        // expect(IS_STUN_INDICATION(request.classType() | request.methodType()));
 
         expect(request.classType() != stun::Message::Request);
         expect(request.classType() == stun::Message::Indication);
 
         stun::Message request1(stun::Message::Request, stun::Message::Allocate);
-        // expect(IS_STUN_REQUEST(request1.classType() |
-        // request1.methodType()));
+        // expect(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
     });
 
     // =========================================================================
