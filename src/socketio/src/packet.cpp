@@ -36,36 +36,31 @@ Packet::Packet(Frame frame, Type type, int id, const std::string& nsp,
 
 
 Packet::Packet(Type type, const std::string& message, bool ack)
-    : Packet(Frame::Message, type, util::randomNumber(), "/", "message",
-             message, ack)
+    : Packet(Frame::Message, type, util::randomNumber(), "/", "message", message, ack)
 {
 }
 
 
 Packet::Packet(const std::string& message, bool ack)
-    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message",
-             message, ack)
+    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", message, ack)
 {
 }
 
 
-Packet::Packet(const json::Value& message, bool ack)
-    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message",
-             json::stringify(message), ack)
+Packet::Packet(const json::value& message, bool ack)
+    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", message.dump(), ack)
 {
 }
 
 
 Packet::Packet(const std::string& event, const std::string& message, bool ack)
-    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event,
-             message, ack)
+    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, message, ack)
 {
 }
 
 
-Packet::Packet(const std::string& event, const json::Value& data, bool ack)
-    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event,
-             json::stringify(data), ack)
+Packet::Packet(const std::string& event, const json::value& data, bool ack)
+    : Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, data.dump(), ack)
 {
 }
 
@@ -123,68 +118,54 @@ std::size_t Packet::read(const ConstBuffer& buf)
 
     BitReader reader(buf);
 
-    // look up frame type
+    // parse frame type
     char frame[2] = {'\0'};
     reader.get(frame, 1);
-    _frame = static_cast<Packet::Frame>(
-        atoi(frame)); // std::stoi(std::string(frame, 1))
+    _frame = static_cast<Packet::Frame>(atoi(frame)); // std::stoi(std::string(frame, 1))
 
     if (_frame == Packet::Frame::Message) {
 
-        // look up packet type
+        // parse packet type
         char type[2] = {'\0'};
         reader.get(type, 1);
-        _type = static_cast<Packet::Type>(
-            atoi(type)); // std::stoi(std::string(type, 1))
+        _type = static_cast<Packet::Type>(atoi(type)); // std::stoi(std::string(type, 1))
         // if (_type < TypeMin || _type > TypeMax) {
         //     WarnN(this) << "Invalid message type: " << _type << endl;
         //     return false;
         // }
 
-        // TraceN(this) << "Parse type: " << type << ": " << typeString() <<
-        // endl;
+        // TraceN(this) << "Parse type: " << type << ": " << typeString() << endl;
     }
 
-    // look up attachments if type binary (not implemented)
+    // parse attachments if type binary (not implemented)
 
-    // look up namespace (if any)
+    // parse namespace (if any)
     if (reader.peek() == '/') {
         reader.readToNext(_nsp, ',');
     }
 
-    // look up id
-    if (reader.available() && isdigit(reader.peek())) {
-        char next;
-        std::string id;
-        reader.get(&next, 1);
-        while (reader.available() && isdigit(next)) {
-            id += next;
-            reader.get(&next, 1);
-        }
-        _id = util::strtoi<int>(id);
-    }
+    // parse id
+    reader.readNextNumber((unsigned int&)_id);
 
-    // look up json data
+    // parse json data
     // TODO: Take into account joined messages
     if (reader.available()) {
         std::string temp;
         reader.get(temp, reader.available());
 
-        json::Value json;
-        json::Reader reader;
-        if (reader.parse(temp, json)) {
-            if (json.isArray()) {
-                if (json.size() < 2) {
-                    _event = "message";
-                    _message = json::stringify(json[0], true);
-                } else {
-                    assert(json[0].isString());
-                    _event = json[0].asString();
-                    _message = json::stringify(json[1], true);
-                }
-            } else if (json.isObject()) {
-                _message = json::stringify(json, true);
+        json::value json = json::value::parse(temp.begin(), temp.end());
+        if (json.is_array()) {
+            if (json.size() < 2) {
+                _event = "message";
+                _message = json[0].dump();
+            } else {
+                assert(json[0].is_string());
+                _event = json[0].get<std::string>();
+                _message = json[1].dump();
             }
+        } 
+        else if (json.is_object()) {
+            _message = json.dump();
         }
     }
 
@@ -201,7 +182,7 @@ void Packet::write(Buffer& buf) const
     assert(valid());
     std::ostringstream os;
     print(os);
-    std::string str = os.str();
+    std::string str(os.str());
     buf.insert(buf.end(), str.begin(), str.end());
 }
 
@@ -260,16 +241,17 @@ std::string Packet::message() const
 }
 
 
-json::Value Packet::json() const
+json::value Packet::json() const
 {
     if (!_message.empty()) {
-        json::Value data;
-        json::Reader reader;
-        if (reader.parse(_message, data)) {
-            return data; //[1];
-        }
+        return json::value::parse(_message.begin(), _message.end());
+        //json::value data;
+        //json::Reader reader;
+        //if (reader.parse(_message, data)) {
+        //    return data; //[1];
+        //}
     }
-    return json::Value();
+    return json::value();
 }
 
 

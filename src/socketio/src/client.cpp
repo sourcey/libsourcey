@@ -129,7 +129,7 @@ int Client::send(const std::string& message, bool ack)
 }
 
 
-int Client::send(const json::Value& message, bool ack)
+int Client::send(const json::value& message, bool ack)
 {
     Packet packet(message, ack);
     return send(packet);
@@ -156,7 +156,7 @@ int Client::send(const std::string& event, const std::string& message, bool ack)
 }
 
 
-int Client::send(const std::string& event, const json::Value& message, bool ack)
+int Client::send(const std::string& event, const json::value& message, bool ack)
 {
     Packet packet(event, message, ack);
     return send(packet);
@@ -353,13 +353,13 @@ void Client::onHandshake(sockio::Packet& packet)
     // assert(stateEquals(ClientState::Connected));
     assert(packet.frame() == sockio::Packet::Frame::Open);
 
-    json::Value json = packet.json();
-    if (json.isMember("sid"))
-        _sessionID = json["sid"].asString();
-    if (json.isMember("pingInterval"))
-        _pingInterval = json["pingInterval"].asInt();
-    if (json.isMember("pingTimeout"))
-        _pingTimeout = json["pingTimeout"].asInt();
+    json::value json = packet.json();
+    if (json.find("sid") != json.end())
+        _sessionID = json["sid"].get<std::string>();
+    if (json.find("pingInterval") != json.end())
+        _pingInterval = json["pingInterval"].get<int>();
+    if (json.find("pingTimeout") != json.end())
+        _pingTimeout = json["pingTimeout"].get<int>();
 
     DebugN(this) << "On handshake: "
                  << "sid=" << _sessionID << ", "

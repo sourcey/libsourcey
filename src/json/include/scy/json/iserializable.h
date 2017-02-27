@@ -25,8 +25,8 @@ class SCY_EXTERN ISerializable
 {
 public:
     virtual ~ISerializable(){};
-    virtual void serialize(json::Value& root) = 0;
-    virtual void deserialize(json::Value& root) = 0;
+    virtual void serialize(json::value& root) = 0;
+    virtual void deserialize(json::value& root) = 0;
 };
 
 
@@ -35,7 +35,7 @@ inline bool serialize(ISerializable* pObj, std::string& output)
     if (pObj == NULL)
         return false;
 
-    json::Value serializeRoot;
+    json::value serializeRoot;
     pObj->serialize(serializeRoot);
 
     json::StyledWriter writer;
@@ -50,7 +50,7 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
     if (pObj == NULL)
         return false;
 
-    json::Value deserializeRoot;
+    json::value deserializeRoot;
     json::Reader reader;
 
     if (!reader.parse(input, deserializeRoot))

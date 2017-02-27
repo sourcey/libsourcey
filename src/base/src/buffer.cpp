@@ -355,11 +355,10 @@ int BitReader::readNextWord(std::string& val)
 int BitReader::readNextNumber(unsigned int& val)
 {
     std::size_t len = skipWhitespace();
-    while (_limit > _position + len && _bytes[_position + len] != ' ' &&
-           _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
-           _bytes[_position + len] != '\r')
+    while (_limit > _position + len && isdigit(_bytes[_position + len]))
         len++;
-    val = util::strtoi<std::uint32_t>(std::string(_bytes + _position, len));
+    if (len)
+        val = util::strtoi<std::uint32_t>(std::string(_bytes + _position, len));
     if (_limit > _position + len)
         _position += len;
     else

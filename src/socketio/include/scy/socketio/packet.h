@@ -62,15 +62,13 @@ public:
     Packet(const std::string& message, bool ack = false);
 
     /// JSON contructor
-    Packet(const json::Value& message, bool ack = false);
+    Packet(const json::value& message, bool ack = false);
 
     /// Event contructor
-    Packet(const std::string& event, const std::string& message,
-           bool ack = false);
+    Packet(const std::string& event, const std::string& message, bool ack = false);
 
     /// Event JSON contructor
-    Packet(const std::string& event, const json::Value& message,
-           bool ack = false);
+    Packet(const std::string& event, const json::value& message, bool ack = false);
 
     Packet(const Packet& r);
     Packet& operator=(const Packet& r);
@@ -83,7 +81,7 @@ public:
     int id() const;
     std::string nsp() const;
     std::string message() const;
-    json::Value json() const;
+    json::value json() const;
 
     void setID(int id);
     void setNamespace(const std::string& nsp);

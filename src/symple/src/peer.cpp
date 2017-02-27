@@ -29,14 +29,14 @@ Peer::Peer()
 
 
 Peer::Peer(const Peer& r)
-    : json::Value(r)
+    : json::value(r)
 {
     (*this)["type"] = "Peer";
 }
 
 
-Peer::Peer(const json::Value& r)
-    : json::Value(r)
+Peer::Peer(const json::value& r)
+    : json::value(r)
 {
     (*this)["type"] = "Peer";
 }
@@ -49,14 +49,15 @@ Peer::~Peer()
 
 void Peer::print(std::ostream& os) const
 {
-    json::StyledWriter writer;
-    os << writer.write(*this);
+    os << dump();
 }
 
 
 bool Peer::valid()
 {
-    return isMember("id") && isMember("user") && isMember("type");
+    return find("id") != end()
+        && find("user") != end()
+        && find("type") != end();
 }
 
 
@@ -68,37 +69,37 @@ Address Peer::address() const
 
 std::string Peer::id() const
 {
-    return get("id", "").asString();
+    return value("id", "");
 }
 
 
 std::string Peer::user() const
 {
-    return get("user", "").asString();
+    return value("user", "");
 }
 
 
 std::string Peer::name() const
 {
-    return get("name", "").asString();
+    return value("name", "");
 }
 
 
 // std::string Peer::group() const
 // {
-//     return get("group", "").asString();
+//     return value("group", "");
 // }
 
 
 std::string Peer::type() const
 {
-    return get("type", "").asString();
+    return value("type", "");
 }
 
 
 std::string Peer::host() const
 {
-    return get("host", "").asString();
+    return value("host", "");
 }
 
 

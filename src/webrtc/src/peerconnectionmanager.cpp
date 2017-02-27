@@ -43,7 +43,7 @@ void PeerConnectionManager::sendCandidate(PeerConnection* conn, const std::strin
 }
 
 
-void PeerConnectionManager::recvSDP(const std::string& token, const json::Value& message)
+void PeerConnectionManager::recvSDP(const std::string& token, const json::value& message)
 {
     auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
@@ -51,8 +51,8 @@ void PeerConnectionManager::recvSDP(const std::string& token, const json::Value&
         return;
     }
 
-    std::string type = message.get(kSessionDescriptionTypeName, "").asString();
-    std::string sdp = message.get(kSessionDescriptionSdpName, "").asString();
+    std::string type = message.value(kSessionDescriptionTypeName, "");
+    std::string sdp = message.value(kSessionDescriptionSdpName, "");
     if (sdp.empty() || (type != "offer" && type != "answer")) {
         ErrorL << "Received bad sdp: " << type << ": " << sdp << endl;
         assert(0 && "bad sdp");
@@ -65,7 +65,7 @@ void PeerConnectionManager::recvSDP(const std::string& token, const json::Value&
 }
 
 
-void PeerConnectionManager::recvCandidate(const std::string& token, const json::Value& message)
+void PeerConnectionManager::recvCandidate(const std::string& token, const json::value& message)
 {
     auto conn = PeerConnectionManager::get(token, false);
     if (!conn) {
@@ -73,9 +73,9 @@ void PeerConnectionManager::recvCandidate(const std::string& token, const json::
         return;
     }
 
-    std::string mid = message.get(kCandidateSdpMidName, "").asString();
-    int mlineindex = message.get(kCandidateSdpMlineIndexName, -1).asInt();
-    std::string sdp = message.get(kCandidateSdpName, "").asString();
+    std::string mid = message.value(kCandidateSdpMidName, "");
+    int mlineindex = message.value(kCandidateSdpMlineIndexName, -1);
+    std::string sdp = message.value(kCandidateSdpName, "");
     if (mlineindex == -1 || mid.empty() || sdp.empty()) {
         ErrorL << "Invalid candidate format" << endl;
         assert(0 && "bad candiate");

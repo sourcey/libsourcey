@@ -17,7 +17,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
 #if USE_SSL
@@ -48,6 +48,15 @@ int main(int argc, char** argv)
         assert(a4.id == "567257247245275");
         assert(a4.valid());
     });
+
+    // =========================================================================
+    // Client
+    //
+    //describe("SOCKET", []() {
+    //    net::TCPSocket sock;
+    //    sock.connect("127.0.0.1", SERVER_PORT);
+    //    uv::runDefaultLoop();
+    //});
 
     // =========================================================================
     // Client

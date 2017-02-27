@@ -51,7 +51,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std:
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kSessionDescriptionTypeName] = type;
     desc[kSessionDescriptionSdpName] = sdp;
     m[type] = desc;
@@ -63,7 +63,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std:
 void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kCandidateSdpMidName] = mid;
     desc[kCandidateSdpMlineIndexName] = mlineindex;
     desc[kCandidateSdpName] = sdp;
@@ -97,11 +97,11 @@ void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
 
-    if (m.isMember("offer")) {
+    if (m.find("offer") != m.end()) {
         recvSDP(m.from().id, m["offer"]);
-    } else if (m.isMember("answer")) {
+    } else if (m.find("answer") != m.end()) {
         assert(0 && "answer not supported");
-    } else if (m.isMember("candidate")) {
+    } else if (m.find("candidate") != m.end()) {
         recvCandidate(m.from().id, m["candidate"]);
     }
     // else assert(0 && "unknown event");

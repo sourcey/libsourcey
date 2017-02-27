@@ -45,7 +45,7 @@ public:
     virtual std::string path();
     virtual bool loaded();
 
-    json::Value root;
+    json::value root;
 
 protected:
     virtual bool getRaw(const std::string& key, std::string& value) const;

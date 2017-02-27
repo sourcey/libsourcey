@@ -30,15 +30,15 @@ Presence::Presence()
 Presence::Presence(const Presence& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         (*this)["type"] = "presence";
 }
 
 
-Presence::Presence(const json::Value& root)
+Presence::Presence(const json::value& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         (*this)["type"] = "presence";
 }
 
@@ -50,7 +50,7 @@ Presence::~Presence()
 
 bool Presence::isProbe()
 {
-    return (*this)["probe"].asBool();
+    return (*this)["probe"].get<bool>();
 }
 
 

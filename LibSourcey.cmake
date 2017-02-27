@@ -180,6 +180,9 @@ if(MSVC)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
   endif()
+  
+  # No pesky windows min/max macros
+  add_definitions(-DNOMINMAX)
 endif()
 
 if(APPLE)
@@ -230,9 +233,9 @@ if(WITH_ZLIB)
   add_vendor_dependency(ZLIB zlib)
   add_vendor_dependency(MINIZIP minizip)
 endif()
-if(WITH_JSONCPP)
-  add_vendor_dependency(JSONCPP jsoncpp)
-endif()
+#if(WITH_JSONCPP)
+#  add_vendor_dependency(JSONCPP jsoncpp)
+#endif()
 add_vendor_dependency(HTTPPARSER http_parser)
 
 # External dependencies
@@ -268,7 +271,8 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio/include
   ${LibSourcey_VENDOR_SOURCE_DIR}/libuv/include
   ${LibSourcey_VENDOR_SOURCE_DIR}/http_parser
-  ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp)
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp
+  ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
 
 # Include inttypes.h for windows
 if (MSVC)

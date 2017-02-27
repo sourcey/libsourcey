@@ -30,7 +30,7 @@ class SCY_EXTERN FormElement
 {
 public:
     FormElement();
-    FormElement(json::Value& root, const std::string& type = "",
+    FormElement(json::value& root, const std::string& type = "",
                 const std::string& id = "", const std::string& label = "");
     FormElement(const FormElement& r);
     FormElement& operator=(const FormElement& r);
@@ -97,12 +97,12 @@ public:
     /// Returns true if the form has multiple pages.
     bool hasPages();
 
-    json::Value& root() const;
+    json::value& root() const;
 
 protected:
     /// The root pointer is just a reference to
     /// the externally managed JSON value memory.
-    json::Value* _root;
+    json::value* _root;
 };
 
 
@@ -110,7 +110,7 @@ class SCY_EXTERN Form : public FormElement
 {
 public:
     Form();
-    Form(json::Value& root);
+    Form(json::value& root);
     Form(Command& root);
     virtual ~Form();
 
@@ -141,7 +141,7 @@ class SCY_EXTERN FormField : public FormElement
 {
 public:
     FormField();
-    FormField(json::Value& root, const std::string& type = "",
+    FormField(json::value& root, const std::string& type = "",
               const std::string& id = "", const std::string& label = "");
     virtual ~FormField();
 
@@ -162,7 +162,7 @@ public:
     void addValue(bool value);
 
     /// Returns a JSON array of all values.
-    json::Value& values();
+    json::value& values();
 
     /// Returns the first value.
     /// Most formats (except multi) only

@@ -149,13 +149,24 @@ void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t
     // TraceL << "Handle read: " << nread << std::endl;
     auto self = reinterpret_cast<Stream*>(handle->data);
 
-    if (nread >= 0) {
-        self->onRead(buf->base, nread);
-    } else {
-        // The stream was closed in error
-        // The value of nread is the error number
-        // ie. UV_ECONNRESET or UV_EOF etc ...
-        self->setUVError("Stream error", (int)nread);
+    try {
+        if (nread >= 0) {
+            self->onRead(buf->base, nread);
+        }
+        else {
+            // The stream was closed in error
+            // The value of nread is the error number
+            // ie. UV_ECONNRESET or UV_EOF etc ...
+            self->setUVError("Stream error", (int)nread);
+        }
+    }
+    catch (std::exception& exc) {
+
+        // Swallow exceptions and set the stream error
+        // This keep errors in the event loop
+        ErrorL << "Exception: " << exc.what() << std::endl;
+        self->setUVError(exc.what());
+        return;
     }
 }
 

@@ -30,15 +30,15 @@ Command::Command()
 Command::Command(const Command& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         (*this)["type"] = "command";
 }
 
 
-Command::Command(const json::Value& root)
+Command::Command(const json::value& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         (*this)["type"] = "command";
 }
 
@@ -50,19 +50,19 @@ Command::~Command()
 
 bool Command::valid() const
 {
-    return Message::valid() && isMember("node");
+    return Message::valid() && find("node") == end();
 }
 
 
 std::string Command::node() const
 {
-    return get("node", "").asString();
+    return value("node", "");
 }
 
 
 std::string Command::action() const
 {
-    return get("action", "execute").asString();
+    return value("action", "execute");
 }
 
 

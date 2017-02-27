@@ -1,0 +1,31 @@
+{
+  /*
+    The port to listen on (default: 4500).
+    If `process.env.PORT` is set, the env value will be used instead.
+    Port 443 should always be used for SSL.
+  */
+  "port" : 4500,  /* 443 */
+
+  /*
+    Session time-to-live in minutes (Redis required, default: 15 minutes)
+    This is the duration of time before sessions expire after the client disconnects.
+    If set to `-1` the session will never expire.
+  */
+  "sessionTTL" : -1,
+
+  /* Enable or disable authentication (Redis required) */
+  "authentication" : false,
+
+  /* Enable users to dynamically join and leave rooms (Redis required) */
+  "dynamicRooms" : true/*,*/
+
+  /*
+    Redis configuration
+  */
+  /*
+  "redis" : {
+    "host" : "localhost",
+    "port" : 6379
+  }
+  */
+}

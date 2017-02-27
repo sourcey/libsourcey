@@ -39,10 +39,11 @@ public:
     {
         user = options.user;
 
-        // client += messageDelegate(this, &TestClient::onRecvMessage);
         client.options() = options;
 
         client += slot(this, &TestClient::onRecvPacket);
+        client += packetSlot(this, &TestClient::onRecvMessage);
+        client += packetSlot(this, &TestClient::onRecvPresence);
         client.Announce += slot(this, &TestClient::onClientAnnounce);
         client.StateChange += slot(this, &TestClient::onClientStateChange);
         client.CreatePresence += slot(this, &TestClient::onCreatePresence);
@@ -79,21 +80,6 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        auto presence = dynamic_cast<smpl::Presence*>(&raw);
-        if (presence) {
-            return onRecvPresence(*presence);
-        }
-
-        auto message = dynamic_cast<smpl::Message*>(&raw);
-        if (message) {
-            return onRecvMessage(*message);
-        }
-
-        auto packet = dynamic_cast<sockio::Packet*>(&raw);
-        if (packet) {
-            return onRecvPacket(*packet);
-        }
-
         DebugL << "####### On raw packet: " << raw.className() << endl;
 
         // Handle incoming raw packets here
@@ -101,9 +87,9 @@ public:
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        InfoL << user << ": On presence: " << presence.toStyledString() << endl;
+        InfoL << user << ": On presence: " << presence.dump(4) << endl;
 
-        expect(presence.data("version").asString() == "1.0.1");
+        expect(presence.data("version").get<std::string>() == "1.0.1");
         if (user == "l") {
             expect(presence.from().user == "r");
         } else if (user == "r") {
@@ -117,15 +103,17 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        InfoL << user << ": On message: " << message.toStyledString() << endl;
+        InfoL << user << ": On message: " << message.dump(4) << endl;
 
         // Handle incoming Symple messages here
     }
 
-    void onClientAnnounce(const int& status) { assert(status == 200); }
+    void onClientAnnounce(const int& status) 
+    { 
+        assert(status == 200); 
+    }
 
-    void onClientStateChange(void*, sockio::ClientState& state,
-                             const sockio::ClientState& oldState)
+    void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
         InfoL << user << ": Client state changed: " << state << ": "
               << client.ws().socket->address() << endl;
