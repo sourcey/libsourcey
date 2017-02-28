@@ -41,18 +41,18 @@ macro(find_library_extended prefix)
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   select_library_configurations(${prefix})
 
-  print_module_variables(${prefix})
+  # print_module_variables(${prefix})
 
-  # messageV("*** Find library for ${prefix}")
-  # messageV("Debug Library: ${${prefix}_LIBRARY_DEBUG}")
-  # messageV("Release Library: ${${prefix}_LIBRARY_RELEASE}")
-  # messageV("Library: ${${prefix}_LIBRARY}")
-  # messageV("Debug Paths: ${${prefix}_PATHS_RELEASE}")
-  # messageV("Release Paths: ${${prefix}_PATHS_DEBUG}")
-  # messageV("Paths: ${${prefix}_PATHS}")
-  # messageV("Debug Names: ${${prefix}_NAMES_RELEASE}")
-  # messageV("Release Names: ${${prefix}_NAMES_DEBUG}")
-  # messageV("Names: ${${prefix}_NAMES}")
+  # message("*** Find library for ${prefix}")
+  # message("Debug Library: ${${prefix}_LIBRARY_DEBUG}")
+  # message("Release Library: ${${prefix}_LIBRARY_RELEASE}")
+  # message("Library: ${${prefix}_LIBRARY}")
+  # message("Debug Paths: ${${prefix}_PATHS_RELEASE}")
+  # message("Release Paths: ${${prefix}_PATHS_DEBUG}")
+  # message("Paths: ${${prefix}_PATHS}")
+  # message("Debug Names: ${${prefix}_NAMES_RELEASE}")
+  # message("Release Names: ${${prefix}_NAMES_DEBUG}")
+  # message("Names: ${${prefix}_NAMES}")
 endmacro(find_library_extended)
 
 
@@ -308,7 +308,7 @@ macro(find_component_paths module component library header)
 
     #include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
     #select_library_configurations(${ALIAS})
-  
+
     # message(STATUS "ALIAS_INCLUDE_DIRS: ${${ALIAS_INCLUDE_DIRS}}")
     # message(STATUS "ALIAS_LIBRARY_DEBUG: ${${ALIAS_LIBRARY_DEBUG}}")
     # message(STATUS "ALIAS_LIBRARY_RELEASE: ${${ALIAS_LIBRARY_RELEASE}}")
@@ -332,7 +332,7 @@ macro(find_component_paths module component library header)
         ${${module}_LIBRARY_SUFFIXES}
     )
   endif()
-    
+
   # print_module_variables(${module})
   set_component_found(${module} ${component})
 endmacro()
