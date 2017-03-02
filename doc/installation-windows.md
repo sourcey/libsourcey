@@ -14,6 +14,7 @@ You can also use either the git command line or GUI client.
 CMake generates the LibSourcey project files so you can build on most platforms and compilers.
 Here we use CMake to generate project for Visual Studio.
 
+
 ### Install OpenSSL
 
 Download and install the 1.0.x branch [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).
@@ -23,7 +24,8 @@ Don't forget to set system path if you download `zip` file version, or if the Op
 
 You can set the `OPENSSL_ROOT_DIR` CMake variable to point to your OpenSSL installation directory and the build system will do the rest.
 
-### Install FFmpeg
+
+### Install FFmpeg (optional)
 
 Download and install [FFmpeg for Windows](https://ffmpeg.zeranoe.com/builds/).
 Notice that you need to download both `Shared` and `Dev` version.
@@ -39,15 +41,58 @@ For example, if you want to build LibSourcey with FFmpeg enabled your CMake comm
 cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\OpenSSL-Win64 -DWITH_FFMPEG=ON -DFFMPEG_ROOT_DIR=E:\dev\vendor\ffmpeg-3.2.2-win64-dev
 ~~~
 
+
+### Install WebRTC (optional)
+
+Follow the guide here to install and build WebRTC: https://webrtc.org/native-code/development/
+
+This guide is also very helpfuif you get stuck: https://github.com/ipop-project/ipop-project.github.io/wiki/Building-the-WebRTC-lib-for-Windows
+
+##### WebRTC with OpenSSL (optional)
+
+You may wish to compile WebRTC with OpenSSL instead of Boring SSL, in which case you can build like so:
+
+1. Add the absolute path to your OpenSSL libs to `<webrtc-checkout>\src\webrtc\base\BUILD.gn`:
+
+~~~
+...
+rtc_static_library("rtc_base") {
+  ...
+  libs += [
+    "E:\dev\vendor\OpenSSL-Win64\lib\libeay32.lib",
+    "E:\dev\vendor\OpenSSL-Win64\lib\ssleay32.lib"
+  ]
+~~~
+
+2. And build WebRTC with the following command:
+
+~~~ bash
+set DEPOT_TOOLS_WIN_TOOLCHAIN=0
+set GYP_MSVS_VERSION=2015
+set GYP_DEFINES=component=shared_library
+
+gn gen out/Debug --args="rtc_include_tests=false rtc_build_ssl=false rtc_ssl_root=""E:\dev\vendor\OpenSSL-Win64\include"""
+ninja -C out/Debug
+~~~
+
+Once WebRTC is compiled set the following CMake variables to build LibSourcey with WebRTC enabled:
+
+~~~ bash
+cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\webrtc-checkout\src -DWITH_WEBRTC=ON
+~~~
+
+
 ### Download LibSourcey
 
 Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`. If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from GitHub.
+
 
 ## Generate Project Files
 
 Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
 
 [See here](/installation.md#cmake-build-options) for a complete list of build options.
+
 
 ## Compile with Visual Studio
 

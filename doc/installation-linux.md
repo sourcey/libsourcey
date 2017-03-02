@@ -30,7 +30,7 @@ sudo make install
 ~~~
 -->
 
-### Install FFmpeg (optional):
+### Install FFmpeg (optional)
 
 FFmpeg is an optional but recommended dependency that's required to make use of LibSourcey's media encoding capabilities.
 
@@ -62,7 +62,7 @@ sudo ldconfig
 ~~~
 -->
 
-### Install WebRTC (optional):
+### Install WebRTC (optional)
 
 Installing WebRTC can be tricky and time consuming, but using the script below you should be able to get started without a hitch. Using the script is highly recommended as there are a copuple of caveats to take note of when compiling WebRTC for use with LibSourcey:
 

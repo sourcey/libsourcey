@@ -9,18 +9,18 @@
   "anonymous" : true,
 
   /* Session ttl in minutes */
-  "sessionTtl" : 15,
+  "sessionTtl" : 15/*,*/
 
-  /* Redis configuration */
+  /* Redis configuration
   "redis" : {
     "host" : "localhost",
     "port" : 6379
-  },
+  }, */
 
-  /* SSL configuration */
+  /* SSL configuration
   "ssl" : {
     "enabled" : false,
     "key" : "ssl/symple.key",
     "cert" : "ssl/symple.crt"
-  }
+  } */
 }

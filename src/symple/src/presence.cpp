@@ -50,7 +50,7 @@ Presence::~Presence()
 
 bool Presence::isProbe()
 {
-    return (*this)["probe"].get<bool>();
+    return value("probe", false);
 }
 
 

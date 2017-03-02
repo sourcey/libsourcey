@@ -75,8 +75,8 @@ struct Trigger : public json::ISerializable
     /// Returns false by default.
     virtual bool expired();
 
-    virtual void serialize(json::Value& root);
-    virtual void deserialize(json::Value& root);
+    virtual void serialize(json::value& root);
+    virtual void deserialize(json::value& root);
 
     /// The type of this trigger class.
     std::string type;
@@ -124,8 +124,8 @@ struct IntervalTrigger : public Trigger
     virtual void update();
     virtual bool expired();
 
-    virtual void serialize(json::Value& root);
-    virtual void deserialize(json::Value& root);
+    virtual void serialize(json::value& root);
+    virtual void deserialize(json::value& root);
 
     /// This value represents the interval to wait
     /// before running the task.

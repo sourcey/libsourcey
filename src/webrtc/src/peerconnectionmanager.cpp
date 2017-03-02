@@ -123,6 +123,13 @@ void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& e
 }
 
 
+void PeerConnectionManager::setFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+{
+    assert(!_factory);
+    _factory = factory;
+}
+
+
 webrtc::PeerConnectionFactoryInterface* PeerConnectionManager::factory() const
 {
     return _factory.get();

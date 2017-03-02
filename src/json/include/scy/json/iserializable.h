@@ -32,31 +32,29 @@ public:
 
 inline bool serialize(ISerializable* pObj, std::string& output)
 {
-    if (pObj == NULL)
+    if (pObj == nullptr)
         return false;
 
     json::value serializeRoot;
     pObj->serialize(serializeRoot);
-
-    json::StyledWriter writer;
-    output = writer.write(serializeRoot);
-
+    output = serializeRoot.dump(4);
     return true;
 }
 
 
 inline bool deserialize(ISerializable* pObj, std::string& input)
 {
-    if (pObj == NULL)
+    if (pObj == nullptr)
         return false;
 
-    json::value deserializeRoot;
-    json::Reader reader;
-
-    if (!reader.parse(input, deserializeRoot))
+    try {
+        json::value deserializeRoot = json::value::parse(input.begin(), input.end());
+        pObj->deserialize(deserializeRoot);
+    }
+    catch (std::invalid_argument&) {
+        // ErrorL << "Cannot deserialize object: " << exc.what() << std::endl;
         return false;
-
-    pObj->deserialize(deserializeRoot);
+    }
 
     return true;
 }

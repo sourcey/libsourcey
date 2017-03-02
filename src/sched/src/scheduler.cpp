@@ -165,7 +165,7 @@ void Scheduler::update()
 }
 
 
-void Scheduler::serialize(json::Value& root)
+void Scheduler::serialize(json::value& root)
 {
     TraceS(this) << "Serializing" << endl;
 
@@ -173,14 +173,14 @@ void Scheduler::serialize(json::Value& root)
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sched::Task* task = reinterpret_cast<sched::Task*>(*it);
         TraceS(this) << "Serializing: " << task << endl;
-        json::Value& entry = root[root.size()];
+        json::value& entry = root[root.size()];
         task->serialize(entry);
         task->trigger().serialize(entry["trigger"]);
     }
 }
 
 
-void Scheduler::deserialize(json::Value& root)
+void Scheduler::deserialize(json::value& root)
 {
     TraceS(this) << "Deserializing" << endl;
 
@@ -189,10 +189,10 @@ void Scheduler::deserialize(json::Value& root)
         sched::Trigger* trigger = nullptr;
         try {
             json::assertMember(*it, "trigger");
-            task = factory().createTask((*it)["type"].asString());
+            task = factory().createTask((*it)["type"].get<std::string>());
             task->deserialize((*it));
             trigger =
-                factory().createTrigger((*it)["trigger"]["type"].asString());
+                factory().createTrigger((*it)["trigger"]["type"].get<std::string>());
             trigger->deserialize((*it)["trigger"]);
             task->setTrigger(trigger);
             schedule(task);
@@ -209,10 +209,9 @@ void Scheduler::deserialize(json::Value& root)
 
 void Scheduler::print(std::ostream& ost)
 {
-    json::StyledWriter writer;
-    json::Value data;
+    json::value data;
     serialize(data);
-    ost << writer.write(data);
+    ost << data.dump(4);
 }
 
 

@@ -19,9 +19,8 @@
 
 
 #define OUTPUT_FILENAME "webrtcrecorder.mp4"
-#define OUTPUT_FORMAT                                                          \
-    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
-                                            48000, 128000, "yuv420p"),         \
+#define OUTPUT_FORMAT av::Format("MP4", "mp4",                                             \
+               av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
                av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
@@ -32,7 +31,8 @@ namespace scy {
 
 
 Signaler::Signaler(const smpl::Client::Options& options)
-    : _client(options)
+    : PeerConnectionManager(webrtc::CreatePeerConnectionFactory())
+    , _client(options)
 {
     _client.StateChange += slot(this, &Signaler::onClientStateChange);
     _client.roster().ItemAdded += slot(this, &Signaler::onPeerConnected);

@@ -27,16 +27,20 @@ Message::Message()
 {
     (*this)["id"] = util::randomString(16);
     (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
 Message::Message(const Message& root)
-    : json::value(root)
+    : json::value(static_cast<const json::value&>(root))
 {
     if (find("id") != end())
         (*this)["id"] = util::randomString(16);
     if (find("type") != end())
         (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
@@ -47,6 +51,8 @@ Message::Message(const json::value& root)
         (*this)["id"] = util::randomString(16);
     if (find("type") != end())
         (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
@@ -212,6 +218,7 @@ void Message::setFrom(const Peer& from)
 
 void Message::setFrom(const Address& from)
 {
+    assert(is_object());
     (*this)["from"] = from.toString();
 }
 

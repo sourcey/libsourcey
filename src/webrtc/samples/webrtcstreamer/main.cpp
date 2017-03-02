@@ -23,21 +23,12 @@ using namespace scy;
 // Test this demo with the code in the `client` directory
 
 
-#define SERVER_HOST "localhost"
-#define USE_SSL 0 // 1
-#if USE_SSL
-#define SERVER_PORT 443
-#else
-#define SERVER_PORT 4500
-#endif
-
-
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace
 
 #if USE_SSL
-    SSLManager::initNoVerifyClient();
+    net::SSLManager::initNoVerifyClient();
 #endif
 
     // Pre-initialize video captures in the main thread
@@ -73,15 +64,14 @@ int main(int argc, char** argv)
         // app.finalize();
     }
 
-// Shutdown the media factory and release devices
-// av::MediaFactory::instance().unloadVideoCaptures();
-// av::MediaFactory::shutdown();
+    // Shutdown the media factory and release devices
+    // av::MediaFactory::instance().unloadVideoCaptures();
+    // av::MediaFactory::shutdown();
 
 #if USE_SSL
     net::SSLManager::destroy();
 #endif
     rtc::CleanupSSL();
     Logger::destroy();
-
     return 0;
 }

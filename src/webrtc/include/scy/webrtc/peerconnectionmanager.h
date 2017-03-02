@@ -50,6 +50,7 @@ public:
     virtual void onClosed(PeerConnection* conn);
     virtual void onFailure(PeerConnection* conn, const std::string& error);
 
+    void setFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
     webrtc::PeerConnectionFactoryInterface* factory() const;
 
 protected:
