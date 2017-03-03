@@ -149,7 +149,7 @@ void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t
     // TraceL << "Handle read: " << nread << std::endl;
     auto self = reinterpret_cast<Stream*>(handle->data);
 
-    //try {
+    try {
         if (nread >= 0) {
             self->onRead(buf->base, nread);
         }
@@ -159,15 +159,15 @@ void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t
             // ie. UV_ECONNRESET or UV_EOF etc ...
             self->setUVError("Stream error", (int)nread);
         }
-    //}
-    //catch (std::exception& exc) {
+    }
+    catch (std::exception& exc) {
 
-    //    // Swallow exceptions and set the stream error
-    //    // This keep errors in the event loop
-    //    ErrorL << "Exception: " << exc.what() << std::endl;
-    //    self->setUVError(exc.what());
-    //    return;
-    //}
+        // Swallow exceptions and set the stream error
+        // This keep errors in the event loop
+        ErrorL << "Exception: " << exc.what() << std::endl;
+        self->setUVError(exc.what());
+        return;
+    }
 }
 
 
@@ -188,11 +188,11 @@ void Stream::handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, 
 
 void Stream::allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
 {
-    auto self = reinterpret_cast<Stream*>( handle->data);
+    auto self = reinterpret_cast<Stream*>(handle->data);
 
     // Reserve the recommended buffer size
     // if (suggested_size > self->_buffer.capacity())
-    // self->_buffer.capacity(suggested_size);
+    //     self->_buffer.capacity(suggested_size);
     assert(self->_buffer.size() >= suggested_size);
 
     // Reset the buffer position on each read

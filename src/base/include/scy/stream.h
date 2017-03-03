@@ -28,7 +28,7 @@ class SCY_EXTERN Stream : public uv::Handle
 {
 public:
     Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr);
-    ~Stream();
+    virtual ~Stream();
 
     /// Closes and resets the stream handle.
     /// This will close the active socket/pipe

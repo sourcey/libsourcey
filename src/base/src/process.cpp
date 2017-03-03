@@ -18,6 +18,8 @@ namespace scy {
 
 Process::Process(uv::Loop* loop)
     : uv::Handle(loop, new uv_process_t)
+    , _stdin(loop)
+    , _stdout(loop)
 {
     ptr()->data = this;
     options.env = nullptr;
@@ -26,46 +28,63 @@ Process::Process(uv::Loop* loop)
     options.stdio_count = 0;
     // options.uid = 0;
     // options.gid = 0;
-    options.exit_cb = [](uv_process_t* req, int64_t exitStatus,
-                         int /*termSignal*/) {
+    options.exit_cb = [](uv_process_t* req, int64_t exitStatus, int /*termSignal*/) {
         auto self = reinterpret_cast<Process*>(req->data);
         if (self->onexit)
             self->onexit(exitStatus);
         // We could call close() here to free the uv_process_t content
     };
+
+    _stdin.init();
+    _stdout.init();
+    _stdout.Read += [this](Stream&, const char* data, const int& len) {
+        if (sdout)
+            sdout(std::string(data, len));
+    };
+
+    options.stdio = _stdio;
+    options.stdio[0].flags = uv_stdio_flags(UV_CREATE_PIPE | UV_READABLE_PIPE);
+    options.stdio[0].data.stream = _stdin.ptr<uv_stream_t>();
+    //options.stdio[0].flags = uv_stdio_flags(UV_IGNORE);
+    options.stdio[1].flags = uv_stdio_flags(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
+    options.stdio[1].data.stream = _stdout.ptr<uv_stream_t>();
+    options.stdio_count = 2;
 }
 
 
 void Process::spawn()
 {
-    // Sanity checks; note that libuv does not return
-    // an error if the target doesn't exist, but we will.
-    if (options.file == nullptr)
-        throw std::runtime_error(
-            "Cannot spawn process: File path must be set.");
+    // Sanity checks
+    //if (options.file == nullptr)
+    //    throw std::runtime_error("Cannot spawn process: File path must be set.");
     if (args.size() > 10)
-        throw std::runtime_error(
-            "Cannot spawn process: Only 10 command line arguments supported.");
-    if (!fs::exists(options.file))
-        throw std::runtime_error("Cannot spawn process: File does not exist: " +
-                                 std::string(options.file));
+        throw std::runtime_error("Cannot spawn process: Maximum of 10 command line arguments are supported.");
 
-    // Override c style args if vector has items.
-    char* uvargs[10];
+    // Override c style args if STL containers have items.
     if (!args.empty()) {
-        uvargs[0] =
-            const_cast<char*>(options.file); // first arg is always exe path
-        unsigned i;
-        for (i = 0; i < args.size(); i++) {
-            uvargs[i + 1] = const_cast<char*>(args[i].data());
-        }
-        uvargs[i + 1] = nullptr;
-        options.args = uvargs;
+        assert(!!options.args && "setting both args and options.args");
+        args.push_back(nullptr);
+        options.args = &args[0];
+        if (file.empty())
+            options.file = args[0];
     }
 
+    if (!cwd.empty()) {
+        options.cwd = &cwd[0];
+    }
+
+    if (!file.empty()) {
+        options.file = &file[0];
+    }
+
+    // Spawn the process
     int r = uv_spawn(loop(), ptr<uv_process_t>(), &options);
     if (r < 0)
         setAndThrowError("Cannot spawn process", r);
+
+    // Start reading on the stdout pipe
+    if (!_stdout.readStart())
+        setAndThrowError("Cannot read stdout pipe");
 }
 
 

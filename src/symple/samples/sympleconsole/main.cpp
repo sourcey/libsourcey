@@ -118,7 +118,7 @@ public:
 
             // client.options().host = "chat.mytommy.com";
             // client.options().port = 443;
-            // client.options().token = "HGrOPG4DXd8RKI8GTtJrHgtt";
+            // client.options().token = "p0nu6PFeW8nVba6GQ6MxfAtt";
             // client.options().user = "2";
             // client.options().host = "localhost";
             // client.options().port = 4500;

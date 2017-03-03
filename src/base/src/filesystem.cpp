@@ -229,6 +229,7 @@ void rename(const std::string& path, const std::string& target)
 
 void trimslash(std::string& path)
 {
+    if (path.empty()) return;
     std::size_t dirp = path.find_last_of(sepPattern);
     if (dirp == path.length() - 1)
         path.resize(dirp);

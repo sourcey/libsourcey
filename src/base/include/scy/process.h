@@ -14,7 +14,7 @@
 
 
 #include "scy/base.h"
-#include "scy/uv/uvpp.h"
+#include "scy/pipe.h"
 #include <functional>
 #include <vector>
 
@@ -25,10 +25,28 @@ namespace scy {
 typedef uv_process_options_t ProcessOptions;
 
 
+
+
+
 class SCY_EXTERN Process : public uv::Handle
 {
 public:
     Process(uv::Loop* loop = uv::defaultLoop());
+
+    /// Path to the program to execute.
+    /// Cenvenience proxy for options.file.
+    /// Must be set before `spawn()`
+    std::string file;
+
+    /// Set the current working directory.
+    /// Cenvenience proxy for options.cwd.
+    /// Must be set before `spawn()`
+    std::string cwd;
+
+    /// Command line agruments to pass to the process.
+    /// Cenvenience proxy for options.args.
+    /// Must be set before `spawn()`
+    std::vector<char*> args;
 
     /// Spawns the process.
     /// Options must be properly set.
@@ -41,18 +59,23 @@ public:
     /// Returns the process PID
     int pid() const;
 
-    /// Command line args.
-    /// STL proxy for options.args
-    std::vector<std::string> args;
+    /// Stdout signal.
+    /// Signals when a line has been output from the process.
+    std::function<void(std::string)> sdout;
 
-    /// Exit callback; returns the exit status.
+    /// Exit stgnals. 
+    /// Signals process exit status code.
     std::function<void(std::int64_t)> onexit;
 
-    /// Process options
+    /// LibUV C options.
+    /// Available for advanced use cases.
     ProcessOptions options;
 
 protected:
     uv_process_t _proc;
+    Pipe _stdin;
+    Pipe _stdout;
+    uv_stdio_container_t _stdio[2];
 };
 
 

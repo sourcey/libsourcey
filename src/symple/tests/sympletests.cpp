@@ -21,8 +21,9 @@ int main(int argc, char** argv)
     test::initialize();
 
 #if USE_SSL
-    SSLManager::initNoVerifyClient();
+    net::SSLManager::initNoVerifyClient();
 #endif
+
 
     // =========================================================================
     // Address
@@ -49,59 +50,65 @@ int main(int argc, char** argv)
         assert(a4.valid());
     });
 
-    // =========================================================================
-    // Client
-    //
-    //describe("SOCKET", []() {
-    //    net::TCPSocket sock;
-    //    sock.connect("127.0.0.1", SERVER_PORT);
-    //    uv::runDefaultLoop();
-    //});
 
     // =========================================================================
     // Client
     //
     describe("client", []() {
-        smpl::Client::Options loptions;
-        loptions.host = SERVER_HOST;
-        loptions.port = SERVER_PORT;
-        loptions.user = "l";
-        loptions.name = "Left";
-        // loptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
+        // Run the test server
+        // If not available the test will fail gracefully 
+        // with a warning
+        Process proc;
+        bool hasServer = true;
+        openTestServer(proc, hasServer);
+        if (!hasServer)
+            goto server_not_available;
 
-        // NOTE: The server should allow anonymous
-        // authentication for this test.
-        // options.token = ""; used for authentication
+        {
+            // NOTE: The server must allow anonymous
+            // authentication for this test.
+            smpl::Client::Options loptions;
+            loptions.host = SERVER_HOST;
+            loptions.port = SERVER_PORT;
+            loptions.user = "l";
+            loptions.name = "Left";
+            // loptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
-        smpl::Client::Options roptions;
-        roptions.host = SERVER_HOST;
-        roptions.port = SERVER_PORT;
-        roptions.user = "r";
-        roptions.name = "Right";
-        // roptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
+            smpl::Client::Options roptions;
+            roptions.host = SERVER_HOST;
+            roptions.port = SERVER_PORT;
+            roptions.user = "r";
+            roptions.name = "Right";
+            // roptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
-        TestClient lclient(loptions);
-        TestClient rclient(roptions);
+            TestClient lclient(loptions);
+            TestClient rclient(roptions);
 
-        lclient.connect();
-        rclient.connect();
+            lclient.connect();
+            rclient.connect();
 
-        while (!lclient.completed() || !rclient.completed()) {
-            // DebugL << "waiting for test completion" << std::endl;
-            uv::runDefaultLoop(UV_RUN_ONCE);
+            while (!lclient.completed() || !rclient.completed()) {
 
-            // // Connect the rclient when lclient is online
-            // if (lclient.client.isOnline() &&
-            //     rclient.client.stateEquals(sockio::ClientState::Closed))
-            //     rclient.connect();
+                // Check client failed status
+                if (!hasServer)
+                    goto server_not_available;
+
+                // DebugL << "waiting for test completion" << std::endl;
+                uv::runDefaultLoop(UV_RUN_ONCE);
+
+                // // Connect the rclient when lclient is online
+                // if (lclient.client.isOnline() &&
+                //     rclient.client.stateEquals(sockio::ClientState::Closed))
+                //     rclient.connect();
+            }
+
+            lclient.check();
+            rclient.check();
+            return;
         }
 
-        // TODO: check client failed status
-        lclient.check();
-        rclient.check();
-
-        // lclient.close();
-        // rclient.close();
+    server_not_available:
+        std::cerr << "Cannot start Symple test server" << std::endl;
     });
 
     // TODO:
@@ -114,9 +121,8 @@ int main(int argc, char** argv)
     test::runAll();
 
 #if USE_SSL
-    SSLManager::instance().shutdown();
+    net::SSLManager::instance().shutdown();
 #endif
     Logger::destroy();
-
     return finalize();
 }

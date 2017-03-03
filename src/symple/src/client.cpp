@@ -284,8 +284,6 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
 
 void Client::onOnline()
 {
-    TraceL << "On online" << endl;
-
     // NOTE: Do not transition to Online state until the Announce
     // callback is successful
     if (!_announceStatus)

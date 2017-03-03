@@ -4,6 +4,9 @@
 
 #include "scy/base.h"
 #include "scy/logger.h"
+#include "scy/pipe.h"
+#include "scy/process.h"
+#include "scy/filesystem.h"
 #include "scy/net/sslmanager.h"
 #include "scy/symple/client.h"
 #include "scy/test.h"
@@ -151,6 +154,62 @@ public:
     }
 };
 
+
+// Helper to raise a test Symple server
+bool installTestServerSync()
+{
+    bool success = false;
+    Process proc;
+    fs::addnode(proc.cwd, SCY_SOURCE_DIR);
+    fs::addnode(proc.cwd, "symple");
+    fs::addnode(proc.cwd, "tests");
+    fs::addnode(proc.cwd, "testserver");
+    //proc.file = "npm";
+    //proc.args = { "node", "server.js" };
+    proc.args = { "npm", "install" };
+    proc.sdout = [](std::string line) {
+        std::cerr << "npm sdout: " << line << std::endl;
+    };
+    proc.onexit = [&](int64_t status) {
+        std::cerr << "npm exit: " << status << std::endl;
+        success = status == 0;
+    };
+    proc.spawn();
+    uv::runDefaultLoop();
+    return success;
+}
+
+
+// Helper to raise a test Symple server
+void openTestServer(Process& proc, bool& running, bool install = true)
+{
+    if (install) {
+        try {
+            installTestServerSync();
+        }
+        catch (std::exception& exc) {
+            // Sometimes this fails on windows, so swallow 
+            // and try to run the server even if npm fails
+        }
+    }
+
+    // Run the server
+    fs::addnode(proc.cwd, SCY_SOURCE_DIR);
+    fs::addnode(proc.cwd, "symple");
+    fs::addnode(proc.cwd, "tests");
+    fs::addnode(proc.cwd, "testserver");
+    proc.args = { "node", "server.js" };
+    proc.sdout = [](std::string line) {
+        std::cerr << "server sdout: " << line << std::endl;
+    };
+    proc.onexit = [&](int64_t status) {
+        std::cerr << "server exit: " << status << std::endl;
+        //if (status != 0) { error }
+        running = false;
+    };
+    proc.spawn();
+
+}
 
 } // namespace scy
 

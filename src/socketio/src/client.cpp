@@ -382,7 +382,7 @@ void Client::onMessage(sockio::Packet& packet)
             // Do nothing, attempt to reconnect after ping timeout
             break;
         case Packet::Packet::Type::Event:
-            assert(stateEquals(ClientState::Online));
+            // assert(stateEquals(ClientState::Online));
             emit(packet);
             break;
         case Packet::Packet::Type::Ack:

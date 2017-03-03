@@ -45,8 +45,10 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
-  set(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}")
-  set(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}")
+  #set(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}")
+  #set(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}")
+  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" DIRECTORY)
+  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" DIRECTORY)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC

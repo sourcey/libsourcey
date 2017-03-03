@@ -14,202 +14,202 @@ int main(int argc, char** argv)
     test::initialize();
 
 
-  //  // =========================================================================
-  //  // Garbage Collector
-  //  //
-  //  describe("garbage collector", []() {
-  //      GarbageCollector gc;
-  //      auto loop = uv::defaultLoop();
-  //      auto loop1 = uv::createLoop();
+    // =========================================================================
+    // Garbage Collector
+    //
+    describe("garbage collector", []() {
+        GarbageCollector gc;
+        auto loop = uv::defaultLoop();
+        auto loop1 = uv::createLoop();
 
-  //      // delete running idler on default loop
-  //      auto idler = new Idler(loop, []() {});
-  //      idler->handle().ref();
-  //      gc.deleteLater(idler, loop);
+        // delete running idler on default loop
+        auto idler = new Idler(loop, []() {});
+        idler->handle().ref();
+        gc.deleteLater(idler, loop);
 
-  //      // delete running idler on loop1
-  //      auto idler1 = new Idler(loop1, []() {});
-  //      idler1->handle().ref();
-  //      gc.deleteLater(idler1, loop1);
+        // delete running idler on loop1
+        auto idler1 = new Idler(loop1, []() {});
+        idler1->handle().ref();
+        gc.deleteLater(idler1, loop1);
 
-  //      // run the default loop which will return 
-  //      // once the idler is deleted
-  //      uv::runDefaultLoop();
+        // run the default loop which will return 
+        // once the idler is deleted
+        uv::runDefaultLoop();
 
-  //      // finalize deletion of all pointers
-  //      gc.finalize();
+        // finalize deletion of all pointers
+        gc.finalize();
 
-  //      expect(loop->active_handles == 0);
-  //      expect(loop1->active_handles == 0);
+        expect(loop->active_handles == 0);
+        expect(loop1->active_handles == 0);
 
-  //      // free the created loop1
-  //      uv::closeLoop(loop1);
-  //  });
-
-
-  //  // =========================================================================
-  //  // Signal Benchmarks
-  //  //
-  //  describe("signal class member benchmark", []() {
-  //      Signal<void(std::uint64_t&)> signal;
-  //      SignalCounter counter;
-  //      signal += slot(&counter, &SignalCounter::increment);
-  //      const std::uint64_t benchstart = time::hrtime();
-  //      std::uint64_t i, value = 0;
-  //      for (i = 0; i < 999999; i++) {
-  //          signal.emit(value);
-  //      }
-  //      const std::uint64_t benchdone = time::hrtime();
-  //      expect(value == i);
-
-  //      std::cout << "signal class member benchmark: "
-  //          << ((benchdone - benchstart) * 1.0 / i) << "ns "
-  //          << "per emission (sz=" << sizeof(signal) << ")"
-  //          << std::endl;
-  //  });
-
-  //  describe("signal const class member benchmark", []() {
-  //      Signal<void(std::uint64_t&)> signal;
-  //      SignalCounter counter;
-  //      signal += slot(&counter, &SignalCounter::incrementConst);
-  //      const std::uint64_t benchstart = time::hrtime();
-  //      std::uint64_t i, value = 0;
-  //      for (i = 0; i < 999999; i++) {
-  //          signal.emit(value);
-  //      }
-  //      const std::uint64_t benchdone = time::hrtime();
-  //      expect(value == i);
-
-  //      std::cout << "signal const class member benchmark: "
-  //          << ((benchdone - benchstart) * 1.0 / i) << "ns "
-  //          << "per emission (sz=" << sizeof(signal) << ")" << std::endl;
-  //  });
-
-  //  describe("signal static member benchmark", []() {
-  //      Signal<void(std::uint64_t&)> signal;
-  //      // SignalCounter counter;
-  //      signal += slot(&SignalCounter::incrementStatic);
-  //      // signal += &SignalCounter::incrementStatic;
-  //      const std::uint64_t benchstart = time::hrtime();
-  //      std::uint64_t i, value = 0;
-  //      for (i = 0; i < 999999; i++) {
-  //          signal.emit(value);
-  //      }
-  //      const std::uint64_t benchdone = time::hrtime();
-  //      expect(value == i);
-
-  //      std::cout << "signal static member benchmark: "
-  //          << ((benchdone - benchstart) * 1.0 / i) << "ns "
-  //          << "per emission (sz=" << sizeof (signal) << ")"
-  //          << std::endl;
-  //  });
-
-  //  describe("signal free function benchmark", []() {
-  //      Signal<void(std::uint64_t&)> signal;
-  //      signal += signalIncrementFree;
-  //      const std::uint64_t benchstart = time::hrtime();
-  //      std::uint64_t i, value = 0;
-  //      for (i = 0; i < 999999; i++) {
-  //          signal.emit(value);
-  //      }
-  //      const std::uint64_t benchdone = time::hrtime();
-  //      expect(value == i);
-
-  //      std::cout << "signal free function benchmark: "
-  //          << ((benchdone - benchstart) * 1.0 / i) << "ns "
-  //          << "per emission (sz=" << sizeof (signal) << ")"
-  //          << std::endl;
-  //  });
+        // free the created loop1
+        uv::closeLoop(loop1);
+    });
 
 
-  //  // =========================================================================
-  //  // Buffer
-  //  //
-  //  describe("buffer", []() {
-  //      ByteOrder orders[2] = { ByteOrder::Host,
-  //                              ByteOrder::Network };
-  //      for (std::size_t i = 0; i < 2; i++) {
-  //          Buffer buffer(1024);
-  //          BitReader reader(buffer, orders[i]);
-  //          BitWriter writer(buffer, orders[i]);
-  //          expect(orders[i] == reader.order());
-  //          expect(orders[i] == writer.order());
+    // =========================================================================
+    // Signal Benchmarks
+    //
+    describe("signal class member benchmark", []() {
+        Signal<void(std::uint64_t&)> signal;
+        SignalCounter counter;
+        signal += slot(&counter, &SignalCounter::increment);
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
+            signal.emit(value);
+        }
+        const std::uint64_t benchdone = time::hrtime();
+        expect(value == i);
 
-  //          // Write and read std::uint8_t.
-  //          std::uint8_t wu8 = 1;
-  //          writer.putU8(wu8);
-  //          std::uint8_t ru8;
-  //          reader.getU8(ru8);
-  //          expect(writer.position() == 1);
-  //          expect(reader.position() == 1);
-  //          expect(wu8 == ru8);
+        std::cout << "signal class member benchmark: "
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof(signal) << ")"
+            << std::endl;
+    });
 
-  //          // Write and read std::uint16_t.
-  //          std::uint16_t wu16 = (1 << 8) + 1;
-  //          writer.putU16(wu16);
-  //          std::uint16_t ru16;
-  //          reader.getU16(ru16);
-  //          expect(wu16 == ru16);
-  //          expect(writer.position() == 3);
-  //          expect(reader.position() == 3);
+    describe("signal const class member benchmark", []() {
+        Signal<void(std::uint64_t&)> signal;
+        SignalCounter counter;
+        signal += slot(&counter, &SignalCounter::incrementConst);
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
+            signal.emit(value);
+        }
+        const std::uint64_t benchdone = time::hrtime();
+        expect(value == i);
 
-  //          // Write and read UInt24.
-  //          std::uint32_t wu24 = (3 << 16) + (2 << 8) + 1;
-  //          writer.putU24(wu24);
-  //          std::uint32_t ru24;
-  //          reader.getU24(ru24);
-  //          expect(wu24 == ru24);
-  //          expect(writer.position() == 6);
-  //          expect(reader.position() == 6);
+        std::cout << "signal const class member benchmark: "
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof(signal) << ")" << std::endl;
+    });
 
-  //          // Write and read std::uint32_t.
-  //          std::uint32_t wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
-  //          writer.putU32(wu32);
-  //          std::uint32_t ru32;
-  //          reader.getU32(ru32);
-  //          expect(wu32 == ru32);
-  //          expect(writer.position() == 10);
-  //          expect(reader.position() == 10);
+    describe("signal static member benchmark", []() {
+        Signal<void(std::uint64_t&)> signal;
+        // SignalCounter counter;
+        signal += slot(&SignalCounter::incrementStatic);
+        // signal += &SignalCounter::incrementStatic;
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
+            signal.emit(value);
+        }
+        const std::uint64_t benchdone = time::hrtime();
+        expect(value == i);
 
-  //          // Write and read std::uint64_t.
-  //          std::uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
-  //          std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) << 32) + wu32;
-  //          writer.putU64(wu64);
-  //          std::uint64_t ru64;
-  //          reader.getU64(ru64);
-  //          expect(wu64 == ru64);
-  //          expect(writer.position() == 18);
-  //          expect(reader.position() == 18);
+        std::cout << "signal static member benchmark: "
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof (signal) << ")"
+            << std::endl;
+    });
 
-  //          // Write and read string.
-  //          std::string write_string("hello");
-  //          writer.put(write_string);
-  //          std::string read_string;
-  //          reader.get(read_string, write_string.size());
-  //          expect(write_string == read_string);
-  //          expect(writer.position() == 23);
-  //          expect(reader.position() == 23);
+    describe("signal free function benchmark", []() {
+        Signal<void(std::uint64_t&)> signal;
+        signal += signalIncrementFree;
+        const std::uint64_t benchstart = time::hrtime();
+        std::uint64_t i, value = 0;
+        for (i = 0; i < 999999; i++) {
+            signal.emit(value);
+        }
+        const std::uint64_t benchdone = time::hrtime();
+        expect(value == i);
 
-  //          // Write and read bytes
-  //          char write_bytes[] = "foo";
-  //          writer.put(write_bytes, 3);
-  //          char read_bytes[3];
-  //          reader.get(read_bytes, 3);
-  //          for (int x = 0; x < 3; ++x) {
-  //            expect(write_bytes[x] == read_bytes[x]);
-  //          }
-  //          expect(writer.position() == 26);
-  //          expect(reader.position() == 26);
+        std::cout << "signal free function benchmark: "
+            << ((benchdone - benchstart) * 1.0 / i) << "ns "
+            << "per emission (sz=" << sizeof (signal) << ")"
+            << std::endl;
+    });
 
-  //          // TODO: Test overflow
-  //          // try {
-  //          //     reader.getU8(ru8);
-  //          //     expect(0 && "must throw");
-  //          // }
-  //          // catch (std::out_of_range& exc) {
-  //          // }
-  //      }
-  //  });
+
+    // =========================================================================
+    // Buffer
+    //
+    describe("buffer", []() {
+        ByteOrder orders[2] = { ByteOrder::Host,
+                                ByteOrder::Network };
+        for (std::size_t i = 0; i < 2; i++) {
+            Buffer buffer(1024);
+            BitReader reader(buffer, orders[i]);
+            BitWriter writer(buffer, orders[i]);
+            expect(orders[i] == reader.order());
+            expect(orders[i] == writer.order());
+
+            // Write and read std::uint8_t.
+            std::uint8_t wu8 = 1;
+            writer.putU8(wu8);
+            std::uint8_t ru8;
+            reader.getU8(ru8);
+            expect(writer.position() == 1);
+            expect(reader.position() == 1);
+            expect(wu8 == ru8);
+
+            // Write and read std::uint16_t.
+            std::uint16_t wu16 = (1 << 8) + 1;
+            writer.putU16(wu16);
+            std::uint16_t ru16;
+            reader.getU16(ru16);
+            expect(wu16 == ru16);
+            expect(writer.position() == 3);
+            expect(reader.position() == 3);
+
+            // Write and read UInt24.
+            std::uint32_t wu24 = (3 << 16) + (2 << 8) + 1;
+            writer.putU24(wu24);
+            std::uint32_t ru24;
+            reader.getU24(ru24);
+            expect(wu24 == ru24);
+            expect(writer.position() == 6);
+            expect(reader.position() == 6);
+
+            // Write and read std::uint32_t.
+            std::uint32_t wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
+            writer.putU32(wu32);
+            std::uint32_t ru32;
+            reader.getU32(ru32);
+            expect(wu32 == ru32);
+            expect(writer.position() == 10);
+            expect(reader.position() == 10);
+
+            // Write and read std::uint64_t.
+            std::uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
+            std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) << 32) + wu32;
+            writer.putU64(wu64);
+            std::uint64_t ru64;
+            reader.getU64(ru64);
+            expect(wu64 == ru64);
+            expect(writer.position() == 18);
+            expect(reader.position() == 18);
+
+            // Write and read string.
+            std::string write_string("hello");
+            writer.put(write_string);
+            std::string read_string;
+            reader.get(read_string, write_string.size());
+            expect(write_string == read_string);
+            expect(writer.position() == 23);
+            expect(reader.position() == 23);
+
+            // Write and read bytes
+            char write_bytes[] = "foo";
+            writer.put(write_bytes, 3);
+            char read_bytes[3];
+            reader.get(read_bytes, 3);
+            for (int x = 0; x < 3; ++x) {
+              expect(write_bytes[x] == read_bytes[x]);
+            }
+            expect(writer.position() == 26);
+            expect(reader.position() == 26);
+
+            // TODO: Test overflow
+            // try {
+            //     reader.getU8(ru8);
+            //     expect(0 && "must throw");
+            // }
+            // catch (std::out_of_range& exc) {
+            // }
+        }
+    });
 
 
     describe("dynamic resizable buffer", []() {
@@ -235,259 +235,259 @@ int main(int argc, char** argv)
     });
 
 
-  //  // =========================================================================
-  //  // Collection
-  //  //
-  //  describe("collection", []() {
-  //      NVCollection nvc;
-  //      expect(nvc.empty());
-  //      expect(nvc.size() == 0);
+    // =========================================================================
+    // Collection
+    //
+    describe("collection", []() {
+        NVCollection nvc;
+        expect(nvc.empty());
+        expect(nvc.size() == 0);
 
-  //      nvc.set("name", "value");
-  //      expect(!nvc.empty());
-  //      expect(nvc["name"] == "value");
-  //      expect(nvc["Name"] == "value");
+        nvc.set("name", "value");
+        expect(!nvc.empty());
+        expect(nvc["name"] == "value");
+        expect(nvc["Name"] == "value");
 
-  //      nvc.set("name2", "value2");
-  //      expect(nvc.get("name2") == "value2");
-  //      expect(nvc.get("NAME2") == "value2");
+        nvc.set("name2", "value2");
+        expect(nvc.get("name2") == "value2");
+        expect(nvc.get("NAME2") == "value2");
 
-  //      expect(nvc.size() == 2);
+        expect(nvc.size() == 2);
 
-  //      try {
-  //          std::string value = nvc.get("name3");
-  //          expect(0 && "not found - must throw");
-  //      }
-  //      catch (std::exception&) {
-  //      }
+        try {
+            std::string value = nvc.get("name3");
+            expect(0 && "not found - must throw");
+        }
+        catch (std::exception&) {
+        }
 
-  //      try {
-  //          std::string value = nvc["name3"];
-  //          expect(0 && "not found - must throw");
-  //      }
-  //      catch (std::exception&) {
-  //      }
+        try {
+            std::string value = nvc["name3"];
+            expect(0 && "not found - must throw");
+        }
+        catch (std::exception&) {
+        }
 
-  //      expect(nvc.get("name", "default") == "value");
-  //      expect(nvc.get("name3", "default") == "default");
+        expect(nvc.get("name", "default") == "value");
+        expect(nvc.get("name3", "default") == "default");
 
-  //      expect(nvc.has("name"));
-  //      expect(nvc.has("name2"));
-  //      expect(!nvc.has("name3"));
+        expect(nvc.has("name"));
+        expect(nvc.has("name2"));
+        expect(!nvc.has("name3"));
 
-  //      nvc.add("name3", "value3");
-  //      expect(nvc.get("name3") == "value3");
+        nvc.add("name3", "value3");
+        expect(nvc.get("name3") == "value3");
 
-  //      nvc.add("name3", "value31");
+        nvc.add("name3", "value31");
 
-  //      nvc.add("Connection", "value31");
+        nvc.add("Connection", "value31");
 
-  //      NVCollection::ConstIterator it = nvc.find("Name3");
-  //      expect(it != nvc.end());
-  //      std::string v1 = it->second;
-  //      expect(it->first == "name3");
-  //      ++it;
-  //      expect(it != nvc.end());
-  //      std::string v2 = it->second;
-  //      expect(it->first == "name3");
+        NVCollection::ConstIterator it = nvc.find("Name3");
+        expect(it != nvc.end());
+        std::string v1 = it->second;
+        expect(it->first == "name3");
+        ++it;
+        expect(it != nvc.end());
+        std::string v2 = it->second;
+        expect(it->first == "name3");
 
-  //      expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
+        expect((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
 
-  //      nvc.erase("name3");
-  //      expect(!nvc.has("name3"));
-  //      expect(nvc.find("name3") == nvc.end());
+        nvc.erase("name3");
+        expect(!nvc.has("name3"));
+        expect(nvc.find("name3") == nvc.end());
 
-  //      it = nvc.begin();
-  //      expect(it != nvc.end());
-  //      ++it;
-  //      expect(it != nvc.end());
-  //      // ++it;
-  //      // expect(it == nvc.end());
+        it = nvc.begin();
+        expect(it != nvc.end());
+        ++it;
+        expect(it != nvc.end());
+        // ++it;
+        // expect(it == nvc.end());
 
-  //      nvc.clear();
-  //      expect(nvc.empty());
+        nvc.clear();
+        expect(nvc.empty());
 
-  //      expect(nvc.size() == 0);
-  //  });
-
-
-  //  // =========================================================================
-  //  // Filesystem
-  //  //
-  //  describe("filesystem", []() {
-  //      std::string path(scy::getExePath());
-  //      cout << "Executable path: " << path << endl;
-  //      expect(fs::exists(path));
-
-  //      std::string junkPath(path + "junkname.huh");
-  //      cout << "Junk path: " << junkPath << endl;
-  //      expect(!fs::exists(junkPath));
-
-  //      std::string dir(fs::dirname(path));
-  //      cout << "Dir name: " << dir << endl;
-  //      expect(fs::exists(dir));
-  //      expect(fs::exists(dir + "/"));
-  //      expect(fs::exists(dir + "\\"));
-  //      expect(fs::dirname(dir) == dir);
-  //      // expect(fs::dirname(dir + "/") == dir);
-  //      // expect(fs::dirname(dir + "\\") == dir);
-  //  });
+        expect(nvc.size() == 0);
+    });
 
 
-  //  // =========================================================================
-  //  // Logger
-  //  //
-  //  describe("logger", []() {
-  //      Logger& logger = Logger::instance();
+    // =========================================================================
+    // Filesystem
+    //
+    describe("filesystem", []() {
+        std::string path(scy::getExePath());
+        cout << "Executable path: " << path << endl;
+        expect(fs::exists(path));
 
-  //      // Test default synchronous writer
-  //      logger.setWriter(new LogWriter);
-  //      clock_t start = clock();
-  //      for (unsigned i = 0; i < 1000; i++)
-  //          TraceL << "test: " << i << endl;
-  //      cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
+        std::string junkPath(path + "junkname.huh");
+        cout << "Junk path: " << junkPath << endl;
+        expect(!fs::exists(junkPath));
 
-  //      // Test asynchronous writer (approx 10x faster)
-  //      logger.setWriter(new AsyncLogWriter);
-  //      start = clock();
-  //      for (unsigned i = 0; i < 1000; i++)
-  //          TraceL << "test: " << i << endl;
-  //      cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
-
-  //      // // Test function logging
-  //      // start = clock();
-  //      // for (unsigned i = 0; i < 1000; i++)
-  //      //     TraceS(this) << "test: " << i << endl;
-  //      // cout << "logger: asynchronous function logging completed after: "
-  //      //      << (clock() - start) << endl;
-  //      //
-  //      // // Test function and mem address logging
-  //      // start = clock();
-  //      // for (unsigned i = 0; i < 1000; i++)
-  //      //     TraceS(this) << "test: " << i << endl;
-  //      // cout << "logger: asynchronous function and mem address logging completed after: "
-  //      //      << (clock() - start) << endl;
-
-  //      logger.setWriter(nullptr);
-
-  //      // TODO: Test log filtering
-  //      // logger.getDefault()->setFilter("scy::*");
-  //      // Destory the current Logger instance to ensure no crash
-  //      Logger::destroy();
-  //  });
+        std::string dir(fs::dirname(path));
+        cout << "Dir name: " << dir << endl;
+        expect(fs::exists(dir));
+        expect(fs::exists(dir + "/"));
+        expect(fs::exists(dir + "\\"));
+        expect(fs::dirname(dir) == dir);
+        // expect(fs::dirname(dir + "/") == dir);
+        // expect(fs::dirname(dir + "\\") == dir);
+    });
 
 
-  //  // =========================================================================
-  //  // Platform
-  //  //
-  //  describe("platform", []() {
-  //      // TODO: expand test coverage
+    // =========================================================================
+    // Logger
+    //
+    describe("logger", []() {
+        Logger& logger = Logger::instance();
 
-  //      expect(!scy::getExePath().empty());
-  //      expect(!scy::getCwd().empty());
+        // Test default synchronous writer
+        logger.setWriter(new LogWriter);
+        clock_t start = clock();
+        for (unsigned i = 0; i < 1000; i++)
+            TraceL << "test: " << i << endl;
+        cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
 
-  //      // cout << "executable path: " << scy::getExePath() << endl;
-  //      // cout << "current working directory: " << scy::getCwd() << endl;
-  //  });
+        // Test asynchronous writer (approx 10x faster)
+        logger.setWriter(new AsyncLogWriter);
+        start = clock();
+        for (unsigned i = 0; i < 1000; i++)
+            TraceL << "test: " << i << endl;
+        cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
 
+        // // Test function logging
+        // start = clock();
+        // for (unsigned i = 0; i < 1000; i++)
+        //     TraceS(this) << "test: " << i << endl;
+        // cout << "logger: asynchronous function logging completed after: "
+        //      << (clock() - start) << endl;
+        //
+        // // Test function and mem address logging
+        // start = clock();
+        // for (unsigned i = 0; i < 1000; i++)
+        //     TraceS(this) << "test: " << i << endl;
+        // cout << "logger: asynchronous function and mem address logging completed after: "
+        //      << (clock() - start) << endl;
 
-  //  // =========================================================================
-  //  // Version String Comparison
-  //  //
-  //  describe("version string comparison", []() {
-  //      expect((util::Version("3.7.8.0") == util::Version("3.7.8.0")) == true);
-  //      expect((util::Version("3.7.8.0") == util::Version("3.7.8")) == true);
-  //      expect((util::Version("3.7.8.0") < util::Version("3.7.8")) == false);
-  //      expect((util::Version("3.7.9") < util::Version("3.7.8")) == false);
-  //      // expect((util::Version("3") < util::Version("3.7.9")) == true);
-  //      expect((util::Version("1.7.9") < util::Version("3.1")) == true);
+        logger.setWriter(nullptr);
 
-  //      cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0") << endl;
-  //  });
-
-
-  //  // =========================================================================
-  //  // Idler
-  //  //
-  //  describe("idler", []() {
-  //      int counter = 0;
-  //      bool ran = false;
-
-  //      // Create the idler with a lambda
-		//Idler idler;
-  //      idler.start([&]() {
-  //          std::cout << "On idle: " << counter << std::endl;
-  //          if (++counter == 10) {
-  //              ran = true;
-  //              expect(idler.running() == true);
-  //              idler.cancel();
-  //              expect(idler.cancelled() == true);
-  //          }
-  //      });
-
-  //      // Make the idler reference the event loop
-  //      idler.handle().ref();
-
-  //      // Run the loop
-  //      uv::runDefaultLoop();
-
-  //      // Check variables
-  //      expect(ran == true);
-  //      expect(counter == 10);
-  //      expect(idler.running() == false);
-
-  //      // Reinitialize the idler with veradic args
-  //      ran = false;
-  //      idler.start([](Idler* idler, bool* ran) {
-  //          *ran = true;
-  //          expect(idler->running() == true);
-  //          idler->cancel();
-  //      }, &idler, &ran);
-
-  //      // Run the loop again
-  //      uv::runDefaultLoop();
-
-  //      // Check variables
-  //      expect(ran == true);
-  //      expect(idler.running() == false);
-
-  //      // Bind to class member
-  //      // idler.start(std::bind(&IdlerTest::idlerCallback, this));
-  //  });
+        // TODO: Test log filtering
+        // logger.getDefault()->setFilter("scy::*");
+        // Destory the current Logger instance to ensure no crash
+        Logger::destroy();
+    });
 
 
-  //  // =========================================================================
-  //  // Thread
-  //  //
-  //  describe("thread", []() {
-  //      bool ran = false;
-  //  	Thread t1;
-  //  	t1.start([&]() {
-  //          ran = true;
-  //          expect(t1.running() == true);
-  //      });
-  //      t1.join();
-  //      expect(ran == true);
-  //      expect(t1.running() == false);
+    // =========================================================================
+    // Platform
+    //
+    describe("platform", []() {
+        // TODO: expand test coverage
 
-  //      // Reuse the same thread container
-  //      ran = false;
-  //      t1.start([&]() {
-  //          ran = true;
-  //          expect(t1.running() == true);
-  //      });
-  //      t1.join();
-  //      expect(ran == true);
-  //      expect(t1.running() == false);
-  //  });
+        expect(!scy::getExePath().empty());
+        expect(!scy::getCwd().empty());
 
-  //  // Define class based tests
-  //  describe("signal", new SignalTest);
-  //  describe("ipc", new IpcTest);
-  //  describe("timer", new TimerTest);
-  //  describe("packet stream", new PacketStreamTest);
-  //  describe("packet stream file io", new PacketStreamIOTest);
-  //  // // describe("multi packet stream", new MultiPacketStreamTest);
+        // cout << "executable path: " << scy::getExePath() << endl;
+        // cout << "current working directory: " << scy::getCwd() << endl;
+    });
+
+
+    // =========================================================================
+    // Version String Comparison
+    //
+    describe("version string comparison", []() {
+        expect((util::Version("3.7.8.0") == util::Version("3.7.8.0")) == true);
+        expect((util::Version("3.7.8.0") == util::Version("3.7.8")) == true);
+        expect((util::Version("3.7.8.0") < util::Version("3.7.8")) == false);
+        expect((util::Version("3.7.9") < util::Version("3.7.8")) == false);
+        // expect((util::Version("3") < util::Version("3.7.9")) == true);
+        expect((util::Version("1.7.9") < util::Version("3.1")) == true);
+
+        cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0") << endl;
+    });
+
+
+    // =========================================================================
+    // Idler
+    //
+    describe("idler", []() {
+        int counter = 0;
+        bool ran = false;
+
+        // Create the idler with a lambda
+		Idler idler;
+        idler.start([&]() {
+            std::cout << "On idle: " << counter << std::endl;
+            if (++counter == 10) {
+                ran = true;
+                expect(idler.running() == true);
+                idler.cancel();
+                expect(idler.cancelled() == true);
+            }
+        });
+
+        // Make the idler reference the event loop
+        idler.handle().ref();
+
+        // Run the loop
+        uv::runDefaultLoop();
+
+        // Check variables
+        expect(ran == true);
+        expect(counter == 10);
+        expect(idler.running() == false);
+
+        // Reinitialize the idler with veradic args
+        ran = false;
+        idler.start([](Idler* idler, bool* ran) {
+            *ran = true;
+            expect(idler->running() == true);
+            idler->cancel();
+        }, &idler, &ran);
+
+        // Run the loop again
+        uv::runDefaultLoop();
+
+        // Check variables
+        expect(ran == true);
+        expect(idler.running() == false);
+
+        // Bind to class member
+        // idler.start(std::bind(&IdlerTest::idlerCallback, this));
+    });
+
+
+    // =========================================================================
+    // Thread
+    //
+    describe("thread", []() {
+        bool ran = false;
+    	Thread t1;
+    	t1.start([&]() {
+            ran = true;
+            expect(t1.running() == true);
+        });
+        t1.join();
+        expect(ran == true);
+        expect(t1.running() == false);
+
+        // Reuse the same thread container
+        ran = false;
+        t1.start([&]() {
+            ran = true;
+            expect(t1.running() == true);
+        });
+        t1.join();
+        expect(ran == true);
+        expect(t1.running() == false);
+    });
+
+    // Define class based tests
+    describe("signal", new SignalTest);
+    describe("ipc", new IpcTest);
+    describe("timer", new TimerTest);
+    describe("packet stream", new PacketStreamTest);
+    describe("packet stream file io", new PacketStreamIOTest);
+    // // describe("multi packet stream", new MultiPacketStreamTest);
 
     test::runAll();
 
