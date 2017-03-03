@@ -62,7 +62,7 @@ void Process::spawn()
 
     // Override c style args if STL containers have items.
     if (!args.empty()) {
-        assert(!!options.args && "setting both args and options.args");
+        //assert(!!options.args && "setting both args and options.args");
         args.push_back(nullptr);
         options.args = &args[0];
         if (file.empty())
