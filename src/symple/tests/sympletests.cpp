@@ -61,7 +61,7 @@ int main(int argc, char** argv)
         // NOTE: The server must allow anonymous authentication for this test
         Process proc;
         if (!openTestServer(proc)) {
-            std::cerr << "Cannot start Symple test server" << std::endl;
+            std::cerr << "cannot start test server, skipping..." << std::endl;
             return;
         }
 

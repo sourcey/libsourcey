@@ -170,10 +170,10 @@ bool installTestServerSync()
     Process proc({ "npm", "install" });
     setTestServerCwd(proc.cwd);
     proc.sdout = [](std::string line) {
-        std::cerr << "symple npm sdout: " << line << std::endl;
+        std::cout << "server npm sdout: " << line << std::endl;
     };
     proc.onexit = [&](int64_t status) {
-        std::cerr << "symple npm exit: " << status << std::endl;
+        std::cout << "server npm exit: " << status << std::endl;
         success = status == 0;
     };
     proc.spawn();
@@ -200,12 +200,12 @@ bool openTestServer(Process& proc, bool install = true)
     setTestServerCwd(proc.cwd);
     proc.args = { "node", "server.js" };
     proc.sdout = [&](std::string line) {
-        std::cout << "symple server sdout: " << line << std::endl;
+        std::cout << "server sdout: " << line << std::endl;
         if (line.find("listening") != std::string::npos)
             running = true;
     };
     proc.onexit = [&](int64_t status) {
-        std::cout << "symple server exit: " << status << std::endl;
+        std::cout << "server exit: " << status << std::endl;
         exited = true;
     };
     proc.spawn();
@@ -215,7 +215,7 @@ bool openTestServer(Process& proc, bool install = true)
         uv::runDefaultLoop(UV_RUN_NOWAIT);
     }
 
-    std::cout << "symple server running: " << running << std::endl;
+    std::cout << "server running: " << running << std::endl;
     return running;
 }
 
