@@ -46,6 +46,7 @@ Process::~Process()
 void Process::init()
 {
     ptr()->data = this;
+    options.args = nullptr;
     options.env = nullptr;
     options.cwd = nullptr;
     options.flags = 0;
@@ -85,13 +86,12 @@ void Process::spawn()
         throw std::runtime_error("Cannot spawn process: Maximum of 10 command line arguments are supported.");
 
     // Override c style args if STL containers have items.
+    _cargs.clear();
     if (!args.empty()) {
         //assert(!!options.args && "setting both args and options.args");
-        _cargs.clear();
         for (auto& arg : args)
             _cargs.push_back(&arg[0]);
         _cargs.push_back(nullptr);
-        options.args = &_cargs[0];
     }
 
     if (!cwd.empty()) {
@@ -100,10 +100,17 @@ void Process::spawn()
 
     if (!file.empty()) {
         options.file = &file[0];
+        if (_cargs.empty()) {
+            _cargs.push_back(&file[0]);
+            _cargs.push_back(nullptr);
+        }
     }
     else if (!_cargs.empty()) {
         options.file = _cargs[0];
     }
+
+    assert(!_cargs.empty() && "args must not be empty");
+    options.args = &_cargs[0];
 
     // Spawn the process
     int r = uv_spawn(loop(), ptr<uv_process_t>(), &options);
@@ -116,13 +123,13 @@ void Process::spawn()
 }
 
 
-Pipe& Process::stdin()
+Pipe& Process::in()
 {
     return _stdin;
 }
 
 
-Pipe& Process::stdout()
+Pipe& Process::out()
 {
     return _stdout;
 }

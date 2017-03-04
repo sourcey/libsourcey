@@ -65,10 +65,10 @@ public:
     int pid() const;
 
     /// Returns the stdin pipe.
-    Pipe& stdin();
+    Pipe& in();
 
     /// Returns the stdout pipe.
-    Pipe& stdout();
+    Pipe& out();
 
     /// Stdout signal.
     /// Signals when a line has been output from the process.

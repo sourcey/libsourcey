@@ -17,34 +17,34 @@ int main(int argc, char** argv)
     // =========================================================================
     // Garbage Collector
     //
-    // describe("garbage collector", []() {
-    //     GarbageCollector gc;
-    //     auto loop = uv::defaultLoop();
-    //     auto loop1 = uv::createLoop();
-    //
-    //     // delete running idler on default loop
-    //     auto idler = new Idler(loop, []() {});
-    //     idler->handle().ref();
-    //     gc.deleteLater(idler, loop);
-    //
-    //     // delete running idler on loop1
-    //     auto idler1 = new Idler(loop1, []() {});
-    //     idler1->handle().ref();
-    //     gc.deleteLater(idler1, loop1);
-    //
-    //     // run the default loop which will return
-    //     // once the idler is deleted
-    //     uv::runDefaultLoop();
-    //
-    //     // finalize deletion of all pointers
-    //     gc.finalize();
-    //
-    //     expect(loop->active_handles == 0);
-    //     expect(loop1->active_handles == 0);
-    //
-    //     // free the created loop1
-    //     uv::closeLoop(loop1);
-    // });
+    describe("garbage collector", []() {
+        GarbageCollector gc;
+        auto loop = uv::defaultLoop();
+        auto loop1 = uv::createLoop();
+
+        // delete running idler on default loop
+        auto idler = new Idler(loop, []() {});
+        idler->handle().ref();
+        gc.deleteLater(idler, loop);
+
+        // delete running idler on loop1
+        auto idler1 = new Idler(loop1, []() {});
+        idler1->handle().ref();
+        gc.deleteLater(idler1, loop1);
+
+        // run the default loop which will return
+        // once the idler is deleted
+        uv::runDefaultLoop();
+
+        // finalize deletion of all pointers
+        gc.finalize();
+
+        expect(loop->active_handles == 0);
+        expect(loop1->active_handles == 0);
+
+        // free the created loop1
+        uv::closeLoop(loop1);
+    });
 
 
     // =========================================================================
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 
         std::cout << "signal static member benchmark: "
             << ((benchdone - benchstart) * 1.0 / i) << "ns "
-            << "per emission (sz=" << sizeof (signal) << ")"
+            << "per emission (sz=" << sizeof(signal) << ")"
             << std::endl;
     });
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
         std::cout << "signal free function benchmark: "
             << ((benchdone - benchstart) * 1.0 / i) << "ns "
-            << "per emission (sz=" << sizeof (signal) << ")"
+            << "per emission (sz=" << sizeof(signal) << ")"
             << std::endl;
     });
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
     //
     describe("buffer", []() {
         ByteOrder orders[2] = { ByteOrder::Host,
-                                ByteOrder::Network };
+            ByteOrder::Network };
         for (std::size_t i = 0; i < 2; i++) {
             Buffer buffer(1024);
             BitReader reader(buffer, orders[i]);
@@ -196,7 +196,7 @@ int main(int argc, char** argv)
             char read_bytes[3];
             reader.get(read_bytes, 3);
             for (int x = 0; x < 3; ++x) {
-              expect(write_bytes[x] == read_bytes[x]);
+                expect(write_bytes[x] == read_bytes[x]);
             }
             expect(writer.position() == 26);
             expect(reader.position() == 26);
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
         std::string write_string1("world");
 
         ByteOrder orders[2] = { ByteOrder::Host,
-                                ByteOrder::Network };
+            ByteOrder::Network };
         for (std::size_t i = 0; i < 2; i++) {
             Buffer buffer; // (1); // (1024);
             DynamicBitWriter writer(buffer, orders[i]);
@@ -416,7 +416,7 @@ int main(int argc, char** argv)
         bool ran = false;
 
         // Create the idler with a lambda
-		Idler idler;
+        Idler idler;
         idler.start([&]() {
             std::cout << "On idle: " << counter << std::endl;
             if (++counter == 10) {
@@ -463,8 +463,8 @@ int main(int argc, char** argv)
     //
     describe("thread", []() {
         bool ran = false;
-    	Thread t1;
-    	t1.start([&]() {
+        Thread t1;
+        t1.start([&]() {
             ran = true;
             expect(t1.running() == true);
         });
@@ -483,13 +483,37 @@ int main(int argc, char** argv)
         expect(t1.running() == false);
     });
 
+
+    // =========================================================================
+    // Process
+    //
+    describe("process", []() {
+        bool gotStdout = false, gotExit = false;
+        Process proc({ "ping", "sourcey.com" });
+        proc.sdout = [&](std::string line) {
+            std::cout << "process sdout: " << line << std::endl;
+            gotStdout = true;
+        };
+        proc.onexit = [&](int64_t status) {
+            std::cout << "process exit: " << status << std::endl;
+            gotExit = true;
+        };
+        proc.spawn();
+        uv::runDefaultLoop();
+        expect(gotStdout);
+        expect(gotExit);
+
+        // TODO: test stdin pipes and verify file contents
+    });
+
+
     // Define class based tests
     describe("signal", new SignalTest);
     describe("ipc", new IpcTest);
     describe("timer", new TimerTest);
     describe("packet stream", new PacketStreamTest);
     describe("packet stream file io", new PacketStreamIOTest);
-    // // describe("multi packet stream", new MultiPacketStreamTest);
+    // describe("multi packet stream", new MultiPacketStreamTest);
 
     test::runAll();
 
