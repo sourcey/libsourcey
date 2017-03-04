@@ -23,30 +23,36 @@ namespace smpl {
 
 
 Message::Message()
-    : json::Value(Json::objectValue)
+    : json::value(json::value::object())
 {
     (*this)["id"] = util::randomString(16);
     (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
 Message::Message(const Message& root)
-    : json::Value(root)
+    : json::value(static_cast<const json::value&>(root))
 {
-    if (!isMember("id"))
+    if (find("id") != end())
         (*this)["id"] = util::randomString(16);
-    if (!isMember("type"))
+    if (find("type") != end())
         (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
-Message::Message(const json::Value& root)
-    : json::Value(root)
+Message::Message(const json::value& root)
+    : json::value(root)
 {
-    if (!isMember("id"))
+    if (find("id") != end())
         (*this)["id"] = util::randomString(16);
-    if (!isMember("type"))
+    if (find("type") != end())
         (*this)["type"] = "message";
+
+    assert(is_object());
 }
 
 
@@ -69,14 +75,17 @@ std::size_t Message::read(const ConstBuffer& buf)
 
 std::size_t Message::read(const std::string& root)
 {
-    json::Reader reader;
-    return reader.parse(root, *this) ? root.length() : 0;
+    //json::Reader reader;
+    //return reader.parse(root, *this) ? root.length() : 0;
+
+    *this = json::value::parse(root.begin(), root.end());
+    return root.length();
 }
 
 
 void Message::write(Buffer& buf) const
 {
-    std::string data(json::stringify(*this));
+    std::string data(dump());
 
     // buf.append(data.c_str(), data.size());
     buf.insert(buf.end(), data.begin(), data.end());
@@ -86,26 +95,28 @@ void Message::write(Buffer& buf) const
 std::size_t Message::size() const
 {
     // KLUDGE: is there a better way?
-    return json::stringify(*this).size();
+    return dump().size();
 }
 
 
 void Message::print(std::ostream& os) const
 {
-    os << json::stringify(*this, true);
+    os << dump(4);
 }
 
 
 bool Message::valid() const
 {
-    return isMember("type") && isMember("id") && isMember("from") &&
-           (*this)["from"].isString();
+    return find("type") != end()
+        && find("id") != end()
+        && find("from") != end()
+        && (*this)["from"].get<std::string>().length();
 }
 
 
 void Message::clear()
 {
-    json::Value::clear();
+    json::value::clear();
 }
 
 
@@ -123,31 +134,31 @@ void Message::clearNotes()
 
 std::string Message::type() const
 {
-    return get("type", "message").asString();
+    return value("type", "message");
 }
 
 
 std::string Message::id() const
 {
-    return get("id", "").asString();
+    return value("id", "");
 }
 
 
 Address Message::to() const
 {
-    return Address(get("to", "").asString());
+    return Address(value("to", ""));
 }
 
 
 Address Message::from() const
 {
-    return Address(get("from", "").asString());
+    return Address(value("from", ""));
 }
 
 
 int Message::status() const
 {
-    return isMember("status") ? (*this)["status"].asInt() : -1;
+    return find("status") != end() ? (*this)["status"].get<int>() : -1;
 }
 
 
@@ -157,19 +168,19 @@ bool Message::isRequest() const
 }
 
 
-json::Value& Message::notes()
+json::value& Message::notes()
 {
     return (*this)["notes"];
 }
 
 
-json::Value Message::data(const std::string& name) const
+json::value Message::data(const std::string& name) const
 {
     return (*this)["data"][name];
 }
 
 
-json::Value& Message::data(const std::string& name)
+json::value& Message::data(const std::string& name)
 {
     return (*this)["data"][name];
 }
@@ -207,6 +218,7 @@ void Message::setFrom(const Peer& from)
 
 void Message::setFrom(const Address& from)
 {
+    assert(is_object());
     (*this)["from"] = from.toString();
 }
 
@@ -234,14 +246,14 @@ void Message::addNote(const std::string& type, const std::string& text)
 {
     assert(type == "info" || type == "warn" || type == "error");
 
-    json::Value note;
+    json::value note;
     note["type"] = type;
     note["text"] = text;
-    (*this)["notes"].append(note);
+    (*this)["notes"].push_back(note);
 }
 
 
-json::Value& Message::setData(const std::string& name)
+json::value& Message::setData(const std::string& name)
 {
     return (*this)["data"][name] = name;
 }
@@ -259,7 +271,7 @@ void Message::setData(const std::string& name, const std::string& data)
 }
 
 
-void Message::setData(const std::string& name, const json::Value& data)
+void Message::setData(const std::string& name, const json::value& data)
 {
     (*this)["data"][name] = data;
 }
@@ -273,13 +285,14 @@ void Message::setData(const std::string& name, int data)
 
 void Message::removeData(const std::string& name)
 {
-    (*this)["data"].removeMember(name);
+    (*this)["data"].erase(name);
 }
 
 
 bool Message::hasData(const std::string& name)
 {
-    return (*this)["data"].isMember(name);
+    auto& element = (*this)["data"];
+    return element.find(name) != element.end();
 }
 
 

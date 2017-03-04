@@ -20,6 +20,8 @@
 #include "scy/util.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 
+#include "config.h"
+
 
 namespace scy {
 

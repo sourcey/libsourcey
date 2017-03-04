@@ -24,11 +24,11 @@ namespace scy {
 namespace smpl {
 
 
-class Message : public json::Value, public IPacket
+class Message : public json::value, public IPacket
 {
 public:
     Message();
-    Message(const json::Value& root);
+    Message(const json::value& root);
     Message(const Message& root);
     virtual ~Message();
 
@@ -57,19 +57,19 @@ public:
     /// @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
     void setStatus(int code);
 
-    json::Value& notes();
+    json::value& notes();
 
     /// Set a note for the application
     /// Possible "type" values: `info`, `warn`, `error`
     void setNote(const std::string& type, const std::string& text);
     void addNote(const std::string& type, const std::string& text);
 
-    json::Value data(const std::string& name) const;
-    json::Value& data(const std::string& name);
-    json::Value& setData(const std::string& name);
+    json::value data(const std::string& name) const;
+    json::value& data(const std::string& name);
+    json::value& setData(const std::string& name);
     void setData(const std::string& name, const char* data);
     void setData(const std::string& name, const std::string& data);
-    void setData(const std::string& name, const json::Value& data);
+    void setData(const std::string& name, const json::value& data);
     void setData(const std::string& name, int data);
     void removeData(const std::string& name);
     bool hasData(const std::string& name);

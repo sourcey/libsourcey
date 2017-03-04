@@ -85,8 +85,7 @@ struct DNSResult
 };
 
 
-inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
-                          struct addrinfo* res)
+inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo* res)
 {
     // Check that res is not NULL.
     // Adding this check after receiving some weird late callbacks with NULL
@@ -112,8 +111,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status,
 
 inline bool resolveDNS(DNSResult* dns)
 {
-    // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port <<
-    // std::endl;
+    // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port << std::endl;
 
     assert(dns->port);
     assert(!dns->host.empty());

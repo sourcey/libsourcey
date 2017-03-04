@@ -316,8 +316,7 @@ Attribute* Attribute::create(std::uint16_t type, std::uint16_t size)
 // ---------------------------------------------------------------------------
 //
 AddressAttribute::AddressAttribute(std::uint16_t type, bool ipv4)
-    : Attribute(type, ipv4 ? IPv4Size : IPv6Size) //,
-//_family(0), _port(0), _ip(0)
+    : Attribute(type, ipv4 ? IPv4Size : IPv6Size)
 {
 }
 
@@ -325,9 +324,6 @@ AddressAttribute::AddressAttribute(std::uint16_t type, bool ipv4)
 AddressAttribute::AddressAttribute(const AddressAttribute& r)
     : Attribute(r._type, r._size)
     , _address(r._address)
-//_family(r._family),
-//_port(r._port),
-//_ip(r._ip)
 {
 }
 
@@ -694,7 +690,7 @@ void StringAttribute::write(BitWriter& writer) const
 }
 
 
-string StringAttribute::asString() const
+std::string StringAttribute::asString() const
 {
     return std::string(_bytes, size());
 }
@@ -717,23 +713,6 @@ Fingerprint::Fingerprint() :
 //}
 */
 
-
-/*
-void Fingerprint::write(BitWriter& writer) const {
-writer.putU32(_crc32);
-}
-
-
-bool Fingerprint::read(BitReader& reader) {
-try {
-    reader.getU32(_crc32);
-}
-catch(...) {
-    return false;
-}
-return true;
-}
-*/
 
 
 // ---------------------------------------------------------------------------
@@ -805,8 +784,7 @@ void MessageIntegrity::read(BitReader& reader)
 
     // Ensure the STUN message size reflects the message up to and
     // including the MessageIntegrity attribute.
-    hmacWriter.updateU32(
-        (std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
+    hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
     _input.assign(hmacWriter.begin(), hmacWriter.position());
 
     _hmac.assign(reader.current(), MessageIntegrity::Size);
@@ -850,8 +828,7 @@ void MessageIntegrity::write(BitWriter& writer) const
         // field from the STUN message header.
         // Prior to performing the hash, the MESSAGE-INTEGRITY attribute MUST be
         // inserted into the message (with dummy content).
-        int sizeBeforeMessageIntegrity =
-            writer.position() - kAttributeHeaderSize;
+        int sizeBeforeMessageIntegrity = writer.position() - kAttributeHeaderSize;
 
         // Get the message prior to the current attribute and
         // fill the attribute with dummy content.
@@ -859,6 +836,7 @@ void MessageIntegrity::write(BitWriter& writer) const
         Buffer hmacBuf(sizeBeforeMessageIntegrity);
         BitWriter hmacWriter(hmacBuf);
         hmacWriter.put(writer.begin(), sizeBeforeMessageIntegrity);
+
         // hmacWriter.put("00000000000000000000");
 
         // The length MUST then
@@ -872,13 +850,10 @@ void MessageIntegrity::write(BitWriter& writer) const
         // the end of the MESSAGE-INTEGRITY attribute prior to calculating the
         // HMAC.  Such adjustment is necessary when attributes, such as
         // FINGERPRINT, appear after MESSAGE-INTEGRITY.
-        hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity +
-                                 MessageIntegrity::Size,
-                             2);
+        hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
 
         std::string input(hmacWriter.begin(), hmacWriter.position());
-        assert(input.size() ==
-               sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
+        assert(input.size() == sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
 
         // std::string input(writer.begin(), sizeBeforeMessageIntegrity);
         std::string hmac(crypto::computeHMAC(input, _key));
@@ -1062,8 +1037,9 @@ void UInt16ListAttribute::write(BitWriter& writer) const
         writer.putU16(_attrTypes[i]);
     writePadding(writer);
 }
-}
-} // namespace scy:stun
+
+
+} } // namespace scy:stun
 
 
 /// @\}

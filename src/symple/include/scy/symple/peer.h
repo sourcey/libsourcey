@@ -25,12 +25,12 @@ namespace smpl {
 /// A Peer object may also contain arbitrary data set by
 /// the client to share with other peers on the network.
 /// @see Address for further methods and basic accessors.
-class Peer : public json::Value
+class Peer : public json::value
 {
 public:
     Peer();
     Peer(const Peer& r);
-    Peer(const json::Value& r);
+    Peer(const json::value& r);
     virtual ~Peer();
 
     Address address() const;
@@ -50,7 +50,7 @@ public:
     void setHost(const std::string& host);
 
     /// Updates the peer from the given data object.
-    // virtual void update(const json::Value& data, bool whiny = false);
+    // virtual void update(const json::value& data, bool whiny = false);
 
     virtual bool valid();
 

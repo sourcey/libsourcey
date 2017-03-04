@@ -18,7 +18,6 @@
 #include "signaler.h"
 
 #include "webrtc/api/mediastreamtrackproxy.h"
-#include "webrtc/api/peerconnectionfactory.h"
 
 
 using std::endl;
@@ -48,7 +47,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kSessionDescriptionTypeName] = type;
     desc[kSessionDescriptionSdpName] = sdp;
     m[type] = desc;
@@ -57,7 +56,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
 
     // assert(type == "offer" || type == "answer");
     // smpl::Message m;
-    // Json::Value desc;
+    // json::value desc;
     // desc[kSessionDescriptionTypeName] = type;
     // desc[kSessionDescriptionSdpName] = sdp;
     // m[type] = desc;
@@ -70,7 +69,7 @@ void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
                              int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kCandidateSdpMidName] = mid;
     desc[kCandidateSdpMlineIndexName] = mlineindex;
     desc[kCandidateSdpName] = sdp;
@@ -91,17 +90,16 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
         return;
     }
 
+    // Create the Peer Connection
+    auto conn = new StreamingPeerConnection(this, peer.id(), "", SOURCE_FILE);
+
     // auto conn = new PeerConnection(this, peer.id(), PeerConnection::Offer);
     // conn->constraints().SetMandatoryReceiveAudio(false);
     // conn->constraints().SetMandatoryReceiveVideo(false);
     // conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    auto conn = new StreamingPeerConnection(this, peer.id(), "test.mp4", "");
-
     // Create the media stream
-    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =
-        conn->createMediaStream();
-
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
     conn->createConnection();
     conn->createOffer();
 
@@ -113,11 +111,11 @@ void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
 
-    if (m.isMember("offer")) {
+    if (m.find("offer") != m.end()) {
         assert(0 && "offer not supported");
-    } else if (m.isMember("answer")) {
+    } else if (m.find("answer") != m.end()) {
         recvSDP(m.from().id, m["answer"]);
-    } else if (m.isMember("candidate")) {
+    } else if (m.find("candidate") != m.end()) {
         recvCandidate(m.from().id, m["candidate"]);
     }
     // else assert(0 && "unknown event");
@@ -136,11 +134,9 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 }
 
 
-void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
-                                   const sockio::ClientState& oldState)
+void Signaler::onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
 {
-    DebugL << "Client state changed from " << oldState << " to " << state
-           << endl;
+    DebugL << "Client state changed from " << oldState << " to " << state << endl;
 
     switch (state.id()) {
         case sockio::ClientState::Connecting:
@@ -157,15 +153,13 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
 }
 
 
-void Signaler::onAddRemoteStream(PeerConnection* conn,
-                                 webrtc::MediaStreamInterface* stream)
+void Signaler::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }
 
 
-void Signaler::onRemoveRemoteStream(PeerConnection* conn,
-                                    webrtc::MediaStreamInterface* stream)
+void Signaler::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }

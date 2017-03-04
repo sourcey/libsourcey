@@ -4,6 +4,9 @@
 
 #include "scy/base.h"
 #include "scy/logger.h"
+#include "scy/pipe.h"
+#include "scy/process.h"
+#include "scy/filesystem.h"
 #include "scy/net/sslmanager.h"
 #include "scy/symple/client.h"
 #include "scy/test.h"
@@ -39,10 +42,11 @@ public:
     {
         user = options.user;
 
-        // client += messageDelegate(this, &TestClient::onRecvMessage);
         client.options() = options;
 
         client += slot(this, &TestClient::onRecvPacket);
+        client += packetSlot(this, &TestClient::onRecvMessage);
+        client += packetSlot(this, &TestClient::onRecvPresence);
         client.Announce += slot(this, &TestClient::onClientAnnounce);
         client.StateChange += slot(this, &TestClient::onClientStateChange);
         client.CreatePresence += slot(this, &TestClient::onCreatePresence);
@@ -79,21 +83,6 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        auto presence = dynamic_cast<smpl::Presence*>(&raw);
-        if (presence) {
-            return onRecvPresence(*presence);
-        }
-
-        auto message = dynamic_cast<smpl::Message*>(&raw);
-        if (message) {
-            return onRecvMessage(*message);
-        }
-
-        auto packet = dynamic_cast<sockio::Packet*>(&raw);
-        if (packet) {
-            return onRecvPacket(*packet);
-        }
-
         DebugL << "####### On raw packet: " << raw.className() << endl;
 
         // Handle incoming raw packets here
@@ -101,9 +90,9 @@ public:
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        InfoL << user << ": On presence: " << presence.toStyledString() << endl;
+        InfoL << user << ": On presence: " << presence.dump(4) << endl;
 
-        expect(presence.data("version").asString() == "1.0.1");
+        expect(presence.data("version").get<std::string>() == "1.0.1");
         if (user == "l") {
             expect(presence.from().user == "r");
         } else if (user == "r") {
@@ -117,15 +106,17 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        InfoL << user << ": On message: " << message.toStyledString() << endl;
+        InfoL << user << ": On message: " << message.dump(4) << endl;
 
         // Handle incoming Symple messages here
     }
 
-    void onClientAnnounce(const int& status) { assert(status == 200); }
+    void onClientAnnounce(const int& status)
+    {
+        assert(status == 200);
+    }
 
-    void onClientStateChange(void*, sockio::ClientState& state,
-                             const sockio::ClientState& oldState)
+    void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
         InfoL << user << ": Client state changed: " << state << ": "
               << client.ws().socket->address() << endl;
@@ -163,6 +154,70 @@ public:
     }
 };
 
+
+void setTestServerCwd(std::string& cwd)
+{
+    fs::addnode(cwd, SCY_SOURCE_DIR);
+    fs::addnode(cwd, "symple");
+    fs::addnode(cwd, "tests");
+    fs::addnode(cwd, "testserver");
+}
+
+// Helper to raise a test Symple server
+bool installTestServerSync()
+{
+    bool success = false;
+    Process proc({ "npm", "install" });
+    setTestServerCwd(proc.cwd);
+    proc.sdout = [](std::string line) {
+        std::cerr << "symple npm sdout: " << line << std::endl;
+    };
+    proc.onexit = [&](int64_t status) {
+        std::cerr << "symple npm exit: " << status << std::endl;
+        success = status == 0;
+    };
+    proc.spawn();
+    uv::runDefaultLoop();
+    return success;
+}
+
+
+// Helper to raise a test Symple server
+bool openTestServer(Process& proc, bool install = true)
+{
+    if (install) {
+        try {
+            installTestServerSync();
+        }
+        catch (std::exception& exc) {
+            // Sometimes this fails on windows, so swallow
+            // and try to run the server even if npm fails
+        }
+    }
+
+    // Run the server
+    bool running = false, exited = false;
+    setTestServerCwd(proc.cwd);
+    proc.args = { "node", "server.js" };
+    proc.sdout = [&](std::string line) {
+        std::cout << "symple server sdout: " << line << std::endl;
+        if (line.find("listening") != std::string::npos)
+            running = true;
+    };
+    proc.onexit = [&](int64_t status) {
+        std::cout << "symple server exit: " << status << std::endl;
+        exited = true;
+    };
+    proc.spawn();
+
+    // Run the loop until the server is listening or exited in failure
+    while (!exited && !running) {
+        uv::runDefaultLoop(UV_RUN_NOWAIT);
+    }
+
+    std::cout << "symple server running: " << running << std::endl;
+    return running;
+}
 
 } // namespace scy
 

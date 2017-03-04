@@ -13,8 +13,9 @@
 #define SCY_JSON_H
 
 
+#include "scy/base.h"
 #include "scy/error.h"
-#include "json/json.h"
+#include "json.hpp" // include nlohmann json
 #include <cstdint>
 #include <fstream>
 
@@ -23,86 +24,82 @@ namespace scy {
 namespace json {
 
 
-using Json::Value;
-using Json::ValueIterator;
-using Json::StyledWriter;
-using Json::FastWriter;
-using Json::Reader;
+// Import the `json` type and friends to our namespace
+using value = nlohmann::json;
 
 
-inline void loadFile(const std::string& path, json::Value& root)
+inline void loadFile(const std::string& path, json::value& root)
 {
     std::ifstream ifs;
     ifs.open(path.c_str(), std::ifstream::in);
     if (!ifs.is_open())
         throw std::runtime_error("Cannot open input file: " + path);
 
-    json::Reader reader;
-    if (!reader.parse(ifs, root))
-        throw std::runtime_error("Cannot write to file: Invalid JSON format: " +
-                                 reader.getFormattedErrorMessages());
+    root = json::value::parse(ifs); // thorws std::invalid_argument
 }
 
 
-inline void saveFile(const std::string& path, const json::Value& root)
+inline void saveFile(const std::string& path, const json::value& root, int indent = 4)
 {
-    json::StyledWriter writer;
     std::ofstream ofs(path, std::ios::binary | std::ios::out);
     if (!ofs.is_open())
         throw std::runtime_error("Cannot open output file: " + path);
 
-    ofs << writer.write(root);
+    if (indent > 0)
+        ofs << root.dump(indent);
+    else
+        ofs << root.dump();
     ofs.close();
 }
 
 
-inline void stringify(const json::Value& root, std::string& output, bool pretty = false)
+//inline void stringify(const json::value& root, std::string& output, bool pretty = false)
+//{
+//    if (pretty) {
+//        json::StyledWriter writer;
+//        output = writer.write(root);
+//    } else {
+//        json::FastWriter writer;
+//        output = writer.write(root); // NOTE: The FastWriter appends a newline
+//                                     // character which we don't want.
+//        if (output.size() > 0)
+//            output.resize(output.size() - 1);
+//    }
+//}
+//
+//
+//inline std::string stringify(const json::value& root, bool pretty = false)
+//{
+//    std::string output;
+//    stringify(root, output, pretty);
+//    return output;
+//}
+
+
+inline void assertMember(const json::value& root, const std::string& name)
 {
-    if (pretty) {
-        json::StyledWriter writer;
-        output = writer.write(root);
-    } else {
-        json::FastWriter writer;
-        output = writer.write(root); // NOTE: The FastWriter appends a newline
-                                     // character which we don't want.
-        if (output.size() > 0)
-            output.resize(output.size() - 1);
-    }
-}
-
-
-inline std::string stringify(const json::Value& root, bool pretty = false)
-{
-    std::string output;
-    stringify(root, output, pretty);
-    return output;
-}
-
-
-inline void assertMember(const json::Value& root, const std::string& name)
-{
-    if (!root.isMember(name))
+    if (root.find(name) == root.end())
         throw std::runtime_error("A '" + name + "' member is required.");
 }
 
 
-inline void countNestedKeys(json::Value& root, const std::string& key,
+inline void countNestedKeys(json::value& root, const std::string& key,
                             int& count, int depth = 0)
 {
     depth++;
-    for (auto it = root.begin(); it != root.end(); it++) {
-        if ((*it).isObject() && (*it).isMember(key))
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if ((*it).is_object() && (*it).find(key) != (*it).end())
             count++;
         countNestedKeys(*it, key, count, depth);
     }
 }
 
 
-inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 0)
+inline bool hasNestedKey(json::value& root, const std::string& key, int depth = 0)
 {
     depth++;
     for (auto it = root.begin(); it != root.end(); it++) {
-        if ((*it).isObject() && (*it).isMember(key))
+        if ((*it).is_object() && (*it).find(key) != (*it).end())
             return true;
         if (hasNestedKey(*it, key, depth))
             return true;
@@ -116,40 +113,38 @@ inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 
 /// If partial is false substring matches will be accepted.
 /// Result must be a reference to a pointer or the root value's
 /// internal reference will also be changed when the result is
-/// assigned. Further investigation into jsoncpp is required.
+/// assigned. Further investigation is required.
 inline bool findNestedObjectWithProperty(
-    json::Value& root, json::Value*& result, const std::string& key,
+    json::value& root, json::value*& result, const std::string& key,
     const std::string& value, bool partial = true, int index = 0,
     int depth = 0) 
 {
     depth++;
-    if (root.isObject()) {
-        json::Value::Members members = root.getMemberNames();
-        for (std::size_t i = 0; i < members.size(); i++) {
-            json::Value& test = root[members[(int)i]];
-            if (test.isNull())
+    if (root.is_object()) {
+        for (auto it = root.begin(); it != root.end(); it++) {
+            json::value& test = it.value();
+            if (test.is_null())
                 continue;
-            else if (test.isString() &&
-                     (key.empty() || members[(int)i] == key) &&
+            else if (test.is_string() &&
+                     (key.empty() || it.value() == key) &&
                      (value.empty() ||
-                      (!partial ? test.asString() == value
-                                : test.asString().find(value) !=
-                                      std::string::npos))) {
+                      (!partial ? test.get<std::string>() == value
+                                : test.get<std::string>().find(value) != std::string::npos))) {
                 if (index == 0) {
                     result = &root;
                     return true;
                 } else
                     index--;
-            } else if ((test.isObject() || test.isArray()) &&
-                       findNestedObjectWithProperty(root[members[(int)i]],
+            } else if ((test.is_object() || test.is_array()) &&
+                       findNestedObjectWithProperty(it.value(),
                                                     result, key, value, partial,
                                                     index, depth))
                 return true;
         }
-    } else if (root.isArray()) {
+    } else if (root.is_array()) {
         for (std::size_t i = 0; i < root.size(); i++) {
-            json::Value& test = root[(int)i];
-            if (!test.isNull() && (test.isObject() || test.isArray()) &&
+            json::value& test = root[(int)i];
+            if (!test.is_null() && (test.is_object() || test.is_array()) &&
                 findNestedObjectWithProperty(root[(int)i], result, key, value,
                                              partial, index, depth))
                 return true;

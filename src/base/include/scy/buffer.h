@@ -385,7 +385,6 @@ protected:
     std::size_t _position;
     std::size_t _limit;
     ByteOrder _order;
-    // Buffer* _buffer;
     char* _bytes;
 };
 
@@ -400,9 +399,8 @@ protected:
 class SCY_EXTERN DynamicBitWriter : public BitWriter
 {
 public:
-    DynamicBitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
     DynamicBitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
-    DynamicBitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
+    DynamicBitWriter(Buffer& buf, Buffer::iterator offset, ByteOrder order = ByteOrder::Network);
     virtual ~DynamicBitWriter();
 
     /// Append bytes to the buffer.
@@ -414,7 +412,8 @@ public:
     virtual bool update(const char* val, std::size_t len, std::size_t pos);
 
 protected:
-    Buffer* _buffer;
+    Buffer& _buffer;
+    std::size_t _offset;
 };
 
 

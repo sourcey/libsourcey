@@ -329,8 +329,7 @@ class ProcessTest : public Test
 
             proc.options.args = args;
             proc.options.file = args[0];
-            proc.onexit = std::bind(&Tests::processExit, this,
-            std::placeholders::_1);
+            proc.onexit = std::bind(&Tests::processExit, this, std::placeholders::_1);
             proc.spawn();
 
             uv::runDefaultLoop();

@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace
 
 #if USE_SSL
-    SSLManager::initNoVerifyClient();
+    net::SSLManager::initNoVerifyClient();
 #endif
 
     // Setup WebRTC environment
@@ -73,6 +73,5 @@ int main(int argc, char** argv)
 #endif
     rtc::CleanupSSL();
     Logger::destroy();
-
     return 0;
 }

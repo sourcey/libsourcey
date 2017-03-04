@@ -46,7 +46,7 @@ StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
 
     _constraints.SetMandatoryReceiveAudio(false);
     _constraints.SetMandatoryReceiveVideo(false);
-    _constraints.SetAllowDtlsSctpDataChannels();
+    _constraints.SetAllowDtlsSctpDataChannels(); // ENABLE ME
 }
 
 

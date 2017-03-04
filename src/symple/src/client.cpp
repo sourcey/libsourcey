@@ -109,6 +109,7 @@ void assertCanSend(Client* client, Message& m)
     m.setFrom(client->ourPeer()->address());
 
     if (m.to().id == m.from().id) {
+        ErrorL << "Invalid Symple address: " << m.to().id << ": " << m.from().id << endl;
         assert(0);
         throw std::runtime_error("Cannot send message with matching sender and recipient.");
     }
@@ -119,7 +120,7 @@ void assertCanSend(Client* client, Message& m)
     }
 
 #ifdef _DEBUG
-    TraceL << "Sending message: " << json::stringify(m, true) << endl;
+    TraceL << "Sending message: " << m.dump(4) << endl;
 #endif
 }
 
@@ -162,7 +163,16 @@ void Client::createPresence(Presence& p)
     auto peer = ourPeer();
     if (peer) {
         CreatePresence.emit(*peer);
-        p["data"] = *peer;
+        assert(peer->is_object());
+        // p["data"] = *peer; doesn't work, turns peer into JSON array :/
+        //true,
+        //value_t manual_type = value_t::array
+        //json::value::object((json::value::object_t&), false, json::value::value_t::object
+        //json::value temp((json::value::object_t&)*peer);
+        //TraceL << "Create presence temptemptemptemptemptemptemptemptemp: " << temp << endl;
+        p["data"] = (json::value&)*peer;
+        //p["data"].swap(temp);
+        assert(p["data"].is_object());
     } else
         assert(0 && "no session");
 }
@@ -195,7 +205,7 @@ int Client::announce()
 {
     TraceL << "Announcing" << endl;
 
-    json::Value data;
+    json::value data;
     data["user"] = _options.user;
     data["name"] = _options.name;
     data["type"] = _options.type;
@@ -235,13 +245,13 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
     switch (state.id()) {
         case TransactionState::Success:
             try {
-                json::Value data = transaction->response().json();
-                _announceStatus = data["status"].asInt();
+                json::value data = transaction->response().json();
+                _announceStatus = data["status"].get<int>();
 
                 if (_announceStatus != 200)
-                    throw std::runtime_error(data["message"].asString());
+                    throw std::runtime_error(data["message"].get<std::string>());
 
-                _ourID = data["data"]["id"].asString();
+                _ourID = data["data"]["id"].get<std::string>();
                 if (_ourID.empty())
                     throw std::runtime_error("Invalid announce response.");
 
@@ -274,8 +284,6 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
 
 void Client::onOnline()
 {
-    TraceL << "On online" << endl;
-
     // NOTE: Do not transition to Online state until the Announce
     // callback is successful
     if (!_announceStatus)
@@ -285,7 +293,7 @@ void Client::onOnline()
 }
 
 
-void Client::emit(/*void* sender, */ IPacket& raw)
+void Client::emit(IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
     TraceL << "Emit packet: " << packet.toString() << endl;
@@ -294,13 +302,13 @@ void Client::emit(/*void* sender, */ IPacket& raw)
     if (packet.type() == sockio::Packet::Type::Event) {
         TraceL << "JSON packet: " << packet.toString() << endl;
 
-        json::Value data = packet.json();
+        json::value data = packet.json();
 #ifdef _DEBUG
-        TraceL << "Received " << json::stringify(data, true) << endl;
+        TraceL << "Received " << data.dump(4) << endl;
 #endif
-        assert(data.isObject());
-        if (data.isMember("type")) {
-            std::string type(data["type"].asString());
+        assert(data.is_object());
+        std::string type(data.value("type", ""));
+        if (!type.empty()) {
 
             // KLUDGE: Note we are currently creating the JSON object
             // twice with these polymorphic message classes. Perhaps
@@ -308,28 +316,25 @@ void Client::emit(/*void* sender, */ IPacket& raw)
             if (type == "message") {
                 Message m(data);
                 if (!m.valid()) {
-                    WarnL << "Dropping invalid message: "
-                          << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid message: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(m);
             } else if (type == "event") {
                 Event e(data);
                 if (!e.valid()) {
-                    WarnL << "Dropping invalid event: "
-                          << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid event: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(e);
             } else if (type == "presence") {
                 Presence p(data);
                 if (!p.valid()) {
-                    WarnL << "Dropping invalid presence: "
-                          << json::stringify(data, false) << endl;
+                    WarnL << "Dropping invalid presence: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(p);
-                if (p.isMember("data")) {
+                if (p.find("data") != p.end()) {
                     onPresenceData(p["data"], false);
                     if (p.isProbe())
                         sendPresence(p.from());
@@ -338,7 +343,7 @@ void Client::emit(/*void* sender, */ IPacket& raw)
                 Command c(data);
                 if (!c.valid()) {
                     WarnL << "Dropping invalid command: "
-                          << json::stringify(data, false) << endl;
+                          << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(c);
@@ -364,14 +369,17 @@ void Client::emit(/*void* sender, */ IPacket& raw)
 }
 
 
-void Client::onPresenceData(const json::Value& data, bool whiny)
+void Client::onPresenceData(const json::value& data, bool whiny)
 {
-    TraceL << "Updating: " << json::stringify(data, true) << endl;
+    TraceL << "Updating: " << data.dump(4) << endl;
 
-    if (data.isObject() && data.isMember("id") && data.isMember("user") &&
-        data.isMember("name") && data.isMember("online")) {
-        std::string id = data["id"].asString();
-        bool online = data["online"].asBool();
+    if (data.is_object() &&
+        data.find("id") != data.end() &&
+        data.find("user") != data.end() &&
+        data.find("name") != data.end() &&
+        data.find("online") != data.end()) {
+        std::string id = data["id"].get<std::string>();
+        bool online = data["online"].get<bool>();
         auto peer = _roster.get(id, false);
         if (online) {
             if (!peer) {
@@ -380,7 +388,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
                 DebugL << "Peer connected: " << peer->address().toString() << endl;
                 PeerConnected.emit(*peer);
             } else
-                static_cast<json::Value&>(*peer) = data;
+                static_cast<json::value&>(*peer) = data;
         } else {
             if (peer) {
                 DebugL << "Peer disconnected: " << peer->address().toString() << endl;
@@ -391,27 +399,27 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
             }
         }
     } else {
-        std::string error("Bad presence data: " + json::stringify(data));
+        std::string error("Bad presence data: " + data.dump());
         ErrorL << error << endl;
         if (whiny)
             throw std::runtime_error(error);
     }
 
 #if 0
-    if (data.isObject() &&
+    if (data.is_object() &&
         data.isMember("id") &&
         data.isMember("user") &&
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
         TraceL << "Updating: " << json::stringify(data, true) << endl;
-        std::string id = data["id"].asString();
+        std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {
             peer = new Peer(data);
             add(id, peer);
         } else
-            static_cast<json::Value&>(*peer) = data;
+            static_cast<json::value&>(*peer) = data;
     }
     else if (data.isArray()) {
         for (auto it = data.begin(); it != data.end(); it++) {
@@ -430,7 +438,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
 
 void Client::reset()
 {
-    // Note: Not clearing persisted messages as they 
+    // Note: Not clearing persisted messages as they
     // may still be in use by the application
     //_persistence.clear();
 
@@ -478,6 +486,7 @@ Peer* Client::ourPeer()
     if (_ourID.empty())
         return nullptr;
         // throw std::runtime_error("No active peer session is available.");
+
     return _roster.get(_ourID, false);
 }
 

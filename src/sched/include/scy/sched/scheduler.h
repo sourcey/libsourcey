@@ -39,8 +39,8 @@ public:
     virtual void cancel(sched::Task* task);
     virtual void clear();
 
-    virtual void serialize(json::Value& root);
-    virtual void deserialize(json::Value& root);
+    virtual void serialize(json::value& root);
+    virtual void deserialize(json::value& root);
 
     virtual void print(std::ostream& ost);
 

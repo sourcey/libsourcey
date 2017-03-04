@@ -57,7 +57,7 @@ void Task::start()
 */
 
 
-void Task::serialize(json::Value& root)
+void Task::serialize(json::value& root)
 {
     TraceL << "Serializing" << endl;
 
@@ -69,7 +69,7 @@ void Task::serialize(json::Value& root)
 }
 
 
-void Task::deserialize(json::Value& root)
+void Task::deserialize(json::value& root)
 {
     TraceL << "Deserializing" << endl;
 
@@ -79,9 +79,9 @@ void Task::deserialize(json::Value& root)
     json::assertMember(root, "type");
     json::assertMember(root, "name");
 
-    _id = root["id"].asUInt();
-    _type = root["type"].asString();
-    _name = root["name"].asString();
+    _id = root["id"].get<std::uint32_t>();
+    _type = root["type"].get<std::string>();
+    _name = root["name"].get<std::string>();
 }
 
 

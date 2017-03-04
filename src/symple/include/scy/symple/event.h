@@ -25,7 +25,7 @@ class Event : public Message
 {
 public:
     Event();
-    Event(const json::Value& root);
+    Event(const json::value& root);
     Event(const Event& root);
     virtual ~Event();
 

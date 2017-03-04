@@ -37,10 +37,10 @@ public:
     // virtual void start();
 
     /// Serializes the task to JSON.
-    virtual void serialize(json::Value& root);
+    virtual void serialize(json::value& root);
 
     /// Deserializes the task from JSON.
-    virtual void deserialize(json::Value& root);
+    virtual void deserialize(json::value& root);
 
 
     template <typename T> T* createTrigger()

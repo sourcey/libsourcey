@@ -26,7 +26,7 @@ class Command : public Message
 {
 public:
     Command();
-    Command(const json::Value& root);
+    Command(const json::value& root);
     Command(const Command& root);
     virtual ~Command();
 

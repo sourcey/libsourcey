@@ -53,8 +53,7 @@ PeerConnection::~PeerConnection()
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface>
-PeerConnection::createMediaStream()
+rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStream()
 {
     assert(_mode == Offer);
     assert(_factory);
@@ -271,8 +270,7 @@ webrtc::PeerConnectionFactoryInterface* PeerConnection::factory() const
 }
 
 
-rtc::scoped_refptr<webrtc::PeerConnectionInterface>
-PeerConnection::peerConnection() const
+rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnection::peerConnection() const
 {
     return _peerConnection;
 }

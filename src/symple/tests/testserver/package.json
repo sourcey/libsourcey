@@ -1,0 +1,17 @@
+{
+  "name": "tommy_chat_server",
+  "version": "0.0.4",
+  "description": "Tommy chat server",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server"
+  },
+  "dependencies": {
+    "symple": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tommyassociates/tommy_chat_server"
+  }
+}

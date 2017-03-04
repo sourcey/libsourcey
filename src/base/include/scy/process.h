@@ -14,9 +14,10 @@
 
 
 #include "scy/base.h"
-#include "scy/uv/uvpp.h"
+#include "scy/pipe.h"
 #include <functional>
 #include <vector>
+#include <initializer_list>
 
 
 namespace scy {
@@ -28,7 +29,29 @@ typedef uv_process_options_t ProcessOptions;
 class SCY_EXTERN Process : public uv::Handle
 {
 public:
+    /// Default constructor.
     Process(uv::Loop* loop = uv::defaultLoop());
+
+    /// Constructor with command line arguments.
+    Process(std::initializer_list<std::string> args, uv::Loop* loop = uv::defaultLoop());
+
+    /// Destructor.
+    ~Process();
+
+    /// Path to the program to execute.
+    /// Cenvenience proxy for options.file.
+    /// Must be set before `spawn()`
+    std::string file;
+
+    /// Set the current working directory.
+    /// Cenvenience proxy for options.cwd.
+    /// Must be set before `spawn()`
+    std::string cwd;
+
+    /// Command line agruments to pass to the process.
+    /// Cenvenience proxy for options.args.
+    /// Must be set before `spawn()`
+    std::vector<std::string> args;
 
     /// Spawns the process.
     /// Options must be properly set.
@@ -36,23 +59,37 @@ public:
     void spawn();
 
     /// Kills the process
-    bool kill(int signum = 0);
+    bool kill(int signum = SIGKILL);
 
     /// Returns the process PID
     int pid() const;
 
-    /// Command line args.
-    /// STL proxy for options.args
-    std::vector<std::string> args;
+    /// Returns the stdin pipe.
+    Pipe& stdin();
 
-    /// Exit callback; returns the exit status.
+    /// Returns the stdout pipe.
+    Pipe& stdout();
+
+    /// Stdout signal.
+    /// Signals when a line has been output from the process.
+    std::function<void(std::string)> sdout;
+
+    /// Exit stgnals.
+    /// Signals process exit status code.
     std::function<void(std::int64_t)> onexit;
 
-    /// Process options
+    /// LibUV C options.
+    /// Available for advanced use cases.
     ProcessOptions options;
 
 protected:
+    void init();
+
     uv_process_t _proc;
+    Pipe _stdin;
+    Pipe _stdout;
+    uv_stdio_container_t _stdio[2];
+    std::vector<char*> _cargs;
 };
 
 

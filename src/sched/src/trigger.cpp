@@ -51,7 +51,7 @@ bool Trigger::expired()
 }
 
 
-void Trigger::serialize(json::Value& root)
+void Trigger::serialize(json::value& root)
 {
     TraceL << "Serializing" << endl;
 
@@ -67,7 +67,7 @@ void Trigger::serialize(json::Value& root)
 }
 
 
-void Trigger::deserialize(json::Value& root)
+void Trigger::deserialize(json::value& root)
 {
     TraceL << "Deserializing" << endl;
 
@@ -79,15 +79,15 @@ void Trigger::deserialize(json::Value& root)
     json::assertMember(root, "timesRun");
 
     int tzd;
-    type = root["type"].asString();
-    name = root["name"].asString();
+    type = root["type"].get<std::string>();
+    name = root["name"].get<std::string>();
     createdAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                      root["createdAt"].asString(), tzd);
+                                      root["createdAt"].get<std::string>(), tzd);
     scheduleAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                       root["scheduleAt"].asString(), tzd);
+                                       root["scheduleAt"].get<std::string>(), tzd);
     lastRunAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT,
-                                      root["lastRunAt"].asString(), tzd);
-    timesRun = root["timesRun"].asInt();
+                                      root["lastRunAt"].get<std::string>(), tzd);
+    timesRun = root["timesRun"].get<int>();
 }
 
 
@@ -126,7 +126,7 @@ bool IntervalTrigger::expired()
 }
 
 
-void IntervalTrigger::serialize(json::Value& root)
+void IntervalTrigger::serialize(json::value& root)
 {
     TraceL << "Serializing" << endl;
 
@@ -139,7 +139,7 @@ void IntervalTrigger::serialize(json::Value& root)
 }
 
 
-void IntervalTrigger::deserialize(json::Value& root)
+void IntervalTrigger::deserialize(json::value& root)
 {
     TraceL << "[IntervalTrigger] Deserializing" << endl;
 
@@ -151,10 +151,10 @@ void IntervalTrigger::deserialize(json::Value& root)
 
     Trigger::deserialize(root);
 
-    interval.assign(root["interval"]["days"].asInt(),
-                    root["interval"]["hours"].asInt(),
-                    root["interval"]["minutes"].asInt(),
-                    root["interval"]["seconds"].asInt(), 0);
+    interval.assign(root["interval"]["days"].get<int>(),
+                    root["interval"]["hours"].get<int>(),
+                    root["interval"]["minutes"].get<int>(),
+                    root["interval"]["seconds"].get<int>(), 0);
 
     if (!interval.totalSeconds())
         throw std::runtime_error(

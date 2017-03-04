@@ -21,8 +21,9 @@ int main(int argc, char** argv)
     test::initialize();
 
 #if USE_SSL
-    SSLManager::initNoVerifyClient();
+    net::SSLManager::initNoVerifyClient();
 #endif
+
 
     // =========================================================================
     // Address
@@ -49,20 +50,26 @@ int main(int argc, char** argv)
         assert(a4.valid());
     });
 
+
     // =========================================================================
     // Client
     //
     describe("client", []() {
+        // Run the test server
+        // If not available the test will fail gracefully with a warning
+        // NOTE: The server must allow anonymous authentication for this test
+        Process proc;
+        if (!openTestServer(proc)) {
+            std::cerr << "Cannot start Symple test server" << std::endl;
+            return;
+        }
+
         smpl::Client::Options loptions;
         loptions.host = SERVER_HOST;
         loptions.port = SERVER_PORT;
         loptions.user = "l";
         loptions.name = "Left";
         // loptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
-
-        // NOTE: The server should allow anonymous
-        // authentication for this test.
-        // options.token = ""; used for authentication
 
         smpl::Client::Options roptions;
         roptions.host = SERVER_HOST;
@@ -78,6 +85,7 @@ int main(int argc, char** argv)
         rclient.connect();
 
         while (!lclient.completed() || !rclient.completed()) {
+
             // DebugL << "waiting for test completion" << std::endl;
             uv::runDefaultLoop(UV_RUN_ONCE);
 
@@ -87,12 +95,8 @@ int main(int argc, char** argv)
             //     rclient.connect();
         }
 
-        // TODO: check client failed status
         lclient.check();
         rclient.check();
-
-        // lclient.close();
-        // rclient.close();
     });
 
     // TODO:
@@ -105,9 +109,8 @@ int main(int argc, char** argv)
     test::runAll();
 
 #if USE_SSL
-    SSLManager::instance().shutdown();
+    net::SSLManager::instance().shutdown();
 #endif
     Logger::destroy();
-
     return finalize();
 }

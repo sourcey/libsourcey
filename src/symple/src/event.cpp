@@ -30,19 +30,19 @@ Event::Event()
 Event::Event(const Event& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         setType("event");
-    if (!isMember("time"))
+    if (find("time") == end())
         setTime(::time(0));
 }
 
 
-Event::Event(const json::Value& root)
+Event::Event(const json::value& root)
     : Message(root)
 {
-    if (!isMember("type"))
+    if (find("type") == end())
         setType("event");
-    if (!isMember("time"))
+    if (find("time") == end())
         setTime(::time(0));
 }
 
@@ -54,19 +54,19 @@ Event::~Event()
 
 bool Event::valid() const
 {
-    return Message::valid() && isMember("name");
+    return Message::valid() && find("name") == end();
 }
 
 
 std::string Event::name() const
 {
-    return get("name", "").asString();
+    return value("name", "");
 }
 
 
 time_t Event::time() const
 {
-    return static_cast<time_t>(get("time", 0).asDouble());
+    return static_cast<time_t>(value("time", double(0)));
 }
 
 
@@ -78,7 +78,7 @@ void Event::setName(const std::string& name)
 
 void Event::setTime(time_t time)
 {
-    (*this)["time"] = static_cast<Json::UInt64>(time);
+    (*this)["time"] = static_cast<double>(time);
     // DateTimeFormatter::format(
     //    Timestamp::fromEpochTime(time),
     //    DateTimeFormat::ISO8601_FORMAT);

@@ -91,8 +91,7 @@ bool Configuration::loaded()
 
 void Configuration::print(std::ostream& ost)
 {
-    json::StyledWriter writer;
-    ost << writer.write(root);
+    ost << root.dump(4);
 }
 
 
@@ -100,7 +99,9 @@ bool Configuration::remove(const std::string& key)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    return root.removeMember(key) != Json::nullValue;
+    return !!root.erase(key);
+
+    // return root.removeMember(key) != Json::nullValue;
 }
 
 
@@ -108,11 +109,16 @@ void Configuration::removeAll(const std::string& baseKey)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    json::Value::Members members = root.getMemberNames();
-    for (unsigned i = 0; i < members.size(); i++) {
-        if (members[i].find(baseKey) != std::string::npos)
-            root.removeMember(members[i]);
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (it.key().find(baseKey) != std::string::npos)
+            it = it->erase(it);
     }
+
+    //json::value::Members members = root.getMemberNames();
+    //for (unsigned i = 0; i < members.size(); i++) {
+    //    if (members[i].find(baseKey) != std::string::npos)
+    //        root.removeMember(members[i]);
+    //}
 }
 
 
@@ -120,14 +126,14 @@ void Configuration::replace(const std::string& from, const std::string& to)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    std::stringstream ss;
-    json::StyledWriter writer;
-    std::string data = writer.write(root);
+    std::string data = root.dump();
     util::replaceInPlace(data, from, to);
-    ss.str(data);
 
-    json::Reader reader;
-    reader.parse(data, root);
+    root = json::value::parse(data.begin(), data.end());
+
+    //std::stringstream ss;
+    //ss << data;
+    //root = json::value::parse(ss); // cannot parse a string?
 }
 
 
@@ -135,11 +141,11 @@ bool Configuration::getRaw(const std::string& key, std::string& value) const
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    if (!root.isMember(key))
-        return false;
-
-    value = (root)[key].asString();
-    return true;
+    if (root.find(key) != root.end()) {
+        value = root[key].get<std::string>();
+        return true;
+    }
+    return false;
 }
 
 
@@ -153,16 +159,20 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
 }
 
 
-void Configuration::keys(std::vector<std::string>& keys,
-                         const std::string& baseKey)
+void Configuration::keys(std::vector<std::string>& keys, const std::string& baseKey)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    json::Value::Members members = root.getMemberNames();
-    for (unsigned i = 0; i < members.size(); i++) {
-        if (members[i].find(baseKey) != std::string::npos)
-            keys.push_back(members[i]);
+    for (auto it = root.begin(); it != root.end(); ++it) {
+        if (it.key().find(baseKey) != std::string::npos)
+            keys.push_back(it.key());
     }
+
+    //json::value::Members members = root.getMemberNames();
+    //for (unsigned i = 0; i < members.size(); i++) {
+    //    if (members[i].find(baseKey) != std::string::npos)
+    //        keys.push_back(members[i]);
+    //}
 }
 
 

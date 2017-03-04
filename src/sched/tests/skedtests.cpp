@@ -28,14 +28,14 @@ struct ScheduledTask : public sched::Task
 
     void run() { taskRunTimes++; }
 
-    void serialize(json::Value& root)
+    void serialize(json::value& root)
     {
         sched::Task::serialize(root);
 
         root["CustomField"] = "blah";
     }
 
-    void deserialize(json::Value& root)
+    void deserialize(json::value& root)
     {
         json::assertMember(root, "CustomField");
 
@@ -46,19 +46,17 @@ struct ScheduledTask : public sched::Task
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
     // Register tasks and triggers
     scheduler.factory().registerTask<ScheduledTask>("ScheduledTask");
-    scheduler.factory().registerTrigger<sched::OnceOnlyTrigger>(
-        "OnceOnlyTrigger");
+    scheduler.factory().registerTrigger<sched::OnceOnlyTrigger>("OnceOnlyTrigger");
     scheduler.factory().registerTrigger<sched::DailyTrigger>("DailyTrigger");
-    scheduler.factory().registerTrigger<sched::IntervalTrigger>(
-        "IntervalTrigger");
+    scheduler.factory().registerTrigger<sched::IntervalTrigger>("IntervalTrigger");
 
     describe("once only task serialization", []() {
-        json::Value json;
+        json::value json;
         Timespan hundredMs(0, 1);
 
         // Schedule a once only task to run in 100ms time.
@@ -91,13 +89,11 @@ int main(int argc, char** argv)
                 DateTime dt;
                 dt += hundredMs;
                 json[(int)0]["trigger"]["scheduleAt"] =
-                    DateTimeFormatter::format(dt,
-                                              DateTimeFormat::ISO8601_FORMAT);
+                    DateTimeFormatter::format(dt, DateTimeFormat::ISO8601_FORMAT);
             }
 
             // Dynamically create the task from JSON
-            DebugL << "Sched Input JSON:\n"
-                   << json::stringify(json, true) << endl;
+            DebugL << "Sched Input JSON:\n" << json.dump(4) << endl;
             scheduler.deserialize(json);
 
             // Print to cout
@@ -106,20 +102,20 @@ int main(int argc, char** argv)
             // DebugL << "##### Sched Print Output END" << endl;
 
             // Output scheduler tasks as JSON before run
-            json::Value before;
+            json::value before;
             scheduler.serialize(before);
             DebugL << "Sched Output JSON Before Run:\n"
-                   << json::stringify(before, true) << endl;
+                   << before.dump(4) << endl;
 
             // Wait for the task to complete
             scy::sleep(1500);
             expect(taskRunTimes == 1);
 
             // Output scheduler tasks as JSON after run
-            json::Value after;
+            json::value after;
             scheduler.serialize(after);
             DebugL << "Sched Output JSON After Run:\n"
-                   << json::stringify(after, true) << endl;
+                   << json.dump(4) << endl;
         }
     });
 

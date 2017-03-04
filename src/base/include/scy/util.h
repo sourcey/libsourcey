@@ -129,16 +129,12 @@ std::string randomBinaryString(int size, bool doBase64 = false);
 //
 
 /// Splits the given string at the delimiter string.
-void split(const std::string& str, const std::string& delim,
-           std::vector<std::string>& elems, int limit = -1);
-std::vector<std::string> split(const std::string& str, const std::string& delim,
-                               int limit = -1);
+void split(const std::string& str, const std::string& delim, std::vector<std::string>& elems, int limit = -1);
+std::vector<std::string> split(const std::string& str, const std::string& delim, int limit = -1);
 
 /// Splits the given string at the delimiter character.
-void split(const std::string& str, char delim, std::vector<std::string>& elems,
-           int limit = -1);
-std::vector<std::string> split(const std::string& str, char delim,
-                               int limit = -1);
+void split(const std::string& str, char delim, std::vector<std::string>& elems, int limit = -1);
+std::vector<std::string> split(const std::string& str, char delim, int limit = -1);
 
 
 //
@@ -359,8 +355,7 @@ template <class S> S& toLowerInPlace(S& str)
 
 /// Case-insensitive string comparison
 template <class S, class It>
-int icompare(const S& str, typename S::size_type pos, typename S::size_type n,
-             It it2, It end2)
+int icompare(const S& str, typename S::size_type pos, typename S::size_type n, It it2, It end2)
 {
     typename S::size_type sz = str.size();
     if (pos > sz)
@@ -410,8 +405,7 @@ template <class S> int icompare(const S& str1, const S& str2)
 }
 
 template <class S>
-int icompare(const S& str1, typename S::size_type n1, const S& str2,
-             typename S::size_type n2)
+int icompare(const S& str1, typename S::size_type n1, const S& str2, typename S::size_type n2)
 {
     if (n2 > str2.size())
         n2 = str2.size();
@@ -427,8 +421,7 @@ int icompare(const S& str1, typename S::size_type n, const S& str2)
 }
 
 template <class S>
-int icompare(const S& str1, typename S::size_type pos, typename S::size_type n,
-             const S& str2)
+int icompare(const S& str1, typename S::size_type pos, typename S::size_type n, const S& str2)
 {
     return icompare(str1, pos, n, str2.begin(), str2.end());
 }

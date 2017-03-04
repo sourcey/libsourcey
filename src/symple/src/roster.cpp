@@ -63,22 +63,22 @@ void Roster::print(std::ostream& os) const
 
 
 #if 0
-void Roster::update(const json::Value& data, bool whiny)
+void Roster::update(const json::value& data, bool whiny)
 {
-    if (data.isObject() &&
+    if (data.is_object() &&
         data.isMember("id") &&
         data.isMember("user") &&
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
         TraceS(this) << "Updating: " << json::stringify(data, true) << endl;
-        std::string id = data["id"].asString();
+        std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {
             peer = new Peer(data);
             add(id, peer);
         } else
-            static_cast<json::Value&>(*peer) = data;
+            static_cast<json::value&>(*peer) = data;
     }
     else if (data.isArray()) {
         for (auto it = data.begin(); it != data.end(); it++) {

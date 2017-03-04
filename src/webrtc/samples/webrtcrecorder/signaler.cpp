@@ -19,9 +19,8 @@
 
 
 #define OUTPUT_FILENAME "webrtcrecorder.mp4"
-#define OUTPUT_FORMAT                                                          \
-    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
-                                            48000, 128000, "yuv420p"),         \
+#define OUTPUT_FORMAT av::Format("MP4", "mp4",                                             \
+               av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
                av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
@@ -32,7 +31,8 @@ namespace scy {
 
 
 Signaler::Signaler(const smpl::Client::Options& options)
-    : _client(options)
+    : PeerConnectionManager(webrtc::CreatePeerConnectionFactory())
+    , _client(options)
 {
     _client.StateChange += slot(this, &Signaler::onClientStateChange);
     _client.roster().ItemAdded += slot(this, &Signaler::onPeerConnected);
@@ -51,7 +51,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std:
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kSessionDescriptionTypeName] = type;
     desc[kSessionDescriptionSdpName] = sdp;
     m[type] = desc;
@@ -63,7 +63,7 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std:
 void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
-    Json::Value desc;
+    json::value desc;
     desc[kCandidateSdpMidName] = mid;
     desc[kCandidateSdpMlineIndexName] = mlineindex;
     desc[kCandidateSdpName] = sdp;
@@ -97,11 +97,11 @@ void Signaler::onPeerMessage(smpl::Message& m)
 {
     DebugL << "Peer message: " << m.from().toString() << endl;
 
-    if (m.isMember("offer")) {
+    if (m.find("offer") != m.end()) {
         recvSDP(m.from().id, m["offer"]);
-    } else if (m.isMember("answer")) {
+    } else if (m.find("answer") != m.end()) {
         assert(0 && "answer not supported");
-    } else if (m.isMember("candidate")) {
+    } else if (m.find("candidate") != m.end()) {
         recvCandidate(m.from().id, m["candidate"]);
     }
     // else assert(0 && "unknown event");

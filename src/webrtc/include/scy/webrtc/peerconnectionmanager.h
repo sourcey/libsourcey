@@ -40,8 +40,8 @@ public:
     virtual void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
     virtual void sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp);
 
-    virtual void recvSDP(const std::string& token, const json::Value& data);
-    virtual void recvCandidate(const std::string& token, const json::Value& data);
+    virtual void recvSDP(const std::string& token, const json::value& data);
+    virtual void recvCandidate(const std::string& token, const json::value& data);
 
     virtual void onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
     virtual void onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
@@ -50,6 +50,7 @@ public:
     virtual void onClosed(PeerConnection* conn);
     virtual void onFailure(PeerConnection* conn, const std::string& error);
 
+    void setFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
     webrtc::PeerConnectionFactoryInterface* factory() const;
 
 protected:
