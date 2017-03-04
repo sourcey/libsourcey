@@ -54,7 +54,8 @@ Event::~Event()
 
 bool Event::valid() const
 {
-    return Message::valid() && find("name") == end();
+    return Message::valid() 
+        && find("name") != end();
 }
 
 

@@ -164,17 +164,10 @@ void Client::createPresence(Presence& p)
     if (peer) {
         CreatePresence.emit(*peer);
         assert(peer->is_object());
-        // p["data"] = *peer; doesn't work, turns peer into JSON array :/
-        //true,
-        //value_t manual_type = value_t::array
-        //json::value::object((json::value::object_t&), false, json::value::value_t::object
-        //json::value temp((json::value::object_t&)*peer);
-        //TraceL << "Create presence temptemptemptemptemptemptemptemptemp: " << temp << endl;
         p["data"] = (json::value&)*peer;
-        //p["data"].swap(temp);
         assert(p["data"].is_object());
     } else
-        assert(0 && "no session");
+        assert(0 && "no peer session object");
 }
 
 
@@ -342,19 +335,27 @@ void Client::emit(IPacket& raw)
             } else if (type == "command") {
                 Command c(data);
                 if (!c.valid()) {
-                    WarnL << "Dropping invalid command: "
-                          << data.dump() << endl;
+                    WarnL << "Dropping invalid command: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(c);
                 if (c.isRequest()) {
                     c.setStatus(404);
-                    WarnL << "Command not handled: " << c.id() << ": "
-                          << c.node() << endl;
+                    WarnL << "Command not handled: " << c.id() << ": " << c.node() << endl;
                     respond(c);
                 }
-            } else
-                WarnL << "Received non-standard message: " << type << endl;
+            } else {
+                DebugL << "Received non-standard message: " << type << endl;
+
+                // Attempt to parse unknown packets as a message type  
+                Message m(data);
+                if (!m.valid()) {
+                    WarnL << "Dropping invalid message: " << data.dump() << endl;
+                    WarnL << "Dropping invalid message message: " << m.dump() << endl;
+                    return;
+                }
+                PacketSignal::emit(m);
+            }
         } else {
             assert(0 && "invalid packet");
             WarnL << "Invalid Symple message" << endl;

@@ -126,8 +126,7 @@ int main(int argc, char** argv)
     // Buffer
     //
     describe("buffer", []() {
-        ByteOrder orders[2] = { ByteOrder::Host,
-            ByteOrder::Network };
+        ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
         for (std::size_t i = 0; i < 2; i++) {
             Buffer buffer(1024);
             BitReader reader(buffer, orders[i]);
@@ -493,6 +492,7 @@ int main(int argc, char** argv)
         proc.sdout = [&](std::string line) {
             std::cout << "process sdout: " << line << std::endl;
             gotStdout = true;
+            proc.kill();
         };
         proc.onexit = [&](int64_t status) {
             std::cout << "process exit: " << status << std::endl;

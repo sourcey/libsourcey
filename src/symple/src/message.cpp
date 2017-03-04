@@ -35,9 +35,9 @@ Message::Message()
 Message::Message(const Message& root)
     : json::value(static_cast<const json::value&>(root))
 {
-    if (find("id") != end())
+    if (find("id") == end())
         (*this)["id"] = util::randomString(16);
-    if (find("type") != end())
+    if (find("type") == end())
         (*this)["type"] = "message";
 
     assert(is_object());
@@ -47,9 +47,9 @@ Message::Message(const Message& root)
 Message::Message(const json::value& root)
     : json::value(root)
 {
-    if (find("id") != end())
+    if (find("id") == end())
         (*this)["id"] = util::randomString(16);
-    if (find("type") != end())
+    if (find("type") == end())
         (*this)["type"] = "message";
 
     assert(is_object());
@@ -75,9 +75,6 @@ std::size_t Message::read(const ConstBuffer& buf)
 
 std::size_t Message::read(const std::string& root)
 {
-    //json::Reader reader;
-    //return reader.parse(root, *this) ? root.length() : 0;
-
     *this = json::value::parse(root.begin(), root.end());
     return root.length();
 }
@@ -108,9 +105,9 @@ void Message::print(std::ostream& os) const
 bool Message::valid() const
 {
     return find("type") != end()
-        && find("id") != end()
-        && find("from") != end()
-        && (*this)["from"].get<std::string>().length();
+        && find("id") != end();
+        // && find("from") != end()
+        // && (*this)["from"].get<std::string>().length()
 }
 
 

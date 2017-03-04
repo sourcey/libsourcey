@@ -26,7 +26,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 0
+#define USE_SSL 1
 
 
 class SympleApplication : public scy::Application
@@ -126,6 +126,8 @@ public:
 
             // Setup the client
             client += packetSlot(this, &SympleApplication::onRecvMessage);
+            client += packetSlot(this, &SympleApplication::onRecvPresence);
+            client += packetSlot(this, &SympleApplication::onRecvEvent);
             client.Announce += slot(this, &SympleApplication::onClientAnnounce);
             client.StateChange += slot(this, &SympleApplication::onClientStateChange);
             client.CreatePresence += slot(this, &SympleApplication::onCreatePresence);
@@ -275,6 +277,20 @@ public:
         // Handle incoming Symple messages here
     }
 
+    void onRecvPresence(smpl::Presence& presence)
+    {
+        DebugL << "####### On presence: " << presence.className() << endl;
+
+        // Handle incoming Symple presences here
+    }
+
+    void onRecvEvent(smpl::Event& event)
+    {
+        DebugL << "####### On event: " << event.className() << endl;
+
+        // Handle incoming Symple events here
+    }
+    
     void onClientAnnounce(const int& status)
     {
         DebugL << "####### On announce: " << status << endl;

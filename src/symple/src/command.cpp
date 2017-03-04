@@ -50,7 +50,8 @@ Command::~Command()
 
 bool Command::valid() const
 {
-    return Message::valid() && find("node") == end();
+    return Message::valid() 
+        && find("node") != end();
 }
 
 
