@@ -276,10 +276,6 @@ bool AsyncLogWriter::writeNext()
     delete next;
     return true;
 #else
-<<<<<<< HEAD
-    std::cout << "AsyncLogWriter writeNext DISABLED" << std::endl;
-=======
->>>>>>> a1c70197c47d86155af79f1fa3cfc39ff7e4172c
     return false;
 #endif
 }
