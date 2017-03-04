@@ -210,13 +210,11 @@ int main(int argc, char** argv)
         }
     });
 
-
     describe("dynamic resizable buffer", []() {
         std::string write_string("hello");
         std::string write_string1("world");
 
-        ByteOrder orders[2] = { ByteOrder::Host,
-            ByteOrder::Network };
+        ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
         for (std::size_t i = 0; i < 2; i++) {
             Buffer buffer; // (1); // (1024);
             DynamicBitWriter writer(buffer, orders[i]);
@@ -276,9 +274,7 @@ int main(int argc, char** argv)
 
         nvc.add("name3", "value3");
         expect(nvc.get("name3") == "value3");
-
         nvc.add("name3", "value31");
-
         nvc.add("Connection", "value31");
 
         NVCollection::ConstIterator it = nvc.find("Name3");
@@ -489,8 +485,8 @@ int main(int argc, char** argv)
     describe("process", []() {
         bool gotStdout = false, gotExit = false;
         Process proc({ "ping", "sourcey.com" });
-        proc.sdout = [&](std::string line) {
-            std::cout << "process sdout: " << line << std::endl;
+        proc.onstdout = [&](std::string line) {
+            std::cout << "process stdout: " << line << std::endl;
             gotStdout = true;
             proc.kill();
         };

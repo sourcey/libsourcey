@@ -169,8 +169,8 @@ bool installTestServerSync()
     bool success = false;
     Process proc({ "npm", "install" });
     setTestServerCwd(proc.cwd);
-    proc.sdout = [](std::string line) {
-        std::cout << "server npm sdout: " << line << std::endl;
+    proc.onstdout = [](std::string line) {
+        std::cout << "server npm stdout: " << line << std::endl;
     };
     proc.onexit = [&](int64_t status) {
         std::cout << "server npm exit: " << status << std::endl;
@@ -199,8 +199,8 @@ bool openTestServer(Process& proc, bool install = true)
     bool running = false, exited = false;
     setTestServerCwd(proc.cwd);
     proc.args = { "node", "server.js" };
-    proc.sdout = [&](std::string line) {
-        std::cout << "server sdout: " << line << std::endl;
+    proc.onstdout = [&](std::string line) {
+        std::cout << "server stdout: " << line << std::endl;
         if (line.find("listening") != std::string::npos)
             running = true;
     };

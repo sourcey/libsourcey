@@ -72,7 +72,7 @@ public:
 
     /// Stdout signal.
     /// Signals when a line has been output from the process.
-    std::function<void(std::string)> sdout;
+    std::function<void(std::string)> onstdout;
 
     /// Exit stgnals.
     /// Signals process exit status code.

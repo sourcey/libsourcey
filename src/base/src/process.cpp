@@ -63,8 +63,8 @@ void Process::init()
     _stdin.init();
     _stdout.init();
     _stdout.Read += [this](Stream&, const char* data, const int& len) {
-        if (sdout)
-            sdout(std::string(data, len));
+        if (onstdout)
+            onstdout(std::string(data, len));
     };
 
     options.stdio = _stdio;

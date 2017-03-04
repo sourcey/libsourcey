@@ -60,6 +60,16 @@ srv.Connection += [](http::ServerConnection::Ptr conn) {
 
 Pretty neat right? Its bloody fast too, especially on Linux kernel 3.9 or newer as it will make use of kernel level multicore socket load balancing. Check the `httpechoserver` for the full code.
 
+Also, interacting with system processes has never been easier. The following code will run the `ping sourcey.com` command on your system and handle events:
+
+~~~cpp
+Process proc({ "ping", "sourcey.com" });
+proc.onstdout = [](std::string line) { /* handle process output */ };
+proc.onexit = [](std::int64_t status) { /* handle process exit */ };
+proc.spawn(); /* spawn the process */
+proc.in() << "write some data to the stdin pipe"
+~~~
+
 Another good starting point is the `PacketStream`, which lets you create a dynamic delegate chain for piping, processing and outputting arbitrary data packets. This method of layering packet processors and dynamic functionality makes it possible to develop complex data processing applications quickly and easily.
 
 For example, this is how you would capture a live webcam stream, encode it into H.264, and broadcast it in realtime over the internet:
