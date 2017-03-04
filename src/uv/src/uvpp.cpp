@@ -139,8 +139,17 @@ void Handle::setError(const scy::Error& err)
 void Handle::close()
 {
     assertThread();
-    if (!_closed) {
-        if (_ptr && !uv_is_closing(_ptr)) {
+    if (_ptr) {
+        if (!_ptr->type) {
+            // If the handle hasn't been initialized don't call uv_close,
+            // just delete the pointer.
+            delete _ptr;
+            _ptr = nullptr;
+            _closed = true;
+
+            // No onClose event since the handle was never initialized.
+        }
+        else if (!_closed && !uv_is_closing(_ptr)) {
             uv_close(_ptr, [](uv_handle_t* handle) {
                 delete handle;
             });

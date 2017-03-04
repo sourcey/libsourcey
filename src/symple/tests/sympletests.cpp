@@ -55,6 +55,7 @@ int main(int argc, char** argv)
     // Client
     //
     describe("client", []() {
+
         // Run the test server
         // If not available the test will fail gracefully with a warning
         // NOTE: The server must allow anonymous authentication for this test
