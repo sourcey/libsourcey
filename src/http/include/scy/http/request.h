@@ -23,6 +23,7 @@
 namespace scy {
 namespace http {
 
+
 /// HTTP request methods
 struct Method
 {

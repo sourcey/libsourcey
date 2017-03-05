@@ -25,6 +25,48 @@ void raiseEchoServer()
 }
 
 
+void raiseMulticoreEchoServer()
+{
+    auto loop = uv::createLoop();
+    std::thread::id tid(std::this_thread::get_id());
+
+    http::Server srv(address, net::makeSocket<net::TCPSocket>(loop));
+    srv.start();
+
+    srv.Connection += [&](http::ServerConnection::Ptr conn) {
+        conn->send("hello universe", 14);
+        conn->close();
+    };
+
+    uv::waitForShutdown([&](void*) {
+        srv.shutdown();
+    }, nullptr, loop);
+
+    uv::closeLoop(loop);
+    delete loop;
+}
+
+
+// Raise a server instance for each CPU core
+void runMulticoreEchoServers()
+{
+    std::vector<Thread*> threads;
+    int ncpus = std::thread::hardware_concurrency();
+    for (int i = 0; i < ncpus; ++i) {
+        threads.push_back(new Thread(std::bind(raiseMulticoreEchoServer)));
+    }
+
+    std::cout << "HTTP echo multicore(" << ncpus << ") server listening on " << address << std::endl;
+
+    for (auto thread : threads) {
+        thread->join();
+    }
+}
+
+
+// -----------------------------------------------------------------------------
+// Benchmark server
+
 void raiseBenchmarkServer()
 {
     http::Server srv(address);

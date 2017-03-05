@@ -31,24 +31,24 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     , _readBIO(nullptr)
     , _writeBIO(nullptr)
 {
-    TraceS(this) << "Create" << endl;
+    // TraceS(this) << "Create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter()
 {
-    TraceS(this) << "Destroy" << endl;
+    // TraceS(this) << "Destroy" << endl;
     if (_ssl) {
         SSL_free(_ssl);
         _ssl = nullptr;
     }
-    TraceS(this) << "Destroy: OK" << endl;
+    // TraceS(this) << "Destroy: OK" << endl;
 }
 
 
 void SSLAdapter::initClient()
 {
-    TraceS(this) << "Init client" << endl;
+    // TraceS(this) << "Init client" << endl;
     assert(_socket);
     if (!_socket->context())
         _socket->useContext(SSLManager::instance().defaultClientContext());
@@ -71,7 +71,7 @@ void SSLAdapter::initClient()
 
 void SSLAdapter::initServer() //(SSL* ssl)
 {
-    TraceS(this) << "Init server" << endl;
+    // TraceS(this) << "Init server" << endl;
     assert(_socket);
     if (!_socket->context())
         _socket->useContext(SSLManager::instance().defaultServerContext());
@@ -88,9 +88,9 @@ void SSLAdapter::initServer() //(SSL* ssl)
 
 void SSLAdapter::shutdown()
 {
-    TraceS(this) << "Shutdown" << endl;
+    // TraceS(this) << "Shutdown" << endl;
     if (_ssl) {
-        TraceS(this) << "Shutdown SSL" << endl;
+        // TraceS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);

@@ -123,13 +123,6 @@ void SSLManager::shutdown()
 }
 
 
-/*
-namespace
-{
-    static Singleton<SSLManager> singleton;
-}
-*/
-
 Singleton<SSLManager>& singleton()
 {
     static Singleton<SSLManager> singleton;

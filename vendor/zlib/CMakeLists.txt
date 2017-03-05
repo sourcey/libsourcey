@@ -21,8 +21,8 @@ include(CheckCSourceCompiles)
 enable_testing()
 
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
-check_include_file(stdint.h    HAVE_STDINT_H)
-check_include_file(stddef.h    HAVE_STDDEF_H)
+check_include_file(stdint.h HAVE_STDINT_H)
+check_include_file(stddef.h HAVE_STDDEF_H)
 
 #
 # Check to see if we have large file support

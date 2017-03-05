@@ -14,14 +14,17 @@ int main(int argc, char** argv)
     //Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
+        //runMulticoreBenchmarkServers();
+        //runMulticoreEchoServers();
+        //libuv::raiseBenchmarkServer();
+
         // NOTE: For best performance the http server should be compiled on
         // linux kernel 3.9 or newer, and with ENABLE_LOGGING=OFF.
 #if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
         runMulticoreBenchmarkServers();
 #else
-        raiseEchoServer();
-        // raiseBenchmarkServer();
-        // libuv::raiseLibuvEchoServer();
+        raiseBenchmarkServer();
+        // raiseEchoServer();
 #endif
     }
     net::SSLManager::instance().shutdown();

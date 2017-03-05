@@ -346,7 +346,7 @@ macro(define_sourcey_dependency name)
   project(${name})
 
   # Include current directory and existing dependency directories
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}") # "${LibSourcey_INCLUDE_DIRS}"
+  # include_directories("${CMAKE_CURRENT_SOURCE_DIR}") # "${LibSourcey_INCLUDE_DIRS}"
 
   # Add library source files
   if (NOT ${name}_SOURCE_FILES)
@@ -356,7 +356,7 @@ macro(define_sourcey_dependency name)
     file(GLOB_RECURSE ${name}_SOURCE_FILES ${${name}_SOURCE_PATH})
     #message("${name}: Globbing source files: ${${name}_SOURCE_FILES}")
   endif()
-  #message("${name}: Sourcey files: ${${name}_SOURCE_FILES}")
+  #message("${name}: Source files: ${${name}_SOURCE_FILES}")
 
   # Add library header files
   if (NOT ${name}_HEADER_FILES)
@@ -369,24 +369,32 @@ macro(define_sourcey_dependency name)
   source_group("Source" FILES ${${name}_SOURCE_FILES})
   source_group("Include" FILES ${${name}_HEADER_FILES})
 
-  add_library(${name} ${LibSourcey_LIB_TYPE} ${${name}_SOURCE_FILES} ${${name}_HEADER_FILES})
+  # message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  # message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  # message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
+  add_library(${name} ${LibSourcey_LIB_TYPE} ${${name}_SOURCE_FILES}) # ${${name}_HEADER_FILES}
+
+  if (${name}_DEFINITIONS)
+    target_compile_definitions(${name} PRIVATE ${${name}_DEFINITIONS})
+  endif()
+  if (${name}_FLAGS)
+    target_compile_options(${name} PRIVATE ${${name}_FLAGS})
+  endif()
+  if (${name}_INCLUDE_DIRS)
+    target_include_directories(${name} PRIVATE ${${name}_INCLUDE_DIRS})
+  endif()
   if (${name}_DEPENDENCIES)
-    target_link_libraries(${name} ${${name}_DEPENDENCIES} ${CMAKE_DL_LIBS})
-    add_dependencies(${name} ${${name}_DEPENDENCIES})
+    target_link_libraries(${name} PRIVATE ${${name}_DEPENDENCIES} ${CMAKE_DL_LIBS})
+    # add_dependencies(${name} ${${name}_DEPENDENCIES})
   endif()
 
   # Cache dependency directories for inclusion by modules and applications
   # get_directory_property(lib_directories INCLUDE_DIRECTORIES)
   # set(LibSourcey_VENDOR_INCLUDE_DIRS ${lib_directories})
   # set(LibSourcey_VENDOR_INCLUDE_DIRS ${lib_directories} PARENT_SCOPE)
-
   # set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${name} PARENT_SCOPE)
   # set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${name} PARENT_SCOPE)
-
-  # message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-  #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-  #message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
   if (${name}_OUTPUT_NAME)
     set_target_properties(${name} PROPERTIES OUTPUT_NAME ${${name}_OUTPUT_NAME})
@@ -399,17 +407,6 @@ macro(define_sourcey_dependency name)
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "dependencies")
   endif()
-  #if(CMAKE_C_FLAGS)
-  #  set_target_properties(${name} PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
-  #endif()
-
-  # message("${name}: OUTPUT_NAME: ${name}_OUTPUT_NAME")
-  # message("${name}: DEBUG_POSTFIX: ${name}_DEBUG_POSTFIX")
-  # message("${name}: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
-  # set_target_properties(${name} PROPERTIES
-  #   OUTPUT_NAME ${${name}_OUTPUT_NAME}
-  #   DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
 
   if (NOT INSTALL_DESTINATION)
     set(INSTALL_DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/lib)

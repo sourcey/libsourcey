@@ -26,7 +26,7 @@ PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
     : SocketAdapter(socket.get())
     , socket(socket)
 {
-    TraceS(this) << "Create: " << socket << endl;
+    // TraceS(this) << "Create: " << socket << endl;
 }
 
 
@@ -34,7 +34,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock,
                                        const MutableBuffer& buffer,
                                        const Address& peerAddress)
 {
-    TraceS(this) << "Recv: " << buffer.size() << endl;
+    // TraceS(this) << "Recv: " << buffer.size() << endl;
 
     IPacket* pkt = nullptr;
     const char* buf = bufferCast<const char*>(buffer);
@@ -53,7 +53,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock,
 
 void PacketSocketAdapter::onPacket(IPacket& pkt)
 {
-    // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
+    // // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
     PacketSignal::emit(pkt);
 }
 
@@ -104,7 +104,7 @@ PacketStreamSocketAdapter::~PacketStreamSocketAdapter()
 
 void PacketStreamSocketAdapter::process(IPacket& packet)
 {
-    TraceS(this) << "Process: " << packet.className() << endl;
+    // TraceS(this) << "Process: " << packet.className() << endl;
 
     //Mutex::ScopedLock lock(_mutex);
 
@@ -121,7 +121,7 @@ bool PacketStreamSocketAdapter::accepts(IPacket* packet)
 
 void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& state)
 {
-    TraceS(this) << "Stream state change: " << state << endl;
+    // TraceS(this) << "Stream state change: " << state << endl;
 
     // TODO: Sync socket with stream?
 
