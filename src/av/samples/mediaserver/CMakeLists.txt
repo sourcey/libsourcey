@@ -1,7 +1,7 @@
 include_dependency(LibUV)
 include_dependency(HttpParser)
 include_dependency(RtAudio)
-#include_dependency(OpenSSL REQUIRED)
+include_dependency(SSL REQUIRED)
 include_dependency(FFmpeg REQUIRED)
 include_dependency(OpenCV REQUIRED)
 

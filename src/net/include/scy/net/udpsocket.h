@@ -37,8 +37,8 @@ public:
 
     virtual void bind(const net::Address& address, unsigned flags = 0);
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
-    virtual int send(const char* data, std::size_t len,
+    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
+    virtual std::size_t send(const char* data, std::size_t len,
                      const net::Address& peerAddress, int flags = 0);
 
     virtual bool setBroadcast(bool flag);

@@ -66,7 +66,7 @@ void ClientConnection::send(http::Request& req)
 }
 
 
-int ClientConnection::send(const char* data, std::size_t len, int flags)
+std::size_t ClientConnection::send(const char* data, std::size_t len, int flags)
 {
     connect();
 

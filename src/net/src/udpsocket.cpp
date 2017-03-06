@@ -101,7 +101,7 @@ void UDPSocket::bind(const Address& address, unsigned flags)
 }
 
 
-int UDPSocket::send(const char* data, std::size_t len, int flags)
+std::size_t UDPSocket::send(const char* data, std::size_t len, int flags)
 {
     assert(_peer.valid());
     return send(data, len, _peer, flags);
@@ -117,8 +117,8 @@ struct SendRequest
 }
 
 
-int UDPSocket::send(const char* data, std::size_t len,
-                    const Address& peerAddress, int /* flags */)
+std::size_t UDPSocket::send(const char* data, std::size_t len,
+                            const Address& peerAddress, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << ": " << peerAddress << endl;
     assert(Thread::currentID() == tid());

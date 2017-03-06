@@ -45,10 +45,8 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
-  #set(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}")
-  #set(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}")
-  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" DIRECTORY)
-  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" DIRECTORY)
+  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" ABSOLUTE)
+  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" ABSOLUTE)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC
@@ -138,15 +136,7 @@ if(WEBRTC_INCLUDE_DIR)
   # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   # select_library_configurations(WEBRTC)
   # message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
-
-  # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
-  # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
-  # Setting PARENT_SCOPE fixes this solves theis issue for now.
-  set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
-  set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
 endif()
-
-# print_module_variables(WEBRTC)
 
 # ----------------------------------------------------------------------
 # Display status
@@ -157,6 +147,15 @@ if(WEBRTC_LIBRARY)
 else()
   find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
 endif()
+
+# HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
+# while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
+# Setting PARENT_SCOPE fixes this solves theis issue for now.
+set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
+set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
+set(WEBRTC_FOUND ${WEBRTC_FOUND} PARENT_SCOPE)
+
+# print_module_variables(WEBRTC)
 
 mark_as_advanced(WEBRTC_LIBRARIES WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR
                  WEBRTC_LIBRARIES_DEBUG WEBRTC_LIBRARIES_RELEASE

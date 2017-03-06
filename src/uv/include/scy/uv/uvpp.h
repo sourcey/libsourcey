@@ -29,11 +29,13 @@
 
 #include "scy/base.h"
 #include "scy/error.h"
+
 #include "uv.h"
-#include <assert.h>
-#include <cstdint>
+
 #include <functional>
 #include <thread>
+#include <assert.h>
+#include <cstdint>
 
 
 namespace scy {
@@ -125,6 +127,9 @@ public:
 
     /// Closes and destroys the associated `libuv` handle.
     virtual void close();
+
+    /// Returns true if the handle has been initialized.
+    bool initialized();
 
     /// Reference main loop again, once unref'd.
     bool ref();

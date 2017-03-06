@@ -155,13 +155,13 @@ void TCPSocket::setSimultaneousAccepts(bool enable)
 #endif
 
 
-int TCPSocket::send(const char* data, std::size_t len, int flags)
+std::size_t TCPSocket::send(const char* data, std::size_t len, int flags)
 {
     return send(data, len, peerAddress(), flags);
 }
 
 
-int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
+std::size_t TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << endl;
     // // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;

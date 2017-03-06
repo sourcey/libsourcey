@@ -14,6 +14,7 @@
 
 
 #include "scy/base.h"
+#include <string>
 #include <vector>
 
 #ifdef SCY_WIN 
