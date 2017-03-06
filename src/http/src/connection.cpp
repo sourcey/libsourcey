@@ -32,13 +32,13 @@ Connection::Connection(const net::TCPSocket::Ptr& socket)
     , _closed(false)
     , _shouldSendHeader(true)
 {
-    TraceS(this) << "Create: " << _socket << endl;
+    // TraceS(this) << "Create: " << _socket << endl;
 }
 
 
 Connection::~Connection()
 {
-    TraceS(this) << "Destroy" << endl;
+    // TraceS(this) << "Destroy" << endl;
     replaceAdapter(nullptr);
     close();
 }
@@ -46,7 +46,7 @@ Connection::~Connection()
 
 int Connection::send(const char* data, std::size_t len, int flags)
 {
-    TraceS(this) << "Send: " << len << endl;
+    // TraceS(this) << "Send: " << len << endl;
     assert(!_closed);
     if (_closed)
         return -1;
@@ -74,7 +74,7 @@ int Connection::sendHeader()
 
 void Connection::close()
 {
-    TraceS(this) << "Close: " << _closed << endl;
+    // TraceS(this) << "Close: " << _closed << endl;
 
     if (_closed)
         return;
@@ -89,7 +89,7 @@ void Connection::close()
 
 void Connection::replaceAdapter(net::SocketAdapter* adapter)
 {
-    TraceS(this) << "Replace adapter: " << adapter << endl;
+    // TraceS(this) << "Replace adapter: " << adapter << endl;
 
     if (_adapter) {
         // Detach the old adapter form all callbacks.
@@ -97,7 +97,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-        TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
+        // TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
         deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
         _adapter = nullptr;
     }
@@ -118,7 +118,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
 void Connection::setError(const scy::Error& err)
 {
-    TraceS(this) << "Set error: " << err.message << endl;
+    // TraceS(this) << "Set error: " << err.message << endl;
 
     _error = err;
 }
@@ -126,7 +126,7 @@ void Connection::setError(const scy::Error& err)
 
 void Connection::onSocketConnect(net::Socket& socket)
 {
-    TraceS(this) << "On socket connect" << endl;
+    // TraceS(this) << "On socket connect" << endl;
 
     // Only useful for client connections
 }
@@ -134,7 +134,7 @@ void Connection::onSocketConnect(net::Socket& socket)
 
 void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceS(this) << "On socket recv" << endl;
+    // TraceS(this) << "On socket recv" << endl;
 
     // Handle payload data
     onPayload(buffer);
@@ -157,7 +157,7 @@ void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 
 void Connection::onSocketClose(net::Socket& socket)
 {
-    TraceS(this) << "On socket close" << endl;
+    // TraceS(this) << "On socket close" << endl;
 
     // Close the connection when the socket closes
     close();
@@ -222,7 +222,7 @@ ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type ty
     , _connection(connection)
     , _parser(type)
 {
-    TraceS(this) << "Create: " << connection << endl;
+    // TraceS(this) << "Create: " << connection << endl;
     _parser.setObserver(this);
     if (type == HTTP_REQUEST)
         _parser.setRequest(&connection->request());
@@ -233,13 +233,13 @@ ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
-    TraceS(this) << "Destroy: " << _connection << endl;
+    // TraceS(this) << "Destroy: " << _connection << endl;
 }
 
 
 int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
 {
-    TraceS(this) << "Send: " << len << endl;
+    // TraceS(this) << "Send: " << len << endl;
 
     try {
         // Send headers on initial send
@@ -270,7 +270,7 @@ int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
 
 void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& buf, const net::Address&)
 {
-    TraceS(this) << "On socket recv: " << buf.size() << endl;
+    // TraceS(this) << "On socket recv: " << buf.size() << endl;
 
     if (_parser.complete()) {
         // Buggy HTTP servers might send late data or multiple responses,
@@ -309,7 +309,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */,
 
 void ConnectionAdapter::onParserHeadersEnd()
 {
-    TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
+    // TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
 
     if (_connection)
         _connection->onHeaders();
@@ -323,7 +323,7 @@ void ConnectionAdapter::onParserHeadersEnd()
 
 void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 {
-    TraceS(this) << "On parser chunk: " << len << endl;
+    // TraceS(this) << "On parser chunk: " << len << endl;
 
     // Dispatch the payload
     if (_connection) {
@@ -351,7 +351,7 @@ void ConnectionAdapter::onParserError(const scy::Error& err)
         // policy += "HTTP/1.1 200 OK\r\nContent-Type: text/x-cross-domain-policy\r\nX-Permitted-Cross-Domain-Policies: all\r\n\r\n";
         policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 
-        TraceS(this) << "Send flash policy: " << policy << endl;
+        // TraceS(this) << "Send flash policy: " << policy << endl;
         base->send(policy.c_str(), policy.length() + 1);
     }
 #endif
@@ -366,7 +366,7 @@ void ConnectionAdapter::onParserError(const scy::Error& err)
 
 void ConnectionAdapter::onParserEnd()
 {
-    TraceS(this) << "On parser end" << endl;
+    // TraceS(this) << "On parser end" << endl;
 
     if (_connection)
         _connection->onComplete();
@@ -393,7 +393,7 @@ Connection* ConnectionAdapter::connection()
 ConnectionStream::ConnectionStream(Connection::Ptr connection)
     : _connection(connection)
 {
-    TraceS(this) << "Create: " << connection << endl;
+    // TraceS(this) << "Create: " << connection << endl;
 
     IncomingProgress.sender = this;
     OutgoingProgress.sender = this;
@@ -413,7 +413,7 @@ ConnectionStream::ConnectionStream(Connection::Ptr connection)
 
 ConnectionStream::~ConnectionStream()
 {
-    TraceS(this) << "Destroy" << endl;
+    // TraceS(this) << "Destroy" << endl;
 
     Outgoing.close();
     Incoming.close();
@@ -422,7 +422,7 @@ ConnectionStream::~ConnectionStream()
 
 int ConnectionStream::send(const char* data, std::size_t len, int flags)
 {
-    TraceS(this) << "Send: " << len << endl;
+    // TraceS(this) << "Send: " << len << endl;
 
     // Send outgoing data to the stream if adapters are attached,
     // or just proxy to the connection.

@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-//#include <unistd.h> // _SC_NPROCESSORS_ONLN on OS X
+#include <unistd.h> // _SC_NPROCESSORS_ONLN on OS X
 #include "uv.h"
 #include "http_parser.h"
 
@@ -126,7 +126,7 @@ void render(uv_work_t* req) {
     client_t* client = (client_t*)closure->client;
     LOGF("[ %5d ] render\n", client->request_num);
 
-    closure->result = "hello universe";
+    //closure->result = "hello universe";
     closure->response_code = "200 OK";
 
 #if 0
@@ -201,7 +201,8 @@ void after_render(uv_work_t* req) {
     std::ostringstream rep;
     rep << "HTTP/1.1 " << closure->response_code << "\r\n"
         << "Content-Type: " << closure->content_type << "\r\n"
-        << "Connection: keep-alive\r\n"
+        //<< "Connection: keep-alive\r\n"
+        << "Connection: close\r\n"
         << "Content-Length: " << closure->result.size() << "\r\n"
         << "Access-Control-Allow-Origin: *" << "\r\n"
         << "\r\n";
@@ -308,12 +309,14 @@ void on_connect(uv_stream_t* server_handle, int status) {
 #define MAX_WRITE_HANDLES 1000
 
 void raiseBenchmarkServer() {
-    //signal(SIGPIPE, SIG_IGN);
-    //int cores = sysconf(_SC_NPROCESSORS_ONLN);
-    //printf("number of cores %d\n", cores);
-    //char cores_string[10];
-    //sprintf(cores_string, "%d", cores);
-    //setenv("UV_THREADPOOL_SIZE", cores_string, 1);
+#ifdef __unix__
+    signal(SIGPIPE, SIG_IGN);
+    int cores = sysconf(_SC_NPROCESSORS_ONLN);
+    printf("number of cores %d\n", cores);
+    char cores_string[10];
+    sprintf(cores_string, "%d", cores);
+    setenv("UV_THREADPOOL_SIZE", cores_string, 1);
+#endif
 
     parser_settings.on_url = on_url;
     // notification callbacks

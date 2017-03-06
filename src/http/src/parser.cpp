@@ -64,7 +64,7 @@ Parser::~Parser()
 
 void Parser::init()
 {
-    TraceS(this) << "Init: " << _type << endl;
+    // TraceS(this) << "Init: " << _type << endl;
 
     ::http_parser_init(&_parser, _type);
     _parser.data = this;
@@ -83,14 +83,14 @@ void Parser::init()
 
 std::size_t Parser::parse(const char* data, std::size_t len)
 {
-    TraceS(this) << "Parse: " << len << endl;
+    // TraceS(this) << "Parse: " << len << endl;
 
     if (_complete) {
         throw std::runtime_error("HTTP parser already complete");
     }
 
     std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
-    
+
     if (_parser.upgrade) {
         // The parser has only parsed the HTTP headers, there
         // may still be unread data from the request body in the buffer.
@@ -173,7 +173,7 @@ bool Parser::upgrade() const
 
 void Parser::onURL(const std::string& value)
 {
-    TraceS(this) << "onURL: " << value << endl;
+    // TraceS(this) << "onURL: " << value << endl;
 
     if (_request)
         _request->setURI(value);
@@ -182,7 +182,7 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-    // TraceS(this) << "onHeader: " << name << ":" << value << endl;
+    // // TraceS(this) << "onHeader: " << name << ":" << value << endl;
 
     if (message())
         message()->add(name, value);
@@ -202,7 +202,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, std::size_t len)
 {
-    TraceS(this) << "onBody" << endl;
+    // TraceS(this) << "onBody" << endl;
     if (_observer)
         _observer->onParserChunk(buf, len);
 }
@@ -210,7 +210,7 @@ void Parser::onBody(const char* buf, std::size_t len)
 
 void Parser::onMessageEnd()
 {
-    TraceS(this) << "onMessageEnd" << endl;
+    // TraceS(this) << "onMessageEnd" << endl;
     _complete = true;
     if (_observer)
         _observer->onParserEnd();
@@ -221,7 +221,7 @@ void Parser::onMessageEnd()
 void Parser::onError(unsigned errorno, const std::string& message)
 {
     assert(errorno != HPE_OK);
-    TraceS(this) << "Parse error: "
+    DebugS(this) << "Parse error: "
         << ::http_errno_name((::http_errno)errorno) << ": "
         << ::http_errno_description((::http_errno)errorno) << endl;
 

@@ -23,7 +23,7 @@ namespace net {
 SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
     : _sender(sender)
 {
-    // TraceS(this) << "Create" << endl;
+    // // TraceS(this) << "Create" << endl;
     assert(sender != this);
     // assert(receiver != this);
 
@@ -34,7 +34,7 @@ SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
 
 SocketAdapter::~SocketAdapter()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // // TraceS(this) << "Destroy" << endl;
 
 #if 0
     // Delete child adapters
