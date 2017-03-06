@@ -60,8 +60,8 @@ function(find_dependency name)
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
 
-    # NOTE: find_package does not always honour REQUIRED flag, so make 
-    # sure the build is cancelled if the dependency wasnt found. 
+    # NOTE: find_package does not always honour REQUIRED flag, so make
+    # sure the build is cancelled if the dependency wasnt found.
     if (${ARGN} MATCHES REQUIRED)
       message(FATAL_ERROR "Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
     else()
@@ -143,11 +143,12 @@ macro(add_dependency_build_variables name)
   endif()
   if(${name}_DEPENDENCIES)
     # message(STATUS "- Found external dependency ${name}: ${${name}_DEPENDENCIES}")
-    #list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_DEPENDENCIES})
-    #set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
+    # message(FATAL_ERROR "- Found external dependency ${name}: ${${name}_DEPENDENCIES}")
+    list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_DEPENDENCIES})
+    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
 
-    list(APPEND CMAKE_CXX_STANDARD_LIBRARIES ${${name}_DEPENDENCIES})
-    set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
+    # list(APPEND CMAKE_CXX_STANDARD_LIBRARIES ${${name}_DEPENDENCIES})
+    # set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
   endif()
 
   if(LibSourcey_INCLUDE_DIRS)
