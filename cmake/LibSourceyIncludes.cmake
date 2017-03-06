@@ -104,6 +104,9 @@ endmacro()
 macro(add_dependency_build_variables name)
   # print_module_variables(${name})
 
+  # TODO: Remove the use of global LibSourcey_XXX variables and use
+  # set_target_xxx function to set dependencies on a target specific basis.
+
   if(${name}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${name}_INCLUDE_DIR}")
     #include_directories(${${name}_INCLUDE_DIR})
@@ -140,8 +143,11 @@ macro(add_dependency_build_variables name)
   endif()
   if(${name}_DEPENDENCIES)
     # message(STATUS "- Found external dependency ${name}: ${${name}_DEPENDENCIES}")
-    list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_DEPENDENCIES})
-    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
+    #list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_DEPENDENCIES})
+    #set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
+
+    list(APPEND CMAKE_CXX_STANDARD_LIBRARIES ${${name}_DEPENDENCIES})
+    set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
   endif()
 
   if(LibSourcey_INCLUDE_DIRS)

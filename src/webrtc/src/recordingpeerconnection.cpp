@@ -26,7 +26,6 @@ RecordingPeerConnection::RecordingPeerConnection(PeerConnectionManager* manager,
                                                  const std::string& token,
                                                  const av::EncoderOptions options)
     : PeerConnection(manager, peerid, token, PeerConnection::Offer)
-    // , _file(file)
     , _recorder(new StreamRecorder(options))
 {
     // _constraints.SetMandatoryReceiveAudio(false);

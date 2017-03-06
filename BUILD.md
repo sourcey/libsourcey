@@ -23,9 +23,7 @@ EXCLUDE_PATTERNS = */anionu* */test* */apps* */samples*
 
 npm install doxygen2md
 ./node_modules/doxygen2md/index.js --verbose ./doc/xml > API.md
-
 node ./doxygen2md/bin/doxygen2md.js --verbose ./biuld/doxygen/xml
-
 node ./doxygen2md/bin/doxygen2md.js --verbose --groups --output=./doc ./build/doxygen/xml
 node ./doxygen2md/bin/doxygen2md.js --verbose --groups --output ./doc/api.md ./build/doxygen/xml
 
@@ -115,4 +113,4 @@ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_MODULE_uv=ON
 
 ## WebRTC (Win64)
-cmake -G "Visual Studio 14 Win64" .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF -DBUILD_MODULES=OFF -DBUILD_APPLICATIONS=ON -DBUILD_SAMPLES=ON -DBUILD_TESTS=ON -DWITH_WEBRTC=ON -DWITH_FFMPEG=ON -DBUILD_MODULE_base=ON -DBUILD_MODULE_crypto=ON -DBUILD_MODULE_http=ON -DBUILD_MODULE_json=ON -DBUILD_MODULE_av=ON -DBUILD_MODULE_net=ON -DBUILD_MODULE_socketio=ON -DBUILD_MODULE_symple=ON -DBUILD_MODULE_util=ON -DBUILD_MODULE_uv=ON -DBUILD_MODULE_stun=ON -DBUILD_MODULE_turn=ON -DBUILD_MODULE_webrtc=ON -DOPENSSL_ROOT_DIR=E:\dev\vendor\OpenSSL-Win64 -DFFMPEG_ROOT_DIR=E:\dev\vendor\ffmpeg-3.2.2-win64-dev -DWEBRTC_ROOT_DIR=E:\dev\vendor\webrtc-checkout\src
+cmake -G "Visual Studio 14 Win64" .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF -DBUILD_MODULES=OFF -DBUILD_APPLICATIONS=ON -DBUILD_SAMPLES=ON -DBUILD_TESTS=ON -DWITH_WEBRTC=ON -DWITH_FFMPEG=ON -DBUILD_MODULE_base=ON -DBUILD_MODULE_crypto=ON -DBUILD_MODULE_http=ON -DBUILD_MODULE_json=ON -DBUILD_MODULE_av=ON -DBUILD_MODULE_net=ON -DBUILD_MODULE_socketio=ON -DBUILD_MODULE_symple=ON -DBUILD_MODULE_util=ON -DBUILD_MODULE_uv=ON -DBUILD_MODULE_stun=ON -DBUILD_MODULE_turn=ON -DBUILD_MODULE_webrtc=ON -DOPENSSL_ROOT_DIR=E:\dev\vendor\openssl-1.0.2k-vs2015 -DFFMPEG_ROOT_DIR=E:\dev\vendor\ffmpeg-3.2.2-win64-dev -DWEBRTC_ROOT_DIR=E:\dev\vendor\webrtc-checkout\src

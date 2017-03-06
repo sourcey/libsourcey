@@ -139,8 +139,7 @@ void MediaCapture::openStream(const std::string& filename,
     if (_formatCtx)
         throw std::runtime_error("Capture has already been initialized");
 
-    if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat,
-                            formatParams) < 0)
+    if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat, formatParams) < 0)
         throw std::runtime_error("Cannot open the media source: " + filename);
 
     if (avformat_find_stream_info(_formatCtx, nullptr) < 0)

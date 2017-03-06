@@ -44,42 +44,85 @@ cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\OpenSSL-Win64 -DWITH_FFMPEG=ON -DFFMPE
 
 ### Install WebRTC (optional)
 
-Follow the guide here to install and build WebRTC: https://webrtc.org/native-code/development/
+The official install guide is here: https://webrtc.org/native-code/development/
+Alternatively, follow the guide below to install WebRTC on your Windows system without pain. 
 
-This guide is also very helpfuif you get stuck: https://github.com/ipop-project/ipop-project.github.io/wiki/Building-the-WebRTC-lib-for-Windows
+##### Download dependencies
 
-##### WebRTC with OpenSSL (optional)
+1.  Install dependencies
 
-You may wish to compile WebRTC with OpenSSL instead of Boring SSL, in which case you can build like so:
+  Install Visual Studio 2015 Update 2 or later - Community Edition should work if its license is appropriate for you. Use the Custom Install option and select:
 
-1. Add the absolute path to your OpenSSL libs to `<webrtc-checkout>\src\webrtc\base\BUILD.gn`:
+    * Visual C++, which will select three sub-categories including MFC
+    * Universal Windows Apps Development Tools > Tools
+    * Universal Windows Apps Development Tools > Windows 10 SDK (10.0.10586)
 
-~~~
-...
-rtc_static_library("rtc_base") {
-  ...
-  libs += [
-    "E:\dev\vendor\OpenSSL-Win64\lib\libeay32.lib",
-    "E:\dev\vendor\OpenSSL-Win64\lib\ssleay32.lib"
-  ]
-~~~
+2.  Install the Chromium depot tolls
 
-2. And build WebRTC with the following command:
+  1. Download [depot_tools.zip](https://storage.googleapis.com/chrome-infra/depot_tools.zip) and decompress it.
+  2. Add depot_tools to the end of your PATH:
 
-~~~ bash
-set DEPOT_TOOLS_WIN_TOOLCHAIN=0
-set GYP_MSVS_VERSION=2015
-set GYP_DEFINES=component=shared_library
+    * With Administrator access:
 
-gn gen out/Debug --args="rtc_include_tests=false rtc_build_ssl=false rtc_ssl_root=""E:\dev\vendor\OpenSSL-Win64\include"""
-ninja -C out/Debug
-~~~
+      * `Control Panel > System and Security > System > Advanced system settings`
+      * Modify the PATH system variable to include depot_tools
 
-Once WebRTC is compiled set the following CMake variables to build LibSourcey with WebRTC enabled:
+    * Without Administrator access:
 
-~~~ bash
-cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\webrtc-checkout\src -DWITH_WEBRTC=ON
-~~~
+      * `Control Panel > User Accounts > User Accounts > Change my environment variables`
+      * Add a PATH user variable: `%PATH%;C:\path\to\depot_tools`
+
+  3. Run `gclient` from the cmd shell (Run as Administrator). The first time it is run, it will install its own copy of svn and other tools.
+  4. Run following commands to set necessary environment variables:
+  
+    ~~~bash
+    set DEPOT_TOOLS_WIN_TOOLCHAIN=0
+    ~~~
+
+#### Download the source code
+
+1.  Create a working directory, enter it, and run fetch webrtc:
+
+  ~~~bash
+  mkdir webrtc-checkout
+  cd webrtc-checkout
+  fetch --nohooks webrtc
+  ~~~
+
+2.  Optionally you can choose the stable release rather than the most recent release by enter:
+
+  ~~~bash
+  cd src
+  git branch -r
+  git checkout <branch_name>
+  ~~~
+  Example: `git checkout branch-heads/57`
+
+3.  Download the code
+  ~~~bash
+  gclient sync
+  ~~~
+
+#### Building WebRTC library
+
+1.  After downloading the code, you can start building the WebRTC library (standing in `src/`).
+
+  ~~~bash
+  gn gen out/Debug --args="is_debug=true rtc_include_tests=false"
+  gn gen out/Release --args="is_debug=false rtc_include_tests=false"
+  ~~~
+  **Note:** _Please run this command with Python2.x, Python3 is currently not supported._
+  
+  Then compile with:
+
+  Debug:
+  ~~~bash
+  ninja -C out/Debug
+  ~~~
+  Release:
+  ~~~bash
+  ninja -C out/Release
+  ~~~
 
 
 ### Download LibSourcey

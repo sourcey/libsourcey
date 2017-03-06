@@ -13,14 +13,15 @@
 #define SCY_Net_SSLContext_H
 
 
+#include "scy/crypto/crypto.h"
 #include "scy/crypto/rsa.h"
 #include "scy/crypto/x509certificate.h"
 #include "scy/memory.h"
-#include "scy/util.h" // remove me
 
-#include <cstdlib>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+
+#include <cstdlib>
 
 
 namespace scy {

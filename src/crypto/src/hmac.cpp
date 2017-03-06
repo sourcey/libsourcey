@@ -29,8 +29,7 @@ namespace crypto {
 
 std::string computeHMAC(const std::string& input, const std::string& key)
 {
-    // DebugL << "Compute HMAC: input='" << util::dumpbin(input.c_str(),
-    // input.length())
+    // DebugL << "Compute HMAC: input='" << util::dumpbin(input.c_str(), input.length())
     //    << "', inputLength=" << input.length() << ", key='" << key << "',
     //    keyLength=" << key.length() << std::endl;
     unsigned int len = 0;

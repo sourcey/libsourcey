@@ -12,6 +12,7 @@
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
 #include "scy/thread.h"
+
 #include <mutex>
 #include <stdexcept>
 
@@ -19,10 +20,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
-//#include <openssl/opensslconf.h>
-#if OPENSSL_VERSION_NUMBER >= 0x0907000L
 #include <openssl/conf.h>
-#endif
 
 
 extern "C" {
@@ -109,8 +107,8 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
 }
 
 
-void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */,
-                    int /* line */)
+void dynlockDestroy(struct CRYPTO_dynlock_value* lock, 
+                    const char* /* file */, int /* line */)
 {
     delete lock;
 }
@@ -126,7 +124,10 @@ void initialize()
 #endif
         SSL_library_init();
         SSL_load_error_strings();
+
+#ifndef OPENSSL_IS_BORINGSSL
         OpenSSL_add_all_algorithms();
+#endif
 
         char seed[SEEDSIZE];
         Random::getSeed(seed, sizeof(seed));

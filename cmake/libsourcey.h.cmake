@@ -58,6 +58,7 @@
 
 /* OpenSSL library */
 #cmakedefine HAVE_OPENSSL
+#cmakedefine OPENSSL_IS_BORINGSSL
 
 /* FFmpeg video library */
 #cmakedefine HAVE_FFMPEG

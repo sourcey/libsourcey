@@ -13,6 +13,7 @@
 #define SCY_Net_SSLSession_H
 
 
+#include "scy/crypto/crypto.h"
 #include "scy/memory.h"
 #include "scy/net/types.h"
 

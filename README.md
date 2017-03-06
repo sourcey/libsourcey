@@ -135,6 +135,8 @@ A BIG thanks to everyone who has contributed to the development of LibSourcey so
 * Michael Fig ([@michael-fig](https://github.com/michael-fig)) — Fixed compiler flags to build without FFmpeg
 * Hyunuk Kim ([@surinkim](https://github.com/surinkim)) — Fixed `std::codecvt` unicode character conversion on Windows
 * Damian Zelim ([@ZelimDamian](https://github.com/ZelimDamian)) — Fixed compiler flags for OS X build
+* Norm Ovenseri ([@normano](https://github.com/normano)) — Added verbose logging output to build system
+* Alexey ([@deilos](https://github.com/deilos)) — Fixed cross-platform FFmpeg build script
 
 ## Contributing
 

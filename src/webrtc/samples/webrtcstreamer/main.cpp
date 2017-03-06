@@ -25,17 +25,20 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace
+    Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace
 
-#if USE_SSL
-    net::SSLManager::initNoVerifyClient();
-#endif
+    //OpenSSL_add_ssl_algorithms();
+//#if USE_SSL
+//#endif
+    //net::SSLManager::initNoVerifyClient();
 
     // Pre-initialize video captures in the main thread
     // av::MediaFactory::instance().loadVideoCaptures();
 
     // Setup WebRTC environment
-    rtc::LogMessage::LogToDebug(rtc::LERROR); // LERROR (rtc::LoggingSeverity)
+    // rtc::LogMessage::LogToDebug(rtc::LERROR);
+    //rtc::LogMessage::LogToDebug(rtc::LS_INFO); // LERROR (rtc::LoggingSeverity)
+    rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE); // LERROR (rtc::LoggingSeverity)
     rtc::LogMessage::LogTimestamps();
     rtc::LogMessage::LogThreads();
 
@@ -68,9 +71,9 @@ int main(int argc, char** argv)
     // av::MediaFactory::instance().unloadVideoCaptures();
     // av::MediaFactory::shutdown();
 
-#if USE_SSL
-    net::SSLManager::destroy();
-#endif
+//#if USE_SSL
+    //net::SSLManager::destroy();
+//#endif
     rtc::CleanupSSL();
     Logger::destroy();
     return 0;

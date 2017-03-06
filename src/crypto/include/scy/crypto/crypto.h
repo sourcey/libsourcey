@@ -13,8 +13,19 @@
 #define SCY_Crypto_Crypto_H
 
 
-#include "scy/base64.h"
+#include "scy/base.h"
 #include <vector>
+
+#ifdef SCY_WIN 
+#include <winsock2.h>
+#include <windows.h>
+
+// Undefine the following definitions defined in wincrypt.h
+// as they conflict with BoringSSL
+#undef X509_NAME 
+#undef X509_CERT_PAIR 
+#undef X509_EXTENSIONS 
+#endif 
 
 
 namespace scy {

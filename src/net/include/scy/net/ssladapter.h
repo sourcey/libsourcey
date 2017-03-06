@@ -13,24 +13,27 @@
 #define SCY_Net_SSLAdapter_H
 
 
+#include "scy/crypto/crypto.h"
 #include "scy/net/address.h"
 #include "scy/net/types.h"
 #include "scy/uv/uvpp.h"
 
+#include <string>
+#include <vector>
+
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include <string>
-#include <vector>
 
 
 namespace scy {
 namespace net {
 
 
-/// TODO: Decouple from SSLSocket implementation
 
 /// A wrapper for the OpenSSL SSL connection context
+///
+/// TODO: Decouple from SSLSocket implementation
 class SCY_EXTERN SSLSocket;
 class SCY_EXTERN SSLAdapter
 {
@@ -39,10 +42,10 @@ public:
     ~SSLAdapter();
 
     /// Initializes the SSL context as a client.
-    void initClient(); // SSL* ssl = nullptr);
+    void initClient();
 
     /// Initializes the SSL context as a server.
-    void initServer(); // SSL* ssl = nullptr);
+    void initServer();
 
     /// Returns true when SSL context has been initialized.
     bool initialized() const;
@@ -80,8 +83,7 @@ protected:
     SSL* _ssl;
     BIO* _readBIO;  ///< The incoming buffer we write encrypted SSL data into
     BIO* _writeBIO; ///<  The outgoing buffer we write to the socket
-    std::vector<char>
-        _bufferOut; ///<  The outgoing payload to be encrypted and sent
+    std::vector<char> _bufferOut; ///<  The outgoing payload to be encrypted and sent
 };
 
 

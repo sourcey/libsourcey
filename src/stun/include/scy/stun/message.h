@@ -36,13 +36,12 @@ public:
         Binding = 0x0001,
 
         /// TURN
-        Allocate = 0x0003, ///< (only request/response semantics defined)
+        Allocate = 0x0003,         ///< (only request/response semantics defined)
         Refresh = 0x0004,
-        SendIndication = 0x0006, ///< (only indication semantics defined)
-        DataIndication = 0x0007, ///< (only indication semantics defined)
-        CreatePermission =
-            0x0008,           ///< (only request/response semantics defined)
-        ChannelBind = 0x0009, ///< (only request/response semantics defined)
+        SendIndication = 0x0006,   ///< (only indication semantics defined)
+        DataIndication = 0x0007,   ///< (only indication semantics defined)
+        CreatePermission = 0x0008, ///< (only request/response semantics defined)
+        ChannelBind = 0x0009,      ///< (only request/response semantics defined)
 
         /// TURN TCP RFC 6062
         Connect = 0x000a,
@@ -89,9 +88,8 @@ public:
     void setMethod(MethodType type);
     void setTransactionID(const std::string& id);
 
-    ClassType classType() const; // { }
-    MethodType
-    methodType() const; //  { return static_cast<MethodType>(_method); }
+    ClassType classType() const;
+    MethodType methodType() const;
     const TransactionID& transactionID() const { return _transactionID; }
     const std::vector<Attribute*> attrs() const { return _attrs; }
     std::size_t size() const { return static_cast<std::size_t>(_size); }

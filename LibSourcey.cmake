@@ -196,7 +196,7 @@ endif()
 # Include third party dependencies
 # ----------------------------------------------------------------------------
 
-# Set some required vendor variables
+# Set some required vendor variables for all modules
 link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
@@ -210,7 +210,7 @@ find_package(FFmpeg)
 # set_option(WITH_LIBUV           "Include LibUV support"                ON)
 # set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
 # set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
-set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
+# set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
 set_option(WITH_ZLIB            "Include zlib support"                 ON)
 set_option(WITH_OPENSSL         "Include OpenSSL support"              ON) #IF (OPENSSL_FOUND)
 set_option(WITH_FFMPEG          "Include FFmpeg support"               OFF) #ON IF (FFmpeg_FOUND)
@@ -220,15 +220,7 @@ set_option(WITH_POCO            "Include Poco support"                 OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # Build dependencies
-
-# Include libuv dependency
-# set(BUILD_TESTS OFF) # don't build libuv tests
-set(LIB_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
-set(BIN_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
-set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
 add_vendor_dependency(LIBUV libuv)
-#set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname})
-
 if(WITH_ZLIB)
   add_vendor_dependency(ZLIB zlib)
   add_vendor_dependency(MINIZIP minizip)
@@ -239,6 +231,24 @@ endif()
 add_vendor_dependency(HTTPPARSER http_parser)
 
 # External dependencies
+if(WITH_WEBRTC)
+  find_dependency(WebRTC REQUIRED)
+
+  # We will be building with BoringSSL instead of OpenSSL
+  set(WITH_OPENSSL OFF)
+  set(HAVE_OPENSSL ON)
+  set(OPENSSL_IS_BORINGSSL ON)
+  unset(OPENSSL_INCLUDE_DIR CACHE)
+  unset(LIB_EAY_DEBUG CACHE)
+  unset(LIB_EAY_RELEASE CACHE)
+  unset(SSL_EAY_DEBUG CACHE)
+  unset(SSL_EAY_RELEASE CACHE)
+  find_path(OPENSSL_INCLUDE_DIR
+    NAMES openssl/ssl.h
+    PATHS ${WEBRTC_ROOT_DIR}/third_party/boringssl/src/include
+    NO_DEFAULT_PATH)
+  list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
+endif()
 if(WITH_OPENSSL)
   find_dependency(OpenSSL REQUIRED)
 endif()
@@ -247,9 +257,6 @@ if(WITH_FFMPEG)
 endif()
 if(WITH_OPENCV)
   find_dependency(OpenCV REQUIRED)
-endif()
-if(WITH_WEBRTC)
-  find_dependency(WebRTC REQUIRED)
 endif()
 if(WITH_POCO)
   find_dependency(Poco REQUIRED Util XML CppParser Foundation)

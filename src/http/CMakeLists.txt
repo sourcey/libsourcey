@@ -7,7 +7,7 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_http))
   #add_subdirectory(vendor/http_parser)
   #set(HAVE_HTTPPARSER 1)
 
-  include_dependency(OpenSSL REQUIRED)
+  #include_dependency(OpenSSL REQUIRED)
   #include_dependency(LibUV)
   #include_dependency(HttpParser)
 
