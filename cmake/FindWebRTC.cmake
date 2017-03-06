@@ -133,21 +133,10 @@ if(WEBRTC_INCLUDE_DIR)
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")
   endif()
 
- message(STATUS "- Found external dependency: ${WEBRTC_DEPENDENCIES}")
- message(STATUS "- Found external dependency: ${LibSourcey_INCLUDE_LIBRARIES}")
-
   # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   # select_library_configurations(WEBRTC)
   # message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
-
-  # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
-  # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
-  # Setting PARENT_SCOPE fixes this solves theis issue for now.
-  set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
-  set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
 endif()
-
-# print_module_variables(WEBRTC)
 
 # ----------------------------------------------------------------------
 # Display status
@@ -158,6 +147,15 @@ if(WEBRTC_LIBRARY)
 else()
   find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
 endif()
+
+# HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
+# while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
+# Setting PARENT_SCOPE fixes this solves theis issue for now.
+set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
+set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
+set(WEBRTC_FOUND ${WEBRTC_FOUND} PARENT_SCOPE)
+
+# print_module_variables(WEBRTC)
 
 mark_as_advanced(WEBRTC_LIBRARIES WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR
                  WEBRTC_LIBRARIES_DEBUG WEBRTC_LIBRARIES_RELEASE
