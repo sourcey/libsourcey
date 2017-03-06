@@ -204,8 +204,8 @@ public:
     // WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response&
     // response);
 
-    virtual int send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
-    virtual int send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual std::size_t send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual std::size_t send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
 
     virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);
 
@@ -285,7 +285,7 @@ public:
     ConnectionAdapter(Connection* connection, ws::Mode mode);
     virtual ~ConnectionAdapter();
 
-    // virtual int sendHeader();
+    // virtual std::size_t sendHeader();
 
     virtual void onHandshakeComplete();
 

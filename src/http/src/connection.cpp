@@ -44,7 +44,7 @@ Connection::~Connection()
 }
 
 
-int Connection::send(const char* data, std::size_t len, int flags)
+std::size_t Connection::send(const char* data, std::size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
     assert(!_closed);
@@ -55,7 +55,7 @@ int Connection::send(const char* data, std::size_t len, int flags)
 }
 
 
-int Connection::sendHeader()
+std::size_t Connection::sendHeader()
 {
     if (!_shouldSendHeader)
         return 0;
@@ -237,7 +237,7 @@ ConnectionAdapter::~ConnectionAdapter()
 }
 
 
-int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
+std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
 
@@ -420,7 +420,7 @@ ConnectionStream::~ConnectionStream()
 }
 
 
-int ConnectionStream::send(const char* data, std::size_t len, int flags)
+std::size_t ConnectionStream::send(const char* data, std::size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
 

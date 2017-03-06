@@ -187,8 +187,8 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
 }
 
 
-int UDPAllocation::send(const char* data, std::size_t size,
-                        const net::Address& peerAddress)
+std::size_t UDPAllocation::send(const char* data, std::size_t size,
+                                const net::Address& peerAddress)
 {
     updateUsage(size);
 
@@ -198,7 +198,7 @@ int UDPAllocation::send(const char* data, std::size_t size,
         return -1;
     }
 
-    return _relaySocket./*base().*/ send(data, size, peerAddress);
+    return _relaySocket.send(data, size, peerAddress);
 }
 
 
@@ -207,8 +207,9 @@ net::Address UDPAllocation::relayedAddress() const
    
     return _relaySocket.address();
 }
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 /// @\}

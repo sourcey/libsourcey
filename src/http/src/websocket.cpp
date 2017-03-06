@@ -92,13 +92,13 @@ bool WebSocketAdapter::shutdown(std::uint16_t statusCode, const std::string& sta
 }
 
 
-int WebSocketAdapter::send(const char* data, std::size_t len, int flags)
+std::size_t WebSocketAdapter::send(const char* data, std::size_t len, int flags)
 {
     return send(data, len, socket->peerAddress(), flags);
 }
 
 
-int WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags)
+std::size_t WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags)
 {
     // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(framer.handshakeComplete());

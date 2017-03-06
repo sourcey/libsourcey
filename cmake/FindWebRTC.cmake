@@ -45,10 +45,8 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
-  #set(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}")
-  #set(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}")
-  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" DIRECTORY)
-  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" DIRECTORY)
+  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" ABSOLUTE)
+  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" ABSOLUTE)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC
@@ -134,6 +132,9 @@ if(WEBRTC_INCLUDE_DIR)
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")
   endif()
+
+ message(STATUS "- Found external dependency: ${WEBRTC_DEPENDENCIES}")
+ message(STATUS "- Found external dependency: ${LibSourcey_INCLUDE_LIBRARIES}")
 
   # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   # select_library_configurations(WEBRTC)

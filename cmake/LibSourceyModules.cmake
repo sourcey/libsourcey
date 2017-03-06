@@ -147,6 +147,11 @@ macro(define_sourcey_module_sample name)
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
 
+  message(STATUS "Including module sample ${name}")
+  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+
   add_executable(${name} ${lib_srcs} ${lib_hdrs})
 
   # Include library and header directories
@@ -154,11 +159,6 @@ macro(define_sourcey_module_sample name)
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
-
-  message(STATUS "Including module sample ${name}")
-  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "samples")

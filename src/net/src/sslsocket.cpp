@@ -84,13 +84,13 @@ bool SSLSocket::shutdown()
 }
 
 
-int SSLSocket::send(const char* data, std::size_t len, int flags)
+std::size_t SSLSocket::send(const char* data, std::size_t len, int flags)
 {
     return send(data, len, peerAddress(), flags);
 }
 
 
-int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
+std::size_t SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << endl;
     assert(Thread::currentID() == tid());

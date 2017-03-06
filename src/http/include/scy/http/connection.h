@@ -43,10 +43,10 @@ public:
     virtual void onClose() = 0;
 
     /// Send raw data to the peer.
-    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
 
     /// Send the outdoing HTTP header.
-    virtual int sendHeader();
+    virtual std::size_t sendHeader();
 
     /// Close the connection and schedule the object for
     /// deferred deletion.
@@ -125,7 +125,7 @@ public:
     ConnectionAdapter(Connection* connection, http_parser_type type);
     virtual ~ConnectionAdapter();
 
-    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
 
     Parser& parser();
     Connection* connection();
@@ -196,7 +196,7 @@ public:
     virtual ~ConnectionStream();
 
     /// Send data via the Outgoing stream.
-    int send(const char* data, std::size_t len, int flags = 0);
+    std::size_t send(const char* data, std::size_t len, int flags = 0);
 
     /// Return a reference to the underlying connection.
     Connection::Ptr connection();

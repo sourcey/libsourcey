@@ -41,7 +41,7 @@ public:
     bool handleRequest(Request& request);
     void handleSendIndication(Request& request);
 
-    int send(const char* data, std::size_t size,
+    std::size_t send(const char* data, std::size_t size,
              const net::Address& peerAddress);
 
     net::Address relayedAddress() const;

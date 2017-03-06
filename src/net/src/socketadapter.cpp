@@ -48,7 +48,7 @@ SocketAdapter::~SocketAdapter()
 }
 
 
-int SocketAdapter::send(const char* data, std::size_t len, int flags)
+std::size_t SocketAdapter::send(const char* data, std::size_t len, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
     if (!_sender)
@@ -57,7 +57,7 @@ int SocketAdapter::send(const char* data, std::size_t len, int flags)
 }
 
 
-int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
+std::size_t SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
     if (!_sender)
@@ -66,7 +66,7 @@ int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAd
 }
 
 
-int SocketAdapter::sendPacket(const IPacket& packet, int flags)
+std::size_t SocketAdapter::sendPacket(const IPacket& packet, int flags)
 {
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
@@ -83,7 +83,7 @@ int SocketAdapter::sendPacket(const IPacket& packet, int flags)
 }
 
 
-int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
+std::size_t SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
 {
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);

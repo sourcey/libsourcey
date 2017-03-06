@@ -1,10 +1,12 @@
 # TODO
 
 Double check WebRTC samples
+	- add some style to demos
+	- take some screenshots for README
 Describe how to build WebRTC for use with LibSourcey in README
 Improve av module documentation
-Fix libuv build script to use internal methods
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
+Fix deprecated ICE code
 
 
 # Tests
