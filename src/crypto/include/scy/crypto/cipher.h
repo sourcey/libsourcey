@@ -15,9 +15,11 @@
 
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
-#include <cstdint>
 
 #include <openssl/evp.h>
+
+#include <cstdint>
+#include <assert.h>
 
 
 namespace scy {
