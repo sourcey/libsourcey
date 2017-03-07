@@ -149,7 +149,7 @@ public:
         _slots.push_back(slot);
         //_slots.sort(Slot::ComparePrioroty);
         std::sort(_slots.begin(), _slots.end(),
-            [](SlotPtr const& l, SlotPtr const& r) { 
+            [](SlotPtr const& l, SlotPtr const& r) {
                 return l->priority > r->priority; });
         return slot->id;
     }
@@ -266,7 +266,7 @@ public:
     }
 
     /// Assignment operator
-    Signal& Signal::operator = (const Signal& r)
+    Signal& operator = (const Signal& r)
     {
         if (&r != this) {
             _slots = r._slots;
