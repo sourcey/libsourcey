@@ -136,25 +136,33 @@ void SocketAdapter::onSocketClose(Socket& socket)
 }
 
 
-void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
+void SocketAdapter::setSender(SocketAdapter* adapter) //, bool freeExisting
 {
     assert(adapter != this);
     if (_sender == adapter)
         return;
-    if (_sender && freeExisting)
-        delete _sender;
+    //if (_sender && freeExisting)
+    //    delete _sender;
     _sender = adapter;
 }
 
 
-void SocketAdapter::setReceiver(SocketAdapter* adapter, bool freeExisting)
+void SocketAdapter::setReceiver(SocketAdapter* adapter) //, bool freeExisting
 {
     assert(adapter != this);
     if (_receiver == adapter)
         return;
-    if (_receiver && freeExisting)
-        delete _receiver;
+    //if (_receiver && freeExisting)
+    //    delete _receiver;
     _receiver = adapter;
+}
+
+
+void SocketAdapter::removeReceiver(SocketAdapter* adapter)
+{
+    assert(adapter != this);
+    if (_receiver == adapter)
+        _receiver = nullptr;
 }
 
 
@@ -170,10 +178,10 @@ SocketAdapter* SocketAdapter::receiver()
 }
 
 
+#if 0
 //
 // SocketSignalAdapter
 //
-
 
 
 SocketSignalAdapter::SocketSignalAdapter(SocketAdapter* sender, SocketAdapter* receiver)
@@ -244,6 +252,7 @@ void SocketSignalAdapter::onSocketClose(Socket& socket)
     else
         Close.emit(socket);
 }
+#endif
 
 
 } // namespace net

@@ -8,7 +8,9 @@
 /// @addtogroup net
 /// @{
 
+
 #include "scy/net/packetsocket.h"
+
 
 using std::endl;
 
@@ -23,7 +25,7 @@ namespace net {
 
 
 PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
-    : SocketSignalAdapter(socket.get()) //reinterpret_cast<SocketAdapter*>(socket.get())
+    : SocketAdapter(socket.get()) //reinterpret_cast<SocketAdapter*>(socket.get())
     , socket(socket)
 {
     // TraceS(this) << "Create: " << socket << endl;

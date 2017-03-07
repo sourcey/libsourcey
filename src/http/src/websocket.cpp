@@ -59,7 +59,7 @@ http::Response& WebSocket::response()
 WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
                                    ws::Mode mode, http::Request& request,
                                    http::Response& response)
-    : SocketSignalAdapter(socket.get())
+    : SignalSocket(socket) //.get()
     , socket(socket)
     , framer(mode)
     , _request(request)
@@ -67,7 +67,7 @@ WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
 {
     // TraceS(this) << "Create" << endl;
 
-    socket->addReceiver(this, 100);
+    // socket->addReceiver(this, 100);
 }
 
 
@@ -75,7 +75,7 @@ WebSocketAdapter::~WebSocketAdapter()
 {
     // TraceS(this) << "Destroy" << endl;
 
-    socket->removeReceiver(this);
+    // socket->removeReceiver(this);
 }
 
 

@@ -90,7 +90,6 @@ public:
 protected:
     virtual void init();
 
-    // std::unique_ptr<uv_connect_t> _connectReq;
     uv_connect_t* _connectReq;
     SocketMode _mode;
 };

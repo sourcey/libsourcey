@@ -71,14 +71,20 @@ public:
 
     /// Sets the pointer to the outgoing data adapter.
     /// Send methods proxy data to this adapter by default.
-    virtual void setSender(SocketAdapter* adapter, bool freeExisting = false);
+    virtual void setSender(SocketAdapter* adapter); //, bool freeExisting = false
 
     /// Returns the output SocketAdapter pointer
     SocketAdapter* sender();
 
     /// Sets the pointer to the incoming data adapter.
     /// Events proxy data to this adapter by default.
-    virtual void setReceiver(SocketAdapter* adapter, bool freeExisting = false);
+    virtual void setReceiver(SocketAdapter* adapter); //, bool freeExisting = false
+
+    /// Remove the given receiver.
+    ///
+    /// By default this function does nothing unless the given receiver 
+    /// matches the current receiver.
+    virtual void removeReceiver(SocketAdapter* adapter);
 
     /// Returns the input SocketAdapter pointer
     SocketAdapter* receiver();
@@ -106,6 +112,8 @@ protected:
 };
 
 
+
+#if 0
 /// SocketSignalAdapter extends the SocketAdapter to add signal callbacks.
 class SCY_EXTERN SocketSignalAdapter : public SocketAdapter
 {
@@ -144,8 +152,8 @@ protected:
     virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
     virtual void onSocketError(Socket& socket, const scy::Error& error);
     virtual void onSocketClose(Socket& socket);
-
 };
+#endif
 
 
 } // namespace net

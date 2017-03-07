@@ -44,7 +44,8 @@ Server::~Server()
 void Server::start()
 {
     _socket->AcceptConnection += slot(this, &Server::onClientSocketAccept);
-    _socket->Close += slot(this, &Server::onSocketClose);
+    // FIXME
+    //_socket->Close += slot(this, &Server::onSocketClose);
     _socket->bind(_address);
     _socket->listen(1000);
 
@@ -61,7 +62,7 @@ void Server::shutdown()
 
     if (_socket) {
         _socket->AcceptConnection -= slot(this, &Server::onClientSocketAccept);
-        _socket->Close -= slot(this, &Server::onSocketClose);
+        //_socket->Close -= slot(this, &Server::onSocketClose);
         _socket->close();
     }
 

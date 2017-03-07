@@ -19,22 +19,21 @@
 #include "scy/http/request.h"
 #include "scy/http/response.h"
 #include "scy/http/connection.h"
+#include "scy/net/signalsocket.h"
 #include "scy/net/socket.h"
-#include "scy/net/socketadapter.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/random.h"
 
 
 namespace scy {
 namespace http {
-//class SCY_EXTERN Connection;
 namespace ws {
 
 
 enum Mode
 {
-    ServerSide, ///< Server-side WebSocket.
-    ClientSide  ///< Client-side WebSocket.
+    ServerSide,  ///< Server-side WebSocket.
+    ClientSide   ///< Client-side WebSocket.
 };
 
 
@@ -93,8 +92,7 @@ enum StatusCodes
 /// to determine the exact cause of the error.
 enum ErrorCodes
 {
-    ErrorNoHandshake = 1, ///< No Connection: Upgrade or Upgrade: websocket
-                          ///header in handshake request.
+    ErrorNoHandshake = 1, ///< No Connection: Upgrade or Upgrade: websocket header in handshake request.
     ErrorHandshakeNoVersion = 2, ///< No Sec-WebSocket-Version header in handshake request.
     ErrorHandshakeUnsupportedVersion = 3, ///< Unsupported WebSocket version requested by client.
     ErrorHandshakeNoKey = 4, ///< No Sec-WebSocket-Key header in handshake request.
@@ -196,7 +194,7 @@ private:
 //
 
 
-class SCY_EXTERN WebSocketAdapter : public net::SocketSignalAdapter
+class SCY_EXTERN WebSocketAdapter : public net::SignalSocket
 {
 public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,

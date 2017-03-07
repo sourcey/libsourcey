@@ -38,7 +38,7 @@ inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 
 
 /// Socket is the base socket implementation from which all sockets derive.
-class SCY_EXTERN Socket : public SocketSignalAdapter
+class SCY_EXTERN Socket : public SocketAdapter
 {
 public:
     typedef std::shared_ptr<Socket> Ptr;

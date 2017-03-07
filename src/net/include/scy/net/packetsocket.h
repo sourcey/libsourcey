@@ -34,7 +34,7 @@ class SCY_EXTERN PacketSocket;
 //
 
 
-class SCY_EXTERN PacketSocketAdapter : public SocketSignalAdapter, public PacketSignal
+class SCY_EXTERN PacketSocketAdapter : public SocketAdapter, public PacketSignal
 {
 public:
     /// Pointer to the underlying socket.
