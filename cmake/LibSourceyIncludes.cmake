@@ -60,8 +60,8 @@ function(find_dependency name)
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
 
-    # NOTE: find_package does not always honour REQUIRED flag, so make 
-    # sure the build is cancelled if the dependency wasnt found. 
+    # NOTE: find_package does not always honour REQUIRED flag, so make
+    # sure the build is cancelled if the dependency wasnt found.
     if (${ARGN} MATCHES REQUIRED)
       message(FATAL_ERROR "Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
     else()

@@ -52,7 +52,10 @@ public:
         client.CreatePresence += slot(this, &TestClient::onCreatePresence);
     }
 
-    ~TestClient() { client.close(); }
+    ~TestClient()
+    {
+        client.close();
+    }
 
     void connect()
     {
@@ -218,6 +221,7 @@ bool openTestServer(Process& proc, bool install = true)
     std::cout << "server running: " << running << std::endl;
     return running;
 }
+
 
 } // namespace scy
 

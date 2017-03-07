@@ -163,6 +163,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
     return;
 
   default:
+    printf("closing uninitialized handle: %p\n", (void*) handle);
     assert(0);
   }
 

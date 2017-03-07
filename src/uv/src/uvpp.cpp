@@ -60,6 +60,16 @@ uv_handle_t* Handle::ptr() const
 }
 
 
+bool Handle::initialized()
+{
+    if (_ptr &&
+        _ptr->type > UV_UNKNOWN_HANDLE &&
+        _ptr->type < UV_HANDLE_TYPE_MAX)
+        return true;
+    return false;
+}
+
+
 bool Handle::active() const
 {
     return _ptr && uv_is_active(_ptr) != 0;
@@ -140,28 +150,24 @@ void Handle::close()
 {
     assertThread();
     if (_ptr) {
-        if (!_ptr->type) {
-            // If the handle hasn't been initialized don't call uv_close,
-            // just delete the pointer.
-            delete _ptr;
-            _ptr = nullptr;
-            _closed = true;
-
-            // No onClose event since the handle was never initialized.
-        }
-        else if (!_closed && !uv_is_closing(_ptr)) {
+        if (initialized() && !_closed && !uv_is_closing(_ptr)) {
             uv_close(_ptr, [](uv_handle_t* handle) {
                 delete handle;
             });
-
-            // We no longer know about the handle.
-            // The handle pointer will be deleted on afterClose.
-            _ptr = nullptr;
-            _closed = true;
-
-            // Call onClose to run final callbacks.
-            onClose();
         }
+        else {
+            // If the handle isn't initialized don't call uv_close,
+            // just delete the pointer.
+            delete _ptr;
+        }
+
+        // We no longer know about the handle.
+        // The handle pointer has been deleted or will be deleted by uv_close.
+        _ptr = nullptr;
+        _closed = true;
+
+        // Call onClose to run final callbacks.
+        onClose();
     }
 }
 
