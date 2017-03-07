@@ -114,7 +114,6 @@ protected:
     void onClientSocketAccept(const net::TCPSocket::Ptr& socket);
     void onConnectionReady(ServerConnection& conn);
     void onConnectionClose(ServerConnection& conn);
-    void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     void onSocketClose(net::Socket& socket);
     void onTimer();
 
@@ -124,7 +123,6 @@ protected:
     Timer _timer;
     ServerConnectionFactory* _factory;
     std::vector<ServerConnection::Ptr> _connections;
-    std::vector<net::TCPSocket::Ptr> _sockets; // FIXME
 
     friend class ServerConnection;
 };

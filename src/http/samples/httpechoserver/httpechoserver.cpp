@@ -9,13 +9,13 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-// #ifdef __unix__
+#ifdef SCY_UNIX
     // char cores_string[10];
     // sprintf(cores_string, "%d", 4); //std::thread::hardware_concurrency());
     int ncores = std::thread::hardware_concurrency();
     std::cout << "threadpool size: " << ncores << std::endl;
     setenv("UV_THREADPOOL_SIZE", std::to_string(ncores).c_str(), 1);
-// #endif
+#endif
 
     //Logger::instance().add(new NullChannel("null"));
     //Logger::instance().add(new ConsoleChannel("debug", LTrace));

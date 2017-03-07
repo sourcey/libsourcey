@@ -75,44 +75,11 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
     // TraceS(this) << "On accept socket connection" << endl;
 
-    // FIXME
-
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
-    //ServerConnection::Ptr conn1 = _factory->createConnection(*this, socket);
-    //ServerConnection::Ptr conn2 = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
     _connections.push_back(conn);
-
-    //socket->setReceiver(this);
-    //_sockets.push_back(socket);
-
-    // std::clock_t start = std::clock();
-    //new ServerConnection(*this, socket);
-    // ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
-    // conn->Close += slot(this, &Server::onConnectionClose);
-    // //std::cout << "create connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
-    // _connections.push_back(conn);
-    // std::cout << "create connection time 1: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
-
-void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
-{
-    //DebugL << "On recv: " << &socket << ": " << buffer.str() << std::endl;
-    // std::cout << "On recv: " << &socket << ": " << buffer.str() << std::endl;
-
-    // Echo it back
-    // socket.send(bufferCast<const char*>(buffer), buffer.size());
-
-    // Send a HTTP packet
-    std::ostringstream res;
-    res << "HTTP/1.1 200 OK\r\n"
-        << "Connection: close\r\n"
-        << "Content-Length: 0" << "\r\n"
-        << "\r\n";
-    std::string response(res.str());
-    socket.send(response.c_str(), response.size());
-}
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
@@ -130,13 +97,9 @@ void Server::onConnectionReady(ServerConnection& conn)
 void Server::onConnectionClose(ServerConnection& conn)
 {
     // TraceS(this) << "On connection closed" << endl;
-
-    // std::cout << "release connection: " << _connections.size() << std::endl;
-    // std::clock_t start = std::clock();
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
-            // std::cout << "release connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
             return;
         }
     }
@@ -146,23 +109,6 @@ void Server::onConnectionClose(ServerConnection& conn)
 void Server::onSocketClose(net::Socket& socket)
 {
     // TraceS(this) << "On server socket close" << endl;
-
-    // FIXME
-
-    // for (auto it = _sockets.begin(); it != _sockets.end(); ++it) {
-    //     if (it->get() == &socket) {
-    //         _sockets.erase(it);
-    //         //return;
-    //     }
-    // }
-    //
-    // // clean the connection that matches the closing socket
-    // for (auto it = _connections.begin(); it != _connections.end(); ++it) {
-    //     if (it->get()->socket().get() == &socket) {
-    //         _connections.erase(it);
-    //         //return;
-    //     }
-    // }
 }
 
 
@@ -213,19 +159,27 @@ void ServerConnection::onHeaders()
     // TraceS(this) << "On headers" << endl;
 
 #if 0
+    // Send a raw HTTP response
+    std::ostringstream res;
+    res << "HTTP/1.1 200 OK\r\n"
+        << "Connection: close\r\n"
+        << "Content-Length: 0" << "\r\n"
+        << "\r\n";
+    std::string response(res.str());
+    send.send(response.c_str(), response.size());
+
+    // Send a test HTTP response
     _response.add("Content-Length", "0");
     _response.add("Connection", "close"); // "keep-alive"
     sendHeader();
-    //send("hello universe", 14);
-    //close();
     return;
 #endif
 
     // Upgrade the connection if required
     _upgrade = reinterpret_cast<ConnectionAdapter*>(adapter())->parser().upgrade();
-    if (_upgrade) {
-        //util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
-        //util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+    if (_upgrade && util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+        // util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
+        // util::icompare(request().get("Upgrade", ""), "websocket") == 0
         // TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
 
         // Note: To upgrade the connection we need to replace the

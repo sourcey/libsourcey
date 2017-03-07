@@ -20,7 +20,7 @@ namespace scy {
 
 
 static Singleton<GarbageCollector> singleton;
-static const int GCTimerDelay = 2000;
+static const int GCTimerDelay = 100;
 
 
 GarbageCollector::GarbageCollector()
