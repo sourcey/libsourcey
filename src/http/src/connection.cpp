@@ -95,11 +95,8 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 {
     // TraceS(this) << "Replace adapter: " << adapter << endl;
 
+    // Detach the old adapter form all callbacks
     if (_adapter) {
-        // Detach the old adapter form all callbacks.
-        // _socket->removeReceiver(_adapter);
-        // _adapter->removeReceiver(this);
-        // _adapter->setSender(nullptr);
         _socket->setReceiver(nullptr);
         _adapter->setReceiver(nullptr);
         _adapter->setSender(nullptr);
@@ -109,14 +106,13 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter = nullptr;
     }
 
+    // Setup the data flow: Connection <-> ConnectionAdapter <-> Socket
     if (adapter) {
-        // Setup the data flow: Connection <-> ConnectionAdapter <-> Socket
-        // adapter->addReceiver(this);
         adapter->setReceiver(this);
         adapter->setSender(_socket.get());
 
         // Attach the ConnectionAdapter to receive Socket callbacks.
-        // The given adapter will process raw packets into HTTP or 
+        // The given adapter will process raw packets into HTTP or
         // WebSocket frames depending on the adapter type.
         _socket->setReceiver(adapter);
         _adapter = adapter;
@@ -293,19 +289,6 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
     // Parse incoming HTTP messages
     _parser.parse(bufferCast<const char*>(buf), buf.size());
 }
-
-
-//void ConnectionAdapter::setReceiver1(net::SocketAdapter* adapter)
-//{
-//    assert(0);
-//    // Set the parent connection instance to null
-//    //if (_connection &&
-//    //    _connection == adapter)
-//    if (adapter == nullptr)
-//        _connection = nullptr;
-//
-//    net::SocketAdapter::setReceiver(adapter);
-//}
 
 
 //

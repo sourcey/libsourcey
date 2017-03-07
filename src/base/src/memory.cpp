@@ -23,11 +23,10 @@ static Singleton<GarbageCollector> singleton;
 static const int GCTimerDelay = 2000;
 
 
-
 GarbageCollector::GarbageCollector()
     : _tid(std::this_thread::get_id())
 {
-    TraceL << "Create" << std::endl;
+    // TraceL << "Create" << std::endl;
 }
 
 
@@ -116,7 +115,7 @@ GarbageCollector::Cleaner::Cleaner(uv::Loop* loop)
     , _loop(loop)
     , _finalize(false)
 {
-    TraceL << "Create: " << loop << std::endl;
+    // TraceL << "Create: " << loop << std::endl;
 }
 
 
@@ -157,9 +156,9 @@ void GarbageCollector::Cleaner::work()
     {
         std::lock_guard<std::mutex> guard(_mutex);
         if (!_ready.empty() || !_pending.empty()) {
-            TraceL << "Deleting: "
-                << "ready=" << _ready.size() << ", "
-                << "pending=" << _pending.size() << std::endl;
+            // TraceL << "Deleting: "
+            //     << "ready=" << _ready.size() << ", "
+            //     << "pending=" << _pending.size() << std::endl;
 
             // Delete waiting pointers
             deletable = _ready;
@@ -180,7 +179,7 @@ void GarbageCollector::Cleaner::work()
             // Stop the timer handle allowing the finalize() method to return.
             _timer.stop();
 
-            TraceL << "Finalization complete: " << _loop->active_handles << std::endl;
+            // TraceL << "Finalization complete: " << _loop->active_handles << std::endl;
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left (our timer)
             uv_walk(_loop, [](uv_handle_t* handle, void* /* arg */) {

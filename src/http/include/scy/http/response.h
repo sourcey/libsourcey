@@ -139,6 +139,9 @@ public:
     /// Writes the HTTP response headers to the given output stream.
     void write(std::ostream& ostr) const;
 
+    /// Writes the HTTP response headers to the given output string.
+    void write(std::string& str) const;
+
     /// Returns true if the HTTP response code was successful (>= 400).
     virtual bool success() const;
 

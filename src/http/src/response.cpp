@@ -125,6 +125,19 @@ void Response::write(std::ostream& ostr) const
 }
 
 
+void Response::write(std::string& str) const
+{
+    str.append(_version);
+    str.append(" ");
+    str.append(std::to_string(int(_status)));
+    str.append(" ");
+    str.append(_reason);
+    str.append("\r\n");
+    http::Message::write(str);
+    str.append("\r\n");
+}
+
+
 bool Response::success() const
 {
     return getStatus() < StatusCode::BadRequest; // < 400

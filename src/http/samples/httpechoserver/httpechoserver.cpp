@@ -14,9 +14,10 @@ int main(int argc, char** argv)
     //Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
+        //raiseBenchmarkServer();
         //runMulticoreBenchmarkServers();
         //runMulticoreEchoServers();
-        //libuv::raiseBenchmarkServer();
+        //rlibuv::raiseBenchmarkServer();
 
         // NOTE: For best performance the HTTP server should be compiled on
         // Linux kernel 3.9 or newer in RELEASE mode with ENABLE_LOGGING=OFF

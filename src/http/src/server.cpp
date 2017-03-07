@@ -193,11 +193,11 @@ void ServerConnection::onHeaders()
         wsAdapter->onSocketRecv(*socket().get(), mutableBuffer(buffer), socket()->peerAddress());
     }
 
-    _server.onConnectionReady(*this);
-
     // Upgraded connections don't receive the onHeaders callback
     //if (!_upgrade)
     //    _responder->onHeaders(_request);
+
+    _server.onConnectionReady(*this);
 }
 
 

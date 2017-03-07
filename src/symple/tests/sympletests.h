@@ -129,7 +129,7 @@ public:
                 break;
             case sockio::ClientState::Connected:
                 break;
-            case sockio::ClientState::Online: {
+            case sockio::ClientState::Online:
                 gotOnline = true;
 
                 // Join the test room when online
@@ -139,7 +139,7 @@ public:
                 // smpl::Message m;
                 // m.setData("olay");
                 // client.send(m, true);
-            } break;
+                break;
             case sockio::ClientState::Error:
                 assert(0);
                 break;
@@ -188,6 +188,7 @@ bool installTestServerSync()
 // Helper to raise a test Symple server
 bool openTestServer(Process& proc, bool install = true)
 {
+    // Try to npm install the nodejs server
     if (install) {
         try {
             installTestServerSync();
@@ -198,7 +199,7 @@ bool openTestServer(Process& proc, bool install = true)
         }
     }
 
-    // Run the server
+    // Run the nodejs server
     bool running = false, exited = false;
     setTestServerCwd(proc.cwd);
     proc.args = { "node", "server.js" };

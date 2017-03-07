@@ -28,9 +28,6 @@ SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
     // TraceS(this) << "Create" << endl;
     assert(sender != this);
     assert(receiver != this);
-
-    //if (receiver)
-    //    addReceiver(receiver);
 }
 
 
@@ -180,7 +177,7 @@ SocketAdapter* SocketAdapter::receiver()
 
 
 SocketSignalAdapter::SocketSignalAdapter(SocketAdapter* sender, SocketAdapter* receiver)
-    : SocketSignalAdapter(sender, receiver)
+    : SocketAdapter(sender, receiver)
 {
 }
 
