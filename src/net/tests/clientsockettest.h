@@ -8,7 +8,8 @@ namespace scy {
 namespace net {
 
 
-template <typename SocketT> class ClientSocketTest
+template <typename SocketT>
+class ClientSocketTest : public SocketAdapter
 {
 public:
     SocketT socket;
@@ -33,26 +34,25 @@ public:
         // Create the socket instance on the stack.
         // When the socket is closed it will unref the main loop
         // causing the test to complete successfully.
-        socket.Recv += slot(this, &ClientSocketTest::onRecv);
-        socket.Connect += slot(this, &ClientSocketTest::onConnect);
-        socket.Error += slot(this, &ClientSocketTest::onError);
-        socket.Close += slot(this, &ClientSocketTest::onClose);
+        // socket.Recv += slot(this, &ClientSocketTest::onRecv);
+        // socket.Connect += slot(this, &ClientSocketTest::onConnect);
+        // socket.Error += slot(this, &ClientSocketTest::onError);
+        // socket.Close += slot(this, &ClientSocketTest::onClose);
         // assert(socket.base().refCount() == 1);
+        socket.setReceiver(this);
         socket.connect(address);
     }
 
     void stop()
     {
+        socket.removeReceiver(this);
         socket.close();
         //socket.shutdown();
     }
 
     void onConnect(Socket& sock)
     {
-        // assert(sender == &socket);
-        // socket.send("client > server", 15);
-        // socket.send("client > server", 15);
-        TraceL << "Connected" << std::endl;
+        DebugL << "Connected" << std::endl;
 
         sock.send("client > server", 15);
     }

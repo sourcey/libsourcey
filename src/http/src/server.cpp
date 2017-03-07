@@ -43,9 +43,8 @@ Server::~Server()
 
 void Server::start()
 {
+    _socket->setReceiver(this);
     _socket->AcceptConnection += slot(this, &Server::onClientSocketAccept);
-    // FIXME
-    //_socket->Close += slot(this, &Server::onSocketClose);
     _socket->bind(_address);
     _socket->listen(1000);
 
@@ -61,8 +60,8 @@ void Server::shutdown()
     // TraceS(this) << "Shutdown" << endl;
 
     if (_socket) {
+        _socket->removeReceiver(this);
         _socket->AcceptConnection -= slot(this, &Server::onClientSocketAccept);
-        //_socket->Close -= slot(this, &Server::onSocketClose);
         _socket->close();
     }
 
@@ -76,15 +75,44 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
     // TraceS(this) << "On accept socket connection" << endl;
 
-    // std::clock_t start = std::clock();
-    ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
-    conn->Close += slot(this, &Server::onConnectionClose);
-    //std::cout << "create connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
+    // FIXME
 
+    ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
+    //ServerConnection::Ptr conn1 = _factory->createConnection(*this, socket);
+    //ServerConnection::Ptr conn2 = _factory->createConnection(*this, socket);
+    conn->Close += slot(this, &Server::onConnectionClose);
     _connections.push_back(conn);
+
+    //socket->setReceiver(this);
+    //_sockets.push_back(socket);
+
+    // std::clock_t start = std::clock();
+    //new ServerConnection(*this, socket);
+    // ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
+    // conn->Close += slot(this, &Server::onConnectionClose);
+    // //std::cout << "create connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
+    // _connections.push_back(conn);
     // std::cout << "create connection time 1: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
+
+void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
+{
+    //DebugL << "On recv: " << &socket << ": " << buffer.str() << std::endl;
+    // std::cout << "On recv: " << &socket << ": " << buffer.str() << std::endl;
+
+    // Echo it back
+    // socket.send(bufferCast<const char*>(buffer), buffer.size());
+
+    // Send a HTTP packet
+    std::ostringstream res;
+    res << "HTTP/1.1 200 OK\r\n"
+        << "Connection: close\r\n"
+        << "Content-Length: 0" << "\r\n"
+        << "\r\n";
+    std::string response(res.str());
+    socket.send(response.c_str(), response.size());
+}
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
@@ -103,21 +131,38 @@ void Server::onConnectionClose(ServerConnection& conn)
 {
     // TraceS(this) << "On connection closed" << endl;
 
-    //std::cout << "release connection: " << _connections.size() << std::endl;
-    //std::clock_t start = std::clock();
+    // std::cout << "release connection: " << _connections.size() << std::endl;
+    // std::clock_t start = std::clock();
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
-            //std::cout << "release connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
+            // std::cout << "release connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
             return;
         }
     }
 }
 
 
-void Server::onSocketClose(net::Socket&)
+void Server::onSocketClose(net::Socket& socket)
 {
     // TraceS(this) << "On server socket close" << endl;
+
+    // FIXME
+
+    // for (auto it = _sockets.begin(); it != _sockets.end(); ++it) {
+    //     if (it->get() == &socket) {
+    //         _sockets.erase(it);
+    //         //return;
+    //     }
+    // }
+    //
+    // // clean the connection that matches the closing socket
+    // for (auto it = _connections.begin(); it != _connections.end(); ++it) {
+    //     if (it->get()->socket().get() == &socket) {
+    //         _connections.erase(it);
+    //         //return;
+    //     }
+    // }
 }
 
 
@@ -146,7 +191,6 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     , _upgrade(false)
 {
     // TraceS(this) << "Create" << endl;
-
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));
 }
 
@@ -154,6 +198,7 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
 ServerConnection::~ServerConnection()
 {
     // TraceS(this) << "Destroy" << endl;
+    close(); // FIXME
 }
 
 
@@ -169,8 +214,7 @@ void ServerConnection::onHeaders()
 
 #if 0
     _response.add("Content-Length", "0");
-    _response.add("Connection", "close");
-    //_response.add("Connection", "keep-alive");
+    _response.add("Connection", "close"); // "keep-alive"
     sendHeader();
     //send("hello universe", 14);
     //close();

@@ -40,7 +40,9 @@ Connection::~Connection()
 {
     // TraceS(this) << "Destroy" << endl;
     replaceAdapter(nullptr);
-    close();
+
+    // NOTE: Call close from impl to avoid pure virtual
+    // close();
 }
 
 
@@ -79,7 +81,6 @@ std::size_t Connection::sendHeader()
 void Connection::close()
 {
     // TraceS(this) << "Close: " << _closed << endl;
-
     if (_closed)
         return;
     _closed = true;
@@ -101,8 +102,10 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->setReceiver(nullptr);
         _adapter->setSender(nullptr);
 
+        // FIXME
         // TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
-        deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
+        //deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
+        delete _adapter;
         _adapter = nullptr;
     }
 
@@ -275,6 +278,27 @@ std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags
 void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& buf, const net::Address&)
 {
     // TraceS(this) << "On socket recv: " << buf.size() << endl;
+
+    // // Send a HTTP packet
+    // std::ostringstream res;
+    // res << "HTTP/1.1 200 OK\r\n"
+    //     << "Connection: close\r\n"
+    //     << "Content-Length: 0" << "\r\n"
+    //     << "\r\n";
+    // std::string response(res.str());
+    // socket.send(response.c_str(), response.size());
+    // return;
+    //
+    //
+    // // FIXME
+    // _connection->response().add("Content-Length", "0");
+    // _connection->response().add("Connection", "close");
+    // //_response.add("Connection", "keep-alive");
+    // _connection->sendHeader();
+    // //send("hello universe", 14);
+    // //close();
+    // //std::cout << "boom" << std::endl;
+    // return;
 
     if (_parser.complete()) {
         // Buggy HTTP servers might send late data or multiple responses,

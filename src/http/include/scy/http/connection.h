@@ -70,7 +70,7 @@ public:
 
     /// Assign the new ConnectionAdapter and setup the chain
     /// The flow is: Connection <-> ConnectionAdapter <-> Socket
-    void replaceAdapter(net::SocketAdapter* adapter);
+    virtual void replaceAdapter(net::SocketAdapter* adapter);
 
     /// Return the underlying socket pointer.
     net::TCPSocket::Ptr& socket();

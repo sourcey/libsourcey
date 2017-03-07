@@ -15,11 +15,13 @@ public:
     UDPEchoServer()
         : server(std::make_shared<UDPSocket>())
     {
-        server->addReceiver(this);
+        // server->addReceiver(this);
+        server->setReceiver(this);
     }
 
     virtual ~UDPEchoServer()
     {
+        // server->removeReceiver(this);
         server->removeReceiver(this);
         shutdown();
     }
@@ -29,30 +31,29 @@ public:
         server->bind(Address(host, port));
     }
 
-    void shutdown() 
-    { 
+    void shutdown()
+    {
         server->close();
     }
 
-    void onSocketRecv(const MutableBuffer& buffer,
-                      const net::Address& peerAddress)
+    void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
     {
         DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
 
-#if 0        
+#if 0
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() < 12) {
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugL << "Recv latency packet from " << peerAddress << ": " 
-                << "payload=" << payload.length() << ", " 
-                << "latency=" << latency 
+            DebugL << "Recv latency packet from " << peerAddress << ": "
+                << "payload=" << payload.length() << ", "
+                << "latency=" << latency
                 << std::endl;
         }
 #endif
-        /// Echo back to client
+        // Echo back to client
         server->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
     }
 
@@ -61,9 +62,9 @@ public:
         ErrorL << "On error: " << error.message << std::endl;
     }
 
-    void onSocketClose() 
-    { 
-        DebugL << "On close" << std::endl; 
+    void onSocketClose()
+    {
+        DebugL << "On close" << std::endl;
     }
 };
 
