@@ -16,7 +16,7 @@
 #include "scy/base.h"
 #include "scy/logger.h"
 #include "scy/net/socket.h"
-#include "scy/net/socketadapter.h"
+#include "scy/net/socketemitter.h"
 #include "scy/packetfactory.h"
 #include "scy/packetsignal.h"
 
@@ -25,31 +25,24 @@ namespace scy {
 namespace net {
 
 
-struct PacketInfo;
-class SCY_EXTERN PacketSocket;
-
-
 //
-// Packet Socket Adapter
+// Packet Socket Emitter
 //
 
 
-class SCY_EXTERN PacketSocketAdapter : public SocketAdapter, public PacketSignal
+class SCY_EXTERN PacketSocketEmitter : public SocketEmitter, public PacketSignal
 {
 public:
-    /// Pointer to the underlying socket.
-    /// Sent data will be proxied to this socket.
-    Socket::Ptr socket;
-
+    /// The packet factory.
     PacketFactory factory;
 
-    /// Creates the PacketSocketAdapter
+    /// Creates the PacketSocketEmitter
     /// This class should have a higher priority than standard
     /// sockets so we can parse data packets first.
     /// Creates and dispatches a packet utilizing the available
     /// creation strategies. For best performance the most used
     /// strategies should have the highest priority.
-    PacketSocketAdapter(const Socket::Ptr& socket = nullptr);
+    PacketSocketEmitter(const Socket::Ptr& socket = nullptr);
 
     virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
 
@@ -63,13 +56,13 @@ public:
 //
 
 
-class SCY_EXTERN PacketSocket: public PacketSocketAdapter
+class SCY_EXTERN PacketSocket: public PacketSocketEmitter
 {
 public:
     PacketSocket(Socket* socket);
     //PacketSocket(Socket* base, bool shared = false);
-    virtual ~PacketSocket();    /// Returns the PacketSocketAdapter for this socket.
-    //PacketSocketAdapter& adapter() const;
+    virtual ~PacketSocket();    /// Returns the PacketSocketEmitter for this socket.
+    //PacketSocketEmitter& adapter() const;
 
     /// Compatibility method for PacketSignal delegates.
     //virtual void send(IPacket& packet);

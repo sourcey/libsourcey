@@ -59,7 +59,7 @@ http::Response& WebSocket::response()
 WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
                                    ws::Mode mode, http::Request& request,
                                    http::Response& response)
-    : SignalSocket(socket) //.get()
+    : SocketEmitter(socket) //.get()
     , socket(socket)
     , framer(mode)
     , _request(request)

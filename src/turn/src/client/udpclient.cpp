@@ -21,11 +21,9 @@ namespace turn {
 
 
 UDPClient::UDPClient(ClientObserver& observer, const Options& options)
-    : Client(observer, options)
+    : Client(observer, options, net::makeSocket<net::UDPSocket>())
 {
     TraceL << "Create" << endl;
-
-    _socket = net::makeSocket<net::UDPSocket>();
 }
 
 

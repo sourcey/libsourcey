@@ -29,12 +29,13 @@ public:
     {
         DebugS(this) << id << ": Creating" << endl;
 
-        socket.addReceiver(this);
+        socket.setReceiver(this);
     }
 
     virtual ~TCPResponder()
     {
         DebugS(this) << id << ": Destroying" << endl;
+        socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)

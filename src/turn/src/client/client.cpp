@@ -29,10 +29,10 @@ namespace scy {
 namespace turn {
 
 
-Client::Client(ClientObserver& observer, const Options& options)
+Client::Client(ClientObserver& observer, const Options& options, const net::Socket::Ptr& socket)
     : _observer(observer)
     , _options(options)
-    , _socket(nullptr)
+    , _socket(socket)
 {
 }
 
@@ -52,15 +52,15 @@ void Client::initiate()
 
     assert(!_permissions.empty() && "must set permissions");
 
-    auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.get());
+    auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.impl.get());
     if (udpSocket) {
         udpSocket->bind(net::Address("0.0.0.0", 0));
         // udpSocket->setBroadcast(true);
     }
 
-    _socket->Recv += slot(this, &Client::onSocketRecv, -1, -1);
-    _socket->Connect += slot(this, &Client::onSocketConnect);
-    _socket->Close += slot(this, &Client::onSocketClose);
+    _socket.Recv += slot(this, &Client::onSocketRecv, -1, -1);
+    _socket.Connect += slot(this, &Client::onSocketConnect);
+    _socket.Close += slot(this, &Client::onSocketClose);
     _socket->connect(_options.serverAddr);
 }
 
@@ -78,10 +78,10 @@ void Client::shutdown()
             it = _transactions.erase(it);
         }
 
-        _socket->Connect -= slot(this, &Client::onSocketConnect);
-        _socket->Recv -= slot(this, &Client::onSocketRecv);
+        _socket.Connect -= slot(this, &Client::onSocketConnect);
+        _socket.Recv -= slot(this, &Client::onSocketRecv);
         //_socket->Error -= slot(this, &Client::onSocketError);
-        _socket->Close -= slot(this, &Client::onSocketClose);
+        _socket.Close -= slot(this, &Client::onSocketClose);
         if (!_socket->closed()) {
             _socket->close();
         }
@@ -131,7 +131,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
 
 void Client::onSocketClose(net::Socket& socket)
 {
-    assert(&socket == _socket.get());
+    assert(&socket == _socket.impl.get());
     TraceL << "Control socket closed" << endl;
     assert(_socket->closed());
     shutdown();
@@ -279,7 +279,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
     // socket = socket ? socket : _socket;
     // assert(socket && !socket->isNull());
     auto transaction = new stun::Transaction(
-        socket ? socket : _socket, _options.serverAddr, _options.timeout, 1);
+        socket ? socket : _socket.impl, _options.serverAddr, _options.timeout, 1);
     transaction->StateChange += slot(this, &Client::onTransactionProgress);
     _transactions.push_back(transaction);
     return transaction;

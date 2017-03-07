@@ -36,7 +36,7 @@ class SCY_EXTERN Socket;
 ///
 /// This class also be extended to implement custom processing
 /// for received socket data before it is dispatched to the application
-/// (see PacketSocketAdapter and Transaction classes).
+/// (see PacketSocketEmitter and Transaction classes).
 class SCY_EXTERN SocketAdapter
 {
 public:

@@ -25,30 +25,32 @@ namespace net {
 /// types emitted from a Socket.
 template <class PacketT>
 class SCY_EXTERN Transaction : public PacketTransaction<PacketT>,
-                               public PacketSocketAdapter
+                               public PacketSocketEmitter
 {
 public:
-	  typedef PacketTransaction<PacketT> BaseT;
+	typedef PacketTransaction<PacketT> BaseT;
 
     Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
                 int timeout = 10000, int retries = 1,
                 uv::Loop* loop = uv::defaultLoop())
         : PacketTransaction<PacketT>(timeout, retries, loop)
-        , PacketSocketAdapter(socket)
+        , PacketSocketEmitter(socket)
         , _peerAddress(peerAddress)
     {
         TraceS(this) << "Create" << std::endl;
 
-        PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
+        reinterpret_cast<net::SocketEmitter*>(
+            impl.get())->addReceiver(this, 100); // highest prioority
+        // PacketSocketEmitter::impl->addReceiver(this, 100);
     }
 
     virtual bool send()
     {
         TraceS(this) << "Send" << std::endl;
-        // assert(PacketSocketAdapter::socket->recvAdapter() == this);
-        assert(PacketSocketAdapter::socket);
+        // assert(PacketSocketEmitter::socket->recvAdapter() == this);
+        assert(PacketSocketEmitter::impl);
 
-        if (PacketSocketAdapter::socket->sendPacket(BaseT::_request, _peerAddress) > 0)
+        if (impl->sendPacket(BaseT::_request, _peerAddress) > 0)
             return BaseT::send();
         BaseT::setState(this, TransactionState::Failed);
         return false;
@@ -64,22 +66,24 @@ public:
     {
         TraceS(this) << "Dispose" << std::endl;
 
-        PacketSocketAdapter::socket->removeReceiver(this);
+        PacketSocketEmitter::impl->removeReceiver(this);
         BaseT::dispose(); // gc
     }
 
-    Address peerAddress() const { return _peerAddress; }
+    Address peerAddress() const 
+    {
+        return _peerAddress;
+    }
 
 protected:
     virtual ~Transaction() {}
 
-    /// Overrides the PacketSocketAdapter::onPacket
+    /// Overrides the PacketSocketEmitter::onPacket
     /// callback for checking potential response candidates.
     virtual void onPacket(IPacket& packet)
     {
         TraceS(this) << "On packet: " << packet.size() << std::endl;
-        if (BaseT::handlePotentialResponse(
-            static_cast<PacketT&>(packet))) {
+        if (BaseT::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
             // we have handled the packet
@@ -103,8 +107,8 @@ protected:
         if (!packet.info)
             return false;
         auto info = reinterpret_cast<net::PacketInfo*>(packet.info);
-        return socket->address() == info->socket->address() &&
-               _peerAddress == info->peerAddress;
+        return impl->address() == info->socket->address()
+            && _peerAddress == info->peerAddress;
     }
 
     Address _peerAddress;

@@ -49,18 +49,17 @@ void Server::start()
     TraceL << "Starting" << endl;
 
     if (_options.enableUDP) {
-        //_udpSocket.assign(new UDPSocket, false);
+        _udpSocket.swap(net::makeSocket<net::UDPSocket>());
         _udpSocket.Recv += slot(this, &Server::onSocketRecv, 1);
-        _udpSocket.bind(_options.listenAddr);
-        //_udpSocket./*base().*/setBroadcast(true);
+        _udpSocket->bind(_options.listenAddr);
         TraceL << "UDP listening on " << _options.listenAddr << endl;
     }
 
     if (_options.enableTCP) {
-        //_tcpSocket.assign(new TCPSocket, false);
-        _tcpSocket.bind(_options.listenAddr);
-        _tcpSocket.listen();
-        _tcpSocket.AcceptConnection +=
+        _tcpSocket.swap(net::makeSocket<net::TCPSocket>());
+        _tcpSocket->bind(_options.listenAddr);
+        _tcpSocket->listen();
+        _tcpSocket.as<net::TCPSocket>()->AcceptConnection +=
             slot(this, &Server::onTCPAcceptConnection);
         TraceL << "TCP listening on " << _options.listenAddr << endl;
     }
@@ -90,14 +89,12 @@ void Server::stop()
     _tcpSockets.clear();
 
     // Close server sockets
-    if (_udpSocket.active()) {
-        // assert(_udpSocket./*base().*/refCount() == 1);
-        _udpSocket.close();
-    }
-    if (_tcpSocket.active()) {
-        // assert(_tcpSocket./*base().*/refCount() == 1);
-        _tcpSocket.close();
-    }
+    //if (_udpSocket->active()) {
+        _udpSocket->close();
+    //}
+    //if (_tcpSocket->active()) {
+        _tcpSocket->close();
+    //}
 }
 
 
@@ -119,12 +116,11 @@ void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 {
     TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;
 
-    // assert(sock./*base().*/refCount() == 1);
-    _tcpSockets.push_back(sock);
-    net::TCPSocket::Ptr& socket = _tcpSockets.back();
-    // assert(socket./*base().*/refCount() == 2);
-    socket->Recv += slot(this, &Server::onSocketRecv);
-    socket->Close += slot(this, &Server::onTCPSocketClosed);
+    net::SocketEmitter emitter(sock);
+    _tcpSockets.push_back(emitter);
+    auto& socket = _tcpSockets.back();
+    socket.Recv += slot(this, &Server::onSocketRecv);
+    socket.Close += slot(this, &Server::onTCPSocketClosed);
 
     // No need to increase control socket buffer size
     // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); //
@@ -138,7 +134,7 @@ net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
         TraceL << "sock->peerAddress(): " << sock->peerAddress() << ": "
                << peerAddr << endl;
         if (sock->peerAddress() == peerAddr) {
-            return sock;
+            return std::dynamic_pointer_cast<TCPSocket>(sock.impl);
         }
     }
     assert(0 && "unknown socket");
@@ -191,17 +187,18 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 void Server::onTCPSocketClosed(net::Socket& socket)
 {
     TraceL << "TCP socket closed" << endl;
-    releaseTCPSocket(&socket);
+    releaseTCPSocket(socket);
 }
 
 
-void Server::releaseTCPSocket(net::Socket* socket)
+void Server::releaseTCPSocket(const net::Socket& socket)
 {
-    TraceS(this) << "Removing TCP socket: " << socket << std::endl;
+    TraceS(this) << "Removing TCP socket: " << &socket << std::endl;
     for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
-        if (it->get() == socket) {
-            socket->Recv -= slot(this, &Server::onSocketRecv);
-            socket->Close -= slot(this, &Server::onTCPSocketClosed);
+        if (it->impl.get() == &socket) {
+            it->Recv -= slot(this, &Server::onSocketRecv);
+            it->Close -= slot(this, &Server::onTCPSocketClosed);
+            //socket->removeReceiver(this);
 
             // All we need to do is erase the socket in order to
             // deincrement the ref counter and destroy the socket.
@@ -743,15 +740,13 @@ void Server::respondError(Request& request, int errorCode,
 
 net::UDPSocket& Server::udpSocket()
 {
-
-    return _udpSocket;
+    return *_tcpSocket.as<net::UDPSocket>();
 }
 
 
 net::TCPSocket& Server::tcpSocket()
 {
-
-    return _tcpSocket;
+    return *_tcpSocket.as<net::TCPSocket>();
 }
 
 

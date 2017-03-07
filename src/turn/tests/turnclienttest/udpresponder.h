@@ -31,7 +31,7 @@ public:
     {
         DebugS(this) << id << ": Creating" << endl;
 
-        socket.addReceiver(this);
+        socket.setReceiver(this);
 
         // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         socket.bind(net::Address("0.0.0.0", 0));
@@ -42,7 +42,7 @@ public:
     virtual ~UDPResponder()
     {
         DebugS(this) << id << ": Destroying" << endl;
-        socket.addReceiver(this);
+        socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)

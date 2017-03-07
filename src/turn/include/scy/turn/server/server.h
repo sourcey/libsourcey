@@ -124,7 +124,7 @@ public:
     ServerAllocation* getAllocation(const FiveTuple& tuple);
     TCPAllocation* getTCPAllocation(const std::uint32_t& connectionID);
     net::TCPSocket::Ptr getTCPSocket(const net::Address& remoteAddr);
-    void releaseTCPSocket(net::Socket* socket);
+    void releaseTCPSocket(const net::Socket& socket);
 
     ServerObserver& observer();
     ServerOptions& options();
@@ -141,14 +141,15 @@ public:
 private:
     ServerObserver& _observer;
     ServerOptions _options;
-    net::UDPSocket _udpSocket;
-    net::TCPSocket _tcpSocket;
-    net::TCPSocket::Vec _tcpSockets;
+    net::SocketEmitter _udpSocket; // net::UDPSocket
+    net::SocketEmitter _tcpSocket; // net::TCPSocket
+    std::vector<net::SocketEmitter> _tcpSockets;
     ServerAllocationMap _allocations;
     Timer _timer;
 };
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 #endif // SCY_TURN_Server_H

@@ -138,11 +138,6 @@ public:
             new FunctionDelegate<RT, Args...>(func), instance, id, priority));
     }
 
-    //static bool ComparePrioroty(const SlotPtr* l, const SlotPtr* r)
-    //{
-    //    return l->priority > r->priority;
-    //}
-
     /// Connects a `SlotPtr` instance to the `Signal`.
     /// The returned value can be used to detach the slot.
     int attach(SlotPtr slot) const
@@ -154,7 +149,8 @@ public:
         _slots.push_back(slot);
         //_slots.sort(Slot::ComparePrioroty);
         std::sort(_slots.begin(), _slots.end(),
-            [](SlotPtr const& l, SlotPtr const& r) { return l->priority > r->priority; });
+            [](SlotPtr const& l, SlotPtr const& r) { 
+                return l->priority > r->priority; });
         return slot->id;
     }
 
@@ -252,11 +248,34 @@ public:
     bool operator-=(const void* instance) { return detach(instance); }
     bool operator-=(SlotPtr slot) { return detach(slot); }
 
-private:
-    /// Non-copyable and non-movable
-    // Signal(const Signal&) = delete;
-    // Signal& operator=(const Signal&) = delete;
+    // static bool ComparePrioroty(const SlotPtr* l, const SlotPtr* r)
+    // {
+    //     return l->priority > r->priority;
+    // }
 
+    /// Default constructor
+    Signal()
+    {
+    }
+
+    /// Copy constructor
+    Signal(const Signal& r)
+        : _slots(r._slots)
+        , _lastId(r._lastId)
+    {
+    }
+
+    /// Assignment operator
+    Signal& Signal::operator = (const Signal& r)
+    {
+        if (&r != this) {
+            _slots = r._slots;
+            _lastId = r._lastId;
+        }
+        return *this;
+    }
+
+private:
     mutable std::mutex _mutex;
     mutable std::vector<SlotPtr> _slots;
     mutable int _lastId = 0;
@@ -311,7 +330,7 @@ template <typename RT, typename... Args> struct Slot
     void* instance;
     int id;
     int priority;
-    std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    // std::atomic_flag flag = ATOMIC_FLAG_INIT;
 
     Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr, int id = -1, int priority = -1)
         : delegate(delegate)
@@ -319,22 +338,22 @@ template <typename RT, typename... Args> struct Slot
         , id(id)
         , priority(priority)
     {
-        flag.test_and_set();
+        // flag.test_and_set();
     }
 
     void kill()
     {
-        flag.clear();
+        // flag.clear();
     }
 
     bool alive()
     {
-        return flag.test_and_set();
+        return true; //flag.test_and_set();
     }
 
     /// NonCopyable and NonMovable
-    Slot(const Slot&) = delete;
-    Slot& operator=(const Slot&) = delete;
+    // Slot(const Slot&) = delete;
+    // Slot& operator=(const Slot&) = delete;
 };
 
 } // namespace internal

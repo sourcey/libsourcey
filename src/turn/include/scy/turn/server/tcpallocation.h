@@ -61,8 +61,8 @@ public:
     void onControlClosed(net::Socket& socket);
 
 protected:
-    net::TCPSocket::Ptr _control;
-    net::TCPSocket::Ptr _acceptor;
+    net::SocketEmitter _control; // net::TCPSocket
+    net::SocketEmitter _acceptor; // net::TCPSocket
     TCPConnectionPairMap _pairs;
 };
 

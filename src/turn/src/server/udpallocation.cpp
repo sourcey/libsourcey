@@ -36,10 +36,10 @@ UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
     // Handle data from the relay socket directly from the allocation.
     // This will remove the need for allocation lookups when receiving
     // data from peers.
-    _relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));
+    _relaySocket->bind(net::Address(server.options().listenAddr.host(), 0));
     _relaySocket.Recv += slot(this, &UDPAllocation::onPeerDataReceived);
 
-    TraceL << " Initializing on address: " << _relaySocket.address() << endl;
+    TraceL << " Initializing on address: " << _relaySocket->address() << endl;
 }
 
 
@@ -47,7 +47,7 @@ UDPAllocation::~UDPAllocation()
 {
     TraceL << "Destroy" << endl;
     _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
-    _relaySocket.close();
+    _relaySocket->close();
 }
 
 
@@ -205,7 +205,7 @@ std::size_t UDPAllocation::send(const char* data, std::size_t size,
 net::Address UDPAllocation::relayedAddress() const
 {
    
-    return _relaySocket.address();
+    return _relaySocket->address();
 }
 
 

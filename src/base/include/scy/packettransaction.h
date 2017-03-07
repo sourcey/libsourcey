@@ -205,6 +205,7 @@ template <class T> inline void PacketTransaction<T>::cancel()
 {
     setState(this, TransactionState::Cancelled);
 }
+
 template <class T> inline bool PacketTransaction<T>::cancelled() const
 {
     return stateEquals(TransactionState::Cancelled);
@@ -214,10 +215,12 @@ template <class T> inline bool PacketTransaction<T>::canResend()
 {
     return !cancelled() && attempts() <= retries();
 }
+
 template <class T> inline int PacketTransaction<T>::attempts() const
 {
     return _attempts;
 }
+
 template <class T> inline int PacketTransaction<T>::retries() const
 {
     return _retries;
@@ -227,14 +230,17 @@ template <class T> inline T& PacketTransaction<T>::request()
 {
     return _request;
 }
+
 template <class T> inline T PacketTransaction<T>::request() const
 {
     return _request;
 }
+
 template <class T> inline T& PacketTransaction<T>::response()
 {
     return _response;
 }
+
 template <class T> inline T PacketTransaction<T>::response() const
 {
     return _response;

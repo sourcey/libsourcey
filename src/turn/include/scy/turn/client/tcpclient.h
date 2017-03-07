@@ -45,7 +45,7 @@ struct RelayConnectionBinding
 };
 
 
-typedef KVCollection<net::Address, net::TCPSocket::Ptr> ConnectionManager;
+typedef KVCollection<net::Address, net::SocketEmitter> ConnectionManager;
 typedef ConnectionManager::Map ConnectionManagerMap;
 
 

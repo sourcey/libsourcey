@@ -19,7 +19,7 @@
 #include "scy/http/request.h"
 #include "scy/http/response.h"
 #include "scy/http/connection.h"
-#include "scy/net/signalsocket.h"
+#include "scy/net/socketemitter.h"
 #include "scy/net/socket.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/random.h"
@@ -194,7 +194,7 @@ private:
 //
 
 
-class SCY_EXTERN WebSocketAdapter : public net::SignalSocket
+class SCY_EXTERN WebSocketAdapter : public net::SocketEmitter
 {
 public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,

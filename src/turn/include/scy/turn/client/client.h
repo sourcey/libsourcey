@@ -114,7 +114,7 @@ public:
     };
 
 public:
-    Client(ClientObserver& observer, const Options& options = Options());
+    Client(ClientObserver& observer, const Options& options, const net::Socket::Ptr& socket);
     virtual ~Client();
 
     /// Initiates the allocation sequence.
@@ -178,7 +178,8 @@ protected:
 protected:
     ClientObserver& _observer;
     Options _options;
-    net::Socket::Ptr _socket;
+    //net::Socket::Ptr _socket;
+    net::SocketEmitter _socket;
     Timer _timer;
     scy::Error _error;
     net::Address _mappedAddress;

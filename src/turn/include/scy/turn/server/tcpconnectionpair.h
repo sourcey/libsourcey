@@ -15,6 +15,7 @@
 
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
+#include "scy/net/socketemitter.h"
 #include "scy/stun/message.h"
 #include "scy/timer.h"
 
@@ -68,10 +69,10 @@ public:
     TCPAllocation& allocation;
 
     /// The client socket, nullptr to start.
-    net::TCPSocket::Ptr client;
+    net::SocketEmitter client; // net::TCPSocket
 
     /// The client socket, nullptr to start.
-    net::TCPSocket::Ptr peer;
+    net::SocketEmitter peer; // net::TCPSocket
 
     /// Return true if the peer `ConnectionBind` request timed out.
     bool expired() const;
