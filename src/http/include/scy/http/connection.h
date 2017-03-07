@@ -62,6 +62,7 @@ public:
     /// a proper response within the allotted time.
     /// bool expired() const;
 
+    /// Return true if headers should be automatically sent.
     bool shouldSendHeader() const;
 
     /// Set true to prevent auto-sending HTTP headers.
@@ -157,7 +158,7 @@ protected:
 //
 
 
-// HTTP progress signal for upload and download progress notifications. 
+// HTTP progress signal for upload and download progress notifications.
 class SCY_EXTERN ProgressSignal : public Signal<void(const double&)>
 {
 public:

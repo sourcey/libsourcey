@@ -75,10 +75,13 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
     // TraceS(this) << "On accept socket connection" << endl;
 
+    // std::clock_t start = std::clock();
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
+    //std::cout << "create connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 
     _connections.push_back(conn);
+    // std::cout << "create connection time 1: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
 
@@ -99,9 +102,12 @@ void Server::onConnectionClose(ServerConnection& conn)
 {
     // TraceS(this) << "On connection closed" << endl;
 
+    //std::cout << "release connection: " << _connections.size() << std::endl;
+    //std::clock_t start = std::clock();
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
+            //std::cout << "release connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
             return;
         }
     }
@@ -159,6 +165,16 @@ Server& ServerConnection::server()
 void ServerConnection::onHeaders()
 {
     // TraceS(this) << "On headers" << endl;
+
+#if 0
+    _response.add("Content-Length", "0");
+    _response.add("Connection", "close");
+    //_response.add("Connection", "keep-alive");
+    sendHeader();
+    //send("hello universe", 14);
+    //close();
+    return;
+#endif
 
     // Upgrade the connection if required
     _upgrade = reinterpret_cast<ConnectionAdapter*>(adapter())->parser().upgrade();

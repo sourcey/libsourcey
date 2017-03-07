@@ -287,7 +287,9 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
     }
 
     // Parse incoming HTTP messages
+    //std::clock_t start = std::clock();
     _parser.parse(bufferCast<const char*>(buf), buf.size());
+    //std::cout << "http parse time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
 

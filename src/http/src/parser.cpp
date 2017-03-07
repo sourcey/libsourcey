@@ -182,7 +182,7 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-    // TraceS(this) << "onHeader: " << name << ":" << value << endl;
+    // TraceS(this) << "On header: " << name << ":" << value << endl;
 
     if (message())
         message()->add(name, value);
@@ -202,7 +202,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, std::size_t len)
 {
-    // TraceS(this) << "onBody" << endl;
+    // TraceS(this) << "On body" << endl;
     if (_observer)
         _observer->onParserChunk(buf, len);
 }
@@ -210,7 +210,7 @@ void Parser::onBody(const char* buf, std::size_t len)
 
 void Parser::onMessageEnd()
 {
-    // TraceS(this) << "onMessageEnd" << endl;
+    // TraceS(this) << "On message end" << endl;
     _complete = true;
     if (_observer)
         _observer->onParserEnd();
