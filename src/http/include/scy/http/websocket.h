@@ -196,13 +196,11 @@ private:
 //
 
 
-class SCY_EXTERN WebSocketAdapter : public net::SocketAdapter
+class SCY_EXTERN WebSocketAdapter : public net::SocketSignalAdapter
 {
 public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
                      http::Request& request, http::Response& response);
-    // WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response&
-    // response);
 
     virtual std::size_t send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
     virtual std::size_t send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary

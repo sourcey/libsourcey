@@ -161,10 +161,11 @@ void ServerConnection::onHeaders()
     // TraceS(this) << "On headers" << endl;
 
     // Upgrade the connection if required
-    if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
-        util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+    _upgrade = reinterpret_cast<ConnectionAdapter*>(adapter())->parser().upgrade();
+    if (_upgrade) {
+        //util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
+        //util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
         // TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
-        _upgrade = true;
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -178,16 +179,21 @@ void ServerConnection::onHeaders()
         // Send the handshake request to the WS adapter for handling.
         // If the request fails the underlying socket will be closed
         // resulting in the destruction of the current connection.
-        std::ostringstream oss;
-        request().write(oss);
+
+        // std::ostringstream oss;
+        // request().write(oss);
+        // request().clear();
+        // std::string buffer(oss.str());
+
+        std::string buffer;
+        buffer.reserve(256);
+        request().write(buffer);
         request().clear();
-        std::string buffer(oss.str());
 
         wsAdapter->onSocketRecv(*socket().get(), mutableBuffer(buffer), socket()->peerAddress());
     }
 
-    //if (!_upgrade)
-        _server.onConnectionReady(*this);
+    _server.onConnectionReady(*this);
 
     // Upgraded connections don't receive the onHeaders callback
     //if (!_upgrade)
@@ -205,10 +211,8 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
         return;
     }
 
-    //assert(_responder);
-    //_responder->onPayload(buffer);
-
-    // TraceS(this) << "On payload: " << Payload.nslots() << endl;
+    // assert(_responder);
+    // _responder->onPayload(buffer);
     Payload.emit(*this, buffer);
 }
 
@@ -225,8 +229,8 @@ void ServerConnection::onComplete()
 
     // The HTTP request is complete.
     // The request handler can give a response.
-    //assert(_responder);
-    //_responder->onRequest(_request, _response);
+    // assert(_responder);
+    // _responder->onRequest(_request, _response);
 }
 
 

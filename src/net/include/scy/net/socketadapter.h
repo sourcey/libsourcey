@@ -69,6 +69,20 @@ public:
     /// socket is closed.
     virtual void sendPacket(IPacket& packet);
 
+    /// Sets the pointer to the outgoing data adapter.
+    /// Send methods proxy data to this adapter by default.
+    virtual void setSender(SocketAdapter* adapter, bool freeExisting = false);
+
+    /// Returns the output SocketAdapter pointer
+    SocketAdapter* sender();
+
+    /// Sets the pointer to the incoming data adapter.
+    /// Events proxy data to this adapter by default.
+    virtual void setReceiver(SocketAdapter* adapter, bool freeExisting = false);
+
+    /// Returns the input SocketAdapter pointer
+    SocketAdapter* receiver();
+
     /// These virtual methods can be overridden as necessary
     /// to intercept socket events before they hit the application.
     virtual void onSocketConnect(Socket& socket);
@@ -76,16 +90,34 @@ public:
     virtual void onSocketError(Socket& socket, const Error& error);
     virtual void onSocketClose(Socket& socket);
 
-    /// A pointer to the adapter for handling outgoing data.
-    /// Send methods proxy data to this adapter by default.
-    /// Note that we only keep a simple pointer so
-    /// as to avoid circular references preventing destruction.
-    virtual void setSender(SocketAdapter* adapter, bool freeExisting = false);
+    /// Optional client data pointer.
+    ///
+    /// The pointer is set to null on initialization 
+    /// but not managed.
+    void* opaque;
 
-    /// Returns the output SocketAdapter pointer
-    SocketAdapter* sender();
+protected:
+    /// Returns the polymorphic instance pointer
+    /// for signal delegate callbacks.
+    // virtual void* self() { return this; };
 
-    /// Adds an input SocketAdapter for receiving socket callbacks.
+    SocketAdapter* _sender;
+    SocketAdapter* _receiver;
+};
+
+
+/// SocketSignalAdapter extends the SocketAdapter to add signal callbacks.
+class SCY_EXTERN SocketSignalAdapter : public SocketAdapter
+{
+public:
+    /// Creates the SocketAdapter.
+    SocketSignalAdapter(SocketAdapter* sender = nullptr,
+                        SocketAdapter* receiver = nullptr);
+
+    /// Destroys the SocketAdapter.
+    virtual ~SocketSignalAdapter();
+
+    /// Adds an input SocketAdapter for receiving socket signals.
     virtual void addReceiver(SocketAdapter* adapter, int priority = 0);
 
     /// Removes an input SocketAdapter.
@@ -105,23 +137,14 @@ public:
     /// Signals that the underlying socket is closed.
     Signal<void(Socket&)> Close;
 
-    /// Optional client data pointer.
-    ///
-    /// The pointer is not initialized or managed
-    /// by the socket base.
-    void* opaque;
-
 protected:
-    /// Returns the polymorphic instance pointer
-    /// for signal delegate callbacks.
-    virtual void* self() { return this; };
 
-    virtual void emitSocketConnect(Socket& socket);
-    virtual void emitSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
-    virtual void emitSocketError(Socket& socket, const scy::Error& error);
-    virtual void emitSocketClose(Socket& socket);
+    /// Internal callback events.
+    virtual void onSocketConnect(Socket& socket);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
+    virtual void onSocketError(Socket& socket, const scy::Error& error);
+    virtual void onSocketClose(Socket& socket);
 
-    SocketAdapter* _sender;
 };
 
 

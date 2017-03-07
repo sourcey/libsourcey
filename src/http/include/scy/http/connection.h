@@ -131,7 +131,7 @@ public:
     Connection* connection();
 
     /// Removes an input SocketAdapter.
-    virtual void removeReceiver(net::SocketAdapter* adapter);
+    // virtual void setReceiver1(net::SocketAdapter* adapter);
 
 protected:
 
@@ -189,7 +189,7 @@ public:
 
 
 /// Packet stream wrapper for a HTTP connection.
-class SCY_EXTERN ConnectionStream
+class SCY_EXTERN ConnectionStream : public net::SocketAdapter
 {
 public:
     ConnectionStream(Connection::Ptr connection);
@@ -216,7 +216,8 @@ public:
     ProgressSignal OutgoingProgress; ///< Fired on upload progress
 
 protected:
-    void onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    //void onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
 
     Connection::Ptr _connection;
 };

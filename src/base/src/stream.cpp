@@ -35,7 +35,7 @@ Stream::~Stream()
 
 void Stream::close()
 {
-    TraceL << "Close: " << ptr() << std::endl;
+    // TraceL << "Close: " << ptr() << std::endl;
 
     if (_started)
         readStop();
@@ -47,7 +47,7 @@ bool Stream::shutdown()
 {
     assertThread();
 
-    TraceL << "Send shutdown" << std::endl;
+    // TraceL << "Send shutdown" << std::endl;
     if (!active()) {
         WarnL << "Cannot shutdown a closed stream" << std::endl;
         return false;
@@ -115,7 +115,7 @@ bool Stream::closed() const
 
 bool Stream::readStart()
 {
-    TraceL << "Read start: " << ptr() << std::endl;
+    // TraceL << "Read start: " << ptr() << std::endl;
     assert(!_started);
     _started = true;
 
@@ -128,7 +128,7 @@ bool Stream::readStart()
 
 bool Stream::readStop()
 {
-    TraceL << "Read stop: " << ptr() << std::endl;
+    // TraceL << "Read stop: " << ptr() << std::endl;
     assert(_started);
     _started = false;
 

@@ -182,7 +182,7 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-    // // TraceS(this) << "onHeader: " << name << ":" << value << endl;
+    // TraceS(this) << "onHeader: " << name << ":" << value << endl;
 
     if (message())
         message()->add(name, value);

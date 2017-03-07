@@ -164,7 +164,7 @@ std::size_t TCPSocket::send(const char* data, std::size_t len, int flags)
 std::size_t TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << endl;
-    // // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
+    // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(Thread::currentID() == tid());
 
     // NOTE: libuv handles this for us
@@ -219,7 +219,7 @@ net::Address TCPSocket::address() const
 
 net::Address TCPSocket::peerAddress() const
 {
-    // // TraceS(this) << "Get peer address: " << closed() << endl;
+    // TraceS(this) << "Get peer address: " << closed() << endl;
     if (!active())
         return net::Address();
         // throw std::runtime_error("Invalid TCP socket: No peer address");

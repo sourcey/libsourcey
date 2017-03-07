@@ -14,7 +14,6 @@
 #include "scy/error.h"
 #include "scy/hex.h"
 
-#include <assert.h>
 #include <iostream>
 #include <memory>
 #include <sstream>

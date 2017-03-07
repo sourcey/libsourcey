@@ -35,7 +35,7 @@ static void onShutdown(void* opaque)
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new LogChannel("debug", LTrace));
-    // Logger::instance().add(new ConsoleChannel("debug", LDebug));
+    Logger::instance().add(new ConsoleChannel("debug", LDebug));
     // Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {

@@ -55,11 +55,10 @@ public:
     void initDecryptor();
 
     /// Encrypts data in a streaming fashion.
-    /// Hand consecutive blocks of data to the update method in order to encrypt
-    /// it.
-    /// Returns the encrypted data chunk. When done, the output of final()
-    /// should be
-    /// additionally added to the result.
+    /// Hand consecutive blocks of data to the update method in order
+    /// to encrypt it.
+    /// Returns the encrypted data chunk. When done, the output 
+    /// of final() should be additionally added to the result.
     int update(const unsigned char* input, int inputLength,
                unsigned char* output, int outputLength);
 
@@ -126,7 +125,8 @@ public:
                                Encoding encoding = Binary);
 
     /// Sets the key for the Cipher.
-    template <typename T> void setKey(const T& key)
+    template <typename T> 
+    void setKey(const T& key)
     {
         assert(int(key.size()) == keySize());
         _key.clear();
@@ -135,7 +135,8 @@ public:
     }
 
     /// Sets the initialization vector (IV) for the Cipher.
-    template <typename T> void setIV(const T& iv)
+    template <typename T> 
+    void setIV(const T& iv)
     {
         assert(int(iv.size()) == ivSize());
         _iv.clear();
@@ -143,15 +144,12 @@ public:
             _iv.push_back(static_cast<unsigned char>(*it));
     }
 
-    /// Enables or disables padding. By default encryption operations are padded
-    /// using
-    /// standard block padding and the padding is checked and removed when
-    /// decrypting.
+    /// Enables or disables padding. By default encryption operations
+    /// are padded using standard block padding and the padding is checked 
+    /// and removed when decrypting.
     /// If the pad parameter is zero then no padding is performed, the total
-    /// amount of
-    /// data encrypted or decrypted must then be a multiple of the block size or
-    /// an
-    /// error will occur.
+    /// amount of data encrypted or decrypted must then be a multiple of the
+    /// block size or an error will occur.
     ///
     /// See EVP_CIPHER_CTX_set_padding for further information.
     int setPadding(int padding);

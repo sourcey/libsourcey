@@ -138,6 +138,9 @@ public:
     /// Writes the HTTP request to the given output stream.
     void write(std::ostream& ostr) const;
 
+    /// Writes the HTTP request to the given output string.
+    void write(std::string& str) const;
+
     friend std::ostream& operator<<(std::ostream& stream, const Request& req)
     {
         req.write(stream);

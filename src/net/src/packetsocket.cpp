@@ -23,16 +23,14 @@ namespace net {
 
 
 PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
-    : SocketAdapter(socket.get())
+    : SocketSignalAdapter(socket.get()) //reinterpret_cast<SocketAdapter*>(socket.get())
     , socket(socket)
 {
     // TraceS(this) << "Create: " << socket << endl;
 }
 
 
-void PacketSocketAdapter::onSocketRecv(Socket& sock,
-                                       const MutableBuffer& buffer,
-                                       const Address& peerAddress)
+void PacketSocketAdapter::onSocketRecv(Socket& sock, const MutableBuffer& buffer, const Address& peerAddress)
 {
     // TraceS(this) << "Recv: " << buffer.size() << endl;
 
@@ -53,7 +51,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock,
 
 void PacketSocketAdapter::onPacket(IPacket& pkt)
 {
-    // // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
+    // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
     PacketSignal::emit(pkt);
 }
 

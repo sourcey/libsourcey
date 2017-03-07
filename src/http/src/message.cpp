@@ -99,8 +99,7 @@ void Message::setChunkedTransferEncoding(bool flag)
 
 bool Message::isChunkedTransferEncoding() const
 {
-    return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) ==
-           0;
+    return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) == 0;
 }
 
 
@@ -155,6 +154,19 @@ void Message::write(std::ostream& ostr) const
     NVCollection::ConstIterator it = begin();
     while (it != end()) {
         ostr << it->first << ": " << it->second << "\r\n";
+        ++it;
+    }
+}
+
+
+void Message::write(std::string& str) const
+{
+    NVCollection::ConstIterator it = begin();
+    while (it != end()) {
+        str.append(it->first);
+        str.append(": ");
+        str.append(it->second);
+        str.append("\r\n");
         ++it;
     }
 }

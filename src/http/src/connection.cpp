@@ -62,9 +62,13 @@ std::size_t Connection::sendHeader()
     _shouldSendHeader = false;
     assert(outgoingHeader());
 
-    std::ostringstream os;
-    outgoingHeader()->write(os);
-    std::string head(os.str().c_str(), os.str().length());
+    // std::ostringstream os;
+    // outgoingHeader()->write(os);
+    // std::string head(os.str().c_str(), os.str().length());
+
+    std::string head;
+    head.reserve(256);
+    outgoingHeader()->write(head);
 
     // Send headers directly to the Socket,
     // bypassing the ConnectionAdapter
@@ -93,8 +97,11 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
     if (_adapter) {
         // Detach the old adapter form all callbacks.
-        _socket->removeReceiver(_adapter);
-        _adapter->removeReceiver(this);
+        // _socket->removeReceiver(_adapter);
+        // _adapter->removeReceiver(this);
+        // _adapter->setSender(nullptr);
+        _socket->setReceiver(nullptr);
+        _adapter->setReceiver(nullptr);
         _adapter->setSender(nullptr);
 
         // TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
@@ -104,13 +111,14 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
     if (adapter) {
         // Setup the data flow: Connection <-> ConnectionAdapter <-> Socket
-        adapter->addReceiver(this);
+        // adapter->addReceiver(this);
+        adapter->setReceiver(this);
         adapter->setSender(_socket.get());
 
         // Attach the ConnectionAdapter to receive Socket callbacks.
         // The given adapter will process raw packets into HTTP or 
         // WebSocket frames depending on the adapter type.
-        _socket->addReceiver(adapter);
+        _socket->setReceiver(adapter);
         _adapter = adapter;
     }
 }
@@ -287,15 +295,17 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
 }
 
 
-void ConnectionAdapter::removeReceiver(net::SocketAdapter* adapter)
-{
-    // Set the parent connection instance to null
-    if (_connection &&
-        _connection == adapter)
-        _connection = nullptr;
-
-    net::SocketAdapter::removeReceiver(adapter);
-}
+//void ConnectionAdapter::setReceiver1(net::SocketAdapter* adapter)
+//{
+//    assert(0);
+//    // Set the parent connection instance to null
+//    //if (_connection &&
+//    //    _connection == adapter)
+//    if (adapter == nullptr)
+//        _connection = nullptr;
+//
+//    net::SocketAdapter::setReceiver(adapter);
+//}
 
 
 //
@@ -311,7 +321,7 @@ void ConnectionAdapter::onParserHeadersEnd()
 {
     // TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
 
-    if (_connection)
+    if (_connection && _receiver)
         _connection->onHeaders();
 
     // Set the position to the end of the headers once
@@ -326,7 +336,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
     // TraceS(this) << "On parser chunk: " << len << endl;
 
     // Dispatch the payload
-    if (_connection) {
+    if (_connection && _receiver) {
         net::SocketAdapter::onSocketRecv(*_connection->socket().get(),
             mutableBuffer(const_cast<char*>(buf), len),
             _connection->socket()->peerAddress());
@@ -336,7 +346,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 
 void ConnectionAdapter::onParserError(const scy::Error& err)
 {
-    WarnL << "On parser error: " << err.message << endl;
+    WarnS(this) << "On parser error: " << err.message << endl;
 
 #if 0
     // HACK: Handle those peski flash policy requests here
@@ -357,7 +367,7 @@ void ConnectionAdapter::onParserError(const scy::Error& err)
 #endif
 
     // Set error and close the connection on parser error
-    if (_connection) {
+    if (_connection && _receiver) {
         _connection->setError(err.message);
         _connection->close(); // do we want to force this?
     }
@@ -368,7 +378,7 @@ void ConnectionAdapter::onParserEnd()
 {
     // TraceS(this) << "On parser end" << endl;
 
-    if (_connection)
+    if (_connection && _receiver)
         _connection->onComplete();
 }
 
@@ -407,7 +417,8 @@ ConnectionStream::ConnectionStream(Connection::Ptr connection)
         static_cast<void (net::SocketAdapter::*)(IPacket&)>(&net::SocketAdapter::sendPacket));
 
     // The Incoming stream receives data from the ConnectionAdapter.
-    _connection->adapter()->Recv += slot(this, &ConnectionStream::onRecv);
+    //_connection->adapter()->Recv += slot(this, &ConnectionStream::onRecv);
+    _connection->adapter()->setReceiver(this);
 }
 
 
@@ -435,7 +446,7 @@ std::size_t ConnectionStream::send(const char* data, std::size_t len, int flags)
 }
 
 
-void ConnectionStream::onRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
+void ConnectionStream::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
     // Push received data onto the Incoming stream.
     Incoming.write(bufferCast<const char*>(buffer), buffer.size());

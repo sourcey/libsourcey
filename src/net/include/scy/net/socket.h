@@ -38,7 +38,7 @@ inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 
 
 /// Socket is the base socket implementation from which all sockets derive.
-class SCY_EXTERN Socket : public SocketAdapter
+class SCY_EXTERN Socket : public SocketSignalAdapter
 {
 public:
     typedef std::shared_ptr<Socket> Ptr;
@@ -75,7 +75,7 @@ public:
     /// closure via callback.
     virtual bool shutdown()
     {
-        assert("not implemented by protocol");
+        assert(0 && "not implemented by protocol");
         return false;
     };
 
@@ -124,7 +124,7 @@ protected:
     /// signal callback sender arguments from void* to Socket.
     /// Note: This method must not be derived by subclasses or casting
     /// will fail for void* pointer callbacks.
-    virtual void* self() { return this; };
+    // virtual void* self() { return this; };
 };
 
 

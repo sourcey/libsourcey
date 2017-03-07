@@ -220,7 +220,7 @@ void FormWriter::writeAsync()
         if (complete())
             _runner->cancel();
     } catch (std::exception& exc) {
-        TraceS(this) << "Error: " << exc.what() << std::endl;
+        // TraceS(this) << "Error: " << exc.what() << std::endl;
         assert(0);
         throw exc;
         //#ifdef _DEBUG

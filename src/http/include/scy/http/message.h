@@ -104,6 +104,9 @@ public:
     /// character. See RFC 2822 for details.
     virtual void write(std::ostream& ostr) const;
 
+    /// Writes the message header to the given output string.
+    virtual void write(std::string& str) const;
+
     static const std::string HTTP_1_0;
     static const std::string HTTP_1_1;
 

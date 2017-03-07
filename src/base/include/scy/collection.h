@@ -271,8 +271,7 @@ public:
 
     virtual ~KVCollection() { clear(); }
 
-    virtual bool add(const TKey& key, const TValue& item, bool update = true,
-                     bool whiny = true)
+    virtual bool add(const TKey& key, const TValue& item, bool update = true, bool whiny = true)
     {
         if (!update && has(key)) {
             if (whiny)
@@ -286,7 +285,6 @@ public:
 
     virtual TValue& get(const TKey& key)
     {
-
         typename Map::iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -296,7 +294,6 @@ public:
 
     virtual const TValue& get(const TKey& key, const TValue& defaultValue) const
     {
-
         typename Map::const_iterator it = _map.find(key);
         if (it != _map.end())
             return it->second;
@@ -305,7 +302,6 @@ public:
 
     virtual bool remove(const TKey& key)
     {
-
         typename Map::iterator it = _map.find(key);
         if (it != _map.end()) {
             _map.erase(it);
@@ -316,36 +312,30 @@ public:
 
     virtual bool has(const TKey& key) const
     {
-
         return _map.find(key) != _map.end();
     }
 
     virtual bool empty() const
     {
-
         return _map.empty();
     }
 
     virtual std::size_t size() const
     {
-
         return _map.size();
     }
 
     virtual void clear()
     {
-
         _map.clear();
     }
 
     virtual Map& map()
     {
-
         return _map;
     }
 
 protected:
-    // mutable std::mutex _mutex;
     Map _map;
 };
 
@@ -450,8 +440,7 @@ inline NVCollection& NVCollection::operator=(const NVCollection& nvc)
 }
 
 
-inline const std::string& NVCollection::
-operator[](const std::string& name) const
+inline const std::string& NVCollection::operator[](const std::string& name) const
 {
     ConstIterator it = _map.find(name);
     if (it != _map.end())
@@ -487,9 +476,8 @@ inline const std::string& NVCollection::get(const std::string& name) const
 }
 
 
-inline const std::string&
-NVCollection::get(const std::string& name,
-                  const std::string& defaultValue) const
+inline const std::string& NVCollection::get(const std::string& name,
+                                            const std::string& defaultValue) const
 {
     ConstIterator it = _map.find(name);
     if (it != _map.end())
@@ -505,8 +493,7 @@ inline bool NVCollection::has(const std::string& name) const
 }
 
 
-inline NVCollection::ConstIterator
-NVCollection::find(const std::string& name) const
+inline NVCollection::ConstIterator NVCollection::find(const std::string& name) const
 {
     return _map.find(name);
 }

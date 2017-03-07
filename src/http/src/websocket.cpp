@@ -59,7 +59,7 @@ http::Response& WebSocket::response()
 WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
                                    ws::Mode mode, http::Request& request,
                                    http::Response& response)
-    : SocketAdapter(socket.get())
+    : SocketSignalAdapter(socket.get())
     , socket(socket)
     , framer(mode)
     , _request(request)
@@ -152,8 +152,8 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
         onHandshakeComplete();
     }
 
-    // If there is remaining data in the packet (packets may be joined) then
-    // it back through the socket recv method.
+    // If there is remaining data in the packet (packets may be joined) 
+    // then send it back through the socket recv method.
     std::size_t remaining = buffer.size() - nparsed;
     if (remaining) {
         onSocketRecv(*socket.get(), MutableBuffer(&data[nparsed], remaining), peerAddr);
