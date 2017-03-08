@@ -87,8 +87,9 @@ protected:
     TCPClientObserver& _observer;
     ConnectionManager _connections;
 };
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 #endif // SCY_TURN_TCPClient_H

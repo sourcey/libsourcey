@@ -16,7 +16,7 @@ public:
         : server(std::make_shared<UDPSocket>())
     {
         // server->addReceiver(this);
-        server->setReceiver(this);
+        server->addReceiver(this);
     }
 
     virtual ~UDPEchoServer()

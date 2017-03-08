@@ -44,7 +44,7 @@ public:
 
     void onAcceptConnection(const TCPSocket::Ptr& socket)
     {
-        socket->setReceiver(this);
+        socket->addReceiver(this);
         // socket->Recv += slot(this, &EchoServer::onClientSocketRecv);
         // socket->Error += slot(this, &EchoServer::onClientSocketError);
         // socket->Close += slot(this, &EchoServer::onClientSocketClose);

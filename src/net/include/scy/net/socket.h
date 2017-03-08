@@ -113,6 +113,12 @@ public:
     /// Returns the socket event loop.
     virtual uv::Loop* loop() const = 0;
 
+    /// Optional client data pointer.
+    ///
+    /// The pointer is set to null on initialization 
+    /// but not managed.
+    void* opaque;
+
 protected:
     /// Initializes the underlying socket context.
     virtual void init() = 0;

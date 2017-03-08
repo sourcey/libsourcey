@@ -43,7 +43,7 @@ Server::~Server()
 
 void Server::start()
 {
-    _socket->setReceiver(this);
+    _socket->addReceiver(this);
     _socket->AcceptConnection += slot(this, &Server::onClientSocketAccept);
     _socket->bind(_address);
     _socket->listen(1000);

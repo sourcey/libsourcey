@@ -25,14 +25,13 @@ namespace net {
 
 
 PacketSocketEmitter::PacketSocketEmitter(const Socket::Ptr& socket)
-    : SocketEmitter(socket) //reinterpret_cast<SocketAdapter*>(socket.get()).get()
-    //, socket(socket)
+    : SocketEmitter(socket)
 {
     // TraceS(this) << "Create: " << socket << endl;
 }
 
 
-void PacketSocketEmitter::onSocketRecv(Socket& sock, const MutableBuffer& buffer, const Address& peerAddress)
+void PacketSocketEmitter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     // TraceS(this) << "Recv: " << buffer.size() << endl;
 

@@ -32,6 +32,22 @@ public:
     /// Creates the SocketEmitter
     SocketEmitter(const Socket::Ptr& socket = nullptr);
 
+    /// Copy constructor
+    SocketEmitter(const SocketEmitter& that)
+        : SocketAdapter(that) //.impl.get()
+        , Connect(that.Connect)
+        , Recv(that.Recv)
+        , Error(that.Error)
+        , Close(that.Close)
+        , impl(that.impl)
+    {
+        //priority = that.priority;
+        //_receivers = that._receivers;
+        if (impl)
+            impl->addReceiver(this); // take receiver ownership
+        assert(that._receivers.empty() || !_receivers.empty());
+    }
+
     /// Destroys the SocketAdapter.
     virtual ~SocketEmitter();
 
@@ -50,7 +66,7 @@ public:
     Signal<void(Socket&)> Close;
 
     /// Adds an input SocketAdapter for receiving socket signals.
-    virtual void addReceiver(SocketAdapter* adapter, int priority = 0);
+    virtual void addReceiver(SocketAdapter* adapter);
 
     /// Removes an input SocketAdapter.
     virtual void removeReceiver(SocketAdapter* adapter);

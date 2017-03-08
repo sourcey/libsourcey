@@ -39,7 +39,7 @@ public:
         // socket.Error += slot(this, &ClientSocketTest::onError);
         // socket.Close += slot(this, &ClientSocketTest::onClose);
         // assert(socket.base().refCount() == 1);
-        socket.setReceiver(this);
+        socket.addReceiver(this);
         socket.connect(address);
     }
 

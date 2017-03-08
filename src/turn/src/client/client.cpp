@@ -51,7 +51,8 @@ void Client::initiate()
     TraceL << "TURN client connecting to " << _options.serverAddr << endl;
 
     assert(!_permissions.empty() && "must set permissions");
-
+    assert(_socket.impl && "must set socket");
+    
     auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.impl.get());
     if (udpSocket) {
         udpSocket->bind(net::Address("0.0.0.0", 0));
@@ -67,25 +68,22 @@ void Client::initiate()
 
 void Client::shutdown()
 {
-    {
-        _timer.stop();
+    _timer.stop();
 
-        for (auto it = _transactions.begin(); it != _transactions.end();) {
-            TraceL << "Shutdown base: Delete transaction: " << *it << endl;
-            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
-            // delete *it;
-            (*it)->dispose();
-            it = _transactions.erase(it);
-        }
+    for (auto it = _transactions.begin(); it != _transactions.end();) {
+        TraceL << "Shutdown base: Delete transaction: " << *it << endl;
+        (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
+        // delete *it;
+        (*it)->dispose();
+        it = _transactions.erase(it);
+    }
 
-        _socket.Connect -= slot(this, &Client::onSocketConnect);
-        _socket.Recv -= slot(this, &Client::onSocketRecv);
-        //_socket->Error -= slot(this, &Client::onSocketError);
-        _socket.Close -= slot(this, &Client::onSocketClose);
-        if (!_socket->closed()) {
-            _socket->close();
-        }
-        // assert(_socket->/*base().*/refCount() == 1);
+    _socket.Connect -= slot(this, &Client::onSocketConnect);
+    _socket.Recv -= slot(this, &Client::onSocketRecv);
+    //_socket->Error -= slot(this, &Client::onSocketError);
+    _socket.Close -= slot(this, &Client::onSocketClose);
+    if (!_socket->closed()) {
+        _socket->close();
     }
 }
 
@@ -93,7 +91,7 @@ void Client::shutdown()
 void Client::onSocketConnect(net::Socket& socket)
 {
     TraceL << "Client connected" << endl;
-    // _socket->Connect -= slot(this, &Client::onSocketConnect);
+    _socket.Connect -= slot(this, &Client::onSocketConnect);
 
     _timer.setInterval(_options.timerInterval);
     _timer.start(std::bind(&Client::onTimer, this));

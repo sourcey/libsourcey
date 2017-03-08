@@ -30,8 +30,8 @@ namespace turn {
 UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
                              const std::string& username,
                              const std::uint32_t& lifetime)
-    : ServerAllocation(server, tuple, username, lifetime) //,
-//_relaySocket(new net::UDPSocket) //server.reactor(), server.runner()
+    : ServerAllocation(server, tuple, username, lifetime)
+    , _relaySocket(net::makeSocket<net::UDPSocket>())
 {
     // Handle data from the relay socket directly from the allocation.
     // This will remove the need for allocation lookups when receiving

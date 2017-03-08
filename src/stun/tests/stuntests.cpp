@@ -61,8 +61,7 @@ int main(int argc, char** argv)
         expect(classType == stun::Message::Indication);
         expect(methodType == stun::Message::SendIndication);
 
-        stun::Message request(stun::Message::Indication,
-                              stun::Message::SendIndication);
+        stun::Message request(stun::Message::Indication, stun::Message::SendIndication);
         // expect(IS_STUN_INDICATION(request.classType() | request.methodType()));
 
         expect(request.classType() != stun::Message::Request);

@@ -31,8 +31,6 @@ struct TCPInitiator : public turn::TCPClientObserver
     Signal<void(const net::Address&)> ConnectionCreated;
     Signal<void(bool)> TestComplete;
 
-    const std::string payload = "initiator > responder";
-
 
     TCPInitiator(int id, const turn::Client::Options opts)
         : id(id)
@@ -84,7 +82,8 @@ struct TCPInitiator : public turn::TCPClientObserver
         // payload.append(65536, 'x');
         // payload.append(10000, 'x');
 
-        //std::string payload("initiator > responder");
+        DebugS(this) << id << ": Sending packet to responder" << endl;
+        std::string payload("initiator > responder");
         client.sendData(payload.c_str(), payload.length(), lastPeerAddr);
     }
 
@@ -158,6 +157,7 @@ struct TCPInitiator : public turn::TCPClientObserver
 
         client.sendData(data, size, peerAddr);
 #endif
+        DebugS(this) << id << ": Data received from responder" << endl;
 
         sendPacketToResponder();
     }

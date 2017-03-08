@@ -31,7 +31,7 @@ public:
     {
         DebugS(this) << id << ": Creating" << endl;
 
-        socket.setReceiver(this);
+        socket.addReceiver(this);
 
         // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         socket.bind(net::Address("0.0.0.0", 0));

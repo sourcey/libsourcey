@@ -12,6 +12,8 @@
 #include "scy/net/socketadapter.h"
 #include "scy/net/socket.h"
 
+#include <iterator>
+
 
 using std::endl;
 
@@ -20,30 +22,20 @@ namespace scy {
 namespace net {
 
 
-SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver)
-    : opaque(nullptr)
+SocketAdapter::SocketAdapter(SocketAdapter* sender)
+    : priority(0)
     , _sender(sender)
-    , _receiver(receiver)
+    , _dirty(false)
 {
     // TraceS(this) << "Create" << endl;
     assert(sender != this);
-    assert(receiver != this);
 }
 
 
 SocketAdapter::~SocketAdapter()
 {
     // TraceS(this) << "Destroy" << endl;
-
-#if 0
-    // Delete child adapters
-    // In order to prevent deletion, the outside
-    // application must nullify the adapter pointers
-    if (_sender)
-        delete _sender;
-    if (_receiver)
-        delete _receiver;
-#endif
+    // assert(_receivers.empty());
 }
 
 
@@ -110,59 +102,127 @@ void SocketAdapter::sendPacket(IPacket& packet)
 
 void SocketAdapter::onSocketConnect(Socket& socket)
 {
-    if (_receiver)
-        _receiver->onSocketConnect(socket);
+    try {
+        int current = _receivers.size() - 1;
+        while (current >= 0) {
+            auto ref = _receivers[current--];
+            if (ref->alive)
+                ref->ptr->onSocketConnect(socket);
+        }
+        cleanupReceivers();
+    }
+    catch (StopPropagation&) {
+    }
 }
 
 
 void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
-    if (_receiver)
-        _receiver->onSocketRecv(socket, buffer, peerAddress);
+    try {
+        int current = _receivers.size() - 1;
+        while (current >= 0) {
+            auto ref = _receivers[current--];
+            if (ref->alive)
+                ref->ptr->onSocketRecv(socket, buffer, peerAddress);
+        }
+        cleanupReceivers();
+    }
+    catch (StopPropagation&) {
+    }
 }
 
 
-void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error) // const Error& error
+void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
 {
-    if (_receiver)
-        _receiver->onSocketError(socket, error);
-}
+    try {
+        int current = _receivers.size() - 1;
+        while (current >= 0) {
+            auto ref = _receivers[current--];
+            if (ref->alive)
+                ref->ptr->onSocketError(socket, error);
+        }
+        cleanupReceivers();
+    }
+    catch (StopPropagation&) {
+    }
+} 
 
 
 void SocketAdapter::onSocketClose(Socket& socket)
 {
-    if (_receiver)
-        _receiver->onSocketClose(socket);
+    try {
+        int current = _receivers.size() - 1;
+        while (current >= 0) {
+            auto ref = _receivers[current--];
+            if (ref->alive) {
+                ref->ptr->onSocketClose(socket);
+            }
+        }
+        cleanupReceivers();
+    }
+    catch (StopPropagation&) {
+    }
 }
 
 
-void SocketAdapter::setSender(SocketAdapter* adapter) //, bool freeExisting
+void SocketAdapter::setSender(SocketAdapter* adapter)
 {
     assert(adapter != this);
     if (_sender == adapter)
         return;
-    //if (_sender && freeExisting)
-    //    delete _sender;
     _sender = adapter;
 }
 
 
-void SocketAdapter::setReceiver(SocketAdapter* adapter) //, bool freeExisting
+bool SocketAdapter::hasReceiver(SocketAdapter* adapter)
 {
+    for (auto& receiver : _receivers) {
+        if (receiver->ptr == adapter)
+            return true;
+    }
+    return false;
+}
+
+
+void SocketAdapter::addReceiver(SocketAdapter* adapter)
+{
+    assert(adapter->priority <= 100);
     assert(adapter != this);
-    if (_receiver == adapter)
+    if (hasReceiver(adapter))
         return;
-    //if (_receiver && freeExisting)
-    //    delete _receiver;
-    _receiver = adapter;
+
+    // Note that we insert new adapters in the back of the queue,
+    // and iterate in reverse to ensure calling order is preserved.
+    _dirty = true;
+    _receivers.push_back(new Ref{ adapter, true });
+    // _receivers.insert(_receivers.begin(), new Ref{ adapter, false }); // insert front
+    // std::sort(_receivers.begin(), _receivers.end(),
+    //     [](SocketAdapter const& l, SocketAdapter const& r) {
+    //     return l.priority > r.priority; });
 }
 
 
 void SocketAdapter::removeReceiver(SocketAdapter* adapter)
 {
     assert(adapter != this);
-    if (_receiver == adapter)
-        _receiver = nullptr;
+    auto it = std::find_if(_receivers.begin(), _receivers.end(),
+        [&](const Ref* ref) { return ref->ptr == adapter; });
+    if (it != _receivers.end()) { (*it)->alive = false; }
+}
+
+
+void SocketAdapter::cleanupReceivers()
+{
+    if (!_dirty) return;
+    for (auto it = _receivers.begin(); it != _receivers.end();) {
+        auto ref = *it;
+        if (!ref->alive) {
+            delete ref;
+            it = _receivers.erase(it);
+        }
+        else ++it;
+    }
+    _dirty = false;
 }
 
 
@@ -172,9 +232,13 @@ SocketAdapter* SocketAdapter::sender()
 }
 
 
-SocketAdapter* SocketAdapter::receiver()
+std::vector<SocketAdapter*> SocketAdapter::receivers()
 {
-    return _receiver;
+    std::vector<SocketAdapter*> items;
+    std::transform(_receivers.begin(), _receivers.end(), std::back_inserter(items),
+        [](const Ref* ref) { return ref->ptr; });
+    return items;
+    // return _receivers;
 }
 
 

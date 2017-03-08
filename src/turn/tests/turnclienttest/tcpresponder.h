@@ -29,7 +29,7 @@ public:
     {
         DebugS(this) << id << ": Creating" << endl;
 
-        socket.setReceiver(this);
+        socket.addReceiver(this);
     }
 
     virtual ~TCPResponder()

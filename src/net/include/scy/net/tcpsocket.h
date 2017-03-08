@@ -90,7 +90,6 @@ public:
 protected:
     virtual void init();
 
-    uv_connect_t* _connectReq;
     SocketMode _mode;
 };
 

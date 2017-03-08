@@ -32,14 +32,15 @@ public:
 
     Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
                 int timeout = 10000, int retries = 1,
-                uv::Loop* loop = uv::defaultLoop())
+                uv::Loop* loop = socket->loop())
         : PacketTransaction<PacketT>(timeout, retries, loop)
         , PacketSocketEmitter(socket)
         , _peerAddress(peerAddress)
     {
         TraceS(this) << "Create" << std::endl;
-        reinterpret_cast<net::SocketEmitter*>(
-            impl.get())->addReceiver(this, 100); // highest priority
+        // reinterpret_cast<net::PacketSocketEmitter*>(
+        //     impl.get())->addReceiver(this, 100); // highest priority
+        // PacketSocketEmitter::addReceiver(this, 100); // highest priority
     }
 
     virtual bool send()
@@ -60,7 +61,7 @@ public:
     virtual void dispose()
     {
         TraceS(this) << "Dispose" << std::endl;
-        PacketSocketEmitter::impl->removeReceiver(this);
+        // PacketSocketEmitter::impl->removeReceiver(this);
         BaseT::dispose(); // gc
     }
 
@@ -81,7 +82,7 @@ protected:
 
             // Stop socket data propagation since
             // we have handled the packet
-            throw StopPropagation();
+            throw StopPropagation(); 
         }
     }
 

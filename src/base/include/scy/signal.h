@@ -330,7 +330,7 @@ template <typename RT, typename... Args> struct Slot
     void* instance;
     int id;
     int priority;
-    // std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    std::atomic_flag flag = ATOMIC_FLAG_INIT;
 
     Slot(AbstractDelegate<RT, Args...>* delegate, void* instance = nullptr, int id = -1, int priority = -1)
         : delegate(delegate)
@@ -338,17 +338,17 @@ template <typename RT, typename... Args> struct Slot
         , id(id)
         , priority(priority)
     {
-        // flag.test_and_set();
+        flag.test_and_set();
     }
 
     void kill()
     {
-        // flag.clear();
+        flag.clear();
     }
 
     bool alive()
     {
-        return true; //flag.test_and_set();
+        return flag.test_and_set();
     }
 
     /// NonCopyable and NonMovable

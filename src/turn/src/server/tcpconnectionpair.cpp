@@ -42,13 +42,11 @@ TCPConnectionPair::~TCPConnectionPair()
     TraceS(this) << "Destroy: " << connectionID << endl;
 
     if (client.impl) {
-        // assert(client->base().refCount() == 2);
         client.Recv -= slot(this, &TCPConnectionPair::onClientDataReceived);
         client.Close -= slot(this, &TCPConnectionPair::onConnectionClosed);
         client->close();
     }
     if (peer.impl) {
-        // assert(peer->base().refCount() == 1);
         peer.Recv -= slot(this, &TCPConnectionPair::onPeerDataReceived);
         peer.Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
         peer.Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
@@ -65,8 +63,8 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 {
     try {
         assert(!transactionID.empty());
-        peer.impl = std::make_shared<net::TCPSocket>();
-        peer.opaque = this;
+        peer.swap(std::make_shared<net::TCPSocket>());
+        peer.impl->opaque = this;
         peer.Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
         // Start receiving early media
@@ -90,15 +88,14 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set peer socket: " << connectionID << ": "
                  << socket->peerAddress() << endl;
-    //<< ": " << socket./*base().*/refCount()
 
-    assert(peer.impl == nullptr);
-    // assert(socket./*base().*/refCount() == 1);
-    peer.impl = socket;
+    assert(!peer.impl);
+    peer.swap(socket);
     peer.Close += slot(this, &TCPConnectionPair::onConnectionClosed);
 
     // Receive and buffer early media from peer
     peer.Recv += slot(this, &TCPConnectionPair::onPeerDataReceived);
+
     net::setServerSocketRecvBufSize<uv_tcp_t>(
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
@@ -108,11 +105,11 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
     TraceS(this) << "Set client socket: " << connectionID << ": "
                  << socket->peerAddress() << endl;
-    //<< ": " << socket./*base().*/refCount()
-    assert(client.impl == nullptr);
-    // assert(socket./*base().*/refCount() == 2);
-    client.impl = socket;
+
+    assert(!client.impl);
+    client.swap(socket);
     client.Close += slot(this, &TCPConnectionPair::onConnectionClosed);
+
     net::setServerSocketRecvBufSize<uv_tcp_t>(
         *socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
@@ -148,7 +145,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
                                            const MutableBuffer& buffer,
                                            const net::Address& peerAddress)
 {
-    TraceS(this) << "Peer => Client: " << buffer.size() << endl;
+    TraceS(this) << "Peer > Client: " << buffer.size() << endl;
     // assert(pkt.buffer.position() == 0);
     // if (pkt.buffer.available() < 300)
     //    TraceS(this) << "Peer => Client: " << pkt.buffer << endl;
@@ -168,6 +165,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
         client->send(buf, len);
     }
 
+#if 0
     // Flash policy requests
     // TODO: Handle elsewhere? Bloody flash...
     else if (len == 23 && (strcmp(buf, "<policy-file-request/>") == 0)) {
@@ -179,6 +177,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
         peer->send(policy.c_str(), policy.length() + 1);
         peer->close();
     }
+#endif
 
     // Buffer early media
     // TODO: Make buffer size server option
@@ -187,14 +186,12 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
             allocation.server().options().earlyMediaBufferSize;
         DebugS(this) << "Buffering early data: " << len << endl;
         //#ifdef _DEBUG
-        //        DebugS(this) << "Printing early data: " << std::string(buf,
-        //        len) << endl;
+        //    DebugS(this) << "Printing early data: " << std::string(buf, len) << endl;
         //#endif
         if (len > maxSize)
             WarnL << "Dropping early media: Oversize packet: " << len << endl;
         if (earlyPeerData.size() > maxSize)
-            WarnL << "Dropping early media: Buffer at capacity >= " << maxSize
-                  << endl;
+            WarnL << "Dropping early media: Buffer at capacity >= " << maxSize << endl;
 
         // earlyPeerData.append(static_cast<const char*>(pkt.data()), len);
         earlyPeerData.insert(earlyPeerData.end(), buf, buf + len);
@@ -206,10 +203,10 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
                                              const MutableBuffer& buffer,
                                              const net::Address& peerAddress)
 {
-    TraceS(this) << "Client => Peer: " << buffer.size() << endl;
+    TraceS(this) << "Client > Peer: " << buffer.size() << endl;
     // assert(packet.buffer.position() == 0);
     // if (packet.size() < 300)
-    //    TraceS(this) << "Client => Peer: " << packet.buffer << endl;
+    //    TraceS(this) << "Client > Peer: " << packet.buffer << endl;
 
     if (peer.impl) {
         allocation.updateUsage(buffer.size());
@@ -239,8 +236,7 @@ void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 }
 
 
-void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
-                                           const Error& error)
+void TCPConnectionPair::onPeerConnectError(net::Socket& socket, const Error& error)
 {
     TraceS(this) << "Peer Connect request error: " << error.message << endl;
     assert(&socket == peer.impl.get());
@@ -252,9 +248,8 @@ void TCPConnectionPair::onPeerConnectError(net::Socket& socket,
 
 void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 {
-    TraceS(this) << "Connection pair socket closed: " << connectionID << ": "
-                 << &socket << endl;
-    delete this; // fail
+    TraceS(this) << "Connection pair socket closed: " << connectionID << ": " << &socket << endl;
+    delete this; // kill
 }
 
 

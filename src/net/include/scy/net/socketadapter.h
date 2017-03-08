@@ -41,8 +41,7 @@ class SCY_EXTERN SocketAdapter
 {
 public:
     /// Creates the SocketAdapter.
-    SocketAdapter(SocketAdapter* sender = nullptr,
-                  SocketAdapter* receiver = nullptr);
+    SocketAdapter(SocketAdapter* sender = nullptr);
 
     /// Destroys the SocketAdapter.
     virtual ~SocketAdapter();
@@ -71,14 +70,14 @@ public:
 
     /// Sets the pointer to the outgoing data adapter.
     /// Send methods proxy data to this adapter by default.
-    virtual void setSender(SocketAdapter* adapter); //, bool freeExisting = false
+    virtual void setSender(SocketAdapter* adapter);
 
     /// Returns the output SocketAdapter pointer
     SocketAdapter* sender();
 
     /// Sets the pointer to the incoming data adapter.
     /// Events proxy data to this adapter by default.
-    virtual void setReceiver(SocketAdapter* adapter); //, bool freeExisting = false
+    virtual void addReceiver(SocketAdapter* adapter);
 
     /// Remove the given receiver.
     ///
@@ -86,8 +85,11 @@ public:
     /// matches the current receiver.
     virtual void removeReceiver(SocketAdapter* adapter);
 
+    /// Returns true if the given receiver is connected.
+    virtual bool hasReceiver(SocketAdapter* adapter);
+
     /// Returns the input SocketAdapter pointer
-    SocketAdapter* receiver();
+    std::vector<SocketAdapter*> receivers();
 
     /// These virtual methods can be overridden as necessary
     /// to intercept socket events before they hit the application.
@@ -96,19 +98,21 @@ public:
     virtual void onSocketError(Socket& socket, const Error& error);
     virtual void onSocketClose(Socket& socket);
 
-    /// Optional client data pointer.
-    ///
-    /// The pointer is set to null on initialization 
-    /// but not managed.
-    void* opaque;
+    /// The priority of this adapter for STL sort operations.
+    int priority;
 
 protected:
-    /// Returns the polymorphic instance pointer
-    /// for signal delegate callbacks.
-    // virtual void* self() { return this; };
+    virtual void cleanupReceivers();
+
+    struct Ref
+    {
+        SocketAdapter* ptr;
+        bool alive;
+    };
 
     SocketAdapter* _sender;
-    SocketAdapter* _receiver;
+    std::vector<Ref*> _receivers;
+    bool _dirty;
 };
 
 

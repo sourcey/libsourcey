@@ -27,6 +27,8 @@ namespace turn {
 Server::Server(ServerObserver& observer, const ServerOptions& options)
     : _observer(observer)
     , _options(options)
+    //, _udpSocket(net::makeSocket<net::UDPSocket>())
+    //, _tcpSocket(net::makeSocket<net::TCPSocket>())
     , _udpSocket(nullptr)
     , _tcpSocket(nullptr)
 {
@@ -37,8 +39,6 @@ Server::Server(ServerObserver& observer, const ServerOptions& options)
 Server::~Server()
 {
     TraceL << "Destroy" << endl;
-    // assert(_udpSocket.isNull() || _udpSocket./*base().*/refCount() == 1);
-    // assert(_tcpSocket.isNull() || _tcpSocket./*base().*/refCount() == 1);
     stop();
     TraceL << "Destroy: OK" << endl;
 }
@@ -102,8 +102,7 @@ void Server::onTimer()
 {
     ServerAllocationMap allocations = this->allocations();
     for (auto it = allocations.begin(); it != allocations.end(); ++it) {
-        // TraceL << "Checking allocation: " << *it->second << endl;    // print
-        // the allocation debug info
+        // TraceL << "Checking allocation: " << *it->second << endl;
         if (!it->second->onTimer()) {
             // Entry removed via ServerAllocation destructor
             delete it->second;
@@ -117,22 +116,20 @@ void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
     TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;
 
     net::SocketEmitter emitter(sock);
+    emitter.Recv += slot(this, &Server::onSocketRecv);
+    emitter.Close += slot(this, &Server::onTCPSocketClosed);
     _tcpSockets.push_back(emitter);
-    auto& socket = _tcpSockets.back();
-    socket.Recv += slot(this, &Server::onSocketRecv);
-    socket.Close += slot(this, &Server::onTCPSocketClosed);
 
     // No need to increase control socket buffer size
-    // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); //
     // TODO: make option
+    // setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE);
 }
 
 
 net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 {
     for (auto& sock : _tcpSockets) {
-        TraceL << "sock->peerAddress(): " << sock->peerAddress() << ": "
-               << peerAddr << endl;
+        // TraceL << "Get socket: " << sock->peerAddress() << ": " << peerAddr << endl;
         if (sock->peerAddress() == peerAddr) {
             return std::dynamic_pointer_cast<TCPSocket>(sock.impl);
         }
@@ -154,12 +151,10 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
     while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
         if (message.classType() == stun::Message::Request ||
             message.classType() == stun::Message::Indication) {
-            Request request(message, socket.transport(), socket.address(),
-                            peerAddress);
+            Request request(message, socket.transport(), socket.address(), peerAddress);
 
             // TODO: Only authenticate stun::Message::Request types
-            handleRequest(request,
-                          _observer.authenticateRequest(this, request));
+            handleRequest(request, _observer.authenticateRequest(this, request));
         } else {
             assert(0 && "unknown request type");
         }
@@ -194,7 +189,7 @@ void Server::onTCPSocketClosed(net::Socket& socket)
 void Server::releaseTCPSocket(const net::Socket& socket)
 {
     TraceS(this) << "Removing TCP socket: " << &socket << std::endl;
-    for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
+    for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) {
         if (it->impl.get() == &socket) {
             it->Recv -= slot(this, &Server::onSocketRecv);
             it->Close -= slot(this, &Server::onTCPSocketClosed);
@@ -237,8 +232,7 @@ void Server::handleRequest(Request& request, AuthenticationState state)
 }
 
 
-void Server::handleAuthorizedRequest(
-    Request& request) //, AuthenticationState state
+void Server::handleAuthorizedRequest(Request& request)
 {
     TraceL << "Handle authorized request: " << request.toString() << endl;
 
@@ -275,10 +269,8 @@ void Server::handleAuthorizedRequest(
             break;
 
         default: {
-            FiveTuple tuple(request.remoteAddress, request.localAddress,
-                            request.transport); // socket->
-            auto allocation =
-                getAllocation(tuple); // reinterpret_cast<ServerAllocation*>();
+            FiveTuple tuple(request.remoteAddress, request.localAddress, request.transport);
+            auto allocation = getAllocation(tuple);
             if (!allocation) {
                 respondError(request, 437, "Allocation Mismatch");
                 return;
@@ -384,8 +376,7 @@ void Server::handleAllocateRequest(Request& request)
 
     int protocol = transportAttr->value() >> 24;
     if (protocol != 6 && protocol != 17) {
-        ErrorL << "Requested Transport is neither TCP or UDP: " << protocol
-               << endl;
+        ErrorL << "Requested Transport is neither TCP or UDP: " << protocol << endl;
         respondError(request, 422, "Unsupported Transport Protocol");
         return;
     }
@@ -681,22 +672,19 @@ void Server::respond(Request& request, stun::Message& response)
         response.add(integrityAttr);
     }
 
-    InfoL << "Sending message: " << response << ": " << request.remoteAddress
-          << endl;
+    TraceL << "Sending message: " << response << ": " << request.remoteAddress << endl;
 
     // The response (either success or error) is sent back to the
     // client on the 5-tuple.
     switch (request.transport) {
         case net::UDP:
-            _udpSocket.sendPacket(response, request.remoteAddress);
+            _udpSocket->sendPacket(response, request.remoteAddress);
             break;
         case net::TCP:
         case net::SSLTCP:
             auto socket = getTCPSocket(request.remoteAddress);
-            if (!socket) {
-                return;
-            }
-            socket->sendPacket(response);
+            if (socket)
+                socket->sendPacket(response);
             break;
     }
 }
@@ -740,7 +728,7 @@ void Server::respondError(Request& request, int errorCode,
 
 net::UDPSocket& Server::udpSocket()
 {
-    return *_tcpSocket.as<net::UDPSocket>();
+    return *_udpSocket.as<net::UDPSocket>();
 }
 
 
@@ -759,14 +747,12 @@ ServerObserver& Server::observer()
 
 ServerOptions& Server::options()
 {
-
     return _options;
 }
 
 
 ServerAllocationMap Server::allocations() const
 {
-
     return _allocations;
 }
 
@@ -783,8 +769,8 @@ void Server::addAllocation(ServerAllocation* alloc)
         assert(_allocations.find(alloc->tuple()) == _allocations.end());
         _allocations[alloc->tuple()] = alloc;
 
-        InfoL << "Allocation added: " << alloc->tuple().toString() << ": "
-              << _allocations.size() << " total" << endl;
+        DebugL << "Allocation added: " << alloc->tuple().toString() << ": "
+               << _allocations.size() << " total" << endl;
     }
 
     _observer.onServerAllocationCreated(this, alloc);
@@ -798,8 +784,8 @@ void Server::removeAllocation(ServerAllocation* alloc)
         if (it != _allocations.end()) {
             _allocations.erase(it);
 
-            InfoL << "Allocation removed: " << alloc->tuple().toString() << ": "
-                  << _allocations.size() << " remaining" << endl;
+            DebugL << "Allocation removed: " << alloc->tuple().toString() << ": "
+                   << _allocations.size() << " remaining" << endl;
         } else
             assert(0);
     }
