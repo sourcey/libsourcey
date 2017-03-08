@@ -23,28 +23,27 @@ SocketEmitter::SocketEmitter(const Socket::Ptr& socket)
     : SocketAdapter(socket.get())
     , impl(socket)
 {
-    TraceS(this) << "Create: " << impl.get() << endl;
     if (impl)
         impl->addReceiver(this);
 }
 
 
-//SocketEmitter::SocketEmitter(const SocketEmitter& that)
-//    : SocketAdapter(that.impl.get())
-//    , Connect(that.Connect)
-//    , Recv(that.Recv)
-//    , Error(that.Error)
-//    , Close(that.Close)
-//    , impl(that.impl)
-//{
-//    if (impl)
-//        impl->addReceiver(this);
-//}
+SocketEmitter::SocketEmitter(const SocketEmitter& that)
+    : SocketAdapter(that)
+    , Connect(that.Connect)
+    , Recv(that.Recv)
+    , Error(that.Error)
+    , Close(that.Close)
+    , impl(that.impl)
+{
+    if (impl)
+        impl->addReceiver(this);
+    assert(that._receivers.empty() || !_receivers.empty());
+}
 
 
 SocketEmitter::~SocketEmitter()
 {
-    TraceS(this) << "Destroy: " << impl.get() << endl;
     if (impl)
         impl->removeReceiver(this);
 }
@@ -88,11 +87,6 @@ void SocketEmitter::removeReceiver(SocketAdapter* adapter)
 void SocketEmitter::onSocketConnect(Socket& socket)
 {
     assert(&socket == impl.get());
-    //if (_receiver)
-    //    _receiver->onSocketConnect(socket);
-    //else
-    //    Connect.emit(socket);
-
     SocketAdapter::onSocketConnect(socket);
     Connect.emit(socket);
 }
@@ -101,24 +95,14 @@ void SocketEmitter::onSocketConnect(Socket& socket)
 void SocketEmitter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     assert(&socket == impl.get());
-    //if (_receiver)
-    //    _receiver->onSocketRecv(socket, buffer, peerAddress);
-    //else
-    //    Recv.emit(socket, buffer, peerAddress);
-
     SocketAdapter::onSocketRecv(socket, buffer, peerAddress);
     Recv.emit(socket, buffer, peerAddress);
 }
 
 
-void SocketEmitter::onSocketError(Socket& socket, const scy::Error& error) // const Error& error
+void SocketEmitter::onSocketError(Socket& socket, const scy::Error& error)
 {
     assert(&socket == impl.get());
-    //if (_receiver)
-    //    _receiver->onSocketError(socket, error);
-    //else
-    //    Error.emit(socket, error);
-
     SocketAdapter::onSocketError(socket, error);
     Error.emit(socket, error);
 }
@@ -127,11 +111,6 @@ void SocketEmitter::onSocketError(Socket& socket, const scy::Error& error) // co
 void SocketEmitter::onSocketClose(Socket& socket)
 {
     assert(&socket == impl.get());
-    //if (_receiver)
-    //    _receiver->onSocketClose(socket);
-    //else
-    //    Close.emit(socket);
-
     SocketAdapter::onSocketClose(socket);
     Close.emit(socket);
 }

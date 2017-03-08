@@ -33,20 +33,7 @@ public:
     SocketEmitter(const Socket::Ptr& socket = nullptr);
 
     /// Copy constructor
-    SocketEmitter(const SocketEmitter& that)
-        : SocketAdapter(that) //.impl.get()
-        , Connect(that.Connect)
-        , Recv(that.Recv)
-        , Error(that.Error)
-        , Close(that.Close)
-        , impl(that.impl)
-    {
-        //priority = that.priority;
-        //_receivers = that._receivers;
-        if (impl)
-            impl->addReceiver(this); // take receiver ownership
-        assert(that._receivers.empty() || !_receivers.empty());
-    }
+    SocketEmitter(const SocketEmitter& that);
 
     /// Destroys the SocketAdapter.
     virtual ~SocketEmitter();

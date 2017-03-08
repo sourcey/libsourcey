@@ -126,6 +126,12 @@ public:
 
     virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
 
+    /// Remove the given receiver.
+    ///
+    /// By default this function does nothing unless the given receiver 
+    /// matches the current receiver.
+    virtual void removeReceiver(SocketAdapter* adapter);
+
     Parser& parser();
     Connection* connection();
 

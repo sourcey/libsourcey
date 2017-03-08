@@ -116,50 +116,6 @@ protected:
 };
 
 
-
-#if 0
-/// SocketSignalAdapter extends the SocketAdapter to add signal callbacks.
-class SCY_EXTERN SocketSignalAdapter : public SocketAdapter
-{
-public:
-    /// Creates the SocketAdapter.
-    SocketSignalAdapter(SocketAdapter* sender = nullptr,
-                        SocketAdapter* receiver = nullptr);
-
-    /// Destroys the SocketAdapter.
-    virtual ~SocketSignalAdapter();
-
-    /// Adds an input SocketAdapter for receiving socket signals.
-    virtual void addReceiver(SocketAdapter* adapter, int priority = 0);
-
-    /// Removes an input SocketAdapter.
-    virtual void removeReceiver(SocketAdapter* adapter);
-
-    /// Signals that the socket is connected.
-    Signal<void(Socket&)> Connect;
-
-    /// Signals when data is received by the socket.
-    Signal<void(Socket&, const MutableBuffer&, const Address&)> Recv;
-
-    /// Signals that the socket is closed in error.
-    /// This signal will be sent just before the
-    /// Closed signal.
-    Signal<void(Socket&, const scy::Error&)> Error;
-
-    /// Signals that the underlying socket is closed.
-    Signal<void(Socket&)> Close;
-
-protected:
-
-    /// Internal callback events.
-    virtual void onSocketConnect(Socket& socket);
-    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
-    virtual void onSocketError(Socket& socket, const scy::Error& error);
-    virtual void onSocketClose(Socket& socket);
-};
-#endif
-
-
 } // namespace net
 } // namespace scy
 

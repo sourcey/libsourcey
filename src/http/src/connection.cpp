@@ -104,7 +104,6 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
         // TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
         deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
-        //delete _adapter;
         _adapter = nullptr;
     }
 
@@ -149,7 +148,7 @@ void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, 
 
 void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 {
-    DebugS(this) << "On socket error: " << error.errorno << ": " << error.message << endl;
+    // DebugS(this) << "On socket error: " << error.errorno << ": " << error.message << endl;
 
     if (error.errorno == UV_EOF) {
         // Close the connection when the other side does
@@ -164,7 +163,6 @@ void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 void Connection::onSocketClose(net::Socket& socket)
 {
     // TraceS(this) << "On socket close" << endl;
-    std::cout << "Connection::onSocketClose: " << this << std::endl;
 
     // Close the connection when the socket closes
     close();
@@ -225,11 +223,16 @@ void Connection::shouldSendHeader(bool flag)
 
 
 ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type type)
-    : SocketAdapter(connection->socket().get(), connection)
+    : SocketAdapter(connection->socket().get())
     , _connection(connection)
     , _parser(type)
 {
     // TraceS(this) << "Create: " << connection << endl;
+
+    // Set the connection as the default receiver
+    SocketAdapter::addReceiver(connection);
+
+    // Setup the HTTP parser
     _parser.setObserver(this);
     if (type == HTTP_REQUEST)
         _parser.setRequest(&connection->request());
@@ -248,7 +251,7 @@ std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags
 {
     // TraceS(this) << "Send: " << len << endl;
 
-    try {
+    // try {
         // Send headers on initial send
         if (_connection &&
             _connection->shouldSendHeader()) {
@@ -264,41 +267,30 @@ std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags
 
         // Send body / chunk
         return SocketAdapter::send(data, len, flags);
-    } catch (std::exception& exc) {
-        ErrorS(this) << "Send error: " << exc.what() << endl;
-
-        // Swallow the exception, the socket error will
-        // cause the connection to close on next iteration.
-    }
+    // } 
+    // catch (std::exception& exc) {
+    //     ErrorS(this) << "Send error: " << exc.what() << endl;
+    //
+    //     // Swallow the exception, the socket error will
+    //     // cause the connection to close on next iteration.
+    // }
 
     return -1;
+}
+
+
+void ConnectionAdapter::removeReceiver(SocketAdapter* adapter)
+{
+    if (_connection == adapter)
+        _connection = nullptr;
+
+    net::SocketAdapter::removeReceiver(adapter);
 }
 
 
 void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& buf, const net::Address&)
 {
     // TraceS(this) << "On socket recv: " << buf.size() << endl;
-
-    // // Send a HTTP packet
-    // std::ostringstream res;
-    // res << "HTTP/1.1 200 OK\r\n"
-    //     << "Connection: close\r\n"
-    //     << "Content-Length: 0" << "\r\n"
-    //     << "\r\n";
-    // std::string response(res.str());
-    // socket.send(response.c_str(), response.size());
-    // return;
-    //
-    //
-    // // FIXME
-    // _connection->response().add("Content-Length", "0");
-    // _connection->response().add("Connection", "close");
-    // //_response.add("Connection", "keep-alive");
-    // _connection->sendHeader();
-    // //send("hello universe", 14);
-    // //close();
-    // //std::cout << "boom" << std::endl;
-    // return;
 
     if (_parser.complete()) {
         // Buggy HTTP servers might send late data or multiple responses,
@@ -311,9 +303,7 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
     }
 
     // Parse incoming HTTP messages
-    //std::clock_t start = std::clock();
     _parser.parse(bufferCast<const char*>(buf), buf.size());
-    //std::cout << "http parse time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
 
@@ -330,7 +320,7 @@ void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
 {
     // TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
 
-    if (_connection && _receiver)
+    if (_connection/* && _receiver */)
         _connection->onHeaders();
 
     // Set the position to the end of the headers once
@@ -345,7 +335,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
     // TraceS(this) << "On parser chunk: " << len << endl;
 
     // Dispatch the payload
-    if (_connection && _receiver) {
+    if (_connection/* && _receiver */) {
         net::SocketAdapter::onSocketRecv(*_connection->socket().get(),
             mutableBuffer(const_cast<char*>(buf), len),
             _connection->socket()->peerAddress());
@@ -369,14 +359,12 @@ void ConnectionAdapter::onParserError(const scy::Error& err)
         // Add the following headers for HTTP policy response
         // policy += "HTTP/1.1 200 OK\r\nContent-Type: text/x-cross-domain-policy\r\nX-Permitted-Cross-Domain-Policies: all\r\n\r\n";
         policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
-
-        // TraceS(this) << "Send flash policy: " << policy << endl;
         base->send(policy.c_str(), policy.length() + 1);
     }
 #endif
 
     // Set error and close the connection on parser error
-    if (_connection && _receiver) {
+    if (_connection/* && _receiver */) {
         _connection->setError(err.message);
         _connection->close(); // do we want to force this?
     }
@@ -387,7 +375,7 @@ void ConnectionAdapter::onParserEnd()
 {
     // TraceS(this) << "On parser end" << endl;
 
-    if (_connection && _receiver)
+    if (_connection/* && _receiver */)
         _connection->onComplete();
 }
 

@@ -103,13 +103,13 @@ void SocketAdapter::sendPacket(IPacket& packet)
 void SocketAdapter::onSocketConnect(Socket& socket)
 {
     try {
+        cleanupReceivers();
         int current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
                 ref->ptr->onSocketConnect(socket);
         }
-        cleanupReceivers();
     }
     catch (StopPropagation&) {
     }
@@ -119,13 +119,13 @@ void SocketAdapter::onSocketConnect(Socket& socket)
 void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     try {
+        cleanupReceivers();
         int current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
                 ref->ptr->onSocketRecv(socket, buffer, peerAddress);
         }
-        cleanupReceivers();
     }
     catch (StopPropagation&) {
     }
@@ -135,13 +135,13 @@ void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, co
 void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
 {
     try {
+        cleanupReceivers();
         int current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
                 ref->ptr->onSocketError(socket, error);
         }
-        cleanupReceivers();
     }
     catch (StopPropagation&) {
     }
@@ -151,6 +151,7 @@ void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
 void SocketAdapter::onSocketClose(Socket& socket)
 {
     try {
+        cleanupReceivers();
         int current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
@@ -158,7 +159,6 @@ void SocketAdapter::onSocketClose(Socket& socket)
                 ref->ptr->onSocketClose(socket);
             }
         }
-        cleanupReceivers();
     }
     catch (StopPropagation&) {
     }
@@ -238,85 +238,7 @@ std::vector<SocketAdapter*> SocketAdapter::receivers()
     std::transform(_receivers.begin(), _receivers.end(), std::back_inserter(items),
         [](const Ref* ref) { return ref->ptr; });
     return items;
-    // return _receivers;
 }
-
-
-#if 0
-//
-// SocketSignalAdapter
-//
-
-
-SocketSignalAdapter::SocketSignalAdapter(SocketAdapter* sender, SocketAdapter* receiver)
-    : SocketAdapter(sender, receiver)
-{
-}
-
-
-SocketSignalAdapter::~SocketSignalAdapter()
-{
-}
-
-
-void SocketSignalAdapter::addReceiver(SocketAdapter* adapter, int priority)
-{
-    Connect.attach(slot(adapter, &net::SocketAdapter::onSocketConnect, -1, priority));
-    Recv.attach(slot(adapter, &net::SocketAdapter::onSocketRecv, -1, priority));
-    Error.attach(slot(adapter, &net::SocketAdapter::onSocketError, -1, priority));
-    Close.attach(slot(adapter, &net::SocketAdapter::onSocketClose, -1, priority));
-}
-
-
-void SocketSignalAdapter::removeReceiver(SocketAdapter* adapter)
-{
-    Connect.detach(adapter);
-    Recv.detach(adapter);
-    Error.detach(adapter);
-    Close.detach(adapter);
-
-    // Connect -= slot(adapter, &net::SocketAdapter::onSocketConnect);
-    // Recv -= slot(adapter, &net::SocketAdapter::onSocketRecv);
-    // Error -= slot(adapter, &net::SocketAdapter::onSocketError);
-    // Close -= slot(adapter, &net::SocketAdapter::onSocketClose);
-}
-
-
-void SocketSignalAdapter::onSocketConnect(Socket& socket)
-{
-    if (_receiver)
-        _receiver->onSocketConnect(socket);
-    else
-        Connect.emit(socket);
-}
-
-
-void SocketSignalAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
-{
-    if (_receiver)
-        _receiver->onSocketRecv(socket, buffer, peerAddress);
-    else
-        Recv.emit(socket, buffer, peerAddress);
-}
-
-
-void SocketSignalAdapter::onSocketError(Socket& socket, const scy::Error& error) // const Error& error
-{
-    if (_receiver)
-        _receiver->onSocketError(socket, error);
-    else
-        Error.emit(socket, error);
-}
-
-
-void SocketSignalAdapter::onSocketClose(Socket& socket)
-{
-    if (_receiver)
-        _receiver->onSocketClose(socket);
-    else
-        Close.emit(socket);
-}
-#endif
 
 
 } // namespace net
