@@ -326,7 +326,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */,
 }
 
 
-void ConnectionAdapter::onParserHeadersEnd(upgrade)
+void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
 {
     // TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
 

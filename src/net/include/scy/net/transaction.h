@@ -38,18 +38,13 @@ public:
         , _peerAddress(peerAddress)
     {
         TraceS(this) << "Create" << std::endl;
-
         reinterpret_cast<net::SocketEmitter*>(
-            impl.get())->addReceiver(this, 100); // highest prioority
-        // PacketSocketEmitter::impl->addReceiver(this, 100);
+            impl.get())->addReceiver(this, 100); // highest priority
     }
 
     virtual bool send()
     {
         TraceS(this) << "Send" << std::endl;
-        // assert(PacketSocketEmitter::socket->recvAdapter() == this);
-        assert(PacketSocketEmitter::impl);
-
         if (impl->sendPacket(BaseT::_request, _peerAddress) > 0)
             return BaseT::send();
         BaseT::setState(this, TransactionState::Failed);
@@ -65,12 +60,11 @@ public:
     virtual void dispose()
     {
         TraceS(this) << "Dispose" << std::endl;
-
         PacketSocketEmitter::impl->removeReceiver(this);
         BaseT::dispose(); // gc
     }
 
-    Address peerAddress() const 
+    Address peerAddress() const
     {
         return _peerAddress;
     }

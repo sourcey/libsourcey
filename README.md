@@ -79,7 +79,7 @@ Requests/sec:  37461.50
 Transfer/sec:      2.04MB
 ~~~
 
-**Nodejs basic echo server**
+**Nodejs echo server**
 
 ~~~bash
 $ wrk -d10s --timeout 2s http://localhost:1337
@@ -93,8 +93,7 @@ Requests/sec:  23236.33
 Transfer/sec:      2.19MB
 ~~~
 
-As you can see the `httpechoserver` is close to twice as fast as the `nodejs` echo server.
-Check the `httpechoserver` sample for the full code, including the `nodejs` echo server we used for profiling.
+As you can see the `httpechoserver` is almost twice as fast as the `nodejs` echo server, which is a massive performance gain over one of the leading web server implementations. Check the `httpechoserver` sample for the full code, including the `nodejs` echo server we used for profiling.
 
 #### Processes
 

@@ -9,20 +9,18 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
+    // NOTE: For best performance the HTTP server should be compiled on
+    // Linux kernel 3.9 or newer in RELEASE mode with ENABLE_LOGGING=OFF
 #ifdef SCY_UNIX
     int ncores = std::thread::hardware_concurrency();
     // std::cout << "threadpool size: " << ncores << std::endl;
     setenv("UV_THREADPOOL_SIZE", std::to_string(ncores).c_str(), 1);
 #endif
 
-    // Logger::instance().add(new NullChannel("null"));
     // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     // Logger::instance().setWriter(new AsyncLogWriter);
     // net::SSLManager::initNoVerifyServer();
     {
-        // NOTE: For best performance the HTTP server should be compiled on
-        // Linux kernel 3.9 or newer in RELEASE mode with ENABLE_LOGGING=OFF
-
         raiseBenchmarkServer();
         // runMulticoreBenchmarkServers();
         // runMulticoreEchoServers();
@@ -34,7 +32,7 @@ int main(int argc, char** argv)
         // raiseBenchmarkServer();
 // #endif
     }
-    //net::SSLManager::instance().shutdown();
+    // net::SSLManager::instance().shutdown();
     Logger::destroy();
     return 0;
 }
