@@ -34,8 +34,10 @@ void raiseMulticoreEchoServer()
     srv.start();
 
     srv.Connection += [&](http::ServerConnection::Ptr conn) {
-        conn->send("hello universe", 14);
-        conn->close();
+        conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+            conn.send(bufferCast<const char*>(buffer), buffer.size());
+            conn.close();
+        };
     };
 
     uv::waitForShutdown([&](void*) {
@@ -73,8 +75,11 @@ void raiseBenchmarkServer()
     srv.start();
 
     srv.Connection += [&](http::ServerConnection::Ptr conn) {
-        conn->send("hello universe", 14);
-        conn->close();
+        conn->response().add("Content-Length", "0");
+        conn->response().add("Connection", "close"); // "keep-alive"
+        conn->sendHeader();
+        // conn->send("hello universe", 14);
+        // conn->close();
     };
 
     std::cout << "HTTP server listening on " << address << std::endl;
@@ -91,8 +96,11 @@ void raiseMulticoreBenchmarkServer()
     srv.start();
 
     srv.Connection += [&](http::ServerConnection::Ptr conn) {
-        conn->send("hello universe", 14);
-        conn->close();
+        conn->response().add("Content-Length", "0");
+        conn->response().add("Connection", "close"); // "keep-alive"
+        conn->sendHeader();
+        // conn->send("hello universe", 14);
+        // conn->close();
     };
 
     uv::waitForShutdown([&](void*) {
