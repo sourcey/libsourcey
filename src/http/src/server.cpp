@@ -28,13 +28,13 @@ Server::Server(const net::Address& address, net::TCPSocket::Ptr socket)
     , _timer(5000, 5000, socket->loop())
     , _factory(new ServerConnectionFactory())
 {
-    TraceS(this) << "Create" << endl;
+    // TraceS(this)<< "Create" << endl;
 }
 
 
 Server::~Server()
 {
-    TraceS(this) << "Destroy" << endl;
+    // TraceS(this)<< "Destroy" << endl;
     shutdown();
     if (_factory)
         delete _factory;
@@ -57,7 +57,7 @@ void Server::start()
 
 void Server::shutdown()
 {
-    TraceS(this) << "Shutdown" << endl;
+    // TraceS(this)<< "Shutdown" << endl;
 
     if (_socket) {
         _socket->removeReceiver(this);
@@ -73,7 +73,7 @@ void Server::shutdown()
 
 void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
-    TraceS(this) << "On accept socket connection" << endl;
+    // TraceS(this)<< "On accept socket connection" << endl;
 
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
@@ -83,7 +83,7 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
-    TraceS(this) << "On connection ready" << endl;
+    // TraceS(this)<< "On connection ready" << endl;
 
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
@@ -96,7 +96,7 @@ void Server::onConnectionReady(ServerConnection& conn)
 
 void Server::onConnectionClose(ServerConnection& conn)
 {
-    TraceS(this) << "On connection closed" << endl;
+    // TraceS(this)<< "On connection closed" << endl;
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
@@ -108,7 +108,7 @@ void Server::onConnectionClose(ServerConnection& conn)
 
 void Server::onSocketClose(net::Socket& socket)
 {
-    TraceS(this) << "On server socket close" << endl;
+    // TraceS(this)<< "On server socket close" << endl;
 }
 
 
@@ -136,14 +136,14 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     , _server(server)
     , _upgrade(false)
 {
-    TraceS(this) << "Create" << endl;
+    // TraceS(this)<< "Create" << endl;
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));
 }
 
 
 ServerConnection::~ServerConnection()
 {
-    TraceS(this) << "Destroy" << endl;
+    // TraceS(this)<< "Destroy" << endl;
     close(); // FIXME
 }
 
@@ -156,7 +156,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders()
 {
-    TraceS(this) << "On headers" << endl;
+    // TraceS(this)<< "On headers" << endl;
 
 #if 0
     // Send a raw HTTP response
@@ -180,7 +180,7 @@ void ServerConnection::onHeaders()
     if (_upgrade && util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
     // if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
     //     util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
-        TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
+        // TraceS(this)<< "Upgrading to WebSocket: " << request() << endl;
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -218,11 +218,11 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-    TraceS(this) << "On payload: " << buffer.size() << endl;
+    // TraceS(this)<< "On payload: " << buffer.size() << endl;
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        TraceS(this) << "On payload: Closed" << endl;
+        // TraceS(this)<< "On payload: Closed" << endl;
         return;
     }
 
@@ -234,11 +234,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onComplete()
 {
-    TraceS(this) << "On complete" << endl;
+    // TraceS(this)<< "On complete" << endl;
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        TraceS(this) << "On complete: Closed" << endl;
+        // TraceS(this)<< "On complete: Closed" << endl;
         return;
     }
 
@@ -251,7 +251,7 @@ void ServerConnection::onComplete()
 
 void ServerConnection::onClose()
 {
-    TraceS(this) << "On close" << endl;
+    // TraceS(this)<< "On close" << endl;
 
     Close.emit(*this);
 }

@@ -103,7 +103,8 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->setSender(nullptr);
 
         // TraceS(this) << "Replace adapter: Delete existing: " << _adapter << endl;
-        // deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
+        deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
+        //delete _adapter;
         _adapter = nullptr;
     }
 
@@ -163,6 +164,7 @@ void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 void Connection::onSocketClose(net::Socket& socket)
 {
     // TraceS(this) << "On socket close" << endl;
+    std::cout << "Connection::onSocketClose: " << this << std::endl;
 
     // Close the connection when the socket closes
     close();
@@ -324,7 +326,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */,
 }
 
 
-void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
+void ConnectionAdapter::onParserHeadersEnd(upgrade)
 {
     // TraceS(this) << "On headers end: " << _parser.upgrade() << endl;
 
