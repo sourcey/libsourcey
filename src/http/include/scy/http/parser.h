@@ -27,7 +27,7 @@ class SCY_EXTERN ParserObserver
 {
 public:
     virtual void onParserHeader(const std::string& name, const std::string& value) = 0;
-    virtual void onParserHeadersEnd() = 0;
+    virtual void onParserHeadersEnd(bool upgrade) = 0;
     virtual void onParserChunk(const char* data, std::size_t len) = 0;
     virtual void onParserEnd() = 0;
 

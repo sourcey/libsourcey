@@ -65,15 +65,15 @@ public:
         return dynamic_cast<T*>(impl.get());
     }
 
-    /// Pointer to the underlying socket.
-    /// Sent data will be proxied to this socket.
-    Socket::Ptr impl;
-
     /// Accessor to the underlying socket.
     Socket* operator->() const
     {
         return impl.get();
     }
+
+    /// Pointer to the underlying socket.
+    /// Sent data will be proxied to this socket.
+    Socket::Ptr impl;
 
 protected:
 

@@ -167,8 +167,7 @@ bool Parser::upgrade() const
 
 
 //
-// Events
-//
+// Callbacks
 
 
 void Parser::onURL(const std::string& value)
@@ -196,7 +195,7 @@ void Parser::onHeadersEnd()
     _upgrade = _parser.upgrade > 0;
 
     if (_observer)
-        _observer->onParserHeadersEnd();
+        _observer->onParserHeadersEnd(_upgrade);
 }
 
 
