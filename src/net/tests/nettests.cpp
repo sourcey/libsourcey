@@ -20,11 +20,12 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
     net::SSLManager::initNoVerifyServer();
     net::SSLManager::initNoVerifyClient();
+
 
     // =========================================================================
     // Address Test
@@ -81,6 +82,7 @@ int main(int argc, char** argv)
         }
     });
 
+
     // =========================================================================
     // TCP Socket Test
     //
@@ -95,6 +97,7 @@ int main(int argc, char** argv)
 
         expect(test.passed);
     });
+
 
     // =========================================================================
     // SSL Socket Test

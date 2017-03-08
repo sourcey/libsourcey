@@ -50,14 +50,14 @@ public:
         //socket.shutdown();
     }
 
-    void onConnect(Socket& sock)
+    void onSocketConnect(Socket& sock)
     {
         DebugL << "Connected" << std::endl;
 
         sock.send("client > server", 15);
     }
 
-    void onRecv(Socket&, const MutableBuffer& buffer, const Address& peerAddress)
+    void onSocketRecv(Socket&, const MutableBuffer& buffer, const Address& peerAddress)
     {
         std::string data(bufferCast<const char*>(buffer), buffer.size());
         DebugL << "On recv: " << data << std::endl;
@@ -76,13 +76,13 @@ public:
             assert(false); // fail...
     }
 
-    void onError(Socket&, const Error& error)
+    void onSocketError(Socket&, const Error& error)
     {
         // assert(sender == &socket);
         InfoL << "On error: " << error.message << std::endl;
     }
 
-    void onClose(Socket&)
+    void onSocketClose(Socket&)
     {
         // The last callback to fire is the Closed signal
         // which notifies us the underlying libuv socket
