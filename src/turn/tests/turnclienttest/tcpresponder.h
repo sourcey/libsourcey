@@ -35,6 +35,7 @@ public:
     virtual ~TCPResponder()
     {
         DebugS(this) << id << ": Destroying" << endl;
+        socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)

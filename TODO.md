@@ -1,5 +1,6 @@
 # TODO
 
+Signal move - for copy packet emitter
 Double check WebRTC samples
 	- add some style to demos
 	- take some screenshots for README
@@ -7,11 +8,11 @@ Describe how to build WebRTC for use with LibSourcey in README
 Improve av module documentation
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Fix deprecated ICE code
-Improve HTP server performance
-	- Remove icompare functions from server --- get from parser
-	- Remove mutex from NVCollection
-	- Test direct 200 close response before handlers are called
-	- SocketAdapter::addReceiver - optimize all the += operators
+STUN buffer appending extra bytes
+CShange socket return values to accomodate -1
+Cleanup SocketAdapter ref map
+Fix signal atomic copy
+ScoketEmitter can't snatch the receiver .. need a shared pointer
 
 
 # Tests

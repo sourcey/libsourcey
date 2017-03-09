@@ -84,10 +84,10 @@ int main(int argc, char** argv)
     describe("url query parameters", []() {
         NVCollection params;
         http::splitURIParameters("/streaming?format=MJPEG&width=400&height=300&"
-                                 "encoding=Base64&packetizer=chunked&"
-                                 "rand=0.09983996045775712", params);
+            "encoding=Base64&packetizer=chunked&"
+            "rand=0.09983996045775712", params);
         for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
-            DebugL << "URL Parameter: " << it->first << ": " << it->second << endl;
+            // std::cout << "URL Parameter: " << it->first << ": " << it->second << endl;
         }
 
         expect(params.get("format") == "MJPEG");
@@ -108,12 +108,12 @@ int main(int argc, char** argv)
     //
 
     describe("client connection download", []() {
-		std::string path(SCY_BUILD_DIR);
-		fs::addnode(path, "zlib-1.2.8.tar.gz");
+        std::string path(SCY_BUILD_DIR);
+        fs::addnode(path, "zlib-1.2.8.tar.gz");
 
         auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
         conn->Complete += [&](const http::Response& response) {
-            std::cout << "Server response: " << response << endl;
+            // std::cout << "Server response: " << response << endl;
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://sourcey.com");
         conn.Headers += [&](http::Response& response) {
-			      std::cout << "On response headers: " << response << endl;
+            // std::cout << "On response headers: " << response << endl;
         };
         conn.Payload += [&](const MutableBuffer& buffer) {
-			      std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+            // std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
         };
         conn.Complete += [&](const http::Response& response) {
-      			std::cout << "On response complete: " << response
-      			          << conn.readStream<std::stringstream>().str() << endl;
+            // std::cout << "On response complete: " << response
+            //     << conn.readStream<std::stringstream>().str() << endl;
 
             // Force connection closure if the other side hasn't already
             conn.close();
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
     //
     //         // https://developers.google.com/drive/web/manage-uploads
     //         // Need a current OAuth2 access_token with https://www.googleapis.com/auth/drive.file
-	  //         // access scope for this to work
+    //         // access scope for this to work
     //         std::string accessToken("ya29.1.AADtN_WY53y0jEgN_SWcmfp6VvAQ6asnYqbDi5CKEfzwL7lfNqtbUiLeL4v07b_I");
     //         std::string metadata("{ \"title\": \"My File\" }");
     //
@@ -276,6 +276,6 @@ int main(int argc, char** argv)
 
     test::runAll();
 
-	http::Client::destroy();
+    http::Client::destroy();
     return test::finalize();
 }

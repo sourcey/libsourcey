@@ -29,10 +29,10 @@ namespace scy {
 namespace turn {
 
 
-Client::Client(ClientObserver& observer, const Options& options)
+Client::Client(ClientObserver& observer, const Options& options, const net::Socket::Ptr& socket)
     : _observer(observer)
     , _options(options)
-    , _socket(nullptr)
+    , _socket(socket)
 {
 }
 
@@ -51,41 +51,39 @@ void Client::initiate()
     TraceL << "TURN client connecting to " << _options.serverAddr << endl;
 
     assert(!_permissions.empty() && "must set permissions");
-
-    auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.get());
+    assert(_socket.impl && "must set socket");
+    
+    auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.impl.get());
     if (udpSocket) {
         udpSocket->bind(net::Address("0.0.0.0", 0));
         // udpSocket->setBroadcast(true);
     }
 
-    _socket->Recv += slot(this, &Client::onSocketRecv, -1, -1);
-    _socket->Connect += slot(this, &Client::onSocketConnect);
-    _socket->Close += slot(this, &Client::onSocketClose);
+    _socket.Recv += slot(this, &Client::onSocketRecv, -1, -1);
+    _socket.Connect += slot(this, &Client::onSocketConnect);
+    _socket.Close += slot(this, &Client::onSocketClose);
     _socket->connect(_options.serverAddr);
 }
 
 
 void Client::shutdown()
 {
-    {
-        _timer.stop();
+    _timer.stop();
 
-        for (auto it = _transactions.begin(); it != _transactions.end();) {
-            TraceL << "Shutdown base: Delete transaction: " << *it << endl;
-            (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
-            // delete *it;
-            (*it)->dispose();
-            it = _transactions.erase(it);
-        }
+    for (auto it = _transactions.begin(); it != _transactions.end();) {
+        TraceL << "Shutdown base: Delete transaction: " << *it << endl;
+        (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
+        // delete *it;
+        (*it)->dispose();
+        it = _transactions.erase(it);
+    }
 
-        _socket->Connect -= slot(this, &Client::onSocketConnect);
-        _socket->Recv -= slot(this, &Client::onSocketRecv);
-        //_socket->Error -= slot(this, &Client::onSocketError);
-        _socket->Close -= slot(this, &Client::onSocketClose);
-        if (!_socket->closed()) {
-            _socket->close();
-        }
-        // assert(_socket->/*base().*/refCount() == 1);
+    _socket.Connect -= slot(this, &Client::onSocketConnect);
+    _socket.Recv -= slot(this, &Client::onSocketRecv);
+    //_socket->Error -= slot(this, &Client::onSocketError);
+    _socket.Close -= slot(this, &Client::onSocketClose);
+    if (!_socket->closed()) {
+        _socket->close();
     }
 }
 
@@ -93,7 +91,7 @@ void Client::shutdown()
 void Client::onSocketConnect(net::Socket& socket)
 {
     TraceL << "Client connected" << endl;
-    // _socket->Connect -= slot(this, &Client::onSocketConnect);
+    _socket.Connect -= slot(this, &Client::onSocketConnect);
 
     _timer.setInterval(_options.timerInterval);
     _timer.start(std::bind(&Client::onTimer, this));
@@ -131,7 +129,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
 
 void Client::onSocketClose(net::Socket& socket)
 {
-    assert(&socket == _socket.get());
+    assert(&socket == _socket.impl.get());
     TraceL << "Control socket closed" << endl;
     assert(_socket->closed());
     shutdown();
@@ -279,7 +277,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
     // socket = socket ? socket : _socket;
     // assert(socket && !socket->isNull());
     auto transaction = new stun::Transaction(
-        socket ? socket : _socket, _options.serverAddr, _options.timeout, 1);
+        socket ? socket : _socket.impl, _options.serverAddr, _options.timeout, 1);
     transaction->StateChange += slot(this, &Client::onTransactionProgress);
     _transactions.push_back(transaction);
     return transaction;

@@ -88,7 +88,7 @@ public:
 /// This HTTP server is not strictly standards compliant.
 /// It was created to be a fast (nocopy where possible)
 /// solution for streaming media to web browsers.
-class SCY_EXTERN Server
+class SCY_EXTERN Server : public net::SocketAdapter
 {
 public:
     Server(const net::Address& address, net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());

@@ -24,15 +24,14 @@ namespace net {
 //
 
 
-PacketSocketAdapter::PacketSocketAdapter(const Socket::Ptr& socket)
-    : SocketAdapter(socket.get()) //reinterpret_cast<SocketAdapter*>(socket.get())
-    , socket(socket)
+PacketSocketEmitter::PacketSocketEmitter(const Socket::Ptr& socket)
+    : SocketEmitter(socket)
 {
     // TraceS(this) << "Create: " << socket << endl;
 }
 
 
-void PacketSocketAdapter::onSocketRecv(Socket& sock, const MutableBuffer& buffer, const Address& peerAddress)
+void PacketSocketEmitter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     // TraceS(this) << "Recv: " << buffer.size() << endl;
 
@@ -42,7 +41,7 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock, const MutableBuffer& buffer
     std::size_t nread = 0;
     while (len > 0 && (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
         assert(nread > 0);
-        pkt->info = new PacketInfo(this->socket, peerAddress);
+        pkt->info = new PacketInfo(this->impl, peerAddress);
         onPacket(*pkt);
         delete pkt;
         buf += nread;
@@ -51,9 +50,9 @@ void PacketSocketAdapter::onSocketRecv(Socket& sock, const MutableBuffer& buffer
 }
 
 
-void PacketSocketAdapter::onPacket(IPacket& pkt)
+void PacketSocketEmitter::onPacket(IPacket& pkt)
 {
-    // TraceS(this) << "onPacket: emitting: " << pkt.size() << endl;
+    // TraceS(this) << "On packet: " << pkt.size() << endl;
     PacketSignal::emit(pkt);
 }
 
@@ -67,7 +66,7 @@ void PacketSocketAdapter::onPacket(IPacket& pkt)
 PacketSocket::PacketSocket(const Socket& socket) :
     Socket(socket)
 {
-    addReceiver(new PacketSocketAdapter);
+    addReceiver(new PacketSocketEmitter);
     //assert(Socket::base().refCount() >= 2);
 }
 
@@ -75,7 +74,7 @@ PacketSocket::PacketSocket(const Socket& socket) :
 PacketSocket::PacketSocket(Socket* base, bool shared) :
     Socket(base, shared)
 {
-    addReceiver(new PacketSocketAdapter);
+    addReceiver(new PacketSocketEmitter);
     //assert(!shared || Socket::base().refCount() >= 2);
 }
 

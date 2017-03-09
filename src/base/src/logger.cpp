@@ -119,12 +119,8 @@ void Logger::setWriter(LogWriter* writer)
     // NOTE: Cannot lock here as writer may
     // attempt to flush pending on destruction.
     // std::lock_guard<std::mutex> guard(_mutex);
-    std::cout << "setWriter" << std::endl;
     if (_writer) {
-        std::cout << "setWriter 1" << std::endl;
         delete _writer;
-        std::cout << "setWriter 2" << std::endl;
-
     }
     _writer = writer;
 }
@@ -200,23 +196,18 @@ AsyncLogWriter::AsyncLogWriter()
 
 AsyncLogWriter::~AsyncLogWriter()
 {
-    std::cout << "~AsyncLogWriter" << std::endl;
     // Cancel and wait for the thread
     cancel();
 
-    std::cout << "~AsyncLogWriter 1" << std::endl;
     // Note: Not using join here as it is causing a deadlock
     // when unloading shared libraries when the logger is not
     // explicitly shutdown().
     // while (_thread.running())
     //    scy::sleep(10);
     _thread.join();
-    std::cout << "~AsyncLogWriter 2" << std::endl;
 
     // Flush remaining items synchronously
     flush();
-    std::cout << "~AsyncLogWriter 3" << std::endl;
-
     assert(_pending.empty());
 }
 
@@ -242,7 +233,6 @@ void AsyncLogWriter::clear()
 
 void AsyncLogWriter::flush()
 {
-    std::cout << "AsyncLogWriter flush" << std::endl;
     while (writeNext())
         scy::sleep(1);
 }
@@ -250,19 +240,15 @@ void AsyncLogWriter::flush()
 
 void AsyncLogWriter::run()
 {
-    std::cout << "AsyncLogWriter run 1" << std::endl;
     while (!cancelled()) {
-        std::cout << "AsyncLogWriter run" << std::endl;
         scy::sleep(writeNext() ? 1 : 50);
     }
-    std::cout << "AsyncLogWriter run CANCELLED" << std::endl;
 }
 
 
 bool AsyncLogWriter::writeNext()
 {
 #ifdef SCY_ENABLE_LOGGING
-    std::cout << "AsyncLogWriter writeNext" << std::endl;
     LogStream* next;
     {
         std::lock_guard<std::mutex> guard(_mutex);
@@ -610,7 +596,7 @@ void EventedFileChannel::write(const LogStream& stream, LogLevel level, const ch
         return;
 
     FileChannel::write(message, level, ptr);
-    OnLogStream.emit(/*this, */message, level, ptr);
+    OnLogStream.emit(message, level, ptr);
 }
 #endif
 

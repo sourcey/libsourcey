@@ -28,13 +28,13 @@ Server::Server(const net::Address& address, net::TCPSocket::Ptr socket)
     , _timer(5000, 5000, socket->loop())
     , _factory(new ServerConnectionFactory())
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceS(this)<< "Create" << endl;
 }
 
 
 Server::~Server()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceS(this)<< "Destroy" << endl;
     shutdown();
     if (_factory)
         delete _factory;
@@ -43,9 +43,8 @@ Server::~Server()
 
 void Server::start()
 {
+    _socket->addReceiver(this);
     _socket->AcceptConnection += slot(this, &Server::onClientSocketAccept);
-    // FIXME
-    //_socket->Close += slot(this, &Server::onSocketClose);
     _socket->bind(_address);
     _socket->listen(1000);
 
@@ -58,11 +57,11 @@ void Server::start()
 
 void Server::shutdown()
 {
-    // TraceS(this) << "Shutdown" << endl;
+    // TraceS(this)<< "Shutdown" << endl;
 
     if (_socket) {
+        _socket->removeReceiver(this);
         _socket->AcceptConnection -= slot(this, &Server::onClientSocketAccept);
-        //_socket->Close -= slot(this, &Server::onSocketClose);
         _socket->close();
     }
 
@@ -74,21 +73,17 @@ void Server::shutdown()
 
 void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
-    // TraceS(this) << "On accept socket connection" << endl;
+    // TraceS(this)<< "On accept socket connection" << endl;
 
-    // std::clock_t start = std::clock();
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
-    //std::cout << "create connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
-
     _connections.push_back(conn);
-    // std::cout << "create connection time 1: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
 }
 
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
-    // TraceS(this) << "On connection ready" << endl;
+    // TraceS(this)<< "On connection ready" << endl;
 
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
@@ -101,23 +96,19 @@ void Server::onConnectionReady(ServerConnection& conn)
 
 void Server::onConnectionClose(ServerConnection& conn)
 {
-    // TraceS(this) << "On connection closed" << endl;
-
-    //std::cout << "release connection: " << _connections.size() << std::endl;
-    //std::clock_t start = std::clock();
+    // TraceS(this)<< "On connection closed" << endl;
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
-            //std::cout << "release connection time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << std::endl;
             return;
         }
     }
 }
 
 
-void Server::onSocketClose(net::Socket&)
+void Server::onSocketClose(net::Socket& socket)
 {
-    // TraceS(this) << "On server socket close" << endl;
+    // TraceS(this)<< "On server socket close" << endl;
 }
 
 
@@ -145,15 +136,15 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     , _server(server)
     , _upgrade(false)
 {
-    // TraceS(this) << "Create" << endl;
-
+    // TraceS(this)<< "Create" << endl;
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));
 }
 
 
 ServerConnection::~ServerConnection()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceS(this)<< "Destroy" << endl;
+    close(); // FIXME
 }
 
 
@@ -165,24 +156,31 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders()
 {
-    // TraceS(this) << "On headers" << endl;
+    // TraceS(this)<< "On headers" << endl;
 
 #if 0
+    // Send a raw HTTP response
+    std::ostringstream res;
+    res << "HTTP/1.1 200 OK\r\n"
+        << "Connection: close\r\n"
+        << "Content-Length: 0" << "\r\n"
+        << "\r\n";
+    std::string response(res.str());
+    send.send(response.c_str(), response.size());
+
+    // Send a test HTTP response
     _response.add("Content-Length", "0");
-    _response.add("Connection", "close");
-    //_response.add("Connection", "keep-alive");
+    _response.add("Connection", "close"); // "keep-alive"
     sendHeader();
-    //send("hello universe", 14);
-    //close();
     return;
 #endif
 
     // Upgrade the connection if required
-    _upgrade = reinterpret_cast<ConnectionAdapter*>(adapter())->parser().upgrade();
-    if (_upgrade) {
-        //util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
-        //util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
-        // TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
+    _upgrade = dynamic_cast<ConnectionAdapter*>(adapter())->parser().upgrade();
+    if (_upgrade && util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+    // if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
+    //     util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
+        // TraceS(this)<< "Upgrading to WebSocket: " << request() << endl;
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -211,8 +209,8 @@ void ServerConnection::onHeaders()
     }
 
     // Upgraded connections don't receive the onHeaders callback
-    //if (!_upgrade)
-    //    _responder->onHeaders(_request);
+    // if (!_upgrade)
+    //     _responder->onHeaders(_request);
 
     _server.onConnectionReady(*this);
 }
@@ -220,11 +218,11 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-    // TraceS(this) << "On payload: " << buffer.size() << endl;
+    // TraceS(this)<< "On payload: " << buffer.size() << endl;
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceS(this) << "On payload: Closed" << endl;
+        // TraceS(this)<< "On payload: Closed" << endl;
         return;
     }
 
@@ -236,11 +234,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onComplete()
 {
-    // TraceS(this) << "On complete" << endl;
+    // TraceS(this)<< "On complete" << endl;
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceS(this) << "On complete: Closed" << endl;
+        // TraceS(this)<< "On complete: Closed" << endl;
         return;
     }
 
@@ -253,7 +251,7 @@ void ServerConnection::onComplete()
 
 void ServerConnection::onClose()
 {
-    // TraceS(this) << "On close" << endl;
+    // TraceS(this)<< "On close" << endl;
 
     Close.emit(*this);
 }

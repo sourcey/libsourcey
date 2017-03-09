@@ -47,7 +47,7 @@ public:
     net::Address relayedAddress() const;
 
 private:
-    net::UDPSocket _relaySocket;
+    net::SocketEmitter _relaySocket; // net::UDPSocket
 };
 }
 } //  namespace scy::turn

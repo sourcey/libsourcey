@@ -25,6 +25,7 @@ namespace net {
 
 
 Socket::Socket()
+    : opaque(nullptr)
 {
     // TraceS(this) << "Create" << endl;
 }

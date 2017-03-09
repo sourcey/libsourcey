@@ -42,7 +42,7 @@ public:
     virtual ~UDPResponder()
     {
         DebugS(this) << id << ": Destroying" << endl;
-        socket.addReceiver(this);
+        socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)

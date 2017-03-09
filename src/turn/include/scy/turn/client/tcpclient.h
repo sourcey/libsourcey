@@ -45,7 +45,7 @@ struct RelayConnectionBinding
 };
 
 
-typedef KVCollection<net::Address, net::TCPSocket::Ptr> ConnectionManager;
+typedef KVCollection<net::Address, net::SocketEmitter> ConnectionManager;
 typedef ConnectionManager::Map ConnectionManagerMap;
 
 
@@ -87,8 +87,9 @@ protected:
     TCPClientObserver& _observer;
     ConnectionManager _connections;
 };
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 #endif // SCY_TURN_TCPClient_H

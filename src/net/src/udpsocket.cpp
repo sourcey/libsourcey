@@ -204,8 +204,8 @@ bool UDPSocket::recvStart()
 
 bool UDPSocket::recvStop()
 {
-    // This method must not throw since it is called internally via libuv
-    // callbacks.
+    // This method must not throw since it is called
+    // internally via libuv callbacks.
     if (!ptr())
         return false;
     return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
@@ -334,7 +334,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
 
 void UDPSocket::onError(const scy::Error& error)
 {
-    ErrorS(this) << "Error: " << error.message << endl;
+    // DebugS(this) << "Error: " << error.message << endl;
     onSocketError(*this, error);
     close(); // close on error
 }

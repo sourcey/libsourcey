@@ -52,7 +52,10 @@ struct PacketCreationStrategy : public IPacketCreationStrategy
     {
         assert(_priority <= 100);
     }
-    virtual ~PacketCreationStrategy(){};
+
+    virtual ~PacketCreationStrategy()
+    {
+    }
 
     virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const
     {
@@ -61,9 +64,12 @@ struct PacketCreationStrategy : public IPacketCreationStrategy
             return packet;
         delete packet;
         return nullptr;
-    };
+    }
 
-    virtual int priority() const { return _priority; };
+    virtual int priority() const 
+    { 
+        return _priority; 
+    }
 
 protected:
     int _priority;

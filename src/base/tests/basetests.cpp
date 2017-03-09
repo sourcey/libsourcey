@@ -51,6 +51,9 @@ int main(int argc, char** argv)
     // Signal Benchmarks
     //
     describe("signal class member benchmark", []() {
+        Signal<void(std::uint64_t&)> sig;
+        Signal<void(std::uint64_t&)> testCopy(sig);
+
         Signal<void(std::uint64_t&)> signal;
         SignalCounter counter;
         signal += slot(&counter, &SignalCounter::increment);

@@ -32,10 +32,10 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
     // Bind a socket acceptor for incoming peer connections.
     _acceptor->bind(net::Address(server.options().listenAddr.host(), 0));
     _acceptor->listen();
-    _acceptor->AcceptConnection += slot(this, &TCPAllocation::onPeerAccept);
+    _acceptor.as<net::TCPSocket>()->AcceptConnection += slot(this, &TCPAllocation::onPeerAccept);
 
     // The allocation will be deleted if the control connection is lost.
-    _control->Close += slot(this, &TCPAllocation::onControlClosed);
+    _control.Close += slot(this, &TCPAllocation::onControlClosed);
 
     TraceL << "Initializing on " << _acceptor->address() << endl;
 }
@@ -46,10 +46,10 @@ TCPAllocation::~TCPAllocation()
     TraceL << "Destroy TCP allocation" << endl;
 
    
-    _acceptor->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
+    _acceptor.as<net::TCPSocket>()->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
     _acceptor->close();
 
-    _control->Close -= slot(this, &TCPAllocation::onControlClosed);
+    _control.Close -= slot(this, &TCPAllocation::onControlClosed);
     _control->close();
 
     auto pairs = this->pairs().map();
@@ -344,25 +344,23 @@ void TCPAllocation::onControlClosed(net::Socket& socket)
 
 net::TCPSocket& TCPAllocation::control()
 {
-   
-    return *_control.get();
+    return *_control.as<net::TCPSocket>();
 }
 
 
 TCPConnectionPairMap& TCPAllocation::pairs()
 {
-   
     return _pairs;
 }
 
 
 net::Address TCPAllocation::relayedAddress() const
 {
-   
     return _acceptor->address();
 }
-}
-} //  namespace scy::turn
+
+
+} } //  namespace scy::turn
 
 
 /// @\}

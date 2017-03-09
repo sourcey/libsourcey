@@ -38,7 +38,7 @@ public:
     virtual ~Connection();
 
     virtual void onHeaders() = 0;
-    virtual void onPayload(const MutableBuffer&) = 0; // {};
+    virtual void onPayload(const MutableBuffer&) = 0;
     virtual void onComplete() = 0;
     virtual void onClose() = 0;
 
@@ -70,7 +70,7 @@ public:
 
     /// Assign the new ConnectionAdapter and setup the chain
     /// The flow is: Connection <-> ConnectionAdapter <-> Socket
-    void replaceAdapter(net::SocketAdapter* adapter);
+    virtual void replaceAdapter(net::SocketAdapter* adapter);
 
     /// Return the underlying socket pointer.
     net::TCPSocket::Ptr& socket();
@@ -88,7 +88,6 @@ public:
     virtual http::Message* outgoingHeader() = 0;
 
 protected:
-
     /// Set the internal error.
     /// Note: Setting the error does not `close()` the connection.
     virtual void setError(const scy::Error& err);
@@ -110,7 +109,6 @@ protected:
 
     friend class ConnectionStream;
     friend class ConnectionAdapter;
-    //friend struct std::default_delete<Connection>;
 };
 
 
@@ -128,14 +126,16 @@ public:
 
     virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
 
+    /// Remove the given receiver.
+    ///
+    /// By default this function does nothing unless the given receiver 
+    /// matches the current receiver.
+    virtual void removeReceiver(SocketAdapter* adapter);
+
     Parser& parser();
     Connection* connection();
 
-    /// Removes an input SocketAdapter.
-    // virtual void setReceiver1(net::SocketAdapter* adapter);
-
 protected:
-
     /// SocketAdapter interface
     virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
     // virtual void onSocketError(const Error& error);
@@ -143,7 +143,7 @@ protected:
 
     /// HTTP Parser interface
     virtual void onParserHeader(const std::string& name, const std::string& value);
-    virtual void onParserHeadersEnd();
+    virtual void onParserHeadersEnd(bool upgrade);
     virtual void onParserChunk(const char* buf, std::size_t len);
     virtual void onParserError(const scy::Error& err);
     virtual void onParserEnd();
