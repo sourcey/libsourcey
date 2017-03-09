@@ -104,7 +104,7 @@ void TCPClient::sendConnectRequest(const net::Address& peerAddress)
 }
 
 
-void TCPClient::sendData(const char* data, std::size_t size, const net::Address& peerAddress)
+void TCPClient::sendData(const char* data, size_t size, const net::Address& peerAddress)
 {
     TraceL << "Send data to " << peerAddress << endl;
 

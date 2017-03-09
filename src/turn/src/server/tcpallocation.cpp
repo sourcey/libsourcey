@@ -143,13 +143,13 @@ bool TCPAllocation::handleRequest(Request& request)
 
 bool TCPAllocation::onTimer()
 {
-    TraceL << "TCPAllocation: On timer" << endl;
+    TraceL << "On timer" << endl;
 
     // Clean up any expired Connect request peer connections.
     auto pairs = this->pairs().map();
     for (auto it = pairs.begin(); it != pairs.end(); ++it) {
         if (it->second->expired()) {
-            TraceL << "TCPAllocation: On timer: Removing expired peer" << endl;
+            TraceL << "On timer: Removing expired peer" << endl;
             this->pairs().free(it->first);
         }
     }
@@ -288,8 +288,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 }
 
 
-void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
-                                            bool success)
+void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool success)
 {
     TraceL << "Send peer Connect response: " << success << endl;
 
@@ -325,7 +324,6 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair,
 
 int TCPAllocation::sendToControl(stun::Message& message)
 {
-   
     TraceL << "Send to control: " << message << endl;
     return _control->sendPacket(message, 0);
 }
@@ -333,7 +331,6 @@ int TCPAllocation::sendToControl(stun::Message& message)
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
-   
     TraceL << "Control socket disconnected" << endl;
 
     // The allocation will be destroyed on the

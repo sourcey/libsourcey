@@ -74,13 +74,13 @@ public:
         _queue.pop_front();
     }
 
-    template <typename Compare> std::size_t sort()
+    template <typename Compare> size_t sort()
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return std::sort(_queue.begin(), _queue.end(), Compare());
     }
 
-    std::size_t size()
+    size_t size()
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _queue.size();

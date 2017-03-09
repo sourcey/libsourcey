@@ -331,7 +331,7 @@ fail:
 
 void printDevices(std::ostream& ost, std::vector<Device>& devs)
 {
-    for (std::size_t i = 0; i < devs.size(); ++i) {
+    for (size_t i = 0; i < devs.size(); ++i) {
         ost << '\t';
         devs[i].print(ost);
         ost << endl;

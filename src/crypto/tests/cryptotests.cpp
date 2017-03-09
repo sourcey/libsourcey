@@ -186,7 +186,7 @@ int main(int argc, char** argv)
         std::string in(1000, 'x');
 
         char encBuf[2048];
-        std::size_t len = enc.encode(in.c_str(), in.length(), encBuf);
+        size_t len = enc.encode(in.c_str(), in.length(), encBuf);
         std::string encRes(encBuf, len);
         DebugL << "Encoded: " << encRes << endl;
 

@@ -562,7 +562,7 @@ bool FilePart::writeChunk(FormWriter& writer)
 
     char buffer[FILE_CHUNK_SIZE];
     if (_istr.read(buffer, FILE_CHUNK_SIZE)) {
-        writer.emit(buffer, (std::size_t)_istr.gcount());
+        writer.emit(buffer, (size_t)_istr.gcount());
         writer.updateProgress((int)_istr.gcount());
         return true;
     }
@@ -570,7 +570,7 @@ bool FilePart::writeChunk(FormWriter& writer)
     if (_istr.eof()) {
         // Still a few bytes left to write?
         if (_istr.gcount() > 0) {
-            writer.emit(buffer, (std::size_t)_istr.gcount());
+            writer.emit(buffer, (size_t)_istr.gcount());
             writer.updateProgress((int)_istr.gcount());
         }
         return false; // all done
@@ -588,13 +588,13 @@ void FilePart::write(FormWriter& writer)
 
     char buffer[FILE_CHUNK_SIZE];
     while (_istr.read(buffer, FILE_CHUNK_SIZE) && !writer.cancelled()) {
-        writer.emit(buffer, (std::size_t)_istr.gcount());
+        writer.emit(buffer, (size_t)_istr.gcount());
         writer.updateProgress((int)_istr.gcount());
     }
 
     if (_istr.eof()) {
         if (_istr.gcount() > 0 && !writer.cancelled()) {
-            writer.emit(buffer, (std::size_t)_istr.gcount());
+            writer.emit(buffer, (size_t)_istr.gcount());
             writer.updateProgress((int)_istr.gcount());
         }
     } else if (_istr.bad())
@@ -610,11 +610,11 @@ void FilePart::write(std::ostream& ostr)
 
     char buffer[FILE_CHUNK_SIZE];
     while (_istr.read(buffer, FILE_CHUNK_SIZE))
-        ostr.write(buffer, (std::size_t)_istr.gcount());
+        ostr.write(buffer, (size_t)_istr.gcount());
 
     if (_istr.eof()) {
         if (_istr.gcount() > 0)
-            ostr.write(buffer, (std::size_t)_istr.gcount());
+            ostr.write(buffer, (size_t)_istr.gcount());
     } else if (_istr.bad())
         throw std::runtime_error("Cannot read multipart source file: " +
                                  _filename);

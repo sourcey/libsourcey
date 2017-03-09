@@ -107,8 +107,8 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
     stun::Message message;
     // auto socket = reinterpret_cast<net::Socket*>(sender);
     char* buf = bufferCast<char*>(buffer);
-    std::size_t len = buffer.size();
-    std::size_t nread = 0;
+    size_t len = buffer.size();
+    size_t nread = 0;
     while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
         handleResponse(message);
         buf += nread;
@@ -816,7 +816,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
 }
 
 
-void Client::sendData(const char* data, std::size_t size, const net::Address& peerAddress)
+void Client::sendData(const char* data, size_t size, const net::Address& peerAddress)
 {
     TraceL << "Send Data Indication to peer: " << peerAddress << endl;
 

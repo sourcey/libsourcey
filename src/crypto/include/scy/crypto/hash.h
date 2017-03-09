@@ -36,7 +36,7 @@ public:
     // Hash the given data.
     /// This function may (and normally will) be called
     /// many times for large blocks of data.
-    void update(const void* data, unsigned length);
+    void update(const void* data, size_t length);
 
     /// Finish up the digest operation and return the result.
     const ByteVec& digest();
@@ -88,7 +88,7 @@ inline std::string checksum(const std::string& algorithm,
     Hash engine(algorithm);
     char buffer[4096];
     while (fstr.read(buffer, 4096) || fstr.gcount() > 0) {
-        engine.update(buffer, (std::size_t)fstr.gcount());
+        engine.update(buffer, (size_t)fstr.gcount());
     }
 
     return hex::encode(engine.digest());

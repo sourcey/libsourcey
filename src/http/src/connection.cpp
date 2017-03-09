@@ -46,7 +46,7 @@ Connection::~Connection()
 }
 
 
-std::size_t Connection::send(const char* data, std::size_t len, int flags)
+ssize_t Connection::send(const char* data, size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
     assert(!_closed);
@@ -57,7 +57,7 @@ std::size_t Connection::send(const char* data, std::size_t len, int flags)
 }
 
 
-std::size_t Connection::sendHeader()
+ssize_t Connection::sendHeader()
 {
     if (!_shouldSendHeader)
         return 0;
@@ -247,7 +247,7 @@ ConnectionAdapter::~ConnectionAdapter()
 }
 
 
-std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags)
+ssize_t ConnectionAdapter::send(const char* data, size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
 
@@ -255,7 +255,7 @@ std::size_t ConnectionAdapter::send(const char* data, std::size_t len, int flags
         // Send headers on initial send
         if (_connection &&
             _connection->shouldSendHeader()) {
-            int res = _connection->sendHeader();
+            ssize_t res = _connection->sendHeader();
 
             // The initial packet may be empty to push the headers through
             if (len == 0)
@@ -330,7 +330,7 @@ void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
 }
 
 
-void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
+void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 {
     // TraceS(this) << "On parser chunk: " << len << endl;
 
@@ -428,7 +428,7 @@ ConnectionStream::~ConnectionStream()
 }
 
 
-std::size_t ConnectionStream::send(const char* data, std::size_t len, int flags)
+ssize_t ConnectionStream::send(const char* data, size_t len, int flags)
 {
     // TraceS(this) << "Send: " << len << endl;
 

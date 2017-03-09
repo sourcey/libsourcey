@@ -77,7 +77,7 @@ std::string print(const std::tm& dt, const char* fmt)
 
 #else
     // LINUX
-    const std::size_t size = 1024;
+    const size_t size = 1024;
     char buffer[size];
     auto success = std::strftime(buffer, size, fmt, &dt);
 

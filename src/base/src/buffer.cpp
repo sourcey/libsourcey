@@ -41,13 +41,13 @@ BitReader::BitReader(const Buffer& buf, ByteOrder order)
 }
 
 
-BitReader::BitReader(const char* bytes, std::size_t size, ByteOrder order)
+BitReader::BitReader(const char* bytes, size_t size, ByteOrder order)
 {
     init(bytes, size, order);
 }
 
 
-void BitReader::init(const char* bytes, std::size_t size, ByteOrder order)
+void BitReader::init(const char* bytes, size_t size, ByteOrder order)
 {
     // _buffer = nullptr;
     //_mark = 0;
@@ -65,7 +65,7 @@ BitReader::~BitReader()
 }
 
 
-void BitReader::seek(std::size_t val)
+void BitReader::seek(size_t val)
 {
     if (val > _limit)
         throw std::out_of_range("index out of range");
@@ -74,7 +74,7 @@ void BitReader::seek(std::size_t val)
 }
 
 
-void BitReader::skip(std::size_t val)
+void BitReader::skip(size_t val)
 {
     if (val > _limit)
         throw std::out_of_range("index out of range");
@@ -89,13 +89,13 @@ std::string BitReader::toString()
 }
 
 
-std::size_t BitReader::available() const
+size_t BitReader::available() const
 {
     return _limit - _position;
 }
 
 
-std::size_t BitReader::limit() const
+size_t BitReader::limit() const
 {
     return _limit;
 }
@@ -147,7 +147,7 @@ void BitReader::getU64(std::uint64_t& val)
 }
 
 
-void BitReader::get(std::string& val, std::size_t len)
+void BitReader::get(std::string& val, size_t len)
 {
     if (len > available()) {
         ErrorS(this) << "index out of range: "
@@ -163,7 +163,7 @@ void BitReader::get(std::string& val, std::size_t len)
 }
 
 
-void BitReader::get(char* val, std::size_t len)
+void BitReader::get(char* val, size_t len)
 {
     if (len > available()) {
         ErrorS(this) << "index out of range: "
@@ -266,9 +266,9 @@ const std::uint64_t BitReader::peekU64()
 // String parsing
 //
 
-int BitReader::skipToChar(char c)
+size_t BitReader::skipToChar(char c)
 {
-    std::size_t len = 0;
+    size_t len = 0;
     while (_limit > _position + len && _bytes[_position + len] != c)
         len++;
     if (_limit > _position + len)
@@ -279,9 +279,9 @@ int BitReader::skipToChar(char c)
 }
 
 
-int BitReader::skipWhitespace()
+size_t BitReader::skipWhitespace()
 {
-    std::size_t len = 0;
+    size_t len = 0;
     while (_limit > _position + len && _bytes[_position + len] == ' ')
         len++;
     if (_limit > _position + len)
@@ -292,9 +292,9 @@ int BitReader::skipWhitespace()
 }
 
 
-int BitReader::skipToNextLine()
+size_t BitReader::skipToNextLine()
 {
-    std::size_t len = 0;
+    size_t len = 0;
     while (_limit > _position + len && _bytes[_position + len] != '\n') {
         len++;
     }
@@ -307,9 +307,9 @@ int BitReader::skipToNextLine()
 }
 
 
-int BitReader::skipNextWord()
+size_t BitReader::skipNextWord()
 {
-    std::size_t len = skipWhitespace();
+    size_t len = skipWhitespace();
     while (_limit > _position + len && _bytes[_position + len] != ' ' &&
            _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
            _bytes[_position + len] != '\r')
@@ -322,9 +322,9 @@ int BitReader::skipNextWord()
 }
 
 
-int BitReader::readToNext(std::string& val, char c)
+size_t BitReader::readToNext(std::string& val, char c)
 {
-    std::size_t len = 0;
+    size_t len = 0;
     while (_limit > _position + len && _bytes[_position + len] != c)
         len++;
     val.append(_bytes + _position, len);
@@ -336,9 +336,9 @@ int BitReader::readToNext(std::string& val, char c)
 }
 
 
-int BitReader::readNextWord(std::string& val)
+size_t BitReader::readNextWord(std::string& val)
 {
-    std::size_t len = skipWhitespace();
+    size_t len = skipWhitespace();
     while (_limit > _position + len && _bytes[_position + len] != ' ' &&
            _bytes[_position + len] != '\t' && _bytes[_position + len] != '\n' &&
            _bytes[_position + len] != '\r')
@@ -352,9 +352,9 @@ int BitReader::readNextWord(std::string& val)
 }
 
 
-int BitReader::readNextNumber(unsigned int& val)
+size_t BitReader::readNextNumber(unsigned int& val)
 {
-    std::size_t len = skipWhitespace();
+    size_t len = skipWhitespace();
     while (_limit > _position + len && isdigit(_bytes[_position + len]))
         len++;
     if (len)
@@ -367,9 +367,9 @@ int BitReader::readNextNumber(unsigned int& val)
 }
 
 
-int BitReader::readLine(std::string& val)
+size_t BitReader::readLine(std::string& val)
 {
-    std::size_t len = 0;
+    size_t len = 0;
     while (_limit > _position + len && _bytes[_position + len] != '\n')
         len++;
     val.append(_bytes + _position, len);
@@ -393,7 +393,7 @@ BitWriter::BitWriter(MutableBuffer& pod, ByteOrder order)
 }
 
 
-BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
+BitWriter::BitWriter(char* bytes, size_t size, ByteOrder order)
 {
     init(bytes, size, order);
 }
@@ -407,7 +407,7 @@ BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 }
 
 
-void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
+void BitWriter::init(char* bytes, size_t size, ByteOrder order)
 {
     _bytes = bytes;
     _limit = size;
@@ -421,7 +421,7 @@ BitWriter::~BitWriter()
 }
 
 
-void BitWriter::skip(std::size_t val)
+void BitWriter::skip(size_t val)
 {
     if (_position + val > _limit) {
         ErrorS(this) << "index out of range: "
@@ -436,7 +436,7 @@ void BitWriter::skip(std::size_t val)
 }
 
 
-void BitWriter::seek(std::size_t val)
+void BitWriter::seek(size_t val)
 {
     if (val > _limit) {
         ErrorS(this) << "index out of range: "
@@ -457,13 +457,13 @@ std::string BitWriter::toString()
 }
 
 
-std::size_t BitWriter::available() const
+size_t BitWriter::available() const
 {
     return _limit - _position;
 }
 
 
-std::size_t BitWriter::limit() const
+size_t BitWriter::limit() const
 {
     return _limit;
 }
@@ -517,7 +517,7 @@ void BitWriter::put(const std::string& val)
 }
 
 
-void BitWriter::put(const char* val, std::size_t len)
+void BitWriter::put(const char* val, size_t len)
 {
     if ((_position + len) > _limit) {
         ErrorS(this) << "insufficient buffer capacity: "
@@ -538,20 +538,20 @@ void BitWriter::put(const char* val, std::size_t len)
 //
 
 
-bool BitWriter::updateU8(std::uint8_t val, std::size_t pos)
+bool BitWriter::updateU8(std::uint8_t val, size_t pos)
 {
     return update(reinterpret_cast<const char*>(&val), 1, pos);
 }
 
 
-bool BitWriter::updateU16(std::uint16_t val, std::size_t pos)
+bool BitWriter::updateU16(std::uint16_t val, size_t pos)
 {
     std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     return update(reinterpret_cast<const char*>(&v), 2, pos);
 }
 
 
-bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
+bool BitWriter::updateU24(std::uint32_t val, size_t pos)
 {
     std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     char* start = reinterpret_cast<char*>(&v);
@@ -562,27 +562,27 @@ bool BitWriter::updateU24(std::uint32_t val, std::size_t pos)
 }
 
 
-bool BitWriter::updateU32(std::uint32_t val, std::size_t pos)
+bool BitWriter::updateU32(std::uint32_t val, size_t pos)
 {
     std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     return update(reinterpret_cast<const char*>(&v), 4, pos);
 }
 
 
-bool BitWriter::updateU64(std::uint64_t val, std::size_t pos)
+bool BitWriter::updateU64(std::uint64_t val, size_t pos)
 {
     std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     return update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 
 
-bool BitWriter::update(const std::string& val, std::size_t pos)
+bool BitWriter::update(const std::string& val, size_t pos)
 {
     return update(val.c_str(), val.size(), pos);
 }
 
 
-bool BitWriter::update(const char* val, std::size_t len, std::size_t pos)
+bool BitWriter::update(const char* val, size_t len, size_t pos)
 {
     if ((pos + len) > available())
         return false;
@@ -618,7 +618,7 @@ DynamicBitWriter::~DynamicBitWriter()
 }
 
 
-void DynamicBitWriter::put(const char* val, std::size_t len)
+void DynamicBitWriter::put(const char* val, size_t len)
 {
     //TraceS(this) << "DynamicBitWriter::put: "
     //    << "val=" << std::string(val, len) << ", "
@@ -627,14 +627,14 @@ void DynamicBitWriter::put(const char* val, std::size_t len)
     //    << "position=" << position() << ", "
     //    << "limit=" << limit() << std::endl;
 
-    // _buffer.resize(std::max<std::size_t>(3 * len / 2, 2048));
+    // _buffer.resize(std::max<size_t>(3 * len / 2, 2048));
     _buffer.insert(_buffer.begin() + _offset + _position, val, val + len);
     _bytes = &_buffer[0]; // ->data();
     _limit = _buffer.size();
     _position += len;
 }
 
-bool DynamicBitWriter::update(const char* val, std::size_t len, std::size_t pos)
+bool DynamicBitWriter::update(const char* val, size_t len, size_t pos)
 {
     if ((pos + len) > available())
         return false;

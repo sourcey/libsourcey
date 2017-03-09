@@ -146,8 +146,8 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 
     stun::Message message;
     char* buf = bufferCast<char*>(buffer);
-    std::size_t len = buffer.size();
-    std::size_t nread = 0;
+    size_t len = buffer.size();
+    size_t nread = 0;
     while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
         if (message.classType() == stun::Message::Request ||
             message.classType() == stun::Message::Indication) {

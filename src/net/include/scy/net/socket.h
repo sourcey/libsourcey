@@ -200,7 +200,7 @@ public:
 
     virtual IPacket* clone() const { return new SocketPacket(*this); }
 
-    virtual std::size_t read(const ConstBuffer&)
+    virtual ssize_t read(const ConstBuffer&)
     {
         assert(0 && "write only");
         return 0;

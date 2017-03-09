@@ -173,14 +173,13 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 }
 
 
-int Cipher::encrypt(const unsigned char* inbuf, std::size_t inlen,
-                    unsigned char* outbuf, std::size_t outlen,
+int Cipher::encrypt(const unsigned char* inbuf, size_t inlen,
+                    unsigned char* outbuf, size_t outlen,
                     Encoding encoding)
 {
     initEncryptor();
 
-    int reslen = 0;
-    int nwrite = 0;
+    ssize_t reslen, nwrite = 0;
     std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
     std::unique_ptr<unsigned char[]> cryptbuf(
         encoder ? new unsigned char[outlen] : nullptr);
@@ -391,7 +390,7 @@ int Cipher::ivSize() const
 }
 
 
-inline void getRandomBytes(ByteVec& vec, std::size_t count)
+inline void getRandomBytes(ByteVec& vec, size_t count)
 {
     Random rnd;
     rnd.seed();

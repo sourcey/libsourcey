@@ -327,8 +327,8 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
 
     sockio::Packet pkt;
     char* buf = bufferCast<char*>(buffer);
-    std::size_t len = buffer.size();
-    std::size_t nread = 0;
+    size_t len = buffer.size();
+    size_t nread = 0;
     while (len > 0 && (nread = pkt.read(constBuffer(buf, len))) > 0) {
         onPacket(pkt);
         buf += nread;

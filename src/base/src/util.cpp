@@ -32,17 +32,17 @@ namespace util {
 
 std::string string_vprintf(const char* fmt, va_list args)
 {
-    std::size_t size = 500;
+    size_t size = 500;
     char* buf = (char*)malloc(size);
     // Grow the buffer size until the output is no longer truncated
     while (true) {
         va_list args_copy;
 #if defined(_WIN32)
         args_copy = args;
-        std::size_t nwritten = _vsnprintf(buf, size - 1, fmt, args_copy);
+        size_t nwritten = _vsnprintf(buf, size - 1, fmt, args_copy);
 #else
         va_copy(args_copy, args);
-        std::size_t nwritten = vsnprintf(buf, size - 1, fmt, args_copy);
+        size_t nwritten = vsnprintf(buf, size - 1, fmt, args_copy);
 #endif
         // Some c libraries return -1 for overflow,
         // some return a number larger than size-1
@@ -70,7 +70,7 @@ std::string format(const char* fmt, ...)
 
 bool isNumber(const std::string& str)
 {
-    for (std::size_t i = 0; i < str.length(); i++) {
+    for (size_t i = 0; i < str.length(); i++) {
         if (!::isdigit(str[i]))
             return false;
     }
@@ -220,12 +220,12 @@ std::int64_t doubleToInt(double d)
 #endif
 
 
-std::string dumpbin(const char* data, std::size_t len)
+std::string dumpbin(const char* data, size_t len)
 {
     std::string output;
-    for (std::size_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         char byte = data[i];
-        for (std::size_t mask = 0x80; mask > 0; mask >>= 1) {
+        for (size_t mask = 0x80; mask > 0; mask >>= 1) {
             output.push_back(byte & mask ? '1' : '0');
         }
         if (i % 4 == 3)
@@ -264,7 +264,7 @@ bool compareVersion(const std::string& l, const std::string& r)
 
 void removeSpecialCharacters(std::string& str, bool allowSpaces)
 {
-    for (std::size_t i = 0; i < str.length(); ++i)
+    for (size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) &&
             str[i] != '.')
             str.erase(i, 1);
@@ -273,7 +273,7 @@ void removeSpecialCharacters(std::string& str, bool allowSpaces)
 
 void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
 {
-    for (std::size_t i = 0; i < str.length(); ++i)
+    for (size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) &&
             str[i] != '.')
             str[i] = with;
@@ -312,7 +312,7 @@ bool matchNodes(const std::vector<std::string>& params,
     if (params.size() > xparams.size() && xparams[xparams.size() - 1] != "*")
         return false;
 
-    for (std::size_t i = 0; i < xparams.size(); ++i) {
+    for (size_t i = 0; i < xparams.size(); ++i) {
 
         // Wildcard * matches anything.
         if (xparams[i] == "*")
@@ -327,7 +327,7 @@ bool matchNodes(const std::vector<std::string>& params,
 
 
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
-                           std::size_t bufferSize)
+                           size_t bufferSize)
 {
     assert(bufferSize > 0);
 
@@ -363,7 +363,7 @@ std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
 
 
 std::streamsize copyToString(std::istream& istr, std::string& str,
-                             std::size_t bufferSize)
+                             size_t bufferSize)
 {
     assert(bufferSize > 0);
 

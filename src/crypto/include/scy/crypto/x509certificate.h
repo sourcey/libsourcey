@@ -45,7 +45,7 @@ public:
 
     /// Creates the X509Certificate object by reading
     /// a certificate in PEM format from the given buffer.
-    explicit X509Certificate(const char* data, std::size_t length);
+    explicit X509Certificate(const char* data, size_t length);
 
     /// Creates the X509Certificate object by reading
     /// a certificate in PEM format from a file.
@@ -131,7 +131,7 @@ public:
 protected:
     /// Loads the certificate from the given buffer.
     /// The certificate must be in PEM format.
-    void load(const char* data, std::size_t length);
+    void load(const char* data, size_t length);
 
     /// Loads the certificate from the given file.
     /// The certificate must be in PEM format.

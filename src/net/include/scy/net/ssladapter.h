@@ -66,9 +66,9 @@ public:
     /// Flushes the SSL read/write buffers.
     void flush();
 
-    void addIncomingData(const char* data, std::size_t len);
+    void addIncomingData(const char* data, size_t len);
     void addOutgoingData(const std::string& data);
-    void addOutgoingData(const char* data, std::size_t len);
+    void addOutgoingData(const char* data, size_t len);
 
 protected:
     void handleError(int rc);

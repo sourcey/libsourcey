@@ -42,7 +42,7 @@ static const char* sepPattern = "/";
 
 std::string filename(const std::string& path)
 {
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp == std::string::npos)
         return path;
     return path.substr(dirp + 1);
@@ -51,7 +51,7 @@ std::string filename(const std::string& path)
 
 std::string dirname(const std::string& path)
 {
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp == std::string::npos)
         return "";
     if (path.find(".", dirp) == std::string::npos)
@@ -62,11 +62,11 @@ std::string dirname(const std::string& path)
 
 std::string basename(const std::string& path)
 {
-    std::size_t dotp = path.find_last_of(".");
+    size_t dotp = path.find_last_of(".");
     if (dotp == std::string::npos)
         return path;
 
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return path;
 
@@ -76,12 +76,12 @@ std::string basename(const std::string& path)
 
 std::string extname(const std::string& path, bool includeDot)
 {
-    std::size_t dotp = path.find_last_of(".");
+    size_t dotp = path.find_last_of(".");
     if (dotp == std::string::npos)
         return "";
 
     // Ensure the dot was not part of the pathname
-    std::size_t dirp = path.find_last_of(fs::sepPattern);
+    size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return "";
 
@@ -230,7 +230,7 @@ void rename(const std::string& path, const std::string& target)
 void trimslash(std::string& path)
 {
     if (path.empty()) return;
-    std::size_t dirp = path.find_last_of(sepPattern);
+    size_t dirp = path.find_last_of(sepPattern);
     if (dirp == path.length() - 1)
         path.resize(dirp);
 }
@@ -291,7 +291,7 @@ void addnode(std::string& path, const std::string& node)
 }
 
 
-bool savefile(const std::string& path, const char* data, std::size_t size,
+bool savefile(const std::string& path, const char* data, size_t size,
               bool whiny)
 {
     std::ofstream ofs(path, std::ios_base::binary | std::ios_base::out);

@@ -55,8 +55,8 @@ public:
     /// Closes the socket forcefully.
     virtual void close();
 
-    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
-    virtual std::size_t send(const char* data, std::size_t len,
+    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len,
                      const net::Address& peerAddress, int flags = 0);
 
     /// Use the given SSL context for this socket.
@@ -100,7 +100,7 @@ public:
     virtual void onConnect(uv_connect_t* handle, int status);
 
     /// Reads raw encrypted SSL data
-    virtual void onRead(const char* data, std::size_t len);
+    virtual void onRead(const char* data, size_t len);
 
 protected:
     /// virtual bool readStart();

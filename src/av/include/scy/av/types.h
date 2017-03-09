@@ -26,7 +26,7 @@ struct MediaPacket : public RawPacket
 {
     std::int64_t time;
 
-    MediaPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
+    MediaPacket(std::uint8_t* data = nullptr, size_t size = 0,
                 std::int64_t time = 0)
         : RawPacket(reinterpret_cast<char*>(data), size)
         , time(time)
@@ -53,7 +53,7 @@ struct VideoPacket : public MediaPacket
     int height;
     bool iframe;
 
-    VideoPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
+    VideoPacket(std::uint8_t* data = nullptr, size_t size = 0,
                 int width = 0, int height = 0,
                 std::int64_t time = 0)
         : MediaPacket(data, size, time)
@@ -81,10 +81,10 @@ struct VideoPacket : public MediaPacket
 
 struct AudioPacket : public MediaPacket
 {
-    std::size_t numSamples; // number of samples per channel
+    size_t numSamples; // number of samples per channel
 
-    AudioPacket(std::uint8_t* data = nullptr, std::size_t size = 0,
-                std::size_t numSamples = 0,
+    AudioPacket(std::uint8_t* data = nullptr, size_t size = 0,
+                size_t numSamples = 0,
                 std::int64_t time = 0)
         : MediaPacket(data, size, time)
         , numSamples(numSamples)

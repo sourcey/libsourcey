@@ -21,7 +21,7 @@ namespace scy {
 namespace crypto {
 
 
-X509Certificate::X509Certificate(const char* data, std::size_t length)
+X509Certificate::X509Certificate(const char* data, size_t length)
     : _certificate(0)
 {
     std::string res;
@@ -97,7 +97,7 @@ X509Certificate::~X509Certificate()
 }
 
 
-void X509Certificate::load(const char* data, std::size_t length)
+void X509Certificate::load(const char* data, size_t length)
 {
     assert(!_certificate);
 
@@ -243,7 +243,7 @@ void X509Certificate::extractNames(std::string& cmnName,
             if (name->type == GEN_DNS) {
                 const char* data =
                     reinterpret_cast<char*>(ASN1_STRING_data(name->d.ia5));
-                std::size_t len = ASN1_STRING_length(name->d.ia5);
+                size_t len = ASN1_STRING_length(name->d.ia5);
                 domainNames.insert(std::string(data, len));
             }
         }

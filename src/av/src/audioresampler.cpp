@@ -153,9 +153,8 @@ int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // cons
 #else
         avresample_get_delay(ctx) +
 #endif
-            (std::int64_t)inNumSamples,
-        (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate,
-        AV_ROUND_UP);
+            (std::int64_t)inNumSamples, (std::int64_t)oparams.sampleRate,
+            (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     // Resize the output buffer if required
     if (requiredNumSamples > maxNumSamples) {

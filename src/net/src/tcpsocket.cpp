@@ -155,13 +155,13 @@ void TCPSocket::setSimultaneousAccepts(bool enable)
 #endif
 
 
-std::size_t TCPSocket::send(const char* data, std::size_t len, int flags)
+ssize_t TCPSocket::send(const char* data, size_t len, int flags)
 {
     return send(data, len, peerAddress(), flags);
 }
 
 
-std::size_t TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
+ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(Thread::currentID() == tid());
@@ -280,7 +280,7 @@ const SocketMode TCPSocket::mode() const
 //
 // Callbacks
 
-void TCPSocket::onRead(const char* data, std::size_t len)
+void TCPSocket::onRead(const char* data, size_t len)
 {
     // TraceS(this) << "On read: " << len << endl;
 

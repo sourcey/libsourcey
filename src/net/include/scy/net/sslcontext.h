@@ -231,12 +231,12 @@ public:
     /// Specifying a size of 0 will set an unlimited cache size.
     ///
     /// This method may only be called on SERVER_USE Context objects.
-    void setSessionCacheSize(std::size_t size);
+    void setSessionCacheSize(size_t size);
 
     /// Returns the current maximum size of the server session cache.
     ///
     /// This method may only be called on SERVER_USE Context objects.
-    std::size_t getSessionCacheSize() const;
+    size_t getSessionCacheSize() const;
 
     /// Sets the timeout (in seconds) of cached sessions on the server.
     /// A cached session will be removed from the cache if it has

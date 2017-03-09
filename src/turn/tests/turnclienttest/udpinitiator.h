@@ -102,7 +102,7 @@ protected:
         }
     }
 
-    void onRelayDataReceived(turn::Client&, const char* data, std::size_t size, const net::Address& peerAddr)
+    void onRelayDataReceived(turn::Client&, const char* data, size_t size, const net::Address& peerAddr)
     {
 #if 0 && TEST_RESPONDER_TO_INITIATOR
         std::string payload(data, size);

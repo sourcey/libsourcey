@@ -49,14 +49,14 @@ public:
     }
 
     /// Construct a buffer to represent the given memory range.
-    MutableBuffer(void* data, std::size_t size)
+    MutableBuffer(void* data, size_t size)
         : _data(data)
         , _size(size)
     {
     }
 
     void* data() const { return _data; }
-    std::size_t size() const { return _size; }
+    size_t size() const { return _size; }
 
     /// Cast the buffer as a char pointer.
     char* cstr() const { return reinterpret_cast<char*>(_data); }
@@ -66,7 +66,7 @@ public:
 
 protected:
     void* _data;
-    std::size_t _size;
+    size_t _size;
 };
 
 
@@ -75,7 +75,7 @@ protected:
 
 
 template <typename T>
-inline MutableBuffer mutableBuffer(T data, std::size_t size)
+inline MutableBuffer mutableBuffer(T data, size_t size)
 {
     return MutableBuffer(reinterpret_cast<void*>(data), size);
 }
@@ -131,7 +131,7 @@ public:
     }
 
     /// Construct a buffer to represent the given memory range.
-    ConstBuffer(const void* data, std::size_t size)
+    ConstBuffer(const void* data, size_t size)
         : _data(data)
         , _size(size)
     {
@@ -145,7 +145,7 @@ public:
     }
 
     const void* data() const { return _data; }
-    std::size_t size() const { return _size; }
+    size_t size() const { return _size; }
 
     /// Cast the buffer as a const char pointer.
     const char* cstr() const { return reinterpret_cast<const char*>(_data); }
@@ -155,12 +155,12 @@ public:
 
 protected:
     const void* _data;
-    std::size_t _size;
+    size_t _size;
 };
 
 
 template <typename T>
-inline ConstBuffer constBuffer(T data, std::size_t size)
+inline ConstBuffer constBuffer(T data, size_t size)
 {
     return ConstBuffer(reinterpret_cast<const void*>(data), size);
 }
@@ -224,7 +224,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 class Base_API BitReader
 {
 public:
-    BitReader(const char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
+    BitReader(const char* bytes, size_t size, ByteOrder order = ByteOrder::Network);
     BitReader(const Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitReader(const ConstBuffer& pod, ByteOrder order = ByteOrder::Network);
     ~BitReader();
@@ -232,8 +232,8 @@ public:
     /// Reads a value from the BitReader.
     /// Returns false if there isn't enough data left for the specified type.
     /// Throws a std::out_of_range exception if reading past the limit.
-    void get(char* val, std::size_t len);
-    void get(std::string& val, std::size_t len);
+    void get(char* val, size_t len);
+    void get(std::string& val, size_t len);
     void getU8(std::uint8_t& val);
     void getU16(std::uint16_t& val);
     void getU24(std::uint32_t& val);
@@ -255,32 +255,32 @@ public:
     // String parsing methods.
     //
 
-    int skipToChar(char c);
-    int skipWhitespace();
-    int skipToNextLine();
-    int skipNextWord();
-    int readNextWord(std::string& val);
-    int readNextNumber(unsigned int& val);
-    int readLine(std::string& val);
-    int readToNext(std::string& val, char c);
+    size_t skipToChar(char c);
+    size_t skipWhitespace();
+    size_t skipToNextLine();
+    size_t skipNextWord();
+    size_t readNextWord(std::string& val);
+    size_t readNextNumber(unsigned int& val);
+    size_t readLine(std::string& val);
+    size_t readToNext(std::string& val, char c);
 
     /// Set position pointer to absolute position.
     /// Throws a std::out_of_range exception if the value exceeds the limit.
-    void seek(std::size_t val);
+    void seek(size_t val);
 
     /// Set position pointer to relative position.
     /// Throws a std::out_of_range exception if the value exceeds the limit.
-    void skip(std::size_t size);
+    void skip(size_t size);
 
     /// Returns the read limit.
-    std::size_t limit() const;
+    size_t limit() const;
 
     /// Returns the current read position.
-    std::size_t position() const { return _position; }
+    size_t position() const { return _position; }
 
     /// Returns the number of elements between the current position and the
     /// limit.
-    std::size_t available() const;
+    size_t available() const;
 
     const char* begin() const { return _bytes; }
     const char* current() const { return _bytes + _position; }
@@ -295,12 +295,11 @@ public:
     }
 
 protected:
-    void init(const char* bytes, std::size_t size, ByteOrder order); // nocopy
+    void init(const char* bytes, size_t size, ByteOrder order); // nocopy
 
-    std::size_t _position;
-    std::size_t _limit;
+    size_t _position;
+    size_t _limit;
     ByteOrder _order;
-    // Buffer* _buffer;
     const char* _bytes;
 };
 
@@ -320,14 +319,14 @@ protected:
 class Base_API BitWriter
 {
 public:
-    BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
+    BitWriter(char* bytes, size_t size, ByteOrder order = ByteOrder::Network);
     BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
     virtual ~BitWriter();
 
     /// Append bytes to the buffer.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    virtual void put(const char* val, std::size_t len);
+    virtual void put(const char* val, size_t len);
     void put(const std::string& val);
     void putU8(std::uint8_t val);
     void putU16(std::uint16_t val);
@@ -337,31 +336,31 @@ public:
 
     /// Update a byte range.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    virtual bool update(const char* val, std::size_t len, std::size_t pos);
-    bool update(const std::string& val, std::size_t pos);
-    bool updateU8(std::uint8_t val, std::size_t pos);
-    bool updateU16(std::uint16_t val, std::size_t pos);
-    bool updateU24(std::uint32_t val, std::size_t pos);
-    bool updateU32(std::uint32_t val, std::size_t pos);
-    bool updateU64(std::uint64_t val, std::size_t pos);
+    virtual bool update(const char* val, size_t len, size_t pos);
+    bool update(const std::string& val, size_t pos);
+    bool updateU8(std::uint8_t val, size_t pos);
+    bool updateU16(std::uint16_t val, size_t pos);
+    bool updateU24(std::uint32_t val, size_t pos);
+    bool updateU32(std::uint32_t val, size_t pos);
+    bool updateU64(std::uint64_t val, size_t pos);
 
     /// Set position pointer to absolute position.
     /// Throws a `std::out_of_range` exception if the value exceeds the limit.
-    void seek(std::size_t val);
+    void seek(size_t val);
 
     /// Set position pointer to relative position.
     /// Throws a `std::out_of_range` exception if the value exceeds the limit.
-    void skip(std::size_t size);
+    void skip(size_t size);
 
     /// Returns the write limit.
-    std::size_t limit() const;
+    size_t limit() const;
 
     /// Returns the current write position.
-    std::size_t position() const { return _position; }
+    size_t position() const { return _position; }
 
     /// Returns the number of elements between the current write position and
     /// the limit.
-    std::size_t available() const;
+    size_t available() const;
 
     char* begin() { return _bytes; }
     char* current() { return _bytes + _position; }
@@ -380,10 +379,10 @@ public:
     }
 
 protected:
-    virtual void init(char* bytes, std::size_t size, ByteOrder order); // nocopy
+    virtual void init(char* bytes, size_t size, ByteOrder order); // nocopy
 
-    std::size_t _position;
-    std::size_t _limit;
+    size_t _position;
+    size_t _limit;
     ByteOrder _order;
     char* _bytes;
 };
@@ -405,15 +404,15 @@ public:
 
     /// Append bytes to the buffer.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    virtual void put(const char* val, std::size_t len);
+    virtual void put(const char* val, size_t len);
 
     /// Update a byte range.
     /// Throws a `std::out_of_range` exception if reading past the limit.
-    virtual bool update(const char* val, std::size_t len, std::size_t pos);
+    virtual bool update(const char* val, size_t len, size_t pos);
 
 protected:
     Buffer& _buffer;
-    std::size_t _offset;
+    size_t _offset;
 };
 
 

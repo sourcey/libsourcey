@@ -35,12 +35,12 @@ enum class ByteOrder
 };
 
 
-inline void set8(void* memory, std::size_t offset, std::uint8_t v)
+inline void set8(void* memory, size_t offset, std::uint8_t v)
 {
     static_cast<std::uint8_t*>(memory)[offset] = v;
 }
 
-inline std::uint8_t get8(const void* memory, std::size_t offset)
+inline std::uint8_t get8(const void* memory, size_t offset)
 {
     return static_cast<const std::uint8_t*>(memory)[offset];
 }

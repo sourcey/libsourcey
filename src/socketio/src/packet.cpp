@@ -103,7 +103,7 @@ IPacket* Packet::clone() const
 }
 
 
-std::size_t Packet::read(const ConstBuffer& buf)
+ssize_t Packet::read(const ConstBuffer& buf)
 {
     TraceN(this) << "Read raw packet: " << buf.str() << endl;
     assert(buf.size() > 0);
@@ -114,7 +114,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
     _id = -1;
     _nsp = "/";
     _message = "";
-    _size = -1;
+    _size = 0;
 
     BitReader reader(buf);
 
@@ -320,12 +320,12 @@ bool Packet::valid() const
 }
 
 
-std::size_t Packet::size() const
+size_t Packet::size() const
 {
     std::ostringstream ss;
     print(ss);
     assert(ss.tellp());
-    return static_cast<std::size_t>(ss.tellp());
+    return static_cast<size_t>(ss.tellp());
 }
 
 

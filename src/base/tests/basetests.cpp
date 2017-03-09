@@ -128,7 +128,7 @@ int main(int argc, char** argv)
     //
     describe("buffer", []() {
         ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
-        for (std::size_t i = 0; i < 2; i++) {
+        for (size_t i = 0; i < 2; i++) {
             Buffer buffer(1024);
             BitReader reader(buffer, orders[i]);
             BitWriter writer(buffer, orders[i]);
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
         std::string write_string1("world");
 
         ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
-        for (std::size_t i = 0; i < 2; i++) {
+        for (size_t i = 0; i < 2; i++) {
             Buffer buffer; // (1); // (1024);
             DynamicBitWriter writer(buffer, orders[i]);
             writer.put(write_string.c_str(), write_string.size());

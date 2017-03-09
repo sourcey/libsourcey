@@ -46,7 +46,7 @@ public:
     ///
     /// Returns false if the underlying socket is closed.
     /// This method does not throw an exception.
-    bool write(const char* data, std::size_t len);
+    bool write(const char* data, size_t len);
 
     /// Returns the read buffer.
     Buffer& buffer();
@@ -60,7 +60,7 @@ public:
 protected:
     virtual bool readStart();
     virtual bool readStop();
-    virtual void onRead(const char* data, std::size_t len);
+    virtual void onRead(const char* data, size_t len);
 
     //
     /// UV callbacks
@@ -68,7 +68,7 @@ protected:
     static void handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending);
     static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf);
     static void handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending);
-    static void allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf);
+    static void allocReadBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 
     Buffer _buffer;
     bool _started;

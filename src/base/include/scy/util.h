@@ -57,7 +57,7 @@ Base_API unsigned parseHex(const std::string& s);
 
 /// Dumps the binary representation of the
 /// given buffer to the output string.
-Base_API std::string dumpbin(const char* data, std::size_t len);
+Base_API std::string dumpbin(const char* data, size_t len);
 
 /// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
 /// If L (local) is greater than R (remote) the function returns true.
@@ -503,9 +503,9 @@ int icompare(const S& str, const typename S::value_type* ptr)
 
 Base_API std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
 Base_API std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
-                                    std::size_t bufferSize = 8192);
+                                    size_t bufferSize = 8192);
 Base_API std::streamsize copyToString(std::istream& istr, std::string& str,
-                                      std::size_t bufferSize = 8192);
+                                      size_t bufferSize = 8192);
 
 
 //

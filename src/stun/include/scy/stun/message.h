@@ -92,7 +92,7 @@ public:
     MethodType methodType() const;
     const TransactionID& transactionID() const { return _transactionID; }
     const std::vector<Attribute*> attrs() const { return _attrs; }
-    std::size_t size() const { return static_cast<std::size_t>(_size); }
+    size_t size() const { return static_cast<size_t>(_size); }
 
     std::string methodString() const;
     std::string classString() const;
@@ -109,7 +109,7 @@ public:
 
     /// Parses the STUN/TURN packet from the given buffer.
     /// The return value indicates the number of bytes read.
-    std::size_t read(const ConstBuffer& buf);
+    ssize_t read(const ConstBuffer& buf);
 
     /// Writes this object into a STUN/TURN packet.
     void write(Buffer& buf) const;

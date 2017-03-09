@@ -31,8 +31,7 @@ void init_encodestate(encodestate* state_in)
     state_in->result = 0;
     state_in->stepcount = 0;
     state_in->linelength = LINE_LENGTH; // added: set 0 for no line feeds
-    state_in->nullptrlterminate =
-        0; // added: set 1 for nullptrl terminated output string
+    state_in->nullptrlterminate = 0; // added: set 1 for nullptrl terminated output string
 }
 
 
@@ -45,7 +44,7 @@ char encode_value(char value_in)
 }
 
 
-int encode_block(const char* plaintext_in, int length_in, char* code_out, encodestate* state_in)
+ssize_t encode_block(const char* plaintext_in, size_t length_in, char* code_out, encodestate* state_in)
 {
     const char* plainchar = plaintext_in;
     const char* const plaintextend = plaintext_in + length_in;
@@ -98,12 +97,13 @@ int encode_block(const char* plaintext_in, int length_in, char* code_out, encode
                 }
         }
     }
-    /* control should not reach here */
+
+    // control should not reach here
     return codechar - code_out;
 }
 
 
-int encode_blockend(char* code_out, encodestate* state_in)
+ssize_t encode_blockend(char* code_out, encodestate* state_in)
 {
     char* codechar = code_out;
 
@@ -132,7 +132,7 @@ int encode_blockend(char* code_out, encodestate* state_in)
 //
 
 
-int decode_value(char value_in)
+ssize_t decode_value(char value_in)
 {
     static const char decoding[] = {
         62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1,
@@ -155,7 +155,7 @@ void init_decodestate(decodestate* state_in)
 }
 
 
-int decode_block(const char* code_in, const int length_in, char* plaintext_out, decodestate* state_in)
+ssize_t decode_block(const char* code_in, const size_t length_in, char* plaintext_out, decodestate* state_in)
 {
     const char* codechar = code_in;
     char* plainchar = plaintext_out;
@@ -209,7 +209,8 @@ int decode_block(const char* code_in, const int length_in, char* plaintext_out, 
                 *plainchar++ |= (fragment & 0x03f);
         }
     }
-    /* control should not reach here */
+
+    // control should not reach here
     return plainchar - plaintext_out;
 }
 

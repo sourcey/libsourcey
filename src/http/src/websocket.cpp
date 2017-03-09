@@ -93,13 +93,13 @@ bool WebSocketAdapter::shutdown(std::uint16_t statusCode, const std::string& sta
 }
 
 
-std::size_t WebSocketAdapter::send(const char* data, std::size_t len, int flags)
+ssize_t WebSocketAdapter::send(const char* data, size_t len, int flags)
 {
     return send(data, len, socket->peerAddress(), flags);
 }
 
 
-std::size_t WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags)
+ssize_t WebSocketAdapter::send(const char* data, size_t len, const net::Address& peerAddr, int flags)
 {
     TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(framer.handshakeComplete());
@@ -137,7 +137,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
 
     auto data = bufferCast<char*>(buffer);
     http::Parser parser(&_response);
-    std::size_t nparsed = parser.parse(data, buffer.size());
+    size_t nparsed = parser.parse(data, buffer.size());
     if (nparsed == 0) {
         throw std::runtime_error(
             "WebSocket error: Cannot parse response: Incomplete HTTP message");
@@ -155,7 +155,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
 
     // If there is remaining data in the packet (packets may be joined) 
     // then send it back through the socket recv method.
-    std::size_t remaining = buffer.size() - nparsed;
+    size_t remaining = buffer.size() - nparsed;
     if (remaining) {
         onSocketRecv(*socket.get(), MutableBuffer(&data[nparsed], remaining), peerAddr);
     }
@@ -230,8 +230,8 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
         // Incoming frames may be joined, so we parse them
         // in a loop until the read buffer is empty.
         BitReader reader(buffer);
-        int total = reader.available();
-        int offset = reader.position();
+        size_t total = reader.available();
+        size_t offset = reader.position();
         while (offset < total) {
             char* payload = nullptr;
             std::uint64_t payloadLength = 0;
@@ -275,7 +275,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
             assert(payload);
             assert(payloadLength);
             net::SocketEmitter::onSocketRecv(*socket.get(), 
-                mutableBuffer(payload, (std::size_t)payloadLength),
+                mutableBuffer(payload, (size_t)payloadLength),
                 peerAddress);
         }
         assert(offset == total);
@@ -446,11 +446,11 @@ void WebSocketFramer::acceptServerRequest(http::Request& request, http::Response
 }
 
 
-std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame)
+size_t WebSocketFramer::writeFrame(const char* data, size_t len, int flags, BitWriter& frame)
 {
     assert(flags == ws::SendFlags::Text || flags == ws::SendFlags::Binary);
     assert(frame.position() == 0);
-    // assert(frame.limit() >= std::size_t(len + MAX_HEADER_LENGTH));
+    // assert(frame.limit() >= size_t(len + MAX_HEADER_LENGTH));
 
     frame.putU8(static_cast<std::uint8_t>(flags));
     std::uint8_t lenByte(0);
@@ -503,7 +503,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 {
     assert(handshakeComplete());
     std::uint64_t limit = frame.limit();
-    std::size_t offset = frame.position();
+    size_t offset = frame.position();
     // assert(offset == 0);
 
     // Read the frame header
@@ -577,7 +577,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     }
 
     // Update frame length to include payload plus header
-    frame.seek(std::size_t(offset + payloadOffset + payloadLength));
+    frame.seek(size_t(offset + payloadOffset + payloadLength));
     // frame.limit(offset + payloadOffset + payloadLength);
     // int frameLength = (offset + payloadOffset);
     // assert(frame.position() == (offset + payloadOffset));

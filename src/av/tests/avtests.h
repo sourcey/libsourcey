@@ -909,7 +909,7 @@ class RealtimeMediaQueueTest : public Test
 //             if(frameFinished)
 //             {
 //                 std::string uu (capturedUrl);
-//                 std::size_t pos = capturedUrl.rfind(".mp4");
+//                 size_t pos = capturedUrl.rfind(".mp4");
 //                 uu.replace(pos, 4, "thumbnail.jpg");
 //                 // save the frame to file
 //                 int Bytes = avpicture_get_size(AV_PIX_FMT_YUVJ420P,

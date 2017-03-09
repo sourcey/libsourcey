@@ -401,9 +401,9 @@ inline LogStream& printL(const char* level, const void* ptr,
 #else
 inline std::string _methodName(const std::string& fsig)
 {
-    std::size_t colons = fsig.find("::");
-    std::size_t sbeg = fsig.substr(0, colons).rfind(" ") + 1;
-    std::size_t send = fsig.rfind("(") - sbeg;
+    size_t colons = fsig.find("::");
+    size_t sbeg = fsig.substr(0, colons).rfind(" ") + 1;
+    size_t send = fsig.rfind("(") - sbeg;
     return fsig.substr(sbeg, send) + "()";
 }
 #define __CLASS_FUNCTION__ _methodName(__PRETTY_FUNCTION__)

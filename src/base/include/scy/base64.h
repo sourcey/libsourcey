@@ -54,10 +54,10 @@ Base_API void init_encodestate(internal::encodestate* state_in);
 
 Base_API char encode_value(char value_in);
 
-Base_API int encode_block(const char* readbuf_in, int length_in, char* code_out,
-                 internal::encodestate* state_in);
+Base_API ssize_t encode_block(const char* readbuf_in, size_t length_in, char* code_out,
+                              internal::encodestate* state_in);
 
-Base_API int encode_blockend(char* code_out, internal::encodestate* state_in);
+Base_API ssize_t encode_blockend(char* code_out, internal::encodestate* state_in);
 
 
 } // namespace internal
@@ -77,8 +77,8 @@ struct Encoder : public basic::Encoder
         const int N = _buffersize;
         char* readbuf = new char[N];
         char* encbuf = new char[2 * N];
-        int nread;
-        int enclen;
+        ssize_t nread;
+        ssize_t enclen;
 
         do {
             istrm.read(readbuf, N);
@@ -99,7 +99,7 @@ struct Encoder : public basic::Encoder
     void encode(const std::string& in, std::string& out)
     {
         char* encbuf = new char[in.length() * 2];
-        int enclen = encode(in.c_str(), in.length(), encbuf);
+        ssize_t enclen = encode(in.c_str(), in.length(), encbuf);
         out.append(encbuf, enclen);
 
         enclen = finalize(encbuf);
@@ -110,12 +110,12 @@ struct Encoder : public basic::Encoder
         delete[] encbuf;
     }
 
-    std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf)
+    ssize_t encode(const char* inbuf, size_t nread, char* outbuf)
     {
         return internal::encode_block(inbuf, nread, outbuf, &_state);
     }
 
-    std::size_t finalize(char* outbuf)
+    ssize_t finalize(char* outbuf)
     {
         return internal::encode_blockend(outbuf, &_state);
     }
@@ -139,13 +139,12 @@ inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
     internal::init_encodestate(&state);
     state.linelength = lineLength;
 
-    int enclen = internal::encode_block(reinterpret_cast<const char*>(&bytes[0]),
-                                        bytes.size(), encbuf.get(), &state);
+    ssize_t enclen = internal::encode_block(reinterpret_cast<const char*>(&bytes[0]),
+                                            bytes.size(), encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
 
     enclen = internal::encode_blockend(encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
-
     return res;
 }
 
@@ -168,10 +167,10 @@ typedef struct
 
 Base_API void init_decodestate(internal::decodestate* state_in);
 
-Base_API int decode_value(char value_in);
+Base_API ssize_t decode_value(char value_in);
 
-Base_API int decode_block(const char* inbuf, const int nread, char* outbuf,
-                          internal::decodestate* state_in);
+Base_API ssize_t decode_block(const char* inbuf, const size_t nread, char* outbuf,
+                              internal::decodestate* state_in);
 
 
 } // namespace internal
@@ -186,9 +185,9 @@ struct Decoder : public basic::Decoder
         internal::init_decodestate(&_state);
     }
 
-    int decode(char value_in) { return internal::decode_value(value_in); }
+    ssize_t decode(char value_in) { return internal::decode_value(value_in); }
 
-    std::size_t decode(const char* inbuf, std::size_t nread, char* outbuf)
+    ssize_t decode(const char* inbuf, size_t nread, char* outbuf)
     {
         return internal::decode_block(inbuf, nread, outbuf, &_state);
     }
@@ -198,8 +197,8 @@ struct Decoder : public basic::Decoder
         const int N = _buffersize;
         char* decbuf = new char[N];
         char* readbuf = new char[N];
-        int declen;
-        int nread;
+        size_t declen;
+        size_t nread;
 
         do {
             istrm.read((char*)decbuf, N);
@@ -230,8 +229,8 @@ inline std::string decode(const T& bytes)
     internal::decodestate state;
     internal::init_decodestate(&state);
 
-    int enclen = internal::decode_block(reinterpret_cast<const char*>(&bytes[0]),
-                                        int(bytes.size()), encbuf.get(), &state);
+    size_t enclen = internal::decode_block(reinterpret_cast<const char*>(&bytes[0]),
+                                           bytes.size(), encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
 
     return res;

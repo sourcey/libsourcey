@@ -43,14 +43,14 @@ struct Encoder : public basic::Encoder
     {
     }
 
-    virtual std::size_t encode(const char* inbuf, std::size_t nread,
+    virtual ssize_t encode(const char* inbuf, size_t nread,
                                char* outbuf)
     {
         // static const int eof = std::char_traits<char>::eof();
         static const char digits[] = "0123456789abcdef0123456789ABCDEF";
 
         char c;
-        std::size_t nwrite = 0;
+        size_t nwrite = 0;
         for (unsigned i = 0; i < nread; i++) {
             c = inbuf[i];
             std::memcpy(outbuf + nwrite++,
@@ -66,7 +66,7 @@ struct Encoder : public basic::Encoder
         return nwrite;
     }
 
-    virtual std::size_t finalize(char* /* outbuf */) { return 0; }
+    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
 
     void setUppercase(bool flag) { _uppercase = flag ? 16 : 0; }
 
@@ -108,13 +108,13 @@ struct Decoder : public basic::Decoder
     }
     virtual ~Decoder() {}
 
-    virtual std::size_t decode(const char* inbuf, std::size_t nread,
+    virtual ssize_t decode(const char* inbuf, size_t nread,
                                char* outbuf)
     {
         int n;
         char c;
-        std::size_t rpos = 0;
-        std::size_t nwrite = 0;
+        size_t rpos = 0;
+        size_t nwrite = 0;
         while (rpos < nread) {
             if (readnext(inbuf, nread, rpos, c))
                 n = (nybble(c) << 4);
@@ -134,9 +134,9 @@ struct Decoder : public basic::Decoder
         return nwrite;
     }
 
-    virtual std::size_t finalize(char* /* outbuf */) { return 0; }
+    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
 
-    bool readnext(const char* inbuf, std::size_t nread, std::size_t& rpos,
+    bool readnext(const char* inbuf, size_t nread, size_t& rpos,
                   char& c)
     {
         if (rpos == 0 && lastbyte != '\0') {

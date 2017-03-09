@@ -156,7 +156,7 @@ inline bool findNestedObjectWithProperty(
                 return true;
         }
     } else if (root.is_array()) {
-        for (std::size_t i = 0; i < root.size(); i++) {
+        for (size_t i = 0; i < root.size(); i++) {
             json::value& test = root[(int)i];
             if (!test.is_null() && (test.is_object() || test.is_array()) &&
                 findNestedObjectWithProperty(root[(int)i], result, key, value,

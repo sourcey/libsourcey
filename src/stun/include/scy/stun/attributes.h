@@ -298,7 +298,7 @@ public:
 
     virtual Attribute* clone();
 
-    std::size_t size() const;
+    size_t size() const;
     std::uint16_t getType(int index) const;
     void setType(int index, std::uint16_t value);
     void addType(std::uint16_t value);

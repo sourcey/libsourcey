@@ -51,16 +51,16 @@ public:
     /// No exception will be thrown.
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
-    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
-    virtual std::size_t send(const char* data, std::size_t len, const Address& peerAddress, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, const Address& peerAddress, int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// Returns the number of bytes sent or -1 on error.
     /// No exception will be thrown.
     /// For TCP sockets the given peer address must match the
     /// connected peer address.
-    virtual std::size_t sendPacket(const IPacket& packet, int flags = 0);
-    virtual std::size_t sendPacket(const IPacket& packet, const Address& peerAddress, int flags = 0);
+    virtual ssize_t sendPacket(const IPacket& packet, int flags = 0);
+    virtual ssize_t sendPacket(const IPacket& packet, const Address& peerAddress, int flags = 0);
 
     /// Sends the given packet to the connected peer.
     /// This method provides delegate compatability, and unlike

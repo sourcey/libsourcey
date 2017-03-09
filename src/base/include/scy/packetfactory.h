@@ -27,7 +27,7 @@ class /* Base_API */ IPacketCreationStrategy
 public:
     IPacketCreationStrategy() {}
     virtual ~IPacketCreationStrategy() {};
-    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;
+    virtual IPacket* create(const ConstBuffer& buffer, size_t& nread) const = 0;
 
     virtual int priority() const = 0; // 0 - 100
 
@@ -57,7 +57,7 @@ struct PacketCreationStrategy : public IPacketCreationStrategy
     {
     }
 
-    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const
+    virtual IPacket* create(const ConstBuffer& buffer, size_t& nread) const
     {
         auto packet = new PacketT;
         if ((nread = packet->read(buffer)) > 0)
@@ -155,9 +155,9 @@ public:
         return true; 
     }
 
-    virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread)
+    virtual IPacket* createPacket(const ConstBuffer& buffer, size_t& nread)
     {
-        // std::size_t offset = reader.position();
+        // size_t offset = reader.position();
         assert(!_types.empty() && "no packet types registered");
 
         for (unsigned i = 0; i < _types.size(); i++) {

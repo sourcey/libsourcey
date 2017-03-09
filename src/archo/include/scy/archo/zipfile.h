@@ -48,8 +48,8 @@ struct Archo_API ZipFile
     struct FileInfo
     {
         std::string path;
-        std::size_t compressedSize;
-        std::size_t uncompressedSize;
+        size_t compressedSize;
+        size_t uncompressedSize;
     };
 
     std::vector<FileInfo> info;

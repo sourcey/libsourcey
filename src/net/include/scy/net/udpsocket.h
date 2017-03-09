@@ -37,8 +37,8 @@ public:
 
     virtual void bind(const net::Address& address, unsigned flags = 0);
 
-    virtual std::size_t send(const char* data, std::size_t len, int flags = 0);
-    virtual std::size_t send(const char* data, std::size_t len,
+    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len,
                      const net::Address& peerAddress, int flags = 0);
 
     virtual bool setBroadcast(bool flag);
@@ -70,7 +70,7 @@ protected:
     static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
                        const struct sockaddr* addr, unsigned flags);
     static void afterSend(uv_udp_send_t* req, int status);
-    static void allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
+    static void allocRecvBuffer(uv_handle_t* handle, size_t suggested_size,
                                 uv_buf_t* buf);
 
     virtual void onError(const scy::Error& error);

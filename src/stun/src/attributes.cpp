@@ -990,7 +990,7 @@ Attribute* UInt16ListAttribute::clone()
 }
 
 
-std::size_t UInt16ListAttribute::size() const
+size_t UInt16ListAttribute::size() const
 {
     return _attrTypes.size();
 }

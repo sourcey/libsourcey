@@ -131,11 +131,11 @@ int SSLAdapter::available() const
 }
 
 
-void SSLAdapter::addIncomingData(const char* data, std::size_t len)
+void SSLAdapter::addIncomingData(const char* data, size_t len)
 {
     // TraceL << "Add incoming data: " << len << endl;
     assert(_readBIO);
-    BIO_write(_readBIO, data, len);
+    BIO_write(_readBIO, data, (int)len);
     flush();
 }
 
@@ -146,7 +146,7 @@ void SSLAdapter::addOutgoingData(const std::string& s)
 }
 
 
-void SSLAdapter::addOutgoingData(const char* data, std::size_t len)
+void SSLAdapter::addOutgoingData(const char* data, size_t len)
 {
     std::copy(data, data + len, std::back_inserter(_bufferOut));
 }
@@ -173,9 +173,7 @@ void SSLAdapter::flush()
 
     // Write any local data to SSL for excryption
     if (_bufferOut.size() > 0) {
-        int r = SSL_write(_ssl, &_bufferOut[0],
-                          _bufferOut.size()); // causes the write_bio to fill up
-                                              // (which we need to flush)
+        int r = SSL_write(_ssl, &_bufferOut[0], (int)_bufferOut.size());
         if (r < 0) {
             handleError(r);
         }
@@ -190,7 +188,7 @@ void SSLAdapter::flush()
 
 void SSLAdapter::flushReadBIO()
 {
-    int npending = BIO_ctrl_pending(_readBIO);
+    size_t npending = BIO_ctrl_pending(_readBIO);
     if (npending > 0) {
         int nread;
         char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
@@ -203,7 +201,7 @@ void SSLAdapter::flushReadBIO()
 
 void SSLAdapter::flushWriteBIO()
 {
-    int npending = BIO_ctrl_pending(_writeBIO);
+    size_t npending = BIO_ctrl_pending(_writeBIO);
     if (npending > 0) {
         char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
         int nread = BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);

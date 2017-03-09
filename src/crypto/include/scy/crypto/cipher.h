@@ -95,8 +95,8 @@ public:
 
     /// Encrypts a buffer and encode it using the given encoding.
     /// This method performs the encryption, and calls final() internally.
-    int encrypt(const unsigned char* inbuf, std::size_t inlen,
-                unsigned char* outbuf, std::size_t outlen,
+    int encrypt(const unsigned char* inbuf, size_t inlen,
+                unsigned char* outbuf, size_t outlen,
                 Encoding encoding = Binary);
 
     /// Alias for encrypt() which accepts a range of buffer types.

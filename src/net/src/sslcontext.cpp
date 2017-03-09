@@ -254,7 +254,7 @@ bool SSLContext::sessionCacheEnabled() const
 }
 
 
-void SSLContext::setSessionCacheSize(std::size_t size)
+void SSLContext::setSessionCacheSize(size_t size)
 {
     assert(isForServerUse());
 
@@ -262,11 +262,11 @@ void SSLContext::setSessionCacheSize(std::size_t size)
 }
 
 
-std::size_t SSLContext::getSessionCacheSize() const
+size_t SSLContext::getSessionCacheSize() const
 {
     assert(isForServerUse());
 
-    return static_cast<std::size_t>(SSL_CTX_sess_get_cache_size(_sslContext));
+    return static_cast<size_t>(SSL_CTX_sess_get_cache_size(_sslContext));
 }
 
 

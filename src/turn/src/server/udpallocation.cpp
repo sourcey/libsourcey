@@ -187,8 +187,8 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
 }
 
 
-std::size_t UDPAllocation::send(const char* data, std::size_t size,
-                                const net::Address& peerAddress)
+ssize_t UDPAllocation::send(const char* data, size_t size,
+                            const net::Address& peerAddress)
 {
     updateUsage(size);
 

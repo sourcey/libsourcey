@@ -95,7 +95,7 @@ public:
 
     /// Read/parse to the packet from the given input buffer.
     /// The number of bytes read is returned.
-    virtual std::size_t read(const ConstBuffer&) = 0;
+    virtual ssize_t read(const ConstBuffer&) = 0;
 
     /// Copy/generate to the packet given output buffer.
     /// The number of bytes written can be obtained from the buffer.
@@ -111,7 +111,7 @@ public:
     /// This is the nember of bytes that will be written on a call
     /// to write(), but may not be the number of bytes that will be
     /// consumed by read().
-    virtual std::size_t size() const { return 0; };
+    virtual size_t size() const { return 0; };
 
     virtual bool hasData() const { return data() != nullptr; }
 
@@ -152,7 +152,7 @@ public:
 
     virtual ~FlagPacket() {}
 
-    virtual std::size_t read(const ConstBuffer&) { return true; }
+    virtual ssize_t read(const ConstBuffer&) { return true; }
 
     virtual void write(Buffer&) const {}
 
@@ -165,7 +165,7 @@ public:
 class Base_API RawPacket : public IPacket
 {
 public:
-    RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0,
+    RawPacket(char* data = nullptr, size_t size = 0, unsigned flags = 0,
               void* source = nullptr, void* opaque = nullptr,
               IPacketInfo* info = nullptr)
         : IPacket(source, opaque, info, flags)
@@ -175,7 +175,7 @@ public:
     {
     }
 
-    RawPacket(const char* data, std::size_t size = 0, unsigned flags = 0,
+    RawPacket(const char* data, size_t size = 0, unsigned flags = 0,
               void* source = nullptr, void* opaque = nullptr,
               IPacketInfo* info = nullptr)
         : IPacket(source, opaque, info, flags)
@@ -207,7 +207,7 @@ public:
 
     virtual IPacket* clone() const { return new RawPacket(*this); }
 
-    virtual void setData(char* data, std::size_t size)
+    virtual void setData(char* data, size_t size)
     {
         assert(size > 0);
         if (_free) // copy data if reuqested
@@ -218,7 +218,7 @@ public:
         }
     }
 
-    virtual void copyData(const char* data, std::size_t size)
+    virtual void copyData(const char* data, size_t size)
     {
         // traceL("RawPacket", this) << "Cloning: " << size << std::endl;
         // assert(_free);
@@ -233,7 +233,7 @@ public:
         std::memcpy(_data, data, size);
     }
 
-    virtual std::size_t read(const ConstBuffer& buf)
+    virtual ssize_t read(const ConstBuffer& buf)
     {
         copyData(bufferCast<const char*>(buf), buf.size());
         return buf.size();
@@ -248,7 +248,7 @@ public:
 
     virtual char* data() const { return _data; }
 
-    virtual std::size_t size() const { return _size; }
+    virtual size_t size() const { return _size; }
 
     virtual const char* className() const { return "RawPacket"; }
 
@@ -257,7 +257,7 @@ public:
     virtual void assignDataOwnership() { _free = true; }
 
     char* _data;
-    std::size_t _size;
+    size_t _size;
     bool _free;
 };
 
@@ -278,14 +278,14 @@ inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags = 0,
                      opaque, info); // copy const data
 }
 
-inline RawPacket rawPacket(char* data = nullptr, std::size_t size = 0,
+inline RawPacket rawPacket(char* data = nullptr, size_t size = 0,
                            unsigned flags = 0, void* source = nullptr,
                            void* opaque = nullptr, IPacketInfo* info = nullptr)
 {
     return RawPacket(data, size, flags, source, opaque, info);
 }
 
-inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0,
+inline RawPacket rawPacket(const char* data = nullptr, size_t size = 0,
                            unsigned flags = 0, void* source = nullptr,
                            void* opaque = nullptr, IPacketInfo* info = nullptr)
 {

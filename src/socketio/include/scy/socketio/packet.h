@@ -89,10 +89,10 @@ public:
     void setMessage(const std::string& message);
     void setAck(bool flag);
 
-    std::size_t read(const ConstBuffer& buf);
+    ssize_t read(const ConstBuffer& buf);
     void write(Buffer& buf) const;
 
-    virtual std::size_t size() const;
+    virtual size_t size() const;
 
     bool valid() const;
 
@@ -111,7 +111,7 @@ protected:
     std::string _event;
     std::string _message;
     bool _ack;
-    std::size_t _size;
+    size_t _size;
 };
 
 

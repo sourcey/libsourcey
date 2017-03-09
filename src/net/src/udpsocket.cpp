@@ -101,7 +101,7 @@ void UDPSocket::bind(const Address& address, unsigned flags)
 }
 
 
-std::size_t UDPSocket::send(const char* data, std::size_t len, int flags)
+ssize_t UDPSocket::send(const char* data, size_t len, int flags)
 {
     assert(_peer.valid());
     return send(data, len, _peer, flags);
@@ -117,7 +117,7 @@ struct SendRequest
 }
 
 
-std::size_t UDPSocket::send(const char* data, std::size_t len,
+ssize_t UDPSocket::send(const char* data, size_t len,
                             const Address& peerAddress, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << ": " << peerAddress << endl;
@@ -136,7 +136,7 @@ std::size_t UDPSocket::send(const char* data, std::size_t len,
 
     int r;
     auto sr = new internal::SendRequest;
-    sr->buf = uv_buf_init((char*)data, len); // TODO: memcpy data?
+    sr->buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
     r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(),
                     UDPSocket::afterSend);
 
@@ -281,8 +281,8 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
 
     if (nread < 0) {
         // assert(0 && "unexpected error");
-        DebugS(socket) << "Recv error: " << uv_err_name(nread) << endl;
-        socket->setUVError("UDP error", nread);
+        DebugS(socket) << "Recv error: " << uv_err_name((int)nread) << endl;
+        socket->setUVError("UDP error", (int)nread);
         return;
     }
 
@@ -311,7 +311,7 @@ void UDPSocket::afterSend(uv_udp_send_t* req, int status)
 }
 
 
-void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
+void UDPSocket::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
     auto self = static_cast<UDPSocket*>(handle->data);
     // TraceL << "Allocating Buffer: " << suggested_size << endl;

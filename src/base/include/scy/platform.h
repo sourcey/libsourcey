@@ -58,9 +58,9 @@ Base_API bool getOsVersion(int* major, int* minor, int* build);
 Base_API bool isWindowsVistaOrLater();
 Base_API bool isWindowsXpOrLater();
 
-Base_API std::wstring toUtf16(const char* utf8, std::size_t len);
+Base_API std::wstring toUtf16(const char* utf8, size_t len);
 Base_API std::wstring toUtf16(const std::string& str);
-Base_API std::string toUtf8(const wchar_t* wide, std::size_t len);
+Base_API std::string toUtf8(const wchar_t* wide, size_t len);
 Base_API std::string toUtf8(const std::wstring& wstr);
 
 #endif

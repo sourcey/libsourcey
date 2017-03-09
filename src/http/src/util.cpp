@@ -64,8 +64,8 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 
 bool splitURIParameters(const std::string& uri, NVCollection& out)
 {
-    std::size_t len = uri.length();
-    std::size_t i = 0;
+    size_t len = uri.length();
+    size_t i = 0;
 
     // Parse REST parameters
     while (i < len && uri[i] != '?') {

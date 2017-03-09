@@ -29,7 +29,7 @@ namespace scy {
 std::string getExePath()
 {
     char buf[PATHMAX];
-    std::size_t size = PATHMAX;
+    size_t size = PATHMAX;
     if (uv_exepath(buf, &size) != 0)
         throw std::runtime_error(
             "System error: Cannot resolve executable path");
@@ -40,7 +40,7 @@ std::string getExePath()
 std::string getCwd()
 {
     char buf[PATHMAX];
-    std::size_t size = PATHMAX;
+    size_t size = PATHMAX;
     if (uv_cwd(buf, &size) != 0)
         throw std::runtime_error(
             "System error: Cannot resolve working directory");
@@ -133,7 +133,7 @@ bool isWindowsXpOrLater()
 #define STACK_ARRAY(TYPE, LEN) static_cast<TYPE*>(::alloca((LEN) * sizeof(TYPE)))
 
 
-std::wstring toUtf16(const char* utf8, std::size_t len)
+std::wstring toUtf16(const char* utf8, size_t len)
 {
     auto len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, int(len), NULL, 0);
     wchar_t* ws = STACK_ARRAY(wchar_t, len16);
@@ -146,7 +146,7 @@ std::wstring toUtf16(const std::string& str)
     return toUtf16(str.data(), str.length());
 }
 
-std::string toUtf8(const wchar_t* wide, std::size_t len)
+std::string toUtf8(const wchar_t* wide, size_t len)
 {
     auto len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, int(len), NULL, 0, NULL, NULL);
     char* ns = STACK_ARRAY(char, len8);

@@ -81,7 +81,7 @@ void Parser::init()
 }
 
 
-std::size_t Parser::parse(const char* data, std::size_t len)
+size_t Parser::parse(const char* data, size_t len)
 {
     // TraceS(this) << "Parse: " << len << endl;
 
@@ -89,7 +89,7 @@ std::size_t Parser::parse(const char* data, std::size_t len)
         throw std::runtime_error("HTTP parser already complete");
     }
 
-    std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
+    size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
 
     if (_parser.upgrade) {
         // The parser has only parsed the HTTP headers, there
@@ -199,7 +199,7 @@ void Parser::onHeadersEnd()
 }
 
 
-void Parser::onBody(const char* buf, std::size_t len)
+void Parser::onBody(const char* buf, size_t len)
 {
     // TraceS(this) << "On body" << endl;
     if (_observer)
@@ -247,7 +247,7 @@ int Parser::on_message_begin(http_parser* parser)
 }
 
 
-int Parser::on_url(http_parser* parser, const char* at, std::size_t len)
+int Parser::on_url(http_parser* parser, const char* at, size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -271,7 +271,7 @@ int Parser::on_status(http_parser* parser, const char* at, size_t length)
 }
 
 
-int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len)
+int Parser::on_header_field(http_parser* parser, const char* at, size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -291,7 +291,7 @@ int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len
 }
 
 
-int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len)
+int Parser::on_header_value(http_parser* parser, const char* at, size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -333,7 +333,7 @@ int Parser::on_headers_complete(http_parser* parser)
 }
 
 
-int Parser::on_body(http_parser* parser, const char* at, std::size_t len)
+int Parser::on_body(http_parser* parser, const char* at, size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);

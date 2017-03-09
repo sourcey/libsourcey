@@ -69,7 +69,7 @@ struct ClientObserver
 {
     virtual void onClientStateChange(Client& client, ClientState& state, const ClientState& oldState) = 0;
 
-    virtual void onRelayDataReceived(Client& client, const char* data, std::size_t size, const net::Address& peerAddress) = 0;
+    virtual void onRelayDataReceived(Client& client, const char* data, size_t size, const net::Address& peerAddress) = 0;
 
     // virtual void onAllocationCreated(Client& client, const stun::Transaction& transaction) {};
     virtual void onAllocationFailed(Client& client, int errorCode, const std::string& reason) {};
@@ -141,7 +141,7 @@ public:
 
     virtual void sendChannelBind(const std::string& peerIP);
     virtual void sendRefresh();
-    virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);
+    virtual void sendData(const char* data, size_t size, const net::Address& peerAddress);
 
     virtual bool handleResponse(const stun::Message& response);
     virtual void handleAllocateResponse(const stun::Message& response);

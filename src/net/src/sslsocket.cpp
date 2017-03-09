@@ -84,13 +84,13 @@ bool SSLSocket::shutdown()
 }
 
 
-std::size_t SSLSocket::send(const char* data, std::size_t len, int flags)
+ssize_t SSLSocket::send(const char* data, size_t len, int flags)
 {
     return send(data, len, peerAddress(), flags);
 }
 
 
-std::size_t SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
+ssize_t SSLSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << endl;
     assert(Thread::currentID() == tid());
@@ -193,7 +193,7 @@ net::TransportType SSLSocket::transport() const
 //
 // Callbacks
 
-void SSLSocket::onRead(const char* data, std::size_t len)
+void SSLSocket::onRead(const char* data, size_t len)
 {
     // TraceS(this) << "On SSL read: " << len << endl;
 

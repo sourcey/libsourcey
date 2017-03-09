@@ -39,7 +39,7 @@ SocketAdapter::~SocketAdapter()
 }
 
 
-std::size_t SocketAdapter::send(const char* data, std::size_t len, int flags)
+ssize_t SocketAdapter::send(const char* data, size_t len, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
     if (!_sender)
@@ -48,7 +48,7 @@ std::size_t SocketAdapter::send(const char* data, std::size_t len, int flags)
 }
 
 
-std::size_t SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
+ssize_t SocketAdapter::send(const char* data, size_t len, const Address& peerAddress, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
     if (!_sender)
@@ -57,7 +57,7 @@ std::size_t SocketAdapter::send(const char* data, std::size_t len, const Address
 }
 
 
-std::size_t SocketAdapter::sendPacket(const IPacket& packet, int flags)
+ssize_t SocketAdapter::sendPacket(const IPacket& packet, int flags)
 {
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
@@ -74,7 +74,7 @@ std::size_t SocketAdapter::sendPacket(const IPacket& packet, int flags)
 }
 
 
-std::size_t SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
+ssize_t SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
 {
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
@@ -94,7 +94,7 @@ std::size_t SocketAdapter::sendPacket(const IPacket& packet, const Address& peer
 
 void SocketAdapter::sendPacket(IPacket& packet)
 {
-    int res = sendPacket(packet, 0);
+    size_t res = sendPacket(packet, 0);
     if (res < 0)
         throw std::runtime_error("Invalid socket operation");
 }
@@ -104,7 +104,7 @@ void SocketAdapter::onSocketConnect(Socket& socket)
 {
     try {
         cleanupReceivers();
-        int current = _receivers.size() - 1;
+        size_t current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -120,7 +120,7 @@ void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, co
 {
     try {
         cleanupReceivers();
-        int current = _receivers.size() - 1;
+        size_t current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -136,7 +136,7 @@ void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
 {
     try {
         cleanupReceivers();
-        int current = _receivers.size() - 1;
+        size_t current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -152,7 +152,7 @@ void SocketAdapter::onSocketClose(Socket& socket)
 {
     try {
         cleanupReceivers();
-        int current = _receivers.size() - 1;
+        size_t current = _receivers.size() - 1;
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive) {

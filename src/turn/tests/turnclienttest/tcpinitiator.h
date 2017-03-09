@@ -126,7 +126,7 @@ struct TCPInitiator : public turn::TCPClientObserver
         DebugS(this) << id << ": Connection Closed" << endl;
     }
 
-    void onRelayDataReceived(turn::Client&, const char* data, std::size_t size, const net::Address& peerAddr)
+    void onRelayDataReceived(turn::Client&, const char* data, size_t size, const net::Address& peerAddr)
     {
 #if 0
         std::string payload(data, size);

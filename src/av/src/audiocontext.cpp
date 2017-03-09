@@ -200,7 +200,7 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 {
     enum AVSampleFormat compatible = AV_SAMPLE_FMT_NONE;
     enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
-    bool planar = av_sample_fmt_is_planar(requested);
+    int planar = av_sample_fmt_is_planar(requested);
     const enum AVSampleFormat* p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
         if (compatible == AV_SAMPLE_FMT_NONE &&

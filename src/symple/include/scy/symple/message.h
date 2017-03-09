@@ -74,12 +74,12 @@ public:
     void removeData(const std::string& name);
     bool hasData(const std::string& name);
 
-    virtual std::size_t read(const ConstBuffer& buf);
-    virtual std::size_t read(const std::string& root);
+    virtual ssize_t read(const ConstBuffer& buf);
+    virtual ssize_t read(const std::string& root);
     virtual void write(Buffer& buf) const;
 
     bool isRequest() const;
-    virtual std::size_t size() const;
+    virtual size_t size() const;
 
     void print(std::ostream& os) const;
 

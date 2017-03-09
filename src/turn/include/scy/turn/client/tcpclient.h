@@ -59,7 +59,7 @@ public:
     virtual void shutdown();
 
     virtual void sendConnectRequest(const net::Address& peerAddress);
-    virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);
+    virtual void sendData(const char* data, size_t size, const net::Address& peerAddress);
 
     virtual bool handleResponse(const stun::Message& response);
     virtual void handleConnectResponse(const stun::Message& response);

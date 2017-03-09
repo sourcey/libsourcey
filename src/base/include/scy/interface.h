@@ -14,8 +14,8 @@
 
 
 #include "scy/base.h"
+#include "scy/uv/uvpp.h" // ssize_t
 #include <atomic>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -33,8 +33,9 @@ class Base_API Decoder
 public:
     Decoder() {}
     virtual ~Decoder() {}
-    virtual std::size_t decode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
-    virtual std::size_t finalize(char* /* outbuf */) { return 0; }
+
+    virtual ssize_t decode(const char* inbuf, size_t nread, char* outbuf) = 0;
+    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
 };
 
 
@@ -43,8 +44,8 @@ class Base_API Encoder
 public:
     Encoder() {}
     virtual ~Encoder() {}
-    virtual std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
-    virtual std::size_t finalize(char* /* outbuf */) { return 0; }
+    virtual ssize_t encode(const char* inbuf, size_t nread, char* outbuf) = 0;
+    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
 };
 
 

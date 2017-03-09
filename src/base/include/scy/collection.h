@@ -43,7 +43,7 @@ public:
     virtual bool exists(const TValue* item) const = 0;
     virtual bool free(const TKey& key) = 0;
     virtual bool empty() const = 0;
-    virtual std::size_t size() const = 0;
+    virtual size_t size() const = 0;
     virtual TValue* get(const TKey& key, bool whiny = true) const = 0;
     virtual void clear() = 0;
 };
@@ -187,7 +187,7 @@ public:
         return _map.empty();
     }
 
-    virtual std::size_t size() const
+    virtual size_t size() const
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _map.size();
@@ -327,7 +327,7 @@ public:
         return _map.empty();
     }
 
-    virtual std::size_t size() const
+    virtual size_t size() const
     {
         return _map.size();
     }

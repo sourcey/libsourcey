@@ -43,8 +43,8 @@ public:
     PacketStreamAdapter(PacketSignal& emitter);
     virtual ~PacketStreamAdapter(){};
 
-    virtual void emit(char* data, std::size_t len, unsigned flags = 0);
-    virtual void emit(const char* data, std::size_t len, unsigned flags = 0);
+    virtual void emit(char* data, size_t len, unsigned flags = 0);
+    virtual void emit(const char* data, size_t len, unsigned flags = 0);
     virtual void emit(const std::string& str, unsigned flags = 0);
     virtual void emit(unsigned flags = 0);
     virtual void emit(IPacket& packet);
@@ -275,10 +275,10 @@ public:
     virtual bool locked() const;
 
     /// Writes data to the stream (nocopy).
-    virtual void write(char* data, std::size_t len);
+    virtual void write(char* data, size_t len);
 
     /// Writes data to the stream (copied).
-    virtual void write(const char* data, std::size_t len);
+    virtual void write(const char* data, size_t len);
 
     /// Writes an incoming packet onto the stream.
     virtual void write(IPacket&& packet);

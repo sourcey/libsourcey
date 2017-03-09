@@ -95,7 +95,7 @@ IPacket* Message::clone() const
 void Message::add(Attribute* attr)
 {
     _attrs.push_back(attr);
-    std::size_t attrLength = attr->size();
+    size_t attrLength = attr->size();
     if (attrLength % 4 != 0)
         attrLength += (4 - (attrLength % 4));
     _size += attrLength + kAttributeHeaderSize;
@@ -117,7 +117,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
 }
 
 
-std::size_t Message::read(const ConstBuffer& buf)
+ssize_t Message::read(const ConstBuffer& buf)
 {
     TraceL << "Parse STUN packet: " << buf.size() << endl;
 

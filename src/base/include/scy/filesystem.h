@@ -91,7 +91,7 @@ Base_API std::string transcode(const std::string& path);
 /// Returns true on success, or if whiny is set then an
 /// exception will be thrown on error.
 Base_API bool savefile(const std::string& path, const char* data, 
-                        std::size_t size, bool whiny = false);
+                        size_t size, bool whiny = false);
 
 // TODO: Implement more libuv fs_* types
 

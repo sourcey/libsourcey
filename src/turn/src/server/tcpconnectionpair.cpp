@@ -154,7 +154,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
 
     // Buffer& buf = pkt.buffer;
     const char* buf = bufferCast<const char*>(buffer);
-    std::size_t len = buffer.size();
+    size_t len = buffer.size();
     if (client.impl) {
 
         allocation.updateUsage(len);
@@ -182,7 +182,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     // Buffer early media
     // TODO: Make buffer size server option
     else {
-        std::size_t maxSize =
+        size_t maxSize =
             allocation.server().options().earlyMediaBufferSize;
         DebugS(this) << "Buffering early data: " << len << endl;
         //#ifdef _DEBUG

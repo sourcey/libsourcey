@@ -67,13 +67,13 @@ IPacket* Message::clone() const
 }
 
 
-std::size_t Message::read(const ConstBuffer& buf)
+ssize_t Message::read(const ConstBuffer& buf)
 {
     return read(buf.str()); // refactor
 }
 
 
-std::size_t Message::read(const std::string& root)
+ssize_t Message::read(const std::string& root)
 {
     *this = json::value::parse(root.begin(), root.end());
     return root.length();
@@ -89,7 +89,7 @@ void Message::write(Buffer& buf) const
 }
 
 
-std::size_t Message::size() const
+size_t Message::size() const
 {
     // KLUDGE: is there a better way?
     return dump().size();

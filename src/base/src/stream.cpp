@@ -65,7 +65,7 @@ bool Stream::shutdown()
 }
 
 
-bool Stream::write(const char* data, std::size_t len)
+bool Stream::write(const char* data, size_t len)
 {
     assertThread();
 
@@ -138,7 +138,7 @@ bool Stream::readStop()
     return r == 0;
 }
 
-void Stream::onRead(const char* data, std::size_t len)
+void Stream::onRead(const char* data, size_t len)
 {
     // TraceL << "On read: " << len << std::endl;
     Read.emit(*this, data, (const int)len);
@@ -186,7 +186,7 @@ void Stream::handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, 
     handleReadCommon((uv_stream_t*)handle, nread, buf, pending);
 }
 
-void Stream::allocReadBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
+void Stream::allocReadBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
     auto self = reinterpret_cast<Stream*>(handle->data);
 

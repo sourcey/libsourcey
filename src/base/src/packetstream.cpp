@@ -176,13 +176,13 @@ void PacketStream::close()
 }
 
 
-void PacketStream::write(char* data, std::size_t len)
+void PacketStream::write(char* data, size_t len)
 {
     write(RawPacket(data, len));
 }
 
 
-void PacketStream::write(const char* data, std::size_t len)
+void PacketStream::write(const char* data, size_t len)
 {
     write(RawPacket(data, len));
 }
@@ -703,14 +703,14 @@ PacketStreamAdapter::PacketStreamAdapter(PacketSignal& emitter)
 }
 
 
-void PacketStreamAdapter::emit(char* data, std::size_t len, unsigned flags)
+void PacketStreamAdapter::emit(char* data, size_t len, unsigned flags)
 {
     RawPacket p(data, len, flags);
     emit(p);
 }
 
 
-void PacketStreamAdapter::emit(const char* data, std::size_t len,
+void PacketStreamAdapter::emit(const char* data, size_t len,
                                unsigned flags)
 {
     RawPacket p(data, len, flags);

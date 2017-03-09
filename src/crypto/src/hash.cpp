@@ -55,7 +55,7 @@ void Hash::reset()
 }
 
 
-void Hash::update(const void* data, unsigned length)
+void Hash::update(const void* data, size_t length)
 {
     internal::api(EVP_DigestUpdate(&_ctx, data, length));
 }

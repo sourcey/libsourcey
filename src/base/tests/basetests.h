@@ -237,7 +237,7 @@ void signalIncrementFree(std::uint64_t& val)
 }
 
 
-bool signalHandlerC(const char* sl, std::size_t ln)
+bool signalHandlerC(const char* sl, size_t ln)
 {
     // std::cout << "signalHandlerC: " << sl << ln << std::endl;
     return false;
@@ -250,14 +250,14 @@ class SignalTest: public Test
     {
         int timesCalled = 0;
 
-        bool signalHandlerA(const char* sl, std::size_t ln)
+        bool signalHandlerA(const char* sl, size_t ln)
         {
             // std::cout << "signalHandlerA: " << sl << ln << std::endl;
             timesCalled++;
             return true;
         }
 
-        bool signalHandlerB(const char* sl, std::size_t ln) const
+        bool signalHandlerB(const char* sl, size_t ln) const
         {
             // std::cout << "signalHandlerB: " << sl << ln << std::endl;
             return true;
@@ -267,12 +267,12 @@ class SignalTest: public Test
     void run()
     {
         Foo foo;
-        Signal<bool(const char*, std::size_t)> signal;
+        Signal<bool(const char*, size_t)> signal;
 
         int refid1, refid2, refid3, refid4, refid5;
 
         // Attach a lambda function
-        refid1 = signal.attach([&](const char* arg1, std::size_t arg2) {
+        refid1 = signal.attach([&](const char* arg1, size_t arg2) {
             // std::cout << "lambda: " << arg1 << arg2 << std::endl;
 
             // Detach slots inside callback scope
@@ -285,7 +285,7 @@ class SignalTest: public Test
         expect(refid1 == 1);
 
         // Attach a lambda function via += operator
-        refid2 = signal += [&](const char* arg1, std::size_t arg2) {
+        refid2 = signal += [&](const char* arg1, size_t arg2) {
             // std::cout << "lambda 2: " << arg1 << arg2 << std::endl;
             return true;
         };

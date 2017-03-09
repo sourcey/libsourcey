@@ -124,7 +124,7 @@ public:
     virtual ~WebSocketFramer();
 
     /// Writes a WebSocket protocol frame from the given data.
-    virtual std::size_t writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame);
+    virtual size_t writeFrame(const char* data, size_t len, int flags, BitWriter& frame);
 
     /// Reads a single WebSocket frame from the given buffer (frame).
     ///
@@ -200,8 +200,8 @@ public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
                      http::Request& request, http::Response& response);
 
-    virtual std::size_t send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
-    virtual std::size_t send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual ssize_t send(const char* data, size_t len, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
 
     virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);
 
@@ -281,7 +281,7 @@ public:
     ConnectionAdapter(Connection* connection, ws::Mode mode);
     virtual ~ConnectionAdapter();
 
-    // virtual std::size_t sendHeader();
+    // virtual ssize_t sendHeader();
 
     virtual void onHandshakeComplete();
 

@@ -235,7 +235,7 @@ public:
     }
 
     /// Returns the number of active slots.
-    std::size_t nslots() const
+    size_t nslots() const
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _slots.size();
