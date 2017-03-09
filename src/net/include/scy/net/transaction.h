@@ -31,9 +31,8 @@ public:
 	typedef PacketTransaction<PacketT> BaseT;
 
     Transaction(const net::Socket::Ptr& socket, const Address& peerAddress,
-                int timeout = 10000, int retries = 1,
-                uv::Loop* loop = socket->loop())
-        : PacketTransaction<PacketT>(timeout, retries, loop)
+                int timeout = 10000, int retries = 1)
+        : PacketTransaction<PacketT>(timeout, retries, socket->loop())
         , PacketSocketEmitter(socket)
         , _peerAddress(peerAddress)
     {
@@ -82,7 +81,7 @@ protected:
 
             // Stop socket data propagation since
             // we have handled the packet
-            throw StopPropagation(); 
+            throw StopPropagation();
         }
     }
 

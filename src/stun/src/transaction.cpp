@@ -27,9 +27,8 @@ namespace stun {
 
 
 Transaction::Transaction(const net::Socket::Ptr& socket,
-                         const net::Address& peerAddress, long timeout,
-                         int retries, uv::Loop* loop)
-    : net::Transaction<Message>(socket, peerAddress, timeout, retries, loop)
+                         const net::Address& peerAddress, long timeout, int retries)
+    : net::Transaction<Message>(socket, peerAddress, timeout, retries)
 {
     DebugS(this) << "Create" << std::endl;
 

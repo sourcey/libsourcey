@@ -269,9 +269,9 @@ public:
 public:
     KVCollection() {}
 
-    virtual ~KVCollection() 
-    { 
-        clear(); 
+    virtual ~KVCollection()
+    {
+        clear();
     }
 
     virtual bool add(const TKey& key, const TValue& item, bool update = true, bool whiny = true)
@@ -282,8 +282,8 @@ public:
             return false;
         }
 
-        _map.insert(Map::value_type({ key, item }));
         // _map[key] = item;
+        _map.insert(typename Map::value_type(key, item));
         return true;
     }
 
