@@ -24,9 +24,8 @@ namespace scy {
 namespace av {
 
 
-// ---------------------------------------------------------------------
-///// Defines a codec for encoding/decoding media.
-struct Codec
+/// Codec for encoding/decoding media.
+struct AV_API Codec
 {
     //
     // Base Codec Variables
@@ -69,7 +68,7 @@ struct Codec
 #define DEFAULT_AUDIO_SAMPLE_FMT "s16"
 
 
-struct AudioCodec : public Codec
+struct AV_API AudioCodec : public Codec
 {
     int channels;
     std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p,
@@ -101,14 +100,14 @@ struct AudioCodec : public Codec
 
 // ---------------------------------------------------------------------
 //
-#define DEFAULT_VIDEO_SAMPLE_RATE                                              \
-    384000 // 128-384 kbit/s for business-oriented videoconferencing quality
-           // using video compression
+// Default 128-384 kbit/s for business-oriented videoconferencing quality
+// using video compression
+#define DEFAULT_VIDEO_SAMPLE_RATE 384000 
 #define DEFAULT_VIDEO_BIT_RATE 400000
 #define DEFAULT_VIDEO_PIXEL_FMT "yuv420p"
 
 
-struct VideoCodec : public Codec
+struct AV_API VideoCodec : public Codec
 {
     int width;
     int height;

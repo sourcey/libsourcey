@@ -43,7 +43,7 @@ struct Method
 /// In addition to the properties common to all HTTP messages,
 /// a HTTP request has a method (e.g. GET, HEAD, POST, etc.) and
 /// a request URI.
-class /* SCY_EXTERN */ Request : public http::Message
+class HTTP_API Request : public http::Message
 {
 public:
     // typedef std::shared_ptr<Request> Ptr;

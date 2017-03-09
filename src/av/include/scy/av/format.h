@@ -26,7 +26,7 @@ namespace av {
 /// Defines a media container format which is available through the
 /// Format Registry for encoding/decoding. A format defined preferred
 /// default values for each codec.
-struct Format
+struct AV_API Format
 {
     enum Type
     {

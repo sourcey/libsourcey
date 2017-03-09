@@ -10,11 +10,11 @@
 
 
 #include "scy/crypto/x509certificate.h"
+#include <sstream>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
-#include <sstream>
 
 
 namespace scy {
@@ -24,7 +24,6 @@ namespace crypto {
 X509Certificate::X509Certificate(const char* data, std::size_t length)
     : _certificate(0)
 {
-
     std::string res;
     Timestamp ts;
     DateTimeFormatter::append(res, ts, DateTimeFormat::HTTP_FORMAT);

@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "scy/base.h"
+#include "scy/av/av.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -28,7 +28,7 @@ namespace scy {
 namespace av {
 
 
-struct AudioBuffer
+struct AV_API AudioBuffer
 {
     AudioBuffer();
     ~AudioBuffer();

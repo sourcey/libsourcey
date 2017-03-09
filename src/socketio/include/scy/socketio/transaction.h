@@ -21,10 +21,10 @@ namespace scy {
 namespace sockio {
 
 
-class /* SCY_EXTERN */ Client;
+class SocketIO_API Client;
 
 
-struct Transaction : public PacketTransaction<sockio::Packet>
+struct SocketIO_API Transaction : public PacketTransaction<sockio::Packet>
 {
     Transaction(sockio::Client& client, long timeout = 10000);
     Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);

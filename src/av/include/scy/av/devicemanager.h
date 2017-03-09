@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-#include "scy/base.h"
+#include "scy/av/av.h"
 #include "scy/signal.h"
 
 
@@ -40,7 +40,7 @@ namespace scy {
 namespace av {
 
 
-class /* SCY_EXTERN */ DeviceManager;
+class AV_API DeviceManager;
 
 
 //
@@ -91,7 +91,7 @@ enum MediaCapabilities
 //
 
 
-class /* SCY_EXTERN */ DeviceWatcher
+class AV_API DeviceWatcher
 {
 public:
     explicit DeviceWatcher(DeviceManager*) {}
@@ -106,7 +106,7 @@ public:
 //
 
 
-class /* SCY_EXTERN */ DeviceManager
+class AV_API DeviceManager
 {
 public:
     DeviceManager();

@@ -13,6 +13,7 @@
 #define SCY_SocketIO_Packet_H
 
 
+#include "scy/socketio/socketio.h"
 #include "scy/json/json.h"
 #include "scy/packet.h"
 
@@ -21,7 +22,7 @@ namespace scy {
 namespace sockio {
 
 
-class /* SCY_EXTERN */ Packet : public IPacket
+class SocketIO_API Packet : public IPacket
 {
 public:
     enum class Frame : int

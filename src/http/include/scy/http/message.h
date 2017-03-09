@@ -13,6 +13,7 @@
 #define SCY_HTTP_Message_H
 
 
+#include "scy/http/http.h"
 #include "scy/collection.h"
 
 
@@ -25,7 +26,7 @@ namespace http {
 /// Defines the common properties of all HTTP messages.
 /// These are version, content length, content type
 /// and transfer encoding.
-class /* SCY_EXTERN */ Message : public NVCollection
+class HTTP_API Message : public NVCollection
 {
 public:
     /// Sets the HTTP version for this message.

@@ -22,8 +22,9 @@
 namespace scy {
 namespace av {
 
-/// An FPS counter based on the simple moving average (SMA) algorithm
-class /* SCY_EXTERN */ FPSCounter
+
+/// FPS counter based on the simple moving average (SMA) algorithm
+class AV_API FPSCounter
 {
 private:
     static const int MAX = 100;
@@ -126,7 +127,7 @@ struct FPSCounter
 /// Note that revious processors must not fragment packets
 /// otherwise this class will not be accurate, and the packet
 /// drop rate will be too high.
-class /* SCY_EXTERN */ FPSLimiter : public PacketProcessor
+class AV_API FPSLimiter : public PacketProcessor
 {
 public:
     FPSLimiter(int max, bool videoOnly = false)

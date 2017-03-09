@@ -355,7 +355,7 @@ protected:
 /// A storage container for a name value collections.
 /// This collection can store multiple entries for each
 /// name, and it's getters are case-insensitive.
-class /* Base_API */ NVCollection
+class Base_API NVCollection
 {
 public:
     struct ILT
@@ -440,110 +440,6 @@ public:
 private:
     Map _map;
 };
-
-
-inline NVCollection& NVCollection::operator=(const NVCollection& nvc)
-{
-    if (&nvc != this) {
-        _map = nvc._map;
-    }
-    return *this;
-}
-
-
-inline const std::string& NVCollection::operator[](const std::string& name) const
-{
-    ConstIterator it = _map.find(name);
-    if (it != _map.end())
-        return it->second;
-    else
-        throw std::runtime_error("Item not found: " + name);
-}
-
-
-inline void NVCollection::set(const std::string& name, const std::string& value)
-{
-    Iterator it = _map.find(name);
-    if (it != _map.end())
-        it->second = value;
-    else
-        _map.insert(Map::value_type(name, value));
-}
-
-
-inline void NVCollection::add(const std::string& name, const std::string& value)
-{
-    _map.insert(Map::value_type(name, value));
-}
-
-
-inline const std::string& NVCollection::get(const std::string& name) const
-{
-    ConstIterator it = _map.find(name);
-    if (it != _map.end())
-        return it->second;
-    else
-        throw std::runtime_error("Item not found: " + name);
-}
-
-
-inline const std::string& NVCollection::get(const std::string& name,
-                                            const std::string& defaultValue) const
-{
-    ConstIterator it = _map.find(name);
-    if (it != _map.end())
-        return it->second;
-    else
-        return defaultValue;
-}
-
-
-inline bool NVCollection::has(const std::string& name) const
-{
-    return _map.find(name) != _map.end();
-}
-
-
-inline NVCollection::ConstIterator NVCollection::find(const std::string& name) const
-{
-    return _map.find(name);
-}
-
-
-inline NVCollection::ConstIterator NVCollection::begin() const
-{
-    return _map.begin();
-}
-
-
-inline NVCollection::ConstIterator NVCollection::end() const
-{
-    return _map.end();
-}
-
-
-inline bool NVCollection::empty() const
-{
-    return _map.empty();
-}
-
-
-inline int NVCollection::size() const
-{
-    return (int)_map.size();
-}
-
-
-inline void NVCollection::erase(const std::string& name)
-{
-    _map.erase(name);
-}
-
-
-inline void NVCollection::clear()
-{
-    _map.clear();
-}
 
 
 typedef std::map<std::string, std::string> StringMap;

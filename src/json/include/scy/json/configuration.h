@@ -13,10 +13,10 @@
 #define SCY_JSON_Configuration_H
 
 
-#include "scy/configuration.h"
 #include "scy/json/json.h"
-#include <mutex>
+#include "scy/configuration.h"
 #include "scy/util.h"
+#include <mutex>
 
 
 namespace scy {
@@ -26,7 +26,7 @@ namespace json {
 /// JSON configuration file
 ///
 /// See base Configuration for all accessors
-class /* SCY_EXTERN */ Configuration : public scy::Configuration
+class JSON_API Configuration : public scy::Configuration
 {
 public:
     Configuration();

@@ -23,7 +23,7 @@ namespace av {
 struct Format;
 
 
-class /* SCY_EXTERN */ ICapture : public PacketSource, public basic::Startable
+class AV_API ICapture : public PacketSource, public basic::Startable
 {
 public:
     ICapture()

@@ -24,7 +24,7 @@ namespace scy {
 namespace crypto {
 
 
-class /* SCY_EXTERN */ Hash
+class Crypto_API Hash
 {
 public:
     Hash(const std::string& algorithm);

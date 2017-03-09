@@ -32,7 +32,7 @@ namespace av {
 
 /// This class implements a cross platform audio, video, screen and
 /// video file capturer.
-class /* SCY_EXTERN */ MediaCapture : public ICapture, public basic::Runnable
+class AV_API MediaCapture : public ICapture, public basic::Runnable
 {
 public:
     typedef std::shared_ptr<MediaCapture> Ptr;

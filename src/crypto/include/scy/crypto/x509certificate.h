@@ -28,7 +28,7 @@ namespace crypto {
 
 
 /// This class represents a X509 Certificate.
-class /* SCY_EXTERN */ X509Certificate
+class Crypto_API X509Certificate
 {
 public:
     /// Name identifier for extracting information from

@@ -21,10 +21,10 @@ namespace scy {
 namespace json {
 
 
-class /* SCY_EXTERN */ ISerializable
+class ISerializable
 {
 public:
-    virtual ~ISerializable(){};
+    virtual ~ISerializable() {};
     virtual void serialize(json::value& root) = 0;
     virtual void deserialize(json::value& root) = 0;
 };

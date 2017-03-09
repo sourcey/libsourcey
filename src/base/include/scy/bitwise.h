@@ -34,7 +34,8 @@ struct Bitwise
     {
         if (!has(flag))
             data |= flag;
-    };
+    }
+
     virtual void add(unsigned flag) { data |= flag; };
     virtual void remove(unsigned flag) { data &= ~flag; };
     virtual void toggle(unsigned flag) { data ^= flag; };
@@ -43,7 +44,7 @@ struct Bitwise
 
 
 #if 0
-class Base_API Flaggable
+class Flaggable
 {
 public:
     Flaggable(unsigned flags = 0) : _flags(flags) {}

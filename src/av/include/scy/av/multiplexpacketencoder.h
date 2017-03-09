@@ -25,7 +25,7 @@ namespace av {
 /// Encodes and multiplexes a realtime video stream form
 /// audio / video capture sources.
 /// FFmpeg is used for encoding.
-class /* SCY_EXTERN */ MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
+class AV_API MultiplexPacketEncoder : public MultiplexEncoder, public PacketProcessor
 {
 public:
     MultiplexPacketEncoder(const EncoderOptions& options = EncoderOptions());

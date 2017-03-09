@@ -235,7 +235,8 @@ add_vendor_dependency(HTTPPARSER http_parser)
 if(WITH_WEBRTC)
   find_dependency(WebRTC REQUIRED)
 
-  # We will be building with BoringSSL instead of OpenSSL
+  # We will be building with BoringSSL instead of OpenSSL 
+  message(STATUS "Using BoringSSL")
   set(WITH_OPENSSL OFF)
   set(HAVE_OPENSSL ON)
   set(OPENSSL_IS_BORINGSSL ON)

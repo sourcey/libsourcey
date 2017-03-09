@@ -15,9 +15,23 @@
 
 #include "scy/base.h"
 #include "scy/error.h"
+
 #include "json.hpp" // include nlohmann json
+
 #include <cstdint>
 #include <fstream>
+
+
+// Shared library exports
+#if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
+    #if defined(JSON_EXPORTS)
+        #define JSON_API __declspec(dllexport)
+    #else
+        #define JSON_API __declspec(dllimport)
+    #endif
+#else
+    #define JSON_API // nothing
+#endif
 
 
 namespace scy {

@@ -78,7 +78,7 @@ struct EncoderOptions
 };
 
 /// This is the abstract class for all encoders.
-class /* SCY_EXTERN */ IEncoder : public Stateful<EncoderState>
+class AV_API IEncoder : public Stateful<EncoderState>
 {
 public:
     enum Type

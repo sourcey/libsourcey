@@ -13,7 +13,7 @@
 #define SCY_HTTP_URL_H
 
 
-#include "scy/base.h"
+#include "scy/http/http.h"
 #include "scy/collection.h"
 #include <http_parser.h>
 
@@ -26,7 +26,7 @@ namespace http {
 /// library to do the heavy lifting.
 /// Constructors and assignment operators will throw
 /// a SyntaxException if the URL is invalid.
-class /* SCY_EXTERN */ URL
+class HTTP_API URL
 {
 public:
     URL();

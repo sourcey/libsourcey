@@ -25,11 +25,11 @@ namespace fs {
 
 /// The platform specific path split separator:
 /// "/" on unix and '\\' on windows.
-extern const char* separator;
+Base_API extern const char* separator;
 
 /// The platform specific path split delimiter:
 /// '/' on unix and '\\' on windows.
-extern const char delimiter;
+Base_API extern const char delimiter;
 
 /// Returns the file name and extension part of the given path.
 Base_API std::string filename(const std::string& path);
@@ -91,7 +91,7 @@ Base_API std::string transcode(const std::string& path);
 /// Returns true on success, or if whiny is set then an
 /// exception will be thrown on error.
 Base_API bool savefile(const std::string& path, const char* data, 
-                         std::size_t size, bool whiny = false);
+                        std::size_t size, bool whiny = false);
 
 // TODO: Implement more libuv fs_* types
 

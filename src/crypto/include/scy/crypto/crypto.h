@@ -30,13 +30,13 @@
 
 // Shared library exports
 #if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
-    #if defined(Base_EXPORTS)
-        #define Base_API __declspec(dllexport)
+    #if defined(Crypto_EXPORTS)
+        #define Crypto_API __declspec(dllexport)
     #else
-        #define Base_API __declspec(dllimport)
+        #define Crypto_API __declspec(dllimport)
     #endif
 #else
-    #define Base_API // nothing
+    #define Crypto_API // nothing
 #endif
 
 
@@ -56,10 +56,10 @@ namespace crypto {
 /// The Crypto library can be called multiple times; however,
 /// for every call to initializeEngine(), a matching call to
 /// uninitializeEngine() must be performed.
-void initializeEngine();
+Crypto_API void initializeEngine();
 
 /// Uninitializes the Crypto library.
-void uninitializeEngine();
+Crypto_API void uninitializeEngine();
 
 /// Generic storage container for storing cryptographic binary data.
 typedef std::vector<unsigned char> ByteVec;

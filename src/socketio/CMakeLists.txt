@@ -6,5 +6,6 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_socketio))
   #include_dependency(HttpParser)
   #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
 
+  set(socketio_PRETTY_NAME SocketIO)
   define_sourcey_module(socketio uv base crypto net http json)
 endif()
