@@ -115,7 +115,7 @@ static std::string ProtocolVersion = "13";
 
 /// This class implements a WebSocket parser according
 /// to the WebSocket protocol described in RFC 6455.
-class SCY_EXTERN WebSocketFramer
+class /* SCY_EXTERN */ WebSocketFramer
 {
 public:
     /// Creates a Socket using the given Socket.
@@ -194,7 +194,7 @@ private:
 //
 
 
-class SCY_EXTERN WebSocketAdapter : public net::SocketEmitter
+class /* SCY_EXTERN */ WebSocketAdapter : public net::SocketEmitter
 {
 public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
@@ -248,7 +248,7 @@ protected:
 
 
 /// Standalone WebSocket class.
-class SCY_EXTERN WebSocket : public WebSocketAdapter
+class /* SCY_EXTERN */ WebSocket : public WebSocketAdapter
 {
 public:
     typedef std::vector<WebSocket> Vec;
@@ -275,7 +275,7 @@ protected:
 
 
 /// WebSocket class which belongs to a HTTP Connection.
-class SCY_EXTERN ConnectionAdapter : public WebSocketAdapter
+class /* SCY_EXTERN */ ConnectionAdapter : public WebSocketAdapter
 {
 public:
     ConnectionAdapter(Connection* connection, ws::Mode mode);

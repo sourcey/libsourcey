@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 #include <deque>
 
@@ -35,7 +35,7 @@ namespace scy {
 /// This class inherits the `Runner` interface and may be used with any
 /// implementation that's powered by an asynchronous `Runner`.
 ///
-class SCY_EXTERN Synchronizer : public Runner
+class Base_API Synchronizer : public Runner
 {
 public:
     /// Create the synchronization context the given event loop.
@@ -123,7 +123,7 @@ protected:
 /// This template class implements an adapter that sits between
 /// an DelegateBase and an object receiving notifications from it.
 template <class C, class BaseT, class CallbackT, DelegateDefaultArgs>
-class SCY_EXTERN SyncDelegate: public Delegate<C, BaseT, CallbackT, P, P2, P3, P4>
+class Base_API SyncDelegate: public Delegate<C, BaseT, CallbackT, P, P2, P3, P4>
 {
 public:
     //typedef DelegateBase<P, P2, P3, P4> DerivedT;

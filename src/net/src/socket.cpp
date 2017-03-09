@@ -12,7 +12,7 @@
 #include "scy/net/socket.h"
 #include "scy/net/address.h"
 #include "scy/net/socketadapter.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 
 #include "scy/logger.h"
 

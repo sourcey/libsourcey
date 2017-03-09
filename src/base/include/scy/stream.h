@@ -14,7 +14,7 @@
 
 
 #include "scy/base.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 #include "scy/buffer.h"
 #include "scy/signal.h"
@@ -24,7 +24,7 @@
 namespace scy {
 
 
-class SCY_EXTERN Stream : public uv::Handle
+class Base_API Stream : public uv::Handle
 {
 public:
     Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr);

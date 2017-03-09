@@ -26,7 +26,7 @@ namespace net {
 
 
 /// SocketAdapter class that adds signal callbacks for sockets.
-class SCY_EXTERN SocketEmitter : public SocketAdapter
+class Net_API SocketEmitter : public SocketAdapter
 {
 public:
     /// Creates the SocketEmitter
@@ -93,7 +93,7 @@ protected:
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
 template <class SocketT>
-class SCY_EXTERN SocketEmitter : public SocketT
+class Net_API SocketEmitter : public SocketT
 {
 public:
     /// Pointer to the underlying socket.

@@ -34,41 +34,41 @@ namespace util {
 
 
 /// Printf style string formatting for POD types.
-std::string format(const char* fmt, ...);
+Base_API std::string format(const char* fmt, ...);
 
 /// Replaces special characters in the given string with
 /// underscores and transform to lowercase.
-void toUnderscore(std::string& str);
+Base_API void toUnderscore(std::string& str);
 
 /// Checks if the string is a number
-bool isNumber(const std::string& str);
+Base_API bool isNumber(const std::string& str);
 
 /// Returns true if the string ends with the given substring.
-bool endsWith(const std::string& str, const std::string& suffix);
+Base_API bool endsWith(const std::string& str, const std::string& suffix);
 
 /// Replaces non-alphanumeric characters.
-void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
-void replaceSpecialCharacters(std::string& str, char with = '_',
-                              bool allowSpaces = false);
+Base_API void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
+Base_API void replaceSpecialCharacters(std::string& str, char with = '_',
+                                       bool allowSpaces = false);
 
 /// String to hex value.
-bool tryParseHex(const std::string& s, unsigned& value);
-unsigned parseHex(const std::string& s);
+Base_API bool tryParseHex(const std::string& s, unsigned& value);
+Base_API unsigned parseHex(const std::string& s);
 
 /// Dumps the binary representation of the
 /// given buffer to the output string.
-std::string dumpbin(const char* data, std::size_t len);
+Base_API std::string dumpbin(const char* data, std::size_t len);
 
 /// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
 /// If L (local) is greater than R (remote) the function returns true.
 /// If L is equal or less than R the function returns false.
-bool compareVersion(const std::string& l, const std::string& r);
+Base_API bool compareVersion(const std::string& l, const std::string& r);
 
 /// Matches two node lists against each other.
-bool matchNodes(const std::string& node, const std::string& xnode,
-                const std::string& delim = "\r\n");
-bool matchNodes(const std::vector<std::string>& params,
-                const std::vector<std::string>& xparams);
+Base_API bool matchNodes(const std::string& node, const std::string& xnode,
+                         const std::string& delim = "\r\n");
+Base_API bool matchNodes(const std::vector<std::string>& params,
+                         const std::vector<std::string>& xparams);
 
 /// Returns the pointer memory address as a string.
 std::string memAddress(const void* ptr);
@@ -115,13 +115,13 @@ std::int64_t doubleToInt(double d);
 //
 
 /// Generates a 31-bit pseudo random number.
-std::uint32_t randomNumber();
+Base_API std::uint32_t randomNumber();
 
 /// Generates a random string.
-std::string randomString(int size);
+Base_API std::string randomString(int size);
 
 /// Generates a random (optionally base64 encoded) binary key.
-std::string randomBinaryString(int size, bool doBase64 = false);
+Base_API std::string randomBinaryString(int size, bool doBase64 = false);
 
 
 //
@@ -129,16 +129,16 @@ std::string randomBinaryString(int size, bool doBase64 = false);
 //
 
 /// Splits the given string at the delimiter string.
-void split(const std::string& str, const std::string& delim, std::vector<std::string>& elems, int limit = -1);
-std::vector<std::string> split(const std::string& str, const std::string& delim, int limit = -1);
+Base_API void split(const std::string& str, const std::string& delim, std::vector<std::string>& elems, int limit = -1);
+Base_API std::vector<std::string> split(const std::string& str, const std::string& delim, int limit = -1);
 
 /// Splits the given string at the delimiter character.
-void split(const std::string& str, char delim, std::vector<std::string>& elems, int limit = -1);
-std::vector<std::string> split(const std::string& str, char delim, int limit = -1);
+Base_API void split(const std::string& str, char delim, std::vector<std::string>& elems, int limit = -1);
+Base_API std::vector<std::string> split(const std::string& str, char delim, int limit = -1);
 
 
 //
-// String replace methods (POCO)
+// String replace methods (Poco)
 //
 
 template <class S>
@@ -381,7 +381,8 @@ int icompare(const S& str, typename S::size_type pos, typename S::size_type n, I
         return 1;
 }
 
-template <class S> int icompare(const S& str1, const S& str2)
+template <class S> 
+int icompare(const S& str1, const S& str2)
 {
     typename S::const_iterator it1(str1.begin());
     typename S::const_iterator end1(str1.end());
@@ -489,7 +490,8 @@ int icompare(const S& str, typename S::size_type pos,
     return icompare(str, pos, str.size() - pos, ptr);
 }
 
-template <class S> int icompare(const S& str, const typename S::value_type* ptr)
+template <class S> 
+int icompare(const S& str, const typename S::value_type* ptr)
 {
     return icompare(str, 0, str.size(), ptr);
 }
@@ -499,11 +501,11 @@ template <class S> int icompare(const S& str, const typename S::value_type* ptr)
 // Stream copiers
 //
 
-std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
-std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
-                           std::size_t bufferSize = 8192);
-std::streamsize copyToString(std::istream& istr, std::string& str,
-                             std::size_t bufferSize = 8192);
+Base_API std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
+Base_API std::streamsize copyStream(std::istream& istr, std::ostream& ostr,
+                                    std::size_t bufferSize = 8192);
+Base_API std::streamsize copyToString(std::istream& istr, std::string& str,
+                                      std::size_t bufferSize = 8192);
 
 
 //
@@ -567,7 +569,8 @@ struct Version
 
 /// Delete all elements from a list of pointers.
 /// @param L List of pointers to delete.
-template <typename Val> inline void clearList(std::list<Val*>& L)
+template <typename Val> 
+inline void clearList(std::list<Val*>& L)
 {
     typename std::list<Val*>::iterator it = L.begin();
     while (it != L.end()) {
@@ -578,7 +581,8 @@ template <typename Val> inline void clearList(std::list<Val*>& L)
 
 /// Delete all elements from a list of pointers.
 /// @param D List of pointers to delete.
-template <typename Val> inline void clearDeque(std::deque<Val*>& D)
+template <typename Val> 
+inline void clearDeque(std::deque<Val*>& D)
 {
     typename std::deque<Val*>::iterator it = D.begin();
     while (it != D.end()) {
@@ -600,7 +604,8 @@ template <typename Val> inline void clearDeque(std::deque<Val*>& D)
 
 /// Delete all elements from a vector of pointers.
 /// @param V Vector of pointers to delete.
-template <typename Val> inline void clearVector(std::vector<Val*>& V)
+template <typename Val> 
+inline void clearVector(std::vector<Val*>& V)
 {
     typename std::vector<Val*>::iterator it = V.begin();
     while (it != V.end()) {
@@ -665,31 +670,3 @@ inline void clearMap(std::map<const Key, Val*>& M)
 
 
 /// @\}
-
-
-//
-// Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
-// and Contributors.
-//
-// Permission is hereby granted, free of charge, to any person or organization
-// obtaining a copy of the software and accompanying documentation covered by
-// this license (the "Software") to use, reproduce, display, distribute,
-// execute, and transmit the Software, and to prepare derivative works of the
-// Software, and to permit third-parties to whom the Software is furnished to
-// do so, all subject to the following:
-//
-// The copyright notices in the Software and this entire statement, including
-// the above license grant, this restriction and the following disclaimer,
-// must be included in all copies of the Software, in whole or in part, and
-// all derivative works of the Software, unless such copies or derivative
-// works are solely in the form of machine-executable object code generated by
-// a source language processor.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
-// SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
-// FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
-// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-// DEALINGS IN THE SOFTWARE.
-//

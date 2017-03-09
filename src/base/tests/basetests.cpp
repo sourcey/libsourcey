@@ -1,6 +1,5 @@
 #include "basetests.h"
 
-
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -12,7 +11,6 @@ int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
-
 
     // =========================================================================
     // Garbage Collector

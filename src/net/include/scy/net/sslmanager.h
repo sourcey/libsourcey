@@ -17,7 +17,7 @@
 
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 #include "scy/singleton.h"
 
 #include <openssl/ssl.h>
@@ -27,13 +27,13 @@ namespace scy {
 namespace net {
 
 
-class SCY_EXTERN VerificationErrorDetails;
+class Net_API VerificationErrorDetails;
 
 
 /// SSLManager is a singleton for holding the default server/client
 /// Context and handling callbacks for certificate verification errors
 /// and private key passphrases.
-class SCY_EXTERN SSLManager
+class Net_API SSLManager
 {
 public:
     /// Initializes the server side of the SSLManager server-side SSLContext.
@@ -130,7 +130,7 @@ private:
 //
 
 /// A utility class for certificate error handling.
-class SCY_EXTERN VerificationErrorDetails
+class Net_API VerificationErrorDetails
 {
 public:
     /// Creates the VerificationErrorDetails. _ignoreError is per default set to

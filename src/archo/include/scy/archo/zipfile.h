@@ -13,6 +13,7 @@
 #define SCY_Archo_ZipFile_H
 
 
+#include "scy/archo/archo.h"
 #include "scy/base64.h"
 #include <unzip.h> // zlib
 #include <vector>
@@ -22,7 +23,7 @@ namespace scy {
 namespace archo {
 
 
-struct ZipFile
+struct Archo_API ZipFile
 {
     ZipFile();
     ZipFile(const std::string& file);

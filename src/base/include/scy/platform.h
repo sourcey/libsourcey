@@ -13,8 +13,10 @@
 #define SCY_Platform_H
 
 
-#include <cstdint>
+#include "scy/base.h"
+
 #include <string>
+#include <cstdint>
 
 
 namespace scy {
@@ -25,25 +27,25 @@ namespace scy {
 //
 
 /// Returns the current executable path.
-std::string getExePath();
+Base_API std::string getExePath();
 
 /// Return the current working directory.
-std::string getCwd();
+Base_API std::string getCwd();
 
 /// Returns the current amount of free memory.
-std::uint64_t getFreeMemory();
+Base_API std::uint64_t getFreeMemory();
 
 /// Returns the current amount of used memory.
-std::uint64_t getTotalMemory();
+Base_API std::uint64_t getTotalMemory();
 
 /// Returns the number of CPU cores.
-int numCpuCores();
+Base_API int numCpuCores();
 
 /// Pause the current thread for the given ms duration.
-void sleep(int ms);
+Base_API void sleep(int ms);
 
 /// Pause the current thread until enter is pressed.
-void pause();
+Base_API void pause();
 
 
 //
@@ -52,14 +54,14 @@ void pause();
 
 #ifdef SCY_WIN
 
-bool getOsVersion(int* major, int* minor, int* build);
-bool isWindowsVistaOrLater();
-bool isWindowsXpOrLater();
+Base_API bool getOsVersion(int* major, int* minor, int* build);
+Base_API bool isWindowsVistaOrLater();
+Base_API bool isWindowsXpOrLater();
 
-std::wstring toUtf16(const char* utf8, std::size_t len);
-std::wstring toUtf16(const std::string& str);
-std::string toUtf8(const wchar_t* wide, std::size_t len);
-std::string toUtf8(const std::wstring& wstr);
+Base_API std::wstring toUtf16(const char* utf8, std::size_t len);
+Base_API std::wstring toUtf16(const std::string& str);
+Base_API std::string toUtf8(const wchar_t* wide, std::size_t len);
+Base_API std::string toUtf8(const std::wstring& wstr);
 
 #endif
 

@@ -1,66 +1,54 @@
-/* Name of package */
-#define SCY_PACKAGE "${PACKAGE}"
+// Name of package
+#define SCY_NAME "${LibSourcey_NAME}"
 
-/* Define to the address where bug reports for this package should be sent. */
-#define SCY_PACKAGE_BUGREPORT "${PACKAGE_BUGREPORT}"
+// Define to the version of this package.
+#define SCY_VERSION "${LibSourcey_VERSION}"
 
-/* Define to the full name of this package. */
-#define SCY_PACKAGE_NAME "${PACKAGE_NAME}"
-
-/* Define to the full name and version of this package. */
-#define SCY_PACKAGE_STRING "${PACKAGE_STRING}"
-
-/* Define to the one symbol short name of this package. */
-#define SCY_PACKAGE_TARNAME "${PACKAGE_TARNAME}"
-
-/* Define to the version of this package. */
-#define SCY_PACKAGE_VERSION "${PACKAGE_VERSION}"
-
-/* Define the source path. */
+// Define the source path.
 #define SCY_SOURCE_DIR "${LibSourcey_SOURCE_DIR}"
 
-/* Define the build path. */
+// Define the build path.
 #define SCY_BUILD_DIR "${LibSourcey_BUILD_DIR}"
 
-/* Define the installation path. */
-#define SCY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
+// Define the installation path.
+#define SCY_INSTALL_DIR "${LibSourcey_INSTALL_DIR}"
 
-/* Version number of package */
-#define SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}"
-
-/* Disable logging */
+// Disable logging
 #cmakedefine SCY_ENABLE_LOGGING
 
-/* LibSourcey modules
-# cmakedefine HAVE_SCY_base
-# cmakedefine HAVE_SCY_http
-# cmakedefine HAVE_SCY_json
-# cmakedefine HAVE_SCY_av
-# cmakedefine HAVE_SCY_net
-# cmakedefine HAVE_SCY_rtp
-# cmakedefine HAVE_SCY_sdp
-# cmakedefine HAVE_SCY_socketio
-# cmakedefine HAVE_SCY_stun
-# cmakedefine HAVE_SCY_symple
-# cmakedefine HAVE_SCY_turn
-# cmakedefine HAVE_SCY_xml
-# cmakedefine HAVE_SCY_xmpp
-# cmakedefine HAVE_SCY_uv
-# cmakedefine HAVE_SCY_rtsp
-# cmakedefine HAVE_SCY_ice
-# cmakedefine HAVE_SCY_pacm
-# cmakedefine HAVE_SCY_webrtc
-# cmakedefine HAVE_SCY_anionu
-# cmakedefine HAVE_SCY_spotapi */
+// Building as shared library (.so or .dll)
+#cmakedefine SCY_SHARED_LIBRARY
 
-/* LibUV library */
+// LibSourcey modules
+// cmakedefine HAVE_SCY_base
+// cmakedefine HAVE_SCY_http
+// cmakedefine HAVE_SCY_json
+// cmakedefine HAVE_SCY_av
+// cmakedefine HAVE_SCY_net
+// cmakedefine HAVE_SCY_rtp
+// cmakedefine HAVE_SCY_sdp
+// cmakedefine HAVE_SCY_socketio
+// cmakedefine HAVE_SCY_stun
+// cmakedefine HAVE_SCY_symple
+// cmakedefine HAVE_SCY_turn
+// cmakedefine HAVE_SCY_xml
+// cmakedefine HAVE_SCY_xmpp
+// cmakedefine HAVE_SCY_uv
+// cmakedefine HAVE_SCY_rtsp
+// cmakedefine HAVE_SCY_ice
+// cmakedefine HAVE_SCY_pacm
+// cmakedefine HAVE_SCY_webrtc
+// cmakedefine HAVE_SCY_anionu
+// cmakedefine HAVE_SCY_spotapi
+
+// LibUV library
 #cmakedefine HAVE_LIBUV
 
-/* OpenSSL library */
+// OpenSSL library
 #cmakedefine HAVE_OPENSSL
 #cmakedefine OPENSSL_IS_BORINGSSL
 
-/* FFmpeg video library */
+// FFmpeg video library
 #cmakedefine HAVE_FFMPEG
 #cmakedefine HAVE_FFMPEG_AVCODEC
 #cmakedefine HAVE_FFMPEG_AVFORMAT
@@ -72,15 +60,85 @@
 #cmakedefine HAVE_FFMPEG_SWSCALE
 #cmakedefine HAVE_FFMPEG_POSTPROC
 
-/* OpenCV library */
+// OpenCV library
 #cmakedefine HAVE_OPENCV
 
-/* RtAudio library */
+// RtAudio library
 #cmakedefine HAVE_RTAUDIO
 
-/* Define to 1 if you have the <inttypes.h> header file. */
+// Define to 1 if you have the <inttypes.h> header file.
 #cmakedefine HAVE_INTTYPES_H 1
 
-/* Define to 1 if your processor stores words with the most significant byte
-   first (like Motorola and SPARC, unlike Intel and VAX). */
+// Enable macros for format specifiers in <inttypes.h>
+#define __STDC_FORMAT_MACROS
+
+// Define to 1 if your processor stores words with the most significant byte
+// first (like Motorola and SPARC, unlike Intel and VAX).
 #cmakedefine WORDS_BIGENDIAN
+
+
+//
+/// Platform and compiler definitions
+//
+
+#ifdef _WIN32 /// Windows (x64 and x86)
+#define SCY_WIN
+#endif
+#if __unix__ /// Unix
+#define SCY_UNIX
+#endif
+#if __posix__ /// POSIX
+#define SCY_POSIX
+#endif
+#if __linux__ /// Linux
+#define SCY_LINUX
+#endif
+#if __APPLE__ /// Mac OS
+#define SCY_APPLE
+#endif
+#if __GNUC__ /// GCC compiler
+#define SCY_GNUC
+#endif
+#if defined(__MINGW32__) || defined(__MINGW64__) /// MinGW
+#define SCY_MINGW
+#endif
+
+
+//
+/// Windows specific
+//
+
+#ifdef SCY_WIN
+
+// Verify that we're building with the multithreaded
+// versions of the runtime libraries
+#if defined(_MSC_VER) && !defined(_MT)
+#error Must compile with /MD, /MDd, /MT or /MTd
+#endif
+
+
+// Check debug/release settings consistency
+#if defined(NDEBUG) && defined(_DEBUG)
+#error Inconsistent build settings (check for /MD[d])
+#endif
+
+
+// Unicode Support
+#if defined(UNICODE)
+#define SCY_UNICODE
+#endif
+
+
+// Disable unnecessary warnings
+#if defined(_MSC_VER)
+#pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union
+#pragma warning(disable : 4251) // ... needs to have dll-interface warning
+#pragma warning(disable : 4355) // 'this' : used in base member initializer list
+#pragma warning(disable : 4996) // VC++ 8.0 deprecation warnings
+#pragma warning(disable : 4351) // new behavior: elements of array '...' will be default initialized
+#pragma warning(disable : 4675) // resolved overload was found by argument-dependent lookup
+#pragma warning(disable : 4100) // MSVS 'unreferenced formal parameter' warnings showing false positives
+#pragma warning(disable : 4706) // assignment within conditional expression
+#endif
+
+#endif // SCY_WIN

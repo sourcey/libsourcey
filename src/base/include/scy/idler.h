@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 #include <functional>
 
@@ -28,7 +28,7 @@ namespace scy {
 /// This class inherits the `Runner` interface and may be used with any
 /// implementation that's powered by an asynchronous `Runner`.
 ///
-class SCY_EXTERN Idler : public Runner
+class Base_API Idler : public Runner
 {
 public:
     /// Create the idler with the given event loop.

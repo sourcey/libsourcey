@@ -18,6 +18,7 @@
 #include "scy/numeric.h"
 #include "scy/random.h"
 #include <stdexcept>
+#include <inttypes.h>
 
 
 using std::endl;
@@ -536,7 +537,7 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         headerReader.getU64(l);
         if (l > limit)
             throw std::runtime_error(
-                util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, ws::ErrorPayloadTooBig
+                util::format("WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 8;
     } else if ((lengthByte & 0x7f) == 126) {
@@ -544,14 +545,14 @@ std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         headerReader.getU16(l);
         if (l > limit)
             throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
+                "WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 2;
     } else {
         std::uint8_t l = lengthByte & 0x7f;
         if (l > limit)
             throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
+                "WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
     }
     if (lengthByte & FRAME_FLAG_MASK) {

@@ -14,11 +14,10 @@
 
 
 #include "scy/base.h"
-#include "scy/logger.h"
-#include "scy/net/socket.h"
-#include "scy/net/socketemitter.h"
 #include "scy/packetfactory.h"
 #include "scy/packetsignal.h"
+#include "scy/net/socket.h"
+#include "scy/net/socketemitter.h"
 
 
 namespace scy {
@@ -30,12 +29,9 @@ namespace net {
 //
 
 
-class SCY_EXTERN PacketSocketEmitter : public SocketEmitter, public PacketSignal
+class Net_API PacketSocketEmitter : public SocketEmitter, public PacketSignal
 {
 public:
-    /// The packet factory.
-    PacketFactory factory;
-
     /// Creates the PacketSocketEmitter
     /// This class should have a higher priority than standard
     /// sockets so we can parse data packets first.
@@ -44,9 +40,14 @@ public:
     /// strategies should have the highest priority.
     PacketSocketEmitter(const Socket::Ptr& socket = nullptr);
 
+    virtual ~PacketSocketEmitter();
+
     virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
 
     virtual void onPacket(IPacket& pkt);
+
+    /// The packet factory.
+    PacketFactory factory;
 };
 
 
@@ -56,7 +57,7 @@ public:
 //
 
 
-class SCY_EXTERN PacketSocket: public PacketSocketEmitter
+class Net_API PacketSocket: public PacketSocketEmitter
 {
 public:
     PacketSocket(Socket* socket);
@@ -77,7 +78,7 @@ public:
 /// Proxies arbitrary PacketStream packets to an output Socket,
 /// ensuring the Socket MTU is not exceeded.
 /// Oversize packets will be split before sending.
-class SCY_EXTERN PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
+class Net_API PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
 {
 public:
     PacketStreamSocketAdapter(Socket& socket);

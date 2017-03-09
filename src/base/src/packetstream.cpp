@@ -507,7 +507,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
     std::lock_guard<std::mutex> guard(_mutex);
     _processors.push_back(std::make_shared<PacketAdapterReference>(proc,
         freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr,
-        order == -1 ? _processors.size() : order));
+        order == -1 ? int(_processors.size()) : order));
 
     sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
 }
@@ -651,21 +651,21 @@ const std::exception_ptr& PacketStream::error()
 int PacketStream::numSources() const
 {
     std::lock_guard<std::mutex> guard(_mutex);
-    return _sources.size();
+    return int(_sources.size());
 }
 
 
 int PacketStream::numProcessors() const
 {
     std::lock_guard<std::mutex> guard(_mutex);
-    return _processors.size();
+    return int(_processors.size());
 }
 
 
 int PacketStream::numAdapters() const
 {
     std::lock_guard<std::mutex> guard(_mutex);
-    return _sources.size() + _processors.size();
+    return int(_sources.size() + _processors.size());
 }
 
 

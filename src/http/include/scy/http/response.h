@@ -78,7 +78,7 @@ enum class StatusCode
 
 
 /// This class encapsulates an HTTP response message.
-class SCY_EXTERN Response : public http::Message
+class /* SCY_EXTERN */ Response : public http::Message
 {
 public:
     /// typedef std::shared_ptr<Response> Ptr;

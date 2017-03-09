@@ -21,6 +21,18 @@
 #include <cstdint>
 
 
+// Shared library exports
+#if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
+    #if defined(STUN_EXPORTS)
+        #define STUN_API __declspec(dllexport)
+    #else
+        #define STUN_API __declspec(dllimport)
+    #endif
+#else
+    #define STUN_API // nothing
+#endif
+
+
 namespace scy {
 namespace stun {
 
@@ -104,8 +116,9 @@ inline int getErrorResponseType(int reqType) {
 #define STUN_PERMISSION_LIFETIME (300)
 #define STUN_NONCE_EXPIRATION_TIME (600)
 #endif
-}
-} // namespace scy:stun
+
+
+} } // namespace scy:stun
 
 
 #endif // SCY_STUN_H

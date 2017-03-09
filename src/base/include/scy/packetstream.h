@@ -37,7 +37,7 @@ struct PacketStreamState;
 /// This class is a wrapper for integrating external
 /// classes with the a PacketStream's data flow and
 /// state machine.
-class SCY_EXTERN PacketStreamAdapter
+class Base_API PacketStreamAdapter
 {
 public:
     PacketStreamAdapter(PacketSignal& emitter);
@@ -78,7 +78,7 @@ typedef PacketStreamAdapter PacketSource; ///< For 0.8.x compatibility
 /// This class is a virtual interface for creating
 /// PacketStreamAdapters which process that and emit
 /// the IPacket type.
-class SCY_EXTERN PacketProcessor : public PacketStreamAdapter
+class Base_API PacketProcessor : public PacketStreamAdapter
 {
 public:
     PacketProcessor(PacketSignal& emitter)
@@ -231,7 +231,7 @@ struct PacketStreamState : public State
 /// loop take a look at the SyncPacketQueue class.
 /// For lengthy operations you can add an AsyncPacketQueue to the start
 /// of the stream to defer processing from the PacketSource thread.
-class SCY_EXTERN PacketStream : public Stateful<PacketStreamState>
+class Base_API PacketStream : public Stateful<PacketStreamState>
 {
 public:
     typedef std::shared_ptr<PacketStream> Ptr;

@@ -29,7 +29,7 @@ namespace crypto {
 /// Provides symmetric algorithms for encryption and decryption.
 /// The algorithms that are available depend on the particular
 /// version of OpenSSL that is installed.
-class SCY_EXTERN Cipher
+class /* SCY_EXTERN */ Cipher
 {
 public:
     /// Creates a new Cipher object. Auto initializes the key

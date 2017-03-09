@@ -26,7 +26,7 @@ namespace scy {
 /// The PRNG is a nonlinear additive feedback random number
 /// generator using 256 bytes of state information
 /// and a period of up to 2^69.
-class SCY_EXTERN Random
+class Base_API Random
 {
 public:
     enum Type

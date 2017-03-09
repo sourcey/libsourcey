@@ -56,7 +56,7 @@ struct ClientState : public State
 };
 
 
-class SCY_EXTERN Client : public Stateful<ClientState>,
+class /* SCY_EXTERN */ Client : public Stateful<ClientState>,
                public net::SocketAdapter,
                public PacketSignal
 {
@@ -186,7 +186,7 @@ protected:
 Client* createTCPClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
-class SCY_EXTERN TCPClient : public Client
+class /* SCY_EXTERN */ TCPClient : public Client
 {
 public:
     TCPClient(const Client::Options& options = Client::Options(),
@@ -202,7 +202,7 @@ public:
 Client* createSSLClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
-class SCY_EXTERN SSLClient : public Client
+class /* SCY_EXTERN */ SSLClient : public Client
 {
 public:
     SSLClient(const Client::Options& options = Client::Options(),

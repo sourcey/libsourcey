@@ -18,7 +18,7 @@
 
 #include "scy/base.h"
 #include "scy/packetsignal.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <ctime>
 
 
@@ -37,7 +37,7 @@ namespace scy {
 /// Timestamps are UTC (Coordinated Universal Time)
 /// based and thus independent of the timezone
 /// in effect on the system.
-class SCY_EXTERN Timestamp
+class Base_API Timestamp
 {
 public:
     typedef std::int64_t TimeVal;    ///< monotonic UTC time value in microsecond resolution
@@ -120,7 +120,7 @@ private:
 //
 
 /// A class that represents time spans up to microsecond resolution.
-class SCY_EXTERN Timespan
+class Base_API Timespan
 {
 public:
     typedef Timestamp::TimeDiff TimeDiff;
@@ -223,10 +223,10 @@ public:
     TimeDiff totalMicroseconds() const;
 
     static const TimeDiff MILLISECONDS; ///< The number of microseconds in a millisecond.
-    static const TimeDiff SECONDS; ///< The number of microseconds in a second.
-    static const TimeDiff MINUTES; ///< The number of microseconds in a minute.
-    static const TimeDiff HOURS;   ///< The number of microseconds in a hour.
-    static const TimeDiff DAYS;    ///< The number of microseconds in a day.
+    static const TimeDiff SECONDS;      ///< The number of microseconds in a second.
+    static const TimeDiff MINUTES;      ///< The number of microseconds in a minute.
+    static const TimeDiff HOURS;        ///< The number of microseconds in a hour.
+    static const TimeDiff DAYS;         ///< The number of microseconds in a day.
 
 private:
     TimeDiff _span;
@@ -266,7 +266,7 @@ private:
 ///   * http://en.wikipedia.org/wiki/Julian_day
 ///   * http://en.wikipedia.org/wiki/UTC
 ///   * http://en.wikipedia.org/wiki/ISO_8601
-class SCY_EXTERN DateTime
+class Base_API DateTime
 {
 public:
     /// Symbolic names for month numbers (1 to 12).
@@ -641,7 +641,7 @@ inline void swap(DateTime& d1, DateTime& d2)
 //
 
 /// This class provides information about the current timezone.
-class SCY_EXTERN Timezone
+class Base_API Timezone
 {
 public:
     /// Returns the offset of local time to UTC, in seconds.
@@ -703,7 +703,7 @@ public:
 /// since the time zone is unknown. Each of the constructors
 /// accepting a tzd parameter have been marked as deprecated and
 /// may be removed in a future revision.
-class SCY_EXTERN LocalDateTime
+class Base_API LocalDateTime
 {
 public:
     /// Creates a LocalDateTime with the current date/time
@@ -901,8 +901,7 @@ public:
     LocalDateTime& operator-=(const Timespan& span);
 
 protected:
-    LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff,
-                  int tzd);
+    LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff, int tzd);
 
     /// Recalculate the tzd based on the _dateTime member based
     /// on the current timezone using the Standard C runtime functions.
@@ -1055,7 +1054,7 @@ inline void swap(LocalDateTime& d1, LocalDateTime& d2)
 
 /// Definition of date/time formats and various
 /// constants used by DateTimeFormatter and DateTimeParser.
-class SCY_EXTERN DateTimeFormat
+class Base_API DateTimeFormat
 {
 public:
     /// predefined date formats
@@ -1139,11 +1138,10 @@ public:
 ///
 /// There are two kind of static member functions:    
 ///    * format* functions
-/// return a std::string containing
-///      the formatted value.
+/// return a std::string containin the formatted value.
 ///    * append* functions append the formatted value to
 ///      an existing string.
-class SCY_EXTERN DateTimeFormatter
+class Base_API DateTimeFormatter
 {
 public:
     enum
@@ -1154,8 +1152,7 @@ public:
     /// Formats the given timestamp according to the given format.
     /// The format string is used as a template to format the date and
     /// is copied character by character except for the following special
-    /// characters,
-    /// which are replaced by the corresponding value.
+    /// characters, which are replaced by the corresponding value.
     ///
     ///   * %w - abbreviated weekday (Mon, Tue, ...)
     ///   * %W - full weekday (Monday, Tuesday, ...)
@@ -1204,8 +1201,7 @@ public:
     /// Formats the given timespan according to the given format.
     /// The format string is used as a template to format the date and
     /// is copied character by character except for the following special
-    /// characters,
-    /// which are replaced by the corresponding value.
+    /// characters, which are replaced by the corresponding value.
     ///
     ///   * %d - days
     ///   * %H - hours     (00 .. 23)
@@ -1297,7 +1293,7 @@ public:
 /// additional specifier is supported: %r will parse a year given by either
 /// two or four digits. Years 69-00 are interpreted in the 20th century
 /// (1969-2000), years 01-68 in the 21th century (2001-2068).
-class SCY_EXTERN DateTimeParser
+class Base_API DateTimeParser
 {
 public:
     /// Parses a date and time in the given format from the given string.
@@ -1738,7 +1734,7 @@ inline std::string DateTimeFormatter::tzdRFC(int timeZoneDifferential)
 ///
 /// The Stopwatch uses the current system time, so if the
 /// system time changes the measured time will be incorrect.
-class SCY_EXTERN Stopwatch
+class Base_API Stopwatch
 {
 public:
     Stopwatch();
@@ -1787,7 +1783,7 @@ private:
 
 
 /// Simple millisecond timeout counter which expires after a given delay.
-class SCY_EXTERN Timeout
+class Base_API Timeout
 {
 public:
     Timeout(long delay = 0, bool autoStart = false);
@@ -1820,7 +1816,7 @@ protected:
 
 
 /// A token that expires after the specified duration.
-class SCY_EXTERN TimedToken : public Timeout
+class Base_API TimedToken : public Timeout
 {
 public:
     TimedToken(long duration = 1000);

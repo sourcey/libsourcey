@@ -22,7 +22,7 @@ namespace scy {
 namespace stun {
 
 
-class SCY_EXTERN Transaction : public net::Transaction<Message>
+class STUN_API Transaction : public net::Transaction<Message>
 {
 public:
     Transaction(const net::Socket::Ptr& socket, const net::Address& peerAddress,

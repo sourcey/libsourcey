@@ -7,6 +7,7 @@
 //
 /// @addtogroup base
 /// @{
+//
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
@@ -14,6 +15,15 @@
 #include "scy/numeric.h"
 
 #include <assert.h>
+
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#define I64_FMT "I64"
+#elif defined(__APPLE__)
+#define I64_FMT "q"
+#else
+#define I64_FMT "ll"
+#endif
 
 
 namespace scy {
@@ -305,6 +315,7 @@ void formatHex(std::string& str, std::uint64_t value, int width)
 void format(std::string& str, const void* ptr)
 {
     char buffer[24];
+#if 0 // deprecated
 #if defined(SCY_PTR_IS_64_BIT)
 #if defined(SCY_LONG_IS_64_BIT)
     std::sprintf(buffer, "%016lX", (std::uintptr_t)ptr);
@@ -314,6 +325,8 @@ void format(std::string& str, const void* ptr)
 #else
     std::sprintf(buffer, "%08lX", (std::uintptr_t)ptr);
 #endif
+#endif
+    std::sprintf(buffer, "%p", ptr);
     str.append(buffer);
 }
 

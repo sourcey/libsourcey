@@ -29,7 +29,7 @@ namespace scy {
 /// class that derives from `std::istream`. It's most regularly used for reading
 /// input files.
 ///
-class SCY_EXTERN ThreadedStreamReader : public PacketSource, public basic::Startable
+class ThreadedStreamReader : public PacketSource, public basic::Startable
 {
 public:
     ThreadedStreamReader(std::istream* is)
@@ -94,7 +94,7 @@ protected:
 /// class that derives from `std::ostream`. It's most regularly used for writing
 /// output files.
 ///
-class SCY_EXTERN StreamWriter : public PacketProcessor
+class StreamWriter : public PacketProcessor
 {
 public:
     StreamWriter(std::ostream* stream)

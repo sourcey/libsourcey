@@ -15,7 +15,7 @@
 
 #include "scy/crypto/crypto.h"
 #include "scy/memory.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 
 #include <openssl/ssl.h>
 
@@ -30,7 +30,7 @@ namespace net {
 /// For session caching to work, a client must
 /// save the session object from an existing connection,
 /// if it wants to reuse it with a future connection.
-class SCY_EXTERN SSLSession
+class Net_API SSLSession
 {
 public:
     typedef std::shared_ptr<SSLSession> Ptr;

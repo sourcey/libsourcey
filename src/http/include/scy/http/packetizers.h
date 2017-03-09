@@ -27,7 +27,7 @@ namespace http {
 //
 
 
-class SCY_EXTERN ChunkedAdapter : public IPacketizer
+class /* SCY_EXTERN */ ChunkedAdapter : public IPacketizer
 {
 public:
     Connection::Ptr connection;
@@ -144,7 +144,7 @@ public:
 //
 
 
-class SCY_EXTERN MultipartAdapter : public IPacketizer
+class /* SCY_EXTERN */ MultipartAdapter : public IPacketizer
 {
 public:
     Connection::Ptr connection;

@@ -9,7 +9,7 @@
 /// @{
 
 
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <iostream>
 
 
@@ -17,7 +17,7 @@ namespace scy {
 namespace uv {
 
 
-Handle::Handle(uv_loop_t* loop, void* handle)
+Handle::Handle(uv::Loop* loop, void* handle)
     : _loop(loop ? loop : uv::defaultLoop()) // nullptr will be uv_default_loop
     , _ptr((uv_handle_t*)handle) // nullptr or instance of uv_handle_t
     , _tid(std::this_thread::get_id())
@@ -38,7 +38,7 @@ Handle::~Handle()
 }
 
 
-void Handle::setLoop(uv_loop_t* loop)
+void Handle::setLoop(uv::Loop* loop)
 {
     assertThread();
     assert(_ptr == nullptr && "loop must be set before handle");
@@ -46,7 +46,7 @@ void Handle::setLoop(uv_loop_t* loop)
 }
 
 
-uv_loop_t* Handle::loop() const
+uv::Loop* Handle::loop() const
 {
     assertThread();
     return _loop;

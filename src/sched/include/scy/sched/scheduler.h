@@ -29,7 +29,7 @@ namespace sched {
 
 /// The Scheduler manages and runs tasks
 /// that need to be executed at specific times.
-class SCY_EXTERN Scheduler : public TaskRunner, public json::ISerializable
+class /* SCY_EXTERN */ Scheduler : public TaskRunner, public json::ISerializable
 {
 public:
     Scheduler();

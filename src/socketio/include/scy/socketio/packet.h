@@ -21,7 +21,7 @@ namespace scy {
 namespace sockio {
 
 
-class SCY_EXTERN Packet : public IPacket
+class /* SCY_EXTERN */ Packet : public IPacket
 {
 public:
     enum class Frame : int

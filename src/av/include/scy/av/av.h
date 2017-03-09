@@ -9,8 +9,11 @@
 /// @{
 
 
-#ifndef SCY_AV_Config_H
-#define SCY_AV_Config_H
+#ifndef SCY_AV_H
+#define SCY_AV_H
+
+
+#include "scy/base.h"
 
 
 #define MAX_VIDEO_PACKET_SIZE (3 * 1024 * 1024)
@@ -32,7 +35,19 @@
 #endif
 
 
-#endif // SCY_AV_Config_H
+// Shared library exports
+#if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
+    #if defined(AV_EXPORTS)
+        #define AV_API __declspec(dllexport)
+    #else
+        #define AV_API __declspec(dllimport)
+    #endif
+#else
+    #define AV_API // nothing
+#endif
+
+
+#endif // SCY_AV_H
 
 
 /// @\}

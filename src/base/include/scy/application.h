@@ -14,7 +14,7 @@
 
 
 #include "scy/util.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <functional>
 #include <map>
 #include <vector>
@@ -32,7 +32,7 @@ namespace scy {
 ///   * Shutdown signal (Ctrl-C) handling
 ///   * Garbage collection
 ///
-class SCY_EXTERN Application
+class Base_API Application
 {
 public:
     /// Constructor.
@@ -93,7 +93,7 @@ protected:
 
 typedef std::map<std::string, std::string> OptionMap;
 
-struct OptionParser
+struct Base_API OptionParser
 {
     std::string exepath; // TODO: UTF8
     OptionMap args;

@@ -14,7 +14,7 @@
 
 
 #include "scy/collection.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 #include "scy/packetstream.h"
 #include "scy/thread.h"
 
@@ -23,9 +23,9 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN Request;
-class SCY_EXTERN ConnectionStream;
-class SCY_EXTERN FormPart;
+class /* SCY_EXTERN */ Request;
+class /* SCY_EXTERN */ ConnectionStream;
+class /* SCY_EXTERN */ FormPart;
 
 
 //
@@ -38,7 +38,7 @@ class SCY_EXTERN FormPart;
 /// while uploading big files. Class members are not synchronized hence
 /// they should not be accessed while the form is sending, not that there
 /// would be any reason to do so.
-class SCY_EXTERN FormWriter : 
+class /* SCY_EXTERN */ FormWriter : 
     public NVCollection,
     public PacketSource,
     public basic::Startable
@@ -198,7 +198,7 @@ protected:
 //
 
 /// An implementation of FormPart.
-class SCY_EXTERN FormPart
+class /* SCY_EXTERN */ FormPart
 {
 public:
     /// Creates the FormPart with the given MIME type.
@@ -246,7 +246,7 @@ protected:
 //
 
 /// An implementation of FilePart for plain files.
-class SCY_EXTERN FilePart : public FormPart
+class /* SCY_EXTERN */ FilePart : public FormPart
 {
 public:
     /// Creates the FilePart for the given path.
@@ -326,7 +326,7 @@ protected:
 //
 
 /// An implementation of StringPart for plain files.
-class SCY_EXTERN StringPart : public FormPart
+class /* SCY_EXTERN */ StringPart : public FormPart
 {
 public:
     /// Creates the StringPart for the given string.

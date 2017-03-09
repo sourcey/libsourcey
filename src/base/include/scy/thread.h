@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include "scy/util.h"
 
 #include <thread>
@@ -32,7 +32,7 @@ namespace scy {
 /// This class inherits the `Runner` interface and may be used with any
 /// implementation that's powered by an asynchronous `Runner`.
 ///
-class SCY_EXTERN Thread : public Runner
+class Base_API Thread : public Runner
 {
 public:
     typedef std::shared_ptr<Thread> Ptr;
@@ -97,7 +97,7 @@ protected:
 /// stop() methods. TStartable is an instance of basic::Startable.
 /// @deprecated
 template <class TStartable>
-class SCY_EXTERN AsyncStartable: public TStartable
+class Base_API AsyncStartable: public TStartable
 {
 public:
     AsyncStartable() {};

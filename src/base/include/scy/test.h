@@ -28,32 +28,32 @@ namespace scy {
 namespace test {
 
 
-class SCY_EXTERN Test;
-class SCY_EXTERN TestRunner;
+class Base_API Test;
+class Base_API TestRunner;
 
 typedef std::list<Test*> TestList;
 typedef std::list<std::string> ErrorList;
 typedef std::map<Test*, ErrorList> ErrorMap;
 
 /// Initialize the test environment.
-void initialize();
+Base_API void initialize();
 
 /// Finalize the test environment.
 ///
 /// Destroy the TestRunner singleton instance and return the exit code.
-int finalize();
+Base_API int finalize();
 
 /// Run all tests.
-void runAll();
+Base_API void runAll();
 
 /// Describe a test environment implemented by the given lambda function.
-void describe(const std::string& name, std::function<void()> target);
+Base_API void describe(const std::string& name, std::function<void()> target);
 
 /// Describe a test environment implemented by the given test instance.
-void describe(const std::string& name, Test* test);
+Base_API void describe(const std::string& name, Test* test);
 
 /// Expect asserts that a condition is true (use expect() as defined below).
-void expectImpl(bool passed, const char* assert, const char* file, long line);
+Base_API void expectImpl(bool passed, const char* assert, const char* file, long line);
 
 // Shamelessly define macros to aesthetic name :)
 #ifdef NDEBUG
@@ -73,7 +73,7 @@ void expectImpl(bool passed, const char* assert, const char* file, long line);
 /// This class is for implementing any kind of unit
 /// test that can be executed by a `TestRunner`.
 ///
-class SCY_EXTERN Test
+class Base_API Test
 {
 public:
     Test(const std::string& name = "Unnamed Test");
@@ -106,7 +106,7 @@ protected:
 
 
 // Test class that runs a static or lambda function.
-class SCY_EXTERN FunctionTest : public Test
+class Base_API FunctionTest : public Test
 {
 public:
     std::function<void()> target;
@@ -137,7 +137,7 @@ protected:
 /// When `run()` the `TestRunner` loops through each test in the list calling
 /// the test's `run()` method.
 ///
-class SCY_EXTERN TestRunner
+class Base_API TestRunner
 {
 public:
     TestRunner();

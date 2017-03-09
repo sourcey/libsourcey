@@ -31,6 +31,11 @@ PacketSocketEmitter::PacketSocketEmitter(const Socket::Ptr& socket)
 }
 
 
+PacketSocketEmitter::~PacketSocketEmitter()
+{
+}
+
+
 void PacketSocketEmitter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
 {
     // TraceS(this) << "Recv: " << buffer.size() << endl;

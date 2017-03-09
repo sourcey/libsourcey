@@ -742,6 +742,7 @@ int Timezone::utcOffset()
 {
     TIME_ZONE_INFORMATION tzInfo;
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
+    (void)dstFlag;
     return -tzInfo.Bias * 60;
 }
 
@@ -750,6 +751,7 @@ int Timezone::dst()
 {
     TIME_ZONE_INFORMATION tzInfo;
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
+    (void)dstFlag;
     return dstFlag == TIME_ZONE_ID_DAYLIGHT ? -tzInfo.DaylightBias * 60 : 0;
 }
 
@@ -772,15 +774,15 @@ std::string Timezone::name()
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
     WCHAR* ptr = dstFlag == TIME_ZONE_ID_DAYLIGHT ? tzInfo.DaylightName
                                                   : tzInfo.StandardName;
-    //#if defined(UNICODE)
-    //    UnicodeConverter::toUTF8(ptr, result);
-    //#else
+    // #if defined(UNICODE)
+    //     UnicodeConverter::toUTF8(ptr, result);
+    // #else
     char buffer[256];
     DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer),
                                    nullptr, nullptr);
     if (rc)
         result = buffer;
-    //#endif
+    // #endif
     return result;
 }
 
@@ -791,15 +793,16 @@ std::string Timezone::standardName()
     TIME_ZONE_INFORMATION tzInfo;
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
     WCHAR* ptr = tzInfo.StandardName;
-    //#if defined(UNICODE)
-    //    UnicodeConverter::toUTF8(ptr, result);
-    //#else
+    (void)dstFlag;
+    // #if defined(UNICODE)
+    //     UnicodeConverter::toUTF8(ptr, result);
+    // #else
     char buffer[256];
     DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer),
                                    nullptr, nullptr);
     if (rc)
         result = buffer;
-    //#endif
+    // #endif
     return result;
 }
 
@@ -810,15 +813,16 @@ std::string Timezone::dstName()
     TIME_ZONE_INFORMATION tzInfo;
     DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
     WCHAR* ptr = tzInfo.DaylightName;
-    //#if defined(UNICODE)
-    //    UnicodeConverter::toUTF8(ptr, result);
-    //#else
+    (void)dstFlag;
+    // #if defined(UNICODE)
+    //     UnicodeConverter::toUTF8(ptr, result);
+    // #else
     char buffer[256];
     DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer),
                                    nullptr, nullptr);
     if (rc)
         result = buffer;
-    //#endif
+    // #endif
     return result;
 }
 
@@ -830,7 +834,7 @@ std::string Timezone::dstName()
 // Timezone: Unix
 //
 
-class SCY_EXTERN TZInfo
+class Base_API TZInfo
 {
 public:
     TZInfo() { tzset(); }
@@ -1660,8 +1664,10 @@ Timespan::Timespan(long seconds, long microseconds)
 
 Timespan::Timespan(int days, int hours, int minutes, int seconds,
                    int microseconds)
-    : _span(TimeDiff(microseconds) + TimeDiff(seconds) * SECONDS +
-            TimeDiff(minutes) * MINUTES + TimeDiff(hours) * HOURS +
+    : _span(TimeDiff(microseconds) + 
+            TimeDiff(seconds) * SECONDS +
+            TimeDiff(minutes) * MINUTES + 
+            TimeDiff(hours) * HOURS +
             TimeDiff(days) * DAYS)
 {
 }

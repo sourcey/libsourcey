@@ -13,8 +13,7 @@
 #define SCY_AV_Codec_H
 
 
-#include "scy/av/config.h"
-#include "scy/base.h"
+#include "scy/av/av.h"
 
 #include <iostream>
 #include <list>

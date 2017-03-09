@@ -21,7 +21,7 @@ namespace scy {
 namespace json {
 
 
-class SCY_EXTERN ISerializable
+class /* SCY_EXTERN */ ISerializable
 {
 public:
     virtual ~ISerializable(){};

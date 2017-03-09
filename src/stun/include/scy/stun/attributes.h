@@ -30,7 +30,7 @@ namespace stun {
 
 
 /// The virtual base class for all STUN/TURN attributes.
-class SCY_EXTERN Attribute
+class STUN_API Attribute
 {
 public:
     enum Type
@@ -117,7 +117,7 @@ protected:
 
 ///
 /// Implements a STUN/TURN attribute that contains a socket address.
-class SCY_EXTERN AddressAttribute : public Attribute
+class STUN_API AddressAttribute : public Attribute
 {
 public:
     AddressAttribute(std::uint16_t type, bool ipv4 = true); // bool xor,
@@ -168,7 +168,7 @@ private:
 
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
-class SCY_EXTERN UInt8Attribute : public Attribute
+class STUN_API UInt8Attribute : public Attribute
 {
 public:
     UInt8Attribute(std::uint16_t type);
@@ -194,7 +194,7 @@ private:
 
 ///
 /// Implements STUN/TURN attribute that reflects a 32-bit integer.
-class SCY_EXTERN UInt32Attribute : public Attribute
+class STUN_API UInt32Attribute : public Attribute
 {
 public:
     UInt32Attribute(std::uint16_t type);
@@ -220,7 +220,7 @@ private:
 
 ///
 /// Implements STUN/TURN attribute that reflects a 64-bit integer.
-class SCY_EXTERN UInt64Attribute : public Attribute
+class STUN_API UInt64Attribute : public Attribute
 {
 public:
     UInt64Attribute(std::uint16_t type);
@@ -244,7 +244,7 @@ private:
 };
 
 /// Implements STUN/TURN attribute representing a 0 size flag.
-class SCY_EXTERN FlagAttribute : public Attribute
+class STUN_API FlagAttribute : public Attribute
 {
 public:
     FlagAttribute(std::uint16_t type);
@@ -260,7 +260,7 @@ public:
 
 ///
 /// Implements STUN/TURN attribute that reflects an arbitrary byte string
-class SCY_EXTERN StringAttribute : public Attribute
+class STUN_API StringAttribute : public Attribute
 {
 public:
     StringAttribute(std::uint16_t type, std::uint16_t size = 0);
@@ -289,7 +289,7 @@ private:
 
 ///
 /// Implements STUN/TURN attribute that reflects a list of attribute names.
-class SCY_EXTERN UInt16ListAttribute : public Attribute
+class STUN_API UInt16ListAttribute : public Attribute
 {
 public:
     UInt16ListAttribute(std::uint16_t type, std::uint16_t size);
@@ -313,7 +313,7 @@ private:
 
 ///
 /// Implements STUN/TURN attributes that reflects an internet address.
-class SCY_EXTERN MessageIntegrity : public Attribute
+class STUN_API MessageIntegrity : public Attribute
 {
 public:
     MessageIntegrity();
@@ -347,7 +347,7 @@ private:
 
 ///
 /// Implements STUN/TURN attribute that reflects an error code.
-class SCY_EXTERN ErrorCode : public Attribute
+class STUN_API ErrorCode : public Attribute
 {
 public:
     ErrorCode(std::uint16_t size = MinSize);

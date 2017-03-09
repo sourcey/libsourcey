@@ -28,30 +28,28 @@ namespace scy {
 namespace basic {
 
 
-class SCY_EXTERN Decoder
+class Base_API Decoder
 {
 public:
     Decoder() {}
     virtual ~Decoder() {}
-    virtual std::size_t decode(const char* inbuf, std::size_t nread,
-                               char* outbuf) = 0;
+    virtual std::size_t decode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
 
 
-class SCY_EXTERN Encoder
+class Base_API Encoder
 {
 public:
     Encoder() {}
     virtual ~Encoder() {}
-    virtual std::size_t encode(const char* inbuf, std::size_t nread,
-                               char* outbuf) = 0;
+    virtual std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
     virtual std::size_t finalize(char* /* outbuf */) { return 0; }
 };
 
 
 /// Abstract interface for classes that can be run and cancelled.
-class SCY_EXTERN Runnable
+class Base_API Runnable
 {
 public:
     Runnable()
@@ -83,7 +81,7 @@ protected:
 
 
 /// Abstract interface for a classes that can be started and stopped.
-class SCY_EXTERN Startable
+class Base_API Startable
 {
 public:
     virtual void start() = 0;
@@ -92,7 +90,7 @@ public:
 
 
 /// Abstract interface for classes that can be sent and cancelled.
-class SCY_EXTERN Sendable
+class Base_API Sendable
 {
 public:
     virtual bool send() = 0;
@@ -103,7 +101,7 @@ public:
 #if 0
 /// A base module class for C++ callback polymorphism.
 /// @deprecated
-class SCY_EXTERN Polymorphic
+class Base_API Polymorphic
 {
 public:
     virtual ~Polymorphic() {};

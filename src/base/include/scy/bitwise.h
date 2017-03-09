@@ -43,7 +43,7 @@ struct Bitwise
 
 
 #if 0
-class SCY_EXTERN Flaggable
+class Base_API Flaggable
 {
 public:
     Flaggable(unsigned flags = 0) : _flags(flags) {}

@@ -13,6 +13,7 @@
 #define SCY_TURN_FiveTuple_H
 
 
+#include "scy/turn/turn.h"
 #include "scy/net/socket.h"
 
 #include <sstream>
@@ -62,7 +63,7 @@ namespace turn {
 ///                            Internal                External
 ///                            5-Tuple                 5-tuple
 ///
-class SCY_EXTERN FiveTuple
+class TURN_API FiveTuple
 {
 public:
     FiveTuple();

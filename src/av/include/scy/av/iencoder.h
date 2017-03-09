@@ -55,11 +55,11 @@ struct EncoderState : public State
 
 struct EncoderOptions
 {
-    Format iformat;    // input media format.
-    Format oformat;    // output media format.
-    std::string ifile; // input file path.
-    std::string ofile; // output file path.
-    long duration;     // duration of time to record in nanoseconds.
+    Format iformat;    ///< input media format.
+    Format oformat;    ///< output media format.
+    std::string ifile; ///< input file path.
+    std::string ofile; ///< output file path.
+    long duration;     ///< duration of time to record in nanoseconds.
     EncoderOptions(const Format& iformat = Format(),
                    const Format& oformat = Format(),
                    const std::string& ifile = "", const std::string& ofile = "",
@@ -71,19 +71,22 @@ struct EncoderOptions
         , duration(duration)
     {
     }
-    virtual ~EncoderOptions(){};
+
+    virtual ~EncoderOptions()
+    {
+    }
 };
 
 /// This is the abstract class for all encoders.
-class SCY_EXTERN IEncoder : public Stateful<EncoderState>
+class /* SCY_EXTERN */ IEncoder : public Stateful<EncoderState>
 {
 public:
     enum Type
     {
-        None = 0,     // huh?
-        Video = 1,    // video only
-        Audio = 2,    // audio only
-        Multiplex = 3 // both video & audio
+        None = 0,     ///< huh?
+        Video = 1,    ///< video only
+        Audio = 2,    ///< audio only
+        Multiplex = 3 ///< both video & audio
     };
 
     virtual void initialize() = 0;
@@ -93,34 +96,14 @@ public:
 
     virtual bool isNone() const { return stateEquals(EncoderState::None); };
     virtual bool isReady() const { return stateEquals(EncoderState::Ready); };
-    virtual bool isEncoding() const
-    {
-        return stateEquals(EncoderState::Encoding);
-    };
-    virtual bool isActive() const
-    {
-        return stateBetween(EncoderState::Ready, EncoderState::Encoding);
-    };
-    virtual bool isStopped() const
-    {
-        return stateEquals(EncoderState::Stopped);
-    };
-    virtual bool isError() const { return stateEquals(EncoderState::Error); };
+    virtual bool isEncoding() const { return stateEquals(EncoderState::Encoding); }
+    virtual bool isActive() const { return stateBetween(EncoderState::Ready, EncoderState::Encoding); }
+    virtual bool isStopped() const { return stateEquals(EncoderState::Stopped); }
+    virtual bool isError() const { return stateEquals(EncoderState::Error); }
 };
 
 
-typedef IEncoder IPacketEncoder; /// 0.8.x compatibility
-
-/*/// This class extends the IEncoder interface to add
-/// PacketStream compatibility.
-class SCY_EXTERN IPacketEncoder: public IEncoder, public PacketProcessor
-{
-public:
-    /// Encodes the packet, and pushes it downstream.
-    virtual void process(IPacket& packet) = 0;
-
-};
-*/
+typedef IEncoder IPacketEncoder; ///< 0.8.x compatibility
 
 
 } // namespace av

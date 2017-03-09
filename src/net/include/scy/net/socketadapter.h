@@ -17,7 +17,7 @@
 #include "scy/memory.h"
 #include "scy/net/address.h"
 #include "scy/net/dns.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 #include "scy/packetstream.h"
 #include "scy/signal.h"
 
@@ -26,7 +26,7 @@ namespace scy {
 namespace net {
 
 
-class SCY_EXTERN Socket;
+class Net_API Socket;
 
 
 /// SocketAdapter is the abstract interface for all socket classes.
@@ -37,7 +37,7 @@ class SCY_EXTERN Socket;
 /// This class also be extended to implement custom processing
 /// for received socket data before it is dispatched to the application
 /// (see PacketSocketEmitter and Transaction classes).
-class SCY_EXTERN SocketAdapter
+class Net_API SocketAdapter
 {
 public:
     /// Creates the SocketAdapter.

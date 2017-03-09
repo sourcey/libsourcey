@@ -15,7 +15,7 @@
 
 #include "scy/net/address.h"
 #include "scy/util.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <cstdint>
 #include <vector>
 

@@ -15,15 +15,15 @@
 
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
-#include "scy/net/types.h"
-#include "scy/uv/uvpp.h"
+#include "scy/net/net.h"
+#include "scy/uv/handle.h"
 
 
 namespace scy {
 namespace net {
 
 
-class SCY_EXTERN UDPSocket : public net::Socket, public uv::Handle
+class Net_API UDPSocket : public net::Socket, public uv::Handle
 {
 public:
     typedef std::shared_ptr<UDPSocket> Ptr;

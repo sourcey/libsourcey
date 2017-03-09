@@ -25,7 +25,7 @@ namespace scy {
 namespace sched {
 
 
-class SCY_EXTERN Scheduler;
+class /* SCY_EXTERN */ Scheduler;
 
 
 template <typename T> sched::Task* instantiateTask()
@@ -41,7 +41,7 @@ template <typename T> sched::Trigger* instantiateTrigger()
 /// The TaskFactory can dynamically instantiate
 /// registered sched::Task and sched::Trigger
 /// classes from named strings.
-class SCY_EXTERN TaskFactory
+class /* SCY_EXTERN */ TaskFactory
 {
 public:
     /// Returns the default TaskFactory singleton.

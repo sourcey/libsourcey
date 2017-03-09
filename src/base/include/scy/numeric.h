@@ -16,17 +16,8 @@
 #define SCY_Numeric_H
 
 
-#include <cstdint>
 #include <string>
-
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#define I64_FMT "I64"
-#elif defined(__APPLE__)
-#define I64_FMT "q"
-#else
-#define I64_FMT "ll"
-#endif
+#include <cstdint>
 
 
 namespace scy {

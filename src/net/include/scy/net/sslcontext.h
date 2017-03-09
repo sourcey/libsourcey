@@ -13,6 +13,7 @@
 #define SCY_Net_SSLContext_H
 
 
+#include "scy/net/net.h"
 #include "scy/crypto/crypto.h"
 #include "scy/crypto/rsa.h"
 #include "scy/crypto/x509certificate.h"
@@ -36,7 +37,7 @@ namespace net {
 ///
 /// The Context class is also used to control
 /// SSL session caching on the server and client side.
-class SCY_EXTERN SSLContext
+class Net_API SSLContext
 {
 public:
     typedef std::shared_ptr<SSLContext> Ptr;

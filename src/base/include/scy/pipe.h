@@ -21,7 +21,7 @@ namespace scy {
 
 
 /// Pipe implementation for process stdio
-class SCY_EXTERN Pipe : public Stream
+class Base_API Pipe : public Stream
 {
 public:
     Pipe(uv::Loop* loop = uv::defaultLoop());

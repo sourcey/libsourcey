@@ -12,6 +12,7 @@ STUN buffer appending extra bytes
 CShange socket return values to accomodate -1
 Cleanup SocketAdapter ref map
 Fix signal atomic copy
+Fix size types - base64 - packet return types
 ScoketEmitter can't snatch the receiver .. need a shared pointer
 
 

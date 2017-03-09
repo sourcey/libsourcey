@@ -59,8 +59,8 @@ struct TransactionState : public State
 /// PacketTransactions are fire and forget. The object will be deleted
 /// after a successful response or a timeout.
 template <class PacketT>
-class SCY_EXTERN PacketTransaction : public basic::Sendable,
-                                     public Stateful<TransactionState>
+class PacketTransaction : public basic::Sendable,
+                          public Stateful<TransactionState>
 {
 public:
     PacketTransaction(long timeout = 10000, int retries = 0,

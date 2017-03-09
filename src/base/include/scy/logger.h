@@ -81,8 +81,8 @@ inline const char* getStringFromLogLevel(LogLevel level)
 }
 
 
-struct LogStream;
-class SCY_EXTERN LogChannel;
+struct Base_API LogStream;
+class Base_API LogChannel;
 
 
 //
@@ -91,7 +91,7 @@ class SCY_EXTERN LogChannel;
 
 
 /// Log output stream writer.
-class SCY_EXTERN LogWriter
+class Base_API LogWriter
 {
 public:
     LogWriter();
@@ -108,7 +108,7 @@ public:
 
 
 /// Thread based log output stream writer.
-class SCY_EXTERN AsyncLogWriter : public LogWriter, public basic::Runnable
+class Base_API AsyncLogWriter : public LogWriter, public basic::Runnable
 {
 public:
     AsyncLogWriter();
@@ -141,7 +141,7 @@ protected:
 
 
 /// Logger class.
-class SCY_EXTERN Logger
+class Base_API Logger
 {
 public:
     Logger();
@@ -270,8 +270,7 @@ struct LogStream
 struct LogStream
 {
     LogStream(LogLevel level = LDebug, const std::string& realm = "",
-        int line = 0, const void* ptr = nullptr,
-        const char* channel = nullptr) {};
+        int line = 0, const void* ptr = nullptr, const char* channel = nullptr) {};
     LogStream(LogLevel level, const std::string& realm = "",
         const std::string& address = "") {};
     LogStream(const LogStream& that) {};
@@ -435,7 +434,7 @@ inline std::string _methodName(const std::string& fsig)
 //
 
 
-class SCY_EXTERN LogChannel
+class Base_API LogChannel
 {
 public:
     LogChannel(const std::string& name, LogLevel level = LDebug,
@@ -475,7 +474,7 @@ typedef LogChannel NullChannel;
 //
 
 
-class SCY_EXTERN ConsoleChannel : public LogChannel
+class Base_API ConsoleChannel : public LogChannel
 {
 public:
     ConsoleChannel(const std::string& name, LogLevel level = LDebug,
@@ -491,7 +490,7 @@ public:
 //
 
 
-class SCY_EXTERN FileChannel : public LogChannel
+class Base_API FileChannel : public LogChannel
 {
 public:
     FileChannel(const std::string& name, const std::string& path,
@@ -518,7 +517,7 @@ protected:
 //
 
 
-class SCY_EXTERN RotatingFileChannel : public LogChannel
+class Base_API RotatingFileChannel : public LogChannel
 {
 public:
     RotatingFileChannel(const std::string& name, const std::string& dir,
@@ -550,7 +549,7 @@ protected:
 
 
 #if 0
-class SCY_EXTERN EventedFileChannel: public FileChannel
+class Base_API EventedFileChannel: public FileChannel
 {
 public:
     EventedFileChannel(

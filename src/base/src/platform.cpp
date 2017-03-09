@@ -11,7 +11,7 @@
 
 #include "scy/platform.h"
 #include "scy/error.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 #ifdef SCY_WIN
 #include <windows.h>

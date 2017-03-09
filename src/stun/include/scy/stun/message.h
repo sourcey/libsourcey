@@ -25,12 +25,12 @@ namespace stun {
 typedef std::string TransactionID;
 
 
-class SCY_EXTERN Message : public IPacket
+class STUN_API Message : public IPacket
 {
 public:
     enum MethodType
     {
-        Undefined = 0x0000, ///< default error type
+        Undefined = 0x0000,        ///< default error type
 
         /// STUN
         Binding = 0x0001,

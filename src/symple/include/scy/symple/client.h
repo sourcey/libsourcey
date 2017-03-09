@@ -39,7 +39,7 @@ typedef TimedManager<std::string, Message> PersistenceT;
 //
 
 
-class SCY_EXTERN Client : public sockio::Client
+class /* SCY_EXTERN */ Client : public sockio::Client
 {
 public:
     struct Options
@@ -201,7 +201,7 @@ Client* createTCPClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
 
-class SCY_EXTERN TCPClient : public Client
+class /* SCY_EXTERN */ TCPClient : public Client
 {
 public:
     TCPClient(const Client::Options& options = Client::Options(),
@@ -218,7 +218,7 @@ Client* createSSLClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
 
-class SCY_EXTERN SSLClient : public Client
+class /* SCY_EXTERN */ SSLClient : public Client
 {
 public:
     SSLClient(const Client::Options& options = Client::Options(),

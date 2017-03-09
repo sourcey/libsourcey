@@ -11,7 +11,7 @@
 
 #include "scy/net/udpsocket.h"
 #include "scy/logger.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 
 
 using namespace std;

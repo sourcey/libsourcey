@@ -13,21 +13,22 @@
 #define SCY_TURN_TCPClientConnection_H
 
 
-#include "scy/collection.h"
+#include "scy/turn/turn.h"
+#include "scy/stun/message.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/socketemitter.h"
-#include "scy/stun/message.h"
-#include "scy/timer.h"
+#include "scy/collection.h"
+#include "scy/datetime.h"
 
 
 namespace scy {
 namespace turn {
 
 
-class SCY_EXTERN TCPAllocation;
+class TURN_API TCPAllocation;
 
 
-class SCY_EXTERN TCPConnectionPair
+class TURN_API TCPConnectionPair
 {
 public:
     TCPConnectionPair(TCPAllocation& allocation);

@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 # ----------------------------------------------------------------------------
 # LibSourcey Build paths
 # ----------------------------------------------------------------------------
+set(LibSourcey_NAME LibSourcey)
 set(LibSourcey_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src)
 set(LibSourcey_VENDOR_SOURCE_DIR ${LibSourcey_DIR}/vendor)
@@ -327,13 +328,14 @@ add_definitions(-DHAVE_CONFIG_H)
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_BUILD_DIR})
 
 # Variables for libsourcey.h.cmake
-set(PACKAGE "LibSourcey")
-set(PACKAGE_BUGREPORT "https://github.com/sourcey/libsourcey/issues")
-set(PACKAGE_NAME "LibSourcey")
-set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
-set(PACKAGE_TARNAME "${PACKAGE}")
-set(PACKAGE_VERSION "${LibSourcey_VERSION}")
-set(SCY_ENABLE_LOGGING "${ENABLE_LOGGING}")
+#set(PACKAGE "LibSourcey")
+#set(PACKAGE_BUGREPORT "https://github.com/sourcey/libsourcey/issues")
+#set(PACKAGE_NAME "LibSourcey")
+#set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
+#set(PACKAGE_TARNAME "${PACKAGE}")
+#set(PACKAGE_VERSION "${LibSourcey_VERSION}")
+set(SCY_ENABLE_LOGGING ${ENABLE_LOGGING})
+set(SCY_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 status("Parsing 'libsourcey.h.cmake'")

@@ -27,8 +27,8 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN Client;
-class SCY_EXTERN ClientConnection : public Connection
+class /* SCY_EXTERN */ Client;
+class /* SCY_EXTERN */ ClientConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ClientConnection> Ptr;
@@ -169,7 +169,7 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = 
 //
 
 
-class SCY_EXTERN Client
+class /* SCY_EXTERN */ Client
 {
 public:
     Client();
@@ -229,7 +229,7 @@ inline ClientConnection::Ptr createConnection(const URL& url, http::Client* clie
 
 
 #if 0
-class SCY_EXTERN SecureClientConnection: public ClientConnection
+class /* SCY_EXTERN */ SecureClientConnection: public ClientConnection
 {
 public:
     SecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
@@ -243,7 +243,7 @@ public:
 };
 
 
-class SCY_EXTERN WebSocketClientConnection: public ClientConnection
+class /* SCY_EXTERN */ WebSocketClientConnection: public ClientConnection
 {
 public:
     WebSocketClientConnection(Client* client, const URL& url) : //, const net::Address& address
@@ -258,7 +258,7 @@ public:
 };
 
 
-class SCY_EXTERN WebSocketSecureClientConnection: public ClientConnection
+class /* SCY_EXTERN */ WebSocketSecureClientConnection: public ClientConnection
 {
 public:
     WebSocketSecureClientConnection(Client* client, const URL& url) : //, const net::Address& address

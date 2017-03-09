@@ -22,12 +22,12 @@ namespace scy {
 namespace sched {
 
 
-class SCY_EXTERN Scheduler;
+class /* SCY_EXTERN */ Scheduler;
 
 
 /// This class extends the Task class to implement
 /// scheduling capabilities.
-class SCY_EXTERN Task : public scy::Task, public json::ISerializable
+class /* SCY_EXTERN */ Task : public scy::Task, public json::ISerializable
 {
 public:
     Task(const std::string& type = "", const std::string& name = "");

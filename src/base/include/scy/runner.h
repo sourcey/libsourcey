@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <cstdint>
 #include <thread>
 #include <atomic>
@@ -31,7 +31,7 @@ namespace scy {
 
 /// Runner is a virtual interface for implementing
 /// asynchronous objects such as threads and futures.
-class SCY_EXTERN Runner
+class Base_API Runner
 {
 public:
     Runner();

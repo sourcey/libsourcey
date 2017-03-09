@@ -26,7 +26,7 @@ namespace json {
 /// JSON configuration file
 ///
 /// See base Configuration for all accessors
-class SCY_EXTERN Configuration : public scy::Configuration
+class /* SCY_EXTERN */ Configuration : public scy::Configuration
 {
 public:
     Configuration();

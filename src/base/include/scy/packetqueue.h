@@ -28,7 +28,7 @@ namespace scy {
 
 
 template <class T = IPacket>
-class SCY_EXTERN SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
+class SyncPacketQueue : public SyncQueue<T>, public PacketProcessor
 {
 public:
     typedef SyncQueue<T> Queue;
@@ -82,7 +82,7 @@ protected:
 // }
 
 
-template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
+template <class T> inline void  SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
@@ -140,7 +140,7 @@ inline void SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& sta
 
 
 template <class T = IPacket>
-class SCY_EXTERN AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
+class AsyncPacketQueue : public AsyncQueue<T>, public PacketProcessor
 {
 public:
     typedef AsyncQueue<T> Queue;

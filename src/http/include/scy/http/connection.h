@@ -27,9 +27,9 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN ConnectionStream;
-class SCY_EXTERN ConnectionAdapter;
-class SCY_EXTERN Connection : public net::SocketAdapter
+class /* SCY_EXTERN */ ConnectionStream;
+class /* SCY_EXTERN */ ConnectionAdapter;
+class /* SCY_EXTERN */ Connection : public net::SocketAdapter
 {
 public:
     typedef std::shared_ptr<Connection> Ptr;
@@ -118,7 +118,7 @@ protected:
 
 
 /// Default HTTP socket adapter for reading and writing HTTP messages
-class SCY_EXTERN ConnectionAdapter : public ParserObserver, public net::SocketAdapter
+class /* SCY_EXTERN */ ConnectionAdapter : public ParserObserver, public net::SocketAdapter
 {
 public:
     ConnectionAdapter(Connection* connection, http_parser_type type);
@@ -159,7 +159,7 @@ protected:
 
 
 // HTTP progress signal for upload and download progress notifications.
-class SCY_EXTERN ProgressSignal : public Signal<void(const double&)>
+class /* SCY_EXTERN */ ProgressSignal : public Signal<void(const double&)>
 {
 public:
     void* sender;
@@ -190,7 +190,7 @@ public:
 
 
 /// Packet stream wrapper for a HTTP connection.
-class SCY_EXTERN ConnectionStream : public net::SocketAdapter
+class /* SCY_EXTERN */ ConnectionStream : public net::SocketAdapter
 {
 public:
     ConnectionStream(Connection::Ptr connection);

@@ -30,7 +30,7 @@ struct IUser
 };
 
 
-class SCY_EXTERN BasicUser : public IUser
+class /* SCY_EXTERN */ BasicUser : public IUser
 {
 public:
     BasicUser(const std::string& username, const std::string& password = "")
@@ -53,7 +53,7 @@ typedef std::map<std::string, IUser*> IUserMap;
 /// @deprecated
 /// This class contains a list of users that have access
 /// on the system.
-class SCY_EXTERN UserManager : public LiveCollection<std::string, IUser>
+class /* SCY_EXTERN */ UserManager : public LiveCollection<std::string, IUser>
 {
 public:
     typedef LiveCollection<std::string, IUser> Manager;

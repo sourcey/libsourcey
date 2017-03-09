@@ -38,16 +38,14 @@ void init_encodestate(encodestate* state_in)
 
 char encode_value(char value_in)
 {
-    static const char* encoding =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static const char* encoding = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     if (value_in > 63)
         return '=';
     return encoding[(int)value_in];
 }
 
 
-int encode_block(const char* plaintext_in, int length_in, char* code_out,
-                 encodestate* state_in)
+int encode_block(const char* plaintext_in, int length_in, char* code_out, encodestate* state_in)
 {
     const char* plainchar = plaintext_in;
     const char* const plaintextend = plaintext_in + length_in;
@@ -157,8 +155,7 @@ void init_decodestate(decodestate* state_in)
 }
 
 
-int decode_block(const char* code_in, const int length_in, char* plaintext_out,
-                 decodestate* state_in)
+int decode_block(const char* code_in, const int length_in, char* plaintext_out, decodestate* state_in)
 {
     const char* codechar = code_in;
     char* plainchar = plaintext_out;

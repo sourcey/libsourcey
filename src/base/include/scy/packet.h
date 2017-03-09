@@ -40,7 +40,7 @@ struct IPacketInfo
 /// The basic packet type which is passed around the LibSourcey system.
 /// IPacket can be extended for each protocol to enable polymorphic
 /// processing and callbacks using PacketStream and friends.
-class SCY_EXTERN IPacket
+class Base_API IPacket
 {
 public:
     IPacket(void* source = nullptr, void* opaque = nullptr,
@@ -135,7 +135,7 @@ public:
 
 
 /// A simple flag packet for sending state flags along the packet stream.
-class SCY_EXTERN FlagPacket : public IPacket
+class Base_API FlagPacket : public IPacket
 {
 public:
     FlagPacket(unsigned flags = 0)
@@ -162,7 +162,7 @@ public:
 
 /// RawPacket is the default data packet type which consists
 /// of an optionally managed char pointer and a size value.
-class SCY_EXTERN RawPacket : public IPacket
+class Base_API RawPacket : public IPacket
 {
 public:
     RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0,

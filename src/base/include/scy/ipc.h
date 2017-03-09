@@ -49,7 +49,7 @@ struct Action
 /// IPC queue is for safely passing templated
 /// actions between threads and processes.
 template <typename TAction = ipc::Action>
-class SCY_EXTERN Queue
+class Queue
 {
 public:
     Queue() {}
@@ -113,7 +113,7 @@ protected:
 /// synchronizing with.
 ///
 template <typename TAction = ipc::Action>
-class SCY_EXTERN SyncQueue : public Queue<TAction>
+class SyncQueue : public Queue<TAction>
 {
 public:
     SyncQueue(uv::Loop* loop = uv::defaultLoop())

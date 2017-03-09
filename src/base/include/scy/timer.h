@@ -15,9 +15,8 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-#include "scy/datetime.h"
 #include "scy/signal.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 #include <cstdint>
 #include <functional>
 
@@ -26,7 +25,7 @@ namespace scy {
 
 
 /// Asynchronous event based timer.
-class SCY_EXTERN Timer : public Runner
+class Base_API Timer : public Runner
 {
 public:
     /// Create a timer.

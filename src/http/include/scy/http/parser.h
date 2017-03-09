@@ -23,7 +23,7 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN ParserObserver
+class /* SCY_EXTERN */ ParserObserver
 {
 public:
     virtual void onParserHeader(const std::string& name, const std::string& value) = 0;
@@ -35,7 +35,7 @@ public:
 };
 
 
-class SCY_EXTERN Parser
+class /* SCY_EXTERN */ Parser
 {
 public:
     Parser(http::Response* response);

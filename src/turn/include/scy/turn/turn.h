@@ -14,12 +14,17 @@
 #define SCY_TURN_H
 
 
-namespace scy {
-namespace turn {
 
-
-} // namespace turn
-} // namespace scy
+// Shared library exports
+#if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
+    #if defined(TURN_EXPORTS)
+        #define TURN_API __declspec(dllexport)
+    #else
+        #define TURN_API __declspec(dllimport)
+    #endif
+#else
+    #define TURN_API // nothing
+#endif
 
 
 #endif

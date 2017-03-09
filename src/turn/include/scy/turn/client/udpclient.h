@@ -28,7 +28,7 @@ namespace scy {
 namespace turn {
 
 
-class SCY_EXTERN UDPClient : public Client
+class TURN_API UDPClient : public Client
 {
 public:
     UDPClient(ClientObserver& observer, const Options& options = Options());

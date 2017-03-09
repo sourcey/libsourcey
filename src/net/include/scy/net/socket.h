@@ -18,7 +18,7 @@
 #include "scy/net/address.h"
 #include "scy/net/dns.h"
 #include "scy/net/socketadapter.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 #include "scy/packetstream.h"
 
 
@@ -28,17 +28,16 @@ namespace net {
 
 /// Helper method for instantiating Sockets wrapped in a `std::shared_ptr`
 /// that will be garbage collected on destruction.
-/// It's recommended to use deferred deletion for Sockets.
 template <class SocketT>
 inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 {
-    // return std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
     return std::make_shared<SocketT>(loop);
+    // return std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
 }
 
 
 /// Socket is the base socket implementation from which all sockets derive.
-class SCY_EXTERN Socket : public SocketAdapter
+class Net_API Socket : public SocketAdapter
 {
 public:
     typedef std::shared_ptr<Socket> Ptr;
@@ -125,12 +124,6 @@ protected:
 
     /// Resets the socket context for reuse.
     virtual void reset() {};
-
-    /// Returns the derived instance pointer for casting SocketAdapter
-    /// signal callback sender arguments from void* to Socket.
-    /// Note: This method must not be derived by subclasses or casting
-    /// will fail for void* pointer callbacks.
-    // virtual void* self() { return this; };
 };
 
 
@@ -179,7 +172,7 @@ struct PacketInfo : public IPacketInfo
 ///
 /// The referenced packet buffer lifetime is only guaranteed
 /// for the duration of the receiver callback.
-class SCY_EXTERN SocketPacket : public RawPacket
+class Net_API SocketPacket : public RawPacket
 {
 public:
     /// PacketInfo pointer

@@ -50,14 +50,14 @@ typedef struct
     int nullptrlterminate; // added
 } encodestate;
 
-void init_encodestate(internal::encodestate* state_in);
+Base_API void init_encodestate(internal::encodestate* state_in);
 
-char encode_value(char value_in);
+Base_API char encode_value(char value_in);
 
-int encode_block(const char* readbuf_in, int length_in, char* code_out,
+Base_API int encode_block(const char* readbuf_in, int length_in, char* code_out,
                  internal::encodestate* state_in);
 
-int encode_blockend(char* code_out, internal::encodestate* state_in);
+Base_API int encode_blockend(char* code_out, internal::encodestate* state_in);
 
 
 } // namespace internal
@@ -139,9 +139,8 @@ inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
     internal::init_encodestate(&state);
     state.linelength = lineLength;
 
-    int enclen =
-        internal::encode_block(reinterpret_cast<const char*>(&bytes[0]),
-                               bytes.size(), encbuf.get(), &state);
+    int enclen = internal::encode_block(reinterpret_cast<const char*>(&bytes[0]),
+                                        bytes.size(), encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
 
     enclen = internal::encode_blockend(encbuf.get(), &state);
@@ -167,12 +166,12 @@ typedef struct
     char plainchar;
 } decodestate;
 
-void init_decodestate(internal::decodestate* state_in);
+Base_API void init_decodestate(internal::decodestate* state_in);
 
-int decode_value(char value_in);
+Base_API int decode_value(char value_in);
 
-int decode_block(const char* inbuf, const int nread, char* outbuf,
-                 internal::decodestate* state_in);
+Base_API int decode_block(const char* inbuf, const int nread, char* outbuf,
+                          internal::decodestate* state_in);
 
 
 } // namespace internal

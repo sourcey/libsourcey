@@ -28,7 +28,7 @@ namespace net {
 //
 
 
-class SCY_EXTERN AddressBase
+class Net_API AddressBase
 {
 public:
     virtual std::string host() const = 0;
@@ -53,7 +53,7 @@ private:
 //
 
 
-class SCY_EXTERN IPv4AddressBase : public AddressBase
+class Net_API IPv4AddressBase : public AddressBase
 {
 public:
     IPv4AddressBase()
@@ -109,7 +109,7 @@ private:
 #if defined(SCY_HAVE_IPv6)
 
 
-class SCY_EXTERN IPv6AddressBase : public AddressBase
+class Net_API IPv6AddressBase : public AddressBase
 {
 public:
     IPv6AddressBase(const struct sockaddr_in6* addr)

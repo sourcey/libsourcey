@@ -28,7 +28,7 @@ typedef LiveCollection<std::string, PacketStream,
     StreamManagerBase;
 
 
-class SCY_EXTERN StreamManager : public StreamManagerBase
+class /* SCY_EXTERN */ StreamManager : public StreamManagerBase
 {
 public:
     typedef StreamManagerBase Manager;

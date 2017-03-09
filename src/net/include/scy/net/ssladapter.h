@@ -15,8 +15,8 @@
 
 #include "scy/crypto/crypto.h"
 #include "scy/net/address.h"
-#include "scy/net/types.h"
-#include "scy/uv/uvpp.h"
+#include "scy/net/net.h"
+#include "scy/uv/handle.h"
 
 #include <string>
 #include <vector>
@@ -34,8 +34,8 @@ namespace net {
 /// A wrapper for the OpenSSL SSL connection context
 ///
 /// TODO: Decouple from SSLSocket implementation
-class SCY_EXTERN SSLSocket;
-class SCY_EXTERN SSLAdapter
+class Net_API SSLSocket;
+class Net_API SSLAdapter
 {
 public:
     SSLAdapter(net::SSLSocket* socket);

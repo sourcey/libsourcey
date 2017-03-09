@@ -70,6 +70,31 @@ macro(define_sourcey_module name)
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
   #message(STATUS "    Dependencies: ${LibSourcey__VENDOR_INCLUDE_DIRS}")
 
+  # Specify the library pretty name for shared EXPORT symbols.
+  # Unless specified, default is `{Name}_EXPORTS` with uppercased
+  # first letter for vanity, just because it looks better in code.
+  # NOTE: We could be using `generate_export_header` with
+  # CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS but doing it ourselves is cleaner.
+  if (NOT ${name}_PRETTY_NAME)
+    string(SUBSTRING ${name} 0 1 first_letter)
+    string(TOUPPER ${first_letter} first_letter)
+    string(REGEX REPLACE "^.(.*)" "${first_letter}\\1" name_capitalized "${name}")
+    set(pretty_name ${name_capitalized})
+  else()
+    set(pretty_name ${${name}_PRETTY_NAME})
+  endif()
+  #message(FATAL_ERROR "    Libraries:  ${${name}_PRETTY_NAME}}")
+  #message(FATAL_ERROR "    Libraries: ${pretty_name}")
+  target_compile_definitions(${name} PRIVATE ${pretty_name}_EXPORTS)
+
+  # include(GenerateExportHeader)
+  # generate_export_header(${name} 
+  #         EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${name}/exports.h"
+  #         EXPORT_MACRO_NAME ${pretty_name}_EXPORT
+  #         NO_EXPORT_MACRO_NAME ${pretty_name}_NO_EXPORT
+  #         DEPRECATED_MACRO_NAME ${pretty_name}_DEPRECATED
+  #         NO_DEPRECATED_MACRO_NAME ${pretty_name}_NO_DEPRECATED)
+
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
     # As result we should not set version properties for Android
@@ -88,6 +113,7 @@ macro(define_sourcey_module name)
     DEBUG_POSTFIX "${LibSourcey_DEBUG_POSTFIX}"
     #ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}
     #RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+    #DEFINE_SYMBOL "${pretty_name}_EXPORTS"
     INSTALL_NAME_DIR lib
     LINKER_LANGUAGE CXX)
 
@@ -369,7 +395,7 @@ macro(define_sourcey_dependency name)
   source_group("Source" FILES ${${name}_SOURCE_FILES})
   source_group("Include" FILES ${${name}_HEADER_FILES})
 
-  # message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   # message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   # message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 

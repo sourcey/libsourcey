@@ -21,8 +21,8 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN Request;
-class SCY_EXTERN Response;
+class /* SCY_EXTERN */ Request;
+class /* SCY_EXTERN */ Response;
 
 
 /// This is a utility class for working with HTTP
@@ -31,7 +31,7 @@ class SCY_EXTERN Response;
 /// Note: Do not forget to read the entire response stream from the 401 response
 /// before sending the authenticated request, otherwise there may be
 /// problems if a persistent connection is used.
-class SCY_EXTERN Authenticator
+class /* SCY_EXTERN */ Authenticator
 {
 public:
     /// Creates an empty Authenticator object.
@@ -105,7 +105,7 @@ private:
 
 /// This is a utility class for working with HTTP Basic
 /// Authentication in http::Request objects.
-class SCY_EXTERN BasicAuthenticator
+class /* SCY_EXTERN */ BasicAuthenticator
 {
 public:
     /// Creates an empty BasicAuthenticator object.

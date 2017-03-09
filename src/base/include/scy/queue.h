@@ -25,8 +25,7 @@
 namespace scy {
 
 
-/// Implements a thread-safe queue container.
-// TODO: Iterators
+/// Thread-safe queue container.
 template <typename T> class Queue
 {
 private:
@@ -42,7 +41,6 @@ public:
 
     bool empty() const
     {
-
         return _queue.empty();
     }
 
@@ -102,7 +100,7 @@ public:
 
 
 template <class T>
-class SCY_EXTERN RunnableQueue : public Queue<T*>, public basic::Runnable
+class RunnableQueue : public Queue<T*>, public basic::Runnable
 {
 public:
     /// The default dispatch function.
@@ -207,7 +205,8 @@ protected:
     RunnableQueue(const RunnableQueue&) = delete;
     RunnableQueue& operator=(const RunnableQueue&) = delete;
 
-    virtual T* popNext() // Pops the next waiting item.
+    /// Pops the next waiting item.
+    virtual T* popNext() 
     {
         T* next;
         {
@@ -221,7 +220,8 @@ protected:
         return next;
     }
 
-    virtual bool dispatchNext() // Pops and dispatches the next waiting item.
+    /// Pops and dispatches the next waiting item.
+    virtual bool dispatchNext() 
     {
         T* next = popNext();
         if (next) {
@@ -247,7 +247,7 @@ protected:
 /// queue which receives T objects from any thread and synchronizes
 /// them for safe consumption by the associated event loop.
 template <class T>
-class SCY_EXTERN SyncQueue : public RunnableQueue<T>
+class SyncQueue : public RunnableQueue<T>
 {
 public:
     typedef RunnableQueue<T> Queue;
@@ -293,8 +293,6 @@ protected:
 //
 
 
-template <class T>
-
 /// AsyncQueue is a thread-based queue which receives packets
 /// from any thread source and dispatches them asynchronously.
 ///
@@ -303,7 +301,8 @@ template <class T>
 ///
 /// The thread will call the RunnableQueue's run() method to
 /// constantly flush outgoing packets until cancel() is called.
-class SCY_EXTERN AsyncQueue : public RunnableQueue<T>
+template <class T>
+class AsyncQueue : public RunnableQueue<T>
 {
 public:
     typedef RunnableQueue<T> Queue;
@@ -325,62 +324,6 @@ protected:
 
     Thread _thread;
 };
-
-
-#if 0
-//
-// Concurrent Queue
-//
-// TODO: Re-implement Condition class from libuv primitives
-//
-
-template<typename T>
-
-    /// Implements a simple thread-safe multiple producer,    /// multiple consumer queue.
-class SCY_EXTERN ConcurrentQueue
-{
-private:
-    std::queue<T> _queue;
-    mutable std::mutex _mutex;
-    Poco::Condition _condition;
-
-public:
-    void push(T const& data)
-    {
-        std::lock_guard<std::mutex> guard(_mutex);
-        _queue.push(data);
-        lock.unlock();
-        _condition.signal();
-    }
-
-    bool empty() const
-    {
-        std::lock_guard<std::mutex> guard(_mutex);
-        return _queue.empty();
-    }
-
-    bool tryPop(T& out)
-    {
-        std::lock_guard<std::mutex> guard(_mutex);
-        if (_queue.empty())
-            return false;
-
-        out = _queue.front();
-        _queue.pop();
-        return true;
-    }
-
-    void waitAndPop(T& out)
-    {
-        std::lock_guard<std::mutex> guard(_mutex);
-        while (_queue.empty())
-            _cond.wait(_mutex);
-
-        out = _queue.front();
-        _queue.pop();
-    }
-};
-#endif
 
 
 } // namespace scy

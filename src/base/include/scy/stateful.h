@@ -29,7 +29,7 @@ namespace scy {
 /// extended and passed to implementations of the `Stateful` template.
 ///
 /// For an example @see PacketStreamState
-class SCY_EXTERN State
+class Base_API State
 {
 public:
     typedef std::uint32_t ID;

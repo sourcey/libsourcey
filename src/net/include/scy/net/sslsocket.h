@@ -18,14 +18,14 @@
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
 #include "scy/net/tcpsocket.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 
 namespace scy {
 namespace net {
 
 
-class SCY_EXTERN SSLSocket : public TCPSocket
+class Net_API SSLSocket : public TCPSocket
 {
 public:
     typedef std::shared_ptr<SSLSocket> Ptr;

@@ -26,7 +26,7 @@ namespace scy {
 typedef uv_process_options_t ProcessOptions;
 
 
-class SCY_EXTERN Process : public uv::Handle
+class Base_API Process : public uv::Handle
 {
 public:
     /// Default constructor.

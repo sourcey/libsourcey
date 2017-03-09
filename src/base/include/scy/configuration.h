@@ -28,7 +28,7 @@ namespace scy {
 /// Subclasses must override the getRaw() and setRaw() and methods.
 ///
 /// This class is safe for multithreaded use.
-class SCY_EXTERN Configuration
+class Base_API Configuration
 {
 public:
     /// Creates the Configuration.
@@ -184,7 +184,7 @@ private:
 /// Example scoping:
 ///        Module: channels.[name].modes.[name].[value]
 ///        Default: modes.[name].[value]
-class SCY_EXTERN ScopedConfiguration
+class Base_API ScopedConfiguration
 {
 public:
     ScopedConfiguration(Configuration& config, const std::string& currentScope,

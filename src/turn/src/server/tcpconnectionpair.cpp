@@ -255,14 +255,12 @@ void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 
 void TCPConnectionPair::startTimeout()
 {
-   
     timeout.reset();
 }
 
 
 bool TCPConnectionPair::expired() const
 {
-   
     return timeout.running() && timeout.expired();
 }
 

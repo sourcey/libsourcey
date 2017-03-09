@@ -14,7 +14,7 @@
 
 
 #include "scy/collection.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 
 
 namespace scy {
@@ -35,7 +35,7 @@ namespace http {
 /// This class supports both the Version 0 (by Netscape) and Version 1
 /// (by RFC 2109) cookie specifications. By default, cookies are created
 /// using Version 0 to ensure the best interoperability.
-class SCY_EXTERN Cookie
+class /* SCY_EXTERN */ Cookie
 {
 public:
     /// Creates an empty Cookie.

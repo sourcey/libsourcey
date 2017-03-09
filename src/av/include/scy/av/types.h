@@ -13,7 +13,7 @@
 #define SCY_AV_Types_H
 
 
-#include "scy/av/config.h"
+#include "scy/av/av.h"
 #include "scy/packet.h"
 #include "scy/time.h"
 

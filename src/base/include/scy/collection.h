@@ -61,7 +61,7 @@ public:
 /// pointers via the TDeleter argument.
 template <class TKey, class TValue,
           class TDeleter = std::default_delete<TValue>>
-class SCY_EXTERN PointerCollection : public AbstractCollection<TKey, TValue>
+class /* Base_API */ PointerCollection : public AbstractCollection<TKey, TValue>
 {
 public:
     typedef std::map<TKey, TValue*> Map;
@@ -234,7 +234,7 @@ protected:
 
 template <class TKey, class TValue,
           class TDeleter = std::default_delete<TValue>>
-class SCY_EXTERN LiveCollection : public PointerCollection<TKey, TValue, TDeleter>
+class /* Base_API */ LiveCollection : public PointerCollection<TKey, TValue, TDeleter>
 {
 public:
     typedef PointerCollection<TKey, TValue> Base;
@@ -261,13 +261,16 @@ public:
 
 
 /// Reusable stack based unique key-value store for DRY coding.
-template <class TKey, class TValue> class KVCollection
+template <class TKey, class TValue> 
+class /* Base_API */ KVCollection
 {
 public:
     typedef std::map<TKey, TValue> Map;
 
 public:
-    KVCollection() {}
+    KVCollection() 
+    {
+    }
 
     virtual ~KVCollection()
     {
@@ -352,7 +355,7 @@ protected:
 /// A storage container for a name value collections.
 /// This collection can store multiple entries for each
 /// name, and it's getters are case-insensitive.
-class SCY_EXTERN NVCollection
+class /* Base_API */ NVCollection
 {
 public:
     struct ILT
@@ -367,14 +370,18 @@ public:
     typedef Map::iterator Iterator;
     typedef Map::const_iterator ConstIterator;
 
-    NVCollection() {}
+    NVCollection() 
+    {
+    }
 
     NVCollection(const NVCollection& nvc)
         : _map(nvc._map)
     {
     }
 
-    virtual ~NVCollection() {}
+    virtual ~NVCollection() 
+    {
+    }
 
     /// Assigns the name-value pairs of another NVCollection to this one.
     NVCollection& operator=(const NVCollection& nvc);

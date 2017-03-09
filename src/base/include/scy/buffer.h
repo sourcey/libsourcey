@@ -38,7 +38,7 @@ typedef std::vector<char> Buffer;
 /// The MutableBuffer class provides a safe representation of a
 /// buffer that can be modified. It does not own the underlying
 /// data, and so is cheap to copy or assign.
-class SCY_EXTERN MutableBuffer
+class Base_API MutableBuffer
 {
 public:
     /// Construct an empty buffer.
@@ -120,7 +120,7 @@ inline MutableBuffer mutableBuffer(const Buffer& buf)
 /// The ConstBuffer class provides a safe representation of a
 /// buffer that cannot be modified. It does not own the underlying
 /// data, and so is cheap to copy or assign.
-class SCY_EXTERN ConstBuffer
+class Base_API ConstBuffer
 {
 public:
     /// Construct an empty buffer.
@@ -221,7 +221,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 
 
 /// Class for reading binary streams.
-class SCY_EXTERN BitReader
+class Base_API BitReader
 {
 public:
     BitReader(const char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
@@ -317,7 +317,7 @@ protected:
 /// when writing passed the buffer capacity.
 /// All other cases will throw a std::out_of_range error when writing
 /// past the buffer capacity.
-class SCY_EXTERN BitWriter
+class Base_API BitWriter
 {
 public:
     BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
@@ -396,7 +396,7 @@ protected:
 /// when writing passed the buffer capacity.
 /// All other cases will throw a std::out_of_range error when writing
 /// past the buffer capacity.
-class SCY_EXTERN DynamicBitWriter : public BitWriter
+class Base_API DynamicBitWriter : public BitWriter
 {
 public:
     DynamicBitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);

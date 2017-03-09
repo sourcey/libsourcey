@@ -38,7 +38,7 @@ namespace scy {
 namespace av {
 
 /// This class implements a multiplex audio and video encoder.
-class SCY_EXTERN MultiplexEncoder : public IEncoder
+class /* SCY_EXTERN */ MultiplexEncoder : public IEncoder
 {
 public:
     MultiplexEncoder(const EncoderOptions& options = EncoderOptions());

@@ -13,9 +13,10 @@
 #define SCY_Time_H
 
 
-#include <cstdint>
-#include <ctime>
+#include "scy/base.h"
 #include <string>
+#include <ctime>
+#include <cstdint>
 
 
 namespace scy {
@@ -34,36 +35,36 @@ namespace time {
 static const char* ISO8601Format = "%Y-%m-%dT%H:%M:%SZ";
 
 /// Return the number of UTC milliseconds since epoch.
-std::time_t now();
+Base_API std::time_t now();
 
 /// Return the current process time in decimal seconds.
-double clockSecs();
+Base_API double clockSecs();
 
 /// Cross-platform time formatting.
-std::string print(const std::tm& dt, const char* fmt = ISO8601Format);
+Base_API std::string print(const std::tm& dt, const char* fmt = ISO8601Format);
 
 /// Print the current local time using the given format.
-std::string printLocal(const char* fmt = ISO8601Format);
+Base_API std::string printLocal(const char* fmt = ISO8601Format);
 
 /// Print the current UTC time using the given format.
-std::string printUTC(const char* fmt = ISO8601Format);
+Base_API std::string printUTC(const char* fmt = ISO8601Format);
 
 /// Convert the given time value to local time.
 /// Uses thread-safe native functions.
-std::tm toLocal(const std::time_t& time);
+Base_API std::tm toLocal(const std::time_t& time);
 
 /// Convert the given time value to UTC time.
 /// Uses thread-safe native functions.
-std::tm toUTC(const std::time_t& time);
+Base_API std::tm toUTC(const std::time_t& time);
 
 /// Return a local ISO8601 formatted date time string.
-std::string getLocal();
+Base_API std::string getLocal();
 
 /// Return a UTC ISO8601 formatted date time string.
-std::string getUTC();
+Base_API std::string getUTC();
 
 /// Return the current high-resolution real time in nanoseconds.
-std::uint64_t hrtime();
+Base_API std::uint64_t hrtime();
 
 #if 0
 /// Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.

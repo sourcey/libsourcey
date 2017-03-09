@@ -16,16 +16,16 @@
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/net/tcpsocket.h"
-#include "scy/net/types.h"
+#include "scy/net/net.h"
 #include "scy/stream.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uv/handle.h"
 
 
 namespace scy {
 namespace net {
 
 
-class SCY_EXTERN TCPSocket : public Stream, public net::Socket
+class Net_API TCPSocket : public Stream, public net::Socket
 {
 public:
     typedef std::shared_ptr<TCPSocket> Ptr;

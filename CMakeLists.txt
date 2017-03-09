@@ -2,13 +2,19 @@
 # Root CMakeLists.txt file for LibSourcey
 # ============================================================================
 
+# CMake 2.8.10 or newer for other platforms.
+# This version is available via Ubuntu's package manager for the 14.04 LTS.
 cmake_minimum_required(VERSION 2.8.10)
 
-# This must go before `project(LibSourcey)` in order to work
+# This must go before `project(LibSourcey)` in order to work.
 if(WIN32)
+  # CMake 3.4 or newer is required on windoes to make use of the 
+  # CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS value for shares releases.
+  # cmake_minimum_required(VERSION 3.4)
+  # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
-# else()
-#   set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
+else()
+  # set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
 endif()
 
 # set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)

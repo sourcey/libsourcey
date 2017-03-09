@@ -24,8 +24,8 @@ namespace net {
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
 template <class PacketT>
-class SCY_EXTERN Transaction : public PacketTransaction<PacketT>,
-                               public PacketSocketEmitter
+class /* Net_API */ Transaction : public PacketTransaction<PacketT>,
+                                  public PacketSocketEmitter
 {
 public:
 	typedef PacketTransaction<PacketT> BaseT;
@@ -37,9 +37,6 @@ public:
         , _peerAddress(peerAddress)
     {
         TraceS(this) << "Create" << std::endl;
-        // reinterpret_cast<net::PacketSocketEmitter*>(
-        //     impl.get())->addReceiver(this, 100); // highest priority
-        // PacketSocketEmitter::addReceiver(this, 100); // highest priority
     }
 
     virtual bool send()
@@ -60,7 +57,6 @@ public:
     virtual void dispose()
     {
         TraceS(this) << "Dispose" << std::endl;
-        // PacketSocketEmitter::impl->removeReceiver(this);
         BaseT::dispose(); // gc
     }
 

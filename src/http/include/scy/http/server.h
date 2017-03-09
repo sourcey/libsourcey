@@ -29,10 +29,10 @@ namespace scy {
 namespace http {
 
 
-class SCY_EXTERN Server;
+class /* SCY_EXTERN */ Server;
 
 /// HTTP server connection.
-class SCY_EXTERN ServerConnection : public Connection
+class /* SCY_EXTERN */ ServerConnection : public Connection
 {
 public:
     typedef std::shared_ptr<ServerConnection> Ptr;
@@ -65,7 +65,7 @@ protected:
 
 /// This implementation of a ServerConnectionFactory
 /// is used by HTTP Server to create ServerConnection objects.
-class SCY_EXTERN ServerConnectionFactory
+class /* SCY_EXTERN */ ServerConnectionFactory
 {
 public:
     ServerConnectionFactory() {};
@@ -88,7 +88,7 @@ public:
 /// This HTTP server is not strictly standards compliant.
 /// It was created to be a fast (nocopy where possible)
 /// solution for streaming media to web browsers.
-class SCY_EXTERN Server : public net::SocketAdapter
+class /* SCY_EXTERN */ Server : public net::SocketAdapter
 {
 public:
     Server(const net::Address& address, net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());

@@ -21,7 +21,7 @@ namespace scy {
 namespace sockio {
 
 
-class SCY_EXTERN Client;
+class /* SCY_EXTERN */ Client;
 
 
 struct Transaction : public PacketTransaction<sockio::Packet>
