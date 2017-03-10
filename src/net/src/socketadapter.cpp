@@ -104,7 +104,7 @@ void SocketAdapter::onSocketConnect(Socket& socket)
 {
     try {
         cleanupReceivers();
-        size_t current = _receivers.size() - 1;
+        int current = int(_receivers.size() - 1);
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -120,7 +120,7 @@ void SocketAdapter::onSocketRecv(Socket& socket, const MutableBuffer& buffer, co
 {
     try {
         cleanupReceivers();
-        size_t current = _receivers.size() - 1;
+        int current = int(_receivers.size() - 1);
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -136,7 +136,7 @@ void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
 {
     try {
         cleanupReceivers();
-        size_t current = _receivers.size() - 1;
+        int current = int(_receivers.size() - 1);
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive)
@@ -152,7 +152,7 @@ void SocketAdapter::onSocketClose(Socket& socket)
 {
     try {
         cleanupReceivers();
-        size_t current = _receivers.size() - 1;
+        int current = int(_receivers.size() - 1);
         while (current >= 0) {
             auto ref = _receivers[current--];
             if (ref->alive) {
