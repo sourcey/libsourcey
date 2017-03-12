@@ -176,9 +176,9 @@ public:
     const EVP_CIPHER* cipher();
 
 protected:
-    Cipher();
-    Cipher(const Cipher&);
-    Cipher& operator=(const Cipher&);
+    Cipher() {};
+    Cipher(const Cipher&) = delete;
+    Cipher& operator=(const Cipher&) = delete;
 
     /// Generates and sets the key and IV from a password and optional salt
     /// string.

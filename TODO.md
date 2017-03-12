@@ -1,19 +1,15 @@
 # TODO
 
-Signal move - for copy packet emitter
+Update Timestamp.cpp and Timespan.cpp ... move Timeout stuff to util or other? ... move inlines to source file 
 Double check WebRTC samples
 	- add some style to demos
 	- take some screenshots for README
-Describe how to build WebRTC for use with LibSourcey in README
-Improve av module documentation
+Fix size types - crypto
+STUN buffer appending extra bytes ... add test to check empty buffer at end of read
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
+Improve av module documentation
+Describe how to build WebRTC for use with LibSourcey in README - maybe move to article and link
 Fix deprecated ICE code
-STUN buffer appending extra bytes
-Change socket return values to accomodate -1
-Cleanup SocketAdapter ref map
-Fix signal atomic copy
-Fix size types - base64 - packet return types
-ScoketEmitter can't snatch the receiver .. need a shared pointer
 
 
 # Tests

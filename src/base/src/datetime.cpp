@@ -415,7 +415,34 @@ void DateTime::computeGregorian(double julianDay)
 void DateTime::computeDaytime()
 {
     Timespan span(_utcTime / 10);
-    _hour = span.hours();
+
+    // Due to double rounding issues, the previous call to computeGregorian()
+    // may have crossed into the next or previous day. We need to correct that.
+    // _hour = span.hours();
+    int hour = span.hours();
+    if (hour == 23 && _hour == 0) {
+        _day--;
+        if (_day == 0) {
+            _month--;
+            if (_month == 0) {
+                _month = 12;
+                _year--;
+            }
+            _day = daysOfMonth(_year, _month);
+        }
+    }
+    else if (hour == 0 && _hour == 23) {
+        _day++;
+        if (_day > daysOfMonth(_year, _month)) {
+            _month++;
+            if (_month > 12) {
+                _month = 1;
+                _year++;
+            }
+            _day = 1;
+        }
+    }
+    _hour = hour;
     _minute = span.minutes();
     _second = span.seconds();
     _millisecond = span.milliseconds();
@@ -436,18 +463,15 @@ LocalDateTime::LocalDateTime()
 
 LocalDateTime::LocalDateTime(int year, int month, int day, int hour, int minute,
                              int second, int millisecond, int microsecond)
-    : _dateTime(year, month, day, hour, minute, second, millisecond,
-                microsecond)
+    : _dateTime(year, month, day, hour, minute, second, millisecond, microsecond)
 {
     determineTzd();
 }
 
 
 LocalDateTime::LocalDateTime(int tzd, int year, int month, int day, int hour,
-                             int minute, int second, int millisecond,
-                             int microsecond)
-    : _dateTime(year, month, day, hour, minute, second, millisecond,
-                microsecond)
+                             int minute, int second, int millisecond, int microsecond)
+    : _dateTime(year, month, day, hour, minute, second, millisecond, microsecond)
     , _tzd(tzd)
 {
 }
@@ -545,8 +569,7 @@ LocalDateTime& LocalDateTime::assign(int year, int month, int day, int hour,
                                      int minute, int second, int millisecond,
                                      int microseconds)
 {
-    _dateTime.assign(year, month, day, hour, minute, second, millisecond,
-                     microseconds);
+    _dateTime.assign(year, month, day, hour, minute, second, millisecond, microseconds);
     determineTzd(false);
     return *this;
 }
@@ -556,8 +579,7 @@ LocalDateTime& LocalDateTime::assign(int tzd, int year, int month, int day,
                                      int hour, int minute, int second,
                                      int millisecond, int microseconds)
 {
-    _dateTime.assign(year, month, day, hour, minute, second, millisecond,
-                     microseconds);
+    _dateTime.assign(year, month, day, hour, minute, second, millisecond, microseconds);
     _tzd = tzd;
     return *this;
 }
@@ -841,8 +863,7 @@ public:
 
     int timeZone()
     {
-#if defined(__APPLE__) || defined(__FreeBSD__) ||                              \
-    defined(POCO_ANDROID) // no timezone global var
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(POCO_ANDROID) // no timezone global var
         std::time_t now = std::time(nullptr);
         struct std::tm t;
         gmtime_r(&now, &t);
@@ -873,8 +894,7 @@ int Timezone::dst()
     std::time_t now = std::time(nullptr);
     struct std::tm t;
     if (!localtime_r(&now, &t))
-        throw std::runtime_error(
-            "System error: cannot get local time DST offset");
+        throw std::runtime_error("System error: cannot get local time DST offset");
     return t.tm_isdst == 1 ? 3600 : 0;
 }
 
@@ -884,8 +904,7 @@ bool Timezone::isDst(const Timestamp& timestamp)
     std::time_t time = timestamp.epochTime();
     struct std::tm* tms = std::localtime(&time);
     if (!tms)
-        throw std::runtime_error(
-            "System error: cannot get local time DST flag");
+        throw std::runtime_error("System error: cannot get local time DST flag");
     return tms->tm_isdst > 0;
 }
 

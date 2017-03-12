@@ -449,6 +449,12 @@ void Cipher::generateKey(const std::string& password, const std::string& salt,
 }
 
 
+const EVP_CIPHER* Cipher::cipher()
+{
+    return _cipher;
+}
+
+
 } // namespace crypto
 } // namespace scy
 

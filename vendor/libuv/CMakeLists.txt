@@ -162,9 +162,11 @@ else() # Non-Windows
       src/unix/fsevents.c
       src/unix/kqueue.c
       src/unix/proctitle.c
+      src/unix/pthread-barrier.c
     )
     list(APPEND libuv_HEADER_FILES
       include/uv-darwin.h
+      include/pthread-barrier.h
     )
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list(APPEND libuv_DEFINITIONS

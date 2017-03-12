@@ -1768,7 +1768,7 @@ public:
     static Timestamp::TimeVal resolution();
 
 private:
-    Stopwatch(const Stopwatch&);
+    Stopwatch(const Stopwatch&) = delete;
     Stopwatch& operator=(const Stopwatch&) = delete;
 
     Timestamp _start;
@@ -1782,7 +1782,7 @@ private:
 //
 
 
-/// Simple millisecond timeout counter which expires after a given delay.
+/// Timeout counter which expires after a given delay.
 class Base_API Timeout
 {
 public:
@@ -1815,7 +1815,7 @@ protected:
 //
 
 
-/// A token that expires after the specified duration.
+/// Token that expires after the specified duration.
 class Base_API TimedToken : public Timeout
 {
 public:
@@ -1824,8 +1824,8 @@ public:
 
     std::string id() const { return _id; }
 
-    bool operator==(const TimedToken& r) const { return id() == r.id(); }
-    bool operator==(const std::string& r) const { return id() == r; }
+    bool operator==(const TimedToken& r) const { return _id == r._id; }
+    bool operator==(const std::string& r) const { return _id == r; }
 
 protected:
     std::string _id;
