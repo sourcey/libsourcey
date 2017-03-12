@@ -167,11 +167,11 @@ stream.attach(socket);
 stream.start();
 ~~~
 
-There are plenty more demos and sample code to play with over on the [examples](/examples.md) page.
+There are plenty more demos and sample code to play with over on the [examples](https://github.com/sourcey/libsourcey/blob/master/doc/examples.md) page.
 
 ## Installation
 
-See the platform independent [installation guides](/installation.md).
+See the platform independent [installation guides](https://github.com/sourcey/libsourcey/blob/master/doc/installation.md).
 
 ## Contributors
 
