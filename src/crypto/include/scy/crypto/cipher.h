@@ -14,6 +14,7 @@
 
 
 #include "scy/crypto/crypto.h"
+#include "scy/uv/uvpp.h" // ssize_t
 #include "scy/random.h"
 
 #include <openssl/evp.h>
@@ -59,8 +60,8 @@ public:
     /// to encrypt it.
     /// Returns the encrypted data chunk. When done, the output 
     /// of final() should be additionally added to the result.
-    int update(const unsigned char* input, int inputLength,
-               unsigned char* output, int outputLength);
+    ssize_t update(const unsigned char* input, size_t inputLength,
+                   unsigned char* output, size_t outputLength);
 
     /// Alias for update() which accepts a range of buffer types.
     template <typename I, typename O> int update(const I& input, O& output)
@@ -74,7 +75,7 @@ public:
     /// Further calls to update() or final() will return garbage.
     ///
     /// See EVP_CipherFinal_ex for further information.
-    int final(unsigned char* output, int length);
+    ssize_t final(unsigned char* output, size_t length);
 
     /// Alias for final() which accepts a range of buffer types.
     template <typename O> int final(O& output)
@@ -95,9 +96,9 @@ public:
 
     /// Encrypts a buffer and encode it using the given encoding.
     /// This method performs the encryption, and calls final() internally.
-    int encrypt(const unsigned char* inbuf, size_t inlen,
-                unsigned char* outbuf, size_t outlen,
-                Encoding encoding = Binary);
+    ssize_t encrypt(const unsigned char* inbuf, size_t inlen,
+                    unsigned char* outbuf, size_t outlen,
+                    Encoding encoding = Binary);
 
     /// Alias for encrypt() which accepts a range of buffer types.
     template <typename I, typename O>
@@ -182,8 +183,7 @@ protected:
 
     /// Generates and sets the key and IV from a password and optional salt
     /// string.
-    void generateKey(const std::string& passphrase, const std::string& salt,
-                     int iterationCount);
+    void generateKey(const std::string& passphrase, const std::string& salt, int iterationCount);
 
     /// Generates and sets key from random data.
     void setRandomKey();

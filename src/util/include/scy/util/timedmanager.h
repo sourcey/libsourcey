@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/collection.h"
-#include "scy/timer.h"
+#include "scy/util/timeout.h"
 
 
 namespace scy {

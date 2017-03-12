@@ -63,7 +63,7 @@ srv.Connection += [](http::ServerConnection::Ptr conn) {
 srv.start();
 ~~~
 
-Pretty neat right? Its bloody fast too, especially on Linux kernel 3.9 or newer where its optimized to use of kernel level multicore socket load balancing. Don't just take our work for it though, check out some benchmarks using `wrk`:
+Pretty neat right? Its bloody fast too, especially on Linux kernel 3.9 or newer where its optimized to use of kernel level multicore socket load balancing. Don't take our word for it though, here are some benchmarks using `wrk`:
 
 **LibSourcey `httpechoserver`**
 

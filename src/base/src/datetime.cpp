@@ -1681,8 +1681,7 @@ Timespan::Timespan(long seconds, long microseconds)
 }
 
 
-Timespan::Timespan(int days, int hours, int minutes, int seconds,
-                   int microseconds)
+Timespan::Timespan(int days, int hours, int minutes, int seconds, int microseconds)
     : _span(TimeDiff(microseconds) + 
             TimeDiff(seconds) * SECONDS +
             TimeDiff(minutes) * MINUTES + 
@@ -1793,84 +1792,6 @@ Timespan& Timespan::operator-=(TimeDiff microseconds)
 
 
 //
-// Timeout
-//
-
-
-Timeout::Timeout(long delay, bool autoStart)
-    : _startAt(0)
-    , _delay(delay)
-{
-    if (autoStart)
-        start();
-}
-
-
-Timeout::Timeout(const Timeout& src)
-    : _startAt(src._startAt)
-    , _delay(src._delay)
-{
-}
-
-
-Timeout& Timeout::operator=(const Timeout& src)
-{
-    _startAt = src._startAt;
-    _delay = src._delay;
-    return *this;
-}
-
-
-Timeout::~Timeout()
-{
-}
-
-
-bool Timeout::running() const
-{
-    return _startAt != 0;
-}
-
-
-void Timeout::start()
-{
-    //_startAt = time::ticks();
-    _startAt = clock();
-}
-
-
-void Timeout::stop()
-{
-    _startAt = 0;
-}
-
-
-void Timeout::reset()
-{
-    //_startAt = time::ticks();
-    _startAt = clock();
-}
-
-
-long Timeout::remaining() const
-{
-    // time_t current = time::ticks();
-    clock_t current = clock();
-    long remaining = static_cast<long>(_delay - (current - _startAt));
-    return remaining > 0 ? remaining : 0;
-}
-
-
-bool Timeout::expired() const
-{
-    if (_delay == 0) // _startAt == 0 ||
-        return false;
-
-    return remaining() == 0;
-}
-
-
-//
 // Stopwatch
 //
 
@@ -1947,25 +1868,6 @@ void Stopwatch::restart()
     _elapsed = 0;
     _start.update();
     _running = true;
-}
-
-
-//
-// Timed Token
-//
-
-
-TimedToken::TimedToken(long duration)
-    : Timeout(duration)
-    , _id(util::randomString(32))
-{
-}
-
-
-TimedToken::TimedToken(const std::string& id, long duration)
-    : Timeout(duration)
-    , _id(id)
-{
 }
 
 

@@ -126,21 +126,21 @@ void Cipher::initialize(bool encrypt)
 }
 
 
-int Cipher::update(const unsigned char* input, int inputLength,
-                   unsigned char* output, int outputLength)
+ssize_t Cipher::update(const unsigned char* input, size_t inputLength,
+                       unsigned char* output, size_t outputLength)
 {
     assert(outputLength >= (inputLength + blockSize() - 1));
-    int len;
-    internal::api(EVP_CipherUpdate(_ctx, output, &len, input, inputLength));
+    ssize_t len;
+    internal::api(EVP_CipherUpdate(_ctx, output, (int*)&len, input, (int)inputLength));
     return len;
 }
 
 
-int Cipher::final(unsigned char* output, int length)
+ssize_t Cipher::final(unsigned char* output, size_t length)
 {
     assert(length >= blockSize());
-    int len;
-    internal::api(EVP_CipherFinal_ex(_ctx, output, &len));
+    ssize_t len;
+    internal::api(EVP_CipherFinal_ex(_ctx, output, (int*)&len));
     return len;
 }
 
@@ -173,9 +173,9 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 }
 
 
-int Cipher::encrypt(const unsigned char* inbuf, size_t inlen,
-                    unsigned char* outbuf, size_t outlen,
-                    Encoding encoding)
+ssize_t Cipher::encrypt(const unsigned char* inbuf, size_t inlen,
+                        unsigned char* outbuf, size_t outlen,
+                        Encoding encoding)
 {
     initEncryptor();
 
@@ -245,16 +245,15 @@ std::string Cipher::decryptString(const std::string& str, Encoding encoding)
 }
 
 
-void Cipher::encryptStream(std::istream& source, std::ostream& sink,
-                           Encoding encoding)
+void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding encoding)
 {
     initEncryptor();
 
     const int N = blockSize() * 128;
     int cryptsize = N * 2;
-    int nread = N;
-    int reslen = 0;
-    int enclen = 0;
+    ssize_t nread = N;
+    ssize_t reslen = 0;
+    ssize_t enclen = 0;
 
     std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
     std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
@@ -311,10 +310,10 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding en
     initDecryptor();
 
     const int N = blockSize() * 128;
-    int nread = N;
-    int reslen = 0;
+    ssize_t nread = N;
+    ssize_t reslen = 0;
     int cryptsize = N * 2; // must be bigger than N, see update()
-    int declen = 0;
+    ssize_t declen = 0;
 
     std::unique_ptr<basic::Decoder> decoder(createDecoder(encoding));
     std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
