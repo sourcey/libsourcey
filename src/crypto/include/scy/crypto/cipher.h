@@ -14,6 +14,7 @@
 
 
 #include "scy/crypto/crypto.h"
+#include "scy/uv/uvpp.h" // ssize_t
 #include "scy/random.h"
 
 #include <openssl/evp.h>
@@ -60,7 +61,7 @@ public:
     /// Returns the encrypted data chunk. When done, the output
     /// of final() should be additionally added to the result.
     ssize_t update(const unsigned char* input, size_t inputLength,
-               unsigned char* output, size_t outputLength);
+                   unsigned char* output, size_t outputLength);
 
     /// Alias for update() which accepts a range of buffer types.
     template <typename I, typename O>
@@ -98,8 +99,8 @@ public:
     /// Encrypts a buffer and encode it using the given encoding.
     /// This method performs the encryption, and calls final() internally.
     ssize_t encrypt(const unsigned char* inbuf, size_t inlen,
-                unsigned char* outbuf, size_t outlen,
-                Encoding encoding = Binary);
+                    unsigned char* outbuf, size_t outlen,
+                    Encoding encoding = Binary);
 
     /// Alias for encrypt() which accepts a range of buffer types.
     template <typename I, typename O>
@@ -111,20 +112,16 @@ public:
     }
 
     /// Encrypts a string and encodes it using the given encoding.
-    virtual std::string encryptString(const std::string& str,
-                                      Encoding encoding = Binary);
+    virtual std::string encryptString(const std::string& str, Encoding encoding = Binary);
 
     /// Decrypts a string that is encoded with the given encoding.
-    virtual std::string decryptString(const std::string& str,
-                                      Encoding encoding = Binary);
+    virtual std::string decryptString(const std::string& str, Encoding encoding = Binary);
 
     /// Encrypts an input stream and encodes it using the given encoding.
-    virtual void encryptStream(std::istream& source, std::ostream& sink,
-                               Encoding encoding = Binary);
+    virtual void encryptStream(std::istream& source, std::ostream& sink, Encoding encoding = Binary);
 
     /// Decrypts an input stream that is encoded with the given encoding.
-    virtual void decryptStream(std::istream& source, std::ostream& sink,
-                               Encoding encoding = Binary);
+    virtual void decryptStream(std::istream& source, std::ostream& sink, Encoding encoding = Binary);
 
     /// Sets the key for the Cipher.
     template <typename T>
@@ -178,14 +175,12 @@ public:
     const EVP_CIPHER* cipher();
 
 protected:
-    Cipher();
-    Cipher(const Cipher&);
-    Cipher& operator=(const Cipher&);
+    Cipher() {};
+    Cipher(const Cipher&) = delete;
+    Cipher& operator=(const Cipher&) = delete;
 
-    /// Generates and sets the key and IV from a password and optional salt
-    /// string.
-    void generateKey(const std::string& passphrase, const std::string& salt,
-                     int iterationCount);
+    /// Generates and sets the key and IV from a password and optional salt string.
+    void generateKey(const std::string& passphrase, const std::string& salt, int iterationCount);
 
     /// Generates and sets key from random data.
     void setRandomKey();

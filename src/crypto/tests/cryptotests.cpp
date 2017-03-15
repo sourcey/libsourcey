@@ -77,7 +77,7 @@ void testCipher(const std::string algorithm, int iterations)
         // We can use a string as buffer as long
         // as the implementation is contiguous (as per c++11)
         std::string out(100, '\0');
-        int len = ciph.encrypt(in, out, crypto::Cipher::BinHex);
+        ssize_t len = ciph.encrypt(in, out, crypto::Cipher::BinHex);
         out.resize(len);
 
         std::string result = ciph.decryptString(out, crypto::Cipher::BinHex);

@@ -131,7 +131,7 @@ ssize_t Cipher::update(const unsigned char* input, size_t inputLength,
 {
     assert(outputLength >= (inputLength + blockSize() - 1));
     int len;
-    internal::api(EVP_CipherUpdate(_ctx, output, &len, input, inputLength));
+    internal::api(EVP_CipherUpdate(_ctx, output, &len, input, (int)inputLength));
     return (ssize_t)len;
 }
 
