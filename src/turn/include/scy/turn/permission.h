@@ -13,12 +13,10 @@
 #define SCY_TURN_Permission_H
 
 
-#include "scy/net/address.h"
-#include "scy/datetime.h"
 #include "scy/turn/fivetuple.h"
+#include "scy/net/address.h"
+#include "scy/util/timeout.h"
 
-#include <list>
-#include <map>
 #include <string>
 #include <vector>
 

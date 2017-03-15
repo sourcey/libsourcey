@@ -43,12 +43,7 @@ public:
     {
         assert(dynamic_cast<PacketT*>(item));
         BaseQueue::push(item);
-        //BaseQueue::sort<MediaPacketTimeCompare>();
-
-        //std::sort(_queue.begin(), _queue.end(), 
-        //    [](const PacketT* a, const PacketT* b)
-        //        { return a->time < b->time; }
-        //);
+        BaseQueue::sort<MediaPacketTimeCompare>();
     }
 
     // Return the current duration from stream start in microseconds
@@ -64,19 +59,18 @@ protected:
             return nullptr;
 
         auto next = BaseQueue::front();
-        InfoS(this) << "@@@@@@@@@@@ next " << next->time << " < " << realTime() << std::endl;
         if (next->time > realTime())
             return nullptr;
         BaseQueue::pop();
 
-        InfoS(this) << "################################## popNext: " << BaseQueue::size() << ": " << realTime()
-            << " > " << next->time << std::endl;
+        TraceS(this) << "Pop next: " << BaseQueue::size() << ": " 
+            << realTime() << " > " << next->time << std::endl;
         return next;
     }
 
     virtual void onStreamStateChange(const PacketStreamState& state)
     {
-        TraceS(this) << "Stream state: " << state << std::endl;
+        TraceS(this) << "Stream state changed: " << state << std::endl;
 
         if (state.equals(PacketStreamState::Active)) {
             _startTime = time::hrtime();

@@ -60,29 +60,8 @@ protected:
 };
 
 
-// SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
-//     SyncQueue<IPacket>(loop, maxSize),
-//     PacketProcessor(this->emitter)
-// {
-//     TraceS(this) << "Create" << std::endl;
-// }
-//
-//
-// SyncPacketQueue::SyncPacketQueue(int maxSize) :
-//     SyncQueue<IPacket>(uv::defaultLoop(), maxSize),
-//     PacketProcessor(this->emitter)
-// {
-//     TraceS(this) << "Create" << std::endl;
-// }
-//
-//
-// SyncPacketQueue::~SyncPacketQueue()
-// {
-//     TraceS(this) << "Destroy" << std::endl;
-// }
-
-
-template <class T> inline void  SyncPacketQueue<T>::process(IPacket& packet)
+template <class T> 
+inline void  SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
@@ -94,10 +73,8 @@ template <class T> inline void  SyncPacketQueue<T>::process(IPacket& packet)
 }
 
 
-/// Emit should never be called after closure.
-/// Any late packets should have been dealt with
-/// and dropped by the run() function.
-template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
+template <class T> 
+inline void SyncPacketQueue<T>::dispatch(T& packet)
 {
     if (Queue::cancelled()) {
         WarnS(this) << "Dispatch late packet" << std::endl;
@@ -105,11 +82,15 @@ template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
         return;
     }
 
+    // Note: Emit should never be called after closure.
+    // Any late packets should have been dealt with
+    // and dropped by the run() function.
     Processor::emit(packet);
 }
 
 
-template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
+template <class T> 
+inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
 {
     return dynamic_cast<T*>(packet) != 0;
 }
@@ -182,7 +163,7 @@ inline void AsyncPacketQueue<T>::close()
 template <class T> inline void 
 AsyncPacketQueue<T>::dispatch(T& packet)
 {
-    if (cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Dispatch late packet" << std::endl;
         assert(0);
         return;
@@ -195,7 +176,7 @@ AsyncPacketQueue<T>::dispatch(T& packet)
 template <class T> 
 inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
-    if (cancelled()) {
+    if (Queue::cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
         assert(0);
         return;

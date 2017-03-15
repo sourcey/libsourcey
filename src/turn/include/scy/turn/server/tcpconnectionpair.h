@@ -18,7 +18,7 @@
 #include "scy/net/tcpsocket.h"
 #include "scy/net/socketemitter.h"
 #include "scy/collection.h"
-#include "scy/datetime.h"
+#include "scy/util/timeout.h"
 
 
 namespace scy {
