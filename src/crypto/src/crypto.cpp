@@ -107,7 +107,7 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock,
 }
 
 
-void dynlockDestroy(struct CRYPTO_dynlock_value* lock, 
+void dynlockDestroy(struct CRYPTO_dynlock_value* lock,
                     const char* /* file */, int /* line */)
 {
     delete lock;
@@ -125,8 +125,9 @@ void initialize()
         SSL_library_init();
         SSL_load_error_strings();
 
-#ifndef OPENSSL_IS_BORINGSSL
         OpenSSL_add_all_algorithms();
+#ifdef OPENSSL_IS_BORINGSSL
+        CRYPTO_library_init();
 #endif
 
         char seed[SEEDSIZE];
@@ -136,10 +137,9 @@ void initialize()
         int nMutexes = CRYPTO_num_locks();
         _mutexes = new std::mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
-        // #ifndef WIN32 // SF# 1828231: random unhandled exceptions when
-        // linking with ssl
-        //         CRYPTO_set_id_callback(&internal::id);
-        // #endif
+// #ifndef WIN32 // SF# 1828231: random unhandled exceptions when linking with ssl
+//         CRYPTO_set_id_callback(&internal::id);
+// #endif
         CRYPTO_set_dynlock_create_callback(&internal::dynlockCreate);
         CRYPTO_set_dynlock_lock_callback(&internal::dynlock);
         CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);

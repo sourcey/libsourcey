@@ -60,7 +60,7 @@ protected:
 };
 
 
-template <class T> 
+template <class T>
 inline void  SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
@@ -73,7 +73,7 @@ inline void  SyncPacketQueue<T>::process(IPacket& packet)
 }
 
 
-template <class T> 
+template <class T>
 inline void SyncPacketQueue<T>::dispatch(T& packet)
 {
     if (Queue::cancelled()) {
@@ -89,7 +89,7 @@ inline void SyncPacketQueue<T>::dispatch(T& packet)
 }
 
 
-template <class T> 
+template <class T>
 inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
 {
     return dynamic_cast<T*>(packet) != 0;
@@ -149,7 +149,7 @@ protected:
 };
 
 
-template <class T> 
+template <class T>
 inline void AsyncPacketQueue<T>::close()
 {
     // Flush queued items, some protocols can't afford dropped packets
@@ -160,7 +160,7 @@ inline void AsyncPacketQueue<T>::close()
 }
 
 
-template <class T> inline void 
+template <class T> inline void
 AsyncPacketQueue<T>::dispatch(T& packet)
 {
     if (Queue::cancelled()) {
@@ -173,7 +173,7 @@ AsyncPacketQueue<T>::dispatch(T& packet)
 }
 
 
-template <class T> 
+template <class T>
 inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
@@ -182,11 +182,11 @@ inline void AsyncPacketQueue<T>::process(IPacket& packet)
         return;
     }
 
-    push(reinterpret_cast<T*>(packet.clone()));
+    this->push(reinterpret_cast<T*>(packet.clone()));
 }
 
 
-template <class T> 
+template <class T>
 inline bool AsyncPacketQueue<T>::accepts(IPacket* packet)
 {
     return dynamic_cast<T*>(packet) != 0;

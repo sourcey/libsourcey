@@ -28,7 +28,7 @@ namespace scy {
 
 
 /// Timeout counter which expires after a given delay.
-class Base_API Timeout
+class Timeout
 {
 public:
     Timeout(long delay = 0, bool autoStart = false);

@@ -14,7 +14,6 @@
 
 
 #include "scy/crypto/crypto.h"
-#include "scy/uv/uvpp.h" // ssize_t
 #include "scy/random.h"
 
 #include <openssl/evp.h>
@@ -58,13 +57,14 @@ public:
     /// Encrypts data in a streaming fashion.
     /// Hand consecutive blocks of data to the update method in order
     /// to encrypt it.
-    /// Returns the encrypted data chunk. When done, the output 
+    /// Returns the encrypted data chunk. When done, the output
     /// of final() should be additionally added to the result.
     ssize_t update(const unsigned char* input, size_t inputLength,
-                   unsigned char* output, size_t outputLength);
+               unsigned char* output, size_t outputLength);
 
     /// Alias for update() which accepts a range of buffer types.
-    template <typename I, typename O> int update(const I& input, O& output)
+    template <typename I, typename O>
+    ssize_t update(const I& input, O& output)
     {
         internal::Raw<const unsigned char*> in(input);
         internal::Raw<unsigned char*> out(output);
@@ -78,7 +78,8 @@ public:
     ssize_t final(unsigned char* output, size_t length);
 
     /// Alias for final() which accepts a range of buffer types.
-    template <typename O> int final(O& output)
+    template <typename O>
+    ssize_t final(O& output)
     {
         internal::Raw<unsigned char*> out(output);
         return final(out.ptr, out.len);
@@ -97,12 +98,12 @@ public:
     /// Encrypts a buffer and encode it using the given encoding.
     /// This method performs the encryption, and calls final() internally.
     ssize_t encrypt(const unsigned char* inbuf, size_t inlen,
-                    unsigned char* outbuf, size_t outlen,
-                    Encoding encoding = Binary);
+                unsigned char* outbuf, size_t outlen,
+                Encoding encoding = Binary);
 
     /// Alias for encrypt() which accepts a range of buffer types.
     template <typename I, typename O>
-    int encrypt(const I& input, O& output, Encoding encoding = Binary)
+    ssize_t encrypt(const I& input, O& output, Encoding encoding = Binary)
     {
         internal::Raw<const unsigned char*> in(input);
         internal::Raw<unsigned char*> out(output);
@@ -126,7 +127,7 @@ public:
                                Encoding encoding = Binary);
 
     /// Sets the key for the Cipher.
-    template <typename T> 
+    template <typename T>
     void setKey(const T& key)
     {
         assert(int(key.size()) == keySize());
@@ -136,7 +137,7 @@ public:
     }
 
     /// Sets the initialization vector (IV) for the Cipher.
-    template <typename T> 
+    template <typename T>
     void setIV(const T& iv)
     {
         assert(int(iv.size()) == ivSize());
@@ -146,7 +147,7 @@ public:
     }
 
     /// Enables or disables padding. By default encryption operations
-    /// are padded using standard block padding and the padding is checked 
+    /// are padded using standard block padding and the padding is checked
     /// and removed when decrypting.
     /// If the pad parameter is zero then no padding is performed, the total
     /// amount of data encrypted or decrypted must then be a multiple of the
@@ -177,13 +178,14 @@ public:
     const EVP_CIPHER* cipher();
 
 protected:
-    Cipher() {};
-    Cipher(const Cipher&) = delete;
-    Cipher& operator=(const Cipher&) = delete;
+    Cipher();
+    Cipher(const Cipher&);
+    Cipher& operator=(const Cipher&);
 
     /// Generates and sets the key and IV from a password and optional salt
     /// string.
-    void generateKey(const std::string& passphrase, const std::string& salt, int iterationCount);
+    void generateKey(const std::string& passphrase, const std::string& salt,
+                     int iterationCount);
 
     /// Generates and sets key from random data.
     void setRandomKey();

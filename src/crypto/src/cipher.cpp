@@ -130,18 +130,18 @@ ssize_t Cipher::update(const unsigned char* input, size_t inputLength,
                        unsigned char* output, size_t outputLength)
 {
     assert(outputLength >= (inputLength + blockSize() - 1));
-    ssize_t len;
-    internal::api(EVP_CipherUpdate(_ctx, output, (int*)&len, input, (int)inputLength));
-    return len;
+    int len;
+    internal::api(EVP_CipherUpdate(_ctx, output, &len, input, inputLength));
+    return (ssize_t)len;
 }
 
 
 ssize_t Cipher::final(unsigned char* output, size_t length)
 {
-    assert(length >= blockSize());
-    ssize_t len;
-    internal::api(EVP_CipherFinal_ex(_ctx, output, (int*)&len));
-    return len;
+    assert(length >= (size_t)blockSize());
+    int len;
+    internal::api(EVP_CipherFinal_ex(_ctx, output, &len));
+    return (ssize_t)len;
 }
 
 
@@ -250,7 +250,7 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
     initEncryptor();
 
     const int N = blockSize() * 128;
-    int cryptsize = N * 2;
+    size_t cryptsize = N * 2;
     ssize_t nread = N;
     ssize_t reslen = 0;
     ssize_t enclen = 0;
@@ -310,9 +310,9 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding en
     initDecryptor();
 
     const int N = blockSize() * 128;
+    size_t cryptsize = N * 2; // must be bigger than N, see update()
     ssize_t nread = N;
     ssize_t reslen = 0;
-    int cryptsize = N * 2; // must be bigger than N, see update()
     ssize_t declen = 0;
 
     std::unique_ptr<basic::Decoder> decoder(createDecoder(encoding));
@@ -445,12 +445,6 @@ void Cipher::generateKey(const std::string& password, const std::string& salt,
         _iv.clear();
     else
         _iv.assign(ivBytes, ivBytes + ivSize());
-}
-
-
-const EVP_CIPHER* Cipher::cipher()
-{
-    return _cipher;
 }
 
 

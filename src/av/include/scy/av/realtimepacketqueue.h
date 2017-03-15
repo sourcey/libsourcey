@@ -21,9 +21,16 @@
 namespace scy {
 namespace av {
 
+      struct MediaPacketTimeCompare
+      {
+          bool operator()(const MediaPacket* a, const MediaPacket* b) {
+              return a->time < b->time;
+          }
+      };
+
 
 /// This class emits media packets based on their realtime pts value.
-template <class PacketT> 
+template <class PacketT>
 class RealtimePacketQueue : public AsyncPacketQueue<PacketT>
 {
 public:
@@ -34,22 +41,21 @@ public:
     {
     }
 
-    virtual ~RealtimePacketQueue() 
+    virtual ~RealtimePacketQueue()
     {
     }
 
     // Add an item to the queue
     virtual void push(PacketT* item)
     {
-        assert(dynamic_cast<PacketT*>(item));
         BaseQueue::push(item);
-        BaseQueue::sort<MediaPacketTimeCompare>();
+        BaseQueue::template sort<MediaPacketTimeCompare>();
     }
 
     // Return the current duration from stream start in microseconds
-    int64_t realTime() 
-    { 
-        return (time::hrtime() - _startTime) / 1000; 
+    int64_t realTime()
+    {
+        return (time::hrtime() - _startTime) / 1000;
     }
 
 protected:
@@ -63,7 +69,7 @@ protected:
             return nullptr;
         BaseQueue::pop();
 
-        TraceS(this) << "Pop next: " << BaseQueue::size() << ": " 
+        TraceS(this) << "Pop next: " << BaseQueue::size() << ": "
             << realTime() << " > " << next->time << std::endl;
         return next;
     }
@@ -78,13 +84,6 @@ protected:
 
         BaseQueue::onStreamStateChange(state);
     }
-
-    struct MediaPacketTimeCompare
-    {
-        bool operator()(const MediaPacket* a, const MediaPacket* b) {
-            return a->time < b->time;
-        }
-    };
 
     int64_t _startTime;
 };

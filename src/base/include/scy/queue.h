@@ -70,7 +70,7 @@ public:
         _queue.pop_front();
     }
 
-    template <typename Compare> 
+    template <typename Compare>
     void sort()
     {
         std::lock_guard<std::mutex> guard(_mutex);
@@ -114,9 +114,9 @@ public:
     {
     }
 
-    virtual ~RunnableQueue() 
-    { 
-        clear(); 
+    virtual ~RunnableQueue()
+    {
+        clear();
     }
 
     /// Push an item onto the queue.
@@ -209,7 +209,7 @@ protected:
     RunnableQueue& operator=(const RunnableQueue&) = delete;
 
     /// Pops the next waiting item.
-    virtual T* popNext() 
+    virtual T* popNext()
     {
         T* next;
         {
@@ -224,7 +224,7 @@ protected:
     }
 
     /// Pops and dispatches the next waiting item.
-    virtual bool dispatchNext() 
+    virtual bool dispatchNext()
     {
         T* next = popNext();
         if (next) {
@@ -323,7 +323,7 @@ public:
     }
 
 protected:
-    virtual ~AsyncQueue() 
+    virtual ~AsyncQueue()
     {
     }
 

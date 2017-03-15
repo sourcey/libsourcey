@@ -43,8 +43,7 @@ struct Encoder : public basic::Encoder
     {
     }
 
-    virtual ssize_t encode(const char* inbuf, size_t nread,
-                               char* outbuf)
+    virtual ssize_t encode(const char* inbuf, size_t nread, char* outbuf)
     {
         // static const int eof = std::char_traits<char>::eof();
         static const char digits[] = "0123456789abcdef0123456789ABCDEF";
@@ -53,8 +52,7 @@ struct Encoder : public basic::Encoder
         size_t nwrite = 0;
         for (unsigned i = 0; i < nread; i++) {
             c = inbuf[i];
-            std::memcpy(outbuf + nwrite++,
-                        &digits[_uppercase + ((c >> 4) & 0xF)], 1);
+            std::memcpy(outbuf + nwrite++, &digits[_uppercase + ((c >> 4) & 0xF)], 1);
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + (c & 0xF)], 1);
             if (_lineLength > 0 &&
                 (_linePos += 2) >= _lineLength) { //++_linePos//++_linePos;
@@ -79,7 +77,8 @@ struct Encoder : public basic::Encoder
 
 
 /// Converts the STL container to Hex.
-template <typename T> inline std::string encode(const T& bytes)
+template <typename T>
+inline std::string encode(const T& bytes)
 {
     static const char digits[] = "0123456789abcdef";
     std::string res;

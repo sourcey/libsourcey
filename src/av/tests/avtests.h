@@ -40,14 +40,13 @@ namespace scy {
 static const int kNumberFramesWanted = 200;
 static const int kInNumSamples = 1024;
 
-#define MP4_H264_AAC_TRANSCODER_FORMAT                                         \
-    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300),     \
-               av::AudioCodec("AAC", "libfdk_aac"));
+#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4", "mp4",                \
+           av::VideoCodec("H.264", "libx264", 400, 300),                       \
+           av::AudioCodec("AAC", "libfdk_aac"));
 
-#define MP4_H264_AAC_REALTIME_FORMAT                                           \
-    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
-                                            48000, 128000, "yuv420p"),         \
-               av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+#define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4",                  \
+           av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
+           av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 // =============================================================================
@@ -541,6 +540,43 @@ class AudioCaptureResamplerTest : public Test
 };
 
 
+// class RealtimeMediaQueueEncoderTest : public Test
+// {
+//     PacketStream stream;
+//     int numFramesRemaining = 1000; // kNumberFramesWanted;
+//
+//     void run()
+//     {
+//         auto capture = std::make_shared<av::MediaCapture>();
+//         capture->openFile("test.mp4");
+//         stream.attachSource(capture, true);
+//         stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>());
+//         stream.start();
+//         stream.emitter += packetSlot(this, &RealtimeMediaQueueEncoderTest::onPacketPlayout);
+//
+//         while (numFramesRemaining > 0) {
+//             DebugL << "Waiting for completion: " << numFramesRemaining << endl;
+//             scy::sleep(10);
+//         }
+//
+//         // TODO: ensure stream duration
+//         expect(numFramesRemaining == 0);
+//     }
+//
+//     void onPacketPlayout(av::MediaPacket& packet)
+//     {
+//         if (numFramesRemaining) {
+//             numFramesRemaining--;
+//             DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+//             // cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+//         }
+//         else {
+//             stream.stop();
+//         }
+//     }
+// };
+
+
 #endif // HAVE_FFMPEG
 
 
@@ -630,43 +666,6 @@ class RealtimeMediaQueueTest : public Test
             numFramesRemaining--;
             cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
         } else {
-            stream.stop();
-        }
-    }
-};
-
-
-class RealtimeMediaQueueEncoderTest : public Test
-{
-    PacketStream stream;
-    int numFramesRemaining = 1000; // kNumberFramesWanted;
-
-    void run()
-    {
-        auto capture = std::make_shared<av::MediaCapture>();
-        capture->openFile("test.mp4");
-        stream.attachSource(capture, true);
-        stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>());
-        stream.start();
-        stream.emitter += packetSlot(this, &RealtimeMediaQueueEncoderTest::onPacketPlayout);
-
-        while (numFramesRemaining > 0) {
-            DebugL << "Waiting for completion: " << numFramesRemaining << endl;
-            scy::sleep(10);
-        }
-
-        // TODO: ensure stream duration
-        expect(numFramesRemaining == 0);
-    }
-
-    void onPacketPlayout(av::MediaPacket& packet)
-    {
-        if (numFramesRemaining) {
-            numFramesRemaining--;
-            DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
-            // cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
-        }
-        else {
             stream.stop();
         }
     }
