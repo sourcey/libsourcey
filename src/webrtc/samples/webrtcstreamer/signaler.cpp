@@ -29,16 +29,35 @@ namespace scy {
 Signaler::Signaler(const smpl::Client::Options& options)
     : _client(options)
 {
+    // Setup the signalling client
     _client.StateChange += slot(this, &Signaler::onClientStateChange);
     _client.roster().ItemAdded += slot(this, &Signaler::onPeerConnected);
     _client.roster().ItemRemoved += slot(this, &Signaler::onPeerDiconnected);
     _client += packetSlot(this, &Signaler::onPeerMessage);
     _client.connect();
+
+    // Setup a PeerConnectionFactory with our custom ADM
+    _networkThread = rtc::Thread::CreateWithSocketServer();
+    _workerThread = rtc::Thread::Create();
+    if (!_networkThread->Start() || !_workerThread->Start())
+        throw std::runtime_error("Failed to start threads");
+
+    _factory = webrtc::CreatePeerConnectionFactory(
+        _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
+        _capturer.getAudioModule(), nullptr, nullptr);
 }
 
 
 Signaler::~Signaler()
 {
+}
+
+
+void Signaler::startStreaming(const std::string& file, bool loop)
+{
+    // Open the video capture
+    _capturer.openFile(file, loop);
+    _capturer.start();
 }
 
 
@@ -53,15 +72,6 @@ void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
     m[type] = desc;
 
     postMessage(m);
-
-    // assert(type == "offer" || type == "answer");
-    // smpl::Message m;
-    // json::value desc;
-    // desc[kSessionDescriptionTypeName] = type;
-    // desc[kSessionDescriptionSdpName] = sdp;
-    // m[type] = desc;
-    //
-    // postMessage(m);
 }
 
 
@@ -91,15 +101,18 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     }
 
     // Create the Peer Connection
-    auto conn = new StreamingPeerConnection(this, peer.id(), "", SOURCE_FILE);
-
-    // auto conn = new PeerConnection(this, peer.id(), PeerConnection::Offer);
-    // conn->constraints().SetMandatoryReceiveAudio(false);
-    // conn->constraints().SetMandatoryReceiveVideo(false);
-    // conn->constraints().SetAllowDtlsSctpDataChannels();
+    auto conn = new PeerConnection(this, peer.id(), "", PeerConnection::Offer);
+    conn->constraints().SetMandatoryReceiveAudio(false);
+    conn->constraints().SetMandatoryReceiveVideo(false);
+    conn->constraints().SetAllowDtlsSctpDataChannels();
 
     // Create the media stream
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
+
+    // Attach decoder output to the peer connection
+    _capturer.addMediaTracks(_factory, stream);
+
+    // Send the Offer SDP
     conn->createConnection();
     conn->createOffer();
 
@@ -129,7 +142,9 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
     auto conn = PeerConnectionManager::remove(peer.id());
     if (conn) {
         DebugL << "Deleting peer connection: " << peer.id() << endl;
-        delete conn;
+        // async delete not essential, but to be safe
+        // delete conn;
+        deleteLater<PeerConnection>(conn); 
     }
 }
 

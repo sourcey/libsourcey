@@ -23,14 +23,13 @@
 namespace scy {
 
 
-/// @addtogroup webrtc
 class MultiplexMediaCapturer
 {
 public:
     MultiplexMediaCapturer();
     virtual ~MultiplexMediaCapturer();
 
-    virtual void openFile(const std::string& file);
+    virtual void openFile(const std::string& file, bool loop = true);
 
     virtual void addMediaTracks(webrtc::PeerConnectionFactoryInterface* factory,
                                 webrtc::MediaStreamInterface* stream);
@@ -43,7 +42,7 @@ public:
 
 protected:
     PacketStream _stream;
-    av::MediaCapture::Ptr _capture;
+    av::MediaCapture::Ptr _videoCapture;
     rtc::scoped_refptr<AudioPacketModule> _audioModule;
 };
 

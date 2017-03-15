@@ -27,8 +27,7 @@ namespace av {
 
 
 AudioContext::AudioContext()
-    : // PacketProcessor(this->emitter),
-    stream(nullptr)
+    : stream(nullptr)
     , codec(nullptr)
     , frame(nullptr)
     , resampler(nullptr)
@@ -193,6 +192,19 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
         p++;
     }
     return false;
+}
+
+
+bool formatIsPlanar(AVSampleFormat format)
+{
+    return av_sample_fmt_is_planar((AVSampleFormat)format) == 1;
+}
+
+
+bool formatIsPlanar(const std::string& pixfmt)
+{
+    enum AVSampleFormat format = av_get_sample_fmt(pixfmt.c_str());
+    return av_sample_fmt_is_planar(format) == 1;
 }
 
 

@@ -1,4 +1,4 @@
-#include "scy/base.h"
+ #include "scy/base.h"
 #include "scy/logger.h"
 #include "scy/net/address.h"
 #include "scy/net/sslcontext.h"

@@ -54,7 +54,6 @@ void PacketStream::start()
 {
     TraceS(this) << "Start" << endl;
 
-
     if (stateEquals(PacketStreamState::Active)) {
         TraceS(this) << "Start: Already active" << endl;
         // assert(0);
@@ -389,8 +388,7 @@ void PacketStream::setup()
         for (auto& proc : _processors) {
             thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
             if (lastProc) {
-                lastProc->getEmitter() +=
-                    slot(thisProc, &PacketProcessor::process);
+                lastProc->getEmitter() += slot(thisProc, &PacketProcessor::process);
             }
             lastProc = thisProc;
         }

@@ -33,8 +33,7 @@ struct AV_API AudioBuffer
     AudioBuffer();
     ~AudioBuffer();
 
-    void alloc(const std::string& sampleFmt, int channels,
-               int numSamples = 1024);
+    void alloc(const std::string& sampleFmt, int channels, int numSamples = 1024);
     void reset();
     void close();
 

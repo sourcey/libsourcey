@@ -28,13 +28,17 @@ StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
     : PeerConnection(manager, peerid, token, PeerConnection::Offer)
     , _file(file)
     , _networkThread(rtc::Thread::CreateWithSocketServer())
-    , _workerThread(rtc::Thread::Create())
+    , _workerThread(rtc::Thread::Create().release())
+    //, _networkThread(rtc::Thread::CreateWithSocketServer().release())
+    //, _workerThread(rtc::Thread::Create().release())
 {
     // Setup a PeerConnectionFactory with our custom ADM
     // TODO: Setup threads properly:
     // _networkThread = rtc::Thread::CreateWithSocketServer(); //.release();
     // _workerThread = rtc::Thread::Create(); //.release();
     // _signalingThread = rtc::Thread::Current();
+
+    // FIXME: Dont create new threads for each factory
 
     if (!_networkThread->Start() || !_workerThread->Start()) {
         throw std::runtime_error("Failed to start threads");
@@ -44,14 +48,24 @@ StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
         _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
         _capturer.getAudioModule(), nullptr, nullptr);
 
+    // https://bugs.chromium.org/p/webrtc/issues/detail?id=2388
     _constraints.SetMandatoryReceiveAudio(false);
     _constraints.SetMandatoryReceiveVideo(false);
-    _constraints.SetAllowDtlsSctpDataChannels(); // ENABLE ME
+    _constraints.SetAllowDtlsSctpDataChannels(); // allow cross-browser
 }
 
 
 StreamingPeerConnection::~StreamingPeerConnection()
 {
+    // https://github.com/pristineio/webrtc-mirror/blob/32001ef124f5082651c661965dc5d75d7f06a57b/talk/examples/android/src/org/appspot/apprtc/AppRTCDemoActivity.java#L473
+    //this->
+    //_factory->
+    //this->Release();
+    //_stream->Release();
+    //_factory->Release();
+    //_factory->Release();
+    //_factory->Release();
+    //delete _factory.release();
 }
 
 
@@ -86,15 +100,6 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> StreamingPeerConnection::create
 //         _capture->start();
 //         break;
 //     }
-//     // assert(0);
-//     // DebugL << _peerid << ": kHaveRemotePrAnswer: " <<
-//     webrtc::PeerConnectionInterface::kHaveRemotePrAnswer << endl;
-//     // DebugL << _peerid << ": kHaveLocalPrAnswer: " <<
-//     webrtc::PeerConnectionInterface::kHaveLocalPrAnswer << endl;
-//     // DebugL << _peerid << ": kHaveRemoteOffer: " <<
-//     webrtc::PeerConnectionInterface::kHaveRemoteOffer << endl;
-//     // DebugL << _peerid << ": kHaveLocalOffer: " <<
-//     webrtc::PeerConnectionInterface::kHaveLocalOffer << endl;
 //
 //     PeerConnection::OnSignalingChange(new_state);
 // }
@@ -112,14 +117,12 @@ void StreamingPeerConnection::OnIceConnectionChange(
             break;
         case webrtc::PeerConnectionInterface::kIceConnectionCompleted:
             _capturer.start();
-            // _capture->start();
             break;
         case webrtc::PeerConnectionInterface::kIceConnectionFailed:
         case webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
         case webrtc::PeerConnectionInterface::kIceConnectionClosed:
         case webrtc::PeerConnectionInterface::kIceConnectionMax:
             _capturer.stop();
-            // _capture->stop();
             break;
     }
 

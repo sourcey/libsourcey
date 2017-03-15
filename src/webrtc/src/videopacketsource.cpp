@@ -10,59 +10,84 @@
 
 
 #include "scy/webrtc/videopacketsource.h"
+#include "scy/webrtc/ffmpegvideobuffer.h"
+#include "scy/av/ffmpeg.h"
+#include "scy/av/videocontext.h"
+#include "scy/av/videodecoder.h"
 
 
 using std::endl;
+
+#define SCY_USE_DECODER_PTS 1
 
 
 namespace scy {
 
 
-VideoPacketSource::VideoPacketSource()
-    : running_(false)
-    , initial_timestamp_(rtc::TimeNanos())
-    , next_timestamp_(rtc::kNumNanosecsPerMillisec)
-    //, is_screencast_(is_screencast)
-    , rotation_(webrtc::kVideoRotation_0)
+VideoPacketSource::VideoPacketSource(int width, int height, int fps, uint32_t fourcc)
+    : _captureFormat(cricket::VideoFormat(width, height, cricket::VideoFormat::FpsToInterval(fps), fourcc))
+    , _rotation(webrtc::kVideoRotation_0)
+    , _timestampOffset(0)
+    , _nextTimestamp(0)
+    , _source(nullptr)
 {
     // Default supported formats. Use SetSupportedFormats to over write.
     std::vector<cricket::VideoFormat> formats;
-    formats.push_back(cricket::VideoFormat(1280, 720,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_NV12)); // FOURCC_I420
-    formats.push_back(cricket::VideoFormat(640, 480,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_NV12)); // FOURCC_I420
-    formats.push_back(cricket::VideoFormat(320, 240,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_NV12)); // FOURCC_I420
-    formats.push_back(cricket::VideoFormat(160, 120,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_NV12)); // FOURCC_I420
+    formats.push_back(_captureFormat);
     SetSupportedFormats(formats);
+}
+
+
+VideoPacketSource::VideoPacketSource(const cricket::VideoFormat& captureFormat)
+    : _captureFormat(captureFormat)
+    , _rotation(webrtc::kVideoRotation_0)
+    , _timestampOffset(0)
+    , _nextTimestamp(0)
+    , _source(nullptr)
+{
+    // Default supported formats. Use SetSupportedFormats to over write.
+    std::vector<cricket::VideoFormat> formats;
+    formats.push_back(_captureFormat);
+    SetSupportedFormats(formats);
+
+    // formats.push_back(cricket::VideoFormat(1280, 720, _fpsInterval, _codec));
+    // formats.push_back(cricket::VideoFormat(640, 480, _fpsInterval, _codec));
+    // formats.push_back(cricket::VideoFormat(320, 240, _fpsInterval, _codec));
+    // formats.push_back(cricket::VideoFormat(160, 120, _fpsInterval, _codec));
 }
 
 
 VideoPacketSource::~VideoPacketSource()
 {
+    DebugL << ": Destroying" << endl;
+}
+
+
+void VideoPacketSource::setPacketSource(PacketSignal* source)
+{
+    assert(!_source);
+    // if (_source)
+    //     _source->detach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
+    _source = source;
 }
 
 
 cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& format)
 {
     // try {
-        RTC_CHECK(format.fourcc == cricket::FOURCC_NV12);
+        DebugL << "Start" << endl;
+
+        // NOTE: The requested format must match the input format until
+        // we implememnt pixel format conversion and resizing inside 
+        // this class.
+        RTC_CHECK(_captureFormat == format);
         if (capture_state() == cricket::CS_RUNNING) {
             WarnL << "Start called when it's already started." << endl;
             return capture_state();
         }
-        DebugL << "Start" << endl;
 
-        // // Convert to compatible format on the fly
-        // assert(_capture->video());
-        // _capture->video()->oparams.pixelFmt = "nv12"; // yuv420p, yuyv422
-        // _capture->video()->oparams.width = capture_format.width;
-        // _capture->video()->oparams.height = capture_format.height;
-        //
-        // // Connect and start the packet stream.
-        // _capture->start();
-        // _capture->emitter += packetSlot(this, &VideoPacketSource::onVideoCaptured);
+        if (_source)
+            _source->attach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
 
         SetCaptureFormat(&format);
         return cricket::CS_RUNNING;
@@ -75,13 +100,14 @@ cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& forma
 void VideoPacketSource::Stop()
 {
     // try {
+        DebugL << "Stop" << endl;
         if (capture_state() == cricket::CS_STOPPED) {
             WarnL << "Stop called when it's already stopped." << endl;
             return;
         }
-        DebugL << "Stop" << endl;
 
-        // _capture->emitter.detach(this); // for cleanup()
+        if (_source)
+            _source->detach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
 
         SetCaptureFormat(nullptr);
         SetCaptureState(cricket::CS_STOPPED);
@@ -90,12 +116,11 @@ void VideoPacketSource::Stop()
 }
 
 
-void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
+void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 {
     TraceL << "On video frame: " << packet.width << 'x' << packet.height << endl;
-    //RTC_CHECK(fourcc == cricket::FOURCC_I420);
-    RTC_CHECK(packet.width > 0);
-    RTC_CHECK(packet.height > 0);
+    assert(packet.width > 0);
+    assert(packet.height > 0);
     
     int adapted_width;
     int adapted_height;
@@ -103,38 +128,58 @@ void VideoPacketSource::onVideoCaptured(av::VideoPacket& packet)
     int crop_height;
     int crop_x;
     int crop_y;
+    int64_t timestamp;
 
-    // TODO(nisse): It's a bit silly to have this logic in a fake
-    // class. Child classes of VideoCapturer are expected to call
-    // AdaptFrame, and the test case
-    // VideoCapturerTest.SinkWantsMaxPixelAndMaxPixelCountStepUp
-    // depends on this.
-    if (AdaptFrame(packet.width, packet.height, 0, 0, &adapted_width, &adapted_height,
-        &crop_width, &crop_height, &crop_x, &crop_y, nullptr)) {
-        rtc::scoped_refptr<webrtc::I420Buffer> buffer(
-            webrtc::I420Buffer::Create(adapted_width, adapted_height));
-        buffer->InitializeData();
-
-        OnFrame(webrtc::VideoFrame(
-            buffer, rotation_,
-            packet.time), // next_timestamp_ / rtc::kNumNanosecsPerMicrosec),
-            packet.width, packet.height);
+    if (!AdaptFrame(packet.width, packet.height, 0, 0, 
+        &adapted_width, &adapted_height,
+        &crop_width, &crop_height, 
+        &crop_x, &crop_y, nullptr)) {
+        // assert(0 && "adapt frame failed");
+        WarnL << "Adapt frame failed" << packet.time << std::endl;
+        return;
     }
-    // next_timestamp_ += timestamp_interval;
 
-    /* Old code pre f5297a0
+    rtc::scoped_refptr<webrtc::I420Buffer> buffer = webrtc::I420Buffer::Copy(
+            packet.width, packet.height,
+            packet.ydata.data(), packet.ystride,
+            packet.udata.data(), packet.ustride,
+            packet.vdata.data(), packet.vstride);
+
+#if SCY_USE_DECODER_PTS
+    // Set the packet timestamp.
+    // Since the stream may not be playing from the beginning we
+    // store the first packet timestamp and subtract it from 
+    // subsequent packets.
+    if (!_timestampOffset)
+        _timestampOffset = -packet.time;
+    timestamp = packet.time + _timestampOffset;
+
+    // NOTE: Initial packet time cannot be 0 for some reason.
+    // WebRTC sets the initial packet time to 1000 so we will do the same.
+    timestamp += 1000;
+#else
+     _nextTimestamp += _captureFormat.interval;
+     timestamp = _nextTimestamp / rtc::kNumNanosecsPerMicrosec;
+#endif
+
+    OnFrame(webrtc::VideoFrame(
+        buffer, _rotation,
+        timestamp), // _nextTimestamp / rtc::kNumNanosecsPerMicrosec
+        packet.width, packet.height);
+
+#if 0 // Old code pre f5297a0
     cricket::CapturedFrame frame;
     frame.width = packet.width;
     frame.height = packet.height;
     frame.pixel_width = 1;
     frame.pixel_height = 1;
-    frame.fourcc = cricket::FOURCC_NV12; // FOURCC_I420
+    frame.fourcc = cricket::FOURCC_NV12;
     frame.data = packet.data();
     frame.data_size = packet.size();
     // frame.time_stamp = packet.time; // time in microseconds is ignored
 
     SignalFrameCaptured(this, &frame);
-    */
+#endif
 }
 
 
@@ -150,7 +195,7 @@ bool VideoPacketSource::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
         return false;
 
     // This class does not yet support multiple pixel formats.
-    fourccs->push_back(cricket::FOURCC_NV12); // FOURCC_I420
+    fourccs->push_back(_captureFormat.fourcc);
     return true;
 }
 
@@ -161,11 +206,12 @@ bool VideoPacketSource::GetBestCaptureFormat(const cricket::VideoFormat& desired
         return false;
 
     // Use the supported format as the best format.
-    best_format->width = desired.width;
-    best_format->height = desired.height;
-    best_format->fourcc = cricket::FOURCC_NV12; // FOURCC_I420
-    best_format->interval = desired.interval;
+    // best_format->width = desired.width;
+    // best_format->height = desired.height;
+    // best_format->fourcc = _codec;
+    // best_format->interval = desired.interval;
 
+    *best_format = _captureFormat;
     return true;
 }
 

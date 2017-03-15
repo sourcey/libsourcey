@@ -25,8 +25,7 @@ void initializeFFmpeg(); /// Initialize the FFmpeg library.
 
 void uninitializeFFmpeg(); /// Uninitializes the FFmpeg library.
 
-std::string
-averror(const int error); /// Get an error string for the given error code.
+std::string averror(const int error); /// Get an error string for the given error code.
 
 void printInputFormats(std::ostream& ost, const char* delim = " ");
 void printOutputFormats(std::ostream& ost, const char* delim = " ");

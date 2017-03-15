@@ -74,10 +74,10 @@ struct VideoContext
     AVCodec* codec;       ///< encoder or decoder codec
     AVFrame* frame;       ///< encoder or decoder frame
     VideoConverter* conv; ///< video conversion context
-    /// FPSCounter fps;          ///< encoder or decoder fps rate
-    /// double pts;              ///< pts in decimal seconds
-    std::int64_t time; ///< stream time in nanoseconds
-    std::int64_t pts;  ///< last packet pts value
+    // FPSCounter fps;          ///< encoder or decoder fps rate
+    // double pts;              ///< pts in decimal seconds
+    int64_t time; ///< stream time in nanoseconds
+    int64_t pts;  ///< last packet pts value
     std::string error; ///< error message
 };
 
@@ -88,8 +88,7 @@ struct VideoContext
 
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
-void initVideoCodecFromContext(const AVStream* stream,
-                               const AVCodecContext* ctx, VideoCodec& params);
+void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
 
 
 } // namespace av

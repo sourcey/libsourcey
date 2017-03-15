@@ -54,20 +54,17 @@ public:
     /// Following functions are inherited from `webrtc::AudioDeviceModule`.
     /// Only functions called by `PeerConnection` are implemented, the rest do
     /// nothing and return success. If a function is not expected to be called
-    /// by
-    /// `PeerConnection` an assertion is triggered if it is in fact called.
+    /// by `PeerConnection` an assertion is triggered if it is in fact called.
     int64_t TimeUntilNextProcess() override;
     void Process() override;
 
     int32_t ActiveAudioLayer(AudioLayer* audio_layer) const override;
 
     ErrorCode LastError() const override;
-    int32_t
-    RegisterEventObserver(webrtc::AudioDeviceObserver* event_callback) override;
+    int32_t RegisterEventObserver(webrtc::AudioDeviceObserver* event_callback) override;
 
     /// Note: Calling this method from a callback may result in deadlock.
-    int32_t
-    RegisterAudioCallback(webrtc::AudioTransport* audio_callback) override;
+    int32_t RegisterAudioCallback(webrtc::AudioTransport* audio_callback) override;
 
     int32_t Init() override;
     int32_t Terminate() override;
@@ -180,8 +177,7 @@ public:
     bool BuiltInNSIsAvailable() const override { return false; }
     int32_t EnableBuiltInNS(bool enable) override { return -1; }
 #if defined(WEBRTC_IOS)
-    int
-    GetPlayoutAudioParameters(webrtc::AudioParameters* params) const override
+    int GetPlayoutAudioParameters(webrtc::AudioParameters* params) const override
     {
         return -1;
     }
@@ -189,7 +185,7 @@ public:
     {
         return -1;
     }
-#endif /// WEBRTC_IOS
+#endif // WEBRTC_IOS
 
     /// End of functions inherited from `webrtc::AudioDeviceModule`.
 
@@ -205,8 +201,7 @@ protected:
     explicit AudioPacketModule();
 
     /// The destructor is protected because it is reference counted and should
-    /// not
-    /// be deleted directly.
+    /// not be deleted directly.
     virtual ~AudioPacketModule();
 
 private:
@@ -249,9 +244,8 @@ private:
     bool _recIsInitialized;  ///< True when the instance is ready to push audio.
 
     /// Input to and output from RecordedDataIsAvailable(..) makes it possible
-    /// to
-    /// modify the current mic level. The implementation does not care about the
-    /// mic level so it just feeds back what it receives.
+    /// to modify the current mic level. The implementation does not care about 
+    /// the mic level so it just feeds back what it receives.
     uint32_t _currentMicLevel;
 
     /// `_nextFrameTime` is updated in a non-drifting manner to indicate the

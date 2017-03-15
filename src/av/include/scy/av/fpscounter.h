@@ -47,7 +47,7 @@ private:
 
 public:
     double fps;
-    std::int64_t frames;
+    int64_t frames;
 
     FPSCounter() { reset(); }
 
@@ -82,7 +82,7 @@ struct FPSCounter
 {
     clock_t start;
     clock_t end;
-    std::int64_t frames;
+    int64_t frames;
     double total;
     double fps;
 

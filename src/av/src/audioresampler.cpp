@@ -50,8 +50,8 @@ void AudioResampler::open()
     if (ctx)
         throw std::runtime_error("Resample context already initialized");
 
-    std::int64_t inChLayout = av_get_default_channel_layout(iparams.channels);
-    std::int64_t outChLayout = av_get_default_channel_layout(oparams.channels);
+    int64_t inChLayout = av_get_default_channel_layout(iparams.channels);
+    int64_t outChLayout = av_get_default_channel_layout(oparams.channels);
 
     char inChBuf[128], outChBuf[128];
     av_get_channel_layout_string(inChBuf, sizeof(inChBuf), -1, inChLayout);
@@ -138,7 +138,7 @@ void AudioResampler::close()
 }
 
 
-int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // const
+int AudioResampler::resample(uint8_t** inSamples, int inNumSamples) // const
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -149,12 +149,12 @@ int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // cons
     // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/resampling_audio.c
     requiredNumSamples = av_rescale_rnd(
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-        swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) +
+        swr_get_delay(ctx, (int64_t)iparams.sampleRate) +
 #else
         avresample_get_delay(ctx) +
 #endif
-            (std::int64_t)inNumSamples, (std::int64_t)oparams.sampleRate,
-            (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
+            (int64_t)inNumSamples, (int64_t)oparams.sampleRate,
+            (int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     // Resize the output buffer if required
     if (requiredNumSamples > maxNumSamples) {
@@ -177,10 +177,10 @@ int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // cons
 // Convert the samples using the resampler.
 #ifdef HAVE_FFMPEG_SWRESAMPLE
     ret = swr_convert(ctx, outSamples, maxNumSamples,
-                      (const std::uint8_t**)/*&*/ inSamples, inNumSamples);
+                      (const uint8_t**)/*&*/ inSamples, inNumSamples);
 #else
     ret = avresample_convert(ctx, outSamples, 0, maxNumSamples,
-                             (std::uint8_t**)/*&*/ inSamples, 0, inNumSamples);
+                             (uint8_t**)/*&*/ inSamples, 0, inNumSamples);
 #endif
     if (ret < 0) {
         close();
@@ -217,7 +217,7 @@ int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) // cons
 
 
 #if 0
-int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
+int AudioResampler::resample(const uint8_t* inSamples, int inNumSamples)
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -228,12 +228,12 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
     // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/resampling_audio.c
     requiredNumSamples = av_rescale_rnd(
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-        swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) +
+        swr_get_delay(ctx, (int64_t)iparams.sampleRate) +
 #else
         avresample_get_delay(ctx) +
 #endif
-        (std::int64_t)inNumSamples,
-        (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
+        (int64_t)inNumSamples,
+        (int64_t)oparams.sampleRate, (int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     requiredNumSamples = 440;
 
@@ -255,9 +255,9 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 
     // Convert the samples using the resampler.
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-    outNumSamples = swr_convert(ctx, outSamples, maxNumSamples, (const std::uint8_t**)&inSamples, inNumSamples);
+    outNumSamples = swr_convert(ctx, outSamples, maxNumSamples, (const uint8_t**)&inSamples, inNumSamples);
 #else
-    outNumSamples = avresample_convert(ctx, outSamples, 0, maxNumSamples, (std::uint8_t**)&inSamples, 0, inNumSamples);
+    outNumSamples = avresample_convert(ctx, outSamples, 0, maxNumSamples, (uint8_t**)&inSamples, 0, inNumSamples);
 #endif
     if (outNumSamples < 0) {
         close();

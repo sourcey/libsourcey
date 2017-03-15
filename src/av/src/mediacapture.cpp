@@ -130,9 +130,7 @@ void MediaCapture::openFile(const std::string& file)
 // // #endif
 
 
-void MediaCapture::openStream(const std::string& filename,
-                              AVInputFormat* inputFormat,
-                              AVDictionary** formatParams)
+void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
     TraceS(this) << "Opening stream: " << filename << endl;
 
@@ -152,22 +150,20 @@ void MediaCapture::openStream(const std::string& filename,
         auto codec = stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             _video = new VideoDecoder(stream);
-            _video->emitter.attach(
-                packetSlot(this, &MediaCapture::emit)); // proxy packets
+            _video->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
             _video->create();
             _video->open();
-        } else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+        } 
+        else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _audio = new AudioDecoder(stream);
-            _audio->emitter.attach(
-                packetSlot(this, &MediaCapture::emit)); // proxy packets
+            _audio->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
             _audio->create();
             _audio->open();
         }
     }
 
     if (!_video && !_audio)
-        throw std::runtime_error("Cannot find a valid media stream: " +
-                                 filename);
+        throw std::runtime_error("Cannot find a valid media stream: " + filename);
 }
 
 
@@ -179,7 +175,7 @@ void MediaCapture::start()
     assert(_video || _audio);
 
     if ((_video || _audio) && !_thread.running()) {
-        TraceS(this) << "Initializing Thread" << endl;
+        TraceS(this) << "Initializing thread" << endl;
         _stopping = false;
         _thread.start(std::bind(&MediaCapture::run, this));
     }
@@ -196,7 +192,7 @@ void MediaCapture::stop()
 
     _stopping = true;
     if (_thread.running()) {
-        TraceS(this) << "Terminating Thread" << endl;
+        TraceS(this) << "Terminating thread" << endl;
         _thread.join();
     }
 
@@ -218,50 +214,72 @@ void MediaCapture::run()
 
     try {
         int res;
+        int64_t videoPtsOffset = 0;
+        int64_t audioPtsOffset = 0;
         AVPacket ipacket;
         av_init_packet(&ipacket);
+
+        // Reset the read stream to the beginning when looping
+        if (_looping) {
+            for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
+                if (avformat_seek_file(_formatCtx, i, 0, 0, 0, AVSEEK_FLAG_FRAME) < 0) {
+                    throw std::runtime_error("Cannot reset media stream");
+                }
+            }
+        }
+
+        // Read input packets until complete
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
             TraceS(this) << "Read frame: pts=" << ipacket.pts
                          << ", dts=" << ipacket.dts << endl;
             if (_stopping)
                 break;
             if (_video && ipacket.stream_index == _video->stream->index) {
+
+                // Set the PTS offset when looping
+                if (_looping) {
+                    if (ipacket.pts == 0 && _video->pts > 0)
+                        videoPtsOffset = _video->pts;
+                    ipacket.pts += videoPtsOffset;
+                }
+                
+                // Decode and emit
                 if (_video->decode(ipacket)) {
                     TraceS(this) << "Decoded video: "
-                                 << "time=" << _video->time //<< ", "
-                                 // << "pts=" << opacket.pts << ", "
-                                 // << "dts=" << opacket.dts
-                                 << endl;
+                                 << "time=" << _video->time << ", "
+                                 << "pts=" << _video->pts << endl;
                 }
-            } else if (_audio &&
-                       ipacket.stream_index == _audio->stream->index) {
-                if (_audio->decode(ipacket)) { //, opacket
+            } 
+            else if (_audio && ipacket.stream_index == _audio->stream->index) {
+
+                // Set the PTS offset when looping
+                if (_looping) {
+                    if (ipacket.pts == 0 && _audio->pts > 0)
+                        videoPtsOffset = _audio->pts;
+                    ipacket.pts += audioPtsOffset;
+                }
+
+                // Decode and emit
+                if (_audio->decode(ipacket)) {
                     TraceS(this) << "Decoded Audio: "
-                                 << "time=" << _audio->time //<< ", "
-                                 // << "pts=" << opacket.pts << ", "
-                                 // << "dts=" << opacket.dts
-                                 << endl;
+                                 << "time=" << _audio->time << ", "
+                                 << "pts=" << _video->pts << endl;
                 }
             }
 
             av_packet_unref(&ipacket);
         }
 
+        // Flush remaining packets
         if (!_stopping && res < 0) {
-
-            // Flush video
-            if (_video) {
+            if (_video)
                 _video->flush();
-            }
-
-            // Flush audio
-            if (_audio) {
+            if (_audio)
                 _audio->flush();
-            }
-
-            // End of file or error.
-            TraceS(this) << "Decoding: EOF" << endl;
         }
+
+        // End of file or error
+        TraceS(this) << "Decoding: EOF: " << res << endl;
     } catch (std::exception& exc) {
         _error = exc.what();
         ErrorS(this) << "Decoder Error: " << _error << endl;
@@ -270,9 +288,11 @@ void MediaCapture::run()
         ErrorS(this) << "Unknown Error" << endl;
     }
 
-    TraceS(this) << "Exiting" << endl;
-    _stopping = true;
-    Closing.emit(/*this*/);
+    if (_stopping || !_looping) {
+        TraceS(this) << "Exiting" << endl;
+        _stopping = true;
+        Closing.emit(/*this*/);
+    }
 }
 
 
@@ -320,6 +340,13 @@ AudioDecoder* MediaCapture::audio() const
 {
     std::lock_guard<std::mutex> guard(_mutex);
     return _audio;
+}
+
+
+void MediaCapture::setLooping(bool flag)
+{
+    _thread.setRepeating(flag);
+    _looping = flag;
 }
 
 

@@ -19,6 +19,7 @@
 #include "scy/symple/client.h"
 #include "scy/util.h"
 #include "scy/webrtc/peerconnectionmanager.h"
+#include "scy/webrtc/multiplexmediacapturer.h"
 
 #include "config.h"
 
@@ -31,6 +32,8 @@ class Signaler : public PeerConnectionManager, public Application
 public:
     Signaler(const smpl::Client::Options& options);
     ~Signaler();
+
+    void startStreaming(const std::string& file, bool loop = true);
 
 protected:
 
@@ -57,6 +60,10 @@ protected:
 #else
     smpl::TCPClient _client;
 #endif
+    MultiplexMediaCapturer _capturer;
+
+    std::unique_ptr<rtc::Thread> _networkThread;
+    std::unique_ptr<rtc::Thread> _workerThread;
 };
 
 

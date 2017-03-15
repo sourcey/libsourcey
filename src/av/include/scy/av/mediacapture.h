@@ -58,19 +58,21 @@ public:
     virtual void getEncoderAudioCodec(AudioCodec& params);
     virtual void getEncoderVideoCodec(VideoCodec& params);
 
+    /// Set the flag to loop the input file
+    void setLooping(bool flag);
+
     AVFormatContext* formatCtx() const;
     VideoDecoder* video() const;
     AudioDecoder* audio() const;
     bool stopping() const;
-    std::string error() const; /// Notifies that the capture thread is closing.
+    std::string error() const; 
+    
+    /// Notifies that the capture thread is closing.
     /// Careful, this signal is emitted from inside the tread contect.
     NullSignal Closing;
 
-
 protected:
-    virtual void openStream(const std::string& filename,
-                            AVInputFormat* inputFormat,
-                            AVDictionary** formatParams);
+    virtual void openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
 
     void emit(IPacket& packet);
 
@@ -82,6 +84,7 @@ protected:
     AudioDecoder* _audio;
     std::string _error;
     bool _stopping;
+    bool _looping;
 };
 
 

@@ -61,8 +61,8 @@ struct PTSCalculator
     double frameDuration;
     double frameDiff;
 
-    std::int64_t currentPTS;
-    std::int64_t lastPTS;
+    int64_t currentPTS;
+    int64_t lastPTS;
 
     PTSCalculator() {
         reset();
@@ -88,7 +88,7 @@ struct PTSCalculator
             << std::endl;
     }
 
-    std::int64_t tick() {
+    int64_t tick() {
     /// Initializing
         if (frameTime == 0) {
             assert(!frameDuration);

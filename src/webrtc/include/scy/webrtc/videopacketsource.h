@@ -14,6 +14,7 @@
 
 
 #include "scy/av/types.h"
+#include "scy/packetsignal.h"
 
 #include "webrtc/media/base/videocapturer.h"
 
@@ -29,27 +30,38 @@ namespace scy {
 class VideoPacketSource : public cricket::VideoCapturer
 {
 public:
-    VideoPacketSource();
+    VideoPacketSource(int width, int height, int fps, uint32_t fourcc);
+    VideoPacketSource(const cricket::VideoFormat& captureFormat);
     virtual ~VideoPacketSource();
 
-    /// cricket::VideoCapturer implementation.
-    virtual cricket::CaptureState
-    Start(const cricket::VideoFormat& capture_format);
-    virtual void Stop();
-    virtual bool IsRunning();
-    virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs);
-    virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired,
-                                      cricket::VideoFormat* best_format);
-    virtual bool IsScreencast() const;
+    /// Set the source `av::VideoPacket` emitter.
+    /// The pointer is not managed by this class.
+    void setPacketSource(PacketSignal* source);
 
-    void onVideoCaptured(av::VideoPacket& packet);
+    /// Callback that fired when an `av::PlanarVideoPacket`
+    /// is ready for processing.
+    void onVideoCaptured(av::PlanarVideoPacket& packet);
+
+    /// cricket::VideoCapturer implementation.
+    virtual cricket::CaptureState Start(const cricket::VideoFormat& capture_format) override;
+    virtual void Stop() override;
+    virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs) override;
+    virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired, 
+                                      cricket::VideoFormat* best_format) override;
+    virtual bool IsRunning() override;
+    virtual bool IsScreencast() const override;
 
 protected:
-    bool running_;
-    int64_t initial_timestamp_;
-    int64_t next_timestamp_;
+    cricket::VideoFormat _captureFormat;
+    //bool running_;
+    //int64_t initial_timestamp_;
     // const bool is_screencast_;
-    webrtc::VideoRotation rotation_;
+    //uint32_t _codec;
+    webrtc::VideoRotation _rotation;
+    int64_t _timestampOffset;
+    int64_t _nextTimestamp;
+    PacketSignal* _source;
+    //int64_t _fpsInterval;
 };
 
 

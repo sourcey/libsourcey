@@ -36,7 +36,7 @@ struct VideoDecoder : public VideoContext
     virtual void open();
     virtual void close();
 
-    virtual bool decode(std::uint8_t* data, int size); //, AVPacket& opacket
+    virtual bool decode(uint8_t* data, int size); //, AVPacket& opacket
     virtual bool decode(AVPacket& ipacket);            //, AVPacket& opacket
     /// Decodes a the given input packet.
     /// Returns true an output packet was returned,    // false otherwise.

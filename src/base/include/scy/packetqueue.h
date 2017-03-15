@@ -168,7 +168,8 @@ protected:
 };
 
 
-template <class T> inline void AsyncPacketQueue<T>::close()
+template <class T> 
+inline void AsyncPacketQueue<T>::close()
 {
     // Flush queued items, some protocols can't afford dropped packets
     Queue::flush();
@@ -178,9 +179,10 @@ template <class T> inline void AsyncPacketQueue<T>::close()
 }
 
 
-template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
+template <class T> inline void 
+AsyncPacketQueue<T>::dispatch(T& packet)
 {
-    if (Queue::cancelled()) {
+    if (cancelled()) {
         WarnS(this) << "Dispatch late packet" << std::endl;
         assert(0);
         return;
@@ -190,26 +192,27 @@ template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
 }
 
 
-template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
+template <class T> 
+inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
-    if (Queue::cancelled()) {
+    if (cancelled()) {
         WarnS(this) << "Process late packet" << std::endl;
         assert(0);
         return;
     }
 
-    Queue::push(reinterpret_cast<T*>(packet.clone()));
+    push(reinterpret_cast<T*>(packet.clone()));
 }
 
 
-template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket* packet)
+template <class T> 
+inline bool AsyncPacketQueue<T>::accepts(IPacket* packet)
 {
     return dynamic_cast<T*>(packet) != 0;
 }
 
 
-template <class T>
-inline void
+template <class T> inline void
 AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "Stream state: " << state << std::endl;

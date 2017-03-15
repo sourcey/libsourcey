@@ -54,7 +54,7 @@ struct AudioResampler
     /// were internally buffered. An exception will be thrown on error.
     ///
     /// Converted samples are accessable via the `outSamples` class member.
-    int resample(std::uint8_t** inSamples, int inNumSamples);
+    int resample(uint8_t** inSamples, int inNumSamples);
 
 
 #ifdef HAVE_FFMPEG_SWRESAMPLE
@@ -65,7 +65,7 @@ struct AudioResampler
 
     AudioCodec iparams;        // input audio parameters
     AudioCodec oparams;        // output audio parameters
-    std::uint8_t** outSamples; // the output samples buffer
+    uint8_t** outSamples; // the output samples buffer
     int outNumSamples; // the number of samples currently in the output buffer
     int outBufferSize; // the number of bytes currently in the buffer
     int maxNumSamples; // the maximum number of samples that can be stored in

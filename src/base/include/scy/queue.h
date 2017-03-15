@@ -28,10 +28,6 @@ namespace scy {
 /// Thread-safe queue container.
 template <typename T> class Queue
 {
-private:
-    std::deque<T> _queue;
-    mutable std::mutex _mutex;
-
 public:
     void push(const T& data)
     {
@@ -74,10 +70,11 @@ public:
         _queue.pop_front();
     }
 
-    template <typename Compare> size_t sort()
+    template <typename Compare> 
+    void sort()
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        return std::sort(_queue.begin(), _queue.end(), Compare());
+        std::sort(_queue.begin(), _queue.end(), Compare());
     }
 
     size_t size()
@@ -91,6 +88,10 @@ public:
         std::lock_guard<std::mutex> guard(_mutex);
         return _queue;
     }
+
+protected:
+    std::deque<T> _queue;
+    mutable std::mutex _mutex;
 };
 
 
@@ -113,7 +114,10 @@ public:
     {
     }
 
-    virtual ~RunnableQueue() { clear(); }
+    virtual ~RunnableQueue() 
+    { 
+        clear(); 
+    }
 
     /// Push an item onto the queue.
     /// The queue takes ownership of the item pointer.
@@ -177,8 +181,7 @@ public:
         sw.start();
         do {
             // scy::sleep(1);
-        } while (!cancelled() && sw.elapsedMilliseconds() < _timeout &&
-                 dispatchNext());
+        } while (!cancelled() && sw.elapsedMilliseconds() < _timeout && dispatchNext());
     }
 
     /// Dispatch a single item to listeners.
@@ -320,7 +323,9 @@ public:
     }
 
 protected:
-    virtual ~AsyncQueue() {}
+    virtual ~AsyncQueue() 
+    {
+    }
 
     Thread _thread;
 };

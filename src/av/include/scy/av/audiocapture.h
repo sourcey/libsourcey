@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #ifndef SCY_AV_AudioCapture_H
 #define SCY_AV_AudioCapture_H
 

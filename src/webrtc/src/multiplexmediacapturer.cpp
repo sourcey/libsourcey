@@ -17,65 +17,62 @@
 #include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/webrtc/webrtc.h"
+#include "webrtc/media/engine/webrtcvideocapturerfactory.h"
+#include "webrtc/modules/video_capture/video_capture_factory.h"
 
 
 namespace scy {
 
 
 MultiplexMediaCapturer::MultiplexMediaCapturer()
-    : _capture(std::make_shared<av::MediaCapture>())
-    , _audioModule(AudioPacketModule::Create()) //,
-// _videoSource(VideoPacketSource::Create())
+    : _videoCapture(std::make_shared<av::MediaCapture>())
+    , _audioModule(AudioPacketModule::Create())
 {
-    // _capture->emitter += packetSlot(_audioModule.get(),
-    // &AudioPacketModule::onAudioCaptured);
-
-    _stream.attachSource(_capture, true);
-    _stream.attach(
-        std::make_shared<av::RealtimePacketQueue<av::VideoPacket>>(0), 5);
-    _stream.emitter +=
-        packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
+    _stream.attachSource(_videoCapture, true);
+    _stream.attach(std::make_shared<av::RealtimePacketQueue<av::PlanarVideoPacket>>(0), 5);
+    _stream.emitter += packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
 }
 
 
 MultiplexMediaCapturer::~MultiplexMediaCapturer()
 {
-    // if (_videoTrack)
-    //     _videoTrack->RemoveSink(this);
-    //
-    // if (_audioTrack)
-    //     _audioTrack->RemoveSink(this);
 }
 
 
-void MultiplexMediaCapturer::openFile(const std::string& file)
+void MultiplexMediaCapturer::openFile(const std::string& file, bool loop)
 {
-    _capture->openFile(file);
-    if (_capture->audio()) {
-        _capture->audio()->oparams.sampleFmt = "s16";
-        _capture->audio()->oparams.sampleRate = 44000;
-        _capture->audio()->oparams.channels = 2;
-        _capture->audio()->recreateResampler();
-        // _capture->audio()->resampler->maxNumSamples = 440;
-        // _capture->audio()->resampler->variableOutput = false;
-    }
-    if (_capture->video()) {
-        _capture->video()->oparams.pixelFmt = "nv12"; // yuv420p
-        // _capture->video()->oparams.width = capture_format.width;
-        // _capture->video()->oparams.height = capture_format.height;
+    // Open the capture file
+    _videoCapture->setLooping(loop);
+    _videoCapture->openFile(file);
+
+    // Set the output settings
+    if (_videoCapture->audio()) {
+        _videoCapture->audio()->oparams.sampleFmt = "s16";
+        _videoCapture->audio()->oparams.sampleRate = 44000;
+        _videoCapture->audio()->oparams.channels = 2;
+        _videoCapture->audio()->recreateResampler();
+        // _videoCapture->audio()->resampler->maxNumSamples = 440;
+        // _videoCapture->audio()->resampler->variableOutput = false;
     }
 
-    // TODO: Set the video packet source format from the video
+    // Convert to yuv420p for easy comsumption by WebRTC
+    if (_videoCapture->video()) {
+        _videoCapture->video()->oparams.pixelFmt = "yuv420p"; // nv12
+        // _videoCapture->video()->oparams.width = capture_format.width;
+        // _videoCapture->video()->oparams.height = capture_format.height;
+    }
 }
 
 
 VideoPacketSource* MultiplexMediaCapturer::createVideoSource()
 {
-    auto videoSource = new VideoPacketSource();
-    _stream.emitter +=
-        packetSlot(videoSource, &VideoPacketSource::onVideoCaptured);
-    return videoSource;
-}
+    assert(_videoCapture->video());
+    auto oparams = _videoCapture->video()->oparams;
+    auto source = new VideoPacketSource(oparams.width, oparams.height, 
+                                        oparams.fps, cricket::FOURCC_I420);
+    source->setPacketSource(&_stream.emitter); // nullified on VideoPacketSource::Stop
+    return source;
+} 
 
 
 rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
@@ -84,35 +81,80 @@ rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
 }
 
 
+// TEST: Open VideoCaptureDevice using the WebRTC way 
+std::unique_ptr<cricket::VideoCapturer> openVideoDefaultWebRtcCaptureDevice() 
+{
+    std::vector<std::string> device_names;
+    {
+        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
+            webrtc::VideoCaptureFactory::CreateDeviceInfo());
+        if (!info) {
+            return nullptr;
+        }
+        int num_devices = info->NumberOfDevices();
+        assert(num_devices > 0);
+        for (int i = 0; i < num_devices; ++i) {
+            const uint32_t kSize = 256;
+            char name[kSize] = { 0 };
+            char id[kSize] = { 0 };
+            if (info->GetDeviceName(i, name, kSize, id, kSize) != -1) {
+                device_names.push_back(name);
+            }
+        }
+    }
+
+    cricket::WebRtcVideoDeviceCapturerFactory factory;
+    std::unique_ptr<cricket::VideoCapturer> capturer;
+    for (const auto& name : device_names) {
+        capturer = factory.Create(cricket::Device(name, 0));
+        if (capturer) {
+            break;
+        }
+    }
+
+    assert(capturer);
+    return capturer;
+}
+
+
 void MultiplexMediaCapturer::addMediaTracks(
     webrtc::PeerConnectionFactoryInterface* factory,
     webrtc::MediaStreamInterface* stream)
 {
+    // This capturer is multicast, meaning it can be used as the source 
+    // for multiple PeerConnection objects.
+    //
+    // KLUDGE: Pixel format conversion should happen on the 
+    // VideoPacketSource rather than on the decoder becasue different  
+    // peers may request different optimal output video sizes.
+
     // Create and add the audio stream
-    if (_capture->audio()) {
+    if (_videoCapture->audio()) {
         stream->AddTrack(factory->CreateAudioTrack(
             kAudioLabel, factory->CreateAudioSource(nullptr)));
     }
 
     // Create and add the video stream
-    if (_capture->video()) {
+    if (_videoCapture->video()) {
         stream->AddTrack(factory->CreateVideoTrack(
-            kVideoLabel,
-            factory->CreateVideoSource(createVideoSource(), nullptr)));
+            kVideoLabel, factory->CreateVideoSource(createVideoSource(), nullptr)));
     }
+
+    // Default WebRTC video stream
+    // stream->AddTrack(factory->CreateVideoTrack(
+    //     kVideoLabel, factory->CreateVideoSource(openVideoDefaultWebRtcCaptureDevice(), nullptr)));
 }
 
 
 void MultiplexMediaCapturer::start()
 {
-    // _capture->start();
     _stream.start();
 }
 
 
 void MultiplexMediaCapturer::stop()
 {
-    // _capture->stop();
+    // _videoCapture->stop();
     _stream.stop();
 }
 

@@ -121,14 +121,14 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 
 void MultiplexPacketEncoder::encode(VideoPacket& packet)
 {
-    encodeVideo((std::uint8_t*)packet.data(), int(packet.size()), packet.width,
+    encodeVideo((uint8_t*)packet.data(), int(packet.size()), packet.width,
                 packet.height, packet.time);
 }
 
 
 void MultiplexPacketEncoder::encode(AudioPacket& packet)
 {
-    encodeAudio((std::uint8_t*)packet.data(), int(packet.numSamples), packet.time);
+    encodeAudio((uint8_t*)packet.data(), int(packet.numSamples), packet.time);
 }
 
 

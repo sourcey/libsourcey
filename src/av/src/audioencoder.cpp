@@ -193,13 +193,13 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
            "planar formats not supported");
 
     // enc->time = enc->frame->pkt_pts > 0 ?
-    // static_cast<std::int64_t>(enc->frame->pkt_pts *
+    // static_cast<int64_t>(enc->frame->pkt_pts *
     // av_q2d(enc->stream->time_base) * 1000) : 0;
     // enc->pts = enc->frame->pkt_pts;
 
     // Compute stream time in milliseconds
     if (enc->stream && opacket.pts >= 0) {
-        enc->time = static_cast<std::int64_t>(
+        enc->time = static_cast<int64_t>(
             opacket.pts * av_q2d(enc->stream->time_base) * 1000);
     }
     enc->pts = opacket.pts;
@@ -238,13 +238,13 @@ int flushBuffer(AudioEncoder* enc)
 }
 
 
-bool AudioEncoder::encode(/*const */ std::uint8_t* samples, const int numSamples, const std::int64_t pts)
+bool AudioEncoder::encode(/*const */ uint8_t* samples, const int numSamples, const int64_t pts)
 {
     TraceS(this) << "Encoding audio packet: " << numSamples << endl;
 
     // Resample input data or add it to the buffer directly
     if (resampler) {
-        if (!resampler->resample((std::uint8_t**)&samples, numSamples)) {
+        if (!resampler->resample((uint8_t**)&samples, numSamples)) {
             // The resampler may buffer frames
             TraceS(this) << "Samples buffered by resampler" << endl;
             return false;

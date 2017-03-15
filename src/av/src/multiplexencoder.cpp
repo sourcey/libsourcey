@@ -54,7 +54,7 @@ MultiplexEncoder::~MultiplexEncoder()
 }
 
 
-static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer,
+static int dispatchOutputPacket(void* opaque, uint8_t* buffer,
                                 int bufferSize)
 {
     // Callback example at:
@@ -290,14 +290,14 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 }
 
 
-void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
+void MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
 {
     // https://docs.thefoundry.co.uk/products/nuke/developers/63/ndkdevguide/examples/ffmpegReader.cpp
     // https://ffmpeg.org/doxygen/trunk/doc_2examples_2muxing_8c-example.html
     // https://ffmpeg.org/doxygen/trunk/doc_2examples_2transcoding_8c-example.html
     if (*pts == AV_NOPTS_VALUE) {
         // Set a realtime pts value if not specified
-        std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
+        int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
         _pts = delta * (float)stream->time_base.den /
                (float)stream->time_base.num / AV_TIME_BASE;
         *pts = _pts;
@@ -375,8 +375,8 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 }
 
 
-bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize,
-                                   int width, int height, std::int64_t time)
+bool MultiplexEncoder::encodeVideo(uint8_t* buffer, int bufferSize,
+                                   int width, int height, int64_t time)
 {
     TraceS(this) << "Encoding video: " << time << endl;
 
@@ -473,8 +473,8 @@ void MultiplexEncoder::freeAudio()
 }
 
 
-bool MultiplexEncoder::encodeAudio(std::uint8_t* buffer, int numSamples,
-                                   std::int64_t time)
+bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples,
+                                   int64_t time)
 {
     TraceS(this) << "Encoding audio packet: samples=" << numSamples
                  << ", time=" << time << endl;
@@ -494,19 +494,6 @@ bool MultiplexEncoder::encodeAudio(std::uint8_t* buffer, int numSamples,
     updateStreamPts(_audio->stream, &time);
 
     return _audio->encode(buffer, numSamples, time);
-
-    // // AVPacket opacket;
-    // // av_init_packet(&opacket);
-    //
-    // //FIXME
-    // if (_audio->encode(buffer, numSamples, time)) { //, opacket
-    //     // assert(opacket.stream_index == _audio->stream->index);
-    //     // return writeOutputPacket(opacket);
-    // }
-    //
-    // assert(0);
-    //
-    // return false;
 }
 
 

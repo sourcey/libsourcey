@@ -11,6 +11,7 @@ $(document).ready(function() {
         mediaConstraints: {
             'mandatory': {
                 'OfferToReceiveAudio': true,
+                //'OfferToReceiveAudio': false,
                 'OfferToReceiveVideo': true
             }
         },

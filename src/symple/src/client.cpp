@@ -347,11 +347,10 @@ void Client::emit(IPacket& raw)
             } else {
                 DebugL << "Received non-standard message: " << type << endl;
 
-                // Attempt to parse unknown packets as a message type  
+                // Attempt to parse custom packets as a message type  
                 Message m(data);
                 if (!m.valid()) {
                     WarnL << "Dropping invalid message: " << data.dump() << endl;
-                    WarnL << "Dropping invalid message message: " << m.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(m);

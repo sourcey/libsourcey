@@ -66,7 +66,6 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStre
 void PeerConnection::createConnection()
 {
     assert(_factory);
-
     _peerConnection = _factory->CreatePeerConnection(_config, &_constraints,
                                                      nullptr, nullptr, this);
 
@@ -80,11 +79,12 @@ void PeerConnection::createConnection()
 
 void PeerConnection::closeConnection()
 {
-    DebugL << _peerid << ": Closing" << endl;
+    DebugL << _peerid << ": Closing @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
 
     if (_peerConnection) {
         _peerConnection->Close();
-    } else {
+    } 
+    else {
         // Call onClosed if no connection has been
         // made so callbacks are always run.
         _manager->onClosed(this);
@@ -109,8 +109,7 @@ void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
     webrtc::SessionDescriptionInterface* desc(
         webrtc::CreateSessionDescription(type, sdp, &error));
     if (!desc) {
-        throw std::runtime_error("Can't parse remote SDP: " +
-                                 error.description);
+        throw std::runtime_error("Can't parse remote SDP: " + error.description);
     }
     _peerConnection->SetRemoteDescription(
         DummySetSessionDescriptionObserver::Create(), desc);
@@ -131,8 +130,7 @@ void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(
         webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
     if (!candidate) {
-        throw std::runtime_error("Can't parse remote candidate: " +
-                                 error.description);
+        throw std::runtime_error("Can't parse remote candidate: " + error.description);
     }
     _peerConnection->AddIceCandidate(candidate.get());
 }

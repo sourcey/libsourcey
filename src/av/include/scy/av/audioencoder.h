@@ -48,8 +48,8 @@ struct AudioEncoder : public AudioContext
     /// @param numSamples The number of input samples per channel.
     /// @param pts        The input samples presentation timestamp.
     /// @param opacket    The output packet data will be encoded to.
-    virtual bool encode(/*const */ std::uint8_t* samples, const int numSamples,
-                        const std::int64_t pts);
+    virtual bool encode(/*const */ uint8_t* samples, const int numSamples,
+                        const int64_t pts);
 
     /// Encode a single AVFrame from the decoder.
     virtual bool encode(AVFrame* iframe);

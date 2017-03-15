@@ -34,8 +34,7 @@ VideoCapture::VideoCapture()
 }
 
 
-VideoCapture::VideoCapture(const std::string& device, int width, int height,
-                           double framerate)
+VideoCapture::VideoCapture(const std::string& device, int width, int height, double framerate)
 {
     open(device, width, height, framerate);
 }
@@ -46,8 +45,7 @@ VideoCapture::~VideoCapture()
 }
 
 
-void VideoCapture::open(const std::string& device, int width, int height,
-                        double framerate)
+void VideoCapture::open(const std::string& device, int width, int height, double framerate)
 {
     TraceS(this) << "Opening camera: " << device << endl;
 
@@ -58,18 +56,18 @@ void VideoCapture::open(const std::string& device, int width, int height,
 
     AVDictionary* iparams = nullptr;
     if (width > 0 && height > 0)
-        av_dict_set(&iparams, "video_size",
-                    util::format("%dx%d", width, height).c_str(), 0);
+        av_dict_set(&iparams, "video_size", util::format("%dx%d", width, height).c_str(), 0);
     if (framerate > 0)
-        av_dict_set(&iparams, "framerate",
-                    util::format("%f", framerate).c_str(), 0);
+        av_dict_set(&iparams, "framerate", util::format("%f", framerate).c_str(), 0);
 
     // Set the desired pixel format
     av_dict_set(&iparams, "pixel_format", "yuv420p", 0);
 
     openStream(device.c_str(), iformat, &iparams);
 
-    av_dict_free(&iparams); // FIXME: possible memory leak
+    // FIXME: Possible memory leak where av_dict_free not 
+    // called if error thrown in openStream 
+    av_dict_free(&iparams);
 }
 
 

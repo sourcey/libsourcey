@@ -47,8 +47,7 @@ static const uint32_t kMaxVolume = 14392;
 // using a real ADM. The constants correspond to 10ms of mono audio at 44kHz.
 static const size_t kNumberSamples = 440;
 static const size_t kNumberBytesPerSample = sizeof(AudioPacketModule::Sample);
-static const size_t kNumberBufferBytes =
-    kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
+static const size_t kNumberBufferBytes = kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
 
 enum
 {
@@ -90,7 +89,7 @@ rtc::scoped_refptr<AudioPacketModule> AudioPacketModule::Create()
 
 void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
 {
-    InfoL << "Audio frame captured" << endl;
+    DebugL << "Audio frame captured" << endl;
 
     // assert(_processThread->IsCurrent());
     rtc::CritScope cs(&_critCallback);
@@ -98,6 +97,7 @@ void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
         return;
     }
 
+    // TODO: Implement planar formats
     auto data = packet.data();
     _sendFifo.write((void**)&data, packet.numSamples);
 }
@@ -188,8 +188,7 @@ void AudioPacketModule::processFrameP()
     const int64_t current_time = rtc::TimeMillis();
     const int64_t wait_time =
         (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
-    _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this,
-                                MSG_RUN_PROCESS);
+    _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this, MSG_RUN_PROCESS);
 }
 
 void AudioPacketModule::sendFrameP()
@@ -277,16 +276,14 @@ webrtc::AudioDeviceModule::ErrorCode AudioPacketModule::LastError() const
     return webrtc::AudioDeviceModule::kAdmErrNone;
 }
 
-int32_t AudioPacketModule::RegisterEventObserver(
-    webrtc::AudioDeviceObserver* /*event_callback*/)
+int32_t AudioPacketModule::RegisterEventObserver(webrtc::AudioDeviceObserver* /*event_callback*/)
 {
     // Only used to report warnings and errors. This fake implementation won't
     // generate any so discard this callback.
     return 0;
 }
 
-int32_t
-AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_callback)
+int32_t AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_callback)
 {
     rtc::CritScope cs(&_critCallback);
     _audioCallback = audio_callback;
@@ -295,8 +292,8 @@ AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_callback)
 
 int32_t AudioPacketModule::Init()
 {
-    // Initialize is called by the factory method. Safe to ignore this Init
-    // call.
+    // Initialize is called by the factory method. 
+    // Safe to ignore this Init call.
     return 0;
 }
 
@@ -324,16 +321,16 @@ int16_t AudioPacketModule::RecordingDevices()
     return 0;
 }
 
-int32_t AudioPacketModule::PlayoutDeviceName(
-    uint16_t /*index*/, char /*name*/[webrtc::kAdmMaxDeviceNameSize],
+int32_t AudioPacketModule::PlayoutDeviceName(uint16_t /*index*/, 
+    char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {
     assert(false);
     return 0;
 }
 
-int32_t AudioPacketModule::RecordingDeviceName(
-    uint16_t /*index*/, char /*name*/[webrtc::kAdmMaxDeviceNameSize],
+int32_t AudioPacketModule::RecordingDeviceName(uint16_t /*index*/, 
+    char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {
     assert(false);

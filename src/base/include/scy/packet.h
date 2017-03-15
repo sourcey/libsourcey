@@ -119,7 +119,7 @@ public:
     virtual char* data() const { return nullptr; }
 
     /// The const packet data pointer for buffered packets.
-    virtual const char* constData() const { return data(); }
+    virtual const void* constData() const { return data(); }
     virtual const char* className() const = 0;
     virtual void print(std::ostream& os) const
     {
@@ -134,7 +134,7 @@ public:
 };
 
 
-/// A simple flag packet for sending state flags along the packet stream.
+/// Packet for sending bitwise flags along the packet stream.
 class Base_API FlagPacket : public IPacket
 {
 public:
@@ -190,12 +190,11 @@ public:
         : IPacket(that)
         , _data(nullptr)
         , _size(0)
-        , _free(false)
+        , _free(true)
     {
-        // Copy assigned data and set the MemManaged flag
+        // Copy assigned data and set the free flag
         // Todo: Use a simple reference counted buffer wrapper
         // so we don't need to force memcpy here.
-        assignDataOwnership();
         copyData(that._data, that._size);
     }
 
@@ -205,32 +204,34 @@ public:
             delete[] _data;
     }
 
-    virtual IPacket* clone() const { return new RawPacket(*this); }
-
-    virtual void setData(char* data, size_t size)
-    {
-        assert(size > 0);
-        if (_free) // copy data if reuqested
-            copyData(data, size);
-        else { // otherwise just assign the pointer
-            _data = data;
-            _size = size;
-        }
+    virtual IPacket* clone() const 
+    { 
+        return new RawPacket(*this); 
     }
 
-    virtual void copyData(const char* data, size_t size)
+    //virtual void setData(char* data, size_t size)
+    //{
+    //    assert(size > 0);
+    //    if (_free) // copy data if reuqested
+    //        copyData(data, size);
+    //    else { // otherwise just assign the pointer
+    //        _data = data;
+    //        _size = size;
+    //    }
+    //}
+
+    virtual void copyData(const void* data, size_t size)
     {
         // traceL("RawPacket", this) << "Cloning: " << size << std::endl;
         // assert(_free);
-        // if (data && size > 0) {
-        assert(size > 0);
-        if (_data && _free)
-            delete[] _data;
-        _size = size;
-        _data = new char[size];
-        _free = true;
-        // }
-        std::memcpy(_data, data, size);
+        if (data && size > 0) {
+            if (_data && _free)
+                delete[] _data;
+            _size = size;
+            _data = new char[size];
+            _free = true;
+            std::memcpy(_data, data, size);
+        }
     }
 
     virtual ssize_t read(const ConstBuffer& buf)
@@ -248,6 +249,8 @@ public:
 
     virtual char* data() const { return _data; }
 
+    // virtual char* cdata() const { return static_cast<char*>(_data); }
+
     virtual size_t size() const { return _size; }
 
     virtual const char* className() const { return "RawPacket"; }
@@ -256,6 +259,7 @@ public:
 
     virtual void assignDataOwnership() { _free = true; }
 
+protected:
     char* _data;
     size_t _size;
     bool _free;
@@ -266,16 +270,14 @@ inline RawPacket rawPacket(const MutableBuffer& buf, unsigned flags = 0,
                            void* source = nullptr, void* opaque = nullptr,
                            IPacketInfo* info = nullptr)
 {
-    return RawPacket(bufferCast<char*>(buf), buf.size(), flags, source, opaque,
-                     info);
+    return RawPacket(bufferCast<char*>(buf), buf.size(), flags, source, opaque, info);
 }
 
 inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags = 0,
                            void* source = nullptr, void* opaque = nullptr,
                            IPacketInfo* info = nullptr)
 {
-    return RawPacket(bufferCast<const char*>(buf), buf.size(), flags, source,
-                     opaque, info); // copy const data
+    return RawPacket(bufferCast<const char*>(buf), buf.size(), flags, source, opaque, info); // copy const data
 }
 
 inline RawPacket rawPacket(char* data = nullptr, size_t size = 0,
@@ -289,8 +291,7 @@ inline RawPacket rawPacket(const char* data = nullptr, size_t size = 0,
                            unsigned flags = 0, void* source = nullptr,
                            void* opaque = nullptr, IPacketInfo* info = nullptr)
 {
-    return RawPacket(data, size, flags, source, opaque,
-                     info); // copy const data
+    return RawPacket(data, size, flags, source, opaque, info); // copy const data
 }
 
 

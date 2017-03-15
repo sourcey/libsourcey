@@ -25,6 +25,7 @@
 #include "scy/logger.h"
 #include "scy/test.h"
 #include "scy/util.h"
+#include <random>
 
 
 using std::cout;
@@ -180,8 +181,7 @@ class AudioEncoderTest : public Test
         encoder.create();
         encoder.open();
 
-        output.open("test." + oparams.encoder,
-                    std::ios::out | std::ios::binary);
+        output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted,
                                                      kInNumSamples, iparams);
@@ -340,8 +340,7 @@ class AudioCaptureTest : public Test
         // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
 
-        capture.emitter.attach(
-            packetSlot(this, &AudioCaptureTest::onAudioCaptured));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureTest::onAudioCaptured));
         capture.start();
 
         av::AudioCodec oparams;
@@ -399,8 +398,6 @@ class AudioCaptureEncoderTest : public Test
         // av::MediaCapture::Ptr capture;
         // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
-        //(std::make_shared<av::AudioCapture>(device.id, inNbChannels,
-        //inSampleRate));
 
         capture.getEncoderAudioCodec(iparams);
         capture.start();
@@ -412,16 +409,13 @@ class AudioCaptureEncoderTest : public Test
         oparams.sampleFmt = "s16";  // fltp
         oparams.enabled = true;
 
-        output.open("test." + oparams.encoder,
-                    std::ios::out | std::ios::binary);
+        output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
         encoder.create();
         encoder.open();
 
-        capture.emitter.attach(
-            packetSlot(this, &AudioCaptureEncoderTest::onAudioCaptured));
-        encoder.emitter.attach(
-            packetSlot(this, &AudioCaptureEncoderTest::onAudioEncoded));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureEncoderTest::onAudioCaptured));
+        encoder.emitter.attach(packetSlot(this, &AudioCaptureEncoderTest::onAudioEncoded));
 
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
@@ -502,8 +496,6 @@ class AudioCaptureResamplerTest : public Test
             return;
         }
 
-        // av::MediaCapture::Ptr capture;
-        // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
 
         capture.getEncoderAudioCodec(iparams);
@@ -515,8 +507,7 @@ class AudioCaptureResamplerTest : public Test
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
         resampler.open();
-        capture.emitter.attach(
-            packetSlot(this, &AudioCaptureResamplerTest::onAudioCaptured));
+        capture.emitter.attach(packetSlot(this, &AudioCaptureResamplerTest::onAudioCaptured));
 
         // numFramesRemaining = kNumberFramesWanted; // * 8;
         while (numFramesRemaining > 0) {
@@ -571,21 +562,22 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
     void start()
     {
         cout << "Start" << endl;
-        runner.start(
-            [](void* arg) {
-                auto self = reinterpret_cast<MockMediaPacketSource*>(arg);
-                if (self->numFramesRemaining) {
-                    self->numFramesRemaining--;
-                    std::int64_t time(
-                        std::rand() %
-                        (1000000 * 5)); // 5 mil is 5 seconds of audio time
-                    cout << "Emitting: " << self->numFramesRemaining << endl;
-                    av::MediaPacket p(new std::uint8_t[10], 10, time);
-                    p.assignDataOwnership();
-                    self->emitter.emit(/*self, */ p);
-                }
-            },
-            this);
+        runner.start([](void* arg) {
+            auto self = reinterpret_cast<MockMediaPacketSource*>(arg);
+            if (self->numFramesRemaining) {
+                self->numFramesRemaining--;
+
+                // 5 mil is 5 seconds of audio time
+                std::random_device rd;
+                std::mt19937 rng(rd());
+                std::uniform_int_distribution<int> uni(1000, 1000000 * 5);
+                auto time = uni(rng);
+                // DebugL << "Emitting: " << self->numFramesRemaining << ": " << time << endl;
+                av::MediaPacket p(new std::uint8_t[10], 10, time);
+                p.assignDataOwnership();
+                self->emitter.emit(p);
+            }
+        }, this);
     }
 
     void stop()
@@ -614,15 +606,13 @@ class RealtimeMediaQueueTest : public Test
 
     void run()
     {
-        /// Create the multiplex encoder
+        // Create the multiplex encoder
         // auto queue(std::make_shared<av::RealtimePacketQueue<>());
 
         stream.attachSource(new MockMediaPacketSource, true, true);
-        stream.attach(
-            std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(), 5);
+        stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(), 5);
         stream.start();
-        stream.emitter +=
-            packetSlot(this, &RealtimeMediaQueueTest::onPacketPlayout);
+        stream.emitter += packetSlot(this, &RealtimeMediaQueueTest::onPacketPlayout);
 
         while (numFramesRemaining > 0) {
             // cout << "Waiting for completion: " << numFramesRemaining << endl;
@@ -638,9 +628,45 @@ class RealtimeMediaQueueTest : public Test
         // auto pkt = reinterpret_cast<av::MediaPacket*>(packet);
         if (numFramesRemaining) {
             numFramesRemaining--;
-            cout << "On packet: " << numFramesRemaining << ": " << packet.time
-                 << endl;
+            cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
         } else {
+            stream.stop();
+        }
+    }
+};
+
+
+class RealtimeMediaQueueEncoderTest : public Test
+{
+    PacketStream stream;
+    int numFramesRemaining = 1000; // kNumberFramesWanted;
+
+    void run()
+    {
+        auto capture = std::make_shared<av::MediaCapture>();
+        capture->openFile("test.mp4");
+        stream.attachSource(capture, true);
+        stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>());
+        stream.start();
+        stream.emitter += packetSlot(this, &RealtimeMediaQueueEncoderTest::onPacketPlayout);
+
+        while (numFramesRemaining > 0) {
+            DebugL << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+
+        // TODO: ensure stream duration
+        expect(numFramesRemaining == 0);
+    }
+
+    void onPacketPlayout(av::MediaPacket& packet)
+    {
+        if (numFramesRemaining) {
+            numFramesRemaining--;
+            DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+            // cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+        }
+        else {
             stream.stop();
         }
     }

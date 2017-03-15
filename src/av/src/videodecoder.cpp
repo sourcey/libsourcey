@@ -53,8 +53,7 @@ void VideoDecoder::create()
 
     int ret = avcodec_open2(ctx, codec, nullptr);
     if (ret < 0)
-        throw std::runtime_error("Cannot open the audio codec: " +
-                                 averror(ret));
+        throw std::runtime_error("Cannot open the audio codec: " + averror(ret));
 
     // Set the default input and output parameters are set here once the codec
     // context has been opened. The output pixel format, width or height can be
@@ -63,8 +62,10 @@ void VideoDecoder::create()
     initVideoCodecFromContext(stream, ctx, iparams);
     initVideoCodecFromContext(stream, ctx, oparams);
 
-    // Default to bgr24 output (planar formats not currently supported)
-    oparams.pixelFmt = "bgr24";
+    // Default to bgr24 output.
+    // Note: This can be removed when planar formats are fully supported via
+    // the av::VideoPacket interface.
+    // oparams.pixelFmt = "bgr24";
 }
 
 
@@ -80,31 +81,59 @@ void VideoDecoder::close()
 }
 
 
-void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
+inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 {
-    // assert(av_pix_fmt_count_planes((AVPixelFormat)frame->format) == 1 &&
-    // "planar formats not supported");
-
-    dec->time = frame->pkt_pts > 0
-                    ? static_cast<std::int64_t>(frame->pkt_pts *
+    // Compute stream time in microseconds
+    dec->time = frame->pkt_pts > 0 ? static_cast<int64_t>(frame->pkt_pts *
                                                 av_q2d(dec->stream->time_base) *
-                                                AV_TIME_BASE)
-                    : 0;
+                                                AV_TIME_BASE) : 0;
     dec->pts = frame->pkt_pts;
 
-    VideoPacket video(frame->data[0],
-                      av_image_get_buffer_size(
-                          (AVPixelFormat)frame->format, dec->oparams.width,
-                          dec->oparams.height, 16), // frame->pkt_size,
-                      frame->width,
-                      frame->height, dec->time);
-    video.source = frame;
-    video.opaque = dec;
-    dec->emitter.emit(/*dec, */ video);
+    // Handle planar video formats
+    if (av_pix_fmt_count_planes(static_cast<AVPixelFormat>(frame->format)) >= 3) {
+        PlanarVideoPacket video(frame->data[0], frame->data[1], frame->data[2],
+                                frame->linesize[0], frame->linesize[1], frame->linesize[2], 
+                                frame->width, frame->height, dec->time);
+        video.source = frame;
+        video.opaque = dec;
+
+        //memcpy(frame->data[0], inputBufferY, frame->linesize[0] * frame->height);
+        //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
+        //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
+
+        TraceL << "Decoded planar video frame:"
+            << "\n\tFrame DTS: " << frame->pkt_dts
+            << "\n\tFrame PTS: " << frame->pkt_pts
+            << "\n\tPacket time: " << video.time
+            << endl;
+
+        dec->emitter.emit(video);
+    }
+
+    // Handle linear formats
+    else {
+        size_t size = av_image_get_buffer_size(static_cast<AVPixelFormat>(frame->format),
+                                               dec->oparams.width, dec->oparams.height, 16);
+        VideoPacket video(frame->data[0], size, frame->width, frame->height, dec->time);
+        video.source = frame;
+        video.opaque = dec;
+
+        TraceL << "Decoded video frame:"
+            << "\n\tFrame DTS: " << frame->pkt_dts
+            << "\n\tFrame PTS: " << frame->pkt_pts
+            << "\n\tPacket time: " << video.time
+            << endl;
+
+        dec->emitter.emit(video);
+    }
+
+
+    // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
+    //     av_q2d(dec->stream->time_base) * 1000) : 0;
+    // dec->pts = opacket.pts;
 
     // opacket.data = frame->data[0];
-    // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt,
-    // dec->oparams.width, dec->oparams.height, 16);
+    // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt, dec->oparams.width, dec->oparams.height, 16);
     // opacket.pts = frame->pkt_pts; // Decoder PTS values can be unordered
     // opacket.dts = frame->pkt_dts;
     //
@@ -115,7 +144,7 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
     // // }
     //
     // // Compute stream time in milliseconds
-    // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts *
+    // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
     // av_q2d(dec->stream->time_base) * 1000) : 0;
     // dec->pts = opacket.pts;
     //
@@ -123,18 +152,10 @@ void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
     // assert(opacket.size);
     // // assert(opacket.dts >= 0);
     // assert(opacket.pts >= 0);
-
-    // TraceL << "Decoded video frame:"
-    //     << "\n\tFrame DTS: " << frame->pkt_dts
-    //     << "\n\tFrame PTS: " << frame->pkt_pts
-    //     << "\n\tPacket Size: " << opacket->size
-    //     << "\n\tPacket DTS: " << opacket->dts
-    //     << "\n\tPacket PTS: " << opacket->pts
-    //     << endl;
 }
 
 
-bool VideoDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
+bool VideoDecoder::decode(uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -163,7 +184,6 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 
         if (frameDecoded) {
             // assert(bytesDecoded == ipacket.size);
-            // assert(bytesDecoded == )
 
             // TraceS(this) << "Decoded frame:"
             //     << "\n\tFrame Size: " << opacket.size
@@ -260,8 +280,7 @@ void VideoDecoder::flush() // AVPacket& opacket
         avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (frameDecoded) {
             TraceS(this) << "Flushed video frame" << endl;
-            emitPacket(this,
-                       convert(frame)); //, opacket stream, ctx, &pts, oparams
+            emitPacket(this, convert(frame)); //, opacket stream, ctx, &pts, oparams
             // return true;
         }
     } while (frameDecoded);

@@ -199,7 +199,7 @@ void VideoEncoder::close()
 }
 
 
-bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
+bool VideoEncoder::encode(unsigned char* data, int size, int64_t pts)
 {
     assert(data);
     assert(size);
@@ -209,7 +209,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 
     // Populate the input frame with date from the given buffer.
     // NOTE: This only works with contiguous buffers
-    frame->data[0] = reinterpret_cast<std::uint8_t*>(data);
+    frame->data[0] = reinterpret_cast<uint8_t*>(data);
 
     // TODO: assert size and update conversion context if required
 
@@ -237,7 +237,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 //
 //     // Populate the input frame with date from the given buffer.
 //     // NOTE: This only works with contiguous buffers
-//     frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
+//     frame->data[0] = reinterpret_cast<uint8_t*>(ipacket.data);
 //
 //     // TODO: Correctly set the input frame PTS
 //     //
@@ -252,7 +252,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 //     // iparams.width = frame->width;
 //     // iparams.height = frame->height;
 //
-//     // avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
+//     // avpicture_fill((AVPicture *)frame, (uint8_t*)ipacket.data,
 //     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 //
 //     return encode(frame, opacket);
@@ -266,13 +266,13 @@ void emitPacket(VideoEncoder* enc, AVPacket& opacket)
     // supported");
 
     // enc->time = enc->frame->pkt_pts > 0 ?
-    // static_cast<std::int64_t>(enc->frame->pkt_pts *
+    // static_cast<int64_t>(enc->frame->pkt_pts *
     // av_q2d(enc->stream->time_base) * 1000) : 0;
     // enc->pts = enc->frame->pkt_pts;
 
     // Compute stream time in milliseconds
     if (enc->stream && opacket.pts >= 0) {
-        enc->time = static_cast<std::int64_t>(
+        enc->time = static_cast<int64_t>(
             opacket.pts * av_q2d(enc->stream->time_base) * 1000);
     }
     enc->pts = opacket.pts;

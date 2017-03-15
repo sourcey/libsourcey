@@ -96,6 +96,8 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
     assert(iframe->data[0]);
     assert(iframe->width == iparams.width);
     assert(iframe->height == iparams.height);
+    assert(iframe);
+    assert(oframe->format == av_get_pix_fmt(oparams.pixelFmt.c_str()));
 
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -104,11 +106,13 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
                   oframe->data, oframe->linesize) < 0)
         throw std::runtime_error("Pixel format conversion not supported.");
 
+    //assert(av_sample_fmt_is_planar((AVSampleFormat)oparams.format) == 0 || oframe->linesize[1] > 0);
+    //assert(!formatIsPlanar(oframe->format) || oframe->linesize[1] > 0);
+
     // Copy input frame properties to output frame
     av_frame_copy_props(oframe, iframe);
 
-    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str());
-    // //ctx->pix_fmt;
+    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
     // oframe->width  = oparams.width; //iframe->width;
     // oframe->height = oparams.height; //iframe->height;
     // oframe->pkt_pts = iframe->pkt_pts;

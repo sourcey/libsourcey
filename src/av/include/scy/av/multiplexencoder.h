@@ -56,15 +56,15 @@ public:
     /// stream time base internally.
     /// If no time is specified a realtime time value will be assigned to
     /// the frame.
-    virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width,
-                             int height, std::int64_t time = AV_NOPTS_VALUE);
+    virtual bool encodeVideo(uint8_t* buffer, int bufferSize, int width,
+                             int height, int64_t time = AV_NOPTS_VALUE);
 
 
     virtual void createAudio();
     virtual void freeAudio(); /// virtual bool encodeAudio(AVFrame* frame);
                               /// // Encode a single audio frame
-    virtual bool encodeAudio(std::uint8_t* buffer, int numSamples,
-                             std::int64_t time = AV_NOPTS_VALUE);
+    virtual bool encodeAudio(uint8_t* buffer, int numSamples,
+                             int64_t time = AV_NOPTS_VALUE);
 
     /// Flush and beffered or queued packets.
     virtual void flush();
@@ -78,7 +78,7 @@ public:
 
 protected:
     bool writeOutputPacket(AVPacket& packet);
-    void updateStreamPts(AVStream* stream, std::int64_t* pts);
+    void updateStreamPts(AVStream* stream, int64_t* pts);
 
     void onVideoEncoded(av::VideoPacket& packet);
     void onAudioEncoded(av::AudioPacket& packet);
@@ -90,7 +90,7 @@ protected:
     VideoEncoder* _video;
     AudioEncoder* _audio;
     AVIOContext* _ioCtx;
-    std::uint8_t* _ioBuffer;
+    uint8_t* _ioBuffer;
     int _ioBufferSize;
     std::uint64_t _pts;
 };

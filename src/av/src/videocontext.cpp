@@ -116,14 +116,21 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
 
     // Recreate the video conversion context on the fly
     // if the input resolution changes.
-    if (iframe->width != /*conv->*/ oparams.width ||
-        iframe->height != /*conv->*/ oparams.height ||
-        iframe->format != /*conv->*/ av_get_pix_fmt(oparams.pixelFmt.c_str())) {
+
+    //if (iframe->width != /*conv->*/ oparams.width ||
+    //    iframe->height != /*conv->*/ oparams.height ||
+    //    iframe->format != /*conv->*/ av_get_pix_fmt(oparams.pixelFmt.c_str())) {
+    //if (iframe->width != conv->iparams.width ||
+    //    iframe->height != conv->iparams.height ||
+    //    iframe->format != av_get_pix_fmt(conv->iparams.pixelFmt.c_str()) || 
+    //    oparams.width != conv->oparams.width ||
+    //    oparams.height != conv->oparams.height ||
+    //    av_get_pix_fmt(oparams.pixelFmt.c_str()) != av_get_pix_fmt(conv->oparams.pixelFmt.c_str())) {
         iparams.width = iframe->width;
         iparams.height = iframe->height;
         iparams.pixelFmt = av_get_pix_fmt_name((AVPixelFormat)iframe->format);
         recreateConverter();
-    }
+    //}
 
     // Return the input frame if no conversion is required
     if (!conv)
@@ -131,8 +138,7 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
 
     // // Set the input PTS or a monotonic value to keep the encoder happy.
     // // The actual setting of the PTS is outside the scope of this encoder.
-    // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts :
-    // ctx->frame_number;
+    // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
 
     // Convert the input frame and return the result
     return conv->convert(iframe);
@@ -152,7 +158,12 @@ bool VideoContext::recreateConverter()
     // `oparams` is the picture format passed into the application.
 
     // Check if conversion is required
-    if (iparams.width == oparams.width && iparams.height == oparams.height &&
+    // This check if only for when unitialized
+    // If iparams or oparams is changed after initialization a conversion
+    // context must be created
+    if (!conv && 
+        iparams.width == oparams.width &&
+        iparams.height == oparams.height &&
         iparams.pixelFmt == oparams.pixelFmt) {
         return false;
     }
@@ -191,7 +202,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
         return nullptr;
 
     int size = av_image_get_buffer_size(pixelFmt, width, height, 16);
-    auto buffer = reinterpret_cast<std::uint8_t*>(av_malloc(size));
+    auto buffer = reinterpret_cast<uint8_t*>(av_malloc(size));
     if (!buffer) {
         av_free(picture);
         return nullptr;
@@ -209,8 +220,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
 }
 
 
-void initVideoCodecFromContext(const AVStream* stream,
-                               const AVCodecContext* ctx, VideoCodec& params)
+void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params)
 {
     params.enabled = true;
     params.encoder = avcodec_get_name(ctx->codec_id);

@@ -25,26 +25,28 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace
+    Logger::instance().add(new ConsoleChannel("debug", LInfo)); // LTrace, LDebug
+    Logger::instance().setWriter(new AsyncLogWriter);
 
-    //OpenSSL_add_ssl_algorithms();
 //#if USE_SSL
-//#endif
     //net::SSLManager::initNoVerifyClient();
+//#endif
 
     // Pre-initialize video captures in the main thread
     // av::MediaFactory::instance().loadVideoCaptures();
 
     // Setup WebRTC environment
-    // rtc::LogMessage::LogToDebug(rtc::LERROR);
-    //rtc::LogMessage::LogToDebug(rtc::LS_INFO); // LERROR (rtc::LoggingSeverity)
-    rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE); // LERROR (rtc::LoggingSeverity)
+    rtc::LogMessage::LogToDebug(rtc::LS_INFO); // LS_VERBOSE, LS_INFO, LERROR
     rtc::LogMessage::LogTimestamps();
     rtc::LogMessage::LogThreads();
 
     rtc::InitializeSSL();
 
     {
+        // Video source file
+        std::string sourceFile(SOURCE_FILE);
+
+        // Symple signalling client options
         smpl::Client::Options options;
         options.host = SERVER_HOST;
         options.port = SERVER_PORT;
@@ -55,10 +57,25 @@ int main(int argc, char** argv)
         // authentication for this test.
         // options.token = ""; token based authentication
 
-        Signaler app(options);
+        // Parse command line args
+        OptionParser optparse(argc, argv, "-");
+        for (auto& kv : optparse.args) {
+            const std::string& key = kv.first;
+            const std::string& value = kv.second;
+            DebugL << "Setting option: " << key << ": " << value << std::endl;
+            if (key == "file") {
+                sourceFile = value;
+            }
+            else {
+                std::cerr << "Unrecognized command: " << key << "=" << value << endl;
+            }
+        }
 
+        Signaler app(options);
+        app.startStreaming(sourceFile, true);
+
+        // Process WebRTC threads on the main loop.
         Idler rtc(app.loop, [](void* arg) {
-            // TraceL << "Running WebRTC loop" << endl;
             auto thread = reinterpret_cast<rtc::Thread*>(arg);
             thread->ProcessMessages(10);
         }, rtc::Thread::Current());

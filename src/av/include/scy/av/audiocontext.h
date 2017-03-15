@@ -63,8 +63,8 @@ struct AudioContext
     AVFrame* frame;      ///< last encoded or decoded frame
     AudioResampler* resampler;
     int outputFrameSize; ///< encoder or decoder output frame size
-    std::int64_t time;   ///< stream time in nanoseconds
-    std::int64_t pts;    ///< encoder current pts
+    int64_t time;   ///< stream time in nanoseconds
+    int64_t pts;    ///< encoder current pts
     /// FPSCounter fps;         ///< encoder or decoder fps rate
     std::string error; ///< error message
 };
@@ -75,6 +75,8 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx,
                             const AVFrame* frame, AVPacket* opacket);
+bool frameIsPlanar(const std::string& pixfmt);
+bool frameIsPlanar(AVSampleFormat format);
 
 
 } // namespace av

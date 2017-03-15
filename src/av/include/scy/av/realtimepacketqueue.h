@@ -23,8 +23,8 @@ namespace av {
 
 
 /// This class emits media packets based on their realtime pts value.
-template <class PacketT> class RealtimePacketQueue
-    : public AsyncPacketQueue<PacketT>
+template <class PacketT> 
+class RealtimePacketQueue : public AsyncPacketQueue<PacketT>
 {
 public:
     typedef AsyncPacketQueue<PacketT> BaseQueue;
@@ -34,10 +34,28 @@ public:
     {
     }
 
-    virtual ~RealtimePacketQueue() {}
+    virtual ~RealtimePacketQueue() 
+    {
+    }
 
-    /// Return the current duration from stream start in microseconds
-    std::int64_t realTime() { return (time::hrtime() - _startTime) / 1000; }
+    // Add an item to the queue
+    virtual void push(PacketT* item)
+    {
+        assert(dynamic_cast<PacketT*>(item));
+        BaseQueue::push(item);
+        //BaseQueue::sort<MediaPacketTimeCompare>();
+
+        //std::sort(_queue.begin(), _queue.end(), 
+        //    [](const PacketT* a, const PacketT* b)
+        //        { return a->time < b->time; }
+        //);
+    }
+
+    // Return the current duration from stream start in microseconds
+    int64_t realTime() 
+    { 
+        return (time::hrtime() - _startTime) / 1000; 
+    }
 
 protected:
     virtual PacketT* popNext()
@@ -46,12 +64,13 @@ protected:
             return nullptr;
 
         auto next = BaseQueue::front();
+        InfoS(this) << "@@@@@@@@@@@ next " << next->time << " < " << realTime() << std::endl;
         if (next->time > realTime())
             return nullptr;
         BaseQueue::pop();
 
-        // TraceS(this) << "popNext: " << BaseQueue::size() << ": " << realTime()
-        //             << " > " << next->time << std::endl;
+        InfoS(this) << "################################## popNext: " << BaseQueue::size() << ": " << realTime()
+            << " > " << next->time << std::endl;
         return next;
     }
 
@@ -66,16 +85,15 @@ protected:
         BaseQueue::onStreamStateChange(state);
     }
 
-    std::int64_t _startTime;
+    struct MediaPacketTimeCompare
+    {
+        bool operator()(const MediaPacket* a, const MediaPacket* b) {
+            return a->time < b->time;
+        }
+    };
+
+    int64_t _startTime;
 };
-
-
-// struct MediaPacketTimeCompare
-// {
-//     bool operator()(const MediaPacket* a, const MediaPacket* b) {
-//         return a->time > b->time;
-//     }
-// };
 
 
 } // namespace av
