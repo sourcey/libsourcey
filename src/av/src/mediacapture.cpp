@@ -35,6 +35,8 @@ MediaCapture::MediaCapture()
     , _video(nullptr)
     , _audio(nullptr)
     , _stopping(false)
+    , _looping(false)
+    , _realtime(false)
 {
     TraceS(this) << "Create" << endl;
     initializeFFmpeg();
@@ -179,8 +181,6 @@ void MediaCapture::start()
         _stopping = false;
         _thread.start(std::bind(&MediaCapture::run, this));
     }
-
-    TraceS(this) << "Starting: OK" << endl;
 }
 
 
@@ -195,8 +195,6 @@ void MediaCapture::stop()
         TraceS(this) << "Terminating thread" << endl;
         _thread.join();
     }
-
-    TraceS(this) << "Stopping: OK" << endl;
 }
 
 
@@ -214,12 +212,18 @@ void MediaCapture::run()
 
     try {
         int res;
-        int64_t videoPtsOffset = 0;
-        int64_t audioPtsOffset = 0;
         AVPacket ipacket;
         av_init_packet(&ipacket);
 
-        // Reset the read stream to the beginning when looping
+        // Looping variables
+        int64_t videoPtsOffset = 0;
+        int64_t audioPtsOffset = 0;
+
+        // Realtime variables
+        int64_t lastTimestamp = time::hrtime();
+        int64_t frameInterval = _video ? fpsToInterval(_video->iparams.fps) : 0;
+
+        // Reset the stream back to the beginning when looping is enabled
         if (_looping) {
             for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
                 if (avformat_seek_file(_formatCtx, i, 0, 0, 0, AVSEEK_FLAG_FRAME) < 0) {
@@ -232,6 +236,7 @@ void MediaCapture::run()
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
             TraceS(this) << "Read frame: pts=" << ipacket.pts
                          << ", dts=" << ipacket.dts << endl;
+
             if (_stopping)
                 break;
             if (_video && ipacket.stream_index == _video->stream->index) {
@@ -248,6 +253,15 @@ void MediaCapture::run()
                     TraceS(this) << "Decoded video: "
                                  << "time=" << _video->time << ", "
                                  << "pts=" << _video->pts << endl;
+                }
+
+                // Pause the input stream in realtime mode if the 
+                // decoder is working too fast
+                if (_realtime) {
+                    while ((time::hrtime() - lastTimestamp) < frameInterval) {
+                        scy::sleep(1);
+                    }
+                    lastTimestamp = time::hrtime();
                 }
             } 
             else if (_audio && ipacket.stream_index == _audio->stream->index) {
@@ -343,10 +357,16 @@ AudioDecoder* MediaCapture::audio() const
 }
 
 
-void MediaCapture::setLooping(bool flag)
+void MediaCapture::setLoopInput(bool flag)
 {
     _thread.setRepeating(flag);
     _looping = flag;
+}
+
+
+void MediaCapture::setRealtimePlayback(bool flag)
+{
+    _realtime = flag;
 }
 
 

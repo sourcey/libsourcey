@@ -8,10 +8,9 @@ $(document).ready(function() {
         element: '#webrtc-video .video-player',
         engine: 'WebRTC',
         rtcConfig: WEBRTC_CONFIG,
-        mediaConstraints: {
+        iceMediaConstraints: {
             'mandatory': {
                 'OfferToReceiveAudio': true,
-                //'OfferToReceiveAudio': false,
                 'OfferToReceiveVideo': true
             }
         },
@@ -76,23 +75,23 @@ $(document).ready(function() {
 
         else if (m.candidate) {
             // Filter non relay candidates for testing TURN
-            //if (m.candidate.candidate.indexOf('typ relay') == -1) { //typ host
+            // if (m.candidate.candidate.indexOf('typ relay') == -1) { //typ host
             //    console.log("Dropping Candidate:", m.candidate);
             //    return;
-            //}
+            // }
 
-            //console.log("Using Candidate:", m.candidate);
+            // console.log("Using Candidate:", m.candidate);
             player.engine.recvRemoteCandidate(m.candidate);
         }
     });
 
-    //client.on('command', function(c) {
+    // client.on('command', function(c) {
     //    console.log('Recv command:', c)
-    //});
+    // });
 
-    //client.on('event', function(e) {
+    // client.on('event', function(e) {
     //    console.log('Recv event:', e)
-    //});
+    // });
 
     client.on('disconnect', function() {
         console.log('Disconnected from server')
@@ -103,7 +102,7 @@ $(document).ready(function() {
     });
 
     client.on('addPeer', function(peer) {
-        //console.log('Adding peer:', peer)
+        // console.log('Adding peer:', peer)
     });
 
     client.on('removePeer', function(peer) {

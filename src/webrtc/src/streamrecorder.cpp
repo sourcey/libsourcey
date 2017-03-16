@@ -49,7 +49,7 @@ void StreamRecorder::setVideoTrack(webrtc::VideoTrackInterface* track)
     assert(!_videoTrack);
     _videoTrack = track;
     _videoTrack->AddOrUpdateSink(this, rtc::VideoSinkWants());
-    _encoder.options().oformat.video.enabled = true;
+    _encoder.options().iformat.video.enabled = true;
     _awaitingVideo = true;
 }
 
@@ -59,7 +59,7 @@ void StreamRecorder::setAudioTrack(webrtc::AudioTrackInterface* track)
     assert(!_audioTrack);
     _audioTrack = track;
     _audioTrack->AddSink(this);
-    _encoder.options().oformat.audio.enabled = true;
+    _encoder.options().iformat.audio.enabled = true;
     _awaitingAudio = true;
 }
 
@@ -84,8 +84,7 @@ void StreamRecorder::OnFrame(const webrtc::VideoFrame& yuvframe)
 
     if (_encoder.isActive()) {
         // Set AVFrame->data pointers manually so we don't need to copy any data
-        // or
-        // convert the pixel format from YUV to some contiguous format.
+        // or convert the pixel format from YUV to some contiguous format.
         auto frame = _encoder.video()->frame;
         frame->data[0] = (uint8_t*)yuvframe.video_frame_buffer()->DataY();
         frame->data[1] = (uint8_t*)yuvframe.video_frame_buffer()->DataU();

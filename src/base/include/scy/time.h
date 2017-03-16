@@ -26,6 +26,15 @@ namespace scy {
 namespace time {
 
 
+/// Constants for calculating time.
+static const int64_t kNumMillisecsPerSec = INT64_C(1000);
+static const int64_t kNumMicrosecsPerSec = INT64_C(1000000);
+static const int64_t kNumNanosecsPerSec = INT64_C(1000000000);
+
+static const int64_t kNumMicrosecsPerMillisec = kNumMicrosecsPerSec / kNumMillisecsPerSec;
+static const int64_t kNumNanosecsPerMillisec = kNumNanosecsPerSec / kNumMillisecsPerSec;
+static const int64_t kNumNanosecsPerMicrosec = kNumNanosecsPerSec / kNumMicrosecsPerSec;
+
 /// The date/time format defined in the ISO 8601 standard.
 /// This is the default format used throughout the library for consistency.
 ///

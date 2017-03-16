@@ -30,6 +30,7 @@
 namespace scy {
 namespace av {
 
+
 /// This class implements a cross platform audio, video, screen and
 /// video file capturer.
 class AV_API MediaCapture : public ICapture, public basic::Runnable
@@ -42,10 +43,10 @@ public:
 
     virtual void openFile(const std::string& file);
     // #ifdef HAVE_FFMPEG_AVDEVICE
-    /// virtual void openCamera(const std::string& device, int width = -1, int
-    /// height = -1, double framerate = -1);    /// virtual void
-    /// openMicrophone(const std::string& device, int channels = -1, int
-    /// sampleRate = -1);
+    // virtual void openCamera(const std::string& device, int width = -1, int
+    //                         height = -1, double framerate = -1);    
+    // virtual void openMicrophone(const std::string& device, int channels = -1, int
+    //                             sampleRate = -1);
     // #endif
     virtual void close();
 
@@ -58,8 +59,11 @@ public:
     virtual void getEncoderAudioCodec(AudioCodec& params);
     virtual void getEncoderVideoCodec(VideoCodec& params);
 
-    /// Set the flag to loop the input file
-    void setLooping(bool flag);
+    /// Continuously loop the input file when set
+    void setLoopInput(bool flag);
+
+    /// Playback video in real time when set
+    void setRealtimePlayback(bool flag);
 
     AVFormatContext* formatCtx() const;
     VideoDecoder* video() const;
@@ -67,7 +71,7 @@ public:
     bool stopping() const;
     std::string error() const; 
     
-    /// Notifies that the capture thread is closing.
+    /// Signals that the capture thread is closing.
     /// Careful, this signal is emitted from inside the tread contect.
     NullSignal Closing;
 
@@ -85,6 +89,7 @@ protected:
     std::string _error;
     bool _stopping;
     bool _looping;
+    bool _realtime;
 };
 
 

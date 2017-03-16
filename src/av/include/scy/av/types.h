@@ -89,17 +89,10 @@ struct PlanarVideoPacket : public VideoPacket
     size_t ustride;
     size_t vstride;
 
-    //memcpy(frame->data[0], inputBufferY, frame->linesize[0] * frame->height);
-    //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
-    //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
-
     PlanarVideoPacket(uint8_t* y = nullptr, uint8_t* u = nullptr, uint8_t* v = nullptr,
                       size_t y_stride = 0, size_t u_stride = 0, size_t v_stride = 0,
                       int width = 0, int height = 0, int64_t time = 0)
         : VideoPacket(nullptr, 0, width, height, time)
-        //, ydata(y, y + y_stride)
-        //, udata(u, u + u_stride)
-        //, vdata(v, v + v_stride)
         , ydata(y, y + (y_stride * height))
         , udata(u, u + (u_stride * height / 2))
         , vdata(v, v + (v_stride * height / 2))
@@ -107,6 +100,9 @@ struct PlanarVideoPacket : public VideoPacket
         , ustride(u_stride)
         , vstride(v_stride)
     {
+        //memcpy(frame->data[0], inputBufferY, frame->linesize[0] * frame->height);
+        //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
+        //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
     }
 
     PlanarVideoPacket(const PlanarVideoPacket& r)

@@ -14,6 +14,7 @@
 
 
 #include "scy/av/av.h"
+#include "scy/time.h"
 
 #include <iostream>
 #include <list>
@@ -134,6 +135,33 @@ struct AV_API VideoCodec : public Codec
 
 typedef std::list<Codec> CodecList;
 typedef std::list<Codec*> CodecPList;
+
+
+// ---------------------------------------------------------------------
+//
+inline int64_t fpsToInterval(int fps) 
+{
+    static const int64_t kMinimumInterval = time::kNumNanosecsPerSec / 10000;  // 10k fps.
+    return fps ? time::kNumNanosecsPerSec / fps : kMinimumInterval;
+}
+
+
+inline int intervalToFps(int64_t interval) 
+{
+    if (!interval) {
+        return 0;
+    }
+    return static_cast<int>(time::kNumNanosecsPerSec / interval);
+}
+
+
+inline float intervalToFpsFloat(int64_t interval) 
+{
+    if (!interval) {
+        return 0.f;
+    }
+    return static_cast<float>(time::kNumNanosecsPerSec) / static_cast<float>(interval);
+}
 
 
 } // namespace av

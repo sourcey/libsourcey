@@ -1,17 +1,11 @@
-#webrtc-video {
-    text-align: center;
-}
-
-#webrtc-video h1 {
-    margin: 40px 0 20px;
+body > .container {
+	padding-top: 30px;
 }
 
 #webrtc-video .video-player {
-    width: 640px;
-    height: 480px;
-    margin: 0 auto;
+    margin-bottom: 1rem;
 }
 
 #webrtc-video .symple-player {
-    height: 480px;
+    min-height: 480px;
 }

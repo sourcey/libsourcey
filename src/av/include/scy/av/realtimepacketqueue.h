@@ -21,13 +21,6 @@
 namespace scy {
 namespace av {
 
-      struct MediaPacketTimeCompare
-      {
-          bool operator()(const MediaPacket* a, const MediaPacket* b) {
-              return a->time < b->time;
-          }
-      };
-
 
 /// This class emits media packets based on their realtime pts value.
 template <class PacketT>
@@ -84,6 +77,13 @@ protected:
 
         BaseQueue::onStreamStateChange(state);
     }
+
+    struct MediaPacketTimeCompare
+    {
+        bool operator()(const MediaPacket* a, const MediaPacket* b) {
+            return a->time < b->time;
+        }
+    };
 
     int64_t _startTime;
 };

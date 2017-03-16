@@ -79,7 +79,7 @@ void PeerConnection::createConnection()
 
 void PeerConnection::closeConnection()
 {
-    DebugL << _peerid << ": Closing @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+    DebugL << _peerid << ": Closing" << endl;
 
     if (_peerConnection) {
         _peerConnection->Close();

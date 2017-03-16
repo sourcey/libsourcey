@@ -10,10 +10,11 @@
 
 
 #include "scy/webrtc/videopacketsource.h"
-#include "scy/webrtc/ffmpegvideobuffer.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"
 #include "scy/av/videodecoder.h"
+#include "scy/av/fpscounter.h"
+#include <chrono>
 
 
 using std::endl;
@@ -74,51 +75,45 @@ void VideoPacketSource::setPacketSource(PacketSignal* source)
 
 cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& format)
 {
-    // try {
-        DebugL << "Start" << endl;
+    DebugL << "Start" << endl;
 
-        // NOTE: The requested format must match the input format until
-        // we implememnt pixel format conversion and resizing inside 
-        // this class.
-        RTC_CHECK(_captureFormat == format);
-        if (capture_state() == cricket::CS_RUNNING) {
-            WarnL << "Start called when it's already started." << endl;
-            return capture_state();
-        }
+    // NOTE: The requested format must match the input format until
+    // we implememnt pixel format conversion and resizing inside 
+    // this class.
+    RTC_CHECK(_captureFormat == format);
+    if (capture_state() == cricket::CS_RUNNING) {
+        WarnL << "Start called when it's already started." << endl;
+        return capture_state();
+    }
 
-        if (_source)
-            _source->attach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
+    if (_source)
+        _source->attach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
 
-        SetCaptureFormat(&format);
-        return cricket::CS_RUNNING;
-    // } catch (...) {
-    // }
-    // return cricket::CS_FAILED;
+    SetCaptureFormat(&format);
+    return cricket::CS_RUNNING;
 }
 
 
 void VideoPacketSource::Stop()
 {
-    // try {
-        DebugL << "Stop" << endl;
-        if (capture_state() == cricket::CS_STOPPED) {
-            WarnL << "Stop called when it's already stopped." << endl;
-            return;
-        }
+    DebugL << "Stop" << endl;
+    if (capture_state() == cricket::CS_STOPPED) {
+        WarnL << "Stop called when it's already stopped." << endl;
+        return;
+    }
 
-        if (_source)
-            _source->detach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
+    if (_source)
+        _source->detach(packetSlot(this, &VideoPacketSource::onVideoCaptured));
 
-        SetCaptureFormat(nullptr);
-        SetCaptureState(cricket::CS_STOPPED);
-    // } catch (...) {
-    // }
+    SetCaptureFormat(nullptr);
+    SetCaptureState(cricket::CS_STOPPED);
 }
 
 
 void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 {
     TraceL << "On video frame: " << packet.width << 'x' << packet.height << endl;
+
     assert(packet.width > 0);
     assert(packet.height > 0);
     
@@ -129,21 +124,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
     int crop_x;
     int crop_y;
     int64_t timestamp;
-
-    if (!AdaptFrame(packet.width, packet.height, 0, 0, 
-        &adapted_width, &adapted_height,
-        &crop_width, &crop_height, 
-        &crop_x, &crop_y, nullptr)) {
-        // assert(0 && "adapt frame failed");
-        WarnL << "Adapt frame failed" << packet.time << std::endl;
-        return;
-    }
-
-    rtc::scoped_refptr<webrtc::I420Buffer> buffer = webrtc::I420Buffer::Copy(
-            packet.width, packet.height,
-            packet.ydata.data(), packet.ystride,
-            packet.udata.data(), packet.ustride,
-            packet.vdata.data(), packet.vstride);
+    int64_t translated_camera_time_us;
 
 #if SCY_USE_DECODER_PTS
     // Set the packet timestamp.
@@ -162,9 +143,25 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
      timestamp = _nextTimestamp / rtc::kNumNanosecsPerMicrosec;
 #endif
 
+    if (!AdaptFrame(packet.width, packet.height,
+        timestamp, //rtc::TimeNanos() / rtc::kNumNanosecsPerMicrosec,
+        rtc::TimeMicros(), //0, 0,
+        &adapted_width, &adapted_height,
+        &crop_width, &crop_height, 
+        &crop_x, &crop_y, &translated_camera_time_us)) {
+        WarnL << "Adapt frame failed" << packet.time << std::endl;
+        return;
+    }
+
+    rtc::scoped_refptr<webrtc::I420Buffer> buffer = webrtc::I420Buffer::Copy(
+            packet.width, packet.height,
+            packet.ydata.data(), packet.ystride,
+            packet.udata.data(), packet.ustride,
+            packet.vdata.data(), packet.vstride);
+
     OnFrame(webrtc::VideoFrame(
         buffer, _rotation,
-        timestamp), // _nextTimestamp / rtc::kNumNanosecsPerMicrosec
+        translated_camera_time_us), // timestamp
         packet.width, packet.height);
 
 #if 0 // Old code pre f5297a0

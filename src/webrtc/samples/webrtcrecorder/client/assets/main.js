@@ -7,11 +7,12 @@ $(document).ready(function() {
     player = new Symple.Player({
         element: '#webrtc-video .video-player',
         engine: 'WebRTC',
+        initiator: true,
         rtcConfig: WEBRTC_CONFIG,
-        mediaConstraints: {
+        iceMediaConstraints: {
             'mandatory': {
-                // 'OfferToReceiveAudio': true,
-                // 'OfferToReceiveVideo': true
+                'OfferToReceiveAudio': false,
+                'OfferToReceiveVideo': false
             }
         },
         onStateChange: function(player, state) {
@@ -21,7 +22,7 @@ $(document).ready(function() {
 
     function startPlaybackAndRecording() {
         // player.setup();
-        player.play({ localMedia: true, disableAudio: false, disableVideo: false });
+        player.play(); //{ localMedia: true, disableAudio: false, disableVideo: false }
         player.engine.sendLocalSDP = function(desc) {
             console.log('Send offer:', JSON.stringify(desc))
             client.send({

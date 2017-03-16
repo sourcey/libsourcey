@@ -53,10 +53,10 @@ Signaler::~Signaler()
 }
 
 
-void Signaler::startStreaming(const std::string& file, bool loop)
+void Signaler::startStreaming(const std::string& file, bool looping)
 {
     // Open the video capture
-    _capturer.openFile(file, loop);
+    _capturer.openFile(file, looping);
     _capturer.start();
 }
 
@@ -106,11 +106,9 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    // Create the media stream
-    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
-
-    // Attach decoder output to the peer connection
-    _capturer.addMediaTracks(_factory, stream);
+    // Create the media stream and attach decoder  
+    // output to the peer connection
+    _capturer.addMediaTracks(_factory, conn->createMediaStream());
 
     // Send the Offer SDP
     conn->createConnection();

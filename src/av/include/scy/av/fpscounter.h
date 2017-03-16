@@ -38,8 +38,7 @@ private:
     {
         tickSum -= tickList[tickIndex]; // subtract value falling off
         tickSum += newTick;             // add new value
-        tickList[tickIndex] =
-            newTick; // save new value so it can be subtracted later
+        tickList[tickIndex] = newTick;  // save new value so it can be subtracted later
         tickIndex = (tickIndex + 1) % MAX;
 
         return ((double)tickSum / MAX); // return average
@@ -86,7 +85,10 @@ struct FPSCounter
     double total;
     double fps;
 
-    FPSCounter() { reset(); }
+    FPSCounter() 
+    { 
+        reset(); 
+    }
 
     void tick()
     {
@@ -104,9 +106,15 @@ struct FPSCounter
         frames = 0;
     }
 
-    bool started() { return start != 0; }
+    bool started() 
+    { 
+        return start != 0; 
+    }
 
-    void startFrame() { start = clock(); }
+    void startFrame() 
+    { 
+        start = clock(); 
+    }
 
     double endFrame()
     {
@@ -119,6 +127,7 @@ struct FPSCounter
 };
 
 } // legacy
+
 
 /// This class limits the throughput rate of IPackets
 /// in a PacketStream. If the throughput rate exceeds the
@@ -148,8 +157,8 @@ public:
         if (_counter.started())
             _counter.endFrame();
         if (static_cast<int>(_counter.fps) > _max) {
-            traceL("FPSLimiter", this) << "Dropping packet: " << _counter.fps
-                                       << " > " << _max << std::endl;
+            TraceL << "Dropping packet: " 
+                   << _counter.fps << " > " << _max << std::endl;
             return;
         }
         _counter.startFrame();

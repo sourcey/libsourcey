@@ -22,6 +22,7 @@
 namespace scy {
 
 
+/// Peer connection class for recording the remote peer video.
 class RecordingPeerConnection : public PeerConnection
 {
 public:
@@ -38,7 +39,6 @@ public:
     virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
 
 protected:
-    std::string _file;
     std::unique_ptr<StreamRecorder> _recorder;
 };
 
