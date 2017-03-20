@@ -47,32 +47,6 @@ void Synchronizer::post()
 }
 
 
-// void Synchronizer::startAsync() // FIXME
-// {
-//     // assert(!_handle.active()); // active() can be unreliable when called
-//     // inside thread
-//
-//     _handle.ptr()->data = new Runner::Context::ptr(pContext);
-//     int r = uv_async_init(
-//         _handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
-//             assert(req->data != nullptr); // catch late callbacks, may need to
-//                                           // make uv handle a context member
-//             auto ctx =
-//                 reinterpret_cast<Runner::Context::ptr*>(req->data);
-//             if (ctx->get()->cancelled()) {
-//                 delete ctx; // delete the context and free memory
-//                 req->data = nullptr;
-//                 return;
-//             }
-//
-//             runAsync(ctx->get());
-//         });
-//
-//     if (r < 0)
-//         _handle.setAndThrowError("Cannot initialize async", r);
-// }
-
-
 void Synchronizer::cancel()
 {
     Runner::cancel();

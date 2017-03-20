@@ -222,7 +222,8 @@ bool getInputDeviceList(const std::vector<std::string>& inputs,
           << endl;
     return false;
 #else
-    AVFormatContext* ctx = nullptr;
+    AVFormatContextHolder ctx(avformat_alloc_context());
+    // AVFormatContext* ctx = nullptr;
     AVInputFormat* iformat = nullptr;
 
     iformat = findDefaultInputFormat(inputs);
@@ -232,7 +233,7 @@ bool getInputDeviceList(const std::vector<std::string>& inputs,
     }
 
     // Alloc an input device context
-    if (!(ctx = avformat_alloc_context())) {
+    if (!ctx) {
         assert(0);
         goto fail;
     }
@@ -264,10 +265,10 @@ bool getInputDeviceList(const std::vector<std::string>& inputs,
     //     assert((ctx->oformat && ctx->oformat->get_device_list) ||
     //         (ctx->iformat && ctx->iformat->get_device_list));
 
-    enumerateDeviceList(ctx, type, devices);
+    enumerateDeviceList(ctx.get(), type, devices);
 
 fail:
-    avformat_free_context(ctx);
+    // avformat_free_context(ctx);
 
     return !devices.empty();
 #endif
@@ -283,7 +284,8 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs,
     return false;
 #else
 
-    AVFormatContext* ctx = nullptr;
+    AVFormatContextHolder ctx(avformat_alloc_context());
+    //AVFormatContext* ctx = nullptr;
     AVOutputFormat* oformat = nullptr;
 
     oformat = findDefaultOutputFormat(outputs);
@@ -292,7 +294,7 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs,
         return false;
     }
 
-    if (!(ctx = avformat_alloc_context())) {
+    if (!ctx) {
         assert(0);
         goto fail;
     }
@@ -318,11 +320,11 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs,
         ctx->priv_data = nullptr;
     }
 
-    enumerateDeviceList(ctx, type, devices);
+    enumerateDeviceList(ctx.get(), type, devices);
 
 fail:
-    if (ctx)
-        avformat_free_context(ctx);
+    //if (ctx)
+    //    avformat_free_context(ctx);
 
     return !devices.empty();
 #endif

@@ -30,10 +30,14 @@ public:
     typedef std::shared_ptr<AudioCapture> Ptr;
 
     AudioCapture();
-    AudioCapture(const std::string& device, int channels = -1, int sampleRate = -1);
+    AudioCapture(const std::string& device, const av::AudioCodec& params);
+    AudioCapture(const std::string& device, int channels = -1, int sampleRate = -1, 
+                 const std::string& sampleFmt = "");
     virtual ~AudioCapture();
 
-    virtual void open(const std::string& device, int channels = -1, int sampleRate = -1);
+    virtual void openAudio(const std::string& device, const av::AudioCodec& params);
+    virtual void openAudio(const std::string& device, int channels = -1, int sampleRate = -1, 
+                           const std::string& sampleFmt = "");
 };
 
 

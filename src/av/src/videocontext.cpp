@@ -31,6 +31,7 @@ VideoContext::VideoContext()
     , conv(nullptr)
     , time(0)
     , pts(0)
+    , seconds(0)
 {
     TraceS(this) << "Create" << endl;
     initializeFFmpeg();
@@ -53,7 +54,7 @@ void VideoContext::create()
 
 void VideoContext::open()
 {
-    TraceS(this) << "Open: "
+    DebugS(this) << "Open: "
                  << "\n\tInput: " << iparams.toString()
                  << "\n\tOutput: " << oparams.toString() << endl;
 
@@ -99,6 +100,7 @@ void VideoContext::close()
 
     time = 0;
     pts = 0;
+    seconds = 0;
     error = "";
 
     TraceS(this) << "Closing: OK" << endl;
@@ -201,6 +203,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     if (!picture)
         return nullptr;
 
+    // TODO: Replace with AVFrameHolder
     int size = av_image_get_buffer_size(pixelFmt, width, height, 16);
     auto buffer = reinterpret_cast<uint8_t*>(av_malloc(size));
     if (!buffer) {
@@ -208,8 +211,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
         return nullptr;
     }
 
-    av_image_fill_arrays(picture->data, picture->linesize, buffer, pixelFmt,
-                         width, height, 1);
+    av_image_fill_arrays(picture->data, picture->linesize, buffer, pixelFmt, width, height, 1);
 
     // FFmpeg v3.1.4 does not set width and height values for us anymore
     picture->width = width;

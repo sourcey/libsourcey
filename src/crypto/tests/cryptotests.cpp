@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     // Cypher
     //
     describe("aes256 cypher", []() {
-        testCipher("aes256", 10000);
+        testCipher("aes-256-cbc", 10000);
     });
 
     // =========================================================================

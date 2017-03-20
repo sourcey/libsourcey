@@ -3,11 +3,8 @@
 #include "snapshotresponder.h"
 #include "streamingresponder.h"
 #include "websocketresponder.h"
-
-#include "scy/av/flvmetadatainjector.h"
 #include "scy/av/formatregistry.h"
-#include "scy/av/mediacapture.h"
-#include "scy/av/mediafactory.h"
+#include "scy/av/devicemanager.h"
 #include "scy/av/multiplexpacketencoder.h"
 #include "scy/collection.h"
 
@@ -18,10 +15,6 @@
 
 using namespace std;
 using namespace scy;
-using namespace scy::av;
-
-
-#define SERVER_PORT 1328
 
 
 namespace scy {
@@ -33,36 +26,37 @@ namespace scy {
 
 
 MediaServer::MediaServer(std::uint16_t port)
-    : http::Server(port, new HTTPStreamingConnectionFactory(this))
+    : http::Server(net::Address("0.0.0.0", port), 
+                   net::makeSocket<net::TCPSocket>(),
+                   new HTTPStreamingConnectionFactory(this))
 {
     DebugL << "Create" << endl;
 
     // Register the media formats we will be using
-    FormatRegistry& formats = MediaFactory::instance().formats();
+    // FormatRegistry& formats = MediaFactory::instance().formats();
 
     // Adobe Flash Player requires that audio files be 16bit and have a sample
     // rate of 44.1khz.
     // Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps,
     // 64kbps, 128kbps, 160kbps or 256kbps.
     // NOTE: 128000 works fine for 44100, but 64000 is borked!
-    formats.registerFormat(
-        Format("MP3", "mp3",
-               AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));
+    formats.registerFormat(av::Format("MP3", "mp3", 
+        av::AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));
 
-    formats.registerFormat(
-        Format("FLV", "flv", VideoCodec("FLV", "flv", 320, 240)));
+    formats.registerFormat(av::Format("FLV", "flv",
+        av::VideoCodec("FLV", "flv", 320, 240)));
 
-    formats.registerFormat(Format("FLV-Speex", "flv",
-                                  VideoCodec("FLV", "flv", 320, 240),
-                                  AudioCodec("Speex", "libspeex", 1, 16000)));
+    formats.registerFormat(av::Format("FLV-Speex", "flv",
+        av::VideoCodec("FLV", "flv", 320, 240),
+        av::AudioCodec("Speex", "libspeex", 1, 16000)));
 
-    formats.registerFormat(
-        Format("Speex", "flv", AudioCodec("Speex", "libspeex", 1, 16000)));
+    formats.registerFormat(av::Format("Speex", "flv",
+        av::AudioCodec("Speex", "libspeex", 1, 16000)));
 
-    formats.registerFormat(
-        Format("MJPEG", "mjpeg", VideoCodec("MJPEG", "mjpeg", 480, 320, 20)));
+    formats.registerFormat(av::Format("MJPEG", "mjpeg",
+        av::VideoCodec("MJPEG", "mjpeg", 480, 320, 20)));
 
-    // TODO: Add h264 and newer audio formats when time permits
+    // TODO: Add h264 and newer audio formats
 }
 
 
@@ -72,8 +66,7 @@ MediaServer::~MediaServer()
 }
 
 
-void MediaServer::setupPacketStream(PacketStream& stream,
-                                    const StreamingOptions& options,
+void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options,
                                     bool freeCaptures, bool attachPacketizers)
 {
     DebugL << "Setup Packet Stream" << endl;
@@ -87,19 +80,15 @@ void MediaServer::setupPacketStream(PacketStream& stream,
         // assert(dynamic_cast<av::VideoCapture*>(options.videoCapture.get()));
         // assert(dynamic_cast<av::ICapture*>(options.videoCapture.get()));
 
-        // auto source =
-        // dynamic_cast<PacketSource*>(options.videoCapture.get());
+        // auto source = dynamic_cast<PacketSource*>(options.videoCapture.get());
         // assert(source);
-        // if (!source) throw std::runtime_error("Cannot attach incompatible
-        // packet source.");
+        // if (!source) throw std::runtime_error("Cannot attach incompatible packet source.");
 
-        stream.attachSource<av::VideoCapture>(options.videoCapture,
-                                              true); // freeCaptures,
+        stream.attachSource<av::VideoCapture>(options.videoCapture, true); // freeCaptures,
     }
     if (options.oformat.audio.enabled) {
         assert(options.audioCapture);
-        stream.attachSource<av::AudioCapture>(options.audioCapture,
-                                              true); // freeCaptures,
+        stream.attachSource<av::AudioCapture>(options.audioCapture, true); // freeCaptures,
     }
 
     // Attach an FPS limiter to the stream
@@ -107,9 +96,8 @@ void MediaServer::setupPacketStream(PacketStream& stream,
 
     // Attach an async queue so we don't choke
     // the video capture while encoding.
-    auto async =
-        new AsyncPacketQueue(2048); // options.oformat.name == "MJPEG" ? 10 :
-    stream.attach(async, 3, true);
+    // auto async = new AsyncPacketQueue<>(2048);
+    // stream.attach(async, 3, true);
 
     // Attach the video encoder
     auto encoder = new av::MultiplexPacketEncoder(options);
@@ -120,16 +108,15 @@ void MediaServer::setupPacketStream(PacketStream& stream,
     if (options.oformat.name == "MJPEG") {
 
         // Base64 encode the MJPEG stream for old browsers
-        if (options.encoding.empty() || options.encoding == "none" ||
-            options.encoding == "None") {
+        if (options.encoding.empty() || options.encoding == "none" || options.encoding == "None") {
             // no default encoding
         } else if (options.encoding == "Base64") {
             auto base64 = new Base64PacketEncoder();
             stream.attach(base64, 10, true);
         } else
-            throw std::runtime_error("Unsupported encoding method: " +
-                                     options.encoding);
-    } else if (options.oformat.name == "FLV") {
+            throw std::runtime_error("Unsupported encoding method: " + options.encoding);
+    } 
+    else if (options.oformat.name == "FLV") {
 
         // Allow mid-stream flash client connection
         // FIXME: Broken in latest flash
@@ -139,28 +126,25 @@ void MediaServer::setupPacketStream(PacketStream& stream,
 
     // Attach the HTTP output framing
     IPacketizer* framing = nullptr;
-    if (options.framing.empty() || options.framing == "none" ||
-        options.framing == "None")
+    if (options.framing.empty() || options.framing == "none" || options.framing == "None")
         ;
-    // framing = new http::StreamingAdapter("image/jpeg");
+        // framing = new http::StreamingAdapter("image/jpeg");
 
     else if (options.framing == "chunked")
         framing = new http::ChunkedAdapter("image/jpeg");
 
     else if (options.framing == "multipart")
-        framing = new http::MultipartAdapter(
-            "image/jpeg", options.encoding == "Base64"); // false,
+        framing = new http::MultipartAdapter("image/jpeg", options.encoding == "Base64"); // false,
 
     else
-        throw std::runtime_error("Unsupported framing method: " +
-                                 options.framing);
+        throw std::runtime_error("Unsupported framing method: " + options.framing);
 
     if (framing)
         stream.attach(framing, 15, true);
 
     // Attach a sync queue to synchronize output with the event loop
-    auto sync = new SyncPacketQueue;
-    stream.attach(sync, 20, true);
+     auto sync = new SyncPacketQueue<>;
+     stream.attach(sync, 20, true);
 }
 
 
@@ -169,15 +153,18 @@ void MediaServer::setupPacketStream(PacketStream& stream,
 //
 
 
-HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(
-    MediaServer* server)
+HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(MediaServer* server)
     : _server(server)
 {
 }
 
 
-StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(
-    http::ServerConnection& conn)
+HTTPStreamingConnectionFactory:: ~HTTPStreamingConnectionFactory() 
+{
+}
+
+
+StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::ServerConnection& conn)
 {
     auto& request = conn.request();
 
@@ -185,97 +172,93 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(
     StreamingOptions options(_server);
     NVCollection params;
     request.getURIParameters(params);
-    FormatRegistry& formats = MediaFactory::instance().formats();
 
     // An exception will be thrown if no format was provided,
     // or if the request format is not registered.
-    options.oformat = formats.get(params.get("format", "MJPEG"));
+    options.oformat = _server->formats.get(params.get("format", "MJPEG"));
     if (params.has("width"))
-        options.oformat.video.width =
-            util::strtoi<std::uint32_t>(params.get("width"));
+        options.oformat.video.width = util::strtoi<std::uint32_t>(params.get("width"));
     if (params.has("height"))
-        options.oformat.video.height =
-            util::strtoi<std::uint32_t>(params.get("height"));
+        options.oformat.video.height = util::strtoi<std::uint32_t>(params.get("height"));
     if (params.has("fps"))
-        options.oformat.video.fps =
-            util::strtoi<std::uint32_t>(params.get("fps"));
+        options.oformat.video.fps = util::strtoi<std::uint32_t>(params.get("fps"));
     if (params.has("quality"))
-        options.oformat.video.quality =
-            util::strtoi<std::uint32_t>(params.get("quality"));
+        options.oformat.video.quality = util::strtoi<std::uint32_t>(params.get("quality"));
 
     // Response encoding and framing options
     options.encoding = params.get("encoding", "");
     options.framing = params.get("framing", "");
 
-    // Video captures must be initialized in the main thread.
-    // See MediaFactory::loadVideo
+    // Open video and audio captures.
     av::Device dev;
-    auto& media = av::MediaFactory::instance();
+    av::DeviceManager devman;
     if (options.oformat.video.enabled) {
-        media.devices().getDefaultCamera(dev);
+        devman.getDefaultCamera(dev);
         InfoL << "Default video capture " << dev.id << endl;
-        options.videoCapture = media.createVideoCapture(dev.id);
+        options.videoCapture = std::make_shared<av::VideoCapture>();
+        options.videoCapture->open(dev.id, options.oformat.video.width, 
+                                           options.oformat.video.height, 
+                                           options.oformat.video.fps);
         options.videoCapture->getEncoderFormat(options.iformat);
     }
     if (options.oformat.audio.enabled) {
-        media.devices().getDefaultMicrophone(dev);
+        devman.getDefaultMicrophone(dev);
         InfoL << "Default audio capture " << dev.id << endl;
-        options.audioCapture =
-            media.createAudioCapture(0, options.oformat.audio.channels,
-                                     options.oformat.audio.sampleRate);
+        options.audioCapture = std::make_shared<av::AudioCapture>();
+        options.audioCapture->open(dev.id, options.oformat.audio.channels, 
+                                           options.oformat.audio.sampleRate);
         options.audioCapture->getEncoderFormat(options.iformat);
     }
 
-    if (!options.audioCapture && !options.audioCapture) {
-        throw std::runtime_error(
-            "No audio or video devices are available for capture");
+    if (!options.videoCapture && !options.audioCapture) {
+        throw std::runtime_error("No audio or video devices are available for capture");
     }
 
     return options;
 }
 
-http::ServerResponder*
-HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn)
+
+http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn)
 {
     try {
         auto& request = conn.request();
 
         // Log incoming requests
         InfoL << "Incoming connection from " << conn.socket()->peerAddress()
-              << ": URI:\n"
-              << request.getURI() << ": Request:\n"
-              << request << endl;
+              << ": URI:\n" << request.getURI() 
+              << ": Request:\n" << request << endl;
 
         // Handle websocket connections
-        if (request.has("Sec-WebSocket-Key") ||
-            request.getURI().find("/websocket") == 0) {
-            return new WebSocketRequestHandler(conn,
-                                               createStreamingOptions(conn));
+        if (request.getURI().find("/websocket") == 0 || request.has("Sec-WebSocket-Key")) {
+            return new WebSocketRequestHandler(conn, createStreamingOptions(conn));
         }
 
         // Handle HTTP streaming
         if (request.getURI().find("/streaming") == 0) {
-            return new StreamingRequestHandler(conn,
-                                               createStreamingOptions(conn));
+            return new StreamingRequestHandler(conn, createStreamingOptions(conn));
         }
 
         // Handle relayed media requests
         if (request.getURI().find("/relay") == 0) {
-            return new RelayedStreamingResponder(conn,
-                                                 createStreamingOptions(conn));
+            return new RelayedStreamingResponder(conn, createStreamingOptions(conn));
         }
 
+#ifdef HAVE_OPENCV
         // Handle HTTP snapshot requests
         if (request.getURI().find("/snapshot") == 0) {
-            return new SnapshotRequestHandler(conn,
-                                              createStreamingOptions(conn));
+            return new SnapshotRequestHandler(conn, createStreamingOptions(conn));
         }
-    } catch (std::exception& exc) {
+#endif
+    } 
+    catch (std::exception& exc) {
         ErrorL << "Request error: " << exc.what() << endl;
     }
 
-    ErrorL << "Bad Request" << endl;
-    return new http::BadRequestHandler(conn);
+    WarnL << "Bad Request" << endl;
+    conn.response().setStatus(http::StatusCode::BadRequest);
+    conn.sendHeader();
+    conn.close();
+    return nullptr;
 }
 
 
@@ -291,61 +274,12 @@ StreamingOptions::StreamingOptions(MediaServer* server,
     , videoCapture(videoCapture)
     , audioCapture(audioCapture)
 {
-    DebugS(this) << "Destroy" << endl;
 }
+ 
 
 StreamingOptions::~StreamingOptions()
 {
-    DebugS(this) << "Destroy" << endl;
 }
 
 
 } // namespace scy
-
-
-static void onShutdown1(void* opaque)
-{
-    reinterpret_cast<MediaServer*>(opaque)->shutdown();
-}
-
-
-int main(int argc, char** argv)
-{
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    // Logger::instance().setWriter(new AsyncLogWriter);
-    {
-        // Pre-initialize video captures in the main thread
-        MediaFactory::instance().loadVideoCaptures();
-
-        // Start the application and server
-        Application app;
-        {
-            MediaServer server(SERVER_PORT);
-            server.start();
-
-            // Wait for Ctrl-C
-            app.waitForShutdown(onShutdown1, &server);
-        }
-
-        // Free all pointers pending garbage collection
-        //
-        // Do this before shutting down the MediaFactory as
-        // capture instances may be pending deletion and we
-        // need to dereference the implementation instances
-        // so system devices can be properly released.
-        // GarbageCollector::destroy();
-
-        // Shutdown the media factory and release devices
-        MediaFactory::instance().unloadVideoCaptures();
-        MediaFactory::shutdown();
-
-        // Shutdown the garbage collector once and for all
-        // GarbageCollector::instance().shutdown();
-
-        // Finalize the application to free all memory
-        // Note: 2 tiny mem leaks (964 bytes) are from OpenCV
-        app.finalize();
-    }
-    Logger::destroy();
-    return 0;
-}

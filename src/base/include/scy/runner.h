@@ -175,14 +175,14 @@ inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
     c->tid = std::this_thread::get_id();
     c->running = true;
     do {
-        try {
+//        try {
             func(std::forward<Args>(args)...);
-        } catch (std::exception& exc) {
-            // std::cout << "Runner error: " << exc.what() << std::endl;
-#ifdef _DEBUG
-            throw exc;
-#endif
-        }
+//        } catch (std::exception& exc) {
+//            // std::cout << "Runner error: " << exc.what() << std::endl;
+//#ifdef _DEBUG
+//            throw exc;
+//#endif
+//        }
         scy::sleep(1);
     } while (c->repeating && !c->cancelled);
     c->running = false;

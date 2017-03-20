@@ -30,6 +30,8 @@ namespace http {
 
 
 class HTTP_API Server;
+class HTTP_API ServerResponder;
+
 
 /// HTTP server connection.
 class HTTP_API ServerConnection : public Connection
@@ -56,8 +58,59 @@ protected:
 
 protected:
     Server& _server;
+    ServerResponder* _responder;
     bool _upgrade;
 };
+
+
+/// The abstract base class for HTTP ServerResponders
+/// created by HTTP Server.
+///
+/// Derived classes should override the onRequest() method.
+///
+/// A new ServerResponder object can be created for
+/// each new HTTP request that is received by the HTTP Server.
+///
+class HTTP_API ServerResponder
+{
+public:
+    ServerResponder(ServerConnection& connection) :
+        _connection(connection)
+    {
+    }
+
+    virtual ~ServerResponder() {}
+
+    virtual void onHeaders(Request& /* request */) {}
+    virtual void onPayload(const MutableBuffer& /* body */) {}
+    virtual void onRequest(Request& /* request */, Response& /* response */) {}
+    virtual void onClose() {};
+
+    ServerConnection& connection()
+    {
+        return _connection;
+    }
+
+    Request& request()
+    {
+        return _connection.request();
+    }
+
+    Response& response()
+    {
+        return _connection.response();
+    }
+
+protected:
+    ServerConnection& _connection;
+
+private:
+    ServerResponder(const ServerResponder&) = delete;
+    ServerResponder(ServerResponder&&) = delete;
+    ServerResponder& operator=(const ServerResponder&) = delete;
+    ServerResponder& operator=(ServerResponder&&) = delete;
+};
+
 
 
 // -------------------------------------------------------------------
@@ -73,10 +126,17 @@ public:
 
     /// Factory method for instantiating the ServerConnection
     /// instance using the given Socket.
-    ServerConnection::Ptr createConnection(Server& server, const net::TCPSocket::Ptr& socket)
+    virtual ServerConnection::Ptr createConnection(Server& server, const net::TCPSocket::Ptr& socket)
     {
         return std::make_shared<ServerConnection>(server, socket);
-    };
+    }
+
+    /// Factory method for instantiating the ServerResponder
+    /// instance using the given ServerConnection.
+    virtual ServerResponder* createResponder(ServerConnection& connection)
+    {
+        return nullptr;
+    }
 };
 
 
@@ -91,7 +151,9 @@ public:
 class HTTP_API Server : public net::SocketAdapter
 {
 public:
-    Server(const net::Address& address, net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>());
+    Server(const net::Address& address,
+        net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>(),
+        ServerConnectionFactory* factory = new ServerConnectionFactory());
     virtual ~Server();
 
     /// Start the HTTP server.
@@ -111,6 +173,8 @@ public:
     NullSignal Shutdown;
 
 protected:
+    ServerResponder* createResponder(ServerConnection& conn);
+
     void onClientSocketAccept(const net::TCPSocket::Ptr& socket);
     void onConnectionReady(ServerConnection& conn);
     void onConnectionClose(ServerConnection& conn);

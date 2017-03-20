@@ -84,7 +84,6 @@ public:
     /// Returns a typecasted pointer to the managed `libuv` handle.
     template <class T> T* ptr() const
     {
-        assertThread(); // conflict with uv_async_send in Synchronizer
         return reinterpret_cast<T*>(_ptr);
     }
 

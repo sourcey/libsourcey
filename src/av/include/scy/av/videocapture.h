@@ -22,6 +22,7 @@
 namespace scy {
 namespace av {
 
+
 /// This class implements a cross platform audio capturer.
 class AV_API VideoCapture : public MediaCapture
 {

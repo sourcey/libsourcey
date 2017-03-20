@@ -34,6 +34,7 @@ AudioContext::AudioContext()
     , outputFrameSize(0)
     , time(0)
     , pts(AV_NOPTS_VALUE)
+    , seconds(0)
 {
     initializeFFmpeg();
 }
@@ -48,7 +49,7 @@ AudioContext::~AudioContext()
 
 void AudioContext::open()
 {
-    TraceS(this) << "Open: "
+    DebugS(this) << "Open: "
                  << "\n\tInput: " << iparams.toString()
                  << "\n\tOutput: " << oparams.toString() << endl;
 
@@ -94,6 +95,7 @@ void AudioContext::close()
 
     time = 0;
     pts = 0;
+    seconds = 0;
     // error = "";
 }
 

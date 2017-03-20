@@ -4,8 +4,11 @@
 
 #include "config.h"
 #include "scy/application.h"
-#include "scy/av/mediafactory.h"
+#include "scy/av/videocapture.h"
+#include "scy/av/audiocapture.h"
 #include "scy/av/multiplexencoder.h"
+#include "scy/av/devicemanager.h"
+#include "scy/av/formatregistry.h"
 #include "scy/http/server.h"
 #include "scy/logger.h"
 #include "scy/packetstream.h"
@@ -51,18 +54,24 @@ public:
                                   const StreamingOptions& options,
                                   bool freeCaptures = true,
                                   bool attachPacketizers = false);
+
+    av::FormatRegistry formats;
 };
 
 
 // ----------------------------------------------------------------------------
 // HTTP Streaming Connection Factory
 //
-class HTTPStreamingConnectionFactory : public http::ServerResponderFactory
+class HTTPStreamingConnectionFactory : public http::ServerConnectionFactory
 {
 public:
     HTTPStreamingConnectionFactory(MediaServer* server);
+    virtual ~HTTPStreamingConnectionFactory();
 
-    http::ServerResponder* createResponder(http::ServerConnection& conn);
+    virtual http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn);
+    //virtual http::ServerConnection::Ptr createConnection(http::Server& server, const net::TCPSocket::Ptr& socket);
+
+    //http::ServerResponder* createResponder(http::ServerConnection& conn);
     StreamingOptions createStreamingOptions(http::ServerConnection& conn);
     MediaServer* _server;
 };

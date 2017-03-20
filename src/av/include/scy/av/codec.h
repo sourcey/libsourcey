@@ -35,8 +35,8 @@ struct AV_API Codec
     std::string encoder; ///< The encoder name for FFmpeg.
     int sampleRate;      ///< The sampling rate or RTP clock rate.
     int bitRate;         ///< The bit rate to encode at.
-    int quality; ///< Optional quality value, variable range depending on codec.
-    bool enabled; ///< Weather or not the codec is available for use.
+    int quality;         ///< Optional quality value, variable range depending on codec.
+    bool enabled;        ///< Weather or not the codec is available for use.
 
     //
     // Ctors/Dtors
@@ -72,30 +72,33 @@ struct AV_API Codec
 struct AV_API AudioCodec : public Codec
 {
     int channels;
-    std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p,
-                           ///fltp, dblp
-    /// int frameSize;  // Frame size (optional value set by encoder/decoder)
-    /// /// int bufferSize; // Buffer size (optional value set by
-    /// encoder/decoder)
+    std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
+    // int frameSize;  // Frame size (optional value set by encoder/decoder)
+    // int bufferSize; // Buffer size (optional value set by encoder/decoder)
 
-    AudioCodec();
+    // AudioCodec();
+    AudioCodec(int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
+               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+               const std::string& sampleFmt = "",  // = DEFAULT_AUDIO_SAMPLE_FMT
+               int bitRate = 0);   // = DEFAULT_AUDIO_BIT_RATE
     AudioCodec(const std::string& name,
-               int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
-               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
-               int bitRate = 0,    // = DEFAULT_AUDIO_BIT_RATE
-               const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
-    AudioCodec(const std::string& name, const std::string& encoder,
-               int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
-               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
-               int bitRate = 0,    // = DEFAULT_AUDIO_BIT_RATE
-               const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
-    /// AudioCodec(const AudioCodec& r);
+               int channels = 0,
+               int sampleRate = 0,
+               int bitRate = 0,
+               const std::string& sampleFmt = "");
+    AudioCodec(const std::string& name, 
+               const std::string& encoder,
+               int channels = 0,
+               int sampleRate = 0,
+               int bitRate = 0,
+               const std::string& sampleFmt = "");
+    // AudioCodec(const AudioCodec& r);
     virtual ~AudioCodec();
 
     virtual std::string toString() const;
     virtual void print(std::ostream& ost);
 
-    /// AudioCodec& operator==(const AudioCodec& that);
+    // AudioCodec& operator==(const AudioCodec& that);
 };
 
 
@@ -115,16 +118,19 @@ struct AV_API VideoCodec : public Codec
     double fps;
     std::string pixelFmt;
 
-    VideoCodec();
-    VideoCodec(const std::string& name, int width = 0, int height = 0,
-               double fps = 20, int bitRate = DEFAULT_VIDEO_BIT_RATE,
-               int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE,
-               const std::string& pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);
+    VideoCodec(int width = 0, int height = 0, double fps = 0.0,
+               const std::string& pixelFmt = "", // = DEFAULT_VIDEO_PIXEL_FMT
+               int bitRate = 0,                  // = DEFAULT_VIDEO_BIT_RATE
+               int sampleRate = 0);              // = DEFAULT_VIDEO_SAMPLE_RATE
+    VideoCodec(const std::string& name, int width = 0, int height = 0, double fps = 0.0,
+               int bitRate = 0, 
+               int sampleRate = 0,
+               const std::string& pixelFmt = "");
     VideoCodec(const std::string& name, const std::string& encoder,
-               int width = 0, int height = 0, double fps = 20,
-               int bitRate = DEFAULT_VIDEO_BIT_RATE,
-               int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE,
-               const std::string& pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);
+               int width = 0, int height = 0, double fps = 0.0,
+               int bitRate = 0,
+               int sampleRatee = 0,
+               const std::string& pixelFmt = 0);
     VideoCodec(const VideoCodec& r);
     virtual ~VideoCodec();
 

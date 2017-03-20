@@ -564,7 +564,6 @@ void PacketStream::startSources()
 
 void PacketStream::stopSources()
 {
-
     auto sources = this->sources();
     for (auto& source : sources) {
         if (source->syncState) {

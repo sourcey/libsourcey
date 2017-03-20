@@ -273,9 +273,8 @@ ssize_t ConnectionAdapter::send(const char* data, size_t len, int flags)
     //
     //     // Swallow the exception, the socket error will
     //     // cause the connection to close on next iteration.
+    //     return -1;
     // }
-
-    return -1;
 }
 
 

@@ -38,7 +38,7 @@ VideoConverter::~VideoConverter()
 
 void VideoConverter::create()
 {
-    //#if 0
+//#if 0
     TraceS(this) << "Create:"
                  << "\n\tInput Width: " << iparams.width
                  << "\n\tInput Height: " << iparams.height
@@ -46,7 +46,7 @@ void VideoConverter::create()
                  << "\n\tOutput Width: " << oparams.width
                  << "\n\tOutput Height: " << oparams.height
                  << "\n\tOutput Pixel Format: " << oparams.pixelFmt << endl;
-    //#endif
+//#endif
 
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");
@@ -90,7 +90,9 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
                  << "\n\tIn Size: " << iframe->width << "x" << iframe->height
                  << "\n\tOut Format: " << oparams.pixelFmt
                  << "\n\tOut Size: " << oparams.width << "x" << oparams.height
-                 << "\n\tPTS: " << iframe->pkt_pts << endl;
+                 << "\n\tPTS: " << iframe->pts
+                 << "\n\tPacket PTS: " << iframe->pkt_pts
+                 << endl;
 
     assert(iframe);
     assert(iframe->data[0]);
@@ -122,8 +124,7 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
 
     // Set the input PTS or a monotonic value to keep the encoder happy.
     // The actual setting of the PTS is outside the scope of this encoder.
-    // oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts :
-    // ctx->frame_number;
+    // oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
 
     return oframe;
 }

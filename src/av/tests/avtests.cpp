@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
+    //Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace, LDebug
     //Logger::instance().setWriter(new AsyncLogWriter);
     test::initialize();
 
@@ -22,8 +22,10 @@ int main(int argc, char** argv)
     // describe("audio capture", new AudioCaptureTest);
     // describe("audio capture encoder", new AudioCaptureEncoderTest);
     // describe("audio capture resampler", new AudioCaptureResamplerTest);
-    // describe("video file transcoder", new VideoFileTranscoderTest);
     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
+    
+    describe("h264 video file transcoder", new VideoFileTranscoderTest);
+    //describe("h264 multiplex capture encoder", new H264MultiplexEncoderTest);
 #endif
 
     describe("realtime media queue", new RealtimeMediaQueueTest);
@@ -39,39 +41,37 @@ int main(int argc, char** argv)
 // //
 //
 // describe("device manager", []() {
-//     cout << "Starting" << endl;
+//     DebugL << "Starting" << endl;
 //     auto& deviceManager = av::MediaFactory::instance().devices();
 //
 //     av::Device device;
 //     if (deviceManager.getDefaultCamera(device)) {
-//         cout << "Default video device: " << device.id << ": " << device.name
-//         << endl;
+//         DebugL << "Default video device: " << device.id << ": " << device.name << endl;
 //     }
 //     if (deviceManager.getDefaultMicrophone(device)) {
-//         cout << "Default audio device: " << device.id << ": " << device.name
-//         << endl;
+//         DebugL << "Default audio device: " << device.id << ": " << device.name << endl;
 //     }
 //
 //     std::vector<av::Device> devices;
 //     if (deviceManager.getCameras(devices)) {
-//         cout << "Num video devices: " << devices.size() << endl;
+//         DebugL << "Num video devices: " << devices.size() << endl;
 //         for (auto& device : devices) {
-//             cout << "Printing video device: " << device.id << ": " <<
+//             DebugL << "Printing video device: " << device.id << ": " <<
 //             device.name << endl;
 //         }
 //     }
 //     else {
-//         cout << "No video devices detected!" << endl;
+//         DebugL << "No video devices detected!" << endl;
 //     }
 //     if (deviceManager.getMicrophones(devices)) {
-//         cout << "Num audio devices: " << devices.size() << endl;
+//         DebugL << "Num audio devices: " << devices.size() << endl;
 //         for (auto& device : devices) {
-//             cout << "Printing audio device: " << device.id << ": " <<
+//             DebugL << "Printing audio device: " << device.id << ": " <<
 //             device.name << endl;
 //         }
 //     }
 //     else {
-//         cout << "No video devices detected!" << endl;
+//         DebugL << "No video devices detected!" << endl;
 //     }
 //
 //     // TODO: verify data integrity?

@@ -115,9 +115,7 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
             return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory, devices);
         default:
             // assert(0 && "unknown dshow device type");
-            DebugL
-                << "DirectShow cannot enumerate output devices: Not implemented"
-                << endl;
+            DebugL << "DirectShow cannot enumerate output devices: Not implemented" << endl;
             break;
     }
 

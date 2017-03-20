@@ -47,7 +47,10 @@ VideoCapture::~VideoCapture()
 
 void VideoCapture::open(const std::string& device, int width, int height, double framerate)
 {
-    TraceS(this) << "Opening camera: " << device << endl;
+    TraceS(this) << "Opening camera: " << device << ", "
+                 << "width=" << width << ", "
+                 << "height=" << height << ", "
+                 << "framerate=" << framerate << endl;
 
     DeviceManager devman;
     auto iformat = devman.findVideoInputFormat();
@@ -55,19 +58,36 @@ void VideoCapture::open(const std::string& device, int width, int height, double
         throw std::runtime_error("Couldn't find camera input format.");
 
     AVDictionary* iparams = nullptr;
+    AVDictionaryCleanup cleanup{ &iparams };
+
+    // Set custom parameters for devices.
+    // NOTE: This doesn't work for DirectShow.
+#ifndef SCY_WIN
     if (width > 0 && height > 0)
         av_dict_set(&iparams, "video_size", util::format("%dx%d", width, height).c_str(), 0);
     if (framerate > 0)
         av_dict_set(&iparams, "framerate", util::format("%f", framerate).c_str(), 0);
 
     // Set the desired pixel format
-    av_dict_set(&iparams, "pixel_format", "yuv420p", 0);
+    // TODO: Use yuv420p once encoders support PlanarVideoPacket input
+    av_dict_set(&iparams, "pixel_format", "bgr24", 0); // yuv420p
+#endif
 
     openStream(device.c_str(), iformat, &iparams);
 
-    // FIXME: Possible memory leak where av_dict_free not 
-    // called if error thrown in openStream 
-    av_dict_free(&iparams);
+    // Set the decoder video output parameters for conversion context.
+    // NOTE: Must be done after `openStream`.
+    // If the input device wouldn't accept our parameters then we will
+    // perform pixel conversions and resizing ourself (on the decoder).
+    if (_video) {
+        _video->oparams.pixelFmt = "bgr24"; // yuv420p
+        if (width > 0)
+            _video->oparams.width = width;
+        if (height > 0)
+            _video->oparams.height = height;
+        if (framerate > 0)
+            _video->oparams.fps = framerate;
+    }
 }
 
 

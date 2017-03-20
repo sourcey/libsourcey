@@ -109,7 +109,8 @@ ssize_t WebSocketAdapter::send(const char* data, size_t len, const net::Address&
         flags = ws::SendFlags::Text;
 
     // Frame and send the data
-    Buffer buffer(len + WebSocketFramer::MAX_HEADER_LENGTH);
+    Buffer buffer;
+    buffer.reserve(len + WebSocketFramer::MAX_HEADER_LENGTH);
     BitWriter writer(buffer);
     framer.writeFrame(data, len, flags, writer);
 

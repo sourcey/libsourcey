@@ -401,9 +401,10 @@ BitWriter::BitWriter(char* bytes, size_t size, ByteOrder order)
 
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
-    if (buf.size() == 0)
-        buf.resize(1024);
-    init(&buf[0], buf.capacity(), order);
+    if (buf.capacity() == 0) {
+        buf.reserve(256);
+    }
+    init(buf.data(), buf.capacity(), order); //&buf[0]
 }
 
 

@@ -68,15 +68,14 @@ std::tm toUTC(const std::time_t& time)
 std::string print(const std::tm& dt, const char* fmt)
 {
 #if defined(WIN32)
-    // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a
-    // "const struct tm* "
-    // ref. C++11 standard: ISO/IEC 14882:2011, � 27.7.1,
+    // BOGUS hack done for VS2012: C++11 non-conformant since
+    // it SHOULD take a `const struct tm*`
+    // ref. C++11 standard: ISO/IEC 14882:2011, � 27.7.1
     std::ostringstream oss;
     oss << std::put_time(const_cast<std::tm*>(&dt), fmt);
     return oss.str();
 
-#else
-    // LINUX
+#else // LINUX
     const size_t size = 1024;
     char buffer[size];
     auto success = std::strftime(buffer, size, fmt, &dt);

@@ -22,6 +22,7 @@
 #include "scy/av/realtimepacketqueue.h"
 #include "scy/av/videocapture.h"
 #include "scy/base.h"
+#include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/test.h"
 #include "scy/util.h"
@@ -40,18 +41,44 @@ namespace scy {
 static const int kNumberFramesWanted = 200;
 static const int kInNumSamples = 1024;
 
+#ifdef SCY_WIN
+// Use native aac encoder on Windows since newer FFmpeg  
+// version should always be available.
+#define ACC_ENCODER "aac"
+#else
+// Use libfdk_aac on Linux since native FFmpeg aac 
+// encoder is shaky on older versions.
+#define ACC_ENCODER "libfdk_aac"
+#endif
+
 #define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4", "mp4",                \
-           av::VideoCodec("H.264", "libx264", 400, 300),                       \
-           av::AudioCodec("AAC", "libfdk_aac"));
+            av::VideoCodec("libx264", 400, 300),                               \
+            av::AudioCodec(ACC_ENCODER));
 
 #define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4",                  \
-           av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
-           av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+            av::VideoCodec("libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
+            av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
+
+#define VP8_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4",                  \
+            av::VideoCodec("vp8", 400, 300, 25, 48000, 128000, "yuv420p"),     \
+            av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
 
 
 // =============================================================================
 // Helpers
 //
+
+std::string sampleDataDir(const std::string& file)
+{
+    std::string dir;
+    fs::addnode(dir, SCY_SOURCE_DIR);
+    fs::addnode(dir, "av");
+    fs::addnode(dir, "samples");
+    fs::addnode(dir, "data");
+    if (!file.empty())
+        fs::addnode(dir, file);
+    return dir;
+}
 
 // Prepare a dummy YUV image
 #ifdef HAVE_FFMPEG
@@ -119,8 +146,7 @@ std::vector<std::uint16_t*> createTestAudioSamplesS16(
     auto vec = std::vector<std::uint16_t*>();
     do {
         auto samples = new std::uint16_t[bufferSize];
-        fillAudioSamplesUInt(samples, params.sampleRate, params.channels,
-                             nbSamples, &t);
+        fillAudioSamplesUInt(samples, params.sampleRate, params.channels, nbSamples, &t);
         vec.push_back(samples);
     } while (--numFrames);
     return vec;
@@ -139,8 +165,7 @@ std::vector<double*> createTestAudioSamplesDBL(
     auto vec = std::vector<double*>();
     do {
         auto samples = new double[bufferSize];
-        fillAudioSamples(samples, params.sampleRate, params.channels, nbSamples,
-                         &t);
+        fillAudioSamples(samples, params.sampleRate, params.channels, nbSamples, &t);
         vec.push_back(samples);
     } while (--numFrames);
     return vec;
@@ -150,6 +175,75 @@ std::vector<double*> createTestAudioSamplesDBL(
 
 #ifdef HAVE_FFMPEG
 
+// =============================================================================
+// Video File Transcoder
+//
+
+class VideoFileTranscoderTest : public Test
+{
+    void run()
+    {
+        av::EncoderOptions options;
+        options.ofile = "transcoderoutput.mp4";
+        options.oformat = MP4_H264_AAC_REALTIME_FORMAT;
+
+        // Create a media capture to read and decode the input file
+        auto capture(std::make_shared<av::MediaCapture>());
+        capture->openFile("test.mp4");
+        capture->getEncoderFormat(options.iformat);
+        // options.iformat.audio.enabled = false;
+        // options.iformat.video.enabled = false;
+
+        // Create the multiplex encoder
+        auto encoder(std::make_shared<av::MultiplexPacketEncoder>(options));
+
+        // Create a PacketStream to pass packets from the
+        // file capture to the encoder
+        PacketStream stream;
+        stream.attachSource(capture, true);
+        stream.attach(encoder, 5);
+        stream.start();
+
+        while (!capture->stopping()) {
+            DebugL << "Waiting for completion" << endl;
+            scy::sleep(10);
+        }
+
+        // capture video time: 59958333 
+        // capture video ctx->frame_number: 1440
+        // capture audio time: 60093242 
+        // capture audio ctx->frame_number: 1295
+        
+        int captureAudioSeconds = 60;
+        int captureVideoSeconds = 59;
+        expect(capture->audio()->time > captureAudioSeconds * time::kNumMicrosecsPerSec);
+        expect(capture->video()->time > captureVideoSeconds * time::kNumMicrosecsPerSec);
+        expect(capture->audio()->time < (captureAudioSeconds + 1) * time::kNumMicrosecsPerSec);
+        expect(capture->video()->time < (captureVideoSeconds + 1) * time::kNumMicrosecsPerSec);
+        expect(capture->audio()->seconds > captureAudioSeconds);
+        expect(capture->video()->seconds > captureVideoSeconds);
+        expect(capture->audio()->seconds < (captureAudioSeconds + 1));
+        expect(capture->video()->seconds < (captureVideoSeconds + 1));
+        
+        // encoder video: 57416640
+        // encoder video ctx->frame_number: 1440
+        // encoder audio time: 60046802 
+        // encoder audio ctx->frame_number: 2589
+        
+        int encoderAudioSeconds = 60;
+        int encoderVideoSeconds = 57;
+        expect(encoder->audio()->time > encoderAudioSeconds * time::kNumMicrosecsPerSec);
+        expect(encoder->video()->time > encoderVideoSeconds * time::kNumMicrosecsPerSec);
+        expect(encoder->audio()->time < (encoderAudioSeconds + 1) * time::kNumMicrosecsPerSec);
+        expect(encoder->video()->time < (encoderVideoSeconds + 1) * time::kNumMicrosecsPerSec);
+        expect(encoder->audio()->seconds > encoderAudioSeconds);
+        expect(encoder->video()->seconds > encoderVideoSeconds);
+        expect(encoder->audio()->seconds < (encoderAudioSeconds + 1));
+        expect(encoder->video()->seconds < (encoderVideoSeconds + 1));
+
+        // TODO: verify data integrity
+    }
+};
 
 // =============================================================================
 // Audio Encoder
@@ -182,25 +276,24 @@ class AudioEncoderTest : public Test
 
         output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted,
-                                                     kInNumSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            encoder.encode(reinterpret_cast<std::uint8_t*>(samples),
-                           kInNumSamples, AV_NOPTS_VALUE);
+            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
         }
 
         encoder.flush();
         encoder.close();
         output.close();
-        util::clearVector<>(testSamples); /// TODO: verify data integrity
+        util::clearVector<>(testSamples); 
+        
+        // TODO: verify data integrity
         expect(numFramesEncoded > 0);
     }
 
     void onAudioEncoded(av::AudioPacket& packet)
     {
         numFramesEncoded++;
-        output.write(reinterpret_cast<const char*>(packet.data()),
-                     packet.size());
+        output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
     }
 };
 
@@ -228,12 +321,10 @@ class AudioResamplerTest : public Test
 
         std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted,
-                                                     kInNumSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
             // auto data = reinterpret_cast<std::uint8_t*>(samples);
-            if (resampler.resample(reinterpret_cast<std::uint8_t**>(&samples),
-                                   kInNumSamples)) {
+            if (resampler.resample(reinterpret_cast<std::uint8_t**>(&samples), kInNumSamples)) {
                 output.write(
                     reinterpret_cast<const char*>(resampler.outSamples[0]),
                     resampler.outBufferSize);
@@ -242,7 +333,9 @@ class AudioResamplerTest : public Test
 
         resampler.close();
         output.close();
-        util::clearVector<>(testSamples); /// TODO: verify data integrity
+        util::clearVector<>(testSamples);
+
+        // TODO: verify data integrity
     }
 };
 
@@ -276,42 +369,6 @@ class AudioBufferTest : public Test
 
 
 // =============================================================================
-// Video File Transcoder
-//
-class VideoFileTranscoderTest : public Test
-{
-    void run()
-    {
-        av::EncoderOptions options;
-        options.ofile = "transcoderoutput.mp4";
-        options.oformat = av::Format(
-            "MP4", "mp4", av::VideoCodec("H.264", "libx264", 480, 320),
-            av::AudioCodec("AAC", "libfdk_aac"));
-
-        // Create a media capture to read and decode the input file
-        auto capture(std::make_shared<av::MediaCapture>());
-        capture->openFile("test.mp4");
-        capture->getEncoderFormat(options.iformat);
-
-        // Create the multiplex encoder
-        auto encoder(std::make_shared<av::MultiplexPacketEncoder>(options));
-
-        // Create a PacketStream to pass packets from the
-        // file capture to the encoder
-        PacketStream stream;
-        stream.attachSource(capture, true);
-        stream.attach(encoder, 5);
-        stream.start();
-
-        while (!capture->stopping()) {
-            cout << "Waiting for completion" << endl;
-            scy::sleep(10);
-        } // TODO: verify data integrity
-    }
-};
-
-
-// =============================================================================
 // Audio Capture
 //
 class AudioCaptureTest : public Test
@@ -329,8 +386,7 @@ class AudioCaptureTest : public Test
         av::Device device;
         av::DeviceManager devman;
         if (!devman.getDefaultMicrophone(device)) {
-            WarnL << "Skipping audio test because no microphone is available"
-                  << endl;
+            WarnL << "Skipping audio test because no microphone is available" << endl;
             return;
         }
 
@@ -348,7 +404,7 @@ class AudioCaptureTest : public Test
         expect(oparams.sampleRate == inSampleRate);
 
         while (numFramesRemaining > 0 && !capture.stopping()) {
-            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
 
@@ -361,8 +417,7 @@ class AudioCaptureTest : public Test
                << ", time=" << packet.time << endl;
         if (numFramesRemaining) {
             numFramesRemaining--;
-            output.write(reinterpret_cast<const char*>(packet.data()),
-                         packet.size());
+            output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
         }
     }
 };
@@ -388,8 +443,7 @@ class AudioCaptureEncoderTest : public Test
         av::Device device;
         av::DeviceManager devman;
         if (!devman.getDefaultMicrophone(device)) {
-            WarnL << "Skipping audio test because no microphone is available"
-                  << endl;
+            WarnL << "Skipping audio test because no microphone is available" << endl;
             return;
         }
 
@@ -422,17 +476,16 @@ class AudioCaptureEncoderTest : public Test
 
         // numFramesRemaining = kNumberFramesWanted; // * 8
         while (numFramesRemaining > 0 && !capture.stopping()) {
-            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
 
         // while(!capture.stopping()) {
         //     scy::sleep(10);
         // }
-        // cout << "Waiting for completion" << endl;
+        // DebugL << "Waiting for completion" << endl;
 
-        cout << "Number samples remaining: " << encoder.fifo.available()
-             << endl;
+        DebugL << "Number samples remaining: " << encoder.fifo.available() << endl;
         // assert(encoder.fifo.available() == 0);
         expect(encoder.fifo.available() < 1024);
 
@@ -448,20 +501,17 @@ class AudioCaptureEncoderTest : public Test
     {
         TraceL << "On audio packet: samples=" << packet.numSamples
                << ", time=" << packet.time << endl;
-        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()),
-                       packet.numSamples, AV_NOPTS_VALUE);
+        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
     }
 
     void onAudioEncoded(av::AudioPacket& packet)
     {
         if (numFramesRemaining) {
             numFramesRemaining--;
-            output.write(reinterpret_cast<const char*>(packet.data()),
-                         packet.size());
+            output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
         }
     }
 };
-
 
 // =============================================================================
 // Audio Capture Resampler
@@ -490,8 +540,7 @@ class AudioCaptureResamplerTest : public Test
         av::Device device;
         av::DeviceManager devman;
         if (!devman.getDefaultMicrophone(device)) {
-            WarnL << "Skipping audio test because no microphone is available"
-                  << endl;
+            WarnL << "Skipping audio test because no microphone is available" << endl;
             return;
         }
 
@@ -510,7 +559,7 @@ class AudioCaptureResamplerTest : public Test
 
         // numFramesRemaining = kNumberFramesWanted; // * 8;
         while (numFramesRemaining > 0) {
-            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
 
@@ -518,7 +567,7 @@ class AudioCaptureResamplerTest : public Test
         capture.stop();
         resampler.close();
         output.close();
-        cout << "numFramesRemaining: " << numFramesRemaining << endl;
+        DebugL << "numFramesRemaining: " << numFramesRemaining << endl;
 
         // TODO: verify data integrity
         expect(numFramesRemaining == 0);
@@ -528,7 +577,7 @@ class AudioCaptureResamplerTest : public Test
     {
         if (numFramesRemaining) {
             numFramesRemaining--;
-            cout << "On audio packet: " << packet.size() << endl;
+            DebugL << "On audio packet: " << packet.size() << endl;
             auto data = reinterpret_cast<std::uint8_t*>(packet.data());
             if (resampler.resample(&data, packet.numSamples)) {
                 output.write(
@@ -568,7 +617,7 @@ class AudioCaptureResamplerTest : public Test
 //         if (numFramesRemaining) {
 //             numFramesRemaining--;
 //             DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
-//             // cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+//             // DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
 //         }
 //         else {
 //             stream.stop();
@@ -597,7 +646,7 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
 
     void start()
     {
-        cout << "Start" << endl;
+        DebugL << "Start" << endl;
         runner.start([](void* arg) {
             auto self = reinterpret_cast<MockMediaPacketSource*>(arg);
             if (self->numFramesRemaining) {
@@ -618,13 +667,13 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
 
     void stop()
     {
-        cout << "Stop" << std::endl;
+        DebugL << "Stop" << std::endl;
         runner.cancel();
     }
 
     void onStreamStateChange(const PacketStreamState& state)
     {
-        cout << "Stream state: " << state << endl;
+        DebugL << "Stream state: " << state << endl;
 
         if (state.equals(PacketStreamState::Closed) ||
             state.equals(PacketStreamState::Error)) {
@@ -651,7 +700,7 @@ class RealtimeMediaQueueTest : public Test
         stream.emitter += packetSlot(this, &RealtimeMediaQueueTest::onPacketPlayout);
 
         while (numFramesRemaining > 0) {
-            // cout << "Waiting for completion: " << numFramesRemaining << endl;
+            // DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
 
@@ -664,7 +713,7 @@ class RealtimeMediaQueueTest : public Test
         // auto pkt = reinterpret_cast<av::MediaPacket*>(packet);
         if (numFramesRemaining) {
             numFramesRemaining--;
-            cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+            DebugL << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
         } else {
             stream.stop();
         }
@@ -691,7 +740,7 @@ class RealtimeMediaQueueTest : public Test
 //             testVideoCapture();
 //             testVideoCaptureStream();
 //
-//             MediaFactory::instance().devices().print(cout);
+//             MediaFactory::instance().devices().print(DebugL);
 //             audioCapture = new AudioCapture(device.id, 2, 44100);
 //
 //             videoCapture = new VideoCapture(0, true);
@@ -881,7 +930,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     if (!(pFormat = av_find_input_format(formatName)))
 //     {
-//         std::cout << "can't find input format " << formatName << "\n";
+//         std::DebugL << "can't find input format " << formatName << "\n";
 //         return false;
 //     }
 //
@@ -889,7 +938,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     if(!FormatCtx.is_valid())
 //     {
-//         std::cout << "\n NULL CONTEXT \n ";
+//         std::DebugL << "\n NULL CONTEXT \n ";
 //         return false;
 //     }
 //

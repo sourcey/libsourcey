@@ -84,54 +84,6 @@ void MediaCapture::openFile(const std::string& file)
 }
 
 
-// // #ifdef HAVE_FFMPEG_AVDEVICE
-//
-// void MediaCapture::openCamera(const std::string& device, int width, int
-// height, double fps)
-// {
-//     TraceS(this) << "Opening camera: " << device << endl;
-//
-//     auto iformat = DeviceManager::instance().findVideoInputFormat();
-//     if (!iformat)
-//         throw std::runtime_error("Couldn't find camera input format.");
-//
-//     AVDictionary* iparams = nullptr;
-//     if (width > 0 && height > 0)
-//         av_dict_set(&iparams, "video_size", util::format("%dx%d", width,
-//         height).c_str(), 0);
-//     if (fps > 0)
-//         av_dict_set(&iparams, "framerate", util::format("%f", fps).c_str(),
-//         0);
-//
-//     openStream(device.c_str(), iformat, &iparams);
-//
-//     av_dict_free(&iparams); // FIXME: possible memory leak
-// }
-//
-//
-// void MediaCapture::openMicrophone(const std::string& device, int channels,
-// int sampleRate)
-// {
-//     TraceS(this) << "Opening microphone: " << device << endl;
-//
-//     auto iformat = DeviceManager::instance().findAudioInputFormat();
-//     if (!iformat)
-//         throw std::runtime_error("Couldn't find microphone input format.");
-//
-//     AVDictionary* iparams = nullptr;
-//     if (sampleRate > 0)
-//         av_dict_set_int(&iparams, "sample_rate", sampleRate, 0);
-//     if (channels > 0)
-//         av_dict_set_int(&iparams, "channels", channels, 0);
-//
-//     openStream(device.c_str(), iformat, &iparams);
-//
-//     av_dict_free(&iparams); // FIXME: possible memory leak
-// }
-//
-// // #endif
-
-
 void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
     TraceS(this) << "Opening stream: " << filename << endl;
@@ -152,13 +104,13 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
         auto codec = stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             _video = new VideoDecoder(stream);
-            _video->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
+            _video->emitter.attach(packetSlot(this, &MediaCapture::emit));
             _video->create();
             _video->open();
         } 
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _audio = new AudioDecoder(stream);
-            _audio->emitter.attach(packetSlot(this, &MediaCapture::emit)); // proxy packets
+            _audio->emitter.attach(packetSlot(this, &MediaCapture::emit));
             _audio->create();
             _audio->open();
         }
@@ -239,6 +191,7 @@ void MediaCapture::run()
 
             if (_stopping)
                 break;
+
             if (_video && ipacket.stream_index == _video->stream->index) {
 
                 // Set the PTS offset when looping
@@ -305,7 +258,7 @@ void MediaCapture::run()
     if (_stopping || !_looping) {
         TraceS(this) << "Exiting" << endl;
         _stopping = true;
-        Closing.emit(/*this*/);
+        Closing.emit();
     }
 }
 
@@ -322,6 +275,14 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_audio) {
+        // HACK: Decoder output does not properly support planar 
+        // formats. By calling this method it means a transcoder
+        // is in use, so force a interleaved output format.
+        // Note: This can be removed when planar formats are fully supported via
+        // the av::VideoPacket interface.
+        // Default to s16 output.
+        _audio->oparams.sampleFmt = "s16";
+
         params = _audio->oparams;
     }
 }
@@ -331,6 +292,14 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_video) {
+        // HACK: Decoder output does not properly support planar 
+        // formats. By calling this method it means a transcoder
+        // is in use, so force a interleaved output format.
+        // Note: This can be removed when planar formats are fully supported via
+        // the av::VideoPacket interface.
+        // Default to bgr24 output.
+        _video->oparams.pixelFmt = "bgr24";
+
         params = _video->oparams;
     }
 }

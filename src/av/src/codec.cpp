@@ -111,19 +111,26 @@ void Codec::print(std::ostream& ost)
 //
 
 
-AudioCodec::AudioCodec()
-    : Codec("Unknown", 0, 0, false)
-    , // DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE
-    // channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
-    channels(0) //, sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
+//AudioCodec::AudioCodec()
+//    : Codec("Unknown", 0, 0, false)
+//    , channels(0) 
+//    // channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
+//{
+//}
+
+
+AudioCodec::AudioCodec(int channels, int sampleRate, 
+                       const std::string& sampleFmt, int bitRate)
+    : Codec(name, sampleRate, bitRate, true)
+    , channels(channels)
+    , sampleFmt(sampleFmt)
 {
-    // assert(0);
 }
 
 
 AudioCodec::AudioCodec(const std::string& name, int channels, int sampleRate,
-                       int bitRate, const std::string& sampleFmt)
-    : Codec(name, encoder, sampleRate, bitRate, true)
+    int bitRate, const std::string& sampleFmt)
+    : Codec(name, sampleRate, bitRate, true)
     , channels(channels)
     , sampleFmt(sampleFmt)
 {
@@ -185,19 +192,29 @@ void AudioCodec::print(std::ostream& ost)
 //
 
 
-VideoCodec::VideoCodec()
-    : Codec("Unknown", 0, 0, false)
-    , // DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE
-    width(0)
-    , height(0)
-    , fps(0) //, pixelFmt(DEFAULT_VIDEO_PIXEL_FMT)
+//VideoCodec::VideoCodec()
+//    : Codec("Unknown", 0, 0, false)
+//    , width(0)
+//    , height(0)
+//    , fps(0) //, pixelFmt(DEFAULT_VIDEO_PIXEL_FMT)
+//{
+//}
+
+
+VideoCodec::VideoCodec(int width, int height, double fps, 
+                       const std::string& pixelFmt, int sampleRate, int bitRatet)
+    : Codec(name, sampleRate, bitRate, true)
+    , width(width)
+    , height(height)
+    , fps(fps)
+    , pixelFmt(pixelFmt)
 {
 }
 
 
 VideoCodec::VideoCodec(const std::string& name, int width, int height,
-                       double fps, int sampleRate, int bitRate,
-                       const std::string& pixelFmt)
+    double fps, int sampleRate, int bitRate,
+    const std::string& pixelFmt)
     : Codec(name, sampleRate, bitRate, true)
     , width(width)
     , height(height)

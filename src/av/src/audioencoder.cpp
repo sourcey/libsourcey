@@ -65,8 +65,7 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
     // sure that the audio frame can hold as many samples as specified.
     if ((error = av_frame_get_buffer(frame, 0)) < 0) {
         av_frame_free(&frame);
-        throw std::runtime_error("Could allocate output frame samples: " +
-                                 averror(error));
+        throw std::runtime_error("Could allocate output frame samples: " + averror(error));
     }
 
     return frame;
@@ -80,8 +79,7 @@ void AudioEncoder::create()
 
     // Find the audio encoder
     if (!(codec = avcodec_find_encoder_by_name(oparams.encoder.c_str()))) {
-        if (!format ||
-            !(codec = avcodec_find_encoder(format->oformat->audio_codec)))
+        if (!format || !(codec = avcodec_find_encoder(format->oformat->audio_codec)))
             throw std::runtime_error("Cannot find an audio encoder for: " + oparams.encoder);
     }
 
@@ -91,8 +89,7 @@ void AudioEncoder::create()
 
         // Create a new audio stream in the output file container.
         if (!(stream = avformat_new_stream(format, codec))) {
-            throw std::runtime_error(
-                "Cannot create the audio stream: Out of memory");
+            throw std::runtime_error("Cannot create the audio stream: Out of memory");
         }
 
         ctx = stream->codec;
@@ -188,20 +185,23 @@ void AudioEncoder::close()
 
 void emitPacket(AudioEncoder* enc, AVPacket& opacket)
 {
-    auto sampleFmt = av_get_sample_fmt(enc->oparams.sampleFmt.c_str());
-    assert(av_sample_fmt_is_planar(sampleFmt) == 0 &&
-           "planar formats not supported");
+    // auto sampleFmt = av_get_sample_fmt(enc->oparams.sampleFmt.c_str());
+    // assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
 
-    // enc->time = enc->frame->pkt_pts > 0 ?
-    // static_cast<int64_t>(enc->frame->pkt_pts *
-    // av_q2d(enc->stream->time_base) * 1000) : 0;
-    // enc->pts = enc->frame->pkt_pts;
+    if (enc->stream) {
+        // Set the encoder time in microseconds
+        // This value represents the number of microseconds 
+        // that have elapsed since the brginning of the stream.
+        enc->time = opacket.pts > 0 ? static_cast<int64_t>(
+            opacket.pts * av_q2d(enc->stream->time_base) * AV_TIME_BASE) : 0;
 
-    // Compute stream time in milliseconds
-    if (enc->stream && opacket.pts >= 0) {
-        enc->time = static_cast<int64_t>(
-            opacket.pts * av_q2d(enc->stream->time_base) * 1000);
+        // Set the encoder seconds since stream start
+        // enc->seconds = enc->time / time::kNumMicrosecsPerSec;
+        // enc->seconds = (opacket.pts - enc->stream->start_time) * av_q2d(enc->stream->time_base);
+        enc->seconds = opacket.pts * av_q2d(enc->stream->time_base);
     }
+
+    // Set the encoder pts in stream time base
     enc->pts = opacket.pts;
 
     assert(opacket.data);
@@ -209,12 +209,11 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
     // assert(opacket.pts >= 0);
     // assert(opacket.dts >= 0);
 
-    AudioPacket audio(opacket.data, opacket.size, enc->outputFrameSize,
-                      enc->time);
+    AudioPacket audio(opacket.data, opacket.size, enc->outputFrameSize, enc->time);
     audio.source = &opacket;
     audio.opaque = enc;
 
-    enc->emitter.emit(/*enc, */ audio);
+    enc->emitter.emit(audio);
 }
 
 
@@ -245,7 +244,6 @@ bool AudioEncoder::encode(/*const */ uint8_t* samples, const int numSamples, con
     // Resample input data or add it to the buffer directly
     if (resampler) {
         if (!resampler->resample((uint8_t**)&samples, numSamples)) {
-            // The resampler may buffer frames
             TraceS(this) << "Samples buffered by resampler" << endl;
             return false;
         }
@@ -287,8 +285,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
 
     // Encode the audio frame and store it in the temporary packet.
     // The output audio stream encoder is used to do this.
-    if ((ret = avcodec_encode_audio2(ctx, &opacket, iframe, &frameEncoded)) <
-        0) {
+    if ((ret = avcodec_encode_audio2(ctx, &opacket, iframe, &frameEncoded)) < 0) {
         throw std::runtime_error("Cannot encode audio frame: " + averror(ret));
     }
 
@@ -298,14 +295,11 @@ bool AudioEncoder::encode(AVFrame* iframe)
         if (stream) {
             opacket.stream_index = stream->index;
             //     if (opacket.pts != AV_NOPTS_VALUE)
-            //         opacket.pts  = av_rescale_q(opacket.pts, ctx->time_base,
-            //         stream->time_base);
+            //         opacket.pts  = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
             //     if (opacket.dts != AV_NOPTS_VALUE)
-            //         opacket.dts  = av_rescale_q(opacket.dts, ctx->time_base,
-            //         stream->time_base);
+            //         opacket.dts  = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
             //     if (opacket.duration > 0)
-            //         opacket.duration = (int)av_rescale_q(opacket.duration,
-            //         ctx->time_base, stream->time_base);
+            //         opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
         }
         TraceL << "Audio frame encoded:\n"
                << "\n\tFrame PTS: " << (iframe ? iframe->pts : 0)
@@ -313,7 +307,8 @@ bool AudioEncoder::encode(AVFrame* iframe)
                << "\n\tDuration: " << opacket.duration << endl;
 
         emitPacket(this, opacket);
-    } else {
+    } 
+    else {
         TraceL << "No frame encoded" << endl;
     }
 

@@ -85,7 +85,7 @@ ssize_t SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddr
     // temp buffer for sending.
     else {
         Buffer buf;
-        buf.reserve(2048);
+        buf.reserve(1024);
         packet.write(buf);
         return send(buf.data(), buf.size(), peerAddress, flags);
     }

@@ -18,9 +18,6 @@
 #include "scy/av/av.h"
 #include "scy/signal.h"
 
-
-// #ifdef HAVE_FFMPEG
-
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/ffmpeg.h"
@@ -65,8 +62,7 @@ struct Device
     bool isDefault;
 
     Device();
-    Device(Type type, const std::string& id, const std::string& name,
-           bool isDefault = false);
+    Device(Type type, const std::string& id, const std::string& name, bool isDefault = false);
 
     void print(std::ostream& os);
 

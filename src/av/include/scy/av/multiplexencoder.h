@@ -37,6 +37,7 @@ extern "C" {
 namespace scy {
 namespace av {
 
+
 /// This class implements a multiplex audio and video encoder.
 class AV_API MultiplexEncoder : public IEncoder
 {
@@ -50,25 +51,28 @@ public:
 
     virtual void createVideo();
     virtual void freeVideo();
-    virtual bool encodeVideo(AVFrame* frame); // Encode a single video frame
-    /// If the time is specified it should be the nanosecond offset since
-    /// the start of the input stream. The value will be converted to the
-    /// stream time base internally.
-    /// If no time is specified a realtime time value will be assigned to
-    /// the frame.
+
+    /// Encode a single video frame.
+    /// All frame values must be set, such as size, pizel format and PTS.
+    virtual bool encodeVideo(AVFrame* frame);
+
+    /// Encode a single video frame.
+    /// If the frame time is specified it should be the microseconds  
+    /// offset since the start of the input stream. If no time is specified 
+    /// a realtime time value will be assigned to the frame.
     virtual bool encodeVideo(uint8_t* buffer, int bufferSize, int width,
                              int height, int64_t time = AV_NOPTS_VALUE);
 
-
     virtual void createAudio();
-    virtual void freeAudio(); /// virtual bool encodeAudio(AVFrame* frame);
-                              /// // Encode a single audio frame
+    virtual void freeAudio(); 
+                              
+    /// Encode a single audio frame.
+    // virtual bool encodeAudio(AVFrame* frame);
     virtual bool encodeAudio(uint8_t* buffer, int numSamples,
                              int64_t time = AV_NOPTS_VALUE);
 
     /// Flush and beffered or queued packets.
     virtual void flush();
-
 
     EncoderOptions& options();
     VideoEncoder* video();
@@ -78,12 +82,12 @@ public:
 
 protected:
     bool writeOutputPacket(AVPacket& packet);
-    void updateStreamPts(AVStream* stream, int64_t* pts);
+
+    /// Convert input microseconds to the stream time base.
+    bool updateStreamPts(AVStream* stream, int64_t* pts);
 
     void onVideoEncoded(av::VideoPacket& packet);
     void onAudioEncoded(av::AudioPacket& packet);
-
-    // static Mutex _mutex; // Protects avcodec_open/close()
 
     EncoderOptions _options;
     AVFormatContext* _formatCtx;
@@ -91,12 +95,8 @@ protected:
     AudioEncoder* _audio;
     AVIOContext* _ioCtx;
     uint8_t* _ioBuffer;
-    int _ioBufferSize;
     std::uint64_t _pts;
 };
-
-
-// bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
 
 
 } // namespace av

@@ -76,20 +76,26 @@ void AudioDecoder::close()
 }
 
 
-bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
+bool emitPacket(AudioDecoder* dec)
 {
     auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
     assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
 
-    // Compute stream time in milliseconds
+    // Set the decoder time in microseconds
+    // This value represents the number of microseconds 
+    // that have elapsed since the brginning of the stream.
     dec->time = dec->frame->pkt_pts > 0 ? static_cast<int64_t>(dec->frame->pkt_pts *
-                                                av_q2d(dec->stream->time_base) *
-                                                AV_TIME_BASE) : 0;
+                av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
+
+    // Set the decoder pts in stream time base
     dec->pts = dec->frame->pkt_pts;
 
+    // Set the decoder seconds since stream start
+    // http://stackoverflow.com/questions/6731706/syncing-decoded-video-using-ffmpeg
+    dec->seconds = (dec->frame->pkt_dts - dec->stream->start_time) * av_q2d(dec->stream->time_base);
+
     if (dec->resampler) {
-        if (!dec->resampler->resample((uint8_t**)dec->frame->data,
-                                      dec->frame->nb_samples)) {
+        if (!dec->resampler->resample((uint8_t**)dec->frame->data, dec->frame->nb_samples)) {
             DebugL << "Samples buffered by resampler" << endl;
             return false;
         }
@@ -98,31 +104,20 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
                           dec->resampler->outBufferSize,
                           dec->resampler->outNumSamples, dec->time);
         dec->outputFrameSize = dec->resampler->outNumSamples;
-        dec->emitter.emit(/*dec, */ audio);
+        dec->emitter.emit(audio);
         // opacket.data = dec->resampler->outSamples[0];
         // opacket.size = dec->resampler->outBufferSize;
     } else {
         int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
                                               dec->frame->nb_samples,
                                               dec->ctx->sample_fmt, 0);
-        AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize,
-                          dec->time);
+        AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize, dec->time);
         dec->outputFrameSize = dec->frame->nb_samples;
-        dec->emitter.emit(/*dec, */ audio);
-        // opacket.data = dec->frame->data[0];
-        // opacket.size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
-        //                                                    dec->frame->nb_samples,
-        //                                                    dec->ctx->sample_fmt,
-        //                                                    0);
+        dec->emitter.emit(audio);
     }
 
     // opacket.pts = dec->frame->pkt_pts; // Decoder PTS values may be out of sequence
     // opacket.dts = dec->frame->pkt_dts;
-
-    // Compute stream time in milliseconds
-    // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
-    // av_q2d(dec->stream->time_base) * 1000) : 0;
-    // dec->pts = opacket.pts;
 
     // assert(opacket.data);
     // assert(opacket.size);
@@ -133,24 +128,34 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
 }
 
 
-bool AudioDecoder::decode(uint8_t* data, int size) //, AVPacket& opacket
-{
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.data = data;
-    ipacket.size = size;
-    if (stream)
-        ipacket.stream_index = stream->index;
-    return decode(ipacket); //, opacket
-}
+//bool AudioDecoder::decode(uint8_t* data, int size)
+//{
+//    AVPacket ipacket;
+//    av_init_packet(&ipacket);
+//    ipacket.data = data;
+//    ipacket.size = size;
+//    if (stream)
+//        ipacket.stream_index = stream->index;
+//    return decode(ipacket);
+//}
 
 
-bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
+bool AudioDecoder::decode(AVPacket& ipacket)
 {
     assert(ctx);
     assert(codec);
     assert(frame);
     assert(!stream || ipacket.stream_index == stream->index);
+
+    // Convert input packet to codec time base
+    //ipacket.dts = av_rescale_q_rnd(ipacket.dts,
+    //    stream->time_base,
+    //    stream->codec->time_base,
+    //    AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+    //ipacket.pts = av_rescale_q_rnd(ipacket.pts,
+    //    stream->time_base,
+    //    stream->codec->time_base,
+    //    AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
 
     // av_init_packet(&opacket);
     // opacket.data = nullptr;
@@ -172,7 +177,6 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 
         if (frameDecoded) {
             // assert(bytesDecoded == ipacket.size);
-            // assert(bytesDecoded == )
 
             // TraceS(this) << "Decoded frame:"
             //     << "\n\tFrame Size: " << opacket.size
@@ -185,7 +189,6 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
             //     << endl;
 
             // fps.tick();
-            // return
             emitPacket(this); //, frame, opacket, &ptsSeconds
         }
 
@@ -193,35 +196,6 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
         ipacket.data += ret;
     }
     assert(ipacket.size == 0);
-
-    // XXX: Asserting here to make sure below looping
-    // avcodec_decode_video2 is actually redundant.
-    // Otherwise we need to reimplement this pseudo code:
-    // while(packet->size > 0)
-    // {
-    //      int ret = avcodec_decode_video2(..., ipacket);
-    //      if(ret < -1)
-    //        throw std::runtime_error("error");
-    //
-    //     ipacket->size -= ret;
-    //     ipacket->data += ret;
-    // }
-    // assert(bytesDecoded == bytesRemaining);
-
-    // while (bytesRemaining) // && !frameDecoded
-    // {
-    //     av_frame_unref(frame);
-    //     bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded,
-    //     &ipacket);
-    //     if (bytesDecoded < 0) {
-    //         ErrorS(this) << "Decoder Error" << endl;
-    //         error = "Decoder error";
-    //         throw std::runtime_error(error);
-    //     }
-    //
-    //     bytesRemaining -= bytesDecoded;
-    // }
-
     return !!frameDecoded;
 }
 

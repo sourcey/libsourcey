@@ -10,20 +10,14 @@
 
 
 #include "scy/av/ffmpeg.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 
 #ifdef HAVE_FFMPEG
 
 #include <mutex>
 #include <iostream>
 #include <stdexcept>
-
-
-extern "C" {
-#include <libavformat/avformat.h>
-#ifdef HAVE_FFMPEG_AVDEVICE
-#include <libavdevice/avdevice.h>
-#endif
-}
 
 
 namespace scy {
@@ -61,6 +55,33 @@ static std::mutex _mutex;
 static int _refCount(0);
 
 
+static void logCallback(void *ptr, int level, const char *fmt, va_list vl)
+{
+    char logbuf[256];
+    vsnprintf(logbuf, sizeof(logbuf), fmt, vl);
+    logbuf[sizeof(logbuf) - 1] = '\0';
+
+    switch (level) {
+    case AV_LOG_PANIC:
+    case AV_LOG_FATAL:
+    case AV_LOG_ERROR:
+        ErrorL << "FFmpeg: " << util::trimRight<std::string>(logbuf) << std::endl;
+        break;
+    case AV_LOG_WARNING:
+        WarnL << "FFmpeg: " << util::trimRight<std::string>(logbuf) << std::endl;
+        break;
+    case AV_LOG_INFO:
+        DebugL << "FFmpeg: " << util::trimRight<std::string>(logbuf) << std::endl;
+        break;
+    default:
+    case AV_LOG_VERBOSE:
+    case AV_LOG_DEBUG:
+        // TraceL << "FFmpeg: " << util::trimRight<std::string>(logbuf) << std::endl;
+        break;
+    }
+}
+
+
 void initialize()
 {
     std::lock_guard<std::mutex> guard(_mutex);
@@ -68,6 +89,10 @@ void initialize()
     if (++_refCount == 1) {
         // Optionally disable logging.
         // av_log_set_level(AV_LOG_QUIET);
+
+        // Use an internal log callback
+        // av_log_set_callback(logCallback);
+        // av_log_set_level(AV_LOG_INFO);
 
         // Register our protocol glue code with FFmpeg.
         av_lockmgr_register(&LockManagerOperation);

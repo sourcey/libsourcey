@@ -63,9 +63,10 @@ struct AudioContext
     AVFrame* frame;      ///< last encoded or decoded frame
     AudioResampler* resampler;
     int outputFrameSize; ///< encoder or decoder output frame size
-    int64_t time;   ///< stream time in nanoseconds
-    int64_t pts;    ///< encoder current pts
-    /// FPSCounter fps;         ///< encoder or decoder fps rate
+    int64_t time;         ///< stream time in codec time base
+    int64_t pts;          ///< last packet pts value
+    double seconds;       ///< video time in seconds
+    // FPSCounter fps;         ///< encoder or decoder fps rate
     std::string error; ///< error message
 };
 

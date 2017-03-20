@@ -36,15 +36,16 @@ struct VideoDecoder : public VideoContext
     virtual void open();
     virtual void close();
 
-    virtual bool decode(uint8_t* data, int size); //, AVPacket& opacket
-    virtual bool decode(AVPacket& ipacket);            //, AVPacket& opacket
     /// Decodes a the given input packet.
-    /// Returns true an output packet was returned,    // false otherwise.
+    /// Input packets should use the raw `AVStream` time base. Time base
+    /// conversion will happen internally.
+    /// Returns true an output packet was was decoded, false otherwise.
+    virtual bool decode(AVPacket& ipacket);
 
-    virtual void flush(); // AVPacket& opacket
     /// Flushes buffered frames.
     /// This method should be called after decoding
     /// until false is returned.
+    virtual void flush();
 };
 
 

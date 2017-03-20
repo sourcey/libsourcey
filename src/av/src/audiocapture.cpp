@@ -33,10 +33,15 @@ AudioCapture::AudioCapture()
 }
 
 
-AudioCapture::AudioCapture(const std::string& device, int channels,
-                           int sampleRate)
+AudioCapture::AudioCapture(const std::string& device, int channels, int sampleRate, const std::string& sampleFmt)
 {
-    open(device, channels, sampleRate);
+    openAudio(device, channels, sampleRate, sampleFmt);
+}
+
+
+AudioCapture::AudioCapture(const std::string& device, const av::AudioCodec& params)
+{
+    openAudio(device, params.channels, params.sampleRate);
 }
 
 
@@ -45,12 +50,19 @@ AudioCapture::~AudioCapture()
 }
 
 
-void AudioCapture::open(const std::string& device, int channels, int sampleRate)
+void AudioCapture::openAudio(const std::string& device, const av::AudioCodec& params)
+{
+    openAudio(device, params.channels, params.sampleRate, params.sampleFmt);
+}
+
+
+void AudioCapture::openAudio(const std::string& device, int channels, int sampleRate, const std::string& sampleFmt)
 {
     TraceS(this) << "Opening microphone: "
                  << "device=" << device << ", "
                  << "channels=" << channels << ", "
-                 << "sampleRate=" << sampleRate << endl;
+                 << "sampleRate=" << sampleRate << ", "
+                 << "sampleFmt=" << sampleFmt << endl;
 
     DeviceManager devman;
     auto iformat = devman.findAudioInputFormat();
@@ -58,14 +70,33 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
         throw std::runtime_error("Couldn't find microphone input format.");
 
     AVDictionary* iparams = nullptr;
+    AVDictionaryCleanup cleanup{ &iparams };
+
+    // Set custom parameters for devices.
+    // NOTE: This doesn't work for DirectShow
+#ifndef SCY_WIN
     if (sampleRate > 0)
         av_dict_set_int(&iparams, "sample_rate", sampleRate, 0);
     if (channels > 0)
         av_dict_set_int(&iparams, "channels", channels, 0);
 
+    // Set sampleFmt?
+#endif
+
     openStream(device.c_str(), iformat, &iparams);
 
-    av_dict_free(&iparams); // FIXME: possible memory leak if exception thrown
+    // Set the decoder audio output parameters for resampler context.
+    // NOTE: Must be done after `openStream`.
+    // If the input device wouldn't accept our parameters then we will
+    // perform pixel conversions and resizing ourself (on the decoder).
+    if (_audio) {
+        if (!sampleFmt.empty() > 0)
+            _audio->oparams.sampleFmt = sampleFmt; // "s16";
+        if (sampleRate > 0)
+            _audio->oparams.sampleRate = sampleRate;
+        if (channels > 0)
+            _audio->oparams.channels = channels;
+    }
 }
 
 

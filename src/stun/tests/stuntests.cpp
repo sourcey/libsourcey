@@ -39,11 +39,11 @@ int main(int argc, char** argv)
         integrityAttr->setKey(password);
         request.add(integrityAttr);
 
-        Buffer buf(1024);
+        Buffer buf;
         request.write(buf);
 
         stun::Message response;
-        response.read(constBuffer(buf));
+        auto nread = response.read(constBuffer(buf));
 
         integrityAttr = response.get<stun::MessageIntegrity>();
         expect(integrityAttr != nullptr);
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
         request.add(addrAttr);
         // DebugL << "Request Address: " << addrAttr->address() << endl;
 
-        Buffer buf(1024);
+        Buffer buf;
         request.write(buf);
 
         stun::Message response;

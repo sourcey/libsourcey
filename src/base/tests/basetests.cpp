@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     describe("buffer", []() {
         ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
         for (size_t i = 0; i < 2; i++) {
-            Buffer buffer(1024);
+            Buffer buffer;
             BitReader reader(buffer, orders[i]);
             BitWriter writer(buffer, orders[i]);
             expect(orders[i] == reader.order());
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 
         ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
         for (size_t i = 0; i < 2; i++) {
-            Buffer buffer; // (1); // (1024);
+            Buffer buffer;
             DynamicBitWriter writer(buffer, orders[i]);
             writer.put(write_string.c_str(), write_string.size());
             writer.put(write_string1.c_str(), write_string1.size());

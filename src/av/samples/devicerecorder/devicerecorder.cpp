@@ -8,6 +8,7 @@
 /// @addtogroup av
 /// @{
 
+
 #include "scy/application.h"
 #include "scy/av/audiocapture.h"
 #include "scy/av/devicemanager.h"
@@ -23,15 +24,14 @@ using namespace scy;
 using std::endl;
 
 #define OUTPUT_FILENAME "deviceoutput.mp4"
-#define OUTPUT_FORMAT                                                          \
-    av::Format("MP4", "mp4", av::VideoCodec("H.264", "libx264", 400, 300, 25,  \
-                                            48000, 128000, "yuv420p"),         \
-               av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+#define OUTPUT_FORMAT av::Format("MP4", "mp4", \
+    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
+    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LDebug));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // Debug
 
     {
         // Create a PacketStream to pass packets
@@ -73,10 +73,10 @@ int main(int argc, char** argv)
         stream.start();
 
         // Keep recording until Ctrl-C is pressed
+        InfoL << "Recording video: " << OUTPUT_FILENAME << endl;
         uv::waitForShutdown([](void* opaque) {
             reinterpret_cast<PacketStream*>(opaque)->stop();
-        },
-        &stream);
+        }, &stream);
     }
 
     // av::DeviceManager::shutdown();

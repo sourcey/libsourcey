@@ -35,7 +35,7 @@ VideoEncoder::~VideoEncoder()
 }
 
 
-void VideoEncoder::create() //, const VideoCodec& params
+void VideoEncoder::create()
 {
     // Find the video encoder
     codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
@@ -43,8 +43,7 @@ void VideoEncoder::create() //, const VideoCodec& params
         if (format)
             codec = avcodec_find_encoder(format->oformat->video_codec);
         if (!codec)
-            throw std::runtime_error("Video encoder not found: " +
-                                     oparams.encoder);
+            throw std::runtime_error("Video encoder not found: " + oparams.encoder);
     }
 
     // Allocate stream and AVCodecContext from the AVFormatContext if available
@@ -85,7 +84,7 @@ void VideoEncoder::create() //, const VideoCodec& params
     ctx->codec_type = AVMEDIA_TYPE_VIDEO;
     ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt.c_str());
     ctx->frame_number = 0;
-    ctx->max_b_frames = 1;
+    // ctx->max_b_frames = 1;
 
     // Resolution must be a multiple of two
     ctx->width = oparams.width;
@@ -93,17 +92,16 @@ void VideoEncoder::create() //, const VideoCodec& params
 
     // For fixed-fps content timebase should be 1/framerate
     // and timestamp increments should be identically 1.
-    ctx->time_base.den = (int)oparams.fps;
+    ctx->time_base.den = (int)oparams.fps ? oparams.fps : 1000;
     ctx->time_base.num = 1;
 
     // Define encoding parameters
     assert(oparams.bitRate);
     ctx->bit_rate = oparams.bitRate;
-    ctx->bit_rate_tolerance =
-        oparams.bitRate * 1000; // needed when time_base.num > 1
+    ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
 
     // Emit one intra frame every ten
-    ctx->gop_size = 10;
+    // ctx->gop_size = 10;
 
     // Set some defaults for codecs of note.
     // Also set optimal output pixel formats if the
@@ -111,8 +109,7 @@ void VideoEncoder::create() //, const VideoCodec& params
     switch (ctx->codec_id) {
         case AV_CODEC_ID_H264:
             // TODO: Use oparams.quality to determine profile?
-            av_opt_set(ctx->priv_data, "preset", "slow",
-                       0); // veryfast // slow // baseline
+            av_opt_set(ctx->priv_data, "preset", "slow", 0); // veryfast // slow // baseline
             break;
         case AV_CODEC_ID_MJPEG:
         case AV_CODEC_ID_LJPEG:
@@ -133,8 +130,7 @@ void VideoEncoder::create() //, const VideoCodec& params
         case AV_CODEC_ID_MSMPEG4V3:
             // Needed to avoid using macroblocks in which some codecs overflow
             // this doesn't happen with normal video, it just happens here as
-            // the
-            // motion of the chroma plane doesn't match the luma plane
+            // the motion of the chroma plane doesn't match the luma plane
             // avoid FFmpeg warning 'clipping 1 dct coefficients...'
             ctx->mb_decision = 2;
             break;
@@ -163,8 +159,7 @@ void VideoEncoder::create() //, const VideoCodec& params
 
     int ret = avcodec_open2(ctx, codec, nullptr);
     if (ret < 0)
-        throw std::runtime_error("Cannot open the video codec: " +
-                                 averror(ret));
+        throw std::runtime_error("Cannot open the video codec: " + averror(ret));
 
     // Update any output parameters that might have changed
     initVideoCodecFromContext(stream, ctx, oparams);
@@ -199,7 +194,7 @@ void VideoEncoder::close()
 }
 
 
-bool VideoEncoder::encode(unsigned char* data, int size, int64_t pts)
+bool VideoEncoder::encode(unsigned char* data, int size, int64_t time)
 {
     assert(data);
     assert(size);
@@ -213,7 +208,7 @@ bool VideoEncoder::encode(unsigned char* data, int size, int64_t pts)
 
     // TODO: assert size and update conversion context if required
 
-    frame->pts = pts;
+    frame->pts = time;
 
     AVPacket opacket;
     return encode(frame); //, opacket
@@ -262,19 +257,22 @@ bool VideoEncoder::encode(unsigned char* data, int size, int64_t pts)
 void emitPacket(VideoEncoder* enc, AVPacket& opacket)
 {
     // auto pixelFmt = av_get_pix_fmt(enc->oparams.pixelFmt.c_str());
-    // assert(av_pix_fmt_count_planes(pixelFmt) == 1 && "planar formats not
-    // supported");
+    // assert(av_pix_fmt_count_planes(pixelFmt) == 1 && "planar formats not supported");
 
-    // enc->time = enc->frame->pkt_pts > 0 ?
-    // static_cast<int64_t>(enc->frame->pkt_pts *
-    // av_q2d(enc->stream->time_base) * 1000) : 0;
-    // enc->pts = enc->frame->pkt_pts;
+    if (enc->stream) {
+        // Set the encoder time in microseconds
+        // This value represents the number of microseconds 
+        // that have elapsed since the brginning of the stream.
+        enc->time = opacket.pts > 0 ? static_cast<int64_t>(
+            opacket.pts * av_q2d(enc->stream->time_base) * AV_TIME_BASE) : 0;
 
-    // Compute stream time in milliseconds
-    if (enc->stream && opacket.pts >= 0) {
-        enc->time = static_cast<int64_t>(
-            opacket.pts * av_q2d(enc->stream->time_base) * 1000);
+        // Set the encoder seconds since stream start
+        // enc->seconds = enc->time / time::kNumMicrosecsPerSec;
+        // enc->seconds = (opacket.pts - enc->stream->start_time) * av_q2d(enc->stream->time_base);
+        enc->seconds = opacket.pts * av_q2d(enc->stream->time_base);
     }
+
+    // Set the encoder pts in stream time base
     enc->pts = opacket.pts;
 
     assert(opacket.data);
@@ -286,7 +284,7 @@ void emitPacket(VideoEncoder* enc, AVPacket& opacket)
                       enc->ctx->coded_frame->height, enc->time);
     video.source = &opacket;
     video.opaque = enc;
-    enc->emitter.emit(/*enc, */ video);
+    enc->emitter.emit(video);
 }
 
 
@@ -303,8 +301,7 @@ bool VideoEncoder::encode(AVFrame* iframe)
     opacket.size = 0;
 
     int frameEncoded = 0;
-    int ret =
-        avcodec_encode_video2(ctx, &opacket, convert(iframe), &frameEncoded);
+    int ret = avcodec_encode_video2(ctx, &opacket, convert(iframe), &frameEncoded);
     if (ret < 0) {
         error = "Video encoder error: " + averror(ret);
         ErrorS(this) << error << endl;
@@ -318,14 +315,11 @@ bool VideoEncoder::encode(AVFrame* iframe)
         if (stream) {
             opacket.stream_index = stream->index;
             // if (opacket.pts != AV_NOPTS_VALUE)
-            //     opacket.pts = av_rescale_q(opacket.pts, ctx->time_base,
-            //     stream->time_base);
+            //     opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
             // if (opacket.dts != AV_NOPTS_VALUE)
-            //     opacket.dts = av_rescale_q(opacket.dts, ctx->time_base,
-            //     stream->time_base);
+            //     opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
             // if (opacket.duration > 0)
-            //     opacket.duration = (int)av_rescale_q(opacket.duration,
-            //     ctx->time_base, stream->time_base);
+            //     opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
             TraceS(this) << "Encoded frame:"
                          << "\n\tScaled PTS: " << opacket.pts

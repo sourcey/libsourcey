@@ -65,7 +65,7 @@ void VideoDecoder::create()
     // Default to bgr24 output.
     // Note: This can be removed when planar formats are fully supported via
     // the av::VideoPacket interface.
-    // oparams.pixelFmt = "bgr24";
+    oparams.pixelFmt = "bgr24";
 }
 
 
@@ -81,13 +81,29 @@ void VideoDecoder::close()
 }
 
 
-inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
+inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
 {
-    // Compute stream time in microseconds
-    dec->time = frame->pkt_pts > 0 ? static_cast<int64_t>(frame->pkt_pts *
-                                                av_q2d(dec->stream->time_base) *
-                                                AV_TIME_BASE) : 0;
-    dec->pts = frame->pkt_pts;
+    frame->pts = av_frame_get_best_effort_timestamp(frame);
+
+    // Set the decoder time in microseconds
+    // This value represents the number of microseconds 
+    // that have elapsed since the brginning of the stream.
+    dec->time = dec->frame->pts > 0 ? static_cast<int64_t>(dec->frame->pkt_pts *
+                av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
+
+    // Set the decoder pts in stream time base
+    dec->pts = frame->pts/*pkt_pts*/;
+
+    // Set the decoder seconds since stream start
+    http://stackoverflow.com/questions/6731706/syncing-decoded-video-using-ffmpeg
+    dec->seconds = (frame->pkt_dts - dec->stream->start_time) * av_q2d(dec->stream->time_base);
+
+    TraceL << "Decoded video frame:"
+        << "\n\tFrame DTS: " << frame->pts
+        << "\n\tFrame PTS: " << frame->pkt_pts
+        << "\n\tTimestamp: " << dec->time
+        << "\n\tSeconds: " << dec->seconds
+        << endl;
 
     // Handle planar video formats
     if (av_pix_fmt_count_planes(static_cast<AVPixelFormat>(frame->format)) >= 3) {
@@ -101,12 +117,6 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
         //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
         //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
 
-        TraceL << "Decoded planar video frame:"
-            << "\n\tFrame DTS: " << frame->pkt_dts
-            << "\n\tFrame PTS: " << frame->pkt_pts
-            << "\n\tPacket time: " << video.time
-            << endl;
-
         dec->emitter.emit(video);
     }
 
@@ -118,15 +128,8 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
         video.source = frame;
         video.opaque = dec;
 
-        TraceL << "Decoded video frame:"
-            << "\n\tFrame DTS: " << frame->pkt_dts
-            << "\n\tFrame PTS: " << frame->pkt_pts
-            << "\n\tPacket time: " << video.time
-            << endl;
-
         dec->emitter.emit(video);
     }
-
 
     // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
     //     av_q2d(dec->stream->time_base) * 1000) : 0;
@@ -134,7 +137,7 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 
     // opacket.data = frame->data[0];
     // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt, dec->oparams.width, dec->oparams.height, 16);
-    // opacket.pts = frame->pkt_pts; // Decoder PTS values can be unordered
+    // opacket.pts = frame->pts/*pkt_pts*/; // Decoder PTS values can be unordered
     // opacket.dts = frame->pkt_dts;
     //
     // // // Local PTS value represented as decimal seconds
@@ -155,18 +158,18 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 }
 
 
-bool VideoDecoder::decode(uint8_t* data, int size) //, AVPacket& opacket
-{
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.stream_index = stream->index;
-    ipacket.data = data;
-    ipacket.size = size;
-    return decode(ipacket); //, opacket
-}
+//bool VideoDecoder::decode(uint8_t* data, int size)
+//{
+//    AVPacket ipacket;
+//    av_init_packet(&ipacket);
+//    ipacket.stream_index = stream->index;
+//    ipacket.data = data;
+//    ipacket.size = size;
+//    return decode(ipacket);
+//}
 
 
-bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
+bool VideoDecoder::decode(AVPacket& ipacket)
 {
     assert(ctx);
     assert(codec);
@@ -203,63 +206,6 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
         ipacket.data += ret;
     }
     assert(ipacket.size == 0);
-
-    // int frameDecoded = 0;
-    // int bytesDecoded = 0;
-    // int bytesRemaining = ipacket.size;
-
-    // av_init_packet(&opacket);
-    // opacket.data = nullptr;
-    // opacket.size = 0;
-    //
-    // bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded,
-    // &ipacket);
-    // if (bytesDecoded < 0) {
-    //     error = "Decoder error";
-    //     ErrorS(this) << "" << error << endl;
-    //     throw std::runtime_error(error);
-    // }
-
-    // XXX: Asserting here to make sure below looping
-    // avcodec_decode_video2 is actually redundant.
-    // Otherwise we need to reimplement this pseudo code:
-    // while(packet->size > 0)
-    // {
-    //      int ret = avcodec_decode_video2(..., ipacket);
-    //      if(ret < -1)
-    //        throw std::runtime_error("error");
-    //
-    //     ipacket->size -= ret;
-    //     ipacket->data += ret;
-    // }
-    // assert(bytesDecoded == bytesRemaining);
-
-    // while (bytesRemaining) { // && !frameDecoded
-    //     //TraceS(this) << "Decoding: " << ipacket.pts << endl;
-    //     bytesRemaining -= bytesDecoded;
-    // }
-
-    //     if (frameDecoded) {
-    //         // fps.tick();
-    //
-    //         // assert(frame->pkt_pts >= 0);
-    //         emitPacket(this, convert(frame), opacket); // stream, ctx, &pts,
-    //         oparams
-    // #if 0
-    //         TraceS(this) << "Decoded Frame:"
-    //             << "\n\tPTS: " << pts
-    //             << "\n\tPacket Size: " << opacket.size
-    //             << "\n\tPacket PTS: " << opacket.pts
-    //             << "\n\tPacket DTS: " << opacket.dts
-    //             << "\n\tFrame Packet PTS: " << frame->pkt_pts
-    //             << "\n\tFrame Packet DTS: " << frame->pkt_dts
-    //             << "\n\tFrame Size: " << ctx->frame_size
-    //             << endl;
-    // #endif
-    //
-    //         return true;
-    //     }
-    //     return false;
     return !!frameDecoded;
 }
 
