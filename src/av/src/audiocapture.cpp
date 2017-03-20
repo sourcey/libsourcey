@@ -90,8 +90,8 @@ void AudioCapture::openAudio(const std::string& device, int channels, int sample
     // If the input device wouldn't accept our parameters then we will
     // perform pixel conversions and resizing ourself (on the decoder).
     if (_audio) {
-        if (!sampleFmt.empty() > 0)
-            _audio->oparams.sampleFmt = sampleFmt; // "s16";
+        if (!sampleFmt.empty())
+            _audio->oparams.sampleFmt = sampleFmt; // s16
         if (sampleRate > 0)
             _audio->oparams.sampleRate = sampleRate;
         if (channels > 0)

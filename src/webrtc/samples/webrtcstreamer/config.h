@@ -11,7 +11,6 @@
 #else
 #define SERVER_PORT 4500
 #endif
-#define SOURCE_FILE "test.mp4"
 
 
 #endif

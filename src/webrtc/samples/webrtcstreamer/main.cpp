@@ -10,6 +10,7 @@
 
 #include "scy/idler.h"
 #include "scy/logger.h"
+#include "scy/filesystem.h"
 #include "signaler.h"
 
 #include "webrtc/base/ssladapter.h"
@@ -20,7 +21,18 @@ using std::endl;
 using namespace scy;
 
 
-// Test this demo with the code in the `client` directory
+// Sample data directory helper
+std::string sampleDataDir(const std::string& file)
+{
+    std::string dir;
+    fs::addnode(dir, SCY_SOURCE_DIR);
+    fs::addnode(dir, "av");
+    fs::addnode(dir, "samples");
+    fs::addnode(dir, "data");
+    if (!file.empty())
+        fs::addnode(dir, file);
+    return dir;
+}
 
 
 int main(int argc, char** argv)
@@ -29,7 +41,7 @@ int main(int argc, char** argv)
     Logger::instance().setWriter(new AsyncLogWriter);
 
 //#if USE_SSL
-    //net::SSLManager::initNoVerifyClient();
+    // net::SSLManager::initNoVerifyClient();
 //#endif
 
     // Pre-initialize video captures in the main thread
@@ -44,7 +56,7 @@ int main(int argc, char** argv)
 
     {
         // Video source file
-        std::string sourceFile(SOURCE_FILE);
+        std::string sourceFile(sampleDataDir("test.mp4"));
 
         // Symple signalling client options
         smpl::Client::Options options;
@@ -62,7 +74,7 @@ int main(int argc, char** argv)
         for (auto& kv : optparse.args) {
             const std::string& key = kv.first;
             const std::string& value = kv.second;
-            DebugL << "Setting option: " << key << ": " << value << std::endl;
+            DebugL << "Setting option: " << key << ": " << value << endl;
             if (key == "file") {
                 sourceFile = value;
             }
@@ -89,7 +101,7 @@ int main(int argc, char** argv)
     // av::MediaFactory::shutdown();
 
 //#if USE_SSL
-    //net::SSLManager::destroy();
+    // net::SSLManager::destroy();
 //#endif
     rtc::CleanupSSL();
     Logger::destroy();

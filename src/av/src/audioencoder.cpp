@@ -156,6 +156,14 @@ void AudioEncoder::create()
     // Update parameters that may have changed
     initAudioCodecFromContext(ctx, oparams);
 
+
+    // Set the default input and output parameters are set here once the codec
+    // context has been opened. The output pixel format, width or height can be
+    // modified after this call and a conversion context will be created on the
+    // next call to open() to output the desired format.
+    // initVideoCodecFromContext(stream, ctx, iparams);
+    // initVideoCodecFromContext(stream, ctx, oparams);
+
     // // Create the resampler if resampling if required
     // if (iparams.channels != oparams.channels ||
     //     iparams.sampleRate != oparams.sampleRate ||

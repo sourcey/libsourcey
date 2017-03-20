@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         av::VideoCapture video;
         if (devman.getDefaultCamera(device)) {
             InfoL << "Using video device: " << device.name << endl;
-            video.open(device.id, 640, 480, 30);
+            video.openVideo(device.id, { 640, 480 });
             video.getEncoderFormat(options.iformat);
             stream.attachSource(&video, false, true);
         }
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
         av::AudioCapture audio;
         if (devman.getDefaultMicrophone(device)) {
             InfoL << "Using audio device: " << device.name << endl;
-            audio.open(device.id, 2, 44100);
+            audio.openAudio(device.id, { 2, 44100 });
             audio.getEncoderFormat(options.iformat);
             stream.attachSource(&audio, false, true);
         }

@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
     
     describe("h264 video file transcoder", new VideoFileTranscoderTest);
-    //describe("h264 multiplex capture encoder", new H264MultiplexEncoderTest);
+    //describe("h264 multiplex capture encoder", new MultiplexEncoderTest);
 #endif
 
     describe("realtime media queue", new RealtimeMediaQueueTest);

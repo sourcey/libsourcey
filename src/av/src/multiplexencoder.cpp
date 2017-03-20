@@ -401,7 +401,6 @@ void MultiplexEncoder::createAudio()
 {
     TraceS(this) << "Create Audio" << endl;
 
-   
     assert(!_audio);
     assert(_options.oformat.audio.enabled);
     assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);

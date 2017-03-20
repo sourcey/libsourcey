@@ -142,7 +142,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
     if (framing)
         stream.attach(framing, 15, true);
 
-    // Attach a sync queue to synchronize output with the event loop
+     // Attach a sync queue to synchronize output with the event loop
      auto sync = new SyncPacketQueue<>;
      stream.attach(sync, 20, true);
 }
@@ -195,18 +195,18 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     if (options.oformat.video.enabled) {
         devman.getDefaultCamera(dev);
         InfoL << "Default video capture " << dev.id << endl;
-        options.videoCapture = std::make_shared<av::VideoCapture>();
-        options.videoCapture->open(dev.id, options.oformat.video.width, 
-                                           options.oformat.video.height, 
-                                           options.oformat.video.fps);
+        options.videoCapture = std::make_shared<av::VideoCapture>(dev.id, options.oformat.video);
+        //options.videoCapture->openVideo(dev.id, options.oformat.video.width, 
+        //                                   options.oformat.video.height, 
+        //                                   options.oformat.video.fps);
         options.videoCapture->getEncoderFormat(options.iformat);
     }
     if (options.oformat.audio.enabled) {
         devman.getDefaultMicrophone(dev);
         InfoL << "Default audio capture " << dev.id << endl;
-        options.audioCapture = std::make_shared<av::AudioCapture>();
-        options.audioCapture->open(dev.id, options.oformat.audio.channels, 
-                                           options.oformat.audio.sampleRate);
+        options.audioCapture = std::make_shared<av::AudioCapture>(dev.id, options.oformat.audio);
+        //options.audioCapture->open(dev.id, options.oformat.audio.channels, 
+        //                                   options.oformat.audio.sampleRate);
         options.audioCapture->getEncoderFormat(options.iformat);
     }
 

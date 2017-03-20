@@ -30,12 +30,15 @@ public:
     typedef std::shared_ptr<VideoCapture> Ptr;
 
     VideoCapture();
-    VideoCapture(const std::string& device, int width = -1, int height = -1,
-                 double framerate = -1);
+    VideoCapture(const std::string& device, const av::VideoCodec& params);
+    VideoCapture(const std::string& device, int width = 0, int height = 0,
+                 double framerate = 0, const std::string& pixelFmt = "");
     virtual ~VideoCapture();
 
-    virtual void open(const std::string& device, int width = -1,
-                      int height = -1, double framerate = -1);
+    virtual void openVideo(const std::string& device, const av::VideoCodec& params);
+    virtual void openVideo(const std::string& device, int width = 0,
+                           int height = 0, double framerate = 0,
+                           const std::string& pixelFmt = "");
 };
 
 

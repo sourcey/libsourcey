@@ -51,15 +51,15 @@ static const int kInNumSamples = 1024;
 #define ACC_ENCODER "libfdk_aac"
 #endif
 
-#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4", "mp4",                \
+#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4 Default", "mp4",        \
             av::VideoCodec("libx264", 400, 300),                               \
             av::AudioCodec(ACC_ENCODER));
 
-#define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4",                  \
+#define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4 Realtime", "mp4",         \
             av::VideoCodec("libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
             av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
 
-#define VP8_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4",                  \
+#define VP8_H264_AAC_REALTIME_FORMAT av::Format("MP4 VP8 Realtime", "mp4",     \
             av::VideoCodec("vp8", 400, 300, 25, 48000, 128000, "yuv420p"),     \
             av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
 
@@ -242,6 +242,101 @@ class VideoFileTranscoderTest : public Test
         expect(encoder->video()->seconds < (encoderVideoSeconds + 1));
 
         // TODO: verify data integrity
+    }
+};
+
+// =============================================================================
+// Video Multiplex Capture Encoder
+//
+
+class MultiplexCaptureEncoderTest : public Test
+{
+    void run()
+    {
+        av::EncoderOptions options;
+        options.ofile = "multiplexcaptureencoderoutput.mp4";
+        options.oformat = MP4_H264_AAC_REALTIME_FORMAT;
+        // options.iformat.audio.enabled = false;
+        // options.iformat.video.enabled = false;
+
+        // Create a PacketStream to pass packets from the
+        // file capture to the encoder
+        PacketStream stream;
+
+        // Create a device manager instance to enumerate system devices
+        av::Device device;
+        av::DeviceManager devman;
+
+        // Create and attach the default video capture
+        av::VideoCapture video;
+        if (devman.getDefaultCamera(device)) {
+            InfoL << "Using video device: " << device.name << endl;
+            video.openVideo(device.id, { 640, 480 });
+            video.getEncoderFormat(options.iformat);
+            stream.attachSource(&video, false, true);
+        }
+
+        // Create and attach the default audio capture
+        av::AudioCapture audio;
+        if (devman.getDefaultMicrophone(device)) {
+            InfoL << "Using audio device: " << device.name << endl;
+            audio.openAudio(device.id, { 2, 44100 });
+            audio.getEncoderFormat(options.iformat);
+            stream.attachSource(&audio, false, true);
+        }
+
+        // Create the multiplex encoder
+        auto encoder(std::make_shared<av::MultiplexPacketEncoder>(options));
+        stream.attach(encoder, 5);
+        stream.start();
+
+        encoder->emitter += packetSlot(this, &MultiplexCaptureEncoderTest::onVideoEncoded);
+
+        // Encode 100 frames and break
+        while (numFramesEncoded < 100 && !video.stopping() && !audio.stopping()) {
+            // DebugL << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+        
+        // capture video time: 59958333 
+        // capture video ctx->frame_number: 1440
+        // capture audio time: 60093242 
+        // capture audio ctx->frame_number: 1295
+
+        //int captureAudioSeconds = 60;
+        //int captureVideoSeconds = 59;
+        //expect(capture->audio()->time > captureAudioSeconds * time::kNumMicrosecsPerSec);
+        //expect(capture->video()->time > captureVideoSeconds * time::kNumMicrosecsPerSec);
+        //expect(capture->audio()->time < (captureAudioSeconds + 1) * time::kNumMicrosecsPerSec);
+        //expect(capture->video()->time < (captureVideoSeconds + 1) * time::kNumMicrosecsPerSec);
+        //expect(capture->audio()->seconds > captureAudioSeconds);
+        //expect(capture->video()->seconds > captureVideoSeconds);
+        //expect(capture->audio()->seconds < (captureAudioSeconds + 1));
+        //expect(capture->video()->seconds < (captureVideoSeconds + 1));
+
+        //// encoder video: 57416640
+        //// encoder video ctx->frame_number: 1440
+        //// encoder audio time: 60046802 
+        //// encoder audio ctx->frame_number: 2589
+
+        //int encoderAudioSeconds = 60;
+        //int encoderVideoSeconds = 57;
+        //expect(encoder->audio()->time > encoderAudioSeconds * time::kNumMicrosecsPerSec);
+        //expect(encoder->video()->time > encoderVideoSeconds * time::kNumMicrosecsPerSec);
+        //expect(encoder->audio()->time < (encoderAudioSeconds + 1) * time::kNumMicrosecsPerSec);
+        //expect(encoder->video()->time < (encoderVideoSeconds + 1) * time::kNumMicrosecsPerSec);
+        //expect(encoder->audio()->seconds > encoderAudioSeconds);
+        //expect(encoder->video()->seconds > encoderVideoSeconds);
+        //expect(encoder->audio()->seconds < (encoderAudioSeconds + 1));
+        //expect(encoder->video()->seconds < (encoderVideoSeconds + 1));
+
+        // TODO: verify data integrity
+    }
+
+    int numFramesEncoded = 0;
+    void onVideoEncoded(av::AudioPacket& packet)
+    {
+        numFramesEncoded++;
     }
 };
 

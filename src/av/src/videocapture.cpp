@@ -34,10 +34,18 @@ VideoCapture::VideoCapture()
 }
 
 
-VideoCapture::VideoCapture(const std::string& device, int width, int height, double framerate)
+VideoCapture::VideoCapture(const std::string& device, int width, int height, 
+                           double framerate, const std::string& pixelFmt)
 {
-    open(device, width, height, framerate);
+    openVideo(device, width, height, framerate);
 }
+
+
+VideoCapture::VideoCapture(const std::string& device, const av::VideoCodec& params)
+{
+    openVideo(device, params.width, params.height, params.fps, params.pixelFmt);
+}
+
 
 
 VideoCapture::~VideoCapture()
@@ -45,7 +53,14 @@ VideoCapture::~VideoCapture()
 }
 
 
-void VideoCapture::open(const std::string& device, int width, int height, double framerate)
+void VideoCapture::openVideo(const std::string& device, const av::VideoCodec& params)
+{
+    openVideo(device, params.width, params.height, params.fps, params.pixelFmt);
+}
+
+
+void VideoCapture::openVideo(const std::string& device, int width, int height, 
+                             double framerate, const std::string& pixelFmt)
 {
     TraceS(this) << "Opening camera: " << device << ", "
                  << "width=" << width << ", "
@@ -70,7 +85,7 @@ void VideoCapture::open(const std::string& device, int width, int height, double
 
     // Set the desired pixel format
     // TODO: Use yuv420p once encoders support PlanarVideoPacket input
-    av_dict_set(&iparams, "pixel_format", "bgr24", 0); // yuv420p
+    av_dict_set(&iparams, "pixel_format", pixelFmt.data(), 0); //bgr24, yuv420p
 #endif
 
     openStream(device.c_str(), iformat, &iparams);
@@ -80,7 +95,8 @@ void VideoCapture::open(const std::string& device, int width, int height, double
     // If the input device wouldn't accept our parameters then we will
     // perform pixel conversions and resizing ourself (on the decoder).
     if (_video) {
-        _video->oparams.pixelFmt = "bgr24"; // yuv420p
+        if (!pixelFmt.empty())
+            _video->oparams.pixelFmt = pixelFmt; // bgr24, yuv420p
         if (width > 0)
             _video->oparams.width = width;
         if (height > 0)
