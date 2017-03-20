@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    //Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace, LDebug
+    //Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
     //Logger::instance().setWriter(new AsyncLogWriter);
     test::initialize();
 
@@ -18,14 +18,13 @@ int main(int argc, char** argv)
     describe("audio encoder", new AudioEncoderTest);
     describe("audio resampler", new AudioResamplerTest);
     describe("audio fifo buffer", new AudioBufferTest);
+    describe("h264 video file transcoder", new VideoFileTranscoderTest);
+    describe("h264 multiplex capture encoder", new MultiplexCaptureEncoderTest);
     // describe("realtime encoder media queue", new RealtimeMediaQueueEncoderTest);
     // describe("audio capture", new AudioCaptureTest);
     // describe("audio capture encoder", new AudioCaptureEncoderTest);
     // describe("audio capture resampler", new AudioCaptureResamplerTest);
     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
-    
-    describe("h264 video file transcoder", new VideoFileTranscoderTest);
-    //describe("h264 multiplex capture encoder", new MultiplexEncoderTest);
 #endif
 
     describe("realtime media queue", new RealtimeMediaQueueTest);

@@ -209,11 +209,13 @@ class VideoFileTranscoderTest : public Test
             scy::sleep(10);
         }
 
+        // Check output file size
+        expect(fs::filesize(options.ofile) > 10000);
+
         // capture video time: 59958333 
         // capture video ctx->frame_number: 1440
         // capture audio time: 60093242 
         // capture audio ctx->frame_number: 1295
-        
         int captureAudioSeconds = 60;
         int captureVideoSeconds = 59;
         expect(capture->audio()->time > captureAudioSeconds * time::kNumMicrosecsPerSec);
@@ -229,7 +231,6 @@ class VideoFileTranscoderTest : public Test
         // encoder video ctx->frame_number: 1440
         // encoder audio time: 60046802 
         // encoder audio ctx->frame_number: 2589
-        
         int encoderAudioSeconds = 60;
         int encoderVideoSeconds = 57;
         expect(encoder->audio()->time > encoderAudioSeconds * time::kNumMicrosecsPerSec);
@@ -240,8 +241,6 @@ class VideoFileTranscoderTest : public Test
         expect(encoder->video()->seconds > encoderVideoSeconds);
         expect(encoder->audio()->seconds < (encoderAudioSeconds + 1));
         expect(encoder->video()->seconds < (encoderVideoSeconds + 1));
-
-        // TODO: verify data integrity
     }
 };
 
@@ -256,8 +255,8 @@ class MultiplexCaptureEncoderTest : public Test
         av::EncoderOptions options;
         options.ofile = "multiplexcaptureencoderoutput.mp4";
         options.oformat = MP4_H264_AAC_REALTIME_FORMAT;
-        // options.iformat.audio.enabled = false;
-        // options.iformat.video.enabled = false;
+        options.iformat.audio.enabled = false; // enabled if available
+        options.iformat.video.enabled = false; // enabled if available
 
         // Create a PacketStream to pass packets from the
         // file capture to the encoder
@@ -290,53 +289,19 @@ class MultiplexCaptureEncoderTest : public Test
         stream.attach(encoder, 5);
         stream.start();
 
-        encoder->emitter += packetSlot(this, &MultiplexCaptureEncoderTest::onVideoEncoded);
-
         // Encode 100 frames and break
-        while (numFramesEncoded < 100 && !video.stopping() && !audio.stopping()) {
+        while (video.video()->seconds < 10 && !video.stopping() && !audio.stopping()) {
             // DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
-        
-        // capture video time: 59958333 
-        // capture video ctx->frame_number: 1440
-        // capture audio time: 60093242 
-        // capture audio ctx->frame_number: 1295
 
-        //int captureAudioSeconds = 60;
-        //int captureVideoSeconds = 59;
-        //expect(capture->audio()->time > captureAudioSeconds * time::kNumMicrosecsPerSec);
-        //expect(capture->video()->time > captureVideoSeconds * time::kNumMicrosecsPerSec);
-        //expect(capture->audio()->time < (captureAudioSeconds + 1) * time::kNumMicrosecsPerSec);
-        //expect(capture->video()->time < (captureVideoSeconds + 1) * time::kNumMicrosecsPerSec);
-        //expect(capture->audio()->seconds > captureAudioSeconds);
-        //expect(capture->video()->seconds > captureVideoSeconds);
-        //expect(capture->audio()->seconds < (captureAudioSeconds + 1));
-        //expect(capture->video()->seconds < (captureVideoSeconds + 1));
+        // Stop and flush the stream
+        stream.stop();
 
-        //// encoder video: 57416640
-        //// encoder video ctx->frame_number: 1440
-        //// encoder audio time: 60046802 
-        //// encoder audio ctx->frame_number: 2589
-
-        //int encoderAudioSeconds = 60;
-        //int encoderVideoSeconds = 57;
-        //expect(encoder->audio()->time > encoderAudioSeconds * time::kNumMicrosecsPerSec);
-        //expect(encoder->video()->time > encoderVideoSeconds * time::kNumMicrosecsPerSec);
-        //expect(encoder->audio()->time < (encoderAudioSeconds + 1) * time::kNumMicrosecsPerSec);
-        //expect(encoder->video()->time < (encoderVideoSeconds + 1) * time::kNumMicrosecsPerSec);
-        //expect(encoder->audio()->seconds > encoderAudioSeconds);
-        //expect(encoder->video()->seconds > encoderVideoSeconds);
-        //expect(encoder->audio()->seconds < (encoderAudioSeconds + 1));
-        //expect(encoder->video()->seconds < (encoderVideoSeconds + 1));
+        // Check output file size
+        expect(fs::filesize(options.ofile) > 10000);
 
         // TODO: verify data integrity
-    }
-
-    int numFramesEncoded = 0;
-    void onVideoEncoded(av::AudioPacket& packet)
-    {
-        numFramesEncoded++;
     }
 };
 
@@ -530,7 +495,7 @@ class AudioCaptureEncoderTest : public Test
     void run()
     {
         int inNbChannels = 2;
-        int inSampleRate = 48000; // 22050; //48000;
+        int inSampleRate = 48000; // 22050, 48000
 
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
@@ -553,7 +518,7 @@ class AudioCaptureEncoderTest : public Test
         oparams.encoder = "mp2"; // mp2, aac, libfdk_aac
         oparams.bitRate = 64000;
         oparams.channels = 2;
-        oparams.sampleRate = 44100; // 22050; //
+        oparams.sampleRate = 44100; // 22050
         oparams.sampleFmt = "s16";  // fltp
         oparams.enabled = true;
 
@@ -569,16 +534,10 @@ class AudioCaptureEncoderTest : public Test
         expect(iparams.sampleRate == inSampleRate);
         assert(iparams.sampleRate == inSampleRate);
 
-        // numFramesRemaining = kNumberFramesWanted; // * 8
         while (numFramesRemaining > 0 && !capture.stopping()) {
             DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
-
-        // while(!capture.stopping()) {
-        //     scy::sleep(10);
-        // }
-        // DebugL << "Waiting for completion" << endl;
 
         DebugL << "Number samples remaining: " << encoder.fifo.available() << endl;
         // assert(encoder.fifo.available() == 0);
@@ -652,13 +611,11 @@ class AudioCaptureResamplerTest : public Test
         resampler.open();
         capture.emitter.attach(packetSlot(this, &AudioCaptureResamplerTest::onAudioCaptured));
 
-        // numFramesRemaining = kNumberFramesWanted; // * 8;
         while (numFramesRemaining > 0) {
             DebugL << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
 
-        // capture.emitter.detach(this);
         capture.stop();
         resampler.close();
         output.close();

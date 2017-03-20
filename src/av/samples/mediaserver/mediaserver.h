@@ -68,7 +68,7 @@ public:
     HTTPStreamingConnectionFactory(MediaServer* server);
     virtual ~HTTPStreamingConnectionFactory();
 
-    virtual http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn);
+    virtual http::ServerResponder* createResponder(http::ServerConnection& conn);
     //virtual http::ServerConnection::Ptr createConnection(http::Server& server, const net::TCPSocket::Ptr& socket);
 
     //http::ServerResponder* createResponder(http::ServerConnection& conn);
