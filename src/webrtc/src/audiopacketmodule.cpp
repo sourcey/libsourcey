@@ -208,7 +208,7 @@ void AudioPacketModule::sendFrameP()
         return;
     }
 
-    TraceL << "Send audio" << endl;
+    TraceA("Send audio")
     if (_audioCallback->RecordedDataIsAvailable(
             samples, kNumberSamples, kNumberBytesPerSample, kNumberOfChannels,
             kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,

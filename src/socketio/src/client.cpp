@@ -371,7 +371,7 @@ void Client::onHandshake(sockio::Packet& packet)
 
 void Client::onMessage(sockio::Packet& packet)
 {
-    TraceL << "On message: " << packet.toString() << endl;
+    TraceA("On message: ", packet.toString())
 
     switch (packet.type()) {
         case Packet::Packet::Type::Connect:

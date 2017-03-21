@@ -86,7 +86,7 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        DebugL << "####### On raw packet: " << raw.className() << endl;
+        DebugA("####### On raw packet: ", raw.className())
 
         // Handle incoming raw packets here
     }

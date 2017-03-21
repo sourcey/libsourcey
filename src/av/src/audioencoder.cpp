@@ -309,7 +309,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
         emitPacket(this, opacket);
     } 
     else {
-        TraceL << "No frame encoded" << endl;
+        TraceA("No frame encoded")
     }
 
     av_packet_unref(&opacket);

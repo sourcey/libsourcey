@@ -39,13 +39,13 @@ UDPAllocation::UDPAllocation(Server& server, const FiveTuple& tuple,
     _relaySocket->bind(net::Address(server.options().listenAddr.host(), 0));
     _relaySocket.Recv += slot(this, &UDPAllocation::onPeerDataReceived);
 
-    TraceL << " Initializing on address: " << _relaySocket->address() << endl;
+    TraceA(" Initializing on address: ", _relaySocket->address())
 }
 
 
 UDPAllocation::~UDPAllocation()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
     _relaySocket.Recv -= slot(this, &UDPAllocation::onPeerDataReceived);
     _relaySocket->close();
 }
@@ -53,7 +53,7 @@ UDPAllocation::~UDPAllocation()
 
 bool UDPAllocation::handleRequest(Request& request)
 {
-    TraceL << "Handle Request" << endl;
+    TraceA("Handle Request")
 
     if (!ServerAllocation::handleRequest(request)) {
         if (request.methodType() == stun::Message::SendIndication)
@@ -68,7 +68,7 @@ bool UDPAllocation::handleRequest(Request& request)
 
 void UDPAllocation::handleSendIndication(Request& request)
 {
-    TraceL << "Handle Send Indication" << endl;
+    TraceA("Handle Send Indication")
 
     // The message is first checked for validity.  The Send indication MUST
     // contain both an XOR-PEER-ADDRESS attribute and a DATA attribute.  If
@@ -146,10 +146,10 @@ void UDPAllocation::onPeerDataReceived(net::Socket&,
                                        const net::Address& peerAddress)
 {
     // auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
-    TraceL << "Received UDP Datagram from " << peerAddress << endl;
+    TraceA("Received UDP Datagram from ", peerAddress)
 
     if (!hasPermission(peerAddress.host())) {
-        TraceL << "No Permission: " << peerAddress.host() << endl;
+        TraceA("No Permission: ", peerAddress.host())
         return;
     }
 

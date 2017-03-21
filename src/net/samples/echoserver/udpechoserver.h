@@ -38,7 +38,7 @@ public:
 
     void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
     {
-        DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
+        DebugA("On recv: ", peerAddress, ": ", buffer.size())
 
 #if 0
         std::string payload(bufferCast<const char*>(buffer), buffer.size());

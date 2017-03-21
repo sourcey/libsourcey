@@ -94,7 +94,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
         return;
 
     net::Address resolved(res->ai_addr, 16);
-    traceL("Network") << "DNS resolved: " << resolved << std::endl;
+    TraceA("DNS resolved: ", resolved);
 
     DNSResult* dns = reinterpret_cast<DNSResult*>(handle->data);
     dns->status = status == 0 ? DNSResult::Success : DNSResult::Failed;
@@ -111,7 +111,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
 
 inline bool resolveDNS(DNSResult* dns)
 {
-    // TraceL << "Resolving DNS: " << dns->host << ":" << dns->port << std::endl;
+    // TraceA("Resolving DNS: ", dns->host, ":", dns->port)
 
     assert(dns->port);
     assert(!dns->host.empty());
@@ -130,7 +130,7 @@ inline bool resolveDNS(const std::string& host, uint16_t port,
                        std::function<void(const DNSResult&)> callback,
                        void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {
-    DNSResult* dns = new DNSResult();
+    auto dns = new DNSResult();
     dns->host = host;
     dns->port = port;
     dns->opaque = opaque;

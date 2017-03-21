@@ -123,7 +123,7 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
-    DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
+    DebugA("Active handle: ", handle, ": ", handle->type)
 }
 
 

@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    //Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
+    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
     //Logger::instance().setWriter(new AsyncLogWriter);
     test::initialize();
 
@@ -45,15 +45,15 @@ int main(int argc, char** argv)
 //
 //     av::Device device;
 //     if (deviceManager.getDefaultCamera(device)) {
-//         DebugL << "Default video device: " << device.id << ": " << device.name << endl;
+//         DebugA("Default video device: ", device.id, ": ", device.name)
 //     }
 //     if (deviceManager.getDefaultMicrophone(device)) {
-//         DebugL << "Default audio device: " << device.id << ": " << device.name << endl;
+//         DebugA("Default audio device: ", device.id, ": ", device.name)
 //     }
 //
 //     std::vector<av::Device> devices;
 //     if (deviceManager.getCameras(devices)) {
-//         DebugL << "Num video devices: " << devices.size() << endl;
+//         DebugA("Num video devices: ", devices.size())
 //         for (auto& device : devices) {
 //             DebugL << "Printing video device: " << device.id << ": " <<
 //             device.name << endl;
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 //         DebugL << "No video devices detected!" << endl;
 //     }
 //     if (deviceManager.getMicrophones(devices)) {
-//         DebugL << "Num audio devices: " << devices.size() << endl;
+//         DebugA("Num audio devices: ", devices.size())
 //         for (auto& device : devices) {
 //             DebugL << "Printing audio device: " << device.id << ": " <<
 //             device.name << endl;

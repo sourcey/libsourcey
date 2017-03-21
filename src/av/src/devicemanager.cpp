@@ -580,7 +580,7 @@ bool enumerateInputDeviceList(AVInputFormat *fmt, Device::Type type, std::vector
     AVDeviceInfoList* devlist = nullptr;
     // AVDictionary* opts = nullptr;
 
-    DebugL << "Enumerating input devices for: " << fmt->name << endl;
+    DebugA("Enumerating input devices for: ", fmt->name)
     if (!fmt || !fmt->priv_class  || !AV_IS_INPUT_DEVICE(fmt->priv_class->category)) {
         assert(0 && "not an input device");
     }
@@ -618,7 +618,7 @@ bool enumerateOutputDeviceList(AVOutputFormat *fmt, Device::Type type, std::vect
     AVDeviceInfoList* devlist = nullptr;
     // AVDictionary* opts = nullptr;
 
-    DebugL << "Enumerating output devices for: " << fmt->name << endl;
+    DebugA("Enumerating output devices for: ", fmt->name)
     if (!fmt || !fmt->priv_class  || !AV_IS_OUTPUT_DEVICE(fmt->priv_class->category)) {
         assert(0 && "not an output device");
     }

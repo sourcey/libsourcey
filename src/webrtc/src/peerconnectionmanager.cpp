@@ -60,7 +60,7 @@ void PeerConnectionManager::recvSDP(const std::string& token, const json::value&
 
     conn->recvSDP(type, sdp);
 
-    DebugL << "Received " << type << ": " << sdp << endl;
+    DebugA("Received ", type, ": ", sdp)
 }
 
 
@@ -81,7 +81,7 @@ void PeerConnectionManager::recvCandidate(const std::string& token, const json::
         return;
     }
 
-    DebugL << "Received candidate: " << sdp << endl;
+    DebugA("Received candidate: ", sdp)
 
     conn->recvCandidate(mid, mlineindex, sdp);
 }
@@ -106,7 +106,7 @@ void PeerConnectionManager::onStable(PeerConnection* conn)
 
 void PeerConnectionManager::onClosed(PeerConnection* conn)
 {
-    DebugL << "Deleting peer connection: " << conn->peerid() << endl;
+    DebugA("Deleting peer connection: ", conn->peerid())
 
     if (remove(conn))
         deleteLater<PeerConnection>(conn); // async delete
@@ -115,7 +115,7 @@ void PeerConnectionManager::onClosed(PeerConnection* conn)
 
 void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& error)
 {
-    DebugL << "Deleting peer connection: " << conn->peerid() << endl;
+    DebugA("Deleting peer connection: ", conn->peerid())
 
     if (remove(conn))
         deleteLater<PeerConnection>(conn); // async delete

@@ -52,7 +52,7 @@ IDeviceManager* DeviceManagerFactory::create()
 Win32DeviceManager::Win32DeviceManager()
     : _needCoUninitialize(false)
 {
-    TraceL << "Create" << endl;
+    TraceA("Create")
 
     // FIXME: Not receiving WM_DEVICECHANGE in our console applications
     setWatcher(new Win32DeviceWatcher(this));
@@ -61,13 +61,13 @@ Win32DeviceManager::Win32DeviceManager()
 
 Win32DeviceManager::~Win32DeviceManager()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
 }
 
 
 bool Win32DeviceManager::initialize()
 {
-    TraceL << "Initializing" << endl;
+    TraceA("Initializing")
     if (!initialized()) {
         HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         // HRESULT hr = CoInitialize(nullptr);
@@ -85,14 +85,14 @@ bool Win32DeviceManager::initialize()
         }
         setInitialized(true);
     }
-    TraceL << "Initializing: OK" << endl;
+    TraceA("Initializing: OK")
     return true;
 }
 
 
 void Win32DeviceManager::uninitialize()
 {
-    TraceL << "Uninitializing" << endl;
+    TraceA("Uninitializing")
 
     if (initialized()) {
         if (watcher())
@@ -103,7 +103,7 @@ void Win32DeviceManager::uninitialize()
         }
         setInitialized(false);
     }
-    TraceL << "Uninitializing: OK" << endl;
+    TraceA("Uninitializing: OK")
 }
 
 
@@ -311,7 +311,7 @@ void Win32DeviceWatcher::Unregister(HDEVNOTIFY handle)
 bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                                    LRESULT& result)
 {
-    DebugL << "OnMessage: " << uMsg << endl;
+    DebugA("OnMessage: ", uMsg)
 
     if (uMsg == WM_DEVICECHANGE) {
         // bool arriving = wParam == DBT_DEVICEARRIVAL;
@@ -440,7 +440,7 @@ LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         if (WM_DESTROY == uMsg) {
             for (HWND child = ::GetWindow(hwnd, GW_CHILD); child;
                  child = ::GetWindow(child, GW_HWNDNEXT)) {
-                DebugL << "Child window: " << static_cast<void*>(child) << endl;
+                DebugA("Child window: ", static_cast<void*>(child))
             }
         }
         if (WM_NCDESTROY == uMsg) {
@@ -618,7 +618,7 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
 
                     Device dev(input ? "audioin" : "audioout", "", i);
 
-                    TraceL << "Enumerating Device: " << i << endl;
+                    TraceA("Enumerating Device: ", i)
                     hr = getDeviceFromImmDevice(device, dev);
                     if (SUCCEEDED(hr)) {
                         devs.push_back(dev);

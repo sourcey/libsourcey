@@ -36,7 +36,7 @@ void StreamManager::closeAll()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    DebugL << "Close all streams: " << _map.size() << endl;
+    DebugA("Close all streams: ", _map.size())
     StreamManager::Map::iterator it = _map.begin();
     StreamManager::Map::iterator it2;
     while (it != _map.end()) {
@@ -71,7 +71,7 @@ bool StreamManager::closeStream(const std::string& name, bool whiny)
 {
     assert(!name.empty());
 
-    DebugL << "Close stream: " << name << endl;
+    DebugA("Close stream: ", name)
     PacketStream* stream = get(name, whiny);
     if (stream) {
         stream->close();
@@ -102,14 +102,14 @@ void StreamManager::onAdd(PacketStream* stream)
 
     // Receive callbacks after all other listeners
     // so we can delete the stream when it closes.
-    DebugL << "stream added: " << stream->name() << endl;
+    DebugA("stream added: ", stream->name())
     stream->StateChange += slot(this, &StreamManager::onStreamStateChange, -1);
 }
 
 
 void StreamManager::onRemove(PacketStream* stream)
 {
-    DebugL << "stream removed: " << stream->name() << endl;
+    DebugA("stream removed: ", stream->name())
     stream->StateChange -= slot(this, &StreamManager::onStreamStateChange);
 }
 
@@ -117,7 +117,7 @@ void StreamManager::onRemove(PacketStream* stream)
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state,
                                         const PacketStreamState&)
 {
-    DebugL << "Stream state change: " << state << endl;
+    DebugA("Stream state change: ", state)
 
     // Cantch stream closed state and free it if necessary
     if (state.equals(PacketStreamState::Closed)) {
@@ -125,10 +125,10 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state,
         stream->StateChange -= slot(this, &StreamManager::onStreamStateChange);
         bool success = false;
         if (_freeClosedStreams) {
-            DebugL << "On stream close: freeing: " << stream->name() << endl;
+            DebugA("On stream close: freeing: ", stream->name())
             success = Manager::free(stream->name());
         } else {
-            DebugL << "On stream close: removing: " << stream->name() << endl;
+            DebugA("On stream close: removing: ", stream->name())
             success = !!Manager::remove(stream->name());
         }
         if (!success) {

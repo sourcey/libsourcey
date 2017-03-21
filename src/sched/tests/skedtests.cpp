@@ -93,7 +93,7 @@ int main(int argc, char** argv)
             }
 
             // Dynamically create the task from JSON
-            DebugL << "Sched Input JSON:\n" << json.dump(4) << endl;
+            DebugA("Sched Input JSON:\n", json.dump(4))
             scheduler.deserialize(json);
 
             // Print to cout

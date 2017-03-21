@@ -94,6 +94,7 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
     if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat, formatParams) < 0)
         throw std::runtime_error("Cannot open the media source: " + filename);
 
+    // _formatCtx->max_analyze_duration = 0;
     if (avformat_find_stream_info(_formatCtx, nullptr) < 0)
         throw std::runtime_error("Cannot find stream information: " + filename);
 
@@ -107,7 +108,7 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
             _video->emitter.attach(packetSlot(this, &MediaCapture::emit));
             _video->create();
             _video->open();
-        } 
+        }
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _audio = new AudioDecoder(stream);
             _audio->emitter.attach(packetSlot(this, &MediaCapture::emit));
@@ -200,7 +201,7 @@ void MediaCapture::run()
                         videoPtsOffset = _video->pts;
                     ipacket.pts += videoPtsOffset;
                 }
-                
+
                 // Decode and emit
                 if (_video->decode(ipacket)) {
                     TraceS(this) << "Decoded video: "
@@ -208,7 +209,7 @@ void MediaCapture::run()
                                  << "pts=" << _video->pts << endl;
                 }
 
-                // Pause the input stream in realtime mode if the 
+                // Pause the input stream in realtime mode if the
                 // decoder is working too fast
                 if (_realtime) {
                     while ((time::hrtime() - lastTimestamp) < frameInterval) {
@@ -216,7 +217,7 @@ void MediaCapture::run()
                     }
                     lastTimestamp = time::hrtime();
                 }
-            } 
+            }
             else if (_audio && ipacket.stream_index == _audio->stream->index) {
 
                 // Set the PTS offset when looping
@@ -275,7 +276,7 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_audio) {
-        // HACK: Decoder output does not properly support planar 
+        // HACK: Decoder output does not properly support planar
         // formats. By calling this method it means a transcoder
         // is in use, so force a interleaved output format.
         // Note: This can be removed when planar formats are fully supported via
@@ -292,7 +293,7 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_video) {
-        // HACK: Decoder output does not properly support planar 
+        // HACK: Decoder output does not properly support planar
         // formats. By calling this method it means a transcoder
         // is in use, so force a interleaved output format.
         // Note: This can be removed when planar formats are fully supported via

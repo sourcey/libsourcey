@@ -38,7 +38,7 @@ public:
 
     virtual AuthenticationState authenticateRequest(Server*, Request& request)
     {
-        DebugL << "Authenticating: " << request.transactionID() << endl;
+        DebugA("Authenticating: ", request.transactionID())
 
         // The authentication information (e.g., username, password, realm, and
         // nonce) is used to both verify subsequent requests and to compute the

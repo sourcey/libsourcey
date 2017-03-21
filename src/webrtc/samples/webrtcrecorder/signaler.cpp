@@ -77,10 +77,10 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 {
     if (peer.id() == _client.ourID())
         return;
-    DebugL << "Peer connected: " << peer.id() << endl;
+    DebugA("Peer connected: ", peer.id())
 
     if (PeerConnectionManager::exists(peer.id())) {
-        DebugL << "Peer already has session: " << peer.id() << endl;
+        DebugA("Peer already has session: ", peer.id())
         return;
     }
 
@@ -95,7 +95,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 
 void Signaler::onPeerMessage(smpl::Message& m)
 {
-    DebugL << "Peer message: " << m.from().toString() << endl;
+    DebugA("Peer message: ", m.from().toString())
 
     if (m.find("offer") != m.end()) {
         recvSDP(m.from().id, m["offer"]);
@@ -114,7 +114,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 
     auto conn = get(peer.id());
     if (conn) {
-        DebugL << "Closing peer connection: " << peer.id() << endl;
+        DebugA("Closing peer connection: ", peer.id())
         conn->closeConnection(); // will be deleted via callback
     }
 }

@@ -85,13 +85,13 @@ bool IDiagnostic::failed() const
 //
 DiagnosticManager::DiagnosticManager()
 {
-    TraceL << "Create" << endl;
+    TraceA("Create")
 }
 
 
 DiagnosticManager::~DiagnosticManager()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
 }
 
 void DiagnosticManager::resetAll()
@@ -128,7 +128,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
     assert(test);
     assert(!test->name.empty());
 
-    TraceL << "Adding Diagnostic: " << test->name << endl;
+    TraceA("Adding Diagnostic: ", test->name)
     // test->StateChange += sdelegate(this,
     // &DiagnosticManager::onDiagnosticStateChange);
     return DiagnosticStore::add(test->name, test);
@@ -139,7 +139,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 {
     assert(!name.empty());
 
-    TraceL << "Removing Diagnostic: " << name << endl;
+    TraceA("Removing Diagnostic: ", name)
     IDiagnostic* test = DiagnosticStore::remove(name);
     if (test) {
         // TODO:

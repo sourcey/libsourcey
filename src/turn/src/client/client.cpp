@@ -39,7 +39,7 @@ Client::Client(ClientObserver& observer, const Options& options, const net::Sock
 
 Client::~Client()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
     shutdown();
     // assert(_socket->/*base().*/refCount() == 1);
     // assert(closed());
@@ -48,7 +48,7 @@ Client::~Client()
 
 void Client::initiate()
 {
-    TraceL << "TURN client connecting to " << _options.serverAddr << endl;
+    TraceA("TURN client connecting to ", _options.serverAddr)
 
     assert(!_permissions.empty() && "must set permissions");
     assert(_socket.impl && "must set socket");
@@ -71,7 +71,7 @@ void Client::shutdown()
     _timer.stop();
 
     for (auto it = _transactions.begin(); it != _transactions.end();) {
-        TraceL << "Shutdown base: Delete transaction: " << *it << endl;
+        TraceA("Shutdown base: Delete transaction: ", *it)
         (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
         // delete *it;
         (*it)->dispose();
@@ -90,7 +90,7 @@ void Client::shutdown()
 
 void Client::onSocketConnect(net::Socket& socket)
 {
-    TraceL << "Client connected" << endl;
+    TraceA("Client connected")
     _socket.Connect -= slot(this, &Client::onSocketConnect);
 
     _timer.setInterval(_options.timerInterval);
@@ -102,7 +102,7 @@ void Client::onSocketConnect(net::Socket& socket)
 
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceL << "Control socket recv: " << buffer.size() << endl;
+    TraceA("Control socket recv: ", buffer.size())
 
     stun::Message message;
     // auto socket = reinterpret_cast<net::Socket*>(sender);
@@ -130,7 +130,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
 void Client::onSocketClose(net::Socket& socket)
 {
     assert(&socket == _socket.impl.get());
-    TraceL << "Control socket closed" << endl;
+    TraceA("Control socket closed")
     assert(_socket->closed());
     shutdown();
     setError(_socket->error());
@@ -152,7 +152,7 @@ void Client::sendRefresh()
     // explicitly delete the allocation. A client MAY refresh an allocation
     // at any time for other reasons.
 
-    TraceL << "Send refresh allocation request" << endl;
+    TraceA("Send refresh allocation request")
 
     auto transaction = createTransaction();
     transaction->request().setClass(stun::Message::Request);
@@ -168,7 +168,7 @@ void Client::sendRefresh()
 
 void Client::handleRefreshResponse(const stun::Message& response)
 {
-    TraceL << "Received a Refresh Response: " << response.toString() << endl;
+    TraceA("Received a Refresh Response: ", response.toString())
 
     assert(response.methodType() == stun::Message::Refresh);
 
@@ -197,7 +197,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
 
     setLifetime(lifetimeAttr->value());
 
-    TraceL << "Refreshed allocation expires in: " << timeRemaining() << endl;
+    TraceA("Refreshed allocation expires in: ", timeRemaining())
 
     // If lifetime is 0 the allocation will be cleaned up by garbage collection.
 }
@@ -205,7 +205,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
 
 bool Client::removeTransaction(stun::Transaction* transaction)
 {
-    TraceL << "Removing transaction: " << transaction << endl;
+    TraceA("Removing transaction: ", transaction)
 
 
     for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
@@ -286,7 +286,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 
 bool Client::handleResponse(const stun::Message& response)
 {
-    TraceL << "Handle response: " << response.toString() << endl;
+    TraceA("Handle response: ", response.toString())
 
     // Send this response to the appropriate handler.
     if (response.methodType() == stun::Message::Allocate) {
@@ -329,7 +329,7 @@ bool Client::handleResponse(const stun::Message& response)
 
 void Client::sendAllocate()
 {
-    TraceL << "Send allocation request" << endl;
+    TraceA("Send allocation request")
 
     assert(!_options.username.empty());
     assert(!_options.password.empty());
@@ -422,7 +422,7 @@ void Client::sendAllocate()
 //  have not checked for existing allocations on this 5 tuple.
 void Client::handleAllocateResponse(const stun::Message& response)
 {
-    TraceL << "Allocate success response" << endl;
+    TraceA("Allocate success response")
     assert(response.methodType() == stun::Message::Allocate);
 
     // If the client receives an Allocate success response, then it MUST
@@ -504,7 +504,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 
 void Client::handleAllocateErrorResponse(const stun::Message& response)
 {
-    TraceL << "Allocate error response" << endl;
+    TraceA("Allocate error response")
 
     assert(response.methodType() == stun::Message::Allocate &&
            response.classType() == stun::Message::ErrorResponse);
@@ -577,7 +577,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
                 // Now that our realm and nonce are set we can re-send the
                 // allocate request.
                 if (_realm.size() && _nonce.size()) {
-                    TraceL << "Resending authenticated allocation request" << endl;
+                    TraceA("Resending authenticated allocation request")
                     sendAllocate();
                     return;
                 }
@@ -713,7 +713,7 @@ void Client::addPermission(const std::string& peerIP)
 
 void Client::sendCreatePermission()
 {
-    TraceL << "Send Create Permission Request" << endl;
+    TraceA("Send Create Permission Request")
 
     assert(!_permissions.empty());
 
@@ -734,7 +734,7 @@ void Client::sendCreatePermission()
     transaction->request().setMethod(stun::Message::CreatePermission);
 
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
-        TraceL << "Create permission request: " << (*it).ip << endl;
+        TraceA("Create permission request: ", (*it).ip)
         auto peerAttr = new stun::XorPeerAddress;
         peerAttr->setAddress(net::Address((*it).ip, 0));
         // peerAttr->setFamily(1);
@@ -752,7 +752,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     // If the client receives a valid CreatePermission success response,
     // then the client updates its data structures to indicate that the
     // permissions have been installed or refreshed.
-    TraceL << "Permission created" << endl;
+    TraceA("Permission created")
 
     // Send all queued requests...
     // TODO: To via onStateChange Success callback
@@ -780,7 +780,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 
     // Once permissions have been created the allocation
     // process is considered a success.
-    TraceL << "Allocation Success" << endl;
+    TraceA("Allocation Success")
     setState(this, ClientState::Success);
 }
 
@@ -818,7 +818,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
 
 void Client::sendData(const char* data, size_t size, const net::Address& peerAddress)
 {
-    TraceL << "Send Data Indication to peer: " << peerAddress << endl;
+    TraceA("Send Data Indication to peer: ", peerAddress)
 
     // auto request = new stun::Message;
     stun::Message request;
@@ -864,7 +864,7 @@ void Client::sendData(const char* data, size_t size, const net::Address& peerAdd
     // Queued requests will be sent when the CreatePermission
     // callback is received from the server.
     else if (stateEquals(ClientState::Authorizing)) {
-        TraceL << "Queueing outgoing request: " << request.toString() << endl;
+        TraceA("Queueing outgoing request: ", request.toString())
 
         _pendingIndications.push_back(request);
         assert(_pendingIndications.size() < 100); // something is wrong...
@@ -909,7 +909,7 @@ void Client::handleDataIndication(const stun::Message& response)
         return;
     }
 
-    TraceL << "Handle Data indication: " << response.toString() << endl;
+    TraceA("Handle Data indication: ", response.toString())
 
     if (!closed()) {
         _observer.onRelayDataReceived(*this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
@@ -919,7 +919,7 @@ void Client::handleDataIndication(const stun::Message& response)
 
 void Client::onTransactionProgress(void* sender, TransactionState& state, const TransactionState&)
 {
-    TraceL << "Transaction state change: " << sender << ": " << state << endl;
+    TraceA("Transaction state change: ", sender, ": ", state)
 
     auto transaction = reinterpret_cast<stun::Transaction*>(sender);
     transaction->response().opaque = transaction;

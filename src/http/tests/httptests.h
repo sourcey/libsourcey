@@ -108,13 +108,13 @@ struct HTTPEchoTest
     {
         std::ostringstream os;
         res.write(os);
-        DebugL << "Response complete: " << os.str() << endl;
+        DebugA("Response complete: ", os.str())
     }
 
     void onPayload(const MutableBuffer& buffer)
     {
         std::string data(bufferCast<const char*>(buffer), buffer.size());
-        DebugL << "On payload: " << buffer.size() << ": " << data << endl;
+        DebugA("On payload: ", buffer.size(), ": ", data)
 
         if (data == "PING")
             numSuccess++;

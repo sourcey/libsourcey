@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         for (auto& kv : optparse.args) {
             const std::string& key = kv.first;
             const std::string& value = kv.second;
-            DebugL << "Setting option: " << key << ": " << value << endl;
+            DebugA("Setting option: ", key, ": ", value)
             if (key == "file") {
                 sourceFile = value;
             }

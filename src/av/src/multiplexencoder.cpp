@@ -59,14 +59,14 @@ static int dispatchOutputPacket(void* opaque, uint8_t* buffer, int bufferSize)
     // http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
     auto klass = reinterpret_cast<MultiplexEncoder*>(opaque);
     if (klass) {
-        TraceL << "Dispatching packet: " << bufferSize << endl;
+        TraceA("Dispatching packet: ", bufferSize)
         if (!klass->isActive()) {
             WarnL << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;
             return bufferSize;
         }
         MediaPacket packet(buffer, bufferSize);
         klass->emitter.emit(packet);
-        TraceL << "Dispatching packet: OK: " << bufferSize << endl;
+        TraceA("Dispatching packet: OK: ", bufferSize)
     }
 
     return bufferSize;

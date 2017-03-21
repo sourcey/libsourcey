@@ -368,7 +368,7 @@ static void scanV4L2Devices(std::vector<Device>& devices)
         std::vector<std::string> nodes;
         fs::readdir(metadataDir, nodes);
         for (auto& filename : nodes) {
-            DebugL << "Checking video device " << filename << endl;
+            DebugA("Checking video device ", filename)
             if (filename.find("video") == 0) {
                 std::string devicePath = "/dev/" + filename;
                 if (isV4L2Device(devicePath)) {

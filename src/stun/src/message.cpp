@@ -119,7 +119,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 ssize_t Message::read(const ConstBuffer& buf)
 {
-    TraceL << "Parse STUN packet: " << buf.size() << endl;
+    TraceA("Parse STUN packet: ", buf.size())
 
     try {
         BitReader reader(buf);
@@ -194,12 +194,12 @@ ssize_t Message::read(const ConstBuffer& buf)
             rest -= (attrLength + kAttributeHeaderSize + padLength);
         }
 
-        TraceL << "Parse success: " << reader.position() << ": " << buf.size() << endl;
+        TraceA("Parse success: ", reader.position(), ": ", buf.size())
         assert(rest == 0);
         assert(reader.position() == _size + kMessageHeaderSize);
         return reader.position();
     } catch (std::exception& exc) {
-        DebugL << "Parse error: " << exc.what() << endl;
+        DebugA("Parse error: ", exc.what())
     }
 
     return 0;

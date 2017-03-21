@@ -20,13 +20,13 @@ public:
         : address("127.0.0.1", port)
         , passed(false)
     {
-        TraceL << "Creating: " << port << std::endl;
+        TraceA("Creating: ", port)
     }
 
     ~ClientSocketTest()
     {
         // assert(socket.base().refCount() == 1);
-        TraceL << "Destroying" << std::endl;
+        TraceA("Destroying")
     }
 
     void run()
@@ -60,10 +60,10 @@ public:
     void onSocketRecv(Socket&, const MutableBuffer& buffer, const Address& peerAddress)
     {
         std::string data(bufferCast<const char*>(buffer), buffer.size());
-        DebugL << "On recv: " << data << std::endl;
+        DebugA("On recv: ", data)
         // Check for return packet echoing sent data
         if (data == "client > server") {
-            TraceL << "Recv: Got Return Packet!" << std::endl;
+            TraceA("Recv: Got Return Packet!")
             passed = true;
 
             // Send the shutdown command to close the connection gracefully.
@@ -87,7 +87,7 @@ public:
         // The last callback to fire is the Closed signal
         // which notifies us the underlying libuv socket
         // handle is closed. Das is gut!
-        TraceL << "On closed" << std::endl;
+        TraceA("On closed")
     }
 };
 

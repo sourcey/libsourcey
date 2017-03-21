@@ -226,7 +226,7 @@ int main(int argc, char** argv)
         writer.seek(500);
         expect(writer.position() == 500);
 
-        // The cursor can be set to past the end of the buffer, 
+        // The cursor can be set to past the end of the buffer,
         // but can't perform any write operations there.
         try {
             writer.seek(1200);
@@ -370,7 +370,7 @@ int main(int argc, char** argv)
 
     // =========================================================================
     // Logger
-    
+
     describe("logger", []() {
         Logger& logger = Logger::instance();
 
@@ -378,7 +378,7 @@ int main(int argc, char** argv)
         logger.setWriter(new LogWriter);
         clock_t start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "sync log " << i << endl;
+            TraceA("sync log ", i)
         cout << "logger: synchronous test completed after: " << (clock() - start) << "ms" << endl;
 
         // Test default synchronous var args writer
@@ -391,7 +391,7 @@ int main(int argc, char** argv)
         logger.setWriter(new AsyncLogWriter);
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "async log " << i << endl;
+            TraceA("async log ", i)
         cout << "logger: asynchronous test completed after: " << (clock() - start) << "ms" << endl;
 
          //// Test function logging
@@ -400,7 +400,7 @@ int main(int argc, char** argv)
          //    TraceS(this) << "test: " << i << endl;
          //cout << "logger: asynchronous function logging completed after: "
          //     << (clock() - start) << endl;
-        
+
          //// Test function and mem address logging
          //start = clock();
          //for (unsigned i = 0; i < 1000; i++)

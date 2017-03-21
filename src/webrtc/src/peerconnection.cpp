@@ -44,7 +44,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
 
 PeerConnection::~PeerConnection()
 {
-    DebugL << _peerid << ": Destroying" << endl;
+    DebugA(_peerid, ": Destroying")
     // closeConnection();
 
     if (_peerConnection) {
@@ -79,7 +79,7 @@ void PeerConnection::createConnection()
 
 void PeerConnection::closeConnection()
 {
-    DebugL << _peerid << ": Closing" << endl;
+    DebugA(_peerid, ": Closing")
 
     if (_peerConnection) {
         _peerConnection->Close();
@@ -103,7 +103,7 @@ void PeerConnection::createOffer()
 
 void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
 {
-    DebugL << _peerid << ": Receive " << type << ": " << sdp << endl;
+    DebugA(_peerid, ": Receive ", type, ": ", sdp)
 
     webrtc::SdpParseError error;
     webrtc::SessionDescriptionInterface* desc(
@@ -139,7 +139,7 @@ void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
 void PeerConnection::OnSignalingChange(
     webrtc::PeerConnectionInterface::SignalingState new_state)
 {
-    DebugL << _peerid << ": On signaling state change: " << new_state << endl;
+    DebugA(_peerid, ": On signaling state change: ", new_state)
 
     switch (new_state) {
         case webrtc::PeerConnectionInterface::kStable:
@@ -160,20 +160,20 @@ void PeerConnection::OnSignalingChange(
 void PeerConnection::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
-    DebugL << _peerid << ": On ICE connection change: " << new_state << endl;
+    DebugA(_peerid, ": On ICE connection change: ", new_state)
 }
 
 
 void PeerConnection::OnIceGatheringChange(
     webrtc::PeerConnectionInterface::IceGatheringState new_state)
 {
-    DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
+    DebugA(_peerid, ": On ICE gathering change: ", new_state)
 }
 
 
 void PeerConnection::OnRenegotiationNeeded()
 {
-    DebugL << _peerid << ": On renegotiation needed" << endl;
+    DebugA(_peerid, ": On renegotiation needed")
 }
 
 
@@ -181,7 +181,7 @@ void PeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
-    DebugL << _peerid << ": On add stream" << endl;
+    DebugA(_peerid, ": On add stream")
     _manager->onAddRemoteStream(this, stream);
 }
 
@@ -190,7 +190,7 @@ void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
-    DebugL << _peerid << ": On remove stream" << endl;
+    DebugA(_peerid, ": On remove stream")
     _manager->onRemoveRemoteStream(this, stream);
 }
 
@@ -212,7 +212,7 @@ void PeerConnection::OnIceCandidate(
 
 void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
-    DebugL << _peerid << ": Set local description" << endl;
+    DebugA(_peerid, ": Set local description")
     _peerConnection->SetLocalDescription(
         DummySetSessionDescriptionObserver::Create(), desc);
 

@@ -58,7 +58,7 @@ void RecordingPeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
-    DebugL << _peerid << ": On add stream" << endl;
+    DebugA(_peerid, ": On add stream")
     _manager->onAddRemoteStream(this, stream);
 
     // Set tracks
@@ -76,7 +76,7 @@ void RecordingPeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* strea
 {
     assert(_mode == Answer);
 
-    DebugL << _peerid << ": On remove stream" << endl;
+    DebugA(_peerid, ": On remove stream")
     _manager->onRemoveRemoteStream(this, stream);
 
     assert(0 && "free streams");
@@ -107,7 +107,7 @@ void RecordingPeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* strea
 void RecordingPeerConnection::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
-    DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
+    DebugA(_peerid, ": On ICE gathering change: ", new_state)
 
     switch (new_state) {
         case webrtc::PeerConnectionInterface::kIceConnectionNew:

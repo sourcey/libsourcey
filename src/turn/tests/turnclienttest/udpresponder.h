@@ -57,7 +57,7 @@ public:
             // socket.bind(net::Address("0.0.0.0", 4020));
             socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            errorL("UDPResponder", this) << id << ": ERROR: " << exc.what() << endl;
+            ErrorS(this) << id << ": ERROR: " << exc.what() << endl;
             assert(false);
         }
     }
@@ -86,7 +86,7 @@ public:
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
         DebugS(this) << id << ": On recv: " << peerAddr << ": " << buffer.size() << std::endl;
-        
+
         // Echo back to client
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
     }

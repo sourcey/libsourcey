@@ -315,7 +315,7 @@ bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 bool DeviceManager::getAudioDevice(bool input, Device& out,
                                    const std::string& name, int id)
 {
-    TraceL << "Get audio device: " << id << ": " << name << endl;
+    TraceA("Get audio device: ", id, ": ", name)
 
     // If the name is empty, return the default device id.
     if (name.empty() || name == kDefaultDeviceName) {
@@ -328,7 +328,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out,
 
     std::vector<Device> devices;
     input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
-    TraceL << "Get audio devices: " << devices.size() << endl;
+    TraceA("Get audio devices: ", devices.size())
     return matchNameAndID(devices, out, name, id);
 }
 
@@ -337,7 +337,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
 {
     std::vector<Device> devices;
     input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
-    TraceL << "Get audio devices: " << devices.size() << endl;
+    TraceA("Get audio devices: ", devices.size())
     return matchID(devices, out, id);
 }
 
@@ -428,7 +428,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName,
     int i = 0;
     while (exclusionList[i]) {
         if (util::icompare(deviceName, exclusionList[i]) == 0) {
-            DebugL << "Ignoring device " << deviceName << endl;
+            DebugA("Ignoring device ", deviceName)
             return true;
         }
         ++i;
@@ -471,22 +471,22 @@ bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out,
                                    const std::string& name, int id)
 {
-    TraceL << "Match name and ID: " << name << ": " << id << endl;
+    TraceA("Match name and ID: ", name, ": ", id)
 
     bool ret = false;
     for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
-        TraceL << "Match name and ID: Checking: " << devices[i].name << endl;
+        TraceA("Match name and ID: Checking: ", devices[i].name)
         if (devices[i].name == name) {
             // The first device matching the given name will be returned,
             // but we will try and match the given ID as well.
             // if (out.id == -1)
             out = devices[i];
-            TraceL << "Match name and ID: Match: " << out.name << endl;
+            TraceA("Match name and ID: Match: ", out.name)
 
             ret = true;
             if (id == -1 || id == i) {
 
-                TraceL << "Match name and ID: Match ID: " << out.name << endl;
+                TraceA("Match name and ID: Match ID: ", out.name)
                 break;
             }
         }

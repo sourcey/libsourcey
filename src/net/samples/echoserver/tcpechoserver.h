@@ -49,12 +49,12 @@ public:
         // socket->Error += slot(this, &EchoServer::onClientSocketError);
         // socket->Close += slot(this, &EchoServer::onClientSocketClose);
         sockets.push_back(socket);
-        // DebugL << "On accept: " << socket << std::endl;
+        // DebugA("On accept: ", socket)
     }
 
     void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress)
     {
-        // DebugL << "On recv: " << &socket << ": " << buffer.str() << std::endl;
+        // DebugA("On recv: ", &socket, ": ", buffer.str())
 
         // Echo it back
         socket.send(bufferCast<const char*>(buffer), buffer.size());
@@ -81,7 +81,7 @@ public:
         for (typename Socket::Vec::iterator it = sockets.begin();
             it != sockets.end(); ++it) {
             if (it->get() == &socket) {
-                DebugL << "Removing: " << &socket << std::endl;
+                DebugA("Removing: ", &socket)
 
                 // All we need to do is erase the socket in order to
                 // deincrement the ref counter and destroy the socket

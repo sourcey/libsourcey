@@ -37,13 +37,13 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
     // The allocation will be deleted if the control connection is lost.
     _control.Close += slot(this, &TCPAllocation::onControlClosed);
 
-    TraceL << "Initializing on " << _acceptor->address() << endl;
+    TraceA("Initializing on ", _acceptor->address())
 }
 
 
 TCPAllocation::~TCPAllocation()
 {
-    TraceL << "Destroy TCP allocation" << endl;
+    TraceA("Destroy TCP allocation")
 
    
     _acceptor.as<net::TCPSocket>()->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
@@ -59,13 +59,13 @@ TCPAllocation::~TCPAllocation()
     }
     assert(this->pairs().empty());
 
-    TraceL << "Destroy TCP allocation: OK" << endl;
+    TraceA("Destroy TCP allocation: OK")
 }
 
 
 void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 {
-    TraceL << "Peer connection accepted: " << socket->peerAddress() << endl;
+    TraceA("Peer connection accepted: ", socket->peerAddress())
 
     // 5.3. Receiving a TCP Connection on a Relayed Transport Address
     //
@@ -85,10 +85,10 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
     // immediately after it has been accepted.
     //
     if (!hasPermission(socket->peerAddress().host())) {
-        TraceL << "No permission for peer: " << socket->peerAddress() << endl;
+        TraceA("No permission for peer: ", socket->peerAddress())
         return;
     }
-    TraceL << "Has permission for: " << socket->peerAddress() << endl;
+    TraceA("Has permission for: ", socket->peerAddress())
 
     // Otherwise, the server sends a ConnectionAttempt indication to the
     // client over the control connection. The indication MUST include an
@@ -126,7 +126,7 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 
 bool TCPAllocation::handleRequest(Request& request)
 {
-    TraceL << "Handle request" << endl;
+    TraceA("Handle request")
 
     if (!ServerAllocation::handleRequest(request)) {
         if (request.methodType() == stun::Message::Connect)
@@ -143,13 +143,13 @@ bool TCPAllocation::handleRequest(Request& request)
 
 bool TCPAllocation::onTimer()
 {
-    TraceL << "On timer" << endl;
+    TraceA("On timer")
 
     // Clean up any expired Connect request peer connections.
     auto pairs = this->pairs().map();
     for (auto it = pairs.begin(); it != pairs.end(); ++it) {
         if (it->second->expired()) {
-            TraceL << "On timer: Removing expired peer" << endl;
+            TraceA("On timer: Removing expired peer")
             this->pairs().free(it->first);
         }
     }
@@ -160,7 +160,7 @@ bool TCPAllocation::onTimer()
 
 void TCPAllocation::handleConnectRequest(Request& request)
 {
-    TraceL << "Handle Connect request" << endl;
+    TraceA("Handle Connect request")
 
     // 5.2. Receiving a Connect Request
     //
@@ -208,7 +208,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
 
 void TCPAllocation::handleConnectionBindRequest(Request& request)
 {
-    TraceL << "Handle ConnectionBind Request" << endl;
+    TraceA("Handle ConnectionBind Request")
 
     assert(request.methodType() == stun::Message::ConnectionBind);
     TCPConnectionPair* pair = nullptr;
@@ -290,7 +290,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 
 void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool success)
 {
-    TraceL << "Send peer Connect response: " << success << endl;
+    TraceA("Send peer Connect response: ", success)
 
     assert(!pair->transactionID.empty());
 
@@ -324,14 +324,14 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool succes
 
 int TCPAllocation::sendToControl(stun::Message& message)
 {
-    TraceL << "Send to control: " << message << endl;
+    TraceA("Send to control: ", message)
     return _control->sendPacket(message, 0);
 }
 
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
-    TraceL << "Control socket disconnected" << endl;
+    TraceA("Control socket disconnected")
 
     // The allocation will be destroyed on the
     // next timer call to IAllocation::deleted()

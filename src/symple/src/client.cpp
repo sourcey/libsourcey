@@ -65,19 +65,19 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     , _options(options)
     , _announceStatus(0)
 {
-    TraceL << "Create" << endl;
+    TraceA("Create")
 }
 
 
 Client::~Client()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
 }
 
 
 void Client::connect()
 {
-    TraceL << "Connecting" << endl;
+    TraceA("Connecting")
 
     assert(!_options.host.empty());
     assert(!_options.user.empty());
@@ -94,7 +94,7 @@ void Client::connect()
 
 void Client::close()
 {
-    TraceL << "Closing" << endl;
+    TraceA("Closing")
     sockio::Client::close();
 }
 
@@ -120,7 +120,7 @@ void assertCanSend(Client* client, Message& m)
     }
 
 #ifdef _DEBUG
-    TraceL << "Sending message: " << m.dump(4) << endl;
+    TraceA("Sending message: ", m.dump(4))
 #endif
 }
 
@@ -158,7 +158,7 @@ int Client::respond(Message& m, bool ack)
 
 void Client::createPresence(Presence& p)
 {
-    TraceL << "Create presence" << endl;
+    TraceA("Create presence")
 
     auto peer = ourPeer();
     if (peer) {
@@ -173,7 +173,7 @@ void Client::createPresence(Presence& p)
 
 int Client::sendPresence(bool probe)
 {
-    TraceL << "Broadcasting presence" << endl;
+    TraceA("Broadcasting presence")
 
     Presence p;
     createPresence(p);
@@ -184,7 +184,7 @@ int Client::sendPresence(bool probe)
 
 int Client::sendPresence(const Address& to, bool probe)
 {
-    TraceL << "Sending presence" << endl;
+    TraceA("Sending presence")
 
     Presence p;
     createPresence(p);
@@ -196,7 +196,7 @@ int Client::sendPresence(const Address& to, bool probe)
 
 int Client::announce()
 {
-    TraceL << "Announcing" << endl;
+    TraceA("Announcing")
 
     json::value data;
     data["user"] = _options.user;
@@ -212,7 +212,7 @@ int Client::announce()
 
 int Client::joinRoom(const std::string& room)
 {
-    DebugL << "Join room: " << room << endl;
+    DebugA("Join room: ", room)
 
     _rooms.push_back(room);
     sockio::Packet pkt("join", "\"" + room + "\"");
@@ -222,7 +222,7 @@ int Client::joinRoom(const std::string& room)
 
 int Client::leaveRoom(const std::string& room)
 {
-    DebugL << "Leave room: " << room << endl;
+    DebugA("Leave room: ", room)
 
     _rooms.erase(std::remove(_rooms.begin(), _rooms.end(), room), _rooms.end());
     sockio::Packet pkt("leave", "\"" + room + "\"");
@@ -232,7 +232,7 @@ int Client::leaveRoom(const std::string& room)
 
 void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
 {
-    TraceL << "On announce response: " << state << endl;
+    TraceA("On announce response: ", state)
 
     auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
     switch (state.id()) {
@@ -289,15 +289,15 @@ void Client::onOnline()
 void Client::emit(IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
-    TraceL << "Emit packet: " << packet.toString() << endl;
+    TraceA("Emit packet: ", packet.toString())
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
-        TraceL << "JSON packet: " << packet.toString() << endl;
+        TraceA("JSON packet: ", packet.toString())
 
         json::value data = packet.json();
 #ifdef _DEBUG
-        TraceL << "Received " << data.dump(4) << endl;
+        TraceA("Received ", data.dump(4))
 #endif
         assert(data.is_object());
         std::string type(data.value("type", ""));
@@ -345,7 +345,7 @@ void Client::emit(IPacket& raw)
                     respond(c);
                 }
             } else {
-                DebugL << "Received non-standard message: " << type << endl;
+                DebugA("Received non-standard message: ", type)
 
                 // Attempt to parse custom packets as a message type  
                 Message m(data);
@@ -363,7 +363,7 @@ void Client::emit(IPacket& raw)
 
     // Other packet types are proxied directly
     else {
-        TraceL << "Proxying packet: " << PacketSignal::nslots() << endl;
+        TraceA("Proxying packet: ", PacketSignal::nslots())
         PacketSignal::emit(packet);
     }
 }
@@ -371,7 +371,7 @@ void Client::emit(IPacket& raw)
 
 void Client::onPresenceData(const json::value& data, bool whiny)
 {
-    TraceL << "Updating: " << data.dump(4) << endl;
+    TraceA("Updating: ", data.dump(4))
 
     if (data.is_object() &&
         data.find("id") != data.end() &&
@@ -385,13 +385,13 @@ void Client::onPresenceData(const json::value& data, bool whiny)
             if (!peer) {
                 peer = new Peer(data);
                 _roster.add(id, peer);
-                DebugL << "Peer connected: " << peer->address().toString() << endl;
+                DebugA("Peer connected: ", peer->address().toString())
                 PeerConnected.emit(*peer);
             } else
                 static_cast<json::value&>(*peer) = data;
         } else {
             if (peer) {
-                DebugL << "Peer disconnected: " << peer->address().toString() << endl;
+                DebugA("Peer disconnected: ", peer->address().toString())
                 PeerDisconnected.emit(*peer);
                 _roster.free(id);
             } else {
@@ -412,7 +412,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
-        TraceL << "Updating: " << json::stringify(data, true) << endl;
+        TraceA("Updating: ", json::stringify(data, true))
         std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {

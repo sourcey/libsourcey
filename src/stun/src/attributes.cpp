@@ -745,14 +745,14 @@ Attribute* MessageIntegrity::clone()
 
 bool MessageIntegrity::verifyHmac(const std::string& key) const
 {
-    // DebugL << "Message: Verify HMAC: " << key << endl;
+    // DebugA("Message: Verify HMAC: ", key)
 
     assert(!key.empty());
     assert(!_hmac.empty());
     assert(!_input.empty());
 
-    // DebugL << "Message: Packet integrity input (" << _input << ")" << endl;
-    // DebugL << "Message: Packet integrity key (" << key << ")" << endl;
+    // DebugA("Message: Packet integrity input (", _input, ")")
+    // DebugA("Message: Packet integrity key (", key, ")")
 
     std::string hmac = crypto::computeHMAC(_input, key);
     assert(hmac.size() == MessageIntegrity::Size);
@@ -792,7 +792,7 @@ void MessageIntegrity::read(BitReader& reader)
     reader.skip(MessageIntegrity::Size);
 
 #if 0
-    //DebugL << "Message: Parsed message integrity (" << _hmac << ")" << endl;
+    //DebugA("Message: Parsed message integrity (", _hmac, ")")
 
     // Remember the original position and set the buffer position back to 0.
     int originalPos = reader.position();

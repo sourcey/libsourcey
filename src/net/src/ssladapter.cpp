@@ -133,7 +133,7 @@ int SSLAdapter::available() const
 
 void SSLAdapter::addIncomingData(const char* data, size_t len)
 {
-    // TraceL << "Add incoming data: " << len << endl;
+    // TraceA("Add incoming data: ", len)
     assert(_readBIO);
     BIO_write(_readBIO, data, (int)len);
     flush();
@@ -162,7 +162,7 @@ void SSLAdapter::handshake()
 
 void SSLAdapter::flush()
 {
-    TraceL << "Flushing" << endl;
+    TraceA("Flushing")
 
     // Keep trying to handshake until initialized
     if (!ready())
@@ -219,14 +219,14 @@ void SSLAdapter::handleError(int rc)
     int error = SSL_get_error(_ssl, rc);
     switch (error) {
         case SSL_ERROR_ZERO_RETURN:
-            // TraceL << "SSL_ERROR_ZERO_RETURN" << endl;
+            // TraceA("SSL_ERROR_ZERO_RETURN")
             return;
         case SSL_ERROR_WANT_READ:
-            // TraceL << "SSL_ERROR_WANT_READ" << endl;
+            // TraceA("SSL_ERROR_WANT_READ")
             flushWriteBIO();
             break;
         case SSL_ERROR_WANT_WRITE:
-            // TraceL << "SSL_ERROR_WANT_WRITE" << endl;
+            // TraceA("SSL_ERROR_WANT_WRITE")
             assert(0 && "TODO");
             break;
         case SSL_ERROR_WANT_CONNECT:

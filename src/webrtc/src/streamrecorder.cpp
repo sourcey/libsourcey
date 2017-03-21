@@ -66,7 +66,7 @@ void StreamRecorder::setAudioTrack(webrtc::AudioTrackInterface* track)
 
 void StreamRecorder::OnFrame(const webrtc::VideoFrame& yuvframe)
 {
-    TraceL << "On video frame: " << yuvframe.width() << 'x' << yuvframe.height() << std::endl;
+    TraceA("On video frame: ", yuvframe.width(), 'x', yuvframe.height())
 
     // TODO: Recreate encoder context on input stream change
     if (_awaitingVideo) {

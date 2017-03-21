@@ -32,27 +32,27 @@ Server::Server(ServerObserver& observer, const ServerOptions& options)
     , _udpSocket(nullptr)
     , _tcpSocket(nullptr)
 {
-    TraceL << "Create" << endl;
+    TraceA("Create")
 }
 
 
 Server::~Server()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
     stop();
-    TraceL << "Destroy: OK" << endl;
+    TraceA("Destroy: OK")
 }
 
 
 void Server::start()
 {
-    TraceL << "Starting" << endl;
+    TraceA("Starting")
 
     if (_options.enableUDP) {
         _udpSocket.swap(net::makeSocket<net::UDPSocket>());
         _udpSocket.Recv += slot(this, &Server::onSocketRecv, 1);
         _udpSocket->bind(_options.listenAddr);
-        TraceL << "UDP listening on " << _options.listenAddr << endl;
+        TraceA("UDP listening on ", _options.listenAddr)
     }
 
     if (_options.enableTCP) {
@@ -61,7 +61,7 @@ void Server::start()
         _tcpSocket->listen();
         _tcpSocket.as<net::TCPSocket>()->AcceptConnection +=
             slot(this, &Server::onTCPAcceptConnection);
-        TraceL << "TCP listening on " << _options.listenAddr << endl;
+        TraceA("TCP listening on ", _options.listenAddr)
     }
 
     _timer.setInterval(_options.timerInterval);
@@ -71,7 +71,7 @@ void Server::start()
 
 void Server::stop()
 {
-    TraceL << "Stopping" << endl;
+    TraceA("Stopping")
 
     _timer.stop();
 
@@ -102,7 +102,7 @@ void Server::onTimer()
 {
     ServerAllocationMap allocations = this->allocations();
     for (auto it = allocations.begin(); it != allocations.end(); ++it) {
-        // TraceL << "Checking allocation: " << *it->second << endl;
+        // TraceA("Checking allocation: ", *it->second)
         if (!it->second->onTimer()) {
             // Entry removed via ServerAllocation destructor
             delete it->second;
@@ -113,7 +113,7 @@ void Server::onTimer()
 
 void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 {
-    TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;
+    TraceA("TCP connection accepted: ", sock->peerAddress())
 
     net::SocketEmitter emitter(sock);
     emitter.Recv += slot(this, &Server::onSocketRecv);
@@ -129,7 +129,7 @@ void Server::onTCPAcceptConnection(const net::TCPSocket::Ptr& sock)
 net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 {
     for (auto& sock : _tcpSockets) {
-        // TraceL << "Get socket: " << sock->peerAddress() << ": " << peerAddr << endl;
+        // TraceA("Get socket: ", sock->peerAddress(), ": ", peerAddr)
         if (sock->peerAddress() == peerAddr) {
             return std::dynamic_pointer_cast<TCPSocket>(sock.impl);
         }
@@ -142,7 +142,7 @@ net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
                           const net::Address& peerAddress)
 {
-    TraceL << "Data received: " << buffer.size() << endl;
+    TraceA("Data received: ", buffer.size())
 
     stun::Message message;
     char* buf = bufferCast<char*>(buffer);
@@ -181,7 +181,7 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
 
 void Server::onTCPSocketClosed(net::Socket& socket)
 {
-    TraceL << "TCP socket closed" << endl;
+    TraceA("TCP socket closed")
     releaseTCPSocket(socket);
 }
 
@@ -234,7 +234,7 @@ void Server::handleRequest(Request& request, AuthenticationState state)
 
 void Server::handleAuthorizedRequest(Request& request)
 {
-    TraceL << "Handle authorized request: " << request.toString() << endl;
+    TraceA("Handle authorized request: ", request.toString())
 
     // All requests after the initial Allocate must use the same username as
     // that used to create the allocation, to prevent attackers from
@@ -276,7 +276,7 @@ void Server::handleAuthorizedRequest(Request& request)
                 return;
             }
 
-            TraceL << "Obtained allocation: " << tuple << endl;
+            TraceA("Obtained allocation: ", tuple)
             if (!allocation->handleRequest(request))
                 respondError(request, 600, "Operation Not Supported");
         }
@@ -288,7 +288,7 @@ void Server::handleConnectionBindRequest(Request& request)
 {
     auto connAttr = request.get<stun::ConnectionID>();
     if (!connAttr) {
-        TraceL << "ConnectionBind request has no ConnectionID" << endl;
+        TraceA("ConnectionBind request has no ConnectionID")
         respondError(request, 400, "Bad Request");
         return;
     }
@@ -307,7 +307,7 @@ void Server::handleConnectionBindRequest(Request& request)
 
 void Server::handleBindingRequest(Request& request)
 {
-    TraceL << "Handle Binding request" << endl;
+    TraceA("Handle Binding request")
 
     assert(request.methodType() == stun::Message::Binding);
     assert(request.classType() == stun::Message::Request);
@@ -333,7 +333,7 @@ void Server::handleBindingRequest(Request& request)
 
 void Server::handleAllocateRequest(Request& request)
 {
-    TraceL << "Handle Allocate request" << endl;
+    TraceA("Handle Allocate request")
 
     assert(request.methodType() == stun::Message::Allocate);
     assert(request.classType() == stun::Message::Request);
@@ -349,7 +349,7 @@ void Server::handleAllocateRequest(Request& request)
     //
     auto usernameAttr = request.get<stun::Username>();
     if (!usernameAttr) {
-        TraceL << "STUN Request not authorized " << endl;
+        TraceA("STUN Request not authorized ")
         respondError(request, 401, "NotAuthorized");
         return;
     }
@@ -625,7 +625,7 @@ void Server::handleAllocateRequest(Request& request)
     // request.socket->send(response, request.remoteAddress);
     respond(request, response);
 
-    TraceL << "Handle Allocate request: OK" << endl;
+    TraceA("Handle Allocate request: OK")
 
     //    NOTE: When the Allocate request is sent over UDP, section 7.3.1 of
     //    [RFC5389] requires that the server handle the possible
@@ -672,7 +672,7 @@ void Server::respond(Request& request, stun::Message& response)
         response.add(integrityAttr);
     }
 
-    TraceL << "Sending message: " << response << ": " << request.remoteAddress << endl;
+    TraceA("Sending message: ", response, ": ", request.remoteAddress)
 
     // The response (either success or error) is sent back to the
     // client on the 5-tuple.
@@ -692,7 +692,7 @@ void Server::respond(Request& request, stun::Message& response)
 void Server::respondError(Request& request, int errorCode,
                           const char* errorDesc)
 {
-    TraceL << "Send STUN error: " << errorCode << ": " << errorDesc << endl;
+    TraceA("Send STUN error: ", errorCode, ": ", errorDesc)
 
     stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
     errorMsg.setTransactionID(request.transactionID());

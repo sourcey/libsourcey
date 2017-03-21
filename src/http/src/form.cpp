@@ -212,7 +212,7 @@ void FormWriter::writeAsync()
         if (encoding() == ENCODING_URL) {
             std::ostringstream ostr;
             writeUrl(ostr);
-            // TraceL << "Writing URL: " << ostr.str() << std::endl;
+            // TraceA("Writing URL: ", ostr.str())
             emit(ostr.str());
             _complete = true;
         } else

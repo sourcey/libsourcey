@@ -46,7 +46,7 @@ void Configuration::load(bool /* create */)
         throw std::runtime_error(
             "Cannot load configuration: File path not set.");
 
-    DebugL << "Load: " << _path << endl;
+    DebugA("Load: ", _path)
 
     try {
         // if (create && !fs::exists(_path))

@@ -74,7 +74,7 @@ public:
         for (auto& kv : optparse.args) {
             const std::string& key = kv.first;
             const std::string& value = kv.second;
-            DebugL << "Setting option: " << key << ": " << value << std::endl;
+            DebugA("Setting option: ", key, ": ", value)
 
             if (key == "help") {
                 showHelp = true;
@@ -239,7 +239,7 @@ public:
 
     void onAckState(void* sender, TransactionState& state, const TransactionState&)
     {
-        DebugL << "####### On announce response: " << state << endl;
+        DebugA("####### On announce response: ", state)
 
         // auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
         switch (state.id()) {
@@ -255,7 +255,7 @@ public:
 
     //void onRecvPacket(IPacket& raw)
     //{
-    //    DebugL << "####### On raw packet: " << raw.className() << endl;
+    //    DebugA("####### On raw packet: ", raw.className())
 
     //    auto message = dynamic_cast<smpl::Message*>(&raw);
     //    if (message) {
@@ -272,28 +272,28 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        DebugL << "####### On message: " << message.className() << endl;
+        DebugA("####### On message: ", message.className())
 
         // Handle incoming Symple messages here
     }
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        DebugL << "####### On presence: " << presence.className() << endl;
+        DebugA("####### On presence: ", presence.className())
 
         // Handle incoming Symple presences here
     }
 
     void onRecvEvent(smpl::Event& event)
     {
-        DebugL << "####### On event: " << event.className() << endl;
+        DebugA("####### On event: ", event.className())
 
         // Handle incoming Symple events here
     }
     
     void onClientAnnounce(const int& status)
     {
-        DebugL << "####### On announce: " << status << endl;
+        DebugA("####### On announce: ", status)
         assert(status == 200);
     }
 

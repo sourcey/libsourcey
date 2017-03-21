@@ -30,7 +30,7 @@ void testCipher(const std::string algorithm, int iterations)
             std::string result = ciph.decryptString(out, crypto::Cipher::Binary);
             expect(in == result);
         }
-        DebugL << "Binary: " << (clock() - start) << endl;
+        DebugA("Binary: ", (clock() - start))
     }
 
     {
@@ -42,7 +42,7 @@ void testCipher(const std::string algorithm, int iterations)
             std::string result = ciph.decryptString(out, crypto::Cipher::Base64);
             expect(in == result);
         }
-        DebugL << "Base64: " << (clock() - start) << endl;
+        DebugA("Base64: ", (clock() - start))
     }
 
     {
@@ -54,7 +54,7 @@ void testCipher(const std::string algorithm, int iterations)
             std::string result = ciph.decryptString(out, crypto::Cipher::BinHex);
             expect(in == result);
         }
-        DebugL << "BinHex: " << (clock() - start) << endl;
+        DebugA("BinHex: ", (clock() - start))
     }
 
     {
@@ -170,12 +170,12 @@ int main(int argc, char** argv)
         char encBuf[2048];
         size_t len = enc.encode(in.c_str(), in.length(), encBuf);
         std::string encRes(encBuf, len);
-        DebugL << "Encoded: " << encRes << endl;
+        DebugA("Encoded: ", encRes)
 
         char decBuf[2048];
         len = dec.decode(encBuf, len, decBuf);
         std::string decRes(decBuf, len);
-        DebugL << "Decoded: " << decRes << endl;
+        DebugA("Decoded: ", decRes)
 
         expect(in == decRes);
     });

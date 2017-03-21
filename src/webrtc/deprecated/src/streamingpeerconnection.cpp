@@ -108,7 +108,7 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> StreamingPeerConnection::create
 void StreamingPeerConnection::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
-    DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
+    DebugA(_peerid, ": On ICE gathering change: ", new_state)
 
     switch (new_state) {
         case webrtc::PeerConnectionInterface::kIceConnectionNew:
@@ -148,7 +148,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //
 // void PeerConnection::closeConnection()
 // {
-//     DebugL << _peerid << ": Closing" << endl;
+//     DebugA(_peerid, ": Closing")
 //
 //     if (_peerConnection) {
 //         _peerConnection->Close();
@@ -172,7 +172,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //
 // void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
 // {
-//     DebugL << _peerid << ": Receive " << type << ": " << sdp << endl;
+//     DebugA(_peerid, ": Receive ", type, ": ", sdp)
 //
 //     webrtc::SdpParseError error;
 //     webrtc::SessionDescriptionInterface*
@@ -212,7 +212,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // PeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState
 // new_state)
 // {
-//     DebugL << _peerid << ": On ICE connection change: " << new_state << endl;
+//     DebugA(_peerid, ": On ICE connection change: ", new_state)
 // }
 //
 //
@@ -220,13 +220,13 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // PeerConnection::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState
 // new_state)
 // {
-//     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
+//     DebugA(_peerid, ": On ICE gathering change: ", new_state)
 // }
 //
 //
 // void PeerConnection::OnRenegotiationNeeded()
 // {
-//     DebugL << _peerid << ": On renegotiation needed" << endl;
+//     DebugA(_peerid, ": On renegotiation needed")
 // }
 //
 //
@@ -234,7 +234,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // {
 //     assert(_mode == Answer);
 //
-//     DebugL << _peerid << ": On add stream" << endl;
+//     DebugA(_peerid, ": On add stream")
 //     _manager->onAddRemoteStream(this, stream);
 // }
 //
@@ -243,7 +243,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // {
 //     assert(_mode == Answer);
 //
-//     DebugL << _peerid << ": On remove stream" << endl;
+//     DebugA(_peerid, ": On remove stream")
 //     _manager->onRemoveRemoteStream(this, stream);
 // }
 //
@@ -265,7 +265,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //
 // void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 // {
-//     DebugL << _peerid << ": Set local description" << endl;
+//     DebugA(_peerid, ": Set local description")
 //     _peerConnection->SetLocalDescription(
 //         DummySetSessionDescriptionObserver::Create(), desc);
 //

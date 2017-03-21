@@ -140,7 +140,7 @@ void MediaFactory::unloadVideoCaptures()
 VideoCapture::Ptr
 MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 {
-    TraceL << "Creating video capture: " << deviceId << endl;
+    TraceA("Creating video capture: ", deviceId)
 
     if (deviceId < 0)
         throw std::runtime_error("Invalid video device ID");
@@ -178,7 +178,7 @@ void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 
 VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 {
-    TraceL << "Create video file capture: " << file << endl;
+    TraceA("Create video file capture: ", file)
 
     return std::make_shared<VideoCapture>(file);
 }
@@ -188,7 +188,7 @@ AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels,
                                                    int sampleRate,
                                                    RtAudioFormat format)
 {
-    TraceL << "Create audio capture: " << deviceId << endl;
+    TraceA("Create audio capture: ", deviceId)
     if (deviceId < 0)
         throw std::runtime_error("Invalid audio device ID");
 

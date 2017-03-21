@@ -45,14 +45,14 @@ IAllocation::IAllocation(const FiveTuple& tuple, const std::string& username,
 
 IAllocation::~IAllocation()
 {
-    TraceL << "Destroy" << endl;
+    TraceA("Destroy")
     _permissions.clear();
 }
 
 
 void IAllocation::updateUsage(std::int64_t numBytes)
 {
-    TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;
+    TraceA("Update usage: ", _bandwidthUsed, ": ", numBytes)
     _updatedAt = time(0);
     _bandwidthUsed += numBytes;
 }
@@ -82,7 +82,7 @@ void IAllocation::setLifetime(std::int64_t lifetime)
 {
     _lifetime = lifetime;
     _updatedAt = static_cast<std::int64_t>(time(0));
-    TraceL << "Updating Lifetime: " << _lifetime << endl;
+    TraceA("Updating Lifetime: ", _lifetime)
 }
 
 
@@ -141,14 +141,14 @@ void IAllocation::addPermission(const std::string& ip)
     // If the permission is already in the list then refresh it.
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
         if ((*it).ip == ip) {
-            TraceL << "Refreshing permission: " << ip << endl;
+            TraceA("Refreshing permission: ", ip)
             (*it).refresh();
             return;
         }
     }
 
     // Otherwise create it...
-    TraceL << "Create permission: " << ip << endl;
+    TraceA("Create permission: ", ip)
     _permissions.push_back(Permission(ip));
 }
 
@@ -207,7 +207,7 @@ bool IAllocation::hasPermission(const std::string& peerIP)
     }
 #endif
 
-    TraceL << "No permission for: " << peerIP << endl;
+    TraceA("No permission for: ", peerIP)
     return false;
 }
 

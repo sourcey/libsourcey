@@ -112,7 +112,7 @@ void VideoPacketSource::Stop()
 
 void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 {
-    TraceL << "On video frame: " << packet.width << 'x' << packet.height << endl;
+    TraceA("On video frame: ", packet.width, 'x', packet.height)
 
     assert(packet.width > 0);
     assert(packet.height > 0);

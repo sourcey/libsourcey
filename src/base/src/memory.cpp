@@ -26,7 +26,7 @@ static const int GCTimerDelay = 100;
 GarbageCollector::GarbageCollector()
     : _tid(std::this_thread::get_id())
 {
-    // TraceL << "Create" << std::endl;
+    // TraceA("Create")
 }
 
 
@@ -58,7 +58,7 @@ GarbageCollector::Cleaner* GarbageCollector::getCleaner(uv::Loop* loop)
 
 void GarbageCollector::finalize()
 {
-    // TraceL << "Finalize" << std::endl;
+    // TraceA("Finalize")
 
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -82,7 +82,7 @@ void GarbageCollector::finalize()
     //uv_ref(_handle.ptr());
     //uv_run(_handle.loop(), UV_RUN_DEFAULT);
 
-    //TraceL << "Finalize: OK" << std::endl;
+    //TraceA("Finalize: OK")
 }
 
 
@@ -115,7 +115,7 @@ GarbageCollector::Cleaner::Cleaner(uv::Loop* loop)
     , _loop(loop)
     , _finalize(false)
 {
-    // TraceL << "Create: " << loop << std::endl;
+    // TraceA("Create: ", loop)
 }
 
 
@@ -179,11 +179,11 @@ void GarbageCollector::Cleaner::work()
             // Stop the timer handle allowing the finalize() method to return.
             _timer.stop();
 
-            // TraceL << "Finalization complete: " << _loop->active_handles << std::endl;
+            // TraceA("Finalization complete: ", _loop->active_handles)
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left (our timer)
             uv_walk(_loop, [](uv_handle_t* handle, void* /* arg */) {
-                DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
+                DebugA("Active handle: ", handle, ": ", handle->type)
             }, nullptr);
             // assert(_handle.loop()->active_handles <= 1);
 #endif

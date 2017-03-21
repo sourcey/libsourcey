@@ -85,7 +85,7 @@ URL& URL::operator=(const char* uri)
 
 bool URL::parse(const std::string& url, bool whiny)
 {
-    TraceL << "Parsing: " << url << std::endl;
+    TraceA("Parsing: ", url)
     std::string src(util::trim(url));
     _buf = src;
     if (http_parser_parse_url(src.c_str(), src.length(), 0, &_parser) == 0)

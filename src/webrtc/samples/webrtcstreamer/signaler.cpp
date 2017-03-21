@@ -93,10 +93,10 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 {
     if (peer.id() == _client.ourID())
         return;
-    DebugL << "Peer connected: " << peer.id() << endl;
+    DebugA("Peer connected: ", peer.id())
 
     if (PeerConnectionManager::exists(peer.id())) {
-        DebugL << "Peer already has session: " << peer.id() << endl;
+        DebugA("Peer already has session: ", peer.id())
         return;
     }
 
@@ -120,7 +120,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 
 void Signaler::onPeerMessage(smpl::Message& m)
 {
-    DebugL << "Peer message: " << m.from().toString() << endl;
+    DebugA("Peer message: ", m.from().toString())
 
     if (m.find("offer") != m.end()) {
         assert(0 && "offer not supported");
@@ -139,7 +139,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 
     auto conn = PeerConnectionManager::remove(peer.id());
     if (conn) {
-        DebugL << "Deleting peer connection: " << peer.id() << endl;
+        DebugA("Deleting peer connection: ", peer.id())
         // async delete not essential, but to be safe
         // delete conn;
         deleteLater<PeerConnection>(conn); 
@@ -149,7 +149,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 
 void Signaler::onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
 {
-    DebugL << "Client state changed from " << oldState << " to " << state << endl;
+    DebugA("Client state changed from ", oldState, " to ", state)
 
     switch (state.id()) {
         case sockio::ClientState::Connecting:

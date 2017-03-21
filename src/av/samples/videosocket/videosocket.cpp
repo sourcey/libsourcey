@@ -77,7 +77,7 @@ public:
 
     void onPayload(const Buffer& body)
     {
-        DebugL << "On recv payload: " << body.size() << endl;
+        DebugA("On recv payload: ", body.size())
 
         // do something with data from peer
     }

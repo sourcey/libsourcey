@@ -246,7 +246,7 @@ struct LogStream
     LogChannel* channel;
     bool flushed;
 
-    LogStream(LogLevel level = LDebug, const std::string& realm = "", int line = 0, 
+    LogStream(LogLevel level = LDebug, const std::string& realm = "", int line = 0,
               const void* ptr = nullptr, const char* channel = nullptr);
     LogStream(const LogStream& that);
     ~LogStream();
@@ -302,22 +302,14 @@ struct LogStream
 {
     LogStream(LogLevel level = LDebug, const std::string& realm = "",
         int line = 0, const void* ptr = nullptr, const char* channel = nullptr) {};
-    LogStream(LogLevel level, const std::string& realm = "",
-        const std::string& address = "") {};
     LogStream(const LogStream& that) {};
-    ~LogStream() {};
 
-    LogStream& operator<<(const LogLevel data)
+    template<typename... Args>
+    void write(Args... args)
     {
-        return *this;
     }
 
-    LogStream& operator<<(LogChannel* data)
-    {
-        return *this;
-    }
-
-    template <typename T> LogStream& operator<<(const T& data)
+    template <typename T> LogStream& operator<<(const T&)
     {
         return *this;
     }
@@ -329,167 +321,6 @@ struct LogStream
 };
 
 #endif
-
-
-//
-// Helpers for replacing file paths with filenames at compile time
-//
-
-
-constexpr const char* str_end(const char *str) 
-{
-    return *str ? str_end(str + 1) : str;
-}
-
-constexpr bool str_slant(const char *str) 
-{
-    return *str == '/' || *str == '\\' ? true : (*str ? str_slant(str + 1) : false);
-}
-
-constexpr const char* r_slant(const char* str) 
-{
-    return *str == '/' || *str == '\\' ? (str + 1) : r_slant(str - 1);
-}
-
-constexpr const char* file_name(const char* str) 
-{
-    return str_slant(str) ? r_slant(str_end(str)) : str;
-}
-
-
-//
-// Inline stream accessors
-//
-
-
-//// Default output
-//inline LogStream& traceL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LTrace, realm, 0, ptr);
-//}
-//
-//inline LogStream& debugL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LDebug, realm, 0, ptr);
-//}
-//
-//inline LogStream& infoL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LInfo, realm, 0, ptr);
-//}
-//
-//inline LogStream& warnL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LWarn, realm, 0, ptr);
-//}
-//
-//inline LogStream& errorL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LError, realm, 0, ptr);
-//}
-//
-//inline LogStream& fatalL(const char* realm = "", const void* ptr = nullptr)
-//{
-//    return *new LogStream(LFatal, realm, 0, ptr);
-//}
-//
-//
-//// Channel output
-//inline LogStream& traceC(const char* channel, const char* realm = "",
-//                         const void* ptr = nullptr)
-//{
-//    return *new LogStream(LTrace, realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& debugC(const char* channel, const char* realm = "",
-//                         const void* ptr = nullptr)
-//{
-//    return *new LogStream(LDebug, realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& infoC(const char* channel, const char* realm = "",
-//                        const void* ptr = nullptr)
-//{
-//    return *new LogStream(LInfo, realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& warnC(const char* channel, const char* realm = "",
-//                        const void* ptr = nullptr)
-//{
-//    return *new LogStream(LWarn, realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& errorC(const char* channel, const char* realm = "",
-//                         const void* ptr = nullptr)
-//{
-//    return *new LogStream(LError, realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& fatalC(const char* channel, const char* realm = "",
-//                         const void* ptr = nullptr)
-//{
-//    return *new LogStream(LFatal, realm, 0, ptr, channel);
-//}
-//
-//
-//// Level output
-//inline LogStream& printL(const char* level = "debug", const char* realm = "",
-//                         const void* ptr = nullptr,
-//                         const char* channel = nullptr)
-//{
-//    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
-//}
-//
-//inline LogStream& printL(const char* level, const void* ptr,
-//                         const char* realm = "", const char* channel = nullptr)
-//{
-//    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
-//}
-
-
-// Macros for debug logging
-//
-// Other useful macros for debug logging: __FILE__, __FUNCTION__, __LINE__
-// KLUDGE: Need a way to shorten __FILE__  which prints the entire relative path
-// __FUNCTION__ might need a fallback on some platforms
-#ifndef __CLASS_FUNCTION__
-#if _MSC_VER
-#define __CLASS_FUNCTION__ __FUNCTION__
-#else
-inline std::string _methodName(const std::string& fsig)
-{
-    size_t colons = fsig.find("::");
-    size_t sbeg = fsig.substr(0, colons).rfind(" ") + 1;
-    size_t send = fsig.rfind("(") - sbeg;
-    return fsig.substr(sbeg, send) + "()";
-}
-#define __CLASS_FUNCTION__ _methodName(__PRETTY_FUNCTION__)
-#endif
-#endif
-
-#define TraceL LogStream(LTrace, file_name(__FILE__), __LINE__)
-#define DebugL LogStream(LDebug, file_name(__FILE__), __LINE__)
-#define InfoL LogStream(LInfo, file_name(__FILE__), __LINE__)
-#define WarnL LogStream(LWarn, file_name(__FILE__), __LINE__)
-#define ErrorL LogStream(LError, file_name(__FILE__), __LINE__)
-
-#define TraceA(...) { LogStream(LTrace, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define DebugA(...) { LogStream(LDebug, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define InfoA(...) { LogStream(LInfo, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define WarnA(...) { LogStream(LWarn, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define ErrorA(...) { LogStream(LError, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-
-#define TraceS(self) LogStream(LTrace, file_name(__FILE__), __LINE__, self)
-#define DebugS(self) LogStream(LDebug, file_name(__FILE__), __LINE__, self)
-#define InfoS(self) LogStream(LInfo, file_name(__FILE__), __LINE__, self)
-#define WarnS(self) LogStream(LWarn, file_name(__FILE__), __LINE__, self)
-#define ErrorS(self) LogStream(LError, file_name(__FILE__), __LINE__, self)
-
-#define TraceN(self) LogStream(LTrace, self->className(), __LINE__, self)
-#define DebugN(self) LogStream(LDebug, self->className(), __LINE__, self)
-#define InfoN(self) LogStream(LInfo, self->className(), __LINE__, self)
-#define WarnN(self) LogStream(LWarn, self->className(), __LINE__, self)
-#define ErrorN(self) LogStream(LError, self->className(), __LINE__, self)
 
 
 //
@@ -631,6 +462,78 @@ public:
     Signal<void(const std::string&, LogLevel&, const Polymorphic*&)> OnLogStream;
 };
 #endif
+
+
+//
+// Compile time helpers for replacing file paths with filenames
+//
+
+
+constexpr const char* str_end(const char *str)
+{
+    return *str ? str_end(str + 1) : str;
+}
+
+constexpr bool str_slant(const char *str)
+{
+    return *str == '/' || *str == '\\' ? true : (*str ? str_slant(str + 1) : false);
+}
+
+constexpr const char* r_slant(const char* str)
+{
+    return *str == '/' || *str == '\\' ? (str + 1) : r_slant(str - 1);
+}
+
+constexpr const char* file_name(const char* str)
+{
+    return str_slant(str) ? r_slant(str_end(str)) : str;
+}
+
+
+//
+// Macros for debug logging
+//
+
+
+// Macro for logging class functions
+#ifndef __CLASS_FUNCTION__
+#if _MSC_VER
+#define __CLASS_FUNCTION__ __FUNCTION__
+#else
+inline std::string _methodName(const std::string& fsig)
+{
+    size_t colons = fsig.find("::");
+    size_t sbeg = fsig.substr(0, colons).rfind(" ") + 1;
+    size_t send = fsig.rfind("(") - sbeg;
+    return fsig.substr(sbeg, send) + "()";
+}
+#define __CLASS_FUNCTION__ _methodName(__PRETTY_FUNCTION__)
+#endif
+#endif
+
+#define TraceL LogStream(LTrace, file_name(__FILE__), __LINE__)
+#define DebugL LogStream(LDebug, file_name(__FILE__), __LINE__)
+#define InfoL LogStream(LInfo, file_name(__FILE__), __LINE__)
+#define WarnL LogStream(LWarn, file_name(__FILE__), __LINE__)
+#define ErrorL LogStream(LError, file_name(__FILE__), __LINE__)
+
+#define TraceA(...) { LogStream(LTrace, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define DebugA(...) { LogStream(LDebug, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define InfoA(...) { LogStream(LInfo, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define WarnA(...) { LogStream(LWarn, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define ErrorA(...) { LogStream(LError, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+
+#define TraceS(self) LogStream(LTrace, file_name(__FILE__), __LINE__, self)
+#define DebugS(self) LogStream(LDebug, file_name(__FILE__), __LINE__, self)
+#define InfoS(self) LogStream(LInfo, file_name(__FILE__), __LINE__, self)
+#define WarnS(self) LogStream(LWarn, file_name(__FILE__), __LINE__, self)
+#define ErrorS(self) LogStream(LError, file_name(__FILE__), __LINE__, self)
+
+#define TraceN(self) LogStream(LTrace, self->className(), __LINE__, self)
+#define DebugN(self) LogStream(LDebug, self->className(), __LINE__, self)
+#define InfoN(self) LogStream(LInfo, self->className(), __LINE__, self)
+#define WarnN(self) LogStream(LWarn, self->className(), __LINE__, self)
+#define ErrorN(self) LogStream(LError, self->className(), __LINE__, self)
 
 
 } // namespace scy

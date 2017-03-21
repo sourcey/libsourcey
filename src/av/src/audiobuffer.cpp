@@ -104,7 +104,7 @@ void AudioBuffer::write(void** samples, int numSamples)
 
 bool AudioBuffer::read(void** samples, int numSamples)
 {
-    TraceL << "Read samples: " << numSamples << endl;
+    TraceA("Read samples: ", numSamples)
 
     // Make sure that there is one frame worth of samples in the FIFO
     // buffer so that the encoder can do its work.
@@ -112,7 +112,7 @@ bool AudioBuffer::read(void** samples, int numSamples)
     // need to FIFO buffer to store as many frames worth of input samples
     // that they make up at least one frame worth of output samples.
     if (available() < numSamples) {
-        TraceL << "No packets in buffer" << endl;
+        TraceA("No packets in buffer")
         return false;
     }
 

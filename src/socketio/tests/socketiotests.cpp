@@ -94,7 +94,7 @@ public:
                              const sockio::ClientState& oldState)
     {
         auto client = reinterpret_cast<sockio::Client*>(sender);
-        DebugL << "Connection state changed: " << state.toString() << endl;
+        DebugA("Connection state changed: ", state.toString())
 
         switch (state.id()) {
             case sockio::ClientState::Connecting:
