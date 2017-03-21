@@ -42,26 +42,26 @@ static const int kNumberFramesWanted = 200;
 static const int kInNumSamples = 1024;
 
 #ifdef SCY_WIN
-// Use native aac encoder on Windows since newer FFmpeg
-// version should always be available.
+    // Use native aac encoder on Windows since newer FFmpeg
+    // version should always be available.
 #define ACC_ENCODER "aac"
 #else
-// Use libfdk_aac on Linux since native FFmpeg aac
-// encoder is shaky on older versions.
+    // Use libfdk_aac on Linux since native FFmpeg aac
+    // encoder is shaky on older versions.
 #define ACC_ENCODER "libfdk_aac"
 #endif
 
 #define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4 Default", "mp4",        \
-            av::VideoCodec("libx264", 400, 300),                               \
-            av::AudioCodec(ACC_ENCODER));
+            { "libx264", 400, 300 },                                           \
+            { ACC_ENCODER });
 
 #define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4 Realtime", "mp4",         \
-            av::VideoCodec("libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
-            av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
+            { "libx264", 400, 300, 25, 48000, 128000, "yuv420p" },             \
+            { ACC_ENCODER, 2, 44100, 64000, "fltp" });
 
 #define VP8_H264_AAC_REALTIME_FORMAT av::Format("MP4 VP8 Realtime", "mp4",     \
-            av::VideoCodec("vp8", 400, 300, 25, 48000, 128000, "yuv420p"),     \
-            av::AudioCodec(ACC_ENCODER, 2, 44100, 64000, "fltp"));
+            { "vp8", 400, 300, 25, 48000, 128000, "yuv420p" },                 \
+            { ACC_ENCODER, 2, 44100, 64000, "fltp" });
 
 
 // =============================================================================
@@ -135,7 +135,7 @@ void fillAudioSamples(double* samples, int sample_rate, int nb_channels,
 
 
 std::vector<uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
-                                                      const av::AudioCodec& params)
+                                                 const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(

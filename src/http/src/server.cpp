@@ -22,6 +22,16 @@ namespace scy {
 namespace http {
 
 
+Server::Server(const std::string& host, short port, net::TCPSocket::Ptr socket, ServerConnectionFactory* factory)
+    : _address(host, port)
+    , _socket(socket)
+    , _timer(5000, 5000, socket->loop())
+    , _factory(factory)
+{
+    // TraceS(this) << "Create" << endl;
+}
+
+
 Server::Server(const net::Address& address, net::TCPSocket::Ptr socket, ServerConnectionFactory* factory)
     : _address(address)
     , _socket(socket)
@@ -143,8 +153,8 @@ net::Address& Server::address()
 ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     : Connection(socket)
     , _server(server)
-    , _upgrade(false)
     , _responder(nullptr)
+    , _upgrade(false)
 {
     // TraceS(this) << "Create" << endl;
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));

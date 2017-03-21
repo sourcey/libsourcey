@@ -151,6 +151,9 @@ public:
 class HTTP_API Server : public net::SocketAdapter
 {
 public:
+    Server(const std::string& host, short port,
+        net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>(),
+        ServerConnectionFactory* factory = new ServerConnectionFactory());
     Server(const net::Address& address,
         net::TCPSocket::Ptr socket = net::makeSocket<net::TCPSocket>(),
         ServerConnectionFactory* factory = new ServerConnectionFactory());

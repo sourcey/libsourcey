@@ -53,7 +53,7 @@ What better way to get acquainted with a new library then with some tasty code e
 Lets start with the classic HTTP echo server, which looks something like this:
 
 ~~~cpp
-http::Server srv(net::Address("0.0.0.0", 1337));
+http::Server srv{ "127.0.0.1", 1337 };
 srv.Connection += [](http::ServerConnection::Ptr conn) {
     conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
         conn.send(bufferCast<const char*>(buffer), buffer.size());
@@ -101,7 +101,7 @@ Interacting with system processes doesn't have to be painful.
 The following code will run the `ping sourcey.com` and with `stdio` and exit callbacks:
 
 ~~~cpp
-Process proc({ "ping", "sourcey.com" });
+Process proc{ "ping", "sourcey.com" };
 proc.onstdout = [](std::string line)
 {
     // handle process output
@@ -130,8 +130,8 @@ PacketStream stream;
 // Setup the encoder options
 av::EncoderOptions options;
 options.oformat = av::Format("MP4", "mp4",
-    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"),
-    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
+    { "H.264", "libx264", 640, 480, 25, 48000, 128000, "yuv420p" },
+    { "AAC", "aac", 2, 44100, 64000, "fltp" });
 
 // Create a device manager instance to enumerate system devices
 av::DeviceManager devman;
@@ -140,7 +140,7 @@ av::Device device;
 // Create and attach the default video capture
 av::VideoCapture::Ptr video;
 if (devman.getDefaultCamera(device)) {
-    video.open(device.id, 640, 480, 30);
+    video.open(device.id, 640, 480);
     video.getEncoderFormat(options.iformat);
     stream.attachSource(video, true);
 }
@@ -167,11 +167,11 @@ stream.attach(socket);
 stream.start();
 ~~~
 
-There are plenty more demos and sample code to play with over on the [examples](/examples.md) page.
+There are plenty more demos and sample code to play with over on the [examples](http://sourcey.com/libsourcey/examples.md) page.
 
 ## Installation
 
-See the platform independent [installation guides](/installation.md).
+See the platform independent [installation guides](http://sourcey.com/libsourcey/installation.md).
 
 ## Contributors
 

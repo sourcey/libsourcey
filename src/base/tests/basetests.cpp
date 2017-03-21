@@ -527,7 +527,7 @@ int main(int argc, char** argv)
     //
     describe("process", []() {
         bool gotStdout = false, gotExit = false;
-        Process proc({ "ping", "sourcey.com" });
+        Process proc{ "ping", "sourcey.com" };
         proc.onstdout = [&](std::string line) {
             std::cout << "process stdout: " << line << std::endl;
             gotStdout = true;

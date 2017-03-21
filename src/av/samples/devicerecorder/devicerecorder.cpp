@@ -20,19 +20,18 @@
 // This demo showcases how to implement a H.264 multiplex recorder from realtime
 // device captures using LibSourcey.
 
+#define OUTPUT_FILENAME "deviceoutput.mp4"
+#define OUTPUT_FORMAT av::Format("MP4 Realtime", "mp4",                        \
+            { "libx264", 400, 300, 25, 48000, 128000, "yuv420p" },             \
+            { "aac", 2, 44100, 64000, "fltp" });
+
 using namespace scy;
 using std::endl;
-
-#define OUTPUT_FILENAME "deviceoutput.mp4"
-#define OUTPUT_FORMAT av::Format("MP4", "mp4", \
-    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
-    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace)); // Debug
-
     {
         // Create a PacketStream to pass packets
         // from device captures to the encoder
@@ -41,6 +40,8 @@ int main(int argc, char** argv)
         av::EncoderOptions options;
         options.ofile = OUTPUT_FILENAME;
         options.oformat = OUTPUT_FORMAT;
+        options.iformat.audio.enabled = false; // enabled if available
+        options.iformat.video.enabled = false; // enabled if available
 
         // Create a device manager instance to enumerate system devices
         av::Device device;
@@ -79,7 +80,6 @@ int main(int argc, char** argv)
         }, &stream);
     }
 
-    // av::DeviceManager::shutdown();
     // Logger::destroy();
     return 0;
 }
