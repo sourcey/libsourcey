@@ -19,7 +19,7 @@
 
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

@@ -126,8 +126,8 @@ void AudioResampler::close()
     }
 
     if (outSamples) {
-        //av_freep(&(outSamples)[0]);
-        av_freep(outSamples);
+        av_freep(&(outSamples)[0]);
+        //av_free(outSamples);
         outSamples = nullptr;
     }
 
@@ -161,9 +161,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
             &outSamples, nullptr, oparams.channels, requiredNumSamples,
             outSampleFmt, 0);
         if (ret < 0) {
-            throw std::runtime_error(
-                "Cannot allocate buffer for converted output samples: " +
-                averror(ret));
+            throw std::runtime_error("Cannot allocate buffer for converted output samples: " + averror(ret));
         }
 
         TraceS(this) << "Resizing resampler buffer: " << outBufferSize << endl;

@@ -17,7 +17,7 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 
 extern "C" {
 #include <libavformat/avformat.h>

@@ -20,7 +20,7 @@
 #include "scy/av/audiodecoder.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/icapture.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/av/videodecoder.h"
 #include "scy/interface.h"
 #include <mutex>

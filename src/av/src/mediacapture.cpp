@@ -282,7 +282,7 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
         // Note: This can be removed when planar formats are fully supported via
         // the av::VideoPacket interface.
         // Default to s16 output.
-        _audio->oparams.sampleFmt = "s16";
+        // _audio->oparams.sampleFmt = "s16";
 
         params = _audio->oparams;
     }
@@ -293,14 +293,6 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_video) {
-        // HACK: Decoder output does not properly support planar
-        // formats. By calling this method it means a transcoder
-        // is in use, so force a interleaved output format.
-        // Note: This can be removed when planar formats are fully supported via
-        // the av::VideoPacket interface.
-        // Default to bgr24 output.
-        _video->oparams.pixelFmt = "bgr24";
-
         params = _video->oparams;
     }
 }

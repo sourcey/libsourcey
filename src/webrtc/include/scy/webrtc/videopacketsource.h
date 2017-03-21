@@ -13,7 +13,7 @@
 #define SCY_WebRTC_VideoPacketSource_H
 
 
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/packetsignal.h"
 
 #include "webrtc/media/base/videocapturer.h"

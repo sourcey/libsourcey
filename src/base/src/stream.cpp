@@ -37,9 +37,10 @@ void Stream::close()
 {
     // TraceA("Close: ", ptr())
 
-    if (_started)
+    if (_started) {
         readStop();
-    uv::Handle::close();
+        uv::Handle::close();
+    }
 }
 
 

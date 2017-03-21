@@ -60,8 +60,6 @@ void VideoConverter::create()
         /* SWS_FAST_BILINEAR */ SWS_BICUBIC, nullptr, nullptr, nullptr);
     if (!ctx)
         throw std::runtime_error("Invalid conversion context.");
-
-    TraceS(this) << "Create: OK: " << ctx << endl;
 }
 
 
@@ -78,8 +76,6 @@ void VideoConverter::close()
         sws_freeContext(ctx);
         ctx = nullptr;
     }
-
-    TraceS(this) << "Closing: OK" << endl;
 }
 
 
@@ -108,19 +104,8 @@ AVFrame* VideoConverter::convert(AVFrame* iframe)
                   oframe->data, oframe->linesize) < 0)
         throw std::runtime_error("Pixel format conversion not supported.");
 
-    //assert(av_sample_fmt_is_planar((AVSampleFormat)oparams.format) == 0 || oframe->linesize[1] > 0);
-    //assert(!formatIsPlanar(oframe->format) || oframe->linesize[1] > 0);
-
     // Copy input frame properties to output frame
     av_frame_copy_props(oframe, iframe);
-
-    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
-    // oframe->width  = oparams.width; //iframe->width;
-    // oframe->height = oparams.height; //iframe->height;
-    // oframe->pkt_pts = iframe->pkt_pts;
-    // oframe->pkt_dts = iframe->pkt_dts;
-    // oframe->pts = iframe->pts;
-    // oframe->dts = iframe->dts;
 
     // Set the input PTS or a monotonic value to keep the encoder happy.
     // The actual setting of the PTS is outside the scope of this encoder.

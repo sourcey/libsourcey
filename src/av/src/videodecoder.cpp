@@ -65,7 +65,7 @@ void VideoDecoder::create()
     // Default to bgr24 output.
     // Note: This can be removed when planar formats are fully supported via
     // the av::VideoPacket interface.
-    oparams.pixelFmt = "bgr24";
+    // oparams.pixelFmt = "bgr24";
 }
 
 
@@ -92,69 +92,24 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
                 av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
 
     // Set the decoder pts in stream time base
-    dec->pts = frame->pts/*pkt_pts*/;
+    dec->pts = frame->pts;
 
     // Set the decoder seconds since stream start
-    http://stackoverflow.com/questions/6731706/syncing-decoded-video-using-ffmpeg
     dec->seconds = (frame->pkt_dts - dec->stream->start_time) * av_q2d(dec->stream->time_base);
 
     TraceL << "Decoded video frame:"
-        << "\n\tFrame DTS: " << frame->pts
-        << "\n\tFrame PTS: " << frame->pkt_pts
+        << "\n\tFrame DTS: " << frame->pkt_dts
+        << "\n\tFrame PTS: " << frame->pts
         << "\n\tTimestamp: " << dec->time
         << "\n\tSeconds: " << dec->seconds
         << endl;
 
-    // Handle planar video formats
-    if (av_pix_fmt_count_planes(static_cast<AVPixelFormat>(frame->format)) >= 3) {
-        PlanarVideoPacket video(frame->data[0], frame->data[1], frame->data[2],
-                                frame->linesize[0], frame->linesize[1], frame->linesize[2], 
-                                frame->width, frame->height, dec->time);
-        video.source = frame;
-        video.opaque = dec;
+    PlanarVideoPacket video(frame->data, frame->linesize, dec->oparams.pixelFmt,
+                           frame->width, frame->height, dec->time);
+    video.source = frame;
+    video.opaque = dec;
 
-        //memcpy(frame->data[0], inputBufferY, frame->linesize[0] * frame->height);
-        //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
-        //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
-
-        dec->emitter.emit(video);
-    }
-
-    // Handle linear formats
-    else {
-        size_t size = av_image_get_buffer_size(static_cast<AVPixelFormat>(frame->format),
-                                               dec->oparams.width, dec->oparams.height, 16);
-        VideoPacket video(frame->data[0], size, frame->width, frame->height, dec->time);
-        video.source = frame;
-        video.opaque = dec;
-
-        dec->emitter.emit(video);
-    }
-
-    // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
-    //     av_q2d(dec->stream->time_base) * 1000) : 0;
-    // dec->pts = opacket.pts;
-
-    // opacket.data = frame->data[0];
-    // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt, dec->oparams.width, dec->oparams.height, 16);
-    // opacket.pts = frame->pts/*pkt_pts*/; // Decoder PTS values can be unordered
-    // opacket.dts = frame->pkt_dts;
-    //
-    // // // Local PTS value represented as decimal seconds
-    // // if (opacket->dts != AV_NOPTS_VALUE) {
-    // //     *pts = (double)opacket->pts;
-    // //     *pts *= av_q2d(stream->time_base);
-    // // }
-    //
-    // // Compute stream time in milliseconds
-    // dec->time = opacket.pts > 0 ? static_cast<int64_t>(opacket.pts *
-    // av_q2d(dec->stream->time_base) * 1000) : 0;
-    // dec->pts = opacket.pts;
-    //
-    // assert(opacket.data);
-    // assert(opacket.size);
-    // // assert(opacket.dts >= 0);
-    // assert(opacket.pts >= 0);
+    dec->emitter.emit(video);
 }
 
 

@@ -38,8 +38,7 @@ AudioBuffer::~AudioBuffer()
     close();
 }
 
-void AudioBuffer::alloc(const std::string& sampleFmt, int channels,
-                        int numSamples)
+void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSamples)
 {
     TraceS(this) << "Create audio buffer:\n"
                  << "\n\tNb Channels: " << channels
@@ -90,8 +89,7 @@ void AudioBuffer::write(void** samples, int numSamples)
 
     // Make the FIFO as large as it needs to be to hold both
     // the old and the new samples.
-    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) +
-                                                 numSamples)) < 0) {
+    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + numSamples)) < 0) {
         throw std::runtime_error("Cannot reallocate FIFO: " + averror(error));
     }
 

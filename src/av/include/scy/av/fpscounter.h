@@ -14,7 +14,7 @@
 
 
 #include "scy/packetstream.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 
 #include <time.h>
 

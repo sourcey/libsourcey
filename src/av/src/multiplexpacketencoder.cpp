@@ -121,14 +121,27 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 
 void MultiplexPacketEncoder::encode(VideoPacket& packet)
 {
-    encodeVideo((uint8_t*)packet.data(), int(packet.size()), packet.width,
-                packet.height, packet.time);
+    auto planar = dynamic_cast<av::PlanarVideoPacket*>(&packet);
+    if (planar) {
+        encodeVideo(planar->buffer, planar->linesize, planar->width,
+            planar->height, planar->time);
+    }
+    else {
+        encodeVideo((uint8_t*)packet.data(), int(packet.size()), packet.width,
+            packet.height, packet.time);
+    }
 }
 
 
 void MultiplexPacketEncoder::encode(AudioPacket& packet)
 {
-    encodeAudio((uint8_t*)packet.data(), int(packet.numSamples), packet.time);
+    auto planar = dynamic_cast<av::PlanarAudioPacket*>(&packet);
+    if (planar) {
+        encodeAudio(planar->buffer, int(planar->numSamples), planar->time);
+    }
+    else {
+        encodeAudio((uint8_t*)packet.data(), int(packet.numSamples), packet.time);
+    }
 }
 
 

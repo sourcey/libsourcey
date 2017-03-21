@@ -30,7 +30,7 @@ VideoContext::VideoContext()
     , frame(nullptr)
     , conv(nullptr)
     , time(0)
-    , pts(0)
+    , pts(AV_NOPTS_VALUE)
     , seconds(0)
 {
     TraceS(this) << "Create" << endl;
@@ -99,7 +99,7 @@ void VideoContext::close()
     //}
 
     time = 0;
-    pts = 0;
+    pts = AV_NOPTS_VALUE;
     seconds = 0;
     error = "";
 
@@ -219,6 +219,22 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     picture->format = pixelFmt;
 
     return picture;
+}
+
+
+AVFrame* cloneVideoFrame(AVFrame* source)
+{
+    AVFrame* copy = av_frame_alloc();
+    copy->format = source->format;
+    copy->width = source->width;
+    copy->height = source->height;
+    copy->channels = source->channels;
+    copy->channel_layout = source->channel_layout;
+    copy->nb_samples = source->nb_samples;
+    av_frame_get_buffer(copy, 32);
+    av_frame_copy(copy, source);
+    av_frame_copy_props(copy, source);
+    return copy;
 }
 
 

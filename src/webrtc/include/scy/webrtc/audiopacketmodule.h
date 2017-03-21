@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "scy/av/audiobuffer.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/packetsignal.h"
 
 #include "webrtc/base/basictypes.h"

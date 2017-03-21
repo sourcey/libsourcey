@@ -19,7 +19,7 @@
 
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/av/videocontext.h"
 
 
@@ -36,22 +36,24 @@ struct VideoEncoder : public VideoContext
     // virtual void open();
     virtual void close();
 
-    virtual bool encode(unsigned char* data, int size,
-                        int64_t pts); //, AVPacket& opacket
     /// Encode a single video frame.
     /// The pts argument should be in stream base time format.
-    /// virtual bool encode(AVPacket& ipacket, AVPacket& opacket);    ///
-    /// virtual bool encode(AVFrame* iframe, AVPacket& opacket);    /// virtual
-    /// bool flush(AVPacket& opacket);
+    /// This method is for interleaved video formats.
+    virtual bool encode(uint8_t* data, int size, int64_t pts);
 
-    virtual bool encode(AVFrame* iframe); //, AVPacket& opacket
+    /// Encode a single video frame.
+    /// The pts argument should be in stream base time format.
+    /// This method is for planar video formats.
+    virtual bool encode(uint8_t* data[4], int linesize[4], int64_t pts);
+
     /// Encode a single AVFrame.
+    virtual bool encode(AVFrame* iframe);
+
     /// Flush remaining packets to be encoded.
     /// This method should be called once before stream closure.
     virtual void flush();
 
-
-    AVFormatContext* format; /// uint8_t* buffer;    /// int bufferSize;
+    AVFormatContext* format;
 };
 
 

@@ -155,9 +155,9 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 
     rtc::scoped_refptr<webrtc::I420Buffer> buffer = webrtc::I420Buffer::Copy(
             packet.width, packet.height,
-            packet.ydata.data(), packet.ystride,
-            packet.udata.data(), packet.ustride,
-            packet.vdata.data(), packet.vstride);
+            packet.buffer[0], packet.linesize[0],
+            packet.buffer[1], packet.linesize[1],
+            packet.buffer[2], packet.linesize[2]);
 
     OnFrame(webrtc::VideoFrame(
         buffer, _rotation,

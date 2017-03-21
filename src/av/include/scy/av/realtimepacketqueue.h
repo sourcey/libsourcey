@@ -13,7 +13,7 @@
 #define SCY_RealtimePacketQueue_H
 
 
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/base.h"
 #include "scy/packetqueue.h"
 

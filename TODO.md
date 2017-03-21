@@ -6,13 +6,16 @@ WebRTC samples
     - input file option
     - apply video transformations
 
+Planar interface for audio decoder, and AV encoders
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Fix deprecated ICE code
 Add move interface to packet class
+Move updated Symple JS code to client repos
 
 
 # Documentation
 
+Update docs and sourcey.com linking
 Improve av module documentation
 Describe how to build WebRTC for use with LibSourcey in README 
 	- maybe move to article and link
@@ -24,6 +27,7 @@ Describe how to build WebRTC for use with LibSourcey in README
 Video encoder test changing input resolution
 Stress test AsyncLoggerWriter
 
+  
 # WebRTC SFU server
 
 https://tools.ietf.org/html/rfc7667

@@ -124,6 +124,8 @@ public:
             // client.options().port = 4500;
             // client.options().user = "2";
 
+            //client.ws().socket().reset();
+
             // Setup the client
             client += packetSlot(this, &SympleApplication::onRecvMessage);
             client += packetSlot(this, &SympleApplication::onRecvPresence);

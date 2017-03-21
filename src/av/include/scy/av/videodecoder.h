@@ -17,7 +17,7 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 // #include "scy/av/format.h"
 // #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"

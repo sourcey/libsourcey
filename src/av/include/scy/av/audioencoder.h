@@ -21,12 +21,11 @@
 #include "scy/av/audiocontext.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-// #include <libavutil/opt.h>
 #include <libavutil/audio_fifo.h>
 }
 
@@ -40,16 +39,25 @@ struct AudioEncoder : public AudioContext
     AudioEncoder(AVFormatContext* format = nullptr);
     virtual ~AudioEncoder();
 
-    virtual void create(); /// virtual void open();
-    virtual void
-    close(); /// Encode an arbitrary number of interleaved audio samples.
+    virtual void create(); 
+    // virtual void open();
+    virtual void close(); 
+    
+    /// Encode interleaved audio samples.
     ///
     /// @param samples    The input samples to encode.
     /// @param numSamples The number of input samples per channel.
     /// @param pts        The input samples presentation timestamp.
     /// @param opacket    The output packet data will be encoded to.
-    virtual bool encode(/*const */ uint8_t* samples, const int numSamples,
-                        const int64_t pts);
+    virtual bool encode(uint8_t* samples, const int numSamples, const int64_t pts);
+
+    /// Encode planar audio samples.
+    ///
+    /// @param samples    The input samples to encode.
+    /// @param numSamples The number of input samples per channel.
+    /// @param pts        The input samples presentation timestamp.
+    /// @param opacket    The output packet data will be encoded to.
+    virtual bool encode(uint8_t* samples[4], const int numSamples, const int64_t pts);
 
     /// Encode a single AVFrame from the decoder.
     virtual bool encode(AVFrame* iframe);
@@ -57,7 +65,6 @@ struct AudioEncoder : public AudioContext
     /// Flush remaining packets to be encoded.
     /// This method should be called once before stream closure.
     virtual void flush();
-
 
     av::AudioBuffer fifo;
     AVFormatContext* format;

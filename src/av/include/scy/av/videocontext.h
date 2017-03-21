@@ -21,7 +21,7 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
 #include "scy/av/fpscounter.h"
-#include "scy/av/types.h"
+#include "scy/av/packet.h"
 #include "scy/av/videoconverter.h"
 
 extern "C" {
@@ -89,8 +89,10 @@ struct VideoContext
 
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
+AVFrame* cloneVideoFrame(AVFrame* source);
 void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
 AVPixelFormat selectPixelFormat(AVCodec* codec, VideoCodec& params);
+
 
 
 } // namespace av

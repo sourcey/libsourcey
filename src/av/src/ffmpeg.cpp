@@ -87,12 +87,12 @@ void initialize()
     std::lock_guard<std::mutex> guard(_mutex);
 
     if (++_refCount == 1) {
+        // Use an internal log callback.
+        // av_log_set_callback(logCallback);
+        // av_log_set_level(AV_LOG_INFO);
+
         // Optionally disable logging.
         // av_log_set_level(AV_LOG_QUIET);
-
-        // Use an internal log callback
-         av_log_set_callback(logCallback);
-         av_log_set_level(AV_LOG_INFO);
 
         // Register our protocol glue code with FFmpeg.
         av_lockmgr_register(&LockManagerOperation);
@@ -100,7 +100,7 @@ void initialize()
         // Now register the rest of FFmpeg.
         av_register_all();
 
-// And devices if available.
+        // And devices if available.
 #ifdef HAVE_FFMPEG_AVDEVICE
         avdevice_register_all();
 #endif

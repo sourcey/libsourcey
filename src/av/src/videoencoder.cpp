@@ -175,20 +175,37 @@ void VideoEncoder::close()
 }
 
 
-bool VideoEncoder::encode(unsigned char* data, int size, int64_t time)
+bool VideoEncoder::encode(uint8_t* data[4], int linesize[4], int64_t pts)
+{
+    assert(data);
+    assert(data[0]);
+    assert(linesize[0]);
+    assert(frame);
+    assert(codec);
+
+    // Populate the input frame with data from the given buffer.
+    for (int i = 0; i < 4; ++i) {
+        frame->data[i] = data[i];
+        frame->linesize[i] = linesize[i];
+    }
+
+    frame->pts = pts;
+
+    AVPacket opacket;
+    return encode(frame);
+}
+
+
+bool VideoEncoder::encode(uint8_t* data, int size, int64_t pts)
 {
     assert(data);
     assert(size);
     assert(frame);
     assert(codec);
 
-    // Populate the input frame with date from the given buffer.
-    // NOTE: This only works with contiguous buffers
+    // Populate the input frame with data from the given buffer.
     frame->data[0] = reinterpret_cast<uint8_t*>(data);
-
-    // TODO: assert size and update conversion context if required
-
-    frame->pts = time;
+    frame->pts = pts;
 
     AVPacket opacket;
     return encode(frame);

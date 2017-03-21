@@ -9,8 +9,8 @@
 /// @{
 
 
-#ifndef SCY_AV_Types_H
-#define SCY_AV_Types_H
+#ifndef SCY_AV_Packet_H
+#define SCY_AV_Packet_H
 
 
 #include "scy/av/av.h"
@@ -24,10 +24,9 @@ namespace av {
 
 struct MediaPacket : public RawPacket
 {
-    int64_t time;
+    int64_t time; // microseconds
 
-    MediaPacket(uint8_t* data = nullptr, size_t size = 0,
-                int64_t time = 0)
+    MediaPacket(uint8_t* data = nullptr, size_t size = 0, int64_t time = 0)
         : RawPacket(reinterpret_cast<char*>(data), size)
         , time(time)
     {
@@ -47,6 +46,7 @@ struct MediaPacket : public RawPacket
 };
 
 
+/// Video packet for interleaved formats
 struct VideoPacket : public MediaPacket
 {
     int width;
@@ -54,8 +54,7 @@ struct VideoPacket : public MediaPacket
     bool iframe;
 
     VideoPacket(uint8_t* data = nullptr, size_t size = 0,
-                int width = 0, int height = 0,
-                int64_t time = 0)
+                int width = 0, int height = 0, int64_t time = 0)
         : MediaPacket(data, size, time)
         , width(width)
         , height(height)
@@ -79,44 +78,17 @@ struct VideoPacket : public MediaPacket
 };
 
 
+/// Video packet for planar formats
 struct PlanarVideoPacket : public VideoPacket
 {
-    std::vector<uint8_t> ydata;
-    std::vector<uint8_t> udata;
-    std::vector<uint8_t> vdata;
+    uint8_t *buffer[4] = { nullptr };
+    int linesize[4];
+    std::string pixelFmt;
 
-    size_t ystride;
-    size_t ustride;
-    size_t vstride;
-
-    PlanarVideoPacket(uint8_t* y = nullptr, uint8_t* u = nullptr, uint8_t* v = nullptr,
-                      size_t y_stride = 0, size_t u_stride = 0, size_t v_stride = 0,
-                      int width = 0, int height = 0, int64_t time = 0)
-        : VideoPacket(nullptr, 0, width, height, time)
-        , ydata(y, y + (y_stride * height))
-        , udata(u, u + (u_stride * height / 2))
-        , vdata(v, v + (v_stride * height / 2))
-        , ystride(y_stride)
-        , ustride(u_stride)
-        , vstride(v_stride)
-    {
-        //memcpy(frame->data[0], inputBufferY, frame->linesize[0] * frame->height);
-        //memcpy(frame->data[1], inputBufferU, frame->linesize[1] * frame->height / 2);
-        //memcpy(frame->data[2], inputBufferV, frame->linesize[2] * frame->height / 2);
-    }
-
-    PlanarVideoPacket(const PlanarVideoPacket& r)
-        : VideoPacket(r)
-        , ydata(r.ydata)
-        , udata(r.udata)
-        , vdata(r.vdata)
-        , ystride(r.ystride)
-        , ustride(r.ustride)
-        , vstride(r.vstride)
-    {
-    }
-
-    virtual ~PlanarVideoPacket() {};
+    PlanarVideoPacket(uint8_t *data[4], const int linesize[4], const std::string& pixelFmt = "",
+                      int width = 0, int height = 0, int64_t time = 0);
+    PlanarVideoPacket(const PlanarVideoPacket& r);
+    virtual ~PlanarVideoPacket();
 
     virtual IPacket* clone() const { return new PlanarVideoPacket(*this); }
 
@@ -124,6 +96,7 @@ struct PlanarVideoPacket : public VideoPacket
 };
 
 
+/// Audio packet for interleaved formats
 struct AudioPacket : public MediaPacket
 {
     size_t numSamples; // number of samples per channel
@@ -149,11 +122,30 @@ struct AudioPacket : public MediaPacket
 };
 
 
+/// Audio packet for planar formats
+struct PlanarAudioPacket : public AudioPacket
+{
+    uint8_t *buffer[4] = { nullptr };
+    int linesize;
+    int channels;
+    std::string sampleFmt;
+
+    PlanarAudioPacket(uint8_t *data[4], int channels = 0, size_t numSamples = 0, 
+                      const std::string& sampleFmt = "", int64_t time = 0);
+    PlanarAudioPacket(const PlanarAudioPacket& r);
+    virtual ~PlanarAudioPacket();
+
+    virtual IPacket* clone() const { return new PlanarAudioPacket(*this); }
+
+    virtual const char* className() const { return "PlanarAudioPacket"; }
+};
+
+
 } // namespace av
 } // namespace scy
 
 
-#endif // SCY_AV_Types_H
+#endif // SCY_AV_Packet_H
 
 
 /// @\}

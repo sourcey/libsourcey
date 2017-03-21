@@ -237,7 +237,7 @@ int flushBuffer(AudioEncoder* enc)
 }
 
 
-bool AudioEncoder::encode(/*const */ uint8_t* samples, const int numSamples, const int64_t pts)
+bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t pts)
 {
     TraceS(this) << "Encoding audio packet: " << numSamples << endl;
 
@@ -256,6 +256,37 @@ bool AudioEncoder::encode(/*const */ uint8_t* samples, const int numSamples, con
     } else {
         // Add the input samples to the FIFO buffer.
         fifo.write((void**)&samples, numSamples);
+    }
+
+    // Set a timestamp value on the frame to be encoded if given.
+    if (pts != AV_NOPTS_VALUE) {
+        frame->pts = pts;
+    }
+
+    return flushBuffer(this) > 0;
+}
+
+
+bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64_t pts)
+{
+    TraceS(this) << "Encoding audio packet: " << numSamples << endl;
+
+    // Resample input data or add it to the buffer directly
+    if (resampler) {
+        if (!resampler->resample((uint8_t**)samples, numSamples)) {
+            TraceS(this) << "Samples buffered by resampler" << endl;
+            return false;
+        }
+
+        TraceS(this) << "Resampled audio packet: " << numSamples << " <=> "
+            << resampler->outNumSamples << endl;
+
+        // Add the converted input samples to the FIFO buffer.
+        fifo.write((void**)resampler->outSamples, resampler->outNumSamples);
+    }
+    else {
+        // Add the input samples to the FIFO buffer.
+        fifo.write((void**)samples, numSamples);
     }
 
     // Set a timestamp value on the frame to be encoded if given.

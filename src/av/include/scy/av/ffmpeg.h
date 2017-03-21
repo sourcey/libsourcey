@@ -17,12 +17,17 @@
 #include <string>
 #include <memory>
 
+
+#ifdef HAVE_FFMPEG
+
 extern "C" {
 #include <libavformat/avformat.h>
 #ifdef HAVE_FFMPEG_AVDEVICE
 #include <libavdevice/avdevice.h>
 #endif
 }
+
+#endif
 
 
 namespace scy {
@@ -42,6 +47,8 @@ void printInputFormats(std::ostream& ost, const char* delim = " ");
 void printOutputFormats(std::ostream& ost, const char* delim = " ");
 void printEncoders(std::ostream& ost, const char* delim = " ");
 
+
+#ifdef HAVE_FFMPEG
 
 //
 /// Utilites for RAII:
@@ -91,6 +98,9 @@ using AVDictionaryCleanup = std::unique_ptr<
 // template<typename T> using AVMallocHolder = std::unique_ptr<
 //     T, AV_Deleter<void, void, av_free>
 // >;
+
+#endif
+
 
 } // namespace av
 } // namespace scy

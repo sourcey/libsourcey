@@ -66,7 +66,7 @@ void AudioDecoder::create()
     initAudioCodecFromContext(ctx, oparams);
 
     // Default to s16 output (planar formats not currently supported)
-    oparams.sampleFmt = "s16";
+    // oparams.sampleFmt = "s16";
 }
 
 
@@ -78,8 +78,8 @@ void AudioDecoder::close()
 
 bool emitPacket(AudioDecoder* dec)
 {
-    auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
-    assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
+    //auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
+    //assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
 
     // Set the decoder time in microseconds
     // This value represents the number of microseconds 
@@ -100,18 +100,30 @@ bool emitPacket(AudioDecoder* dec)
             return false;
         }
 
-        AudioPacket audio(dec->resampler->outSamples[0],
-                          dec->resampler->outBufferSize,
-                          dec->resampler->outNumSamples, dec->time);
-        dec->outputFrameSize = dec->resampler->outNumSamples;
-        dec->emitter.emit(audio);
+        //AudioPacket audio(dec->resampler->outSamples[0],
+        //                  dec->resampler->outBufferSize,
+        //                  dec->resampler->outNumSamples, dec->time);
+        //dec->outputFrameSize = dec->resampler->outNumSamples;
+        //dec->emitter.emit(audio);
         // opacket.data = dec->resampler->outSamples[0];
         // opacket.size = dec->resampler->outBufferSize;
+
+        PlanarAudioPacket audio(dec->resampler->outSamples, // dec->frame->linesize,
+            dec->oparams.channels, dec->frame->nb_samples, 
+            dec->oparams.sampleFmt, dec->time);
+        dec->outputFrameSize = dec->frame->nb_samples;
+        dec->emitter.emit(audio);
     } else {
-        int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
-                                              dec->frame->nb_samples,
-                                              dec->ctx->sample_fmt, 0);
-        AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize, dec->time);
+        //int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
+        //                                      dec->frame->nb_samples,
+        //                                      dec->ctx->sample_fmt, 0);
+        //AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize, dec->time);
+        //dec->outputFrameSize = dec->frame->nb_samples;
+        //dec->emitter.emit(audio);
+
+        PlanarAudioPacket audio(dec->frame->data, // dec->frame->linesize, 
+            dec->oparams.channels, dec->frame->nb_samples,
+            dec->oparams.sampleFmt, dec->time);
         dec->outputFrameSize = dec->frame->nb_samples;
         dec->emitter.emit(audio);
     }

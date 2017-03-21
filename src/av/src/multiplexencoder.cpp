@@ -310,7 +310,6 @@ bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
 
 void MultiplexEncoder::createVideo()
 {
-   
     assert(!_video);
     assert(_options.oformat.video.enabled);
     assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
@@ -353,6 +352,33 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
     }
 
     return _video->encode(frame);
+}
+
+
+bool MultiplexEncoder::encodeVideo(uint8_t* data[4], int linesize[4],
+                                   int width, int height, int64_t time)
+{
+    TraceS(this) << "Encoding video: " << time << endl;
+
+    assert(isActive());
+    assert(_video && _video->frame);
+    assert(data[0]);
+    assert(linesize[0]);
+
+    if (!isActive())
+        throw std::runtime_error("The encoder is not initialized");
+
+    if (!_video)
+        throw std::runtime_error("No video context");
+
+    if (!data[0] || !linesize[0] || !width || !height)
+        throw std::runtime_error("Invalid video frame");
+
+    if (!updateStreamPts(_video->stream, &time)) {
+        return false; // duplicate PTS
+    }
+
+    return _video->encode(data, linesize, time);
 }
 
 
@@ -430,11 +456,9 @@ void MultiplexEncoder::freeAudio()
 }
 
 
-bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples,
-                                   int64_t time)
+bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time)
 {
-    TraceS(this) << "Encoding audio packet: samples=" << numSamples
-                 << ", time=" << time << endl;
+    TraceS(this) << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
     assert(buffer);
     assert(numSamples);
 
@@ -447,7 +471,27 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples,
     if (!_audio)
         throw std::runtime_error("No audio context");
 
-    // if (time == AV_NOPTS_VALUE)
+    updateStreamPts(_audio->stream, &time);
+
+    return _audio->encode(buffer, numSamples, time);
+}
+
+
+bool MultiplexEncoder::encodeAudio(uint8_t* buffer[4], int numSamples, int64_t time)
+{
+    TraceS(this) << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
+    assert(buffer[0]);
+    assert(numSamples);
+
+    if (!buffer[0] || !numSamples)
+        throw std::runtime_error("Invalid audio input");
+
+    if (!isActive())
+        throw std::runtime_error("The encoder is not initialized");
+
+    if (!_audio)
+        throw std::runtime_error("No audio context");
+
     updateStreamPts(_audio->stream, &time);
 
     return _audio->encode(buffer, numSamples, time);

@@ -94,7 +94,7 @@ void AudioContext::close()
     }
 
     time = 0;
-    pts = 0;
+    pts = AV_NOPTS_VALUE;
     seconds = 0;
     // error = "";
 }
@@ -161,12 +161,6 @@ bool AudioContext::recreateResampler()
     resampler->open();
     return true;
 }
-
-
-// bool AudioContext::accepts(IPacket* packet)
-// {
-//     return dynamic_cast<AudioPacket*>(&packet) != 0;
-// }
 
 
 //
