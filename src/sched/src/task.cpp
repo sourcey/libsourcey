@@ -79,7 +79,7 @@ void Task::deserialize(json::value& root)
     json::assertMember(root, "type");
     json::assertMember(root, "name");
 
-    _id = root["id"].get<std::uint32_t>();
+    _id = root["id"].get<uint32_t>();
     _type = root["type"].get<std::string>();
     _name = root["name"].get<std::string>();
 }

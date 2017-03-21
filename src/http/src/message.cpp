@@ -54,22 +54,22 @@ void Message::setVersion(const std::string& version)
 }
 
 
-void Message::setContentLength(std::uint64_t length)
+void Message::setContentLength(uint64_t length)
 {
     if (int(length) != UNKNOWN_CONTENT_LENGTH)
-        set(CONTENT_LENGTH, util::itostr<std::uint64_t>(length));
+        set(CONTENT_LENGTH, util::itostr<uint64_t>(length));
     else
         erase(CONTENT_LENGTH);
 }
 
 
-std::uint64_t Message::getContentLength() const
+uint64_t Message::getContentLength() const
 {
     const std::string& contentLength = get(CONTENT_LENGTH, EMPTY);
     if (!contentLength.empty()) {
-        return util::strtoi<std::uint64_t>(contentLength);
+        return util::strtoi<uint64_t>(contentLength);
     } else
-        return std::uint64_t(UNKNOWN_CONTENT_LENGTH);
+        return uint64_t(UNKNOWN_CONTENT_LENGTH);
 }
 
 

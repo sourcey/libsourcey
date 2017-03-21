@@ -33,10 +33,10 @@ Base_API std::string getExePath();
 Base_API std::string getCwd();
 
 /// Returns the current amount of free memory.
-Base_API std::uint64_t getFreeMemory();
+Base_API uint64_t getFreeMemory();
 
 /// Returns the current amount of used memory.
-Base_API std::uint64_t getTotalMemory();
+Base_API uint64_t getTotalMemory();
 
 /// Returns the number of CPU cores.
 Base_API int numCpuCores();

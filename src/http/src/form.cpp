@@ -163,7 +163,7 @@ void FormWriter::stop()
 }
 
 
-std::uint64_t FormWriter::calculateMultipartContentLength()
+uint64_t FormWriter::calculateMultipartContentLength()
 {
     std::ostringstream ostr;
     for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
@@ -633,7 +633,7 @@ std::ifstream& FilePart::stream()
 }
 
 
-std::uint64_t FilePart::length() const
+uint64_t FilePart::length() const
 {
     return _fileSize;
 }
@@ -696,7 +696,7 @@ void StringPart::write(std::ostream& ostr)
 }
 
 
-std::uint64_t StringPart::length() const
+uint64_t StringPart::length() const
 {
     return _data.length();
 }

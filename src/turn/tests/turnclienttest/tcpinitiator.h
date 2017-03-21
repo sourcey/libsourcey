@@ -133,8 +133,8 @@ struct TCPInitiator : public turn::TCPClientObserver
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'),
         payload.end());
         if (payload.length() == 8) {
-            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
-            std::uint64_t latency = time::ticks() - sentAt;
+            uint64_t sentAt = util::strtoi<uint64_t>(payload);
+            uint64_t latency = time::ticks() - sentAt;
 
             DebugS(this) << id << ": Received data from " << peerAddr 
                 << ": payload=" << payload << ", latency=" << latency << endl;
@@ -143,8 +143,8 @@ struct TCPInitiator : public turn::TCPClientObserver
         if (size < 150) {
             //std::string payload(data, size);
             std::string payload(data, 8); // read the first packet from joined packets
-            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
-            std::uint64_t latency = time::ticks() - sentAt;
+            uint64_t sentAt = util::strtoi<uint64_t>(payload);
+            uint64_t latency = time::ticks() - sentAt;
 
             DebugS(this) << id << ": Received data from " << peerAddr 
                 << ": payload=" << payload << ", latency=" << latency << endl;

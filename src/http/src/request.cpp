@@ -86,12 +86,12 @@ void Request::setHost(const std::string& host)
 }
 
 
-void Request::setHost(const std::string& host, std::uint16_t port)
+void Request::setHost(const std::string& host, uint16_t port)
 {
     std::string value(host);
     if (port != 80 && port != 443) {
         value.append(":");
-        value.append(util::itostr<std::uint16_t>(port));
+        value.append(util::itostr<uint16_t>(port));
     }
     setHost(value);
 }

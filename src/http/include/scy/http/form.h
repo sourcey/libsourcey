@@ -90,7 +90,7 @@ public:
 
     /// Processes the entire stream and calculates the content length.
     /// Not used for chunked encoding.
-    std::uint64_t calculateMultipartContentLength();
+    uint64_t calculateMultipartContentLength();
 
     /// Writes "application/x-www-form-urlencoded" encoded data to
     /// the client connection.
@@ -186,7 +186,7 @@ protected:
     std::string _encoding;
     std::string _boundary;
     PartQueue _parts;
-    std::uint64_t _filesLength;
+    uint64_t _filesLength;
     int _writeState;
     bool _initial;
     bool _complete;
@@ -231,11 +231,11 @@ public:
     const std::string& contentType() const;
 
     /// Returns the length of the current part.
-    virtual std::uint64_t length() const = 0;
+    virtual uint64_t length() const = 0;
 
 protected:
     std::string _contentType;
-    std::uint64_t _length;
+    uint64_t _length;
     NVCollection _headers;
     bool _initialWrite;
 };
@@ -298,7 +298,7 @@ public:
     std::ifstream& stream();
 
     /// Returns the length of the current part.
-    virtual std::uint64_t length() const;
+    virtual uint64_t length() const;
 
     // /// Returns a NVCollection containing additional header
     // /// fields for the part.
@@ -308,15 +308,15 @@ public:
     // const std::string& contentType() const;
     //
     // /// Returns the file size.
-    // std::uint64_t fileSize() const;
+    // uint64_t fileSize() const;
 
 protected:
     // std::string _contentType;
     std::string _path;
     std::string _filename;
     std::ifstream _istr;
-    std::uint64_t _fileSize;
-    // std::uint64_t _nWritten;
+    uint64_t _fileSize;
+    // uint64_t _nWritten;
     // NVCollection _headers;
 };
 
@@ -349,7 +349,7 @@ public:
     virtual void write(std::ostream& ostr);
 
     /// Returns the length of the current part.
-    virtual std::uint64_t length() const;
+    virtual uint64_t length() const;
 
 protected:
     std::string _data;

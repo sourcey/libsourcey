@@ -47,17 +47,17 @@ public:
     ~Random();
 
     /// Seeds the pseudo random generator with the given seed.
-    void seed(std::uint32_t seed);
+    void seed(uint32_t seed);
 
     /// Seeds the pseudo random generator with a random seed
     /// obtained from a RandomInputStream.
     void seed();
 
     /// Returns the next 31-bit pseudo random number.
-    std::uint32_t next();
+    uint32_t next();
 
     /// Returns the next 31-bit pseudo random number modulo n.
-    std::uint32_t next(std::uint32_t n);
+    uint32_t next(uint32_t n);
 
     /// Returns the next pseudo random character.
     char nextChar();
@@ -75,8 +75,8 @@ public:
     static void getSeed(char* seed, unsigned length);
 
 protected:
-    void initState(std::uint32_t seed, char* arg_state, std::int32_t n);
-    static std::uint32_t goodRand(std::int32_t x);
+    void initState(uint32_t seed, char* arg_state, std::int32_t n);
+    static uint32_t goodRand(std::int32_t x);
 
 private:
     enum
@@ -85,13 +85,13 @@ private:
         NSHUFF = 50
     };
 
-    std::uint32_t* _fptr;
-    std::uint32_t* _rptr;
-    std::uint32_t* _state;
+    uint32_t* _fptr;
+    uint32_t* _rptr;
+    uint32_t* _state;
     int _randType;
     int _randDeg;
     int _randSep;
-    std::uint32_t* _endPtr;
+    uint32_t* _endPtr;
     char* _buffer;
 };
 

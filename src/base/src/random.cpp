@@ -134,9 +134,9 @@ Random::Random(int stateSize)
 
     _buffer = new char[stateSize];
 #if defined(_WIN32_WCE)
-    initState((std::uint32_t)wceex_time(nullptr), _buffer, stateSize);
+    initState((uint32_t)wceex_time(nullptr), _buffer, stateSize);
 #else
-    initState((std::uint32_t)std::time(nullptr), _buffer, stateSize);
+    initState((uint32_t)std::time(nullptr), _buffer, stateSize);
 #endif
 }
 
@@ -155,7 +155,7 @@ Random::~Random()
  * Park and Miller, Communications of the ACM, vol. 31, no. 10,
  * October 1988, p. 1195.
  */
-std::uint32_t Random::goodRand(std::int32_t x)
+uint32_t Random::goodRand(std::int32_t x)
 {
     std::int32_t hi, lo;
 
@@ -181,7 +181,7 @@ std::uint32_t Random::goodRand(std::int32_t x)
  * introduced by the L.C.R.N.G.  Note that the initialization of randtbl[]
  * for default usage relies on values produced by this routine.
  */
-void Random::seed(std::uint32_t x)
+void Random::seed(uint32_t x)
 {
     int i, lim;
 
@@ -269,9 +269,9 @@ void Random::getSeed(char* seed, unsigned length)
  * word boundary; otherwise a bus error will occur. Even so, lint will
  * complain about mis-alignment, but you should disregard these messages.
  */
-void Random::initState(std::uint32_t s, char* argState, std::int32_t n)
+void Random::initState(uint32_t s, char* argState, std::int32_t n)
 {
-    std::uint32_t* intArgState = (std::uint32_t*)argState;
+    uint32_t* intArgState = (uint32_t*)argState;
 
     if (n < BREAK_0) {
         assert(0 && "not enough state");
@@ -325,10 +325,10 @@ void Random::initState(std::uint32_t s, char* argState, std::int32_t n)
  *
  * Returns a 31-bit random number.
  */
-std::uint32_t Random::next()
+uint32_t Random::next()
 {
-    std::uint32_t i;
-    std::uint32_t *f, *r;
+    uint32_t i;
+    uint32_t *f, *r;
 
     if (_randType == TYPE_0) {
         i = _state[0];
@@ -355,7 +355,7 @@ std::uint32_t Random::next()
 }
 
 
-std::uint32_t Random::next(std::uint32_t n)
+uint32_t Random::next(uint32_t n)
 {
     return next() % n;
 }

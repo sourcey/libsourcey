@@ -115,7 +115,7 @@ std::int64_t doubleToInt(double d);
 //
 
 /// Generates a 31-bit pseudo random number.
-Base_API std::uint32_t randomNumber();
+Base_API uint32_t randomNumber();
 
 /// Generates a random string.
 Base_API std::string randomString(int size);

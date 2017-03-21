@@ -234,22 +234,22 @@ public:
     /// Throws a std::out_of_range exception if reading past the limit.
     void get(char* val, size_t len);
     void get(std::string& val, size_t len);
-    void getU8(std::uint8_t& val);
-    void getU16(std::uint16_t& val);
-    void getU24(std::uint32_t& val);
-    void getU32(std::uint32_t& val);
+    void getU8(uint8_t& val);
+    void getU16(uint16_t& val);
+    void getU24(uint32_t& val);
+    void getU32(uint32_t& val);
 
-    void getU64(std::uint64_t& val);
+    void getU64(uint64_t& val);
 
     const char peek();
-    const std::uint8_t peekU8();
-    const std::uint16_t peekU16();
-    const std::uint32_t peekU24();
-    const std::uint32_t peekU32();
+    const uint8_t peekU8();
+    const uint16_t peekU16();
+    const uint32_t peekU24();
+    const uint32_t peekU32();
 
     /// Peeks data from the BitReader.
     /// -1 is returned if reading past boundary.
-    const std::uint64_t peekU64();
+    const uint64_t peekU64();
 
     //
     // String parsing methods.
@@ -328,21 +328,21 @@ public:
     /// Throws a `std::out_of_range` exception if reading past the limit.
     virtual void put(const char* val, size_t len);
     void put(const std::string& val);
-    void putU8(std::uint8_t val);
-    void putU16(std::uint16_t val);
-    void putU24(std::uint32_t val);
-    void putU32(std::uint32_t val);
-    void putU64(std::uint64_t val);
+    void putU8(uint8_t val);
+    void putU16(uint16_t val);
+    void putU24(uint32_t val);
+    void putU32(uint32_t val);
+    void putU64(uint64_t val);
 
     /// Update a byte range.
     /// Throws a `std::out_of_range` exception if reading past the limit.
     virtual bool update(const char* val, size_t len, size_t pos);
     bool update(const std::string& val, size_t pos);
-    bool updateU8(std::uint8_t val, size_t pos);
-    bool updateU16(std::uint16_t val, size_t pos);
-    bool updateU24(std::uint32_t val, size_t pos);
-    bool updateU32(std::uint32_t val, size_t pos);
-    bool updateU64(std::uint64_t val, size_t pos);
+    bool updateU8(uint8_t val, size_t pos);
+    bool updateU16(uint16_t val, size_t pos);
+    bool updateU24(uint32_t val, size_t pos);
+    bool updateU32(uint32_t val, size_t pos);
+    bool updateU64(uint64_t val, size_t pos);
 
     /// Set position pointer to absolute position.
     /// Throws a `std::out_of_range` exception if the value exceeds the limit.

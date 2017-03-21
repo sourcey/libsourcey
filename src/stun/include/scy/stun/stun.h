@@ -42,7 +42,7 @@ const int kAttributeHeaderSize = 4;
 const int kMessageHeaderSize = 20;
 const int kTransactionIdOffset = 8;
 const int kTransactionIdLength = 12;
-const std::uint32_t kMagicCookie = 0x2112A442;
+const uint32_t kMagicCookie = 0x2112A442;
 const int kMagicCookieLength = sizeof(kMagicCookie);
 
 
@@ -57,7 +57,7 @@ enum AddressFamily
 
 
 #if 0
-inline bool isChannelData(std::uint16_t msgType)
+inline bool isChannelData(uint16_t msgType)
 {
   // The first two bits of a channel data message are 0b01.
   return ((msgType & 0xC000) == 0x4000);

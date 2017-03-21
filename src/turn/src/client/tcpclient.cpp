@@ -282,7 +282,7 @@ void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 }
 
 
-bool TCPClient::createAndBindConnection(std::uint32_t connectionID, const net::Address& peerAddress)
+bool TCPClient::createAndBindConnection(uint32_t connectionID, const net::Address& peerAddress)
 {
     TraceL << "Create and bind connection: " << peerAddress << endl;
 

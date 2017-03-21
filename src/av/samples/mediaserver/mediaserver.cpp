@@ -25,7 +25,7 @@ namespace scy {
 //
 
 
-MediaServer::MediaServer(std::uint16_t port)
+MediaServer::MediaServer(uint16_t port)
     : http::Server(net::Address("0.0.0.0", port), 
                    net::makeSocket<net::TCPSocket>(),
                    new HTTPStreamingConnectionFactory(this))
@@ -177,13 +177,13 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     // or if the request format is not registered.
     options.oformat = _server->formats.get(params.get("format", "MJPEG"));
     if (params.has("width"))
-        options.oformat.video.width = util::strtoi<std::uint32_t>(params.get("width"));
+        options.oformat.video.width = util::strtoi<uint32_t>(params.get("width"));
     if (params.has("height"))
-        options.oformat.video.height = util::strtoi<std::uint32_t>(params.get("height"));
+        options.oformat.video.height = util::strtoi<uint32_t>(params.get("height"));
     if (params.has("fps"))
-        options.oformat.video.fps = util::strtoi<std::uint32_t>(params.get("fps"));
+        options.oformat.video.fps = util::strtoi<uint32_t>(params.get("fps"));
     if (params.has("quality"))
-        options.oformat.video.quality = util::strtoi<std::uint32_t>(params.get("quality"));
+        options.oformat.video.quality = util::strtoi<uint32_t>(params.get("quality"));
 
     // Response encoding and framing options
     options.encoding = params.get("encoding", "");

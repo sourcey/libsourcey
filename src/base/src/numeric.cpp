@@ -263,7 +263,7 @@ void formatHex(std::string& str, std::int64_t value, int width)
 }
 
 
-void format(std::string& str, std::uint64_t value)
+void format(std::string& str, uint64_t value)
 {
     char buffer[64];
     std::sprintf(buffer, "%" I64_FMT "u", value);
@@ -271,7 +271,7 @@ void format(std::string& str, std::uint64_t value)
 }
 
 
-void format(std::string& str, std::uint64_t value, int width)
+void format(std::string& str, uint64_t value, int width)
 {
     assert(width > 0 && width < 64);
 
@@ -281,7 +281,7 @@ void format(std::string& str, std::uint64_t value, int width)
 }
 
 
-void format0(std::string& str, std::uint64_t value, int width)
+void format0(std::string& str, uint64_t value, int width)
 {
     assert(width > 0 && width < 64);
 
@@ -291,7 +291,7 @@ void format0(std::string& str, std::uint64_t value, int width)
 }
 
 
-void formatHex(std::string& str, std::uint64_t value)
+void formatHex(std::string& str, uint64_t value)
 {
     char buffer[64];
     std::sprintf(buffer, "%" I64_FMT "X", value);
@@ -299,7 +299,7 @@ void formatHex(std::string& str, std::uint64_t value)
 }
 
 
-void formatHex(std::string& str, std::uint64_t value, int width)
+void formatHex(std::string& str, uint64_t value, int width)
 {
     assert(width > 0 && width < 64);
 

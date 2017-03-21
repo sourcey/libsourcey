@@ -105,23 +105,23 @@ size_t BitReader::limit() const
 // Get methods
 //
 
-void BitReader::getU8(std::uint8_t& val)
+void BitReader::getU8(uint8_t& val)
 {
     get(reinterpret_cast<char*>(&val), 1);
 }
 
 
-void BitReader::getU16(std::uint16_t& val)
+void BitReader::getU16(uint16_t& val)
 {
-    std::uint16_t v;
+    uint16_t v;
     get(reinterpret_cast<char*>(&v), 2);
     val = (_order == ByteOrder::Network) ? networkToHost16(v) : v;
 }
 
 
-void BitReader::getU24(std::uint32_t& val)
+void BitReader::getU24(uint32_t& val)
 {
-    std::uint32_t v = 0;
+    uint32_t v = 0;
     char* target = reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++target;
@@ -131,17 +131,17 @@ void BitReader::getU24(std::uint32_t& val)
 }
 
 
-void BitReader::getU32(std::uint32_t& val)
+void BitReader::getU32(uint32_t& val)
 {
-    std::uint32_t v;
+    uint32_t v;
     get(reinterpret_cast<char*>(&v), 4);
     val = (_order == ByteOrder::Network) ? networkToHost32(v) : v;
 }
 
 
-void BitReader::getU64(std::uint64_t& val)
+void BitReader::getU64(uint64_t& val)
 {
-    std::uint64_t v;
+    uint64_t v;
     get(reinterpret_cast<char*>(&v), 8);
     val = (_order == ByteOrder::Network) ? networkToHost64(v) : v;
 }
@@ -188,39 +188,39 @@ const char BitReader::peek()
 }
 
 
-const std::uint8_t BitReader::peekU8()
+const uint8_t BitReader::peekU8()
 {
     try {
-        std::uint8_t v;
+        uint8_t v;
         getU8(v);
         _position -= 1;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking std::uint8_t: NULL" << std::endl;
+        DebugL << "Peeking uint8_t: NULL" << std::endl;
     }
     return 0;
 }
 
 
-const std::uint16_t BitReader::peekU16()
+const uint16_t BitReader::peekU16()
 {
     try {
-        std::uint16_t v;
+        uint16_t v;
         getU16(v);
         _position -= 2;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking std::uint16_t: NULL" << std::endl;
+        DebugL << "Peeking uint16_t: NULL" << std::endl;
     }
 
     return 0;
 }
 
 
-const std::uint32_t BitReader::peekU24()
+const uint32_t BitReader::peekU24()
 {
     try {
-        std::uint32_t v;
+        uint32_t v;
         getU24(v);
         _position -= 3;
         return v;
@@ -232,30 +232,30 @@ const std::uint32_t BitReader::peekU24()
 }
 
 
-const std::uint32_t BitReader::peekU32()
+const uint32_t BitReader::peekU32()
 {
     try {
-        std::uint32_t v;
+        uint32_t v;
         getU32(v);
         _position -= 4;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking std::uint32_t: NULL" << std::endl;
+        DebugL << "Peeking uint32_t: NULL" << std::endl;
     }
 
     return 0;
 }
 
 
-const std::uint64_t BitReader::peekU64()
+const uint64_t BitReader::peekU64()
 {
     try {
-        std::uint64_t v;
+        uint64_t v;
         getU64(v);
         _position -= 8;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking std::uint64_t: NULL" << std::endl;
+        DebugL << "Peeking uint64_t: NULL" << std::endl;
     }
 
     return 0;
@@ -358,7 +358,7 @@ size_t BitReader::readNextNumber(unsigned int& val)
     while (_limit > _position + len && isdigit(_bytes[_position + len]))
         len++;
     if (len)
-        val = util::strtoi<std::uint32_t>(std::string(_bytes + _position, len));
+        val = util::strtoi<uint32_t>(std::string(_bytes + _position, len));
     if (_limit > _position + len)
         _position += len;
     else
@@ -474,22 +474,22 @@ size_t BitWriter::limit() const
 // Write functions
 //
 
-void BitWriter::putU8(std::uint8_t val)
+void BitWriter::putU8(uint8_t val)
 {
     put(reinterpret_cast<const char*>(&val), 1);
 }
 
 
-void BitWriter::putU16(std::uint16_t val)
+void BitWriter::putU16(uint16_t val)
 {
-    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     put(reinterpret_cast<const char*>(&v), 2);
 }
 
 
-void BitWriter::putU24(std::uint32_t val)
+void BitWriter::putU24(uint32_t val)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     char* start = reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
@@ -498,16 +498,16 @@ void BitWriter::putU24(std::uint32_t val)
 }
 
 
-void BitWriter::putU32(std::uint32_t val)
+void BitWriter::putU32(uint32_t val)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     put(reinterpret_cast<const char*>(&v), 4);
 }
 
 
-void BitWriter::putU64(std::uint64_t val)
+void BitWriter::putU64(uint64_t val)
 {
-    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     put(reinterpret_cast<const char*>(&v), 8);
 }
 
@@ -539,22 +539,22 @@ void BitWriter::put(const char* val, size_t len)
 //
 
 
-bool BitWriter::updateU8(std::uint8_t val, size_t pos)
+bool BitWriter::updateU8(uint8_t val, size_t pos)
 {
     return update(reinterpret_cast<const char*>(&val), 1, pos);
 }
 
 
-bool BitWriter::updateU16(std::uint16_t val, size_t pos)
+bool BitWriter::updateU16(uint16_t val, size_t pos)
 {
-    std::uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
+    uint16_t v = (_order == ByteOrder::Network) ? hostToNetwork16(val) : val;
     return update(reinterpret_cast<const char*>(&v), 2, pos);
 }
 
 
-bool BitWriter::updateU24(std::uint32_t val, size_t pos)
+bool BitWriter::updateU24(uint32_t val, size_t pos)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     char* start = reinterpret_cast<char*>(&v);
     if (_order == ByteOrder::Network || isBigEndian())
         ++start;
@@ -563,16 +563,16 @@ bool BitWriter::updateU24(std::uint32_t val, size_t pos)
 }
 
 
-bool BitWriter::updateU32(std::uint32_t val, size_t pos)
+bool BitWriter::updateU32(uint32_t val, size_t pos)
 {
-    std::uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
+    uint32_t v = (_order == ByteOrder::Network) ? hostToNetwork32(val) : val;
     return update(reinterpret_cast<const char*>(&v), 4, pos);
 }
 
 
-bool BitWriter::updateU64(std::uint64_t val, size_t pos)
+bool BitWriter::updateU64(uint64_t val, size_t pos)
 {
-    std::uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
+    uint64_t v = (_order == ByteOrder::Network) ? hostToNetwork64(val) : val;
     return update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 

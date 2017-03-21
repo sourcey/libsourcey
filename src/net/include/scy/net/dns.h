@@ -44,7 +44,7 @@ struct DNSResult
     std::string host;
 
     /// The host port to resolve
-    std::uint16_t port;
+    uint16_t port;
 
     /// The resolved address
     net::Address addr;
@@ -122,11 +122,11 @@ inline bool resolveDNS(DNSResult* dns)
     handle->data = dns;
     return uv_getaddrinfo(
                uv_default_loop(), handle, onDNSResolved, dns->host.c_str(),
-               util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
+               util::itostr<uint16_t>(dns->port).c_str(), dns->hints) == 0;
 }
 
 
-inline bool resolveDNS(const std::string& host, std::uint16_t port,
+inline bool resolveDNS(const std::string& host, uint16_t port,
                        std::function<void(const DNSResult&)> callback,
                        void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {

@@ -115,7 +115,7 @@ public:
     /// by the internal state machine.
     virtual void dispose()
     {
-        TraceL << "Dispose" << std::endl;
+        TraceA("Dispose");
 
         if (!_destroyed) {
             _destroyed = true;
@@ -145,7 +145,7 @@ protected:
     /// Override to handle post state change logic.
     virtual void onStateChange(TransactionState& state, const TransactionState&)
     {
-        TraceL << "On state change: " << state.toString() << std::endl;
+        TraceA("On state change:", state.toString());
 
         if (state.equals(TransactionState::Success) ||
             state.equals(TransactionState::Failed))
@@ -172,12 +172,12 @@ protected:
     /// Called when a successful response is received.
     virtual void onResponse()
     {
-        TraceL << "Success: " << _response.toString() << std::endl;
+        TraceA("Success:", _response.toString());
     }
 
     virtual void onTimeout()
     {
-        DebugL << "Timeout" << std::endl;
+        DebugA("Timeout");
 
         if (!canResend()) {
             // if (!cancelled())
@@ -194,8 +194,7 @@ protected:
     PacketT _request;
     PacketT _response;
     Timer _timer;  ///< The request timeout callback.
-    int _retries;  ///< The maximum number of attempts before the transaction is
-                   ///< considered failed.
+    int _retries;  ///< The maximum number of attempts before the transaction is considered failed.
     int _attempts; ///< The number of times the transaction has been sent.
     bool _destroyed;
 };

@@ -64,7 +64,7 @@ public:
     struct Options
     {
         std::string host;
-        std::uint16_t port;
+        uint16_t port;
 
         /// Weather or not to reconnect if disconnected from the server.
         bool reconnection;
@@ -91,7 +91,7 @@ public:
            const Options& options = Options());
     virtual ~Client();
 
-    // virtual void connect(const std::string& host, std::uint16_t port);
+    // virtual void connect(const std::string& host, uint16_t port);
     virtual void connect();
     virtual void close();
 

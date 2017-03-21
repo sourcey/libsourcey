@@ -61,7 +61,7 @@ public:
     std::string scheme() const;
     std::string userInfo() const;
     std::string host() const;
-    std::uint16_t port() const;
+    uint16_t port() const;
     std::string authority() const;
     std::string path() const;
     std::string pathEtc() const;

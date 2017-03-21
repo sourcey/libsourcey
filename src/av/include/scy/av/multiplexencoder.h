@@ -95,7 +95,7 @@ protected:
     AudioEncoder* _audio;
     AVIOContext* _ioCtx;
     uint8_t* _ioBuffer;
-    std::uint64_t _pts;
+    uint64_t _pts;
 };
 
 

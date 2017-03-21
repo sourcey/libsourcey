@@ -24,7 +24,7 @@ namespace turn {
 TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
                              const FiveTuple& tuple,
                              const std::string& username,
-                             const std::uint32_t& lifetime)
+                             const uint32_t& lifetime)
     : ServerAllocation(server, tuple, username, lifetime)
     , _control(std::dynamic_pointer_cast<net::TCPSocket>(control))
     , _acceptor(std::make_shared<net::TCPSocket>())

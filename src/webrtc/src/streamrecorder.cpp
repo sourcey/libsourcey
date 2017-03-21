@@ -134,7 +134,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
     }
 
     if (_encoder.isActive())
-        _encoder.encodeAudio((std::uint8_t*)audio_data, number_of_frames);
+        _encoder.encodeAudio((uint8_t*)audio_data, number_of_frames);
 }
 
 

@@ -26,14 +26,14 @@ namespace scy {
 namespace stun {
 
 
-Attribute::Attribute(std::uint16_t type, std::uint16_t size)
+Attribute::Attribute(uint16_t type, uint16_t size)
     : _type(type)
     , _size(size)
 {
 }
 
 
-std::string Attribute::typeString(std::uint16_t type)
+std::string Attribute::typeString(uint16_t type)
 {
     switch (type) {
         case Attribute::XorMappedAddress:
@@ -113,19 +113,19 @@ std::string Attribute::typeString(std::uint16_t type)
 }
 
 
-std::uint16_t Attribute::size() const
+uint16_t Attribute::size() const
 {
     return _size;
 }
 
 
-std::uint16_t Attribute::type() const // Attribute::Type
+uint16_t Attribute::type() const // Attribute::Type
 {
     return _type; // static_cast<Attribute::Type>(_type);
 }
 
 
-void Attribute::setLength(std::uint16_t size)
+void Attribute::setLength(uint16_t size)
 {
     _size = size;
 }
@@ -156,7 +156,7 @@ void Attribute::writePadding(BitWriter& writer) const
 }
 
 
-Attribute* Attribute::create(std::uint16_t type, std::uint16_t size)
+Attribute* Attribute::create(uint16_t type, uint16_t size)
 {
     // Attribute* attr = get(type);
     // if (attr)
@@ -315,7 +315,7 @@ Attribute* Attribute::create(std::uint16_t type, std::uint16_t size)
 
 // ---------------------------------------------------------------------------
 //
-AddressAttribute::AddressAttribute(std::uint16_t type, bool ipv4)
+AddressAttribute::AddressAttribute(uint16_t type, bool ipv4)
     : Attribute(type, ipv4 ? IPv4Size : IPv6Size)
 {
 }
@@ -340,7 +340,7 @@ net::Address AddressAttribute::address() const
 }
 
 
-std::string intToIPv4(std::uint32_t ip)
+std::string intToIPv4(uint32_t ip)
 {
     // Input should be in host network order
     // ip = ntohl(ip);
@@ -375,11 +375,11 @@ void AddressAttribute::read(BitReader& reader)
     // in host byte order, XOR'ing it with the magic cookie and the 96-bit
     // transaction ID, and converting the result to network byte order.
 
-    std::uint8_t dummy, family;
+    uint8_t dummy, family;
     reader.getU8(dummy);
     reader.getU8(family);
 
-    std::uint16_t port;
+    uint16_t port;
     reader.getU16(port);
     port = ntohs(port) ^ ntohs(kMagicCookie >> 16); // XOR
     // port ^= (kMagicCookie >> 16);
@@ -390,7 +390,7 @@ void AddressAttribute::read(BitReader& reader)
             return;
         }
 
-        std::uint32_t ip;
+        uint32_t ip;
         reader.getU32(ip);
         ip = ntohl(ip) ^ ntohl(kMagicCookie); // XOR
         // ip ^= ntohl(kMagicCookie);
@@ -419,7 +419,7 @@ void AddressAttribute::write(BitWriter& writer) const
                 const_cast<sockaddr*>(_address.addr()));
 
             // Port
-            std::uint16_t port = ntohs(v4addr->sin_port);
+            uint16_t port = ntohs(v4addr->sin_port);
             // assert(port == 5555);
             // assert(port == 0x15B3);
             port ^= (kMagicCookie >> 16); // XOR
@@ -428,7 +428,7 @@ void AddressAttribute::write(BitWriter& writer) const
             writer.putU16(port);
 
             // Address
-            std::uint32_t ip = ntohl(v4addr->sin_addr.s_addr);
+            uint32_t ip = ntohl(v4addr->sin_addr.s_addr);
             ip ^= kMagicCookie; // XOR
             writer.putU32(ip);
             break;
@@ -443,7 +443,7 @@ void AddressAttribute::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-UInt8Attribute::UInt8Attribute(std::uint16_t type)
+UInt8Attribute::UInt8Attribute(uint16_t type)
     : Attribute(type, Size)
     , _bits(0)
 {
@@ -492,7 +492,7 @@ void UInt8Attribute::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-UInt32Attribute::UInt32Attribute(std::uint16_t type)
+UInt32Attribute::UInt32Attribute(uint16_t type)
     : Attribute(type, Size)
     , _bits(0)
 {
@@ -540,7 +540,7 @@ void UInt32Attribute::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-UInt64Attribute::UInt64Attribute(std::uint16_t type)
+UInt64Attribute::UInt64Attribute(uint16_t type)
     : Attribute(type, Size)
     , _bits(0)
 {
@@ -589,7 +589,7 @@ void UInt64Attribute::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-FlagAttribute::FlagAttribute(std::uint16_t type)
+FlagAttribute::FlagAttribute(uint16_t type)
     : Attribute(type, 0)
 {
 }
@@ -603,7 +603,7 @@ Attribute* FlagAttribute::clone()
 
 // ---------------------------------------------------------------------------
 //
-StringAttribute::StringAttribute(std::uint16_t type, std::uint16_t size)
+StringAttribute::StringAttribute(uint16_t type, uint16_t size)
     : Attribute(type, size)
     , _bytes(0)
 {
@@ -642,7 +642,7 @@ void StringAttribute::setBytes(char* bytes, unsigned size)
 
 void StringAttribute::copyBytes(const char* bytes)
 {
-    copyBytes(bytes, static_cast<std::uint16_t>(strlen(bytes)));
+    copyBytes(bytes, static_cast<uint16_t>(strlen(bytes)));
 }
 
 
@@ -654,15 +654,15 @@ void StringAttribute::copyBytes(const void* bytes, unsigned size)
 }
 
 
-std::uint8_t StringAttribute::getByte(int index) const
+uint8_t StringAttribute::getByte(int index) const
 {
     assert(_bytes != nullptr);
     assert((0 <= index) && (index < size()));
-    return static_cast<std::uint8_t>(_bytes[index]);
+    return static_cast<uint8_t>(_bytes[index]);
 }
 
 
-void StringAttribute::setByte(int index, std::uint8_t value)
+void StringAttribute::setByte(int index, uint8_t value)
 {
     assert(_bytes != nullptr);
     assert((0 <= index) && (index < size()));
@@ -784,7 +784,7 @@ void MessageIntegrity::read(BitReader& reader)
 
     // Ensure the STUN message size reflects the message up to and
     // including the MessageIntegrity attribute.
-    hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
+    hmacWriter.updateU32((uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
     _input.assign(hmacWriter.begin(), hmacWriter.position());
 
     _hmac.assign(reader.current(), MessageIntegrity::Size);
@@ -808,7 +808,7 @@ void MessageIntegrity::read(BitReader& reader)
 
     // Ensure the STUN message size value represents the real
     // size of the buffered message.
-    hmacWriter.updateU32((std::uint32_t)hmacWriter.position(), 2);
+    hmacWriter.updateU32((uint32_t)hmacWriter.position(), 2);
     _input.assign(hmacWriter.begin(), hmacWriter.position());
 
     // Reset the original buffer position.
@@ -850,7 +850,7 @@ void MessageIntegrity::write(BitWriter& writer) const
         // the end of the MESSAGE-INTEGRITY attribute prior to calculating the
         // HMAC.  Such adjustment is necessary when attributes, such as
         // FINGERPRINT, appear after MESSAGE-INTEGRITY.
-        hmacWriter.updateU32((std::uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
+        hmacWriter.updateU32((uint32_t)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
 
         std::string input(hmacWriter.begin(), hmacWriter.position());
         assert(input.size() == sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
@@ -872,7 +872,7 @@ void MessageIntegrity::write(BitWriter& writer) const
 
         // Ensure the STUN message size value represents the real
         // size of the buffered message.
-        hmacWriter.updateU32((std::uint32_t)hmacWriter.position() + MessageIntegrity::Size, 2);
+        hmacWriter.updateU32((uint32_t)hmacWriter.position() + MessageIntegrity::Size, 2);
 
         //string input(hmacBuf.data(), hmacBuf.available());
         std::string input(hmacWriter.begin(), hmacWriter.position());
@@ -891,7 +891,7 @@ void MessageIntegrity::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-ErrorCode::ErrorCode(std::uint16_t size)
+ErrorCode::ErrorCode(uint16_t size)
     : Attribute(Attribute::ErrorCode, size)
     , _class(0)
     , _number(0)
@@ -928,21 +928,21 @@ int ErrorCode::errorCode() const
 
 void ErrorCode::setErrorCode(int code)
 {
-    _class = static_cast<std::uint8_t>(code / 100);
-    _number = static_cast<std::uint8_t>(code % 100);
+    _class = static_cast<uint8_t>(code / 100);
+    _number = static_cast<uint8_t>(code % 100);
 }
 
 
 void ErrorCode::setReason(const std::string& reason)
 {
-    setLength(MinSize + static_cast<std::uint16_t>(reason.size()));
+    setLength(MinSize + static_cast<uint16_t>(reason.size()));
     _reason = reason;
 }
 
 
 void ErrorCode::read(BitReader& reader)
 {
-    std::uint32_t val;
+    uint32_t val;
     reader.getU32(val);
 
     if ((val >> 11) != 0)
@@ -966,7 +966,7 @@ void ErrorCode::write(BitWriter& writer) const
 
 // ---------------------------------------------------------------------------
 //
-UInt16ListAttribute::UInt16ListAttribute(std::uint16_t type, std::uint16_t size)
+UInt16ListAttribute::UInt16ListAttribute(uint16_t type, uint16_t size)
     : Attribute(type, size)
 {
 }
@@ -996,29 +996,29 @@ size_t UInt16ListAttribute::size() const
 }
 
 
-std::uint16_t UInt16ListAttribute::getType(int index) const
+uint16_t UInt16ListAttribute::getType(int index) const
 {
     return _attrTypes[index];
 }
 
 
-void UInt16ListAttribute::setType(int index, std::uint16_t value)
+void UInt16ListAttribute::setType(int index, uint16_t value)
 {
     _attrTypes[index] = value;
 }
 
 
-void UInt16ListAttribute::addType(std::uint16_t value)
+void UInt16ListAttribute::addType(uint16_t value)
 {
     _attrTypes.push_back(value);
-    setLength(static_cast<std::uint16_t>(_attrTypes.size() * 2));
+    setLength(static_cast<uint16_t>(_attrTypes.size() * 2));
 }
 
 
 void UInt16ListAttribute::read(BitReader& reader)
 {
     for (unsigned i = 0; i < size() / 2; i++) {
-        std::uint16_t attr;
+        uint16_t attr;
         reader.getU16(attr);
         _attrTypes.push_back(attr);
     }

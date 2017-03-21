@@ -175,7 +175,7 @@ class TimerTest : public Test
 //
 // class SignalTest: public Test
 // {
-//     Signal<void(std::uint64_t&)> TestSignal;
+//     Signal<void(uint64_t&)> TestSignal;
 //
 //     void run()
 //     {
@@ -223,15 +223,15 @@ class TimerTest : public Test
 
 struct SignalCounter
 {
-    void increment(std::uint64_t& val) { val++; }
+    void increment(uint64_t& val) { val++; }
 
-    void incrementConst(std::uint64_t& val) const { val++; }
+    void incrementConst(uint64_t& val) const { val++; }
 
-    static void incrementStatic(std::uint64_t& val) { val++; }
+    static void incrementStatic(uint64_t& val) { val++; }
 };
 
 
-void signalIncrementFree(std::uint64_t& val)
+void signalIncrementFree(uint64_t& val)
 {
     val++;
 }
@@ -442,7 +442,6 @@ static std::string RANDOM_CONTENT = "r@ndom";
 
 struct PacketStreamIOTest : public Test
 {
-
     int numPackets;
 
     PacketStreamIOTest()

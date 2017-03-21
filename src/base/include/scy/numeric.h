@@ -140,24 +140,24 @@ void formatHex(std::string& str, std::int64_t value);
 void formatHex(std::string& str, std::int64_t value, int width);
 
 /// Formats an unsigned 64-bit integer value in decimal notation.
-void format(std::string& str, std::uint64_t value);
+void format(std::string& str, uint64_t value);
 
 /// Formats an unsigned 64-bit integer value in decimal notation,
 /// right justified in a field having at least the specified width.
-void format(std::string& str, std::uint64_t value, int width);
+void format(std::string& str, uint64_t value, int width);
 
 /// Formats an unsigned 64-bit integer value in decimal notation,
 /// right justified and zero-padded in a field having at least the
 /// specified width.
-void format0(std::string& str, std::uint64_t value, int width);
+void format0(std::string& str, uint64_t value, int width);
 
 /// Formats a 64-bit integer value in hexadecimal notation.
-void formatHex(std::string& str, std::uint64_t value);
+void formatHex(std::string& str, uint64_t value);
 
 /// Formats a 64-bit integer value in hexadecimal notation,
 /// right justified and zero-padded in a field having at least
 /// the specified width.
-void formatHex(std::string& str, std::uint64_t value, int width);
+void formatHex(std::string& str, uint64_t value, int width);
 
 
 #if 0

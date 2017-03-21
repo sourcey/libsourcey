@@ -39,12 +39,12 @@ public:
     ///
     /// If length is UNKNOWN_CONTENT_LENGTH, removes
     /// the Content-Length header.
-    void setContentLength(std::uint64_t length);
+    void setContentLength(uint64_t length);
 
     /// Returns the content length for this message,
     /// which may be UNKNOWN_CONTENT_LENGTH if
     /// no Content-Length header is present.
-    std::uint64_t getContentLength() const;
+    uint64_t getContentLength() const;
 
     /// Returns true if a Content-Length header is present.
     bool hasContentLength() const;

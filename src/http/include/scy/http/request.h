@@ -85,7 +85,7 @@ public:
     /// If the given port number is a non-standard
     /// port number (other than 80 or 443), it is
     /// included in the Host header field.
-    void setHost(const std::string& host, std::uint16_t port);
+    void setHost(const std::string& host, uint16_t port);
 
     /// Returns the value of the Host header field.
     ///

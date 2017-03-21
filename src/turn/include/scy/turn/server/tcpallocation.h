@@ -26,7 +26,7 @@ namespace turn {
 class TURN_API Server;
 
 
-typedef PointerCollection<std::uint32_t, TCPConnectionPair>
+typedef PointerCollection<uint32_t, TCPConnectionPair>
     TCPConnectionPairMap;
 
 
@@ -35,7 +35,7 @@ class TURN_API TCPAllocation : public ServerAllocation
 public:
     TCPAllocation(Server& server, const net::Socket::Ptr& control,
                   const FiveTuple& tuple, const std::string& username,
-                  const std::uint32_t& lifetime);
+                  const uint32_t& lifetime);
     virtual ~TCPAllocation();
 
     bool handleRequest(Request& request);

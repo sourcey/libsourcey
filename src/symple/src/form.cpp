@@ -334,7 +334,7 @@ std::string FormField::value() const
 
 int FormField::intValue() const
 {
-    return util::strtoi<std::uint32_t>(value());
+    return util::strtoi<uint32_t>(value());
 }
 
 

@@ -125,7 +125,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         BitReader reader(buf);
 
         // Message type
-        std::uint16_t type;
+        uint16_t type;
         reader.getU16(type);
         if (type & 0x8000) {
             // RTP and RTCP set MSB of first byte, since first two bits are version,
@@ -134,18 +134,18 @@ ssize_t Message::read(const ConstBuffer& buf)
             return 0;
         }
 
-        // std::uint16_t method = (type & 0x000F) | ((type & 0x00E0)>>1) |
+        // uint16_t method = (type & 0x000F) | ((type & 0x00E0)>>1) |
         //    ((type & 0x0E00)>>2) | ((type & 0x3000)>>2);
 
-        std::uint16_t classType = type & 0x0110;
-        std::uint16_t methodType = type & 0x000F;
+        uint16_t classType = type & 0x0110;
+        uint16_t methodType = type & 0x000F;
         if (!isValidMethod(methodType)) {
             WarnL << "STUN message unknown method: " << methodType << endl;
             return 0;
         }
 
-        _class = classType;   // static_cast<std::uint16_t>(type & 0x0110);
-        _method = methodType; // static_cast<std::uint16_t>(type & 0x000F);
+        _class = classType;   // static_cast<uint16_t>(type & 0x0110);
+        _method = methodType; // static_cast<uint16_t>(type & 0x000F);
 
         // Message length
         reader.getU16(_size);
@@ -172,7 +172,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         _attrs.clear();
         // int errors = 0;
         int rest = _size;
-        std::uint16_t attrType, attrLength, padLength;
+        uint16_t attrType, attrLength, padLength;
         assert(int(reader.available()) >= rest);
         while (rest > 0) {
             reader.getU16(attrType);
@@ -213,7 +213,7 @@ void Message::write(Buffer& buf) const
 
     // BitWriter writer(buf);
     DynamicBitWriter writer(buf);
-    writer.putU16((std::uint16_t)(_class | _method));
+    writer.putU16((uint16_t)(_class | _method));
     writer.putU16(_size);
     writer.putU32(kMagicCookie);
     writer.put(_transactionID.c_str(), _transactionID.size());
@@ -245,7 +245,7 @@ std::string Message::classString() const
 }
 
 
-std::string Message::errorString(std::uint16_t errorCode) const
+std::string Message::errorString(uint16_t errorCode) const
 {
     switch (errorCode) {
         case BadRequest:

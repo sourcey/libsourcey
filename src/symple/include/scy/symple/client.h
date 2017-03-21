@@ -45,7 +45,7 @@ public:
     struct Options
     {
         std::string host;
-        std::uint16_t port;
+        uint16_t port;
 
         /// Weather or not to reconnect if disconnected from the server.
         bool reconnection;

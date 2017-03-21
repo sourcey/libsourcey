@@ -96,7 +96,7 @@ public:
 
     std::string methodString() const;
     std::string classString() const;
-    std::string errorString(std::uint16_t errorCode) const;
+    std::string errorString(uint16_t errorCode) const;
 
     void add(Attribute* attr);
     Attribute* get(Attribute::Type type, int index = 0) const;
@@ -120,15 +120,15 @@ public:
     virtual const char* className() const { return "StunMessage"; }
 
 protected:
-    std::uint16_t _class;
-    std::uint16_t _method;
-    std::uint16_t _size;
+    uint16_t _class;
+    uint16_t _method;
+    uint16_t _size;
     TransactionID _transactionID;
     std::vector<Attribute*> _attrs;
 };
 
 
-inline bool isValidMethod(std::uint16_t methodType)
+inline bool isValidMethod(uint16_t methodType)
 {
     switch (methodType) {
         case Message::Binding:

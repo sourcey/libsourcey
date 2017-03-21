@@ -85,7 +85,7 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     if (!lifetimeAttr) {
         return;
     }
-    std::uint32_t desiredLifetime = std::min<std::uint32_t>(
+    uint32_t desiredLifetime = std::min<uint32_t>(
         _server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
     // lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 

@@ -38,7 +38,7 @@ public:
     virtual void close();
 
     virtual void connect(const net::Address& peerAddress);
-    virtual void connect(const std::string& host, std::uint16_t port);
+    virtual void connect(const std::string& host, uint16_t port);
 
     virtual ssize_t send(const char* data, size_t len, int flags = 0);
     virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddress, int flags = 0);

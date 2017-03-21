@@ -210,6 +210,25 @@ protected:
 
 
 //
+// Recursive logging for veradic arguments
+//
+
+
+template <typename T>
+void logArgs(std::ostream& o, T t)
+{
+    o << t << ' '; // << std::endl;
+}
+
+template<typename T, typename... Args>
+void logArgs(std::ostream& o, T t, Args... args) // recursive variadic function
+{
+    logArgs(o, t);
+    logArgs(o, args...);
+}
+
+
+//
 // Log Stream
 //
 
@@ -225,12 +244,27 @@ struct LogStream
     std::ostringstream message;
     std::time_t ts;
     LogChannel* channel;
+    bool flushed;
 
-    LogStream(LogLevel level = LDebug, const std::string& realm = "",
-              int line = 0, const void* ptr = nullptr, const char* channel = nullptr);
-    LogStream(LogLevel level, const std::string& realm = "", const std::string& address = "");
+    LogStream(LogLevel level = LDebug, const std::string& realm = "", int line = 0, 
+              const void* ptr = nullptr, const char* channel = nullptr);
     LogStream(const LogStream& that);
     ~LogStream();
+
+    /// Recursively log veradic arguments.
+    template<typename... Args>
+    void write(Args... args)
+    {
+        logArgs(message, args...);
+        flush();
+    }
+
+    /// Write data to the log message.
+    template <typename T> LogStream& operator<<(const T& data)
+    {
+        message << data;
+        return *this;
+    }
 
     LogStream& operator<<(const LogLevel data)
     {
@@ -244,24 +278,21 @@ struct LogStream
         return *this;
     }
 
-    template <typename T> LogStream& operator<<(const T& data)
+    /// Handle std::endl manipulators.
+    /// This method flushes the log message and queues it for write.
+    LogStream& operator<<(std::ostream& (*f)(std::ostream&))
     {
-        message << data;
+        flush();
         return *this;
     }
 
-    /// Handle std::endl flags.
-    /// This method flushes the log message and queues it for write.
-    /// WARNING: After using std::endl to flush the LogStream pointer
-    /// should not be user.
-    LogStream& operator<<(std::ostream& (*f)(std::ostream&))
+    void flush()
     {
-        message << f;
-
-        // Send to default channel
-        // Channel flag or stream operation
-        Logger::instance().write(this);
-        return *this;
+        if (!flushed) {
+            flushed = true;
+            message << std::endl;
+            Logger::instance().write(new LogStream(*this));
+        }
     }
 };
 
@@ -301,93 +332,119 @@ struct LogStream
 
 
 //
+// Helpers for replacing file paths with filenames at compile time
+//
+
+
+constexpr const char* str_end(const char *str) 
+{
+    return *str ? str_end(str + 1) : str;
+}
+
+constexpr bool str_slant(const char *str) 
+{
+    return *str == '/' || *str == '\\' ? true : (*str ? str_slant(str + 1) : false);
+}
+
+constexpr const char* r_slant(const char* str) 
+{
+    return *str == '/' || *str == '\\' ? (str + 1) : r_slant(str - 1);
+}
+
+constexpr const char* file_name(const char* str) 
+{
+    return str_slant(str) ? r_slant(str_end(str)) : str;
+}
+
+
+//
 // Inline stream accessors
 //
 
 
-// Default output
-inline LogStream& traceL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LTrace, realm, 0, ptr);
-}
-
-inline LogStream& debugL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LDebug, realm, 0, ptr);
-}
-
-inline LogStream& infoL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LInfo, realm, 0, ptr);
-}
-
-inline LogStream& warnL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LWarn, realm, 0, ptr);
-}
-
-inline LogStream& errorL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LError, realm, 0, ptr);
-}
-
-inline LogStream& fatalL(const char* realm = "", const void* ptr = nullptr)
-{
-    return *new LogStream(LFatal, realm, 0, ptr);
-}
-
-
-// Channel output
-inline LogStream& traceC(const char* channel, const char* realm = "",
-                         const void* ptr = nullptr)
-{
-    return *new LogStream(LTrace, realm, 0, ptr, channel);
-}
-
-inline LogStream& debugC(const char* channel, const char* realm = "",
-                         const void* ptr = nullptr)
-{
-    return *new LogStream(LDebug, realm, 0, ptr, channel);
-}
-
-inline LogStream& infoC(const char* channel, const char* realm = "",
-                        const void* ptr = nullptr)
-{
-    return *new LogStream(LInfo, realm, 0, ptr, channel);
-}
-
-inline LogStream& warnC(const char* channel, const char* realm = "",
-                        const void* ptr = nullptr)
-{
-    return *new LogStream(LWarn, realm, 0, ptr, channel);
-}
-
-inline LogStream& errorC(const char* channel, const char* realm = "",
-                         const void* ptr = nullptr)
-{
-    return *new LogStream(LError, realm, 0, ptr, channel);
-}
-
-inline LogStream& fatalC(const char* channel, const char* realm = "",
-                         const void* ptr = nullptr)
-{
-    return *new LogStream(LFatal, realm, 0, ptr, channel);
-}
-
-
-// Level output
-inline LogStream& printL(const char* level = "debug", const char* realm = "",
-                         const void* ptr = nullptr,
-                         const char* channel = nullptr)
-{
-    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
-}
-
-inline LogStream& printL(const char* level, const void* ptr,
-                         const char* realm = "", const char* channel = nullptr)
-{
-    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
-}
+//// Default output
+//inline LogStream& traceL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LTrace, realm, 0, ptr);
+//}
+//
+//inline LogStream& debugL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LDebug, realm, 0, ptr);
+//}
+//
+//inline LogStream& infoL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LInfo, realm, 0, ptr);
+//}
+//
+//inline LogStream& warnL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LWarn, realm, 0, ptr);
+//}
+//
+//inline LogStream& errorL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LError, realm, 0, ptr);
+//}
+//
+//inline LogStream& fatalL(const char* realm = "", const void* ptr = nullptr)
+//{
+//    return *new LogStream(LFatal, realm, 0, ptr);
+//}
+//
+//
+//// Channel output
+//inline LogStream& traceC(const char* channel, const char* realm = "",
+//                         const void* ptr = nullptr)
+//{
+//    return *new LogStream(LTrace, realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& debugC(const char* channel, const char* realm = "",
+//                         const void* ptr = nullptr)
+//{
+//    return *new LogStream(LDebug, realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& infoC(const char* channel, const char* realm = "",
+//                        const void* ptr = nullptr)
+//{
+//    return *new LogStream(LInfo, realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& warnC(const char* channel, const char* realm = "",
+//                        const void* ptr = nullptr)
+//{
+//    return *new LogStream(LWarn, realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& errorC(const char* channel, const char* realm = "",
+//                         const void* ptr = nullptr)
+//{
+//    return *new LogStream(LError, realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& fatalC(const char* channel, const char* realm = "",
+//                         const void* ptr = nullptr)
+//{
+//    return *new LogStream(LFatal, realm, 0, ptr, channel);
+//}
+//
+//
+//// Level output
+//inline LogStream& printL(const char* level = "debug", const char* realm = "",
+//                         const void* ptr = nullptr,
+//                         const char* channel = nullptr)
+//{
+//    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
+//}
+//
+//inline LogStream& printL(const char* level, const void* ptr,
+//                         const char* realm = "", const char* channel = nullptr)
+//{
+//    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
+//}
 
 
 // Macros for debug logging
@@ -410,23 +467,29 @@ inline std::string _methodName(const std::string& fsig)
 #endif
 #endif
 
-#define TraceL *new LogStream(LTrace, __CLASS_FUNCTION__, __LINE__)
-#define DebugL *new LogStream(LDebug, __CLASS_FUNCTION__, __LINE__)
-#define InfoL *new LogStream(LInfo, __CLASS_FUNCTION__, __LINE__)
-#define WarnL *new LogStream(LWarn, __CLASS_FUNCTION__, __LINE__)
-#define ErrorL *new LogStream(LError, __CLASS_FUNCTION__, __LINE__)
+#define TraceL LogStream(LTrace, file_name(__FILE__), __LINE__)
+#define DebugL LogStream(LDebug, file_name(__FILE__), __LINE__)
+#define InfoL LogStream(LInfo, file_name(__FILE__), __LINE__)
+#define WarnL LogStream(LWarn, file_name(__FILE__), __LINE__)
+#define ErrorL LogStream(LError, file_name(__FILE__), __LINE__)
 
-#define TraceS(self) *new LogStream(LTrace, __CLASS_FUNCTION__, __LINE__, self)
-#define DebugS(self) *new LogStream(LDebug, __CLASS_FUNCTION__, __LINE__, self)
-#define InfoS(self) *new LogStream(LInfo, __CLASS_FUNCTION__, __LINE__, self)
-#define WarnS(self) *new LogStream(LWarn, __CLASS_FUNCTION__, __LINE__, self)
-#define ErrorS(self) *new LogStream(LError, __CLASS_FUNCTION__, __LINE__, self)
+#define TraceA(...) { LogStream(LTrace, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define DebugA(...) { LogStream(LDebug, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define InfoA(...) { LogStream(LInfo, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define WarnA(...) { LogStream(LWarn, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define ErrorA(...) { LogStream(LError, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
 
-#define TraceN(self) *new LogStream(LTrace, self->className(), __LINE__, self)
-#define DebugN(self) *new LogStream(LDebug, self->className(), __LINE__, self)
-#define InfoN(self) *new LogStream(LInfo, self->className(), __LINE__, self)
-#define WarnN(self) *new LogStream(LWarn, self->className(), __LINE__, self)
-#define ErrorN(self) *new LogStream(LError, self->className(), __LINE__, self)
+#define TraceS(self) LogStream(LTrace, file_name(__FILE__), __LINE__, self)
+#define DebugS(self) LogStream(LDebug, file_name(__FILE__), __LINE__, self)
+#define InfoS(self) LogStream(LInfo, file_name(__FILE__), __LINE__, self)
+#define WarnS(self) LogStream(LWarn, file_name(__FILE__), __LINE__, self)
+#define ErrorS(self) LogStream(LError, file_name(__FILE__), __LINE__, self)
+
+#define TraceN(self) LogStream(LTrace, self->className(), __LINE__, self)
+#define DebugN(self) LogStream(LDebug, self->className(), __LINE__, self)
+#define InfoN(self) LogStream(LInfo, self->className(), __LINE__, self)
+#define WarnN(self) LogStream(LWarn, self->className(), __LINE__, self)
+#define ErrorN(self) LogStream(LError, self->className(), __LINE__, self)
 
 
 //
@@ -439,7 +502,7 @@ class Base_API LogChannel
 public:
     LogChannel(const std::string& name, LogLevel level = LDebug,
                const std::string& timeFormat = "%H:%M:%S");
-    virtual ~LogChannel(){};
+    virtual ~LogChannel() {};
 
     virtual void write(const LogStream& stream);
     virtual void write(const std::string& message, LogLevel level = LDebug,

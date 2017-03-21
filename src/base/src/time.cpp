@@ -112,7 +112,7 @@ std::string getUTC()
 }
 
 
-std::uint64_t hrtime()
+uint64_t hrtime()
 {
     return uv_hrtime();
 }
@@ -125,7 +125,7 @@ std::time_t nowUTC()
     return std::mktime(std::gmtime(&local)); // UTC time
 }
 
-std::uint64_t ticks()
+uint64_t ticks()
 {
 #ifdef SCY_WIN
     return ::GetTickCount();
@@ -137,7 +137,7 @@ std::uint64_t ticks()
 }
 
 
-std::uint64_t getTimeMS()
+uint64_t getTimeMS()
 {
     return uv_hrtime() / 1000000;
 }

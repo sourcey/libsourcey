@@ -176,7 +176,7 @@ void TestRunner::run()
     cout << "===============================================================" << endl;
     // cout << "running all tests" << endl;
 
-    std::uint64_t start = time::hrtime();
+    uint64_t start = time::hrtime();
     double duration = 0;
     TestList tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
@@ -187,7 +187,7 @@ void TestRunner::run()
         cout
             << "---------------------------------------------------------------" << endl;
         cout << _current->name << " starting" << endl;
-        std::uint64_t test_start = time::hrtime();
+        uint64_t test_start = time::hrtime();
         try {
             _current->run();
         } catch (std::exception& exc) {

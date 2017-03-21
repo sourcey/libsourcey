@@ -73,14 +73,14 @@ Base_API std::string getLocal();
 Base_API std::string getUTC();
 
 /// Return the current high-resolution real time in nanoseconds.
-Base_API std::uint64_t hrtime();
+Base_API uint64_t hrtime();
 
 #if 0
 /// Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
-std::uint64_t ticks();
+uint64_t ticks();
 
 /// Return the current real time in milliseconds.
-std::uint64_t getTimeMS();
+uint64_t getTimeMS();
 #endif
 
 

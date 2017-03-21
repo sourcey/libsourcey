@@ -93,25 +93,25 @@ public:
 
     /// Creates an attribute object with the given type
     /// and size.
-    static Attribute* create(std::uint16_t type, std::uint16_t size = 0);
+    static Attribute* create(uint16_t type, uint16_t size = 0);
 
-    std::uint16_t type() const;
-    std::uint16_t size() const;
+    uint16_t type() const;
+    uint16_t size() const;
 
     void consumePadding(BitReader& reader) const;
     void writePadding(BitWriter& writer) const;
 
-    static const std::uint16_t TypeID = 0;
+    static const uint16_t TypeID = 0;
 
     std::string typeString();
-    static std::string typeString(std::uint16_t type);
+    static std::string typeString(uint16_t type);
 
 protected:
-    Attribute(std::uint16_t type, std::uint16_t size = 0);
-    void setLength(std::uint16_t size);
+    Attribute(uint16_t type, uint16_t size = 0);
+    void setLength(uint16_t size);
 
-    std::uint16_t _type;
-    std::uint16_t _size;
+    uint16_t _type;
+    uint16_t _size;
 };
 
 
@@ -120,13 +120,13 @@ protected:
 class STUN_API AddressAttribute : public Attribute
 {
 public:
-    AddressAttribute(std::uint16_t type, bool ipv4 = true); // bool xor,
+    AddressAttribute(uint16_t type, bool ipv4 = true); // bool xor,
     AddressAttribute(const AddressAttribute& r);
 
     virtual stun::Attribute* clone();
 
-    static const std::uint16_t IPv4Size = 8;
-    static const std::uint16_t IPv6Size = 20;
+    static const uint16_t IPv4Size = 8;
+    static const uint16_t IPv6Size = 20;
 
     stun::AddressFamily family() const
     {
@@ -147,18 +147,18 @@ public:
     virtual void setAddress(const net::Address& addr) { _address = addr; }
 
 #if 0
-    virtual std::uint16_t port() const { return _port; }
-    virtual std::uint32_t ip() const { return _ip; }
-    virtual std::uint8_t family() const { return _family; }
+    virtual uint16_t port() const { return _port; }
+    virtual uint32_t ip() const { return _ip; }
+    virtual uint8_t family() const { return _family; }
 
-    virtual void setFamily(std::uint8_t family) { _family = family; }
-    virtual void setIP(std::uint32_t ip) { _ip = ip; }
+    virtual void setFamily(uint8_t family) { _family = family; }
+    virtual void setIP(uint32_t ip) { _ip = ip; }
     virtual void setIP(const std::string& ip);
-    virtual void setPort(std::uint16_t port) { _port = port; }
+    virtual void setPort(uint16_t port) { _port = port; }
 
-    std::uint8_t _family;
-    std::uint16_t _port;
-    std::uint32_t _ip;
+    uint8_t _family;
+    uint16_t _port;
+    uint32_t _ip;
 #endif
 
 private:
@@ -171,15 +171,15 @@ private:
 class STUN_API UInt8Attribute : public Attribute
 {
 public:
-    UInt8Attribute(std::uint16_t type);
+    UInt8Attribute(uint16_t type);
     UInt8Attribute(const UInt8Attribute& r);
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size = 1;
+    static const uint16_t Size = 1;
 
-    std::uint8_t value() const { return _bits; }
-    void setValue(std::uint8_t bits) { _bits = bits; }
+    uint8_t value() const { return _bits; }
+    void setValue(uint8_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -188,7 +188,7 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    std::uint8_t _bits;
+    uint8_t _bits;
 };
 
 
@@ -197,15 +197,15 @@ private:
 class STUN_API UInt32Attribute : public Attribute
 {
 public:
-    UInt32Attribute(std::uint16_t type);
+    UInt32Attribute(uint16_t type);
     UInt32Attribute(const UInt32Attribute& r);
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size = 4;
+    static const uint16_t Size = 4;
 
-    std::uint32_t value() const { return _bits; }
-    void setValue(std::uint32_t bits) { _bits = bits; }
+    uint32_t value() const { return _bits; }
+    void setValue(uint32_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -214,7 +214,7 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    std::uint32_t _bits;
+    uint32_t _bits;
 };
 
 
@@ -223,15 +223,15 @@ private:
 class STUN_API UInt64Attribute : public Attribute
 {
 public:
-    UInt64Attribute(std::uint16_t type);
+    UInt64Attribute(uint16_t type);
     UInt64Attribute(const UInt64Attribute& r);
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size = 8;
+    static const uint16_t Size = 8;
 
-    std::uint64_t value() const { return _bits; }
-    void setValue(std::uint64_t bits) { _bits = bits; }
+    uint64_t value() const { return _bits; }
+    void setValue(uint64_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -240,18 +240,18 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    std::uint64_t _bits;
+    uint64_t _bits;
 };
 
 /// Implements STUN/TURN attribute representing a 0 size flag.
 class STUN_API FlagAttribute : public Attribute
 {
 public:
-    FlagAttribute(std::uint16_t type);
+    FlagAttribute(uint16_t type);
 
     virtual Attribute* clone();
 
-    static const std::uint16_t Size = 0;
+    static const uint16_t Size = 0;
 
     void read(BitReader&) { assert(0 && "not implemented"); }
     void write(BitWriter&) const { assert(0 && "not implemented"); }
@@ -263,7 +263,7 @@ public:
 class STUN_API StringAttribute : public Attribute
 {
 public:
-    StringAttribute(std::uint16_t type, std::uint16_t size = 0);
+    StringAttribute(uint16_t type, uint16_t size = 0);
     StringAttribute(const StringAttribute& r);
     virtual ~StringAttribute();
 
@@ -276,8 +276,8 @@ public:
     void copyBytes(const char* bytes); //  uses strlen
     void copyBytes(const void* bytes, unsigned size);
 
-    std::uint8_t getByte(int index) const;
-    void setByte(int index, std::uint8_t value);
+    uint8_t getByte(int index) const;
+    void setByte(int index, uint8_t value);
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
@@ -292,22 +292,22 @@ private:
 class STUN_API UInt16ListAttribute : public Attribute
 {
 public:
-    UInt16ListAttribute(std::uint16_t type, std::uint16_t size);
+    UInt16ListAttribute(uint16_t type, uint16_t size);
     UInt16ListAttribute(const UInt16ListAttribute& r);
     virtual ~UInt16ListAttribute();
 
     virtual Attribute* clone();
 
     size_t size() const;
-    std::uint16_t getType(int index) const;
-    void setType(int index, std::uint16_t value);
-    void addType(std::uint16_t value);
+    uint16_t getType(int index) const;
+    void setType(int index, uint16_t value);
+    void addType(uint16_t value);
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
 
 private:
-    std::vector<std::uint16_t> _attrTypes;
+    std::vector<uint16_t> _attrTypes;
 };
 
 
@@ -322,8 +322,8 @@ public:
 
     virtual Attribute* clone();
 
-    static const std::uint16_t TypeID = 0x0008;
-    static const std::uint16_t Size = 20;
+    static const uint16_t TypeID = 0x0008;
+    static const uint16_t Size = 20;
 
     bool verifyHmac(const std::string& key) const;
 
@@ -350,31 +350,31 @@ private:
 class STUN_API ErrorCode : public Attribute
 {
 public:
-    ErrorCode(std::uint16_t size = MinSize);
+    ErrorCode(uint16_t size = MinSize);
     ErrorCode(const ErrorCode& r);
     virtual ~ErrorCode();
 
     virtual Attribute* clone();
 
-    static const std::uint16_t TypeID = 0x0009;
-    static const std::uint16_t MinSize = 4;
+    static const uint16_t TypeID = 0x0009;
+    static const uint16_t MinSize = 4;
 
     void setErrorCode(int code);
-    // void setErrorClass(std::uint8_t eClass);
-    // void setErrorNumber(std::uint8_t eNumber);
+    // void setErrorClass(uint8_t eClass);
+    // void setErrorNumber(uint8_t eNumber);
     void setReason(const std::string& reason);
 
     int errorCode() const;
-    std::uint8_t errorClass() const { return _class; }
-    std::uint8_t errorNumber() const { return _number; }
+    uint8_t errorClass() const { return _class; }
+    uint8_t errorNumber() const { return _number; }
     const std::string& reason() const { return _reason; }
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
 
 private:
-    std::uint8_t _class;
-    std::uint8_t _number;
+    uint8_t _class;
+    uint8_t _number;
     std::string _reason;
 };
 
@@ -388,7 +388,7 @@ private:
     class Name : public Derives                                                \
     {                                                                          \
     public:                                                                    \
-        static const std::uint16_t TypeID = Type;                              \
+        static const uint16_t TypeID = Type;                              \
         Name()                                                                 \
             : Derives(TypeID){};                                               \
         virtual ~Name(){};                                                     \
@@ -399,8 +399,8 @@ private:
     class Name : public Derives                                                \
     {                                                                          \
     public:                                                                    \
-        static const std::uint16_t TypeID = Type;                              \
-        Name(std::uint16_t size = Length)                                      \
+        static const uint16_t TypeID = Type;                              \
+        Name(uint16_t size = Length)                                      \
             : Derives(TypeID, size){};                                         \
         virtual ~Name(){};                                                     \
     };
@@ -422,7 +422,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(XorMappedAddress, 0x0020, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorPeerAddress, 0x0012, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorRelayedAddress, 0x0016, AddressAttribute)
 
-/// std::uint32_t attributes
+/// uint32_t attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(Fingerprint, 0x8028, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(RequestedTransport, 0x0019, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ChangeRequest, 0x0003, UInt32Attribute)

@@ -49,18 +49,18 @@ int main(int argc, char** argv)
     // Signal Benchmarks
     //
     describe("signal class member benchmark", []() {
-        Signal<void(std::uint64_t&)> sig;
-        Signal<void(std::uint64_t&)> testCopy(sig);
+        Signal<void(uint64_t&)> sig;
+        Signal<void(uint64_t&)> testCopy(sig);
 
-        Signal<void(std::uint64_t&)> signal;
+        Signal<void(uint64_t&)> signal;
         SignalCounter counter;
         signal += slot(&counter, &SignalCounter::increment);
-        const std::uint64_t benchstart = time::hrtime();
-        std::uint64_t i, value = 0;
+        const uint64_t benchstart = time::hrtime();
+        uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone = time::hrtime();
+        const uint64_t benchdone = time::hrtime();
         expect(value == i);
 
         std::cout << "signal class member benchmark: "
@@ -70,15 +70,15 @@ int main(int argc, char** argv)
     });
 
     describe("signal const class member benchmark", []() {
-        Signal<void(std::uint64_t&)> signal;
+        Signal<void(uint64_t&)> signal;
         SignalCounter counter;
         signal += slot(&counter, &SignalCounter::incrementConst);
-        const std::uint64_t benchstart = time::hrtime();
-        std::uint64_t i, value = 0;
+        const uint64_t benchstart = time::hrtime();
+        uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone = time::hrtime();
+        const uint64_t benchdone = time::hrtime();
         expect(value == i);
 
         std::cout << "signal const class member benchmark: "
@@ -87,16 +87,16 @@ int main(int argc, char** argv)
     });
 
     describe("signal static member benchmark", []() {
-        Signal<void(std::uint64_t&)> signal;
+        Signal<void(uint64_t&)> signal;
         // SignalCounter counter;
         signal += slot(&SignalCounter::incrementStatic);
         // signal += &SignalCounter::incrementStatic;
-        const std::uint64_t benchstart = time::hrtime();
-        std::uint64_t i, value = 0;
+        const uint64_t benchstart = time::hrtime();
+        uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone = time::hrtime();
+        const uint64_t benchdone = time::hrtime();
         expect(value == i);
 
         std::cout << "signal static member benchmark: "
@@ -106,14 +106,14 @@ int main(int argc, char** argv)
     });
 
     describe("signal free function benchmark", []() {
-        Signal<void(std::uint64_t&)> signal;
+        Signal<void(uint64_t&)> signal;
         signal += signalIncrementFree;
-        const std::uint64_t benchstart = time::hrtime();
-        std::uint64_t i, value = 0;
+        const uint64_t benchstart = time::hrtime();
+        uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
             signal.emit(value);
         }
-        const std::uint64_t benchdone = time::hrtime();
+        const uint64_t benchdone = time::hrtime();
         expect(value == i);
 
         std::cout << "signal free function benchmark: "
@@ -129,53 +129,53 @@ int main(int argc, char** argv)
     describe("buffer", []() {
         ByteOrder orders[2] = { ByteOrder::Host, ByteOrder::Network };
         for (size_t i = 0; i < 2; i++) {
-            Buffer buffer;
+            Buffer buffer(1024);
             BitReader reader(buffer, orders[i]);
             BitWriter writer(buffer, orders[i]);
             expect(orders[i] == reader.order());
             expect(orders[i] == writer.order());
 
-            // Write and read std::uint8_t.
-            std::uint8_t wu8 = 1;
+            // Write and read uint8_t.
+            uint8_t wu8 = 1;
             writer.putU8(wu8);
-            std::uint8_t ru8;
+            uint8_t ru8;
             reader.getU8(ru8);
             expect(writer.position() == 1);
             expect(reader.position() == 1);
             expect(wu8 == ru8);
 
-            // Write and read std::uint16_t.
-            std::uint16_t wu16 = (1 << 8) + 1;
+            // Write and read uint16_t.
+            uint16_t wu16 = (1 << 8) + 1;
             writer.putU16(wu16);
-            std::uint16_t ru16;
+            uint16_t ru16;
             reader.getU16(ru16);
             expect(wu16 == ru16);
             expect(writer.position() == 3);
             expect(reader.position() == 3);
 
             // Write and read UInt24.
-            std::uint32_t wu24 = (3 << 16) + (2 << 8) + 1;
+            uint32_t wu24 = (3 << 16) + (2 << 8) + 1;
             writer.putU24(wu24);
-            std::uint32_t ru24;
+            uint32_t ru24;
             reader.getU24(ru24);
             expect(wu24 == ru24);
             expect(writer.position() == 6);
             expect(reader.position() == 6);
 
-            // Write and read std::uint32_t.
-            std::uint32_t wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
+            // Write and read uint32_t.
+            uint32_t wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
             writer.putU32(wu32);
-            std::uint32_t ru32;
+            uint32_t ru32;
             reader.getU32(ru32);
             expect(wu32 == ru32);
             expect(writer.position() == 10);
             expect(reader.position() == 10);
 
-            // Write and read std::uint64_t.
-            std::uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
-            std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) << 32) + wu32;
+            // Write and read uint64_t.
+            uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
+            uint64_t wu64 = (static_cast<uint64_t>(another32) << 32) + wu32;
             writer.putU64(wu64);
-            std::uint64_t ru64;
+            uint64_t ru64;
             reader.getU64(ru64);
             expect(wu64 == ru64);
             expect(writer.position() == 18);
@@ -210,6 +210,45 @@ int main(int argc, char** argv)
             // }
         }
     });
+
+    describe("buffer move offset", []() {
+        Buffer buffer(1000);
+
+        BitWriter writer(buffer.data(), buffer.size());
+        expect(writer.position() == 0);
+        expect(writer.limit() == buffer.size());
+
+        // Move the write cursor around.
+        writer.seek(100);
+        expect(writer.position() == 100);
+        writer.seek(900);
+        expect(writer.position() == 900);
+        writer.seek(500);
+        expect(writer.position() == 500);
+
+        // The cursor can be set to past the end of the buffer, 
+        // but can't perform any write operations there.
+        try {
+            writer.seek(1200);
+            expect(0 && "must throw");
+        }
+        catch (std::out_of_range& exc) {
+        }
+    });
+
+    describe("buffer write chunk", []() {
+        const std::string kInputData = "abcdefghijklmnopqrstuvwxyz";
+        Buffer output(kInputData.size());
+        BitWriter writer(output.data(), output.size());
+
+        writer.put(kInputData.data(), kInputData.size());
+        expect(writer.position() == output.size());
+
+        // Compare input and output data, converting the latter to
+        // a string for clarity of error messages.
+        expect(std::string(output.begin(), output.end()) == kInputData);
+    });
+
 
     describe("dynamic resizable buffer", []() {
         std::string write_string("hello");
@@ -329,10 +368,9 @@ int main(int argc, char** argv)
         // expect(fs::dirname(dir + "\\") == dir);
     });
 
-
     // =========================================================================
     // Logger
-    //
+    
     describe("logger", []() {
         Logger& logger = Logger::instance();
 
@@ -340,38 +378,42 @@ int main(int argc, char** argv)
         logger.setWriter(new LogWriter);
         clock_t start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "sync log: " << i << endl;
-        cout << "logger: synchronous test completed after: " << (clock() - start) << endl;
+            TraceL << "sync log " << i << endl;
+        cout << "logger: synchronous test completed after: " << (clock() - start) << "ms" << endl;
 
-        // Test asynchronous writer (approx 10x faster)
+        // Test default synchronous var args writer
+        start = clock();
+        for (unsigned i = 0; i < 1000; i++)
+            TraceA("sync log", i)
+        cout << "logger: synchronous var args test completed after: " << (clock() - start) << "ms" << endl;
+
+        // Test asynchronous writer (approx 10x faster with console output)
         logger.setWriter(new AsyncLogWriter);
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceL << "async log: " << i << endl;
-        cout << "logger: asynchronous test completed after: " << (clock() - start) << endl;
+            TraceL << "async log " << i << endl;
+        cout << "logger: asynchronous test completed after: " << (clock() - start) << "ms" << endl;
 
-        // // Test function logging
-        // start = clock();
-        // for (unsigned i = 0; i < 1000; i++)
-        //     TraceS(this) << "test: " << i << endl;
-        // cout << "logger: asynchronous function logging completed after: "
-        //      << (clock() - start) << endl;
-        //
-        // // Test function and mem address logging
-        // start = clock();
-        // for (unsigned i = 0; i < 1000; i++)
-        //     TraceS(this) << "test: " << i << endl;
-        // cout << "logger: asynchronous function and mem address logging completed after: "
-        //      << (clock() - start) << endl;
+         //// Test function logging
+         //start = clock();
+         //for (unsigned i = 0; i < 1000; i++)
+         //    TraceS(this) << "test: " << i << endl;
+         //cout << "logger: asynchronous function logging completed after: "
+         //     << (clock() - start) << endl;
+        
+         //// Test function and mem address logging
+         //start = clock();
+         //for (unsigned i = 0; i < 1000; i++)
+         //    TraceS(this) << "test: " << i << endl;
+         //cout << "logger: asynchronous function and mem address logging completed after: "
+         //     << (clock() - start) << endl;
 
-        logger.setWriter(nullptr);
-        cout << "logger: synchronous test: 3" << endl;
+         logger.setWriter(nullptr);
 
-        // TODO: Test log filtering
-        // logger.getDefault()->setFilter("scy::*");
-        // Destory the current Logger instance to ensure no crash
-        Logger::destroy();
-        cout << "logger: synchronous test: 4" << endl;
+         // TODO: Test log filtering
+         // logger.getDefault()->setFilter("scy::*");
+         // Destory the current Logger instance to ensure no crash
+         Logger::destroy();
     });
 
 

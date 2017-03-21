@@ -104,7 +104,7 @@ static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
 }
 
 // Generate sin tone with 440Hz frequency and duplicated channels
-void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate,
+void fillAudioSamplesUInt(uint16_t* samples, int sample_rate,
                           int nb_channels, int nb_samples, double* t)
 {
     int j, k;
@@ -134,16 +134,16 @@ void fillAudioSamples(double* samples, int sample_rate, int nb_channels,
 }
 
 
-std::vector<std::uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
+std::vector<uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
                                                       const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(
         nullptr, params.channels, nbSamples,
         av_get_sample_fmt(params.sampleFmt.c_str()), 0);
-    auto vec = std::vector<std::uint16_t*>();
+    auto vec = std::vector<uint16_t*>();
     do {
-        auto samples = new std::uint16_t[bufferSize];
+        auto samples = new uint16_t[bufferSize];
         fillAudioSamplesUInt(samples, params.sampleRate, params.channels, nbSamples, &t);
         vec.push_back(samples);
     } while (--numFrames);
@@ -334,7 +334,7 @@ class AudioEncoderTest : public Test
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
+            encoder.encode(reinterpret_cast<uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
         }
 
         encoder.flush();
@@ -379,8 +379,8 @@ class AudioResamplerTest : public Test
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            // auto data = reinterpret_cast<std::uint8_t*>(samples);
-            if (resampler.resample(reinterpret_cast<std::uint8_t**>(&samples), kInNumSamples)) {
+            // auto data = reinterpret_cast<uint8_t*>(samples);
+            if (resampler.resample(reinterpret_cast<uint8_t**>(&samples), kInNumSamples)) {
                 output.write(
                     reinterpret_cast<const char*>(resampler.outSamples[0]),
                     resampler.outBufferSize);
@@ -551,7 +551,7 @@ class AudioCaptureEncoderTest : public Test
     {
         TraceL << "On audio packet: samples=" << packet.numSamples
                << ", time=" << packet.time << endl;
-        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
+        encoder.encode(reinterpret_cast<uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
     }
 
     void onAudioEncoded(av::AudioPacket& packet)
@@ -626,7 +626,7 @@ class AudioCaptureResamplerTest : public Test
         if (numFramesRemaining) {
             numFramesRemaining--;
             DebugL << "On audio packet: " << packet.size() << endl;
-            auto data = reinterpret_cast<std::uint8_t*>(packet.data());
+            auto data = reinterpret_cast<uint8_t*>(packet.data());
             if (resampler.resample(&data, packet.numSamples)) {
                 output.write(
                     reinterpret_cast<const char*>(resampler.outSamples[0]),
@@ -706,7 +706,7 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
                 std::uniform_int_distribution<int> uni(1000, 1000000 * 5);
                 auto time = uni(rng);
                 // DebugL << "Emitting: " << self->numFramesRemaining << ": " << time << endl;
-                av::MediaPacket p(new std::uint8_t[10], 10, time);
+                av::MediaPacket p(new uint8_t[10], 10, time);
                 p.assignDataOwnership();
                 self->emitter.emit(p);
             }

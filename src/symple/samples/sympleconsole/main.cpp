@@ -81,7 +81,7 @@ public:
             } else if (key == "host") {
                 client.options().host = value;
             } else if (key == "port") {
-                client.options().port = util::strtoi<std::uint16_t>(value);
+                client.options().port = util::strtoi<uint16_t>(value);
             } else if (key == "token") {
                 client.options().token = value;
             } else if (key == "user") {

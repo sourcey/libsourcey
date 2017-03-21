@@ -25,7 +25,7 @@ public:
         shutdown();
     }
 
-    void start(const std::string& host, std::uint16_t port)
+    void start(const std::string& host, uint16_t port)
     {
         auto ssl = dynamic_cast<SSLSocket*>(server.get());
         if (ssl)

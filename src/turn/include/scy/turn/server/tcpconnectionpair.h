@@ -82,7 +82,7 @@ public:
     Buffer earlyPeerData;
 
     /// The unique connection ID.
-    std::uint32_t connectionID;
+    uint32_t connectionID;
 
     /// True when p2p relay is flowing.
     bool isDataConnection;

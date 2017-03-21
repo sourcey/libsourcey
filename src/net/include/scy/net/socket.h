@@ -57,7 +57,7 @@ public:
     /// Throws an Exception if the host is malformed.
     /// Since the DNS callback is asynchronous implementations need
     /// to listen for the Error signal for handling connection errors.
-    virtual void connect(const std::string& host, std::uint16_t port);
+    virtual void connect(const std::string& host, uint16_t port);
 
     /// Bind a local address to the socket.
     /// The address may be IPv4 or IPv6 (if supported).

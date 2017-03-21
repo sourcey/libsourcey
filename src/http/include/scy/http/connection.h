@@ -163,8 +163,8 @@ class HTTP_API ProgressSignal : public Signal<void(const double&)>
 {
 public:
     void* sender;
-    std::uint64_t current;
-    std::uint64_t total;
+    uint64_t current;
+    uint64_t total;
 
     ProgressSignal()
         : sender(nullptr)

@@ -134,7 +134,7 @@ public:
     ///
     /// If the frame is invalid or too big an exception will be thrown.
     /// Return true when the handshake has completed successfully.
-    virtual std::uint64_t readFrame(BitReader& frame, char*& payload);
+    virtual uint64_t readFrame(BitReader& frame, char*& payload);
 
     bool handshakeComplete() const;
 
@@ -203,7 +203,7 @@ public:
     virtual ssize_t send(const char* data, size_t len, int flags = 0); // flags = ws::Text || ws::Binary
     virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
 
-    virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);
+    virtual bool shutdown(uint16_t statusCode, const std::string& statusMessage);
 
     /// Pointer to the underlying socket.
     /// Sent data will be proxied to this socket.

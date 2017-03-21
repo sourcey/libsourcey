@@ -44,7 +44,7 @@ public:
     ///
     /// The IP address must either be a domain name, or it must
     /// be in dotted decimal (IPv4) or hex string (IPv6) format.
-    Address(const std::string& host, std::uint16_t port);
+    Address(const std::string& host, uint16_t port);
 
     /// Creates a Address by copying another one.
     Address(const Address& addr);
@@ -86,7 +86,7 @@ public:
     std::string host() const;
 
     /// Returns the port number.
-    std::uint16_t port() const;
+    uint16_t port() const;
 
     /// Returns the length of the internal native socket address.
     socklen_t length() const;
@@ -107,7 +107,7 @@ public:
     /// ie. not wildcard.
     bool valid() const;
 
-    static std::uint16_t resolveService(const std::string& service);
+    static uint16_t resolveService(const std::string& service);
 
     static bool validateIP(const std::string& address);
 
@@ -133,7 +133,7 @@ public:
     };
 
 protected:
-    void init(const std::string& host, std::uint16_t port);
+    void init(const std::string& host, uint16_t port);
 
 private:
     std::shared_ptr<AddressBase> _base;

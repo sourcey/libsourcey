@@ -48,13 +48,13 @@ std::string getCwd()
 }
 
 
-std::uint64_t getFreeMemory()
+uint64_t getFreeMemory()
 {
     return uv_get_free_memory();
 }
 
 
-std::uint64_t getTotalMemory()
+uint64_t getTotalMemory()
 {
     return uv_get_total_memory();
 }

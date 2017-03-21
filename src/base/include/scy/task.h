@@ -47,7 +47,7 @@ public:
     virtual bool repeating() const;
 
     /// Unique task ID.
-    virtual std::uint32_t id() const;
+    virtual uint32_t id() const;
 
     // Inherits basic::Runnable:
     //
@@ -73,7 +73,7 @@ protected:
     /// Tasks belong to a TaskRunner instance.
     friend class TaskRunner;
 
-    std::uint32_t _id;
+    uint32_t _id;
     bool _repeating;
     bool _destroyed;
 };
@@ -110,7 +110,7 @@ public:
 
     /// Returns the task pointer matching the given ID,
     /// or nullptr if no task exists.
-    virtual Task* get(std::uint32_t id) const;
+    virtual Task* get(uint32_t id) const;
 
     /// Set the asynchronous context for packet processing.
     /// This may be a Thread or another derivative of Async.

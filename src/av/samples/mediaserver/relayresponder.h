@@ -111,7 +111,7 @@ protected:
     }
 
     void onRelayConnectionCreated(turn::TCPClient&, const net::TCPSocket::Ptr& socket,
-                                  const net::Address& peerAddr) // std::uint32_t connectionID,
+                                  const net::Address& peerAddr) // uint32_t connectionID,
     {
         DebugS(this) << "Connection created: " << peerAddr << std::endl;
         // Just allow one stream for now

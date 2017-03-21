@@ -53,7 +53,7 @@ protected:
 
     friend class Server;
 
-    std::uint32_t _maxLifetime;
+    uint32_t _maxLifetime;
     Server& _server;
 
 private:

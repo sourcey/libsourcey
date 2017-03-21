@@ -16,6 +16,7 @@
 #include "scy/time.h"
 #include "scy/util.h"
 #include <assert.h>
+#include <iterator>
 
 
 using std::endl;
@@ -31,6 +32,8 @@ Logger::Logger()
     : _defaultChannel(nullptr)
     , _writer(new LogWriter)
 {
+    // Decouple C and C++ streams for performance increase.
+    std::cout.sync_with_stdio(false);
 }
 
 
@@ -281,19 +284,8 @@ LogStream::LogStream(LogLevel level, const std::string& realm, int line,
     , realm(realm)
     , address(ptr ? util::memAddress(ptr) : "")
     , ts(time::now())
-    , channel(nullptr)
-{
-    if (channel)
-        this->channel = Logger::instance().get(channel, false);
-}
-
-
-LogStream::LogStream(LogLevel level, const std::string& realm, const std::string& address)
-    : level(level)
-    , realm(realm)
-    , address(address)
-    , ts(time::now())
-    , channel(nullptr)
+    , channel(channel ? Logger::instance().get(channel, false) : nullptr)
+    , flushed(false)
 {
 }
 
@@ -305,14 +297,17 @@ LogStream::LogStream(const LogStream& that)
     , address(that.address)
     , ts(that.ts)
     , channel(that.channel)
+    , flushed(that.flushed)
 {
     // try to avoid copy assign
-    message.str(that.message.str());
+    // message.str(that.message.str());
+    message.swap(const_cast<std::ostringstream&>(that.message));
 }
 
 
 LogStream::~LogStream()
 {
+    flush();
 }
 
 #endif

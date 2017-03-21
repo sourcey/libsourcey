@@ -54,9 +54,9 @@ int main(int argc, char** argv)
     // Request Types
     //
     describe("request types", []() {
-        std::uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
-        std::uint16_t classType = type & 0x0110;
-        std::uint16_t methodType = type & 0x000F;
+        uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
+        uint16_t classType = type & 0x0110;
+        uint16_t methodType = type & 0x000F;
 
         expect(classType == stun::Message::Indication);
         expect(methodType == stun::Message::SendIndication);

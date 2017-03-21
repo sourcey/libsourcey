@@ -71,7 +71,7 @@ void TCPSocket::connect(const net::Address& peerAddress)
 }
 
 
-void TCPSocket::connect(const std::string& host, std::uint16_t port)
+void TCPSocket::connect(const std::string& host, uint16_t port)
 {
     Socket::connect(host, port);
 }

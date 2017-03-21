@@ -37,7 +37,7 @@ std::string string_vprintf(const char* fmt, va_list args)
     // Grow the buffer size until the output is no longer truncated
     while (true) {
         va_list args_copy;
-#if defined(_WIN32)
+#if defined(SCY_WIN)
         args_copy = args;
         size_t nwritten = _vsnprintf(buf, size - 1, fmt, args_copy);
 #else
@@ -126,7 +126,7 @@ std::string randomString(int size)
 }
 
 
-std::uint32_t randomNumber()
+uint32_t randomNumber()
 {
     Random rnd;
     rnd.seed();

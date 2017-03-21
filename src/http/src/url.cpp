@@ -119,7 +119,7 @@ std::string URL::host() const
 }
 
 
-std::uint16_t URL::port() const
+uint16_t URL::port() const
 {
     if (hasPort())
         return _parser.port;
@@ -142,7 +142,7 @@ std::string URL::authority() const
     res.append(host());
     if (hasPort()) {
         res.append(":");
-        res.append(util::itostr<std::uint16_t>(port()));
+        res.append(util::itostr<uint16_t>(port()));
     }
     return res;
 }
@@ -223,15 +223,15 @@ void URL::updateHost(const std::string& host)
 }
 
 
-void URL::updatePort(std::uint16_t port)
+void URL::updatePort(uint16_t port)
 {
     if (!hasPort())
         throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp,
-        util::itostr<std::uint16_t>(this->port()),
-        util::itostr<std::uint16_t>(port));
+        util::itostr<uint16_t>(this->port()),
+        util::itostr<uint16_t>(port));
     parse(tmp);
 }
 

@@ -32,7 +32,7 @@ namespace scy {
 class Base_API State
 {
 public:
-    typedef std::uint32_t ID;
+    typedef uint32_t ID;
 
     State(ID id = 0);
     State(const State& that);

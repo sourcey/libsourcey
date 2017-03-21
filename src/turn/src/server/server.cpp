@@ -424,7 +424,7 @@ void Server::handleAllocateRequest(Request& request)
     //     attribute follow the specification in [RFC5389].
 
     // Compute the appropriate LIFETIME for this allocation.
-    std::uint32_t lifetime = min(options().allocationMaxLifetime / 1000,
+    uint32_t lifetime = min(options().allocationMaxLifetime / 1000,
                                  options().allocationDefaultLifetime / 1000);
     auto lifetimeAttr = request.get<stun::Lifetime>();
     if (lifetimeAttr)
@@ -803,7 +803,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 }
 
 
-TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID)
+TCPAllocation* Server::getTCPAllocation(const uint32_t& connectionID)
 {
     for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
         auto alloc = dynamic_cast<TCPAllocation*>(it->second);

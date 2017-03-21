@@ -60,7 +60,7 @@ void IAllocation::updateUsage(std::int64_t numBytes)
 
 std::int64_t IAllocation::timeRemaining() const
 {
-    // std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));
+    // uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));
     std::int64_t remaining = _lifetime - static_cast<std::int64_t>(time(0) - _updatedAt);
     return remaining > 0 ? remaining : 0;
 }

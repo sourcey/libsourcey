@@ -4,7 +4,7 @@
 namespace scy {
 
 
-const std::uint16_t HttpPort = 1337;
+const uint16_t HttpPort = 1337;
 const net::Address address("0.0.0.0", HttpPort);
 
 

@@ -32,7 +32,7 @@ class Net_API AddressBase
 {
 public:
     virtual std::string host() const = 0;
-    virtual std::uint16_t port() const = 0;
+    virtual uint16_t port() const = 0;
     virtual Address::Family family() const = 0;
     virtual socklen_t length() const = 0;
     virtual const struct sockaddr* addr() const = 0;
@@ -68,7 +68,7 @@ public:
         memcpy(&_addr, addr, sizeof(_addr));
     }
 
-    IPv4AddressBase(const void* addr, std::uint16_t port)
+    IPv4AddressBase(const void* addr, uint16_t port)
     {
         memset(&_addr, 0, sizeof(_addr));
         _addr.sin_family = AF_INET;
@@ -84,7 +84,7 @@ public:
         return dest;
     }
 
-    std::uint16_t port() const { return _addr.sin_port; }
+    uint16_t port() const { return _addr.sin_port; }
 
     Address::Family family() const { return Address::IPv4; }
 
@@ -118,7 +118,7 @@ public:
         memcpy(&_addr, addr, sizeof(_addr));
     }
 
-    IPv6AddressBase(const void* addr, std::uint16_t port)
+    IPv6AddressBase(const void* addr, uint16_t port)
     {
         _addr.sin6_family = AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
@@ -126,7 +126,7 @@ public:
         _addr.sin6_port = port;
     }
 
-    IPv6AddressBase(const void* addr, std::uint16_t port, std::uint32_t scope)
+    IPv6AddressBase(const void* addr, uint16_t port, uint32_t scope)
     {
         _addr.sin6_family = AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
@@ -143,7 +143,7 @@ public:
         return dest;
     }
 
-    std::uint16_t port() const { return _addr.sin6_port; }
+    uint16_t port() const { return _addr.sin6_port; }
 
     Address::Family family() const { return Address::IPv6; }
 
@@ -175,7 +175,7 @@ Address::Address() :
 }
 
 
-Address::Address(const std::string& addr, std::uint16_t port)
+Address::Address(const std::string& addr, uint16_t port)
 {
     init(addr, port);
 }
@@ -255,7 +255,7 @@ Address& Address::operator=(const Address& addr)
 }
 
 
-void Address::init(const std::string& host, std::uint16_t port)
+void Address::init(const std::string& host, uint16_t port)
 {
     // TraceS(this) << "Parse: " << host << ":" << port << endl;
 
@@ -275,7 +275,7 @@ std::string Address::host() const
 }
 
 
-std::uint16_t Address::port() const
+uint16_t Address::port() const
 {
     return ntohs(_base->port());
 }
@@ -320,7 +320,7 @@ std::string Address::toString() const
     if (family() == Address::IPv6)
         result.append("]");
     result.append(":");
-    result.append(util::itostr<std::uint16_t>(port()));
+    result.append(util::itostr<uint16_t>(port()));
     return result;
 }
 
@@ -373,11 +373,11 @@ bool Address::validateIP(const std::string& addr)
 }
 
 
-std::uint16_t Address::resolveService(const std::string& service)
+uint16_t Address::resolveService(const std::string& service)
 {
-    std::uint16_t port = util::strtoi<std::uint16_t>(service);
+    uint16_t port = util::strtoi<uint16_t>(service);
     if (port && port > 0) //, port) && port <= 0xFFFF
-        return (std::uint16_t)port;
+        return (uint16_t)port;
 
     struct servent* se = getservbyname(service.c_str(), nullptr);
     if (se)

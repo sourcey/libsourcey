@@ -156,7 +156,7 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
         }
 
         else {
-            TraceL << "Unrecognized option: " << argv[i] << std::endl;
+            DebugA("Unrecognized option:", argv[i]);
         }
     }
 }
