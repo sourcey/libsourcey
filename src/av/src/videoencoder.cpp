@@ -56,8 +56,8 @@ void VideoEncoder::create()
         if (!stream)
             throw std::runtime_error("Cannot create video stream.");
 
-        // // Testing realtime streams
-        // //
+        // Testing realtime streams
+        //
         // http://stackoverflow.com/questions/16768794/muxing-from-video-and-video-files-with-ffmpeg
         // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
         // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
@@ -82,7 +82,7 @@ void VideoEncoder::create()
     avcodec_get_context_defaults3(ctx, codec);
     ctx->codec_id = codec->id;
     ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt.c_str());
+    ctx->pix_fmt = selectPixelFormat(codec, oparams);
     ctx->frame_number = 0;
     // ctx->max_b_frames = 1;
 
@@ -96,9 +96,10 @@ void VideoEncoder::create()
     ctx->time_base.num = 1;
 
     // Define encoding parameters
-    assert(oparams.bitRate);
-    ctx->bit_rate = oparams.bitRate;
-    ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
+    if (oparams.bitRate) {
+        ctx->bit_rate = oparams.bitRate;
+        ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
+    }
 
     // Emit one intra frame every ten
     // ctx->gop_size = 10;
@@ -109,13 +110,10 @@ void VideoEncoder::create()
     switch (ctx->codec_id) {
         case AV_CODEC_ID_H264:
             // TODO: Use oparams.quality to determine profile?
-            av_opt_set(ctx->priv_data, "preset", "slow", 0); // veryfast // slow // baseline
+            av_opt_set(ctx->priv_data, "preset", "slow", 0); // veryfast, slow, baseline
             break;
         case AV_CODEC_ID_MJPEG:
         case AV_CODEC_ID_LJPEG:
-            if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-                ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;
-
             // Use high quality JPEG
             // TODO: Use oparams.quality to determine values
             // ctx->mb_lmin        = ctx->lmin = ctx->qmin * FF_QP2LAMBDA;
@@ -125,23 +123,6 @@ void VideoEncoder::create()
             break;
         case AV_CODEC_ID_MPEG2VIDEO:
             ctx->max_b_frames = 2;
-            break;
-        case AV_CODEC_ID_MPEG1VIDEO:
-        case AV_CODEC_ID_MSMPEG4V3:
-            // Needed to avoid using macroblocks in which some codecs overflow
-            // this doesn't happen with normal video, it just happens here as
-            // the motion of the chroma plane doesn't match the luma plane
-            // avoid FFmpeg warning 'clipping 1 dct coefficients...'
-            ctx->mb_decision = 2;
-            break;
-        case AV_CODEC_ID_JPEGLS:
-            // AV_PIX_FMT_BGR24 or GRAY8 depending on if color...
-            if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-                ctx->pix_fmt = AV_PIX_FMT_BGR24;
-            break;
-        case AV_CODEC_ID_HUFFYUV:
-            if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-                ctx->pix_fmt = AV_PIX_FMT_YUV422P;
             break;
         default:
             break;
@@ -198,7 +179,6 @@ bool VideoEncoder::encode(unsigned char* data, int size, int64_t time)
 {
     assert(data);
     assert(size);
-    // assert(ipacket.data);
     assert(frame);
     assert(codec);
 
@@ -211,47 +191,8 @@ bool VideoEncoder::encode(unsigned char* data, int size, int64_t time)
     frame->pts = time;
 
     AVPacket opacket;
-    return encode(frame); //, opacket
-
-    // AVPacket ipacket;
-    // av_init_packet(&ipacket);
-    // ipacket.data = data;
-    // ipacket.size = size;
-    // ipacket.pts = pts;
-    // if (stream)
-    //     ipacket.stream_index = stream->index;
-    // return encode(ipacket, opacket);
+    return encode(frame);
 }
-
-
-// bool VideoEncoder::encode(AVPacket& ipacket, AVPacket& opacket)
-// {
-//     assert(ipacket.data);
-//     assert(frame);
-//     assert(codec);
-//
-//     // Populate the input frame with date from the given buffer.
-//     // NOTE: This only works with contiguous buffers
-//     frame->data[0] = reinterpret_cast<uint8_t*>(ipacket.data);
-//
-//     // TODO: Correctly set the input frame PTS
-//     //
-//     http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
-//     //
-//     http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
-//     // (1 / oparams.fps) * sample rate * frame number
-//     frame->pts = ipacket.pts;
-//
-//     // _options.iformat.video.width = iframe->width;
-//     // _options.iformat.video.height = iframe->height;
-//     // iparams.width = frame->width;
-//     // iparams.height = frame->height;
-//
-//     // avpicture_fill((AVPicture *)frame, (uint8_t*)ipacket.data,
-//     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
-//
-//     return encode(frame, opacket);
-// }
 
 
 void emitPacket(VideoEncoder* enc, AVPacket& opacket)

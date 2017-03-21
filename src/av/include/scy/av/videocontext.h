@@ -90,6 +90,7 @@ struct VideoContext
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
+AVPixelFormat selectPixelFormat(AVCodec* codec, VideoCodec& params);
 
 
 } // namespace av

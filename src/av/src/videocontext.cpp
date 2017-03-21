@@ -93,9 +93,9 @@ void VideoContext::close()
 
     // Streams are managed differently by the external impl
     // if (stream)    {
-    // stream = nullptr;
-    // Note: The stream is managed by the AVFormatContext
-    // av_freep(stream);
+    //     stream = nullptr;
+    //     Note: The stream is managed by the AVFormatContext
+    //     av_freep(stream);
     //}
 
     time = 0;
@@ -234,6 +234,25 @@ void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx
     if (stream && stream->r_frame_rate.num) {
         params.fps = stream->r_frame_rate.num / stream->r_frame_rate.den;
     }
+}
+
+AVPixelFormat selectPixelFormat(AVCodec* codec, VideoCodec& params)
+{
+    enum AVPixelFormat compatible = AV_PIX_FMT_NONE;
+    enum AVPixelFormat requested = av_get_pix_fmt(params.pixelFmt.c_str());
+    int nplanes = av_pix_fmt_count_planes(requested);
+    const enum AVPixelFormat* p = codec->pix_fmts;
+    while (*p != AV_PIX_FMT_NONE) {
+        if (compatible == AV_PIX_FMT_NONE &&
+            nplanes == 0 || av_pix_fmt_count_planes(*p) == nplanes)
+            compatible = *p; // or use the first compatible format
+        if (*p == requested)
+            return requested; // always try to return requested format
+        p++;
+    }
+    if (compatible == AV_PIX_FMT_NONE)
+        compatible = codec->pix_fmts[0];
+    return compatible;
 }
 
 

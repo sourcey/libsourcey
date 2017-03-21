@@ -134,10 +134,8 @@ void fillAudioSamples(double* samples, int sample_rate, int nb_channels,
 }
 
 
-std::vector<std::uint16_t*> createTestAudioSamplesS16(
-    int numFrames, int nbSamples,
-    const av::AudioCodec& params) // const char* sampleFmt, int sampleRate, int
-                                  // channels, int frameSize
+std::vector<std::uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
+                                                      const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(
@@ -153,10 +151,8 @@ std::vector<std::uint16_t*> createTestAudioSamplesS16(
 }
 
 
-std::vector<double*> createTestAudioSamplesDBL(
-    int numFrames, int nbSamples,
-    const av::AudioCodec& params) // const char* sampleFmt, int sampleRate, int
-                                  // channels, int frameSize
+std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples,
+                                               const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(
@@ -197,8 +193,8 @@ class VideoFileTranscoderTest : public Test
         // Create the multiplex encoder
         auto encoder(std::make_shared<av::MultiplexPacketEncoder>(options));
 
-        // Create a PacketStream to pass packets from the
-        // file capture to the encoder
+        // Create a PacketStream to pass packets 
+        // from the file capture to the encoder
         PacketStream stream;
         stream.attachSource(capture, true);
         stream.attach(encoder, 5);

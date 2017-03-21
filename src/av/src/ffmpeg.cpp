@@ -91,8 +91,8 @@ void initialize()
         // av_log_set_level(AV_LOG_QUIET);
 
         // Use an internal log callback
-        // av_log_set_callback(logCallback);
-        // av_log_set_level(AV_LOG_INFO);
+         av_log_set_callback(logCallback);
+         av_log_set_level(AV_LOG_INFO);
 
         // Register our protocol glue code with FFmpeg.
         av_lockmgr_register(&LockManagerOperation);

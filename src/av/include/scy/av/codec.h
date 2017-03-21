@@ -73,12 +73,10 @@ struct AV_API AudioCodec : public Codec
 {
     int channels;
     std::string sampleFmt; ///< One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
-    // int frameSize;  // Frame size (optional value set by encoder/decoder)
-    // int bufferSize; // Buffer size (optional value set by encoder/decoder)
 
-    // AudioCodec();
-    AudioCodec(int channels = 0,   // = DEFAULT_AUDIO_CHANNELS
-               int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+    AudioCodec();
+    AudioCodec(int channels,   // = DEFAULT_AUDIO_CHANNELS
+               int sampleRate, // = DEFAULT_AUDIO_SAMPLE_RATE
                const std::string& sampleFmt = "",  // = DEFAULT_AUDIO_SAMPLE_FMT
                int bitRate = 0);   // = DEFAULT_AUDIO_BIT_RATE
     AudioCodec(const std::string& name,
@@ -118,7 +116,8 @@ struct AV_API VideoCodec : public Codec
     double fps;
     std::string pixelFmt;
 
-    VideoCodec(int width = 0, int height = 0, double fps = 0.0,
+    VideoCodec();
+    VideoCodec(int width, int height, double fps = 0.0,
                const std::string& pixelFmt = "", // = DEFAULT_VIDEO_PIXEL_FMT
                int bitRate = 0,                  // = DEFAULT_VIDEO_BIT_RATE
                int sampleRate = 0);              // = DEFAULT_VIDEO_SAMPLE_RATE
@@ -130,7 +129,7 @@ struct AV_API VideoCodec : public Codec
                int width = 0, int height = 0, double fps = 0.0,
                int bitRate = 0,
                int sampleRatee = 0,
-               const std::string& pixelFmt = 0);
+               const std::string& pixelFmt = "");
     VideoCodec(const VideoCodec& r);
     virtual ~VideoCodec();
 
