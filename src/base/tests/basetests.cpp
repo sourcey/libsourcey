@@ -49,9 +49,6 @@ int main(int argc, char** argv)
     // Signal Benchmarks
     //
     describe("signal class member benchmark", []() {
-        Signal<void(uint64_t&)> sig;
-        Signal<void(uint64_t&)> testCopy(sig);
-
         Signal<void(uint64_t&)> signal;
         SignalCounter counter;
         signal += slot(&counter, &SignalCounter::increment);
@@ -88,9 +85,7 @@ int main(int argc, char** argv)
 
     describe("signal static member benchmark", []() {
         Signal<void(uint64_t&)> signal;
-        // SignalCounter counter;
         signal += slot(&SignalCounter::incrementStatic);
-        // signal += &SignalCounter::incrementStatic;
         const uint64_t benchstart = time::hrtime();
         uint64_t i, value = 0;
         for (i = 0; i < 999999; i++) {
@@ -351,15 +346,15 @@ int main(int argc, char** argv)
     //
     describe("filesystem", []() {
         std::string path(scy::getExePath());
-        cout << "Executable path: " << path << endl;
+        // cout << "executable path: " << path << endl;
         expect(fs::exists(path));
 
         std::string junkPath(path + "junkname.huh");
-        cout << "Junk path: " << junkPath << endl;
+        // cout << "junk path: " << junkPath << endl;
         expect(!fs::exists(junkPath));
 
         std::string dir(fs::dirname(path));
-        cout << "Dir name: " << dir << endl;
+        // cout << "dir name: " << dir << endl;
         expect(fs::exists(dir));
         expect(fs::exists(dir + "/"));
         expect(fs::exists(dir + "\\"));
@@ -456,7 +451,7 @@ int main(int argc, char** argv)
         // Create the idler with a lambda
         Idler idler;
         idler.start([&]() {
-            std::cout << "On idle: " << counter << std::endl;
+            // std::cout << "on idle: " << counter << std::endl;
             if (++counter == 10) {
                 ran = true;
                 expect(idler.running() == true);

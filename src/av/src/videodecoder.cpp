@@ -62,9 +62,7 @@ void VideoDecoder::create()
     initVideoCodecFromContext(stream, ctx, iparams);
     initVideoCodecFromContext(stream, ctx, oparams);
 
-    // Default to bgr24 output.
-    // Note: This can be removed when planar formats are fully supported via
-    // the av::VideoPacket interface.
+    // Default to bgr24 interleaved output.
     // oparams.pixelFmt = "bgr24";
 }
 

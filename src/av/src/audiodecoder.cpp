@@ -65,7 +65,7 @@ void AudioDecoder::create()
     initAudioCodecFromContext(ctx, iparams);
     initAudioCodecFromContext(ctx, oparams);
 
-    // Default to s16 output (planar formats not currently supported)
+    // Default to s16 interleaved output.
     // oparams.sampleFmt = "s16";
 }
 
