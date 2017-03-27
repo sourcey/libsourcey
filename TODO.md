@@ -6,7 +6,6 @@ WebRTC samples
     - input file option
     - apply video transformations
 
-Planar interface for audio decoder, and AV encoders
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Fix deprecated ICE code
 Add move interface to packet class

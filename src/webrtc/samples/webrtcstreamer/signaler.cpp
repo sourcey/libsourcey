@@ -11,7 +11,6 @@
 #include <iostream>
 #include <string>
 
-#include "scy/webrtc/streamingpeerconnection.h"
 #include "scy/webrtc/audiopacketmodule.h"
 #include "scy/webrtc/multiplexmediacapturer.h"
 #include "scy/webrtc/videopacketsource.h"
