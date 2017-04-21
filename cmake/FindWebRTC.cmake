@@ -15,19 +15,19 @@
 #  WEBRTC_DEPENDENCIES
 #
 
-# unset(WEBRTC_INCLUDE_DIR)
-# unset(WEBRTC_INCLUDE_DIR CACHE)
-# unset(WEBRTC_LIBRARIES)
-# unset(WEBRTC_LIBRARIES CACHE)
-# unset(WEBRTC_LIBRARIES_DEBUG)
-# unset(WEBRTC_LIBRARIES_DEBUG CACHE)
-# unset(WEBRTC_LIBRARIES_RELEASE)
-# unset(WEBRTC_LIBRARIES_RELEASE CACHE)
+unset(WEBRTC_INCLUDE_DIR)
+unset(WEBRTC_INCLUDE_DIR CACHE)
+unset(WEBRTC_LIBRARIES)
+unset(WEBRTC_LIBRARIES CACHE)
+unset(WEBRTC_LIBRARIES_DEBUG)
+unset(WEBRTC_LIBRARIES_DEBUG CACHE)
+unset(WEBRTC_LIBRARIES_RELEASE)
+unset(WEBRTC_LIBRARIES_RELEASE CACHE)
 
 # Set required variables
 set(WEBRTC_ROOT_DIR "" CACHE STRING "Where is the WebRTC root directory located?")
-set(WEBRTC_BUILD_DIR_SUFFIX_DEBUG "out/Debug" CACHE STRING "What is the WebRTC debug build directory suffix?")
-set(WEBRTC_BUILD_DIR_SUFFIX_RELEASE "out/Release" CACHE STRING "What is the WebRTC release build directory suffix?")
+# set(WEBRTC_BUILD_DIR_SUFFIX_DEBUG "out/Debug" CACHE STRING "What is the WebRTC debug build directory suffix?")
+# set(WEBRTC_BUILD_DIR_SUFFIX_RELEASE "out/Release" CACHE STRING "What is the WebRTC release build directory suffix?")
 
 # ----------------------------------------------------------------------
 # Find WEBRTC include path
@@ -37,6 +37,7 @@ find_path(WEBRTC_INCLUDE_DIR
     webrtc/config.h
   PATHS
     ${WEBRTC_ROOT_DIR}
+    ${WEBRTC_ROOT_DIR}/include
     $ENV{HOME}/tmp/webrtcbuilds/out/src
     $ENV{HOME}/sourcey/webrtcbuilds/out/src
 )
@@ -45,12 +46,21 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
-  get_filename_component(debug_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_DEBUG}" ABSOLUTE)
-  get_filename_component(release_dir "${WEBRTC_ROOT_DIR}/${WEBRTC_BUILD_DIR_SUFFIX_RELEASE}" ABSOLUTE)
+  find_existing_directory(debug_dir 
+      ${WEBRTC_ROOT_DIR}/lib/x64/Debug
+      ${WEBRTC_ROOT_DIR}/out/Debug_x64
+      ${WEBRTC_ROOT_DIR}/out/Debug-x64
+      ${WEBRTC_ROOT_DIR}/out/Debug)
+
+  find_existing_directory(release_dir 
+      ${WEBRTC_ROOT_DIR}/lib/x64/Release
+      ${WEBRTC_ROOT_DIR}/out/Release_x64
+      ${WEBRTC_ROOT_DIR}/out/Release-x64
+      ${WEBRTC_ROOT_DIR}/out/Release)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC
-    NAMES webrtc_full
+    NAMES webrtc webrtc_full libwebrtc_full
     PATHS_DEBUG ${debug_dir}
     PATHS_RELEASE ${release_dir}
   )

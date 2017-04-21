@@ -134,7 +134,7 @@ void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 {
     char* lastkey = 0;
-    int dlen = strlen(delim);
+    auto dlen = strlen(delim);
     for (int i = 0; i < argc; i++) {
 
         // Get the application exe path

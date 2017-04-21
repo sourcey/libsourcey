@@ -13,8 +13,6 @@
 #include "scy/logger.h"
 
 
-#ifdef HAVE_FFMPEG
-
 // TODO: implement all possible platform formats:
 //
 // input/output: alsa, decklink, fbdev, oss, pulse, sndio, v4l2
@@ -106,8 +104,7 @@ Device::Device()
 }
 
 
-Device::Device(Type type, const std::string& id, const std::string& name,
-               bool isDefault)
+Device::Device(Type type, const std::string& id, const std::string& name, bool isDefault)
     : type(type)
     , id(id)
     , name(name)
@@ -118,9 +115,7 @@ Device::Device(Type type, const std::string& id, const std::string& name,
 
 void Device::print(std::ostream& os)
 {
-    os << "Device[" << type << ":" << name << ":" << id //<< ":"
-       // << isDefault
-       << "]";
+    os << "Device[" << type << ":" << name << ":" << id << ":" << isDefault << "]";
 }
 
 
@@ -131,6 +126,8 @@ void Device::print(std::ostream& os)
 
 namespace internal {
 
+
+#ifdef HAVE_FFMPEG
 
 // Substitute for missing `av_find_output_format()` function
 AVOutputFormat* findOutputFormat(const std::string& name)
@@ -330,6 +327,8 @@ fail:
 #endif
 }
 
+#endif // HAVE_FFMPEG
+
 
 void printDevices(std::ostream& ost, std::vector<Device>& devs)
 {
@@ -352,13 +351,17 @@ void printDevices(std::ostream& ost, std::vector<Device>& devs)
 DeviceManager::DeviceManager()
     : _watcher(nullptr)
 {
+#ifdef HAVE_FFMPEG
     initializeFFmpeg();
+#endif // HAVE_FFMPEG
 }
 
 
 DeviceManager::~DeviceManager()
 {
+#ifdef HAVE_FFMPEG
     uninitializeFFmpeg();
+#endif // HAVE_FFMPEG
 }
 
 
@@ -464,6 +467,8 @@ bool DeviceManager::getDefaultSpeaker(Device& device)
 }
 
 
+#ifdef HAVE_FFMPEG
+
 AVInputFormat* DeviceManager::findVideoInputFormat()
 {
     return internal::findDefaultInputFormat(SCY_VIDEO_INPUTS);
@@ -475,9 +480,10 @@ AVInputFormat* DeviceManager::findAudioInputFormat()
     return internal::findDefaultInputFormat(SCY_AUDIO_INPUTS);
 }
 
+#endif // HAVE_FFMPEG
 
-bool DeviceManager::getDeviceList(Device::Type type,
-                                  std::vector<av::Device>& devices)
+
+bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     devices.clear();
 
@@ -488,21 +494,17 @@ bool DeviceManager::getDeviceList(Device::Type type,
     return dshow::getDeviceList(type, devices);
 #elif defined(SCY_APPLE)
     return avfoundation::getDeviceList(type, devices);
-#else
+#elif defined(HAVE_FFMPEG)
     // Use FFmpeg by default
     switch (type) {
         case Device::VideoInput:
-            return internal::getInputDeviceList(SCY_VIDEO_INPUTS, type,
-                                                devices);
+            return internal::getInputDeviceList(SCY_VIDEO_INPUTS, type,  devices);
         case Device::AudioInput:
-            return internal::getInputDeviceList(SCY_AUDIO_INPUTS, type,
-                                                devices);
+            return internal::getInputDeviceList(SCY_AUDIO_INPUTS, type, devices);
         case Device::VideoOutput:
-            return internal::getOutputDeviceList(SCY_VIDEO_OUTPUTS, type,
-                                                 devices);
+            return internal::getOutputDeviceList(SCY_VIDEO_OUTPUTS, type, devices);
         case Device::AudioOutput:
-            return internal::getOutputDeviceList(SCY_AUDIO_OUTPUTS, type,
-                                                 devices);
+            return internal::getOutputDeviceList(SCY_AUDIO_OUTPUTS, type, devices);
         default:
             assert(0 && "unknown device type");
             break;
@@ -742,9 +744,6 @@ AVOutputFormat* nextOutputDevice(Device::Type type, AVOutputFormat* prev = nullp
 
 } // namespace av
 } // namespace scy
-
-
-#endif // HAVE_FFMPEG
 
 
 /// @\}

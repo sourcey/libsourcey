@@ -84,6 +84,7 @@ rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
 
 
 // TEST: Open VideoCaptureDevice using the WebRTC way 
+#if 0
 std::unique_ptr<cricket::VideoCapturer> openVideoDefaultWebRtcCaptureDevice() 
 {
     std::vector<std::string> deviceNames;
@@ -117,6 +118,7 @@ std::unique_ptr<cricket::VideoCapturer> openVideoDefaultWebRtcCaptureDevice()
     assert(capturer);
     return capturer;
 }
+#endif
 
 
 void MultiplexMediaCapturer::addMediaTracks(

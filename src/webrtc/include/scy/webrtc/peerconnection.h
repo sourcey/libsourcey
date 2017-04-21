@@ -64,8 +64,7 @@ public:
 
     /// Set a custom PeerConnectionFactory object
     /// Must be done before any streams are initiated
-    void setPeerConnectionFactory(
-        rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
+    void setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
 
     std::string peerid() const;
     std::string token() const;
@@ -76,13 +75,18 @@ public:
 
 protected:
     /// inherited from PeerConnectionObserver
-    virtual void OnAddStream(webrtc::MediaStreamInterface* stream);
-    virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream);
+    virtual void OnAddStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
+    virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
     virtual void OnIceCandidate(const webrtc::IceCandidateInterface* candidate);
     virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state);
     virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
     virtual void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state);
     virtual void OnRenegotiationNeeded();
+
+    /// PeerConnectionObserver interface since 7f0676
+    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
+    virtual void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
+    virtual void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream);
 
     /// inherited from CreateSessionDescriptionObserver
     virtual void OnSuccess(webrtc::SessionDescriptionInterface* desc);

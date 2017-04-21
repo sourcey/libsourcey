@@ -38,7 +38,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
 
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
-    // _constraints.SetAllowDtlsSctpDataChannels(); // triggers error if CreateAnswer
+    // _constraints.SetAllowDtlsSctpDataChannels();
 }
 
 
@@ -174,6 +174,26 @@ void PeerConnection::OnIceGatheringChange(
 void PeerConnection::OnRenegotiationNeeded()
 {
     DebugA(_peerid, ": On renegotiation needed")
+}
+
+
+void PeerConnection::OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
+{
+    // proxy to deprecated OnAddStream method
+    OnAddStream(stream.get());
+}
+
+
+void PeerConnection::OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
+{
+    // proxy to deprecated OnRemoveStream method
+    OnRemoveStream(stream.get());
+}
+
+
+void PeerConnection::OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream)
+{
+    assert(0 && "virtual");
 }
 
 

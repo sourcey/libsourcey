@@ -247,7 +247,9 @@ if(WITH_WEBRTC)
   unset(SSL_EAY_RELEASE CACHE)
   find_path(OPENSSL_INCLUDE_DIR
     NAMES openssl/ssl.h
-    PATHS ${WEBRTC_ROOT_DIR}/third_party/boringssl/src/include
+    PATHS 
+      ${WEBRTC_ROOT_DIR}/third_party/boringssl/src/include
+      ${WEBRTC_ROOT_DIR}/include/third_party/boringssl/src/include
     NO_DEFAULT_PATH)
   list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
 endif()
@@ -284,9 +286,9 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
 
 # Include inttypes.h for windows
-if (MSVC)
-  include_directories(${LibSourcey_VENDOR_SOURCE_DIR}/msvc)
-endif()
+# if (MSVC)
+#   include_directories(${LibSourcey_VENDOR_SOURCE_DIR}/msvc)
+# endif()
 
 # Enable testing if requested
 if (BUILD_TESTS)

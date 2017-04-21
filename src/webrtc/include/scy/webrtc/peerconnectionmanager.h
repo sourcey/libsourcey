@@ -30,8 +30,7 @@ namespace scy {
 class PeerConnection;
 
 
-class PeerConnectionManager
-    : public PointerCollection<std::string, PeerConnection>
+class PeerConnectionManager : public PointerCollection<std::string, PeerConnection>
 {
 public:
     PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory = nullptr);

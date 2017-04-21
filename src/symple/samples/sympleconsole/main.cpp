@@ -116,10 +116,10 @@ public:
                 return;
             }
 
-            // client.options().host = "chat.mytommy.com";
-            // client.options().port = 443;
-            // client.options().token = "p0nu6PFeW8nVba6GQ6MxfAtt";
-            // client.options().user = "2";
+             client.options().host = "chat.mytommy.com";
+             client.options().port = 443;
+             client.options().token = "UKysLaQSbPhSxyhxgUqw5wtt";
+             client.options().user = "2";
             // client.options().host = "localhost";
             // client.options().port = 4500;
             // client.options().user = "2";

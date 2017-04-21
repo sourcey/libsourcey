@@ -45,7 +45,7 @@ class AV_API DeviceManager;
 //
 
 /// Represents a system audio, video or render device.
-struct Device
+struct AV_API Device
 {
     enum Type
     {
@@ -159,7 +159,5 @@ protected:
 } // namespace av
 } // namespace scy
 
-
-// #endif // HAVE_FFMPEG
 
 #endif // SCY_AV_DeviceManager_H
