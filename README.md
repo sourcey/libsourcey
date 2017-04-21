@@ -34,7 +34,7 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>= 1.0). Read more about [Socket.IO](http://socket.io).
     * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](<http://sourcey.com/symple).
 
-* **WebRTC support** — WebRTC native support allows you to build p2p desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Take a look at the [examples](examples.md) for how to stream live webcam and microphone streams to the browser, and also how to record live WebRTC streams on the server side.
+* **WebRTC support** — WebRTC native support allows you to build p2p desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Take a look at the [examples](doc/examples.md) for how to stream live webcam and microphone streams to the browser, and also how to record live WebRTC streams on the server side.
 
 <!--
 * **Full ICE stack** — The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
