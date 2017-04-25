@@ -11,6 +11,8 @@
 
 #include "scy/webrtc/audiopacketmodule.h"
 
+#ifdef HAVE_FFMPEG
+
 #include "webrtc/base/refcount.h"
 #include "webrtc/base/thread.h"
 #include "webrtc/base/timeutils.h"
@@ -815,6 +817,9 @@ int32_t AudioPacketModule::GetLoudspeakerStatus(bool* /*enabled*/) const
 
 
 } // namespace scy
+
+
+#endif // HAVE_FFMPEG
 
 
 /// @\}

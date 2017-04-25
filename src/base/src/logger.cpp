@@ -392,12 +392,12 @@ void ConsoleChannel::write(const LogStream& stream)
 #if !defined(WIN32) || defined(_CONSOLE) || defined(_DEBUG)
     std::cout << ss.str();
 #endif
-#if defined(_MSC_VER) && defined(_DEBUG)
-    std::string s(ss.str());
-    std::wstring temp(s.length(), L' ');
-    std::copy(s.begin(), s.end(), temp.begin());
-    OutputDebugString(temp.c_str());
-#endif
+//#if defined(_MSC_VER) && defined(_DEBUG)
+//    std::string s(ss.str());
+//    std::wstring temp(s.length(), L' ');
+//    std::copy(s.begin(), s.end(), temp.begin());
+//    OutputDebugString(temp.c_str());
+//#endif
 #endif
 }
 
@@ -463,12 +463,12 @@ void FileChannel::write(const LogStream& stream)
 #if defined(_CONSOLE) || defined(_DEBUG)
     std::cout << ss.str();
 #endif
-#if defined(_MSC_VER) && defined(_DEBUG)
-    std::string s(ss.str());
-    std::wstring temp(s.length(), L' ');
-    std::copy(s.begin(), s.end(), temp.begin());
-    OutputDebugString(temp.c_str());
-#endif
+//#if defined(_MSC_VER) && defined(_DEBUG)
+//    std::string s(ss.str());
+//    std::wstring temp(s.length(), L' ');
+//    std::copy(s.begin(), s.end(), temp.begin());
+//    OutputDebugString(temp.c_str());
+//#endif
 #endif
 }
 
@@ -533,12 +533,12 @@ void RotatingFileChannel::write(const LogStream& stream)
 #if defined(_CONSOLE) && defined(_DEBUG)
     cout << ss.str();
 #endif
-#if defined(_MSC_VER) && defined(_DEBUG)
-    std::string s(ss.str());
-    std::wstring temp(s.length(), L' ');
-    std::copy(s.begin(), s.end(), temp.begin());
-    OutputDebugString(temp.c_str());
-#endif
+//#if defined(_MSC_VER) && defined(_DEBUG)
+//    std::string s(ss.str());
+//    std::wstring temp(s.length(), L' ');
+//    std::copy(s.begin(), s.end(), temp.begin());
+//    OutputDebugString(temp.c_str());
+//#endif
 #endif
 }
 

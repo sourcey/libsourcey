@@ -11,6 +11,8 @@
 
 #include "scy/webrtc/multiplexmediacapturer.h"
 
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/audioresampler.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/realtimepacketqueue.h"
@@ -83,44 +85,6 @@ rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
 }
 
 
-// TEST: Open VideoCaptureDevice using the WebRTC way 
-#if 0
-std::unique_ptr<cricket::VideoCapturer> openVideoDefaultWebRtcCaptureDevice() 
-{
-    std::vector<std::string> deviceNames;
-    {
-        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
-            webrtc::VideoCaptureFactory::CreateDeviceInfo());
-        if (!info) {
-            return nullptr;
-        }
-        int numDevicess = info->NumberOfDevices();
-        assert(numDevicess > 0);
-        for (int i = 0; i < numDevicess; ++i) {
-            const uint32_t kSize = 256;
-            char name[kSize] = { 0 };
-            char id[kSize] = { 0 };
-            if (info->GetDeviceName(i, name, kSize, id, kSize) != -1) {
-                deviceNames.push_back(name);
-            }
-        }
-    }
-
-    cricket::WebRtcVideoDeviceCapturerFactory factory;
-    std::unique_ptr<cricket::VideoCapturer> capturer;
-    for (const auto& name : deviceNames) {
-        capturer = factory.Create(cricket::Device(name, 0));
-        if (capturer) {
-            break;
-        }
-    }
-
-    assert(capturer);
-    return capturer;
-}
-#endif
-
-
 void MultiplexMediaCapturer::addMediaTracks(
     webrtc::PeerConnectionFactoryInterface* factory,
     webrtc::MediaStreamInterface* stream)
@@ -165,6 +129,9 @@ void MultiplexMediaCapturer::stop()
 
 
 } // namespace scy
+
+
+#endif // HAVE_FFMPEG
 
 
 /// @\}

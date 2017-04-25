@@ -48,12 +48,14 @@ find_path(WEBRTC_INCLUDE_DIR
 if(WEBRTC_INCLUDE_DIR)
   find_existing_directory(debug_dir 
       ${WEBRTC_ROOT_DIR}/lib/x64/Debug
+      ${WEBRTC_ROOT_DIR}/out/x64/Debug
       ${WEBRTC_ROOT_DIR}/out/Debug_x64
       ${WEBRTC_ROOT_DIR}/out/Debug-x64
       ${WEBRTC_ROOT_DIR}/out/Debug)
 
   find_existing_directory(release_dir 
       ${WEBRTC_ROOT_DIR}/lib/x64/Release
+      ${WEBRTC_ROOT_DIR}/out/x64/Release
       ${WEBRTC_ROOT_DIR}/out/Release_x64
       ${WEBRTC_ROOT_DIR}/out/Release-x64
       ${WEBRTC_ROOT_DIR}/out/Release)

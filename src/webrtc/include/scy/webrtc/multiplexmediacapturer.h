@@ -13,6 +13,8 @@
 #define SCY_WebRTC_MultiplexMediaCapturer_H
 
 
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/mediacapture.h"
 #include "scy/webrtc/audiopacketmodule.h"
 #include "scy/webrtc/videopacketsource.h"
@@ -50,6 +52,7 @@ protected:
 } // namespace scy
 
 
+#endif // HAVE_FFMPEG
 #endif
 
 

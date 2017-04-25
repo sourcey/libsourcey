@@ -13,6 +13,8 @@
 #define SCY_WebRTC_AudioPacketModule_H
 
 
+#ifdef HAVE_FFMPEG
+
 #include <memory>
 
 #include "scy/av/audiobuffer.h"
@@ -277,6 +279,7 @@ private:
 } /// namespace scy
 
 
+#endif // HAVE_FFMPEG
 #endif /// SCY_WebRTC_AudioPacketModule_H
 
 

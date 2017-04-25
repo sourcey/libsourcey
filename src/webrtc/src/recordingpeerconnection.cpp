@@ -10,6 +10,9 @@
 
 
 #include "scy/webrtc/recordingpeerconnection.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/logger.h"
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/webrtc/videopacketsource.h"
@@ -128,3 +131,6 @@ void RecordingPeerConnection::OnIceConnectionChange(
 
 
 } // namespace scy
+
+
+#endif // HAVE_FFMPEG

@@ -87,8 +87,8 @@ endfunction()
 #
 ### Function: find_existing_directory
 #
-function(find_existing_directory result directories)
-  foreach(dir ${directories})
+function(find_existing_directory result)
+  foreach(dir ${ARGN})
     if(EXISTS ${dir})
       get_filename_component(dir ${dir} ABSOLUTE)
       set(${result} ${dir} PARENT_SCOPE)

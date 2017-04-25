@@ -50,6 +50,7 @@ protected:
 
     void onPeerConnected(smpl::Peer& peer);
     void onPeerMessage(smpl::Message& m);
+    void onPeerCommand(smpl::Command& c);
     void onPeerDiconnected(const smpl::Peer& peer);
 
     void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState);

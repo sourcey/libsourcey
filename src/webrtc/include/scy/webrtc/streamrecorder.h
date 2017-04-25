@@ -13,6 +13,8 @@
 #define SCY_WebRTC_StreamRecorder_H
 
 
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/multiplexencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
@@ -50,6 +52,7 @@ protected:
 } // namespace scy
 
 
+#endif // HAVE_FFMPEG
 #endif
 
 

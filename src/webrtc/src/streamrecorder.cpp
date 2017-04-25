@@ -11,6 +11,8 @@
 
 #include "scy/webrtc/streamrecorder.h"
 
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/ffmpeg.h"
 #include "scy/filesystem.h"
 #include "scy/logger.h"
@@ -142,3 +144,6 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
 
 
 /// @\}
+
+
+#endif // HAVE_FFMPEG
