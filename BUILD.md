@@ -45,6 +45,12 @@ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=ON \
          -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON \
          -DWEBRTC_ROOT_DIR=/home/kam/sourcey/webrtcbuilds/out/src
 
+cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_MODULES=ON -DBUILD_APPLICATIONS=ON \
+        -DBUILD_SAMPLES=ON -DBUILD_TESTS=ON \
+        -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON \
+        -DWEBRTC_ROOT_DIR=/home/kam/sourcey/webrtcbuilds/out/webrtc-16937-cf6f3f6-linux-x64
+
 ## All modules (selective)
 cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_APPLICATIONS=OFF -DBUILD_MODULES=OFF \

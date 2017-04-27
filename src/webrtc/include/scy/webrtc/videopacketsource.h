@@ -16,6 +16,8 @@
 #include "scy/av/packet.h"
 #include "scy/packetsignal.h"
 
+#ifdef HAVE_FFMPEG
+
 #include "webrtc/media/base/videocapturer.h"
 
 
@@ -46,7 +48,7 @@ public:
     virtual cricket::CaptureState Start(const cricket::VideoFormat& capture_format) override;
     virtual void Stop() override;
     virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs) override;
-    virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired, 
+    virtual bool GetBestCaptureFormat(const cricket::VideoFormat& desired,
                                       cricket::VideoFormat* best_format) override;
     virtual bool IsRunning() override;
     virtual bool IsScreencast() const override;
@@ -79,6 +81,7 @@ protected:
 } // namespace scy
 
 
+#endif // HAVE_FFMPEG
 #endif
 
 

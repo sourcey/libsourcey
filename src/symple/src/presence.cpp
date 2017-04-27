@@ -30,7 +30,7 @@ Presence::Presence()
 Presence::Presence(const Presence& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         (*this)["type"] = "presence";
 }
 
@@ -38,7 +38,7 @@ Presence::Presence(const Presence& root)
 Presence::Presence(const json::value& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         (*this)["type"] = "presence";
 }
 

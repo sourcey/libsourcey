@@ -10,6 +10,9 @@
 
 
 #include "scy/webrtc/videopacketsource.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"
 #include "scy/av/videodecoder.h"
@@ -220,6 +223,9 @@ bool VideoPacketSource::IsScreencast() const
 
 
 } // namespace scy
+
+
+#endif // HAVE_FFMPEG
 
 
 /// @\}

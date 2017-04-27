@@ -110,11 +110,13 @@ else() # Non-Windows
   # These flags are geared to match the libuv autotools flags, but -g is
   # excluded since it is better-controlled by CMAKE_BUILD_TYPE
   add_flag_if_supported(libuv_FLAGS -fvisibility=hidden)
-  add_flag_if_supported(libuv_FLAGS -std=gnu89)
   add_flag_if_supported(libuv_FLAGS -pedantic)
   add_flag_if_supported(libuv_FLAGS -Wall)
   add_flag_if_supported(libuv_FLAGS -Wextra)
   add_flag_if_supported(libuv_FLAGS -Wno-unused-parameter)
+  if(NOT CMAKE_COMPILER_IS_GNUCC)
+    add_flag_if_supported(libuv_FLAGS -std=gnu89)
+  endif()
   list(APPEND libuv_DEFINITIONS
     _LARGEFILE_SOURCE
     _FILE_OFFSET_BITS=64

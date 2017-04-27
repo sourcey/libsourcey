@@ -7,19 +7,6 @@
 #  LibSourcey_LIBRARIES     - Link these to use the required components.
 #  LibSourcey_DEFINITIONS   - Compiler switches required for using the required components.
 #
-# For each of the components it will additionally set.
-#   - base
-#   - CppParser
-#   - CppUnit
-#   - Net
-#   - NetSSL
-#   - Crypto
-#   - Util
-#   - XML
-#   - Zip
-#   - Data
-#   - PageCompiler
-#
 # the following variables will be defined
 #  LibSourcey_<component>_FOUND        - System has <component>
 #  LibSourcey_<component>_INCLUDE_DIRS - Include directories necessary for using the <component> headers
@@ -37,6 +24,9 @@ set(LibSourcey_LIBRARY_DIR "${LibSourcey_ROOT_DIR}/build" CACHE STRING "Where ar
 set(LibSourcey_DIR ${LibSourcey_ROOT_DIR})
 set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src)
 set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build)
+set(LibSourcey_DIR ${LibSourcey_ROOT_DIR} PARENT_SCOPE)
+set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src PARENT_SCOPE)
+set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build PARENT_SCOPE)
 
 # message("LibSourcey_SOURCE_DIR=${LibSourcey_SOURCE_DIR}")
 # message("LibSourcey_ROOT_DIR=${LibSourcey_ROOT_DIR}")
@@ -114,9 +104,20 @@ if (NOT LibSourcey_FOUND)
   find_component(LibSourcey util     util     scy_util     scy/util/ratelimiter.h)
   find_component(LibSourcey uv       uv       scy_uv       scy/uv/uvpp.h)
   find_component(LibSourcey webrtc   webrtc   scy_webrtc   scy/webrtc/webrtc.h)
-  
+
   # Include the dir with libsourcey.h
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_LIBRARY_DIR})
+
+  # Include dependency headers
+  list(APPEND LibSourcey_INCLUDE_DIRS
+    ${LibSourcey_DIR}/vendor/zlib
+    ${LibSourcey_DIR}/vendor/minizip
+    # ${LibSourcey_DIR}/vendor/rtaudio
+    # ${LibSourcey_DIR}/vendor/rtaudio/include
+    ${LibSourcey_DIR}/vendor/libuv/include
+    ${LibSourcey_DIR}/vendor/http_parser
+    # ${LibSourcey_DIR}/vendor/jsoncpp
+    ${LibSourcey_DIR}/vendor/json/src)
 
   # Set LibSourcey as found or not
   # print_module_variables(LibSourcey)

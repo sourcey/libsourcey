@@ -30,7 +30,7 @@ Event::Event()
 Event::Event(const Event& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         setType("event");
     if (find("time") == end())
         setTime(::time(0));
@@ -40,7 +40,7 @@ Event::Event(const Event& root)
 Event::Event(const json::value& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         setType("event");
     if (find("time") == end())
         setTime(::time(0));
@@ -54,7 +54,7 @@ Event::~Event()
 
 bool Event::valid() const
 {
-    return Message::valid() 
+    return Message::valid()
         && find("name") != end();
 }
 

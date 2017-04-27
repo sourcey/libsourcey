@@ -30,7 +30,7 @@ Command::Command()
 Command::Command(const Command& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         (*this)["type"] = "command";
 }
 
@@ -38,7 +38,7 @@ Command::Command(const Command& root)
 Command::Command(const json::value& root)
     : Message(root)
 {
-    if (find("type") == end())
+    // if (find("type") == end())
         (*this)["type"] = "command";
 }
 
@@ -50,7 +50,7 @@ Command::~Command()
 
 bool Command::valid() const
 {
-    return Message::valid() 
+    return Message::valid()
         && find("node") != end();
 }
 
