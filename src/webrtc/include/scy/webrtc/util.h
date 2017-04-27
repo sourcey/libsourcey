@@ -23,8 +23,8 @@ namespace scy {
 
 std::vector<std::string> getVideoCaptureDevices();
 
-//std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
-cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
+std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
+// cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
 
 
 

@@ -78,7 +78,6 @@ Client::~Client()
 void Client::connect()
 {
     TraceA("Connecting")
-
     assert(!_options.host.empty());
     assert(!_options.user.empty());
 
@@ -120,7 +119,7 @@ void assertCanSend(Client* client, Message& m)
     }
 
 #ifdef _DEBUG
-    TraceA("Sending message: ", m.dump(4))
+    TraceA("Sending message:", m.dump(4))
 #endif
 }
 
@@ -212,7 +211,7 @@ int Client::announce()
 
 int Client::joinRoom(const std::string& room)
 {
-    DebugA("Join room: ", room)
+    DebugA("Join room:", room)
 
     _rooms.push_back(room);
     sockio::Packet pkt("join", "\"" + room + "\"");
@@ -222,7 +221,7 @@ int Client::joinRoom(const std::string& room)
 
 int Client::leaveRoom(const std::string& room)
 {
-    DebugA("Leave room: ", room)
+    DebugA("Leave room:", room)
 
     _rooms.erase(std::remove(_rooms.begin(), _rooms.end(), room), _rooms.end());
     sockio::Packet pkt("leave", "\"" + room + "\"");
@@ -232,7 +231,7 @@ int Client::leaveRoom(const std::string& room)
 
 void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
 {
-    TraceA("On announce response: ", state)
+    TraceA("On announce response:", state)
 
     auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
     switch (state.id()) {
@@ -289,11 +288,11 @@ void Client::onOnline()
 void Client::emit(IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
-    TraceA("Emit packet: ", packet.toString())
+    TraceA("Emit packet:", packet.toString())
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
-        TraceA("JSON packet: ", packet.toString())
+        TraceA("JSON packet:", packet.toString())
 
         json::value data = packet.json();
 #ifdef _DEBUG
@@ -345,9 +344,9 @@ void Client::emit(IPacket& raw)
                     respond(c);
                 }
             } else {
-                DebugA("Received non-standard message: ", type)
+                DebugA("Received non-standard message:", type)
 
-                // Attempt to parse custom packets as a message type  
+                // Attempt to parse custom packets as a message type
                 Message m(data);
                 if (!m.valid()) {
                     WarnL << "Dropping invalid message: " << data.dump() << endl;
@@ -363,7 +362,7 @@ void Client::emit(IPacket& raw)
 
     // Other packet types are proxied directly
     else {
-        TraceA("Proxying packet: ", PacketSignal::nslots())
+        TraceA("Proxying packet:", PacketSignal::nslots())
         PacketSignal::emit(packet);
     }
 }
@@ -371,7 +370,7 @@ void Client::emit(IPacket& raw)
 
 void Client::onPresenceData(const json::value& data, bool whiny)
 {
-    TraceA("Updating: ", data.dump(4))
+    TraceA("Updating:", data.dump(4))
 
     if (data.is_object() &&
         data.find("id") != data.end() &&
@@ -385,17 +384,18 @@ void Client::onPresenceData(const json::value& data, bool whiny)
             if (!peer) {
                 peer = new Peer(data);
                 _roster.add(id, peer);
-                DebugA("Peer connected: ", peer->address().toString())
+                DebugA("Peer connected:", peer->address().toString())
                 PeerConnected.emit(*peer);
-            } else
+            } else {
                 static_cast<json::value&>(*peer) = data;
+            }
         } else {
             if (peer) {
-                DebugA("Peer disconnected: ", peer->address().toString())
+                DebugA("Peer disconnected:", peer->address().toString())
                 PeerDisconnected.emit(*peer);
                 _roster.free(id);
             } else {
-                WarnL << "Got peer disconnected for unknown peer: " << id << endl;
+                WarnA("Unknown peer disconnected:", peer->address().toString())
             }
         }
     } else {
@@ -412,7 +412,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
-        TraceA("Updating: ", json::stringify(data, true))
+        TraceA("Updating:", json::stringify(data, true))
         std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {

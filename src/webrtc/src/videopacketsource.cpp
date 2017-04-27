@@ -33,9 +33,9 @@ VideoPacketSource::VideoPacketSource(int width, int height, int fps, uint32_t fo
     , _source(nullptr)
 {
     // Default supported formats. Use SetSupportedFormats to over write.
-    std::vector<cricket::VideoFormat> formats;
-    formats.push_back(_captureFormat);
-    SetSupportedFormats(formats);
+    // std::vector<cricket::VideoFormat> formats;
+    // formats.push_back(_captureFormat);
+    // SetSupportedFormats(formats);
 }
 
 
@@ -47,9 +47,9 @@ VideoPacketSource::VideoPacketSource(const cricket::VideoFormat& captureFormat)
     , _source(nullptr)
 {
     // Default supported formats. Use SetSupportedFormats to over write.
-    std::vector<cricket::VideoFormat> formats;
-    formats.push_back(_captureFormat);
-    SetSupportedFormats(formats);
+    // std::vector<cricket::VideoFormat> formats;
+    // formats.push_back(_captureFormat);
+    // SetSupportedFormats(formats);
 
     // formats.push_back(cricket::VideoFormat(1280, 720, _fpsInterval, _codec));
     // formats.push_back(cricket::VideoFormat(640, 480, _fpsInterval, _codec));
@@ -78,7 +78,7 @@ cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& forma
     DebugL << "Start" << endl;
 
     // NOTE: The requested format must match the input format until
-    // we implememnt pixel format conversion and resizing inside 
+    // we implememnt pixel format conversion and resizing inside
     // this class.
     RTC_CHECK(_captureFormat == format);
     if (capture_state() == cricket::CS_RUNNING) {
@@ -116,7 +116,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 
     assert(packet.width > 0);
     assert(packet.height > 0);
-    
+
     int adapted_width;
     int adapted_height;
     int crop_width;
@@ -129,7 +129,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 #if SCY_USE_DECODER_PTS
     // Set the packet timestamp.
     // Since the stream may not be playing from the beginning we
-    // store the first packet timestamp and subtract it from 
+    // store the first packet timestamp and subtract it from
     // subsequent packets.
     if (!_timestampOffset)
         _timestampOffset = -packet.time;
@@ -147,7 +147,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
         timestamp, //rtc::TimeNanos() / rtc::kNumNanosecsPerMicrosec,
         rtc::TimeMicros(), //0, 0,
         &adapted_width, &adapted_height,
-        &crop_width, &crop_height, 
+        &crop_width, &crop_height,
         &crop_x, &crop_y, &translated_camera_time_us)) {
         WarnL << "Adapt frame failed" << packet.time << std::endl;
         return;

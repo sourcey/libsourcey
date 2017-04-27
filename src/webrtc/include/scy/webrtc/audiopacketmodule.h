@@ -13,9 +13,9 @@
 #define SCY_WebRTC_AudioPacketModule_H
 
 
-#ifdef HAVE_FFMPEG
+#include "scy/av/av.h"
 
-#include <memory>
+#ifdef HAVE_FFMPEG
 
 #include "scy/av/audiobuffer.h"
 #include "scy/av/packet.h"
@@ -246,7 +246,7 @@ private:
     bool _recIsInitialized;  ///< True when the instance is ready to push audio.
 
     /// Input to and output from RecordedDataIsAvailable(..) makes it possible
-    /// to modify the current mic level. The implementation does not care about 
+    /// to modify the current mic level. The implementation does not care about
     /// the mic level so it just feeds back what it receives.
     uint32_t _currentMicLevel;
 

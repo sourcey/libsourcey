@@ -181,7 +181,7 @@ if(MSVC)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
   endif()
-  
+
   # No pesky windows min/max macros
   add_definitions(-DNOMINMAX)
 endif()
@@ -204,7 +204,7 @@ list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
 list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
 # Prefind external dependencies so we can set defaults
-find_package(OpenSSL)
+# find_package(OpenSSL)
 find_package(OpenCV)
 find_package(FFmpeg)
 
@@ -235,7 +235,7 @@ add_vendor_dependency(HTTPPARSER http_parser)
 if(WITH_WEBRTC)
   find_dependency(WebRTC REQUIRED)
 
-  # We will be building with BoringSSL instead of OpenSSL 
+  # We will be building with BoringSSL instead of OpenSSL
   message(STATUS "Using BoringSSL")
   set(WITH_OPENSSL OFF)
   set(HAVE_OPENSSL ON)
@@ -247,7 +247,7 @@ if(WITH_WEBRTC)
   unset(SSL_EAY_RELEASE CACHE)
   find_path(OPENSSL_INCLUDE_DIR
     NAMES openssl/ssl.h
-    PATHS 
+    PATHS
       ${WEBRTC_ROOT_DIR}/third_party/boringssl/src/include
       ${WEBRTC_ROOT_DIR}/include/third_party/boringssl/src/include
     NO_DEFAULT_PATH)

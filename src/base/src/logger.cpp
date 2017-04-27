@@ -33,7 +33,7 @@ Logger::Logger()
     , _writer(new LogWriter)
 {
     // Decouple C and C++ streams for performance increase.
-    std::cout.sync_with_stdio(false);
+    // std::cout.sync_with_stdio(false);
 }
 
 
@@ -390,7 +390,7 @@ void ConsoleChannel::write(const LogStream& stream)
     std::ostringstream ss;
     format(stream, ss);
 #if !defined(WIN32) || defined(_CONSOLE) || defined(_DEBUG)
-    std::cout << ss.str();
+    std::cout << ss.str() << std::flush;
 #endif
 //#if defined(_MSC_VER) && defined(_DEBUG)
 //    std::string s(ss.str());
@@ -461,7 +461,7 @@ void FileChannel::write(const LogStream& stream)
     _fstream.flush();
 
 #if defined(_CONSOLE) || defined(_DEBUG)
-    std::cout << ss.str();
+    std::cout << ss.str() << std::flush;
 #endif
 //#if defined(_MSC_VER) && defined(_DEBUG)
 //    std::string s(ss.str());
@@ -531,7 +531,7 @@ void RotatingFileChannel::write(const LogStream& stream)
     _fstream->flush();
 
 #if defined(_CONSOLE) && defined(_DEBUG)
-    cout << ss.str();
+    std::cout << ss.str() << std::flush;
 #endif
 //#if defined(_MSC_VER) && defined(_DEBUG)
 //    std::string s(ss.str());

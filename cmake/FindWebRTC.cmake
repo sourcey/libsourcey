@@ -46,14 +46,14 @@ find_path(WEBRTC_INCLUDE_DIR
 # Find WEBRTC libraries
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
-  find_existing_directory(debug_dir 
+  find_existing_directory(debug_dir
       ${WEBRTC_ROOT_DIR}/lib/x64/Debug
       ${WEBRTC_ROOT_DIR}/out/x64/Debug
       ${WEBRTC_ROOT_DIR}/out/Debug_x64
       ${WEBRTC_ROOT_DIR}/out/Debug-x64
       ${WEBRTC_ROOT_DIR}/out/Debug)
 
-  find_existing_directory(release_dir 
+  find_existing_directory(release_dir
       ${WEBRTC_ROOT_DIR}/lib/x64/Release
       ${WEBRTC_ROOT_DIR}/out/x64/Release
       ${WEBRTC_ROOT_DIR}/out/Release_x64
@@ -98,14 +98,26 @@ if(WEBRTC_INCLUDE_DIR)
       set(lib_suffix "a")
     endif()
 
+    # ADDLIB obj/third_party/boringssl/libboringssl.a
+    # ADDLIB obj/third_party/protobuf/libprotobuf_full.a
+    # ADDLIB obj/webrtc/system_wrappers/libfield_trial_default.a
+    # ADDLIB obj/webrtc/system_wrappers/libmetrics_default.a
+    # ADDLIB obj/webrtc/libwebrtc.a
+
+    set(_WEBRTC_DEPENDENCY_INCLUDES "webrtc\\.a|boringssl|protobuf_full|field_trial_default|metrics_default") #|common|video|media
+
     # Debug
     if (EXISTS ${debug_dir})
       file(GLOB_RECURSE debug_libs "${debug_dir}/*.${lib_suffix}")
       foreach(lib ${debug_libs})
         # if(${lib} NOT MATCHES ${_WEBRTC_DEPENDENCY_EXCLUDES})
+        if(${lib} MATCHES ${_WEBRTC_DEPENDENCY_INCLUDES})
+          message( "DONE: ${lib}")
           list(APPEND WEBRTC_LIBRARIES_DEBUG ${lib})
+        endif()
         # endif()
       endforeach()
+      # message(FATAL_ERROR "DONE")
       foreach(lib ${WEBRTC_LIBRARIES_DEBUG})
         if(WIN32 AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
           list(APPEND WEBRTC_LIBRARIES "debug" ${lib})

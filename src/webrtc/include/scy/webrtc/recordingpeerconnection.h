@@ -13,6 +13,8 @@
 #define SCY_WebRTC_RecordingPeerConnection_H
 
 
+#include "scy/av/av.h"
+
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/mediacapture.h"

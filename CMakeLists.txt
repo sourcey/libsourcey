@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8.10)
 
 # This must go before `project(LibSourcey)` in order to work.
 if(WIN32)
-  # CMake 3.4 or newer is required on windoes to make use of the 
+  # CMake 3.4 or newer is required on windoes to make use of the
   # CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS value for shares releases.
   # cmake_minimum_required(VERSION 3.4)
   # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -83,7 +83,7 @@ endif()
 status("")
 status("  C/C++:")
 status("    Built as dynamic libs?:" BUILD_SHARED_LIBS THEN YES ELSE NO)
-status("    C++ Compiler:"           CMAKE_COMPILER_IS_GNUCXX THEN "${CMAKE_CXX_COMPILER} (ver ${CMAKE_GCC_REGEX_VERSION})" ELSE "${CMAKE_CXX_COMPILER}" )
+status("    C++ Compiler:"           CMAKE_COMPILER_IS_GNUCXX THEN "${CMAKE_CXX_COMPILER} (ver ${CMAKE_CXX_COMPILER_VERSION})" ELSE "${CMAKE_CXX_COMPILER}" )
 status("    C++ flags (Release):"    ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE})
 status("    C++ flags (Debug):"      ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG})
 

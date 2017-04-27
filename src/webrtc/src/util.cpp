@@ -27,8 +27,11 @@ std::vector<std::string> getVideoCaptureDevices()
     if (!info) {
         return deviceNames;
     }
+    ErrorL << "getVideoCaptureDevices" << std::endl;
     int numDevicess = info->NumberOfDevices();
+    ErrorL << "getVideoCaptureDevices" << std::endl;
     assert(numDevicess > 0);
+    ErrorL << "getVideoCaptureDevices" << std::endl;
     for (int i = 0; i < numDevicess; ++i) {
         const uint32_t kSize = 256;
         char name[kSize] = { 0 };
@@ -37,15 +40,18 @@ std::vector<std::string> getVideoCaptureDevices()
             deviceNames.push_back(name);
         }
     }
+    ErrorL << "getVideoCaptureDevices: 4" << std::endl;
+    return deviceNames;
 }
 
 
-// std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::string& deviceName)
-cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName)
+// cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName)
+std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::string& deviceName)
 {
     cricket::WebRtcVideoDeviceCapturerFactory factory;
-    // std::unique_ptr<cricket::VideoCapturer> capturer;
-    cricket::VideoCapturer* capturer = nullptr;
+    std::unique_ptr<cricket::VideoCapturer> capturer;
+    // cricket::VideoCapturer* capturer = nullptr;
+    ErrorL << "openWebRtcVideoCaptureDevice" << std::endl;
     auto deviceNames = getVideoCaptureDevices();
     for (const auto& name : deviceNames) {
         if (name == deviceName) {
@@ -57,6 +63,7 @@ cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceNa
         capturer = factory.Create(cricket::Device(deviceNames[0], 0));
 
     }
+    ErrorL << "openWebRtcVideoCaptureDevice: 4" << std::endl;
 
     assert(capturer);
     return capturer;
