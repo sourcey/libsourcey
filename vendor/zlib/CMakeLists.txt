@@ -8,11 +8,11 @@ set(VERSION "1.2.8")
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
 
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
-set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
-set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+set(INSTALL_BIN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin" CACHE STRING "Installation directory for executables")
+set(INSTALL_LIB_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib" CACHE STRING "Installation directory for libraries")
+set(INSTALL_INC_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include" CACHE STRING "Installation directory for headers")
+set(INSTALL_MAN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/man" CACHE STRING "Installation directory for manual pages")
+set(INSTALL_PKGCONFIG_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/pkgconfig" CACHE STRING "Installation directory for pkgconfig (.pc) files")
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -223,7 +223,7 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     install(TARGETS zlib zlibstatic
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
 endif()
 
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )

@@ -24,23 +24,14 @@ set(LibSourcey_LIBRARY_DIR "${LibSourcey_ROOT_DIR}/build" CACHE STRING "Where ar
 set(LibSourcey_DIR ${LibSourcey_ROOT_DIR})
 set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src)
 set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build)
-set(LibSourcey_DIR ${LibSourcey_ROOT_DIR} PARENT_SCOPE)
-set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src PARENT_SCOPE)
-set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build PARENT_SCOPE)
+# set(LibSourcey_DIR ${LibSourcey_ROOT_DIR} PARENT_SCOPE)
+# set(LibSourcey_SOURCE_DIR ${LibSourcey_DIR}/src PARENT_SCOPE)
+# set(LibSourcey_BUILD_DIR ${LibSourcey_DIR}/build PARENT_SCOPE)
 
 # message("LibSourcey_SOURCE_DIR=${LibSourcey_SOURCE_DIR}")
 # message("LibSourcey_ROOT_DIR=${LibSourcey_ROOT_DIR}")
 # message("LibSourcey_LIBRARY_DIR=${LibSourcey_ROOT_DIR}")
 # message("LibSourcey_INCLUDE_DIR=${LibSourcey_INCLUDE_DIR}")
-
-# Include the LibSourcey cmake helpers (if included from third party library)
-# if (LibSourcey_ROOT_DIR AND EXISTS ${LibSourcey_ROOT_DIR})
-#   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LibSourcey_ROOT_DIR}/cmake)
-#   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${LibSourcey_ROOT_DIR}/cmake)
-#
-#   include(CMakeHelpers REQUIRED)
-#   include(CMakeFindExtensions REQUIRED)
-# endif()
 
 include(CMakeHelpers REQUIRED)
 include(CMakeFindExtensions REQUIRED)
@@ -110,6 +101,8 @@ if (NOT LibSourcey_FOUND)
 
   # Include dependency headers
   list(APPEND LibSourcey_INCLUDE_DIRS
+    ${LibSourcey_DIR}/share/libsourcey/vendor/include
+    ${LibSourcey_DIR}/vendor/zlib
     ${LibSourcey_DIR}/vendor/zlib
     ${LibSourcey_DIR}/vendor/minizip
     # ${LibSourcey_DIR}/vendor/rtaudio

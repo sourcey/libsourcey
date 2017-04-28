@@ -88,7 +88,7 @@ macro(define_sourcey_module name)
   target_compile_definitions(${name} PRIVATE ${pretty_name}_EXPORTS)
 
   # include(GenerateExportHeader)
-  # generate_export_header(${name} 
+  # generate_export_header(${name}
   #         EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${name}/exports.h"
   #         EXPORT_MACRO_NAME ${pretty_name}_EXPORT
   #         NO_EXPORT_MACRO_NAME ${pretty_name}_NO_EXPORT

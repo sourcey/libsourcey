@@ -17,7 +17,7 @@ set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_VENDOR_BUILD_DIR ${CMAKE_BINARY_DIR}/vendor)
 
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
+set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/libsourcey)
 set(LibSourcey_VENDOR_INSTALL_DIR ${LibSourcey_SHARED_INSTALL_DIR}/vendor)
 set(LibSourcey_PKGCONFIG_DIR ${LibSourcey_INSTALL_DIR}/lib/pkgconfig)
 
@@ -226,9 +226,10 @@ if(WITH_ZLIB)
   add_vendor_dependency(ZLIB zlib)
   add_vendor_dependency(MINIZIP minizip)
 endif()
-#if(WITH_JSONCPP)
-#  add_vendor_dependency(JSONCPP jsoncpp)
-#endif()
+# if(WITH_JSONCPP)
+#   add_vendor_dependency(JSONCPP jsoncpp)
+# endif()
+# add_vendor_dependency(JSON json)
 add_vendor_dependency(HTTPPARSER http_parser)
 
 # External dependencies
@@ -274,6 +275,7 @@ endif()
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
 
+# Include vendor source dirs
 list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/zlib
   ${LibSourcey_VENDOR_BUILD_DIR}/zlib
@@ -284,6 +286,10 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/http_parser
   # ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp
   ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
+
+# Install specific vendor sources
+install(FILES "${LibSourcey_VENDOR_SOURCE_DIR}/json/src/json.hpp"
+        DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include)
 
 # Include inttypes.h for windows
 # if (MSVC)
