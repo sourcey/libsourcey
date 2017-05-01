@@ -14,17 +14,21 @@ macro(add_vendor_dependency name libname)
   set(LibSourcey_INCLUDE_DIRS ${libdir})
   set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname})
   set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname})
-
   set(HAVE_${name} TRUE)
 
-  get_directory_property(hasParent PARENT_DIRECTORY)
-  if(hasParent)
-    set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
-    set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
-    set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} CACHE INTERNAL "")
+  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} CACHE INTERNAL "")
+  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} CACHE INTERNAL "")
+  set(HAVE_${name} TRUE CACHE INTERNAL "")
 
-    set(HAVE_${name} TRUE PARENT_SCOPE)
-  endif()
+  # get_directory_property(hasParent PARENT_DIRECTORY)
+  # if(hasParent)
+  #   set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
+  #   set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
+  #   set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
+
+  #   set(HAVE_${name} TRUE PARENT_SCOPE)
+  # endif()
 endmacro()
 
 
@@ -44,7 +48,9 @@ function(find_dependency name)
     return()
   endif()
 
+  # start_track_variables()
   find_package(${name} ${ARGN})
+  # forward_changed_variables_to_parent_scope() #(bla_bla);
 
   # Try to find standard uppercase variable accessor
   set(lib_found 0)
@@ -74,12 +80,21 @@ function(find_dependency name)
   set(HAVE_${var_root_upper} TRUE CACHE INTERNAL "")
   set(${var_root_upper}_FOUND TRUE CACHE INTERNAL "")
 
+  # HACK: This is also called in `include_dependency`, but for some reason
+  # valiables set by `find_package`, such as `OPENSSL_LIBRARIES` set by 
+  # are not propagating to the outside `include_dependency` function scope.
+  # This behaviour was noted with cmake 3.5.2 when calling FindSSL.cmake.
+  # Expose normal and uppercase variants to LibSourcey
+  string(TOUPPER ${name} name_upper)
+  add_dependency_build_variables(${name})
+  add_dependency_build_variables(${name_upper})
+
   # This is required for multi-level finders such as FindSSL.cmake
-  #get_directory_property(hasParent PARENT_DIRECTORY)
-  #if(hasParent)
-  #  set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
-  #  set(${var_root_upper}_FOUND TRUE PARENT_SCOPE)
-  #endif()
+  # get_directory_property(hasParent PARENT_DIRECTORY)
+  # if(hasParent)
+  #   set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
+  #   set(${var_root_upper}_FOUND TRUE PARENT_SCOPE)
+  # endif()
 endfunction()
 
 
@@ -88,7 +103,7 @@ endfunction()
 #
 # Includes a 3rd party dependency into the LibSourcey solution.
 #
-macro(include_dependency name)
+function(include_dependency name)
   message(STATUS "Including dependency: ${name}")
   find_dependency(${name} ${ARGN})
 
@@ -96,7 +111,7 @@ macro(include_dependency name)
   string(TOUPPER ${name} name_upper)
   add_dependency_build_variables(${name})
   add_dependency_build_variables(${name_upper})
-endmacro()
+endfunction()
 
 
 #
@@ -114,40 +129,40 @@ macro(add_dependency_build_variables name)
     # message(STATUS "- Found ${name} Inc Dir: ${${name}_INCLUDE_DIR}")
     #include_directories(${${name}_INCLUDE_DIR})
     list(APPEND LibSourcey_INCLUDE_DIRS ${${name}_INCLUDE_DIR})
-    set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${${name}_INCLUDE_DIR} PARENT_SCOPE)
+    set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${${name}_INCLUDE_DIR})
   endif()
   if(${name}_INCLUDE_DIRS)
     # message(STATUS "- Found ${name} Inc Dirs: ${${name}_INCLUDE_DIRS}")
     #include_directories(${${name}_INCLUDE_DIRS})
     list(APPEND LibSourcey_INCLUDE_DIRS ${${name}_INCLUDE_DIRS})
-    set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${${name}_INCLUDE_DIRS} PARENT_SCOPE)
+    set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${${name}_INCLUDE_DIRS})
   endif()
   if(${name}_LIBRARY_DIR)
     #message(STATUS "- Found ${name} Lib Dir: ${${name}_LIBRARY_DIR}")
     #link_directories(${${name}_LIBRARY_DIR})
     list(APPEND LibSourcey_LIBRARY_DIRS ${${name}_LIBRARY_DIR})
-    set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${${name}_LIBRARY_DIR} PARENT_SCOPE)
+    set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${${name}_LIBRARY_DIR})
   endif()
   if(${name}_LIBRARY_DIRS)
     #message(STATUS "- Found ${name} Lib Dirs: ${${name}_LIBRARY_DIRS}")
     #link_directories(${${name}_LIBRARY_DIRS})
     list(APPEND LibSourcey_LIBRARY_DIRS ${${name}_LIBRARY_DIRS})
-    set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${${name}_LIBRARY_DIRS} PARENT_SCOPE)
+    set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${${name}_LIBRARY_DIRS})
   endif()
   if(${name}_LIBRARY)
     # message(STATUS "- Found dependency lib ${name}: ${${name}_LIBRARY}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_LIBRARY})
-    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_LIBRARY} PARENT_SCOPE)
+    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_LIBRARY})
   endif()
   if(${name}_LIBRARIES)
     # message(STATUS "- Found dependency libs ${name}: ${${name}_LIBRARIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_LIBRARIES})
-    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_LIBRARIES} PARENT_SCOPE)
+    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_LIBRARIES})
   endif()
   if(${name}_DEPENDENCIES)
     # message(STATUS "- Found external dependency ${name}: ${${name}_DEPENDENCIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name}_DEPENDENCIES})
-    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES} PARENT_SCOPE)
+    set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${${name}_DEPENDENCIES})
   endif()
 
   # if(LibSourcey_INCLUDE_DIRS)
@@ -163,8 +178,13 @@ macro(add_dependency_build_variables name)
   #   list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
   # endif()
 
-  # set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} PARENT_SCOPE)
-  # set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} PARENT_SCOPE)
+  set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} CACHE INTERNAL "")
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} CACHE INTERNAL "")
+  set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} CACHE INTERNAL "")
+
+  set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} PARENT_SCOPE)
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} PARENT_SCOPE)
+  set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} PARENT_SCOPE)
 endmacro()
 
 
@@ -308,7 +328,6 @@ macro(find_library_extended prefix)
   # message("Debug Names: ${${prefix}_NAMES_RELEASE}")
   # message("Release Names: ${${prefix}_NAMES_DEBUG}")
   # message("Names: ${${prefix}_NAMES}")
-
 endmacro(find_library_extended)
 
 

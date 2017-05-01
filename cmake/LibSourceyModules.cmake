@@ -220,9 +220,9 @@ macro(define_libsourcey_test name)
   set_default_project_dependencies(${name} ${ARGN})
 
   message(STATUS "Including module test ${name}")
-  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+  # message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  # message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
   # Add ctest support
   if(NOT ${name}_EXCLUDE_CTEST)
