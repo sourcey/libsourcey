@@ -51,10 +51,10 @@ function(find_dependency name)
   if(${var_root_upper}_FOUND)
     set(var_root ${var_root_upper})
     set(lib_found 1)
-    # else()
-    #   if(${var_root}_FOUND)
-    #   set(lib_found 1)
-    # endif()
+  # else()
+  #   if(${var_root}_FOUND)
+  #   set(lib_found 1)
+  # endif()
   endif()
 
   # Exit message on failure
@@ -70,13 +70,16 @@ function(find_dependency name)
     endif()
   endif()
 
-  # Set a HAVE_XXX variable at parent scope for the libsourcey.h config sile
-  set(HAVE_${var_root_upper} CACHE TRUE FORCE)
+  # Set a HAVE_XXX variable at global scope for the libsourcey.h config sile
+  set(HAVE_${var_root_upper} TRUE CACHE INTERNAL "")
+  set(${var_root_upper}_FOUND TRUE CACHE INTERNAL "")
 
-  # get_directory_property(hasParent PARENT_DIRECTORY)
-  # if(hasParent)
-    set(HAVE_${var_root_upper} CACHE TRUE PARENT_SCOPE)
-  # endif()
+  # This is required for multi-level finders such as FindSSL.cmake
+  #get_directory_property(hasParent PARENT_DIRECTORY)
+  #if(hasParent)
+  #  set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
+  #  set(${var_root_upper}_FOUND TRUE PARENT_SCOPE)
+  #endif()
 endfunction()
 
 
