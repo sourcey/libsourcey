@@ -84,7 +84,7 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
     frame->pts = av_frame_get_best_effort_timestamp(frame);
 
     // Set the decoder time in microseconds
-    // This value represents the number of microseconds 
+    // This value represents the number of microseconds
     // that have elapsed since the brginning of the stream.
     dec->time = dec->frame->pts > 0 ? static_cast<int64_t>(dec->frame->pkt_pts *
                 av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
@@ -103,7 +103,7 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
         << endl;
 
     PlanarVideoPacket video(frame->data, frame->linesize, dec->oparams.pixelFmt,
-                           frame->width, frame->height, dec->time);
+                            frame->width, frame->height, dec->time);
     video.source = frame;
     video.opaque = dec;
 

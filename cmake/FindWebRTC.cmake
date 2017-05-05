@@ -151,7 +151,7 @@ if(WEBRTC_INCLUDE_DIR)
     set(WEBRTC_DEPENDENCIES Secur32.lib Winmm.lib msdmo.lib dmoguids.lib wmcodecdspuuid.lib) # strmbase.lib
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DWEBRTC_POSIX)
-    set(WEBRTC_DEPENDENCIES -lX11 -lrt -lGLU -lGL)
+    set(WEBRTC_DEPENDENCIES -lX11 -lrt -lGLU) # -lGL
 
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")

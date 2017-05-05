@@ -1,0 +1,16 @@
+{
+  "name": "zippy-teleop-proto",
+  "title": "Zippy Teleop Prototype",
+  "version": "0.1.0",
+  "private": false,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "symple" : "*",
+    "symple-client" : "*",
+    "symple-client-player" : "*",
+    "express" : "~4.13.3",
+    "ejs" : "~2.3.4"
+  }
+}

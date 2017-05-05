@@ -61,7 +61,7 @@ struct DNSResult
     /// Client data pointer
     void* opaque;
 
-
+    /// Resolve status
     enum Status
     {
         None,
@@ -87,19 +87,19 @@ struct DNSResult
 
 inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo* res)
 {
-    // Check that res is not NULL.
-    // Adding this check after receiving some weird late callbacks with NULL
-    // res.
-    if (!res)
-        return;
-
-    net::Address resolved(res->ai_addr, 16);
-    TraceA("DNS resolved: ", resolved);
-
-    DNSResult* dns = reinterpret_cast<DNSResult*>(handle->data);
-    dns->status = status == 0 ? DNSResult::Success : DNSResult::Failed;
+    auto dns = reinterpret_cast<DNSResult*>(handle->data);
     dns->info = res;
-    dns->addr.swap(resolved);
+
+    if (status == 0) {
+        net::Address resolved(res->ai_addr, 16);
+        TraceA("DNS resolved:", resolved)
+        dns->status = DNSResult::Success;
+        dns->addr.swap(resolved);
+    }
+    else {
+        TraceA("DNS failed to resolve:", dns->host, ":", dns->port)
+        dns->status = DNSResult::Failed;
+    }
 
     dns->callback(*dns);
 
@@ -111,7 +111,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
 
 inline bool resolveDNS(DNSResult* dns)
 {
-    // TraceA("Resolving DNS: ", dns->host, ":", dns->port)
+    // TraceA("Resolving DNS:", dns->host, ":", dns->port)
 
     assert(dns->port);
     assert(!dns->host.empty());

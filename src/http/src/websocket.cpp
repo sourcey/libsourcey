@@ -154,7 +154,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
         onHandshakeComplete();
     }
 
-    // If there is remaining data in the packet (packets may be joined) 
+    // If there is remaining data in the packet (packets may be joined)
     // then send it back through the socket recv method.
     size_t remaining = buffer.size() - nparsed;
     if (remaining) {
@@ -208,6 +208,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
 void WebSocketAdapter::onSocketConnect(net::Socket&)
 {
     TraceS(this) << "On connect" << endl;
+
 
     // Send the WS handshake request
     // The Connect signal will be sent after the
@@ -275,7 +276,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
             // Emit the result packet
             assert(payload);
             assert(payloadLength);
-            net::SocketEmitter::onSocketRecv(*socket.get(), 
+            net::SocketEmitter::onSocketRecv(*socket.get(),
                 mutableBuffer(payload, (size_t)payloadLength),
                 peerAddress);
         }
@@ -297,6 +298,8 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
 
 void WebSocketAdapter::onSocketClose(net::Socket&)
 {
+    TraceS(this) << "On close" << endl;
+
     // Reset state so the connection can be reused
     _request.clear();
     _response.clear();

@@ -36,9 +36,9 @@ VideoPacketSource::VideoPacketSource(int width, int height, int fps, uint32_t fo
     , _source(nullptr)
 {
     // Default supported formats. Use SetSupportedFormats to over write.
-    // std::vector<cricket::VideoFormat> formats;
-    // formats.push_back(_captureFormat);
-    // SetSupportedFormats(formats);
+    std::vector<cricket::VideoFormat> formats;
+    formats.push_back(_captureFormat);
+    SetSupportedFormats(formats);
 }
 
 
@@ -50,9 +50,9 @@ VideoPacketSource::VideoPacketSource(const cricket::VideoFormat& captureFormat)
     , _source(nullptr)
 {
     // Default supported formats. Use SetSupportedFormats to over write.
-    // std::vector<cricket::VideoFormat> formats;
-    // formats.push_back(_captureFormat);
-    // SetSupportedFormats(formats);
+    std::vector<cricket::VideoFormat> formats;
+    formats.push_back(_captureFormat);
+    SetSupportedFormats(formats);
 
     // formats.push_back(cricket::VideoFormat(1280, 720, _fpsInterval, _codec));
     // formats.push_back(cricket::VideoFormat(640, 480, _fpsInterval, _codec));

@@ -26,7 +26,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 1
+#define USE_SSL 0
 
 
 class SympleApplication : public scy::Application
@@ -116,15 +116,18 @@ public:
                 return;
             }
 
-             client.options().host = "chat.mytommy.com";
-             client.options().port = 443;
-             client.options().token = "UKysLaQSbPhSxyhxgUqw5wtt";
-             client.options().user = "2";
+            // client.options().host = "chat.mytommy.com";
+            // client.options().port = 443;
+            // client.options().token = "UKysLaQSbPhSxyhxgUqw5wtt";
+            // client.options().user = "2";
+
             // client.options().host = "localhost";
             // client.options().port = 4500;
             // client.options().user = "2";
 
-            //client.ws().socket().reset();
+            client.options().host = "google.com";
+            client.options().port = 4500;
+            client.options().user = "2";
 
             // Setup the client
             client += packetSlot(this, &SympleApplication::onRecvMessage);
@@ -292,7 +295,7 @@ public:
 
         // Handle incoming Symple events here
     }
-    
+
     void onClientAnnounce(const int& status)
     {
         DebugA("####### On announce: ", status)

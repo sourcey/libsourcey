@@ -328,7 +328,7 @@ void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
 
 void TCPSocket::onError(const scy::Error& error)
 {
-    // DebugS(this) << "Error: " << error.message << endl;
+    DebugS(this) << "Error: " << error.message << endl;
     onSocketError(*this, error);
     close(); // close on error
 }

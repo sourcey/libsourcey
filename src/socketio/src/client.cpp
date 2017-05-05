@@ -307,7 +307,7 @@ void Client::onSocketError(net::Socket& socket, const scy::Error& error)
 
     setError(error);
 }
-
+//
 
 void Client::onSocketClose(net::Socket& socket)
 {

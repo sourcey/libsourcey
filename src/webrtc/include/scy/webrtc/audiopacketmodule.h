@@ -280,7 +280,7 @@ private:
 
 
 #endif // HAVE_FFMPEG
-#endif /// SCY_WebRTC_AudioPacketModule_H
+#endif // SCY_WebRTC_AudioPacketModule_H
 
 
 /// @\}

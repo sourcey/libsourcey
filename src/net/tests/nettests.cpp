@@ -114,6 +114,39 @@ int main(int argc, char** argv)
         expect(test.passed);
     });
 
+
+    // =========================================================================
+    // DNS Resolver Test
+    //
+    describe("dns resolver test", []() {
+        net::resolveDNS("sourcey.com", 80, [&](const net::DNSResult& dns) {
+            expect(dns.success());
+        });
+        net::resolveDNS("thishadbetternotexizt.com", 8888, [&](const net::DNSResult& dns) {
+            expect(!dns.success());
+        });
+        uv::runDefaultLoop();
+    });
+
+
+    // =========================================================================
+    // TCP Socket Error Test
+    //
+    describe("tcp socket error test", []() {
+        {
+            net::TCPSocket socket;
+            socket.connect("192.169.7.888", 4500); // Connection refused
+            uv::runDefaultLoop();
+            expect(socket.error().any());
+        }
+        {
+            net::TCPSocket socket;
+            socket.connect("hostthatdoesntexist.what", 80); // DNS resolution will fail
+            uv::runDefaultLoop();
+            expect(socket.error().any());
+        }
+    });
+
     test::runAll();
 
     return test::finalize();

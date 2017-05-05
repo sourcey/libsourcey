@@ -39,14 +39,14 @@ Socket::~Socket()
 
 void Socket::connect(const std::string& host, uint16_t port)
 {
-    // TraceS(this) << "Connect to host: " << host << ":" << port << endl;
+    TraceS(this) << "Connect to host: " << host << ":" << port << endl;
 
     if (Address::validateIP(host)) {
         connect(Address(host, port));
     }
     else if (host == "localhost") {
-        // NOTE: Forcefully translate localhost to 127.0.0.1 since  
-        // the DNS service returns 0.0.0.0 on some systems resulting 
+        // NOTE: Forcefully translate localhost to 127.0.0.1 since
+        // the DNS service returns 0.0.0.0 on some systems resulting
         // in connection failure.
         connect(Address("127.0.0.1", port));
     }

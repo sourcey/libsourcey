@@ -22,6 +22,7 @@
 namespace scy {
 namespace av {
 
+
 /// Encodes and multiplexes a realtime video stream form
 /// audio / video capture sources.
 /// FFmpeg is used for encoding.

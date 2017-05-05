@@ -11,17 +11,22 @@
 find_path(HTTPPARSER_INCLUDE_DIR
   NAMES http_parser.h
   PATHS ${LibSourcey_DIR}/vendor/http_parser
+  PATHS ${LibSourcey_DIR}/share/libsourcey/vendor/include
   NO_DEFAULT_PATH)
 
 find_library(HTTPPARSER_LIBRARY_DEBUG
   NAMES http_parserd libhttp_parserd
-  PATHS ${LibSourcey_BUILD_DIR}/vendor/http_parser
+  PATHS
+    ${LibSourcey_BUILD_DIR}/vendor/http_parser
+    ${LibSourcey_DIR}/share/libsourcey/vendor/lib
   PATH_SUFFIXES Debug
   NO_DEFAULT_PATH)
 
 find_library(HTTPPARSER_LIBRARY_RELEASE
   NAMES http_parser libhttp_parser
-  PATHS ${LibSourcey_BUILD_DIR}/vendor/http_parser
+  PATHS
+    ${LibSourcey_BUILD_DIR}/vendor/http_parser
+    ${LibSourcey_DIR}/share/libsourcey/vendor/lib
   PATH_SUFFIXES Release
   NO_DEFAULT_PATH)
 
