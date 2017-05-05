@@ -1,4 +1,4 @@
-# WebRTC Native Video Recorder
+# WebRTC Native Video Streamer
 
 This sample app showcases how to stream realtime video to the the browser using LibSourcey and WebRTC. Audio and video streams can be from realtime device captures or movie files encoded in any format that's supported by LibSourcey/FFmpeg.
 

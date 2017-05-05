@@ -42,7 +42,7 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
     * **STUN** — [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation that includes support for ICE and TURN and TURN TCP messages.
     * **TURN** — Server and client stack that supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.s
     * **SDP** — [RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation that includes extra support for ICE headers.
--->
+      -->
 
 ## Examples
 
@@ -167,7 +167,7 @@ stream.attach(socket);
 stream.start();
 ~~~
 
-There are plenty more demos and sample code to play with over on the [examples](http://sourcey.com/libsourcey/examples.md) page.
+There are plenty more demos and sample code to play with over on the [examples](https://sourcey.com/libsourcey/examples/) page.
 
 ## Installation
 
