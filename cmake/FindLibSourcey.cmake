@@ -133,6 +133,7 @@ if (LibSourcey_FOUND)
   find_package(Threads REQUIRED)
   find_package(LibUV REQUIRED)
   find_package(HttpParser REQUIRED)
+  # find_package(SSL REQUIRED)
 
   list(APPEND LibSourcey_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR} ${HTTPPARSER_INCLUDE_DIR})
   list(APPEND LibSourcey_DEPENDENCIES ${LIBUV_LIBRARIES} ${HTTPPARSER_LIBRARIES})

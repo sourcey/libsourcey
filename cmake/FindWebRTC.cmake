@@ -98,11 +98,11 @@ if(WEBRTC_INCLUDE_DIR)
       set(lib_suffix "a")
     endif()
 
-    # ADDLIB obj/third_party/boringssl/libboringssl.a
-    # ADDLIB obj/third_party/protobuf/libprotobuf_full.a
-    # ADDLIB obj/webrtc/system_wrappers/libfield_trial_default.a
-    # ADDLIB obj/webrtc/system_wrappers/libmetrics_default.a
-    # ADDLIB obj/webrtc/libwebrtc.a
+    # obj/third_party/boringssl/libboringssl.a
+    # obj/third_party/protobuf/libprotobuf_full.a
+    # obj/webrtc/system_wrappers/libfield_trial_default.a
+    # obj/webrtc/system_wrappers/libmetrics_default.a
+    # obj/webrtc/libwebrtc.a
 
     set(_WEBRTC_DEPENDENCY_INCLUDES "webrtc\\.a|boringssl|protobuf_full|field_trial_default|metrics_default") #|common|video|media
 
@@ -151,10 +151,15 @@ if(WEBRTC_INCLUDE_DIR)
     set(WEBRTC_DEPENDENCIES Secur32.lib Winmm.lib msdmo.lib dmoguids.lib wmcodecdspuuid.lib) # strmbase.lib
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DWEBRTC_POSIX)
-    set(WEBRTC_DEPENDENCIES -lX11 -lrt -lGLU) # -lGL
+    set(WEBRTC_DEPENDENCIES -lrt -lX11 -lGLU) # -lGL
 
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")
+  endif()
+
+  # Add vendor include directories
+  if(WEBRTC_INCLUDE_DIR)
+    list(APPEND WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIR} ${WEBRTC_INCLUDE_DIR}/third_party/boringssl/src/include)
   endif()
 
   # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
@@ -175,9 +180,12 @@ endif()
 # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
 # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
 # Setting PARENT_SCOPE fixes this solves theis issue for now.
-set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
-set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
-set(WEBRTC_FOUND ${WEBRTC_FOUND} PARENT_SCOPE)
+# set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
+# set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
+# set(WEBRTC_FOUND ${WEBRTC_FOUND} PARENT_SCOPE)
+set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} CACHE INTERNAL "")
+set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} CACHE INTERNAL "")
+set(WEBRTC_FOUND ${WEBRTC_FOUND} CACHE INTERNAL "")
 
 # print_module_variables(WEBRTC)
 
