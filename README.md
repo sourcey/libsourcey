@@ -8,7 +8,7 @@
 <!-- <img style="float:left;width:70px;margin-right:15px;margin-bottom:10px" src="https://sourcey.com/images/logos/libsourcey-80x80.png"> -->
 LibSourcey is a collection of cross platform C++11 modules and classes that provide developers with an arsenal for rapidly developing high performance network based p2p and media streaming applications. Think of it as the power and performance of `libuv` combined with the features of `FFmpeg`, `OpenCV` and `WebRTC`, all integrated with the ease and readability of the `stl` (C++ Standard Library).
 
-* **Documentation**: [http://sourcey.com/libsourcey](https://sourcey.com/libsourcey)  
+* **Documentation**: [https://sourcey.com/libsourcey](https://sourcey.com/libsourcey)  
 * **Repository**: [https://github.com/sourcey/libsourcey](https://github.com/sourcey/libsourcey)  
 * **Licence**: [LGPL-2.1+](/LICENSE.md)
 
