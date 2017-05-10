@@ -299,12 +299,14 @@ LogStream::LogStream(const LogStream& that)
     , channel(that.channel)
     , flushed(that.flushed)
 {
-    // try to avoid copy assign
-    // message.str(that.message.str());
-
-    // NOTE: std::ostringstream::swap broken on gcc 4.9
-    // message.swap(const_cast<std::ostringstream&>(that.message));
-    message.rdbuf()->swap(*that.message.rdbuf());
+    // NOTE: Try to avoid copy assign std::stringstream::swap is not implemented
+    // on gcc < 5
+#if __GNUC__ < 5
+    message.str(that.message.str());
+#else
+    // message.rdbuf()->swap(*that.message.rdbuf());
+    message.swap(const_cast<std::ostringstream&>(that.message));
+#endif
 }
 
 
