@@ -3,12 +3,12 @@
 > C++ Networking Evolved
 
 [![Circle CI](https://circleci.com/gh/sourcey/libsourcey.svg?style=shield&circle-token=ab142562b19bb857de796d729aab28fa9df7682d)](https://circleci.com/gh/sourcey/libsourcey)
-[![Doxygen](http://sourcey.com/images/doxygen.svg)](http://sourcey.com/libsourcey)
+[![Doxygen](https://sourcey.com/images/doxygen.svg)](https://sourcey.com/libsourcey)
 
-<!-- <img style="float:left;width:70px;margin-right:15px;margin-bottom:10px" src="http://sourcey.com/images/logos/libsourcey-80x80.png"> -->
+<!-- <img style="float:left;width:70px;margin-right:15px;margin-bottom:10px" src="https://sourcey.com/images/logos/libsourcey-80x80.png"> -->
 LibSourcey is a collection of cross platform C++11 modules and classes that provide developers with an arsenal for rapidly developing high performance network based p2p and media streaming applications. Think of it as the power and performance of `libuv` combined with the features of `FFmpeg`, `OpenCV` and `WebRTC`, all integrated with the ease and readability of the `stl` (C++ Standard Library).
 
-* **Documentation**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
+* **Documentation**: [https://sourcey.com/libsourcey](https://sourcey.com/libsourcey)  
 * **Repository**: [https://github.com/sourcey/libsourcey](https://github.com/sourcey/libsourcey)  
 * **Licence**: [LGPL-2.1+](/LICENSE.md)
 
@@ -32,9 +32,9 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 
 * **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>= 1.0). Read more about [Socket.IO](http://socket.io).
-    * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](<http://sourcey.com/symple).
+    * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](https://sourcey.com/symple).
 
-* **WebRTC support** — WebRTC native support allows you to build p2p desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Take a look at the [examples](doc/examples.md) for how to stream live webcam and microphone streams to the browser, and also how to record live WebRTC streams on the server side.
+* **WebRTC support** — WebRTC native support allows you to build p2p desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Take a look at the [examples](https://sourcey.com/libsourcey/examples/) for how to stream live webcam and microphone streams to the browser, and also how to record live WebRTC streams on the server side.
 
 <!--
 * **Full ICE stack** — The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
@@ -171,7 +171,7 @@ There are plenty more demos and sample code to play with over on the [examples](
 
 ## Installation
 
-See the platform independent [installation guides](http://sourcey.com/libsourcey/installation.md).
+See the platform independent [installation guides](https://sourcey.com/libsourcey/installation).
 
 ## Contributors
 
