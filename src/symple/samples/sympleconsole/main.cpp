@@ -52,7 +52,7 @@ public:
         cout
             << "\nSymple Console Client v0.1.0"
                "\n(c) Sourcey"
-               "\nhttp://sourcey.com/symple"
+               "\nhttps://sourcey.com/symple"
                "\n"
                "\nGeneral options:"
                "\n  -help           Print help"

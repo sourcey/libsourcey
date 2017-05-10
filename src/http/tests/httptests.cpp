@@ -172,7 +172,7 @@ int main(int argc, char** argv)
     //
 
     describe("standalone client connection", []() {
-        http::ClientConnection conn("http://sourcey.com");
+        http::ClientConnection conn("https://sourcey.com");
         conn.Headers += [&](http::Response& response) {
             // std::cout << "On response headers: " << response << endl;
         };

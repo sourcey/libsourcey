@@ -116,3 +116,29 @@ if (NOT LibSourcey_FOUND)
   # print_module_variables(LibSourcey)
   set_module_found(LibSourcey)
 endif()
+
+# Include dependencies if found
+if (LibSourcey_FOUND)
+
+	# Add required system libraries
+	if(MSVC)
+	  set(LibSourcey_DEPENDENCIES advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib)
+	elseif(APPLE)
+	  set(LibSourcey_DEPENDENCIES -ldl)
+	elseif(UNIX)
+	  set(LibSourcey_DEPENDENCIES -lm -lrt -ldl)
+	endif()
+
+	# Third party dependencies
+  find_package(Threads REQUIRED)
+  find_package(LibUV REQUIRED)
+  find_package(HttpParser REQUIRED)
+
+  list(APPEND LibSourcey_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR} ${HTTPPARSER_INCLUDE_DIR})
+  list(APPEND LibSourcey_DEPENDENCIES ${LIBUV_LIBRARIES} ${HTTPPARSER_LIBRARIES})
+
+	# This is necessary on Linux as well as Threads package
+	if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+	endif()
+endif()

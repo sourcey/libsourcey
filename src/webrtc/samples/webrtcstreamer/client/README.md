@@ -2,7 +2,7 @@
 
 The Symple video chat demo is an example of how to use the Symple for instant messaging and WebRTC signaling in about 100 lines of JavaScript. External projects used are AngularJS, Bootstrap, Node.js and Express.
 
-See this blog post for more information about the demo: http://sourcey.com/symple-webrtc-video-chat-demo
+See this blog post for more information about the demo: https://sourcey.com/symple-webrtc-video-chat-demo
 
 ## What is Symple?
 
@@ -38,5 +38,5 @@ Other than that all relevant JavaScript is located in `public/js/app.js` and `pu
 
 ## Contact
 
-For more information please check out the Symple homepage: http://sourcey.com/symple/
+For more information please check out the Symple homepage: https://sourcey.com/symple/
 If you have a bug or an issue then please use the Github issue tracker: https://github.com/sourcey/symple-client/issues

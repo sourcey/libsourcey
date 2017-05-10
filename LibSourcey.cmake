@@ -2,9 +2,9 @@
 # CMake file for LibSourcey
 # ============================================================================
 
-# C++ standard 14 minimum is required
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
+# C++ standard 14 minimum is required (wait until CMake 3.1 is widely used)
+# set(CMAKE_CXX_STANDARD 14)
+# set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # ----------------------------------------------------------------------------
 # LibSourcey Build paths
@@ -288,8 +288,13 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
 
 # Install specific vendor sources
-install(FILES "${LibSourcey_VENDOR_SOURCE_DIR}/json/src/json.hpp"
+install(FILES ${LibSourcey_VENDOR_SOURCE_DIR}/json/src/json.hpp
         DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include)
+
+# Copy CMake files to shared install directory
+install(DIRECTORY ${LibSourcey_DIR}/cmake
+        DESTINATION ${LibSourcey_SHARED_INSTALL_DIR}
+        FILES_MATCHING PATTERN "CMake*"  PATTERN "Find*")
 
 # Include inttypes.h for windows
 # if (MSVC)

@@ -8,21 +8,21 @@ set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "")
 
 # Set processor flags
 if(CMAKE_SYSTEM_PROCESSOR MATCHES amd64.*|x86_64.*)
-    set(X86_64 1)
+  set(X86_64 1)
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES i686.*|i386.*|x86.*)
-    set(X86 1)
+  set(X86 1)
 endif()
 
-# Using c++11 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # message(STATUS "Detected version of GNU GCC: ${CMAKE_CXX_COMPILER_VERSION}")
 
   # Require at least gcc 4.9
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
     message(FATAL_ERROR "GCC version must be at least 4.9!")
   endif()
+
+  # Using c++14 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 
   # High level of warnings.
   set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wall")
