@@ -301,7 +301,10 @@ LogStream::LogStream(const LogStream& that)
 {
     // try to avoid copy assign
     // message.str(that.message.str());
-    message.swap(const_cast<std::ostringstream&>(that.message));
+
+    // NOTE: std::ostringstream::swap broken on gcc 4.9
+    // message.swap(const_cast<std::ostringstream&>(that.message));
+    message.rdbuf()->swap(*that.message.rdbuf());
 }
 
 
