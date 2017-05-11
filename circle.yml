@@ -10,8 +10,9 @@ dependencies:
     - sudo apt-get install --yes alsa-base alsa-utils libasound2 libasound2-dev
     - sudo apt-get install --yes gcc-4.9 g++-4.9
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
+    - wget -qO- https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-17657-02ba69d-linux-x64.tar.gz | tar xvz -C /tmp/webrtc-17657-02ba69d-linux-x64
   override:
-    - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake .. -DWITH_FFMPEG=ON
+    - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake .. -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON -DWEBRTC_ROOT_DIR=/tmp/webrtc-17657-02ba69d-linux-x64
     - cd build; make; sudo make install
 test:
   override:
