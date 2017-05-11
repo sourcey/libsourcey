@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - cd tmp && curl -sSL https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-17657-02ba69d-linux-x64.tar.gz | sudo tar -xz
+    - cd /tmp && curl -sSL https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-17657-02ba69d-linux-x64.tar.gz | sudo tar -xz
     - curl -sSL https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz | sudo tar -xzC /opt
     - git clone git@github.com:sourcey/pacm.git src/pacm
     - git clone git@github.com:sourcey/pluga.git src/pluga
