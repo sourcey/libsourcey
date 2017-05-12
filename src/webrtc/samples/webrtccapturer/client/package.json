@@ -1,6 +1,6 @@
 {
-  "name": "zippy-teleop-proto",
-  "title": "Zippy Teleop Prototype",
+  "name": "libsourcey-webrtc-capturer",
+  "title": "LibSourcey WebRTC Capturer",
   "version": "0.1.0",
   "private": false,
   "scripts": {

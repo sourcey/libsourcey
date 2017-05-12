@@ -14,6 +14,7 @@
 #include "scy/filesystem.h"
 #include "scy/util.h"
 
+#include "scy/webrtc/peerconnectionfactory.h"
 #include "scy/webrtc/util.h"
 
 #include <iostream>
@@ -27,7 +28,7 @@ namespace scy {
 
 
 Signaler::Signaler(const smpl::Client::Options& options)
-    : PeerConnectionManager(webrtc::CreatePeerConnectionFactory())
+    : PeerConnectionManager(PeerConnectionFactory::create()) // webrtc::CreatePeerConnectionFactory()
     , _client(options)
 {
     _client.StateChange += slot(this, &Signaler::onClientStateChange);
@@ -37,6 +38,8 @@ Signaler::Signaler(const smpl::Client::Options& options)
     _client += packetSlot(this, &Signaler::onPeerEvent);
     _client += packetSlot(this, &Signaler::onPeerMessage);
     _client.connect();
+
+    // static_cast<PeerConnectionFactory*>(_factory.get())->setPortRange(40000, 40001);
 }
 
 
@@ -136,6 +139,8 @@ void Signaler::onPeerCommand(smpl::Command& c)
         conn->constraints().SetMandatoryReceiveVideo(false);
         conn->constraints().SetAllowDtlsSctpDataChannels();
 
+        // conn->setPortRange(40000, 40001);
+
         // Create tracks and device captures
         rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
             _factory->CreateAudioTrack(kAudioLabel, _factory->CreateAudioSource(nullptr)));
@@ -156,13 +161,6 @@ void Signaler::onPeerCommand(smpl::Command& c)
 
         c.setStatus(200);
         _client.respond(c);
-
-        //auto conn = new StreamingPeerConnection(this, c.from().id, c.id(), filePath);
-        //auto stream = conn->createMediaStream();
-        //conn->createConnection();
-        //conn->createOffer();
-        //PeerConnectionManager::add(c.id(), conn);
-        // _client.persistence().add(c.id(), reinterpret_cast<smpl::Message *>(c.clone()), 0);
     }
 
     // Stop streaming
@@ -265,14 +263,12 @@ void Signaler::onStable(PeerConnection* conn)
 
 void Signaler::onClosed(PeerConnection* conn)
 {
-    // _recorder.reset(); // shutdown the recorder
     PeerConnectionManager::onClosed(conn);
 }
 
 
 void Signaler::onFailure(PeerConnection* conn, const std::string& error)
 {
-    // _recorder.reset(); // shutdown the recorder
     PeerConnectionManager::onFailure(conn, error);
 }
 

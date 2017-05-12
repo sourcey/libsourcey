@@ -169,7 +169,7 @@ $(document).ready(function() {
         // ICE SDP
         if (e.name == 'ice:sdp') {
              try {
-                console.log('Reieve offer:', e.sdp)
+                console.log('Reieve offer:', e.sdp);
 
                 remotePeer = e.from;
                 player.play();
@@ -245,7 +245,7 @@ $(document).ready(function() {
         // console.log('Adding peer:', peer)
 
         // Get a list of streaming devices as soon as the peer connects
-        if (peer.type == 'zippy') {
+        if (peer.type == 'demo') {
             refreshStreamingDevices(peer);
         }
     });

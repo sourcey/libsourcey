@@ -12,6 +12,7 @@
 #include "scy/webrtc/peerconnection.h"
 #include "scy/logger.h"
 #include "scy/webrtc/peerconnectionmanager.h"
+#include "scy/webrtc/peerconnectionfactory.h"
 
 
 using std::endl;
@@ -28,6 +29,8 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
     , _peerid(peerid)
     , _token(token)
     , _mode(mode)
+    // , _minPort(0)
+    // , _maxPort(0) 
     , _factory(manager->factory())
     , _peerConnection(nullptr)
     , _stream(nullptr)
@@ -60,6 +63,38 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStre
     assert(!_stream);
     _stream = _factory->CreateLocalMediaStream(kStreamLabel);
     return _stream;
+}
+
+
+void PeerConnection::setPortRange(int minPort, int maxPort)
+{
+    assert(!_peerConnection);
+
+    assert(static_cast<PeerConnectionFactory*>(_factory.get())->networkManager());
+
+    if (!_portAllocator)
+        _portAllocator.reset(new cricket::BasicPortAllocator(
+            static_cast<PeerConnectionFactory*>(_factory.get())->networkManager(), 
+            static_cast<PeerConnectionFactory*>(_factory.get())->socketFactory()));
+    _portAllocator->SetPortRange(minPort, maxPort);
+
+    // _portAllocator.reset(
+    //     new rtc::BasicPortAllocator()); //rtc::Thread::Current(), nullptr
+    // _portAllocator->SetPortRange(minPort, maxPort);
+    // // _portAllocator = new talk_base::RefCountedObject<PortAllocatorFactoryWrapper>(
+    // //       static_cast<PeerConnectionFactory *>(factory.get())->worker_thread(),
+    // //       minPort, maxPort);
+
+    // // default_network_manager_.reset(new rtc::BasicNetworkManager());
+    // // if (!default_network_manager_) {
+    // //   return false;
+    // // }
+
+    // // default_socket_factory_.reset(
+    // //     new rtc::BasicPacketSocketFactory(network_thread_));
+    // // if (!default_socket_factory_) {
+    // //   return false;
+    // // }
 }
 
 

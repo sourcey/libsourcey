@@ -16,6 +16,7 @@
 #include "webrtc/api/jsep.h"
 #include "webrtc/api/peerconnectioninterface.h"
 #include "webrtc/api/test/fakeconstraints.h"
+#include "webrtc/p2p/client/basicportallocator.h"
 
 
 namespace scy {
@@ -62,9 +63,13 @@ public:
     /// Receive a remote candidate.
     virtual void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
 
-    /// Set a custom PeerConnectionFactory object
-    /// Must be done before any streams are initiated
+    /// Set a custom PeerConnectionFactory object.
+    /// Must be set before any streams are initiated.
     void setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
+
+    /// Set the port range for WebRTC connections.
+    /// Must be done before the connection is initiated.
+    void setPortRange(int minPort, int maxPort);
 
     std::string peerid() const;
     std::string token() const;
@@ -77,16 +82,14 @@ protected:
     /// inherited from PeerConnectionObserver
     virtual void OnAddStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
     virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
+    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream); ///< since 7f0676
+    virtual void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream); ///< since 7f0676
+    virtual void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream); ///< since 7f0676
     virtual void OnIceCandidate(const webrtc::IceCandidateInterface* candidate);
     virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state);
     virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
     virtual void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state);
     virtual void OnRenegotiationNeeded();
-
-    /// PeerConnectionObserver interface since 7f0676
-    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
-    virtual void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
-    virtual void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream);
 
     /// inherited from CreateSessionDescriptionObserver
     virtual void OnSuccess(webrtc::SessionDescriptionInterface* desc);
@@ -100,11 +103,14 @@ protected:
     std::string _peerid;
     std::string _token;
     Mode _mode;
+    // int _minPort;
+    // int _maxPort;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
+    std::unique_ptr<cricket::BasicPortAllocator> _portAllocator;
 };
 
 
