@@ -9,12 +9,12 @@
 /// @{
 
 
-#include "scy/webrtc/recordingpeerconnection.h"
+#include "scy/webrtc/recordingpeer.h"
 
 #ifdef HAVE_FFMPEG
 
 #include "scy/logger.h"
-#include "scy/webrtc/peerconnectionmanager.h"
+#include "scy/webrtc/peermanager.h"
 #include "scy/webrtc/videopacketsource.h"
 
 
@@ -22,13 +22,15 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
-RecordingPeerConnection::RecordingPeerConnection(PeerConnectionManager* manager,
-                                                 const std::string& peerid,
-                                                 const std::string& token,
-                                                 const av::EncoderOptions options)
-    : PeerConnection(manager, peerid, token, PeerConnection::Offer)
+RecordingPeer::RecordingPeer(PeerManager* manager,
+                             PeerFactoryContext* context,
+                             const std::string& peerid,
+                             const std::string& token,
+                             const av::EncoderOptions& options)
+    : Peer(manager, context, peerid, token, Peer::Offer)
     , _recorder(new StreamRecorder(options))
 {
     // _constraints.SetMandatoryReceiveAudio(false);
@@ -37,12 +39,12 @@ RecordingPeerConnection::RecordingPeerConnection(PeerConnectionManager* manager,
 }
 
 
-RecordingPeerConnection::~RecordingPeerConnection()
+RecordingPeer::~RecordingPeer()
 {
 }
 
 
-// rtc::scoped_refptr<webrtc::MediaStreamInterface> RecordingPeerConnection::createMediaStream()
+// rtc::scoped_refptr<webrtc::MediaStreamInterface> RecordingPeer::createMediaStream()
 // {
 //     assert(_mode == Offer);
 //     assert(_factory);
@@ -57,7 +59,7 @@ RecordingPeerConnection::~RecordingPeerConnection()
 // }
 
 
-void RecordingPeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
+void RecordingPeer::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
@@ -75,7 +77,7 @@ void RecordingPeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
 }
 
 
-void RecordingPeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
+void RecordingPeer::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
@@ -86,7 +88,7 @@ void RecordingPeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* strea
 }
 
 
-// void RecordingPeerConnection::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
+// void RecordingPeer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
 // {
 //     switch(new_state) {
 //     case webrtc::PeerConnectionInterface::kStable:
@@ -103,11 +105,11 @@ void RecordingPeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* strea
 //         break;
 //     }
 //
-//     PeerConnection::OnSignalingChange(new_state);
+//     Peer::OnSignalingChange(new_state);
 // }
 
 
-void RecordingPeerConnection::OnIceConnectionChange(
+void RecordingPeer::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugA(_peerid, ": On ICE gathering change: ", new_state)
@@ -126,11 +128,11 @@ void RecordingPeerConnection::OnIceConnectionChange(
             break;
     }
 
-    PeerConnection::OnIceConnectionChange(new_state);
+    Peer::OnIceConnectionChange(new_state);
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

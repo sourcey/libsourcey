@@ -24,6 +24,7 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
 OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId)
@@ -157,4 +158,4 @@ bool OpenCVVideoCapturer::IsScreencast() const
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc

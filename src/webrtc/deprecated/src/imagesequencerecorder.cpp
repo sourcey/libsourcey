@@ -21,6 +21,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 ImageSequenceRecorder::ImageSequenceRecorder(
@@ -117,7 +118,7 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /// @\}

@@ -6,8 +6,8 @@
 ///
 
 
-#ifndef SCY_Zippy_WebRTC_Util_H
-#define SCY_Zippy_WebRTC_Util_H
+#ifndef SCY_WebRTC_Util_H
+#define SCY_WebRTC_Util_H
 
 
 #include "scy/webrtc/webrtc.h"

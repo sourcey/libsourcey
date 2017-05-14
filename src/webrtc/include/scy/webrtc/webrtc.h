@@ -13,11 +13,12 @@
 /// @{
 
 
-#ifndef SCY_WEBRTC_H
-#define SCY_WEBRTC_H
+#ifndef SCY_WebRTC_WEBRTC_H
+#define SCY_WebRTC_WEBRTC_H
 
 
 namespace scy {
+namespace wrtc {
 // namespace webrtc {
 
 
@@ -39,10 +40,10 @@ const char kStreamLabel[] = "stream_label";
 const char kGoogleStunServerUri[] = "stun:stun.l.google.com:19302";
 
 
-} // } // namespace scy::webrtc
+} } // namespace scy::wrtc
 
 
-#endif // SCY_WEBRTC_H
+#endif // SCY_WebRTC_WEBRTC_H
 
 
 /// @\}

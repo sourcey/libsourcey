@@ -9,9 +9,11 @@
 /// @{
 
 
-#ifndef SCY_PeerConnection_H
-#define SCY_PeerConnection_H
+#ifndef SCY_WebRTC_Peer_H
+#define SCY_WebRTC_Peer_H
 
+
+#include "scy/webrtc/peerfactorycontext.h"
 
 #include "webrtc/api/jsep.h"
 #include "webrtc/api/peerconnectioninterface.h"
@@ -20,13 +22,14 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
-class PeerConnectionManager;
+class PeerManager;
 
 
-class PeerConnection : public webrtc::PeerConnectionObserver,
-                       public webrtc::CreateSessionDescriptionObserver
+class Peer : public webrtc::PeerConnectionObserver,
+             public webrtc::CreateSessionDescriptionObserver
 {
 public:
     enum Mode
@@ -35,18 +38,19 @@ public:
         Answer ///< Operating as answerer
     };
 
-    PeerConnection(PeerConnectionManager* manager,
-                   const std::string& peerid,
-                   const std::string& token,
-                   Mode mode);
-    virtual ~PeerConnection();
+    Peer(PeerManager* manager, 
+         PeerFactoryContext* context,
+         const std::string& peerid,
+         const std::string& token,
+         Mode mode);
+    virtual ~Peer();
 
     /// Create the local media stream.
     /// Only necessary when we are creating the offer.
     virtual rtc::scoped_refptr<webrtc::MediaStreamInterface> createMediaStream();
 
     /// Create the peer connection once configuration, constraints and
-    /// streams have been set.
+    /// streams have been created.
     virtual void createConnection();
 
     /// Close the peer connection.
@@ -54,7 +58,7 @@ public:
 
     /// Create the offer SDP tos end to the peer.
     /// No offer should be received after creating the offer.
-    /// A call to `recvRemoteAnswer` is expected to initiate the session.
+    /// A call to `recvSDP` with answer is expected in order to initiate the session.
     virtual void createOffer();
 
     /// Receive a remote offer or answer.
@@ -63,9 +67,9 @@ public:
     /// Receive a remote candidate.
     virtual void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
 
-    /// Set a custom PeerConnectionFactory object.
+    /// Set a custom PeerFactory object.
     /// Must be set before any streams are initiated.
-    void setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
+    void setPeerFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
 
     /// Set the port range for WebRTC connections.
     /// Must be done before the connection is initiated.
@@ -99,15 +103,14 @@ protected:
     virtual int Release() const { return 0; }
 
 protected:
-    PeerConnectionManager* _manager;
+    PeerManager* _manager;
+    PeerFactoryContext* _context;
     std::string _peerid;
     std::string _token;
     Mode _mode;
-    // int _minPort;
-    // int _maxPort;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;
-    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
+    //rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
     std::unique_ptr<cricket::BasicPortAllocator> _portAllocator;
@@ -131,7 +134,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

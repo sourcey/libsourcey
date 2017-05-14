@@ -19,6 +19,7 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
 StreamingPeerConnection::StreamingPeerConnection(PeerConnectionManager* manager,
@@ -105,40 +106,40 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> StreamingPeerConnection::create
 // }
 
 
-void StreamingPeerConnection::OnIceConnectionChange(
-    webrtc::PeerConnectionInterface::IceConnectionState new_state)
+void StreamingPeerConnection::OnIcePeerChange(
+    webrtc::PeerConnectionInterface::IcePeerState new_state)
 {
     DebugA(_peerid, ": On ICE gathering change: ", new_state)
 
     switch (new_state) {
-        case webrtc::PeerConnectionInterface::kIceConnectionNew:
-        case webrtc::PeerConnectionInterface::kIceConnectionChecking:
-        case webrtc::PeerConnectionInterface::kIceConnectionConnected:
+        case webrtc::PeerConnectionInterface::kIcePeerNew:
+        case webrtc::PeerConnectionInterface::kIcePeerChecking:
+        case webrtc::PeerConnectionInterface::kIcePeerConnected:
             break;
-        case webrtc::PeerConnectionInterface::kIceConnectionCompleted:
+        case webrtc::PeerConnectionInterface::kIcePeerCompleted:
             _capturer.start();
             break;
-        case webrtc::PeerConnectionInterface::kIceConnectionFailed:
-        case webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
-        case webrtc::PeerConnectionInterface::kIceConnectionClosed:
-        case webrtc::PeerConnectionInterface::kIceConnectionMax:
+        case webrtc::PeerConnectionInterface::kIcePeerFailed:
+        case webrtc::PeerConnectionInterface::kIcePeerDisconnected:
+        case webrtc::PeerConnectionInterface::kIcePeerClosed:
+        case webrtc::PeerConnectionInterface::kIcePeerMax:
             _capturer.stop();
             break;
     }
 
-    PeerConnection::OnIceConnectionChange(new_state);
+    PeerConnection::OnIcePeerChange(new_state);
 }
 
 
-// void PeerConnection::createConnection()
+// void PeerConnection::createPeer()
 // {
 //     assert(_factory);
 //
-//     _peerConnection = _factory->CreatePeerConnection(
+//     _peerPeer = _factory->CreatePeerConnection(
 //         _config, &_constraints, nullptr, nullptr, this);
 //
 //     if (_stream) {
-//         if (!_peerConnection->AddStream(_stream)) {
+//         if (!_peerPeer->AddStream(_stream)) {
 //             throw std::runtime_error("Adding stream to PeerConnection
 //             failed");
 //         }
@@ -146,12 +147,12 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // }
 //
 //
-// void PeerConnection::closeConnection()
+// void PeerConnection::closePeer()
 // {
 //     DebugA(_peerid, ": Closing")
 //
-//     if (_peerConnection) {
-//         _peerConnection->Close();
+//     if (_peerPeer) {
+//         _peerPeer->Close();
 //     }
 //     else {
 //         // Call onClosed if no connection has been
@@ -164,9 +165,9 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // void PeerConnection::createOffer()
 // {
 //     assert(_mode == Offer);
-//     assert(_peerConnection);
+//     assert(_peerPeer);
 //
-//     _peerConnection->CreateOffer(this, &_constraints);
+//     _peerPeer->CreateOffer(this, &_constraints);
 // }
 //
 //
@@ -181,12 +182,12 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //         throw std::runtime_error("Can't parse remote SDP: " +
 //         error.description);
 //     }
-//     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(),
+//     _peerPeer->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(),
 //     desc);
 //
 //     if (type == "offer") {
 //         assert(_mode == Answer);
-//         _peerConnection->CreateAnswer(this, &_constraints);
+//         _peerPeer->CreateAnswer(this, &_constraints);
 //     }
 //     else {
 //         assert(_mode == Offer);
@@ -204,12 +205,12 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //         throw std::runtime_error("Can't parse remote candidate: " +
 //         error.description);
 //     }
-//     _peerConnection->AddIceCandidate(candidate.get());
+//     _peerPeer->AddIceCandidate(candidate.get());
 // }
 //
 //
 // void
-// PeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState
+// PeerConnection::OnIcePeerChange(webrtc::PeerConnectionInterface::IcePeerState
 // new_state)
 // {
 //     DebugA(_peerid, ": On ICE connection change: ", new_state)
@@ -266,7 +267,7 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 // {
 //     DebugA(_peerid, ": Set local description")
-//     _peerConnection->SetLocalDescription(
+//     _peerPeer->SetLocalDescription(
 //         DummySetSessionDescriptionObserver::Create(), desc);
 //
 //     // Send an SDP offer to the peer
@@ -317,9 +318,9 @@ void StreamingPeerConnection::OnIceConnectionChange(
 //
 //
 // rtc::scoped_refptr<webrtc::PeerConnectionInterface>
-// PeerConnection::peerConnection() const
+// PeerConnection::peerPeer() const
 // {
-//     return _peerConnection;
+//     return _peerPeer;
 // }
 //
 //
@@ -348,4 +349,4 @@ void StreamingPeerConnection::OnIceConnectionChange(
 // }
 
 
-} // namespace scy
+} } // namespace scy::wrtc

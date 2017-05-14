@@ -23,6 +23,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 StreamRecorder::StreamRecorder(const av::EncoderOptions& options)
@@ -140,7 +141,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /// @\}

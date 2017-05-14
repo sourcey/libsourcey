@@ -9,8 +9,8 @@
 /// @{
 
 
-#ifndef SCY_WebRTC_RecordingPeerConnection_H
-#define SCY_WebRTC_RecordingPeerConnection_H
+#ifndef SCY_WebRTC_RecordingPeer_H
+#define SCY_WebRTC_RecordingPeer_H
 
 
 #include "scy/av/av.h"
@@ -19,25 +19,27 @@
 
 #include "scy/av/mediacapture.h"
 #include "scy/webrtc/multiplexmediacapturer.h"
-#include "scy/webrtc/peerconnection.h"
+#include "scy/webrtc/peer.h"
 #include "scy/webrtc/streamrecorder.h"
 
 
 namespace scy {
+namespace wrtc {
 
 
 /// Peer connection class for recording the remote peer video.
-class RecordingPeerConnection : public PeerConnection
+class RecordingPeer : public Peer
 {
 public:
     /// Create the recording peer connection.
-    RecordingPeerConnection(PeerConnectionManager* manager,
-                            const std::string& peerid,
-                            const std::string& token,
-                            const av::EncoderOptions options = av::EncoderOptions());
-    virtual ~RecordingPeerConnection();
+    RecordingPeer(PeerManager* manager,
+                  PeerFactoryContext* context,
+                  const std::string& peerid,
+                  const std::string& token,
+                  const av::EncoderOptions& options = av::EncoderOptions());
+    virtual ~RecordingPeer();
 
-    /// inherited from PeerConnectionObserver
+    /// inherited from PeerObserver
     virtual void OnAddStream(webrtc::MediaStreamInterface* stream);
     virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream);
     virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
@@ -47,7 +49,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

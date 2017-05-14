@@ -9,29 +9,30 @@
 /// @{
 
 
-#include "scy/webrtc/peerconnection.h"
+#include "scy/webrtc/peer.h"
+#include "scy/webrtc/peermanager.h"
+#include "scy/webrtc/peerfactorycontext.h"
 #include "scy/logger.h"
-#include "scy/webrtc/peerconnectionmanager.h"
-#include "scy/webrtc/peerconnectionfactory.h"
 
 
 using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
-PeerConnection::PeerConnection(PeerConnectionManager* manager,
-                               const std::string& peerid,
-                               const std::string& token,
-                               Mode mode)
+Peer::Peer(PeerManager* manager,
+           PeerFactoryContext* context,
+           const std::string& peerid,
+           const std::string& token,
+           Mode mode)
     : _manager(manager)
+    , _context(context)
     , _peerid(peerid)
     , _token(token)
     , _mode(mode)
-    // , _minPort(0)
-    // , _maxPort(0) 
-    , _factory(manager->factory())
+    //, _context->factory(manager->factory())
     , _peerConnection(nullptr)
     , _stream(nullptr)
 {
@@ -45,7 +46,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager,
 }
 
 
-PeerConnection::~PeerConnection()
+Peer::~Peer()
 {
     DebugA(_peerid, ": Destroying")
     // closeConnection();
@@ -56,33 +57,39 @@ PeerConnection::~PeerConnection()
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStream()
+rtc::scoped_refptr<webrtc::MediaStreamInterface> Peer::createMediaStream()
 {
     assert(_mode == Offer);
-    assert(_factory);
+    //assert(_context->factory);
     assert(!_stream);
-    _stream = _factory->CreateLocalMediaStream(kStreamLabel);
+    _stream = _context->factory->CreateLocalMediaStream(kStreamLabel);
     return _stream;
 }
 
 
-void PeerConnection::setPortRange(int minPort, int maxPort)
+void Peer::setPortRange(int minPort, int maxPort)
 {
     assert(!_peerConnection);
 
-    assert(static_cast<PeerConnectionFactory*>(_factory.get())->networkManager());
+    if (!_context->networkManager) {
+        throw std::runtime_error("Must initialize custom network manager to set port range");
+    }
+
+    if (!_context->socketFactory) {
+        throw std::runtime_error("Must initialize custom socket factory to set port range");
+    }
 
     if (!_portAllocator)
         _portAllocator.reset(new cricket::BasicPortAllocator(
-            static_cast<PeerConnectionFactory*>(_factory.get())->networkManager(), 
-            static_cast<PeerConnectionFactory*>(_factory.get())->socketFactory()));
+            _context->networkManager.get(),
+            _context->socketFactory.get()));
     _portAllocator->SetPortRange(minPort, maxPort);
 
     // _portAllocator.reset(
     //     new rtc::BasicPortAllocator()); //rtc::Thread::Current(), nullptr
     // _portAllocator->SetPortRange(minPort, maxPort);
     // // _portAllocator = new talk_base::RefCountedObject<PortAllocatorFactoryWrapper>(
-    // //       static_cast<PeerConnectionFactory *>(factory.get())->worker_thread(),
+    // //       static_cast<PeerFactory *>(factory.get())->worker_thread(),
     // //       minPort, maxPort);
 
     // // default_network_manager_.reset(new rtc::BasicNetworkManager());
@@ -90,29 +97,29 @@ void PeerConnection::setPortRange(int minPort, int maxPort)
     // //   return false;
     // // }
 
-    // // default_socket_factory_.reset(
+    // // default_socket_context->factory_.reset(
     // //     new rtc::BasicPacketSocketFactory(network_thread_));
-    // // if (!default_socket_factory_) {
+    // // if (!default_socket_context->factory_) {
     // //   return false;
     // // }
 }
 
 
-void PeerConnection::createConnection()
+void Peer::createConnection()
 {
-    assert(_factory);
-    _peerConnection = _factory->CreatePeerConnection(_config, &_constraints,
-                                                     nullptr, nullptr, this);
+    assert(_context->factory);
+    _peerConnection = _context->factory->CreatePeerConnection(_config, &_constraints,
+                                                     std::move(_portAllocator), nullptr, this);
 
     if (_stream) {
         if (!_peerConnection->AddStream(_stream)) {
-            throw std::runtime_error("Adding stream to PeerConnection failed");
+            throw std::runtime_error("Adding stream to Peer failed");
         }
     }
 }
 
 
-void PeerConnection::closeConnection()
+void Peer::closeConnection()
 {
     DebugA(_peerid, ": Closing")
 
@@ -127,7 +134,7 @@ void PeerConnection::closeConnection()
 }
 
 
-void PeerConnection::createOffer()
+void Peer::createOffer()
 {
     assert(_mode == Offer);
     assert(_peerConnection);
@@ -136,7 +143,7 @@ void PeerConnection::createOffer()
 }
 
 
-void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
+void Peer::recvSDP(const std::string& type, const std::string& sdp)
 {
     DebugA(_peerid, ": Receive ", type, ": ", sdp)
 
@@ -158,7 +165,7 @@ void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
 }
 
 
-void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
+void Peer::recvCandidate(const std::string& mid, int mlineindex,
                                    const std::string& sdp)
 {
     webrtc::SdpParseError error;
@@ -171,7 +178,7 @@ void PeerConnection::recvCandidate(const std::string& mid, int mlineindex,
 }
 
 
-void PeerConnection::OnSignalingChange(
+void Peer::OnSignalingChange(
     webrtc::PeerConnectionInterface::SignalingState new_state)
 {
     DebugA(_peerid, ": On signaling state change: ", new_state)
@@ -192,47 +199,47 @@ void PeerConnection::OnSignalingChange(
 }
 
 
-void PeerConnection::OnIceConnectionChange(
+void Peer::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugA(_peerid, ": On ICE connection change: ", new_state)
 }
 
 
-void PeerConnection::OnIceGatheringChange(
+void Peer::OnIceGatheringChange(
     webrtc::PeerConnectionInterface::IceGatheringState new_state)
 {
     DebugA(_peerid, ": On ICE gathering change: ", new_state)
 }
 
 
-void PeerConnection::OnRenegotiationNeeded()
+void Peer::OnRenegotiationNeeded()
 {
     DebugA(_peerid, ": On renegotiation needed")
 }
 
 
-void PeerConnection::OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
+void Peer::OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
 {
     // proxy to deprecated OnAddStream method
     OnAddStream(stream.get());
 }
 
 
-void PeerConnection::OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
+void Peer::OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
 {
     // proxy to deprecated OnRemoveStream method
     OnRemoveStream(stream.get());
 }
 
 
-void PeerConnection::OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream)
+void Peer::OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
+void Peer::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
@@ -241,7 +248,7 @@ void PeerConnection::OnAddStream(webrtc::MediaStreamInterface* stream)
 }
 
 
-void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
+void Peer::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
@@ -250,7 +257,7 @@ void PeerConnection::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 }
 
 
-void PeerConnection::OnIceCandidate(
+void Peer::OnIceCandidate(
     const webrtc::IceCandidateInterface* candidate)
 {
     std::string sdp;
@@ -265,7 +272,7 @@ void PeerConnection::OnIceCandidate(
 }
 
 
-void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
+void Peer::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
     DebugA(_peerid, ": Set local description")
     _peerConnection->SetLocalDescription(
@@ -283,7 +290,7 @@ void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 }
 
 
-void PeerConnection::OnFailure(const std::string& error)
+void Peer::OnFailure(const std::string& error)
 {
     ErrorL << _peerid << ": On failure: " << error << endl;
 
@@ -291,52 +298,52 @@ void PeerConnection::OnFailure(const std::string& error)
 }
 
 
-void PeerConnection::setPeerConnectionFactory(
+void Peer::setPeerFactory(
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
 {
-    assert(!_factory); // should not be already set via PeerConnectionManager
-    _factory = factory;
+    assert(!_context->factory); // should not be already set via PeerManager
+    _context->factory = factory;
 }
 
 
-std::string PeerConnection::peerid() const
+std::string Peer::peerid() const
 {
     return _peerid;
 }
 
 
-std::string PeerConnection::token() const
+std::string Peer::token() const
 {
     return _token;
 }
 
 
-webrtc::FakeConstraints& PeerConnection::constraints()
+webrtc::FakeConstraints& Peer::constraints()
 {
     return _constraints;
 }
 
 
-webrtc::PeerConnectionFactoryInterface* PeerConnection::factory() const
+webrtc::PeerConnectionFactoryInterface* Peer::factory() const
 {
-    return _factory.get();
+    return _context->factory.get();
 }
 
 
-rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnection::peerConnection() const
+rtc::scoped_refptr<webrtc::PeerConnectionInterface> Peer::peerConnection() const
 {
     return _peerConnection;
 }
 
 
-rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::stream() const
+rtc::scoped_refptr<webrtc::MediaStreamInterface> Peer::stream() const
 {
     return _stream;
 }
 
 
 //
-// Dummy Set Session Description Observer
+// Dummy Set Peer Description Observer
 //
 
 
@@ -353,7 +360,7 @@ void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /// @\}

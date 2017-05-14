@@ -31,6 +31,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class OpenCVVideoCapturer : public cricket::VideoCapturer
@@ -76,7 +77,7 @@ private:
 // };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

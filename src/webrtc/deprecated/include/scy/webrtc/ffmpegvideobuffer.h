@@ -19,6 +19,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class FFmpeg420Buffer : public webrtc::VideoFrameBuffer {
@@ -69,7 +70,7 @@ private:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

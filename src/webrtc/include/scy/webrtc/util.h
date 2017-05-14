@@ -9,8 +9,8 @@
 /// @{
 
 
-#ifndef SCY_WEBRTC_UTIL_H
-#define SCY_WEBRTC_UTIL_H
+#ifndef SCY_WebRTC_WEBRTC_UTIL_H
+#define SCY_WebRTC_WEBRTC_UTIL_H
 
 
 #include "scy/webrtc/audiopacketmodule.h"
@@ -23,6 +23,7 @@
 
 
 namespace scy {
+namespace wrtc {
 // namespace webrtc {
 
 
@@ -32,11 +33,10 @@ std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::
 // cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
 
 
+} } // namespace scy::wrtc
 
-} // } // namespace scy::webrtc
 
-
-#endif // SCY_WEBRTC_H
+#endif // SCY_WebRTC_WEBRTC_H
 
 
 /// @\}

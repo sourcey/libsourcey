@@ -18,6 +18,7 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
 FFmpeg420Buffer::FFmpeg420Buffer(int width, int height,
@@ -110,7 +111,7 @@ rtc::scoped_refptr<webrtc::VideoFrameBuffer> FFmpeg420Buffer::NativeToI420Buffer
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /// @\}

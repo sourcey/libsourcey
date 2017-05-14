@@ -20,8 +20,8 @@
 #include "webrtc/base/constructormagic.h"
 
 
-namespace scy
-{
+namespace scy {
+namespace wrtc {
 
 
 // Generates YUV420 frames with a "landscape with striped crosshair" in the
@@ -105,7 +105,7 @@ private:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // SCY_WebRTC_YuvFrameGenerator_H

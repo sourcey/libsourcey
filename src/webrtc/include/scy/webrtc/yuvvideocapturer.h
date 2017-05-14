@@ -135,7 +135,7 @@ private:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

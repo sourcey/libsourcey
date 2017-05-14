@@ -19,6 +19,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class ImageSequenceRecorder
@@ -45,7 +46,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

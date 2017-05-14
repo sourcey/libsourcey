@@ -23,27 +23,21 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
-/// This class implements an `AudioDeviceModule` that can be used to detect if
-/// audio is being received properly if it is fed by another `AudioDeviceModule`
-/// in some arbitrary audio pipeline where they are connected. It does not play
-/// out or record any audio so it does not need access to any hardware and can
-/// therefore be used in the gtest testing framework.
-///
-/// Note P postfix of a function indicates that it should only be called by the
-/// processing thread.
+/// This class implements a fake `AudioDeviceModule` that does absolutely nothing.
 class FakeAudioDeviceModule : public webrtc::AudioDeviceModule,
-                               public rtc::MessageHandler
+                              public rtc::MessageHandler
 {
 public:
     /// Creates a `FakeAudioDeviceModule` or returns NULL on failure.
     static rtc::scoped_refptr<FakeAudioDeviceModule> Create();
 
     /// Following functions are inherited from `webrtc::AudioDeviceModule`.
-    /// Only functions called by `PeerConnection` are implemented, the rest do
+    /// Only functions called by `Peer` are implemented, the rest do
     /// nothing and return success. If a function is not expected to be called
-    /// by `PeerConnection` an assertion is triggered if it is in fact called.
+    /// by `Peer` an assertion is triggered if it is in fact called.
     int64_t TimeUntilNextProcess() override;
     void Process() override;
 
@@ -90,10 +84,8 @@ public:
     int32_t SetAGC(bool enable) override;
     bool AGC() const override;
 
-    int32_t SetWaveOutVolume(uint16_t volume_left,
-                             uint16_t volume_right) override;
-    int32_t WaveOutVolume(uint16_t* volume_left,
-                          uint16_t* volume_right) const override;
+    int32_t SetWaveOutVolume(uint16_t volume_left, uint16_t volume_right) override;
+    int32_t WaveOutVolume(uint16_t* volume_left, uint16_t* volume_right) const override;
 
     int32_t InitSpeaker() override;
     bool SpeakerIsInitialized() const override;
@@ -136,8 +128,7 @@ public:
     int32_t SetRecordingChannel(const ChannelType channel) override;
     int32_t RecordingChannel(ChannelType* channel) const override;
 
-    int32_t SetPlayoutBuffer(const BufferType type,
-                             uint16_t size_ms = 0) override;
+    int32_t SetPlayoutBuffer(const BufferType type, uint16_t size_ms = 0) override;
     int32_t PlayoutBuffer(BufferType* type, uint16_t* size_ms) const override;
     int32_t PlayoutDelay(uint16_t* delay_ms) const override;
     int32_t RecordingDelay(uint16_t* delay_ms) const override;
@@ -194,7 +185,6 @@ protected:
     virtual ~FakeAudioDeviceModule();
 
 private:
-
     /// The time in milliseconds when Process() was last called or 0 if no call
     /// has been made.
     int64_t _lastProcessTimeMS;
@@ -213,59 +203,12 @@ private:
     /// the mic level so it just feeds back what it receives.
     uint32_t _currentMicLevel;
 
-    /// Protects variables that are accessed from `_processThread` and
-    /// the main thread.
+    /// Protects variables for multithread access.
     rtc::CriticalSection _crit;
-
-
-    // /// Initializes the state of the `FakeAudioDeviceModule`. This API is called on
-    // /// creation by the `Create()` API.
-    // bool Initialize();
-
-    // /// Returns true/false depending on if recording or playback has been
-    // /// enabled/started.
-    // bool shouldStartProcessing();
-    //
-    // /// Starts or stops the pushing and pulling of audio frames.
-    // void updateProcessing(bool start);
-    //
-    // /// Starts the periodic calling of `ProcessFrame()` in a thread safe way.
-    // void startProcessP();
-    //
-    // /// Periodcally called function that ensures that frames are pulled and
-    // /// pushed
-    // /// periodically if enabled/started.
-    // void processFrameP();
-    //
-    // /// Pulls frames from the registered webrtc::AudioTransport.
-    // void receiveFrameP();
-    //
-    // /// Pushes frames to the registered webrtc::AudioTransport.
-    // void sendFrameP();
-    //
-    // /// `_nextFrameTime` is updated in a non-drifting manner to indicate the
-    // /// next
-    // /// wall clock time the next frame should be generated and received.
-    // /// `_started`
-    // /// ensures that _nextFrameTime can be initialized properly on first call.
-    // bool _started;
-    // int64_t _nextFrameTime;
-    //
-    // std::unique_ptr<rtc::Thread> _processThread;
-    //
-    // /// A FIFO buffer that stores samples from the audio source to be sent.
-    // av::AudioBuffer _sendFifo;
-    //
-    // /// A buffer with enough storage for a 10ms of samples to send.
-    // std::vector<Sample> _sendSamples;
-
-    // /// Protects |_audioCallback| that is accessed from `_processThread` and
-    // /// the main thread.
-    // rtc::CriticalSection _critCallback;
 };
 
 
-} /// namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // SCY_WebRTC_FakeAudioDeviceModule_H

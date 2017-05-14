@@ -31,13 +31,11 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
-/// This class implements an `AudioDeviceModule` that can be used to detect if
-/// audio is being received properly if it is fed by another `AudioDeviceModule`
-/// in some arbitrary audio pipeline where they are connected. It does not play
-/// out or record any audio so it does not need access to any hardware and can
-/// therefore be used in the gtest testing framework.
+/// This class implements an `AudioDeviceModule` that can be used to process
+/// arbitrary audio packets. This class is send only, recording is not implemented
 ///
 /// Note P postfix of a function indicates that it should only be called by the
 /// processing thread.
@@ -54,9 +52,9 @@ public:
     void onAudioCaptured(av::AudioPacket& packet);
 
     /// Following functions are inherited from `webrtc::AudioDeviceModule`.
-    /// Only functions called by `PeerConnection` are implemented, the rest do
+    /// Only functions called by `Peer` are implemented, the rest do
     /// nothing and return success. If a function is not expected to be called
-    /// by `PeerConnection` an assertion is triggered if it is in fact called.
+    /// by `Peer` an assertion is triggered if it is in fact called.
     int64_t TimeUntilNextProcess() override;
     void Process() override;
 
@@ -103,10 +101,8 @@ public:
     int32_t SetAGC(bool enable) override;
     bool AGC() const override;
 
-    int32_t SetWaveOutVolume(uint16_t volume_left,
-                             uint16_t volume_right) override;
-    int32_t WaveOutVolume(uint16_t* volume_left,
-                          uint16_t* volume_right) const override;
+    int32_t SetWaveOutVolume(uint16_t volume_left, uint16_t volume_right) override;
+    int32_t WaveOutVolume(uint16_t* volume_left, uint16_t* volume_right) const override;
 
     int32_t InitSpeaker() override;
     bool SpeakerIsInitialized() const override;
@@ -149,8 +145,7 @@ public:
     int32_t SetRecordingChannel(const ChannelType channel) override;
     int32_t RecordingChannel(ChannelType* channel) const override;
 
-    int32_t SetPlayoutBuffer(const BufferType type,
-                             uint16_t size_ms = 0) override;
+    int32_t SetPlayoutBuffer(const BufferType type, uint16_t size_ms = 0) override;
     int32_t PlayoutBuffer(BufferType* type, uint16_t* size_ms) const override;
     int32_t PlayoutDelay(uint16_t* delay_ms) const override;
     int32_t RecordingDelay(uint16_t* delay_ms) const override;
@@ -251,10 +246,8 @@ private:
     uint32_t _currentMicLevel;
 
     /// `_nextFrameTime` is updated in a non-drifting manner to indicate the
-    /// next
-    /// wall clock time the next frame should be generated and received.
-    /// `_started`
-    /// ensures that _nextFrameTime can be initialized properly on first call.
+    /// next wall clock time the next frame should be generated and received.
+    /// `_started` ensures that _nextFrameTime can be initialized properly on first call.
     bool _started;
     int64_t _nextFrameTime;
 
@@ -276,7 +269,7 @@ private:
 };
 
 
-} /// namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

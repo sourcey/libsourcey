@@ -22,6 +22,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 /// VideoPacketSource implements a simple `cricket::VideoCapturer` that
@@ -78,7 +79,7 @@ protected:
 // };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

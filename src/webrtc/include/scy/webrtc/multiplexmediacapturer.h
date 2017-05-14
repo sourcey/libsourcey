@@ -25,6 +25,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class MultiplexMediaCapturer
@@ -51,7 +52,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

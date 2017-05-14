@@ -22,32 +22,14 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
-
-// // Audio sample value that is high enough that it doesn't occur naturally when
-// // frames are being faked. E.g. NetEq will not generate this large sample value
-// // unless it has received an audio frame containing a sample of this value.
-// // Even simpler buffers would likely just contain audio sample values of 0.
-// static const int kHighSampleValue = 10000;
 
 // Same value as src/modules/audio_device/main/source/audio_device_config.h in
 // https://code.google.com/p/webrtc/
 static const int kAdmMaxIdleTimeProcess = 1000;
-
-// // Constants here are derived by running VoE using a real ADM.
-// // The constants correspond to 10ms of mono audio at 44kHz.
-// static const int kTimePerFrameMs = 10;
-// static const uint8_t kNumberOfChannels = 2; // 1;
-// static const int kSamplesPerSecond = 44000;
-// static const int kTotalDelayMs = 0;
-// static const int kClockDriftMs = 0;
 static const uint32_t kMaxVolume = 14392;
-//
-// // The value for the following constants have been derived by running VoE
-// // using a real ADM. The constants correspond to 10ms of mono audio at 44kHz.
-// static const size_t kNumberSamples = 440;
-// static const size_t kNumberBytesPerSample = sizeof(FakeAudioDeviceModule::Sample);
-// static const size_t kNumberBufferBytes = kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
+
 
 enum
 {
@@ -64,43 +46,19 @@ FakeAudioDeviceModule::FakeAudioDeviceModule()
     , _playIsInitialized(false)
     , _recIsInitialized(false)
     , _currentMicLevel(kMaxVolume)
-    // , _started(false)
-    // , _nextFrameTime(0)
-    // , _sendSamples(kNumberBufferBytes)
 {
 }
 
 FakeAudioDeviceModule::~FakeAudioDeviceModule()
 {
-    // if (_processThread) {
-    //     _processThread->Stop();
-    // }
 }
 
 rtc::scoped_refptr<FakeAudioDeviceModule> FakeAudioDeviceModule::Create()
 {
     rtc::scoped_refptr<FakeAudioDeviceModule> capture_module(
         new rtc::RefCountedObject<FakeAudioDeviceModule>());
-    // if (!capture_module->Initialize()) {
-    //     return nullptr;
-    // }
     return capture_module;
 }
-
-// void FakeAudioDeviceModule::onAudioCaptured(av::AudioPacket& packet)
-// {
-//     DebugL << "Audio frame captured" << endl;
-//
-//     // assert(_processThread->IsCurrent());
-//     rtc::CritScope cs(&_critCallback);
-//     if (!_audioCallback) {
-//         return;
-//     }
-//
-//     // TODO: Implement planar formats
-//     auto data = packet.data();
-//     _sendFifo.write((void**)&data, packet.numSamples);
-// }
 
 void FakeAudioDeviceModule::OnMessage(rtc::Message* msg)
 {
@@ -117,133 +75,6 @@ void FakeAudioDeviceModule::OnMessage(rtc::Message* msg)
             assert(false);
     }
 }
-
-// bool FakeAudioDeviceModule::Initialize()
-// {
-//     // Allocate the send audio FIFO buffer
-//     _sendFifo.close();
-//     _sendFifo.alloc("s16", kNumberOfChannels);
-//
-//     // Set the send buffer samples high enough that it would not occur on the
-//     // remote side unless a packet containing a sample of that magnitude has
-//     // been sent to it. Note that the audio processing pipeline will likely
-//     // distort the original signal.
-//     // SetSendBuffer(kHighSampleValue);
-//     _lastProcessTimeMS = rtc::TimeMillis();
-//     return true;
-// }
-//
-// bool FakeAudioDeviceModule::shouldStartProcessing()
-// {
-//     return _recording || _playing;
-// }
-
-// void FakeAudioDeviceModule::updateProcessing(bool start)
-// {
-//     // if (start) {
-//     //     if (!_processThread) {
-//     //         _processThread.reset(new rtc::Thread());
-//     //         _processThread->Start();
-//     //     }
-//     //     _processThread->Post(RTC_FROM_HERE, this, MSG_START_PROCESS);
-//     // } else {
-//     //     if (_processThread) {
-//     //         _processThread->Stop();
-//     //         _processThread.reset(nullptr);
-//     //     }
-//     //     _started = false;
-//     // }
-// }
-//
-// void FakeAudioDeviceModule::startProcessP()
-// {
-//     assert(_processThread->IsCurrent());
-//     if (_started) {
-//         // Already started.
-//         return;
-//     }
-//     processFrameP();
-// }
-//
-// void FakeAudioDeviceModule::processFrameP()
-// {
-//     assert(_processThread->IsCurrent());
-//     if (!_started) {
-//         _nextFrameTime = rtc::TimeMillis();
-//         _started = true;
-//     }
-//
-//     {
-//         rtc::CritScope cs(&_crit);
-//         // Receive and send frames every kTimePerFrameMs.
-//         if (_playing) {
-//             receiveFrameP();
-//         }
-//         if (_recording) {
-//             sendFrameP();
-//         }
-//     }
-//
-//     _nextFrameTime += kTimePerFrameMs;
-//     const int64_t current_time = rtc::TimeMillis();
-//     const int64_t wait_time =
-//         (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
-//     _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this, MSG_RUN_PROCESS);
-// }
-//
-// void FakeAudioDeviceModule::sendFrameP()
-// {
-//     assert(_processThread->IsCurrent());
-//     rtc::CritScope cs(&_critCallback);
-//     if (!_audioCallback) {
-//         return;
-//     }
-//     bool key_pressed = false;
-//     uint32_t current_mic_level = 0;
-//     MicrophoneVolume(&current_mic_level);
-//
-//     auto samples = &_sendSamples[0];
-//     if (!_sendFifo.read((void**)&samples, kNumberSamples)) {
-//         InfoL << "No audio frames in send buffer" << endl;
-//         return;
-//     }
-//
-//     TraceA("Send audio")
-//     if (_audioCallback->RecordedDataIsAvailable(
-//             samples, kNumberSamples, kNumberBytesPerSample, kNumberOfChannels,
-//             kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,
-//             key_pressed, current_mic_level) != 0) {
-//         assert(false);
-//     }
-//
-//     SetMicrophoneVolume(current_mic_level);
-// }
-//
-// void FakeAudioDeviceModule::receiveFrameP()
-// {
-//     assert(_processThread->IsCurrent());
-//     assert(0 && "playout not implemented");
-//
-//     // {
-//     //   rtc::CritScope cs(&_critCallback);
-//     //   if (!_audioCallback) {
-//     //     return;
-//     //   }
-//     //   size_t nSamplesOut = 0;
-//     //   int64_t elapsed_time_ms = 0;
-//     //   int64_t ntp_time_ms = 0;
-//     //   if (_audioCallback->NeedMorePlayData(kNumberSamples,
-//     //                                        kNumberBytesPerSample,
-//     //                                        kNumberOfChannels,
-//     //                                        kSamplesPerSecond,
-//     //                                        rec_sendFifo_, nSamplesOut,
-//     //                                        &elapsed_time_ms, &ntp_time_ms) !=
-//     //                                        0) {
-//     //     assert(false);
-//     //   }
-//     //   assert(nSamplesOut == kNumberSamples);
-//     // }
-// }
 
 int64_t FakeAudioDeviceModule::TimeUntilNextProcess()
 {
@@ -409,21 +240,16 @@ int32_t FakeAudioDeviceModule::StartPlayout()
         rtc::CritScope cs(&_crit);
         _playing = true;
     }
-    // bool start = true;
-    // updateProcessing(start);
     return 0;
 }
 
 int32_t FakeAudioDeviceModule::StopPlayout()
 {
     DebugL << "Stop playout" << endl;
-    // bool start = false;
     {
         rtc::CritScope cs(&_crit);
         _playing = false;
-        // start = shouldStartProcessing();
     }
-    // updateProcessing(start);
     return 0;
 }
 
@@ -443,21 +269,16 @@ int32_t FakeAudioDeviceModule::StartRecording()
         rtc::CritScope cs(&_crit);
         _recording = true;
     }
-    // bool start = true;
-    // updateProcessing(start);
     return 0;
 }
 
 int32_t FakeAudioDeviceModule::StopRecording()
 {
     DebugL << "Stop recording" << endl;
-    // bool start = false;
     {
         rtc::CritScope cs(&_crit);
         _recording = false;
-        // start = shouldStartProcessing();
     }
-    // updateProcessing(start);
     return 0;
 }
 
@@ -814,7 +635,7 @@ int32_t FakeAudioDeviceModule::GetLoudspeakerStatus(bool* /*enabled*/) const
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /// @\}

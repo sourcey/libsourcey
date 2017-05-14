@@ -98,7 +98,7 @@ $(document).ready(function() {
     });
 
     client.on('error', function(error, message) {
-        console.log('Connection error:', error, message)
+        console.log('Peer error:', error, message)
     });
 
     client.on('addPeer', function(peer) {

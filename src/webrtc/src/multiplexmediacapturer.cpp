@@ -24,6 +24,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 MultiplexMediaCapturer::MultiplexMediaCapturer()
@@ -90,7 +91,7 @@ void MultiplexMediaCapturer::addMediaTracks(
     webrtc::MediaStreamInterface* stream)
 {
     // This capturer is multicast, meaning it can be used as the source 
-    // for multiple PeerConnection objects.
+    // for multiple Peer objects.
     //
     // KLUDGE: Pixel format conversion should happen on the 
     // VideoPacketSource rather than on the decoder becasue different  
@@ -128,7 +129,7 @@ void MultiplexMediaCapturer::stop()
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

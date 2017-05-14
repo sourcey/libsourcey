@@ -22,10 +22,11 @@
 
 using std::endl;
 
-#define SCY_USE_DECODER_PTS 1
+#define SCY_WebRTC_USE_DECODER_PTS 1
 
 
 namespace scy {
+namespace wrtc {
 
 
 VideoPacketSource::VideoPacketSource(int width, int height, int fps, uint32_t fourcc)
@@ -129,7 +130,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
     int64_t timestamp;
     int64_t translated_camera_time_us;
 
-#if SCY_USE_DECODER_PTS
+#if SCY_WebRTC_USE_DECODER_PTS
     // Set the packet timestamp.
     // Since the stream may not be playing from the beginning we
     // store the first packet timestamp and subtract it from
@@ -222,7 +223,7 @@ bool VideoPacketSource::IsScreencast() const
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

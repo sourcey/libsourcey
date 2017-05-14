@@ -27,6 +27,8 @@ namespace scy {
 
 Signaler::Signaler(const smpl::Client::Options& options)
     : _client(options)
+    , _capturer()
+    , _context(_capturer.getAudioModule())
 {
     // Setup the signalling client
     _client.StateChange += slot(this, &Signaler::onClientStateChange);
@@ -36,14 +38,14 @@ Signaler::Signaler(const smpl::Client::Options& options)
     _client.connect();
 
     // Setup a PeerConnectionFactory with our custom ADM
-    _networkThread = rtc::Thread::CreateWithSocketServer();
-    _workerThread = rtc::Thread::Create();
-    if (!_networkThread->Start() || !_workerThread->Start())
-        throw std::runtime_error("Failed to start threads");
+    //_networkThread = rtc::Thread::CreateWithSocketServer();
+    //_workerThread = rtc::Thread::Create();
+    //if (!_networkThread->Start() || !_workerThread->Start())
+    //    throw std::runtime_error("Failed to start threads");
 
-    _factory = webrtc::CreatePeerConnectionFactory(
-        _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
-        _capturer.getAudioModule(), nullptr, nullptr);
+    //_factory = webrtc::CreatePeerConnectionFactory(
+    //    _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
+    //    _capturer.getAudioModule(), nullptr, nullptr);
 }
 
 
@@ -60,28 +62,28 @@ void Signaler::startStreaming(const std::string& file, bool looping)
 }
 
 
-void Signaler::sendSDP(PeerConnection* conn, const std::string& type,
+void Signaler::sendSDP(wrtc::Peer* conn, const std::string& type,
                        const std::string& sdp)
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
     json::value desc;
-    desc[kSessionDescriptionTypeName] = type;
-    desc[kSessionDescriptionSdpName] = sdp;
+    desc[wrtc::kSessionDescriptionTypeName] = type;
+    desc[wrtc::kSessionDescriptionSdpName] = sdp;
     m[type] = desc;
 
     postMessage(m);
 }
 
 
-void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid,
+void Signaler::sendCandidate(wrtc::Peer* conn, const std::string& mid,
                              int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
     json::value desc;
-    desc[kCandidateSdpMidName] = mid;
-    desc[kCandidateSdpMlineIndexName] = mlineindex;
-    desc[kCandidateSdpName] = sdp;
+    desc[wrtc::kCandidateSdpMidName] = mid;
+    desc[wrtc::kCandidateSdpMlineIndexName] = mlineindex;
+    desc[wrtc::kCandidateSdpName] = sdp;
     m["candidate"] = desc;
 
     postMessage(m);
@@ -94,26 +96,26 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
         return;
     DebugA("Peer connected: ", peer.id())
 
-    if (PeerConnectionManager::exists(peer.id())) {
+    if (wrtc::PeerManager::exists(peer.id())) {
         DebugA("Peer already has session: ", peer.id())
         return;
     }
 
-    // Create the Peer Connection
-    auto conn = new PeerConnection(this, peer.id(), "", PeerConnection::Offer);
+    // Create the Peer Peer
+    auto conn = new wrtc::Peer(this, &_context, peer.id(), "", wrtc::Peer::Offer);
     conn->constraints().SetMandatoryReceiveAudio(false);
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
 
     // Create the media stream and attach decoder  
     // output to the peer connection
-    _capturer.addMediaTracks(_factory, conn->createMediaStream());
+    _capturer.addMediaTracks(_context.factory, conn->createMediaStream());
 
     // Send the Offer SDP
     conn->createConnection();
     conn->createOffer();
 
-    PeerConnectionManager::add(peer.id(), conn);
+    wrtc::PeerManager::add(peer.id(), conn);
 }
 
 
@@ -136,12 +138,12 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
     DebugL << "Peer disconnected" << endl;
 
-    auto conn = PeerConnectionManager::remove(peer.id());
+    auto conn = wrtc::PeerManager::remove(peer.id());
     if (conn) {
         DebugA("Deleting peer connection: ", peer.id())
         // async delete not essential, but to be safe
         // delete conn;
-        deleteLater<PeerConnection>(conn); 
+        deleteLater<wrtc::Peer>(conn); 
     }
 }
 
@@ -165,13 +167,13 @@ void Signaler::onClientStateChange(void*, sockio::ClientState& state, const sock
 }
 
 
-void Signaler::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void Signaler::onAddRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }
 
 
-void Signaler::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
+void Signaler::onRemoveRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }

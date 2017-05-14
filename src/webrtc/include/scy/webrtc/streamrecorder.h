@@ -23,6 +23,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class StreamRecorder : public rtc::VideoSinkInterface<webrtc::VideoFrame>,
@@ -51,7 +52,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

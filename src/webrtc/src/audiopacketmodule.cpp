@@ -24,6 +24,7 @@ using std::endl;
 
 
 namespace scy {
+namespace wrtc {
 
 
 // Audio sample value that is high enough that it doesn't occur naturally when
@@ -816,7 +817,7 @@ int32_t AudioPacketModule::GetLoudspeakerStatus(bool* /*enabled*/) const
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif // HAVE_FFMPEG

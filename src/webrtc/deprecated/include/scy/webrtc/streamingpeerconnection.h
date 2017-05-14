@@ -19,6 +19,7 @@
 
 
 namespace scy {
+namespace wrtc {
 
 
 class StreamingPeerConnection : public PeerConnection
@@ -33,8 +34,8 @@ public:
     virtual rtc::scoped_refptr<webrtc::MediaStreamInterface>
     createMediaStream();
 
-    virtual void OnIceConnectionChange(
-        webrtc::PeerConnectionInterface::IceConnectionState new_state);
+    virtual void OnIcePeerChange(
+        webrtc::PeerConnectionInterface::IcePeerState new_state);
 
 protected:
     std::string _file;
@@ -46,7 +47,7 @@ protected:
 };
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 #endif

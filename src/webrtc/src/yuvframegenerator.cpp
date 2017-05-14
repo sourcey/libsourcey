@@ -20,8 +20,8 @@
 #include <assert.h>
 
 
-namespace scy
-{
+namespace scy {
+namespace wrtc {
 
 
 // These values were figured out by trial and error. If you change any
@@ -350,7 +350,7 @@ void YuvFrameGenerator::DrawBlockRectangle(
 }
 
 
-} // namespace scy
+} } // namespace scy::wrtc
 
 
 /*
