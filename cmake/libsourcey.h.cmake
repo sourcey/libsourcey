@@ -1,16 +1,19 @@
-// Name of package
+// Name of library
 #define SCY_NAME "${LibSourcey_NAME}"
 
-// Define to the version of this package.
+// Define the library version
 #define SCY_VERSION "${LibSourcey_VERSION}"
+#define SCY_VERSION_MAJOR ${LibSourcey_VERSION_MAJOR}
+#define SCY_VERSION_MINOR ${LibSourcey_VERSION_MINOR}
+#define SCY_VERSION_PATCH ${LibSourcey_VERSION_PATCH}
 
-// Define the source path.
+// Define the source path
 #define SCY_SOURCE_DIR "${LibSourcey_SOURCE_DIR}"
 
-// Define the build path.
+// Define the build path
 #define SCY_BUILD_DIR "${LibSourcey_BUILD_DIR}"
 
-// Define the installation path.
+// Define the installation path
 #define SCY_INSTALL_DIR "${LibSourcey_INSTALL_DIR}"
 
 // Disable logging
@@ -81,25 +84,25 @@
 /// Platform and compiler definitions
 //
 
-#ifdef _WIN32 /// Windows (x64 and x86)
+#ifdef _WIN32 // Windows (x64 and x86)
 #define SCY_WIN
 #endif
-#if __unix__ /// Unix
+#if __unix__ // Unix
 #define SCY_UNIX
 #endif
-#if __posix__ /// POSIX
+#if __posix__ // POSIX
 #define SCY_POSIX
 #endif
-#if __linux__ /// Linux
+#if __linux__ // Linux
 #define SCY_LINUX
 #endif
-#if __APPLE__ /// Mac OS
+#if __APPLE__ // Mac OS
 #define SCY_APPLE
 #endif
-#if __GNUC__ /// GCC compiler
+#if __GNUC__ // GCC compiler
 #define SCY_GNUC
 #endif
-#if defined(__MINGW32__) || defined(__MINGW64__) /// MinGW
+#if defined(__MINGW32__) || defined(__MINGW64__) // MinGW
 #define SCY_MINGW
 #endif
 
@@ -116,18 +119,15 @@
 #error Must compile with /MD, /MDd, /MT or /MTd
 #endif
 
-
 // Check debug/release settings consistency
 #if defined(NDEBUG) && defined(_DEBUG)
 #error Inconsistent build settings (check for /MD[d])
 #endif
 
-
 // Unicode Support
 #if defined(UNICODE)
 #define SCY_UNICODE
 #endif
-
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
