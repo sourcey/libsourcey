@@ -39,7 +39,7 @@ public:
     std::unique_ptr<rtc::NetworkManager> networkManager;
     std::unique_ptr<rtc::PacketSocketFactory> socketFactory;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory;
-    rtc::scoped_refptr<webrtc::AudioDeviceModule> audioDeviceManager;
+    // rtc::scoped_refptr<webrtc::AudioDeviceModule> audioDeviceManager;
 };
 
 

@@ -13,8 +13,12 @@
 #include "scy/error.h"
 #include "scy/uv/handle.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef SCY_WIN
 #include <windows.h>
+#include <winsock2.h>
 #else
 #include <unistd.h>
 #endif
@@ -84,6 +88,32 @@ void pause()
 {
     std::puts("Press enter to continue...");
     std::getchar();
+}
+
+
+std::string getHostname()
+{
+    char name[256];
+    gethostname(name, 256);
+    return name;
+}
+
+
+std::string getEnv(const std::string& name, const std::string& defaultValue)
+{
+    const char* value = getenv(name.c_str());
+    if (value)
+        return value;
+    return defaultValue;
+}
+
+
+bool getEnvBool(const std::string& name)
+{
+    const char* value = getenv(name.c_str());
+    return value && (
+        strcmp(value, "1") == 0 ||
+        strcmp(value, "true") == 0);
 }
 
 

@@ -36,7 +36,7 @@ PeerFactoryContext::PeerFactoryContext(
     cricket::WebRtcVideoDecoderFactory* video_decoder_factory,
     rtc::scoped_refptr<webrtc::AudioEncoderFactory> audio_encoder_factory,
     rtc::scoped_refptr<webrtc::AudioDecoderFactory> audio_decoder_factory)
-    : audioDeviceManager(default_adm)
+    // : audioDeviceManager(default_adm)
 {
     // Setup threads
     networkThread = rtc::Thread::CreateWithSocketServer();
@@ -57,7 +57,8 @@ PeerFactoryContext::PeerFactoryContext(
             //audioDeviceManager = FakeAudioCaptureModule::Create();
         factory = webrtc::CreatePeerConnectionFactory(
             networkThread.get(), workerThread.get(), rtc::Thread::Current(),
-            audioDeviceManager.get(), video_encoder_factory, video_decoder_factory);
+            default_adm, video_encoder_factory, video_decoder_factory);
+            // audioDeviceManager.get(), video_encoder_factory, video_decoder_factory);
         //factory = webrtc::CreatePeerConnectionFactory();
     }
     if (!factory)

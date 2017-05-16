@@ -120,13 +120,14 @@ macro(define_sourcey_module name)
   # Add install routine, unless lib is header only
   if (lib_srcs)
     install(TARGETS ${name}
-      RUNTIME DESTINATION bin COMPONENT main
-      LIBRARY DESTINATION lib COMPONENT main
-      ARCHIVE DESTINATION lib COMPONENT main)
+      RUNTIME DESTINATION bin COMPONENT libs
+      LIBRARY DESTINATION lib COMPONENT libs
+      ARCHIVE DESTINATION lib COMPONENT dev)
   endif()
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    DESTINATION "${LibSourcey_INSTALL_DIR}")
+    DESTINATION "${LibSourcey_INSTALL_DIR}"
+    COMPONENT dev)
 
   # Set HAVE_SOURCEY_XXX at parent scope for use in libsourcey.h
   set(HAVE_SOURCEY_${name} ON PARENT_SCOPE)
@@ -191,7 +192,7 @@ macro(define_sourcey_module_sample name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/samples/${name}" COMPONENT main)
+  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/samples/${name}" COMPONENT samples)
 endmacro()
 
 
@@ -235,7 +236,7 @@ macro(define_libsourcey_test name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "")
 
-  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/tests/${name}" COMPONENT main)
+  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/tests/${name}" COMPONENT tests)
 endmacro()
 
 
@@ -274,7 +275,7 @@ macro(define_libsourcey_library name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-  install(TARGETS ${name} DESTINATION "bin/${name}" COMPONENT main)
+  install(TARGETS ${name} DESTINATION "bin/${name}" COMPONENT libs)
 endmacro()
 
 
@@ -351,8 +352,7 @@ macro(define_sourcey_application name)
     set(${name}_INSTALL_DESTINATION "bin")
   endif()
   install(TARGETS ${name}
-    RUNTIME DESTINATION ${${name}_INSTALL_DESTINATION} COMPONENT main)
-
+    RUNTIME DESTINATION ${${name}_INSTALL_DESTINATION} COMPONENT apps)
 endmacro()
 
 
@@ -438,10 +438,10 @@ macro(define_sourcey_dependency name)
     set(INSTALL_DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
   endif()
   install(TARGETS ${name}
-    RUNTIME DESTINATION ${INSTALL_DESTINATION} COMPONENT main
-    ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT main
-    LIBRARY DESTINATION ${INSTALL_DESTINATION} COMPONENT main)
+    RUNTIME DESTINATION ${INSTALL_DESTINATION} COMPONENT libs
+    LIBRARY DESTINATION ${INSTALL_DESTINATION} COMPONENT libs
+    ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT dev)
 
   # install header include files
-  install(FILES ${${name}_HEADER_FILES} DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include)
+  install(FILES ${${name}_HEADER_FILES} DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include COMPONENT dev)
 endmacro()

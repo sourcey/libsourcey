@@ -33,6 +33,13 @@ endif()
 # cmake_policy(SET CMP0054 OLD)
 
 include(LibSourcey.cmake REQUIRED)
+# include(cmake/LibSourceyVersion.cmake)
+
+# ----------------------------------------------------------------------------
+#  Package configuration
+# ----------------------------------------------------------------------------
+
+include(cmake/LibSourceyPackage.cmake)
 
 # ----------------------------------------------------------------------------
 #  Include test target

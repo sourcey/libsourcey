@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.4.4)
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
+# cmake_minimum_required(VERSION 2.4.4)
+# set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
 
@@ -18,7 +18,6 @@ include(CheckTypeSize)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCSourceCompiles)
-enable_testing()
 
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(stdint.h HAVE_STDINT_H)
@@ -217,24 +216,24 @@ if(ENABLE_SOLUTION_FOLDERS)
 endif()
 
 # LibSourcey include minizip (see deps/minizip)
-#add_subdirectory("contrib")
+# add_subdirectory("contrib")
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     install(TARGETS zlib zlibstatic
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT libs
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT libs
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT dev)
 endif()
 
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}" COMPONENT dev)
 endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-endif()
+# if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#     install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
+# endif()
+# if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#     install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+# endif()
 
 #============================================================================
 # Example binaries

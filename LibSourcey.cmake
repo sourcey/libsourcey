@@ -287,15 +287,6 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   # ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp
   ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
 
-# Install specific vendor sources
-install(FILES ${LibSourcey_VENDOR_SOURCE_DIR}/json/src/json.hpp
-        DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include)
-
-# Copy CMake files to shared install directory
-install(DIRECTORY ${LibSourcey_DIR}/cmake
-        DESTINATION ${LibSourcey_SHARED_INSTALL_DIR}
-        FILES_MATCHING PATTERN "CMake*"  PATTERN "Find*")
-
 # Include inttypes.h for windows
 # if (MSVC)
 #   include_directories(${LibSourcey_VENDOR_SOURCE_DIR}/msvc)
@@ -333,6 +324,30 @@ if(LibSourcey_BUILD_DEPENDENCIES)
 endif()
 
 # ----------------------------------------------------------------------------
+# Install targets
+# ----------------------------------------------------------------------------
+
+# Install specific vendor headers
+install(FILES ${LibSourcey_VENDOR_SOURCE_DIR}/json/src/json.hpp
+  DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include
+  COMPONENT dev)
+
+# Copy CMake files to shared install directory
+install(DIRECTORY ${LibSourcey_DIR}/cmake
+  DESTINATION ${LibSourcey_SHARED_INSTALL_DIR}
+  COMPONENT dev
+  FILES_MATCHING PATTERN "CMake*"  PATTERN "Find*")
+
+# ----------------------------------------------------------------------------
+#  Install PkgConfig file
+# ----------------------------------------------------------------------------
+set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
+configure_file(
+  ${LibSourcey_DIR}/cmake/libsourcey.pc.cmake.in
+	${LibSourcey_PC} @ONLY)
+install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR} COMPONENT dev)
+
+# ----------------------------------------------------------------------------
 # Build our libsourcey.h file
 #
 # A directory will be created for each platform so the "libsourcey.h" file is
@@ -342,12 +357,6 @@ add_definitions(-DHAVE_CONFIG_H)
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_BUILD_DIR})
 
 # Variables for libsourcey.h.cmake
-#set(PACKAGE "LibSourcey")
-#set(PACKAGE_BUGREPORT "https://github.com/sourcey/libsourcey/issues")
-#set(PACKAGE_NAME "LibSourcey")
-#set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
-#set(PACKAGE_TARNAME "${PACKAGE}")
-#set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 set(SCY_ENABLE_LOGGING ${ENABLE_LOGGING})
 set(SCY_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 
@@ -356,13 +365,4 @@ status("Parsing 'libsourcey.h.cmake'")
 configure_file(
   ${LibSourcey_DIR}/cmake/libsourcey.h.cmake
   ${LibSourcey_CONFIG_FILE})
-install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include)
-
-# ----------------------------------------------------------------------------
-#  Install PkgConfig file
-# ----------------------------------------------------------------------------
-set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
-configure_file(
-    ${LibSourcey_DIR}/cmake/libsourcey.pc.cmake.in
-		${LibSourcey_PC} @ONLY)
-install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR})
+install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include COMPONENT dev)

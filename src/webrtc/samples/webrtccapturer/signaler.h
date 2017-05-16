@@ -31,7 +31,7 @@ public:
 
 protected:
 
-    /// SessionManager interface
+    /// PeerManager interface
     void sendSDP(wrtc::Peer* conn, const std::string& type, const std::string& sdp);
     void sendCandidate(wrtc::Peer* conn, const std::string& mid, int mlineindex, const std::string& sdp);
     void onAddRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream);

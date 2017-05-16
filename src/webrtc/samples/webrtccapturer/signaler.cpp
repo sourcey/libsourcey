@@ -138,11 +138,11 @@ void Signaler::onPeerCommand(smpl::Command& c)
         conn->constraints().SetMandatoryReceiveVideo(false);
         conn->constraints().SetAllowDtlsSctpDataChannels();
 
-        conn->setPortRange(40000, 40001);
+        // conn->setPortRange(40000, 40001);
 
         // Create tracks and device captures
         rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
-            _context.factory->CreateAudioTrack(wrtc::kAudioLabel, 
+            _context.factory->CreateAudioTrack(wrtc::kAudioLabel,
                 _context.factory->CreateAudioSource(nullptr)));
         rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track(
             _context.factory->CreateVideoTrack(wrtc::kVideoLabel,

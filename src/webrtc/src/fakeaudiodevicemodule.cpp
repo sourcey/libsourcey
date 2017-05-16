@@ -31,13 +31,6 @@ static const int kAdmMaxIdleTimeProcess = 1000;
 static const uint32_t kMaxVolume = 14392;
 
 
-enum
-{
-    MSG_START_PROCESS,
-    MSG_RUN_PROCESS
-};
-
-
 FakeAudioDeviceModule::FakeAudioDeviceModule()
     : _lastProcessTimeMS(0)
     , _audioCallback(nullptr)
@@ -62,18 +55,6 @@ rtc::scoped_refptr<FakeAudioDeviceModule> FakeAudioDeviceModule::Create()
 
 void FakeAudioDeviceModule::OnMessage(rtc::Message* msg)
 {
-    switch (msg->message_id) {
-        case MSG_START_PROCESS:
-            // startProcessP();
-            break;
-        case MSG_RUN_PROCESS:
-            // processFrameP();
-            break;
-        default:
-            // All existing messages should be caught. Getting here should never
-            // happen.
-            assert(false);
-    }
 }
 
 int64_t FakeAudioDeviceModule::TimeUntilNextProcess()

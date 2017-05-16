@@ -26,8 +26,8 @@
 #include "webrtc/common_video/include/video_frame_buffer.h"
 
 
-namespace scy
-{
+namespace scy {
+namespace wrtc {
 
 
 class YuvVideoCapturer : public cricket::VideoCapturer, public rtc::Thread

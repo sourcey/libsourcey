@@ -47,6 +47,16 @@ Base_API void sleep(int ms);
 /// Pause the current thread until enter is pressed.
 Base_API void pause();
 
+/// Return the system hostname.
+Base_API std::string getHostname();
+
+/// Return an environment variable or the default value.
+Base_API std::string getEnv(const std::string& name, const std::string& defaultValue = "");
+
+/// Return an environment variable boolean or the default value.
+/// The variable must be `1` or `true` for this function to return true.
+Base_API bool getEnvBool(const std::string& name);
+
 
 //
 /// Windows helpers

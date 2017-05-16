@@ -1,19 +1,17 @@
 # ----------------------------------------------------------------------------
 # Define the current LibSourcey version number
 # ----------------------------------------------------------------------------
-set(LibSourcey_VERSION_FILE "${LibSourcey_DIR}/src/base/include/scy/base.h")
+set(LibSourcey_VERSION_FILE "${LibSourcey_DIR}/VERSION")
 if(NOT EXISTS "${LibSourcey_VERSION_FILE}")
-  message(FATAL_ERROR "Cannot find base module headers.")
+  message(FATAL_ERROR "Cannot find VERSION file.")
 endif()
 
-FILE(STRINGS "${LibSourcey_VERSION_FILE}" LibSourcey_VERSION_PARTS REGEX "#define SCY_.+_VERSION[ ]+[0-9]+" )
+file(STRINGS "${LibSourcey_VERSION_FILE}" LibSourcey_VERSION)
 
-string(REGEX REPLACE ".+SCY_MAJOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MAJOR "${LibSourcey_VERSION_PARTS}")
-string(REGEX REPLACE ".+SCY_MINOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MINOR "${LibSourcey_VERSION_PARTS}")
-string(REGEX REPLACE ".+SCY_PATCH_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_PATCH "${LibSourcey_VERSION_PARTS}")
-
-set(LibSourcey_VERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}.${LibSourcey_VERSION_PATCH}")
-set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
+string(REPLACE "." ";" VERSION_LIST ${LibSourcey_VERSION})
+list(GET VERSION_LIST 0 LibSourcey_VERSION_MAJOR)
+list(GET VERSION_LIST 1 LibSourcey_VERSION_MINOR)
+list(GET VERSION_LIST 2 LibSourcey_VERSION_PATCH)
 
 if(WIN32)
   # Postfix of DLLs:
@@ -21,6 +19,6 @@ if(WIN32)
   set(LibSourcey_DEBUG_POSTFIX "d")
 else()
   # Postfix of so's:
-  set(LibSourcey_DLLVERSION "")
+	set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
   set(LibSourcey_DEBUG_POSTFIX "")
 endif()

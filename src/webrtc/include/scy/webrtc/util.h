@@ -24,13 +24,11 @@
 
 namespace scy {
 namespace wrtc {
-// namespace webrtc {
 
 
 std::vector<std::string> getVideoCaptureDevices();
 
 std::unique_ptr<cricket::VideoCapturer> openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
-// cricket::VideoCapturer* openWebRtcVideoCaptureDevice(const std::string& deviceName = "");
 
 
 } } // namespace scy::wrtc
