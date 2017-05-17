@@ -22,13 +22,10 @@ GENERATE_LATEX=NO
 EXCLUDE_PATTERNS = */anionu* */test* */apps* */samples*
 
 npm install moxygen
-./node_modules/moxygen/index.js --verbose ./doc/xml > API.md
-node ./moxygen/bin/moxygen.js --verbose ./biuld/doxygen/xml
-node ./moxygen/bin/moxygen.js --verbose --groups --output=./doc ./build/doxygen/xml
-node ./moxygen/bin/moxygen.js --verbose --groups --output ./doc/api.md ./build/doxygen/xml
+node ./node_modules/moxygen/bin/moxygen.js --verbose --groups --output=./doc/api-%s.md ./build/doxygen/xml
 
 npm install gitbook-cli
-./node_modules/gitbook-cli/bin/gitbook.js init
+node ./node_modules/gitbook-cli/bin/gitbook.js init
 
 https://github.com/contao/docs/blob/master/cookbook/book.json
 
