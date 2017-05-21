@@ -2,12 +2,8 @@
 # CMake file for LibSourcey
 # ============================================================================
 
-# C++ standard 14 minimum is required (wait until CMake 3.1 is widely used)
-# set(CMAKE_CXX_STANDARD 14)
-# set(CMAKE_CXX_STANDARD_REQUIRED on)
-
 # ----------------------------------------------------------------------------
-# LibSourcey Build paths
+# LibSourcey build paths
 # ----------------------------------------------------------------------------
 set(LibSourcey_NAME LibSourcey)
 set(LibSourcey_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -87,6 +83,14 @@ if(ENABLE_SOLUTION_FOLDERS)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMakeTargets")
 endif()
+
+# ----------------------------------------------------------------------------
+# C++ standard:
+# ----------------------------------------------------------------------------
+# C++ standard 14 minimum is required
+# Wait until CMake >= 3.1 is widely adopted to use CMAKE_CXX_STANDARD
+# set(CMAKE_CXX_STANDARD 14)
+# set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # ----------------------------------------------------------------------------
 # Use statically or dynamically linked CRT?
@@ -280,12 +284,12 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/zlib
   ${LibSourcey_VENDOR_BUILD_DIR}/zlib
   ${LibSourcey_VENDOR_SOURCE_DIR}/minizip
-  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio
-  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio/include
   ${LibSourcey_VENDOR_SOURCE_DIR}/libuv/include
   ${LibSourcey_VENDOR_SOURCE_DIR}/http_parser
-  # ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp
   ${LibSourcey_VENDOR_SOURCE_DIR}/json/src)
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio/include
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp
 
 # Include inttypes.h for windows
 # if (MSVC)
@@ -312,7 +316,7 @@ endforeach()
 
 # Condense related sublists into main variables
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_MODULE_INCLUDE_DIRS} ${LibSourcey_VENDOR_INCLUDE_DIRS})
-list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_MODULE_LIBRARY_DIRS})
+list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_MODULE_LIBRARY_DIRS} ${LibSourcey_BUILD_DIR})
 list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_MODULE_INCLUDE_LIBRARIES})
 
 # Remove any duplicates from our lists
@@ -342,6 +346,7 @@ install(DIRECTORY ${LibSourcey_DIR}/cmake
 #  Install PkgConfig file
 # ----------------------------------------------------------------------------
 set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
+status("Creating 'libsourcey.pc'")
 configure_file(
   ${LibSourcey_DIR}/cmake/libsourcey.pc.cmake.in
 	${LibSourcey_PC} @ONLY)
@@ -353,16 +358,14 @@ install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR} COMPONENT
 # A directory will be created for each platform so the "libsourcey.h" file is
 # not overwritten if CMake generates code in the same path.
 # ----------------------------------------------------------------------------
-add_definitions(-DHAVE_CONFIG_H)
-list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_BUILD_DIR})
 
-# Variables for libsourcey.h.cmake
+# Variables for libsourcey.h
 set(SCY_ENABLE_LOGGING ${ENABLE_LOGGING})
 set(SCY_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
-status("Parsing 'libsourcey.h.cmake'")
+status("Creating 'libsourcey.h'")
 configure_file(
-  ${LibSourcey_DIR}/cmake/libsourcey.h.cmake
+  ${LibSourcey_DIR}/cmake/libsourcey.h.cmake.in
   ${LibSourcey_CONFIG_FILE})
 install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include COMPONENT dev)

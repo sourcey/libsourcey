@@ -21,6 +21,7 @@ Handle::Handle(uv::Loop* loop, void* handle)
     : _loop(loop ? loop : uv::defaultLoop()) // nullptr will be uv_default_loop
     , _ptr((uv_handle_t*)handle) // nullptr or instance of uv_handle_t
     , _tid(std::this_thread::get_id())
+    , _initialized(false)
     , _closed(false)
 {
     if (_ptr)
@@ -38,10 +39,28 @@ Handle::~Handle()
 }
 
 
+void Handle::initialize()
+{
+    assert(_ptr && "handle must be set");
+    // the implementation should call `uv_init` on the handle
+    _initialized = true;
+    // _initialized = false;
+    _closed = false;
+    _error.reset();
+}
+
+
+void Handle::reset()
+{
+    close();
+    initialize();
+}
+
+
 void Handle::setLoop(uv::Loop* loop)
 {
     assertThread();
-    assert(_ptr == nullptr && "loop must be set before handle");
+    assert(_ptr == nullptr && "must be set before handle");
     _loop = loop;
 }
 
@@ -62,11 +81,7 @@ uv_handle_t* Handle::ptr() const
 
 bool Handle::initialized()
 {
-    if (_ptr &&
-        _ptr->type > UV_UNKNOWN_HANDLE &&
-        _ptr->type < UV_HANDLE_TYPE_MAX)
-        return true;
-    return false;
+    return _initialized;
 }
 
 
@@ -146,29 +161,41 @@ void Handle::setError(const scy::Error& err)
 }
 
 
+bool Handle::closing() const
+{
+    return !(uv_is_closing(_ptr) == 0);
+}
+
+
 void Handle::close()
 {
     assertThread();
-    if (_ptr) {
-        if (initialized() && !_closed && !uv_is_closing(_ptr)) {
-            uv_close(_ptr, [](uv_handle_t* handle) {
-                delete handle;
-            });
-        }
-        else {
-            // If the handle isn't initialized don't call uv_close,
-            // just delete the pointer.
-            delete _ptr;
-        }
 
-        // We no longer know about the handle.
-        // The handle pointer has been deleted or will be deleted by uv_close.
-        _ptr = nullptr;
-        _closed = true;
+    // Do nothing if the pointer is null.
+    if (!_ptr)
+        return;
 
-        // Call onClose to run final callbacks.
-        onClose();
+    // Call `uv_close` on the handle if its initialized ie. `uv_init` has been
+    // called, and the handle and not currently closing.
+    if (_initialized && !_closed && !closing()) {
+        uv_close(_ptr, [](uv_handle_t* handle) {
+            delete handle;
+        });
     }
+
+    // Otherwise just delete the pointer directly.
+    else {
+        delete _ptr;
+    }
+
+    // Either the handle has been deleted or will be deleted by `uv_close`,
+    // so just nullify the pointer.
+    _ptr = nullptr;
+    _initialized = false;
+    _closed = true;
+
+    // Call onClose to run external callbacks.
+    onClose();
 }
 
 

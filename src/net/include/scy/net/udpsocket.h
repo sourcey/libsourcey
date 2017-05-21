@@ -23,6 +23,7 @@ namespace scy {
 namespace net {
 
 
+/// UDN socket implementation.
 class Net_API UDPSocket : public net::Socket, public uv::Handle
 {
 public:
@@ -32,38 +33,38 @@ public:
     UDPSocket(uv::Loop* loop = uv::defaultLoop());
     virtual ~UDPSocket();
 
-    virtual void connect(const net::Address& peerAddress);
-    virtual void close();
+    virtual void connect(const net::Address& peerAddress) override;
+    virtual void close() override;
 
-    virtual void bind(const net::Address& address, unsigned flags = 0);
+    virtual void bind(const net::Address& address, unsigned flags = 0) override;
 
-    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override;
     virtual ssize_t send(const char* data, size_t len,
-                     const net::Address& peerAddress, int flags = 0);
+                         const net::Address& peerAddress, int flags = 0) override;
 
-    virtual bool setBroadcast(bool flag);
-    virtual bool setMulticastLoop(bool flag);
-    virtual bool setMulticastTTL(int ttl);
+    bool setBroadcast(bool flag);
+    bool setMulticastLoop(bool flag);
+    bool setMulticastTTL(int ttl);
 
-    virtual net::Address address() const;
-    virtual net::Address peerAddress() const;
+    virtual net::Address address() const override;
+    virtual net::Address peerAddress() const override;
 
     /// Returns the UDP transport protocol.
     net::TransportType transport() const;
 
-    virtual void setError(const scy::Error& err);
-    virtual const scy::Error& error() const;
+    virtual void setError(const scy::Error& err) override;
+    virtual const scy::Error& error() const override;
 
-    /// Returns true if the native socket
-    /// handle is closed.
-    virtual bool closed() const;
+    /// Returns true if the native socket handle is closed.
+    virtual bool closed() const override;
 
-    virtual uv::Loop* loop() const;
+    virtual uv::Loop* loop() const override;
 
     virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
 
 protected:
-    virtual void init();
+    virtual void initialize() override;
+    virtual void reset() override;
     virtual bool recvStart();
     virtual bool recvStop();
 
@@ -73,8 +74,8 @@ protected:
     static void allocRecvBuffer(uv_handle_t* handle, size_t suggested_size,
                                 uv_buf_t* buf);
 
-    virtual void onError(const scy::Error& error);
-    virtual void onClose();
+    virtual void onError(const scy::Error& error) override;
+    virtual void onClose() override;
 
     net::Address _peer;
     Buffer _buffer;

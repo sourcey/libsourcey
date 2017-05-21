@@ -18,13 +18,15 @@
 
 
 #include "scy/uv/uvpp.h"
+#include "scy/uv/loop.h"
+#include "scy/uv/util.h"
 
 
 namespace scy {
 namespace uv {
 
 
-/// A base class for managing a `libuv` handle during it's lifecycle and
+/// Base class for managing a `libuv` handle during it's lifecycle and
 /// safely handling its asynchronous destruction mechanism.
 class UV_API Handle
 {
@@ -32,14 +34,14 @@ public:
     Handle(uv::Loop* loop = nullptr, void* handle = nullptr);
     virtual ~Handle();
 
-    /// The event loop may be set before the handle is initialized.
-    virtual void setLoop(uv::Loop* loop);
+    /// Initialize the handle.
+    ///
+    /// This method should be overridden by the implementation to call `uv_init`
+    /// on the handle.
+    virtual void initialize();
 
-    /// Closes and destroys the associated `libuv` handle.
+    /// Close and destroy the associated `libuv` handle.
     virtual void close();
-
-    /// Returns true if the handle has been initialized.
-    bool initialized();
 
     /// Reference main loop again, once unref'd.
     bool ref();
@@ -47,10 +49,24 @@ public:
     /// Unreference the main loop after initialized.
     bool unref();
 
-    /// Returns the error context if any.
+    /// Return true if the handle has been initialized.
+    bool initialized();
+
+    /// Return true when the handle is active.
+    /// This method should be used instead of closed() to determine
+    /// the veracity of the `libuv` handle for stream operations.
+    virtual bool active() const;
+
+    /// Return true if the handle is closing.
+    virtual bool closing() const;
+
+    /// Return true after close() has been called.
+    virtual bool closed() const;
+
+    /// Return the error context if any.
     const scy::Error& error() const;
 
-    /// Sets the error content and triggers callbacks.
+    /// Set the error and triggers callbacks.
     virtual void setError(const scy::Error& err);
 
     /// Sets and throws the last error.
@@ -67,41 +83,53 @@ public:
     /// This method can be called inside `libuv` callbacks.
     virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0);
 
-    /// Returns the parent thread ID.
-    std::thread::id tid() const;
+    /// Set the event loop.
+    /// The event loop may be set before the handle is initialized.
+    virtual void setLoop(uv::Loop* loop);
 
-    /// Returns a cast pointer to the managed `libuv` handle.
+    /// Return a cast pointer to the managed `libuv` handle.
     virtual uv::Loop* loop() const;
 
-    /// Returns true when the handle is active.
-    /// This method should be used instead of closed() to determine
-    /// the veracity of the `libuv` handle for stream operations.
-    virtual bool active() const;
-
-    /// Returns true after close() has been called.
-    virtual bool closed() const;
-
-    /// Returns a typecasted pointer to the managed `libuv` handle.
+    /// Return a typecasted pointer to the managed `libuv` handle.
     template <class T> T* ptr() const
     {
         return reinterpret_cast<T*>(_ptr);
     }
 
-    /// Returns a pointer to the managed `libuv` handle.
+    /// Return a pointer to the managed `libuv` handle.
     virtual uv_handle_t* ptr() const;
+
+    /// Return the parent thread ID.
+    std::thread::id tid() const;
 
     /// Make sure we are calling from the event loop thread.
     void assertThread() const;
 
 protected:
+    /// Reset the internal handle.
+    virtual void reset();
+
+    /// Invoke an internal `libuv` method.
+    template<typename F, typename... Args>
+    bool invoke(F&& f, Args&&... args)
+    {
+        int err = std::forward<F>(f)(std::forward<Args>(args)...);
+        if (err)
+            setUVError("UV Error", err);
+        return !err;
+    }
+
+    /// Error callback.
     /// Override to handle errors.
     /// The error may be a UV error, or a custom error.
     virtual void onError(const scy::Error& error);
 
+    /// Close callback.
     /// Override to handle closure.
     virtual void onClose();
 
 protected:
+    /// NonCopyable and NonMovable
     Handle(const Handle&) = delete;
     Handle& operator=(const Handle&) = delete;
 
@@ -109,6 +137,7 @@ protected:
     uv_handle_t* _ptr;
     scy::Error _error;
     std::thread::id _tid;
+    bool _initialized;
     bool _closed;
 };
 

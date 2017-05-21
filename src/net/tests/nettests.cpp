@@ -6,6 +6,7 @@
 #include "scy/net/sslsocket.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/udpsocket.h"
+#include "scy/net/socketemitter.h"
 #include "scy/test.h"
 #include "scy/time.h"
 
@@ -145,6 +146,29 @@ int main(int argc, char** argv)
             uv::runDefaultLoop();
             expect(socket.error().any());
         }
+    });
+
+
+    // =========================================================================
+    // TCP Socket Reconnection Test
+    //
+    describe("tcp socket reconnection test", []() {
+        int connected = 0;
+        net::SocketEmitter socket(std::make_shared<net::TCPSocket>());
+        socket->connect("sourcey.com", 80);
+        socket.Connect += [&](net::Socket& sock) {
+            connected++;
+            sock.close();
+        };
+        socket.Close += [&](net::Socket& sock) {
+            // connect again on close
+            if (connected == 1) {
+                sock.connect("sourcey.com", 80);
+            }
+        };
+
+        uv::runDefaultLoop();
+        expect(connected == 2);
     });
 
     test::runAll();

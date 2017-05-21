@@ -117,12 +117,13 @@ void SSLSocket::acceptConnection()
 
     // Create the shared socket pointer so the if the socket handle is not
     // incremented the accepted socket will be destroyed.
-    //auto socket = net::makeSocket<net::SSLSocket>(_context, loop());
     auto socket = std::make_shared<net::SSLSocket>(_context, loop());
 
     // TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
-    UVCallOrThrow("Cannot initialize SSL socket",
-                  uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
+    uv::invokeOrThrow("Cannot initialize SSL socket",
+                  &uv_tcp_init, loop(), socket->ptr<uv_tcp_t>());
+    // UVCallOrThrow("Cannot initialize SSL socket",
+    //               uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
 
     if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
         socket->readStart();

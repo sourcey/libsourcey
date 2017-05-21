@@ -24,7 +24,7 @@ TCPSocket::TCPSocket(uv::Loop* loop)
     : Stream(loop)
 {
     // TraceS(this) << "Create" << endl;
-    init();
+    initialize();
 }
 
 
@@ -34,19 +34,22 @@ TCPSocket::~TCPSocket()
 }
 
 
-void TCPSocket::init()
+void TCPSocket::initialize()
 {
-    if (ptr())
-        return;
+    if (!_ptr) {
+        auto tcp = new uv_tcp_t;
+        tcp->data = this;
+        _ptr = reinterpret_cast<uv_handle_t*>(tcp);
+        invoke(&uv_tcp_init_ex, loop(), tcp, _af);
+    }
 
-    // TraceS(this) << "Init" << endl;
-    auto tcp = new uv_tcp_t;
-    tcp->data = this;
-    _ptr = reinterpret_cast<uv_handle_t*>(tcp);
-    _closed = false;
-    _error.reset();
+    Handle::initialize();
+}
 
-     // UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), tcp)
+
+void TCPSocket::reset()
+{
+    Handle::reset();
 }
 
 
@@ -61,13 +64,10 @@ UVStatusCallbackWithType(TCPSocket, onAcceptConnection, uv_stream_t);
 void TCPSocket::connect(const net::Address& peerAddress)
 {
     // TraceS(this) << "Connecting to " << peerAddress << endl;
-    init();
-
-    UVCallOrThrow("Cannot initialize TCP socket", uv_tcp_init, loop(), ptr<uv_tcp_t>())
-
+    initialize();
     auto req = new uv_connect_t;
     req->data = this;
-    UVCallOrThrow("TCP connect failed", uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect)
+    invoke(&uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect); //"TCP connect failed",
 }
 
 
@@ -80,38 +80,24 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
 void TCPSocket::bind(const net::Address& address, unsigned flags)
 {
     // TraceS(this) << "Binding on " << address << endl;
-    init();
 
-    UVCallOrThrow("Cannot initialize TCP socket",
-                  uv_tcp_init_ex, loop(), ptr<uv_tcp_t>(), address.af())
-
-#if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
-    uv_os_fd_t fd;
-    uv_fileno(ptr(), &fd);
-    int enable = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
-        ErrorS(this) << "setsockopt(SO_REUSEPORT) failed" << endl;
-#endif
-
-    switch (address.af()) {
-        case AF_INET:
-            UVCallOrThrow("TCP bind failed", uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags)
-            break;
-        case AF_INET6:
-            UVCallOrThrow("TCP bind IPv6 failed",  uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags |= UV_TCP_IPV6ONLY)
-            break;
-        default:
-            throw std::runtime_error("Unexpected address family");
+    // Reset the handle if the address family has changed
+    if (_af != address.af()) {
+        _af = address.af();
+        reset();
     }
+
+    if (_af == AF_INET6)
+        flags |= UV_TCP_IPV6ONLY;
+
+    invoke(&uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags); //"TCP bind failed",
 }
 
 
 void TCPSocket::listen(int backlog)
 {
     // TraceS(this) << "Listening" << endl;
-    init();
-
-    UVCallOrThrow("TCP listen failed", uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection)
+    invoke(&uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection); //"TCP listen failed",
 }
 
 
@@ -129,30 +115,53 @@ void TCPSocket::close()
 }
 
 
-void TCPSocket::setNoDelay(bool enable)
+bool TCPSocket::setNoDelay(bool enable)
 {
-    init();
-
-    UVCallOrThrow("TCP socket error", uv_tcp_nodelay, ptr<uv_tcp_t>(), enable ? 1 : 0)
+    assert(_ptr);
+    return uv_tcp_nodelay(ptr<uv_tcp_t>(), enable ? 1 : 0) == 0;
 }
 
 
-void TCPSocket::setKeepAlive(int enable, unsigned int delay)
+bool TCPSocket::setKeepAlive(bool enable, int delay)
 {
-    init();
-
-    UVCallOrThrow("TCP socket error", uv_tcp_keepalive, ptr<uv_tcp_t>(), enable, delay)
+    assert(_ptr);
+    return uv_tcp_keepalive(ptr<uv_tcp_t>(), enable ? 1 : 0, delay) == 0;
 }
 
 
+bool TCPSocket::setSimultaneousAccepts(bool enable)
+{
+    assert(_ptr);
 #ifdef SCY_WIN
-void TCPSocket::setSimultaneousAccepts(bool enable)
-{
-    init();
-
-    UVCallOrThrow("TCP socket error", uv_tcp_simultaneous_accepts, ptr<uv_tcp_t>(), enable)
-}
+    return uv_tcp_simultaneous_accepts(ptr<uv_tcp_t>(), enable ? 1 : 0) == 0;
+#else
+    return false;
 #endif
+}
+
+
+bool TCPSocket::setReusePort()
+{
+    assert(_ptr);
+#if SCY_HAS_KERNEL_SOCKET_LOAD_BALANCING
+    if (_af == AF_UNSPEC) {
+        assert (0 && "bind() must be called first");
+        return false;
+    }
+
+    uv_os_fd_t fd;
+    uv_fileno(ptr(), &fd);
+    int on = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(int)) < 0) {
+        ErrorS(this) << "setsockopt(SO_REUSEPORT) failed" << endl;
+        return false;
+    }
+
+    return true;
+#else
+    return false;
+#endif
+}
 
 
 ssize_t TCPSocket::send(const char* data, size_t len, int flags)
@@ -165,6 +174,7 @@ ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* pee
 {
     // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(Thread::currentID() == tid());
+    assert(_ptr);
 
     // NOTE: libuv handles this for us
     // assert(len <= net::MAX_TCP_PACKET_SIZE);
@@ -179,57 +189,26 @@ ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* pee
 }
 
 
-void TCPSocket::acceptConnection()
-{
-    // Create the shared socket pointer so the if the socket handle is not
-    // incremented the accepted socket will be destroyed.
-    auto socket = net::makeSocket<net::TCPSocket>(loop());
-    // TraceS(this) << "Accept connection: " << socket->ptr() << endl;
-
-    UVCallOrThrow("Cannot initialize TCP socket",
-                  uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
-
-    if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
-        socket->readStart();
-        AcceptConnection.emit(socket);
-    }
-    else {
-        assert(0 && "uv_accept should not fail");
-    }
-}
-
-
 net::Address TCPSocket::address() const
 {
-    if (!active())
-        return net::Address();
-        // throw std::runtime_error("Invalid TCP socket: No address");
-
+    assert(_ptr);
     struct sockaddr_storage address;
     int addrlen = sizeof(address);
     int r = uv_tcp_getsockname(ptr<uv_tcp_t>(), reinterpret_cast<sockaddr*>(&address), &addrlen);
     if (r)
         return net::Address();
-        // throwLastError("Invalid TCP socket: No address");
-
     return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
 }
 
 
 net::Address TCPSocket::peerAddress() const
 {
-    if (!active())
-        return net::Address();
-        // throw std::runtime_error("Invalid TCP socket: No peer address");
-
+    assert(_ptr);
     struct sockaddr_storage address;
     int addrlen = sizeof(address);
     int r = uv_tcp_getpeername(ptr<uv_tcp_t>(), reinterpret_cast<sockaddr*>(&address), &addrlen);
-
     if (r)
         return net::Address();
-        // throwLastError("Invalid TCP socket: No peer address");
-
     return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
 }
 
@@ -311,6 +290,25 @@ void TCPSocket::onConnect(uv_connect_t* handle, int status)
         setUVError("Connection failed", status);
     }
     delete handle;
+}
+
+
+void TCPSocket::acceptConnection()
+{
+    // Create the shared socket pointer so the if the socket handle is not
+    // incremented the accepted socket will be destroyed.
+    auto socket = net::makeSocket<net::TCPSocket>(loop());
+    // TraceS(this) << "Accept connection: " << socket->ptr() << endl;
+
+    invoke(&uv_tcp_init, loop(), socket->ptr<uv_tcp_t>()); // "Cannot initialize TCP socket",
+
+    if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
+        socket->readStart();
+        AcceptConnection.emit(socket);
+    }
+    else {
+        assert(0 && "uv_accept should not fail");
+    }
 }
 
 

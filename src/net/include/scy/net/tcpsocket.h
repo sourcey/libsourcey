@@ -25,6 +25,7 @@ namespace scy {
 namespace net {
 
 
+/// TCP socket implementation.
 class Net_API TCPSocket : public Stream, public net::Socket
 {
 public:
@@ -35,60 +36,59 @@ public:
     virtual ~TCPSocket();
 
     virtual bool shutdown();
-    virtual void close();
+    virtual void close() override;
 
-    virtual void connect(const net::Address& peerAddress);
-    virtual void connect(const std::string& host, uint16_t port);
+    virtual void connect(const net::Address& peerAddress) override;
+    virtual void connect(const std::string& host, uint16_t port) override;
 
-    virtual ssize_t send(const char* data, size_t len, int flags = 0);
-    virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddress, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override;
+    virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddress, int flags = 0) override;
 
-    virtual void bind(const net::Address& address, unsigned flags = 0);
-    virtual void listen(int backlog = 64);
+    virtual void bind(const net::Address& address, unsigned flags = 0) override;
+    virtual void listen(int backlog = 64) override;
 
     virtual void acceptConnection();
 
-    virtual void setNoDelay(bool enable);
-    virtual void setKeepAlive(int enable, unsigned int delay);
-
-    virtual uv::Loop* loop() const;
+    bool setReusePort();
+    bool setNoDelay(bool enable);
+    bool setKeepAlive(bool enable, int delay);
+    bool setSimultaneousAccepts(bool enable);
 
     void setMode(SocketMode mode);
     const SocketMode mode() const;
 
-    void setError(const scy::Error& err);
-    const scy::Error& error() const;
+    virtual void setError(const scy::Error& err) override;
+    const scy::Error& error() const override;
 
     /// Returns true if the native socket handle is closed.
-    virtual bool closed() const;
+    virtual bool closed() const override;
 
     /// Returns the IP address and port number of the socket.
     /// A wildcard address is returned if the socket is not connected.
-    net::Address address() const;
+    net::Address address() const override;
 
     /// Returns the IP address and port number of the peer socket.
     /// A wildcard address is returned if the socket is not connected.
-    net::Address peerAddress() const;
+    net::Address peerAddress() const override;
 
     /// Returns the TCP transport protocol.
-    net::TransportType transport() const;
+    net::TransportType transport() const override;
 
-#ifdef SCY_WIN
-    void setSimultaneousAccepts(bool enable);
-#endif
+    virtual uv::Loop* loop() const override;
 
     Signal<void(const net::TCPSocket::Ptr&)> AcceptConnection;
 
 public:
     virtual void onConnect(uv_connect_t* handle, int status);
     virtual void onAcceptConnection(uv_stream_t* handle, int status);
-    virtual void onRead(const char* data, size_t len);
+    virtual void onRead(const char* data, size_t len) override;
     virtual void onRecv(const MutableBuffer& buf);
-    virtual void onError(const scy::Error& error);
-    virtual void onClose();
+    virtual void onError(const scy::Error& error) override;
+    virtual void onClose() override;
 
 protected:
-    virtual void init();
+    virtual void initialize() override;
+    virtual void reset() override;
 
     SocketMode _mode;
 };

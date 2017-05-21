@@ -31,12 +31,11 @@ namespace net {
 template <class SocketT>
 inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 {
-    return std::make_shared<SocketT>(loop);
-    // return std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
+    return std::make_shared<SocketT>(loop); // std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
 }
 
 
-/// Socket is the base socket implementation from which all sockets derive.
+/// Base socket implementation from which all sockets derive.
 class Net_API Socket : public SocketAdapter
 {
 public:
@@ -114,16 +113,18 @@ public:
 
     /// Optional client data pointer.
     ///
-    /// The pointer is set to null on initialization 
+    /// The pointer is set to null on initialization
     /// but not managed.
     void* opaque;
 
 protected:
     /// Initializes the underlying socket context.
-    virtual void init() = 0;
+    virtual void initialize() = 0;
 
     /// Resets the socket context for reuse.
-    virtual void reset() {};
+    virtual void reset() = 0;
+
+    int _af{ AF_UNSPEC };
 };
 
 
@@ -179,7 +180,7 @@ public:
     PacketInfo* info;
 
     SocketPacket(const Socket::Ptr& socket, const MutableBuffer& buffer, const Address& peerAddress)
-        : RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, socket.get(), nullptr, 
+        : RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, socket.get(), nullptr,
                                       new PacketInfo(socket, peerAddress))
     {
         info = (PacketInfo*)RawPacket::info;
@@ -235,7 +236,7 @@ int uv___stream_fd(const uv_stream_t* handle);
 #endif
 
 
-template <class NativeT> 
+template <class NativeT>
 int getServerSocketSendBufSize(uv::Handle& handle)
 {
     int val = 0;
@@ -243,7 +244,7 @@ int getServerSocketSendBufSize(uv::Handle& handle)
 }
 
 
-template <class NativeT> 
+template <class NativeT>
 int getServerSocketRecvBufSize(uv::Handle& handle)
 {
     int val = 0;

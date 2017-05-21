@@ -51,13 +51,13 @@ void Socket::connect(const std::string& host, uint16_t port)
         connect(Address("127.0.0.1", port));
     }
     else {
-        init();
+        initialize();
         assert(!closed());
         net::resolveDNS(host, port, [&](const net::DNSResult& dns) {
 
             // Return if the socket was closed while resolving
             if (closed()) {
-                WarnL << "DNS resolved but socket closed" << endl;
+                WarnS(this) << "DNS resolved but socket closed" << endl;
                 return;
             }
 

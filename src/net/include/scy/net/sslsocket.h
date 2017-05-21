@@ -25,6 +25,7 @@ namespace scy {
 namespace net {
 
 
+/// SSL socket implementation.
 class Net_API SSLSocket : public TCPSocket
 {
 public:
@@ -50,14 +51,14 @@ public:
     /// Shuts down the connection by attempting
     /// an orderly SSL shutdown, then actually
     /// shutting down the TCP connection.
-    virtual bool shutdown();
+    virtual bool shutdown() override;
 
     /// Closes the socket forcefully.
-    virtual void close();
+    virtual void close() override;
 
-    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override;
     virtual ssize_t send(const char* data, size_t len,
-                     const net::Address& peerAddress, int flags = 0);
+                         const net::Address& peerAddress, int flags = 0) override;
 
     /// Use the given SSL context for this socket.
     void useContext(SSLContext::Ptr context);
@@ -93,18 +94,16 @@ public:
     /// Returns the peer's certificate.
     X509* peerCertificate() const;
 
-    net::TransportType transport() const;
+    net::TransportType transport() const override;
 
-    virtual void acceptConnection();
+    virtual void acceptConnection() override;
 
-    virtual void onConnect(uv_connect_t* handle, int status);
+    virtual void onConnect(uv_connect_t* handle, int status) override;
 
     /// Reads raw encrypted SSL data
     virtual void onRead(const char* data, size_t len);
 
 protected:
-    /// virtual bool readStart();
-
     net::SSLContext::Ptr _context;
     net::SSLSession::Ptr _session;
     net::SSLAdapter _sslAdapter;

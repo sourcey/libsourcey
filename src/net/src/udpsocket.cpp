@@ -21,17 +21,12 @@ namespace scy {
 namespace net {
 
 
-//
-// UDP Base
-//
-
-
 UDPSocket::UDPSocket(uv::Loop* loop)
     : uv::Handle(loop)
     , _buffer(65536)
 {
     // TraceS(this) << "Create" << endl;
-    init();
+    reset();
 }
 
 
@@ -41,29 +36,33 @@ UDPSocket::~UDPSocket()
 }
 
 
-void UDPSocket::init()
+void UDPSocket::initialize()
 {
-    if (ptr())
-        return;
+    if (!_ptr) {
+        // TraceS(this) << "Init" << endl;
+        uv_udp_t* udp = new uv_udp_t;
+        udp->data = this;
+        _ptr = reinterpret_cast<uv_handle_t*>(udp);
+        invoke(&uv_udp_init, loop(), udp);
+    }
 
-    // TraceS(this) << "Init" << endl;
-    uv_udp_t* udp = new uv_udp_t;
-    udp->data = this; // instance();
-    _closed = false;
-    _ptr = reinterpret_cast<uv_handle_t*>(udp);
-    int r = uv_udp_init(loop(), udp);
-    if (r)
-        setUVError("Cannot initialize UDP socket", r);
+    Handle::initialize();
+}
+
+
+void UDPSocket::reset()
+{
+    Handle::reset();
 }
 
 
 void UDPSocket::connect(const Address& peerAddress)
 {
+    initialize();
     _peer = peerAddress;
 
-    // Send the Connected signal to mimic TCP behaviour
+    // Emit the Connected signal to mimic TCPSocket behaviour
     // since socket implementations are interchangable.
-    // emitConnect();
     onSocketConnect(*this);
 }
 
@@ -79,22 +78,12 @@ void UDPSocket::close()
 void UDPSocket::bind(const Address& address, unsigned flags)
 {
     // TraceS(this) << "Binding on " << address << endl;
+    initialize();
 
-    int r;
-    switch (address.af()) {
-        case AF_INET:
-            r = uv_udp_bind(ptr<uv_udp_t>(), address.addr(), flags);
-            break;
-        // case AF_INET6:
-        //    r = uv_udp_bind6(ptr<uv_udp_t>(), address.addr(), flags);
-        //    break;
-        default:
-            throw std::runtime_error("Unexpected address family");
-    }
+    if (address.af() == AF_INET6)
+        flags |= UV_UDP_IPV6ONLY;
 
-    // Throw and exception of error
-    if (r)
-        setAndThrowError("Cannot bind UDP socket", r);
+    invoke(&uv_udp_bind, ptr<uv_udp_t>(), address.addr(), flags);
 
     // Open the receiver channel
     recvStart();
@@ -122,6 +111,7 @@ ssize_t UDPSocket::send(const char* data, size_t len,
 {
     // TraceS(this) << "Send: " << len << ": " << peerAddress << endl;
     assert(Thread::currentID() == tid());
+    assert(_ptr);
     // assert(len <= net::MAX_UDP_PACKET_SIZE);
 
     if (_peer.valid() && _peer != peerAddress) {
@@ -137,22 +127,7 @@ ssize_t UDPSocket::send(const char* data, size_t len,
     int r;
     auto sr = new internal::SendRequest;
     sr->buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
-    r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(),
-                    UDPSocket::afterSend);
-
-#if 0
-    switch (peerAddress.af()) {
-    case AF_INET:
-        r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPSocket::afterSend);
-        break;
-    case AF_INET6:
-        r = uv_udp_send6(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1,
-            *reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPSocket::afterSend);
-        break;
-    default:
-        throw std::runtime_error("Unexpected address family");
-    }
-#endif
+    r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPSocket::afterSend);
     if (r) {
         ErrorS(this) << "Send failed: " << uv_err_name(r) << endl;
         setUVError("Invalid UDP socket", r);
@@ -163,28 +138,25 @@ ssize_t UDPSocket::send(const char* data, size_t len,
 }
 
 
-bool UDPSocket::setBroadcast(bool flag)
+bool UDPSocket::setBroadcast(bool enable)
 {
-    if (!ptr())
-        return false;
-    return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
+    assert(_ptr);
+    return uv_udp_set_broadcast(ptr<uv_udp_t>(), enable ? 1 : 0) == 0;
 }
 
 
-bool UDPSocket::setMulticastLoop(bool flag)
+bool UDPSocket::setMulticastLoop(bool enable)
 {
-    if (!ptr())
-        return false;
-    return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
+    assert(_ptr);
+    return uv_udp_set_multicast_loop(ptr<uv_udp_t>(), enable ? 1 : 0) == 0;
 }
 
 
 bool UDPSocket::setMulticastTTL(int ttl)
 {
-    assert(ttl > 0 && ttl < 255);
-    if (!ptr())
-        return false;
-    return uv_udp_set_broadcast(ptr<uv_udp_t>(), ttl) == 0;
+    assert(_ptr);
+    assert(ttl > 0 && ttl <= 255);
+    return uv_udp_set_multicast_ttl(ptr<uv_udp_t>(), ttl) == 0;
 }
 
 
@@ -195,7 +167,7 @@ bool UDPSocket::recvStart()
     // since it is called internally by bind().
     int r = uv_udp_recv_start(ptr<uv_udp_t>(), UDPSocket::allocRecvBuffer, onRecv);
     if (r && r != UV_EALREADY) {
-        setAndThrowError("Cannot start recv on invalid UDP socket", r);
+        setUVError("Cannot start recv on invalid UDP socket", r);
         return false;
     }
     return true;
@@ -206,8 +178,6 @@ bool UDPSocket::recvStop()
 {
     // This method must not throw since it is called
     // internally via libuv callbacks.
-    if (!ptr())
-        return false;
     return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 
@@ -234,17 +204,11 @@ const scy::Error& UDPSocket::error() const
 
 net::Address UDPSocket::address() const
 {
-    if (!active())
-        return net::Address();
-        // throw std::runtime_error("Invalid UDP socket: No address");
-
     struct sockaddr address;
     int addrlen = sizeof(address);
     int r = uv_udp_getsockname(ptr<uv_udp_t>(), &address, &addrlen);
     if (r)
         return net::Address();
-        // throwLastError("Invalid UDP socket: No address");
-
     return Address(&address, addrlen);
 }
 
@@ -253,7 +217,6 @@ net::Address UDPSocket::peerAddress() const
 {
     if (!_peer.valid())
         return net::Address();
-        // throw std::runtime_error("Invalid UDP socket: No peer address");
     return _peer;
 }
 
