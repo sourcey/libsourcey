@@ -411,6 +411,7 @@ bool MultiplexEncoder::encodeVideo(uint8_t* buffer, int bufferSize,
 
 void MultiplexEncoder::onVideoEncoded(av::VideoPacket& packet)
 {
+    std::lock_guard<std::mutex> guard(_mutex);
     writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
 
@@ -500,6 +501,7 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer[4], int numSamples, int64_t t
 
 void MultiplexEncoder::onAudioEncoded(av::AudioPacket& packet)
 {
+    std::lock_guard<std::mutex> guard(_mutex);
     writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
 
