@@ -84,24 +84,6 @@ void Peer::setPortRange(int minPort, int maxPort)
             _context->networkManager.get(),
             _context->socketFactory.get()));
     _portAllocator->SetPortRange(minPort, maxPort);
-
-    // _portAllocator.reset(
-    //     new rtc::BasicPortAllocator()); //rtc::Thread::Current(), nullptr
-    // _portAllocator->SetPortRange(minPort, maxPort);
-    // // _portAllocator = new talk_base::RefCountedObject<PortAllocatorFactoryWrapper>(
-    // //       static_cast<PeerFactory *>(factory.get())->worker_thread(),
-    // //       minPort, maxPort);
-
-    // // default_network_manager_.reset(new rtc::BasicNetworkManager());
-    // // if (!default_network_manager_) {
-    // //   return false;
-    // // }
-
-    // // default_socket_context->factory_.reset(
-    // //     new rtc::BasicPacketSocketFactory(network_thread_));
-    // // if (!default_socket_context->factory_) {
-    // //   return false;
-    // // }
 }
 
 
@@ -109,7 +91,7 @@ void Peer::createConnection()
 {
     assert(_context->factory);
     _peerConnection = _context->factory->CreatePeerConnection(_config, &_constraints,
-                                                     std::move(_portAllocator), nullptr, this);
+                                                              std::move(_portAllocator), nullptr, this);
 
     if (_stream) {
         if (!_peerConnection->AddStream(_stream)) {
@@ -125,7 +107,7 @@ void Peer::closeConnection()
 
     if (_peerConnection) {
         _peerConnection->Close();
-    } 
+    }
     else {
         // Call onClosed if no connection has been
         // made so callbacks are always run.
@@ -178,8 +160,7 @@ void Peer::recvCandidate(const std::string& mid, int mlineindex,
 }
 
 
-void Peer::OnSignalingChange(
-    webrtc::PeerConnectionInterface::SignalingState new_state)
+void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
 {
     DebugA(_peerid, ": On signaling state change: ", new_state)
 
@@ -199,15 +180,13 @@ void Peer::OnSignalingChange(
 }
 
 
-void Peer::OnIceConnectionChange(
-    webrtc::PeerConnectionInterface::IceConnectionState new_state)
+void Peer::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
     DebugA(_peerid, ": On ICE connection change: ", new_state)
 }
 
 
-void Peer::OnIceGatheringChange(
-    webrtc::PeerConnectionInterface::IceGatheringState new_state)
+void Peer::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state)
 {
     DebugA(_peerid, ": On ICE gathering change: ", new_state)
 }
@@ -257,8 +236,7 @@ void Peer::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 }
 
 
-void Peer::OnIceCandidate(
-    const webrtc::IceCandidateInterface* candidate)
+void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
 {
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
@@ -298,8 +276,7 @@ void Peer::OnFailure(const std::string& error)
 }
 
 
-void Peer::setPeerFactory(
-    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+void Peer::setPeerFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
 {
     assert(!_context->factory); // should not be already set via PeerManager
     _context->factory = factory;

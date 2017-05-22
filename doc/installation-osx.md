@@ -16,7 +16,7 @@ brew link --force openssl
 brew install cmake
 ~~~
 
-Please see the [Linux instructions](/installation-linux.md) for other optional dependencies. <!-- such as FFmpeg and OpenCV -->
+Please see the [Linux instructions](/installation-linux.md) for other optional dependencies, such as FFmpeg and WebRTC. <!-- such as FFmpeg and OpenCV -->
 
 ## Install LibSourcey
 

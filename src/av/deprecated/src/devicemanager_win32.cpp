@@ -323,8 +323,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                 dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
                 bool isVideo = dbdi->dbcc_classguid == KSCATEGORY_VIDEO;
                 bool isConnect = wParam == DBT_DEVICEARRIVAL;
-                DebugL << "Signal Devices changed: " << isVideo << ": "
-                       << isConnect << endl;
+                DebugA("Signal Devices changed: ", isVideo, ": ", isConnect);
                 manager_->DevicesChanged.emit(manager_, isVideo, isConnect);
             }
         }

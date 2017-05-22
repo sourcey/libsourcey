@@ -48,12 +48,25 @@ The main build options you will want to configure are as follows:
 * `BUILD_MODULE_SAMPLES`: Build module sample applications _default: ON_
 * `ENABLE_LOGGING`: Enable internal debug logging _default: OFF_
 
-
 If you are using third-party libraries is custom locations then make sure you update the CMake include paths: `CMAKE_SYSTEM_PREFIX_PATH` and `CMAKE_LIBRARY_PATH`.
 
 The only third-party libraries that may need configuring if you're using them are FFmpeg, OpenCV and WebRTC.
 
 For an exhaustive list of options check the `CMakeLists.txt` in the main directory.
+
+## Building Packages
+
+LibSourcey can be packaged into `deb`, `rpm`, `tar.gz`, `zip` and many other formats using CPack:
+
+~~~ bash
+cd libsourcey/build
+cmake .. -DCPACK_GENERATOR=DEB # other build commands here
+sudo cpack ..
+~~~
+
+The output package will be in the `build` folder.
+
+Check the [CPack documentation](https://cmake.org/Wiki/CMake:CPackPackageGenerators) for a full list of supported package generators.
 
 ## CMake Build Shortcuts
 

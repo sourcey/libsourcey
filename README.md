@@ -28,6 +28,8 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 
 * **Media streaming and encoding** — The `av` library consists of thin wrappers around `FFmpeg` and `OpenCV` for media capture, encoding, recording, streaming, analysis and more.
 
+* **Easy install** — LibSourcey can be packaged as a `deb`, `rpm`, `tar.gz`, `zip` and many other formats with a [single command](https://sourcey.com/libsourcey/installation#building-packages) for straight forward distribution and integration.
+
 * **Web servers and clients** — A HTTP stack is provided that includes servers, clients, WebSockets, media streaming, file transfers, and authentication. The HTTP parser is based on the super-fast C code used by `nginx`.
 
 * **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.

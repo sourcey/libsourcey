@@ -44,86 +44,19 @@ cmake .. -DOPENSSL_ROOT_DIR=E:\dev\vendor\OpenSSL-Win64 -DWITH_FFMPEG=ON -DFFMPE
 
 ### Install WebRTC (optional)
 
-The official install guide is here: https://webrtc.org/native-code/development/
-Alternatively, follow the guide below to install WebRTC on your Windows system without pain. 
+The easiest way to get started with WebRTC is to download the precompiled static libraries and headers available here: https://sourcey.com/precompiled-webrtc-libraries/
 
-##### Download dependencies
+Alternatively if you want to compile WebRTC yourself you can use our automated build scripts, which can be found here: https://github.com/sourcey/webrtc-builds
 
-1.  Install dependencies
+There is also a step-by-step build Windows guide here: https://sourcey.com/building-and-installing-webrtc-on-windows/
 
-  Install Visual Studio 2015 Update 2 or later - Community Edition should work if its license is appropriate for you. Use the Custom Install option and select:
+Once installed enable and add the WebRTC root directory to your build command like so:
 
-    * Visual C++, which will select three sub-categories including MFC
-    * Universal Windows Apps Development Tools > Tools
-    * Universal Windows Apps Development Tools > Windows 10 SDK (10.0.10586)
+~~~ bash
+cmake .. -DWITH_WEBRTC=ON -DWEBRTC_ROOT_DIR=E:\dev\vendor\webrtcbuilds\out\webrtc-17657-02ba69d-win-x64
+~~~
 
-2.  Install the Chromium depot tolls
-
-  1. Download [depot_tools.zip](https://storage.googleapis.com/chrome-infra/depot_tools.zip) and decompress it.
-  2. Add depot_tools to the end of your PATH:
-
-    * With Administrator access:
-
-      * `Control Panel > System and Security > System > Advanced system settings`
-      * Modify the PATH system variable to include depot_tools
-
-    * Without Administrator access:
-
-      * `Control Panel > User Accounts > User Accounts > Change my environment variables`
-      * Add a PATH user variable: `%PATH%;C:\path\to\depot_tools`
-
-  3. Run `gclient` from the cmd shell (Run as Administrator). The first time it is run, it will install its own copy of svn and other tools.
-  4. Run following commands to set necessary environment variables:
-  
-    ~~~bash
-    set DEPOT_TOOLS_WIN_TOOLCHAIN=0
-    ~~~
-
-#### Download the source code
-
-1.  Create a working directory, enter it, and run fetch webrtc:
-
-  ~~~bash
-  mkdir webrtc-checkout
-  cd webrtc-checkout
-  fetch --nohooks webrtc
-  ~~~
-
-2.  Optionally you can choose the stable release rather than the most recent release by enter:
-
-  ~~~bash
-  cd src
-  git branch -r
-  git checkout <branch_name>
-  ~~~
-  Example: `git checkout branch-heads/57`
-
-3.  Download the code
-  ~~~bash
-  gclient sync
-  ~~~
-
-#### Building WebRTC library
-
-1.  After downloading the code, you can start building the WebRTC library (standing in `src/`).
-
-  ~~~bash
-  gn gen out/Debug --args="is_debug=true rtc_include_tests=false"
-  gn gen out/Release --args="is_debug=false rtc_include_tests=false"
-  ~~~
-  **Note:** _Please run this command with Python2.x, Python3 is currently not supported._
-  
-  Then compile with:
-
-  Debug:
-  ~~~bash
-  ninja -C out/Debug
-  ~~~
-  Release:
-  ~~~bash
-  ninja -C out/Release
-  ~~~
-
+Note that you will need Visual Studio 2017 Update 3 or newer to build with WebRTC on Windows.
 
 ### Download LibSourcey
 

@@ -40,7 +40,13 @@ Most versions on Linux have FFmpeg development libraries that you can install di
 sudo apt-get install --yes libavcodec-ffmpeg-dev libavdevice-ffmpeg-dev libavfilter-ffmpeg-dev libavformat-ffmpeg-dev libswresample-ffmpeg-dev libpostproc-ffmpeg-dev
 ~~~
 
-Otherwise if you want to compile FFmpeg yourself you can follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide) that works out of the box with LibSourcey.
+Otherwise if you want to compile FFmpeg yourself you can follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide) that works out of the box with LibSourcey without configuration.
+
+If FFmpeg is installed in a non-standard location you can enable expose it to the CMake build system like so:
+
+~~~ bash
+cmake .. -DWITH_FFMPEG=ON -DFFMPEG_ROOT_DIR=<PATH_TO_FFMPEG_BUILD_DIRECTORY>
+~~~
 
 <!--
 **Install OpenCV (optional):**
@@ -64,16 +70,26 @@ sudo ldconfig
 
 ### Install WebRTC (optional)
 
-Installing WebRTC can be tricky and time consuming, but using the script below you should be able to get started without a hitch. Using the script is highly recommended as there are a copuple of caveats to take note of when compiling WebRTC for use with LibSourcey:
+<!-- Installing WebRTC can be tricky and time consuming, but using the script below you should be able to get started without a hitch. Using the script is highly recommended as there are a copuple of caveats to take note of when compiling WebRTC for use with LibSourcey:
 
 1. RTTI must be enabled (the `-no_rtti` compiler flag must be removed)
-2. libstdc++ iterator debugging must be disabled or it conflicts with external dependencies compiled without it (ninja build must set `enable_iterator_debugging=false`)
+2. libstdc++ iterator debugging must be disabled or it conflicts with external dependencies compiled without it (ninja build must set `enable_iterator_debugging=false`) -->
+
+The easiest way to get started with WebRTC is to download the precompiled static libraries and headers available here: https://sourcey.com/precompiled-webrtc-libraries/
+
+Alternatively if you want to compile WebRTC yourself you can use our automated build scripts, which can be found here: https://github.com/sourcey/webrtc-builds
 
 ~~~ bash
 cd ~/tmp
-git clone git@github.com:sourcey/webrtcbuilds.git
-cd webrtcbuilds
-./build.sh -e
+git clone git@github.com:sourcey/webrtc-builds.git
+cd webrtc-builds
+./build.sh
+~~~
+
+Once installed enable and add the WebRTC root directory to your build command like so:
+
+~~~ bash
+cmake .. -DWITH_WEBRTC=ON -DWEBRTC_ROOT_DIR=<PATH_TO_WEBRTC_ROOT_DIRECTORY>
 ~~~
 
 ### Install LibSourcey
