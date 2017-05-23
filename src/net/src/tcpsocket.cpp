@@ -191,25 +191,25 @@ ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* pee
 
 net::Address TCPSocket::address() const
 {
-    assert(_ptr);
-    struct sockaddr_storage address;
-    int addrlen = sizeof(address);
-    int r = uv_tcp_getsockname(ptr<uv_tcp_t>(), reinterpret_cast<sockaddr*>(&address), &addrlen);
-    if (r)
-        return net::Address();
-    return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
+    if (_ptr) {
+        struct sockaddr address;
+        int addrlen = sizeof(address);
+        if (uv_tcp_getsockname(ptr<uv_tcp_t>(), &address, &addrlen) == 0)
+            return net::Address(&address, addrlen);
+    }
+    return net::Address();
 }
 
 
 net::Address TCPSocket::peerAddress() const
 {
-    assert(_ptr);
-    struct sockaddr_storage address;
-    int addrlen = sizeof(address);
-    int r = uv_tcp_getpeername(ptr<uv_tcp_t>(), reinterpret_cast<sockaddr*>(&address), &addrlen);
-    if (r)
-        return net::Address();
-    return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
+    if (_ptr) {
+        struct sockaddr address;
+        int addrlen = sizeof(address);
+        if (uv_tcp_getpeername(ptr<uv_tcp_t>(), &address, &addrlen) == 0)
+            return net::Address(&address, addrlen);
+    }
+    return net::Address();
 }
 
 

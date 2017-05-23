@@ -204,12 +204,13 @@ const scy::Error& UDPSocket::error() const
 
 net::Address UDPSocket::address() const
 {
-    struct sockaddr address;
-    int addrlen = sizeof(address);
-    int r = uv_udp_getsockname(ptr<uv_udp_t>(), &address, &addrlen);
-    if (r)
-        return net::Address();
-    return Address(&address, addrlen);
+    if (_ptr) {
+        struct sockaddr address;
+        int addrlen = sizeof(address);
+        if (uv_udp_getsockname(ptr<uv_udp_t>(), &address, &addrlen) == 0)
+            return net::Address(&address, addrlen);
+    }
+    return net::Address();
 }
 
 

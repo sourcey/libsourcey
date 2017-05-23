@@ -31,11 +31,11 @@ Handle::Handle(uv::Loop* loop, void* handle)
 
 Handle::~Handle()
 {
-    assertThread();
-    if (!_closed)
-        close();
-    if (_ptr)
-        delete _ptr;
+    close();
+    // if (!_closed)
+    //     close();
+    // if (_ptr)
+    //     delete _ptr;
 }
 
 

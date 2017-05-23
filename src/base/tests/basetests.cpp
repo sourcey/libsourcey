@@ -32,7 +32,9 @@ int main(int argc, char** argv)
 
         // run the default loop which will return
         // once the idler is deleted
+        std::cout << "!!!before" << '\n';
         uv::runDefaultLoop();
+        std::cout << "!!!after" << '\n';
 
         // finalize deletion of all pointers
         gc.finalize();
