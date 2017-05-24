@@ -47,7 +47,7 @@ struct ScheduledTask : public sched::Task
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    test::init();
 
     // Register tasks and triggers
     scheduler.factory().registerTask<ScheduledTask>("ScheduledTask");

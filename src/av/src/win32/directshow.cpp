@@ -99,7 +99,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::
     classenum->Release();
 
     if (needCoUninitialize) {
-        CoUninit();
+        CoUninitialize();
     }
 
     return !devices.empty();
