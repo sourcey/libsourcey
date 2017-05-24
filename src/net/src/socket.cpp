@@ -51,7 +51,7 @@ void Socket::connect(const std::string& host, uint16_t port)
         connect(Address("127.0.0.1", port));
     }
     else {
-        initialize();
+        init();
         assert(!closed());
         net::resolveDNS(host, port, [&](const net::DNSResult& dns) {
 

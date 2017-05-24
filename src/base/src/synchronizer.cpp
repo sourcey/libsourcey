@@ -59,7 +59,7 @@ void Synchronizer::close()
         return;
     cancel();
     post(); // post to wake up event loop
-    _handle.close();
+    _handle.reset<uv_async_t>();
 }
 
 

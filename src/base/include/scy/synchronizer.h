@@ -78,6 +78,7 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
+        _handle.init();
         _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., _context);
         int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
             auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
@@ -108,7 +109,7 @@ public:
     uv::Handle& handle();
 
 protected:
-    virtual bool async() const;
+    virtual bool async() const override;
 
     uv::Handle _handle;
 };

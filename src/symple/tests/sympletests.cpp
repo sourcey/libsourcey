@@ -18,7 +18,7 @@ using namespace scy::test;
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    test::init();
 
 #if USE_SSL
     net::SSLManager::initNoVerifyClient();
@@ -113,5 +113,5 @@ int main(int argc, char** argv)
     net::SSLManager::instance().shutdown();
 #endif
     Logger::destroy();
-    return finalize();
+    return test::finalize();
 }

@@ -9,7 +9,7 @@ using namespace scy::test;
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    test::init();
     net::SSLManager::initNoVerifyClient();
 
     //

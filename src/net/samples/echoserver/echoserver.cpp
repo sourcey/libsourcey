@@ -26,9 +26,9 @@ struct Servers
 static void onShutdown(void* opaque)
 {
     auto srvs = reinterpret_cast<Servers*>(opaque);
-    srvs->udp.shutdown();
     srvs->tcp.shutdown();
     srvs->ssl.shutdown();
+    srvs->udp.shutdown();
 }
 
 

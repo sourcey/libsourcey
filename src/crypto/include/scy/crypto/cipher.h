@@ -189,7 +189,7 @@ protected:
     void setRandomIV();
 
     /// Initializes the Cipher using the given direction.
-    void initialize(bool encrypt);
+    void init(bool encrypt);
 
     bool _initialized;
     bool _encrypt;

@@ -48,7 +48,7 @@ MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
 MultiplexEncoder::~MultiplexEncoder()
 {
     TraceS(this) << "Destroy" << endl;
-    uninitialize();
+    uninit();
     uninitializeFFmpeg();
 }
 
@@ -73,7 +73,7 @@ static int dispatchOutputPacket(void* opaque, uint8_t* buffer, int bufferSize)
 }
 
 
-void MultiplexEncoder::initialize()
+void MultiplexEncoder::init()
 {
     assert(!isActive());
 
@@ -160,7 +160,7 @@ void MultiplexEncoder::initialize()
 }
 
 
-void MultiplexEncoder::uninitialize()
+void MultiplexEncoder::uninit()
 {
     TraceS(this) << "Uninitialize" << endl;
 

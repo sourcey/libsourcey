@@ -22,7 +22,7 @@ using namespace scy::test;
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    test::init();
 
     net::SSLManager::initNoVerifyServer();
     net::SSLManager::initNoVerifyClient();
@@ -170,6 +170,30 @@ int main(int argc, char** argv)
         uv::runDefaultLoop();
         expect(connected == 2);
     });
+
+
+    // =========================================================================
+    // UDP Socket Reconnection Test
+    //
+    describe("udp socket reconnection test", []() {
+        int connected = 0;
+        net::SocketEmitter socket(std::make_shared<net::UDPSocket>());
+        socket->connect("sourcey.com", 80);
+        socket.Connect += [&](net::Socket& sock) {
+            connected++;
+            sock.close();
+        };
+        socket.Close += [&](net::Socket& sock) {
+            // connect again on close
+            if (connected == 1) {
+                sock.connect("sourcey.com", 80);
+            }
+        };
+
+        uv::runDefaultLoop();
+        expect(connected == 2);
+    });
+
 
     test::runAll();
 

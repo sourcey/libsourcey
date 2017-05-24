@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
         // Create and attach the multiplex encoder
         av::MultiplexPacketEncoder encoder(options);
-        encoder.initialize();
+        encoder.init();
         stream.attach(&encoder, 5, false);
 
         // Start the stream

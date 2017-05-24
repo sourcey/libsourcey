@@ -79,6 +79,7 @@ void Timer::init()
     if (err < 0)
         _handle.setAndThrowError("Cannot initialize timer", err);
 
+    _handle.init();
     _handle.unref(); // unref by default
 }
 

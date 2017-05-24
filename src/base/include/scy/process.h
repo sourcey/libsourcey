@@ -26,7 +26,7 @@ namespace scy {
 typedef uv_process_options_t ProcessOptions;
 
 
-class Base_API Process : public uv::Handle
+class Base_API Process
 {
 public:
     /// Default constructor.
@@ -85,7 +85,7 @@ public:
 protected:
     void init();
 
-    uv_process_t _proc;
+    uv::Handle _handle;
     Pipe _stdin;
     Pipe _stdout;
     uv_stdio_container_t _stdio[2];

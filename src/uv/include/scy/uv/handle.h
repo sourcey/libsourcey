@@ -38,7 +38,7 @@ public:
     ///
     /// This method should be overridden by the implementation to call `uv_init`
     /// on the handle.
-    virtual void initialize();
+    virtual void init();
 
     /// Close and destroy the associated `libuv` handle.
     virtual void close();
@@ -90,6 +90,26 @@ public:
     /// Return a cast pointer to the managed `libuv` handle.
     virtual uv::Loop* loop() const;
 
+    /// Create the internal handle.
+    template <class T> T* create()
+    {
+        assert(!_ptr);
+        assert(!_initialized);
+        T* handle = new T;
+        _ptr = reinterpret_cast<uv_handle_t*>(handle);
+        _ptr->data = this;
+        _closed = false;
+        _error.reset();
+        return handle;
+    }
+
+    /// Reset the internal handle pointer and container state.
+    template <class T> T* reset()
+    {
+        close();
+        return create<T>();
+    }
+
     /// Return a typecasted pointer to the managed `libuv` handle.
     template <class T> T* ptr() const
     {
@@ -106,8 +126,6 @@ public:
     void assertThread() const;
 
 protected:
-    /// Reset the internal handle.
-    virtual void reset();
 
     /// Invoke an internal `libuv` method.
     template<typename F, typename... Args>

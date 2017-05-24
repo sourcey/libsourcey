@@ -26,7 +26,7 @@ UDPSocket::UDPSocket(uv::Loop* loop)
     , _buffer(65536)
 {
     // TraceS(this) << "Create" << endl;
-    reset();
+    init();
 }
 
 
@@ -36,29 +36,37 @@ UDPSocket::~UDPSocket()
 }
 
 
-void UDPSocket::initialize()
+void UDPSocket::init()
 {
-    if (!_ptr) {
-        // TraceS(this) << "Init" << endl;
-        uv_udp_t* udp = new uv_udp_t;
-        udp->data = this;
-        _ptr = reinterpret_cast<uv_handle_t*>(udp);
-        invoke(&uv_udp_init, loop(), udp);
-    }
+    if (initialized())
+        return;
 
-    Handle::initialize();
+    // TraceS(this) << "Init" << endl;
+    //assert(!_ptr);
+    //uv_udp_t* udp = new uv_udp_t;
+    //udp->data = this;
+    //_ptr = reinterpret_cast<uv_handle_t*>(udp);
+
+    if (!ptr()) {
+        Handle::create<uv_udp_t>();
+        ptr()->data = this;
+    }
+    invoke(&uv_udp_init, loop(), ptr<uv_udp_t>());
+    Handle::init();
 }
 
 
 void UDPSocket::reset()
 {
-    Handle::reset();
+    Handle::reset<uv_udp_t>();
+    ptr()->data = this;
+    init();
 }
 
 
 void UDPSocket::connect(const Address& peerAddress)
 {
-    initialize();
+    init();
     _peer = peerAddress;
 
     // Emit the Connected signal to mimic TCPSocket behaviour
@@ -70,7 +78,8 @@ void UDPSocket::connect(const Address& peerAddress)
 void UDPSocket::close()
 {
     // TraceS(this) << "Closing" << endl;
-    recvStop();
+    if (!closed())
+        recvStop();
     uv::Handle::close();
 }
 
@@ -78,15 +87,13 @@ void UDPSocket::close()
 void UDPSocket::bind(const Address& address, unsigned flags)
 {
     // TraceS(this) << "Binding on " << address << endl;
-    initialize();
+    init();
 
     if (address.af() == AF_INET6)
         flags |= UV_UDP_IPV6ONLY;
 
-    invoke(&uv_udp_bind, ptr<uv_udp_t>(), address.addr(), flags);
-
-    // Open the receiver channel
-    recvStart();
+    if (invoke(&uv_udp_bind, ptr<uv_udp_t>(), address.addr(), flags))
+        recvStart();
 }
 
 
@@ -124,10 +131,9 @@ ssize_t UDPSocket::send(const char* data, size_t len,
         return -1;
     }
 
-    int r;
     auto sr = new internal::SendRequest;
     sr->buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
-    r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPSocket::afterSend);
+    int r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPSocket::afterSend);
     if (r) {
         ErrorS(this) << "Send failed: " << uv_err_name(r) << endl;
         setUVError("Invalid UDP socket", r);
@@ -162,6 +168,7 @@ bool UDPSocket::setMulticastTTL(int ttl)
 
 bool UDPSocket::recvStart()
 {
+    assert(_ptr);
     // UV_EALREADY means that the socket is already bound but that's okay
     // TODO: No need for boolean value as this method can throw exceptions
     // since it is called internally by bind().
@@ -178,6 +185,7 @@ bool UDPSocket::recvStop()
 {
     // This method must not throw since it is called
     // internally via libuv callbacks.
+    assert(_ptr);
     return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 
@@ -216,8 +224,6 @@ net::Address UDPSocket::address() const
 
 net::Address UDPSocket::peerAddress() const
 {
-    if (!_peer.valid())
-        return net::Address();
     return _peer;
 }
 
@@ -298,7 +304,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_b
 
 void UDPSocket::onError(const scy::Error& error)
 {
-    // DebugS(this) << "Error: " << error.message << endl;
+    DebugS(this) << "Error: " << error.message << endl;
     onSocketError(*this, error);
     close(); // close on error
 }
@@ -306,7 +312,7 @@ void UDPSocket::onError(const scy::Error& error)
 
 void UDPSocket::onClose()
 {
-    // DebugS(this) << "On close" << endl;
+    DebugS(this) << "On close" << endl;
     onSocketClose(*this);
 }
 

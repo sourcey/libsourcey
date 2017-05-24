@@ -114,7 +114,7 @@ void dynlockDestroy(struct CRYPTO_dynlock_value* lock,
 }
 
 
-void initialize()
+void init()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -147,9 +147,9 @@ void initialize()
 }
 
 
-void uninitialize()
+void uninit()
 {
-    // NOTE: crypto::uninitialize() should be called before the app exists
+    // NOTE: crypto::uninit() should be called before the app exists
     // to endure the mutex is still in memory.
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -168,13 +168,13 @@ void uninitialize()
 /// Initializes the OpenSSL library.
 void initializeEngine()
 {
-    internal::initialize();
+    internal::init();
 }
 
 /// Shuts down the OpenSSL library.
 void uninitializeEngine()
 {
-    internal::uninitialize();
+    internal::uninit();
 }
 
 

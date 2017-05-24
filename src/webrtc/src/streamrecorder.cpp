@@ -82,7 +82,7 @@ void StreamRecorder::OnFrame(const webrtc::VideoFrame& yuvframe)
         ivideo.fps = 25;
 
         if (!_awaitingAudio)
-            _encoder.initialize();
+            _encoder.init();
     }
 
     if (_encoder.isActive()) {
@@ -133,7 +133,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
         assert(bits_per_sample == 16);
 
         if (!_awaitingVideo)
-            _encoder.initialize();
+            _encoder.init();
     }
 
     if (_encoder.isActive())

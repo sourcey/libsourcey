@@ -45,8 +45,8 @@ public:
     MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
     virtual ~MultiplexEncoder();
 
-    virtual void initialize();
-    virtual void uninitialize();
+    virtual void init();
+    virtual void uninit();
     virtual void cleanup();
 
     virtual void createVideo();

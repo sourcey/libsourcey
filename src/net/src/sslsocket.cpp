@@ -152,8 +152,7 @@ SSLSession::Ptr SSLSocket::currentSession()
                 SSL_SESSION_free(session);
                 return _session;
             } else
-                return std::make_shared<SSLSession>(
-                    session); // new SSLSession(session);
+                return std::make_shared<SSLSession>(session); // new SSLSession(session);
         }
     }
     return 0;

@@ -39,21 +39,12 @@ Handle::~Handle()
 }
 
 
-void Handle::initialize()
+void Handle::init()
 {
     assert(_ptr && "handle must be set");
-    // the implementation should call `uv_init` on the handle
     _initialized = true;
-    // _initialized = false;
-    _closed = false;
-    _error.reset();
-}
 
-
-void Handle::reset()
-{
-    close();
-    initialize();
+    // The implementation should call `uv_init` on the handle
 }
 
 

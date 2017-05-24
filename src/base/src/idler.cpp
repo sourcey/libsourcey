@@ -34,6 +34,7 @@ Idler::~Idler()
 void Idler::init()
 {
     uv_idle_init(_handle.loop(), _handle.ptr<uv_idle_t>());
+    _handle.init();
     _handle.unref(); // unref by default
 }
 

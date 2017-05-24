@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
     // Logger::instance().setWriter(new AsyncLogWriter);
-    test::initialize();
+    test::init();
 
     turn::Client::Options co;
     co.serverAddr = net::Address(TURN_SERVER_IP, TURN_SERVER_PORT);

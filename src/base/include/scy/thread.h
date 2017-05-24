@@ -85,7 +85,7 @@ protected:
     Thread(const Thread&) = delete;
     Thread& operator=(const Thread&) = delete;
 
-    bool async() const;
+    bool async() const override;
 
     std::thread _thread;
 };

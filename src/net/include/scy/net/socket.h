@@ -119,7 +119,7 @@ public:
 
 protected:
     /// Initializes the underlying socket context.
-    virtual void initialize() = 0;
+    virtual void init() = 0;
 
     /// Resets the socket context for reuse.
     virtual void reset() = 0;

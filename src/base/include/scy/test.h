@@ -36,7 +36,7 @@ typedef std::list<std::string> ErrorList;
 typedef std::map<Test*, ErrorList> ErrorMap;
 
 /// Initialize the test environment.
-Base_API void initialize();
+Base_API void init();
 
 /// Finalize the test environment.
 ///

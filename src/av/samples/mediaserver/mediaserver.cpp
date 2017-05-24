@@ -101,7 +101,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 
     // Attach the video encoder
     auto encoder = new av::MultiplexPacketEncoder(options);
-    // encoder->initialize();
+    // encoder->init();
     stream.attach(encoder, 5, true);
 
     // Add format specific framings

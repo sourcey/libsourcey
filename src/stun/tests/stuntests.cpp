@@ -19,7 +19,7 @@ using namespace scy::test;
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new ConsoleChannel("Test", LTrace));
-    test::initialize();
+    test::init();
 
     // =========================================================================
     // Message Integrity

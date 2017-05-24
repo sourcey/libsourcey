@@ -83,8 +83,6 @@ macro(define_sourcey_module name)
   else()
     set(pretty_name ${${name}_PRETTY_NAME})
   endif()
-  #message(FATAL_ERROR "    Libraries:  ${${name}_PRETTY_NAME}}")
-  #message(FATAL_ERROR "    Libraries: ${pretty_name}")
   target_compile_definitions(${name} PRIVATE ${pretty_name}_EXPORTS)
 
   # include(GenerateExportHeader)
@@ -99,8 +97,8 @@ macro(define_sourcey_module name)
     # Android SDK build scripts can include only .so files into final .apk
     # As result we should not set version properties for Android
     set_target_properties(${name} PROPERTIES
-      VERSION ${LibSourcey_VERSION}
-      SOVERSION ${LibSourcey_SOVERSION})
+      VERSION "${LibSourcey_VERSION}"
+      SOVERSION "${LibSourcey_SOVERSION}")
   endif()
 
   # Additional target properties

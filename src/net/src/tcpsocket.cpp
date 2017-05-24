@@ -24,7 +24,7 @@ TCPSocket::TCPSocket(uv::Loop* loop)
     : Stream(loop)
 {
     // TraceS(this) << "Create" << endl;
-    initialize();
+    init();
 }
 
 
@@ -34,22 +34,42 @@ TCPSocket::~TCPSocket()
 }
 
 
-void TCPSocket::initialize()
+void TCPSocket::init()
 {
-    if (!_ptr) {
-        auto tcp = new uv_tcp_t;
-        tcp->data = this;
-        _ptr = reinterpret_cast<uv_handle_t*>(tcp);
-        invoke(&uv_tcp_init_ex, loop(), tcp, _af);
-    }
+    if (initialized())
+        return;
 
-    Handle::initialize();
+    //assert(!_ptr);
+    //auto tcp = new uv_tcp_t;
+    //tcp->data = this;
+    //_ptr = reinterpret_cast<uv_handle_t*>(tcp);
+
+    //if (!_ptr) {
+    //    auto tcp = new uv_tcp_t;
+    //    tcp->data = this;
+    //    _ptr = reinterpret_cast<uv_handle_t*>(tcp);
+    //    invoke(&uv_tcp_init_ex, loop(), tcp, _af);
+    //}
+
+    if (!ptr()) {
+        Handle::create<uv_tcp_t>();
+        ptr()->data = this;
+    }
+    invoke(&uv_tcp_init_ex, loop(), ptr<uv_tcp_t>(), _af);
+    Handle::init();
 }
 
 
 void TCPSocket::reset()
 {
-    Handle::reset();
+    //assert(!_ptr);
+    //auto tcp = new uv_tcp_t;
+    //tcp->data = this;
+    //_ptr = reinterpret_cast<uv_handle_t*>(tcp);
+
+    Handle::reset<uv_tcp_t>();
+    ptr()->data = this;
+    init();
 }
 
 
@@ -64,7 +84,8 @@ UVStatusCallbackWithType(TCPSocket, onAcceptConnection, uv_stream_t);
 void TCPSocket::connect(const net::Address& peerAddress)
 {
     // TraceS(this) << "Connecting to " << peerAddress << endl;
-    initialize();
+    init();
+
     auto req = new uv_connect_t;
     req->data = this;
     invoke(&uv_tcp_connect, req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect); //"TCP connect failed",
@@ -79,7 +100,7 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
 
 void TCPSocket::bind(const net::Address& address, unsigned flags)
 {
-    // TraceS(this) << "Binding on " << address << endl;
+     TraceS(this) << "Binding on " << address << endl;
 
     // Reset the handle if the address family has changed
     if (_af != address.af()) {
@@ -90,13 +111,17 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
     if (_af == AF_INET6)
         flags |= UV_TCP_IPV6ONLY;
 
+    assert(_ptr);
+    assert(initialized());
     invoke(&uv_tcp_bind, ptr<uv_tcp_t>(), address.addr(), flags); //"TCP bind failed",
 }
 
 
 void TCPSocket::listen(int backlog)
 {
-    // TraceS(this) << "Listening" << endl;
+     TraceS(this) << "Listening" << endl;
+    assert(_ptr);
+    assert(initialized());
     invoke(&uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection); //"TCP listen failed",
 }
 

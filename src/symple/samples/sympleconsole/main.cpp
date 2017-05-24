@@ -26,7 +26,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 0
+#define USE_SSL 1
 
 
 class SympleApplication : public scy::Application
@@ -118,16 +118,12 @@ public:
 
             // client.options().host = "chat.mytommy.com";
             // client.options().port = 443;
-            // client.options().token = "UKysLaQSbPhSxyhxgUqw5wtt";
+            // client.options().token = "g5A2VIcQJQ3FTdQJB1JFDwtt";
             // client.options().user = "2";
 
             // client.options().host = "localhost";
             // client.options().port = 4500;
             // client.options().user = "2";
-
-            client.options().host = "google.com";
-            client.options().port = 4500;
-            client.options().user = "2";
 
             // Setup the client
             client += packetSlot(this, &SympleApplication::onRecvMessage);

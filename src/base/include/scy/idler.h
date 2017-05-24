@@ -99,7 +99,7 @@ public:
 protected:
     virtual void init();
 
-    virtual bool async() const;
+    virtual bool async() const override;
 
     uv::Handle _handle;
 };

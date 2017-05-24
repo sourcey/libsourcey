@@ -63,7 +63,7 @@ public:
     virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
 
 protected:
-    virtual void initialize() override;
+    virtual void init() override;
     virtual void reset() override;
     virtual bool recvStart();
     virtual bool recvStop();

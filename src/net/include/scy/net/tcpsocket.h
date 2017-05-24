@@ -87,7 +87,7 @@ public:
     virtual void onClose() override;
 
 protected:
-    virtual void initialize() override;
+    virtual void init() override;
     virtual void reset() override;
 
     SocketMode _mode;

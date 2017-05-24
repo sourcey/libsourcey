@@ -164,7 +164,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
                 // if (MultiplexEncoder::options().oformat.video.enabled &&
                 //    MultiplexEncoder::options().oformat.audio.enabled)
                 //    _muxLiveStreams = true;
-                MultiplexEncoder::initialize();
+                MultiplexEncoder::init();
             }
             break;
 
@@ -173,7 +173,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
             if (isActive()) {
                 TraceS(this) << "Uninitializing" << endl;
                 MultiplexEncoder::flush();
-                MultiplexEncoder::uninitialize();
+                MultiplexEncoder::uninit();
             }
             break;
             // case PacketStreamState::Stopped:

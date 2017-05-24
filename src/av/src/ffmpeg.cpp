@@ -82,7 +82,7 @@ static void logCallback(void *ptr, int level, const char *fmt, va_list vl)
 }
 
 
-void initialize()
+void init()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -108,7 +108,7 @@ void initialize()
 }
 
 
-void uninitialize()
+void uninit()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -123,13 +123,13 @@ void uninitialize()
 
 void initializeFFmpeg()
 {
-    internal::initialize();
+    internal::init();
 }
 
 
 void uninitializeFFmpeg()
 {
-    internal::uninitialize();
+    internal::uninit();
 }
 
 

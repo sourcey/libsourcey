@@ -89,8 +89,8 @@ public:
         Multiplex = 3 ///< both video & audio
     };
 
-    virtual void initialize() = 0;
-    virtual void uninitialize() = 0;
+    virtual void init() = 0;
+    virtual void uninit() = 0;
 
     virtual EncoderOptions& options() = 0;
 

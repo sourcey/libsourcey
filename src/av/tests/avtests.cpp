@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 {
     //Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
     //Logger::instance().setWriter(new AsyncLogWriter);
-    test::initialize();
+    test::init();
 
     // Define class based tests
 #ifdef HAVE_FFMPEG

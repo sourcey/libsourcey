@@ -103,17 +103,17 @@ Cipher::~Cipher()
 
 void Cipher::initEncryptor()
 {
-    initialize(true);
+    init(true);
 }
 
 
 void Cipher::initDecryptor()
 {
-    initialize(false);
+    init(false);
 }
 
 
-void Cipher::initialize(bool encrypt)
+void Cipher::init(bool encrypt)
 {
     if (_initialized)
         EVP_CIPHER_CTX_cleanup(_ctx);

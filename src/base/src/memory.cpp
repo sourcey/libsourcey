@@ -62,7 +62,7 @@ void GarbageCollector::finalize()
 
     std::lock_guard<std::mutex> guard(_mutex);
 
-    assert(std::this_thread::get_id() == _tid);
+    assert(_tid == std::this_thread::get_id());
     for (auto cleaner : _cleaners) {
         if (!cleaner->_finalize)
             cleaner->finalize();
@@ -168,6 +168,9 @@ void GarbageCollector::Cleaner::work()
             _ready.swap(_pending);
         }
     }
+
+    if (!deletable.empty())
+        std::cout << "destroy" << '\n';
 
     // Delete pointers
     util::clearVector(deletable);

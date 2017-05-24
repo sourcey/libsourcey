@@ -1528,7 +1528,7 @@ class RealtimeMediaQueueTest : public Test
 //                 // init encoder
 //                 MultiplexEncoder* encoder = new MultiplexEncoder();
 //                 encoder->setParams(options);
-//                 encoder->initialize();
+//                 encoder->init();
 //                 stream.attach(encoder, 5, true);
 //
 //                 //HTTPMultipartAdapter* packetizer = new
@@ -1625,7 +1625,7 @@ class RealtimeMediaQueueTest : public Test
 //         //CaptureRecorder<VideoEncoder> enc(videoCapture, options);
 //         //encoder = new MultiplexEncoder(stream.options());
 //         CaptureRecorder enc(options, videoCapture, audioCapture);
-//         //enc.initialize();
+//         //enc.init();
 //
 //         enc.attach(packetSlot(this,
 //         &Tests::onCaptureRecorderTestVideoEncoded));
@@ -1700,7 +1700,7 @@ class RealtimeMediaQueueTest : public Test
 //         :
 //             capture(capture), encoder(options), closed(false) {
 //             assert(capture);
-//             encoder.initialize();
+//             encoder.init();
 //         };
 //
 //         void start()
@@ -1714,7 +1714,7 @@ class RealtimeMediaQueueTest : public Test
 //         {
 //             capture.emitter -= packetSlot(this, &CaptureRecorder::onFrame);
 //             capture.stop();
-//             encoder.uninitialize();
+//             encoder.uninit();
 //             closed = true;
 //         }
 //
@@ -1793,7 +1793,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //         // Attach the Audio Encoder
 //         auto encoder = new av::MultiplexPacketEncoder(options);
-//         encoder->initialize();
+//         encoder->init();
 //         stream.attach(encoder, 5, true);
 //
 //         stream.start();
@@ -1832,7 +1832,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //         // Attach the Audio Encoder
 //         //auto encoder = new av::MultiplexPacketEncoder(options);
-//         //encoder->initialize();
+//         //encoder->init();
 //         //stream.attach(encoder, 5, true);
 //
 //         //CaptureRecorder enc(audioCapture, options);

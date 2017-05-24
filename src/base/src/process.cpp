@@ -18,7 +18,7 @@ namespace scy {
 
 
 Process::Process(uv::Loop* loop)
-    : uv::Handle(loop, new uv_process_t)
+    : _handle(loop, new uv_process_t)
     , _stdin(loop)
     , _stdout(loop)
 {
@@ -27,8 +27,8 @@ Process::Process(uv::Loop* loop)
 
 
 Process::Process(std::initializer_list<std::string> args, uv::Loop* loop)
-    : uv::Handle(loop, new uv_process_t)
-    , args(args)
+    : args(args)
+    , _handle(loop, new uv_process_t)
     , _stdin(loop)
     , _stdout(loop)
 {
@@ -45,7 +45,6 @@ Process::~Process()
 
 void Process::init()
 {
-    ptr()->data = this;
     options.args = nullptr;
     options.env = nullptr;
     options.cwd = nullptr;
@@ -74,6 +73,9 @@ void Process::init()
     options.stdio[1].flags = uv_stdio_flags(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
     options.stdio[1].data.stream = _stdout.ptr<uv_stream_t>();
     options.stdio_count = 2;
+
+    _handle.init();
+    _handle.ptr()->data = this;
 }
 
 
@@ -113,13 +115,13 @@ void Process::spawn()
     options.args = &_cargs[0];
 
     // Spawn the process
-    int r = uv_spawn(loop(), ptr<uv_process_t>(), &options);
+    int r = uv_spawn(_handle.loop(), _handle.ptr<uv_process_t>(), &options);
     if (r < 0)
-        setAndThrowError("Cannot spawn process", r);
+        _handle.setAndThrowError("Cannot spawn process", r);
 
     // Start reading on the stdout pipe
     if (!_stdout.readStart())
-        setAndThrowError("Cannot read stdout pipe");
+        _handle.setAndThrowError("Cannot read stdout pipe");
 }
 
 
@@ -144,7 +146,7 @@ bool Process::kill(int signum)
 
 int Process::pid() const
 {
-    return ptr<uv_process_t>()->pid;
+    return _handle.ptr<uv_process_t>()->pid;
 }
 
 

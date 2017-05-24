@@ -32,7 +32,7 @@ namespace test {
 static Singleton<TestRunner> singleton;
 
 
-void initialize()
+void init()
 {
     // Set the logger to only log warning level and above if no debug
     // channel has been set yet.

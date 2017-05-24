@@ -82,7 +82,7 @@ public:
 
     bool active() const;
 
-    virtual bool async() const;
+    virtual bool async() const override;
 
     std::int64_t timeout() const;
     std::int64_t interval() const;
