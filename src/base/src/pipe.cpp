@@ -32,7 +32,7 @@ Pipe::~Pipe()
 void Pipe::init(bool ipc)
 {
     uv_pipe_init(loop(), ptr<uv_pipe_t>(), ipc ? 1 : 0);
-    //Stream::readStart();
+    Stream::init();
 }
 
 
@@ -41,11 +41,11 @@ bool Pipe::readStart()
     return Stream::readStart();
 }
 
-//
-//bool Pipe::readStop()
-//{
-//    return Stream::readStop();
-//}
+
+// bool Pipe::readStop()
+// {
+//     return Stream::readStop();
+// }
 
 
 } // namespace scy
