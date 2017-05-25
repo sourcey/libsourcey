@@ -12,229 +12,203 @@ int main(int argc, char** argv)
     test::init();
     net::SSLManager::initNoVerifyClient();
 
-    // //
-    // /// HTTP URL Tests
-    // //
     //
-    // describe("url parser", []() {
-    //     http::URL url;
-    //     expect(url.scheme().empty());
-    //     expect(url.authority().empty());
-    //     expect(url.userInfo().empty());
-    //     expect(url.host().empty());
-    //     expect(url.port() == 0);
-    //     expect(url.path().empty());
-    //     expect(url.query().empty());
-    //     expect(url.fragment().empty());
+    /// HTTP URL Tests
     //
-    //     http::URL url2("HTTP", "localhost", "/home/sourcey/foo.bar");
-    //     expect(url2.scheme() == "http");
-    //     expect(url2.host() == "localhost");
-    //     expect(url2.path() == "/home/sourcey/foo.bar");
+
+    describe("url parser", []() {
+        http::URL url;
+        expect(url.scheme().empty());
+        expect(url.authority().empty());
+        expect(url.userInfo().empty());
+        expect(url.host().empty());
+        expect(url.port() == 0);
+        expect(url.path().empty());
+        expect(url.query().empty());
+        expect(url.fragment().empty());
+
+        http::URL url2("HTTP", "localhost", "/home/sourcey/foo.bar");
+        expect(url2.scheme() == "http");
+        expect(url2.host() == "localhost");
+        expect(url2.path() == "/home/sourcey/foo.bar");
+
+        http::URL url3("http", "www.sourcey.com", "/index.html");
+        expect(url3.scheme() == "http");
+        expect(url3.authority() == "www.sourcey.com");
+        expect(url3.host() == "www.sourcey.com");
+        expect(url3.path() == "/index.html");
+
+        http::URL url4("http", "www.sourcey.com:8000", "/index.html");
+        expect(url4.scheme() == "http");
+        expect(url4.authority() == "www.sourcey.com:8000");
+        expect(url4.host() == "www.sourcey.com");
+        expect(url4.path() == "/index.html");
+
+        http::URL url5("http", "user@www.sourcey.com:8000", "/index.html");
+        expect(url5.scheme() == "http");
+        expect(url5.userInfo() == "user");
+        expect(url5.host() == "www.sourcey.com");
+        expect(url5.port() == 8000);
+        expect(url5.authority() == "user@www.sourcey.com:8000");
+        expect(url5.path() == "/index.html");
+
+        http::URL url6("http", "user@www.sourcey.com:80", "/index.html");
+        expect(url6.scheme() == "http");
+        expect(url6.userInfo() == "user");
+        expect(url6.host() == "www.sourcey.com");
+        expect(url6.port() == 80);
+        expect(url6.authority() == "user@www.sourcey.com:80");
+        expect(url6.path() == "/index.html");
+
+        http::URL url7("http", "www.sourcey.com", "/index.html", "query=test", "fragment");
+        expect(url7.scheme() == "http");
+        expect(url7.authority() == "www.sourcey.com");
+        expect(url7.path() == "/index.html");
+        expect(url7.pathEtc() == "/index.html?query=test#fragment");
+        expect(url7.query() == "query=test");
+        expect(url7.fragment() == "fragment");
+
+        http::URL url8("http", "www.sourcey.com", "/index.html?query=test#fragment");
+        expect(url8.scheme() == "http");
+        expect(url8.authority() == "www.sourcey.com");
+        expect(url8.path() == "/index.html");
+        expect(url8.pathEtc() == "/index.html?query=test#fragment");
+        expect(url8.query() == "query=test");
+        expect(url8.fragment() == "fragment");
+    });
+
     //
-    //     http::URL url3("http", "www.sourcey.com", "/index.html");
-    //     expect(url3.scheme() == "http");
-    //     expect(url3.authority() == "www.sourcey.com");
-    //     expect(url3.host() == "www.sourcey.com");
-    //     expect(url3.path() == "/index.html");
+    /// HTTP URL Parameters Tests
     //
-    //     http::URL url4("http", "www.sourcey.com:8000", "/index.html");
-    //     expect(url4.scheme() == "http");
-    //     expect(url4.authority() == "www.sourcey.com:8000");
-    //     expect(url4.host() == "www.sourcey.com");
-    //     expect(url4.path() == "/index.html");
+
+    describe("url query parameters", []() {
+        NVCollection params;
+        http::splitURIParameters("/streaming?format=MJPEG&width=400&height=300&"
+            "encoding=Base64&packetizer=chunked&"
+            "rand=0.09983996045775712", params);
+        for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
+            // std::cout << "URL Parameter: " << it->first << ": " << it->second << endl;
+        }
+
+        expect(params.get("format") == "MJPEG");
+        expect(params.get("Format") == "MJPEG");
+        expect(params.get("width") == "400");
+        expect(params.get("WIDTH") == "400");
+        expect(params.get("height") == "300");
+        expect(params.get("encoding") == "Base64");
+        expect(params.get("ENCODING") == "Base64");
+        expect(params.get("packetizer") == "chunked");
+        expect(params.get("rand") == "0.09983996045775712");
+        expect(params.get("RaNd") == "0.09983996045775712");
+        expect(params.get("0") == "streaming");
+    });
+
     //
-    //     http::URL url5("http", "user@www.sourcey.com:8000", "/index.html");
-    //     expect(url5.scheme() == "http");
-    //     expect(url5.userInfo() == "user");
-    //     expect(url5.host() == "www.sourcey.com");
-    //     expect(url5.port() == 8000);
-    //     expect(url5.authority() == "user@www.sourcey.com:8000");
-    //     expect(url5.path() == "/index.html");
+    /// Default HTTP Client Connection Test
     //
-    //     http::URL url6("http", "user@www.sourcey.com:80", "/index.html");
-    //     expect(url6.scheme() == "http");
-    //     expect(url6.userInfo() == "user");
-    //     expect(url6.host() == "www.sourcey.com");
-    //     expect(url6.port() == 80);
-    //     expect(url6.authority() == "user@www.sourcey.com:80");
-    //     expect(url6.path() == "/index.html");
-    //
-    //     http::URL url7("http", "www.sourcey.com", "/index.html", "query=test", "fragment");
-    //     expect(url7.scheme() == "http");
-    //     expect(url7.authority() == "www.sourcey.com");
-    //     expect(url7.path() == "/index.html");
-    //     expect(url7.pathEtc() == "/index.html?query=test#fragment");
-    //     expect(url7.query() == "query=test");
-    //     expect(url7.fragment() == "fragment");
-    //
-    //     http::URL url8("http", "www.sourcey.com", "/index.html?query=test#fragment");
-    //     expect(url8.scheme() == "http");
-    //     expect(url8.authority() == "www.sourcey.com");
-    //     expect(url8.path() == "/index.html");
-    //     expect(url8.pathEtc() == "/index.html?query=test#fragment");
-    //     expect(url8.query() == "query=test");
-    //     expect(url8.fragment() == "fragment");
-    // });
-    //
-    // //
-    // /// HTTP URL Parameters Tests
-    // //
-    //
-    // describe("url query parameters", []() {
-    //     NVCollection params;
-    //     http::splitURIParameters("/streaming?format=MJPEG&width=400&height=300&"
-    //         "encoding=Base64&packetizer=chunked&"
-    //         "rand=0.09983996045775712", params);
-    //     for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
-    //         // std::cout << "URL Parameter: " << it->first << ": " << it->second << endl;
-    //     }
-    //
-    //     expect(params.get("format") == "MJPEG");
-    //     expect(params.get("Format") == "MJPEG");
-    //     expect(params.get("width") == "400");
-    //     expect(params.get("WIDTH") == "400");
-    //     expect(params.get("height") == "300");
-    //     expect(params.get("encoding") == "Base64");
-    //     expect(params.get("ENCODING") == "Base64");
-    //     expect(params.get("packetizer") == "chunked");
-    //     expect(params.get("rand") == "0.09983996045775712");
-    //     expect(params.get("RaNd") == "0.09983996045775712");
-    //     expect(params.get("0") == "streaming");
-    // });
-    //
-    // //
-    // /// Default HTTP Client Connection Test
-    // //
-    //
-    // describe("client connection download", []() {
-    //     std::string path(SCY_BUILD_DIR);
-    //     fs::addnode(path, "zlib-1.2.8.tar.gz");
-    //
-    //     auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
-    //     conn->Complete += [&](const http::Response& response) {
-    //         // std::cout << "Server response: " << response << endl;
-    //     };
+
+    describe("client connection download", []() {
+        std::string path(SCY_BUILD_DIR);
+        fs::addnode(path, "zlib-1.2.8.tar.gz");
+
+        auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
+        conn->Complete += [&](const http::Response& response) {
+            // std::cout << "Server response: " << response << endl;
+        };
+        conn->request().setMethod("GET");
+        conn->request().setKeepAlive(false);
+        conn->setReadStream(new std::ofstream(path, std::ios_base::out | std::ios_base::binary));
+        conn->send();
+
+        uv::runDefaultLoop();
+
+        expect(fs::exists(path));
+        expect(crypto::checksum("MD5", path) == "44d667c142d7cda120332623eab69f40");
+        fs::unlink(path);
+    });
+
+    // describe("secure client connection download", []() {
+    //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
+    //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
     //     conn->request().setMethod("GET");
     //     conn->request().setKeepAlive(false);
-    //     conn->setReadStream(new std::ofstream(path, std::ios_base::out | std::ios_base::binary));
-    //     conn->send();
-    //
-    //     uv::runDefaultLoop();
-    //
-    //     expect(fs::exists(path));
-    //     expect(crypto::checksum("MD5", path) == "44d667c142d7cda120332623eab69f40");
-    //     fs::unlink(path);
-    // });
-    //
-    // // describe("secure client connection download", []() {
-    // //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
-    // //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
-    // //     conn->request().setMethod("GET");
-    // //     conn->request().setKeepAlive(false);
-    // //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // });
-    //
-    // describe("client connection", []() {
-    //     auto conn = http::Client::instance().createConnection("http://google.com/");
-    //     // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
-    //     conn->Complete += [&](const http::Response& response) {
-    //         // std::cout << "Server response: " << response << endl;
-    //     };
-    //     conn->request().setMethod("GET");
-    //     conn->request().setKeepAlive(false);
-    //     // conn->setReadStream(new std::stringstream);
+    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
     //     conn->send();
     //     uv::runDefaultLoop();
-    //     expect(conn->closed());
-    //     expect(!conn->error().any());
     // });
+
+    describe("client connection", []() {
+        auto conn = http::Client::instance().createConnection("http://google.com/");
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += [&](const http::Response& response) {
+            // std::cout << "Server response: " << response << endl;
+        };
+        conn->request().setMethod("GET");
+        conn->request().setKeepAlive(false);
+        // conn->setReadStream(new std::stringstream);
+        conn->send();
+        uv::runDefaultLoop();
+        expect(conn->closed());
+        expect(!conn->error().any());
+    });
+
+    describe("secure client connection", []() {
+        auto conn = http::Client::instance().createConnection("https://google.com/");
+        // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += [&](const http::Response& response) {
+            // std::cout << "Server response: " << response << endl;
+        };
+        conn->request().setMethod("GET");
+        conn->request().setKeepAlive(false);
+        // conn->setReadStream(new std::stringstream);
+        conn->send();
+        uv::runDefaultLoop();
+        expect(conn->closed());
+        expect(!conn->error().any());
+    });
+
     //
-    // describe("secure client connection", []() {
-    //     auto conn = http::Client::instance().createConnection("https://google.com/");
-    //     // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
-    //     conn->Complete += [&](const http::Response& response) {
-    //         // std::cout << "Server response: " << response << endl;
-    //     };
-    //     conn->request().setMethod("GET");
-    //     conn->request().setKeepAlive(false);
-    //     // conn->setReadStream(new std::stringstream);
-    //     conn->send();
-    //     uv::runDefaultLoop();
-    //     expect(conn->closed());
-    //     expect(!conn->error().any());
-    // });
+    /// Standalone HTTP Client Connection Test
     //
-    // //
-    // /// Standalone HTTP Client Connection Test
-    // //
-    //
-    // describe("standalone client connection", []() {
-    //     http::ClientConnection conn("https://sourcey.com");
-    //     conn.Headers += [&](http::Response& response) {
-    //         // std::cout << "On response headers: " << response << endl;
-    //     };
-    //     conn.Payload += [&](const MutableBuffer& buffer) {
-    //         // std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
-    //     };
-    //     conn.Complete += [&](const http::Response& response) {
-    //         // std::cout << "On response complete: " << response
-    //         //     << conn.readStream<std::stringstream>().str() << endl;
-    //
-    //         // Force connection closure if the other side hasn't already
-    //         conn.close();
-    //     };
-    //     conn.setReadStream(new std::stringstream);
-    //     conn.send(); // send default GET /
-    //
-    //     uv::runDefaultLoop();
-    //
-    //     expect(conn.closed());
-    //     expect(!conn.error().any());
-    // });
+
+    describe("standalone client connection", []() {
+        http::ClientConnection conn("https://sourcey.com");
+        conn.Headers += [&](http::Response& response) {
+            // std::cout << "On response headers: " << response << endl;
+        };
+        conn.Payload += [&](const MutableBuffer& buffer) {
+            // std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+        };
+        conn.Complete += [&](const http::Response& response) {
+            // std::cout << "On response complete: " << response
+            //     << conn.readStream<std::stringstream>().str() << endl;
+
+            // Force connection closure if the other side hasn't already
+            conn.close();
+        };
+        conn.setReadStream(new std::stringstream);
+        conn.send(); // send default GET /
+
+        uv::runDefaultLoop();
+
+        expect(conn.closed());
+        expect(!conn.error().any());
+    });
 
     //
     /// Server and Client Echo Tests
     //
 
     describe("websocket client and server", []() {
-        // {
-        //     HTTPEchoTest test1(100);
-        //     // test1.raiseServer();
-        //     auto conn = test1.createConnection("http", "/echo");
-        //     conn->request().setMethod("POST");
-        //     conn->request().setContentLength(4);
-        //     conn->send("PING", 4);
-        //
-        //     uv::runDefaultLoop();
-        // }
-        // {
-        //     HTTPEchoTest test1(100);
-        //     // test1.raiseServer();
-        //     auto conn = test1.createConnection("ws", "/websocket");
-        //     conn->send("PING", 4);
-        //
-        //     uv::runDefaultLoop();
-        // }
-        // {
-        //     HTTPEchoTest test1(100);
-        //     // test1.raiseServer();
-        //     auto conn = test1.createConnection("ws", "/websocket");
-        //     conn->send("PING", 4);
-        //
-        //     uv::runDefaultLoop();
-        // }
-        // HTTPEchoTest test(100);
-        // test.raiseServer();
-        // auto conn = test.createConnection("ws", "/websocket");
-        // conn->send("PING", 4);
-        //
-        // uv::runDefaultLoop();
-        //
-        // expect(conn->closed());
-        // expect(!conn->error().any());
+        HTTPEchoTest test(100);
+        test.raiseServer();
+        auto conn = test.createConnection("ws", "/websocket");
+        conn->send("PING", 4);
+
+        uv::runDefaultLoop();
+
+        expect(conn->closed());
+        expect(!conn->error().any());
     });
 
     describe("http client and server", []() {
