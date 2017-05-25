@@ -21,34 +21,11 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::init();
 
     net::SSLManager::initNoVerifyServer();
     net::SSLManager::initNoVerifyClient();
-
-    //describe("timer test", [&]() {
-    //    //for (int a = 0; a < 1000; a++) {
-    //    //    Idler idler;
-    //    //    idler.start([&]() {
-    //    //        idler.cancel();
-    //    //    });
-    //    //    idler.handle().ref();
-
-    //    //    uv::runDefaultLoop();
-    //    //}
-
-    //    for (int a = 0; a < 100; a++) {
-    //        Timer idler(1, 1);
-    //        idler.start([&]() {
-    //            std::cout << "timer" << endl;
-    //            idler.stop();
-    //        });
-    //        idler.handle().ref();
-
-    //        uv::runDefaultLoop();
-    //    }
-    //});
 
     // =========================================================================
     // Address Test

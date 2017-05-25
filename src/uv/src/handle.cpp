@@ -32,10 +32,6 @@ Handle::Handle(uv::Loop* loop, void* handle)
 Handle::~Handle()
 {
     close();
-    // if (!_closed)
-    //     close();
-    // if (_ptr)
-    //     delete _ptr;
 }
 
 
@@ -186,7 +182,7 @@ void Handle::close()
     _closed = true;
 
     // Call onClose to run external callbacks.
-    //onClose();
+    onClose();
 }
 
 

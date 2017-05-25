@@ -116,6 +116,7 @@ bool Stream::closed() const
 bool Stream::readStart()
 {
     // TraceA("Read start: ", ptr())
+    assert(initialized());
     assert(!_started);
     _started = true;
 
@@ -129,6 +130,7 @@ bool Stream::readStart()
 bool Stream::readStop()
 {
     // TraceA("Read stop: ", ptr())
+    assert(initialized());
     assert(_started);
     _started = false;
 
@@ -149,6 +151,7 @@ void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t
     // TraceA("Handle read: ", nread)
     auto self = reinterpret_cast<Stream*>(handle->data);
     assert(self->_started);
+    assert(self->initialized());
 
     // try {
         if (nread >= 0) {
