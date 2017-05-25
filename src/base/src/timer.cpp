@@ -72,6 +72,7 @@ void Timer::init()
     // _timeout = 0;
     // _interval = 0;
 
+    assert(!_handle.initialized());
     assert(_handle.ptr());
     _handle.ptr()->data = this;
 
@@ -97,7 +98,7 @@ void Timer::start(std::function<void()> func)
 }
 
 
-void Timer::start() //std::int64_t timeout, std::int64_t interval)
+void Timer::start()
 {
     // TraceS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(!active());

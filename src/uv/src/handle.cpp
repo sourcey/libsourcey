@@ -84,7 +84,7 @@ bool Handle::active() const
 
 bool Handle::closed() const
 {
-    return _closed; //_ptr && uv_is_closing(_ptr) != 0;
+    return _closed;
 }
 
 
@@ -186,7 +186,7 @@ void Handle::close()
     _closed = true;
 
     // Call onClose to run external callbacks.
-    onClose();
+    //onClose();
 }
 
 
@@ -212,4 +212,4 @@ void Handle::onClose()
 } // namespace scy
 
 
-/// @\}
+  /// @\}

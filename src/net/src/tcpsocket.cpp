@@ -39,18 +39,6 @@ void TCPSocket::init()
     if (initialized())
         return;
 
-    //assert(!_ptr);
-    //auto tcp = new uv_tcp_t;
-    //tcp->data = this;
-    //_ptr = reinterpret_cast<uv_handle_t*>(tcp);
-
-    //if (!_ptr) {
-    //    auto tcp = new uv_tcp_t;
-    //    tcp->data = this;
-    //    _ptr = reinterpret_cast<uv_handle_t*>(tcp);
-    //    invoke(&uv_tcp_init_ex, loop(), tcp, _af);
-    //}
-
     if (!ptr()) {
         Handle::create<uv_tcp_t>();
         ptr()->data = this;
@@ -62,11 +50,6 @@ void TCPSocket::init()
 
 void TCPSocket::reset()
 {
-    //assert(!_ptr);
-    //auto tcp = new uv_tcp_t;
-    //tcp->data = this;
-    //_ptr = reinterpret_cast<uv_handle_t*>(tcp);
-
     Handle::reset<uv_tcp_t>();
     ptr()->data = this;
     init();
@@ -105,7 +88,7 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
     // Reset the handle if the address family has changed
     if (_af != address.af()) {
         _af = address.af();
-        // reset();
+         reset();
     }
 
     if (_af == AF_INET6)
@@ -120,8 +103,10 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
 void TCPSocket::listen(int backlog)
 {
      TraceS(this) << "Listening" << endl;
+     init();
     assert(_ptr);
     assert(initialized());
+
     invoke(&uv_listen, ptr<uv_stream_t>(), backlog, internal::onAcceptConnection); //"TCP listen failed",
 }
 

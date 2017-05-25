@@ -26,7 +26,7 @@ static const int GCTimerDelay = 100;
 GarbageCollector::GarbageCollector()
     : _tid(std::this_thread::get_id())
 {
-    // TraceA("Create")
+    TraceA("Create")
 }
 
 
@@ -115,7 +115,7 @@ GarbageCollector::Cleaner::Cleaner(uv::Loop* loop)
     , _loop(loop)
     , _finalize(false)
 {
-    // TraceA("Create: ", loop)
+    TraceA("Create: ", loop)
 }
 
 
@@ -141,6 +141,8 @@ void GarbageCollector::Cleaner::finalize()
     // Ensure previous calls to uv_stop don't prevent cleanup.
     //_loop->stop_flag = 0;
 
+    assert(_timer.handle().initialized());
+    assert(!_timer.handle().closed());
     _timer.setInterval(1);
     _timer.handle().ref(); // ref until complete
     uv_run(_loop, UV_RUN_DEFAULT);
@@ -183,7 +185,7 @@ void GarbageCollector::Cleaner::work()
 #ifdef _DEBUG
             // Print active handles, there should only be 1 left (our timer)
             uv_walk(_loop, [](uv_handle_t* handle, void* /* arg */) {
-                DebugA("Active handle: ", handle, ": ", handle->type)
+                // DebugA("Active handle: ", handle, ": ", handle->type)
             }, nullptr);
             // assert(_handle.loop()->active_handles <= 1);
 #endif

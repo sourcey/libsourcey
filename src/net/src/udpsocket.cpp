@@ -41,12 +41,6 @@ void UDPSocket::init()
     if (initialized())
         return;
 
-    // TraceS(this) << "Init" << endl;
-    //assert(!_ptr);
-    //uv_udp_t* udp = new uv_udp_t;
-    //udp->data = this;
-    //_ptr = reinterpret_cast<uv_handle_t*>(udp);
-
     if (!ptr()) {
         Handle::create<uv_udp_t>();
         ptr()->data = this;
@@ -78,7 +72,7 @@ void UDPSocket::connect(const Address& peerAddress)
 void UDPSocket::close()
 {
     // TraceS(this) << "Closing" << endl;
-    if (!closed())
+    if (initialized() && !closed())
         recvStop();
     uv::Handle::close();
 }
@@ -119,6 +113,7 @@ ssize_t UDPSocket::send(const char* data, size_t len,
     // TraceS(this) << "Send: " << len << ": " << peerAddress << endl;
     assert(Thread::currentID() == tid());
     assert(_ptr);
+    assert(initialized());
     // assert(len <= net::MAX_UDP_PACKET_SIZE);
 
     if (_peer.valid() && _peer != peerAddress) {
@@ -147,6 +142,7 @@ ssize_t UDPSocket::send(const char* data, size_t len,
 bool UDPSocket::setBroadcast(bool enable)
 {
     assert(_ptr);
+    assert(initialized());
     return uv_udp_set_broadcast(ptr<uv_udp_t>(), enable ? 1 : 0) == 0;
 }
 
@@ -154,6 +150,7 @@ bool UDPSocket::setBroadcast(bool enable)
 bool UDPSocket::setMulticastLoop(bool enable)
 {
     assert(_ptr);
+    assert(initialized());
     return uv_udp_set_multicast_loop(ptr<uv_udp_t>(), enable ? 1 : 0) == 0;
 }
 
@@ -161,6 +158,7 @@ bool UDPSocket::setMulticastLoop(bool enable)
 bool UDPSocket::setMulticastTTL(int ttl)
 {
     assert(_ptr);
+    assert(initialized());
     assert(ttl > 0 && ttl <= 255);
     return uv_udp_set_multicast_ttl(ptr<uv_udp_t>(), ttl) == 0;
 }
@@ -169,6 +167,8 @@ bool UDPSocket::setMulticastTTL(int ttl)
 bool UDPSocket::recvStart()
 {
     assert(_ptr);
+    assert(initialized());
+
     // UV_EALREADY means that the socket is already bound but that's okay
     // TODO: No need for boolean value as this method can throw exceptions
     // since it is called internally by bind().
@@ -183,9 +183,11 @@ bool UDPSocket::recvStart()
 
 bool UDPSocket::recvStop()
 {
+    assert(_ptr);
+    assert(initialized());
+
     // This method must not throw since it is called
     // internally via libuv callbacks.
-    assert(_ptr);
     return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 

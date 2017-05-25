@@ -52,7 +52,7 @@ int finalize()
     singleton.destroy();
 
     // Finalize the garbage collector to ensure memory if freed before exiting.
-    // GarbageCollector::instance().finalize();
+    GarbageCollector::instance().finalize();
 
     return passed ? 0 : 1;
 }
