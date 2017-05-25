@@ -43,8 +43,8 @@ void TCPSocket::init()
         Handle::create<uv_tcp_t>();
         ptr()->data = this;
     }
-    invoke(&uv_tcp_init_ex, loop(), ptr<uv_tcp_t>(), _af);
-    Handle::init();
+    // invoke(&uv_tcp_init_ex, loop(), ptr<uv_tcp_t>(), _af);
+    Handle::init<uv_tcp_t>(&uv_tcp_init_ex, _af);
 }
 
 

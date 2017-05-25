@@ -45,8 +45,8 @@ void UDPSocket::init()
         Handle::create<uv_udp_t>();
         ptr()->data = this;
     }
-    invoke(&uv_udp_init, loop(), ptr<uv_udp_t>());
-    Handle::init();
+    // invoke(&uv_udp_init, loop(), ptr<uv_udp_t>());
+    Handle::init<uv_udp_t>(&uv_udp_init);
 }
 
 

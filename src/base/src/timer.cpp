@@ -75,12 +75,13 @@ void Timer::init()
     assert(!_handle.initialized());
     assert(_handle.ptr());
     _handle.ptr()->data = this;
+    _handle.init<uv_timer_t>(&uv_timer_init);
+    _handle.throwLastError("Cannot initialize timer");
 
-    int err = uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
-    if (err < 0)
-        _handle.setAndThrowError("Cannot initialize timer", err);
+    // int err = uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
+    // if (err < 0)
+    //     _handle.setAndThrowError("Cannot initialize timer", err);
 
-    _handle.init();
     _handle.unref(); // unref by default
 }
 

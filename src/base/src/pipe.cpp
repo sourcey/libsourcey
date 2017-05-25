@@ -31,8 +31,9 @@ Pipe::~Pipe()
 
 void Pipe::init(bool ipc)
 {
-    uv_pipe_init(loop(), ptr<uv_pipe_t>(), ipc ? 1 : 0);
-    Stream::init();
+    // uv_pipe_init(loop(), ptr<uv_pipe_t>(), ipc ? 1 : 0);
+    // Stream::init();
+    Handle::init<uv_pipe_t>(&uv_pipe_init, ipc ? 1 : 0);
 }
 
 

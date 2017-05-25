@@ -74,7 +74,7 @@ void Process::init()
     options.stdio[1].data.stream = _stdout.ptr<uv_stream_t>();
     options.stdio_count = 2;
 
-    _handle.init();
+    // _handle.init();
     _handle.ptr()->data = this;
 }
 
@@ -115,9 +115,11 @@ void Process::spawn()
     options.args = &_cargs[0];
 
     // Spawn the process
-    int r = uv_spawn(_handle.loop(), _handle.ptr<uv_process_t>(), &options);
-    if (r < 0)
-        _handle.setAndThrowError("Cannot spawn process", r);
+    _handle.init<uv_process_t>(&uv_spawn, &options);
+    _handle.throwLastError("Cannot spawn process");
+    // int r = uv_spawn(_handle.loop(), _handle.ptr<uv_process_t>(), &options);
+    // if (r < 0)
+    //     _handle.setAndThrowError("Cannot spawn process", r);
 
     // Start reading on the stdout pipe
     if (!_stdout.readStart())

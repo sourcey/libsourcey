@@ -35,15 +35,6 @@ Handle::~Handle()
 }
 
 
-void Handle::init()
-{
-    assert(_ptr && "handle must be set");
-    _initialized = true;
-
-    // The implementation should call `uv_init` on the handle
-}
-
-
 void Handle::setLoop(uv::Loop* loop)
 {
     assertThread();
@@ -136,6 +127,14 @@ void Handle::setUVError(const std::string& prefix, int errorno)
     // err.syserr = uv.sys_errno_;
     err.message = formatError(prefix, errorno);
     setError(err);
+}
+
+
+void Handle::throwLastError(const std::string& prefix)
+{
+    if (error().any()) {
+        setAndThrowError(prefix, error().errorno);
+    }
 }
 
 

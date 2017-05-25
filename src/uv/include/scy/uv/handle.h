@@ -38,7 +38,27 @@ public:
     ///
     /// This method should be overridden by the implementation to call `uv_init`
     /// on the handle.
-    virtual void init();
+    template<class T, typename F, typename... Args>
+    bool init(F&& f, Args&&... args)
+    {
+        assert(!initialized());
+        int err = std::forward<F>(f)(loop(), ptr<T>(), std::forward<Args>(args)...);
+        if (err)
+            setUVError("Initialization failed", err);
+        else
+            _initialized = true;
+        return !err;
+    }
+
+    /// Invoke a method on the handle.
+    template<typename F, typename... Args>
+    bool invoke(F&& f, Args&&... args)
+    {
+        int err = std::forward<F>(f)(std::forward<Args>(args)...);
+        if (err)
+            setUVError("UV Error", err);
+        return !err;
+    }
 
     /// Close and destroy the associated `libuv` handle.
     virtual void close();
@@ -69,19 +89,23 @@ public:
     /// Set the error and triggers callbacks.
     virtual void setError(const scy::Error& err);
 
-    /// Sets and throws the last error.
+    /// Set the error and throw an exception.
     /// Should never be called inside `libuv` callbacks.
     virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0);
 
-    /// Throws the last error.
+    /// Throw an exception.
     /// This function is const so it can be used for
     /// invalid getter operations on closed handles.
     /// The actual error would be set on the next iteraton.
     virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const;
 
-    /// Sets the last error and sends relevant callbacks.
+    /// Set the error and trigger relevant callbacks.
     /// This method can be called inside `libuv` callbacks.
     virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0);
+
+    /// Throw an exception if the handle is in error state.
+    /// The error message prefix will be updated if provided.
+    virtual void throwLastError(const std::string& prefix = "UV Error");
 
     /// Set the event loop.
     /// The event loop may be set before the handle is initialized.
@@ -126,16 +150,6 @@ public:
     void assertThread() const;
 
 protected:
-
-    /// Invoke an internal `libuv` method.
-    template<typename F, typename... Args>
-    bool invoke(F&& f, Args&&... args)
-    {
-        int err = std::forward<F>(f)(std::forward<Args>(args)...);
-        if (err)
-            setUVError("UV Error", err);
-        return !err;
-    }
 
     /// Error callback.
     /// Override to handle errors.
