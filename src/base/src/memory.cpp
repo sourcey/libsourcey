@@ -169,9 +169,6 @@ void GarbageCollector::Cleaner::work()
         }
     }
 
-    if (!deletable.empty())
-        std::cout << "destroy" << '\n';
-
     // Delete pointers
     util::clearVector(deletable);
 

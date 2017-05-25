@@ -105,7 +105,7 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
     // Reset the handle if the address family has changed
     if (_af != address.af()) {
         _af = address.af();
-        reset();
+        // reset();
     }
 
     if (_af == AF_INET6)
