@@ -42,6 +42,8 @@ void Synchronizer::start(std::function<void()> target)
 
 void Synchronizer::post()
 {
+    assert(_handle.ptr());
+    assert(_handle.initialized());
     assert(!_handle.closed());
     uv_async_send(_handle.ptr<uv_async_t>());
 }
@@ -59,7 +61,7 @@ void Synchronizer::close()
         return;
     cancel();
     post(); // post to wake up event loop
-    _handle.reset<uv_async_t>();
+    _handle.close();
 }
 
 
