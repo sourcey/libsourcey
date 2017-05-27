@@ -17,8 +17,8 @@
 #include "scy/net/socket.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/net.h"
-#include "scy/stream.h"
-#include "scy/uv/handle.h"
+#include "scy/stream2.h"
+#include "scy/uv/handle2.h"
 
 
 namespace scy {
@@ -26,7 +26,7 @@ namespace net {
 
 
 /// TCP socket implementation.
-class Net_API TCPSocket : public Stream, public net::Socket
+class Net_API TCPSocket : public Stream2<uv_tcp_t>, public net::Socket
 {
 public:
     typedef std::shared_ptr<TCPSocket> Ptr;
@@ -75,6 +75,8 @@ public:
     net::TransportType transport() const override;
 
     virtual uv::Loop* loop() const override;
+
+    virtual void* self() override;
 
     Signal<void(const net::TCPSocket::Ptr&)> AcceptConnection;
 

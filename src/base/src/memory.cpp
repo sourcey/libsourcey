@@ -142,7 +142,6 @@ void GarbageCollector::Cleaner::finalize()
     //_loop->stop_flag = 0;
 
     assert(_timer.handle().initialized());
-    assert(!_timer.handle().closed());
     _timer.setInterval(1);
     _timer.handle().ref(); // ref until complete
     uv_run(_loop, UV_RUN_DEFAULT);

@@ -40,14 +40,14 @@ MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
     , _ioBuffer(nullptr)
     , _pts(0)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
     initializeFFmpeg();
 }
 
 
 MultiplexEncoder::~MultiplexEncoder()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
     uninit();
     uninitializeFFmpeg();
 }
@@ -156,31 +156,31 @@ void MultiplexEncoder::init()
         throw exc;
     }
 
-    TraceS(this) << "Initialize: OK" << endl;
+    TraceA("Initialize: OK")
 }
 
 
 void MultiplexEncoder::uninit()
 {
-    TraceS(this) << "Uninitialize" << endl;
+    TraceA("Uninitialize")
 
     // Write the trailer and dispatch the tail packet if any
     if (_formatCtx && _formatCtx->pb)
         av_write_trailer(_formatCtx);
 
-    TraceS(this) << "Uninitializing: Wrote trailer" << endl;
+    TraceA("Uninitializing: Wrote trailer")
 
     // Free memory
     cleanup();
     setState(this, EncoderState::Stopped);
 
-    TraceS(this) << "Uninitialize: OK" << endl;
+    TraceA("Uninitialize: OK")
 }
 
 
 void MultiplexEncoder::cleanup()
 {
-    TraceS(this) << "Cleanup" << endl;
+    TraceA("Cleanup")
 
     // Delete stream encoders
     freeVideo();
@@ -211,13 +211,13 @@ void MultiplexEncoder::cleanup()
         _ioBuffer = nullptr;
     }
 
-    TraceS(this) << "Cleanup: OK" << endl;
+    TraceA("Cleanup: OK")
 }
 
 
 void MultiplexEncoder::flush()
 {
-    TraceS(this) << "Flushing" << endl;
+    TraceA("Flushing")
 
     if (_video) {
         _video->flush();
@@ -423,7 +423,7 @@ void MultiplexEncoder::onVideoEncoded(av::VideoPacket& packet)
 
 void MultiplexEncoder::createAudio()
 {
-    TraceS(this) << "Create Audio" << endl;
+    TraceA("Create Audio")
 
     assert(!_audio);
     assert(_options.oformat.audio.enabled);

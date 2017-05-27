@@ -65,7 +65,7 @@ void VideoConverter::create()
 
 void VideoConverter::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     if (oframe) {
         av_free(oframe);

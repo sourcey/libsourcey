@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 #include "scy/util.h"
 
 #include <thread>

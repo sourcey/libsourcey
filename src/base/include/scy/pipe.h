@@ -14,14 +14,15 @@
 
 
 #include "scy/base.h"
-#include "scy/stream.h"
+#include "scy/stream2.h"
+// #include "scy/stream.h"
 
 
 namespace scy {
 
 
 /// Pipe implementation for process stdio
-class Base_API Pipe : public Stream
+class Base_API Pipe : public Stream2<uv_pipe_t>
 {
 public:
     Pipe(uv::Loop* loop = uv::defaultLoop());

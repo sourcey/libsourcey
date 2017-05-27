@@ -149,7 +149,7 @@ void VideoEncoder::create()
 
 void VideoEncoder::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     VideoContext::close();
 

@@ -66,7 +66,7 @@ WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
     , _request(request)
     , _response(response)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
 
     // socket->addReceiver(this, 100);
 }
@@ -74,7 +74,7 @@ WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket,
 
 WebSocketAdapter::~WebSocketAdapter()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
 
     // socket->removeReceiver(this);
 }
@@ -150,7 +150,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const n
     // Parse and check the response
 
     if (framer.checkClientHandshakeResponse(_response)) {
-        TraceS(this) << "Handshake success" << endl;
+        TraceA("Handshake success")
         onHandshakeComplete();
     }
 
@@ -188,7 +188,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
     // Verify the WebSocket handshake request
     try {
         framer.acceptServerRequest(_request, _response);
-        TraceS(this) << "Handshake success" << endl;
+        TraceA("Handshake success")
     } catch (std::exception& exc) {
         WarnL << "Handshake failed: " << exc.what() << endl;
     }
@@ -207,7 +207,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
 
 void WebSocketAdapter::onSocketConnect(net::Socket&)
 {
-    TraceS(this) << "On connect" << endl;
+    TraceA("On connect")
 
 
     // Send the WS handshake request
@@ -264,7 +264,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
 
                 // Drop empty packets
                 if (!payloadLength) {
-                    DebugS(this) << "Dropping empty frame" << endl;
+                    DebugA("Dropping empty frame")
                     continue;
                 }
             } catch (std::exception& exc) {
@@ -298,7 +298,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
 
 void WebSocketAdapter::onSocketClose(net::Socket&)
 {
-    TraceS(this) << "On close" << endl;
+    TraceA("On close")
 
     // Reset state so the connection can be reused
     _request.clear();

@@ -39,12 +39,12 @@ struct TestServer : public turn::ServerObserver
 
     void onServerAllocationCreated(turn::Server*, turn::IAllocation* alloc)
     {
-        DebugS(this) << "Allocation created" << endl;
+        DebugA("Allocation created")
     }
 
     void onServerAllocationRemoved(turn::Server*, turn::IAllocation* alloc)
     {
-        DebugS(this) << "Allocation removed" << endl;
+        DebugA("Allocation removed")
     }
 };
 

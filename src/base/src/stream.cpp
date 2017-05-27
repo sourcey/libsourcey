@@ -68,6 +68,10 @@ bool Stream::shutdown()
 bool Stream::write(const char* data, size_t len)
 {
     assertThread();
+    assert(_started);
+    assert(initialized());
+    assert(active());
+    assert(!closed());
 
     // if (closed())
     //    throw std::runtime_error("IO error: Cannot write to closed stream");
@@ -131,6 +135,7 @@ bool Stream::readStop()
 {
     // TraceA("Read stop: ", ptr())
     assert(initialized());
+    assert(!closed());
     assert(_started);
     _started = false;
 
@@ -140,11 +145,13 @@ bool Stream::readStop()
     return r == 0;
 }
 
+
 void Stream::onRead(const char* data, size_t len)
 {
     // TraceA("On read: ", len)
     Read.emit(*this, data, (const int)len);
 }
+
 
 void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
 {
@@ -152,6 +159,7 @@ void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t
     auto self = reinterpret_cast<Stream*>(handle->data);
     assert(self->_started);
     assert(self->initialized());
+    assert(!self->closed());
 
     // try {
         if (nread >= 0) {
@@ -185,10 +193,12 @@ void Stream::handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
     handleReadCommon(handle, nread, buf, UV_UNKNOWN_HANDLE);
 }
 
+
 void Stream::handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
 {
     handleReadCommon((uv_stream_t*)handle, nread, buf, pending);
 }
+
 
 void Stream::allocReadBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {

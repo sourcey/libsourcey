@@ -97,21 +97,35 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
 //
 
 
-/// Invoke a `libuv` method on the handle.
-template<typename F, typename... Args>
-auto invoke(F&& f, Args&&... args)
+/// Call a function with the given argument tuple.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple, size_t ... I>
+auto invoke(Function f, Tuple t, std::index_sequence<I ...>)
 {
-    return std::forward<F>(f)(std::forward<Args>(args)...);
+     return f(std::get<I>(t)...);
+}
+
+
+/// Call a function with the given argument tuple.
+///
+/// Create an index sequence for the array, and pass it to the
+/// implementation `call` function.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple>
+auto invoke(Function f, Tuple t)
+{
+    static constexpr auto size = std::tuple_size<Tuple>::value;
+    return invoke(f, t, std::make_index_sequence<size>{});
 }
 
 
 /// Invoke a `libuv` method on the handle.
 template<typename F, typename... Args>
-void invokeOrThrow(const std::string& message, F&& f, Args&&... args)
+auto invoke(F&& f, Args&&... args)
 {
-    auto err = std::forward<F>(f)(std::forward<Args>(args)...);
-    if (err)
-        throwError(message, err);
+    return std::forward<F>(f)(std::forward<Args>(args)...);
 }
 
 

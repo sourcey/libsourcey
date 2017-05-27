@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
-#include "scy/uv/handle.h"
+#include "scy/uv/handle2.h"
 
 #include <deque>
 
@@ -38,6 +38,8 @@ namespace scy {
 class Base_API Synchronizer : public Runner
 {
 public:
+    // using uv::Handle2<uv_async_t>;
+
     /// Create the synchronization context the given event loop.
     Synchronizer(uv::Loop* loop);
 
@@ -48,7 +50,7 @@ public:
     /// Create the synchronization context the given event loop and method.
     template<class Function, class... Args>
     explicit Synchronizer(Function&& func, Args&&... args, uv::Loop* loop = uv::defaultLoop())
-        : _handle(loop, new uv_async_t)
+        : _handle(loop)
     {
         start(std::forward<Function>(func),
               std::forward<Args>(args)...);
@@ -78,8 +80,9 @@ public:
 
         // Use a FunctionWrap instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., _context);
-        _handle.init<uv_async_t>(&uv_async_init, [](uv_async_t* req) {
+        assert(_handle.get());
+        _handle.get()->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., _context);
+        _handle.init(&uv_async_init, [](uv_async_t* req) {
             auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
             if (!wrap->ctx->cancelled) {
                 wrap->call();
@@ -100,14 +103,14 @@ public:
     virtual void cancel();
 
     virtual void close();
-    virtual bool closed();
+    // virtual bool closed();
 
-    uv::Handle& handle();
+    uv::Handle2<uv_async_t>& handle();
 
 protected:
     virtual bool async() const override;
 
-    uv::Handle _handle;
+    uv::Handle2<uv_async_t> _handle;
 };
 
 

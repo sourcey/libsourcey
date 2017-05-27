@@ -42,8 +42,8 @@ public:
     typedef std::shared_ptr<Socket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    Socket();
-    virtual ~Socket();
+    Socket() = default;
+    virtual ~Socket() = default;
 
     /// Connects to the given peer IP address.
     ///
@@ -56,7 +56,7 @@ public:
     /// Throws an Exception if the host is malformed.
     /// Since the DNS callback is asynchronous implementations need
     /// to listen for the Error signal for handling connection errors.
-    virtual void connect(const std::string& host, uint16_t port);
+    virtual void connect(const std::string& host, uint16_t port) = 0;
 
     /// Bind a local address to the socket.
     /// The address may be IPv4 or IPv6 (if supported).
@@ -115,7 +115,7 @@ public:
     ///
     /// The pointer is set to null on initialization
     /// but not managed.
-    void* opaque;
+    void* opaque { nullptr };
 
 protected:
     /// Initializes the underlying socket context.
@@ -124,7 +124,7 @@ protected:
     /// Resets the socket context for reuse.
     virtual void reset() = 0;
 
-    int _af{ AF_UNSPEC };
+    int _af { AF_UNSPEC };
 };
 
 

@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 #include <cstdint>
 #include <thread>
 #include <atomic>

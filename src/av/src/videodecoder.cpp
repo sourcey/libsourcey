@@ -178,7 +178,7 @@ void VideoDecoder::flush() // AVPacket& opacket
     do {
         avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (frameDecoded) {
-            TraceS(this) << "Flushed video frame" << endl;
+            TraceA("Flushed video frame")
             emitPacket(this, convert(frame)); //, opacket stream, ctx, &pts, oparams
             // return true;
         }

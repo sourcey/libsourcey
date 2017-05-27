@@ -167,7 +167,7 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::value& root)
 {
-    TraceS(this) << "Serializing" << endl;
+    TraceA("Serializing")
 
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -182,7 +182,7 @@ void Scheduler::serialize(json::value& root)
 
 void Scheduler::deserialize(json::value& root)
 {
-    TraceS(this) << "Deserializing" << endl;
+    TraceA("Deserializing")
 
     for (auto it = root.begin(); it != root.end(); it++) {
         sched::Task* task = nullptr;

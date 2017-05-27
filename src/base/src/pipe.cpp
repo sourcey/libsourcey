@@ -19,7 +19,7 @@ namespace scy {
 
 
 Pipe::Pipe(uv::Loop* loop)
-    : Stream(loop, new uv_pipe_t)
+    : Stream2<uv_pipe_t>(loop) //, new uv_pipe_t
 {
 }
 
@@ -33,13 +33,14 @@ void Pipe::init(bool ipc)
 {
     // uv_pipe_init(loop(), ptr<uv_pipe_t>(), ipc ? 1 : 0);
     // Stream::init();
-    Handle::init<uv_pipe_t>(&uv_pipe_init, ipc ? 1 : 0);
+    // <uv_pipe_t>
+    Stream2<uv_pipe_t>::init(&uv_pipe_init, ipc ? 1 : 0);
 }
 
 
 bool Pipe::readStart()
 {
-    return Stream::readStart();
+    return Stream2<uv_pipe_t>::readStart();
 }
 
 

@@ -28,13 +28,13 @@ namespace av {
 AudioEncoder::AudioEncoder(AVFormatContext* format)
     : format(format)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
 }
 
 
 AudioEncoder::~AudioEncoder()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
     close();
 }
 
@@ -74,7 +74,7 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
 
 void AudioEncoder::create()
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
     int err;
 
     // Find the audio encoder
@@ -167,13 +167,13 @@ void AudioEncoder::create()
 
 // void AudioEncoder::open()
 // {
-//     TraceS(this) << "Create" << endl;
+//     TraceA("Create")
 // }
 
 
 void AudioEncoder::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     AudioContext::close();
 
@@ -244,7 +244,7 @@ bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t 
     // Resample input data or add it to the buffer directly
     if (resampler) {
         if (!resampler->resample((uint8_t**)&samples, numSamples)) {
-            TraceS(this) << "Samples buffered by resampler" << endl;
+            TraceA("Samples buffered by resampler")
             return false;
         }
 
@@ -274,7 +274,7 @@ bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64
     // Resample input data or add it to the buffer directly
     if (resampler) {
         if (!resampler->resample((uint8_t**)samples, numSamples)) {
-            TraceS(this) << "Samples buffered by resampler" << endl;
+            TraceA("Samples buffered by resampler")
             return false;
         }
 
@@ -300,7 +300,7 @@ bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64
 
 bool AudioEncoder::encode(AVFrame* iframe)
 {
-    TraceS(this) << "Encoding audio frame" << endl;
+    TraceA("Encoding audio frame")
 
     int frameEncoded, ret;
 
@@ -351,7 +351,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
 
 void AudioEncoder::flush()
 {
-    TraceS(this) << "Flush" << endl;
+    TraceA("Flush")
 
     // Flush any remaining frames in the FIFO
     flushBuffer(this);

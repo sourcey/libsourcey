@@ -12,7 +12,7 @@
 #include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/util.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 #include <algorithm>
 #include <fstream>
 #include <memory>

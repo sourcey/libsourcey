@@ -28,7 +28,7 @@ Server::Server(const std::string& host, short port, net::TCPSocket::Ptr socket, 
     , _timer(5000, 5000, socket->loop())
     , _factory(factory)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
@@ -38,13 +38,13 @@ Server::Server(const net::Address& address, net::TCPSocket::Ptr socket, ServerCo
     , _timer(5000, 5000, socket->loop())
     , _factory(factory)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
 Server::~Server()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
     shutdown();
     if (_factory)
         delete _factory;
@@ -67,7 +67,7 @@ void Server::start()
 
 void Server::shutdown()
 {
-    // TraceS(this) << "Shutdown" << endl;
+    // TraceA("Shutdown")
 
     if (_socket) {
         _socket->removeReceiver(this);
@@ -92,7 +92,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 
 void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
-    // TraceS(this) << "On accept socket connection" << endl;
+    // TraceA("On accept socket connection")
 
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
@@ -102,7 +102,7 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
-    // TraceS(this) << "On connection ready" << endl;
+    // TraceA("On connection ready")
 
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
@@ -115,7 +115,7 @@ void Server::onConnectionReady(ServerConnection& conn)
 
 void Server::onConnectionClose(ServerConnection& conn)
 {
-    // TraceS(this) << "On connection closed" << endl;
+    // TraceA("On connection closed")
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
@@ -127,7 +127,7 @@ void Server::onConnectionClose(ServerConnection& conn)
 
 void Server::onSocketClose(net::Socket& socket)
 {
-    // TraceS(this) << "On server socket close" << endl;
+    // TraceA("On server socket close")
 }
 
 
@@ -156,14 +156,14 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     , _responder(nullptr)
     , _upgrade(false)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));
 }
 
 
 ServerConnection::~ServerConnection()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 
     close();
 
@@ -182,7 +182,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders()
 {
-    // TraceS(this) << "On headers" << endl;
+    // TraceA("On headers")
 
 #if 0
     // Send a raw HTTP response
@@ -252,7 +252,7 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceS(this) << "On payload: Closed" << endl;
+        // TraceA("On payload: Closed")
         return;
     }
 
@@ -266,11 +266,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onComplete()
 {
-    // TraceS(this) << "On complete" << endl;
+    // TraceA("On complete")
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceS(this) << "On complete: Closed" << endl;
+        // TraceA("On complete: Closed")
         return;
     }
 
@@ -283,7 +283,7 @@ void ServerConnection::onComplete()
 
 void ServerConnection::onClose()
 {
-    // TraceS(this) << "On close" << endl;
+    // TraceA("On close")
 
     if (_responder)
         _responder->onClose();

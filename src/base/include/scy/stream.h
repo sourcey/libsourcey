@@ -14,7 +14,7 @@
 
 
 #include "scy/base.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 
 #include "scy/buffer.h"
 #include "scy/signal.h"

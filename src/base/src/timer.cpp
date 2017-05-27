@@ -22,23 +22,23 @@ namespace scy {
 
 
 Timer::Timer(uv::Loop* loop)
-    : _handle(loop, new uv_timer_t)
+    : _handle(loop) //, new uv_timer_t)
     , _timeout(0)
     , _interval(0)
     , _count(0)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
     init();
 }
 
 
 Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
-    : _handle(loop, new uv_timer_t)
+    : _handle(loop) //, new uv_timer_t)
     , _timeout(timeout)
     , _interval(0)
     , _count(0)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
     init();
     if (func)
         start(func);
@@ -46,12 +46,12 @@ Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
 
 
 Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::function<void()> func)
-    : _handle(loop, new uv_timer_t)
+    : _handle(loop) //, new uv_timer_t)
     , _timeout(timeout)
     , _interval(interval)
     , _count(0)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
     init();
     if (func)
         start(func);
@@ -60,25 +60,25 @@ Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::f
 
 Timer::~Timer()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 }
 
 
 void Timer::init()
 {
-    // TraceS(this) << "Init" << endl;
+    // TraceA("Init")
 
     // _count = 0;
     // _timeout = 0;
     // _interval = 0;
 
     assert(!_handle.initialized());
-    assert(_handle.ptr());
-    _handle.ptr()->data = this;
-    _handle.init<uv_timer_t>(&uv_timer_init);
+    assert(_handle.get());
+    _handle.get()->data = this;
+    _handle.init(&uv_timer_init);
     _handle.throwLastError("Cannot initialize timer");
 
-    // int err = uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());
+    // int err = uv_timer_init(_handle.loop(), _handle.get());
     // if (err < 0)
     //     _handle.setAndThrowError("Cannot initialize timer", err);
 
@@ -103,14 +103,14 @@ void Timer::start()
 {
     // TraceS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(!active());
-    assert(_handle.ptr());
+    assert(_handle.get());
     assert(_timeout > 0 || _interval > 0);
 
     // _timeout = timeout;
     // _interval = interval;
     _count = 0;
 
-    int err = uv_timer_start(_handle.ptr<uv_timer_t>(), [](uv_timer_t* req) {
+    int err = uv_timer_start(_handle.get(), [](uv_timer_t* req) {
         auto self = reinterpret_cast<Timer*>(req->data);
         self->_count++;
         self->Timeout.emit();
@@ -130,7 +130,7 @@ void Timer::stop()
         return; // do nothing
 
     _count = 0;
-    int err = uv_timer_stop(_handle.ptr<uv_timer_t>());
+    int err = uv_timer_stop(_handle.get());
     if (err < 0)
         _handle.setAndThrowError("Invalid timer", err);
 
@@ -149,10 +149,10 @@ void Timer::restart()
 
 void Timer::again()
 {
-    TraceS(this) << "Again" << endl;
+    TraceA("Again")
 
-    assert(_handle.ptr());
-    int err = uv_timer_again(_handle.ptr<uv_timer_t>());
+    assert(_handle.get());
+    int err = uv_timer_again(_handle.get());
     if (err < 0)
         _handle.setAndThrowError("Invalid timer", err);
 
@@ -170,9 +170,9 @@ void Timer::setTimeout(std::int64_t timeout)
 
 void Timer::setInterval(std::int64_t interval)
 {
-    assert(_handle.ptr());
+    assert(_handle.get());
     _interval = interval;
-    uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), interval);
+    uv_timer_set_repeat(_handle.get(), interval);
 }
 
 
@@ -190,9 +190,9 @@ std::int64_t Timer::timeout() const
 
 std::int64_t Timer::interval() const
 {
-    assert(_handle.ptr());
+    assert(_handle.get());
     return std::min<std::int64_t>(
-        uv_timer_get_repeat(_handle.ptr<uv_timer_t>()), 0);
+        uv_timer_get_repeat(_handle.get()), 0);
 }
 
 
@@ -208,7 +208,7 @@ bool Timer::async() const
 }
 
 
-uv::Handle& Timer::handle()
+uv::Handle2<uv_timer_t>& Timer::handle()
 {
     return _handle;
 }

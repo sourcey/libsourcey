@@ -16,7 +16,7 @@
 #include "scy/base.h"
 #include "scy/runner.h"
 #include "scy/signal.h"
-#include "scy/uv/handle.h"
+#include "scy/uv/handle2.h"
 #include <cstdint>
 #include <functional>
 
@@ -38,7 +38,7 @@ public:
 
     /// Create a repeating interval timer.
     ///
-    /// The interval timer will trigger once after `timeout` milliseconds, 
+    /// The interval timer will trigger once after `timeout` milliseconds,
     /// and continue to trigger after the `interval` milliseconds.
     Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop = uv::defaultLoop(), std::function<void()> func = nullptr);
 
@@ -88,7 +88,7 @@ public:
     std::int64_t interval() const;
     std::int64_t count();
 
-    uv::Handle& handle();
+    uv::Handle2<uv_timer_t>& handle();
 
     NullSignal Timeout;
 
@@ -98,7 +98,7 @@ protected:
 
     virtual void init();
 
-    uv::Handle _handle;
+    uv::Handle2<uv_timer_t> _handle;
     std::int64_t _timeout;
     std::int64_t _interval;
     std::int64_t _count;

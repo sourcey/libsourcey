@@ -16,7 +16,7 @@
 #include "scy/net/address.h"
 #include "scy/net/socket.h"
 #include "scy/net/net.h"
-#include "scy/uv/handle.h"
+#include "scy/uv/handle2.h"
 
 
 namespace scy {
@@ -24,7 +24,7 @@ namespace net {
 
 
 /// UDN socket implementation.
-class Net_API UDPSocket : public net::Socket, public uv::Handle
+class Net_API UDPSocket : public uv::Handle2<uv_udp_t>, public net::Socket
 {
 public:
     typedef std::shared_ptr<UDPSocket> Ptr;
@@ -34,6 +34,7 @@ public:
     virtual ~UDPSocket();
 
     virtual void connect(const net::Address& peerAddress) override;
+    virtual void connect(const std::string& host, uint16_t port) override;
     virtual void close() override;
 
     virtual void bind(const net::Address& address, unsigned flags = 0) override;
@@ -60,6 +61,8 @@ public:
 
     virtual uv::Loop* loop() const override;
 
+    virtual void* self() override;
+
     virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
 
 protected:
@@ -70,9 +73,8 @@ protected:
 
     static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
                        const struct sockaddr* addr, unsigned flags);
-    static void afterSend(uv_udp_send_t* req, int status);
-    static void allocRecvBuffer(uv_handle_t* handle, size_t suggested_size,
-                                uv_buf_t* buf);
+    // static void afterSend(uv_udp_send_t* req, int status);
+    static void allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 
     virtual void onError(const scy::Error& error) override;
     virtual void onClose() override;

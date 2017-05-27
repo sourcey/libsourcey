@@ -33,14 +33,14 @@ VideoContext::VideoContext()
     , pts(AV_NOPTS_VALUE)
     , seconds(0)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
     initializeFFmpeg();
 }
 
 
 VideoContext::~VideoContext()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
 
     close();
     uninitializeFFmpeg();
@@ -74,7 +74,7 @@ void VideoContext::open()
 
 void VideoContext::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     if (frame) {
         av_free(frame);
@@ -103,7 +103,7 @@ void VideoContext::close()
     seconds = 0;
     error = "";
 
-    TraceS(this) << "Closing: OK" << endl;
+    TraceA("Closing: OK")
 }
 
 

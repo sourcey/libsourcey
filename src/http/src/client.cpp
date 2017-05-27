@@ -47,7 +47,7 @@ ClientConnection::ClientConnection(const URL& url, const net::TCPSocket::Ptr& so
 
 ClientConnection::~ClientConnection()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 }
 
 
@@ -83,7 +83,7 @@ void ClientConnection::connect()
 {
     if (!_connect) {
         _connect = true;
-        // TraceS(this) << "Connecting" << endl;
+        // TraceA("Connecting")
         _socket->connect(_url.host(), _url.port());
     }
 }
@@ -115,7 +115,7 @@ http::Message* ClientConnection::outgoingHeader()
 
 void ClientConnection::onSocketConnect(net::Socket& socket)
 {
-    // TraceS(this) << "On connect" << endl;
+    // TraceA("On connect")
 
     // Set the connection to active
     _active = true;
@@ -143,7 +143,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
     // Note if there are stream adapters we wait for the stream to push
     // through any custom headers. See ChunkedAdapter::emitHeader
     //if (Outgoing.numAdapters() == 0) {
-    //    // TraceS(this) << "On connect: Send header" << endl;
+    //    // TraceA("On connect: Send header")
     //    sendHeader();
     //}
 }
@@ -154,7 +154,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
 
 void ClientConnection::onHeaders()
 {
-    // TraceS(this) << "On headers" << endl;
+    // TraceA("On headers")
     //IncomingProgress.total = _response.getContentLength();
 
     Headers.emit(_response);
@@ -188,7 +188,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
 
 void ClientConnection::onComplete()
 {
-    // TraceS(this) << "On complete" << endl;
+    // TraceA("On complete")
 
     assert(!_complete);
     _complete = true; // in case close() is called inside callback
@@ -197,7 +197,7 @@ void ClientConnection::onComplete()
     if (_readStream) {
         auto fstream = dynamic_cast<std::ofstream*>(_readStream.get());
         if (fstream) {
-            // TraceS(this) << "Closing file stream" << endl;
+            // TraceA("Closing file stream")
             fstream->close();
         }
     }
@@ -208,7 +208,7 @@ void ClientConnection::onComplete()
 
 void ClientConnection::onClose()
 {
-    // TraceS(this) << "On close" << endl;
+    // TraceA("On close")
 
     if (!_complete)
         onComplete();
@@ -242,7 +242,7 @@ void Client::destroy()
 
 Client::Client()
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 
     //_timer.Timeout += sdelegate(this, &Client::onConnectionTimer);
     //_timer.start(5000);
@@ -251,14 +251,14 @@ Client::Client()
 
 Client::~Client()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
     shutdown();
 }
 
 
 void Client::shutdown()
 {
-    // TraceS(this) << "Shutdown" << endl;
+    // TraceA("Shutdown")
 
     //_timer.stop();
     Shutdown.emit(/*this*/);

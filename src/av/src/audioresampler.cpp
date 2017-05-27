@@ -108,13 +108,13 @@ void AudioResampler::open()
         throw std::runtime_error("Cannot initialize resample context: " + averror(ret));
     }
 
-    TraceS(this) << "Create: OK" << endl;
+    TraceA("Create: OK")
 }
 
 
 void AudioResampler::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     if (ctx) {
 #ifdef HAVE_FFMPEG_SWRESAMPLE

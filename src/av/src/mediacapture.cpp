@@ -38,14 +38,14 @@ MediaCapture::MediaCapture()
     , _looping(false)
     , _realtime(false)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
     initializeFFmpeg();
 }
 
 
 MediaCapture::~MediaCapture()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
 
     close();
     uninitializeFFmpeg();
@@ -54,7 +54,7 @@ MediaCapture::~MediaCapture()
 
 void MediaCapture::close()
 {
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     stop();
 
@@ -73,7 +73,7 @@ void MediaCapture::close()
         _formatCtx = nullptr;
     }
 
-    TraceS(this) << "Closing: OK" << endl;
+    TraceA("Closing: OK")
 }
 
 
@@ -124,13 +124,13 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
 
 void MediaCapture::start()
 {
-    TraceS(this) << "Starting" << endl;
+    TraceA("Starting")
 
     std::lock_guard<std::mutex> guard(_mutex);
     assert(_video || _audio);
 
     if ((_video || _audio) && !_thread.running()) {
-        TraceS(this) << "Initializing thread" << endl;
+        TraceA("Initializing thread")
         _stopping = false;
         _thread.start(std::bind(&MediaCapture::run, this));
     }
@@ -139,13 +139,13 @@ void MediaCapture::start()
 
 void MediaCapture::stop()
 {
-    TraceS(this) << "Stopping" << endl;
+    TraceA("Stopping")
 
     std::lock_guard<std::mutex> guard(_mutex);
 
     _stopping = true;
     if (_thread.running()) {
-        TraceS(this) << "Terminating thread" << endl;
+        TraceA("Terminating thread")
         _thread.join();
     }
 }
@@ -161,7 +161,7 @@ void MediaCapture::emit(IPacket& packet)
 
 void MediaCapture::run()
 {
-    TraceS(this) << "Running" << endl;
+    TraceA("Running")
 
     try {
         int res;
@@ -253,11 +253,11 @@ void MediaCapture::run()
         ErrorS(this) << "Decoder Error: " << _error << endl;
     } catch (...) {
         _error = "Unknown Error";
-        ErrorS(this) << "Unknown Error" << endl;
+        ErrorA("Unknown Error")
     }
 
     if (_stopping || !_looping) {
-        TraceS(this) << "Exiting" << endl;
+        TraceA("Exiting")
         _stopping = true;
         Closing.emit();
     }

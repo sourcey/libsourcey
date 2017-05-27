@@ -18,7 +18,7 @@ namespace scy {
 
 
 Process::Process(uv::Loop* loop)
-    : _handle(loop, new uv_process_t)
+    : _handle(loop)
     , _stdin(loop)
     , _stdout(loop)
 {
@@ -28,7 +28,7 @@ Process::Process(uv::Loop* loop)
 
 Process::Process(std::initializer_list<std::string> args, uv::Loop* loop)
     : args(args)
-    , _handle(loop, new uv_process_t)
+    , _handle(loop)
     , _stdin(loop)
     , _stdout(loop)
 {
@@ -61,21 +61,21 @@ void Process::init()
 
     _stdin.init();
     _stdout.init();
-    _stdout.Read += [this](Stream&, const char* data, const int& len) {
+    _stdout.Read += [this](/*Stream&, */const char* data, const int& len) {
         if (onstdout)
             onstdout(std::string(data, len));
     };
 
     options.stdio = _stdio;
     options.stdio[0].flags = uv_stdio_flags(UV_CREATE_PIPE | UV_READABLE_PIPE);
-    options.stdio[0].data.stream = _stdin.ptr<uv_stream_t>();
+    options.stdio[0].data.stream = _stdin.get<uv_stream_t>();
     //options.stdio[0].flags = uv_stdio_flags(UV_IGNORE);
     options.stdio[1].flags = uv_stdio_flags(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
-    options.stdio[1].data.stream = _stdout.ptr<uv_stream_t>();
+    options.stdio[1].data.stream = _stdout.get<uv_stream_t>();
     options.stdio_count = 2;
 
     // _handle.init();
-    _handle.ptr()->data = this;
+    _handle.get()->data = this;
 }
 
 
@@ -115,7 +115,7 @@ void Process::spawn()
     options.args = &_cargs[0];
 
     // Spawn the process
-    _handle.init<uv_process_t>(&uv_spawn, &options);
+    _handle.init(&uv_spawn, &options);
     _handle.throwLastError("Cannot spawn process");
     // int r = uv_spawn(_handle.loop(), _handle.ptr<uv_process_t>(), &options);
     // if (r < 0)
@@ -148,7 +148,7 @@ bool Process::kill(int signum)
 
 int Process::pid() const
 {
-    return _handle.ptr<uv_process_t>()->pid;
+    return _handle.get()->pid;
 }
 
 

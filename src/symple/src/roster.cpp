@@ -22,13 +22,13 @@ namespace smpl {
 
 Roster::Roster()
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
 Roster::~Roster()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 }
 
 

@@ -19,7 +19,6 @@
 #include "scy/turn/fivetuple.h"
 #include "scy/turn/iallocation.h"
 #include "scy/turn/turn.h"
-#include "scy/turn/turn.h"
 #include "scy/turn/types.h"
 
 #include <deque>
@@ -52,7 +51,7 @@ struct ClientState : public State
                 return "Authorizing";
             case Success:
                 return "Success";
-            // case Terminated:     
+            // case Terminated:
             //    return "Terminated";
             case Failed:
                 return "Failed";
@@ -178,7 +177,6 @@ protected:
 protected:
     ClientObserver& _observer;
     Options _options;
-    //net::Socket::Ptr _socket;
     net::SocketEmitter _socket;
     Timer _timer;
     scy::Error _error;

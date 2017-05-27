@@ -18,7 +18,7 @@
 
 #include "scy/base.h"
 #include "scy/packetsignal.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 #include <ctime>
 
 

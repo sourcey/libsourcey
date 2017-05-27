@@ -17,7 +17,7 @@
 #include "scy/logger.h"
 #include "scy/timer.h"
 #include "scy/singleton.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 #include <mutex>
 #include <atomic>
 #include <cstdint>

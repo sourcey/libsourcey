@@ -26,13 +26,13 @@ PacketStream::PacketStream(const std::string& name)
     , _autoStart(false)
     , _closeOnError(true)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
 }
 
 
 PacketStream::~PacketStream()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
 
     close();
 
@@ -52,10 +52,10 @@ PacketStream::~PacketStream()
 
 void PacketStream::start()
 {
-    TraceS(this) << "Start" << endl;
+    TraceA("Start")
 
     if (stateEquals(PacketStreamState::Active)) {
-        TraceS(this) << "Start: Already active" << endl;
+        TraceA("Start: Already active")
         // assert(0);
         return;
     }
@@ -76,13 +76,13 @@ void PacketStream::start()
 
 void PacketStream::stop()
 {
-    TraceS(this) << "Stop" << endl;
+    TraceA("Stop")
 
 
     if (stateEquals(PacketStreamState::Stopped) ||
         stateEquals(PacketStreamState::Stopping) ||
         stateEquals(PacketStreamState::Closed)) {
-        TraceS(this) << "Stop: Already stopped" << endl;
+        TraceA("Stop: Already stopped")
         // assert(0);
         return;
     }
@@ -100,16 +100,16 @@ void PacketStream::stop()
 
 void PacketStream::pause()
 {
-    TraceS(this) << "Pause" << endl;
+    TraceA("Pause")
     setState(this, PacketStreamState::Paused);
 }
 
 
 void PacketStream::resume()
 {
-    TraceS(this) << "Resume" << endl;
+    TraceA("Resume")
     if (!stateEquals(PacketStreamState::Paused)) {
-        TraceS(this) << "Resume: Not paused" << endl;
+        TraceA("Resume: Not paused")
         return;
     }
 
@@ -119,7 +119,7 @@ void PacketStream::resume()
 
 void PacketStream::reset()
 {
-    TraceS(this) << "Reset" << endl;
+    TraceA("Reset")
     assert(stateEquals(PacketStreamState::None) ||
            stateEquals(PacketStreamState::Closed));
 
@@ -133,7 +133,7 @@ void PacketStream::close()
 {
     if (stateEquals(PacketStreamState::None) ||
         stateEquals(PacketStreamState::Closed)) {
-        // TraceS(this) << "Already closed" << endl;
+        // TraceA("Already closed")
         // assert(0);
         return;
     }
@@ -143,7 +143,7 @@ void PacketStream::close()
         !stateEquals(PacketStreamState::Stopping))
         stop();
 
-    TraceS(this) << "Closing" << endl;
+    TraceA("Closing")
 
     // Queue the Closed state
     setState(this, PacketStreamState::Closed);
@@ -298,7 +298,7 @@ void PacketStream::process(IPacket& packet)
             !packet.flags.has(PacketFlags::NoModify)) {
             {
                 std::lock_guard<std::mutex> guard(_mutex);
-                firstProc = !_processors.empty() ? 
+                firstProc = !_processors.empty() ?
                     reinterpret_cast<PacketProcessor*>(_processors[0]->ptr) : nullptr;
             }
             if (firstProc) {
@@ -411,7 +411,7 @@ void PacketStream::setup()
 
 void PacketStream::teardown()
 {
-    TraceS(this) << "Teardown" << endl;
+    TraceA("Teardown")
     std::lock_guard<std::mutex> guard(_mutex);
 
     // Detach the processor chain first
@@ -600,7 +600,7 @@ void PacketStream::handleException(std::exception& exc)
 
     //_syncError = true;
     if (_closeOnError) {
-        TraceS(this) << "Close on error" << endl;
+        TraceA("Close on error")
         this->close();
     }
 }

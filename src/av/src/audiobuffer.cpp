@@ -27,14 +27,14 @@ namespace av {
 AudioBuffer::AudioBuffer()
     : fifo(nullptr)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
     assert(!fifo);
 }
 
 
 AudioBuffer::~AudioBuffer()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
     close();
 }
 
@@ -61,7 +61,7 @@ void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSampl
 
 void AudioBuffer::reset()
 {
-    TraceS(this) << "Reset" << endl;
+    TraceA("Reset")
 
     if (fifo) {
         av_audio_fifo_reset(fifo);
@@ -71,7 +71,7 @@ void AudioBuffer::reset()
 
 void AudioBuffer::close()
 {
-    TraceS(this) << "Close" << endl;
+    TraceA("Close")
 
     if (fifo) {
         av_audio_fifo_free(fifo);

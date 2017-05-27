@@ -14,7 +14,7 @@
 
 
 #include "scy/util.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 
 
 namespace scy {

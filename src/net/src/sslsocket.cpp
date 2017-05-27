@@ -30,7 +30,7 @@ SSLSocket::SSLSocket(uv::Loop* loop)
     , _session(nullptr)
     , _sslAdapter(this)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
@@ -40,7 +40,7 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
     , _session(nullptr)
     , _sslAdapter(this)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
@@ -50,13 +50,13 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop*
     , _session(session)
     , _sslAdapter(this)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
 }
 
 
 SSLSocket::~SSLSocket()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 }
 
 
@@ -74,7 +74,7 @@ void SSLSocket::close()
 
 bool SSLSocket::shutdown()
 {
-    // TraceS(this) << "Shutdown" << endl;
+    // TraceA("Shutdown")
     try {
         // Try to gracefully shutdown the SSL connection
         _sslAdapter.shutdown();
@@ -121,11 +121,11 @@ void SSLSocket::acceptConnection()
 
     // TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
     uv::invokeOrThrow("Cannot initialize SSL socket",
-                  &uv_tcp_init, loop(), socket->ptr<uv_tcp_t>());
+                  &uv_tcp_init, loop(), socket->get());
     // UVCallOrThrow("Cannot initialize SSL socket",
-    //               uv_tcp_init, loop(), socket->ptr<uv_tcp_t>())
+    //               uv_tcp_init, loop(), socket->get()())
 
-    if (uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()) == 0) {
+    if (uv_accept(get<uv_stream_t>(), socket->get<uv_stream_t>()) == 0) {
         socket->readStart();
         socket->_sslAdapter.initServer();
 
@@ -205,7 +205,7 @@ void SSLSocket::onRead(const char* data, size_t len)
 
 void SSLSocket::onConnect(uv_connect_t* handle, int status)
 {
-    // TraceS(this) << "On connect" << endl;
+    // TraceA("On connect")
     if (status) {
         setUVError("SSL connect error", status);
         return;

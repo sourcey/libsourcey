@@ -38,7 +38,7 @@ Connection::Connection(const net::TCPSocket::Ptr& socket)
 
 Connection::~Connection()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
     replaceAdapter(nullptr);
 
     // NOTE: Call close from impl to avoid pure virtual
@@ -131,7 +131,7 @@ void Connection::setError(const scy::Error& err)
 
 void Connection::onSocketConnect(net::Socket& socket)
 {
-    // TraceS(this) << "On socket connect" << endl;
+    // TraceA("On socket connect")
 
     // Only useful for client connections
 }
@@ -139,7 +139,7 @@ void Connection::onSocketConnect(net::Socket& socket)
 
 void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    // TraceS(this) << "On socket recv" << endl;
+    // TraceA("On socket recv")
 
     // Handle payload data
     onPayload(buffer);
@@ -162,7 +162,7 @@ void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 
 void Connection::onSocketClose(net::Socket& socket)
 {
-    // TraceS(this) << "On socket close" << endl;
+    // TraceA("On socket close")
 
     // Close the connection when the socket closes
     close();
@@ -372,7 +372,7 @@ void ConnectionAdapter::onParserError(const scy::Error& err)
 
 void ConnectionAdapter::onParserEnd()
 {
-    // TraceS(this) << "On parser end" << endl;
+    // TraceA("On parser end")
 
     if (_connection/* && _receiver */)
         _connection->onComplete();
@@ -420,7 +420,7 @@ ConnectionStream::ConnectionStream(Connection::Ptr connection)
 
 ConnectionStream::~ConnectionStream()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
 
     Outgoing.close();
     Incoming.close();

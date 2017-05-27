@@ -27,14 +27,14 @@ SocketAdapter::SocketAdapter(SocketAdapter* sender)
     , _sender(sender)
     , _dirty(false)
 {
-    // TraceS(this) << "Create" << endl;
+    // TraceA("Create")
     assert(sender != this);
 }
 
 
 SocketAdapter::~SocketAdapter()
 {
-    // TraceS(this) << "Destroy" << endl;
+    // TraceA("Destroy")
     // assert(_receivers.empty());
 }
 

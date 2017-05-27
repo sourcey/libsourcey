@@ -30,7 +30,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams)
     , _options(options)
     , _params(cvParams)
 {
-    TraceS(this) << "Create" << endl;
+    TraceA("Create")
 
     if (_options.oformat.id == "jpeg" || _options.oformat.id == "mjpeg")
         _extension = ".jpg";
@@ -44,7 +44,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams)
 
 ImageEncoder::~ImageEncoder()
 {
-    TraceS(this) << "Destroy" << endl;
+    TraceA("Destroy")
 }
 
 
@@ -66,7 +66,7 @@ bool ImageEncoder::accepts(IPacket* packet)
 
 void ImageEncoder::process(IPacket& packet)
 {
-    // TraceS(this) << "Processing" << endl;
+    // TraceA("Processing")
 
     MatrixPacket* mpacket = dynamic_cast<MatrixPacket*>(&packet);
     if (!mpacket)

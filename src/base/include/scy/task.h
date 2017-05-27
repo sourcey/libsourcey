@@ -17,7 +17,7 @@
 #include "scy/runner.h"
 #include "scy/signal.h"
 #include "scy/task.h"
-#include "scy/uv/handle.h"
+//#include "scy/uv/handle.h"
 
 
 namespace scy {

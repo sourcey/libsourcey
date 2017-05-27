@@ -201,7 +201,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, size_t len)
 {
-    // TraceS(this) << "On body" << endl;
+    // TraceA("On body")
     if (_observer)
         _observer->onParserChunk(buf, len);
 }
@@ -209,7 +209,7 @@ void Parser::onBody(const char* buf, size_t len)
 
 void Parser::onMessageEnd()
 {
-    // TraceS(this) << "On message end" << endl;
+    // TraceA("On message end")
     _complete = true;
     if (_observer)
         _observer->onParserEnd();

@@ -169,7 +169,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     // Flash policy requests
     // TODO: Handle elsewhere? Bloody flash...
     else if (len == 23 && (strcmp(buf, "<policy-file-request/>") == 0)) {
-        TraceS(this) << "Handle flash policy" << endl;
+        TraceA("Handle flash policy")
         std::string policy(
             "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from "
             "domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
@@ -220,7 +220,7 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
 
 void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 {
-    TraceS(this) << "Peer Connect request success" << endl;
+    TraceA("Peer Connect request success")
     assert(&socket == peer.impl.get());
     peer.Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
     peer.Error -= slot(this, &TCPConnectionPair::onPeerConnectError);

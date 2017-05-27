@@ -16,13 +16,13 @@ namespace scy {
 
 
 Synchronizer::Synchronizer(uv::Loop* loop)
-    : _handle(loop, new uv_async_t)
+    : _handle(loop)
 {
 }
 
 
 Synchronizer::Synchronizer(std::function<void()> target, uv::Loop* loop)
-    : _handle(loop, new uv_async_t)
+    : _handle(loop)
 {
     start<std::function<void()>>(std::forward<std::function<void()>>(target));
 }
@@ -42,10 +42,8 @@ void Synchronizer::start(std::function<void()> target)
 
 void Synchronizer::post()
 {
-    assert(_handle.ptr());
     assert(_handle.initialized());
-    assert(!_handle.closed());
-    uv_async_send(_handle.ptr<uv_async_t>());
+    uv_async_send(_handle.get());
 }
 
 
@@ -57,7 +55,7 @@ void Synchronizer::cancel()
 
 void Synchronizer::close()
 {
-    if (closed())
+    if (!_handle.initialized())
         return;
     cancel();
     post(); // post to wake up event loop
@@ -65,10 +63,11 @@ void Synchronizer::close()
 }
 
 
-bool Synchronizer::closed()
-{
-    return _handle.closed();
-}
+// bool Synchronizer::closed()
+// {
+//     return !_handle.initialized();
+//     // return _handle.closed();
+// }
 
 
 bool Synchronizer::async() const
@@ -77,7 +76,7 @@ bool Synchronizer::async() const
 }
 
 
-uv::Handle& Synchronizer::handle()
+uv::Handle2<uv_async_t>& Synchronizer::handle()
 {
     return _handle;
 }
