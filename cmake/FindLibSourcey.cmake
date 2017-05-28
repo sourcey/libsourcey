@@ -58,7 +58,6 @@ set(LibSourcey_ALL_MODULES
   symple
   turn
   util
-  uv
   webrtc
 )
 
@@ -94,7 +93,6 @@ if (NOT LibSourcey_FOUND)
   find_component(LibSourcey crypto   crypto   scy_crypto   scy/crypto/crypto.h)
   find_component(LibSourcey json     json     scy_json     scy/json/json.h)
   find_component(LibSourcey base     base     scy_base     scy/base.h)
-  find_component(LibSourcey uv       uv       scy_uv       scy/uv/uvpp.h)
 
   # Include the dir with libsourcey.h
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_LIBRARY_DIR})

@@ -2,4 +2,4 @@
 # include_dependency(JsonCpp)
 
 set(archotests_EXCLUDE_CTEST TRUE)
-define_libsourcey_test(archotests uv base archo)
+define_libsourcey_test(archotests base archo)

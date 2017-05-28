@@ -1,4 +1,4 @@
 # include_dependency(SSL REQUIRED)
 # include_dependency(LibUV)
 
-define_libsourcey_test(turnclienttest base net stun turn uv util)
+define_libsourcey_test(turnclienttest base net stun turn util)

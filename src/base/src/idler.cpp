@@ -20,7 +20,7 @@ namespace scy {
 
 
 Idler::Idler(uv::Loop* loop)
-    : _handle(loop, new uv_idle_t)
+    : _handle(loop)
 {
     init();
 }
@@ -33,8 +33,7 @@ Idler::~Idler()
 
 void Idler::init()
 {
-    // uv_idle_init(_handle.loop(), _handle.ptr<uv_idle_t>());
-    _handle.init<uv_idle_t>(&uv_idle_init);
+    _handle.init(&uv_idle_init);
     _handle.unref(); // unref by default
 }
 
@@ -45,7 +44,7 @@ void Idler::start(std::function<void()> target)
 }
 
 
-uv::Handle& Idler::handle()
+uv::Handle<uv_idle_t>& Idler::handle()
 {
     return _handle;
 }

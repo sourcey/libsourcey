@@ -208,7 +208,7 @@ bool Timer::async() const
 }
 
 
-uv::Handle2<uv_timer_t>& Timer::handle()
+uv::Handle<uv_timer_t>& Timer::handle()
 {
     return _handle;
 }

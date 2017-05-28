@@ -16,7 +16,7 @@
 #include "scy/base.h"
 #include "scy/runner.h"
 #include "scy/signal.h"
-#include "scy/uv/handle2.h"
+#include "scy/handle.h"
 #include <cstdint>
 #include <functional>
 
@@ -88,7 +88,7 @@ public:
     std::int64_t interval() const;
     std::int64_t count();
 
-    uv::Handle2<uv_timer_t>& handle();
+    uv::Handle<uv_timer_t>& handle();
 
     NullSignal Timeout;
 
@@ -98,7 +98,7 @@ protected:
 
     virtual void init();
 
-    uv::Handle2<uv_timer_t> _handle;
+    uv::Handle<uv_timer_t> _handle;
     std::int64_t _timeout;
     std::int64_t _interval;
     std::int64_t _count;

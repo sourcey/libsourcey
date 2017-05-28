@@ -1,4 +1,5 @@
 #include "scy/http/server.h"
+#include "scy/application.h"
 
 
 namespace scy {
@@ -21,7 +22,7 @@ void raiseEchoServer()
     };
 
     std::cout << "HTTP server listening on " << address << std::endl;
-    uv::waitForShutdown();
+    waitForShutdown();
 }
 
 
@@ -40,7 +41,7 @@ void raiseMulticoreEchoServer()
         };
     };
 
-    uv::waitForShutdown([&](void*) {
+    waitForShutdown([&](void*) {
         srv.shutdown();
     }, nullptr, loop);
 
@@ -83,7 +84,7 @@ void raiseBenchmarkServer()
     };
 
     std::cout << "HTTP server listening on " << address << std::endl;
-    uv::waitForShutdown();
+    waitForShutdown();
 }
 
 
@@ -103,7 +104,7 @@ void raiseMulticoreBenchmarkServer()
         // conn->close();
     };
 
-    uv::waitForShutdown([&](void*) {
+    waitForShutdown([&](void*) {
         srv.shutdown();
     }, nullptr, loop);
 

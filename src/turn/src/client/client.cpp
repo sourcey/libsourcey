@@ -48,11 +48,11 @@ Client::~Client()
 
 void Client::initiate()
 {
-    TraceA("TURN client connecting to ", _options.serverAddr)
+    DebugA("TURN client connecting to ", _options.serverAddr)
 
     assert(!_permissions.empty() && "must set permissions");
     assert(_socket.impl && "must set socket");
-    
+
     auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.impl.get());
     if (udpSocket) {
         udpSocket->bind(net::Address("0.0.0.0", 0));
@@ -456,7 +456,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
         assert(0);
         return;
     }
-    _mappedAddress = mappedAttr->address(); 
+    _mappedAddress = mappedAttr->address();
 
     // The client must also remember the 5-tuple used for the request and
     // the username and password it used to authenticate the request to

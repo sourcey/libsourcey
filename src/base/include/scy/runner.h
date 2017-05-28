@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
-//#include "scy/uv/handle.h"
+// #include "scy/handle.h"
 #include <cstdint>
 #include <thread>
 #include <atomic>
@@ -37,7 +37,7 @@ public:
     Runner();
     virtual ~Runner();
 
-    /// Start the asynchronous context with the given callback.
+    /// Start the asynchronous context with the given invokeback.
     ///
     /// The target `Runnable` instance must outlive the `Runner`.
     virtual void start(std::function<void()> target) = 0;
@@ -56,7 +56,7 @@ public:
     /// Returns true if the Runner is operating in repeating mode.
     bool repeating() const;
 
-    /// This setting means the implementation should call the
+    /// This setting means the implementation should invoke the
     /// target function repeatedly until cancelled. The importance
     /// of this method to normalize the functionality of threadded
     /// and event loop driven Runner models.
@@ -71,8 +71,8 @@ public:
 
     /// Wait until the thread exits.
     ///
-    /// The thread should be cancelled beore calling this method.
-    /// This method must be called from outside the current thread
+    /// The thread should be cancelled beore invokeing this method.
+    /// This method must be invokeed from outside the current thread
     /// context or deadlock will ensue.
     bool waitForExit(int timeout = 5000);
 
@@ -81,7 +81,7 @@ public:
 
     /// Context object which we send to the thread context.
     ///
-    /// This intermediate object allows us to garecefully handle late callbacks
+    /// This intermediate object allows us to garecefully handle late invokebacks
     /// and so avoid the need for deferred destruction of `Runner` objects.
     struct Context
     {
@@ -123,52 +123,9 @@ protected:
 
 namespace internal {
 
-/// Call a function with the given argument tuple.
-///
-/// Note: This will become redundant once C++17 `std::apply` is fully supported.
-template<typename Function, typename Tuple, size_t ... I>
-auto call(Function f, Tuple t, std::index_sequence<I ...>)
-{
-     return f(std::get<I>(t)...);
-}
-
-
-/// Call a function with the given argument tuple.
-///
-/// Create an index sequence for the array, and pass it to the
-/// implementation `call` function.
-///
-/// Note: This will become redundant once C++17 `std::apply` is fully supported.
-template<typename Function, typename Tuple>
-auto call(Function f, Tuple t)
-{
-    static constexpr auto size = std::tuple_size<Tuple>::value;
-    return call(f, t, std::make_index_sequence<size>{});
-}
-
-
-/// Helper class for working with async libuv types and veradic arguments.
-template<class Function, class... Args>
-struct FunctionWrap
-{
-    Function func;
-    std::tuple<Args...> args;
-    Runner::Context::Ptr ctx;
-
-    FunctionWrap(Function&& f, Args&&... a, Runner::Context::Ptr c)
-        : func(f), args(std::make_tuple(a...)), ctx(c)
-    {
-    }
-
-    void call()
-    {
-        internal::call(func, args);
-    }
-};
-
 
 /// Helper function for running an async context.
-template<class Function, class... Args>
+template<typename Function, typename... Args>
 inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
 {
     // std::cout << "Runner::runAsync" << std::endl;
@@ -188,29 +145,55 @@ inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
     c->running = false;
 }
 
-} // namespace internal
 
-
-/// Run the given function at the beginning of the next event loop iteration.
-template<class Function, class... Args>
-void runOnce(uv::Loop* loop, Function&& func, Args&&... args)
+/// Call a function with the given argument tuple.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple, size_t ... I>
+auto invoke(Function f, Tuple t, std::index_sequence<I ...>)
 {
-    typedef internal::FunctionWrap<Function, Args...> FunctionWrap;
-
-    auto prepare = new uv_prepare_t;
-    prepare->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., nullptr);
-
-    uv_prepare_init(loop, prepare);
-    uv_prepare_start(prepare, [](uv_prepare_t *req) {
-        auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
-        wrap->call();
-        delete wrap;
-        uv_prepare_stop(req);
-        delete req;
-    });
+     return f(std::get<I>(t)...);
 }
 
 
+/// Call a function with the given argument tuple.
+///
+/// Create an index sequence for the array, and pass it to the
+/// implementation `invoke` function.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple>
+auto invoke(Function f, Tuple t)
+{
+    static constexpr auto size = std::tuple_size<Tuple>::value;
+    return invoke(f, t, std::make_index_sequence<size>{});
+}
+
+
+/// Helper class that stores a function pointer and veradic arguments for
+/// deferred invocation.
+template<typename Function, typename... Args>
+struct DeferredCallable
+{
+    Runner::Context::Ptr ctx;
+    Function func;
+    std::tuple<Args...> args;
+
+    DeferredCallable(Runner::Context::Ptr c, Function&& f, Args&&... a)
+        : ctx(c)
+        , func(f)
+        , args(std::make_tuple(a...))
+    {
+    }
+
+    void invoke()
+    {
+        internal::invoke(func, args);
+    }
+};
+
+
+} // namespace internal
 } // namespace scy
 
 

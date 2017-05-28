@@ -12,5 +12,5 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_symple))
   #include_dependency(OpenCV REQUIRED)
   #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
 
-  define_sourcey_module(symple uv base crypto net http socketio json util)
+  define_sourcey_module(symple base crypto net http socketio json util)
 endif()

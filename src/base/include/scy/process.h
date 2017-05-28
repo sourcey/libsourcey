@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/pipe.h"
-#include "scy/uv/handle2.h"
+#include "scy/handle.h"
 #include <functional>
 #include <vector>
 #include <initializer_list>
@@ -86,7 +86,7 @@ public:
 protected:
     void init();
 
-    uv::Handle2<uv_process_t> _handle;
+    uv::Handle<uv_process_t> _handle;
     Pipe _stdin;
     Pipe _stdout;
     uv_stdio_container_t _stdio[2];

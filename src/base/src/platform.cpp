@@ -11,7 +11,8 @@
 
 #include "scy/platform.h"
 #include "scy/error.h"
-//#include "scy/uv/handle.h"
+
+#include "uv.h"
 
 #include <stdlib.h>
 #include <string.h>

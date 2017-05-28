@@ -14,5 +14,5 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_http))
   #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/http_parser)
 
   set(http_PRETTY_NAME HTTP)
-  define_sourcey_module(http base net uv crypto) # util
+  define_sourcey_module(http base net crypto) # util
 endif()

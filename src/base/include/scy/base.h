@@ -18,15 +18,15 @@
 #include "libsourcey.h"
 
 // Shared library exports
- #if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
-     #if defined(Base_EXPORTS)
-         #define Base_API __declspec(dllexport)
-     #else
-         #define Base_API __declspec(dllimport)
-     #endif
- #else
-     #define Base_API // nothing
- #endif
+#if defined(SCY_WIN) && defined(SCY_SHARED_LIBRARY)
+    #if defined(Base_EXPORTS)
+        #define Base_API __declspec(dllexport)
+    #else
+        #define Base_API __declspec(dllimport)
+    #endif
+#else
+    #define Base_API // nothing
+#endif
 
 
 #endif // SCY_H

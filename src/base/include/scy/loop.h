@@ -5,11 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1+
 //
-/// @defgroup uv UV module
-///
-/// The `uv` module contains C++ wrappers for `libuv`.
-///
-/// @addtogroup uv
+/// @addtogroup base
 /// @{
 
 
@@ -19,7 +15,7 @@
 
 #include "scy/base.h"
 
-#include "scy/uv/uvpp.h"
+#include "uv.h"
 
 
 namespace scy {

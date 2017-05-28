@@ -13,5 +13,5 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_archo))
   #include_dependency(ZLIB)
   #include_dependency(Minizip)
 
-  define_sourcey_module(archo base uv)
+  define_sourcey_module(archo base)
 endif ()

@@ -15,6 +15,8 @@
 
 #include "scy/base.h"
 
+#include "uv.h"
+
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -72,6 +74,33 @@ struct Error
 };
 
 
+//
+// UV Error Helpers
+//
+
+
+namespace uv {
+
+
+inline std::string formatError(const std::string& message, int errorno = UV_UNKNOWN)
+{
+    std::string m(message); // prefix the message since libuv errors are brisk
+    if (errorno != UV_UNKNOWN && errorno != 0) {
+        if (!m.empty())
+            m.append(": ");
+        m.append(uv_strerror(errorno));
+    }
+    return m;
+}
+
+
+inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
+{
+    throw std::runtime_error(formatError(message, errorno));
+}
+
+
+} // namespace uv
 } // namespace scy
 
 

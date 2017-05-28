@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
         // Keep recording until Ctrl-C is pressed
         InfoL << "Recording video: " << OUTPUT_FILENAME << endl;
-        uv::waitForShutdown([](void* opaque) {
+        waitForShutdown([](void* opaque) {
             reinterpret_cast<PacketStream*>(opaque)->stop();
         }, &stream);
     }

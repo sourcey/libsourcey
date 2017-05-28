@@ -9,17 +9,23 @@
 ///
 /// The `uv` module contains C++ wrappers for `libuv`.
 ///
-/// @addtogroup uv
+/// @addtogroup base
 /// @{
 
 
-#ifndef SCY_UV_Handle2_H
-#define SCY_UV_Handle2_H
+#ifndef SCY_UV_Handle_H
+#define SCY_UV_Handle_H
 
 
-#include "scy/uv/uvpp.h"
-#include "scy/uv/loop.h"
-#include "scy/uv/util.h"
+#include "scy/base.h"
+#include "scy/error.h"
+#include "scy/loop.h"
+
+#include "uv.h"
+
+#include <thread>
+#include <memory>
+#include <assert.h>
 
 
 namespace scy {
@@ -27,19 +33,19 @@ namespace uv {
 
 
 template <typename T>
-class UV_API Handle2;
+class Base_API Handle;
 
 
 /// Shared `libuv` handle context.
 template<typename T>
 struct Context
 {
-    Handle2<T>* handle = nullptr;
+    Handle<T>* handle = nullptr;
     T* ptr = new T;
     bool initialized = false;
     bool deleted = false;
 
-    Context(Handle2<T>* h)
+    Context(Handle<T>* h)
         : handle(h)
     {
     }
@@ -62,14 +68,18 @@ struct Context
 template<typename T, typename R>
 struct Request
 {
-    Handle2<T>* parent;
     std::shared_ptr<Context<T>> ctx;
     R req;
     uv_buf_t buf;
 
-    Request(Handle2<T>* p)
-        : parent(p)
-        , ctx(p->context())
+    Request(Handle<T>* h)
+        : ctx(h->context())
+    {
+        req.data = this;
+    }
+
+    Request(std::shared_ptr<Context<T>> c)
+        : ctx(c)
     {
         req.data = this;
     }
@@ -78,11 +88,71 @@ struct Request
     bool invoke(F&& f, Args&&... args)
     {
         int err = std::forward<F>(f)(std::forward<Args>(args)...);
-        if (err)
-            parent->setError("UV Error", err);
+        if (err && handle())
+            handle()->setUVError("UV Error", err);
         return !err;
     }
+
+    template <typename Handle = Handle<T>>
+    Handle* handle() const
+    {
+        return ctx->deleted ? nullptr :
+            reinterpret_cast<Handle*>(ctx->handle->self());
+    }
 };
+
+
+/// Call a function with the given argument tuple.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple, size_t ... I>
+auto invoke(Function f, Tuple t, std::index_sequence<I ...>)
+{
+     return f(std::get<I>(t)...);
+}
+
+
+/// Call a function with the given argument tuple.
+///
+/// Create an index sequence for the array, and pass it to the
+/// implementation `invoke` function.
+///
+/// Note: This will become redundant once C++17 `std::apply` is fully supported.
+template<typename Function, typename Tuple>
+auto invoke(Function f, Tuple t)
+{
+    static constexpr auto size = std::tuple_size<Tuple>::value;
+    return invoke(f, t, std::make_index_sequence<size>{});
+}
+
+
+/// Helper class for working with async libuv types and veradic arguments.
+// template<typename T, typename Function, typename... Args>
+// struct Callback
+// {
+//     std::shared_ptr<Context<T>> ctx;
+//     Function func;
+//     std::tuple<Args...> args;
+//
+//     FunctionWrap(std::shared_ptr<Context<T>> c, Function&& f, Args&&... a)
+//         : ctx(c)
+//         , func(f)
+//         , args(std::make_tuple(a...))
+//     {
+//     }
+//
+//     void invoke()
+//     {
+//         internal::invoke(func, args);
+//     }
+//
+//     Handle<T>* parent()
+//     {
+//         if (ctx->deleted)
+//             return nullptr;
+//         return ctx->handle->self();
+//     }
+// };
 
 
 /// Wrapper class for managing a `libuv` handle.
@@ -90,16 +160,16 @@ struct Request
 /// This class manages thehandle during it's lifecycle and
 /// safely handles the asynchronous destruction mechanism.
 template<typename T>
-class UV_API Handle2
+class Base_API Handle
 {
 public:
-    Handle2(uv::Loop* loop = uv::defaultLoop())
+    Handle(uv::Loop* loop = uv::defaultLoop())
         : _loop(loop)
         , _context(std::make_shared<Context<T>>(this))
     {
     }
 
-    virtual ~Handle2()
+    virtual ~Handle()
     {
     }
 
@@ -111,7 +181,7 @@ public:
         assert(!initialized());
         int err = std::forward<F>(f)(loop(), get(), std::forward<Args>(args)...);
         if (err)
-            setError("Initialization failed", err);
+            setUVError("Initialization failed", err);
         else
             _context->initialized = true;
         return !err;
@@ -119,11 +189,13 @@ public:
 
     /// Invoke a method on the handle.
     template<typename F, typename... Args>
-    bool invoke(F&& f, Args&&... args)
+    bool invoke(F&& f, Args&&... args) //, const std::string& prefix = "UV Error")
     {
+        assertThread();
+        assert(initialized());
         int err = std::forward<F>(f)(std::forward<Args>(args)...);
         if (err)
-            setError("UV Error", err);
+            setUVError("UV Error", err);
         return !err;
     }
 
@@ -133,6 +205,8 @@ public:
     template<typename F, typename... Args>
     void invokeOrThrow(const std::string& message, F&& f, Args&&... args)
     {
+        assertThread();
+        assert(initialized());
         int err = std::forward<F>(f)(std::forward<Args>(args)...);
         if (err)
             setAndThrowError(message, err);
@@ -152,23 +226,17 @@ public:
     }
 
     /// Reference main loop again, once unref'd.
-    bool ref()
+    void ref()
     {
-        if (uv_has_ref(get<uv_handle_t>()))
-            return false;
-
-        uv_ref(get<uv_handle_t>());
-        return true;
+        if (initialized())
+            uv_ref(get<uv_handle_t>());
     }
 
     /// Unreference the main loop after initialized.
-    bool unref()
+    void unref()
     {
-        if (!uv_has_ref(get<uv_handle_t>()))
-            return false;
-
-        uv_unref(get<uv_handle_t>());
-        return true;
+        if (initialized())
+            uv_unref(get<uv_handle_t>());
     }
 
     /// Return true if the handle has been initialized.
@@ -212,7 +280,7 @@ public:
 
     /// Set the error and trigger relevant callbacks.
     /// This method can be called inside `libuv` callbacks.
-    virtual void setError(const std::string& prefix = "UV Error", int errorno = 0)
+    virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0)
     {
         scy::Error err;
         err.errorno = errorno;
@@ -225,7 +293,7 @@ public:
     /// Should never be called inside `libuv` callbacks.
     virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0)
     {
-        setError(prefix, errorno);
+        setUVError(prefix, errorno);
         throwError(prefix, errorno);
     }
 
@@ -295,6 +363,8 @@ public:
     }
 
     typedef T Resource;
+    typedef Request<T, uv_connect_t> ConnectReq;
+    typedef Request<T, uv_getaddrinfo_t> GetAddrInfoReq;
 
 protected:
     /// Error callback.
@@ -310,10 +380,12 @@ protected:
     {
     }
 
+
+
 protected:
     /// NonCopyable and NonMovable
-    Handle2(const Handle2&) = delete;
-    Handle2& operator=(const Handle2&) = delete;
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
 
     uv::Loop* _loop;
     std::shared_ptr<Context<T>> _context;
@@ -326,7 +398,7 @@ protected:
 } // namespace scy
 
 
-#endif // SCY_UV_Handle2
+#endif // SCY_UV_Handle
 
 
 /// @\}

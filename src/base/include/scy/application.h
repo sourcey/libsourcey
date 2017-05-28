@@ -13,8 +13,10 @@
 #define SCY_Application_H
 
 
+#include "scy/base.h"
 #include "scy/util.h"
-//#include "scy/uv/handle.h"
+#include "scy/loop.h"
+
 #include <functional>
 #include <map>
 #include <vector>
@@ -52,7 +54,7 @@ public:
     uv::Loop* loop;
 
     //
-    // Event Loop
+    // Event uv::Loop
     //
 
     /// Run the application event loop.
@@ -117,6 +119,46 @@ struct Base_API OptionParser
             return util::strtoi<NumericType>(it->second);
     }
 };
+
+
+//
+// Shutdown Signal Handler
+//
+
+
+struct ShutdownCmd
+{
+    void* opaque;
+    std::function<void(void*)> callback;
+};
+
+
+inline void onShutdownSignal(std::function<void(void*)> callback = nullptr,
+                             void* opaque = nullptr, uv::Loop* loop = uv::defaultLoop())
+{
+    auto cmd = new ShutdownCmd;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
+
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
+    uv_signal_init(loop, sig);
+    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
+        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
+        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) { delete handle; });
+        if (cmd->callback)
+            cmd->callback(cmd->opaque);
+        delete cmd;
+    }, SIGINT);
+}
+
+
+inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
+                            void* opaque = nullptr, uv::Loop* loop = uv::defaultLoop())
+{
+    onShutdownSignal(callback, opaque, loop);
+    uv_run(loop, UV_RUN_DEFAULT);
+}
 
 
 } // namespace scy

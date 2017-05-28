@@ -18,7 +18,7 @@
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
 #include "scy/net/tcpsocket.h"
-#include "scy/uv/handle.h"
+#include "scy/handle.h"
 
 
 namespace scy {
@@ -47,6 +47,9 @@ public:
     ///
     /// The SSL handshake is performed when the socket is connected.
     // virtual void connect(const Address& peerAddress);
+
+    virtual void bind(const net::Address& address, unsigned flags = 0) override;
+    virtual void listen(int backlog = 64) override;
 
     /// Shuts down the connection by attempting
     /// an orderly SSL shutdown, then actually
@@ -98,14 +101,14 @@ public:
 
     virtual void acceptConnection() override;
 
-    virtual void onConnect(uv_connect_t* handle, int status) override;
+    virtual void onConnect() override;
 
     /// Reads raw encrypted SSL data
-    virtual void onRead(const char* data, size_t len);
+    virtual void onRead(const char* data, size_t len) override;
 
 protected:
-    net::SSLContext::Ptr _context;
-    net::SSLSession::Ptr _session;
+    net::SSLContext::Ptr _sslContext;
+    net::SSLSession::Ptr _sslSession;
     net::SSLAdapter _sslAdapter;
 
     friend class net::SSLAdapter;

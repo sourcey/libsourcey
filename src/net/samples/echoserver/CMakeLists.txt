@@ -1,1 +1,1 @@
-define_sourcey_module_sample(echoserver uv base net)
+define_sourcey_module_sample(echoserver base net)

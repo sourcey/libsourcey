@@ -5,7 +5,7 @@
 
 using namespace std;
 using namespace scy;
-using namespace scy::uv;
+// using namespace scy::uv;
 using namespace scy::net;
 using namespace scy::turn;
 

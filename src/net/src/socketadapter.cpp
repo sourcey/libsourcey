@@ -145,7 +145,7 @@ void SocketAdapter::onSocketError(Socket& socket, const scy::Error& error)
     }
     catch (StopPropagation&) {
     }
-} 
+}
 
 
 void SocketAdapter::onSocketClose(Socket& socket)

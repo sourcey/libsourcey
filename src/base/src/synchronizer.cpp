@@ -76,7 +76,7 @@ bool Synchronizer::async() const
 }
 
 
-uv::Handle2<uv_async_t>& Synchronizer::handle()
+uv::Handle<uv_async_t>& Synchronizer::handle()
 {
     return _handle;
 }

@@ -15,7 +15,7 @@
 
 #include "scy/interface.h"
 #include "scy/platform.h"
-#include "scy/uv/uvpp.h"
+#include "scy/uvpp.h"
 #include <mutex>
 
 

@@ -15,11 +15,13 @@
 
 #include "scy/base.h"
 #include "scy/memory.h"
-#include "scy/net/address.h"
-#include "scy/net/dns.h"
-#include "scy/net/socketadapter.h"
-#include "scy/net/net.h"
+#include "scy/handle.h"
 #include "scy/packetstream.h"
+#include "scy/net/net.h"
+#include "scy/net/address.h"
+#include "scy/net/socketadapter.h"
+
+#include "uv.h"
 
 
 namespace scy {
@@ -215,55 +217,6 @@ public:
 
     virtual const char* className() const { return "SocketPacket"; }
 };
-
-
-//
-// Socket Helpers
-//
-
-
-#if WIN32
-#define nativeSocketFd(handle) ((handle)->socket)
-#else
-// uv__stream_fd taken from libuv unix/internal.h
-#if defined(__APPLE__)
-int uv___stream_fd(const uv_stream_t* handle);
-#define uv__stream_fd(handle) (uv___stream_fd((const uv_stream_t*)(handle)))
-#else
-#define uv__stream_fd(handle) ((handle)->io_watcher.fd)
-#endif
-#define nativeSocketFd(handle) (uv__stream_fd(handle))
-#endif
-
-
-template <class NativeT>
-int getServerSocketSendBufSize(uv::Handle& handle)
-{
-    int val = 0;
-    return uv_send_buffer_size(handle.ptr(), &val);
-}
-
-
-template <class NativeT>
-int getServerSocketRecvBufSize(uv::Handle& handle)
-{
-    int val = 0;
-    return uv_recv_buffer_size(handle.ptr(), &val);
-}
-
-
-template <class NativeT>
-int setServerSocketSendBufSize(uv::Handle& handle, int size)
-{
-    return uv_send_buffer_size(handle.ptr(), &size);
-}
-
-
-template <class NativeT>
-int setServerSocketRecvBufSize(uv::Handle& handle, int size)
-{
-    return uv_recv_buffer_size(handle.ptr(), &size);
-}
 
 
 } // namespace net

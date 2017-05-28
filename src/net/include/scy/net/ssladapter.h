@@ -16,7 +16,7 @@
 #include "scy/crypto/crypto.h"
 #include "scy/net/address.h"
 #include "scy/net/net.h"
-#include "scy/uv/handle.h"
+#include "scy/handle.h"
 
 #include <string>
 #include <vector>

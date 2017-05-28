@@ -17,5 +17,5 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_av))
   # include_dependency(OpenCV)
 
   set(av_PRETTY_NAME AV)
-  define_sourcey_module(av base uv)
+  define_sourcey_module(av base)
 endif()

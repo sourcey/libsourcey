@@ -15,13 +15,11 @@ public:
     UDPEchoServer()
         : server(std::make_shared<UDPSocket>())
     {
-        // server->addReceiver(this);
         server->addReceiver(this);
     }
 
     virtual ~UDPEchoServer()
     {
-        // server->removeReceiver(this);
         server->removeReceiver(this);
         shutdown();
     }
@@ -36,7 +34,7 @@ public:
         server->close();
     }
 
-    void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
+    void onSocketRecv(Socket&, const MutableBuffer& buffer, const net::Address& peerAddress) override
     {
         DebugA("On recv: ", peerAddress, ": ", buffer.size())
 
@@ -57,12 +55,12 @@ public:
         server->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
     }
 
-    void onSocketError(const scy::Error& error)
+    void onSocketError(Socket&, const scy::Error& error) override
     {
         ErrorL << "On error: " << error.message << std::endl;
     }
 
-    void onSocketClose()
+    void onSocketClose(Socket&) override
     {
         DebugL << "On close" << std::endl;
     }

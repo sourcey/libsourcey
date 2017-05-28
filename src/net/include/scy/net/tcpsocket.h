@@ -17,8 +17,8 @@
 #include "scy/net/socket.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/net.h"
-#include "scy/stream2.h"
-#include "scy/uv/handle2.h"
+#include "scy/stream.h"
+#include "scy/handle.h"
 
 
 namespace scy {
@@ -26,7 +26,7 @@ namespace net {
 
 
 /// TCP socket implementation.
-class Net_API TCPSocket : public Stream2<uv_tcp_t>, public net::Socket
+class Net_API TCPSocket : public Stream<uv_tcp_t>, public net::Socket
 {
 public:
     typedef std::shared_ptr<TCPSocket> Ptr;
@@ -81,8 +81,7 @@ public:
     Signal<void(const net::TCPSocket::Ptr&)> AcceptConnection;
 
 public:
-    virtual void onConnect(uv_connect_t* handle, int status);
-    virtual void onAcceptConnection(uv_stream_t* handle, int status);
+    virtual void onConnect();
     virtual void onRead(const char* data, size_t len) override;
     virtual void onRecv(const MutableBuffer& buf);
     virtual void onError(const scy::Error& error) override;

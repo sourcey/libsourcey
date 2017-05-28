@@ -11,7 +11,9 @@
 
 #include "scy/time.h"
 #include "scy/util.h"
-//#include "scy/uv/handle.h"
+
+#include "uv.h"
+
 #include <ctime>
 #include <time.h>
 //#include <chrono>

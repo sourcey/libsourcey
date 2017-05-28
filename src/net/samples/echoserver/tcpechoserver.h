@@ -71,12 +71,12 @@ public:
 
     void onSocketError(Socket& socket, const Error& error)
     {
-        InfoL << "On error: " << error.errorno << ": " << error.message << std::endl;
+        DebugA("On error: ", error.errorno, ": ", error.message)
     }
 
     void onSocketClose(Socket& socket)
     {
-        DebugL << "On close" << std::endl;
+        DebugA("On close")
 
         for (typename Socket::Vec::iterator it = sockets.begin();
             it != sockets.end(); ++it) {

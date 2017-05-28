@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-//#include "scy/uv/handle.h"
+//#include "scy/handle.h"
 #include "scy/util.h"
 
 #include <thread>
@@ -43,7 +43,7 @@ public:
     /// Templated constructor.
     ///
     /// This constructor starts the thread with the given function.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     explicit Thread(Function&& func, Args&&... args) :
         _thread(internal::runAsync<Function, Args...>, _context,
                 std::forward<Function>(func),
@@ -57,7 +57,7 @@ public:
     /// Start a function with veradic arguments.
     ///
     /// This method starts the thread with the given function.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     void start(Function&& func, Args&&... args)
     {
         _thread = std::thread(internal::runAsync<Function, Args...>, _context,

@@ -14,7 +14,9 @@
 
 
 #include "scy/base.h"
-#include "scy/uv/uvpp.h" // ssize_t
+
+#include "uv.h" // ssize_t
+
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -97,34 +99,6 @@ public:
     virtual bool send() = 0;
     virtual void cancel() {};
 };
-
-
-#if 0
-/// A base module class for C++ callback polymorphism.
-/// @deprecated
-class Base_API Polymorphic
-{
-public:
-    virtual ~Polymorphic() {};
-
-    template<class T>
-    bool is() {
-        return dynamic_cast<T*>(this) != nullptr;
-    };
-
-    template<class T>
-    T* as(bool whiny = false) {
-        T* self = dynamic_cast<T*>(this);
-        if (self == nullptr && whiny)
-            throw std::runtime_error("Polymorphic cast failed");
-        return self;
-    };
-
-    scy::LogStream& log(const char* level = "debug") const;
-
-    virtual const char* className() const = 0;
-};
-#endif
 
 
 } // namespace basic

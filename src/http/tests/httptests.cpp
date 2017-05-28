@@ -211,21 +211,6 @@ int main(int argc, char** argv)
         expect(!conn->error().any());
     });
 
-    describe("http client and server", []() {
-        HTTPEchoTest test;
-        test.raiseServer();
-        auto conn = test.createConnection("http", "/echo");
-        conn->request().setMethod("POST");
-        conn->request().setContentLength(4);
-        conn->send("PING", 4);
-
-        uv::runDefaultLoop();
-
-        expect(conn->closed());
-        expect(!conn->error().any());
-    });
-
-
     //
     /// Google Drive Upload Test
     //

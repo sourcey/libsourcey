@@ -117,6 +117,22 @@ int main(int argc, char** argv)
     //
     //
     // // =========================================================================
+    // // UDP Socket Test
+    // //
+    // describe("udp socket test", []() {
+    //     net::UDPEchoServer srv;
+    //     srv.start("127.0.0.1", 1339);
+    //     srv.server->unref();
+    //
+    //     net::ClientSocketTest<net::UDPSocket> test(1339);
+    //     test.socket.bind(net::Address("0.0.0.0", 0));
+    //     test.run();
+    //     uv::runDefaultLoop();
+    //
+    //     expect(test.passed);
+    // });
+    //
+    // // =========================================================================
     // // DNS Resolver Test
     // //
     // describe("dns resolver test", []() {
@@ -128,25 +144,25 @@ int main(int argc, char** argv)
     //     });
     //     uv::runDefaultLoop();
     // });
+
+
+    // =========================================================================
+    // TCP Socket Error Test
     //
-    //
-    // // =========================================================================
-    // // TCP Socket Error Test
-    // //
-    // describe("tcp socket error test", []() {
-    //     {
-    //         net::TCPSocket socket;
-    //         socket.connect("192.169.7.888", 4500); // Connection refused
-    //         uv::runDefaultLoop();
-    //         expect(socket.error().any());
-    //     }
-    //     {
-    //         net::TCPSocket socket;
-    //         socket.connect("hostthatdoesntexist.what", 80); // DNS resolution will fail
-    //         uv::runDefaultLoop();
-    //         expect(socket.error().any());
-    //     }
-    // });
+    describe("tcp socket error test", []() {
+        {
+            net::TCPSocket socket;
+            socket.connect("192.169.7.888", 4500); // Connection refused
+            uv::runDefaultLoop();
+            expect(socket.error().any());
+        }
+        {
+            net::TCPSocket socket;
+            socket.connect("hostthatdoesntexist.what", 80); // DNS resolution will fail
+            uv::runDefaultLoop();
+            expect(socket.error().any());
+        }
+    });
 
     // =========================================================================
     // Socket Destructor Scope Test
@@ -161,6 +177,11 @@ int main(int argc, char** argv)
             socket.connect("sourcey.com", 80); // with DNS
         }
         {
+            net::TCPSocket socket;
+            socket.bind(net::Address("0.0.0.1", 7331));
+            socket.listen();
+        }
+        {
             net::SSLSocket socket;
             socket.connect("127.0.0.1", 80);
         }
@@ -175,6 +196,10 @@ int main(int argc, char** argv)
         {
             net::UDPSocket socket;
             socket.connect("sourcey.com", 80);
+        }
+        {
+            net::UDPSocket socket;
+            socket.bind(net::Address("0.0.0.1", 7331));
         }
         uv::runDefaultLoop();
     });
@@ -201,34 +226,33 @@ int main(int argc, char** argv)
         uv::runDefaultLoop();
         expect(connected == 2);
     });
-    //
-    //
-    // // =========================================================================
-    // // UDP Socket Reconnection Test
-    // //
-    // describe("udp socket reconnection test", []() {
-    //     // net::UDPEchoServer srv;
-    //     // srv.start("127.0.0.1", 1337);
-    //     // srv.server->unref();
-    //
-    //     int connected = 0;
-    //     net::SocketEmitter socket(std::make_shared<net::UDPSocket>());
-    //     socket->connect("127.0.0.1", 1337);
-    //     socket.Connect += [&](net::Socket& sock) {
-    //         connected++;
-    //         sock.close();
-    //     };
-    //     socket.Close += [&](net::Socket& sock) {
-    //         // connect again on close
-    //         if (connected == 1) {
-    //             sock.connect("127.0.0.1", 1337);
-    //         }
-    //     };
-    //
-    //     uv::runDefaultLoop();
-    //     expect(connected == 2);
-    // });
 
+
+    // =========================================================================
+    // UDP Socket Reconnection Test
+    //
+    describe("udp socket reconnection test", []() {
+        net::UDPEchoServer srv;
+        srv.start("127.0.0.1", 1337);
+        srv.server->unref();
+
+        int connected = 0;
+        net::SocketEmitter socket(std::make_shared<net::UDPSocket>());
+        socket.Connect += [&](net::Socket& sock) {
+            connected++;
+            sock.close();
+        };
+        socket.Close += [&](net::Socket& sock) {
+            // connect again on close
+            if (connected == 1) {
+                sock.connect("127.0.0.1", 1337);
+            }
+        };
+        socket->connect("127.0.0.1", 1337);
+
+        uv::runDefaultLoop();
+        expect(connected == 2);
+    });
 
     test::runAll();
 

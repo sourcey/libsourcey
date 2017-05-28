@@ -14,8 +14,9 @@
 
 
 #include "scy/crypto/crypto.h"
-#include "scy/uv/uvpp.h" // ssize_t
 #include "scy/random.h"
+
+#include "uv.h" // ssize_t
 
 #include <openssl/evp.h>
 

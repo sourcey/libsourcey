@@ -17,7 +17,7 @@
 #include "scy/interface.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
-#include "scy/uv/handle2.h"
+#include "scy/handle.h"
 
 #include <deque>
 
@@ -38,7 +38,7 @@ namespace scy {
 class Base_API Synchronizer : public Runner
 {
 public:
-    // using uv::Handle2<uv_async_t>;
+    // using uv::Handle<uv_async_t>;
 
     /// Create the synchronization context the given event loop.
     Synchronizer(uv::Loop* loop);
@@ -48,7 +48,7 @@ public:
     Synchronizer(std::function<void()> target, uv::Loop* loop = uv::defaultLoop());
 
     /// Create the synchronization context the given event loop and method.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     explicit Synchronizer(Function&& func, Args&&... args, uv::Loop* loop = uv::defaultLoop())
         : _handle(loop)
     {
@@ -66,10 +66,10 @@ public:
     void post();
 
     /// Start the synchronizer with the given callback.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     void start(Function&& func, Args&&... args)
     {
-        typedef internal::FunctionWrap<Function, Args...> FunctionWrap;
+        typedef internal::DeferredCallable<Function, Args...> Callback;
 
         // assert(!_handle.active());
         assert(!_context->running);
@@ -78,14 +78,16 @@ public:
         _context->running = true;
         _context->repeating = true; // always repeating
 
-        // Use a FunctionWrap instance since we can't pass the capture lambda
+        // Use a Callback instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
         assert(_handle.get());
-        _handle.get()->data = new FunctionWrap(std::forward<Function>(func), std::forward<Args>(args)..., _context);
+        _handle.get()->data = new Callback(_context,
+                                           std::forward<Function>(func),
+                                           std::forward<Args>(args)...);
         _handle.init(&uv_async_init, [](uv_async_t* req) {
-            auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
+            auto wrap = reinterpret_cast<Callback*>(req->data);
             if (!wrap->ctx->cancelled) {
-                wrap->call();
+                wrap->invoke();
             }
             else {
                 req->data = nullptr;
@@ -105,12 +107,12 @@ public:
     virtual void close();
     // virtual bool closed();
 
-    uv::Handle2<uv_async_t>& handle();
+    uv::Handle<uv_async_t>& handle();
 
 protected:
     virtual bool async() const override;
 
-    uv::Handle2<uv_async_t> _handle;
+    uv::Handle<uv_async_t> _handle;
 };
 
 

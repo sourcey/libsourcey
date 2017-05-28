@@ -291,7 +291,7 @@ typedef Signal<void()> NullSignal;
 
 
 // Class member function slot
-template <class Class, class RT, class... Args>
+template <class Class, class RT, typename... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
 slot(Class* instance, RT (Class::*method)(Args...), int id = -1, int priority = -1)
 {
@@ -300,7 +300,7 @@ slot(Class* instance, RT (Class::*method)(Args...), int id = -1, int priority = 
 }
 
 // Const class member function slot
-template <class Class, class RT, class... Args>
+template <class Class, class RT, typename... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
 slot(Class* instance, RT (Class::*method)(Args...) const, int id = -1, int priority = -1)
 {
@@ -309,7 +309,7 @@ slot(Class* instance, RT (Class::*method)(Args...) const, int id = -1, int prior
 }
 
 // Static function slot
-template <class RT, class... Args>
+template <class RT, typename... Args>
 std::shared_ptr<internal::Slot<RT, Args...>>
 slot(RT (*method)(Args...), int id = -1, int priority = -1)
 {

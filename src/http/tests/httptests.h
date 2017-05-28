@@ -57,12 +57,13 @@ struct HTTPEchoTest
     {
     }
 
-    void raiseServer() 
-    { 
+    void raiseServer()
+    {
         server.start();
         server.Connection += [](http::ServerConnection::Ptr conn) {
             conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
                 conn.send(bufferCast<const char*>(buffer), buffer.size());
+                // conn.close();
             };
         };
     }
@@ -80,9 +81,9 @@ struct HTTPEchoTest
         return conn;
     }
 
-    void start() 
-    { 
-        conn->send("PING", 4); 
+    void start()
+    {
+        conn->send("PING", 4);
     }
 
     void shutdown()

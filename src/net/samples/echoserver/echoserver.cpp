@@ -7,7 +7,6 @@
 
 using std::endl;
 using namespace scy;
-using namespace scy::net;
 
 
 const uint16_t TcpPort = 1337;
@@ -17,24 +16,15 @@ const uint16_t UdpPort = 1339;
 
 struct Servers
 {
-    TCPEchoServer tcp;
-    SSLEchoServer ssl;
-    UDPEchoServer udp;
+    net::TCPEchoServer tcp;
+    net::SSLEchoServer ssl;
+    net::UDPEchoServer udp;
 };
-
-
-static void onShutdown(void* opaque)
-{
-    auto srvs = reinterpret_cast<Servers*>(opaque);
-    srvs->tcp.shutdown();
-    srvs->ssl.shutdown();
-    srvs->udp.shutdown();
-}
 
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     // Logger::instance().setWriter(new AsyncLogWriter);
     net::SSLManager::initNoVerifyServer();
     {
@@ -47,7 +37,11 @@ int main(int argc, char** argv)
         std::cout << "SSL Server listening on " << srvs.ssl.server->address() << endl;
         std::cout << "UDP Server listening on " << srvs.udp.server->address() << endl;
 
-        uv::waitForShutdown(onShutdown, &srvs);
+        waitForShutdown([&](void*) {
+            srvs.tcp.shutdown();
+            srvs.ssl.shutdown();
+            srvs.udp.shutdown();
+        });
     }
     net::SSLManager::instance().shutdown();
     Logger::destroy();

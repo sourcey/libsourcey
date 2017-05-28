@@ -1,5 +1,5 @@
 ask_build_sourcey_module(json)
 if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_json))
   set(json_PRETTY_NAME JSON)
-  define_sourcey_module(json base uv)
+  define_sourcey_module(json base)
 endif()

@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/runner.h"
-//#include "scy/uv/handle.h"
+#include "scy/handle.h"
 
 #include <functional>
 
@@ -35,28 +35,28 @@ public:
     Idler(uv::Loop* loop = uv::defaultLoop());
 
     /// Create and start the idler with the given callback.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     explicit Idler(Function&& func, Args&&... args)
-        : _handle(uv::defaultLoop(), new uv_idle_t)
+        : _handle(uv::defaultLoop())
     {
         init();
         start(std::forward<Function>(func), std::forward<Args>(args)...);
     }
 
     /// Create and start the idler with the given callback and event loop.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     explicit Idler(uv::Loop* loop, Function&& func, Args&&... args)
-        : _handle(loop, new uv_idle_t)
+        : _handle(loop)
     {
         init();
         start(std::forward<Function>(func), std::forward<Args>(args)...);
     }
 
     /// Start the idler with the given callback function.
-    template<class Function, class... Args>
+    template<typename Function, typename... Args>
     void start(Function&& func, Args&&... args)
     {
-        typedef internal::FunctionWrap<Function, Args...> FunctionWrap;
+        typedef internal::DeferredCallable<Function, Args...> Callback;
 
         assert(!_handle.active());
         assert(!_handle.active());
@@ -66,15 +66,15 @@ public:
         _context->running = true;
         _context->repeating = true; // idler is always repeating
 
-        // Use a FunctionWrap instance since we can't pass the capture lambda
+        // Use a Callback instance since we can't pass the capture lambda
         // to the libuv callback without compiler trickery.
-        _handle.ptr()->data = new FunctionWrap(std::forward<Function>(func),
-                                               std::forward<Args>(args)...,
-                                               _context);
-        int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req) {
-            auto wrap = reinterpret_cast<FunctionWrap*>(req->data);
+        _handle.get()->data = new Callback(_context,
+                                           std::forward<Function>(func),
+                                           std::forward<Args>(args)...);
+        int r = uv_idle_start(_handle.get(), [](uv_idle_t* req) {
+            auto wrap = reinterpret_cast<Callback*>(req->data);
             if (!wrap->ctx->cancelled) {
-                wrap->call();
+                wrap->invoke();
             }
             else {
                 wrap->ctx->running = false;
@@ -94,14 +94,14 @@ public:
 
     virtual ~Idler();
 
-    uv::Handle& handle();
+    uv::Handle<uv_idle_t>& handle();
 
 protected:
     virtual void init();
 
     virtual bool async() const override;
 
-    uv::Handle _handle;
+    uv::Handle<uv_idle_t> _handle;
 };
 
 

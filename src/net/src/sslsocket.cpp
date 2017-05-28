@@ -21,13 +21,10 @@ namespace scy {
 namespace net {
 
 
-// TODO: Using client context, should assert no bind()/listen() on this socket
-
-
 SSLSocket::SSLSocket(uv::Loop* loop)
     : TCPSocket(loop)
-    , _context(nullptr)
-    , _session(nullptr)
+    , _sslContext(nullptr)
+    , _sslSession(nullptr)
     , _sslAdapter(this)
 {
     // TraceA("Create")
@@ -36,8 +33,8 @@ SSLSocket::SSLSocket(uv::Loop* loop)
 
 SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
     : TCPSocket(loop)
-    , _context(context)
-    , _session(nullptr)
+    , _sslContext(context)
+    , _sslSession(nullptr)
     , _sslAdapter(this)
 {
     // TraceA("Create")
@@ -46,8 +43,8 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
 
 SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop)
     : TCPSocket(loop)
-    , _context(context)
-    , _session(session)
+    , _sslContext(context)
+    , _sslSession(session)
     , _sslAdapter(this)
 {
     // TraceA("Create")
@@ -90,6 +87,20 @@ ssize_t SSLSocket::send(const char* data, size_t len, int flags)
 }
 
 
+void SSLSocket::bind(const net::Address& address, unsigned flags)
+{
+    assert(_sslContext->isForServerUse());
+    TCPSocket::bind(address, flags);
+}
+
+
+void SSLSocket::listen(int backlog)
+{
+    assert(_sslContext->isForServerUse());
+    TCPSocket::listen(backlog);
+}
+
+
 ssize_t SSLSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     // TraceS(this) << "Send: " << len << endl;
@@ -113,17 +124,14 @@ ssize_t SSLSocket::send(const char* data, size_t len, const net::Address& /* pee
 
 void SSLSocket::acceptConnection()
 {
-    assert(_context->isForServerUse());
+    assert(_sslContext->isForServerUse());
 
     // Create the shared socket pointer so the if the socket handle is not
     // incremented the accepted socket will be destroyed.
-    auto socket = std::make_shared<net::SSLSocket>(_context, loop());
+    auto socket = std::make_shared<net::SSLSocket>(_sslContext, loop());
 
     // TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
-    uv::invokeOrThrow("Cannot initialize SSL socket",
-                  &uv_tcp_init, loop(), socket->get());
-    // UVCallOrThrow("Cannot initialize SSL socket",
-    //               uv_tcp_init, loop(), socket->get()())
+    // invoke(&uv_tcp_init, loop(), socket->get()); // "Cannot initialize SSL socket"
 
     if (uv_accept(get<uv_stream_t>(), socket->get<uv_stream_t>()) == 0) {
         socket->readStart();
@@ -139,7 +147,7 @@ void SSLSocket::acceptConnection()
 
 void SSLSocket::useSession(SSLSession::Ptr session)
 {
-    _session = session;
+    _sslSession = session;
 }
 
 
@@ -148,9 +156,9 @@ SSLSession::Ptr SSLSocket::currentSession()
     if (_sslAdapter._ssl) {
         SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
         if (session) {
-            if (_session && session == _session->sslSession()) {
+            if (_sslSession && session == _sslSession->sslSession()) {
                 SSL_SESSION_free(session);
-                return _session;
+                return _sslSession;
             } else
                 return std::make_shared<SSLSession>(session); // new SSLSession(session);
         }
@@ -165,13 +173,13 @@ void SSLSocket::useContext(SSLContext::Ptr context)
         throw std::runtime_error(
             "Cannot change the SSL context for an active socket.");
 
-    _context = context;
+    _sslContext = context;
 }
 
 
 SSLContext::Ptr SSLSocket::context() const
 {
-    return _context;
+    return _sslContext;
 }
 
 
@@ -195,7 +203,7 @@ net::TransportType SSLSocket::transport() const
 
 void SSLSocket::onRead(const char* data, size_t len)
 {
-    // TraceS(this) << "On SSL read: " << len << endl;
+    // TraceA("On SSL read: ", len)
 
     // SSL encrypted data is sent to the SSL context
     _sslAdapter.addIncomingData(data, len);
@@ -203,19 +211,14 @@ void SSLSocket::onRead(const char* data, size_t len)
 }
 
 
-void SSLSocket::onConnect(uv_connect_t* handle, int status)
+void SSLSocket::onConnect()
 {
     // TraceA("On connect")
-    if (status) {
-        setUVError("SSL connect error", status);
-        return;
-    } else
-        readStart();
-
-    _sslAdapter.initClient();
-    // _sslAdapter.start();
-
-    onSocketConnect(*this);
+    if (readStart()) {
+        _sslAdapter.initClient();
+        // _sslAdapter.start();
+        onSocketConnect(*this);
+    }
 }
 
 
