@@ -216,7 +216,7 @@ bool openTestServer(Process& proc, bool install = true)
 
     // Run the loop until the server is listening or exited in failure
     while (!exited && !running) {
-        uv::runLoop(UV_RUN_NOWAIT);
+        uv::runLoop(uv::defaultLoop(), UV_RUN_NOWAIT);
     }
 
     std::cout << "server running: " << running << std::endl;

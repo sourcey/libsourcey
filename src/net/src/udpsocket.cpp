@@ -85,26 +85,18 @@ void UDPSocket::connect(const std::string& host, uint16_t port)
     }
     else {
         init();
-        auto wrap = new GetAddrInfoReq(this);
-        auto func = [](uv_getaddrinfo_t* req, int status, struct addrinfo* res) {
-            auto wrap = reinterpret_cast<GetAddrInfoReq*>(req->data);
-            auto handle = wrap->handle<UDPSocket>();
-            if (handle) {
-                if (status == 0) {
-                    handle->connect(net::Address(res->ai_addr, 16));
-                }
-                else {
-                    handle->setUVError("DNS failed to resolve");
-                }
+
+        auto wrap = new GetAddrInfoReq();
+        wrap->callback = [ptr = context()](const GetAddrInfoEvent& event) {
+            if (!ptr->deleted) {
+                auto handle = reinterpret_cast<UDPSocket*>(ptr->handle);
+                if (event.status)
+                    handle->setUVError(event.status, "DNS failed to resolve");
+                else
+                    handle->connect(event.addr);
             }
-            else {
-                DebugA("Dropping DNS request for closed UDP socket")
-            }
-            uv_freeaddrinfo(res);
-            delete wrap;
         };
-        wrap->invoke(&uv_getaddrinfo, loop(), &wrap->req, func,
-            host.c_str(), util::itostr<uint16_t>(port).c_str(), nullptr);
+        wrap->resolve(host, port, loop());
     }
 }
 
@@ -156,28 +148,37 @@ ssize_t UDPSocket::send(const char* data, size_t len, const Address& peerAddress
         return -1;
     }
 
-    typedef uv::Request<uv_udp_t, uv_udp_send_t> Request;
-
-    auto wrap = new Request(context());
-    wrap->buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
-    if (invoke(&uv_udp_send, &wrap->req, get(), &wrap->buf, 1, peerAddress.addr(),
-        [](uv_udp_send_t* req, int status) {
-            auto wrap = reinterpret_cast<Request*>(req->data);
-            if (!wrap->ctx->deleted) {
-                if (status) {
-                    DebugA("Send error:", uv_err_name(status))
-                    wrap->ctx->handle->setUVError("UDP send error", status);
-                }
-            }
-            else {
-                DebugA("Dropping send request for closed UDP socket")
-            }
-            delete wrap;
+    auto buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
+    if (invoke(&uv_udp_send, new uv_udp_send_t, get(), &buf, 1, peerAddress.addr(),
+        [](uv_udp_send_t* req, int) {
+            delete req;
         })) {
         return len;
     }
-
     return error().errorno;
+
+    // typedef uv::Request<uv_udp_t, uv_udp_send_t> Request;
+    //
+    // auto wrap = new Request(context());
+    // wrap->buf = uv_buf_init((char*)data, (unsigned int)len); // TODO: memcpy data?
+    // if (invoke(&uv_udp_send, &wrap->req, get(), &wrap->buf, 1, peerAddress.addr(),
+    //     [](uv_udp_send_t* req, int status) {
+    //         auto wrap = reinterpret_cast<Request*>(req->data);
+    //         if (!wrap->ctx->deleted) {
+    //             if (status) {
+    //                 DebugA("Send error:", uv_err_name(status))
+    //                 wrap->ctx->handle->setUVError(status, "UDP send error");
+    //             }
+    //         }
+    //         else {
+    //             DebugA("Dropping send request for closed UDP socket")
+    //         }
+    //         delete wrap;
+    //     })) {
+    //     return len;
+    // }
+    //
+    // return error().errorno;
 }
 
 
@@ -217,7 +218,7 @@ bool UDPSocket::recvStart()
     // since it is called internally by bind().
     int r = uv_udp_recv_start(get(), UDPSocket::allocRecvBuffer, UDPSocket::onRecv);
     if (r) { // && r != UV_EALREADY
-        setUVError("Cannot start recv on invalid UDP socket", r);
+        setUVError(r, "Cannot start recv on invalid UDP socket");
         return false;
     }
     return true;
@@ -301,14 +302,14 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
     if (nread < 0) {
         // assert(0 && "unexpected error");
         DebugA("Recv error:", uv_err_name((int)nread))
-        socket->setUVError("UDP recv error", (int)nread);
+        socket->setUVError((int)nread, "UDP recv error");
         return;
     }
     else if (nread == 0) {
         assert(addr == nullptr);
         // Returning unused buffer, this is not an error
         // 11/12/13: This happens on linux but not windows
-        // socket->setUVError("End of file", UV_EOF);
+        // socket->setUVError(UV_EOF, "End of file");
         return;
     }
 

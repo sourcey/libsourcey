@@ -15,7 +15,7 @@
 
 #include "scy/base.h"
 #include "scy/handle.h"
-
+#include "scy/request.h"
 #include "scy/buffer.h"
 #include "scy/signal.h"
 
@@ -83,9 +83,8 @@ public:
 
         assert(_started);
 
-        auto req = new uv_write_t;
         auto buf = uv_buf_init((char*)data, (int)len);
-        return Handle::invoke(&uv_write, req, stream(), &buf, 1, [](uv_write_t* req, int) {
+        return Handle::invoke(&uv_write, new uv_write_t, stream(), &buf, 1, [](uv_write_t* req, int) {
             delete req;
         });
     }
@@ -101,9 +100,8 @@ public:
         assert(_started);
         assert(stream()->type == UV_NAMED_PIPE && this->template get<uv_pipe_t>()->ipc);
 
-        auto req = new uv_write_t;
         auto buf = uv_buf_init((char*)data, (int)len);
-        return Handle::invoke(&uv_write2, req, stream(), &buf, 1, send, [](uv_write_t* req, int) {
+        return Handle::invoke(&uv_write2, new uv_write_t, stream(), &buf, 1, send, [](uv_write_t* req, int) {
             delete req;
         });
     }
@@ -169,7 +167,7 @@ protected:
                 // The stream was closed in error
                 // The value of nread is the error number
                 // ie. UV_ECONNRESET or UV_EOF etc ...
-                self->setUVError("Stream error", (int)nread);
+                self->setUVError((int)nread, "Stream read error");
             }
         // }
         // catch (std::exception& exc) {
@@ -196,6 +194,26 @@ protected:
 protected:
     Buffer _buffer;
     bool _started { false };
+};
+
+
+/// Stream connection request for sockets and pipes.
+struct ConnectReq : public uv::Request<uv_connect_t>
+{
+    ConnectReq()
+    {
+        req.data = this;
+    }
+
+    bool connect(uv_tcp_t* handle, const struct sockaddr* addr)
+    {
+        return invoke(&uv_tcp_connect, &req, handle, addr, &defaultCallback);
+    }
+
+    // bool connect(uv_pipe_t* handle, const char* name)
+    // {
+    //     return invoke(&uv_pipe_connect, &req, handle, name, &defaultCallback);
+    // }
 };
 
 

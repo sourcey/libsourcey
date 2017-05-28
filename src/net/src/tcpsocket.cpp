@@ -61,35 +61,45 @@ void TCPSocket::connect(const net::Address& peerAddress)
     // TraceA("Connecting to", peerAddress)
     init();
 
-    // auto req = new uv_connect_t;
-    // req->data = this;
-    // invoke(&uv_tcp_connect, req, get(), peerAddress.addr(), internal::onConnect); // "TCP connect failed"
+    auto wrap = new ConnectReq();
+    wrap->callback = [ptr = context()](const uv::BasicEvent& event) {
+        if (!ptr->deleted) {
+            auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
+            if (event.status)
+                handle->setUVError(event.status, "TCP connection failed");
+            else
+                handle->onConnect();
+        }
+    };
+    wrap->connect(get(), peerAddress.addr());
 
-    auto wrap = new ConnectReq(this);
-    wrap->invoke(&uv_tcp_connect, &wrap->req, get(), peerAddress.addr(),
-        [](uv_connect_t* req, int status) {
-            auto wrap = reinterpret_cast<ConnectReq*>(req->data);
-            auto handle = wrap->handle<TCPSocket>();
-            if (handle) {
-                if (status == 0) {
-                    handle->onConnect();
-                }
-                else {
-                    // Error handled by callback proxy
-                    handle->setUVError("Connection failed", status);
-                }
-                // handle->onConnect(req, status);
-            }
-            else {
-                DebugA("Dropping request for closed TCP socket")
-            }
-            delete wrap;
-        });
+    // auto wrap = new ConnectReq(this);
+    // wrap->invoke(&uv_tcp_connect, &wrap->req, get(), peerAddress.addr(),
+    //     [](uv_connect_t* req, int status) {
+    //         auto wrap = static_cast<ConnectReq*>(req->data);
+    //         auto handle = wrap->handle<TCPSocket>();
+    //         if (handle) {
+    //             if (status == 0) {
+    //                 handle->onConnect();
+    //             }
+    //             else {
+    //                 // Error handled by callback proxy
+    //                 handle->setUVError(status, "TCP connection failed");
+    //             }
+    //             // handle->onConnect(req, status);
+    //         }
+    //         else {
+    //             DebugA("Dropping request for closed TCP socket")
+    //         }
+    //         delete wrap;
+    //     });
 }
 
 
 void TCPSocket::connect(const std::string& host, uint16_t port)
 {
+    // TraceA("Connecting to", peerAddress)
+
     if (Address::validateIP(host)) {
         connect(Address(host, port));
     }
@@ -101,28 +111,18 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
     }
     else {
         init();
-        auto wrap = new GetAddrInfoReq(this);
-        auto func = [](uv_getaddrinfo_t* req, int status, struct addrinfo* res) {
-            auto wrap = reinterpret_cast<GetAddrInfoReq*>(req->data);
-            auto handle = wrap->handle<TCPSocket>();
-            if (handle) {
-                if (status == 0) {
-                    net::Address resolved(res->ai_addr, 16);
-                    // TraceA("DNS resolved:", resolved)
-                    handle->connect(resolved);
-                }
-                else {
-                    handle->setUVError("DNS failed to resolve");
-                }
+
+        auto wrap = new GetAddrInfoReq();
+        wrap->callback = [ptr = context()](const GetAddrInfoEvent& event) {
+            if (!ptr->deleted) {
+                auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
+                if (event.status)
+                    handle->setUVError(event.status, "DNS failed to resolve");
+                else
+                    handle->connect(event.addr);
             }
-            else {
-                DebugA("Dropping DNS request for closed TCP socket")
-            }
-            uv_freeaddrinfo(res);
-            delete wrap;
         };
-        wrap->invoke(&uv_getaddrinfo, loop(), &wrap->req, func,
-            host.c_str(), util::itostr<uint16_t>(port).c_str(), nullptr);
+        wrap->resolve(host, port, loop());
     }
 }
 
@@ -158,7 +158,6 @@ void TCPSocket::listen(int backlog)
             else {
                 ErrorA("Accept connection failed:", uv_strerror(status));
             }
-            // self->onAcceptConnection(handle, status);
         }); // "TCP listen failed"
 }
 

@@ -5,11 +5,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1+
 //
-/// @defgroup uv UV module
-///
-/// The `uv` module contains C++ wrappers for `libuv`.
-///
-/// @addtogroup base
+/// @addtogroup uv
 /// @{
 
 
@@ -64,48 +60,6 @@ struct Context
 };
 
 
-/// Wrapper class for managing `uv_req_t` variants.
-///
-/// This class povides safe access to the parent handle incase the handle gets
-/// destroyed before the request callback returns, and should be used whenever
-/// the handle pointer is accessed via the callback.
-template<typename T, typename R>
-struct Request
-{
-    std::shared_ptr<Context<T>> ctx;
-    R req;
-    uv_buf_t buf;
-
-    Request(Handle<T>* h)
-        : ctx(h->context())
-    {
-        req.data = this;
-    }
-
-    Request(std::shared_ptr<Context<T>> c)
-        : ctx(c)
-    {
-        req.data = this;
-    }
-
-    template<typename F, typename... Args>
-    bool invoke(F&& f, Args&&... args)
-    {
-        int err = std::forward<F>(f)(std::forward<Args>(args)...);
-        if (err && handle())
-            handle()->setUVError("UV Error", err);
-        return !err;
-    }
-
-    template <typename Handle = Handle<T>>
-    Handle* handle() const
-    {
-        return ctx->deleted ? nullptr :
-            reinterpret_cast<Handle*>(ctx->handle->self());
-    }
-};
-
-
 /// Wrapper class for managing `uv_handle_t` variants.
 ///
 /// This class manages the handle during it's lifecycle and safely handles the
@@ -133,7 +87,7 @@ public:
         assert(!initialized());
         int err = std::forward<F>(f)(loop(), get(), std::forward<Args>(args)...);
         if (err)
-            setUVError("Initialization failed", err);
+            setUVError(err, "Initialization failed");
         else
             _context->initialized = true;
         return !err;
@@ -147,7 +101,7 @@ public:
         assert(initialized());
         int err = std::forward<F>(f)(std::forward<Args>(args)...);
         if (err)
-            setUVError("UV Error", err);
+            setUVError(err, "UV Error");
         return !err;
     }
 
@@ -232,7 +186,7 @@ public:
 
     /// Set the error and trigger relevant callbacks.
     /// This method can be called inside `libuv` callbacks.
-    virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0)
+    void setUVError(int errorno, const std::string& prefix = "UV Error")
     {
         Error err;
         err.errorno = errorno;
@@ -243,22 +197,22 @@ public:
 
     /// Set the error and throw an exception.
     /// Should never be called inside `libuv` callbacks.
-    virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0)
+    void setAndThrowError(int errorno, const std::string& prefix = "UV Error")
     {
-        setUVError(prefix, errorno);
+        setUVError(errorno, prefix);
         throwError(prefix, errorno);
     }
 
     /// Throw an exception if the handle is in error state.
     /// The error message prefix will be updated if provided.
-    virtual void throwLastError(const std::string& prefix = "UV Error")
+    void throwLastError(const std::string& prefix = "UV Error")
     {
         if (error().any())
-            setAndThrowError(prefix, error().errorno);
+            setAndThrowError(error().errorno, prefix);
     }
 
     /// Return a cast pointer to the managed `libuv` handle.
-    virtual uv::Loop* loop() const
+    uv::Loop* loop() const
     {
         assertThread();
         return _loop;
@@ -305,8 +259,8 @@ public:
         assert(std::this_thread::get_id() == _tid);
     }
 
-    typedef Request<T, uv_connect_t> ConnectReq;
-    typedef Request<T, uv_getaddrinfo_t> GetAddrInfoReq;
+    /// Define the native handle type.
+    typedef T Type;
 
 protected:
     /// Error callback.

@@ -5,7 +5,11 @@
 //
 // SPDX-License-Identifier: LGPL-2.1+
 //
-/// @addtogroup base
+/// @defgroup uv UV module
+///
+/// The `uv` module contains C++ wrappers for `libuv`.
+///
+/// @addtogroup uv
 /// @{
 
 

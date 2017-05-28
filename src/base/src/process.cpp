@@ -117,13 +117,10 @@ void Process::spawn()
     // Spawn the process
     _handle.init(&uv_spawn, &options);
     _handle.throwLastError("Cannot spawn process");
-    // int r = uv_spawn(_handle.loop(), _handle.ptr<uv_process_t>(), &options);
-    // if (r < 0)
-    //     _handle.setAndThrowError("Cannot spawn process", r);
 
     // Start reading on the stdout pipe
     if (!_stdout.readStart())
-        _handle.setAndThrowError("Cannot read stdout pipe");
+        _handle.setAndThrowError(_stdout.error().errorno, "Cannot read stdout pipe");
 }
 
 

@@ -33,7 +33,7 @@ Timer::Timer(uv::Loop* loop)
 
 
 Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
-    : _handle(loop) //, new uv_timer_t)
+    : _handle(loop)
     , _timeout(timeout)
     , _interval(0)
     , _count(0)
@@ -46,7 +46,7 @@ Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
 
 
 Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::function<void()> func)
-    : _handle(loop) //, new uv_timer_t)
+    : _handle(loop)
     , _timeout(timeout)
     , _interval(interval)
     , _count(0)
@@ -77,11 +77,6 @@ void Timer::init()
     _handle.get()->data = this;
     _handle.init(&uv_timer_init);
     _handle.throwLastError("Cannot initialize timer");
-
-    // int err = uv_timer_init(_handle.loop(), _handle.get());
-    // if (err < 0)
-    //     _handle.setAndThrowError("Cannot initialize timer", err);
-
     _handle.unref(); // unref by default
 }
 
@@ -101,7 +96,7 @@ void Timer::start(std::function<void()> func)
 
 void Timer::start()
 {
-    // TraceS(this) << "Starting: " << << timeout << ": " << interval << endl;
+    // TraceA("Starting: ", << timeout, ": ", interval)
     assert(!active());
     assert(_handle.get());
     assert(_timeout > 0 || _interval > 0);
@@ -110,37 +105,33 @@ void Timer::start()
     // _interval = interval;
     _count = 0;
 
-    int err = uv_timer_start(_handle.get(), [](uv_timer_t* req) {
-        auto self = reinterpret_cast<Timer*>(req->data);
-        self->_count++;
-        self->Timeout.emit();
-    }, _timeout, _interval);
-    if (err < 0)
-        _handle.setAndThrowError("Invalid timer", err);
-
-    assert(active());
+    _handle.invoke(&uv_timer_start, _handle.get(),
+        [](uv_timer_t* req) {
+            auto self = reinterpret_cast<Timer*>(req->data);
+            self->_count++;
+            self->Timeout.emit();
+        }, _timeout, _interval);
+    _handle.throwLastError("Cannot start timer");
 }
 
 
 void Timer::stop()
 {
-    // TraceS(this) << "Stopping: " << __handle.ptr << endl;
+    // TraceA("Stopping")
 
     if (!active())
         return; // do nothing
 
     _count = 0;
-    int err = uv_timer_stop(_handle.get());
-    if (err < 0)
-        _handle.setAndThrowError("Invalid timer", err);
-
+    _handle.invoke(&uv_timer_stop, _handle.get());
+    _handle.throwLastError("Cannot stop timer");
     assert(!active());
 }
 
 
 void Timer::restart()
 {
-    // TraceS(this) << "Restarting: " << __handle.ptr << endl;
+    // TraceS(this), "Restarting: ", __handle.ptr)
     if (!active())
         return start(); //_timeout, _interval);
     return again();
@@ -149,12 +140,11 @@ void Timer::restart()
 
 void Timer::again()
 {
-    TraceA("Again")
+    // TraceA("Again")
 
     assert(_handle.get());
-    int err = uv_timer_again(_handle.get());
-    if (err < 0)
-        _handle.setAndThrowError("Invalid timer", err);
+    _handle.invoke(&uv_timer_again, _handle.get());
+    _handle.throwLastError("Cannot run timer again");
 
     //assert(active());
     _count = 0;

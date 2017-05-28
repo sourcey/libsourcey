@@ -71,22 +71,19 @@ public:
         _handle.get()->data = new Callback(_context,
                                            std::forward<Function>(func),
                                            std::forward<Args>(args)...);
-        int r = uv_idle_start(_handle.get(), [](uv_idle_t* req) {
-            auto wrap = reinterpret_cast<Callback*>(req->data);
-            if (!wrap->ctx->cancelled) {
-                wrap->invoke();
-            }
-            else {
-                wrap->ctx->running = false;
-                uv_idle_stop(req);
-                delete wrap;
-            }
-        });
-
-        if (r < 0)
-            _handle.setAndThrowError("Cannot initialize idler", r);
-
-        assert(_handle.active());
+        _handle.invoke(&uv_idle_start, _handle.get(),
+            [](uv_idle_t* req) {
+                auto wrap = reinterpret_cast<Callback*>(req->data);
+                if (!wrap->ctx->cancelled) {
+                    wrap->invoke();
+                }
+                else {
+                    wrap->ctx->running = false;
+                    uv_idle_stop(req);
+                    delete wrap;
+                }
+           });
+        _handle.throwLastError("Cannot start idler");
     }
 
     /// Start the idler with the given callback function.
