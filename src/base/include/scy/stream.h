@@ -210,10 +210,10 @@ struct ConnectReq : public uv::Request<uv_connect_t>
         return invoke(&uv_tcp_connect, &req, handle, addr, &defaultCallback);
     }
 
-    // bool connect(uv_pipe_t* handle, const char* name)
-    // {
-    //     return invoke(&uv_pipe_connect, &req, handle, name, &defaultCallback);
-    // }
+    void connect(uv_pipe_t* handle, const char* name)
+    {
+        invoke(&uv_pipe_connect, &req, handle, name, &defaultCallback);
+    }
 };
 
 

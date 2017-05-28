@@ -1,9 +1,9 @@
 # TODO
 
-Remove UV Error messages
+Add a free function helper to launch UV request types
+ConnectReq to use uv_pipe_t
+Move UV request types to request.h
 Logger not to add space
-Remove comments
-Remove const std::string &
 
 Add override tags to virtual methods
 Copy samples data to install folder
