@@ -8,8 +8,8 @@ dependencies:
     - sudo apt-get update
     - sudo apt-get install --yes libavcodec-ffmpeg-dev libavdevice-ffmpeg-dev libavfilter-ffmpeg-dev libavformat-ffmpeg-dev libswresample-ffmpeg-dev libpostproc-ffmpeg-dev
     - sudo apt-get install --yes alsa-base alsa-utils libasound2 libasound2-dev
-    - sudo apt-get install --yes gcc-4.9 g++-4.9
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
+    - sudo apt-get install --yes gcc-5.0 g++-5.0
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5.0 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5.0
     - mkdir -p /tmp/webrtc-17657-02ba69d-linux-x64; curl -sSL https://github.com/sourcey/webrtc-precompiled-builds/raw/master/webrtc-17657-02ba69d-linux-x64.tar.gz | sudo tar -xzC /tmp/webrtc-17657-02ba69d-linux-x64
   override:
     - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake .. -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON -DWEBRTC_ROOT_DIR=/tmp/webrtc-17657-02ba69d-linux-x64
