@@ -81,7 +81,7 @@ The `base` module contains reusable cross platform tools and utilities.
 `class `[`scy::Stateful`](#classscy_1_1Stateful)    | 
 `class `[`scy::StopPropagation`](#classscy_1_1StopPropagation)    | Exception to break out of the current [Signal](#classscy_1_1Signal) callback scope.
 `class `[`scy::Stopwatch`](#classscy_1_1Stopwatch)    | 
-`class `[`scy::Stream`](#classscy_1_1Stream)    | 
+`class `[`scy::Stream`](#classscy_1_1Stream)    | Basic stream type for sockets and pipes.
 `class `[`scy::StreamWriter`](#classscy_1_1StreamWriter)    | 
 `class `[`scy::Synchronizer`](#classscy_1_1Synchronizer)    | 
 `class `[`scy::SyncPacketQueue`](#classscy_1_1SyncPacketQueue)    | 
@@ -100,6 +100,7 @@ The `base` module contains reusable cross platform tools and utilities.
 `struct `[`scy::AbstractDelegate`](#structscy_1_1AbstractDelegate)    | 
 `struct `[`scy::Bitwise`](#structscy_1_1Bitwise)    | Container for smart management of bitwise integer flags.
 `struct `[`scy::ClassDelegate`](#structscy_1_1ClassDelegate)    | 
+`struct `[`scy::ConnectReq`](#structscy_1_1ConnectReq)    | [Stream](#classscy_1_1Stream) connection request for sockets and pipes.
 `struct `[`scy::ConstClassDelegate`](#structscy_1_1ConstClassDelegate)    | 
 `struct `[`scy::Error`](#structscy_1_1Error)    | 
 `struct `[`scy::FunctionDelegate`](#structscy_1_1FunctionDelegate)    | 
@@ -111,6 +112,7 @@ The `base` module contains reusable cross platform tools and utilities.
 `struct `[`scy::PacketStreamState`](#structscy_1_1PacketStreamState)    | 
 `struct `[`scy::PolymorphicDelegate`](#structscy_1_1PolymorphicDelegate)    | 
 `struct `[`scy::SharedLibrary`](#structscy_1_1SharedLibrary)    | 
+`struct `[`scy::ShutdownCmd`](#structscy_1_1ShutdownCmd)    | 
 `struct `[`scy::TransactionState`](#structscy_1_1TransactionState)    | 
 # class `scy::AbstractCollection` 
 
@@ -2172,13 +2174,13 @@ This class inherits the `[Runner](#classscy_1_1Runner)` interface and may be use
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public  Idler(uv::Loop * loop)` | Create the idler with the given event loop.
-`public template<class Function,class... Args>`  <br/>`inline  explicit Idler(Function && func,Args &&... args)` | Create and start the idler with the given callback.
-`public template<class Function,class... Args>`  <br/>`inline  explicit Idler(uv::Loop * loop,Function && func,Args &&... args)` | Create and start the idler with the given callback and event loop.
-`public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | Start the idler with the given callback function.
+`public template<typename Function,typename... Args>`  <br/>`inline  explicit Idler(Function && func,Args &&... args)` | Create and start the idler with the given callback.
+`public template<typename Function,typename... Args>`  <br/>`inline  explicit Idler(uv::Loop * loop,Function && func,Args &&... args)` | Create and start the idler with the given callback and event loop.
+`public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | Start the idler with the given callback function.
 `public virtual void start(std::function< void()> func)` | Start the idler with the given callback function.
 `public virtual  ~Idler()` | 
-`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_idle_t > & handle()` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_idle_t > _handle` | 
 `protected virtual void init()` | 
 `protected virtual bool async() const` | 
 
@@ -2190,19 +2192,19 @@ Create the idler with the given event loop.
 
 
 
-#### `public template<class Function,class... Args>`  <br/>`inline  explicit Idler(Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline  explicit Idler(Function && func,Args &&... args)` 
 
 Create and start the idler with the given callback.
 
 
 
-#### `public template<class Function,class... Args>`  <br/>`inline  explicit Idler(uv::Loop * loop,Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline  explicit Idler(uv::Loop * loop,Function && func,Args &&... args)` 
 
 Create and start the idler with the given callback and event loop.
 
 
 
-#### `public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
 
 Start the idler with the given callback function.
 
@@ -2220,13 +2222,13 @@ Start the idler with the given callback function.
 
 
 
-#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` 
+#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_idle_t > & handle()` 
 
 
 
 
 
-#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` 
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_idle_t > _handle` 
 
 
 
@@ -4507,7 +4509,7 @@ Called when a successful response is received.
 
 ```
 class scy::Pipe
-  : public scy::Stream
+  : public scy::Stream< uv_pipe_t >
 ```  
 
 [Pipe](#classscy_1_1Pipe) implementation for process stdio.
@@ -4704,10 +4706,6 @@ This class allows for custom memory handling of managed pointers via the TDelete
 
 # class `scy::Process` 
 
-```
-class scy::Process
-  : public scy::uv::Handle
-```  
 
 
 
@@ -4731,7 +4729,7 @@ class scy::Process
 `public int pid() const` | Returns the process PID.
 `public `[`Pipe`](#classscy_1_1Pipe)` & in()` | Returns the stdin pipe.
 `public `[`Pipe`](#classscy_1_1Pipe)` & out()` | Returns the stdout pipe.
-`protected uv_process_t _proc` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_process_t > _handle` | 
 `protected `[`Pipe`](./doc/api-base.md#classscy_1_1Pipe)` _stdin` | 
 `protected `[`Pipe`](./doc/api-base.md#classscy_1_1Pipe)` _stdout` | 
 `protected uv_stdio_container_t _stdio` | 
@@ -4824,7 +4822,7 @@ Returns the stdout pipe.
 
 
 
-#### `protected uv_process_t _proc` 
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_process_t > _handle` 
 
 
 
@@ -5480,7 +5478,7 @@ Pops and dispatches the next waiting item.
 `public bool async() const` | 
 `public std::thread::id tid() const` | Return the native thread ID.
 `public bool waitForExit(int timeout)` | 
-`protected Context::Ptr _context` | Shared pointer to the internal [Runner::Context](./doc/api-base.md#structscy_1_1Runner_1_1Context).
+`protected std::shared_ptr< `[`Context`](./doc/api-base.md#structscy_1_1Runner_1_1Context)` > _context` | Shared pointer to the internal [Context](./doc/api-base.md#structscy_1_1Runner_1_1Context).
 `protected  Runner(const `[`Runner`](#classscy_1_1Runner)` &) = delete` | NonCopyable and NonMovable.
 `protected `[`Runner`](#classscy_1_1Runner)` & operator=(const `[`Runner`](#classscy_1_1Runner)` &) = delete` | 
 
@@ -5502,7 +5500,7 @@ Pops and dispatches the next waiting item.
 
 
 
-Start the asynchronous context with the given callback.
+Start the asynchronous context with the given invokeback.
 
 The target `Runnable` instance must outlive the `[Runner](#classscy_1_1Runner)`.
 
@@ -5534,7 +5532,7 @@ Returns true if the [Runner](#classscy_1_1Runner) is operating in repeating mode
 
 
 
-This setting means the implementation should call the target function repeatedly until cancelled. The importance of this method to normalize the functionality of threadded and event loop driven [Runner](#classscy_1_1Runner) models.
+This setting means the implementation should invoke the target function repeatedly until cancelled. The importance of this method to normalize the functionality of threadded and event loop driven [Runner](#classscy_1_1Runner) models.
 
 #### `public bool async() const` 
 
@@ -5554,11 +5552,11 @@ Return the native thread ID.
 
 Wait until the thread exits.
 
-The thread should be cancelled beore calling this method. This method must be called from outside the current thread context or deadlock will ensue.
+The thread should be cancelled beore invokeing this method. This method must be invokeed from outside the current thread context or deadlock will ensue.
 
-#### `protected Context::Ptr _context` 
+#### `protected std::shared_ptr< `[`Context`](./doc/api-base.md#structscy_1_1Runner_1_1Context)` > _context` 
 
-Shared pointer to the internal [Runner::Context](#structscy_1_1Runner_1_1Context).
+Shared pointer to the internal [Context](#structscy_1_1Runner_1_1Context).
 
 
 
@@ -6411,10 +6409,10 @@ Returns the number of milliseconds elapsed since the stopwatch started.
 
 ```
 class scy::Stream
-  : public scy::uv::Handle
+  : public scy::uv::Handle< T >
 ```  
 
-
+Basic stream type for sockets and pipes.
 
 
 
@@ -6422,71 +6420,80 @@ class scy::Stream
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public `[`Signal](#classscy_1_1Signal)< void([Stream`](#classscy_1_1Stream) &, const char *, const int &)`> Read` | Signals when data can be read from the stream.
-`public  Stream(uv::Loop * loop,void * stream)` | 
-`public virtual  ~Stream()` | 
-`public virtual void close()` | 
-`public bool shutdown()` | 
-`public bool write(const char * data,size_t len)` | 
-`public `[`Buffer`](#group__base_1gab10b36b080deb583ed703fca6b63ffdd)` & buffer()` | Returns the read buffer.
-`public virtual bool closed() const` | Returns true if the native socket handle is closed.
+`public `[`Signal`](#classscy_1_1Signal)< void(const char *, const int &)`> Read` | [Signal](./doc/api-base.md#classscy_1_1Signal) the notifies when data is available for read.
+`public inline  Stream(uv::Loop * loop)` | 
+`public inline virtual  ~Stream()` | 
+`public inline virtual void close()` | 
+`public inline bool shutdown()` | 
+`public inline bool write(const char * data,size_t len)` | 
+`public inline bool write(const char * data,size_t len,uv_stream_t * send)` | 
+`public inline virtual bool closed() const` | Return true if the native stream handle is closed.
+`public inline uv_stream_t * stream()` | Return the uv_stream_t pointer.
 `protected `[`Buffer`](#group__base_1gab10b36b080deb583ed703fca6b63ffdd)` _buffer` | 
 `protected bool _started` | 
-`protected virtual bool readStart()` | 
-`protected virtual bool readStop()` | 
-`protected virtual void onRead(const char * data,size_t len)` | 
+`protected inline virtual bool readStart()` | 
+`protected inline virtual bool readStop()` | 
+`protected inline virtual void onRead(const char * data,size_t len)` | 
 
 ## Members
 
-#### `public `[`Signal](#classscy_1_1Signal)< void([Stream`](#classscy_1_1Stream) &, const char *, const int &)`> Read` 
+#### `public `[`Signal`](#classscy_1_1Signal)< void(const char *, const int &)`> Read` 
 
-Signals when data can be read from the stream.
-
-
-
-#### `public  Stream(uv::Loop * loop,void * stream)` 
+[Signal](#classscy_1_1Signal) the notifies when data is available for read.
 
 
 
-
-
-#### `public virtual  ~Stream()` 
+#### `public inline  Stream(uv::Loop * loop)` 
 
 
 
 
 
-#### `public virtual void close()` 
+#### `public inline virtual  ~Stream()` 
 
 
 
-Closes and resets the stream handle. This will close the active socket/pipe and destroy the uv_stream_t handle.
+
+
+#### `public inline virtual void close()` 
+
+
+
+Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle.
 
 If the stream is already closed this call will have no side-effects.
 
-#### `public bool shutdown()` 
+#### `public inline bool shutdown()` 
 
 
 
-Sends a shutdown packet to the connected peer. Returns true if the shutdown packet was sent.
+Sends a shutdown packet to the connected peer. Return true if the shutdown packet was sent.
 
-#### `public bool write(const char * data,size_t len)` 
+#### `public inline bool write(const char * data,size_t len)` 
 
 
 
 Writes data to the stream.
 
-Returns false if the underlying socket is closed. This method does not throw an exception.
+Return false if the underlying socket is closed. This method does not throw an exception.
 
-#### `public `[`Buffer`](#group__base_1gab10b36b080deb583ed703fca6b63ffdd)` & buffer()` 
-
-Returns the read buffer.
+#### `public inline bool write(const char * data,size_t len,uv_stream_t * send)` 
 
 
 
-#### `public virtual bool closed() const` 
+Write data to the target stream.
 
-Returns true if the native socket handle is closed.
+This method is only valid for IPC streams.
+
+#### `public inline virtual bool closed() const` 
+
+Return true if the native stream handle is closed.
+
+
+
+#### `public inline uv_stream_t * stream()` 
+
+Return the uv_stream_t pointer.
 
 
 
@@ -6502,19 +6509,19 @@ Returns true if the native socket handle is closed.
 
 
 
-#### `protected virtual bool readStart()` 
+#### `protected inline virtual bool readStart()` 
 
 
 
 
 
-#### `protected virtual bool readStop()` 
+#### `protected inline virtual bool readStop()` 
 
 
 
 
 
-#### `protected virtual void onRead(const char * data,size_t len)` 
+#### `protected inline virtual void onRead(const char * data,size_t len)` 
 
 
 
@@ -6617,16 +6624,15 @@ This class inherits the `[Runner](#classscy_1_1Runner)` interface and may be use
 --------------------------------|---------------------------------------------
 `public  Synchronizer(uv::Loop * loop)` | Create the synchronization context the given event loop.
 `public  Synchronizer(std::function< void()> target,uv::Loop * loop)` | 
-`public template<class Function,class... Args>`  <br/>`inline  explicit Synchronizer(Function && func,Args &&... args,uv::Loop * loop)` | Create the synchronization context the given event loop and method.
+`public template<typename Function,typename... Args>`  <br/>`inline  explicit Synchronizer(Function && func,Args &&... args,uv::Loop * loop)` | Create the synchronization context the given event loop and method.
 `public virtual  ~Synchronizer()` | Destructor.
 `public void post()` | 
-`public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | Start the synchronizer with the given callback.
+`public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | Start the synchronizer with the given callback.
 `public virtual void start(std::function< void()> func)` | Start the synchronizer with the given callback function.
 `public virtual void cancel()` | 
 `public virtual void close()` | 
-`public virtual bool closed()` | 
-`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_async_t > & handle()` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_async_t > _handle` | 
 `protected virtual bool async() const` | 
 
 ## Members
@@ -6643,7 +6649,7 @@ Create the synchronization context the given event loop.
 
 Create the synchronization context the given event loop and method. The target method will be called from the event loop context.
 
-#### `public template<class Function,class... Args>`  <br/>`inline  explicit Synchronizer(Function && func,Args &&... args,uv::Loop * loop)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline  explicit Synchronizer(Function && func,Args &&... args,uv::Loop * loop)` 
 
 Create the synchronization context the given event loop and method.
 
@@ -6661,7 +6667,7 @@ Destructor.
 
 Send a synchronization request to the event loop. Call this each time you want the target method called synchronously. The synchronous method will be called on next iteration. This is not atomic, so do not expect a callback for every request.
 
-#### `public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
 
 Start the synchronizer with the given callback.
 
@@ -6685,19 +6691,13 @@ Start the synchronizer with the given callback function.
 
 
 
-#### `public virtual bool closed()` 
+#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_async_t > & handle()` 
 
 
 
 
 
-#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` 
-
-
-
-
-
-#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` 
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_async_t > _handle` 
 
 
 
@@ -6871,9 +6871,9 @@ Tasks are designed to be run by a [TaskRunner](#classscy_1_1TaskRunner).
 `protected uint32_t _id` | 
 `protected bool _repeating` | 
 `protected bool _destroyed` | 
-`protected  Task(const `[`Task`](#classscy_1_1Task)` & task)` | 
-`protected `[`Task`](#classscy_1_1Task)` & operator=(`[`Task`](#classscy_1_1Task)` const &)` | 
-`protected virtual  ~Task()` | Should remain protected.
+`protected  Task(const `[`Task`](#classscy_1_1Task)` & task) = delete` | 
+`protected `[`Task`](#classscy_1_1Task)` & operator=(`[`Task`](#classscy_1_1Task)` const &) = delete` | 
+`protected virtual  ~Task()` | 
 `protected void run()` | 
 
 ## Members
@@ -6926,13 +6926,13 @@ Unique task ID.
 
 
 
-#### `protected  Task(const `[`Task`](#classscy_1_1Task)` & task)` 
+#### `protected  Task(const `[`Task`](#classscy_1_1Task)` & task) = delete` 
 
 
 
 
 
-#### `protected `[`Task`](#classscy_1_1Task)` & operator=(`[`Task`](#classscy_1_1Task)` const &)` 
+#### `protected `[`Task`](#classscy_1_1Task)` & operator=(`[`Task`](#classscy_1_1Task)` const &) = delete` 
 
 
 
@@ -6940,9 +6940,9 @@ Unique task ID.
 
 #### `protected virtual  ~Task()` 
 
-Should remain protected.
 
 
+Destroctor. Should remain protected.
 
 #### `protected void run()` 
 
@@ -6971,17 +6971,17 @@ The `[TaskRunner](#classscy_1_1TaskRunner)` is powered by an abstract `[Runner](
 --------------------------------|---------------------------------------------
 `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Idle` | Fires after completing an iteration of all tasks.
 `public `[`NullSignal`](./doc/api-base.md#classscy_1_1Signal)` Shutdown` | Signals when the `[TaskRunner](./doc/api-base.md#classscy_1_1TaskRunner)` is shutting down.
-`public  TaskRunner(`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner)` | 
+`public  TaskRunner(std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner)` | 
 `public virtual  ~TaskRunner()` | 
 `public virtual bool start(`[`Task`](#classscy_1_1Task)` * task)` | Starts a task, adding it if it doesn't exist.
 `public virtual bool cancel(`[`Task`](#classscy_1_1Task)` * task)` | 
 `public virtual bool destroy(`[`Task`](#classscy_1_1Task)` * task)` | Queues a task for destruction.
 `public virtual bool exists(`[`Task`](#classscy_1_1Task)` * task) const` | Returns weather or not a task exists.
 `public virtual `[`Task`](#classscy_1_1Task)` * get(uint32_t id) const` | 
-`public virtual void setRunner(`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner)` | 
+`public virtual void setRunner(std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner)` | 
 `public inline virtual const char * className() const` | 
 `protected mutable std::mutex _mutex` | 
-`protected `[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` _runner` | 
+`protected std::shared_ptr< `[`Runner`](./doc/api-base.md#classscy_1_1Runner)` > _runner` | 
 `protected TaskList _tasks` | 
 `protected virtual void run()` | Called by the async context to run the next task.
 `protected virtual bool add(`[`Task`](#classscy_1_1Task)` * task)` | Adds a task to the runner.
@@ -7008,7 +7008,7 @@ Signals when the `[TaskRunner](#classscy_1_1TaskRunner)` is shutting down.
 
 
 
-#### `public  TaskRunner(`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner)` 
+#### `public  TaskRunner(std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner)` 
 
 
 
@@ -7052,7 +7052,7 @@ Returns weather or not a task exists.
 
 Returns the task pointer matching the given ID, or nullptr if no task exists.
 
-#### `public virtual void setRunner(`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner)` 
+#### `public virtual void setRunner(std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner)` 
 
 
 
@@ -7070,7 +7070,7 @@ Set the asynchronous context for packet processing. This may be a [Thread](#clas
 
 
 
-#### `protected `[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` _runner` 
+#### `protected std::shared_ptr< `[`Runner`](./doc/api-base.md#classscy_1_1Runner)` > _runner` 
 
 
 
@@ -7171,9 +7171,9 @@ This class inherits the `[Runner](#classscy_1_1Runner)` interface and may be use
 `public bool waitForExit(int timeout)` | 
 `public uv_thread_t id() const` | Returns the native thread handle.
 `public  Thread()` | Default constructor.
-`public template<class Function,class... Args>`  <br/>`inline  explicit Thread(Function && func,Args &&... args)` | 
+`public template<typename Function,typename... Args>`  <br/>`inline  explicit Thread(Function && func,Args &&... args)` | 
 `public virtual  ~Thread()` | Destructor.
-`public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | 
+`public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` | 
 `public virtual void start(std::function< void()> func)` | Start the asynchronous context with the given void function.
 `public void join()` | Wait until the thread exits.
 `public std::thread::id id() const` | Return the native thread handle.
@@ -7245,7 +7245,7 @@ Default constructor.
 
 
 
-#### `public template<class Function,class... Args>`  <br/>`inline  explicit Thread(Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline  explicit Thread(Function && func,Args &&... args)` 
 
 
 
@@ -7259,7 +7259,7 @@ Destructor.
 
 
 
-#### `public template<class Function,class... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
+#### `public template<typename Function,typename... Args>`  <br/>`inline void start(Function && func,Args &&... args)` 
 
 
 
@@ -7634,8 +7634,8 @@ Asynchronous event based timer.
 `public std::int64_t timeout() const` | 
 `public std::int64_t interval() const` | 
 `public std::int64_t count()` | 
-`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` | 
-`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` | 
+`public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_timer_t > & handle()` | 
+`protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_timer_t > _handle` | 
 `protected std::int64_t _timeout` | 
 `protected std::int64_t _interval` | 
 `protected std::int64_t _count` | 
@@ -7759,13 +7759,13 @@ Returns true if the implementation is thread-based, or false if it belongs to an
 
 
 
-#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)` & handle()` 
+#### `public `[`uv::Handle`](#classscy_1_1uv_1_1Handle)`< uv_timer_t > & handle()` 
 
 
 
 
 
-#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)` _handle` 
+#### `protected `[`uv::Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< uv_timer_t > _handle` 
 
 
 
@@ -8512,6 +8512,38 @@ This class implements fast delegates and function comparison.
 
 
 
+# struct `scy::ConnectReq` 
+
+```
+struct scy::ConnectReq
+  : public scy::uv::Request< uv_connect_t >
+```  
+
+[Stream](#classscy_1_1Stream) connection request for sockets and pipes.
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public inline  ConnectReq()` | 
+`public inline bool connect(uv_tcp_t * handle,const struct sockaddr * addr)` | 
+
+## Members
+
+#### `public inline  ConnectReq()` 
+
+
+
+
+
+#### `public inline bool connect(uv_tcp_t * handle,const struct sockaddr * addr)` 
+
+
+
+
+
 # struct `scy::ConstClassDelegate` 
 
 ```
@@ -9033,7 +9065,7 @@ Theis class contains a pointer to a class member that receices a derived subclas
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public inline bool open(const std::string & path)` | 
-`public inline void close()` | 
+`public inline void close()` | Closes the shared library.
 `public inline bool sym(const char * name,void ** ptr)` | 
 `public inline void setError(const std::string & prefix)` | 
 `public inline std::string error() const` | 
@@ -9050,7 +9082,7 @@ Opens a shared library. The filename is in utf-8. Returns true on success and fa
 
 #### `public inline void close()` 
 
-
+Closes the shared library.
 
 
 
@@ -9079,6 +9111,34 @@ Retrieves a data pointer from a dynamic library. It is legal for a symbol to map
 
 
 #### `protected std::string _error` 
+
+
+
+
+
+# struct `scy::ShutdownCmd` 
+
+
+
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public void * opaque` | 
+`public std::function< void(void *)> callback` | 
+
+## Members
+
+#### `public void * opaque` 
+
+
+
+
+
+#### `public std::function< void(void *)> callback` 
 
 
 
@@ -10322,7 +10382,7 @@ The grabage collector maintains a single cleaner context per event loop.
 
 [Context](#structscy_1_1Runner_1_1Context) object which we send to the thread context.
 
-This intermediate object allows us to garecefully handle late callbacks and so avoid the need for deferred destruction of `[Runner](#classscy_1_1Runner)` objects.
+This intermediate object allows us to garecefully handle late invokebacks and so avoid the need for deferred destruction of `[Runner](#classscy_1_1Runner)` objects.
 
 ## Summary
 

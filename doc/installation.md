@@ -1,14 +1,14 @@
 ## Installation
 
-LibSourcey uses `CMake` to generate the project files for your compiler, and the codebase is cross platform so it should compile on any system with a modern C++11 compiler. LibSourcey has been successfully compiled and used on the following platforms:
+LibSourcey uses `CMake` to generate the project files for your compiler, and the codebase is cross platform so it should compile on any system with a modern C++14 compiler. LibSourcey has been successfully compiled and used on the following platforms:
 
-* Linux (`gcc` >= 4.9)
+* Linux (`gcc` >= 5.0)
 * OS X (`Xcode`, `gcc`)
 * Windows (`msys`, `vs`)
 * Android
 * iOS
 
-**Note**: If using `gcc` then version >= 4.9 is required because older versions have a bug and that doesn't accept parameters pack in lambdas. See here: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55914
+**Note**: If using `gcc` then version >= 5.0 is required because older versions have a bug and that doesn't accept parameters pack in lambdas. See here: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55914
 
 Please refer to the platform specific installation guides:
 

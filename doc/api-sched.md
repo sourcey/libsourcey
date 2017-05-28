@@ -144,7 +144,7 @@ This class extends the [Task](#classscy_1_1sched_1_1Task) class to implement sch
 `protected `[`sched::Scheduler`](./doc/api-sched.md#classscy_1_1sched_1_1Scheduler)` * _scheduler` | 
 `protected `[`sched::Trigger`](./doc/api-sched.md#structscy_1_1sched_1_1Trigger)` * _trigger` | 
 `protected mutable std::mutex _mutex` | 
-`protected virtual  ~Task()` | Should remain protected.
+`protected virtual  ~Task()` | 
 `protected virtual bool beforeRun()` | 
 `protected void run()` | 
 `protected virtual bool afterRun()` | 
@@ -255,9 +255,9 @@ Returns the milliseconds remaining until the next scheduled timeout. An [sched::
 
 #### `protected virtual  ~Task()` 
 
-Should remain protected.
 
 
+Destroctor. Should remain protected.
 
 #### `protected virtual bool beforeRun()` 
 

@@ -1201,8 +1201,8 @@ This is the abstract class for all encoders.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public void initialize()` | 
-`public void uninitialize()` | 
+`public void init()` | 
+`public void uninit()` | 
 `public `[`EncoderOptions`](#structscy_1_1av_1_1EncoderOptions)` & options()` | 
 `public inline virtual bool isNone() const` | 
 `public inline virtual bool isReady() const` | 
@@ -1213,13 +1213,13 @@ This is the abstract class for all encoders.
 
 ## Members
 
-#### `public void initialize()` 
+#### `public void init()` 
 
 
 
 
 
-#### `public void uninitialize()` 
+#### `public void uninit()` 
 
 
 

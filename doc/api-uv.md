@@ -16,160 +16,200 @@ The `uv` module contains C++ wrappers for `libuv`.
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `class `[`scy::uv::Handle`](#classscy_1_1uv_1_1Handle)    | 
-`struct `[`scy::uv::ShutdownCmd`](#structscy_1_1uv_1_1ShutdownCmd)    | 
+`struct `[`scy::uv::BasicEvent`](#structscy_1_1uv_1_1BasicEvent)    | Default request callback event.
+`struct `[`scy::uv::Context`](#structscy_1_1uv_1_1Context)    | Shared `libuv` handle context.
+`struct `[`scy::uv::Request`](#structscy_1_1uv_1_1Request)    | 
 # class `scy::uv::Handle` 
 
 
 
 
-A base class for managing a `libuv` handle during it's lifecycle and safely handling its asynchronous destruction mechanism.
+Wrapper class for managing `uv_handle_t` variants.
+
+This class manages the handle during it's lifecycle and safely handles the asynchronous destruction mechanism.
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public  Handle(uv::Loop * loop,void * handle)` | 
-`public virtual  ~Handle()` | 
-`public virtual void setLoop(uv::Loop * loop)` | The event loop may be set before the handle is initialized.
-`public virtual void close()` | Closes and destroys the associated `libuv` handle.
-`public bool initialized()` | Returns true if the handle has been initialized.
-`public bool ref()` | Reference main loop again, once unref'd.
-`public bool unref()` | Unreference the main loop after initialized.
-`public const `[`scy::Error`](#structscy_1_1Error)` & error() const` | Returns the error context if any.
-`public virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` | Sets the error content and triggers callbacks.
-`public virtual void setAndThrowError(const std::string & prefix,int errorno)` | 
-`public virtual void throwError(const std::string & prefix,int errorno) const` | 
-`public virtual void setUVError(const std::string & prefix,int errorno)` | 
-`public std::thread::id tid() const` | Returns the parent thread ID.
-`public virtual uv::Loop * loop() const` | Returns a cast pointer to the managed `libuv` handle.
-`public virtual bool active() const` | 
-`public virtual bool closed() const` | Returns true after [close()](#group__uv_1ga299a571ac2e23a62521675e21d96780a) has been called.
-`public template<class T>`  <br/>`inline T * ptr() const` | Returns a typecasted pointer to the managed `libuv` handle.
-`public virtual uv_handle_t * ptr() const` | Returns a pointer to the managed `libuv` handle.
-`public void assertThread() const` | Make sure we are calling from the event loop thread.
+`public inline  Handle(uv::Loop * loop)` | 
+`public inline virtual  ~Handle()` | 
+`public template<typename F,typename... Args>`  <br/>`inline bool init(F && f,Args &&... args)` | Initialize the handle.
+`public template<typename F,typename... Args>`  <br/>`inline bool invoke(F && f,Args &&... args)` | Invoke a method on the handle.
+`public template<typename F,typename... Args>`  <br/>`inline void invokeOrThrow(const std::string & message,F && f,Args &&... args)` | 
+`public inline virtual void close()` | Close and destroy the handle.
+`public inline void ref()` | Reference main loop again, once unref'd.
+`public inline void unref()` | Unreference the main loop after initialized.
+`public inline bool initialized() const` | Return true if the handle has been initialized.
+`public inline virtual bool active() const` | Return true when the handle is active.
+`public inline virtual bool closing() const` | Return true if the handle is closing.
+`public inline virtual bool closed() const` | Return true is the handle has been closed.
+`public inline const `[`Error`](#structscy_1_1Error)` & error() const` | Return the error context if any.
+`public inline virtual void setError(const `[`Error`](#structscy_1_1Error)` & err)` | Set the error and triggers callbacks.
+`public inline void setUVError(int errorno,const std::string & prefix)` | 
+`public inline void setAndThrowError(int errorno,const std::string & prefix)` | 
+`public inline void throwLastError(const std::string & prefix)` | 
+`public inline uv::Loop * loop() const` | Return a cast pointer to the managed `libuv` handle.
+`public inline virtual void * self()` | Return a pointer to the current or derived instance.
+`public inline void reset()` | Reset the internal handle pointer and container state.
+`public template<typename `[`Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`>`  <br/>`inline `[`Handle`](#classscy_1_1uv_1_1Handle)` * get() const` | Return a typecasted pointer to the managed handle.
+`public inline std::thread::id tid() const` | Return the parent thread ID.
+`public inline std::shared_ptr< `[`Context`](#structscy_1_1uv_1_1Context)`< T > > context() const` | Return the shared handle pointer context.
+`public inline void assertThread() const` | Assert the call is from the parent event loop thread.
 `protected uv::Loop * _loop` | 
-`protected uv_handle_t * _ptr` | 
-`protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` | 
+`protected std::shared_ptr< `[`Context`](./doc/api-uv.md#structscy_1_1uv_1_1Context)`< T > > _context` | 
 `protected std::thread::id _tid` | 
-`protected bool _closed` | 
-`protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`protected virtual void onClose()` | Override to handle closure.
-`protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` | 
+`protected `[`Error`](./doc/api-base.md#structscy_1_1Error)` _error` | 
+`protected inline virtual void onError(const `[`Error`](#structscy_1_1Error)` & error)` | 
+`protected inline virtual void onClose()` | 
+`protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` | NonCopyable and NonMovable.
 `protected `[`Handle`](#classscy_1_1uv_1_1Handle)` & operator=(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` | 
 
 ## Members
 
-#### `public  Handle(uv::Loop * loop,void * handle)` 
+#### `public inline  Handle(uv::Loop * loop)` 
 
 
 
 
 
-#### `public virtual  ~Handle()` 
+#### `public inline virtual  ~Handle()` 
 
 
 
 
 
-#### `public virtual void setLoop(uv::Loop * loop)` 
+#### `public template<typename F,typename... Args>`  <br/>`inline bool init(F && f,Args &&... args)` 
 
-The event loop may be set before the handle is initialized.
-
-
-
-#### `public virtual void close()` 
-
-Closes and destroys the associated `libuv` handle.
+Initialize the handle.
 
 
 
-#### `public bool initialized()` 
+#### `public template<typename F,typename... Args>`  <br/>`inline bool invoke(F && f,Args &&... args)` 
 
-Returns true if the handle has been initialized.
+Invoke a method on the handle.
 
 
 
-#### `public bool ref()` 
+#### `public template<typename F,typename... Args>`  <br/>`inline void invokeOrThrow(const std::string & message,F && f,Args &&... args)` 
+
+
+
+Invoke a method on the handle.
+
+An exception will be thrown if the invoked method returns an error.
+
+#### `public inline virtual void close()` 
+
+Close and destroy the handle.
+
+
+
+#### `public inline void ref()` 
 
 Reference main loop again, once unref'd.
 
 
 
-#### `public bool unref()` 
+#### `public inline void unref()` 
 
 Unreference the main loop after initialized.
 
 
 
-#### `public const `[`scy::Error`](#structscy_1_1Error)` & error() const` 
+#### `public inline bool initialized() const` 
 
-Returns the error context if any.
-
-
-
-#### `public virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` 
-
-Sets the error content and triggers callbacks.
+Return true if the handle has been initialized.
 
 
 
-#### `public virtual void setAndThrowError(const std::string & prefix,int errorno)` 
+#### `public inline virtual bool active() const` 
+
+Return true when the handle is active.
 
 
 
-Sets and throws the last error. Should never be called inside `libuv` callbacks.
+#### `public inline virtual bool closing() const` 
 
-#### `public virtual void throwError(const std::string & prefix,int errorno) const` 
-
-
-
-Throws the last error. This function is const so it can be used for invalid getter operations on closed handles. The actual error would be set on the next iteraton.
-
-#### `public virtual void setUVError(const std::string & prefix,int errorno)` 
+Return true if the handle is closing.
 
 
 
-Sets the last error and sends relevant callbacks. This method can be called inside `libuv` callbacks.
+#### `public inline virtual bool closed() const` 
 
-#### `public std::thread::id tid() const` 
-
-Returns the parent thread ID.
+Return true is the handle has been closed.
 
 
 
-#### `public virtual uv::Loop * loop() const` 
+#### `public inline const `[`Error`](#structscy_1_1Error)` & error() const` 
 
-Returns a cast pointer to the managed `libuv` handle.
-
-
-
-#### `public virtual bool active() const` 
+Return the error context if any.
 
 
 
-Returns true when the handle is active. This method should be used instead of [closed()](#group__uv_1ga102cbff669d0f4d710d8eac02fd7f5d0) to determine the veracity of the `libuv` handle for stream operations.
+#### `public inline virtual void setError(const `[`Error`](#structscy_1_1Error)` & err)` 
 
-#### `public virtual bool closed() const` 
-
-Returns true after [close()](#group__uv_1ga299a571ac2e23a62521675e21d96780a) has been called.
+Set the error and triggers callbacks.
 
 
 
-#### `public template<class T>`  <br/>`inline T * ptr() const` 
-
-Returns a typecasted pointer to the managed `libuv` handle.
+#### `public inline void setUVError(int errorno,const std::string & prefix)` 
 
 
 
-#### `public virtual uv_handle_t * ptr() const` 
+Set the error and trigger relevant callbacks. This method can be called inside `libuv` callbacks.
 
-Returns a pointer to the managed `libuv` handle.
+#### `public inline void setAndThrowError(int errorno,const std::string & prefix)` 
 
 
 
-#### `public void assertThread() const` 
+Set the error and throw an exception. Should never be called inside `libuv` callbacks.
 
-Make sure we are calling from the event loop thread.
+#### `public inline void throwLastError(const std::string & prefix)` 
+
+
+
+Throw an exception if the handle is in error state. The error message prefix will be updated if provided.
+
+#### `public inline uv::Loop * loop() const` 
+
+Return a cast pointer to the managed `libuv` handle.
+
+
+
+#### `public inline virtual void * self()` 
+
+Return a pointer to the current or derived instance.
+
+
+
+#### `public inline void reset()` 
+
+Reset the internal handle pointer and container state.
+
+
+
+#### `public template<typename `[`Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`>`  <br/>`inline `[`Handle`](#classscy_1_1uv_1_1Handle)` * get() const` 
+
+Return a typecasted pointer to the managed handle.
+
+
+
+#### `public inline std::thread::id tid() const` 
+
+Return the parent thread ID.
+
+
+
+#### `public inline std::shared_ptr< `[`Context`](#structscy_1_1uv_1_1Context)`< T > > context() const` 
+
+Return the shared handle pointer context.
+
+
+
+#### `public inline void assertThread() const` 
+
+Assert the call is from the parent event loop thread.
 
 
 
@@ -179,13 +219,7 @@ Make sure we are calling from the event loop thread.
 
 
 
-#### `protected uv_handle_t * _ptr` 
-
-
-
-
-
-#### `protected `[`scy::Error`](./doc/api-base.md#structscy_1_1Error)` _error` 
+#### `protected std::shared_ptr< `[`Context`](./doc/api-uv.md#structscy_1_1uv_1_1Context)`< T > > _context` 
 
 
 
@@ -197,27 +231,27 @@ Make sure we are calling from the event loop thread.
 
 
 
-#### `protected bool _closed` 
+#### `protected `[`Error`](./doc/api-base.md#structscy_1_1Error)` _error` 
 
 
 
 
 
-#### `protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` 
+#### `protected inline virtual void onError(const `[`Error`](#structscy_1_1Error)` & error)` 
 
 
 
-Override to handle errors. The error may be a UV error, or a custom error.
+[Error](#structscy_1_1Error) callback. Override to handle errors. The error may be a UV error, or a custom error.
 
-#### `protected virtual void onClose()` 
-
-Override to handle closure.
+#### `protected inline virtual void onClose()` 
 
 
+
+Close callback. Override to handle closure.
 
 #### `protected  Handle(const `[`Handle`](#classscy_1_1uv_1_1Handle)` &) = delete` 
 
-
+NonCopyable and NonMovable.
 
 
 
@@ -227,10 +261,10 @@ Override to handle closure.
 
 
 
-# struct `scy::uv::ShutdownCmd` 
+# struct `scy::uv::BasicEvent` 
 
 
-
+Default request callback event.
 
 
 
@@ -238,18 +272,111 @@ Override to handle closure.
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public void * opaque` | 
-`public std::function< void(void *)> callback` | 
+`public int status` | 
 
 ## Members
 
-#### `public void * opaque` 
+#### `public int status` 
 
 
 
 
 
-#### `public std::function< void(void *)> callback` 
+# struct `scy::uv::Context` 
+
+
+Shared `libuv` handle context.
+
+
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public `[`Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< T > * handle` | 
+`public T * ptr` | 
+`public bool initialized` | 
+`public bool deleted` | 
+`public inline  Context(`[`Handle`](#classscy_1_1uv_1_1Handle)`< T > * h)` | 
+`public inline  ~Context()` | 
+
+## Members
+
+#### `public `[`Handle`](./doc/api-uv.md#classscy_1_1uv_1_1Handle)`< T > * handle` 
+
+
+
+
+
+#### `public T * ptr` 
+
+
+
+
+
+#### `public bool initialized` 
+
+
+
+
+
+#### `public bool deleted` 
+
+
+
+
+
+#### `public inline  Context(`[`Handle`](#classscy_1_1uv_1_1Handle)`< T > * h)` 
+
+
+
+
+
+#### `public inline  ~Context()` 
+
+
+
+
+
+# struct `scy::uv::Request` 
+
+
+
+
+Wrapper class for managing `uv_req_t` variants.
+
+This class povides safe access to the parent handle incase the handle gets destroyed before the request callback returns, and should be used whenever the handle pointer is accessed via the callback.
+
+## Summary
+
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public T req` | 
+`public std::function< void(const E &)> callback` | 
+`public inline  Request()` | 
+`public template<typename F,typename... Args>`  <br/>`inline auto invoke(F && f,Args &&... args)` | 
+
+## Members
+
+#### `public T req` 
+
+
+
+
+
+#### `public std::function< void(const E &)> callback` 
+
+
+
+
+
+#### `public inline  Request()` 
+
+
+
+
+
+#### `public template<typename F,typename... Args>`  <br/>`inline auto invoke(F && f,Args &&... args)` 
 
 
 

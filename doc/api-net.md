@@ -20,7 +20,7 @@
 `class `[`scy::net::AddressBase`](#classscy_1_1net_1_1AddressBase)    | 
 `class `[`scy::net::IPv4AddressBase`](#classscy_1_1net_1_1IPv4AddressBase)    | 
 `class `[`scy::net::PacketSocketEmitter`](#classscy_1_1net_1_1PacketSocketEmitter)    | 
-`class `[`scy::net::Socket`](#classscy_1_1net_1_1Socket)    | [Socket](#classscy_1_1net_1_1Socket) is the base socket implementation from which all sockets derive.
+`class `[`scy::net::Socket`](#classscy_1_1net_1_1Socket)    | Base socket implementation from which all sockets derive.
 `class `[`scy::net::SocketAdapter`](#classscy_1_1net_1_1SocketAdapter)    | 
 `class `[`scy::net::SocketEmitter`](#classscy_1_1net_1_1SocketEmitter)    | [SocketAdapter](#classscy_1_1net_1_1SocketAdapter) class that adds signal callbacks for sockets.
 `class `[`scy::net::SocketPacket`](#classscy_1_1net_1_1SocketPacket)    | 
@@ -28,12 +28,13 @@
 `class `[`scy::net::SSLContext`](#classscy_1_1net_1_1SSLContext)    | 
 `class `[`scy::net::SSLManager`](#classscy_1_1net_1_1SSLManager)    | 
 `class `[`scy::net::SSLSession`](#classscy_1_1net_1_1SSLSession)    | 
-`class `[`scy::net::SSLSocket`](#classscy_1_1net_1_1SSLSocket)    | 
-`class `[`scy::net::TCPSocket`](#classscy_1_1net_1_1TCPSocket)    | 
+`class `[`scy::net::SSLSocket`](#classscy_1_1net_1_1SSLSocket)    | SSL socket implementation.
+`class `[`scy::net::TCPSocket`](#classscy_1_1net_1_1TCPSocket)    | TCP socket implementation.
 `class `[`scy::net::Transaction`](#classscy_1_1net_1_1Transaction)    | 
-`class `[`scy::net::UDPSocket`](#classscy_1_1net_1_1UDPSocket)    | 
+`class `[`scy::net::UDPSocket`](#classscy_1_1net_1_1UDPSocket)    | UDP socket implementation.
 `class `[`scy::net::VerificationErrorDetails`](#classscy_1_1net_1_1VerificationErrorDetails)    | A utility class for certificate error handling.
-`struct `[`scy::net::DNSResult`](#structscy_1_1net_1_1DNSResult)    | 
+`struct `[`scy::net::GetAddrInfoEvent`](#structscy_1_1net_1_1GetAddrInfoEvent)    | Get address info request callback event.
+`struct `[`scy::net::GetAddrInfoReq`](#structscy_1_1net_1_1GetAddrInfoReq)    | DNS resolver request to get the IP address of a hostname.
 `struct `[`scy::net::PacketInfo`](#structscy_1_1net_1_1PacketInfo)    | 
 # class `scy::net::Address` 
 
@@ -418,7 +419,7 @@ class scy::net::Socket
   : public scy::net::SocketAdapter
 ```  
 
-[Socket](#classscy_1_1net_1_1Socket) is the base socket implementation from which all sockets derive.
+Base socket implementation from which all sockets derive.
 
 
 
@@ -427,10 +428,10 @@ class scy::net::Socket
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public void * opaque` | 
-`public  Socket()` | 
-`public virtual  ~Socket()` | 
+`public  Socket() = default` | 
+`public virtual  ~Socket() = default` | 
 `public void connect(const `[`Address`](#classscy_1_1net_1_1Address)` & address)` | 
-`public virtual void connect(const std::string & host,uint16_t port)` | 
+`public void connect(const std::string & host,uint16_t port)` | 
 `public void bind(const `[`Address`](#classscy_1_1net_1_1Address)` & address,unsigned flags)` | 
 `public inline virtual void listen(int backlog)` | 
 `public inline virtual bool shutdown()` | 
@@ -442,8 +443,9 @@ class scy::net::Socket
 `public const `[`scy::Error`](#structscy_1_1Error)` & error() const` | Return the socket error if any.
 `public bool closed() const` | Returns true if the native socket handle is closed.
 `public uv::Loop * loop() const` | Returns the socket event loop.
+`protected int _af` | 
 `protected void init()` | Initializes the underlying socket context.
-`protected inline virtual void reset()` | Resets the socket context for reuse.
+`protected void reset()` | Resets the socket context for reuse.
 
 ## Members
 
@@ -455,13 +457,13 @@ Optional client data pointer.
 
 The pointer is set to null on initialization but not managed.
 
-#### `public  Socket()` 
+#### `public  Socket() = default` 
 
 
 
 
 
-#### `public virtual  ~Socket()` 
+#### `public virtual  ~Socket() = default` 
 
 
 
@@ -475,7 +477,7 @@ Connects to the given peer IP address.
 
 Throws an exception if the address is malformed. Connection errors can be handled via the [Error](#structscy_1_1Error) signal.
 
-#### `public virtual void connect(const std::string & host,uint16_t port)` 
+#### `public void connect(const std::string & host,uint16_t port)` 
 
 
 
@@ -559,13 +561,19 @@ Returns the socket event loop.
 
 
 
+#### `protected int _af` 
+
+
+
+
+
 #### `protected void init()` 
 
 Initializes the underlying socket context.
 
 
 
-#### `protected inline virtual void reset()` 
+#### `protected void reset()` 
 
 Resets the socket context for reuse.
 
@@ -1497,7 +1505,7 @@ class scy::net::SSLSocket
   : public scy::net::TCPSocket
 ```  
 
-
+SSL socket implementation.
 
 
 
@@ -1509,7 +1517,9 @@ class scy::net::SSLSocket
 `public  SSLSocket(SSLContext::Ptr sslContext,uv::Loop * loop)` | 
 `public  SSLSocket(SSLContext::Ptr sslContext,SSLSession::Ptr session,uv::Loop * loop)` | 
 `public virtual  ~SSLSocket()` | 
-`public virtual bool shutdown()` | Initialize the [SSLSocket](#classscy_1_1net_1_1SSLSocket) with the given [SSLContext](#classscy_1_1net_1_1SSLContext).
+`public virtual void bind(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address,unsigned flags)` | Initialize the [SSLSocket](#classscy_1_1net_1_1SSLSocket) with the given [SSLContext](#classscy_1_1net_1_1SSLContext).
+`public virtual void listen(int backlog)` | 
+`public virtual bool shutdown()` | 
 `public virtual void close()` | Closes the socket forcefully.
 `public virtual ssize_t send(const char * data,size_t len,int flags)` | 
 `public virtual ssize_t send(const char * data,size_t len,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress,int flags)` | 
@@ -1522,10 +1532,10 @@ class scy::net::SSLSocket
 `public X509 * peerCertificate() const` | Returns the peer's certificate.
 `public virtual net::TransportType transport() const` | The transport protocol: TCP, UDP or SSLTCP.
 `public virtual void acceptConnection()` | 
-`public virtual void onConnect(uv_connect_t * handle,int status)` | 
+`public virtual void onConnect()` | 
 `public virtual void onRead(const char * data,size_t len)` | Reads raw encrypted SSL data.
-`protected net::SSLContext::Ptr _context` | virtual bool readStart();
-`protected net::SSLSession::Ptr _session` | 
+`protected net::SSLContext::Ptr _sslContext` | 
+`protected net::SSLSession::Ptr _sslSession` | 
 `protected `[`net::SSLAdapter`](./doc/api-net.md#classscy_1_1net_1_1SSLAdapter)` _sslAdapter` | 
 
 ## Members
@@ -1554,13 +1564,27 @@ class scy::net::SSLSocket
 
 
 
-#### `public virtual bool shutdown()` 
+#### `public virtual void bind(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address,unsigned flags)` 
 
 Initialize the [SSLSocket](#classscy_1_1net_1_1SSLSocket) with the given [SSLContext](#classscy_1_1net_1_1SSLContext).
 
 Initializes the socket and establishes a secure connection to the TCP server at the given address.
 
-The SSL handshake is performed when the socket is connected. Shuts down the connection by attempting an orderly SSL shutdown, then actually shutting down the TCP connection.
+The SSL handshake is performed when the socket is connected.
+
+#### `public virtual void listen(int backlog)` 
+
+
+
+Listens the socket on the given address.
+
+Throws an Exception on error.
+
+#### `public virtual bool shutdown()` 
+
+
+
+Shuts down the connection by attempting an orderly SSL shutdown, then actually shutting down the TCP connection.
 
 #### `public virtual void close()` 
 
@@ -1600,7 +1624,7 @@ Sets the SSL session to use for the next connection. Setting a previously saved 
 
 To remove the currently set session, a nullptr pointer can be given.
 
-Must be called before [connect()](#group__net_1gac0e835a51a9e772b0d2f1e61cfddd87f) to be effective.
+Must be called before [connect()](#group__net_1ga54a8edb09f593627d120d15339b4a04d) to be effective.
 
 #### `public SSLSession::Ptr currentSession()` 
 
@@ -1640,7 +1664,7 @@ The transport protocol: TCP, UDP or SSLTCP.
 
 
 
-#### `public virtual void onConnect(uv_connect_t * handle,int status)` 
+#### `public virtual void onConnect()` 
 
 
 
@@ -1652,13 +1676,13 @@ Reads raw encrypted SSL data.
 
 
 
-#### `protected net::SSLContext::Ptr _context` 
-
-virtual bool readStart();
+#### `protected net::SSLContext::Ptr _sslContext` 
 
 
 
-#### `protected net::SSLSession::Ptr _session` 
+
+
+#### `protected net::SSLSession::Ptr _sslSession` 
 
 
 
@@ -1674,11 +1698,11 @@ virtual bool readStart();
 
 ```
 class scy::net::TCPSocket
-  : public scy::Stream
+  : public scy::Stream< uv_tcp_t >
   : public scy::net::Socket
 ```  
 
-
+TCP socket implementation.
 
 
 
@@ -1690,7 +1714,7 @@ class scy::net::TCPSocket
 `public  TCPSocket(uv::Loop * loop)` | 
 `public virtual  ~TCPSocket()` | 
 `public virtual bool shutdown()` | 
-`public virtual void close()` | 
+`public virtual void close()` | Closes the underlying socket.
 `public virtual void connect(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address)` | 
 `public virtual void connect(const std::string & host,uint16_t port)` | 
 `public virtual ssize_t send(const char * data,size_t len,int flags)` | 
@@ -1698,9 +1722,10 @@ class scy::net::TCPSocket
 `public virtual void bind(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address,unsigned flags)` | 
 `public virtual void listen(int backlog)` | 
 `public virtual void acceptConnection()` | 
-`public virtual void setNoDelay(bool enable)` | 
-`public virtual void setKeepAlive(int enable,unsigned int delay)` | 
-`public virtual uv::Loop * loop() const` | Returns the socket event loop.
+`public bool setReusePort()` | 
+`public bool setNoDelay(bool enable)` | 
+`public bool setKeepAlive(bool enable,int delay)` | 
+`public bool setSimultaneousAccepts(bool enable)` | 
 `public void setMode(`[`SocketMode`](#group__net_1gadfa90186218954a86b7d57d02c563da2)` mode)` | 
 `public const `[`SocketMode`](#group__net_1gadfa90186218954a86b7d57d02c563da2)` mode() const` | 
 `public virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` | 
@@ -1709,14 +1734,16 @@ class scy::net::TCPSocket
 `public virtual `[`net::Address`](#classscy_1_1net_1_1Address)` address() const` | 
 `public virtual `[`net::Address`](#classscy_1_1net_1_1Address)` peerAddress() const` | 
 `public virtual net::TransportType transport() const` | Returns the TCP transport protocol.
-`public virtual void onConnect(uv_connect_t * handle,int status)` | 
-`public virtual void onAcceptConnection(uv_stream_t * handle,int status)` | 
+`public virtual uv::Loop * loop() const` | Returns the socket event loop.
+`public virtual void * self()` | Return a pointer to the current or derived instance.
+`public virtual void onConnect()` | 
 `public virtual void onRead(const char * data,size_t len)` | 
 `public virtual void onRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buf)` | 
 `public virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`public virtual void onClose()` | Override to handle closure.
+`public virtual void onClose()` | 
 `protected `[`SocketMode`](#group__net_1gadfa90186218954a86b7d57d02c563da2)` _mode` | 
 `protected virtual void init()` | Initializes the underlying socket context.
+`protected virtual void reset()` | Resets the socket context for reuse.
 
 ## Members
 
@@ -1746,11 +1773,9 @@ Sends the shutdown packet which should result is socket closure via callback.
 
 #### `public virtual void close()` 
 
+Closes the underlying socket.
 
 
-Closes and resets the stream handle. This will close the active socket/pipe and destroy the uv_stream_t handle.
-
-If the stream is already closed this call will have no side-effects.
 
 #### `public virtual void connect(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address)` 
 
@@ -1802,21 +1827,27 @@ Throws an Exception on error.
 
 
 
-#### `public virtual void setNoDelay(bool enable)` 
+#### `public bool setReusePort()` 
 
 
 
 
 
-#### `public virtual void setKeepAlive(int enable,unsigned int delay)` 
+#### `public bool setNoDelay(bool enable)` 
 
 
 
 
 
-#### `public virtual uv::Loop * loop() const` 
+#### `public bool setKeepAlive(bool enable,int delay)` 
 
-Returns the socket event loop.
+
+
+
+
+#### `public bool setSimultaneousAccepts(bool enable)` 
+
+
 
 
 
@@ -1870,13 +1901,19 @@ Returns the TCP transport protocol.
 
 
 
-#### `public virtual void onConnect(uv_connect_t * handle,int status)` 
+#### `public virtual uv::Loop * loop() const` 
+
+Returns the socket event loop.
 
 
 
+#### `public virtual void * self()` 
+
+Return a pointer to the current or derived instance.
 
 
-#### `public virtual void onAcceptConnection(uv_stream_t * handle,int status)` 
+
+#### `public virtual void onConnect()` 
 
 
 
@@ -1898,13 +1935,13 @@ Returns the TCP transport protocol.
 
 
 
-Override to handle errors. The error may be a UV error, or a custom error.
+[Error](#structscy_1_1Error) callback. Override to handle errors. The error may be a UV error, or a custom error.
 
 #### `public virtual void onClose()` 
 
-Override to handle closure.
 
 
+Close callback. Override to handle closure.
 
 #### `protected `[`SocketMode`](#group__net_1gadfa90186218954a86b7d57d02c563da2)` _mode` 
 
@@ -1915,6 +1952,12 @@ Override to handle closure.
 #### `protected virtual void init()` 
 
 Initializes the underlying socket context.
+
+
+
+#### `protected virtual void reset()` 
+
+Resets the socket context for reuse.
 
 
 
@@ -2015,11 +2058,11 @@ Sub classes should derive this method to implement response checking logic. The 
 
 ```
 class scy::net::UDPSocket
+  : public scy::uv::Handle< uv_udp_t >
   : public scy::net::Socket
-  : public scy::uv::Handle
 ```  
 
-
+UDP socket implementation.
 
 
 
@@ -2030,28 +2073,31 @@ class scy::net::UDPSocket
 `public  UDPSocket(uv::Loop * loop)` | 
 `public virtual  ~UDPSocket()` | 
 `public virtual void connect(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address)` | 
+`public virtual void connect(const std::string & host,uint16_t port)` | 
 `public virtual void close()` | Closes the underlying socket.
 `public virtual void bind(const `[`net::Address`](#classscy_1_1net_1_1Address)` & address,unsigned flags)` | 
 `public virtual ssize_t send(const char * data,size_t len,int flags)` | 
 `public virtual ssize_t send(const char * data,size_t len,const `[`net::Address`](#classscy_1_1net_1_1Address)` & peerAddress,int flags)` | 
-`public virtual bool setBroadcast(bool flag)` | 
-`public virtual bool setMulticastLoop(bool flag)` | 
-`public virtual bool setMulticastTTL(int ttl)` | 
+`public bool setBroadcast(bool flag)` | 
+`public bool setMulticastLoop(bool flag)` | 
+`public bool setMulticastTTL(int ttl)` | 
 `public virtual `[`net::Address`](#classscy_1_1net_1_1Address)` address() const` | 
 `public virtual `[`net::Address`](#classscy_1_1net_1_1Address)` peerAddress() const` | 
 `public virtual net::TransportType transport() const` | Returns the UDP transport protocol.
 `public virtual void setError(const `[`scy::Error`](#structscy_1_1Error)` & err)` | 
 `public virtual const `[`scy::Error`](#structscy_1_1Error)` & error() const` | Return the socket error if any.
-`public virtual bool closed() const` | 
+`public virtual bool closed() const` | Returns true if the native socket handle is closed.
 `public virtual uv::Loop * loop() const` | Returns the socket event loop.
+`public virtual void * self()` | Return a pointer to the current or derived instance.
 `public virtual void onRecv(const `[`MutableBuffer`](#classscy_1_1MutableBuffer)` & buf,const `[`net::Address`](#classscy_1_1net_1_1Address)` & address)` | 
 `protected `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` _peer` | 
 `protected `[`Buffer`](#group__base_1gab10b36b080deb583ed703fca6b63ffdd)` _buffer` | 
 `protected virtual void init()` | Initializes the underlying socket context.
+`protected virtual void reset()` | Resets the socket context for reuse.
+`protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
+`protected virtual void onClose()` | 
 `protected virtual bool recvStart()` | 
 `protected virtual bool recvStop()` | 
-`protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` | 
-`protected virtual void onClose()` | Override to handle closure.
 
 ## Members
 
@@ -2074,6 +2120,14 @@ class scy::net::UDPSocket
 Connects to the given peer IP address.
 
 Throws an exception if the address is malformed. Connection errors can be handled via the [Error](#structscy_1_1Error) signal.
+
+#### `public virtual void connect(const std::string & host,uint16_t port)` 
+
+
+
+Resolves and connects to the given host address.
+
+Throws an Exception if the host is malformed. Since the DNS callback is asynchronous implementations need to listen for the [Error](#structscy_1_1Error) signal for handling connection errors.
 
 #### `public virtual void close()` 
 
@@ -2101,19 +2155,19 @@ Sends the given data buffer to the connected peer. Returns the number of bytes s
 
 
 
-#### `public virtual bool setBroadcast(bool flag)` 
+#### `public bool setBroadcast(bool flag)` 
 
 
 
 
 
-#### `public virtual bool setMulticastLoop(bool flag)` 
+#### `public bool setMulticastLoop(bool flag)` 
 
 
 
 
 
-#### `public virtual bool setMulticastTTL(int ttl)` 
+#### `public bool setMulticastTTL(int ttl)` 
 
 
 
@@ -2157,13 +2211,19 @@ Return the socket error if any.
 
 #### `public virtual bool closed() const` 
 
-
-
 Returns true if the native socket handle is closed.
+
+
 
 #### `public virtual uv::Loop * loop() const` 
 
 Returns the socket event loop.
+
+
+
+#### `public virtual void * self()` 
+
+Return a pointer to the current or derived instance.
 
 
 
@@ -2191,6 +2251,24 @@ Initializes the underlying socket context.
 
 
 
+#### `protected virtual void reset()` 
+
+Resets the socket context for reuse.
+
+
+
+#### `protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` 
+
+
+
+[Error](#structscy_1_1Error) callback. Override to handle errors. The error may be a UV error, or a custom error.
+
+#### `protected virtual void onClose()` 
+
+
+
+Close callback. Override to handle closure.
+
 #### `protected virtual bool recvStart()` 
 
 
@@ -2200,18 +2278,6 @@ Initializes the underlying socket context.
 #### `protected virtual bool recvStop()` 
 
 
-
-
-
-#### `protected virtual void onError(const `[`scy::Error`](#structscy_1_1Error)` & error)` 
-
-
-
-Override to handle errors. The error may be a UV error, or a custom error.
-
-#### `protected virtual void onClose()` 
-
-Override to handle closure.
 
 
 
@@ -2285,117 +2351,61 @@ returns the value of _ignoreError
 
 
 
-# struct `scy::net::DNSResult` 
+# struct `scy::net::GetAddrInfoEvent` 
 
 
+Get address info request callback event.
 
 
-DNS Resolver
-
-Example:
-
-
-```cpp
-static void onDNSResult(const net::DNSResult& result)
-{
-    do something with result
-}
-net::resolveDNS("google.com", 80, onDNSResult);
-```
 
 ## Summary
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public std::string host` | The host to resolve.
-`public uint16_t port` | The host port to resolve.
-`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` addr` | The resolved address.
-`public struct addrinfo * info` | The libuv uv_getaddrinfo result.
-`public struct addrinfo * hints` | libuv uv_getaddrinfo hints (optional)
-`public std::function< void(const `[`DNSResult`](#structscy_1_1net_1_1DNSResult) &)`> callback` | Result callback function.
-`public void * opaque` | Client data pointer.
-`public enum `[`scy::net::DNSResult::Status`](#group__net_1gaac1957da67292e72dc27de08119d7b88)` status` | 
-`public inline bool resolving() const` | 
-`public inline bool success() const` | 
-`public inline bool failed() const` | 
-`public inline bool complete() const` | 
-`public inline  DNSResult()` | 
+`public int status` | 
+`public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` addr` | 
 
 ## Members
 
-#### `public std::string host` 
-
-The host to resolve.
+#### `public int status` 
 
 
-
-#### `public uint16_t port` 
-
-The host port to resolve.
 
 
 
 #### `public `[`net::Address`](./doc/api-net.md#classscy_1_1net_1_1Address)` addr` 
 
-The resolved address.
 
 
 
-#### `public struct addrinfo * info` 
 
-The libuv uv_getaddrinfo result.
+# struct `scy::net::GetAddrInfoReq` 
 
+```
+struct scy::net::GetAddrInfoReq
+  : public scy::uv::Request< uv_getaddrinfo_t, GetAddrInfoEvent >
+```  
 
-
-#### `public struct addrinfo * hints` 
-
-libuv uv_getaddrinfo hints (optional)
-
-
-
-#### `public std::function< void(const `[`DNSResult`](#structscy_1_1net_1_1DNSResult) &)`> callback` 
-
-Result callback function.
+DNS resolver request to get the IP address of a hostname.
 
 
 
-#### `public void * opaque` 
+## Summary
 
-Client data pointer.
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public inline  GetAddrInfoReq()` | 
+`public inline bool resolve(const std::string & host,int port,uv::Loop * loop)` | 
 
+## Members
 
-
-#### `public enum `[`scy::net::DNSResult::Status`](#group__net_1gaac1957da67292e72dc27de08119d7b88)` status` 
+#### `public inline  GetAddrInfoReq()` 
 
 
 
 
 
-#### `public inline bool resolving() const` 
-
-
-
-
-
-#### `public inline bool success() const` 
-
-
-
-
-
-#### `public inline bool failed() const` 
-
-
-
-
-
-#### `public inline bool complete() const` 
-
-
-
-
-
-#### `public inline  DNSResult()` 
+#### `public inline bool resolve(const std::string & host,int port,uv::Loop * loop)` 
 
 
 

@@ -1604,7 +1604,7 @@ This class runs in its own thread so as not to block the event loop while upload
 `public const std::string & boundary() const` | Returns the MIME boundary used for writing multipart form data.
 `public `[`ConnectionStream`](#classscy_1_1http_1_1ConnectionStream)` & connection()` | The associated HTTP client connection.
 `protected `[`ConnectionStream`](./doc/api-http.md#classscy_1_1http_1_1ConnectionStream)` & _stream` | 
-`protected `[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` _runner` | 
+`protected std::shared_ptr< `[`Runner`](./doc/api-base.md#classscy_1_1Runner)` > _runner` | 
 `protected std::string _encoding` | 
 `protected std::string _boundary` | 
 `protected PartQueue _parts` | 
@@ -1612,7 +1612,7 @@ This class runs in its own thread so as not to block the event loop while upload
 `protected int _writeState` | 
 `protected bool _initial` | 
 `protected bool _complete` | 
-`protected  FormWriter(`[`ConnectionStream`](#classscy_1_1http_1_1ConnectionStream)` & conn,`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner,const std::string & encoding)` | 
+`protected  FormWriter(`[`ConnectionStream`](#classscy_1_1http_1_1ConnectionStream)` & conn,std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner,const std::string & encoding)` | 
 `protected  FormWriter(const `[`FormWriter`](#classscy_1_1http_1_1FormWriter)` &) = delete` | 
 `protected `[`FormWriter`](#classscy_1_1http_1_1FormWriter)` & operator=(const `[`FormWriter`](#classscy_1_1http_1_1FormWriter)` &) = delete` | 
 `protected void writePartHeader(const `[`NVCollection`](#classscy_1_1NVCollection)` & header,std::ostream & ostr)` | 
@@ -1746,7 +1746,7 @@ The associated HTTP client connection.
 
 
 
-#### `protected `[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` _runner` 
+#### `protected std::shared_ptr< `[`Runner`](./doc/api-base.md#classscy_1_1Runner)` > _runner` 
 
 
 
@@ -1794,7 +1794,7 @@ The associated HTTP client connection.
 
 
 
-#### `protected  FormWriter(`[`ConnectionStream`](#classscy_1_1http_1_1ConnectionStream)` & conn,`[`Runner::Ptr`](#group__base_1gaa7609d14d29d11ee67fc6ace554583ab)` runner,const std::string & encoding)` 
+#### `protected  FormWriter(`[`ConnectionStream`](#classscy_1_1http_1_1ConnectionStream)` & conn,std::shared_ptr< `[`Runner`](#classscy_1_1Runner)` > runner,const std::string & encoding)` 
 
 
 

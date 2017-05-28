@@ -69,7 +69,7 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 `protected void generateKey(const std::string & passphrase,const std::string & salt,int iterationCount)` | Generates and sets the key and IV from a password and optional salt string.
 `protected void setRandomKey()` | Generates and sets key from random data.
 `protected void setRandomIV()` | Generates and sets IV from random data.
-`protected void initialize(bool encrypt)` | Initializes the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher) using the given direction.
+`protected void init(bool encrypt)` | Initializes the [Cipher](./doc/api-crypto.md#classscy_1_1crypto_1_1Cipher) using the given direction.
 
 ## Members
 
@@ -311,7 +311,7 @@ Generates and sets IV from random data.
 
 
 
-#### `protected void initialize(bool encrypt)` 
+#### `protected void init(bool encrypt)` 
 
 Initializes the [Cipher](#classscy_1_1crypto_1_1Cipher) using the given direction.
 

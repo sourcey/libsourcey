@@ -222,7 +222,7 @@ This class implements the package installation procedure.
 `protected bool _downloading` | 
 `protected http::ClientConnection::Ptr _dlconn` | 
 `protected uv::Loop * _loop` | 
-`protected virtual void run()` | 
+`protected virtual void run()` | Called asynchronously by the thread to do the work.
 `protected virtual void onStateChange(`[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & state,const `[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & oldState)` | 
 `protected virtual void onDownloadProgress(const double & progress)` | 
 `protected virtual void onDownloadComplete(const `[`http::Response`](#classscy_1_1http_1_1Response)` & response)` | 
@@ -424,9 +424,9 @@ Returns true when the task has been cancelled.
 
 #### `protected virtual void run()` 
 
-
-
 Called asynchronously by the thread to do the work.
+
+
 
 #### `protected virtual void onStateChange(`[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & state,const `[`InstallationState`](#structscy_1_1pacm_1_1InstallationState)` & oldState)` 
 
@@ -866,7 +866,7 @@ struct scy::pacm::InstallationState
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public std::string version` | 
+`public std::string version` | If set then the given package version will be installed.
 `public std::string sdkVersion` | 
 `public std::string installDir` | 
 `public inline  InstallOptions()` | 
@@ -875,9 +875,9 @@ struct scy::pacm::InstallationState
 
 #### `public std::string version` 
 
-
-
 If set then the given package version will be installed.
+
+
 
 #### `public std::string sdkVersion` 
 
@@ -913,7 +913,7 @@ This class is a JSON representation of an installed local package that exists on
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public  LocalPackage()` | 
-`public  LocalPackage(const json::Value & src)` | 
+`public  LocalPackage(const json::value & src)` | 
 `public  LocalPackage(const `[`RemotePackage`](#structscy_1_1pacm_1_1RemotePackage)` & src)` | 
 `public virtual  ~LocalPackage()` | 
 `public virtual void setState(const std::string & state)` | 
@@ -935,7 +935,7 @@ This class is a JSON representation of an installed local package that exists on
 `public virtual `[`Manifest`](#structscy_1_1pacm_1_1LocalPackage_1_1Manifest)` manifest()` | Returns the installation manifest.
 `public virtual bool verifyInstallManifest(bool allowEmpty)` | 
 `public virtual std::string getInstalledFilePath(const std::string & fileName,bool whiny)` | 
-`public virtual json::Value & errors()` | 
+`public virtual json::value & errors()` | 
 `public virtual void addError(const std::string & message)` | 
 `public virtual std::string lastError() const` | 
 `public virtual void clearErrors()` | 
@@ -949,7 +949,7 @@ This class is a JSON representation of an installed local package that exists on
 
 
 
-#### `public  LocalPackage(const json::Value & src)` 
+#### `public  LocalPackage(const json::value & src)` 
 
 
 
@@ -1081,7 +1081,7 @@ Returns the installation manifest.
 
 Returns the full full path of the installed file. Thrown an exception if the install directory is unset.
 
-#### `public virtual json::Value & errors()` 
+#### `public virtual json::value & errors()` 
 
 
 
@@ -1115,7 +1115,7 @@ Returns the full full path of the installed file. Thrown an exception if the ins
 
 ```
 struct scy::pacm::Package
-  : public Value
+  : public value
 ```  
 
 
@@ -1127,7 +1127,7 @@ This class is a JSON representation of an package belonging to the [PackageManag
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public  Package()` | 
-`public  Package(const json::Value & src)` | 
+`public  Package(const json::value & src)` | 
 `public virtual  ~Package()` | 
 `public virtual std::string id() const` | 
 `public virtual std::string name() const` | 
@@ -1145,7 +1145,7 @@ This class is a JSON representation of an package belonging to the [PackageManag
 
 
 
-#### `public  Package(const json::Value & src)` 
+#### `public  Package(const json::value & src)` 
 
 
 
@@ -1285,9 +1285,9 @@ This class is a JSON representation of an package existing on the remote server 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
 `public  RemotePackage()` | 
-`public  RemotePackage(const json::Value & src)` | 
+`public  RemotePackage(const json::value & src)` | 
 `public virtual  ~RemotePackage()` | 
-`public virtual json::Value & assets()` | 
+`public virtual json::value & assets()` | 
 `public virtual `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` latestAsset()` | 
 `public virtual `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` assetVersion(const std::string & version)` | 
 `public virtual `[`Asset`](#structscy_1_1pacm_1_1Package_1_1Asset)` latestSDKAsset(const std::string & version)` | 
@@ -1300,7 +1300,7 @@ This class is a JSON representation of an package existing on the remote server 
 
 
 
-#### `public  RemotePackage(const json::Value & src)` 
+#### `public  RemotePackage(const json::value & src)` 
 
 
 
@@ -1312,7 +1312,7 @@ This class is a JSON representation of an package existing on the remote server 
 
 
 
-#### `public virtual json::Value & assets()` 
+#### `public virtual json::value & assets()` 
 
 
 
@@ -1347,8 +1347,8 @@ This class represents a archived file asset containing files belonging to the pa
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public json::Value & root` | 
-`public  Asset(json::Value & src)` | 
+`public json::value & root` | 
+`public  Asset(json::value & src)` | 
 `public virtual  ~Asset()` | 
 `public virtual std::string fileName() const` | 
 `public virtual std::string version() const` | 
@@ -1363,13 +1363,13 @@ This class represents a archived file asset containing files belonging to the pa
 
 ## Members
 
-#### `public json::Value & root` 
+#### `public json::value & root` 
 
 
 
 
 
-#### `public  Asset(json::Value & src)` 
+#### `public  Asset(json::value & src)` 
 
 
 
@@ -1452,21 +1452,21 @@ This class provides a list of all package files and their location on the file s
 
  Members                        | Descriptions                                
 --------------------------------|---------------------------------------------
-`public json::Value & root` | 
-`public  Manifest(json::Value & src)` | 
+`public json::value & root` | 
+`public  Manifest(json::value & src)` | 
 `public virtual  ~Manifest()` | 
 `public virtual bool empty() const` | 
 `public virtual void addFile(const std::string & path)` | 
 
 ## Members
 
-#### `public json::Value & root` 
+#### `public json::value & root` 
 
 
 
 
 
-#### `public  Manifest(json::Value & src)` 
+#### `public  Manifest(json::value & src)` 
 
 
 
@@ -1506,12 +1506,12 @@ This class provides a list of all package files and their location on the file s
 `public std::string httpUsername` | Username for HTTP basic auth.
 `public std::string httpPassword` | PAssword for HTTP basic auth.
 `public std::string httpOAuthToken` | Will be used instead of HTTP basic if provided.
-`public std::string tempDir` | 
+`public std::string tempDir` | Directory where package files will be downloaded and extracted.
 `public std::string dataDir` | Directory where package manifests will be kept.
 `public std::string installDir` | Directory where packages will be installed.
 `public std::string platform` | Platform (win32, linux, mac)
 `public std::string checksumAlgorithm` | Checksum algorithm (MDS/SHA1)
-`public bool clearFailedCache` | to clear the package cache if installation fails.
+`public bool clearFailedCache` | 
 `public inline  Options(const std::string & root)` | 
 
 ## Members
@@ -1548,9 +1548,9 @@ Will be used instead of HTTP basic if provided.
 
 #### `public std::string tempDir` 
 
+Directory where package files will be downloaded and extracted.
 
 
-Directory where package files will be downloaded and extracted
 
 #### `public std::string dataDir` 
 
@@ -1578,9 +1578,9 @@ Checksum algorithm (MDS/SHA1)
 
 #### `public bool clearFailedCache` 
 
-to clear the package cache if installation fails.
 
-This flag tells the package manager weather or not
+
+This flag tells the package manager weather or not to clear the package cache if installation fails.
 
 #### `public inline  Options(const std::string & root)` 
 
