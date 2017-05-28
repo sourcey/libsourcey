@@ -64,7 +64,11 @@ struct Context
 };
 
 
-/// Request handle wrapper.
+/// Wrapper class for managing `uv_req_t` variants.
+///
+/// This class povides safe access to the parent handle incase the handle gets
+/// destroyed before the request callback returns, and should be used whenever
+/// the handle pointer is accessed via the callback.
 template<typename T, typename R>
 struct Request
 {
@@ -102,10 +106,10 @@ struct Request
 };
 
 
-/// Wrapper class for managing a `libuv` handle.
+/// Wrapper class for managing `uv_handle_t` variants.
 ///
-/// This class manages thehandle during it's lifecycle and
-/// safely handles the asynchronous destruction mechanism.
+/// This class manages the handle during it's lifecycle and safely handles the
+/// asynchronous destruction mechanism.
 template<typename T>
 class Base_API Handle
 {
@@ -124,6 +128,7 @@ public:
     template<typename F, typename... Args>
     bool init(F&& f, Args&&... args)
     {
+        assertThread();
         assert(_context);
         assert(!initialized());
         int err = std::forward<F>(f)(loop(), get(), std::forward<Args>(args)...);
@@ -211,13 +216,13 @@ public:
     }
 
     /// Return the error context if any.
-    const scy::Error& error() const
+    const Error& error() const
     {
         return _error;
     }
 
     /// Set the error and triggers callbacks.
-    virtual void setError(const scy::Error& err)
+    virtual void setError(const Error& err)
     {
         // if (_error == err) return;
         assertThread();
@@ -229,7 +234,7 @@ public:
     /// This method can be called inside `libuv` callbacks.
     virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0)
     {
-        scy::Error err;
+        Error err;
         err.errorno = errorno;
         // err.syserr = uv.sys_errno_;
         err.message = formatError(prefix, errorno);
@@ -251,15 +256,6 @@ public:
         if (error().any())
             setAndThrowError(prefix, error().errorno);
     }
-
-    /// Set the event loop.
-    /// The event loop may be set before the handle is initialized.
-    // virtual void setLoop(uv::Loop* loop)
-    // {
-    //     assertThread();
-    //     assert(get() == nullptr && "must be set before handle");
-    //     _loop = loop;
-    // }
 
     /// Return a cast pointer to the managed `libuv` handle.
     virtual uv::Loop* loop() const
@@ -316,7 +312,7 @@ protected:
     /// Error callback.
     /// Override to handle errors.
     /// The error may be a UV error, or a custom error.
-    virtual void onError(const scy::Error& error)
+    virtual void onError(const Error& error)
     {
     }
 
@@ -334,7 +330,7 @@ protected:
     uv::Loop* _loop;
     std::shared_ptr<Context<T>> _context;
     std::thread::id _tid = std::this_thread::get_id();
-    scy::Error _error;
+    Error _error;
 };
 
 

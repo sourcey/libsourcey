@@ -17,7 +17,6 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
-// #include "scy/handle.h"
 #include <cstdint>
 #include <thread>
 #include <atomic>
@@ -76,17 +75,12 @@ public:
     /// context or deadlock will ensue.
     bool waitForExit(int timeout = 5000);
 
-    /// Shared pointer type
-    typedef std::shared_ptr<Runner> Ptr;
-
     /// Context object which we send to the thread context.
     ///
     /// This intermediate object allows us to garecefully handle late invokebacks
     /// and so avoid the need for deferred destruction of `Runner` objects.
     struct Context
     {
-        typedef std::shared_ptr<Context> Ptr;
-
         std::thread::id tid;
         std::atomic<bool> running;
         std::atomic<bool> cancelled;
@@ -107,12 +101,12 @@ public:
     };
 
 protected:
-    /// Shared pointer to the internal Runner::Context.
-    Context::Ptr _context;
-
     /// NonCopyable and NonMovable
     Runner(const Runner&) = delete;
     Runner& operator=(const Runner&) = delete;
+
+    /// Shared pointer to the internal Context.
+    std::shared_ptr<Context> _context;
 };
 
 
@@ -126,7 +120,7 @@ namespace internal {
 
 /// Helper function for running an async context.
 template<typename Function, typename... Args>
-inline void runAsync(Runner::Context::Ptr c, Function func, Args... args)
+inline void runAsync(std::shared_ptr<Runner::Context> c, Function func, Args... args)
 {
     // std::cout << "Runner::runAsync" << std::endl;
     c->tid = std::this_thread::get_id();
@@ -175,11 +169,11 @@ auto invoke(Function f, Tuple t)
 template<typename Function, typename... Args>
 struct DeferredCallable
 {
-    Runner::Context::Ptr ctx;
+    std::shared_ptr<Runner::Context> ctx;
     Function func;
     std::tuple<Args...> args;
 
-    DeferredCallable(Runner::Context::Ptr c, Function&& f, Args&&... a)
+    DeferredCallable(std::shared_ptr<Runner::Context> c, Function&& f, Args&&... a)
         : ctx(c)
         , func(f)
         , args(std::make_tuple(a...))

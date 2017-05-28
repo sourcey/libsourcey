@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
         // run the default loop which will return
         // once the idler is deleted
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         // finalize deletion of all pointers
         gc.finalize();
@@ -464,7 +464,7 @@ int main(int argc, char** argv)
         idler.handle().ref();
 
         // Run the loop
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         // Check variables
         expect(ran == true);
@@ -480,7 +480,7 @@ int main(int argc, char** argv)
         }, &idler, &ran);
 
         // Run the loop again
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         // Check variables
         expect(ran == true);
@@ -533,7 +533,7 @@ int main(int argc, char** argv)
             gotExit = true;
         };
         proc.spawn();
-        uv::runDefaultLoop();
+        uv::runLoop();
         expect(gotStdout);
         expect(gotExit);
 

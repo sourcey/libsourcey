@@ -74,7 +74,7 @@ bool Task::repeating() const
 //
 
 
-TaskRunner::TaskRunner(Runner::Ptr runner)
+TaskRunner::TaskRunner(std::shared_ptr<Runner> runner)
 {
     if (runner)
         setRunner(runner);
@@ -225,7 +225,7 @@ void TaskRunner::clear()
 }
 
 
-void TaskRunner::setRunner(Runner::Ptr runner)
+void TaskRunner::setRunner(std::shared_ptr<Runner> runner)
 {
     TraceN(this) << "Set async: " << runner.get() << endl;
 

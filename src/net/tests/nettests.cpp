@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     //
     //     net::ClientSocketTest<net::TCPSocket> test(1337);
     //     test.run();
-    //     uv::runDefaultLoop();
+    //     uv::runLoop();
     //
     //     expect(test.passed);
     // });
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
     //
     //     net::ClientSocketTest<net::SSLSocket> test(1338);
     //     test.run();
-    //     uv::runDefaultLoop();
+    //     uv::runLoop();
     //
     //     expect(test.passed);
     // });
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
     //     net::ClientSocketTest<net::UDPSocket> test(1339);
     //     test.socket.bind(net::Address("0.0.0.0", 0));
     //     test.run();
-    //     uv::runDefaultLoop();
+    //     uv::runLoop();
     //
     //     expect(test.passed);
     // });
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
     //     net::resolveDNS("thishadbetternotexizt.com", 8888, [&](const net::DNSResult& dns) {
     //         expect(!dns.success());
     //     });
-    //     uv::runDefaultLoop();
+    //     uv::runLoop();
     // });
 
 
@@ -153,13 +153,13 @@ int main(int argc, char** argv)
         {
             net::TCPSocket socket;
             socket.connect("192.169.7.888", 4500); // Connection refused
-            uv::runDefaultLoop();
+            uv::runLoop();
             expect(socket.error().any());
         }
         {
             net::TCPSocket socket;
             socket.connect("hostthatdoesntexist.what", 80); // DNS resolution will fail
-            uv::runDefaultLoop();
+            uv::runLoop();
             expect(socket.error().any());
         }
     });
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
             net::UDPSocket socket;
             socket.bind(net::Address("0.0.0.1", 7331));
         }
-        uv::runDefaultLoop();
+        uv::runLoop();
     });
 
     // =========================================================================
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
             }
         };
 
-        uv::runDefaultLoop();
+        uv::runLoop();
         expect(connected == 2);
     });
 
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
         };
         socket->connect("127.0.0.1", 1337);
 
-        uv::runDefaultLoop();
+        uv::runLoop();
         expect(connected == 2);
     });
 

@@ -180,7 +180,7 @@ bool installTestServerSync()
         success = status == 0;
     };
     proc.spawn();
-    uv::runDefaultLoop();
+    uv::runLoop();
     return success;
 }
 
@@ -216,7 +216,7 @@ bool openTestServer(Process& proc, bool install = true)
 
     // Run the loop until the server is listening or exited in failure
     while (!exited && !running) {
-        uv::runDefaultLoop(UV_RUN_NOWAIT);
+        uv::runLoop(UV_RUN_NOWAIT);
     }
 
     std::cout << "server running: " << running << std::endl;

@@ -120,7 +120,7 @@ int main(int argc, char** argv)
         conn->setReadStream(new std::ofstream(path, std::ios_base::out | std::ios_base::binary));
         conn->send();
 
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         expect(fs::exists(path));
         expect(crypto::checksum("MD5", path) == "44d667c142d7cda120332623eab69f40");
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     //     conn->request().setKeepAlive(false);
     //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
     //     conn->send();
-    //     uv::runDefaultLoop();
+    //     uv::runLoop();
     // });
 
     describe("client connection", []() {
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
         conn->send();
-        uv::runDefaultLoop();
+        uv::runLoop();
         expect(conn->closed());
         expect(!conn->error().any());
     });
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
         conn->send();
-        uv::runDefaultLoop();
+        uv::runLoop();
         expect(conn->closed());
         expect(!conn->error().any());
     });
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
         conn.setReadStream(new std::stringstream);
         conn.send(); // send default GET /
 
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         expect(conn.closed());
         expect(!conn.error().any());
@@ -205,7 +205,7 @@ int main(int argc, char** argv)
         auto conn = test.createConnection("ws", "/websocket");
         conn->send("PING", 4);
 
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         expect(conn->closed());
         expect(!conn->error().any());
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
     //         // Send the request
     //         conn->send();
     //
-    //         uv::runDefaultLoop();
+    //         uv::runLoop();
     //     });
 
     test::runAll();

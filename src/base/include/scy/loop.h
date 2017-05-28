@@ -22,32 +22,22 @@ namespace scy {
 namespace uv {
 
 
-//
-// Default Event Loop
-//
-
-
 typedef uv_loop_t Loop;
 
-static uv_thread_t mainThread = 0;
 
 inline Loop* defaultLoop()
 {
-    // Capture the main TID the first time
-    // uv_default_loop is accessed.
-    if (mainThread == 0)
-        mainThread = uv_thread_self();
     return uv_default_loop();
 }
 
-inline void runDefaultLoop(uv_run_mode mode = UV_RUN_DEFAULT)
+inline void runLoop(Loop* loop = defaultLoop(), uv_run_mode mode = UV_RUN_DEFAULT)
 {
-    uv_run(defaultLoop(), mode);
+    uv_run(loop, mode);
 }
 
-inline void stopDefaultLoop()
+inline void stopLoop(Loop* loop = defaultLoop())
 {
-    uv_stop(defaultLoop());
+    uv_stop(loop);
 }
 
 inline Loop* createLoop()

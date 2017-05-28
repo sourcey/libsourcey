@@ -146,7 +146,7 @@ protected:
     ///
     /// Encoding must be either "application/x-www-form-urlencoded"
     /// (which is the default) or "multipart/form-data".
-    FormWriter(ConnectionStream& conn, Runner::Ptr runner,
+    FormWriter(ConnectionStream& conn, std::shared_ptr<Runner> runner,
                const std::string& encoding = FormWriter::ENCODING_URL);
 
     FormWriter(const FormWriter&) = delete;
@@ -182,7 +182,7 @@ protected:
     typedef std::deque<Part> PartQueue;
 
     ConnectionStream& _stream;
-    Runner::Ptr _runner;
+    std::shared_ptr<Runner> _runner;
     std::string _encoding;
     std::string _boundary;
     PartQueue _parts;

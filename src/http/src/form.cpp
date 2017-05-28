@@ -52,7 +52,7 @@ FormWriter* FormWriter::create(ConnectionStream& stream, const std::string& enco
 }
 
 
-FormWriter::FormWriter(ConnectionStream& connection, Runner::Ptr runner, const std::string& encoding)
+FormWriter::FormWriter(ConnectionStream& connection, std::shared_ptr<Runner> runner, const std::string& encoding)
     : PacketSource(this->emitter)
     , _stream(connection)
     , _runner(runner)

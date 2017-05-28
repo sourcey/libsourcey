@@ -91,7 +91,7 @@ protected:
 class Base_API TaskRunner : public basic::Runnable
 {
 public:
-    TaskRunner(Runner::Ptr runner = nullptr);
+    TaskRunner(std::shared_ptr<Runner> runner = nullptr);
     virtual ~TaskRunner();
 
     /// Starts a task, adding it if it doesn't exist.
@@ -116,7 +116,7 @@ public:
     /// Set the asynchronous context for packet processing.
     /// This may be a Thread or another derivative of Async.
     /// Must be set before the stream is activated.
-    virtual void setRunner(Runner::Ptr runner);
+    virtual void setRunner(std::shared_ptr<Runner> runner);
 
     /// Returns the default `TaskRunner` singleton, although
     /// TaskRunner instances may be initialized individually.
@@ -167,7 +167,7 @@ protected:
     typedef std::deque<Task*> TaskList;
 
     mutable std::mutex _mutex;
-    Runner::Ptr _runner;
+    std::shared_ptr<Runner> _runner;
     TaskList _tasks;
 };
 

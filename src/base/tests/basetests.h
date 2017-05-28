@@ -71,7 +71,7 @@ class IpcTest : public Test
             std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc,  "test5"));
 
         // std::cout << "Test IPC: OK" << std::endl;
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         expect(num_ipc_callbacks == want_x_ipc_callbacks);
     }
@@ -130,7 +130,7 @@ class TimerTest : public Test
         // };
 
         // std::cout << "Ending" << std::endl;
-        uv::runDefaultLoop();
+        uv::runLoop();
 
         expect(numTimerTicks == wantTimerTicks);
     }
@@ -154,7 +154,7 @@ class TimerTest : public Test
 //         idler.start(std::bind(&IdlerTest::idlerCallback, this));
 //         idler.handle().ref();
 //
-//         uv::runDefaultLoop();
+//         uv::runLoop();
 //
 //         expect(numIdlerTicks == wantIdlerTicks);
 //     }
@@ -333,7 +333,7 @@ class ProcessTest : public Test
             proc.onexit = std::bind(&Tests::processExit, this, std::placeholders::_1);
             proc.spawn();
 
-            uv::runDefaultLoop();
+            uv::runLoop();
         } catch (std::exception& exc) {
             std::cerr << "Process error: " << exc.what() << std::endl;
             expect(0);
@@ -536,7 +536,7 @@ class MultiPacketStreamTest : public Test
         // //     if (streams->s3) delete streams->s3;
         // // }, &children);
         ///
-        /// uv::runDefaultLoop();
+        /// uv::runLoop();
         ///
         /// if (children.s1) delete children.s1;
         // if (children.s2) delete children.s2;
