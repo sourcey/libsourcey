@@ -14,7 +14,8 @@
 
 
 #include "scy/util.h"
-//#include "scy/handle.h"
+
+#include "uv.h"
 
 
 namespace scy {
@@ -22,9 +23,9 @@ namespace scy {
 
 struct SharedLibrary
 {
-    /// Opens a shared library. The filename is in utf-8. Returns true on
-    /// success and
-    /// false on error. Call `SharedLibrary::error()` to get the error message.
+    /// Opens a shared library.
+    /// The filename is in utf-8. Returns true on success and false on error.
+    /// Call `SharedLibrary::error()` to get the error message.
     bool open(const std::string& path)
     {
         if (uv_dlopen(path.c_str(), &_lib)) {
@@ -34,14 +35,15 @@ struct SharedLibrary
         return true;
     }
 
-    void close() // Closes the shared library.
+    /// Closes the shared library.
+    void close()
     {
         uv_dlclose(&_lib);
     }
 
-    /// Retrieves a data pointer from a dynamic library. It is legal for a
-    /// symbol to
-    /// map to nullptr. Returns 0 on success and -1 if the symbol was not found.
+    /// Retrieves a data pointer from a dynamic library.
+    /// It is legal for a symbol to map to nullptr.
+    /// Returns 0 on success and -1 if the symbol was not found.
     bool sym(const char* name, void** ptr)
     {
         if (uv_dlsym(&_lib, name, ptr)) {

@@ -56,9 +56,10 @@ public:
     // virtual bool cancelled() const;
 
 protected:
-    Task(const Task& task);
-    Task& operator=(Task const&);
+    Task(const Task& task) = delete;
+    Task& operator=(Task const&) = delete;
 
+    /// Destroctor.
     /// Should remain protected.
     virtual ~Task();
 

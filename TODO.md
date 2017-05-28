@@ -2,8 +2,9 @@
 
 Logger not to add space
 Remove comments
-Rename from Handle2 and Stream2
+Remove const std::string &
 
+Add override tags to virtual methods
 Copy samples data to install folder
 Add updated Symple JS from npm code to samples
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis

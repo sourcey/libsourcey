@@ -25,6 +25,7 @@
 namespace scy {
 
 
+/// Basic stream type for sockets and pipes.
 template<typename T>
 class Base_API Stream : public uv::Handle<T>
 {

@@ -18,6 +18,7 @@
 
 #include "scy/interface.h"
 #include "scy/logger.h"
+
 #include <cstdint>
 #include <iostream>
 #include <memory>

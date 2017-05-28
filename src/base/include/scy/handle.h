@@ -102,59 +102,6 @@ struct Request
 };
 
 
-/// Call a function with the given argument tuple.
-///
-/// Note: This will become redundant once C++17 `std::apply` is fully supported.
-template<typename Function, typename Tuple, size_t ... I>
-auto invoke(Function f, Tuple t, std::index_sequence<I ...>)
-{
-     return f(std::get<I>(t)...);
-}
-
-
-/// Call a function with the given argument tuple.
-///
-/// Create an index sequence for the array, and pass it to the
-/// implementation `invoke` function.
-///
-/// Note: This will become redundant once C++17 `std::apply` is fully supported.
-template<typename Function, typename Tuple>
-auto invoke(Function f, Tuple t)
-{
-    static constexpr auto size = std::tuple_size<Tuple>::value;
-    return invoke(f, t, std::make_index_sequence<size>{});
-}
-
-
-/// Helper class for working with async libuv types and veradic arguments.
-// template<typename T, typename Function, typename... Args>
-// struct Callback
-// {
-//     std::shared_ptr<Context<T>> ctx;
-//     Function func;
-//     std::tuple<Args...> args;
-//
-//     FunctionWrap(std::shared_ptr<Context<T>> c, Function&& f, Args&&... a)
-//         : ctx(c)
-//         , func(f)
-//         , args(std::make_tuple(a...))
-//     {
-//     }
-//
-//     void invoke()
-//     {
-//         internal::invoke(func, args);
-//     }
-//
-//     Handle<T>* parent()
-//     {
-//         if (ctx->deleted)
-//             return nullptr;
-//         return ctx->handle->self();
-//     }
-// };
-
-
 /// Wrapper class for managing a `libuv` handle.
 ///
 /// This class manages thehandle during it's lifecycle and
@@ -362,7 +309,6 @@ public:
         assert(std::this_thread::get_id() == _tid);
     }
 
-    typedef T Resource;
     typedef Request<T, uv_connect_t> ConnectReq;
     typedef Request<T, uv_getaddrinfo_t> GetAddrInfoReq;
 
@@ -379,8 +325,6 @@ protected:
     virtual void onClose()
     {
     }
-
-
 
 protected:
     /// NonCopyable and NonMovable
