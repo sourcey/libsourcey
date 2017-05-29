@@ -46,7 +46,11 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
     * **SDP** — [RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation that includes extra support for ICE headers.
       -->
 
-## Examples
+## Getting started
+
+See the [installation guides](https://sourcey.com/libsourcey/installation) in the docs to get started playing with LibSourcey.
+
+## A few examples
 
 What better way to get acquainted with a new library then with some tasty code examples.
 
@@ -65,7 +69,7 @@ srv.Connection += [](http::ServerConnection::Ptr conn) {
 srv.start();
 ~~~
 
-Pretty neat right? Its bloody fast too, especially on Linux kernel 3.9 or newer where its optimized to use of kernel level multicore socket load balancing. Don't take our word for it though, here are some benchmarks using `wrk`:
+Pretty neat right? Its crazy fast too, especially on Linux kernel 3.9 or newer where its optimized to use of kernel level multicore socket load balancing. Don't take our word for it though, here are some benchmarks using `wrk`:
 
 **LibSourcey `httpechoserver`**
 
@@ -95,11 +99,11 @@ Requests/sec:  23236.33
 Transfer/sec:      2.19MB
 ~~~
 
-As you can see the `httpechoserver` is almost twice as fast as the `nodejs` echo server, which is a massive performance gain over one of the leading web server implementations. Check the `httpechoserver` sample for the full code, including the `nodejs` echo server we used for profiling.
+As you can see the `httpechoserver` is almost twice as fast as the dead simple `nodejs` echo server, which is not a bad performance gain over one of the web's leading technologies thats touted for it's performance. Check the `httpechoserver` sample for the full code, including the `nodejs` echo server we used for benchmarking.
 
 #### Processes
 
-Interacting with system processes doesn't have to be painful.
+Interacting with system processes and piping IO doesn't have to be painful.
 The following code will run the `ping sourcey.com` and with `stdio` and exit callbacks:
 
 ~~~cpp
@@ -120,9 +124,9 @@ proc.in() << "random data"
 
 #### PacketStream
 
-A good starting point is the `PacketStream`, which lets you create a dynamic delegate chain for piping, processing and outputting arbitrary data packets. This method of layering packet processors and dynamic functionality makes it possible to develop complex data processing applications quickly and easily.
+A good starting point for learning LibSourcey is the `PacketStream`, which lets you create a dynamic delegate chain for piping, processing and outputting arbitrary data packets. This method of layering packet processors and makes it possible to develop complex data processing applications on the fly.
 
-For example, this is how you would capture a live webcam stream, encode it into H.264, and broadcast it in realtime over the internet:
+For example, the code below captures a live webcam stream, encodes it into H.264, and then finally broadcasts it in realtime over the internet:
 
 ~~~cpp
 // Create a PacketStream to pass packets from the
@@ -171,13 +175,9 @@ stream.start();
 
 There are plenty more demos and sample code to play with over on the [examples](https://sourcey.com/libsourcey/examples/) page.
 
-## Installation
-
-See the platform independent [installation guides](https://sourcey.com/libsourcey/installation).
-
 ## Contributors
 
-A BIG thanks to everyone who has contributed to the development of LibSourcey so far:
+A big thanks to everyone who has contributed to making C++ the most viable option:
 
 * Kam Low ([@auscaster](https://github.com/auscaster)) — Primary developer
 * Yury Shulbn ([@yuryshubin](https://github.com/yuryshubin)) — iOS build toolchain and platform fixes
@@ -190,7 +190,7 @@ A BIG thanks to everyone who has contributed to the development of LibSourcey so
 
 ## Contributing
 
-Pull Requests are always welcome, so if you make any improvements please feel free to float them back upstream :)
+Pull Requests are always welcome, so if you fix or make anything better then feel free to float a PR back upstream :)
 
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
 2. Create your feature branch (`git checkout -b my-new-feature`)
