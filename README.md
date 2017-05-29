@@ -12,7 +12,7 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 * **Repository**: [https://github.com/sourcey/libsourcey](https://github.com/sourcey/libsourcey)  
 * **Licence**: [LGPL-2.1+](/LICENSE.md)
 
-## Features
+## Basic features
 
 * **Event-based IO** — Core modules are built on top of `libuv` (the underlying C library that powers `nodejs`) and use event-based asynchronous IO throughout to maximize performance and minimize concurrency reliance for building mission critical native and server side apps.
 
