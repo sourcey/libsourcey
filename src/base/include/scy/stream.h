@@ -18,6 +18,7 @@
 #include "scy/request.h"
 #include "scy/buffer.h"
 #include "scy/signal.h"
+#include "scy/logger.h"
 
 #include <stdexcept>
 
@@ -158,26 +159,24 @@ protected:
     {
         // TraceA("Handle read: ", nread)
         auto self = reinterpret_cast<Stream*>(handle->data);
-
-        // try {
+#ifdef SCY_EXCEPTION_RECOVERY
+        try {
+#endif
             if (nread >= 0) {
                 self->onRead(buf->base, nread);
             }
             else {
-                // The stream was closed in error
-                // The value of nread is the error number
-                // ie. UV_ECONNRESET or UV_EOF etc ...
                 self->setUVError((int)nread, "Stream read error");
             }
-        // }
-        // catch (std::exception& exc) {
-        //
-        //     // Swallow exceptions and set the stream error
-        //     // This keep errors in the event loop
-        //     ErrorL << "Exception: " << exc.what() << std::endl;
-        //     self->setUVError(exc.what());
-        //     return;
-        // }
+#ifdef SCY_EXCEPTION_RECOVERY
+        }
+        catch (std::exception& exc) {
+            // Exceptions thrown inside the read callback scope will set the
+            // stream error in order to keep errors in the event loop
+            ErrorA("Stream exception: ", exc.what());
+            self->setUVError(UV_UNKNOWN, exc.what());
+        }
+#endif
     }
 
     static void allocReadBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)

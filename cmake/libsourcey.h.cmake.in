@@ -16,11 +16,16 @@
 // Define the installation path
 #define SCY_INSTALL_DIR "${LibSourcey_INSTALL_DIR}"
 
+// Building as shared library (.so or .dll)
+#cmakedefine SCY_SHARED_LIBRARY
+
 // Disable logging
 #cmakedefine SCY_ENABLE_LOGGING
 
-// Building as shared library (.so or .dll)
-#cmakedefine SCY_SHARED_LIBRARY
+// Attempt to recover from internal exceptions
+// Exceptions thrown inside thread and stream context will be caught, logged and
+// handled via the event loop in an attempt to prevent crashes.
+#cmakedefine SCY_EXCEPTION_RECOVERY
 
 // LibSourcey modules
 // cmakedefine HAVE_SCY_base

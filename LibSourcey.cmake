@@ -61,7 +61,9 @@ set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"              
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
 set_option(ENABLE_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
 set_option(ENABLE_LOGGING             "Enable internal debug logging"                            ON   IF (CMAKE_BUILD_TYPE MATCHES DEBUG) )
+set_option(EXCEPTION_RECOVERY         "Attempt to recover from internal exceptions"              ON   IF (CMAKE_BUILD_TYPE MATCHES DEBUG) )
 set_option(MSG_VERBOSE                "Print verbose debug status messages"                      OFF )
+
 
 # ----------------------------------------------------------------------------
 # LibSourcey internal options
@@ -361,6 +363,7 @@ install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR} COMPONENT
 
 # Variables for libsourcey.h
 set(SCY_ENABLE_LOGGING ${ENABLE_LOGGING})
+set(SCY_EXCEPTION_RECOVERY ${EXCEPTION_RECOVERY})
 set(SCY_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 
 set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)

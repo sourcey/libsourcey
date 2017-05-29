@@ -26,7 +26,7 @@ const std::thread::id Thread::mainID = std::this_thread::get_id();
 
 
 Thread::Thread() :
-    // Explicitly using the default constructor to
+    // Call the default constructor explicitly to
     // underline the fact that it does get called
     _thread()
 {

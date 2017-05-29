@@ -17,12 +17,14 @@
 #include "scy/interface.h"
 #include "scy/platform.h"
 #include "scy/util.h"
+
 #include <cstdint>
 #include <thread>
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <iostream>
 
 
 namespace scy {
@@ -126,14 +128,15 @@ inline void runAsync(std::shared_ptr<Runner::Context> c, Function func, Args... 
     c->tid = std::this_thread::get_id();
     c->running = true;
     do {
-//        try {
+#ifdef SCY_EXCEPTION_RECOVERY
+        try {
+#endif
             func(std::forward<Args>(args)...);
-//        } catch (std::exception& exc) {
-//            // std::cout << "Runner error: " << exc.what() << std::endl;
-//#ifdef _DEBUG
-//            throw exc;
-//#endif
-//        }
+#ifdef SCY_EXCEPTION_RECOVERY
+        } catch (std::exception& exc) {
+            std::cerr << "Runner exception: " << exc.what() << std::endl;
+        }
+#endif
         scy::sleep(1);
     } while (c->repeating && !c->cancelled);
     c->running = false;
@@ -164,8 +167,8 @@ auto invoke(Function f, Tuple t)
 }
 
 
-/// Helper class that stores a function pointer and veradic arguments for
-/// deferred invocation.
+/// Helper class that stores a function pointer and veradic arguments as a tuple
+/// for deferred invocation.
 template<typename Function, typename... Args>
 struct DeferredCallable
 {
