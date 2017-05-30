@@ -170,45 +170,45 @@ public:
     }
 
     /// Return the error context if any.
-    const Error& error() const
+    const scy::Error& error() const
     {
         return _error;
     }
 
     /// Set the error and triggers callbacks.
-    virtual void setError(const Error& err)
+    virtual void setError(const Error& error)
     {
         // if (_error == err) return;
         assertThread();
-        _error = err;
-        onError(err);
+        _error = error;
+        onError(error);
     }
 
     /// Set the error and trigger relevant callbacks.
     /// This method can be called inside `libuv` callbacks.
-    void setUVError(int errorno, const std::string& prefix = "UV Error")
+    void setUVError(int err, std::string prefix = "UV Error")
     {
-        Error err;
-        err.errorno = errorno;
+        Error error;
+        error.err = err;
         // err.syserr = uv.sys_errno_;
-        err.message = formatError(prefix, errorno);
-        setError(err);
+        error.message = formatError(std::move(prefix), err);
+        setError(error);
     }
 
     /// Set the error and throw an exception.
     /// Should never be called inside `libuv` callbacks.
-    void setAndThrowError(int errorno, const std::string& prefix = "UV Error")
+    void setAndThrowError(int err, std::string prefix = "UV Error")
     {
-        setUVError(errorno, prefix);
-        throwError(prefix, errorno);
+        setUVError(err, std::move(prefix));
+        throwError(std::move(prefix), err);
     }
 
     /// Throw an exception if the handle is in error state.
     /// The error message prefix will be updated if provided.
-    void throwLastError(const std::string& prefix = "UV Error")
+    void throwLastError(std::string prefix = "UV Error")
     {
         if (error().any())
-            setAndThrowError(error().errorno, prefix);
+            setAndThrowError(error().err, std::move(prefix));
     }
 
     /// Return a cast pointer to the managed `libuv` handle.

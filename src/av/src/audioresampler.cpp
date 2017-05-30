@@ -60,7 +60,7 @@ void AudioResampler::open()
     inSampleFmt = av_get_sample_fmt(iparams.sampleFmt.c_str());
     outSampleFmt = av_get_sample_fmt(oparams.sampleFmt.c_str());
 
-    TraceS(this) << "Create audio resampler:\n"
+    STrace << "Create audio resampler:\n"
                  << "\n\tIn Nb Channels: " << iparams.channels
                  << "\n\tIn Channel Layout: " << inChBuf
                  << "\n\tIn Sample Rate: " << iparams.sampleRate
@@ -108,13 +108,13 @@ void AudioResampler::open()
         throw std::runtime_error("Cannot initialize resample context: " + averror(ret));
     }
 
-    TraceA("Create: OK")
+    LTrace("Create: OK")
 }
 
 
 void AudioResampler::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
 
     if (ctx) {
 #ifdef HAVE_FFMPEG_SWRESAMPLE
@@ -164,7 +164,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
             throw std::runtime_error("Cannot allocate buffer for converted output samples: " + averror(ret));
         }
 
-        TraceS(this) << "Resizing resampler buffer: " << outBufferSize << endl;
+        STrace << "Resizing resampler buffer: " << outBufferSize << endl;
         maxNumSamples = requiredNumSamples;
     }
 
@@ -193,7 +193,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
     outBufferSize = av_samples_get_buffer_size(nullptr, oparams.channels,
                                                outNumSamples, outSampleFmt, 1);
 
-    TraceS(this) << "Resampled audio frame:"
+    STrace << "Resampled audio frame:"
                  << "\n\tIn Nb Samples: " << inNumSamples
                  << "\n\tIn Channels: " << iparams.channels
                  << "\n\tIn Sample Rate: " << iparams.sampleRate
@@ -269,7 +269,7 @@ int AudioResampler::resample(const uint8_t* inSamples, int inNumSamples)
                                                  av_get_sample_fmt(oparams.sampleFmt.c_str()), 1);
     assert(outBufferSize > 0);
 
-    TraceS(this) << "Resampled audio frame:"
+    STrace << "Resampled audio frame:"
         << "\n\tIn Nb Samples: " << inNumSamples
         << "\n\tIn Channels: " << iparams.channels
         << "\n\tIn Sample Rate: " << iparams.sampleRate

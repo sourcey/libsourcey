@@ -28,13 +28,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options)
     , _audio(nullptr)
     , _videoConv(nullptr)
 {
-    TraceN(this) << "Create" << endl;
+    STrace << "Create" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer()
 {
-    TraceN(this) << "Destroy" << endl;
+    STrace << "Destroy" << endl;
     uninitialize();
 }
 
@@ -44,7 +44,7 @@ void VideoAnalyzer::initialize()
     if (_options.ifile.empty())
         throw std::runtime_error("Please specify an input file.");
 
-    TraceN(this) << "Loading: " << _options.ifile << endl;
+    STrace << "Loading: " << _options.ifile << endl;
 
     _error = "";
 
@@ -70,7 +70,7 @@ void VideoAnalyzer::initialize()
 
 void VideoAnalyzer::uninitialize()
 {
-    // TraceL << "[VideoAnalyzerStream: " << this << ": " << name << "]
+    // STrace << "[VideoAnalyzerStream: " << this << ": " << name << "]
     // Uninitializing" << endl;
     stop();
 
@@ -99,7 +99,7 @@ void VideoAnalyzer::start()
         _reader.start();
     } catch (std::exception& exc) {
         _error = exc.what();
-        ErrorS(this) << "Error: " << _error << endl;
+        SError << "Error: " << _error << endl;
         throw exc; //.rethrow()
     }
 }
@@ -118,7 +118,7 @@ void VideoAnalyzer::stop()
 
 void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 {
-    // TraceN(this) << "On video: "
+    // STrace << "On video: "
     //    << packet.size() << ": " << packet.time << endl;
 
     VideoAnalyzer::Packet pkt(packet.time);
@@ -155,7 +155,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
         pkt.value /= frames;
         pkt.value = sqrt(pkt.value); ///= _video->rdftSize;
 
-        TraceN(this) << "Video Output: " << pkt.time << ", " << pkt.value
+        STrace << "Video Output: " << pkt.time << ", " << pkt.value
                      << endl;
         PacketOut.emit(*_video, pkt);
     }
@@ -163,7 +163,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 
 void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 {
-    // TraceN(this) << "On Audio: "
+    // STrace << "On Audio: "
     //  << packet.size() << ": " << packet.time << endl;
 
     std::lock_guard<std::mutex> guard(_mutex);
@@ -196,7 +196,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
         // Calculate the average value for this video frame
         pkt.value /= frames;
 
-        TraceN(this) << "Audio Output: " << pkt.time << ", " << pkt.value
+        STrace << "Audio Output: " << pkt.time << ", " << pkt.value
                      << endl;
         PacketOut.emit(*_audio, pkt);
     }
@@ -235,7 +235,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
 void VideoAnalyzer::onReadComplete(void* sender)
 {
-    TraceN(this) << "On Read Complete" << endl;
+    STrace << "On Read Complete" << endl;
 
     MediaCapture* reader = reinterpret_cast<MediaCapture*>(sender);
     {
@@ -295,7 +295,7 @@ VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     , frames(0)
     , filled(0)
 {
-    TraceL << "[VideoAnalyzerStream: " << this << ": " << name
+    STrace << "[VideoAnalyzerStream: " << this << ": " << name
            << "] Creating: " << rdftSize << ": " << rdftBits << endl;
 
     assert(rdftSize);
@@ -331,7 +331,7 @@ void VideoAnalyzer::Stream::initialize()
 
 void VideoAnalyzer::Stream::uninitialize()
 {
-    // TraceL << "[VideoAnalyzerStream: " << this << ": " << name << "]
+    // STrace << "[VideoAnalyzerStream: " << this << ": " << name << "]
     // Uninitializing" << endl;
 
     if (rdft)

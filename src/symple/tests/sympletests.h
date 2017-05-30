@@ -59,13 +59,13 @@ public:
 
     void connect()
     {
-        InfoL << user << ": connect" << std::endl;
+        SInfo << user << ": connect" << std::endl;
         client.connect();
     }
 
     bool completed()
     {
-        InfoL << user << ": completed: "
+        SInfo << user << ": completed: "
               // << "user=" << client.options().user << ", "
               // << "name=" << client.options().name << ", "
               << "gotOnline=" << gotOnline << ", "
@@ -75,7 +75,7 @@ public:
 
     void check()
     {
-        InfoL << user << ": check: "
+        SInfo << user << ": check: "
               // << "user=" << client.options().user << ", "
               // << "name=" << client.options().name << ", "
               << "gotOnline=" << gotOnline << ", "
@@ -86,14 +86,14 @@ public:
 
     void onRecvPacket(IPacket& raw)
     {
-        DebugA("####### On raw packet: ", raw.className())
+        LDebug("####### On raw packet: ", raw.className())
 
         // Handle incoming raw packets here
     }
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        InfoL << user << ": On presence: " << presence.dump(4) << endl;
+        SInfo << user << ": On presence: " << presence.dump(4) << endl;
 
         expect(presence.data("version").get<std::string>() == "1.0.1");
         if (user == "l") {
@@ -109,7 +109,7 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        InfoL << user << ": On message: " << message.dump(4) << endl;
+        SInfo << user << ": On message: " << message.dump(4) << endl;
 
         // Handle incoming Symple messages here
     }
@@ -121,7 +121,7 @@ public:
 
     void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        InfoL << user << ": Client state changed: " << state << ": "
+        SInfo << user << ": Client state changed: " << state << ": "
               << client.ws().socket->address() << endl;
 
         switch (state.id()) {
@@ -148,7 +148,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        InfoL << user << ": Updating Client Data" << endl;
+        SInfo << user << ": Updating Client Data" << endl;
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.

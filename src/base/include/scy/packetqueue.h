@@ -64,7 +64,7 @@ template <class T>
 inline void  SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
-        WarnS(this) << "Process late packet" << std::endl;
+        SWarn << "Process late packet" << std::endl;
         assert(0);
         return;
     }
@@ -77,7 +77,7 @@ template <class T>
 inline void SyncPacketQueue<T>::dispatch(T& packet)
 {
     if (Queue::cancelled()) {
-        WarnS(this) << "Dispatch late packet" << std::endl;
+        SWarn << "Dispatch late packet" << std::endl;
         assert(0);
         return;
     }
@@ -99,7 +99,7 @@ inline bool SyncPacketQueue<T>::accepts(IPacket* packet)
 template <class T>
 inline void SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
-    TraceS(this) << "Stream state: " << state << std::endl;
+    STrace << "Stream state: " << state << std::endl;
 
     switch (state.id()) {
         // case PacketStreamState::None:
@@ -164,7 +164,7 @@ template <class T> inline void
 AsyncPacketQueue<T>::dispatch(T& packet)
 {
     if (Queue::cancelled()) {
-        WarnS(this) << "Dispatch late packet" << std::endl;
+        SWarn << "Dispatch late packet" << std::endl;
         assert(0);
         return;
     }
@@ -177,7 +177,7 @@ template <class T>
 inline void AsyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
-        WarnS(this) << "Process late packet" << std::endl;
+        SWarn << "Process late packet" << std::endl;
         assert(0);
         return;
     }
@@ -196,7 +196,7 @@ inline bool AsyncPacketQueue<T>::accepts(IPacket* packet)
 template <class T> inline void
 AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
 {
-    TraceS(this) << "Stream state: " << state << std::endl;
+    STrace << "Stream state: " << state << std::endl;
 
     switch (state.id()) {
         case PacketStreamState::Active:

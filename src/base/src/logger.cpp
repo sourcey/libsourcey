@@ -15,6 +15,7 @@
 #include "scy/platform.h"
 #include "scy/time.h"
 #include "scy/util.h"
+
 #include <assert.h>
 #include <iterator>
 
@@ -153,11 +154,11 @@ void Logger::write(LogStream* stream)
 }
 
 
-LogStream& Logger::send(const char* level, const char* realm, const void* ptr,
-                        const char* channel) const
-{
-    return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
-}
+// LogStream& Logger::send(const char* level, const char* realm, const void* ptr,
+//                         const char* channel) const
+// {
+//     return *new LogStream(getLevelFromString(level), realm, 0, ptr, channel);
+// }
 
 
 //
@@ -277,12 +278,10 @@ bool AsyncLogWriter::writeNext()
 
 #ifdef SCY_ENABLE_LOGGING
 
-LogStream::LogStream(LogLevel level, const std::string& realm, int line,
-                     const void* ptr, const char* channel)
+LogStream::LogStream(Level level, std::string realm, int line, const char* channel)
     : level(level)
     , line(line)
-    , realm(realm)
-    , address(ptr ? util::memAddress(ptr) : "")
+    , realm(std::move(realm))
     , ts(time::now())
     , channel(channel ? Logger::instance().get(channel, false) : nullptr)
     , flushed(false)
@@ -294,13 +293,11 @@ LogStream::LogStream(const LogStream& that)
     : level(that.level)
     , line(that.line)
     , realm(that.realm)
-    , address(that.address)
     , ts(that.ts)
     , channel(that.channel)
     , flushed(that.flushed)
 {
-    // NOTE: Try to avoid copy assign std::stringstream::swap is not implemented
-    // on gcc < 5
+    // NOTE: std::stringstream::swap is not implemented on gcc < 5
 #if __GNUC__ < 5
     message.str(that.message.str());
 #else
@@ -323,21 +320,21 @@ LogStream::~LogStream()
 //
 
 
-LogChannel::LogChannel(const std::string& name, LogLevel level,
-                       const std::string& timeFormat)
-    : _name(name)
+LogChannel::LogChannel(std::string name, Level level,
+                       std::string timeFormat)
+    : _name(std::move(name))
     , _level(level)
-    , _timeFormat(timeFormat)
+    , _timeFormat(std::move(timeFormat))
 {
 }
 
 
-void LogChannel::write(const std::string& message, LogLevel level,
-                       const char* realm, const void* ptr)
+void LogChannel::write(std::string message, Level level,
+                       std::string realm)
 {
 #ifdef SCY_ENABLE_LOGGING
-    LogStream stream(level, realm, 0, ptr);
-    stream << message;
+    LogStream stream(level, std::move(realm), 0);
+    stream << std::move(message);
     write(stream);
 #endif
 }
@@ -354,15 +351,15 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
 #ifdef SCY_ENABLE_LOGGING
     if (!_timeFormat.empty())
         ost << time::print(time::toLocal(stream.ts), _timeFormat.c_str());
-    ost << " [" << getStringFromLogLevel(stream.level) << "] ";
-    if (!stream.realm.empty() || !stream.address.empty()) {
+    ost << " [" << getStringFromLevel(stream.level) << "] ";
+    if (!stream.realm.empty()) { // || !stream.address.empty()
         ost << "[";
         if (!stream.realm.empty())
             ost << stream.realm;
         if (stream.line > 0)
             ost << "(" << stream.line << ")";
-        if (!stream.address.empty())
-            ost << ":" << stream.address;
+        // if (!stream.address.empty())
+        //     ost << ":" << stream.address;
         ost << "] ";
     }
     ost << stream.message.str();
@@ -376,9 +373,9 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
 //
 
 
-ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level,
-                               const std::string& timeFormat)
-    : LogChannel(name, level, timeFormat)
+ConsoleChannel::ConsoleChannel(std::string name, Level level,
+                               std::string timeFormat)
+    : LogChannel(std::move(name), level, std::move(timeFormat))
 {
 }
 
@@ -401,7 +398,7 @@ void ConsoleChannel::write(const LogStream& stream)
 //    std::string s(ss.str());
 //    std::wstring temp(s.length(), L' ');
 //    std::copy(s.begin(), s.end(), temp.begin());
-//    OutputDebugString(temp.c_str());
+//    OutputSDebugtring(temp.c_str());
 //#endif
 #endif
 }
@@ -412,10 +409,10 @@ void ConsoleChannel::write(const LogStream& stream)
 //
 
 
-FileChannel::FileChannel(const std::string& name, const std::string& path,
-                         LogLevel level, const char* timeFormat)
-    : LogChannel(name, level, timeFormat)
-    , _path(path)
+FileChannel::FileChannel(std::string name, std::string path,
+                         Level level, std::string timeFormat)
+    : LogChannel(std::move(name), level, std::move(timeFormat))
+    , _path(std::move(path))
 {
 }
 
@@ -472,7 +469,7 @@ void FileChannel::write(const LogStream& stream)
 //    std::string s(ss.str());
 //    std::wstring temp(s.length(), L' ');
 //    std::copy(s.begin(), s.end(), temp.begin());
-//    OutputDebugString(temp.c_str());
+//    OutputSDebugtring(temp.c_str());
 //#endif
 #endif
 }
@@ -496,15 +493,16 @@ std::string FileChannel::path() const
 //
 
 
-RotatingFileChannel::RotatingFileChannel(const std::string& name,
-                                         const std::string& dir, LogLevel level,
-                                         const std::string& extension,
+RotatingFileChannel::RotatingFileChannel(std::string name,
+                                         std::string dir,
+                                         Level level,
+                                         std::string extension,
                                          int rotationInterval,
-                                         const char* timeFormat)
-    : LogChannel(name, level, timeFormat)
+                                         std::string timeFormat)
+    : LogChannel(std::move(name), level, std::move(timeFormat))
     , _fstream(nullptr)
-    , _dir(dir)
-    , _extension(extension)
+    , _dir(std::move(dir))
+    , _extension(std::move(extension))
     , _rotationInterval(rotationInterval)
     , _rotatedAt(0)
 {
@@ -542,7 +540,7 @@ void RotatingFileChannel::write(const LogStream& stream)
 //    std::string s(ss.str());
 //    std::wstring temp(s.length(), L' ');
 //    std::copy(s.begin(), s.end(), temp.begin());
-//    OutputDebugString(temp.c_str());
+//    OutputSDebugtring(temp.c_str());
 //#endif
 #endif
 }
@@ -574,9 +572,9 @@ void RotatingFileChannel::rotate()
 // ---------------------------------------------------------------------
 // Evented File Channel
 //
-EventedFileChannel::EventedFileChannel(const std::string& name,
+EventedFileChannel::EventedFileChannel(std::string name,
                          const std::string& dir,
-                         LogLevel level,
+                         Level level,
                          const std::string& extension,
                          int rotationInterval,
                          const char* timeFormat) :
@@ -590,7 +588,7 @@ EventedFileChannel::~EventedFileChannel()
 }
 
 
-void EventedFileChannel::write(const LogStream& stream, LogLevel level, const char* realm, const void* ptr)
+void EventedFileChannel::write(const LogStream& stream, Level level, const char* realm, const void* ptr)
 {
     if (this->level() > level)
         return;

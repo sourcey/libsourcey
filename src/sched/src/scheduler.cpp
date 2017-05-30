@@ -72,7 +72,7 @@ void Scheduler::run()
         {
             DateTime now;
             Timespan remaining = task->trigger().scheduleAt - now;
-            TraceS(this) << "Waiting: "
+            STrace << "Waiting: "
                          << "\n\tPID: " << task
                          << "\n\tDays: " << remaining.days()
                          << "\n\tHours: " << remaining.totalHours()
@@ -102,7 +102,7 @@ void Scheduler::run()
 #if _DEBUG
             {
                 DateTime now;
-                TraceS(this)
+                STrace
                     << "Running: "
                     << "\n\tPID: " << task << "\n\tCurrentTime: "
                     << DateTimeFormatter::format(now,
@@ -113,26 +113,26 @@ void Scheduler::run()
                     << endl;
             }
 #else
-            TraceS(this) << "Running: " << task << endl;
+            STrace << "Running: " << task << endl;
 #endif
             task->run();
             if (task->afterRun())
                 onRun(task);
             else {
-                TraceS(this) << "Destroy After Run: " << task << endl;
+                STrace << "Destroy After Run: " << task << endl;
                 task->_destroyed = true; // destroy();
             }
         } else
-            TraceS(this) << "Skipping Task: " << task << endl;
+            STrace << "Skipping Task: " << task << endl;
 
         // Destroy the task if needed
         if (task->destroyed()) {
-            TraceS(this) << "Destroy Task: " << task << endl;
+            STrace << "Destroy Task: " << task << endl;
             assert(remove(task));
             delete task;
         }
 
-        // TraceS(this) << "Running: OK: " << task << endl;
+        // STrace << "Running: OK: " << task << endl;
     }
 
     // Prevent 100% CPU
@@ -144,7 +144,7 @@ void Scheduler::update()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    // TraceS(this) << "Updating: " << _tasks.size() << endl;
+    // STrace << "Updating: " << _tasks.size() << endl;
 
     // Update and clean the task list
     auto it = _tasks.begin();
@@ -153,7 +153,7 @@ void Scheduler::update()
         if (task->destroyed()) {
             it = _tasks.erase(it);
             onRemove(task);
-            TraceS(this) << "Destroy: " << task << endl;
+            STrace << "Destroy: " << task << endl;
             delete task;
         } else
             ++it;
@@ -167,12 +167,12 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::value& root)
 {
-    TraceA("Serializing")
+    LTrace("Serializing")
 
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sched::Task* task = reinterpret_cast<sched::Task*>(*it);
-        TraceS(this) << "Serializing: " << task << endl;
+        STrace << "Serializing: " << task << endl;
         json::value& entry = root[root.size()];
         task->serialize(entry);
         task->trigger().serialize(entry["trigger"]);
@@ -182,7 +182,7 @@ void Scheduler::serialize(json::value& root)
 
 void Scheduler::deserialize(json::value& root)
 {
-    TraceA("Deserializing")
+    LTrace("Deserializing")
 
     for (auto it = root.begin(); it != root.end(); it++) {
         sched::Task* task = nullptr;
@@ -201,7 +201,7 @@ void Scheduler::deserialize(json::value& root)
                 delete task;
             if (trigger)
                 delete trigger;
-            ErrorS(this) << "Deserialization Error: " << exc.what() << endl;
+            SError << "Deserialization Error: " << exc.what() << endl;
         }
     }
 }

@@ -49,7 +49,7 @@ AudioContext::~AudioContext()
 
 void AudioContext::open()
 {
-    DebugS(this) << "Open: "
+    SDebug << "Open: "
                  << "\n\tInput: " << iparams.toString()
                  << "\n\tOutput: " << oparams.toString() << endl;
 
@@ -152,7 +152,7 @@ bool AudioContext::recreateResampler()
     // }
 
     // Recreate the resampler context
-    DebugL << "Recreating audio resampler context" << endl;
+    SDebug << "Recreating audio resampler context" << endl;
     if (resampler)
         delete resampler;
     resampler = new AudioResampler();

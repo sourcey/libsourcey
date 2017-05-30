@@ -58,7 +58,7 @@ void AudioCapture::openAudio(const std::string& device, const av::AudioCodec& pa
 
 void AudioCapture::openAudio(const std::string& device, int channels, int sampleRate, const std::string& sampleFmt)
 {
-    TraceS(this) << "Opening microphone: "
+    STrace << "Opening microphone: "
                  << "device=" << device << ", "
                  << "channels=" << channels << ", "
                  << "sampleRate=" << sampleRate << ", "

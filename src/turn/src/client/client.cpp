@@ -39,7 +39,7 @@ Client::Client(ClientObserver& observer, const Options& options, const net::Sock
 
 Client::~Client()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
     shutdown();
     // assert(_socket->/*base().*/refCount() == 1);
     // assert(closed());
@@ -48,7 +48,7 @@ Client::~Client()
 
 void Client::initiate()
 {
-    DebugA("TURN client connecting to ", _options.serverAddr)
+    LDebug("TURN client connecting to ", _options.serverAddr)
 
     assert(!_permissions.empty() && "must set permissions");
     assert(_socket.impl && "must set socket");
@@ -71,7 +71,7 @@ void Client::shutdown()
     _timer.stop();
 
     for (auto it = _transactions.begin(); it != _transactions.end();) {
-        TraceA("Shutdown base: Delete transaction: ", *it)
+        LTrace("Shutdown base: Delete transaction: ", *it)
         (*it)->StateChange -= slot(this, &Client::onTransactionProgress);
         // delete *it;
         (*it)->dispose();
@@ -90,7 +90,7 @@ void Client::shutdown()
 
 void Client::onSocketConnect(net::Socket& socket)
 {
-    TraceA("Client connected")
+    LTrace("Client connected")
     _socket.Connect -= slot(this, &Client::onSocketConnect);
 
     _timer.setInterval(_options.timerInterval);
@@ -102,7 +102,7 @@ void Client::onSocketConnect(net::Socket& socket)
 
 void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceA("Control socket recv: ", buffer.size())
+    LTrace("Control socket recv: ", buffer.size())
 
     stun::Message message;
     // auto socket = reinterpret_cast<net::Socket*>(sender);
@@ -115,14 +115,14 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
         len -= nread;
     }
     if (len == buffer.size())
-        WarnL << "Non STUN packet received" << endl;
+        SWarn << "Non STUN packet received" << endl;
 
 #if 0
     stun::Message message;
     if (message.read(constBuffer(packet.data(), packet.size())))
         handleResponse(message);
     else
-        WarnL << "Non STUN packet received" << endl;
+        SWarn << "Non STUN packet received" << endl;
 #endif
 }
 
@@ -130,7 +130,7 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
 void Client::onSocketClose(net::Socket& socket)
 {
     assert(&socket == _socket.impl.get());
-    TraceA("Control socket closed")
+    LTrace("Control socket closed")
     assert(_socket->closed());
     shutdown();
     setError(_socket->error());
@@ -152,7 +152,7 @@ void Client::sendRefresh()
     // explicitly delete the allocation. A client MAY refresh an allocation
     // at any time for other reasons.
 
-    TraceA("Send refresh allocation request")
+    LTrace("Send refresh allocation request")
 
     auto transaction = createTransaction();
     transaction->request().setClass(stun::Message::Request);
@@ -168,7 +168,7 @@ void Client::sendRefresh()
 
 void Client::handleRefreshResponse(const stun::Message& response)
 {
-    TraceA("Received a Refresh Response: ", response.toString())
+    LTrace("Received a Refresh Response: ", response.toString())
 
     assert(response.methodType() == stun::Message::Refresh);
 
@@ -197,7 +197,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
 
     setLifetime(lifetimeAttr->value());
 
-    TraceA("Refreshed allocation expires in: ", timeRemaining())
+    LTrace("Refreshed allocation expires in: ", timeRemaining())
 
     // If lifetime is 0 the allocation will be cleaned up by garbage collection.
 }
@@ -205,7 +205,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
 
 bool Client::removeTransaction(stun::Transaction* transaction)
 {
-    TraceA("Removing transaction: ", transaction)
+    LTrace("Removing transaction: ", transaction)
 
 
     for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
@@ -252,7 +252,7 @@ void Client::authenticateRequest(stun::Message& request)
         // return hex::encode(engine.digest());
         // std::string key(crypto::hash("MD5", _options.username + ":" + _realm
         // + ":" + _options.password));
-        TraceL << "Generating HMAC: data="
+        STrace << "Generating HMAC: data="
                << (_options.username + ":" + _realm + ":" + _options.password)
                << ", key=" << engine.digestStr() << endl;
         auto integrityAttr = new stun::MessageIntegrity;
@@ -265,7 +265,7 @@ void Client::authenticateRequest(stun::Message& request)
 bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 {
     authenticateRequest(transaction->request());
-    TraceL << "Send authenticated transaction: "
+    STrace << "Send authenticated transaction: "
            << transaction->request().toString() << endl;
     return transaction->send();
 }
@@ -286,7 +286,7 @@ stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 
 bool Client::handleResponse(const stun::Message& response)
 {
-    TraceA("Handle response: ", response.toString())
+    LTrace("Handle response: ", response.toString())
 
     // Send this response to the appropriate handler.
     if (response.methodType() == stun::Message::Allocate) {
@@ -329,7 +329,7 @@ bool Client::handleResponse(const stun::Message& response)
 
 void Client::sendAllocate()
 {
-    TraceA("Send allocation request")
+    LTrace("Send allocation request")
 
     assert(!_options.username.empty());
     assert(!_options.password.empty());
@@ -422,7 +422,7 @@ void Client::sendAllocate()
 //  have not checked for existing allocations on this 5 tuple.
 void Client::handleAllocateResponse(const stun::Message& response)
 {
-    TraceA("Allocate success response")
+    LTrace("Allocate success response")
     assert(response.methodType() == stun::Message::Allocate);
 
     // If the client receives an Allocate success response, then it MUST
@@ -486,7 +486,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
         relayedAttr->address().host(),
         relayedAttr->address().port()); //_options.serverAddr.host()
 
-    TraceL << "Allocation created:"
+    STrace << "Allocation created:"
            << "\n\tRelayed address: " << _relayedAddress //.toString()
            << "\n\tMapped address: " << _mappedAddress   //.toString()
            << "\n\tLifetime: " << lifetimeAttr->value() << endl;
@@ -504,7 +504,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 
 void Client::handleAllocateErrorResponse(const stun::Message& response)
 {
-    TraceA("Allocate error response")
+    LTrace("Allocate error response")
 
     assert(response.methodType() == stun::Message::Allocate &&
            response.classType() == stun::Message::ErrorResponse);
@@ -515,7 +515,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
         return;
     }
 
-    TraceL << "Allocation error response: " << errorAttr->errorCode() << ": "
+    STrace << "Allocation error response: " << errorAttr->errorCode() << ": "
            << errorAttr->reason() << endl;
 
     // If the client receives an Allocate error response, then the
@@ -577,7 +577,7 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
                 // Now that our realm and nonce are set we can re-send the
                 // allocate request.
                 if (_realm.size() && _nonce.size()) {
-                    TraceA("Resending authenticated allocation request")
+                    LTrace("Resending authenticated allocation request")
                     sendAllocate();
                     return;
                 }
@@ -713,7 +713,7 @@ void Client::addPermission(const std::string& peerIP)
 
 void Client::sendCreatePermission()
 {
-    TraceA("Send Create Permission Request")
+    LTrace("Send Create Permission Request")
 
     assert(!_permissions.empty());
 
@@ -734,7 +734,7 @@ void Client::sendCreatePermission()
     transaction->request().setMethod(stun::Message::CreatePermission);
 
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
-        TraceA("Create permission request: ", (*it).ip)
+        LTrace("Create permission request: ", (*it).ip)
         auto peerAttr = new stun::XorPeerAddress;
         peerAttr->setAddress(net::Address((*it).ip, 0));
         // peerAttr->setFamily(1);
@@ -752,7 +752,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
     // If the client receives a valid CreatePermission success response,
     // then the client updates its data structures to indicate that the
     // permissions have been installed or refreshed.
-    TraceA("Permission created")
+    LTrace("Permission created")
 
     // Send all queued requests...
     // TODO: To via onStateChange Success callback
@@ -780,14 +780,14 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 
     // Once permissions have been created the allocation
     // process is considered a success.
-    TraceA("Allocation Success")
+    LTrace("Allocation Success")
     setState(this, ClientState::Success);
 }
 
 
 void Client::handleCreatePermissionErrorResponse(const stun::Message& /* response */)
 {
-    WarnL << "Permission Creation Failed" << endl;
+    SWarn << "Permission Creation Failed" << endl;
 
     removeAllPermissions();
 
@@ -818,7 +818,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
 
 void Client::sendData(const char* data, size_t size, const net::Address& peerAddress)
 {
-    TraceA("Send Data Indication to peer: ", peerAddress)
+    LTrace("Send Data Indication to peer: ", peerAddress)
 
     // auto request = new stun::Message;
     stun::Message request;
@@ -864,7 +864,7 @@ void Client::sendData(const char* data, size_t size, const net::Address& peerAdd
     // Queued requests will be sent when the CreatePermission
     // callback is received from the server.
     else if (stateEquals(ClientState::Authorizing)) {
-        TraceA("Queueing outgoing request: ", request.toString())
+        LTrace("Queueing outgoing request: ", request.toString())
 
         _pendingIndications.push_back(request);
         assert(_pendingIndications.size() < 100); // something is wrong...
@@ -909,7 +909,7 @@ void Client::handleDataIndication(const stun::Message& response)
         return;
     }
 
-    TraceA("Handle Data indication: ", response.toString())
+    LTrace("Handle Data indication: ", response.toString())
 
     if (!closed()) {
         _observer.onRelayDataReceived(*this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
@@ -919,7 +919,7 @@ void Client::handleDataIndication(const stun::Message& response)
 
 void Client::onTransactionProgress(void* sender, TransactionState& state, const TransactionState&)
 {
-    TraceA("Transaction state change: ", sender, ": ", state)
+    LTrace("Transaction state change: ", sender, ": ", state)
 
     auto transaction = reinterpret_cast<stun::Transaction*>(sender);
     transaction->response().opaque = transaction;
@@ -932,7 +932,7 @@ void Client::onTransactionProgress(void* sender, TransactionState& state, const 
             return;
 
         case TransactionState::Success: {
-            TraceL << "STUN transaction success:"
+            STrace << "STUN transaction success:"
                    << "\n\tState: " << state.toString()
                    << "\n\tFrom: " << transaction->peerAddress().toString()
                    << "\n\tRequest: " << transaction->request().toString()
@@ -941,14 +941,14 @@ void Client::onTransactionProgress(void* sender, TransactionState& state, const 
 
             if (removeTransaction(transaction)) {
                 if (!handleResponse(transaction->response())) {
-                    TraceL << "Unhandled STUN response: "
+                    STrace << "Unhandled STUN response: "
                            << transaction->response().toString() << endl;
                 }
             }
         } break;
 
         case TransactionState::Failed:
-            WarnL << "STUN transaction error:"
+            SWarn << "STUN transaction error:"
                   << "\n\tState: " << state.toString()
                   << "\n\tFrom: " << transaction->peerAddress().toString()
                   << "\n\tData: " << transaction->response().toString() << endl;

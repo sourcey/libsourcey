@@ -48,7 +48,7 @@ Peer::Peer(PeerManager* manager,
 
 Peer::~Peer()
 {
-    DebugA(_peerid, ": Destroying")
+    LDebug(_peerid, ": Destroying")
     // closeConnection();
 
     if (_peerConnection) {
@@ -103,7 +103,7 @@ void Peer::createConnection()
 
 void Peer::closeConnection()
 {
-    DebugA(_peerid, ": Closing")
+    LDebug(_peerid, ": Closing")
 
     if (_peerConnection) {
         _peerConnection->Close();
@@ -127,7 +127,7 @@ void Peer::createOffer()
 
 void Peer::recvSDP(const std::string& type, const std::string& sdp)
 {
-    DebugA(_peerid, ": Receive ", type, ": ", sdp)
+    LDebug(_peerid, ": Receive ", type, ": ", sdp)
 
     webrtc::SdpParseError error;
     webrtc::SessionDescriptionInterface* desc(
@@ -162,7 +162,7 @@ void Peer::recvCandidate(const std::string& mid, int mlineindex,
 
 void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
 {
-    DebugA(_peerid, ": On signaling state change: ", new_state)
+    LDebug(_peerid, ": On signaling state change: ", new_state)
 
     switch (new_state) {
         case webrtc::PeerConnectionInterface::kStable:
@@ -182,19 +182,19 @@ void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new
 
 void Peer::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state)
 {
-    DebugA(_peerid, ": On ICE connection change: ", new_state)
+    LDebug(_peerid, ": On ICE connection change: ", new_state)
 }
 
 
 void Peer::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state)
 {
-    DebugA(_peerid, ": On ICE gathering change: ", new_state)
+    LDebug(_peerid, ": On ICE gathering change: ", new_state)
 }
 
 
 void Peer::OnRenegotiationNeeded()
 {
-    DebugA(_peerid, ": On renegotiation needed")
+    LDebug(_peerid, ": On renegotiation needed")
 }
 
 
@@ -222,7 +222,7 @@ void Peer::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
-    DebugA(_peerid, ": On add stream")
+    LDebug(_peerid, ": On add stream")
     _manager->onAddRemoteStream(this, stream);
 }
 
@@ -231,7 +231,7 @@ void Peer::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
     assert(_mode == Answer);
 
-    DebugA(_peerid, ": On remove stream")
+    LDebug(_peerid, ": On remove stream")
     _manager->onRemoveRemoteStream(this, stream);
 }
 
@@ -240,7 +240,7 @@ void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
 {
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
-        ErrorL << _peerid << ": Failed to serialize candidate" << endl;
+        SError << _peerid << ": Failed to serialize candidate" << endl;
         assert(0);
         return;
     }
@@ -252,14 +252,14 @@ void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
 
 void Peer::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
-    DebugA(_peerid, ": Set local description")
+    LDebug(_peerid, ": Set local description")
     _peerConnection->SetLocalDescription(
         DummySetSessionDescriptionObserver::Create(), desc);
 
     // Send an SDP offer to the peer
     std::string sdp;
     if (!desc->ToString(&sdp)) {
-        ErrorL << _peerid << ": Failed to serialize local sdp" << endl;
+        SError << _peerid << ": Failed to serialize local sdp" << endl;
         assert(0);
         return;
     }
@@ -270,7 +270,7 @@ void Peer::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 
 void Peer::OnFailure(const std::string& error)
 {
-    ErrorL << _peerid << ": On failure: " << error << endl;
+    SError << _peerid << ": On failure: " << error << endl;
 
     _manager->onFailure(this, error);
 }
@@ -326,13 +326,13 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> Peer::stream() const
 
 void DummySetSessionDescriptionObserver::OnSuccess()
 {
-    DebugL << "On SDP parse success" << endl;
+    SDebug << "On SDP parse success" << endl;
 }
 
 
 void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 {
-    ErrorL << "On SDP parse error: " << error << endl;
+    SError << "On SDP parse error: " << error << endl;
     assert(0);
 }
 

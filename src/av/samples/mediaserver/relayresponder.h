@@ -52,7 +52,7 @@ public:
 
     void initiate()
     {
-        DebugS(this) << "Initiating" << std::endl;
+        SDebug << "Initiating" << std::endl;
         try {
             // Initiate the TRUN client allocation
             client.addPermission(peerIP);
@@ -61,14 +61,14 @@ public:
             client.initiate();
         } 
         catch (std::exception& exc) {
-            ErrorS(this) << "Error: " << exc.what() << std::endl;
+            SError << "Error: " << exc.what() << std::endl;
             assert(0);
         }
     }
 
     void dispose()
     {
-        DebugS(this) << "Terminating" << std::endl;
+        SDebug << "Terminating" << std::endl;
         if (deleted) {
             // assert(0);
             return;
@@ -87,7 +87,7 @@ public:
 protected:
     void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
-        DebugS(this) << "Relay state changed: " << state.toString() << std::endl;
+        SDebug << "Relay state changed: " << state.toString() << std::endl;
 
         switch (state.id()) {
             case turn::ClientState::None:
@@ -101,7 +101,7 @@ protected:
                 break;
             case turn::ClientState::Failed:
                 // assert(0 && "Allocation failed");
-                WarnS(this) << "Relay connection lost" << std::endl;
+                SWarn << "Relay connection lost" << std::endl;
                 // AllocationFailed.emit(/*this, */this->client);
                 // dispose();
                 break;
@@ -113,10 +113,10 @@ protected:
     void onRelayConnectionCreated(turn::TCPClient&, const net::TCPSocket::Ptr& socket,
                                   const net::Address& peerAddr) // uint32_t connectionID,
     {
-        DebugS(this) << "Connection created: " << peerAddr << std::endl;
+        SDebug << "Connection created: " << peerAddr << std::endl;
         // Just allow one stream for now
         if (this->streams.size() == 1) {
-            DebugS(this) << "Rejecting connection" << std::endl;
+            SDebug << "Rejecting connection" << std::endl;
             return;
         }
 
@@ -145,14 +145,14 @@ protected:
 
             this->streams.addStream(stream);
         } catch (std::exception& exc) {
-            ErrorS(this) << "Stream error: " << exc.what() << std::endl;
+            SError << "Stream error: " << exc.what() << std::endl;
             assert(0);
         }
     }
 
     void onRelayConnectionClosed(turn::TCPClient&, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress)
     {
-        DebugS(this) << "Connection closed: " << peerAddress << std::endl;
+        SDebug << "Connection closed: " << peerAddress << std::endl;
 
         try {
             // Destroy the media stream for the closed connection (if any).
@@ -168,7 +168,7 @@ protected:
                 // stream->destroy();
             }
         } catch (std::exception& exc) {
-            ErrorS(this) << "Stream error: " << exc.what() << std::endl;
+            SError << "Stream error: " << exc.what() << std::endl;
             assert(0);
         }
 
@@ -178,7 +178,7 @@ protected:
 
     void onRelayDataReceived(turn::Client&, const char* data, std::size_t size, const net::Address& peerAddr)
     {
-        DebugS(this) << "Received data from peer: " << std::string(data, size)
+        SDebug << "Received data from peer: " << std::string(data, size)
                      << ": " << peerAddr << std::endl;
         // If the remove peer is a web browser then the HTTP request sent
         // to the relayed address will be the first thing we see here...
@@ -186,7 +186,7 @@ protected:
 
     void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
-        DebugS(this) << "Permissions created" << std::endl;
+        SDebug << "Permissions created" << std::endl;
     }
 };
 
@@ -213,7 +213,7 @@ public:
 
     void onRequest(http::Request& request, http::Response& response)
     {
-        DebugS(this) << "Running: "
+        SDebug << "Running: "
                      << "\n\tOutput Format: " << options.oformat.name
                      << "\n\tOutput Encoding: " << options.encoding
                      << "\n\tOutput Packetizer: " << options.framing
@@ -240,7 +240,7 @@ public:
         allocation->AllocationCreated -= slot(this, &RelayedStreamingResponder::onAllocationCreated);
         std::string address(allocation->client.relayedAddress().toString());
 
-        DebugS(this) << "Allocation Created: " << address << std::endl;
+        SDebug << "Allocation Created: " << address << std::endl;
         // Send the relay address response to the initiator
         connection().response().set("Access-Control-Allow-Origin", "*");
         connection().send(address.c_str(), address.length());
@@ -252,7 +252,7 @@ public:
     {
         allocation->AllocationFailed -= sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
 
-        DebugS(this) << "Allocation Failed" << std::endl;
+        SDebug << "Allocation Failed" << std::endl;
         
         // Send the relay address response to the initiator
         //connection().socket()->send(address.c_str(), address.length());

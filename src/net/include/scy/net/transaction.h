@@ -36,12 +36,12 @@ public:
         , PacketSocketEmitter(socket)
         , _peerAddress(peerAddress)
     {
-        TraceS(this) << "Create" << std::endl;
+        STrace << "Create" << std::endl;
     }
 
     virtual bool send()
     {
-        TraceS(this) << "Send" << std::endl;
+        STrace << "Send" << std::endl;
         if (impl->sendPacket(BaseT::_request, _peerAddress) > 0)
             return BaseT::send();
         BaseT::setState(this, TransactionState::Failed);
@@ -50,13 +50,13 @@ public:
 
     virtual void cancel()
     {
-        TraceS(this) << "Cancel" << std::endl;
+        STrace << "Cancel" << std::endl;
         BaseT::cancel();
     }
 
     virtual void dispose()
     {
-        TraceS(this) << "Dispose" << std::endl;
+        STrace << "Dispose" << std::endl;
         BaseT::dispose(); // gc
     }
 
@@ -72,7 +72,7 @@ protected:
     /// callback for checking potential response candidates.
     virtual void onPacket(IPacket& packet)
     {
-        TraceS(this) << "On packet: " << packet.size() << std::endl;
+        STrace << "On packet: " << packet.size() << std::endl;
         if (BaseT::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
@@ -84,7 +84,7 @@ protected:
     /// Called when a successful response match is received.
     virtual void onResponse()
     {
-        TraceS(this) << "On success: " << BaseT::_response.toString() << std::endl;
+        STrace << "On success: " << BaseT::_response.toString() << std::endl;
         PacketSignal::emit(BaseT::_response);
     }
 

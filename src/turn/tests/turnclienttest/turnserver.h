@@ -39,18 +39,18 @@ struct TestServer : public turn::ServerObserver
 
     void onServerAllocationCreated(turn::Server*, turn::IAllocation* alloc)
     {
-        DebugA("Allocation created")
+        LDebug("Allocation created")
     }
 
     void onServerAllocationRemoved(turn::Server*, turn::IAllocation* alloc)
     {
-        DebugA("Allocation removed")
+        LDebug("Allocation removed")
     }
 };
 
 
 #define RunTestServer()                                                        \
-    DebugL << "Running TURN Server" << endl;                                   \
+    SDebug << "Running TURN Server" << endl;                                   \
     turn::ServerOptions so;                                                    \
     so.software = "Sourcey STUN/TURN Server [rfc5766]";                        \
     so.realm = "sourcey.com";                                                  \

@@ -37,13 +37,13 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control,
     // The allocation will be deleted if the control connection is lost.
     _control.Close += slot(this, &TCPAllocation::onControlClosed);
 
-    TraceA("Initializing on ", _acceptor->address())
+    LTrace("Initializing on ", _acceptor->address())
 }
 
 
 TCPAllocation::~TCPAllocation()
 {
-    TraceA("Destroy TCP allocation")
+    LTrace("Destroy TCP allocation")
 
    
     _acceptor.as<net::TCPSocket>()->AcceptConnection -= slot(this, &TCPAllocation::onPeerAccept);
@@ -59,13 +59,13 @@ TCPAllocation::~TCPAllocation()
     }
     assert(this->pairs().empty());
 
-    TraceA("Destroy TCP allocation: OK")
+    LTrace("Destroy TCP allocation: OK")
 }
 
 
 void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 {
-    TraceA("Peer connection accepted: ", socket->peerAddress())
+    LTrace("Peer connection accepted: ", socket->peerAddress())
 
     // 5.3. Receiving a TCP Connection on a Relayed Transport Address
     //
@@ -85,10 +85,10 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
     // immediately after it has been accepted.
     //
     if (!hasPermission(socket->peerAddress().host())) {
-        TraceA("No permission for peer: ", socket->peerAddress())
+        LTrace("No permission for peer: ", socket->peerAddress())
         return;
     }
-    TraceA("Has permission for: ", socket->peerAddress())
+    LTrace("Has permission for: ", socket->peerAddress())
 
     // Otherwise, the server sends a ConnectionAttempt indication to the
     // client over the control connection. The indication MUST include an
@@ -119,14 +119,14 @@ void TCPAllocation::onPeerAccept(const net::TCPSocket::Ptr& socket)
 
     sendToControl(response);
 
-    TraceL << "Peer connection accepted with ID: " << pair->connectionID
+    STrace << "Peer connection accepted with ID: " << pair->connectionID
            << endl;
 }
 
 
 bool TCPAllocation::handleRequest(Request& request)
 {
-    TraceA("Handle request")
+    LTrace("Handle request")
 
     if (!ServerAllocation::handleRequest(request)) {
         if (request.methodType() == stun::Message::Connect)
@@ -143,13 +143,13 @@ bool TCPAllocation::handleRequest(Request& request)
 
 bool TCPAllocation::onTimer()
 {
-    TraceA("On timer")
+    LTrace("On timer")
 
     // Clean up any expired Connect request peer connections.
     auto pairs = this->pairs().map();
     for (auto it = pairs.begin(); it != pairs.end(); ++it) {
         if (it->second->expired()) {
-            TraceA("On timer: Removing expired peer")
+            LTrace("On timer: Removing expired peer")
             this->pairs().free(it->first);
         }
     }
@@ -160,7 +160,7 @@ bool TCPAllocation::onTimer()
 
 void TCPAllocation::handleConnectRequest(Request& request)
 {
-    TraceA("Handle Connect request")
+    LTrace("Handle Connect request")
 
     // 5.2. Receiving a Connect Request
     //
@@ -208,7 +208,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
 
 void TCPAllocation::handleConnectionBindRequest(Request& request)
 {
-    TraceA("Handle ConnectionBind Request")
+    LTrace("Handle ConnectionBind Request")
 
     assert(request.methodType() == stun::Message::ConnectionBind);
     TCPConnectionPair* pair = nullptr;
@@ -275,7 +275,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 
         assert(pair->isDataConnection);
     } catch (std::exception& exc) {
-        ErrorL << "ConnectionBind error: " << exc.what() << endl;
+        SError << "ConnectionBind error: " << exc.what() << endl;
         server().respondError(request, 400, "Bad Request");
 
         if (pair && !pair->isDataConnection) {
@@ -290,7 +290,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 
 void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool success)
 {
-    TraceA("Send peer Connect response: ", success)
+    LTrace("Send peer Connect response: ", success)
 
     assert(!pair->transactionID.empty());
 
@@ -324,14 +324,14 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool succes
 
 int TCPAllocation::sendToControl(stun::Message& message)
 {
-    TraceA("Send to control: ", message)
+    LTrace("Send to control: ", message)
     return _control->sendPacket(message, 0);
 }
 
 
 void TCPAllocation::onControlClosed(net::Socket& socket)
 {
-    TraceA("Control socket disconnected")
+    LTrace("Control socket disconnected")
 
     // The allocation will be destroyed on the
     // next timer call to IAllocation::deleted()

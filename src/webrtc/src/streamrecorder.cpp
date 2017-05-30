@@ -69,7 +69,7 @@ void StreamRecorder::setAudioTrack(webrtc::AudioTrackInterface* track)
 
 void StreamRecorder::OnFrame(const webrtc::VideoFrame& yuvframe)
 {
-    TraceA("On video frame: ", yuvframe.width(), 'x', yuvframe.height())
+    LTrace("On video frame: ", yuvframe.width(), 'x', yuvframe.height())
 
     // TODO: Recreate encoder context on input stream change
     if (_awaitingVideo) {
@@ -106,7 +106,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
                             int sample_rate, size_t number_of_channels,
                             size_t number_of_frames)
 {
-    TraceL << "On audio frame: "
+    STrace << "On audio frame: "
            << "number_of_frames=" << number_of_frames << ", "
            << "number_of_channels=" << number_of_channels << ", "
            << "sample_rate=" << sample_rate << ", "
@@ -115,7 +115,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
     // FIXME: For some reason the first couple of samples come though as mono,
     // so let's just skip those for now.
     if (number_of_channels < 2) {
-        WarnL << "Dropping initial mono samples" << std::endl;
+        SWarn << "Dropping initial mono samples" << std::endl;
         return;
     }
 

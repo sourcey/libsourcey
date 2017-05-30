@@ -74,7 +74,7 @@ public:
         for (auto& kv : optparse.args) {
             const std::string& key = kv.first;
             const std::string& value = kv.second;
-            DebugA("Setting option: ", key, ": ", value)
+            LDebug("Setting option: ", key, ": ", value)
 
             if (key == "help") {
                 showHelp = true;
@@ -240,7 +240,7 @@ public:
 
     void onAckState(void* sender, TransactionState& state, const TransactionState&)
     {
-        DebugA("####### On announce response: ", state)
+        LDebug("####### On announce response: ", state)
 
         // auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
         switch (state.id()) {
@@ -256,7 +256,7 @@ public:
 
     //void onRecvPacket(IPacket& raw)
     //{
-    //    DebugA("####### On raw packet: ", raw.className())
+    //    LDebug("####### On raw packet: ", raw.className())
 
     //    auto message = dynamic_cast<smpl::Message*>(&raw);
     //    if (message) {
@@ -273,34 +273,34 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        DebugA("####### On message: ", message.className())
+        LDebug("####### On message: ", message.className())
 
         // Handle incoming Symple messages here
     }
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        DebugA("####### On presence: ", presence.className())
+        LDebug("####### On presence: ", presence.className())
 
         // Handle incoming Symple presences here
     }
 
     void onRecvEvent(smpl::Event& event)
     {
-        DebugA("####### On event: ", event.className())
+        LDebug("####### On event: ", event.className())
 
         // Handle incoming Symple events here
     }
 
     void onClientAnnounce(const int& status)
     {
-        DebugA("####### On announce: ", status)
+        LDebug("####### On announce: ", status)
         assert(status == 200);
     }
 
     void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        DebugL << "Client state changed: " << state << ": "
+        SDebug << "Client state changed: " << state << ": "
                << client.ws().socket->address() << endl;
 
         switch (state.id()) {
@@ -322,7 +322,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        DebugL << "####### Updating presence data" << endl;
+        SDebug << "####### Updating presence data" << endl;
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.
@@ -339,8 +339,8 @@ int main(int argc, char** argv)
     // fs::addnode(logPath, util::format("Symple_%Ld.log",
     // static_cast<long>(Timestamp().epochTime())));
     // cout << "Log path: " << logPath << endl;
-    // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LDebug
+    // Logger::instance().add(new FileChannel("Symple", logPath, Level::Debug));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LDebug
 
     // Init SSL client context
 #if USE_SSL

@@ -89,7 +89,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    Logger::instance().add(new ConsoleChannel("Test", Level::Trace));
     {
         archo::Tests app;
     }

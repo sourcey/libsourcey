@@ -56,14 +56,14 @@ public:
     /// Update the item expiry timeout
     virtual bool expires(const TKey& key, long timeout)
     {
-        TraceS(this) << "Set expires: " << key << ": " << timeout << std::endl;
+        STrace << "Set expires: " << key << ": " << timeout << std::endl;
         return expires(Base::get(key, false), timeout);
     }
 
     /// Update the item expiry timeout
     virtual bool expires(TValue* item, long timeout)
     {
-        TraceS(this) << "Set expires: " << item << ": " << timeout << std::endl;
+        STrace << "Set expires: " << item << ": " << timeout << std::endl;
         return setTimeout(item, timeout);
     }
 
@@ -80,7 +80,7 @@ protected:
         if (item) {
             std::lock_guard<std::mutex> guard(_tmutex);
             if (timeout > 0) {
-                TraceS(this) << "Set timeout: " << item << ": " << timeout << std::endl;
+                STrace << "Set timeout: " << item << ": " << timeout << std::endl;
                 auto& t = _timeouts[item];
                 t.setDelay(timeout);
                 t.start();
@@ -123,13 +123,13 @@ protected:
 
         // for (auto ref : timeouts) {}
         for (auto it = timeouts.begin(); it != timeouts.end(); ++it) {
-            // TraceS(this) << "Check item: "
+            // STrace << "Check item: "
             //    << it->first << ": "
             //    << it->second.delay() << ": "
             //    << it->second.remaining() << std::endl;
             if (it->second.expired()) {
                 // auto item = it->first;
-                TraceS(this) << "Item expired: " << it->first << std::endl;
+                STrace << "Item expired: " << it->first << std::endl;
                 onTimeout(it->first);
                 // it = _timeouts.erase(it);
             }

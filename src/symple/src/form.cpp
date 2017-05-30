@@ -245,10 +245,10 @@ bool FormElement::clearElements(const std::string& id, bool partial)
                     // element.isMember("id") &&
                     partial ? curID.find(id) != std::string::npos
                             : curID == id) {
-                    TraceA("Symple form: Removing redundant: ", curID)
+                    LTrace("Symple form: Removing redundant: ", curID)
                     match = true;
                 } else {
-                    TraceA("Symple form: Keeping: ", curID)
+                    LTrace("Symple form: Keeping: ", curID)
                     result["elements"].push_back(element);
                 }
             }

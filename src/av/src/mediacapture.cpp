@@ -38,14 +38,14 @@ MediaCapture::MediaCapture()
     , _looping(false)
     , _realtime(false)
 {
-    TraceA("Create")
+    LTrace("Create")
     initializeFFmpeg();
 }
 
 
 MediaCapture::~MediaCapture()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 
     close();
     uninitializeFFmpeg();
@@ -54,7 +54,7 @@ MediaCapture::~MediaCapture()
 
 void MediaCapture::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
 
     stop();
 
@@ -73,20 +73,20 @@ void MediaCapture::close()
         _formatCtx = nullptr;
     }
 
-    TraceA("Closing: OK")
+    LTrace("Closing: OK")
 }
 
 
 void MediaCapture::openFile(const std::string& file)
 {
-    TraceS(this) << "Opening file: " << file << endl;
+    STrace << "Opening file: " << file << endl;
     openStream(file, nullptr, nullptr);
 }
 
 
 void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
-    TraceS(this) << "Opening stream: " << filename << endl;
+    STrace << "Opening stream: " << filename << endl;
 
     if (_formatCtx)
         throw std::runtime_error("Capture has already been initialized");
@@ -124,13 +124,13 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
 
 void MediaCapture::start()
 {
-    TraceA("Starting")
+    LTrace("Starting")
 
     std::lock_guard<std::mutex> guard(_mutex);
     assert(_video || _audio);
 
     if ((_video || _audio) && !_thread.running()) {
-        TraceA("Initializing thread")
+        LTrace("Initializing thread")
         _stopping = false;
         _thread.start(std::bind(&MediaCapture::run, this));
     }
@@ -139,13 +139,13 @@ void MediaCapture::start()
 
 void MediaCapture::stop()
 {
-    TraceA("Stopping")
+    LTrace("Stopping")
 
     std::lock_guard<std::mutex> guard(_mutex);
 
     _stopping = true;
     if (_thread.running()) {
-        TraceA("Terminating thread")
+        LTrace("Terminating thread")
         _thread.join();
     }
 }
@@ -153,7 +153,7 @@ void MediaCapture::stop()
 
 void MediaCapture::emit(IPacket& packet)
 {
-    TraceS(this) << "Emit: " << packet.size() << endl;
+    STrace << "Emit: " << packet.size() << endl;
 
     emitter.emit(packet);
 }
@@ -161,7 +161,7 @@ void MediaCapture::emit(IPacket& packet)
 
 void MediaCapture::run()
 {
-    TraceA("Running")
+    LTrace("Running")
 
     try {
         int res;
@@ -187,7 +187,7 @@ void MediaCapture::run()
 
         // Read input packets until complete
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-            TraceS(this) << "Read frame: pts=" << ipacket.pts
+            STrace << "Read frame: pts=" << ipacket.pts
                          << ", dts=" << ipacket.dts << endl;
 
             if (_stopping)
@@ -204,7 +204,7 @@ void MediaCapture::run()
 
                 // Decode and emit
                 if (_video->decode(ipacket)) {
-                    TraceS(this) << "Decoded video: "
+                    STrace << "Decoded video: "
                                  << "time=" << _video->time << ", "
                                  << "pts=" << _video->pts << endl;
                 }
@@ -229,7 +229,7 @@ void MediaCapture::run()
 
                 // Decode and emit
                 if (_audio->decode(ipacket)) {
-                    TraceS(this) << "Decoded Audio: "
+                    STrace << "Decoded Audio: "
                                  << "time=" << _audio->time << ", "
                                  << "pts=" << _video->pts << endl;
                 }
@@ -247,17 +247,17 @@ void MediaCapture::run()
         }
 
         // End of file or error
-        TraceS(this) << "Decoding: EOF: " << res << endl;
+        STrace << "Decoding: EOF: " << res << endl;
     } catch (std::exception& exc) {
         _error = exc.what();
-        ErrorS(this) << "Decoder Error: " << _error << endl;
+        SError << "Decoder Error: " << _error << endl;
     } catch (...) {
         _error = "Unknown Error";
-        ErrorA("Unknown Error")
+        LError("Unknown Error")
     }
 
     if (_stopping || !_looping) {
-        TraceA("Exiting")
+        LTrace("Exiting")
         _stopping = true;
         Closing.emit();
     }

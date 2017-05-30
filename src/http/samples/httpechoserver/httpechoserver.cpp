@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     setenv("UV_THREADPOOL_SIZE", std::to_string(ncores).c_str(), 1);
 #endif
 
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     // Logger::instance().setWriter(new AsyncLogWriter);
     // net::SSLManager::initNoVerifyServer();
     {

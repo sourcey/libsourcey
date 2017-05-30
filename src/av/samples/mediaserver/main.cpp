@@ -10,7 +10,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     //Logger::instance().setWriter(new AsyncLogWriter);
     {
         // Pre-initialize video captures in the main thread

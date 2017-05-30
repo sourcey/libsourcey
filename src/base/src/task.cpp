@@ -100,7 +100,7 @@ bool TaskRunner::start(Task* task)
     // if (task->_cancelled) {
     // task->_cancelled = false;
     // task->start();
-    TraceN(this) << "Start task: " << task << endl;
+    STrace << "Start task: " << task << endl;
     onStart(task);
     //_wakeUp.set();
     return true;
@@ -114,7 +114,7 @@ bool TaskRunner::cancel(Task* task)
     // if (!task->_cancelled) {
     // task->_cancelled = true;
     // task->cancel();
-    // TraceN(this) << "Cancelled task: " << task << endl;
+    // STrace << "Cancelled task: " << task << endl;
     // onCancel(task);
     //_wakeUp.set();
     // return true;
@@ -122,7 +122,7 @@ bool TaskRunner::cancel(Task* task)
 
     if (!task->cancelled()) {
         task->cancel();
-        TraceN(this) << "Cancel task: " << task << endl;
+        STrace << "Cancel task: " << task << endl;
         onCancel(task);
         //_wakeUp.set();
         return true;
@@ -134,17 +134,17 @@ bool TaskRunner::cancel(Task* task)
 
 bool TaskRunner::destroy(Task* task)
 {
-    TraceN(this) << "Abort task: " << task << endl;
+    STrace << "Abort task: " << task << endl;
 
     // If the task exists then set the destroyed flag.
     if (exists(task)) {
-        TraceN(this) << "Abort managed task: " << task << endl;
+        STrace << "Abort managed task: " << task << endl;
         task->_destroyed = true;
     }
 
     // Otherwise destroy the pointer.
     else {
-        TraceN(this) << "Delete unmanaged task: " << task << endl;
+        STrace << "Delete unmanaged task: " << task << endl;
         delete task;
     }
 
@@ -154,7 +154,7 @@ bool TaskRunner::destroy(Task* task)
 
 bool TaskRunner::add(Task* task)
 {
-    TraceN(this) << "Add task: " << task << endl;
+    STrace << "Add task: " << task << endl;
     if (!exists(task)) {
         std::lock_guard<std::mutex> guard(_mutex);
         _tasks.push_back(task);
@@ -167,7 +167,7 @@ bool TaskRunner::add(Task* task)
 
 bool TaskRunner::remove(Task* task)
 {
-    TraceN(this) << "Remove task: " << task << endl;
+    STrace << "Remove task: " << task << endl;
 
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -218,7 +218,7 @@ void TaskRunner::clear()
 {
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-        TraceN(this) << "Clear: Destroying task: " << *it << endl;
+        STrace << "Clear: Destroying task: " << *it << endl;
         delete *it;
     }
     _tasks.clear();
@@ -227,7 +227,7 @@ void TaskRunner::clear()
 
 void TaskRunner::setRunner(std::shared_ptr<Runner> runner)
 {
-    TraceN(this) << "Set async: " << runner.get() << endl;
+    STrace << "Set async: " << runner.get() << endl;
 
     std::lock_guard<std::mutex> guard(_mutex);
     assert(!_runner);
@@ -240,13 +240,13 @@ void TaskRunner::setRunner(std::shared_ptr<Runner> runner)
 void TaskRunner::run()
 {
     Task* task = next();
-    // TraceN(this) << "Next task: " << task << endl;
+    // STrace << "Next task: " << task << endl;
 
     // Run the task
     if (task) {
         // Check once more that the task has not been cancelled
         if (!task->cancelled()) {
-            TraceN(this) << "Run task: " << task << endl;
+            STrace << "Run task: " << task << endl;
             task->run();
 
             onRun(task);
@@ -269,14 +269,14 @@ void TaskRunner::run()
 
         // Destroy the task if required
         if (task->destroyed()) {
-            TraceN(this) << "Destroy task: " << task << endl;
+            STrace << "Destroy task: " << task << endl;
             remove(task);
             delete task;
         }
     }
 
     // Dispatch the Idle signal
-    // TraceN(this) << "idle: "<< Idle.nslots() << endl;
+    // STrace << "idle: "<< Idle.nslots() << endl;
     Idle.emit(/*this*/);
 
     // Prevent 100% CPU

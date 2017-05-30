@@ -57,10 +57,10 @@ OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
 {
     try {
         if (capture_state() == cricket::CS_RUNNING) {
-            WarnL << "Start called when it's already started." << endl;
+            SWarn << "Start called when it's already started." << endl;
             return capture_state();
         }
-        InfoL << "Start" << endl;
+        SInfo << "Start" << endl;
 
         // TODO: Check and verify cricket::VideoFormat
 
@@ -83,10 +83,10 @@ void OpenCVVideoCapturer::Stop()
 {
     try {
         if (capture_state() == cricket::CS_STOPPED) {
-            WarnL << "Stop called when it's already stopped." << endl;
+            SWarn << "Stop called when it's already stopped." << endl;
             return;
         }
-        InfoL << "Stop" << endl;
+        SInfo << "Stop" << endl;
 
         capture->emitter.detach(this); // for cleanup()
 
@@ -102,7 +102,7 @@ void OpenCVVideoCapturer::Stop()
 void OpenCVVideoCapturer::onFrameCaptured(void* sender,
                                           av::MatrixPacket& packet)
 {
-    // TraceS(this) << "On frame" << std::endl;
+    // STrace << "On frame" << std::endl;
 
     // Convert the packet from BGR to I420 for WebRTC
     cv::Mat yuv(packet.width, packet.height, CV_8UC4);

@@ -302,7 +302,7 @@ Attribute* Attribute::create(uint16_t type, uint16_t size)
         //    break;
 
         default:
-            ErrorL << "Cannot create attribute for type: " << type << endl;
+            SError << "Cannot create attribute for type: " << type << endl;
             break;
     }
 
@@ -745,19 +745,19 @@ Attribute* MessageIntegrity::clone()
 
 bool MessageIntegrity::verifyHmac(const std::string& key) const
 {
-    // DebugA("Message: Verify HMAC: ", key)
+    // LDebug("Message: Verify HMAC: ", key)
 
     assert(!key.empty());
     assert(!_hmac.empty());
     assert(!_input.empty());
 
-    // DebugA("Message: Packet integrity input (", _input, ")")
-    // DebugA("Message: Packet integrity key (", key, ")")
+    // LDebug("Message: Packet integrity input (", _input, ")")
+    // LDebug("Message: Packet integrity key (", key, ")")
 
     std::string hmac = crypto::computeHMAC(_input, key);
     assert(hmac.size() == MessageIntegrity::Size);
 
-    // DebugL << "Message: Verifying message integrity (" << hmac << ": " <<
+    // SDebug << "Message: Verifying message integrity (" << hmac << ": " <<
     // _hmac << ")" << endl;
 
     return _hmac == hmac;
@@ -766,7 +766,7 @@ bool MessageIntegrity::verifyHmac(const std::string& key) const
 
 void MessageIntegrity::read(BitReader& reader)
 {
-    // DebugL << "Message: Read HMAC" << endl;
+    // SDebug << "Message: Read HMAC" << endl;
     int sizeBeforeMessageIntegrity = reader.position() - kAttributeHeaderSize;
 
     // Read the HMAC value.
@@ -792,7 +792,7 @@ void MessageIntegrity::read(BitReader& reader)
     reader.skip(MessageIntegrity::Size);
 
 #if 0
-    //DebugA("Message: Parsed message integrity (", _hmac, ")")
+    //LDebug("Message: Parsed message integrity (", _hmac, ")")
 
     // Remember the original position and set the buffer position back to 0.
     int originalPos = reader.position();

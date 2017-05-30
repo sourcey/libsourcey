@@ -234,22 +234,18 @@ Address::Address(const struct sockaddr* addr, socklen_t length)
 Address::Address(const Address& addr)
 {
     _base = addr._base;
-    // _base->duplicate();
 }
 
 
 Address::~Address()
 {
-    // _base->release();
 }
 
 
 Address& Address::operator=(const Address& addr)
 {
     if (&addr != this) {
-        // _base->release();
         _base = addr._base;
-        // _base->duplicate();
     }
     return *this;
 }
@@ -318,7 +314,7 @@ std::string Address::toString() const
     if (family() == Address::IPv6)
         result.append("]");
     result.append(":");
-    result.append(util::itostr<uint16_t>(port()));
+    result.append(util::itostr(port()));
     return result;
 }
 
@@ -373,13 +369,13 @@ bool Address::validateIP(const std::string& addr)
 
 uint16_t Address::resolveService(const std::string& service)
 {
-    uint16_t port = util::strtoi<uint16_t>(service);
+    auto port = util::strtoi<uint16_t>(service);
     if (port && port > 0) //, port) && port <= 0xFFFF
-        return (uint16_t)port;
+        return port;
 
-    struct servent* se = getservbyname(service.c_str(), nullptr);
-    if (se)
-        return ntohs(se->s_port);
+    struct servent* serv = getservbyname(service.c_str(), nullptr);
+    if (serv)
+        return ntohs(serv->s_port);
     else
         throw std::runtime_error("Service not found: " + service);
 }

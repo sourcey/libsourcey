@@ -31,24 +31,24 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket)
     , _readBIO(nullptr)
     , _writeBIO(nullptr)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
 SSLAdapter::~SSLAdapter()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
     if (_ssl) {
         SSL_free(_ssl);
         _ssl = nullptr;
     }
-    // TraceA("Destroy: OK")
+    // LTrace("Destroy: OK")
 }
 
 
 void SSLAdapter::initClient()
 {
-    // TraceA("Init client")
+    // LTrace("Init client")
     assert(_socket);
     if (!_socket->context())
         _socket->useContext(SSLManager::instance().defaultClientContext());
@@ -71,7 +71,7 @@ void SSLAdapter::initClient()
 
 void SSLAdapter::initServer() //(SSL* ssl)
 {
-    // TraceA("Init server")
+    // LTrace("Init server")
     assert(_socket);
     if (!_socket->context())
         _socket->useContext(SSLManager::instance().defaultServerContext());
@@ -88,9 +88,9 @@ void SSLAdapter::initServer() //(SSL* ssl)
 
 void SSLAdapter::shutdown()
 {
-    // TraceA("Shutdown")
+    // LTrace("Shutdown")
     if (_ssl) {
-        // TraceA("Shutdown SSL")
+        // LTrace("Shutdown SSL")
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);
@@ -133,7 +133,7 @@ int SSLAdapter::available() const
 
 void SSLAdapter::addIncomingData(const char* data, size_t len)
 {
-    // TraceA("Add incoming data: ", len)
+    // LTrace("Add incoming data: ", len)
     assert(_readBIO);
     BIO_write(_readBIO, data, (int)len);
     flush();
@@ -162,7 +162,7 @@ void SSLAdapter::handshake()
 
 void SSLAdapter::flush()
 {
-    TraceA("Flushing")
+    LTrace("Flushing")
 
     // Keep trying to handshake until initialized
     if (!ready())
@@ -219,14 +219,14 @@ void SSLAdapter::handleError(int rc)
     int error = SSL_get_error(_ssl, rc);
     switch (error) {
         case SSL_ERROR_ZERO_RETURN:
-            // TraceA("SSL_ERROR_ZERO_RETURN")
+            // LTrace("SSL_ERROR_ZERO_RETURN")
             return;
         case SSL_ERROR_WANT_READ:
-            // TraceA("SSL_ERROR_WANT_READ")
+            // LTrace("SSL_ERROR_WANT_READ")
             flushWriteBIO();
             break;
         case SSL_ERROR_WANT_WRITE:
-            // TraceA("SSL_ERROR_WANT_WRITE")
+            // LTrace("SSL_ERROR_WANT_WRITE")
             assert(0 && "TODO");
             break;
         case SSL_ERROR_WANT_CONNECT:

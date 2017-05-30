@@ -59,7 +59,7 @@ PlanarVideoPacket::PlanarVideoPacket(const PlanarVideoPacket& r)
     _size = av_image_alloc((uint8_t**)r.buffer, (int*)r.linesize,
         width, height, pixfmt, 1);
     if (_size < 0) {
-        ErrorA("Could not allocate raw video buffer");
+        LError("Could not allocate raw video buffer");
         assert(0);
     }
 
@@ -113,7 +113,7 @@ PlanarAudioPacket::PlanarAudioPacket(const PlanarAudioPacket& r)
     int ret = av_samples_alloc_array_and_samples((uint8_t***)&buffer, 
         nullptr, channels, numSamples, fmt, 0);
     if (ret < 0) {
-        ErrorA("Could not allocate raw audio buffer");
+        LError("Could not allocate raw audio buffer");
         assert(0);
     }
     

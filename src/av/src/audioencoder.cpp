@@ -28,13 +28,13 @@ namespace av {
 AudioEncoder::AudioEncoder(AVFormatContext* format)
     : format(format)
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
 AudioEncoder::~AudioEncoder()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
     close();
 }
 
@@ -74,7 +74,7 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
 
 void AudioEncoder::create()
 {
-    TraceA("Create")
+    LTrace("Create")
     int err;
 
     // Find the audio encoder
@@ -167,13 +167,13 @@ void AudioEncoder::create()
 
 // void AudioEncoder::open()
 // {
-//     TraceA("Create")
+//     LTrace("Create")
 // }
 
 
 void AudioEncoder::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
 
     AudioContext::close();
 
@@ -190,7 +190,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
 
     if (enc->stream) {
         // Set the encoder time in microseconds
-        // This value represents the number of microseconds 
+        // This value represents the number of microseconds
         // that have elapsed since the brginning of the stream.
         enc->time = opacket.pts > 0 ? static_cast<int64_t>(
             opacket.pts * av_q2d(enc->stream->time_base) * AV_TIME_BASE) : 0;
@@ -219,7 +219,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
 
 int flushBuffer(AudioEncoder* enc)
 {
-    TraceS(enc) << "Flush" << endl;
+    // STrace << "Flush" << endl;
 
     // Read frames from the FIFO while available
     int num = 0;
@@ -239,17 +239,18 @@ int flushBuffer(AudioEncoder* enc)
 
 bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t pts)
 {
-    TraceS(this) << "Encoding audio packet: " << numSamples << endl;
+    // STrace << "Encoding audio packet: " << numSamples << endl;
 
     // Resample input data or add it to the buffer directly
     if (resampler) {
         if (!resampler->resample((uint8_t**)&samples, numSamples)) {
-            TraceA("Samples buffered by resampler")
+            LTrace("Samples buffered by resampler")
             return false;
         }
 
-        TraceS(this) << "Resampled audio packet: " << numSamples << " <=> "
-                     << resampler->outNumSamples << endl;
+        // STrace << "Resampled audio packet: " 
+        //        << numSamples << " <=> "
+        //        << resampler->outNumSamples << endl;
 
         // Add the converted input samples to the FIFO buffer.
         fifo.write((void**)resampler->outSamples, resampler->outNumSamples);
@@ -269,16 +270,16 @@ bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t 
 
 bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64_t pts)
 {
-    TraceS(this) << "Encoding audio packet: " << numSamples << endl;
+    STrace << "Encoding audio packet: " << numSamples << endl;
 
     // Resample input data or add it to the buffer directly
     if (resampler) {
         if (!resampler->resample((uint8_t**)samples, numSamples)) {
-            TraceA("Samples buffered by resampler")
+            LTrace("Samples buffered by resampler")
             return false;
         }
 
-        TraceS(this) << "Resampled audio packet: " << numSamples << " <=> "
+        STrace << "Resampled audio packet: " << numSamples << " <=> "
             << resampler->outNumSamples << endl;
 
         // Add the converted input samples to the FIFO buffer.
@@ -300,7 +301,7 @@ bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64
 
 bool AudioEncoder::encode(AVFrame* iframe)
 {
-    TraceA("Encoding audio frame")
+    LTrace("Encoding audio frame")
 
     int frameEncoded, ret;
 
@@ -332,15 +333,15 @@ bool AudioEncoder::encode(AVFrame* iframe)
             //     if (opacket.duration > 0)
             //         opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
         }
-        TraceL << "Audio frame encoded:\n"
+        STrace << "Audio frame encoded:\n"
                << "\n\tFrame PTS: " << (iframe ? iframe->pts : 0)
                << "\n\tPTS: " << opacket.pts << "\n\tDTS: " << opacket.dts
                << "\n\tDuration: " << opacket.duration << endl;
 
         emitPacket(this, opacket);
-    } 
+    }
     else {
-        TraceA("No frame encoded")
+        LTrace("No frame encoded")
     }
 
     av_packet_unref(&opacket);
@@ -351,7 +352,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
 
 void AudioEncoder::flush()
 {
-    TraceA("Flush")
+    LTrace("Flush")
 
     // Flush any remaining frames in the FIFO
     flushBuffer(this);

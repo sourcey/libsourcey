@@ -30,7 +30,7 @@ MediaServer::MediaServer(uint16_t port)
                    net::makeSocket<net::TCPSocket>(),
                    new HTTPStreamingConnectionFactory(this))
 {
-    DebugL << "Create" << endl;
+    SDebug << "Create" << endl;
 
     // Register the media formats we will be using
     // FormatRegistry& formats = MediaFactory::instance().formats();
@@ -62,14 +62,14 @@ MediaServer::MediaServer(uint16_t port)
 
 MediaServer::~MediaServer()
 {
-    DebugL << "Destroy" << endl;
+    SDebug << "Destroy" << endl;
 }
 
 
 void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options,
                                     bool freeCaptures, bool attachPacketizers)
 {
-    DebugL << "Setup Packet Stream" << endl;
+    SDebug << "Setup Packet Stream" << endl;
 
     // Attach capture sources
 
@@ -194,7 +194,7 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     av::DeviceManager devman;
     if (options.oformat.video.enabled) {
         devman.getDefaultCamera(dev);
-        InfoL << "Default video capture " << dev.id << endl;
+        SInfo << "Default video capture " << dev.id << endl;
         options.videoCapture = std::make_shared<av::VideoCapture>(dev.id, options.oformat.video);
         //options.videoCapture->openVideo(dev.id, options.oformat.video.width, 
         //                                   options.oformat.video.height, 
@@ -203,7 +203,7 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     }
     if (options.oformat.audio.enabled) {
         devman.getDefaultMicrophone(dev);
-        InfoL << "Default audio capture " << dev.id << endl;
+        SInfo << "Default audio capture " << dev.id << endl;
         options.audioCapture = std::make_shared<av::AudioCapture>(dev.id, options.oformat.audio);
         //options.audioCapture->open(dev.id, options.oformat.audio.channels, 
         //                                   options.oformat.audio.sampleRate);
@@ -224,7 +224,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
         auto& request = conn.request();
 
         // Log incoming requests
-        InfoL << "Incoming connection from " << conn.socket()->peerAddress()
+        SInfo << "Incoming connection from " << conn.socket()->peerAddress()
               << ": URI:\n" << request.getURI() 
               << ": Request:\n" << request << endl;
 
@@ -251,10 +251,10 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 #endif
     } 
     catch (std::exception& exc) {
-        ErrorL << "Request error: " << exc.what() << endl;
+        SError << "Request error: " << exc.what() << endl;
     }
 
-    WarnL << "Bad Request" << endl;
+    SWarn << "Bad Request" << endl;
     conn.response().setStatus(http::StatusCode::BadRequest);
     conn.sendHeader();
     conn.close();

@@ -42,10 +42,10 @@ ServerAllocation::~ServerAllocation()
 
 bool ServerAllocation::handleRequest(Request& request)
 {
-    TraceA("Handle Request")
+    LTrace("Handle Request")
 
     if (IAllocation::deleted()) {
-        WarnL << "Dropping request for deleted allocation" << endl;
+        SWarn << "Dropping request for deleted allocation" << endl;
         return false;
     }
 
@@ -62,7 +62,7 @@ bool ServerAllocation::handleRequest(Request& request)
 
 void ServerAllocation::handleRefreshRequest(Request& request)
 {
-    TraceA("Handle Refresh Request")
+    LTrace("Handle Refresh Request")
     assert(request.methodType() == stun::Message::Refresh);
     assert(request.classType() == stun::Message::Request);
 
@@ -134,7 +134,7 @@ void ServerAllocation::handleRefreshRequest(Request& request)
 
 void ServerAllocation::handleCreatePermission(Request& request)
 {
-    TraceA("Handle Create Permission")
+    LTrace("Handle Create Permission")
 
     // 9.2. Receiving a CreatePermission Request
     //
@@ -190,7 +190,7 @@ void ServerAllocation::handleCreatePermission(Request& request)
 
 bool ServerAllocation::onTimer()
 {
-    TraceA("ServerAllocation: On timer: ", IAllocation::deleted())
+    LTrace("ServerAllocation: On timer: ", IAllocation::deleted())
     if (IAllocation::deleted())
         return false; // bye bye
 

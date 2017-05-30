@@ -25,7 +25,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LDebug)); // LTrace
+    Logger::instance().add(new ConsoleChannel("debug", Level::Debug)); // LTrace
 
 #if USE_SSL
     net::SSLManager::initNoVerifyClient();
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
         Signaler app(options);
 
         Idler rtc(app.loop, [](void* arg) {
-            // TraceA("Running WebRTC loop")
+            // LTrace("Running WebRTC loop")
             auto thread = reinterpret_cast<rtc::Thread*>(arg);
             thread->ProcessMessages(10);
         }, rtc::Thread::Current());

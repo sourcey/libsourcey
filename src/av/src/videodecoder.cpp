@@ -39,7 +39,7 @@ VideoDecoder::~VideoDecoder()
 void VideoDecoder::create()
 {
     assert(stream);
-    TraceS(this) << "Create: " << stream->index << endl;
+    STrace << "Create: " << stream->index << endl;
 
     ctx = stream->codec;
 
@@ -95,7 +95,7 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
     // Set the decoder seconds since stream start
     dec->seconds = (frame->pkt_dts - dec->stream->start_time) * av_q2d(dec->stream->time_base);
 
-    TraceL << "Decoded video frame:"
+    STrace << "Decoded video frame:"
         << "\n\tFrame DTS: " << frame->pkt_dts
         << "\n\tFrame PTS: " << frame->pts
         << "\n\tTimestamp: " << dec->time
@@ -134,14 +134,14 @@ bool VideoDecoder::decode(AVPacket& ipacket)
         ret = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
             error = "Audio decoder error: " + averror(ret);
-            ErrorS(this) << error << endl;
+            SError << error << endl;
             throw std::runtime_error(error);
         }
 
         if (frameDecoded) {
             // assert(bytesDecoded == ipacket.size);
 
-            // TraceS(this) << "Decoded frame:"
+            // STrace << "Decoded frame:"
             //     << "\n\tFrame Size: " << opacket.size
             //     << "\n\tFrame PTS: " << opacket.pts
             //     << "\n\tInput Frame PTS: " << ipacket.pts
@@ -178,7 +178,7 @@ void VideoDecoder::flush() // AVPacket& opacket
     do {
         avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (frameDecoded) {
-            TraceA("Flushed video frame")
+            LTrace("Flushed video frame")
             emitPacket(this, convert(frame)); //, opacket stream, ctx, &pts, oparams
             // return true;
         }

@@ -32,49 +32,49 @@
 namespace scy {
 
 
-enum LogLevel
+enum class Level
 {
-    LTrace = 0,
-    LDebug = 1,
-    LInfo = 2,
-    LWarn = 3,
-    LError = 4,
-    LFatal = 5,
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+    Fatal = 5,
 };
 
 
-inline LogLevel getLogLevelFromString(const char* level)
+inline Level getLevelFromString(const char* level)
 {
     if (strcmp(level, "trace") == 0)
-        return LTrace;
+        return Level::Trace;
     if (strcmp(level, "debug") == 0)
-        return LDebug;
+        return Level::Debug;
     if (strcmp(level, "info") == 0)
-        return LInfo;
+        return Level::Info;
     if (strcmp(level, "warn") == 0)
-        return LWarn;
+        return Level::Warn;
     if (strcmp(level, "error") == 0)
-        return LError;
+        return Level::Error;
     if (strcmp(level, "fatal") == 0)
-        return LFatal;
-    return LDebug;
+        return Level::Fatal;
+    return Level::Trace;
 }
 
 
-inline const char* getStringFromLogLevel(LogLevel level)
+inline const char* getStringFromLevel(Level level)
 {
     switch (level) {
-        case LTrace:
+        case Level::Trace:
             return "trace";
-        case LDebug:
+        case Level::Debug:
             return "debug";
-        case LInfo:
+        case Level::Info:
             return "info";
-        case LWarn:
+        case Level::Warn:
             return "warn";
-        case LError:
+        case Level::Error:
             return "error";
-        case LFatal:
+        case Level::Fatal:
             return "fatal";
     }
     return "debug";
@@ -188,9 +188,9 @@ public:
 
     /// Sends to the default log using the given class instance.
     /// Recommend using write(LogStream&) to avoid copying data.
-    LogStream& send(const char* level = "debug", const char* realm = "",
-                    const void* ptr = nullptr,
-                    const char* channel = nullptr) const;
+    // LogStream& send(const char* level = "debug", const char* realm = "",
+    //                 const void* ptr = nullptr,
+    //                 const char* channel = nullptr) const;
 
 protected:
     /// NonCopyable and NonMovable
@@ -215,16 +215,16 @@ protected:
 
 
 template <typename T>
-void logArgs(std::ostream& o, T t)
+void logArgs(std::ostream& o, T&& t)
 {
-    o << t << ' '; // << std::endl;
+    o << t; // << ' '; // << std::endl;
 }
 
 template<typename T, typename... Args>
-void logArgs(std::ostream& o, T t, Args... args) // recursive variadic function
+void logArgs(std::ostream& o, T&& t, Args&&... args) // recursive variadic function
 {
-    logArgs(o, t);
-    logArgs(o, args...);
+    logArgs(o, std::forward<T>(t));
+    logArgs(o, std::forward<Args>(args)...);
 }
 
 
@@ -237,17 +237,15 @@ void logArgs(std::ostream& o, T t, Args... args) // recursive variadic function
 
 struct LogStream
 {
-    LogLevel level;
+    Level level;
     int line;
     std::string realm;
-    std::string address; // deprecated - encode in message
     std::ostringstream message;
     std::time_t ts;
     LogChannel* channel;
     bool flushed;
 
-    LogStream(LogLevel level = LDebug, const std::string& realm = "", int line = 0,
-              const void* ptr = nullptr, const char* channel = nullptr);
+    LogStream(Level level, std::string realm, int line, const char* channel = nullptr);
     LogStream(const LogStream& that);
     ~LogStream();
 
@@ -266,7 +264,7 @@ struct LogStream
         return *this;
     }
 
-    LogStream& operator<<(const LogLevel data)
+    LogStream& operator<<(const Level data)
     {
         level = data;
         return *this;
@@ -300,9 +298,8 @@ struct LogStream
 
 struct LogStream
 {
-    LogStream(LogLevel level = LDebug, const std::string& realm = "",
-        int line = 0, const void* ptr = nullptr, const char* channel = nullptr) {};
-    LogStream(const LogStream& that) {};
+    LogStream(Level level, std::string realm, int line, const char* channel = nullptr) = default;
+    LogStream(const LogStream& that) = default;
 
     template<typename... Args>
     void write(Args... args)
@@ -331,26 +328,26 @@ struct LogStream
 class Base_API LogChannel
 {
 public:
-    LogChannel(const std::string& name, LogLevel level = LDebug,
-               const std::string& timeFormat = "%H:%M:%S");
-    virtual ~LogChannel() {};
+    LogChannel(std::string name, Level level = Level::Debug,
+               std::string timeFormat = "%H:%M:%S");
+    virtual ~LogChannel() = default;
 
     virtual void write(const LogStream& stream);
-    virtual void write(const std::string& message, LogLevel level = LDebug,
-                       const char* realm = "", const void* ptr = nullptr);
+    virtual void write(std::string message, Level level = Level::Debug,
+                       std::string realm = "");
     virtual void format(const LogStream& stream, std::ostream& ost);
 
     std::string name() const { return _name; };
-    LogLevel level() const { return _level; };
+    Level level() const { return _level; };
     std::string timeFormat() const { return _timeFormat; };
 
-    void setLevel(LogLevel level) { _level = level; };
-    void setDateFormat(const std::string& format) { _timeFormat = format; };
-    void setFilter(const std::string& filter) { _filter = filter; }
+    void setLevel(Level level) { _level = level; };
+    void setTimeFormat(std::string format) { _timeFormat = std::move(format); };
+    void setFilter(std::string filter) { _filter = std::move(filter); }
 
 protected:
     std::string _name;
-    LogLevel _level;
+    Level _level;
     std::string _timeFormat;
     std::string _filter;
 };
@@ -371,9 +368,9 @@ typedef LogChannel NullChannel;
 class Base_API ConsoleChannel : public LogChannel
 {
 public:
-    ConsoleChannel(const std::string& name, LogLevel level = LDebug,
-                   const std::string& timeFormat = "%H:%M:%S");
-    virtual ~ConsoleChannel(){};
+    ConsoleChannel(std::string name, Level level = Level::Debug,
+                   std::string timeFormat = "%H:%M:%S");
+    virtual ~ConsoleChannel() = default;
 
     virtual void write(const LogStream& stream);
 };
@@ -387,8 +384,9 @@ public:
 class Base_API FileChannel : public LogChannel
 {
 public:
-    FileChannel(const std::string& name, const std::string& path,
-                LogLevel level = LDebug, const char* timeFormat = "%H:%M:%S");
+    FileChannel(std::string name, std::string path,
+                Level level = Level::Debug,
+                std::string timeFormat = "%H:%M:%S");
     virtual ~FileChannel();
 
     virtual void write(const LogStream& stream);
@@ -414,11 +412,12 @@ protected:
 class Base_API RotatingFileChannel : public LogChannel
 {
 public:
-    RotatingFileChannel(const std::string& name, const std::string& dir,
-                        LogLevel level = LDebug,
-                        const std::string& extension = "log",
-                        int rotationInterval = 12 * 3600,
-                        const char* timeFormat = "%H:%M:%S");
+    RotatingFileChannel(std::string name,
+                        std::string dir,
+                        Level level = Level::Debug,
+                        std::string extension = "log",
+                        int rotationInterval = 12 * 3600, // 12 hours
+                        std::string timeFormat = "%H:%M:%S");
     virtual ~RotatingFileChannel();
 
     virtual void write(const LogStream& stream);
@@ -428,8 +427,8 @@ public:
     std::string filename() const { return _filename; };
     int rotationInterval() const { return _rotationInterval; };
 
-    void setDir(const std::string& dir) { _dir = dir; };
-    void setExtension(const std::string& ext) { _extension = ext; };
+    void setDir(std::string dir) { _dir = std::move(dir); };
+    void setExtension(std::string ext) { _extension = std::move(ext); };
     void setRotationInterval(int interval) { _rotationInterval = interval; };
 
 protected:
@@ -447,19 +446,19 @@ class Base_API EventedFileChannel: public FileChannel
 {
 public:
     EventedFileChannel(
-        const std::string& name,
+        std::string name,
         const std::string& dir,
-        LogLevel level = LDebug,
+        Level level = Level::Debug,
         const std::string& extension = "log",
         int rotationInterval = 12 * 3600,
         const char* timeFormat = "%H:%M:%S");
     virtual ~EventedFileChannel();
 
-    virtual void write(const std::string& message, LogLevel level = LDebug,
+    virtual void write(const std::string& message, Level level = Level::Debug,
         const char* realm = "", const void* ptr = nullptr);
     virtual void write(const LogStream& stream);
 
-    Signal<void(const std::string&, LogLevel&, const Polymorphic*&)> OnLogStream;
+    Signal<void(const std::string&, Level&, const Polymorphic*&)> OnLogStream;
 };
 #endif
 
@@ -484,14 +483,14 @@ constexpr const char* r_slant(const char* str)
     return *str == '/' || *str == '\\' ? (str + 1) : r_slant(str - 1);
 }
 
-constexpr const char* file_name(const char* str)
+constexpr const char* _fileName(const char* str)
 {
     return str_slant(str) ? r_slant(str_end(str)) : str;
 }
 
 
 //
-// Macros for debug logging
+// Logging macros
 //
 
 
@@ -511,29 +510,30 @@ inline std::string _methodName(const std::string& fsig)
 #endif
 #endif
 
-#define TraceL LogStream(LTrace, file_name(__FILE__), __LINE__)
-#define DebugL LogStream(LDebug, file_name(__FILE__), __LINE__)
-#define InfoL LogStream(LInfo, file_name(__FILE__), __LINE__)
-#define WarnL LogStream(LWarn, file_name(__FILE__), __LINE__)
-#define ErrorL LogStream(LError, file_name(__FILE__), __LINE__)
 
-#define TraceA(...) { LogStream(LTrace, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define DebugA(...) { LogStream(LDebug, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define InfoA(...) { LogStream(LInfo, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define WarnA(...) { LogStream(LWarn, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
-#define ErrorA(...) { LogStream(LError, file_name(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define STrace LogStream(Level::Trace, _fileName(__FILE__), __LINE__)
+#define SDebug LogStream(Level::Debug, _fileName(__FILE__), __LINE__)
+#define SInfo  LogStream(Level::Info, _fileName(__FILE__), __LINE__)
+#define SWarn  LogStream(Level::Warn, _fileName(__FILE__), __LINE__)
+#define SError LogStream(Level::Error, _fileName(__FILE__), __LINE__)
 
-#define TraceS(self) LogStream(LTrace, file_name(__FILE__), __LINE__, self)
-#define DebugS(self) LogStream(LDebug, file_name(__FILE__), __LINE__, self)
-#define InfoS(self) LogStream(LInfo, file_name(__FILE__), __LINE__, self)
-#define WarnS(self) LogStream(LWarn, file_name(__FILE__), __LINE__, self)
-#define ErrorS(self) LogStream(LError, file_name(__FILE__), __LINE__, self)
+#define LTrace(...) { LogStream(Level::Trace, _fileName(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define LDebug(...) { LogStream(Level::Debug, _fileName(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define LInfo(...)  { LogStream(Level::Info, _fileName(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define LWarn(...)  { LogStream(Level::Warn, _fileName(__FILE__), __LINE__).write(__VA_ARGS__); }
+#define LError(...) { LogStream(Level::Error, _fileName(__FILE__), __LINE__).write(__VA_ARGS__); }
 
-#define TraceN(self) LogStream(LTrace, self->className(), __LINE__, self)
-#define DebugN(self) LogStream(LDebug, self->className(), __LINE__, self)
-#define InfoN(self) LogStream(LInfo, self->className(), __LINE__, self)
-#define WarnN(self) LogStream(LWarn, self->className(), __LINE__, self)
-#define ErrorN(self) LogStream(LError, self->className(), __LINE__, self)
+// #define TraceS(self) LogStream(Level::Trace, _fileName(__FILE__), __LINE__, self)
+// #define DebugS(self) LogStream(Level::Debug, _fileName(__FILE__), __LINE__, self)
+// #define InfoS(self)  LogStream(Level::Info, _fileName(__FILE__), __LINE__, self)
+// #define WarnS(self)  LogStream(Level::Warn, _fileName(__FILE__), __LINE__, self)
+// #define ErrorS(self) LogStream(Level::Error, _fileName(__FILE__), __LINE__, self)
+
+// #define TraceN(self) LogStream(Level::Trace, self->className(), __LINE__, self)
+// #define DebugN(self) LogStream(Level::Debug, self->className(), __LINE__, self)
+// #define InfoN(self)  LogStream(Level::Info, self->className(), __LINE__, self)
+// #define WarnN(self)  LogStream(Level::Warn, self->className(), __LINE__, self)
+// #define ErrorN(self) LogStream(Level::Error, self->className(), __LINE__, self)
 
 
 } // namespace scy

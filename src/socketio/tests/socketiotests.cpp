@@ -94,13 +94,13 @@ public:
                              const sockio::ClientState& oldState)
     {
         auto client = reinterpret_cast<sockio::Client*>(sender);
-        DebugA("Connection state changed: ", state.toString())
+        LDebug("Connection state changed: ", state.toString())
 
         switch (state.id()) {
             case sockio::ClientState::Connecting:
                 break;
             case sockio::ClientState::Connected:
-                DebugL << "Connected" << endl;
+                SDebug << "Connected" << endl;
                 break;
             case sockio::ClientState::Online:
                 // TODO: Send message
@@ -119,7 +119,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
 #if USE_SSL
     SSLManager::initNoVerifyClient();
 #endif

@@ -74,7 +74,7 @@ FormatRegistry& MediaFactory::formats()
 
 void MediaFactory::loadVideoCaptures()
 {
-    DebugL << "Loading video captures" << endl;
+    SDebug << "Loading video captures" << endl;
     assert(Thread::mainID == Thread::currentID());
 
     // Initialize a VideoCapture object for each available device.
@@ -86,7 +86,7 @@ void MediaFactory::loadVideoCaptures()
         try {
             createVideoCapture(devs[0].id);
         } catch (std::exception& exc) {
-            ErrorL << "Cannot load video capture: " << devs[0].id << ": "
+            SError << "Cannot load video capture: " << devs[0].id << ": "
                    << exc.what() << endl;
         }
     }
@@ -95,7 +95,7 @@ void MediaFactory::loadVideoCaptures()
 
 void MediaFactory::reloadFailedVideoCaptures()
 {
-    DebugL << "Reloading failed video captures" << endl;
+    SDebug << "Reloading failed video captures" << endl;
     assert(Thread::mainID == Thread::currentID());
 
     // Loop through captures and attempt to reopen any
@@ -103,7 +103,7 @@ void MediaFactory::reloadFailedVideoCaptures()
     auto videoCaptures = this->videoCaptures();
     for (auto& kv : videoCaptures) {
         if (kv.second->error().any()) {
-            TraceL << "Reloading capture " << kv.second->deviceId() << ": "
+            STrace << "Reloading capture " << kv.second->deviceId() << ": "
                    << kv.second->error() << endl;
             try {
                 kv.second->open();
@@ -115,7 +115,7 @@ void MediaFactory::reloadFailedVideoCaptures()
                     VideoCaptureLoaded.emit(kv.second);
                 }
             } catch (std::exception& exc) {
-                ErrorL << "Capture initialization error: " << exc.what()
+                SError << "Capture initialization error: " << exc.what()
                        << endl;
             }
         }
@@ -140,7 +140,7 @@ void MediaFactory::unloadVideoCaptures()
 VideoCapture::Ptr
 MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 {
-    TraceA("Creating video capture: ", deviceId)
+    LTrace("Creating video capture: ", deviceId)
 
     if (deviceId < 0)
         throw std::runtime_error("Invalid video device ID");
@@ -178,7 +178,7 @@ void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 
 VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 {
-    TraceA("Create video file capture: ", file)
+    LTrace("Create video file capture: ", file)
 
     return std::make_shared<VideoCapture>(file);
 }
@@ -188,7 +188,7 @@ AudioCapture::Ptr MediaFactory::createAudioCapture(int deviceId, int channels,
                                                    int sampleRate,
                                                    RtAudioFormat format)
 {
-    TraceA("Create audio capture: ", deviceId)
+    LTrace("Create audio capture: ", deviceId)
     if (deviceId < 0)
         throw std::runtime_error("Invalid audio device ID");
 

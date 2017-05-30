@@ -27,7 +27,7 @@ SSLSocket::SSLSocket(uv::Loop* loop)
     , _sslSession(nullptr)
     , _sslAdapter(this)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
@@ -37,7 +37,7 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop)
     , _sslSession(nullptr)
     , _sslAdapter(this)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
@@ -47,13 +47,13 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop*
     , _sslSession(session)
     , _sslAdapter(this)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
 SSLSocket::~SSLSocket()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
 }
 
 
@@ -71,7 +71,7 @@ void SSLSocket::close()
 
 bool SSLSocket::shutdown()
 {
-    // TraceA("Shutdown")
+    // LTrace("Shutdown")
     try {
         // Try to gracefully shutdown the SSL connection
         _sslAdapter.shutdown();
@@ -103,12 +103,12 @@ void SSLSocket::listen(int backlog)
 
 ssize_t SSLSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
-    // TraceS(this) << "Send: " << len << endl;
+    // STrace << "Send: " << len << endl;
     assert(Thread::currentID() == tid());
     // assert(len <= net::MAX_TCP_PACKET_SIZE);
 
     if (!active()) {
-        WarnL << "Send error" << endl;
+        SWarn << "Send error" << endl;
         return -1;
     }
 
@@ -130,7 +130,7 @@ void SSLSocket::acceptConnection()
     // incremented the accepted socket will be destroyed.
     auto socket = std::make_shared<net::SSLSocket>(_sslContext, loop());
 
-    // TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
+    // STrace << "Accept SSL connection: " << socket->ptr() << endl;
     // invoke(&uv_tcp_init, loop(), socket->get()); // "Cannot initialize SSL socket"
 
     if (uv_accept(get<uv_stream_t>(), socket->get<uv_stream_t>()) == 0) {
@@ -203,7 +203,7 @@ net::TransportType SSLSocket::transport() const
 
 void SSLSocket::onRead(const char* data, size_t len)
 {
-    // TraceA("On SSL read: ", len)
+    // LTrace("On SSL read: ", len)
 
     // SSL encrypted data is sent to the SSL context
     _sslAdapter.addIncomingData(data, len);
@@ -213,7 +213,7 @@ void SSLSocket::onRead(const char* data, size_t len)
 
 void SSLSocket::onConnect()
 {
-    // TraceA("On connect")
+    // LTrace("On connect")
     if (readStart()) {
         _sslAdapter.initClient();
         // _sslAdapter.start();

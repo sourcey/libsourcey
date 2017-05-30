@@ -40,14 +40,14 @@ MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
     , _ioBuffer(nullptr)
     , _pts(0)
 {
-    TraceA("Create")
+    LTrace("Create")
     initializeFFmpeg();
 }
 
 
 MultiplexEncoder::~MultiplexEncoder()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
     uninit();
     uninitializeFFmpeg();
 }
@@ -59,14 +59,14 @@ static int dispatchOutputPacket(void* opaque, uint8_t* buffer, int bufferSize)
     // http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
     auto klass = reinterpret_cast<MultiplexEncoder*>(opaque);
     if (klass) {
-        TraceA("Dispatching packet: ", bufferSize)
+        LTrace("Dispatching packet: ", bufferSize)
         if (!klass->isActive()) {
-            WarnL << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;
+            SWarn << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;
             return bufferSize;
         }
         MediaPacket packet(buffer, bufferSize);
         klass->emitter.emit(packet);
-        TraceA("Dispatching packet: OK: ", bufferSize)
+        LTrace("Dispatching packet: OK: ", bufferSize)
     }
 
     return bufferSize;
@@ -77,7 +77,7 @@ void MultiplexEncoder::init()
 {
     assert(!isActive());
 
-    TraceS(this) << "Initialize:"
+    STrace << "Initialize:"
                  << "\n\tInput Format: " << _options.iformat.toString()
                  << "\n\tOutput Format: " << _options.oformat.toString()
                  << "\n\tDuration: " << _options.duration << endl;
@@ -150,37 +150,37 @@ void MultiplexEncoder::init()
 
         setState(this, EncoderState::Ready);
     } catch (std::exception& exc) {
-        ErrorS(this) << "Error: " << exc.what() << endl;
+        SError << "Error: " << exc.what() << endl;
         setState(this, EncoderState::Error); //, exc.what()
         cleanup();
         throw exc;
     }
 
-    TraceA("Initialize: OK")
+    LTrace("Initialize: OK")
 }
 
 
 void MultiplexEncoder::uninit()
 {
-    TraceA("Uninitialize")
+    LTrace("Uninitialize")
 
     // Write the trailer and dispatch the tail packet if any
     if (_formatCtx && _formatCtx->pb)
         av_write_trailer(_formatCtx);
 
-    TraceA("Uninitializing: Wrote trailer")
+    LTrace("Uninitializing: Wrote trailer")
 
     // Free memory
     cleanup();
     setState(this, EncoderState::Stopped);
 
-    TraceA("Uninitialize: OK")
+    LTrace("Uninitialize: OK")
 }
 
 
 void MultiplexEncoder::cleanup()
 {
-    TraceA("Cleanup")
+    LTrace("Cleanup")
 
     // Delete stream encoders
     freeVideo();
@@ -211,13 +211,13 @@ void MultiplexEncoder::cleanup()
         _ioBuffer = nullptr;
     }
 
-    TraceA("Cleanup: OK")
+    LTrace("Cleanup: OK")
 }
 
 
 void MultiplexEncoder::flush()
 {
-    TraceA("Flushing")
+    LTrace("Flushing")
 
     if (_video) {
         _video->flush();
@@ -259,7 +259,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
     assert(packet.pts != AV_NOPTS_VALUE);
     assert(isActive());
 
-    TraceL << "Writing packet:"
+    STrace << "Writing packet:"
            << "\n\tPacket Size: " << packet.size 
            << "\n\tPTS: " << packet.pts
            << "\n\tDTS: " << packet.dts 
@@ -268,7 +268,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 
     // Write the encoded frame to the output file
     if (av_interleaved_write_frame(_formatCtx, &packet) != 0) {
-        WarnL << "Cannot write packet" << endl;
+        SWarn << "Cannot write packet" << endl;
         return false;
     }
     return true;
@@ -277,7 +277,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 
 bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
 {
-    TraceS(this) << "Update PTS: last=" << _pts << ", input=" << *pts << endl;
+    STrace << "Update PTS: last=" << _pts << ", input=" << *pts << endl;
 
     // https://docs.thefoundry.co.uk/products/nuke/developers/63/ndkdevguide/examples/ffmpegReader.cpp
     // https://ffmpeg.org/doxygen/trunk/doc_2examples_2muxing_8c-example.html
@@ -294,7 +294,7 @@ bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
     }
 
     if (next == _pts) {
-        WarnS(this) << "Dropping frame at dusplicate PTS: " << next << endl;
+        SWarn << "Dropping frame at dusplicate PTS: " << next << endl;
         return false;
     }
 
@@ -333,7 +333,7 @@ void MultiplexEncoder::freeVideo()
 
 bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 {
-    TraceS(this) << "Encoding video: " << frame->pts << endl;
+    STrace << "Encoding video: " << frame->pts << endl;
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -358,7 +358,7 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 bool MultiplexEncoder::encodeVideo(uint8_t* data[4], int linesize[4],
                                    int width, int height, int64_t time)
 {
-    TraceS(this) << "Encoding video: " << time << endl;
+    STrace << "Encoding video: " << time << endl;
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -385,7 +385,7 @@ bool MultiplexEncoder::encodeVideo(uint8_t* data[4], int linesize[4],
 bool MultiplexEncoder::encodeVideo(uint8_t* buffer, int bufferSize,
                                    int width, int height, int64_t time)
 {
-    TraceS(this) << "Encoding video: " << time << endl;
+    STrace << "Encoding video: " << time << endl;
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -423,7 +423,7 @@ void MultiplexEncoder::onVideoEncoded(av::VideoPacket& packet)
 
 void MultiplexEncoder::createAudio()
 {
-    TraceA("Create Audio")
+    LTrace("Create Audio")
 
     assert(!_audio);
     assert(_options.oformat.audio.enabled);
@@ -459,7 +459,7 @@ void MultiplexEncoder::freeAudio()
 
 bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time)
 {
-    TraceS(this) << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
+    STrace << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
     assert(buffer);
     assert(numSamples);
 
@@ -480,7 +480,7 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time
 
 bool MultiplexEncoder::encodeAudio(uint8_t* buffer[4], int numSamples, int64_t time)
 {
-    TraceS(this) << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
+    STrace << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
     assert(buffer[0]);
     assert(numSamples);
 

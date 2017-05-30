@@ -30,14 +30,14 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
     , _format(format)
     , _opened(false)
 {
-    TraceA("Create")
+    LTrace("Create")
 
     _iParams.deviceId = _deviceId;
     _iParams.nChannels = _channels;
     _iParams.firstChannel = 0;
 
     if (_audio.getDeviceCount() < 1) {
-        WarnL << "No audio devices found!" << endl;
+        SWarn << "No audio devices found!" << endl;
         return;
     }
 
@@ -46,13 +46,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
 
     // Open the audio stream or throw an exception.
     open(); // channels, sampleRate
-    TraceA("Create: OK")
+    LTrace("Create: OK")
 }
 
 
 AudioCapture::~AudioCapture()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 
@@ -62,7 +62,7 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
         close();
 
     std::lock_guard<std::mutex> guard(_mutex);
-    TraceS(this) << "Opening: " << _channels << ": " << _sampleRate << endl;
+    STrace << "Opening: " << _channels << ": " << _sampleRate << endl;
 
     // 1024 is a common frame size for many codecs.
     unsigned int nBufferFrames = 1024; // 256, 512
@@ -81,7 +81,7 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
 
         _error = "";
         _opened = true;
-        TraceA("Opening: OK")
+        LTrace("Opening: OK")
     } catch (RtAudioError& e) {
         setError("Cannot open audio capture: " + e.getMessage());
     } catch (...) {
@@ -92,13 +92,13 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
 
 void AudioCapture::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
     try {
         std::lock_guard<std::mutex> guard(_mutex);
         _opened = false;
         if (_audio.isStreamOpen())
             _audio.closeStream();
-        TraceA("Closing: OK")
+        LTrace("Closing: OK")
     } catch (RtAudioError& e) {
         setError("Cannot close audio capture: " + e.getMessage());
     } catch (...) {
@@ -109,14 +109,14 @@ void AudioCapture::close()
 
 void AudioCapture::start()
 {
-    TraceA("Starting")
+    LTrace("Starting")
 
     if (!running()) {
         try {
             std::lock_guard<std::mutex> guard(_mutex);
             _audio.startStream();
             _error = "";
-            TraceA("Starting: OK")
+            LTrace("Starting: OK")
         } catch (RtAudioError& e) {
             setError("Cannot start audio capture: " + e.getMessage());
         } catch (...) {
@@ -128,14 +128,14 @@ void AudioCapture::start()
 
 void AudioCapture::stop()
 {
-    TraceA("Stopping")
+    LTrace("Stopping")
 
     if (running()) {
         try {
             std::lock_guard<std::mutex> guard(_mutex);
-            TraceA("Stopping: Before")
+            LTrace("Stopping: Before")
             _audio.stopStream();
-            TraceA("Stopping: OK")
+            LTrace("Stopping: OK")
         } catch (RtAudioError& e) {
             setError("Cannot stop audio capture: " + e.getMessage());
         } catch (...) {
@@ -149,7 +149,7 @@ void AudioCapture::stop()
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
     PacketSignal::attach(delegate);
-    TraceS(this) << "Added Delegate: " << refCount() << endl;
+    STrace << "Added Delegate: " << refCount() << endl;
     if (refCount() == 1)
         start();
 }
@@ -158,10 +158,10 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 bool AudioCapture::detach(const PacketDelegateBase& delegate)
 {
     if (PacketSignal::detach(delegate)) {
-        TraceS(this) << "Removed Delegate: " << refCount() << endl;
+        STrace << "Removed Delegate: " << refCount() << endl;
         if (refCount() == 0)
             stop();
-        TraceA("Removed Delegate: OK")
+        LTrace("Removed Delegate: OK")
         return true;
     }
     return false;
@@ -177,11 +177,11 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     AudioPacket packet;
 
     if (status)
-        ErrorL << "Stream over/underflow detected" << endl;
+        SError << "Stream over/underflow detected" << endl;
 
     assert(inputBuffer);
     if (inputBuffer == nullptr) {
-        ErrorL << "Input buffer is NULL" << endl;
+        SError << "Input buffer is NULL" << endl;
         return 2;
     }
 
@@ -193,13 +193,13 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
         packet.time = streamTime;
     }
 
-    // TraceL << "Captured audio packet: "
+    // STrace << "Captured audio packet: "
     //      << "\n\tPacket Ptr: " << inputBuffer
     //      << "\n\tPacket Size: " << packet.size()
     //      << "\n\tStream Time: " << packet.time
     //      << endl;
 
-    TraceS(self) << "Emitting: " << packet.time << std::endl;
+    STrace << "Emitting: " << packet.time << std::endl;
     self->emit(packet);
     return 0;
 }
@@ -208,13 +208,13 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
 void AudioCapture::errorCallback(RtAudioError::Type type,
                                  const std::string& errorText)
 {
-    ErrorL << "Audio system error: " << errorText << endl;
+    SError << "Audio system error: " << errorText << endl;
 }
 
 
 void AudioCapture::setError(const std::string& message, bool throwExec)
 {
-    ErrorS(this) << "Error: " << message << endl;
+    SError << "Error: " << message << endl;
     _error = message;
     if (throwExec)
         throw std::runtime_error(message);

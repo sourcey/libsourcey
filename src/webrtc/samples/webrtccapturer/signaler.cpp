@@ -84,17 +84,17 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 {
     if (peer.id() == _client.ourID())
         return;
-    DebugL << "Peer connected: " << peer.id() << endl;
+    SDebug << "Peer connected: " << peer.id() << endl;
 
     if (wrtc::PeerManager::exists(peer.id())) {
-        DebugL << "Peer already has a session: " << peer.id() << endl;
+        SDebug << "Peer already has a session: " << peer.id() << endl;
     }
 }
 
 
 void Signaler::onPeerCommand(smpl::Command& c)
 {
-    DebugL << "Peer command: " << c.from().toString() << endl;
+    SDebug << "Peer command: " << c.from().toString() << endl;
 
     // List available devices for streaming
     if (c.node() == "streaming:devices") {
@@ -168,7 +168,7 @@ void Signaler::onPeerCommand(smpl::Command& c)
     else if (c.node() == "streaming:stop") {
         auto conn = wrtc::PeerManager::get(c.from().id, false);
         if (conn) {
-            DebugL << "Closing peer connection: " << c.from().id << endl;
+            SDebug << "Closing peer connection: " << c.from().id << endl;
             conn->closeConnection(); // will be deleted via callback
         }
     }
@@ -195,7 +195,7 @@ void Signaler::onPeerCommand(smpl::Command& c)
 
 void Signaler::onPeerEvent(smpl::Event& e)
 {
-    DebugL << "Peer event: " << e.from().toString() << endl;
+    SDebug << "Peer event: " << e.from().toString() << endl;
 
     if (e.name() == "ice:sdp") {
         recvSDP(e.from().id, e["sdp"]);
@@ -208,19 +208,19 @@ void Signaler::onPeerEvent(smpl::Event& e)
 
 void Signaler::onPeerMessage(smpl::Message& m)
 {
-    DebugL << "Peer message: " << m.from().toString() << endl;
+    SDebug << "Peer message: " << m.from().toString() << endl;
 }
 
 
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
-    DebugL << "Peer disconnected" << endl;
+    SDebug << "Peer disconnected" << endl;
 
     // TODO: Loop all and close for peer
 
     auto conn = get(peer.id(), false);
     if (conn) {
-        DebugL << "Closing peer connection: " << peer.id() << endl;
+        SDebug << "Closing peer connection: " << peer.id() << endl;
         conn->closeConnection(); // will be deleted via callback
     }
 }
@@ -229,7 +229,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 void Signaler::onClientStateChange(void* sender, sockio::ClientState& state,
                                    const sockio::ClientState& oldState)
 {
-    DebugL << "Client state changed from " << oldState << " to " << state << endl;
+    SDebug << "Client state changed from " << oldState << " to " << state << endl;
 
     switch (state.id()) {
         case sockio::ClientState::Connecting:

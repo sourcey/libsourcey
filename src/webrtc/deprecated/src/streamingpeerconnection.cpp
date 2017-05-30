@@ -109,7 +109,7 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> StreamingPeerConnection::create
 void StreamingPeerConnection::OnIcePeerChange(
     webrtc::PeerConnectionInterface::IcePeerState new_state)
 {
-    DebugA(_peerid, ": On ICE gathering change: ", new_state)
+    LDebug(_peerid, ": On ICE gathering change: ", new_state)
 
     switch (new_state) {
         case webrtc::PeerConnectionInterface::kIcePeerNew:
@@ -149,7 +149,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 //
 // void PeerConnection::closePeer()
 // {
-//     DebugA(_peerid, ": Closing")
+//     LDebug(_peerid, ": Closing")
 //
 //     if (_peerPeer) {
 //         _peerPeer->Close();
@@ -173,7 +173,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 //
 // void PeerConnection::recvSDP(const std::string& type, const std::string& sdp)
 // {
-//     DebugA(_peerid, ": Receive ", type, ": ", sdp)
+//     LDebug(_peerid, ": Receive ", type, ": ", sdp)
 //
 //     webrtc::SdpParseError error;
 //     webrtc::SessionDescriptionInterface*
@@ -213,7 +213,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 // PeerConnection::OnIcePeerChange(webrtc::PeerConnectionInterface::IcePeerState
 // new_state)
 // {
-//     DebugA(_peerid, ": On ICE connection change: ", new_state)
+//     LDebug(_peerid, ": On ICE connection change: ", new_state)
 // }
 //
 //
@@ -221,13 +221,13 @@ void StreamingPeerConnection::OnIcePeerChange(
 // PeerConnection::OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState
 // new_state)
 // {
-//     DebugA(_peerid, ": On ICE gathering change: ", new_state)
+//     LDebug(_peerid, ": On ICE gathering change: ", new_state)
 // }
 //
 //
 // void PeerConnection::OnRenegotiationNeeded()
 // {
-//     DebugA(_peerid, ": On renegotiation needed")
+//     LDebug(_peerid, ": On renegotiation needed")
 // }
 //
 //
@@ -235,7 +235,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 // {
 //     assert(_mode == Answer);
 //
-//     DebugA(_peerid, ": On add stream")
+//     LDebug(_peerid, ": On add stream")
 //     _manager->onAddRemoteStream(this, stream);
 // }
 //
@@ -244,7 +244,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 // {
 //     assert(_mode == Answer);
 //
-//     DebugA(_peerid, ": On remove stream")
+//     LDebug(_peerid, ": On remove stream")
 //     _manager->onRemoveRemoteStream(this, stream);
 // }
 //
@@ -254,7 +254,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 // {
 //     std::string sdp;
 //     if (!candidate->ToString(&sdp)) {
-//         ErrorL << _peerid << ": Failed to serialize candidate" << endl;
+//         SError << _peerid << ": Failed to serialize candidate" << endl;
 //         assert(0);
 //         return;
 //     }
@@ -266,14 +266,14 @@ void StreamingPeerConnection::OnIcePeerChange(
 //
 // void PeerConnection::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 // {
-//     DebugA(_peerid, ": Set local description")
+//     LDebug(_peerid, ": Set local description")
 //     _peerPeer->SetLocalDescription(
 //         DummySetSessionDescriptionObserver::Create(), desc);
 //
 //     // Send an SDP offer to the peer
 //     std::string sdp;
 //     if (!desc->ToString(&sdp)) {
-//         ErrorL << _peerid << ": Failed to serialize local sdp" << endl;
+//         SError << _peerid << ": Failed to serialize local sdp" << endl;
 //         assert(0);
 //         return;
 //     }
@@ -284,7 +284,7 @@ void StreamingPeerConnection::OnIcePeerChange(
 //
 // void PeerConnection::OnFailure(const std::string& error)
 // {
-//     ErrorL << _peerid << ": On failure: " << error << endl;
+//     SError << _peerid << ": On failure: " << error << endl;
 //
 //     _manager->onFailure(this, error);
 // }
@@ -338,13 +338,13 @@ void StreamingPeerConnection::OnIcePeerChange(
 //
 // void DummySetSessionDescriptionObserver::OnSuccess()
 // {
-//     DebugL << "On SDP parse success" << endl;
+//     SDebug << "On SDP parse success" << endl;
 // }
 //
 //
 // void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 // {
-//     ErrorL << "On SDP parse error: " << error << endl;
+//     SError << "On SDP parse error: " << error << endl;
 //     assert(0);
 // }
 

@@ -7,7 +7,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     {
         av::DeviceManager devman;
         devman.print(std::cout);

@@ -42,13 +42,13 @@ Application& Application::getDefault()
 Application::Application(uv::Loop* loop) :
     loop(loop)
 {
-    DebugS(this) << "Create" << std::endl;
+    SDebug << "Create" << std::endl;
 }
 
 
 Application::~Application()
 {
-    DebugS(this) << "Destroy" << std::endl;
+    SDebug << "Destroy" << std::endl;
 }
 
 
@@ -66,7 +66,7 @@ void Application::stop()
 
 void Application::finalize()
 {
-    DebugS(this) << "Finalizing" << std::endl;
+    SDebug << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
     // Print active handles
@@ -81,7 +81,7 @@ void Application::finalize()
     assert(loop->active_handles == 0);
     //assert(loop->active_reqs == 0);
 
-    DebugS(this) << "Finalization complete" << std::endl;
+    SDebug << "Finalization complete" << std::endl;
 }
 
 
@@ -101,7 +101,7 @@ void Application::bindShutdownSignal(std::function<void(void*)> callback, void* 
 
 void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 {
-    DebugS(this) << "Wait for shutdown" << std::endl;
+    SDebug << "Wait for shutdown" << std::endl;
     bindShutdownSignal(callback, opaque);
     run();
 }
@@ -110,7 +110,7 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
     auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
-    DebugS(cmd->self) << "Got shutdown signal" << std::endl;
+    SDebug << "Got shutdown signal" << std::endl;
 
     uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
         delete handle;
@@ -123,7 +123,7 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
-    DebugA("Active handle: ", handle, ": ", handle->type)
+    LDebug("Active handle: ", handle, ": ", handle->type)
 }
 
 
@@ -156,7 +156,7 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
         }
 
         else {
-            DebugA("Unrecognized option:", argv[i]);
+            LDebug("Unrecognized option:", argv[i]);
         }
     }
 }

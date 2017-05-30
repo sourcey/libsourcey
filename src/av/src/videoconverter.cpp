@@ -39,7 +39,7 @@ VideoConverter::~VideoConverter()
 void VideoConverter::create()
 {
 //#if 0
-    TraceS(this) << "Create:"
+    STrace << "Create:"
                  << "\n\tInput Width: " << iparams.width
                  << "\n\tInput Height: " << iparams.height
                  << "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -65,7 +65,7 @@ void VideoConverter::create()
 
 void VideoConverter::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
 
     if (oframe) {
         av_free(oframe);
@@ -81,7 +81,7 @@ void VideoConverter::close()
 
 AVFrame* VideoConverter::convert(AVFrame* iframe)
 {
-    TraceS(this) << "Convert:"
+    STrace << "Convert:"
                  << "\n\tIn Format: " << iparams.pixelFmt
                  << "\n\tIn Size: " << iframe->width << "x" << iframe->height
                  << "\n\tOut Format: " << oparams.pixelFmt

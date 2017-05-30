@@ -34,13 +34,13 @@ TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation)
     while (!allocation.pairs().add(connectionID, this, false)) {
         connectionID = util::randomNumber();
     }
-    TraceS(this) << "Create: " << connectionID << endl;
+    STrace << "Create: " << connectionID << endl;
 }
 
 
 TCPConnectionPair::~TCPConnectionPair()
 {
-    TraceS(this) << "Destroy: " << connectionID << endl;
+    STrace << "Destroy: " << connectionID << endl;
 
     if (client.impl) {
         client.Recv -= slot(this, &TCPConnectionPair::onClientDataReceived);
@@ -77,7 +77,7 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 
         client->connect(peerAddr);
     } catch (std::exception& exc) {
-        ErrorS(this) << "Peer connect error: " << exc.what() << endl;
+        SError << "Peer connect error: " << exc.what() << endl;
         assert(0);
         return false;
     }
@@ -87,7 +87,7 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 
 void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 {
-    TraceS(this) << "Set peer socket: " << connectionID << ": "
+    STrace << "Set peer socket: " << connectionID << ": "
                  << socket->peerAddress() << endl;
 
     assert(!peer.impl);
@@ -104,7 +104,7 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 
 void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
-    TraceS(this) << "Set client socket: " << connectionID << ": "
+    STrace << "Set client socket: " << connectionID << ": "
                  << socket->peerAddress() << endl;
 
     assert(!client.impl);
@@ -118,7 +118,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 
 bool TCPConnectionPair::makeDataConnection()
 {
-    TraceS(this) << "Make data connection: " << connectionID << endl;
+    STrace << "Make data connection: " << connectionID << endl;
     if (!peer.impl || !client.impl)
         return false;
 
@@ -133,7 +133,7 @@ bool TCPConnectionPair::makeDataConnection()
 
     // Send early data from peer to client
     if (earlyPeerData.size()) {
-        TraceS(this) << "Flushing early media: " << earlyPeerData.size() << endl;
+        STrace << "Flushing early media: " << earlyPeerData.size() << endl;
         client->send(earlyPeerData.data(), earlyPeerData.size());
         earlyPeerData.clear();
     }
@@ -146,10 +146,10 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
                                            const MutableBuffer& buffer,
                                            const net::Address& peerAddress)
 {
-    TraceS(this) << "Peer > Client: " << buffer.size() << endl;
+    STrace << "Peer > Client: " << buffer.size() << endl;
     // assert(pkt.buffer.position() == 0);
     // if (pkt.buffer.available() < 300)
-    //    TraceS(this) << "Peer => Client: " << pkt.buffer << endl;
+    //    STrace << "Peer => Client: " << pkt.buffer << endl;
     // auto socket = reinterpret_cast<net::Socket*>(sender);
     // char* buf = bufferCast<char*>(buf);
 
@@ -170,7 +170,7 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     // Flash policy requests
     // TODO: Handle elsewhere? Bloody flash...
     else if (len == 23 && (strcmp(buf, "<policy-file-request/>") == 0)) {
-        TraceA("Handle flash policy")
+        LTrace("Handle flash policy")
         std::string policy(
             "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from "
             "domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
@@ -185,14 +185,14 @@ void TCPConnectionPair::onPeerDataReceived(net::Socket&,
     else {
         size_t maxSize =
             allocation.server().options().earlyMediaBufferSize;
-        DebugS(this) << "Buffering early data: " << len << endl;
+        SDebug << "Buffering early data: " << len << endl;
         //#ifdef _DEBUG
-        //    DebugS(this) << "Printing early data: " << std::string(buf, len) << endl;
+        //    SDebug << "Printing early data: " << std::string(buf, len) << endl;
         //#endif
         if (len > maxSize)
-            WarnL << "Dropping early media: Oversize packet: " << len << endl;
+            SWarn << "Dropping early media: Oversize packet: " << len << endl;
         if (earlyPeerData.size() > maxSize)
-            WarnL << "Dropping early media: Buffer at capacity >= " << maxSize << endl;
+            SWarn << "Dropping early media: Buffer at capacity >= " << maxSize << endl;
 
         // earlyPeerData.append(static_cast<const char*>(pkt.data()), len);
         earlyPeerData.insert(earlyPeerData.end(), buf, buf + len);
@@ -204,10 +204,10 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
                                              const MutableBuffer& buffer,
                                              const net::Address& peerAddress)
 {
-    TraceS(this) << "Client > Peer: " << buffer.size() << endl;
+    STrace << "Client > Peer: " << buffer.size() << endl;
     // assert(packet.buffer.position() == 0);
     // if (packet.size() < 300)
-    //    TraceS(this) << "Client > Peer: " << packet.buffer << endl;
+    //    STrace << "Client > Peer: " << packet.buffer << endl;
 
     if (peer.impl) {
         allocation.updateUsage(buffer.size());
@@ -221,7 +221,7 @@ void TCPConnectionPair::onClientDataReceived(net::Socket&,
 
 void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 {
-    TraceA("Peer Connect request success")
+    LTrace("Peer Connect request success")
     assert(&socket == peer.impl.get());
     peer.Connect -= slot(this, &TCPConnectionPair::onPeerConnectSuccess);
     peer.Error -= slot(this, &TCPConnectionPair::onPeerConnectError);
@@ -239,7 +239,7 @@ void TCPConnectionPair::onPeerConnectSuccess(net::Socket& socket)
 
 void TCPConnectionPair::onPeerConnectError(net::Socket& socket, const Error& error)
 {
-    TraceS(this) << "Peer Connect request error: " << error.message << endl;
+    STrace << "Peer Connect request error: " << error.message << endl;
     assert(&socket == peer.impl.get());
     allocation.sendPeerConnectResponse(this, false);
 
@@ -249,7 +249,7 @@ void TCPConnectionPair::onPeerConnectError(net::Socket& socket, const Error& err
 
 void TCPConnectionPair::onConnectionClosed(net::Socket& socket)
 {
-    TraceS(this) << "Connection pair socket closed: " << connectionID << ": " << &socket << endl;
+    STrace << "Connection pair socket closed: " << connectionID << ": " << &socket << endl;
     delete this; // kill
 }
 

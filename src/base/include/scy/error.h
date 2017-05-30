@@ -30,7 +30,7 @@ namespace scy {
 /// Errors contain an error code, message, and exception pointer.
 struct Error
 {
-    int errorno;
+    int err;
     std::string message;
     std::exception_ptr exception;
 
@@ -50,12 +50,12 @@ struct Error
 
     bool any() const
     {
-        return errorno != 0 || !message.empty() || exception != nullptr;
+        return err != 0 || !message.empty() || exception != nullptr;
     }
 
     void reset()
     {
-        errorno = 0;
+        err = 0;
         message.clear();
         exception = nullptr;
     }
@@ -82,21 +82,20 @@ struct Error
 namespace uv {
 
 
-inline std::string formatError(const std::string& message, int errorno = UV_UNKNOWN)
+inline std::string formatError(std::string message, int err = UV_UNKNOWN)
 {
-    std::string m(message); // prefix the message since libuv errors are brisk
-    if (errorno != UV_UNKNOWN && errorno != 0) {
-        if (!m.empty())
-            m.append(": ");
-        m.append(uv_strerror(errorno));
+    if (err != UV_UNKNOWN) {
+        if (!message.empty())
+            message.append(": ");
+        message.append(uv_strerror(err));
     }
-    return m;
+    return message;
 }
 
 
-inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
+inline void throwError(std::string message, int err = UV_UNKNOWN)
 {
-    throw std::runtime_error(formatError(message, errorno));
+    throw std::runtime_error(formatError(std::move(message), err));
 }
 
 

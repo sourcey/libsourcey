@@ -62,7 +62,7 @@ void SocketEmitter::swap(const Socket::Ptr& socket)
 
 void SocketEmitter::addReceiver(SocketAdapter* adapter)
 {
-    // TraceA("Remove receiver: ", adapter)
+    // LTrace("Remove receiver: ", adapter)
     assert(adapter->priority <= 100);
     Connect.attach(slot(adapter, &net::SocketAdapter::onSocketConnect, -1, adapter->priority));
     Recv.attach(slot(adapter, &net::SocketAdapter::onSocketRecv, -1, adapter->priority));
@@ -73,7 +73,7 @@ void SocketEmitter::addReceiver(SocketAdapter* adapter)
 
 void SocketEmitter::removeReceiver(SocketAdapter* adapter)
 {
-    // TraceA("Remove receiver: ", adapter)
+    // LTrace("Remove receiver: ", adapter)
     Connect.detach(adapter);
     Recv.detach(adapter);
     Error.detach(adapter);

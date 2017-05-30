@@ -221,7 +221,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
 #if 0
     for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
         if (name == it->name) {
-            InfoL << "Create VideoCapturer for " << name << endl;
+            SInfo << "Create VideoCapturer for " << name << endl;
             out = *it;
             return true;
         }
@@ -231,7 +231,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
     // with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
     // for these devices.
     if (talk_base::FileSystem::IsFile(name)) {
-        InfoL << "Create FileVideoCapturer" << endl;
+        SInfo << "Create FileVideoCapturer" << endl;
         *out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
         return true;
     }
@@ -262,7 +262,7 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 
     // Determine the number of devices available
     auto ndevices = audio.getDeviceCount();
-    TraceS(this) << "Get audio devices: " << ndevices << endl;
+    STrace << "Get audio devices: " << ndevices << endl;
 
     // Scan through devices for various capabilities
     RtAudio::DeviceInfo info;
@@ -270,7 +270,7 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
         try {
             info = audio.getDeviceInfo(i); // may throw RtAudioError
 
-            TraceS(this) << "Device:"
+            STrace << "Device:"
                          << "\n\tName: " << info.name
                          << "\n\tOutput Channels: " << info.outputChannels
                          << "\n\tInput Channels: " << info.inputChannels
@@ -282,14 +282,14 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
             if (info.probed == true && ((input && info.inputChannels > 0) ||
                                         (!input && info.outputChannels > 0))) {
 
-                TraceS(this) << "Adding device: " << info.name << endl;
+                STrace << "Adding device: " << info.name << endl;
                 Device dev(
                     (input ? "audioin" : "audioout"), i, info.name, "",
                     (input ? info.isDefaultInput : info.isDefaultOutput));
                 devs.push_back(dev);
             }
         } catch (RtAudioError& e) {
-            ErrorS(this) << "Cannot probe audio device: " << e.getMessage()
+            SError << "Cannot probe audio device: " << e.getMessage()
                          << endl;
         }
     }
@@ -315,7 +315,7 @@ bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 bool DeviceManager::getAudioDevice(bool input, Device& out,
                                    const std::string& name, int id)
 {
-    TraceA("Get audio device: ", id, ": ", name)
+    LTrace("Get audio device: ", id, ": ", name)
 
     // If the name is empty, return the default device id.
     if (name.empty() || name == kDefaultDeviceName) {
@@ -328,7 +328,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out,
 
     std::vector<Device> devices;
     input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
-    TraceA("Get audio devices: ", devices.size())
+    LTrace("Get audio devices: ", devices.size())
     return matchNameAndID(devices, out, name, id);
 }
 
@@ -337,7 +337,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
 {
     std::vector<Device> devices;
     input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
-    TraceA("Get audio devices: ", devices.size())
+    LTrace("Get audio devices: ", devices.size())
     return matchID(devices, out, id);
 }
 
@@ -428,7 +428,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName,
     int i = 0;
     while (exclusionList[i]) {
         if (util::icompare(deviceName, exclusionList[i]) == 0) {
-            DebugA("Ignoring device ", deviceName)
+            LDebug("Ignoring device ", deviceName)
             return true;
         }
         ++i;
@@ -471,22 +471,22 @@ bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out,
                                    const std::string& name, int id)
 {
-    TraceA("Match name and ID: ", name, ": ", id)
+    LTrace("Match name and ID: ", name, ": ", id)
 
     bool ret = false;
     for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
-        TraceA("Match name and ID: Checking: ", devices[i].name)
+        LTrace("Match name and ID: Checking: ", devices[i].name)
         if (devices[i].name == name) {
             // The first device matching the given name will be returned,
             // but we will try and match the given ID as well.
             // if (out.id == -1)
             out = devices[i];
-            TraceA("Match name and ID: Match: ", out.name)
+            LTrace("Match name and ID: Match: ", out.name)
 
             ret = true;
             if (id == -1 || id == i) {
 
-                TraceA("Match name and ID: Match ID: ", out.name)
+                LTrace("Match name and ID: Match ID: ", out.name)
                 break;
             }
         }

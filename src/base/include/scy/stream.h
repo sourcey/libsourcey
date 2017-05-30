@@ -50,7 +50,7 @@ public:
     /// If the stream is already closed this call will have no side-effects.
     virtual void close()
     {
-        // TraceA("Close: ", ptr())
+        // LTrace("Close: ", ptr())
         if (_started)
             readStop();
         Handle::close();
@@ -125,7 +125,7 @@ public:
 protected:
     virtual bool readStart()
     {
-        // TraceA("Read start: ", ptr())
+        // LTrace("Read start: ", ptr())
         assert(!_started);
         _started = true;
 
@@ -135,7 +135,7 @@ protected:
 
     virtual bool readStop()
     {
-        // TraceA("Read stop: ", ptr())
+        // LTrace("Read stop: ", ptr())
         assert(_started);
         _started = false;
 
@@ -144,7 +144,7 @@ protected:
 
     virtual void onRead(const char* data, size_t len)
     {
-        // TraceA("On read: ", len)
+        // LTrace("On read: ", len)
         assert(Handle::initialized());
         assert(!Handle::closed());
         assert(_started);
@@ -157,7 +157,7 @@ protected:
 
     static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
     {
-        // TraceA("Handle read: ", nread)
+        // LTrace("Handle read: ", nread)
         auto self = reinterpret_cast<Stream*>(handle->data);
 #ifdef SCY_EXCEPTION_RECOVERY
         try {
@@ -173,7 +173,7 @@ protected:
         catch (std::exception& exc) {
             // Exceptions thrown inside the read callback scope will set the
             // stream error in order to keep errors in the event loop
-            ErrorA("Stream exception: ", exc.what());
+            LError("Stream exception: ", exc.what());
             self->setUVError(UV_UNKNOWN, exc.what());
         }
 #endif
@@ -192,27 +192,7 @@ protected:
 
 protected:
     Buffer _buffer;
-    bool _started { false };
-};
-
-
-/// Stream connection request for sockets and pipes.
-struct ConnectReq : public uv::Request<uv_connect_t>
-{
-    ConnectReq()
-    {
-        req.data = this;
-    }
-
-    bool connect(uv_tcp_t* handle, const struct sockaddr* addr)
-    {
-        return invoke(&uv_tcp_connect, &req, handle, addr, &defaultCallback);
-    }
-
-    void connect(uv_pipe_t* handle, const char* name)
-    {
-        invoke(&uv_pipe_connect, &req, handle, name, &defaultCallback);
-    }
+    bool _started{false};
 };
 
 

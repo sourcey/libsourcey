@@ -37,7 +37,7 @@ void init()
     // Set the logger to only log warning level and above if no debug
     // channel has been set yet.
     if (!Logger::instance().get("debug", false))
-        Logger::instance().add(new ConsoleChannel("debug", LWarn));
+        Logger::instance().add(new ConsoleChannel("debug", Level::Warn));
 
     // Initialize the default test runner.
     TestRunner::getDefault();

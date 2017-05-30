@@ -119,7 +119,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 ssize_t Message::read(const ConstBuffer& buf)
 {
-    TraceA("Parse STUN packet: ", buf.size())
+    LTrace("Parse STUN packet: ", buf.size())
 
     try {
         BitReader reader(buf);
@@ -130,7 +130,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         if (type & 0x8000) {
             // RTP and RTCP set MSB of first byte, since first two bits are version,
             // and version is always 2 (10). If set, this is not a STUN packet.
-            WarnL << "Not STUN packet" << endl;
+            SWarn << "Not STUN packet" << endl;
             return 0;
         }
 
@@ -140,7 +140,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         uint16_t classType = type & 0x0110;
         uint16_t methodType = type & 0x000F;
         if (!isValidMethod(methodType)) {
-            WarnL << "STUN message unknown method: " << methodType << endl;
+            SWarn << "STUN message unknown method: " << methodType << endl;
             return 0;
         }
 
@@ -150,7 +150,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         // Message length
         reader.getU16(_size);
         if (_size > buf.size()) {
-            WarnL << "STUN message larger than buffer: " << _size << " > " << buf.size() << endl;
+            SWarn << "STUN message larger than buffer: " << _size << " > " << buf.size() << endl;
             return 0;
         }
 
@@ -184,22 +184,22 @@ ssize_t Message::read(const ConstBuffer& buf)
                 attr->read(reader); // parse or throw
                 _attrs.push_back(attr);
 
-                // TraceL << "Parse attribute: " << Attribute::typeString(attrType) << ": " 
+                // STrace << "Parse attribute: " << Attribute::typeString(attrType) << ": " 
                 //    << attrLength << endl;
             } else
-                WarnL << "Failed to parse attribute: "
+                SWarn << "Failed to parse attribute: "
                       << Attribute::typeString(attrType) << ": " << attrLength
                       << endl;
 
             rest -= (attrLength + kAttributeHeaderSize + padLength);
         }
 
-        TraceA("Parse success: ", reader.position(), ": ", buf.size())
+        LTrace("Parse success: ", reader.position(), ": ", buf.size())
         assert(rest == 0);
         assert(reader.position() == _size + kMessageHeaderSize);
         return reader.position();
     } catch (std::exception& exc) {
-        DebugA("Parse error: ", exc.what())
+        LDebug("Parse error: ", exc.what())
     }
 
     return 0;

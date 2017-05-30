@@ -22,13 +22,13 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     test::init();
 
     net::SSLManager::initNoVerifyServer();
     net::SSLManager::initNoVerifyClient();
 
-
+    
     // =========================================================================
     // Address Test
     //
@@ -145,24 +145,38 @@ int main(int argc, char** argv)
         // });
         // uv::runLoop();
         {
+            // bool success = false;
+            // auto wrap = new net::GetAddrInfoReq();
+            // wrap->callback = [&](const net::GetAddrInfoEvent& event) {
+            //     expect(event.status == 0);
+            //     success = event.status == 0;
+            // };
+            // wrap->resolve("sourcey.com", 80);
+            // uv::runLoop();
+            // expect(success);
             bool success = false;
-            auto wrap = new net::GetAddrInfoReq();
-            wrap->callback = [&](const net::GetAddrInfoEvent& event) {
-                expect(event.status == 0);
-                success = event.status == 0;
-            };
-            wrap->resolve("sourcey.com", 80);
+            net::dns::resolve("sourcey.com", 80, [&](int err, const net::Address& addr) {
+                expect(err == 0);
+                success = err == 0;
+            });
             uv::runLoop();
             expect(success);
         }
         {
+            // bool success = false;
+            // auto wrap = new net::GetAddrInfoReq();
+            // wrap->callback = [&](const net::GetAddrInfoEvent& event) {
+            //     expect(event.status != 0);
+            //     success = event.status != 0;
+            // };
+            // wrap->resolve("hostthatdoesntexist.what", 80);
+            // uv::runLoop();
+            // expect(success);
             bool success = false;
-            auto wrap = new net::GetAddrInfoReq();
-            wrap->callback = [&](const net::GetAddrInfoEvent& event) {
-                expect(event.status != 0);
-                success = event.status != 0;
-            };
-            wrap->resolve("hostthatdoesntexist.what", 80);
+            net::dns::resolve("hostthatdoesntexist.what", 80, [&](int err, const net::Address& addr) {
+                expect(err == 0);
+                success = err == 0;
+            });
             uv::runLoop();
             expect(success);
         }

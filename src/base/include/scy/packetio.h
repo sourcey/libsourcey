@@ -135,7 +135,7 @@ public:
 
     void onStreamStateChange(const PacketStreamState& state)
     {
-        //TraceS(this) << "Stream state: " << state << std::endl;
+        //STrace << "Stream state: " << state << std::endl;
 
         switch (state.id()) {
         // case PacketStreamState::None:

@@ -63,7 +63,7 @@ std::string ImageSequenceRecorder::getNextFilename()
 
 void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 {
-    TraceL << "On video frame: " << yuvframe.width() << 'x' << yuvframe.height()
+    STrace << "On video frame: " << yuvframe.width() << 'x' << yuvframe.height()
            << std::endl;
 
     if (_width != yuvframe.width() || _height != yuvframe.height()) {
@@ -111,7 +111,7 @@ void ImageSequenceRecorder::OnFrame(const cricket::VideoFrame& yuvframe)
 
         // Write the output file
         std::string filename(getNextFilename());
-        TraceA("Write video frame: ", filename)
+        LTrace("Write video frame: ", filename)
         fs::savefile(filename, (const char*)opacket.data,
                      (std::streamsize)opacket.size);
     }

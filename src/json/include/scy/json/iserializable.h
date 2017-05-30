@@ -52,7 +52,7 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
         pObj->deserialize(deserializeRoot);
     }
     catch (std::invalid_argument&) {
-        // ErrorL << "Cannot deserialize object: " << exc.what() << std::endl;
+        // SError << "Cannot deserialize object: " << exc.what() << std::endl;
         return false;
     }
 

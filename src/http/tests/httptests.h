@@ -97,25 +97,25 @@ struct HTTPEchoTest
 
     void onConnect()
     {
-        DebugL << "On connect" << endl;
+        SDebug << "On connect" << endl;
     }
 
     void onHeaders(http::Response& res)
     {
-        DebugL << "On headers" << endl;
+        SDebug << "On headers" << endl;
     }
 
     void onComplete(const http::Response& res)
     {
         std::ostringstream os;
         res.write(os);
-        DebugA("Response complete: ", os.str())
+        LDebug("Response complete: ", os.str())
     }
 
     void onPayload(const MutableBuffer& buffer)
     {
         std::string data(bufferCast<const char*>(buffer), buffer.size());
-        DebugA("On payload: ", buffer.size(), ": ", data)
+        LDebug("On payload: ", buffer.size(), ": ", data)
 
         if (data == "PING")
             numSuccess++;
@@ -129,7 +129,7 @@ struct HTTPEchoTest
 
     void onClose(http::Connection&)
     {
-        DebugL << "Connection closed" << endl;
+        SDebug << "Connection closed" << endl;
         shutdown();
     }
 };

@@ -23,13 +23,13 @@ namespace turn {
 UDPClient::UDPClient(ClientObserver& observer, const Options& options)
     : Client(observer, options, net::makeSocket<net::UDPSocket>())
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
 UDPClient::~UDPClient()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 

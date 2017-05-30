@@ -150,7 +150,7 @@ void BitReader::getU64(uint64_t& val)
 void BitReader::get(std::string& val, size_t len)
 {
     if (len > available()) {
-        ErrorS(this) << "index out of range: "
+        SError << "index out of range: "
                      << "len=" << len << ", "
                      << "available=" << available() << ", "
                      << "position=" << position() << ", "
@@ -166,7 +166,7 @@ void BitReader::get(std::string& val, size_t len)
 void BitReader::get(char* val, size_t len)
 {
     if (len > available()) {
-        ErrorS(this) << "index out of range: "
+        SError << "index out of range: "
                      << "len=" << len << ", "
                      << "available=" << available() << ", "
                      << "position=" << position() << ", "
@@ -183,7 +183,7 @@ const char BitReader::peek()
 {
     if (_limit > _position)
         return (const char)_bytes[_position];
-    // DebugL << "Peeking next character is NULL" << std::endl;
+    // SDebug << "Peeking next character is NULL" << std::endl;
     return 0;
 }
 
@@ -196,7 +196,7 @@ const uint8_t BitReader::peekU8()
         _position -= 1;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking uint8_t: NULL" << std::endl;
+        SDebug << "Peeking uint8_t: NULL" << std::endl;
     }
     return 0;
 }
@@ -210,7 +210,7 @@ const uint16_t BitReader::peekU16()
         _position -= 2;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking uint16_t: NULL" << std::endl;
+        SDebug << "Peeking uint16_t: NULL" << std::endl;
     }
 
     return 0;
@@ -225,7 +225,7 @@ const uint32_t BitReader::peekU24()
         _position -= 3;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking UInt24: NULL" << std::endl;
+        SDebug << "Peeking UInt24: NULL" << std::endl;
     }
 
     return 0;
@@ -240,7 +240,7 @@ const uint32_t BitReader::peekU32()
         _position -= 4;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking uint32_t: NULL" << std::endl;
+        SDebug << "Peeking uint32_t: NULL" << std::endl;
     }
 
     return 0;
@@ -255,7 +255,7 @@ const uint64_t BitReader::peekU64()
         _position -= 8;
         return v;
     } catch (std::out_of_range&) {
-        DebugL << "Peeking uint64_t: NULL" << std::endl;
+        SDebug << "Peeking uint64_t: NULL" << std::endl;
     }
 
     return 0;
@@ -425,7 +425,7 @@ BitWriter::~BitWriter()
 void BitWriter::skip(size_t val)
 {
     if (_position + val > _limit) {
-        ErrorS(this) << "index out of range: "
+        SError << "index out of range: "
                      << "val=" << val << ", "
                      << "available=" << available() << ", "
                      << "position=" << position() << ", "
@@ -440,7 +440,7 @@ void BitWriter::skip(size_t val)
 void BitWriter::seek(size_t val)
 {
     if (val > _limit) {
-        ErrorS(this) << "index out of range: "
+        SError << "index out of range: "
                      << "val=" << val << ", "
                      << "available=" << available() << ", "
                      << "position=" << position() << ", "
@@ -521,7 +521,7 @@ void BitWriter::put(const std::string& val)
 void BitWriter::put(const char* val, size_t len)
 {
     if ((_position + len) > _limit) {
-        ErrorS(this) << "insufficient buffer capacity: "
+        SError << "insufficient buffer capacity: "
                         << "len=" << len << ", "
                         << "available=" << available() << ", "
                         << "position=" << position() << ", "
@@ -621,7 +621,7 @@ DynamicBitWriter::~DynamicBitWriter()
 
 void DynamicBitWriter::put(const char* val, size_t len)
 {
-    //TraceS(this) << "DynamicBitWriter::put: "
+    //STrace << "DynamicBitWriter::put: "
     //    << "val=" << std::string(val, len) << ", "
     //    << "len=" << len << ", "
     //    << "available=" << available() << ", "

@@ -64,7 +64,7 @@ VideoPacketSource::VideoPacketSource(const cricket::VideoFormat& captureFormat)
 
 VideoPacketSource::~VideoPacketSource()
 {
-    DebugL << ": Destroying" << endl;
+    SDebug << ": Destroying" << endl;
 }
 
 
@@ -79,14 +79,14 @@ void VideoPacketSource::setPacketSource(PacketSignal* source)
 
 cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& format)
 {
-    DebugL << "Start" << endl;
+    SDebug << "Start" << endl;
 
     // NOTE: The requested format must match the input format until
     // we implememnt pixel format conversion and resizing inside
     // this class.
     RTC_CHECK(_captureFormat == format);
     if (capture_state() == cricket::CS_RUNNING) {
-        WarnL << "Start called when it's already started." << endl;
+        SWarn << "Start called when it's already started." << endl;
         return capture_state();
     }
 
@@ -100,9 +100,9 @@ cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& forma
 
 void VideoPacketSource::Stop()
 {
-    DebugL << "Stop" << endl;
+    SDebug << "Stop" << endl;
     if (capture_state() == cricket::CS_STOPPED) {
-        WarnL << "Stop called when it's already stopped." << endl;
+        SWarn << "Stop called when it's already stopped." << endl;
         return;
     }
 
@@ -116,7 +116,7 @@ void VideoPacketSource::Stop()
 
 void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
 {
-    TraceA("On video frame: ", packet.width, 'x', packet.height)
+    LTrace("On video frame: ", packet.width, 'x', packet.height)
 
     assert(packet.width > 0);
     assert(packet.height > 0);
@@ -153,7 +153,7 @@ void VideoPacketSource::onVideoCaptured(av::PlanarVideoPacket& packet)
         &adapted_width, &adapted_height,
         &crop_width, &crop_height,
         &crop_x, &crop_y, &translated_camera_time_us)) {
-        WarnL << "Adapt frame failed" << packet.time << std::endl;
+        SWarn << "Adapt frame failed" << packet.time << std::endl;
         return;
     }
 

@@ -24,7 +24,7 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
 #endif
   {
     NSArray* capture_devices = [AVCaptureDevice devices];
-    DebugA([capture_devices count], " capture device(s) found:")
+    LDebug([capture_devices count], " capture device(s) found:")
     for (AVCaptureDevice* capture_device in capture_devices) {
       if ((type == Device::VideoInput && [capture_device hasMediaType:AVMediaTypeVideo]) ||
           (type == Device::AudioInput && [capture_device hasMediaType:AVMediaTypeAudio])) {
@@ -40,7 +40,7 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
                              [capture_device uniqueID],
                              [capture_device isConnected],
                              [capture_device isInUseByAnotherApplication]];
-        DebugA('\t', [info UTF8String])
+        LDebug('\t', [info UTF8String])
 
         std::string uniqueID([[capture_device uniqueID] UTF8String]);
         std::string name([[capture_device localizedName] UTF8String]);

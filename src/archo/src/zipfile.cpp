@@ -112,7 +112,7 @@ void ZipFile::open(const std::string& file)
         finfo.uncompressedSize = static_cast<size_t>(fileInfo.compressed_size);
         this->info.push_back(finfo);
 
-        TraceA("Zip file contains: ", fileName)
+        LTrace("Zip file contains: ", fileName)
     }
 
     unzGoToFirstFile(this->fp); // rewind
@@ -130,7 +130,7 @@ void ZipFile::close()
 
 void ZipFile::extract(const std::string& path)
 {
-    TraceA("Extracting zip to: ", path)
+    LTrace("Extracting zip to: ", path)
 
     if (!opened())
         throw std::runtime_error("The archive must be opened for extraction.");
@@ -160,7 +160,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
         std::string outPath(path);
         fs::addnode(outPath, fname);
 
-        TraceA("Extracting asset: ", outPath)
+        LTrace("Extracting asset: ", outPath)
 
 // Create directory
 #if !WIN32
@@ -168,13 +168,13 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 #endif
         if (finfo.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
             fname[strlen(fname) - 1] == fs::delimiter) {
-            TraceA("Create directory: ", outPath)
+            LTrace("Create directory: ", outPath)
             fs::mkdirr(outPath);
         }
 
         // Create file
         else {
-            TraceA("Create file: ", outPath)
+            LTrace("Create file: ", outPath)
 
             // Note: If this fails the file we are trying
             // to write may be in use on the filesystem.
@@ -203,7 +203,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
             closeCurrentFile();
         }
     } catch (std::exception& exc) {
-        ErrorL << "Cannot unzip file: " << exc.what() << endl;
+        SError << "Cannot unzip file: " << exc.what() << endl;
         if (whiny)
             throw exc;
         return false;

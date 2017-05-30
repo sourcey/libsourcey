@@ -62,7 +62,7 @@ void VideoCapture::openVideo(const std::string& device, const av::VideoCodec& pa
 void VideoCapture::openVideo(const std::string& device, int width, int height, 
                              double framerate, const std::string& pixelFmt)
 {
-    TraceS(this) << "Opening camera: " << device << ", "
+    STrace << "Opening camera: " << device << ", "
                  << "width=" << width << ", "
                  << "height=" << height << ", "
                  << "framerate=" << framerate << endl;

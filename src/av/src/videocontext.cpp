@@ -33,14 +33,14 @@ VideoContext::VideoContext()
     , pts(AV_NOPTS_VALUE)
     , seconds(0)
 {
-    TraceA("Create")
+    LTrace("Create")
     initializeFFmpeg();
 }
 
 
 VideoContext::~VideoContext()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 
     close();
     uninitializeFFmpeg();
@@ -54,7 +54,7 @@ void VideoContext::create()
 
 void VideoContext::open()
 {
-    DebugS(this) << "Open: "
+    SDebug << "Open: "
                  << "\n\tInput: " << iparams.toString()
                  << "\n\tOutput: " << oparams.toString() << endl;
 
@@ -74,7 +74,7 @@ void VideoContext::open()
 
 void VideoContext::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
 
     if (frame) {
         av_free(frame);
@@ -103,7 +103,7 @@ void VideoContext::close()
     seconds = 0;
     error = "";
 
-    TraceA("Closing: OK")
+    LTrace("Closing: OK")
 }
 
 
@@ -181,7 +181,7 @@ bool VideoContext::recreateConverter()
     }
 
     // Recreate the conversion context
-    DebugL << "Recreating video conversion context" << endl;
+    SDebug << "Recreating video conversion context" << endl;
     if (conv)
         delete conv;
     conv = new VideoConverter();

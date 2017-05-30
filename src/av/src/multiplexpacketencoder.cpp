@@ -37,7 +37,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    TraceS(this) << "processing" << std::endl;
+    STrace << "processing" << std::endl;
 
     // We may be receiving either audio or video packets
     auto vPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -104,7 +104,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    TraceS(this) << "Processing" << std::endl;
+    STrace << "Processing" << std::endl;
 
     // We may be receiving either audio or video packets
     auto vPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -153,14 +153,14 @@ bool MultiplexPacketEncoder::accepts(IPacket* packet)
 
 void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
-    TraceS(this) << "On stream state change: " << state << endl;
+    STrace << "On stream state change: " << state << endl;
 
     std::lock_guard<std::mutex> guard(_mutex);
 
     switch (state.id()) {
         case PacketStreamState::Active:
             if (!isActive()) {
-                TraceA("Initializing")
+                LTrace("Initializing")
                 // if (MultiplexEncoder::options().oformat.video.enabled &&
                 //    MultiplexEncoder::options().oformat.audio.enabled)
                 //    _muxLiveStreams = true;
@@ -171,7 +171,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
         // case PacketStreamState::Resetting:
         case PacketStreamState::Stopping:
             if (isActive()) {
-                TraceA("Uninitializing")
+                LTrace("Uninitializing")
                 MultiplexEncoder::flush();
                 MultiplexEncoder::uninit();
             }
@@ -182,7 +182,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
             // case PacketStreamState::Closed:
     }
 
-    TraceS(this) << "Stream state change: OK: " << state << endl;
+    STrace << "Stream state change: OK: " << state << endl;
 }
 
 

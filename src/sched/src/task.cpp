@@ -27,7 +27,7 @@ Task::Task(const std::string& type, const std::string& name)
     , _scheduler(nullptr)
     , _trigger(nullptr)
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
@@ -38,13 +38,13 @@ Task::Task(sched::Scheduler& scheduler, const std::string& type,
     , _scheduler(&scheduler)
     , _trigger(nullptr)
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
 Task::~Task()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 
@@ -59,7 +59,7 @@ void Task::start()
 
 void Task::serialize(json::value& root)
 {
-    TraceA("Serializing")
+    LTrace("Serializing")
 
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -71,7 +71,7 @@ void Task::serialize(json::value& root)
 
 void Task::deserialize(json::value& root)
 {
-    TraceA("Deserializing")
+    LTrace("Deserializing")
 
     std::lock_guard<std::mutex> guard(_mutex);
 

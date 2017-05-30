@@ -67,7 +67,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+    Logger::instance().add(new ConsoleChannel("debug", STraceevel));
 
     Sourcey::Net::Address srvAddr("localhost", 1337);
     Messenger app(srvAddr);

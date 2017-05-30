@@ -45,14 +45,14 @@ IAllocation::IAllocation(const FiveTuple& tuple, const std::string& username,
 
 IAllocation::~IAllocation()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
     _permissions.clear();
 }
 
 
 void IAllocation::updateUsage(std::int64_t numBytes)
 {
-    TraceA("Update usage: ", _bandwidthUsed, ": ", numBytes)
+    LTrace("Update usage: ", _bandwidthUsed, ": ", numBytes)
     _updatedAt = time(0);
     _bandwidthUsed += numBytes;
 }
@@ -82,7 +82,7 @@ void IAllocation::setLifetime(std::int64_t lifetime)
 {
     _lifetime = lifetime;
     _updatedAt = static_cast<std::int64_t>(time(0));
-    TraceA("Updating Lifetime: ", _lifetime)
+    LTrace("Updating Lifetime: ", _lifetime)
 }
 
 
@@ -141,14 +141,14 @@ void IAllocation::addPermission(const std::string& ip)
     // If the permission is already in the list then refresh it.
     for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
         if ((*it).ip == ip) {
-            TraceA("Refreshing permission: ", ip)
+            LTrace("Refreshing permission: ", ip)
             (*it).refresh();
             return;
         }
     }
 
     // Otherwise create it...
-    TraceA("Create permission: ", ip)
+    LTrace("Create permission: ", ip)
     _permissions.push_back(Permission(ip));
 }
 
@@ -185,7 +185,7 @@ void IAllocation::removeExpiredPermissions()
 
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).timeout.expired()) {
-            InfoL << "Removing Expired Permission: " << (*it).ip << endl;
+            SInfo << "Removing Expired Permission: " << (*it).ip << endl;
             it = _permissions.erase(it);
         } else
             ++it;
@@ -202,12 +202,12 @@ bool IAllocation::hasPermission(const std::string& peerIP)
 
 #if ENABLE_LOCAL_IPS
     if (peerIP.find("192.168.") == 0 || peerIP.find("127.") == 0) {
-        WarnL << "Granting permission for local IP without explicit permission: " << peerIP << endl;
+        SWarn << "Granting permission for local IP without explicit permission: " << peerIP << endl;
         return true;
     }
 #endif
 
-    TraceA("No permission for: ", peerIP)
+    LTrace("No permission for: ", peerIP)
     return false;
 }
 

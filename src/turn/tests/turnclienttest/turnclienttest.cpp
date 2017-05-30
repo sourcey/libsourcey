@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     // Logger::instance().setWriter(new AsyncLogWriter);
     test::init();
 
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
         initiator.AllocationCreated += [&]()
         {
-            DebugL << "Initiator allocation created" << endl;
+            SDebug << "Initiator allocation created" << endl;
 
             // Start the responder when the allocation is created
             responder.connect(initiator.client.relayedAddress());
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
         initiator.TestComplete += [&](bool success)
         {
-            DebugL << "Test complete: " << success << endl;
+            SDebug << "Test complete: " << success << endl;
             expect(success);
             initiator.shutdown();
             responder.shutdown();
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 
         initiator.AllocationCreated += [&]()
         {
-            DebugL << "Initiator allocation created" << endl;
+            SDebug << "Initiator allocation created" << endl;
 
             // Start the responder when the allocation is created
             responder.connect(initiator.client.relayedAddress());
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
         initiator.TestComplete += [&](bool success)
         {
-            DebugL << "Test complete: " << success << endl;
+            SDebug << "Test complete: " << success << endl;
             expect(success);
             initiator.shutdown();
             responder.shutdown();

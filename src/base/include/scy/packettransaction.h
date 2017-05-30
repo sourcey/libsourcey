@@ -115,7 +115,7 @@ public:
     /// by the internal state machine.
     virtual void dispose()
     {
-        TraceA("Dispose");
+        LTrace("Dispose");
 
         if (!_destroyed) {
             _destroyed = true;
@@ -145,7 +145,7 @@ protected:
     /// Override to handle post state change logic.
     virtual void onStateChange(TransactionState& state, const TransactionState&)
     {
-        TraceA("On state change:", state.toString());
+        LTrace("On state change:", state.toString());
 
         if (state.equals(TransactionState::Success) ||
             state.equals(TransactionState::Failed))
@@ -172,12 +172,12 @@ protected:
     /// Called when a successful response is received.
     virtual void onResponse()
     {
-        TraceA("Success:", _response.toString());
+        LTrace("Success:", _response.toString());
     }
 
     virtual void onTimeout()
     {
-        DebugA("Timeout");
+        LDebug("Timeout");
 
         if (!canResend()) {
             // if (!cancelled())

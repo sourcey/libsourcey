@@ -28,7 +28,7 @@ Server::Server(const std::string& host, short port, net::TCPSocket::Ptr socket, 
     , _timer(5000, 5000, socket->loop())
     , _factory(factory)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
@@ -38,13 +38,13 @@ Server::Server(const net::Address& address, net::TCPSocket::Ptr socket, ServerCo
     , _timer(5000, 5000, socket->loop())
     , _factory(factory)
 {
-    // TraceA("Create")
+    // LTrace("Create")
 }
 
 
 Server::~Server()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
     shutdown();
     if (_factory)
         delete _factory;
@@ -58,7 +58,7 @@ void Server::start()
     _socket->bind(_address);
     _socket->listen(1000);
 
-    DebugS(this) << "HTTP server listening on " << _address << endl;
+    SDebug << "HTTP server listening on " << _address << endl;
 
     _timer.Timeout += slot(this, &Server::onTimer);
     _timer.start();
@@ -67,7 +67,7 @@ void Server::start()
 
 void Server::shutdown()
 {
-    // TraceA("Shutdown")
+    // LTrace("Shutdown")
 
     if (_socket) {
         _socket->removeReceiver(this);
@@ -92,7 +92,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 
 void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 {
-    // TraceA("On accept socket connection")
+    // LTrace("On accept socket connection")
 
     ServerConnection::Ptr conn = _factory->createConnection(*this, socket);
     conn->Close += slot(this, &Server::onConnectionClose);
@@ -102,7 +102,7 @@ void Server::onClientSocketAccept(const net::TCPSocket::Ptr& socket)
 
 void Server::onConnectionReady(ServerConnection& conn)
 {
-    // TraceA("On connection ready")
+    // LTrace("On connection ready")
 
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
@@ -115,7 +115,7 @@ void Server::onConnectionReady(ServerConnection& conn)
 
 void Server::onConnectionClose(ServerConnection& conn)
 {
-    // TraceA("On connection closed")
+    // LTrace("On connection closed")
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (it->get() == &conn) {
             _connections.erase(it);
@@ -127,13 +127,13 @@ void Server::onConnectionClose(ServerConnection& conn)
 
 void Server::onSocketClose(net::Socket& socket)
 {
-    // TraceA("On server socket close")
+    // LTrace("On server socket close")
 }
 
 
 void Server::onTimer()
 {
-    // DebugS(this) << "Num active HTTP server connections: " << connections.size() << endl;
+    // SDebug << "Num active HTTP server connections: " << connections.size() << endl;
 
     // TODO: cleanup timed out pending connections
 }
@@ -156,19 +156,19 @@ ServerConnection::ServerConnection(Server& server, net::TCPSocket::Ptr socket)
     , _responder(nullptr)
     , _upgrade(false)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     replaceAdapter(new ConnectionAdapter(this, HTTP_REQUEST));
 }
 
 
 ServerConnection::~ServerConnection()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
 
     close();
 
     if (_responder) {
-        TraceS(this) << "Destroy: Responder: " << _responder << endl;
+        STrace << "Destroy: Responder: " << _responder << endl;
         delete _responder;
     }
 }
@@ -182,7 +182,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders()
 {
-    // TraceA("On headers")
+    // LTrace("On headers")
 
 #if 0
     // Send a raw HTTP response
@@ -206,7 +206,7 @@ void ServerConnection::onHeaders()
     if (_upgrade && util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
     // if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
     //     util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
-        // TraceS(this) << "Upgrading to WebSocket: " << request() << endl;
+        // STrace << "Upgrading to WebSocket: " << request() << endl;
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -248,11 +248,11 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-    // TraceS(this) << "On payload: " << buffer.size() << endl;
+    // STrace << "On payload: " << buffer.size() << endl;
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceA("On payload: Closed")
+        // LTrace("On payload: Closed")
         return;
     }
 
@@ -266,11 +266,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onComplete()
 {
-    // TraceA("On complete")
+    // LTrace("On complete")
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {
-        // TraceA("On complete: Closed")
+        // LTrace("On complete: Closed")
         return;
     }
 
@@ -283,7 +283,7 @@ void ServerConnection::onComplete()
 
 void ServerConnection::onClose()
 {
-    // TraceA("On close")
+    // LTrace("On close")
 
     if (_responder)
         _responder->onClose();

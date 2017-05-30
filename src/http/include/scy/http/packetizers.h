@@ -98,7 +98,7 @@ public:
 
     virtual void process(IPacket& packet)
     {
-        TraceA("Processing:", packet.size());
+        LTrace("Processing:", packet.size());
 
         if (!packet.hasData())
             throw std::invalid_argument("Incompatible packet type");

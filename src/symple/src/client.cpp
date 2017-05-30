@@ -65,19 +65,19 @@ Client::Client(const net::Socket::Ptr& socket, const Client::Options& options)
     , _options(options)
     , _announceStatus(0)
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
 Client::~Client()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 
 void Client::connect()
 {
-    TraceA("Connecting")
+    LTrace("Connecting")
     assert(!_options.host.empty());
     assert(!_options.user.empty());
 
@@ -93,7 +93,7 @@ void Client::connect()
 
 void Client::close()
 {
-    TraceA("Closing")
+    LTrace("Closing")
     sockio::Client::close();
 }
 
@@ -108,7 +108,7 @@ void assertCanSend(Client* client, Message& m)
     m.setFrom(client->ourPeer()->address());
 
     if (m.to().id == m.from().id) {
-        ErrorL << "Invalid Symple address: " << m.to().id << ": " << m.from().id << endl;
+        SError << "Invalid Symple address: " << m.to().id << ": " << m.from().id << endl;
         assert(0);
         throw std::runtime_error("Cannot send message with matching sender and recipient.");
     }
@@ -119,7 +119,7 @@ void assertCanSend(Client* client, Message& m)
     }
 
 #ifdef _DEBUG
-    TraceA("Sending message:", m.dump(4))
+    LTrace("Sending message:", m.dump(4))
 #endif
 }
 
@@ -157,7 +157,7 @@ int Client::respond(Message& m, bool ack)
 
 void Client::createPresence(Presence& p)
 {
-    TraceA("Create presence")
+    LTrace("Create presence")
 
     auto peer = ourPeer();
     if (peer) {
@@ -172,7 +172,7 @@ void Client::createPresence(Presence& p)
 
 int Client::sendPresence(bool probe)
 {
-    TraceA("Broadcasting presence")
+    LTrace("Broadcasting presence")
 
     Presence p;
     createPresence(p);
@@ -183,7 +183,7 @@ int Client::sendPresence(bool probe)
 
 int Client::sendPresence(const Address& to, bool probe)
 {
-    TraceA("Sending presence")
+    LTrace("Sending presence")
 
     Presence p;
     createPresence(p);
@@ -195,7 +195,7 @@ int Client::sendPresence(const Address& to, bool probe)
 
 int Client::announce()
 {
-    TraceA("Announcing")
+    LTrace("Announcing")
 
     json::value data;
     data["user"] = _options.user;
@@ -211,7 +211,7 @@ int Client::announce()
 
 int Client::joinRoom(const std::string& room)
 {
-    DebugA("Join room:", room)
+    LDebug("Join room:", room)
 
     _rooms.push_back(room);
     sockio::Packet pkt("join", "\"" + room + "\"");
@@ -221,7 +221,7 @@ int Client::joinRoom(const std::string& room)
 
 int Client::leaveRoom(const std::string& room)
 {
-    DebugA("Leave room:", room)
+    LDebug("Leave room:", room)
 
     _rooms.erase(std::remove(_rooms.begin(), _rooms.end(), room), _rooms.end());
     sockio::Packet pkt("leave", "\"" + room + "\"");
@@ -231,7 +231,7 @@ int Client::leaveRoom(const std::string& room)
 
 void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
 {
-    TraceA("On announce response:", state)
+    LTrace("On announce response:", state)
 
     auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
     switch (state.id()) {
@@ -288,15 +288,15 @@ void Client::onOnline()
 void Client::emit(IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
-    TraceA("Emit packet:", packet.toString())
+    LTrace("Emit packet:", packet.toString())
 
     // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
-        TraceA("JSON packet:", packet.toString())
+        LTrace("JSON packet:", packet.toString())
 
         json::value data = packet.json();
 #ifdef _DEBUG
-        TraceA("Received ", data.dump(4))
+        LTrace("Received ", data.dump(4))
 #endif
         assert(data.is_object());
         std::string type(data.value("type", ""));
@@ -308,21 +308,21 @@ void Client::emit(IPacket& raw)
             if (type == "message") {
                 Message m(data);
                 if (!m.valid()) {
-                    WarnL << "Dropping invalid message: " << data.dump() << endl;
+                    SWarn << "Dropping invalid message: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(m);
             } else if (type == "event") {
                 Event e(data);
                 if (!e.valid()) {
-                    WarnL << "Dropping invalid event: " << data.dump() << endl;
+                    SWarn << "Dropping invalid event: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(e);
             } else if (type == "presence") {
                 Presence p(data);
                 if (!p.valid()) {
-                    WarnL << "Dropping invalid presence: " << data.dump() << endl;
+                    SWarn << "Dropping invalid presence: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(p);
@@ -334,35 +334,35 @@ void Client::emit(IPacket& raw)
             } else if (type == "command") {
                 Command c(data);
                 if (!c.valid()) {
-                    WarnL << "Dropping invalid command: " << data.dump() << endl;
+                    SWarn << "Dropping invalid command: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(c);
                 if (c.isRequest()) {
                     c.setStatus(404);
-                    WarnL << "Command not handled: " << c.id() << ": " << c.node() << endl;
+                    SWarn << "Command not handled: " << c.id() << ": " << c.node() << endl;
                     respond(c);
                 }
             } else {
-                DebugA("Received non-standard message:", type)
+                LDebug("Received non-standard message:", type)
 
                 // Attempt to parse custom packets as a message type
                 Message m(data);
                 if (!m.valid()) {
-                    WarnL << "Dropping invalid message: " << data.dump() << endl;
+                    SWarn << "Dropping invalid message: " << data.dump() << endl;
                     return;
                 }
                 PacketSignal::emit(m);
             }
         } else {
             assert(0 && "invalid packet");
-            WarnL << "Invalid Symple message" << endl;
+            SWarn << "Invalid Symple message" << endl;
         }
     }
 
     // Other packet types are proxied directly
     else {
-        TraceA("Proxying packet:", PacketSignal::nslots())
+        LTrace("Proxying packet:", PacketSignal::nslots())
         PacketSignal::emit(packet);
     }
 }
@@ -370,7 +370,7 @@ void Client::emit(IPacket& raw)
 
 void Client::onPresenceData(const json::value& data, bool whiny)
 {
-    TraceA("Updating:", data.dump(4))
+    LTrace("Updating:", data.dump(4))
 
     if (data.is_object() &&
         data.find("id") != data.end() &&
@@ -384,23 +384,23 @@ void Client::onPresenceData(const json::value& data, bool whiny)
             if (!peer) {
                 peer = new Peer(data);
                 _roster.add(id, peer);
-                DebugA("Peer connected:", peer->address().toString())
+                LDebug("Peer connected:", peer->address().toString())
                 PeerConnected.emit(*peer);
             } else {
                 static_cast<json::value&>(*peer) = data;
             }
         } else {
             if (peer) {
-                DebugA("Peer disconnected:", peer->address().toString())
+                LDebug("Peer disconnected:", peer->address().toString())
                 PeerDisconnected.emit(*peer);
                 _roster.free(id);
             } else {
-                WarnA("Unknown peer disconnected:", peer->address().toString())
+                LWarn("Unknown peer disconnected:", peer->address().toString())
             }
         }
     } else {
         std::string error("Bad presence data: " + data.dump());
-        ErrorL << error << endl;
+        SError << error << endl;
         if (whiny)
             throw std::runtime_error(error);
     }
@@ -412,7 +412,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
-        TraceA("Updating:", json::stringify(data, true))
+        LTrace("Updating:", json::stringify(data, true))
         std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {
@@ -428,7 +428,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
     }
     else {
         std::string error("Bad presence data: " + json::stringify(data));
-        ErrorL << error << endl;
+        SError << error << endl;
         if (whiny)
             throw std::runtime_error(error);
     }

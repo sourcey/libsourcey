@@ -42,7 +42,7 @@ void AudioDecoder::create()
 {
     assert(stream);
 
-    TraceS(this) << "Create: " << stream->index << endl;
+    STrace << "Create: " << stream->index << endl;
 
     ctx = stream->codec;
 
@@ -96,7 +96,7 @@ bool emitPacket(AudioDecoder* dec)
 
     if (dec->resampler) {
         if (!dec->resampler->resample((uint8_t**)dec->frame->data, dec->frame->nb_samples)) {
-            DebugL << "Samples buffered by resampler" << endl;
+            SDebug << "Samples buffered by resampler" << endl;
             return false;
         }
 
@@ -183,14 +183,14 @@ bool AudioDecoder::decode(AVPacket& ipacket)
         ret = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
             error = "Audio decoder error: " + averror(ret);
-            ErrorS(this) << error << endl;
+            SError << error << endl;
             throw std::runtime_error(error);
         }
 
         if (frameDecoded) {
             // assert(bytesDecoded == ipacket.size);
 
-            // TraceS(this) << "Decoded frame:"
+            // STrace << "Decoded frame:"
             //     << "\n\tFrame Size: " << opacket.size
             //     << "\n\tFrame PTS: " << opacket.pts
             //     << "\n\tInput Frame PTS: " << ipacket.pts
@@ -228,7 +228,7 @@ void AudioDecoder::flush() // AVPacket& opacket
     avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
 
     if (frameDecoded) {
-        TraceS(this) << "Flushed audio frame: " << frame->pts << endl;
+        STrace << "Flushed audio frame: " << frame->pts << endl;
         assert(0);
         emitPacket(this); //, frame, opacket, &ptsSeconds
     }
@@ -237,7 +237,7 @@ void AudioDecoder::flush() // AVPacket& opacket
 
 // void AudioContext::process(IPacket& packet)
 // {
-//     TraceA("Process")
+//     LTrace("Process")
 //
 //     auto apacket = dynamic_cast<AudioPacket*>(&packet);
 //     if (!apacket)

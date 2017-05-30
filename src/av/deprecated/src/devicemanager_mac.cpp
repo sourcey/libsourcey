@@ -115,7 +115,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //   OSErr err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
 //                                            &propsize, NULL);
 //   if (0 != err) {
-//     ErrorL << "Couldn't get information about property, "
+//     SError << "Couldn't get information about property, "
 //                   << "so no device list acquired." << endl;
 //     return false;
 //   }
@@ -128,7 +128,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //   err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
 //                                  &propsize, device_ids); //.get()
 //   if (0 != err) {
-//     ErrorL << "Failed to get device ids, "
+//     SError << "Failed to get device ids, "
 //                   << "so no device listing acquired." << endl;
 // 	delete device_ids;
 //     return false;
@@ -148,7 +148,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //         out_dev_ids->push_back(an_id);
 //       }
 //     } else {
-//       ErrorL << "No property info for stream property for device id "
+//       SError << "No property info for stream property for device id "
 //                     << an_id << "(input == " << input
 //                     << "), so not including it in the list." << endl;
 //     }
@@ -168,7 +168,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //                                      kAudioDevicePropertyDeviceName,
 //                                      &nameLength, name);
 //   if (0 != err) {
-//     ErrorL << "No name acquired for device id " << id << endl;
+//     SError << "No name acquired for device id " << id << endl;
 //     return false;
 //   }
 //

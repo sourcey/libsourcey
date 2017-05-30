@@ -64,7 +64,7 @@ Parser::~Parser()
 
 void Parser::init()
 {
-    // TraceS(this) << "Init: " << _type << endl;
+    // STrace << "Init: " << _type << endl;
 
     ::http_parser_init(&_parser, _type);
     _parser.data = this;
@@ -83,7 +83,7 @@ void Parser::init()
 
 size_t Parser::parse(const char* data, size_t len)
 {
-    // TraceS(this) << "Parse: " << len << endl;
+    // STrace << "Parse: " << len << endl;
 
     if (_complete) {
         throw std::runtime_error("HTTP parser already complete");
@@ -96,7 +96,7 @@ size_t Parser::parse(const char* data, size_t len)
         // may still be unread data from the request body in the buffer.
     }
     else if (nparsed != len) { // parser.http_errno == HPE_OK && !parser.upgrade
-        WarnS(this) << "HTTP parse failed: " << len << " != "<< nparsed << endl;
+        SWarn << "HTTP parse failed: " << len << " != "<< nparsed << endl;
 
         // Handle error. Usually just close the connection.
         onError(_parser.http_errno);
@@ -172,7 +172,7 @@ bool Parser::upgrade() const
 
 void Parser::onURL(const std::string& value)
 {
-    // TraceS(this) << "onURL: " << value << endl;
+    // STrace << "onURL: " << value << endl;
 
     if (_request)
         _request->setURI(value);
@@ -181,7 +181,7 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-    // TraceS(this) << "On header: " << name << ":" << value << endl;
+    // STrace << "On header: " << name << ":" << value << endl;
 
     if (message())
         message()->add(name, value);
@@ -201,7 +201,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, size_t len)
 {
-    // TraceA("On body")
+    // LTrace("On body")
     if (_observer)
         _observer->onParserChunk(buf, len);
 }
@@ -209,7 +209,7 @@ void Parser::onBody(const char* buf, size_t len)
 
 void Parser::onMessageEnd()
 {
-    // TraceA("On message end")
+    // LTrace("On message end")
     _complete = true;
     if (_observer)
         _observer->onParserEnd();
@@ -220,12 +220,12 @@ void Parser::onMessageEnd()
 void Parser::onError(unsigned errorno, const std::string& message)
 {
     assert(errorno != HPE_OK);
-    DebugS(this) << "Parse error: "
+    SDebug << "Parse error: "
         << ::http_errno_name((::http_errno)errorno) << ": "
         << ::http_errno_description((::http_errno)errorno) << endl;
 
     _complete = true;
-    _error.errorno = (http_errno)errorno; // HTTP_PARSER_ERRNO((http_errno)errno);
+    _error.err = (http_errno)errorno; // HTTP_PARSER_ERRNO((http_errno)errno);
     _error.message = message.empty() ? http_errno_name((::http_errno)errorno) : message;
     if (_observer)
         _observer->onParserError(_error);

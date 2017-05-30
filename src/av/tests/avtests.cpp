@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    //Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
+    //Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LTrace, Level::Debug
     //Logger::instance().setWriter(new AsyncLogWriter);
     test::init();
 
@@ -40,37 +40,37 @@ int main(int argc, char** argv)
 // //
 //
 // describe("device manager", []() {
-//     DebugL << "Starting" << endl;
+//     SDebug << "Starting" << endl;
 //     auto& deviceManager = av::MediaFactory::instance().devices();
 //
 //     av::Device device;
 //     if (deviceManager.getDefaultCamera(device)) {
-//         DebugA("Default video device: ", device.id, ": ", device.name)
+//         LDebug("Default video device: ", device.id, ": ", device.name)
 //     }
 //     if (deviceManager.getDefaultMicrophone(device)) {
-//         DebugA("Default audio device: ", device.id, ": ", device.name)
+//         LDebug("Default audio device: ", device.id, ": ", device.name)
 //     }
 //
 //     std::vector<av::Device> devices;
 //     if (deviceManager.getCameras(devices)) {
-//         DebugA("Num video devices: ", devices.size())
+//         LDebug("Num video devices: ", devices.size())
 //         for (auto& device : devices) {
-//             DebugL << "Printing video device: " << device.id << ": " <<
+//             SDebug << "Printing video device: " << device.id << ": " <<
 //             device.name << endl;
 //         }
 //     }
 //     else {
-//         DebugL << "No video devices detected!" << endl;
+//         SDebug << "No video devices detected!" << endl;
 //     }
 //     if (deviceManager.getMicrophones(devices)) {
-//         DebugA("Num audio devices: ", devices.size())
+//         LDebug("Num audio devices: ", devices.size())
 //         for (auto& device : devices) {
-//             DebugL << "Printing audio device: " << device.id << ": " <<
+//             SDebug << "Printing audio device: " << device.id << ": " <<
 //             device.name << endl;
 //         }
 //     }
 //     else {
-//         DebugL << "No video devices detected!" << endl;
+//         SDebug << "No video devices detected!" << endl;
 //     }
 //
 //     // TODO: verify data integrity?
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 // //
 //
 // describe("video capture", []() {
-//     DebugL << "Starting" << endl;
+//     SDebug << "Starting" << endl;
 //
 //     av::VideoCapture::Ptr capture =
 //     MediaFactory::instance().createVideoCapture(0);
@@ -97,11 +97,11 @@ int main(int argc, char** argv)
 //     capture->emitter -= packetSlot(this,
 //     &CallbackContext::onVideoCaptureFrame);
 //
-//     DebugL << "Complete" << endl;
+//     SDebug << "Complete" << endl;
 // }
 //
 // describe("video capture stream", []() {
-//     DebugL << "Starting" << endl;
+//     SDebug << "Starting" << endl;
 //
 //     av::VideoCapture::Ptr capture =
 //     MediaFactory::instance().createVideoCapture(0);
@@ -118,5 +118,5 @@ int main(int argc, char** argv)
 //
 //     assert(capture->emitter.nslots() == 0);
 //
-//     DebugL << "Complete" << endl;
+//     SDebug << "Complete" << endl;
 // });

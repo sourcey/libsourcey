@@ -35,7 +35,7 @@
 //
 // void Stream::close()
 // {
-//     // TraceA("Close: ", ptr())
+//     // LTrace("Close: ", ptr())
 //
 //     if (_started)
 //         readStop();
@@ -47,9 +47,9 @@
 // {
 //     assertThread();
 //
-//     // TraceA("Send shutdown")
+//     // LTrace("Send shutdown")
 //     if (!active()) {
-//         WarnL << "Cannot shutdown a closed stream" << std::endl;
+//         SWarn << "Cannot shutdown a closed stream" << std::endl;
 //         return false;
 //     }
 //
@@ -119,7 +119,7 @@
 //
 // bool Stream::readStart()
 // {
-//     // TraceA("Read start: ", ptr())
+//     // LTrace("Read start: ", ptr())
 //     assert(initialized());
 //     assert(!_started);
 //     _started = true;
@@ -133,7 +133,7 @@
 //
 // bool Stream::readStop()
 // {
-//     // TraceA("Read stop: ", ptr())
+//     // LTrace("Read stop: ", ptr())
 //     assert(initialized());
 //     assert(!closed());
 //     assert(_started);
@@ -148,14 +148,14 @@
 //
 // void Stream::onRead(const char* data, size_t len)
 // {
-//     // TraceA("On read: ", len)
+//     // LTrace("On read: ", len)
 //     Read.emit(*this, data, (const int)len);
 // }
 //
 //
 // void Stream::handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending)
 // {
-//     // TraceA("Handle read: ", nread)
+//     // LTrace("Handle read: ", nread)
 //     auto self = reinterpret_cast<Stream*>(handle->data);
 //     assert(self->_started);
 //     assert(self->initialized());
@@ -176,7 +176,7 @@
 //     //
 //     //     // Swallow exceptions and set the stream error
 //     //     // This keep errors in the event loop
-//     //     ErrorL << "Exception: " << exc.what() << std::endl;
+//     //     SError << "Exception: " << exc.what() << std::endl;
 //     //     self->setUVError(exc.what());
 //     //     return;
 //     // }

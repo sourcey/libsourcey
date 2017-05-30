@@ -65,18 +65,18 @@ static void logCallback(void *ptr, int level, const char *fmt, va_list vl)
     case AV_LOG_PANIC:
     case AV_LOG_FATAL:
     case AV_LOG_ERROR:
-        ErrorA("FFmpeg: ", util::trimRight<std::string>(logbuf))
+        LError("FFmpeg: ", util::trimRight<std::string>(logbuf))
         break;
     case AV_LOG_WARNING:
-        WarnA("FFmpeg: ", util::trimRight<std::string>(logbuf))
+        LWarn("FFmpeg: ", util::trimRight<std::string>(logbuf))
         break;
     case AV_LOG_INFO:
-        DebugA("FFmpeg: ", util::trimRight<std::string>(logbuf))
+        LDebug("FFmpeg: ", util::trimRight<std::string>(logbuf))
         break;
     default:
     case AV_LOG_VERBOSE:
     case AV_LOG_DEBUG:
-        // TraceA("FFmpeg: ", util::trimRight<std::string>(logbuf))
+        // LTrace("FFmpeg: ", util::trimRight<std::string>(logbuf))
         break;
     }
 }

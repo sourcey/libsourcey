@@ -94,10 +94,10 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 {
     if (peer.id() == _client.ourID())
         return;
-    DebugA("Peer connected: ", peer.id())
+    LDebug("Peer connected: ", peer.id())
 
     if (wrtc::PeerManager::exists(peer.id())) {
-        DebugA("Peer already has session: ", peer.id())
+        LDebug("Peer already has session: ", peer.id())
         return;
     }
 
@@ -121,7 +121,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
 
 void Signaler::onPeerMessage(smpl::Message& m)
 {
-    DebugA("Peer message: ", m.from().toString())
+    LDebug("Peer message: ", m.from().toString())
 
     if (m.find("offer") != m.end()) {
         assert(0 && "offer not supported");
@@ -136,11 +136,11 @@ void Signaler::onPeerMessage(smpl::Message& m)
 
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
-    DebugL << "Peer disconnected" << endl;
+    SDebug << "Peer disconnected" << endl;
 
     auto conn = wrtc::PeerManager::remove(peer.id());
     if (conn) {
-        DebugA("Deleting peer connection: ", peer.id())
+        LDebug("Deleting peer connection: ", peer.id())
         // async delete not essential, but to be safe
         // delete conn;
         deleteLater<wrtc::Peer>(conn); 
@@ -150,7 +150,7 @@ void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 
 void Signaler::onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
 {
-    DebugA("Client state changed from ", oldState, " to ", state)
+    LDebug("Client state changed from ", oldState, " to ", state)
 
     switch (state.id()) {
         case sockio::ClientState::Connecting:

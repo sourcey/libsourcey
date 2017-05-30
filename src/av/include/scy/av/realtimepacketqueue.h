@@ -62,14 +62,14 @@ protected:
             return nullptr;
         BaseQueue::pop();
 
-        TraceS(this) << "Pop next: " << BaseQueue::size() << ": "
+        STrace << "Pop next: " << BaseQueue::size() << ": "
             << realTime() << " > " << next->time << std::endl;
         return next;
     }
 
     virtual void onStreamStateChange(const PacketStreamState& state)
     {
-        TraceS(this) << "Stream state changed: " << state << std::endl;
+        STrace << "Stream state changed: " << state << std::endl;
 
         if (state.equals(PacketStreamState::Active)) {
             _startTime = time::hrtime();

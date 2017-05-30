@@ -23,14 +23,14 @@ namespace net {
 TCPSocket::TCPSocket(uv::Loop* loop)
     : Stream(loop)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     init();
 }
 
 
 TCPSocket::~TCPSocket()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
     close();
 }
 
@@ -40,7 +40,7 @@ void TCPSocket::init()
     if (initialized())
         return;
 
-    // TraceA("Init")
+    // LTrace("Init")
     if (!get())
         Stream::reset();
     Stream::init(&uv_tcp_init_ex, _af);
@@ -58,11 +58,10 @@ void TCPSocket::reset()
 
 void TCPSocket::connect(const net::Address& peerAddress)
 {
-    // TraceA("Connecting to", peerAddress)
+    // LTrace("Connecting to", peerAddress)
     init();
 
-    auto wrap = new ConnectReq();
-    wrap->callback = [ptr = context()](const uv::BasicEvent& event) {
+    uv::createRequest<uv::ConnectReq>([ptr = context()](const uv::BasicEvent& event) {
         if (!ptr->deleted) {
             auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
             if (event.status)
@@ -70,8 +69,19 @@ void TCPSocket::connect(const net::Address& peerAddress)
             else
                 handle->onConnect();
         }
-    };
-    wrap->connect(get(), peerAddress.addr());
+    }).connect(get(), peerAddress.addr());
+
+    // auto wrap = new ConnectReq();
+    // wrap->callback = [ptr = context()](const uv::BasicEvent& event) {
+    //     if (!ptr->deleted) {
+    //         auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
+    //         if (event.status)
+    //             handle->setUVError(event.status, "TCP connection failed");
+    //         else
+    //             handle->onConnect();
+    //     }
+    // };
+    // wrap->connect(get(), peerAddress.addr());
 
     // auto wrap = new ConnectReq(this);
     // wrap->invoke(&uv_tcp_connect, &wrap->req, get(), peerAddress.addr(),
@@ -89,7 +99,7 @@ void TCPSocket::connect(const net::Address& peerAddress)
     //             // handle->onConnect(req, status);
     //         }
     //         else {
-    //             DebugA("Dropping request for closed TCP socket")
+    //             LDebug("Dropping request for closed TCP socket")
     //         }
     //         delete wrap;
     //     });
@@ -98,7 +108,7 @@ void TCPSocket::connect(const net::Address& peerAddress)
 
 void TCPSocket::connect(const std::string& host, uint16_t port)
 {
-    // TraceA("Connecting to", peerAddress)
+    // LTrace("Connecting to", peerAddress)
 
     if (Address::validateIP(host)) {
         connect(Address(host, port));
@@ -112,24 +122,22 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
     else {
         init();
 
-        auto wrap = new GetAddrInfoReq();
-        wrap->callback = [ptr = context()](const GetAddrInfoEvent& event) {
+        net::dns::resolve("sourcey.com", 80, [ptr = context()](int err, const net::Address& addr) {
             if (!ptr->deleted) {
                 auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
-                if (event.status)
-                    handle->setUVError(event.status, "DNS failed to resolve");
+                if (err)
+                    handle->setUVError(err, "DNS failed to resolve");
                 else
-                    handle->connect(event.addr);
+                    handle->connect(addr);
             }
-        };
-        wrap->resolve(host, port, loop());
+        }, loop());
     }
 }
 
 
 void TCPSocket::bind(const net::Address& address, unsigned flags)
 {
-    // TraceA("Binding on", address)
+    // LTrace("Binding on", address)
 
     // Reset the handle if the address family has changed
     if (_af != address.af()) {
@@ -146,7 +154,7 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
 
 void TCPSocket::listen(int backlog)
 {
-    // TraceA("Listening")
+    // LTrace("Listening")
     init();
 
     invoke(&uv_listen, get<uv_stream_t>(), backlog,
@@ -156,7 +164,7 @@ void TCPSocket::listen(int backlog)
                 self->acceptConnection();
             }
             else {
-                ErrorA("Accept connection failed:", uv_strerror(status));
+                LError("Accept connection failed:", uv_strerror(status));
             }
         }); // "TCP listen failed"
 }
@@ -164,14 +172,14 @@ void TCPSocket::listen(int backlog)
 
 bool TCPSocket::shutdown()
 {
-    // TraceA("Shutdown")
+    // LTrace("Shutdown")
     return Stream::shutdown();
 }
 
 
 void TCPSocket::close()
 {
-    // TraceA("Close")
+    // LTrace("Close")
     Stream::close();
 }
 
@@ -214,7 +222,7 @@ bool TCPSocket::setReusePort()
     uv_fileno(get<uv_handle_t>(), &fd);
     int on = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(int)) < 0) {
-        ErrorA("setsockopt(SO_REUSEPORT) failed")
+        LError("setsockopt(SO_REUSEPORT) failed")
         return false;
     }
 
@@ -233,7 +241,7 @@ ssize_t TCPSocket::send(const char* data, size_t len, int flags)
 
 ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
-    // TraceA("Send:", len, ":", std::string(data, len))
+    // LTrace("Send:", len, ":", std::string(data, len))
     assert(Thread::currentID() == tid());
     assert(initialized());
 
@@ -241,7 +249,7 @@ ssize_t TCPSocket::send(const char* data, size_t len, const net::Address& /* pee
     // assert(len <= net::MAX_TCP_PACKET_SIZE);
 
     if (!Stream::write(data, len)) {
-        WarnA("TCP send error")
+        LWarn("TCP send error")
         return -1;
     }
 
@@ -328,7 +336,7 @@ const SocketMode TCPSocket::mode() const
 
 void TCPSocket::onRead(const char* data, size_t len)
 {
-    // TraceA("On read:", len)
+    // LTrace("On read:", len)
 
     // Note: The const_cast here is relatively safe since the given
     // data pointer is the underlying _buffer.data() pointer, but
@@ -339,14 +347,14 @@ void TCPSocket::onRead(const char* data, size_t len)
 
 void TCPSocket::onRecv(const MutableBuffer& buf)
 {
-    // TraceA("On recv:", buf.size())
+    // LTrace("On recv:", buf.size())
     onSocketRecv(*this, buf, peerAddress());
 }
 
 
 void TCPSocket::onConnect()
 {
-    // TraceA("On connect")
+    // LTrace("On connect")
 
     if (readStart()) // will set error on failure
         onSocketConnect(*this);
@@ -358,7 +366,7 @@ void TCPSocket::acceptConnection()
     // Create the shared socket pointer so the if the socket handle is not
     // incremented the accepted socket will be destroyed.
     auto socket = net::makeSocket<net::TCPSocket>(loop());
-    // TraceA("Accept connection:", socket->get())
+    // LTrace("Accept connection:", socket->get())
 
     // invoke(&uv_tcp_init, loop(), socket->get()); // "Cannot initialize TCP socket"
 
@@ -375,18 +383,18 @@ void TCPSocket::acceptConnection()
 // void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
 // {
 //     if (status == 0) {
-//         // TraceA("On accept connection")
+//         // LTrace("On accept connection")
 //         acceptConnection();
 //     }
 //     else {
-//         ErrorA("Accept connection failed:", uv_strerror(status));
+//         LError("Accept connection failed:", uv_strerror(status));
 //     }
 // }
 
 
 void TCPSocket::onError(const scy::Error& error)
 {
-    // DebugA("Error:", error.message);
+    // LDebug("Error:", error.message);
     onSocketError(*this, error);
     close(); // close on error
 }
@@ -394,7 +402,7 @@ void TCPSocket::onError(const scy::Error& error)
 
 void TCPSocket::onClose()
 {
-    // TraceA("On close")
+    // LTrace("On close")
     onSocketClose(*this);
 }
 

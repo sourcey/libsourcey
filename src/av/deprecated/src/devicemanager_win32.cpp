@@ -52,7 +52,7 @@ IDeviceManager* DeviceManagerFactory::create()
 Win32DeviceManager::Win32DeviceManager()
     : _needCoUninitialize(false)
 {
-    TraceA("Create")
+    LTrace("Create")
 
     // FIXME: Not receiving WM_DEVICECHANGE in our console applications
     setWatcher(new Win32DeviceWatcher(this));
@@ -61,38 +61,38 @@ Win32DeviceManager::Win32DeviceManager()
 
 Win32DeviceManager::~Win32DeviceManager()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 
 bool Win32DeviceManager::initialize()
 {
-    TraceA("Initializing")
+    LTrace("Initializing")
     if (!initialized()) {
         HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         // HRESULT hr = CoInitialize(nullptr);
         _needCoUninitialize = SUCCEEDED(hr);
         if (FAILED(hr)) {
             if (hr != RPC_E_CHANGED_MODE) {
-                ErrorL << "CoInitialize failed, hr=" << hr << endl;
+                SError << "CoInitialize failed, hr=" << hr << endl;
                 return false;
             } else
-                WarnL << "CoInitialize Changed Mode" << endl;
+                SWarn << "CoInitialize Changed Mode" << endl;
         }
         if (watcher() && !watcher()->start()) {
-            ErrorL << "Cannot start watcher" << endl;
+            SError << "Cannot start watcher" << endl;
             return false;
         }
         setInitialized(true);
     }
-    TraceA("Initializing: OK")
+    LTrace("Initializing: OK")
     return true;
 }
 
 
 void Win32DeviceManager::uninitialize()
 {
-    TraceA("Uninitializing")
+    LTrace("Uninitializing")
 
     if (initialized()) {
         if (watcher())
@@ -103,7 +103,7 @@ void Win32DeviceManager::uninitialize()
         }
         setInitialized(false);
     }
-    TraceA("Uninitializing: OK")
+    LTrace("Uninitializing: OK")
 }
 
 
@@ -311,7 +311,7 @@ void Win32DeviceWatcher::Unregister(HDEVNOTIFY handle)
 bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                                    LRESULT& result)
 {
-    DebugA("OnMessage: ", uMsg)
+    LDebug("OnMessage: ", uMsg)
 
     if (uMsg == WM_DEVICECHANGE) {
         // bool arriving = wParam == DBT_DEVICEARRIVAL;
@@ -323,7 +323,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
                 dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
                 bool isVideo = dbdi->dbcc_classguid == KSCATEGORY_VIDEO;
                 bool isConnect = wParam == DBT_DEVICEARRIVAL;
-                DebugA("Signal Devices changed: ", isVideo, ": ", isConnect);
+                LDebug("Signal Devices changed: ", isVideo, ": ", isConnect);
                 manager_->DevicesChanged.emit(manager_, isVideo, isConnect);
             }
         }
@@ -368,7 +368,7 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
                                    GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                                reinterpret_cast<LPCWSTR>(&Win32Window::WndProc),
                                &instance_)) {
-            ErrorL << "GetModuleHandleEx failed" << endl;
+            SError << "GetModuleHandleEx failed" << endl;
             return false;
         }
 
@@ -381,7 +381,7 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
         wcex.lpszClassName = kWindowBaseClassName;
         window_class_ = ::RegisterClassEx(&wcex);
         if (!window_class_) {
-            ErrorL << "RegisterClassEx failed" << endl;
+            SError << "RegisterClassEx failed" << endl;
             return false;
         }
     }
@@ -439,7 +439,7 @@ LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         if (WM_DESTROY == uMsg) {
             for (HWND child = ::GetWindow(hwnd, GW_CHILD); child;
                  child = ::GetWindow(child, GW_HWNDNEXT)) {
-                DebugA("Child window: ", static_cast<void*>(child))
+                LDebug("Child window: ", static_cast<void*>(child))
             }
         }
         if (WM_NCDESTROY == uMsg) {
@@ -467,7 +467,7 @@ bool getDevices(const CLSID& catid, std::vector<Device>& devices)
     CComPtr<IEnumMoniker> cam_enum;
     if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
         FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-            ErrorL << "Cannot create device enumerator, hr="  << hr << endl;
+            SError << "Cannot create device enumerator, hr="  << hr << endl;
             return false;
     }
 
@@ -617,12 +617,12 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
 
                     Device dev(input ? "audioin" : "audioout", "", i);
 
-                    TraceA("Enumerating Device: ", i)
+                    LTrace("Enumerating Device: ", i)
                     hr = getDeviceFromImmDevice(device, dev);
                     if (SUCCEEDED(hr)) {
                         devs.push_back(dev);
                     } else {
-                        WarnL << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
+                        SWarn << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
                         hr = S_FALSE;
                     }
                 }
@@ -631,7 +631,7 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
     }
 
     if (FAILED(hr)) {
-        WarnL << "getCoreAudioDevices failed with hr " << hr << endl;
+        SWarn << "getCoreAudioDevices failed with hr " << hr << endl;
         return false;
     }
     return true;

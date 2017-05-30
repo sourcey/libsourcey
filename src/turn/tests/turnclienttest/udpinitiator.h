@@ -41,14 +41,14 @@ public:
 
     void initiate(const std::string& peerIP)
     {
-        DebugS(this) << id << ": Initializing" << endl;
+        SDebug << id << ": Initializing" << endl;
         try {
             client.addPermission(peerIP);
             client.addPermission("127.0.0.1");
             client.addPermission("192.168.1.1");
             client.initiate();
         } catch (std::exception& exc) {
-            ErrorS(this) << id << ": " << exc.what() << std::endl;
+            SError << id << ": " << exc.what() << std::endl;
         }
     }
 
@@ -66,7 +66,7 @@ public:
             return;
         }
 
-        DebugS(this) << id << ": Senidng to responder: " << responderAddress << endl;
+        SDebug << id << ": Senidng to responder: " << responderAddress << endl;
 
         // Send large packets to test throttling
         // payload.append(65536, 'x');
@@ -78,7 +78,7 @@ public:
 protected:
     void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
-        DebugS(this) << id << ": State change: " << state.toString() << endl;
+        SDebug << id << ": State change: " << state.toString() << endl;
 
         switch (state.id()) {
             case turn::ClientState::None:
@@ -111,11 +111,11 @@ protected:
             uint64_t sentAt = util::strtoi<uint64_t>(payload);
             uint64_t latency = time::ticks() - sentAt;
 
-            DebugS(this) << id << ": Received data from " << peerAddr
+            SDebug << id << ": Received data from " << peerAddr
                          << ": payload=" << payload << ", latency=" << latency
                          << endl;
         } else
-            DebugS(this) << id << ": Received dummy data from " << peerAddr
+            SDebug << id << ": Received dummy data from " << peerAddr
                          << ": payloadLength=" << payload.length() << endl;
 
         if (size < 150) {
@@ -123,15 +123,15 @@ protected:
             uint64_t sentAt = util::strtoi<uint64_t>(payload);
             uint64_t latency = time::ticks() - sentAt;
 
-            DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            SDebug << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else
-            DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+            SDebug << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
         
         // Echo back to peer
         // client.sendData(data, size, peerAddr);
 #endif
-        DebugS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
+        SDebug << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
 
         // Send the intial data packet to responder 
         sendPacketToResponder();
@@ -139,13 +139,13 @@ protected:
 
     void onAllocationCreated(turn::Client&, const stun::Transaction& transaction) 
     {
-        DebugS(this) << id << ": Permissions Created" << endl;
+        SDebug << id << ": Permissions Created" << endl;
         // AllocationCreated
     }
 
     void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
-        DebugS(this) << id << ": Permissions Created" << endl;
+        SDebug << id << ": Permissions Created" << endl;
     }
 };
 

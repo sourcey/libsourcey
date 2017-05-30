@@ -120,7 +120,7 @@ LinuxDeviceManager::~LinuxDeviceManager()
 //         success = sound_system_->EnumeratePlaybackDevices(&list);
 //     }
 //     if (!success) {
-//         ErrorL << "Can't enumerate devices" << endl;
+//         SError << "Can't enumerate devices" << endl;
 //         sound_system_.release();
 //         return false;
 //     }
@@ -224,13 +224,13 @@ bool isV4L2Device(const std::string& devicePath)
                 if ((errno == EBUSY) ||
                     (::ioctl(video_fd, VIDIOC_QUERYCAP, &video_caps) >= 0 &&
                      (video_caps.capabilities & V4L2_CAP_VIDEO_CAPTURE))) {
-                    InfoL << "Found V4L2 capture device " << devicePath;
+                    SInfo << "Found V4L2 capture device " << devicePath;
                     is_v4l2 = true;
                 } else {
-                    ErrorL << "VIDIOC_QUERYCAP failed for " << devicePath;
+                    SError << "VIDIOC_QUERYCAP failed for " << devicePath;
                 }
             } else {
-                ErrorL << "Failed to open " << devicePath;
+                SError << "Failed to open " << devicePath;
             }
         }
     }
@@ -276,7 +276,7 @@ static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath)
         metaFile.close();
     }
 
-    ErrorL << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
+    SError << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
     return "";
 }
 
@@ -319,27 +319,27 @@ static std::string getVideoDeviceName(MetaType meta,
     if (meta == M2_6) {
         metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
 
-        InfoL << "Trying " + metaFilePath << endl;
+        SInfo << "Trying " + metaFilePath << endl;
         deviceName = getVideoDeviceNameK2_6(metaFilePath);
         if (deviceName.empty()) {
             metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";
 
-            InfoL << "Trying " << metaFilePath << endl;
+            SInfo << "Trying " << metaFilePath << endl;
             deviceName = getVideoDeviceNameK2_6(metaFilePath);
         }
     } else {
         metaFilePath = kVideoMetaPathK2_4 + deviceFileName;
-        InfoL << "Trying " << metaFilePath << endl;
+        SInfo << "Trying " << metaFilePath << endl;
         deviceName = getVideoDeviceNameK2_4(metaFilePath);
     }
 
     if (deviceName.empty()) {
         deviceName = "/dev/" + deviceFileName;
-        ErrorL << "Device name not found, defaulting to device path: "
+        SError << "Device name not found, defaulting to device path: "
                << deviceName << endl;
     }
 
-    InfoL << "Name for " << deviceFileName << " is " << deviceName << endl;
+    SInfo << "Name for " << deviceFileName << " is " << deviceName << endl;
 
     return trim(deviceName);
 }
@@ -347,7 +347,7 @@ static std::string getVideoDeviceName(MetaType meta,
 
 static void scanV4L2Devices(std::vector<Device>& devices)
 {
-    InfoL << "Enumerating V4L2 devices" << endl;
+    SInfo << "Enumerating V4L2 devices" << endl;
 
     MetaType meta;
     std::string metadataDir;
@@ -363,12 +363,12 @@ static void scanV4L2Devices(std::vector<Device>& devices)
     }
 
     if (meta != NONE) {
-        InfoL << "V4L2 device metadata found at " << metadataDir << endl;
+        SInfo << "V4L2 device metadata found at " << metadataDir << endl;
 
         std::vector<std::string> nodes;
         fs::readdir(metadataDir, nodes);
         for (auto& filename : nodes) {
-            DebugA("Checking video device ", filename)
+            LDebug("Checking video device ", filename)
             if (filename.find("video") == 0) {
                 std::string devicePath = "/dev/" + filename;
                 if (isV4L2Device(devicePath)) {
@@ -379,15 +379,15 @@ static void scanV4L2Devices(std::vector<Device>& devices)
             }
         }
     } else {
-        ErrorL << "Unable to detect v4l2 metadata directory" << endl;
+        SError << "Unable to detect v4l2 metadata directory" << endl;
     }
 
     if (devices.size() == 0) {
-        InfoL << "Plan B. Scanning all video devices in /dev directory" << endl;
+        SInfo << "Plan B. Scanning all video devices in /dev directory" << endl;
         scanDeviceDirectory("/dev/", devices);
     }
 
-    InfoL << "Total V4L2 devices found : " << devices.size() << endl;
+    SInfo << "Total V4L2 devices found : " << devices.size() << endl;
 }
 
 
@@ -426,7 +426,7 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     }
 //     udev_ = LATE(udev_new)();
 //     if (!udev_) {
-//         ErrorL << "udev_new()" << endl;
+//         SError << "udev_new()" << endl;
 //         return true;
 //     }
 //     // The second argument here is the event source. It can be either
@@ -436,7 +436,7 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     // udev daemon in turn listens on the kernel.
 //     udev_monitor_ = LATE(udev_monitor_new_from_netlink)(udev_, "udev");
 //     if (!udev_monitor_) {
-//         ErrorL << "udev_monitor_new_from_netlink()" << endl;
+//         SError << "udev_monitor_new_from_netlink()" << endl;
 //         return true;
 //     }
 //     // We only listen for changes in the video devices. Audio devices are
@@ -456,12 +456,12 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     if (LATE(udev_monitor_filter_add_match_subsystem_devtype)(udev_monitor_,
 //         "video4linux",
 //         NULL) < 0) {
-//             ErrorL << "udev_monitor_filter_add_match_subsystem_devtype()" <<
+//             SError << "udev_monitor_filter_add_match_subsystem_devtype()" <<
 //             endl;
 //             return true;
 //     }
 //     if (LATE(udev_monitor_enable_receiving)(udev_monitor_) < 0) {
-//         ErrorL << "udev_monitor_enable_receiving()" << endl;
+//         SError << "udev_monitor_enable_receiving()" << endl;
 //         return true;
 //     }
 //     static_cast<talk_base::PhysicalSocketServer*>(

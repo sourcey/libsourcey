@@ -191,7 +191,7 @@ bool enumerateDeviceList(AVFormatContext* s, Device::Type type,
     // TODO: replace with `list_devices_for_context`
     error = avdevice_list_devices(s, &devlist);
     if (error || !devlist) {
-        WarnL << "Cannot list system devices: " << averror(error) << endl;
+        SWarn << "Cannot list system devices: " << averror(error) << endl;
         goto fail;
     }
 
@@ -215,7 +215,7 @@ bool getInputDeviceList(const std::vector<std::string>& inputs,
                         Device::Type type, std::vector<av::Device>& devices)
 {
 #ifndef HAVE_FFMPEG_AVDEVICE
-    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices"
+    SWarn << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices"
           << endl;
     return false;
 #else
@@ -276,7 +276,7 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs,
                          Device::Type type, std::vector<av::Device>& devices)
 {
 #ifndef HAVE_FFMPEG_AVDEVICE
-    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices"
+    SWarn << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices"
           << endl;
     return false;
 #else
@@ -582,18 +582,18 @@ bool enumerateInputDeviceList(AVInputFormat *fmt, Device::Type type, std::vector
     AVDeviceInfoList* devlist = nullptr;
     // AVDictionary* opts = nullptr;
 
-    DebugA("Enumerating input devices for: ", fmt->name)
+    LDebug("Enumerating input devices for: ", fmt->name)
     if (!fmt || !fmt->priv_class  || !AV_IS_INPUT_DEVICE(fmt->priv_class->category)) {
         assert(0 && "not an input device");
     }
 
     if (!fmt->get_device_list) {
-        WarnL << "Cannot list input devices: Not implemented" << endl;
+        SWarn << "Cannot list input devices: Not implemented" << endl;
         goto fail;
     }
 
     if ((ret = avdevice_list_input_sources(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
-        WarnL << "Cannot list input device: " << averror(ret) << endl;
+        SWarn << "Cannot list input device: " << averror(ret) << endl;
         goto fail;
     }
 
@@ -620,18 +620,18 @@ bool enumerateOutputDeviceList(AVOutputFormat *fmt, Device::Type type, std::vect
     AVDeviceInfoList* devlist = nullptr;
     // AVDictionary* opts = nullptr;
 
-    DebugA("Enumerating output devices for: ", fmt->name)
+    LDebug("Enumerating output devices for: ", fmt->name)
     if (!fmt || !fmt->priv_class  || !AV_IS_OUTPUT_DEVICE(fmt->priv_class->category)) {
         assert(0 && "not an output device");
     }
 
     if (!fmt->get_device_list) {
-        WarnL << "Cannot list output devices: Not implemented" << endl;
+        SWarn << "Cannot list output devices: Not implemented" << endl;
         goto fail;
     }
 
     if ((ret = avdevice_list_output_sinks(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
-        WarnL << "Cannot list output device: " << averror(ret) << endl;
+        SWarn << "Cannot list output device: " << averror(ret) << endl;
         goto fail;
     }
 

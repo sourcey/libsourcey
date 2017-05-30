@@ -120,7 +120,7 @@ void Process::spawn()
 
     // Start reading on the stdout pipe
     if (!_stdout.readStart())
-        _handle.setAndThrowError(_stdout.error().errorno, "Cannot read stdout pipe");
+        _handle.setAndThrowError(_stdout.error().err, "Cannot read stdout pipe");
 }
 
 
@@ -145,6 +145,7 @@ bool Process::kill(int signum)
 
 int Process::pid() const
 {
+    assert(_handle.initialized());
     return _handle.get()->pid;
 }
 

@@ -46,7 +46,7 @@ struct ScheduledTask : public sched::Task
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     test::init();
 
     // Register tasks and triggers
@@ -93,18 +93,18 @@ int main(int argc, char** argv)
             }
 
             // Dynamically create the task from JSON
-            DebugA("Sched Input JSON:\n", json.dump(4))
+            LDebug("Sched Input JSON:\n", json.dump(4))
             scheduler.deserialize(json);
 
             // Print to cout
-            // DebugL << "##### Sched Print Output:" << endl;
+            // SDebug << "##### Sched Print Output:" << endl;
             // scheduler.print(cout);
-            // DebugL << "##### Sched Print Output END" << endl;
+            // SDebug << "##### Sched Print Output END" << endl;
 
             // Output scheduler tasks as JSON before run
             json::value before;
             scheduler.serialize(before);
-            DebugL << "Sched Output JSON Before Run:\n"
+            SDebug << "Sched Output JSON Before Run:\n"
                    << before.dump(4) << endl;
 
             // Wait for the task to complete
@@ -114,13 +114,13 @@ int main(int argc, char** argv)
             // Output scheduler tasks as JSON after run
             json::value after;
             scheduler.serialize(after);
-            DebugL << "Sched Output JSON After Run:\n"
+            SDebug << "Sched Output JSON After Run:\n"
                    << json.dump(4) << endl;
         }
     });
 
     describe("interval task", []() {
-        DebugL << "Running Scheduled Task Test" << endl;
+        SDebug << "Running Scheduled Task Test" << endl;
 
         taskRunTimes = 0;
 
@@ -136,16 +136,16 @@ int main(int argc, char** argv)
             scheduler.start(task);
 
             // Print to cout
-            // DebugL << "##### Sched Print Output:" << endl;
+            // SDebug << "##### Sched Print Output:" << endl;
             // scheduler.print(cout);
-            // DebugL << "##### Sched Print Output END" << endl;
+            // SDebug << "##### Sched Print Output END" << endl;
 
             // Wait for the task to complete
             scy::sleep(1000);
             expect(taskRunTimes == 3);
         }
 
-        DebugL << "Running Scheduled Task Test: END" << endl;
+        SDebug << "Running Scheduled Task Test: END" << endl;
     });
 
     // // Schedule to fire once now, and in two days time.

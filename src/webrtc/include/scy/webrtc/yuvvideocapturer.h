@@ -89,7 +89,7 @@ public:
 
     virtual cricket::CaptureState Start(const cricket::VideoFormat& format)
     {
-        DebugL << "Start" << std::endl;
+        SDebug << "Start" << std::endl;
         _startThread = rtc::Thread::Current();
         _asyncInvoker.reset(new rtc::AsyncInvoker());
 
@@ -101,7 +101,7 @@ public:
 
     virtual void Stop()
     {
-        DebugL << "Stop" << std::endl;
+        SDebug << "Stop" << std::endl;
         SetCaptureFormat(nullptr);
         SetCaptureState(cricket::CS_STOPPED);
 

@@ -374,7 +374,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+    Logger::instance().add(new ConsoleChannel("debug", STraceevel));
 
     // MediaFactory::initialize();
     // MediaFactory::instance()->loadVideo();

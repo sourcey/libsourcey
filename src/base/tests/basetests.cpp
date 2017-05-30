@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     test::init();
 
     // =========================================================================
@@ -373,33 +373,33 @@ int main(int argc, char** argv)
         logger.setWriter(new LogWriter);
         clock_t start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceA("sync log ", i)
+            LTrace("sync log ", i)
         cout << "logger: synchronous test completed after: " << (clock() - start) << "ms" << endl;
 
         // Test default synchronous var args writer
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceA("sync log", i)
+            LTrace("sync log", i)
         cout << "logger: synchronous var args test completed after: " << (clock() - start) << "ms" << endl;
 
         // Test asynchronous writer (approx 10x faster with console output)
         logger.setWriter(new AsyncLogWriter);
         start = clock();
         for (unsigned i = 0; i < 1000; i++)
-            TraceA("async log ", i)
+            LTrace("async log ", i)
         cout << "logger: asynchronous test completed after: " << (clock() - start) << "ms" << endl;
 
          //// Test function logging
          //start = clock();
          //for (unsigned i = 0; i < 1000; i++)
-         //    TraceS(this) << "test: " << i << endl;
+         //    STrace << "test: " << i << endl;
          //cout << "logger: asynchronous function logging completed after: "
          //     << (clock() - start) << endl;
 
          //// Test function and mem address logging
          //start = clock();
          //for (unsigned i = 0; i < 1000; i++)
-         //    TraceS(this) << "test: " << i << endl;
+         //    STrace << "test: " << i << endl;
          //cout << "logger: asynchronous function and mem address logging completed after: "
          //     << (clock() - start) << endl;
 

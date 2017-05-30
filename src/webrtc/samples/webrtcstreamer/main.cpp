@@ -37,7 +37,7 @@ std::string sampleDataDir(const std::string& file)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LInfo)); // LTrace, LDebug
+    Logger::instance().add(new ConsoleChannel("debug", LInfo)); // LTrace, Level::Debug
     Logger::instance().setWriter(new AsyncLogWriter);
 
 //#if USE_SSL
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         for (auto& kv : optparse.args) {
             const std::string& key = kv.first;
             const std::string& value = kv.second;
-            DebugA("Setting option: ", key, ": ", value)
+            LDebug("Setting option: ", key, ": ", value)
             if (key == "file") {
                 sourceFile = value;
             }

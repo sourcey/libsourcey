@@ -32,8 +32,8 @@ class Base_API Test;
 class Base_API TestRunner;
 
 typedef std::list<Test*> TestList;
-typedef std::list<std::string> ErrorList;
-typedef std::map<Test*, ErrorList> ErrorMap;
+typedef std::list<std::string> SErrorist;
+typedef std::map<Test*, SErrorist> ErrorMap;
 
 /// Initialize the test environment.
 Base_API void init();
@@ -91,7 +91,7 @@ public:
     std::string name;
 
     /// A list of test errors.
-    ErrorList errors;
+    SErrorist errors;
 
     /// The test run duration for benchmarking.
     double duration;

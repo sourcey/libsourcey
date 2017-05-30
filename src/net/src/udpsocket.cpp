@@ -25,14 +25,14 @@ UDPSocket::UDPSocket(uv::Loop* loop)
     : uv::Handle<uv_udp_t>(loop)
     , _buffer(65536)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     init();
 }
 
 
 UDPSocket::~UDPSocket()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
     close();
 }
 
@@ -42,7 +42,7 @@ void UDPSocket::init()
     if (initialized())
         return;
 
-    // TraceA("Init")
+    // LTrace("Init")
 
     if (!get())
         uv::Handle<uv_udp_t>::reset();
@@ -53,7 +53,7 @@ void UDPSocket::init()
 
 void UDPSocket::reset()
 {
-    // TraceA("Reset")
+    // LTrace("Reset")
     uv::Handle<uv_udp_t>::reset();
     init();
     get()->data = this;
@@ -62,7 +62,7 @@ void UDPSocket::reset()
 
 void UDPSocket::connect(const Address& peerAddress)
 {
-    // TraceA("Connect:", peerAddress)
+    // LTrace("Connect:", peerAddress)
     init();
     _peer = peerAddress;
 
@@ -86,24 +86,22 @@ void UDPSocket::connect(const std::string& host, uint16_t port)
     else {
         init();
 
-        auto wrap = new GetAddrInfoReq();
-        wrap->callback = [ptr = context()](const GetAddrInfoEvent& event) {
+        net::dns::resolve("sourcey.com", 80, [ptr = context()](int err, const net::Address& addr) {
             if (!ptr->deleted) {
                 auto handle = reinterpret_cast<UDPSocket*>(ptr->handle);
-                if (event.status)
-                    handle->setUVError(event.status, "DNS failed to resolve");
+                if (err)
+                    handle->setUVError(err, "DNS failed to resolve");
                 else
-                    handle->connect(event.addr);
+                    handle->connect(addr);
             }
-        };
-        wrap->resolve(host, port, loop());
+        }, loop());
     }
 }
 
 
 void UDPSocket::close()
 {
-    // TraceA("Closing")
+    // LTrace("Closing")
     if (initialized() && !closed())
         recvStop();
     uv::Handle<uv_udp_t>::close();
@@ -112,7 +110,7 @@ void UDPSocket::close()
 
 void UDPSocket::bind(const Address& address, unsigned flags)
 {
-    // TraceA("Binding on", address)
+    // LTrace("Binding on", address)
     init();
 
     if (address.af() == AF_INET6)
@@ -132,19 +130,19 @@ ssize_t UDPSocket::send(const char* data, size_t len, int flags)
 
 ssize_t UDPSocket::send(const char* data, size_t len, const Address& peerAddress, int /* flags */)
 {
-    // TraceA("Send:", len, ":", peerAddress)
+    // LTrace("Send:", len, ":", peerAddress)
     assert(Thread::currentID() == tid());
     assert(initialized());
     assert(!closed());
     // assert(len <= net::MAX_UDP_PACKET_SIZE);
 
     if (_peer.valid() && _peer != peerAddress) {
-        ErrorA("Peer not authorized:", peerAddress)
+        LError("Peer not authorized:", peerAddress)
         return -1;
     }
 
     if (!peerAddress.valid()) {
-        ErrorA("Peer not valid:", peerAddress)
+        LError("Peer not valid:", peerAddress)
         return -1;
     }
 
@@ -155,7 +153,7 @@ ssize_t UDPSocket::send(const char* data, size_t len, const Address& peerAddress
         })) {
         return len;
     }
-    return error().errorno;
+    return error().err;
 
     // typedef uv::Request<uv_udp_t, uv_udp_send_t> Request;
     //
@@ -166,19 +164,19 @@ ssize_t UDPSocket::send(const char* data, size_t len, const Address& peerAddress
     //         auto wrap = reinterpret_cast<Request*>(req->data);
     //         if (!wrap->ctx->deleted) {
     //             if (status) {
-    //                 DebugA("Send error:", uv_err_name(status))
+    //                 LDebug("Send error:", uv_err_name(status))
     //                 wrap->ctx->handle->setUVError(status, "UDP send error");
     //             }
     //         }
     //         else {
-    //             DebugA("Dropping send request for closed UDP socket")
+    //             LDebug("Dropping send request for closed UDP socket")
     //         }
     //         delete wrap;
     //     })) {
     //     return len;
     // }
     //
-    // return error().errorno;
+    // return error().err;
 }
 
 
@@ -211,7 +209,7 @@ bool UDPSocket::recvStart()
     assert(!closed());
     assert(get()->data == this);
 
-    // TraceA("Recv start")
+    // LTrace("Recv start")
 
     // UV_EALREADY means that the socket is already bound but that's okay
     // TODO: No need for boolean value as this method can throw exceptions
@@ -241,7 +239,7 @@ bool UDPSocket::recvStop()
 
 void UDPSocket::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
-    // TraceA("On recv:", buf.size(), ":", address)
+    // LTrace("On recv:", buf.size(), ":", address)
     onSocketRecv(*this, buf, address);
 }
 
@@ -297,11 +295,11 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
     auto socket = reinterpret_cast<UDPSocket*>(handle->data);
     assert(socket->initialized());
     assert(!socket->closed());
-    // TraceA("On read:", nread)
+    // LTrace("On read:", nread)
 
     if (nread < 0) {
         // assert(0 && "unexpected error");
-        DebugA("Recv error:", uv_err_name((int)nread))
+        LDebug("Recv error:", uv_err_name((int)nread))
         socket->setUVError((int)nread, "UDP recv error");
         return;
     }
@@ -321,7 +319,7 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
 void UDPSocket::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
     auto& buffer = static_cast<UDPSocket*>(handle->data)->_buffer;
-    // // TraceA("Allocating buffer:", suggested_size)
+    // // LTrace("Allocating buffer:", suggested_size)
 
     // Reserve the recommended buffer size
     // XXX: libuv wants us to allocate 65536 bytes for UDP .. hmmm
@@ -341,7 +339,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_b
 
 void UDPSocket::onError(const scy::Error& error)
 {
-    // DebugA("Error", error.message)
+    // LDebug("Error", error.message)
     onSocketError(*this, error);
     close(); // close on error
 }
@@ -349,7 +347,7 @@ void UDPSocket::onError(const scy::Error& error)
 
 void UDPSocket::onClose()
 {
-    // DebugA("On close")
+    // LDebug("On close")
     onSocketClose(*this);
 }
 

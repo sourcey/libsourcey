@@ -35,7 +35,7 @@ public:
     MPEGResponder(http::ServerConnection& conn)
         : http::ServerResponder(conn)
     {
-        DebugL << "Creating" << endl;
+        SDebug << "Creating" << endl;
 
         auto stream = new PacketStream;
 
@@ -70,38 +70,38 @@ public:
 
     ~MPEGResponder()
     {
-        DebugL << "Destroying" << endl;
+        SDebug << "Destroying" << endl;
         // stream->destroy();
         delete stream;
     }
 
     void onPayload(const Buffer& body)
     {
-        DebugA("On recv payload: ", body.size())
+        LDebug("On recv payload: ", body.size())
 
         // do something with data from peer
     }
 
     void onClose()
     {
-        DebugL << "On close" << endl;
+        SDebug << "On close" << endl;
 
         stream->emitter -= packetSlot(this, &MPEGResponder::onVideoEncoded);
-        DebugL << "On close 1" << endl;
+        SDebug << "On close 1" << endl;
         stream->stop();
-        DebugL << "On close 2" << endl;
+        SDebug << "On close 2" << endl;
     }
 
     void onVideoEncoded(void* sender, RawPacket& packet)
     {
-        TraceL << "Sending packet: " << packet.size() << ": " << fpsCounter.fps
+        STrace << "Sending packet: " << packet.size() << ": " << fpsCounter.fps
                << endl;
 
         try {
             connection().send(packet.data(), packet.size());
             fpsCounter.tick();
         } catch (std::exception /*Exception*/& exc) {
-            ErrorL << "Error: " << std::string(exc.what()) /*message()*/
+            SError << "Error: " << std::string(exc.what()) /*message()*/
                    << endl;
             connection().close();
         }
@@ -132,7 +132,7 @@ static void onShutdownSignal(void* opaque)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
 
 #if USE_AVDEVICE_CAPTURE
     gVideoCapture = new av::MediaCapture();

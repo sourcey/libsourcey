@@ -36,7 +36,7 @@ public:
 
     void onSocketRecv(Socket&, const MutableBuffer& buffer, const net::Address& peerAddress) override
     {
-        DebugA("On recv: ", peerAddress, ": ", buffer.size())
+        LDebug("On recv: ", peerAddress, ": ", buffer.size())
 
 #if 0
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
@@ -45,7 +45,7 @@ public:
             uint64_t sentAt = util::strtoi<uint64_t>(payload);
             uint64_t latency = time::ticks() - sentAt;
 
-            DebugL << "Recv latency packet from " << peerAddress << ": "
+            SDebug << "Recv latency packet from " << peerAddress << ": "
                 << "payload=" << payload.length() << ", "
                 << "latency=" << latency
                 << std::endl;
@@ -57,12 +57,12 @@ public:
 
     void onSocketError(Socket&, const scy::Error& error) override
     {
-        ErrorL << "On error: " << error.message << std::endl;
+        SError << "On error: " << error.message << std::endl;
     }
 
     void onSocketClose(Socket&) override
     {
-        DebugL << "On close" << std::endl;
+        SDebug << "On close" << std::endl;
     }
 };
 

@@ -92,7 +92,7 @@ rtc::scoped_refptr<AudioPacketModule> AudioPacketModule::Create()
 
 void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
 {
-    DebugL << "Audio frame captured" << endl;
+    SDebug << "Audio frame captured" << endl;
 
     // assert(_processThread->IsCurrent());
     rtc::CritScope cs(&_critCallback);
@@ -207,11 +207,11 @@ void AudioPacketModule::sendFrameP()
 
     auto samples = &_sendSamples[0];
     if (!_sendFifo.read((void**)&samples, kNumberSamples)) {
-        InfoL << "No audio frames in send buffer" << endl;
+        SInfo << "No audio frames in send buffer" << endl;
         return;
     }
 
-    TraceA("Send audio")
+    LTrace("Send audio")
     if (_audioCallback->RecordedDataIsAvailable(
             samples, kNumberSamples, kNumberBytesPerSample, kNumberOfChannels,
             kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,
@@ -404,7 +404,7 @@ bool AudioPacketModule::RecordingIsInitialized() const
 
 int32_t AudioPacketModule::StartPlayout()
 {
-    DebugL << "Start playout" << endl;
+    SDebug << "Start playout" << endl;
     if (!_playIsInitialized) {
         return -1;
     }
@@ -419,7 +419,7 @@ int32_t AudioPacketModule::StartPlayout()
 
 int32_t AudioPacketModule::StopPlayout()
 {
-    DebugL << "Stop playout" << endl;
+    SDebug << "Stop playout" << endl;
     bool start = false;
     {
         rtc::CritScope cs(&_crit);
@@ -438,7 +438,7 @@ bool AudioPacketModule::Playing() const
 
 int32_t AudioPacketModule::StartRecording()
 {
-    DebugL << "Start recording" << endl;
+    SDebug << "Start recording" << endl;
     if (!_recIsInitialized) {
         return -1;
     }
@@ -453,7 +453,7 @@ int32_t AudioPacketModule::StartRecording()
 
 int32_t AudioPacketModule::StopRecording()
 {
-    DebugL << "Stop recording" << endl;
+    SDebug << "Stop recording" << endl;
     bool start = false;
     {
         rtc::CritScope cs(&_crit);

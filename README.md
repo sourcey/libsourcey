@@ -6,7 +6,7 @@
 [![Doxygen](https://sourcey.com/images/doxygen.svg)](https://sourcey.com/libsourcey)
 
 <!-- <img style="float:left;width:70px;margin-right:15px;margin-bottom:10px" src="https://sourcey.com/images/logos/libsourcey-80x80.png"> -->
-LibSourcey is a collection of cross platform C++11 modules and classes that provide developers with an arsenal for rapidly developing high performance network based p2p and media streaming applications. Think of it as the power and performance of `libuv` combined with the features of `FFmpeg`, `OpenCV` and `WebRTC`, all integrated with the ease and readability of the `stl` (C++ Standard Library).
+LibSourcey is a collection of cross platform C++14 modules and classes that provide developers with an arsenal for rapidly developing high performance network based p2p and media streaming applications. Think of it as the power and performance of `libuv` combined with the features of `FFmpeg`, `OpenCV` and `WebRTC`, all integrated with the ease and readability of the `stl` (C++ Standard Library).
 
 * **Documentation**: [https://sourcey.com/libsourcey](https://sourcey.com/libsourcey)  
 * **Repository**: [https://github.com/sourcey/libsourcey](https://github.com/sourcey/libsourcey)  
@@ -16,7 +16,7 @@ LibSourcey is a collection of cross platform C++11 modules and classes that prov
 
 * **Event-based IO** — Core modules are built on top of `libuv` (the underlying C library that powers `nodejs`) and use event-based asynchronous IO throughout to maximize performance and minimize concurrency reliance for building mission critical native and server side apps.
 
-* **Cross platform** — The codebase is cross platform and should compile on any system with access to a modern C++11 compiler.
+* **Cross platform** — The codebase is cross platform and should compile on any system with access to a modern C++14 compiler.
 
 * **Modular libraries** — Libraries are modular for easy integration into your existing projects, so you can just "include what you need" without incurring extra incumbent bloat.
 

@@ -11,17 +11,17 @@ public:
         : http::ServerResponder(connection)
         , options(options)
     {
-        DebugS(this) << "Create" << std::endl;
+        SDebug << "Create" << std::endl;
     }
 
     virtual ~StreamingRequestHandler()
     {
-        DebugS(this) << "Destroy" << std::endl;
+        SDebug << "Destroy" << std::endl;
     }
 
     virtual void onRequest(http::Request& request, http::Response& response)
     {
-        DebugS(this) << "Handle request: "
+        SDebug << "Handle request: "
                      //<< "\n\tOutput Format: " << options.oformat.name
                      << "\n\tOutput Encoding: " << options.encoding
                      << "\n\tOutput Packetizer: " << options.framing
@@ -40,14 +40,14 @@ public:
 
     virtual void onClose()
     {
-        DebugS(this) << "On close" << std::endl;
+        SDebug << "On close" << std::endl;
         stream.emitter -= packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.stop();
     }
 
     void onVideoEncoded(RawPacket& packet)
     {
-        DebugS(this) << "Send packet: "
+        SDebug << "Send packet: "
                      // assert(!connection().socket()->closed());
                      << packet.size() << ": " << fpsCounter.fps << std::endl;
 
@@ -55,7 +55,7 @@ public:
             connection().socket()->send((const char*)packet.data(), packet.size());
             fpsCounter.tick();
         } catch (std::exception& exc) {
-            ErrorS(this) << exc.what() << std::endl;
+            SError << exc.what() << std::endl;
             connection().close();
         }
     }

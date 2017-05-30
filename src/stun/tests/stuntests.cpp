@@ -18,7 +18,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    // Logger::instance().add(new ConsoleChannel("Test", Level::Trace));
     test::init();
 
     // =========================================================================
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         expect((5555 ^ (stun::kMagicCookie >> 16)) == 0x34A1);
 
         net::Address addr("192.168.1.1", 5555);
-        // DebugA("Source Address: ", addr)
+        // LDebug("Source Address: ", addr)
 
         stun::Message request(stun::Message::Request, stun::Message::Allocate);
         // stun::Message request;
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         auto addrAttr = new stun::XorRelayedAddress;
         addrAttr->setAddress(addr);
         request.add(addrAttr);
-        // DebugA("Request Address: ", addrAttr->address())
+        // LDebug("Request Address: ", addrAttr->address())
 
         Buffer buf;
         request.write(buf);
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
         addrAttr = response.get<stun::XorRelayedAddress>();
 
-        // DebugA("Response Address: ", addrAttr->address())
+        // LDebug("Response Address: ", addrAttr->address())
         expect(addrAttr->address() == addr);
     });
 

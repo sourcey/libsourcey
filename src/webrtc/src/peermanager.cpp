@@ -54,14 +54,14 @@ void PeerManager::recvSDP(const std::string& token, const json::value& message)
     std::string type = message.value(kSessionDescriptionTypeName, "");
     std::string sdp = message.value(kSessionDescriptionSdpName, "");
     if (sdp.empty() || (type != "offer" && type != "answer")) {
-        ErrorL << "Received bad sdp: " << type << ": " << sdp << endl;
+        SError << "Received bad sdp: " << type << ": " << sdp << endl;
         assert(0 && "bad sdp");
         return;
     }
 
     conn->recvSDP(type, sdp);
 
-    DebugA("Received ", type, ": ", sdp)
+    LDebug("Received ", type, ": ", sdp)
 }
 
 
@@ -77,12 +77,12 @@ void PeerManager::recvCandidate(const std::string& token, const json::value& mes
     int mlineindex = message.value(kCandidateSdpMlineIndexName, -1);
     std::string sdp = message.value(kCandidateSdpName, "");
     if (mlineindex == -1 || mid.empty() || sdp.empty()) {
-        ErrorL << "Invalid candidate format" << endl;
+        SError << "Invalid candidate format" << endl;
         assert(0 && "bad candiate");
         return;
     }
 
-    DebugA("Received candidate: ", sdp)
+    LDebug("Received candidate: ", sdp)
 
     conn->recvCandidate(mid, mlineindex, sdp);
 }
@@ -107,7 +107,7 @@ void PeerManager::onStable(Peer* conn)
 
 void PeerManager::onClosed(Peer* conn)
 {
-    DebugA("Deleting peer connection: ", conn->peerid())
+    LDebug("Deleting peer connection: ", conn->peerid())
 
     if (remove(conn))
         deleteLater<Peer>(conn); // async delete
@@ -116,7 +116,7 @@ void PeerManager::onClosed(Peer* conn)
 
 void PeerManager::onFailure(Peer* conn, const std::string& error)
 {
-    DebugA("Deleting peer connection: ", conn->peerid())
+    LDebug("Deleting peer connection: ", conn->peerid())
 
     if (remove(conn))
         deleteLater<Peer>(conn); // async delete

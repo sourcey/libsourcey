@@ -29,25 +29,25 @@ public:
         : id(id)
         , timer(1000, 1000)
     {
-        DebugS(this) << id << ": Creating" << endl;
+        SDebug << id << ": Creating" << endl;
 
         socket.addReceiver(this);
 
         // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         socket.bind(net::Address("0.0.0.0", 0));
 
-        DebugS(this) << id << ": Listening on: " << socket.address() << endl;
+        SDebug << id << ": Listening on: " << socket.address() << endl;
     }
 
     virtual ~UDPResponder()
     {
-        DebugS(this) << id << ": Destroying" << endl;
+        SDebug << id << ": Destroying" << endl;
         socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)
     {
-        DebugS(this) << id << ": Starting on: " << relayAddr << endl;
+        SDebug << id << ": Starting on: " << relayAddr << endl;
 
         try {
             this->relayedAddr = relayAddr;
@@ -57,7 +57,7 @@ public:
             // socket.bind(net::Address("0.0.0.0", 4020));
             socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            ErrorS(this) << id << ": ERROR: " << exc.what() << endl;
+            SError << id << ": ERROR: " << exc.what() << endl;
             assert(false);
         }
     }
@@ -85,7 +85,7 @@ public:
     void onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddr)
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        DebugS(this) << id << ": On recv: " << peerAddr << ": " << buffer.size() << std::endl;
+        SDebug << id << ": On recv: " << peerAddr << ": " << buffer.size() << std::endl;
 
         // Echo back to client
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
@@ -93,12 +93,12 @@ public:
 
     void onSocketError(net::Socket&, const scy::Error& error)
     {
-        DebugS(this) << id << ": On error: " << error.message << std::endl;
+        SDebug << id << ": On error: " << error.message << std::endl;
     }
 
     void onSocketClose(net::Socket&)
     {
-        DebugS(this) << id << ": On close" << std::endl;
+        SDebug << id << ": On close" << std::endl;
         shutdown();
     }
 };

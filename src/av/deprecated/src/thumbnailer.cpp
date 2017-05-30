@@ -91,16 +91,16 @@ void Thumbnailer::grab()
 
 void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
 {
-    DebugA("Thumbnail packet out: ", packet.size())
+    LDebug("Thumbnail packet out: ", packet.size())
 
     // Skip frames before seek position
     if (reader.video()->pts < options.seek) {
-        TraceA("Skipping thumbnail frame: ", reader.video()->pts, " < ", options.seek)
+        LTrace("Skipping thumbnail frame: ", reader.video()->pts, " < ", options.seek)
         return;
     }
 
     if (!packet.iframe) {
-        TraceA("Skipping non-iframe")
+        LTrace("Skipping non-iframe")
         return;
     }
 

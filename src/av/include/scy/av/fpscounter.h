@@ -157,7 +157,7 @@ public:
         if (_counter.started())
             _counter.endFrame();
         if (static_cast<int>(_counter.fps) > _max) {
-            TraceL << "Dropping packet: " 
+            STrace << "Dropping packet: " 
                    << _counter.fps << " > " << _max << std::endl;
             return;
         }

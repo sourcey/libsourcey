@@ -21,7 +21,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); // LTrace, LDebug
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LTrace, Level::Debug
 
     // Setup WebRTC environment
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE); // LS_VERBOSE, LS_INFO, LERROR
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 
         auto rtcthread = rtc::Thread::Current();
         Idler rtc([=]() {
-            // TraceL << "Running WebRTC loop" << endl;
+            // STrace << "Running WebRTC loop" << endl;
             rtcthread->ProcessMessages(10);
         });
 

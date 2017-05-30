@@ -27,7 +27,7 @@ Timer::Timer(uv::Loop* loop)
     , _interval(0)
     , _count(0)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     init();
 }
 
@@ -38,7 +38,7 @@ Timer::Timer(std::int64_t timeout, uv::Loop* loop, std::function<void()> func)
     , _interval(0)
     , _count(0)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     init();
     if (func)
         start(func);
@@ -51,7 +51,7 @@ Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::f
     , _interval(interval)
     , _count(0)
 {
-    // TraceA("Create")
+    // LTrace("Create")
     init();
     if (func)
         start(func);
@@ -60,13 +60,13 @@ Timer::Timer(std::int64_t timeout, std::int64_t interval, uv::Loop* loop, std::f
 
 Timer::~Timer()
 {
-    // TraceA("Destroy")
+    // LTrace("Destroy")
 }
 
 
 void Timer::init()
 {
-    // TraceA("Init")
+    // LTrace("Init")
 
     // _count = 0;
     // _timeout = 0;
@@ -96,7 +96,7 @@ void Timer::start(std::function<void()> func)
 
 void Timer::start()
 {
-    // TraceA("Starting: ", << timeout, ": ", interval)
+    // LTrace("Starting: ", << timeout, ": ", interval)
     assert(!active());
     assert(_handle.get());
     assert(_timeout > 0 || _interval > 0);
@@ -117,7 +117,7 @@ void Timer::start()
 
 void Timer::stop()
 {
-    // TraceA("Stopping")
+    // LTrace("Stopping")
 
     if (!active())
         return; // do nothing
@@ -131,7 +131,7 @@ void Timer::stop()
 
 void Timer::restart()
 {
-    // TraceS(this), "Restarting: ", __handle.ptr)
+    // STrace, "Restarting: ", __handle.ptr)
     if (!active())
         return start(); //_timeout, _interval);
     return again();
@@ -140,7 +140,7 @@ void Timer::restart()
 
 void Timer::again()
 {
-    // TraceA("Again")
+    // LTrace("Again")
 
     assert(_handle.get());
     _handle.invoke(&uv_timer_again, _handle.get());

@@ -27,20 +27,20 @@ namespace av {
 AudioBuffer::AudioBuffer()
     : fifo(nullptr)
 {
-    TraceA("Create")
+    LTrace("Create")
     assert(!fifo);
 }
 
 
 AudioBuffer::~AudioBuffer()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
     close();
 }
 
 void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSamples)
 {
-    TraceS(this) << "Create audio buffer:\n"
+    STrace << "Create audio buffer:\n"
                  << "\n\tNb Channels: " << channels
                  << "\n\tSample Fmt: " << sampleFmt
                  << "\n\tNb Samples: " << numSamples << "\n\tfifo: " << fifo
@@ -61,7 +61,7 @@ void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSampl
 
 void AudioBuffer::reset()
 {
-    TraceA("Reset")
+    LTrace("Reset")
 
     if (fifo) {
         av_audio_fifo_reset(fifo);
@@ -71,7 +71,7 @@ void AudioBuffer::reset()
 
 void AudioBuffer::close()
 {
-    TraceA("Close")
+    LTrace("Close")
 
     if (fifo) {
         av_audio_fifo_free(fifo);
@@ -102,7 +102,7 @@ void AudioBuffer::write(void** samples, int numSamples)
 
 bool AudioBuffer::read(void** samples, int numSamples)
 {
-    TraceA("Read samples: ", numSamples)
+    LTrace("Read samples: ", numSamples)
 
     // Make sure that there is one frame worth of samples in the FIFO
     // buffer so that the encoder can do its work.
@@ -110,7 +110,7 @@ bool AudioBuffer::read(void** samples, int numSamples)
     // need to FIFO buffer to store as many frames worth of input samples
     // that they make up at least one frame worth of output samples.
     if (available() < numSamples) {
-        TraceA("No packets in buffer")
+        LTrace("No packets in buffer")
         return false;
     }
 

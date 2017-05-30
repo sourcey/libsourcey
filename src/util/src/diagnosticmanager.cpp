@@ -85,13 +85,13 @@ bool IDiagnostic::failed() const
 //
 DiagnosticManager::DiagnosticManager()
 {
-    TraceA("Create")
+    LTrace("Create")
 }
 
 
 DiagnosticManager::~DiagnosticManager()
 {
-    TraceA("Destroy")
+    LTrace("Destroy")
 }
 
 void DiagnosticManager::resetAll()
@@ -128,7 +128,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
     assert(test);
     assert(!test->name.empty());
 
-    TraceA("Adding Diagnostic: ", test->name)
+    LTrace("Adding Diagnostic: ", test->name)
     // test->StateChange += sdelegate(this,
     // &DiagnosticManager::onDiagnosticStateChange);
     return DiagnosticStore::add(test->name, test);
@@ -139,7 +139,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 {
     assert(!name.empty());
 
-    TraceA("Removing Diagnostic: ", name)
+    LTrace("Removing Diagnostic: ", name)
     IDiagnostic* test = DiagnosticStore::remove(name);
     if (test) {
         // TODO:
@@ -163,7 +163,7 @@ void DiagnosticManager::onDiagnosticStateChange(void* sender,
                                                 const DiagnosticState&)
 {
     auto test = reinterpret_cast<IDiagnostic*>(sender);
-    TraceL << "Diagnostic state change: " << test->name << ": " << state
+    STrace << "Diagnostic state change: " << test->name << ": " << state
            << endl;
 
     if (test->complete() && allComplete())

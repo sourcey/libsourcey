@@ -37,10 +37,10 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::
     bool needCoUninitialize = SUCCEEDED(hr);
     if (FAILED(hr)) {
         if (hr != RPC_E_CHANGED_MODE) {
-            ErrorL << "CoInitialize failed, hr=" << hr << endl;
+            SError << "CoInitialize failed, hr=" << hr << endl;
             return false;
         } else {
-            WarnL << "CoInitialize Changed Mode" << endl;
+            SWarn << "CoInitialize Changed Mode" << endl;
         }
     }
 
@@ -115,7 +115,7 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
             return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory, devices);
         default:
             // assert(0 && "unknown dshow device type");
-            DebugL << "DirectShow cannot enumerate output devices: Not implemented" << endl;
+            SDebug << "DirectShow cannot enumerate output devices: Not implemented" << endl;
             break;
     }
 

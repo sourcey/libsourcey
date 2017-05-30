@@ -38,7 +38,7 @@ public:
 
     virtual AuthenticationState authenticateRequest(Server*, Request& request)
     {
-        DebugA("Authenticating: ", request.transactionID())
+        LDebug("Authenticating: ", request.transactionID())
 
         // The authentication information (e.g., username, password, realm, and
         // nonce) is used to both verify subsequent requests and to compute the
@@ -69,7 +69,7 @@ public:
         auto nonceAttr = request.get<stun::Nonce>();
         auto integrityAttr = request.get<stun::MessageIntegrity>();
         if (!usernameAttr || !realmAttr || !nonceAttr || !integrityAttr) {
-            DebugL << "Authenticating: Unauthorized STUN Request" << endl;
+            SDebug << "Authenticating: Unauthorized STUN Request" << endl;
             return turn::NotAuthorized;
         }
 
@@ -81,7 +81,7 @@ public:
         request.hash = engine.digestStr();
 
 #if ENABLE_AUTHENTICATION
-        DebugL << "Generating HMAC: data=" << credentials
+        SDebug << "Generating HMAC: data=" << credentials
                << ", key=" << request.hash << endl;
 
         if (integrityAttr->verifyHmac(request.hash))
@@ -95,12 +95,12 @@ public:
 
     virtual void onServerAllocationCreated(Server*, IAllocation* alloc)
     {
-        DebugL << "Allocation Created" << endl;
+        SDebug << "Allocation Created" << endl;
     }
 
     virtual void onServerAllocationRemoved(Server*, IAllocation* alloc)
     {
-        DebugL << "Allocation Removed" << endl;
+        SDebug << "Allocation Removed" << endl;
     }
 };
 
@@ -111,7 +111,7 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     Logger::instance().setWriter(new AsyncLogWriter);
     {
         Application app;
