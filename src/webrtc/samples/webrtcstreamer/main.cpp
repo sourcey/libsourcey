@@ -37,7 +37,7 @@ std::string sampleDataDir(const std::string& file)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LInfo)); // LTrace, Level::Debug
+    Logger::instance().add(new ConsoleChannel("debug", Level::Info)); // LTrace, Level::Debug
     Logger::instance().setWriter(new AsyncLogWriter);
 
 //#if USE_SSL
