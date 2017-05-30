@@ -298,8 +298,8 @@ struct LogStream
 
 struct LogStream
 {
-    LogStream(Level level, std::string realm, int line, const char* channel = nullptr) = default;
-    LogStream(const LogStream& that) = default;
+    LogStream(Level level, std::string realm, int line, const char* channel = nullptr) {};
+    LogStream(const LogStream& that) {};
 
     template<typename... Args>
     void write(Args... args)
