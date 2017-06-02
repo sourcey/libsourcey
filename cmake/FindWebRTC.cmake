@@ -17,6 +17,8 @@
 
 unset(WEBRTC_INCLUDE_DIR)
 unset(WEBRTC_INCLUDE_DIR CACHE)
+unset(WEBRTC_LIBRARY)
+unset(WEBRTC_LIBRARY CACHE)
 unset(WEBRTC_LIBRARIES)
 unset(WEBRTC_LIBRARIES CACHE)
 unset(WEBRTC_LIBRARIES_DEBUG)
@@ -61,11 +63,12 @@ if(WEBRTC_INCLUDE_DIR)
       ${WEBRTC_ROOT_DIR}/out/Release)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
-  find_library_extended(WEBRTC
-    NAMES webrtc webrtc_full libwebrtc_full
-    PATHS_DEBUG ${debug_dir}
-    PATHS_RELEASE ${release_dir}
-  )
+  # find_library_extended(WEBRTC
+  #   NAMES webrtc webrtc_full libwebrtc_full
+  #   PATHS_DEBUG ${debug_dir}
+  #   PATHS_RELEASE ${release_dir}
+  # )
+  # message(FATAL_ERROR "DONEa: ${WEBRTC_LIBRARIES}")
 
   # # Otherwise generate a library from available .o objects
   # if(NOT WEBRTC_LIBRARY)
@@ -90,7 +93,7 @@ if(WEBRTC_INCLUDE_DIR)
   # endif()
 
   # Otherwise fallback to library objects (slower and unreliable)
-  if(NOT WEBRTC_LIBRARY)
+  if(NOT WEBRTC_LIBRARIES)
     set(WEBRTC_LIBRARIES "")
     if(MSVC)
       set(lib_suffix "lib")
@@ -116,7 +119,7 @@ if(WEBRTC_INCLUDE_DIR)
         endif()
         # endif()
       endforeach()
-      # message(FATAL_ERROR "DONE")
+      # message(FATAL_ERROR "DONE: ${WEBRTC_LIBRARIES_DEBUG}")
       foreach(lib ${WEBRTC_LIBRARIES_DEBUG})
         if(WIN32 AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
           list(APPEND WEBRTC_LIBRARIES "debug" ${lib})
@@ -151,6 +154,9 @@ if(WEBRTC_INCLUDE_DIR)
     set(WEBRTC_DEPENDENCIES Secur32.lib Winmm.lib msdmo.lib dmoguids.lib wmcodecdspuuid.lib) # strmbase.lib
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DWEBRTC_POSIX)
+
+    # For ABI compatability between precompiled WebRTC libraries using clang and new GCC versions
+    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
     set(WEBRTC_DEPENDENCIES -lrt -lX11 -lGLU) # -lGL
 
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
