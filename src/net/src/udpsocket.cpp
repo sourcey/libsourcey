@@ -86,7 +86,7 @@ void UDPSocket::connect(const std::string& host, uint16_t port)
     else {
         init();
 
-        net::dns::resolve("sourcey.com", 80, [ptr = context()](int err, const net::Address& addr) {
+        /*net::dns::resolve("sourcey.com", 80, [ptr = context()](int err, const net::Address& addr) {
             if (!ptr->deleted) {
                 auto handle = reinterpret_cast<UDPSocket*>(ptr->handle);
                 if (err)
@@ -94,7 +94,18 @@ void UDPSocket::connect(const std::string& host, uint16_t port)
                 else
                     handle->connect(addr);
             }
-        }, loop());
+        }, loop());*/
+        uv::createRequest<uv::GetAddrInfoReq>([ptr = context()](const uv::GetAddrInfoEvent& event) {
+            if (!ptr->deleted) {
+                auto handle = reinterpret_cast<UDPSocket *>(ptr->handle);
+                if (event.status) {
+                    LWarn("Cannot resolve DNS : ", uv_strerror(event.status))
+                    handle->setUVError(event.status, "DNS failed to resolve");
+                } else {
+                    handle->connect(net::Address{event.addr->ai_addr, event.addr->ai_addrlen});
+                }
+            }
+        }).resolve(host, port, loop());
     }
 }
 
