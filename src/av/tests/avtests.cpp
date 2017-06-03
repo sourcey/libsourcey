@@ -9,8 +9,8 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    //Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LTrace, Level::Debug
-    //Logger::instance().setWriter(new AsyncLogWriter);
+    Logger::instance().add(new ConsoleChannel("debug", Level::Debug)); // Level::Trace, Level::Debug
+    // Logger::instance().setWriter(new AsyncLogWriter);
     test::init();
 
     // Define class based tests

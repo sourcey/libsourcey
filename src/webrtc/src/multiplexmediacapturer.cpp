@@ -60,7 +60,7 @@ void MultiplexMediaCapturer::openFile(const std::string& file, bool loop)
         // _videoCapture->audio()->resampler->variableOutput = false;
     }
 
-    // Convert to yuv420p for easy comsumption by WebRTC
+    // Convert to yuv420p for WebRTC compatability 
     if (_videoCapture->video()) {
         _videoCapture->video()->oparams.pixelFmt = "yuv420p"; // nv12
         // _videoCapture->video()->oparams.width = capture_format.width;
@@ -73,11 +73,11 @@ VideoPacketSource* MultiplexMediaCapturer::createVideoSource()
 {
     assert(_videoCapture->video());
     auto oparams = _videoCapture->video()->oparams;
-    auto source = new VideoPacketSource(oparams.width, oparams.height, 
+    auto source = new VideoPacketSource(oparams.width, oparams.height,
                                         oparams.fps, cricket::FOURCC_I420);
     source->setPacketSource(&_stream.emitter); // nullified on VideoPacketSource::Stop
     return source;
-} 
+}
 
 
 rtc::scoped_refptr<AudioPacketModule> MultiplexMediaCapturer::getAudioModule()
@@ -90,11 +90,11 @@ void MultiplexMediaCapturer::addMediaTracks(
     webrtc::PeerConnectionFactoryInterface* factory,
     webrtc::MediaStreamInterface* stream)
 {
-    // This capturer is multicast, meaning it can be used as the source 
+    // This capturer is multicast, meaning it can be used as the source
     // for multiple Peer objects.
     //
-    // KLUDGE: Pixel format conversion should happen on the 
-    // VideoPacketSource rather than on the decoder becasue different  
+    // KLUDGE: Pixel format conversion should happen on the
+    // VideoPacketSource rather than on the decoder becasue different
     // peers may request different optimal output video sizes.
 
     // Create and add the audio stream

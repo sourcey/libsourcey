@@ -50,8 +50,8 @@ AudioContext::~AudioContext()
 void AudioContext::open()
 {
     SDebug << "Open: "
-                 << "\n\tInput: " << iparams.toString()
-                 << "\n\tOutput: " << oparams.toString() << endl;
+           << "\n\tInput: " << iparams.toString()
+           << "\n\tOutput: " << oparams.toString() << endl;
 
     assert(ctx);
     assert(avcodec_is_open(ctx) && "avcodec_open2 must be called");

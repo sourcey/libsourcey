@@ -37,20 +37,17 @@ std::string sampleDataDir(const std::string& file)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", Level::Info)); // LTrace, Level::Debug
-    Logger::instance().setWriter(new AsyncLogWriter);
+    Logger::instance().add(new ConsoleChannel("debug", Level::Debug)); // Level::Trace, Level::Debug
+    // Logger::instance().setWriter(new AsyncLogWriter);
 
 //#if USE_SSL
     // net::SSLManager::initNoVerifyClient();
 //#endif
 
-    // Pre-initialize video captures in the main thread
-    // av::MediaFactory::instance().loadVideoCaptures();
-
     // Setup WebRTC environment
     rtc::LogMessage::LogToDebug(rtc::LS_INFO); // LS_VERBOSE, LS_INFO, LERROR
-    rtc::LogMessage::LogTimestamps();
-    rtc::LogMessage::LogThreads();
+    // rtc::LogMessage::LogTimestamps();
+    // rtc::LogMessage::LogThreads();
 
     rtc::InitializeSSL();
 

@@ -191,22 +191,22 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
     // This may be useful for implementations that need to know the size of
     // converted output samples in bytes, such as for writing to files.
     outBufferSize = av_samples_get_buffer_size(nullptr, oparams.channels,
-                                               outNumSamples, outSampleFmt, 1);
+                                               outNumSamples, outSampleFmt, 0);
 
-    STrace << "Resampled audio frame:"
-                 << "\n\tIn Nb Samples: " << inNumSamples
-                 << "\n\tIn Channels: " << iparams.channels
-                 << "\n\tIn Sample Rate: " << iparams.sampleRate
-                 << "\n\tIn Sample Fmt: " << iparams.sampleFmt
-                 << "\n\tOut Nb Samples: " << outNumSamples
-                 << "\n\tOut Max Nb Samples: " << maxNumSamples
-                 << "\n\tOut Buffer Size: " << outBufferSize
-                 << "\n\tOut Channels: " << oparams.channels
-                 << "\n\tOut Sample Rate: " << oparams.sampleRate
-                 << "\n\tOut Sample Fmt: " << oparams.sampleFmt << endl;
+    // STrace << "Resampled audio frame:"
+    //        << "\n\tIn Nb Samples: " << inNumSamples
+    //        << "\n\tIn Channels: " << iparams.channels
+    //        << "\n\tIn Sample Rate: " << iparams.sampleRate
+    //        << "\n\tIn Sample Fmt: " << iparams.sampleFmt
+    //        << "\n\tOut Nb Samples: " << outNumSamples
+    //        << "\n\tOut Max Nb Samples: " << maxNumSamples
+    //        << "\n\tOut Buffer Size: " << outBufferSize
+    //        << "\n\tOut Channels: " << oparams.channels
+    //        << "\n\tOut Sample Rate: " << oparams.sampleRate
+    //        << "\n\tOut Sample Fmt: " << oparams.sampleFmt << endl;
 
-    assert(outNumSamples > 0);
-    assert(outBufferSize > 0);
+    // assert(outNumSamples > 0);
+    // assert(outBufferSize > 0);
 
     return ret;
 }

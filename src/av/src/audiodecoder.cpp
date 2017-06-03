@@ -41,7 +41,6 @@ AudioDecoder::~AudioDecoder()
 void AudioDecoder::create()
 {
     assert(stream);
-
     STrace << "Create: " << stream->index << endl;
 
     ctx = stream->codec;
@@ -82,7 +81,7 @@ bool emitPacket(AudioDecoder* dec)
     //assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
 
     // Set the decoder time in microseconds
-    // This value represents the number of microseconds 
+    // This value represents the number of microseconds
     // that have elapsed since the brginning of the stream.
     dec->time = dec->frame->pkt_pts > 0 ? static_cast<int64_t>(dec->frame->pkt_pts *
                 av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
@@ -95,33 +94,35 @@ bool emitPacket(AudioDecoder* dec)
     dec->seconds = (dec->frame->pkt_dts - dec->stream->start_time) * av_q2d(dec->stream->time_base);
 
     if (dec->resampler) {
-        if (!dec->resampler->resample((uint8_t**)dec->frame->data, dec->frame->nb_samples)) {
+        if (!dec->resampler->resample((uint8_t**)dec->frame->extended_data, dec->frame->nb_samples)) {
             SDebug << "Samples buffered by resampler" << endl;
             return false;
         }
 
-        //AudioPacket audio(dec->resampler->outSamples[0],
+        // AudioPacket audio(dec->resampler->outSamples[0],
         //                  dec->resampler->outBufferSize,
         //                  dec->resampler->outNumSamples, dec->time);
-        //dec->outputFrameSize = dec->resampler->outNumSamples;
-        //dec->emitter.emit(audio);
+        // dec->outputFrameSize = dec->resampler->outNumSamples;
+        // dec->emitter.emit(audio);
         // opacket.data = dec->resampler->outSamples[0];
         // opacket.size = dec->resampler->outBufferSize;
 
-        PlanarAudioPacket audio(dec->resampler->outSamples, // dec->frame->linesize,
-            dec->oparams.channels, dec->frame->nb_samples, 
+        PlanarAudioPacket audio(dec->resampler->outSamples,
+            dec->oparams.channels, dec->resampler->outNumSamples,
             dec->oparams.sampleFmt, dec->time);
-        dec->outputFrameSize = dec->frame->nb_samples;
+        dec->outputFrameSize = dec->resampler->outNumSamples;
         dec->emitter.emit(audio);
-    } else {
-        //int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
+        assert(audio.size() == dec->resampler->outBufferSize);
+    }
+    else {
+        // int size = av_samples_get_buffer_size(nullptr, dec->ctx->channels,
         //                                      dec->frame->nb_samples,
         //                                      dec->ctx->sample_fmt, 0);
-        //AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize, dec->time);
-        //dec->outputFrameSize = dec->frame->nb_samples;
-        //dec->emitter.emit(audio);
+        // AudioPacket audio(dec->frame->data[0], size, dec->outputFrameSize, dec->time);
+        // dec->outputFrameSize = dec->frame->nb_samples;
+        // dec->emitter.emit(audio);
 
-        PlanarAudioPacket audio(dec->frame->data, // dec->frame->linesize, 
+        PlanarAudioPacket audio(dec->frame->data,
             dec->oparams.channels, dec->frame->nb_samples,
             dec->oparams.sampleFmt, dec->time);
         dec->outputFrameSize = dec->frame->nb_samples;
@@ -140,8 +141,8 @@ bool emitPacket(AudioDecoder* dec)
 }
 
 
-//bool AudioDecoder::decode(uint8_t* data, int size)
-//{
+// bool AudioDecoder::decode(uint8_t* data, int size)
+// {
 //    AVPacket ipacket;
 //    av_init_packet(&ipacket);
 //    ipacket.data = data;
@@ -149,7 +150,7 @@ bool emitPacket(AudioDecoder* dec)
 //    if (stream)
 //        ipacket.stream_index = stream->index;
 //    return decode(ipacket);
-//}
+// }
 
 
 bool AudioDecoder::decode(AVPacket& ipacket)
@@ -160,11 +161,11 @@ bool AudioDecoder::decode(AVPacket& ipacket)
     assert(!stream || ipacket.stream_index == stream->index);
 
     // Convert input packet to codec time base
-    //ipacket.dts = av_rescale_q_rnd(ipacket.dts,
+    // ipacket.dts = av_rescale_q_rnd(ipacket.dts,
     //    stream->time_base,
     //    stream->codec->time_base,
     //    AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
-    //ipacket.pts = av_rescale_q_rnd(ipacket.pts,
+    // ipacket.pts = av_rescale_q_rnd(ipacket.pts,
     //    stream->time_base,
     //    stream->codec->time_base,
     //    AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
@@ -201,7 +202,7 @@ bool AudioDecoder::decode(AVPacket& ipacket)
             //     << endl;
 
             // fps.tick();
-            emitPacket(this); //, frame, opacket, &ptsSeconds
+            emitPacket(this);
         }
 
         ipacket.size -= ret;
@@ -212,7 +213,7 @@ bool AudioDecoder::decode(AVPacket& ipacket)
 }
 
 
-void AudioDecoder::flush() // AVPacket& opacket
+void AudioDecoder::flush()
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -230,7 +231,7 @@ void AudioDecoder::flush() // AVPacket& opacket
     if (frameDecoded) {
         STrace << "Flushed audio frame: " << frame->pts << endl;
         assert(0);
-        emitPacket(this); //, frame, opacket, &ptsSeconds
+        emitPacket(this);
     }
 }
 

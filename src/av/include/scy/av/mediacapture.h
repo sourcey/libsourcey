@@ -23,7 +23,6 @@
 #include "scy/av/packet.h"
 #include "scy/av/videodecoder.h"
 #include "scy/interface.h"
-#include <mutex>
 #include "scy/packetsignal.h"
 
 
@@ -43,10 +42,8 @@ public:
 
     virtual void openFile(const std::string& file);
     // #ifdef HAVE_FFMPEG_AVDEVICE
-    // virtual void openCamera(const std::string& device, int width = -1, int
-    //                         height = -1, double framerate = -1);    
-    // virtual void openMicrophone(const std::string& device, int channels = -1, int
-    //                             sampleRate = -1);
+    // virtual void openCamera(const std::string& device, int width = -1, int height = -1, double framerate = -1);
+    // virtual void openMicrophone(const std::string& device, int channels = -1, int sampleRate = -1);
     // #endif
     virtual void close();
 
@@ -69,8 +66,8 @@ public:
     VideoDecoder* video() const;
     AudioDecoder* audio() const;
     bool stopping() const;
-    std::string error() const; 
-    
+    std::string error() const;
+
     /// Signals that the capture thread is closing.
     /// Careful, this signal is emitted from inside the tread contect.
     NullSignal Closing;

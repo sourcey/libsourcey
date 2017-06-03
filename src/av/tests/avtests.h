@@ -51,17 +51,17 @@ static const int kInNumSamples = 1024;
 #define ACC_ENCODER "libfdk_aac"
 #endif
 
-#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4 Default", "mp4",        \
+#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format{"MP4 Default", "mp4",        \
             { "libx264", 400, 300 },                                           \
-            { ACC_ENCODER });
+            { ACC_ENCODER }};
 
-#define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4 Realtime", "mp4",         \
+#define MP4_H264_AAC_REALTIME_FORMAT av::Format{"MP4 Realtime", "mp4",         \
             { "libx264", 400, 300, 25, 48000, 128000, "yuv420p" },             \
-            { ACC_ENCODER, 2, 44100, 64000, "fltp" });
+            { ACC_ENCODER, 2, 44100, 64000, "fltp" }};
 
-#define VP8_H264_AAC_REALTIME_FORMAT av::Format("MP4 VP8 Realtime", "mp4",     \
+#define VP8_H264_AAC_REALTIME_FORMAT av::Format{"MP4 VP8 Realtime", "mp4",     \
             { "vp8", 400, 300, 25, 48000, 128000, "yuv420p" },                 \
-            { ACC_ENCODER, 2, 44100, 64000, "fltp" });
+            { ACC_ENCODER, 2, 44100, 64000, "fltp" }};
 
 
 // =============================================================================
@@ -82,26 +82,26 @@ std::string sampleDataDir(const std::string& file)
 
 // Prepare a dummy YUV image
 #ifdef HAVE_FFMPEG
-static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
-{
-    int x, y, i;
-    i = frame_index;
-
-    /* Y */
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            pict->data[0][y * pict->linesize[0] + x] = x + y + i * 3;
-        }
-    }
-
-    /* Cb and Cr */
-    for (y = 0; y < height / 2; y++) {
-        for (x = 0; x < width / 2; x++) {
-            pict->data[1][y * pict->linesize[1] + x] = 128 + y + i * 2;
-            pict->data[2][y * pict->linesize[2] + x] = 64 + x + i * 5;
-        }
-    }
-}
+// static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
+// {
+//     int x, y, i;
+//     i = frame_index;
+//
+//     /* Y */
+//     for (y = 0; y < height; y++) {
+//         for (x = 0; x < width; x++) {
+//             pict->data[0][y * pict->linesize[0] + x] = x + y + i * 3;
+//         }
+//     }
+//
+//     /* Cb and Cr */
+//     for (y = 0; y < height / 2; y++) {
+//         for (x = 0; x < width / 2; x++) {
+//             pict->data[1][y * pict->linesize[1] + x] = 128 + y + i * 2;
+//             pict->data[2][y * pict->linesize[2] + x] = 64 + x + i * 5;
+//         }
+//     }
+// }
 
 // Generate sin tone with 440Hz frequency and duplicated channels
 void fillAudioSamplesUInt(uint16_t* samples, int sample_rate,
@@ -134,8 +134,7 @@ void fillAudioSamples(double* samples, int sample_rate, int nb_channels,
 }
 
 
-std::vector<uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
-                                                 const av::AudioCodec& params)
+std::vector<uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples, const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(
@@ -151,8 +150,7 @@ std::vector<uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples,
 }
 
 
-std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples,
-                                               const av::AudioCodec& params)
+std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, const av::AudioCodec& params)
 {
     double t = 0;
     int bufferSize = av_samples_get_buffer_size(
@@ -197,7 +195,7 @@ class VideoFileTranscoderTest : public Test
         // from the file capture to the encoder
         PacketStream stream;
         stream.attachSource(capture, true);
-        stream.attach(encoder, 5);
+        stream.attach(encoder);
         stream.start();
 
         while (!capture->stopping()) {
@@ -208,7 +206,7 @@ class VideoFileTranscoderTest : public Test
         // Check output file size
         expect(fs::filesize(options.ofile) > 10000);
 
-        // NOTE: Disabling time checks for now since different 
+        // NOTE: Disabling time checks for now since different
         // FFmpeg versions produce different results,
         //
         // // capture video time: 59958333
@@ -386,7 +384,7 @@ class AudioResamplerTest : public Test
 
         std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted * 100, kInNumSamples, iparams);
         for (auto samples : testSamples) {
             // auto data = reinterpret_cast<uint8_t*>(samples);
             if (resampler.resample(reinterpret_cast<uint8_t**>(&samples), kInNumSamples)) {
@@ -438,14 +436,13 @@ class AudioBufferTest : public Test
 //
 class AudioCaptureTest : public Test
 {
+    int inNbChannels = 2;
+    int inSampleRate = 48000;
     int numFramesRemaining = kNumberFramesWanted;
     std::ofstream output;
 
     void run()
     {
-        int inNbChannels = 2;
-        int inSampleRate = 48000;
-
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
         av::Device device;
@@ -493,15 +490,14 @@ class AudioCaptureTest : public Test
 //
 class AudioCaptureEncoderTest : public Test
 {
-    av::AudioEncoder encoder;
+    int inNbChannels = 2;
+    int inSampleRate = 48000; // 22050, 48000
     int numFramesRemaining = kNumberFramesWanted;
+    av::AudioEncoder encoder;
     std::ofstream output;
 
     void run()
     {
-        int inNbChannels = 2;
-        int inSampleRate = 48000; // 22050, 48000
-
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
 
@@ -513,8 +509,6 @@ class AudioCaptureEncoderTest : public Test
         }
 
         // Create a media capture to read and decode the input file
-        // av::MediaCapture::Ptr capture;
-        // capture.openFile("test.mp4");
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
 
         capture.getEncoderAudioCodec(iparams);
@@ -537,7 +531,6 @@ class AudioCaptureEncoderTest : public Test
 
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
-        assert(iparams.sampleRate == inSampleRate);
 
         while (numFramesRemaining > 0 && !capture.stopping()) {
             LDebug("Waiting for completion: ", numFramesRemaining)
@@ -580,15 +573,14 @@ class AudioCaptureEncoderTest : public Test
 //
 class AudioCaptureResamplerTest : public Test
 {
+    int inNbChannels = 2;
+    int inSampleRate = 48000;
+    int numFramesRemaining = kNumberFramesWanted; // * 100;
     av::AudioResampler resampler;
-    int numFramesRemaining = kNumberFramesWanted;
     std::ofstream output;
 
     void run()
     {
-        int inNbChannels = 2;
-        int inSampleRate = 48000;
-
         auto& iparams = resampler.iparams;
         auto& oparams = resampler.oparams;
 

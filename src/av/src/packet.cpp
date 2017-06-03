@@ -84,7 +84,7 @@ PlanarVideoPacket::~PlanarVideoPacket()
 //
 
 
-PlanarAudioPacket::PlanarAudioPacket(uint8_t* data[4], int channels, size_t numSamples, 
+PlanarAudioPacket::PlanarAudioPacket(uint8_t* data[4], int channels, size_t numSamples,
                                      const std::string& sampleFmt, int64_t time)
     : AudioPacket(data[0], 0, numSamples, time)
     , channels(channels)
@@ -110,13 +110,13 @@ PlanarAudioPacket::PlanarAudioPacket(const PlanarAudioPacket& r)
     auto fmt = av_get_sample_fmt(sampleFmt.c_str());
 
     // Allocate image where the data image will copied
-    int ret = av_samples_alloc_array_and_samples((uint8_t***)&buffer, 
+    int ret = av_samples_alloc_array_and_samples((uint8_t***)&buffer,
         nullptr, channels, numSamples, fmt, 0);
     if (ret < 0) {
         LError("Could not allocate raw audio buffer");
         assert(0);
     }
-    
+
     // Copy image data from other frame
     av_samples_copy(buffer, (uint8_t* const*)r.buffer, 0, 0,
         channels, numSamples, fmt);

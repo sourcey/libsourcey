@@ -81,11 +81,11 @@ struct VideoPacket : public MediaPacket
 /// Video packet for planar formats
 struct PlanarVideoPacket : public VideoPacket
 {
-    uint8_t *buffer[4] = { nullptr };
+    uint8_t* buffer[4] = { nullptr };
     int linesize[4];
     std::string pixelFmt;
 
-    PlanarVideoPacket(uint8_t *data[4], const int linesize[4], const std::string& pixelFmt = "",
+    PlanarVideoPacket(uint8_t* data[4], const int linesize[4], const std::string& pixelFmt = "",
                       int width = 0, int height = 0, int64_t time = 0);
     PlanarVideoPacket(const PlanarVideoPacket& r);
     virtual ~PlanarVideoPacket();
@@ -125,12 +125,12 @@ struct AudioPacket : public MediaPacket
 /// Audio packet for planar formats
 struct PlanarAudioPacket : public AudioPacket
 {
-    uint8_t *buffer[4] = { nullptr };
+    uint8_t* buffer[4] = { nullptr };
     int linesize;
     int channels;
     std::string sampleFmt;
 
-    PlanarAudioPacket(uint8_t *data[4], int channels = 0, size_t numSamples = 0, 
+    PlanarAudioPacket(uint8_t* data[4], int channels = 0, size_t numSamples = 0, //, size_t size = 0
                       const std::string& sampleFmt = "", int64_t time = 0);
     PlanarAudioPacket(const PlanarAudioPacket& r);
     virtual ~PlanarAudioPacket();

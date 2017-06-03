@@ -21,7 +21,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LTrace, Level::Debug
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // Level::Trace, Level::Debug
 
     // Setup WebRTC environment
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE); // LS_VERBOSE, LS_INFO, LERROR

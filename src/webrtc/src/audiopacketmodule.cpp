@@ -27,30 +27,22 @@ namespace scy {
 namespace wrtc {
 
 
-// Audio sample value that is high enough that it doesn't occur naturally when
-// frames are being faked. E.g. NetEq will not generate this large sample value
-// unless it has received an audio frame containing a sample of this value.
-// Even simpler buffers would likely just contain audio sample values of 0.
-static const int kHighSampleValue = 10000;
+// Constants correspond to 10ms of sterio audio at 44kHz.
+static const uint8_t kNumberOfChannels = 2;
+static const int kSamplesPerSecond = 44000;
+static const size_t kNumberSamples = 440;
+static const size_t kBytesPerSample = sizeof(AudioPacketModule::Sample) * kNumberOfChannels;
+static const size_t kBufferBytes = kNumberSamples * kBytesPerSample;
+
+static const int kTimePerFrameMs = 10;
+static const int kTotalDelayMs = 0;
+static const int kClockDriftMs = 0;
+static const uint32_t kMaxVolume = 14392;
 
 // Same value as src/modules/audio_device/main/source/audio_device_config.h in
 // https://code.google.com/p/webrtc/
 static const int kAdmMaxIdleTimeProcess = 1000;
 
-// Constants here are derived by running VoE using a real ADM.
-// The constants correspond to 10ms of mono audio at 44kHz.
-static const int kTimePerFrameMs = 10;
-static const uint8_t kNumberOfChannels = 2; // 1;
-static const int kSamplesPerSecond = 44000;
-static const int kTotalDelayMs = 0;
-static const int kClockDriftMs = 0;
-static const uint32_t kMaxVolume = 14392;
-
-// The value for the following constants have been derived by running VoE
-// using a real ADM. The constants correspond to 10ms of mono audio at 44kHz.
-static const size_t kNumberSamples = 440;
-static const size_t kNumberBytesPerSample = sizeof(AudioPacketModule::Sample);
-static const size_t kNumberBufferBytes = kNumberSamples * kNumberBytesPerSample * kNumberOfChannels; // 1760
 
 enum
 {
@@ -69,7 +61,7 @@ AudioPacketModule::AudioPacketModule()
     , _currentMicLevel(kMaxVolume)
     , _started(false)
     , _nextFrameTime(0)
-    , _sendSamples(kNumberBufferBytes)
+    , _sendSamples(kBufferBytes)
 {
 }
 
@@ -92,7 +84,7 @@ rtc::scoped_refptr<AudioPacketModule> AudioPacketModule::Create()
 
 void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
 {
-    SDebug << "Audio frame captured" << endl;
+    LTrace("Audio frame captured")
 
     // assert(_processThread->IsCurrent());
     rtc::CritScope cs(&_critCallback);
@@ -127,11 +119,6 @@ bool AudioPacketModule::Initialize()
     _sendFifo.close();
     _sendFifo.alloc("s16", kNumberOfChannels);
 
-    // Set the send buffer samples high enough that it would not occur on the
-    // remote side unless a packet containing a sample of that magnitude has
-    // been sent to it. Note that the audio processing pipeline will likely
-    // distort the original signal.
-    // SetSendBuffer(kHighSampleValue);
     _lastProcessTimeMS = rtc::TimeMillis();
     return true;
 }
@@ -194,6 +181,7 @@ void AudioPacketModule::processFrameP()
     _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this, MSG_RUN_PROCESS);
 }
 
+
 void AudioPacketModule::sendFrameP()
 {
     assert(_processThread->IsCurrent());
@@ -201,19 +189,21 @@ void AudioPacketModule::sendFrameP()
     if (!_audioCallback) {
         return;
     }
+
     bool key_pressed = false;
     uint32_t current_mic_level = 0;
     MicrophoneVolume(&current_mic_level);
 
     auto samples = &_sendSamples[0];
     if (!_sendFifo.read((void**)&samples, kNumberSamples)) {
-        SInfo << "No audio frames in send buffer" << endl;
+        LDebug("No audio frames in send buffer")
         return;
     }
 
     LTrace("Send audio")
+
     if (_audioCallback->RecordedDataIsAvailable(
-            samples, kNumberSamples, kNumberBytesPerSample, kNumberOfChannels,
+            samples, kNumberSamples, kBytesPerSample, kNumberOfChannels,
             kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,
             key_pressed, current_mic_level) != 0) {
         assert(false);
@@ -236,7 +226,7 @@ void AudioPacketModule::receiveFrameP()
     //   int64_t elapsed_time_ms = 0;
     //   int64_t ntp_time_ms = 0;
     //   if (_audioCallback->NeedMorePlayData(kNumberSamples,
-    //                                        kNumberBytesPerSample,
+    //                                        kBytesPerSample,
     //                                        kNumberOfChannels,
     //                                        kSamplesPerSecond,
     //                                        rec_sendFifo_, nSamplesOut,
@@ -295,7 +285,7 @@ int32_t AudioPacketModule::RegisterAudioCallback(webrtc::AudioTransport* audio_c
 
 int32_t AudioPacketModule::Init()
 {
-    // Initialize is called by the factory method. 
+    // Initialize is called by the factory method.
     // Safe to ignore this Init call.
     return 0;
 }
@@ -324,7 +314,7 @@ int16_t AudioPacketModule::RecordingDevices()
     return 0;
 }
 
-int32_t AudioPacketModule::PlayoutDeviceName(uint16_t /*index*/, 
+int32_t AudioPacketModule::PlayoutDeviceName(uint16_t /*index*/,
     char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {
@@ -332,7 +322,7 @@ int32_t AudioPacketModule::PlayoutDeviceName(uint16_t /*index*/,
     return 0;
 }
 
-int32_t AudioPacketModule::RecordingDeviceName(uint16_t /*index*/, 
+int32_t AudioPacketModule::RecordingDeviceName(uint16_t /*index*/,
     char /*name*/[webrtc::kAdmMaxDeviceNameSize],
     char /*guid*/[webrtc::kAdmMaxGuidSize])
 {

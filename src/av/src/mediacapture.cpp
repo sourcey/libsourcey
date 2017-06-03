@@ -187,8 +187,9 @@ void MediaCapture::run()
 
         // Read input packets until complete
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-            STrace << "Read frame: pts=" << ipacket.pts
-                         << ", dts=" << ipacket.dts << endl;
+            STrace << "Read frame: "
+                   << "pts=" << ipacket.pts << ", "
+                   << "dts=" << ipacket.dts << endl;
 
             if (_stopping)
                 break;
@@ -205,8 +206,8 @@ void MediaCapture::run()
                 // Decode and emit
                 if (_video->decode(ipacket)) {
                     STrace << "Decoded video: "
-                                 << "time=" << _video->time << ", "
-                                 << "pts=" << _video->pts << endl;
+                           << "time=" << _video->time << ", "
+                           << "pts=" << _video->pts << endl;
                 }
 
                 // Pause the input stream in realtime mode if the
@@ -230,8 +231,8 @@ void MediaCapture::run()
                 // Decode and emit
                 if (_audio->decode(ipacket)) {
                     STrace << "Decoded Audio: "
-                                 << "time=" << _audio->time << ", "
-                                 << "pts=" << _video->pts << endl;
+                           << "time=" << _audio->time << ", "
+                           << "pts=" << _audio->pts << endl;
                 }
             }
 
@@ -276,14 +277,9 @@ void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_audio) {
-        // HACK: Decoder output does not properly support planar
-        // formats. By calling this method it means a transcoder
-        // is in use, so force a interleaved output format.
-        // Note: This can be removed when planar formats are fully supported via
-        // the av::VideoPacket interface.
-        // Default to s16 output.
-        // _audio->oparams.sampleFmt = "s16";
-
+        assert(_audio->oparams.channels);
+        assert(_audio->oparams.sampleRate);
+        assert(!_audio->oparams.sampleFmt.empty());
         params = _audio->oparams;
     }
 }
@@ -293,6 +289,9 @@ void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     std::lock_guard<std::mutex> guard(_mutex);
     if (_video) {
+        assert(_video->oparams.width);
+        assert(_video->oparams.height);
+        assert(!_video->oparams.pixelFmt.empty());
         params = _video->oparams;
     }
 }
