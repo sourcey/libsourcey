@@ -108,8 +108,8 @@ protected:
     {
         SocketAdapter* ptr;
         bool alive;
-    }
-    
+    };
+
     SocketAdapter* _sender;
     std::vector<Ref*> _receivers;
     bool _dirty = false;

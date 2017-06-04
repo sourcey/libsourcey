@@ -17,6 +17,7 @@
 #include "scy/http/websocket.h"
 #include "scy/net/socket.h"
 #include "scy/socketio/client.h"
+#include "scy/symple/symple.h"
 #include "scy/symple/command.h"
 #include "scy/symple/event.h"
 #include "scy/symple/form.h"
@@ -58,6 +59,11 @@ public:
         std::string name;
         std::string type;
         std::string token;
+
+        Options() {
+            // Required on gcc 6
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70528
+        }
     };
 
 public:

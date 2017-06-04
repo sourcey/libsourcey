@@ -13,11 +13,10 @@
 #define SCY_Symple_Message_H
 
 
-#include "scy/base.h"
-#include "scy/json/json.h"
-#include "scy/packet.h"
+#include "scy/symple/symple.h"
 #include "scy/symple/address.h"
 #include "scy/symple/peer.h"
+#include "scy/packet.h"
 
 
 namespace scy {

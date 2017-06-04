@@ -13,8 +13,9 @@
 #define SCY_Symple_Peer_H
 
 
-#include "scy/json/json.h"
+#include "scy/symple/symple.h"
 #include "scy/symple/address.h"
+#include "scy/json/json.h"
 
 
 namespace scy {

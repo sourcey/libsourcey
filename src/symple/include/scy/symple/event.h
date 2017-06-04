@@ -13,6 +13,7 @@
 #define SCY_Symple_Event_H
 
 
+#include "scy/symple/symple.h"
 #include "scy/symple/message.h"
 #include <ctime>
 

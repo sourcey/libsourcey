@@ -13,6 +13,7 @@
 #define SCY_Symple_Address_H
 
 
+#include "scy/symple/symple.h"
 #include <cstdint>
 #include <string>
 

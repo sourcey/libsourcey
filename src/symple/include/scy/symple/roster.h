@@ -13,9 +13,10 @@
 #define SCY_Symple_Roster_H
 
 
-#include "scy/collection.h"
+#include "scy/symple/symple.h"
 #include "scy/symple/address.h"
 #include "scy/symple/peer.h"
+#include "scy/collection.h"
 
 
 namespace scy {

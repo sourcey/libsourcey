@@ -74,6 +74,11 @@ public:
         /// from the server. (0 = unlimited)
         int reconnectAttempts = 0;
         int reconnectDelay = 6 * 1000; // 6 secs
+
+        Options() {
+            // Required on gcc 6
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70528
+        }
     };
 
 public:
