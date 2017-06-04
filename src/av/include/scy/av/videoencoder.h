@@ -32,9 +32,8 @@ struct VideoEncoder : public VideoContext
     VideoEncoder(AVFormatContext* format = nullptr);
     virtual ~VideoEncoder();
 
-    virtual void create();
-    // virtual void open();
-    virtual void close();
+    virtual void create() override;
+    virtual void close() override;
 
     /// Encode a single video frame.
     /// The pts argument should be in stream base time format.

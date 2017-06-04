@@ -13,6 +13,7 @@
 #define SCY_Symple_Event_H
 
 
+#include "scy/symple/symple.h"
 #include "scy/symple/message.h"
 #include <ctime>
 
@@ -21,7 +22,7 @@ namespace scy {
 namespace smpl {
 
 
-class Event : public Message
+class Symple_API Event : public Message
 {
 public:
     Event();

@@ -18,8 +18,6 @@
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/packet.h"
-// #include "scy/av/format.h"
-// #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"
 
 
@@ -32,9 +30,9 @@ struct VideoDecoder : public VideoContext
     VideoDecoder(AVStream* stream);
     virtual ~VideoDecoder();
 
-    virtual void create();
-    virtual void open();
-    virtual void close();
+    virtual void create() override;
+    virtual void open() override;
+    virtual void close() override;
 
     /// Decodes a the given input packet.
     /// Input packets should use the raw `AVStream` time base. Time base

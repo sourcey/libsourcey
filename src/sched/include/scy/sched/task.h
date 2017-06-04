@@ -13,8 +13,9 @@
 #define SCY_Sched_Task_H
 
 
-#include "scy/json/iserializable.h"
+#include "scy/sched/sched.h"
 #include "scy/sched/trigger.h"
+#include "scy/json/iserializable.h"
 #include "scy/task.h"
 
 
@@ -22,12 +23,12 @@ namespace scy {
 namespace sched {
 
 
-class /* Sched_API */ Scheduler;
+class Sched_API Scheduler;
 
 
 /// This class extends the Task class to implement
 /// scheduling capabilities.
-class /* Sched_API */ Task : public scy::Task, public json::ISerializable
+class Sched_API Task : public scy::Task, public json::ISerializable
 {
 public:
     Task(const std::string& type = "", const std::string& name = "");

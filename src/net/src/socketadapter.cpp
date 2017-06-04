@@ -23,9 +23,7 @@ namespace net {
 
 
 SocketAdapter::SocketAdapter(SocketAdapter* sender)
-    : priority(0)
-    , _sender(sender)
-    , _dirty(false)
+    : _sender(sender)
 {
     // LTrace("Create")
     assert(sender != this);

@@ -56,39 +56,33 @@ struct ClientState : public State
 };
 
 
-class SocketIO_API Client : public Stateful<ClientState>,
-               public net::SocketAdapter,
-               public PacketSignal
+class SocketIO_API Client :
+    public Stateful<ClientState>,
+    public net::SocketAdapter,
+    public PacketSignal
 {
 public:
     struct Options
     {
-        std::string host;
-        uint16_t port;
+        std::string host = "127.0.0.1";
+        uint16_t port = 4500;
 
         /// Weather or not to reconnect if disconnected from the server.
-        bool reconnection;
+        bool reconnection = true;
 
         /// The number of times to attempt to reconnect if disconnected
         /// from the server. (0 = unlimited)
-        int reconnectAttempts;
-        int reconnectDelay;
+        int reconnectAttempts = 0;
+        int reconnectDelay = 6 * 1000; // 6 secs
 
-        Options()
-        {
-            host = "127.0.0.1";
-            port = 4500;
-
-            reconnection = true;
-            reconnectAttempts = 0;
-            reconnectDelay = 6 * 1000; // 6 secs
+        Options() {
+            // Required on gcc 6
+            // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70528
         }
     };
 
 public:
-    /// Client(const net::Socket::Ptr& socket);
-    Client(const net::Socket::Ptr& socket,
-           const Options& options = Options());
+    Client(const net::Socket::Ptr& socket, const Options& options = Options());
     virtual ~Client();
 
     // virtual void connect(const std::string& host, uint16_t port);

@@ -50,7 +50,7 @@ struct AudioContext
     /// Close the AVCodecContext
     virtual void close();
 
-
+    /// Create the audio resampling context.
     virtual bool recreateResampler();
 
     PacketSignal emitter;
@@ -61,13 +61,12 @@ struct AudioContext
     AVCodecContext* ctx; ///< encoder or decoder context
     AVCodec* codec;      ///< encoder or decoder codec
     AVFrame* frame;      ///< last encoded or decoded frame
-    AudioResampler* resampler;
+    AudioResampler* resampler; ///< audio resampler
     int outputFrameSize; ///< encoder or decoder output frame size
-    int64_t time;         ///< stream time in codec time base
-    int64_t pts;          ///< last packet pts value
-    double seconds;       ///< video time in seconds
-    // FPSCounter fps;         ///< encoder or decoder fps rate
-    std::string error; ///< error message
+    int64_t time;        ///< stream time in codec time base
+    int64_t pts;         ///< last packet pts value
+    double seconds;      ///< video time in seconds
+    std::string error;   ///< error message
 };
 
 

@@ -13,6 +13,7 @@
 #define SCY_Sched_Trigger_H
 
 
+#include "scy/sched/sched.h"
 #include "scy/datetime.h"
 #include "scy/json/iserializable.h"
 

@@ -35,13 +35,13 @@ namespace av {
 
 
 /// Initialize the FFmpeg library.
-void initializeFFmpeg(); 
+void initializeFFmpeg();
 
 /// Uninitializes the FFmpeg library.
 void uninitializeFFmpeg();
 
 /// Get an error string for the given error code.
-std::string averror(const int error); 
+std::string averror(const int error);
 
 void printInputFormats(std::ostream& ost, const char* delim = " ");
 void printOutputFormats(std::ostream& ost, const char* delim = " ");
@@ -53,50 +53,48 @@ void printEncoders(std::ostream& ost, const char* delim = " ");
 //
 /// Utilites for RAII:
 
-/// Deleter adaptor for functions like av_free that take a pointer
-template<typename T, typename R, R(*Fn)(T*)> struct AV_Deleter {
-    inline void operator() (T* p) const
-    {
+/// Deleter adaptor for functions like av_free that take a pointer.
+template<typename T, typename R, R(*Fn)(T*)> struct Deleter {
+    inline void operator() (T* p) const {
         if (p)
             Fn(p);
     }
 };
 
-/// Deleter adaptor for functions like av_freep that take a pointer to a pointer
-template<typename T, typename R, R(*Fn)(T**)> struct AV_Deleterp {
-    inline void operator() (T* p) const
-    {
+/// Deleter adaptor for functions like av_freep that take a pointer to a pointer.
+template<typename T, typename R, R(*Fn)(T**)> struct Deleterp {
+    inline void operator() (T* p) const {
         if (p)
             Fn(&p);
     }
 };
 
 using AVFrameHolder = std::unique_ptr<
-    AVFrame, AV_Deleterp<AVFrame, void, av_frame_free>
+    AVFrame, Deleterp<AVFrame, void, av_frame_free>
 >;
 
 // using AVFifoBufferHolder = std::unique_ptr<
-//     AVFifoBuffer, AV_Deleter<AVFifoBuffer, void, av_fifo_free>
+//     AVFifoBuffer, Deleter<AVFifoBuffer, void, av_fifo_free>
 // >;
 
 using AVFormatContextHolder = std::unique_ptr<
-    AVFormatContext, AV_Deleter<AVFormatContext, void, avformat_free_context>
+    AVFormatContext, Deleter<AVFormatContext, void, avformat_free_context>
 >;
 
 using AVCodecContextHolder = std::unique_ptr<
-    AVCodecContext, AV_Deleter<AVCodecContext, int, avcodec_close>
+    AVCodecContext, Deleter<AVCodecContext, int, avcodec_close>
 >;
 
 using AVDictionaryCleanup = std::unique_ptr<
-    AVDictionary*, AV_Deleter<AVDictionary*, void, av_dict_free>
+    AVDictionary*, Deleter<AVDictionary*, void, av_dict_free>
 >;
 
 // using UFileHolder = std::unique_ptr<
-//     AVIOContext, AV_Deleter<AVIOContext, int, ufile_close>
+//     AVIOContext, Deleter<AVIOContext, int, ufile_close>
 // >;
 
 // template<typename T> using AVMallocHolder = std::unique_ptr<
-//     T, AV_Deleter<void, void, av_free>
+//     T, Deleter<void, void, av_free>
 // >;
 
 #endif

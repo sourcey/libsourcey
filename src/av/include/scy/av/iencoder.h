@@ -62,7 +62,8 @@ struct EncoderOptions
     long duration;     ///< duration of time to record in nanoseconds.
     EncoderOptions(const Format& iformat = Format(),
                    const Format& oformat = Format(),
-                   const std::string& ifile = "", const std::string& ofile = "",
+                   const std::string& ifile = "",
+                   const std::string& ofile = "",
                    long duration = 0)
         : iformat(iformat)
         , oformat(oformat)

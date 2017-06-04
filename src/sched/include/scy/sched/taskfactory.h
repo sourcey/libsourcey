@@ -13,10 +13,11 @@
 #define SCY_Sched_TaskFactory_H
 
 
-#include "scy/logger.h"
-#include "scy/singleton.h"
+#include "scy/sched/sched.h"
 #include "scy/sched/task.h"
 #include "scy/sched/trigger.h"
+#include "scy/logger.h"
+#include "scy/singleton.h"
 
 #include <vector>
 
@@ -25,7 +26,7 @@ namespace scy {
 namespace sched {
 
 
-class /* Sched_API */ Scheduler;
+class Sched_API Scheduler;
 
 
 template <typename T> sched::Task* instantiateTask()
@@ -41,7 +42,7 @@ template <typename T> sched::Trigger* instantiateTrigger()
 /// The TaskFactory can dynamically instantiate
 /// registered sched::Task and sched::Trigger
 /// classes from named strings.
-class /* Sched_API */ TaskFactory
+class Sched_API TaskFactory
 {
 public:
     /// Returns the default TaskFactory singleton.
@@ -55,13 +56,12 @@ public:
 
     typedef std::map<std::string, sched::Task* (*)(/*Scheduler&*/)> TaskMap;
 
-    sched::Task* createTask(const std::string& type /*, Scheduler& scheduler*/)
+    sched::Task* createTask(const std::string& type/*, Scheduler& scheduler*/)
     {
         std::lock_guard<std::mutex> guard(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
-            throw std::runtime_error("Failed to create scheduled task: " +
-                                     type);
+            throw std::runtime_error("Failed to create scheduled task: " + type);
         return it->second();
     }
 
@@ -86,7 +86,8 @@ public:
         return _tasks;
     }
 
-    ///// Schedule Triggers
+    //
+    /// Schedule Triggers
 
     typedef std::map<std::string, sched::Trigger* (*)()> TriggerMap;
 
@@ -95,8 +96,7 @@ public:
         std::lock_guard<std::mutex> guard(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
-            throw std::runtime_error("Failed to create scheduled trigger: " +
-                                     type);
+            throw std::runtime_error("Failed to create scheduled trigger: " + type);
         return it->second();
     }
 

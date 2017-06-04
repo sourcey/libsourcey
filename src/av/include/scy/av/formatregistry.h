@@ -32,8 +32,10 @@ public:
 
     virtual Format& get(const std::string& name);
     virtual Format& getByID(const std::string& id);
-    virtual Format&
-    getOrDefault(const std::string& name); // Returns the default media format.
+
+    /// Returns the default media format.
+    virtual Format& getOrDefault(const std::string& name);
+    
     /// If a default has been specified it will be
     /// returned, other the format with the highest
     /// priority will take precedence.

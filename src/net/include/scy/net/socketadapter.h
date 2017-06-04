@@ -81,7 +81,7 @@ public:
 
     /// Remove the given receiver.
     ///
-    /// By default this function does nothing unless the given receiver 
+    /// By default this function does nothing unless the given receiver
     /// matches the current receiver.
     virtual void removeReceiver(SocketAdapter* adapter);
 
@@ -99,7 +99,7 @@ public:
     virtual void onSocketClose(Socket& socket);
 
     /// The priority of this adapter for STL sort operations.
-    int priority;
+    int priority = 0;
 
 protected:
     virtual void cleanupReceivers();
@@ -112,7 +112,7 @@ protected:
 
     SocketAdapter* _sender;
     std::vector<Ref*> _receivers;
-    bool _dirty;
+    bool _dirty = false;
 };
 
 
