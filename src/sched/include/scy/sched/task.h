@@ -13,8 +13,9 @@
 #define SCY_Sched_Task_H
 
 
-#include "scy/json/iserializable.h"
+#include "scy/sched/sched.h"
 #include "scy/sched/trigger.h"
+#include "scy/json/iserializable.h"
 #include "scy/task.h"
 
 

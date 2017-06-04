@@ -13,10 +13,11 @@
 #define SCY_Sched_TaskFactory_H
 
 
-#include "scy/logger.h"
-#include "scy/singleton.h"
+#include "scy/sched/sched.h"
 #include "scy/sched/task.h"
 #include "scy/sched/trigger.h"
+#include "scy/logger.h"
+#include "scy/singleton.h"
 
 #include <vector>
 
