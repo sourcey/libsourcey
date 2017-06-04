@@ -57,17 +57,17 @@ public:
     virtual bool encodeVideo(AVFrame* frame);
 
     /// Encode a single video frame.
-    /// If the frame time is specified it should be the microseconds  
-    /// offset since the start of the input stream. If no time is specified 
+    /// If the frame time is specified it should be the microseconds
+    /// offset since the start of the input stream. If no time is specified
     /// a realtime time value will be assigned to the frame.
-    virtual bool encodeVideo(uint8_t* buffer, int bufferSize, int width, int height, 
+    virtual bool encodeVideo(uint8_t* buffer, int bufferSize, int width, int height,
                              int64_t time = AV_NOPTS_VALUE);
     virtual bool encodeVideo(uint8_t* data[4], int linesize[4], int width, int height,
                              int64_t time = AV_NOPTS_VALUE);
 
     virtual void createAudio();
-    virtual void freeAudio(); 
-                              
+    virtual void freeAudio();
+
     /// Encode a single audio frame.
     // virtual bool encodeAudio(AVFrame* frame);
     virtual bool encodeAudio(uint8_t* buffer, int numSamples,

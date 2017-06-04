@@ -22,7 +22,7 @@ namespace scy {
 namespace smpl {
 
 
-class Presence : public Message
+class Symple_API Presence : public Message
 {
 public:
     Presence();

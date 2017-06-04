@@ -24,13 +24,14 @@ namespace smpl {
 /// The Address structure is an endpoint identifier for a
 /// peer on the network.
 /// The format is like so: user|id
-struct Address
+struct Symple_API Address
 {
 public:
     Address();
     Address(const std::string& addr);
     Address(const std::string& user,
-            const std::string& id); // const std::string& group,
+            const std::string& id);
+            // const std::string& group,
     virtual ~Address();
 
     bool parse(const std::string& addr);

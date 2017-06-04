@@ -22,7 +22,7 @@ namespace scy {
 namespace smpl {
 
 
-class Command : public Message
+class Symple_API Command : public Message
 {
 public:
     Command();

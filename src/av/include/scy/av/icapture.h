@@ -31,10 +31,10 @@ public:
     virtual ~ICapture(){};
 
     virtual void start() = 0;
-    virtual void
-    stop() = 0; /// Sets the input format for encoding with this capture device.
-    virtual void getEncoderFormat(Format& iformat) = 0;
+    virtual void stop() = 0;
 
+    /// Sets the input format for encoding with this capture device.
+    virtual void getEncoderFormat(Format& iformat) = 0;
 
     virtual void onStreamStateChange(const PacketStreamState& state)
     {

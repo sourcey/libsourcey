@@ -21,7 +21,7 @@ namespace scy {
 namespace smpl {
 
 
-class Event : public Message
+class Symple_API Event : public Message
 {
 public:
     Event();

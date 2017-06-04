@@ -21,12 +21,12 @@ namespace scy {
 namespace smpl {
 
 
-class /* SCY_EXTERN */ Form;
+class Symple_API Form;
 
 
 /// Base implementation for form pages, sections and fields.
-class /* SCY_EXTERN */ FormField;
-class /* SCY_EXTERN */ FormElement
+class Symple_API FormField;
+class Symple_API FormElement
 {
 public:
     FormElement();
@@ -106,7 +106,7 @@ protected:
 };
 
 
-class /* SCY_EXTERN */ Form : public FormElement
+class Symple_API Form : public FormElement
 {
 public:
     Form();
@@ -137,7 +137,7 @@ public:
 };
 
 
-class /* SCY_EXTERN */ FormField : public FormElement
+class Symple_API FormField : public FormElement
 {
 public:
     FormField();

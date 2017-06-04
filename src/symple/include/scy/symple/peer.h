@@ -25,7 +25,7 @@ namespace smpl {
 /// A Peer object may also contain arbitrary data set by
 /// the client to share with other peers on the network.
 /// @see Address for further methods and basic accessors.
-class Peer : public json::value
+class Symple_API Peer : public json::value
 {
 public:
     Peer();

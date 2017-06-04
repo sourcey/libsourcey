@@ -24,7 +24,7 @@ namespace scy {
 namespace smpl {
 
 
-class Message : public json::value, public IPacket
+class Symple_API Message : public json::value, public IPacket
 {
 public:
     Message();

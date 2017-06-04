@@ -28,7 +28,6 @@ AudioBuffer::AudioBuffer()
     : fifo(nullptr)
 {
     LTrace("Create")
-    assert(!fifo);
 }
 
 
@@ -41,10 +40,11 @@ AudioBuffer::~AudioBuffer()
 void AudioBuffer::alloc(const std::string& sampleFmt, int channels, int numSamples)
 {
     STrace << "Create audio buffer:\n"
-                 << "\n\tNb Channels: " << channels
-                 << "\n\tSample Fmt: " << sampleFmt
-                 << "\n\tNb Samples: " << numSamples << "\n\tfifo: " << fifo
-                 << endl;
+           << "\n\tNb Channels: " << channels
+           << "\n\tSample Fmt: " << sampleFmt
+           << "\n\tNb Samples: " << numSamples
+           << "\n\tfifo: " << fifo
+           << endl;
 
     enum AVSampleFormat format = av_get_sample_fmt(sampleFmt.c_str());
     assert(!fifo);

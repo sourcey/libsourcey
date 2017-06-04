@@ -73,21 +73,17 @@ void AudioContext::open()
 void AudioContext::close()
 {
     if (frame) {
-        // av_free(frame);
         av_frame_free(&frame);
         frame = nullptr;
     }
-
     if (ctx) {
         avcodec_close(ctx);
         ctx = nullptr;
     }
-
     if (stream) {
         // The stream pointer is managed by the AVFormatContext
         stream = nullptr;
     }
-
     if (resampler) {
         delete resampler;
         resampler = nullptr;

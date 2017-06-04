@@ -39,10 +39,9 @@ struct AudioEncoder : public AudioContext
     AudioEncoder(AVFormatContext* format = nullptr);
     virtual ~AudioEncoder();
 
-    virtual void create(); 
-    // virtual void open();
-    virtual void close(); 
-    
+    virtual void create() override;
+    virtual void close() override;
+
     /// Encode interleaved audio samples.
     ///
     /// @param samples    The input samples to encode.

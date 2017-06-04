@@ -39,39 +39,25 @@ typedef TimedManager<std::string, Message> PersistenceT;
 //
 
 
-class /* SCY_EXTERN */ Client : public sockio::Client
+class Symple_API Client : public sockio::Client
 {
 public:
     struct Options
     {
-        std::string host;
-        uint16_t port;
+        std::string host = "127.0.0.1";
+        uint16_t port = 4500;
 
         /// Weather or not to reconnect if disconnected from the server.
-        bool reconnection;
+        bool reconnection = true;
 
         /// The number of times to attempt to reconnect if disconnected
         /// from the server. (0 = unlimited)
-        int reconnectAttempts;
+        int reconnectAttempts = 0;
 
         std::string user;
         std::string name;
         std::string type;
         std::string token;
-
-        Options()
-        {
-            host = "127.0.0.1";
-            port = 4500;
-
-            reconnection = true;
-            reconnectAttempts = 0;
-
-            user = "";
-            name = "";
-            type = "";
-            token = "";
-        }
     };
 
 public:
@@ -160,7 +146,6 @@ public:
     /// can modify the outgoing Peer JSON object.
     Signal<void(Peer&)> CreatePresence;
 
-
 protected:
     /// Called when a new connection is established
     /// to announce and authenticate the peer on the
@@ -201,7 +186,7 @@ Client* createTCPClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
 
-class /* SCY_EXTERN */ TCPClient : public Client
+class Symple_API TCPClient : public Client
 {
 public:
     TCPClient(const Client::Options& options = Client::Options(),
@@ -218,7 +203,7 @@ Client* createSSLClient(const Client::Options& options = Client::Options(),
                         uv::Loop* loop = uv::defaultLoop());
 
 
-class /* SCY_EXTERN */ SSLClient : public Client
+class Symple_API SSLClient : public Client
 {
 public:
     SSLClient(const Client::Options& options = Client::Options(),

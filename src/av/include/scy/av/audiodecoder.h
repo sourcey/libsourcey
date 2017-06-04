@@ -30,8 +30,8 @@ struct AudioDecoder : public AudioContext
     AudioDecoder(AVStream* stream);
     virtual ~AudioDecoder();
 
-    virtual void create();
-    virtual void close();
+    virtual void create() override;
+    virtual void close() override;
 
     /// Decodes a the given input packet.
     /// Returns true an output packet was created, false otherwise.

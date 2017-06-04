@@ -2,7 +2,6 @@
 
 Reinstate other WebRTC smaples
 Cleanup av tests
-Resampling from fltp 22500 to other
 Add override tags to virtual methods
 Copy samples data to install folder
 Add updated Symple JS from npm code to samples
