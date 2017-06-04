@@ -1,10 +1,8 @@
 # TODO
 
-Reinstate other WebRTC smaples
-Cleanup av tests
+Archo tests
 Add override tags to virtual methods
 Copy samples data to install folder
-Add updated Symple JS from npm code to samples
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Fix deprecated ICE code
 

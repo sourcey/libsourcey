@@ -1,9 +1,6 @@
 ########################################################################
 # CMake module for finding WEBRTC
 #
-# For compatability WebRTC must be build without jsoncpp, and must not define
-# _GLIBCXX_DEBUG=1 or -fno-rtti
-#
 # The best way to build WebRTC is with the forked `webrtcbuilds` project here:
 # https://github.com/sourcey/webrtcbuilds
 #
@@ -63,12 +60,11 @@ if(WEBRTC_INCLUDE_DIR)
       ${WEBRTC_ROOT_DIR}/out/Release)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
-  # find_library_extended(WEBRTC
-  #   NAMES webrtc webrtc_full libwebrtc_full
-  #   PATHS_DEBUG ${debug_dir}
-  #   PATHS_RELEASE ${release_dir}
-  # )
-  # message(FATAL_ERROR "DONEa: ${WEBRTC_LIBRARIES}")
+  find_library_extended(WEBRTC
+    NAMES webrtc webrtc_full libwebrtc_full
+    PATHS_DEBUG ${debug_dir}
+    PATHS_RELEASE ${release_dir}
+  )
 
   # # Otherwise generate a library from available .o objects
   # if(NOT WEBRTC_LIBRARY)
@@ -168,8 +164,8 @@ if(WEBRTC_INCLUDE_DIR)
     list(APPEND WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIR} ${WEBRTC_INCLUDE_DIR}/third_party/boringssl/src/include)
   endif()
 
-  # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  # select_library_configurations(WEBRTC)
+  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+  select_library_configurations(WEBRTC)
   # message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
 endif()
 
@@ -177,18 +173,11 @@ endif()
 # Display status
 # ----------------------------------------------------------------------
 include(FindPackageHandleStandardArgs)
-if(WEBRTC_LIBRARY)
-  find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR)
-else()
-  find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
-endif()
+find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
 
 # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
 # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
 # Setting PARENT_SCOPE fixes this solves theis issue for now.
-# set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} PARENT_SCOPE)
-# set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
-# set(WEBRTC_FOUND ${WEBRTC_FOUND} PARENT_SCOPE)
 set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} CACHE INTERNAL "")
 set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} CACHE INTERNAL "")
 set(WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIRS} CACHE INTERNAL "")
