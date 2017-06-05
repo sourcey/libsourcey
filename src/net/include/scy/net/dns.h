@@ -31,7 +31,7 @@ inline auto resolve(const std::string& host, int port,
                     std::function<void(int,const net::Address&)> callback,
                     uv::Loop* loop = uv::defaultLoop())
 {
-    return uv::createRequest<uv::GetAddrInfoReq>([&](const uv::GetAddrInfoEvent& event) {
+    return uv::createRequest<uv::GetAddrInfoReq>([=](const uv::GetAddrInfoEvent& event) {
         if (event.status) {
             LWarn("Cannot resolve DNS for ", host, ": ", uv_strerror(event.status))
             callback(event.status, net::Address{});
