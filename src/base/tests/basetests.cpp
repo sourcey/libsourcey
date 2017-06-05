@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
+    // Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
     test::init();
 
     // =========================================================================
@@ -358,9 +358,14 @@ int main(int argc, char** argv)
         expect(fs::exists(dir));
         expect(fs::exists(dir + "/"));
         expect(fs::exists(dir + "\\"));
-        expect(fs::dirname(dir) == dir);
-        // expect(fs::dirname(dir + "/") == dir);
-        // expect(fs::dirname(dir + "\\") == dir);
+        expect(fs::dirname("file.a") == ".");
+        expect(fs::dirname("/some/file.a") == "/some");
+        expect(fs::dirname("/some/dir") == "/some");
+        expect(fs::dirname("/some/dir/") == "/some/dir");
+
+        std::string test(fs::dirname(dir));
+        fs::addnode(test, "tests");
+        expect(test == dir);
     });
 
     // =========================================================================

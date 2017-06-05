@@ -92,6 +92,7 @@ void testCipher(const std::string algorithm, int iterations)
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
+    test::init();
     crypto::initializeEngine();
 
     // =========================================================================

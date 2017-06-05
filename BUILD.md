@@ -63,7 +63,7 @@ cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_MODULE_turn=ON -DBUILD_MODULE_util=ON \
          -DBUILD_MODULE_webrtc=ON
 
-## Minimum build (uv, base)
+## Minimum build (base)
 cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_MODULES=OFF \
          -DBUILD_MODULE_base=ON
 

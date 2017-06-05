@@ -51,11 +51,9 @@ std::string filename(const std::string& path)
 
 std::string dirname(const std::string& path)
 {
-    size_t dirp = path.find_last_of(fs::sepPattern);
+    size_t dirp = path.find_last_of(sepPattern);
     if (dirp == std::string::npos)
-        return "";
-    if (path.find(".", dirp) == std::string::npos)
-        return path;
+        return ".";
     return path.substr(0, dirp);
 }
 
