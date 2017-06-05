@@ -174,8 +174,8 @@ int main(int argc, char** argv)
             // expect(success);
             bool success = false;
             net::dns::resolve("hostthatdoesntexist.what", 80, [&](int err, const net::Address& addr) {
-                expect(err == 0);
-                success = err == 0;
+                expect(err != 0);
+                success = err != 0;
             });
             uv::runLoop();
             expect(success);

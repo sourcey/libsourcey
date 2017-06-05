@@ -29,6 +29,7 @@ namespace scy {
 template <typename RT, typename... Args>
 struct AbstractDelegate
 {
+    virtual ~AbstractDelegate() {}
     virtual RT operator()(Args... args) const = 0;
     virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const = 0;
 };

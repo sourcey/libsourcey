@@ -341,6 +341,12 @@ template <typename RT, typename... Args> struct Slot
         flag.test_and_set();
     }
 
+    ~Slot()
+    {
+        if (delegate)
+            delete delegate;
+    }
+
     void kill()
     {
         flag.clear();
