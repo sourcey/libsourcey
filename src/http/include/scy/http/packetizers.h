@@ -96,7 +96,7 @@ public:
         }
     }
 
-    virtual void process(IPacket& packet)
+    virtual void process(IPacket& packet) override
     {
         LTrace("Processing:", packet.size());
 

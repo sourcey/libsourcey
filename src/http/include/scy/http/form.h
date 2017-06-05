@@ -38,7 +38,7 @@ class HTTP_API FormPart;
 /// while uploading big files. Class members are not synchronized hence
 /// they should not be accessed while the form is sending, not that there
 /// would be any reason to do so.
-class HTTP_API FormWriter : 
+class HTTP_API FormWriter :
     public NVCollection,
     public PacketSource,
     public basic::Startable
@@ -137,8 +137,8 @@ public:
     /// The outgoing packet emitter.
     PacketSignal emitter;
 
-    static const char* ENCODING_URL; ///< "application/x-www-form-urlencoded"
-    static const char* ENCODING_MULTIPART_FORM; ///< "multipart/form-data"
+    static const char* ENCODING_URL;               ///< "application/x-www-form-urlencoded"
+    static const char* ENCODING_MULTIPART_FORM;    ///< "multipart/form-data"
     static const char* ENCODING_MULTIPART_RELATED; ///< "multipart/related" http://tools.ietf.org/html/rfc2387
 
 protected:

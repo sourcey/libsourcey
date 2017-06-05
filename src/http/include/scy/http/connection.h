@@ -43,7 +43,7 @@ public:
     virtual void onClose() = 0;
 
     /// Send raw data to the peer.
-    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override;
 
     /// Send the outdoing HTTP header.
     virtual ssize_t sendHeader();
@@ -93,10 +93,10 @@ protected:
     virtual void setError(const scy::Error& err);
 
     /// net::SocketAdapter interface
-    virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketError(net::Socket& socket, const scy::Error& error);
-    virtual void onSocketClose(net::Socket& socket);
+    virtual void onSocketConnect(net::Socket& socket) override;
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress) override;
+    virtual void onSocketError(net::Socket& socket, const scy::Error& error) override;
+    virtual void onSocketClose(net::Socket& socket) override;
 
 protected:
     net::TCPSocket::Ptr _socket;
@@ -128,7 +128,7 @@ public:
 
     /// Remove the given receiver.
     ///
-    /// By default this function does nothing unless the given receiver 
+    /// By default this function does nothing unless the given receiver
     /// matches the current receiver.
     virtual void removeReceiver(SocketAdapter* adapter);
 

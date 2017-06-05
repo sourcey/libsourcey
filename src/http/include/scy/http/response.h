@@ -81,8 +81,6 @@ enum class StatusCode
 class HTTP_API Response : public http::Message
 {
 public:
-    /// typedef std::shared_ptr<Response> Ptr;
-
     /// Creates the Response with OK status.
     Response();
 
@@ -90,8 +88,7 @@ public:
     Response(StatusCode status, const std::string& reason);
 
     /// Creates the Response with the given version, status and reason phrase.
-    Response(const std::string& version, StatusCode status,
-             const std::string& reason);
+    Response(const std::string& version, StatusCode status, const std::string& reason);
 
     /// Creates the Response with the given status
     /// an an appropriate reason phrase.
@@ -137,10 +134,10 @@ public:
     void getCookies(std::vector<Cookie>& cookies) const;
 
     /// Writes the HTTP response headers to the given output stream.
-    void write(std::ostream& ostr) const;
+    void write(std::ostream& ostr) const override;
 
     /// Writes the HTTP response headers to the given output string.
-    void write(std::string& str) const;
+    void write(std::string& str) const override;
 
     /// Returns true if the HTTP response code was successful (>= 400).
     virtual bool success() const;
@@ -152,9 +149,6 @@ public:
     }
 
 private:
-    Response(const Response&);
-    Response& operator=(const Response&);
-
     StatusCode _status;
     std::string _reason;
 };

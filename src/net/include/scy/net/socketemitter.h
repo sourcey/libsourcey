@@ -56,10 +56,10 @@ public:
     Signal<void(Socket&)> Close;
 
     /// Adds an input SocketAdapter for receiving socket signals.
-    virtual void addReceiver(SocketAdapter* adapter);
+    virtual void addReceiver(SocketAdapter* adapter) override;
 
     /// Removes an input SocketAdapter.
-    virtual void removeReceiver(SocketAdapter* adapter);
+    virtual void removeReceiver(SocketAdapter* adapter) override;
 
     /// Swap the underlying socket pointer.
     virtual void swap(const Socket::Ptr& socket);

@@ -91,9 +91,11 @@ protected:
 
 
 #if 0
-/// This class is an invisible wrapper around a TStartable instance,
-/// which provides asynchronous access to the TStartable start() and
-/// stop() methods. TStartable is an instance of basic::Startable.
+/// This class is an invisible wrapper around a Startable instance,
+/// which provides asynchronous access to the Startable start() and
+/// stop() methods.
+///
+/// TStartable is an instance of basic::Startable.
 /// @deprecated
 template <class TStartable>
 class Base_API AsyncStartable: public TStartable

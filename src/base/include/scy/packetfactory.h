@@ -57,7 +57,7 @@ struct PacketCreationStrategy : public IPacketCreationStrategy
     {
     }
 
-    virtual IPacket* create(const ConstBuffer& buffer, size_t& nread) const
+    virtual IPacket* create(const ConstBuffer& buffer, size_t& nread) const override
     {
         auto packet = new PacketT;
         if ((nread = packet->read(buffer)) > 0)
@@ -66,9 +66,9 @@ struct PacketCreationStrategy : public IPacketCreationStrategy
         return nullptr;
     }
 
-    virtual int priority() const 
-    { 
-        return _priority; 
+    virtual int priority() const override
+    {
+        return _priority;
     }
 
 protected:
@@ -84,29 +84,29 @@ protected:
 class /* Base_API */ PacketFactory
 {
 public:
-    PacketFactory() 
+    PacketFactory()
     {
     }
 
-    virtual ~PacketFactory() 
-    { 
+    virtual ~PacketFactory()
+    {
         util::clearVector(_types);
     }
 
-    template <class PacketT> 
+    template <class PacketT>
     void registerPacketType(int priority)
     {
         unregisterPacketType<PacketT>(); // ensure unique values
-       
+
         _types.push_back(new PacketCreationStrategy<PacketT>(priority));
         sort(_types.begin(), _types.end(),
              IPacketCreationStrategy::compareProiroty);
     }
 
-    template <class PacketT> 
+    template <class PacketT>
     void unregisterPacketType()
     {
-       
+
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
                 delete *it;
@@ -116,20 +116,20 @@ public:
         }
     }
 
-    template <class StrategyT> 
+    template <class StrategyT>
     void registerStrategy(int priority)
     {
         unregisterStrategy<StrategyT>(); // ensure unique values
-       
+
         _types.push_back(new StrategyT(priority));
         std::sort(_types.begin(), _types.end(),
                   IPacketCreationStrategy::compareProiroty);
     }
 
-    template <class StrategyT> 
+    template <class StrategyT>
     void unregisterStrategy()
     {
-       
+
         for (auto it = _types.begin(); it != _types.end(); ++it) {
             if (dynamic_cast<StrategyT*>(*it) != 0) {
                 delete *it;
@@ -149,10 +149,10 @@ public:
         return _types;
     }
 
-    /// returning false will stop packet propagation
-    virtual bool onPacketCreated(IPacket*) 
-    { 
-        return true; 
+    virtual bool onPacketCreated(IPacket*)
+    {
+        // returning false will stop packet propagation
+        return true;
     }
 
     virtual IPacket* createPacket(const ConstBuffer& buffer, size_t& nread)

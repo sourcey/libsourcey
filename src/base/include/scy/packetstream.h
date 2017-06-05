@@ -97,7 +97,7 @@ public:
 
     /// This method ensures compatibility with the given
     /// packet type. Return false to reject the packet.
-    virtual bool accepts(IPacket&) { return true; };
+    virtual bool accepts(IPacket*) { return true; };
 
     /// Stream operator alias for process()
     virtual void operator<<(IPacket& packet) { process(packet); };
@@ -477,8 +477,7 @@ protected:
     void synchronizeStates();
 
     /// Override the Stateful::onStateChange method
-    virtual void onStateChange(PacketStreamState& state,
-                               const PacketStreamState& oldState);
+    virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState) override;
 
     /// Returns true if the given state ID is queued.
     // bool hasQueuedState(PacketStreamState::ID state) const;
@@ -504,15 +503,6 @@ protected:
 
 typedef std::vector<PacketStream*> PacketStreamVec;
 typedef std::vector<PacketStream::Ptr> PacketStreamPtrVec;
-
-
-//
-// Helpers Functions
-//
-
-
-/// Block the calling thread until the given state is synchronized.
-// bool waitForStateSync(PacketStream* stream, PacketStreamState::ID state);
 
 
 } // namespace scy

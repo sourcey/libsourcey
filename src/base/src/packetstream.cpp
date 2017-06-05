@@ -314,7 +314,7 @@ void PacketStream::process(IPacket& packet)
                     // STrace << "Starting process chain: "
                     //     << firstProc << ": " << packet.className() << endl;
                     // assert(stateEquals(PacketStreamState::Active));
-                    if (firstProc->accepts(packet))
+                    if (firstProc->accepts(&packet))
                         firstProc->process(packet);
                     else
                         firstProc->emit(packet);

@@ -29,11 +29,11 @@ struct SocketIO_API Transaction : public PacketTransaction<sockio::Packet>
     Transaction(sockio::Client& client, long timeout = 10000);
     Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
 
-    virtual bool send();
-    virtual bool checkResponse(const sockio::Packet& packet);
+    virtual bool send() override;
+    virtual bool checkResponse(const sockio::Packet& packet) override;
 
     virtual void onPotentialResponse(sockio::Packet& packet);
-    virtual void onResponse();
+    virtual void onResponse() override;
 
     virtual const char* className() const { return "SocketIO::Transaction"; }
 

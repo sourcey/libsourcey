@@ -143,7 +143,7 @@ protected:
     }
 
     /// Override to handle post state change logic.
-    virtual void onStateChange(TransactionState& state, const TransactionState&)
+    virtual void onStateChange(TransactionState& state, const TransactionState&) override
     {
         LTrace("On state change:", state.toString());
 

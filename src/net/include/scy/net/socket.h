@@ -33,7 +33,8 @@ namespace net {
 template <class SocketT>
 inline std::shared_ptr<SocketT> makeSocket(uv::Loop* loop = uv::defaultLoop())
 {
-    return std::make_shared<SocketT>(loop); // std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
+    // std::shared_ptr<SocketT>(new SocketT(loop), deleter::Deferred<SocketT>());
+    return std::make_shared<SocketT>(loop);
 }
 
 

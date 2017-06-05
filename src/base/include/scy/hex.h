@@ -7,9 +7,6 @@
 //
 /// @addtogroup base
 /// @{
-// This file uses the public domain libb64 library:
-// http://libb64.sourceforge.net/
-//
 
 
 #ifndef SCY_Hex_H
@@ -43,7 +40,7 @@ struct Encoder : public basic::Encoder
     {
     }
 
-    virtual ssize_t encode(const char* inbuf, size_t nread, char* outbuf)
+    virtual ssize_t encode(const char* inbuf, size_t nread, char* outbuf) override
     {
         // static const int eof = std::char_traits<char>::eof();
         static const char digits[] = "0123456789abcdef0123456789ABCDEF";
@@ -55,7 +52,7 @@ struct Encoder : public basic::Encoder
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + ((c >> 4) & 0xF)], 1);
             std::memcpy(outbuf + nwrite++, &digits[_uppercase + (c & 0xF)], 1);
             if (_lineLength > 0 &&
-                (_linePos += 2) >= _lineLength) { //++_linePos//++_linePos;
+                (_linePos += 2) >= _lineLength) { //++_linePos;
                 _linePos = 0;
                 std::memcpy(outbuf + nwrite++, "\n", 1);
             }
@@ -64,7 +61,7 @@ struct Encoder : public basic::Encoder
         return nwrite;
     }
 
-    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
+    virtual ssize_t finalize(char* /* outbuf */) override  { return 0; }
 
     void setUppercase(bool flag) { _uppercase = flag ? 16 : 0; }
 
@@ -107,8 +104,7 @@ struct Decoder : public basic::Decoder
     }
     virtual ~Decoder() {}
 
-    virtual ssize_t decode(const char* inbuf, size_t nread,
-                               char* outbuf)
+    virtual ssize_t decode(const char* inbuf, size_t nread, char* outbuf) override
     {
         int n;
         char c;
@@ -133,7 +129,7 @@ struct Decoder : public basic::Decoder
         return nwrite;
     }
 
-    virtual ssize_t finalize(char* /* outbuf */) { return 0; }
+    virtual ssize_t finalize(char* /* outbuf */) override { return 0; }
 
     bool readnext(const char* inbuf, size_t nread, size_t& rpos,
                   char& c)

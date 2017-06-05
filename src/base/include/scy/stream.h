@@ -48,7 +48,7 @@ public:
     /// This will close the active socket/pipe and destroy the handle.
     ///
     /// If the stream is already closed this call will have no side-effects.
-    virtual void close()
+    virtual void close() override
     {
         // LTrace("Close: ", ptr())
         if (_started)
@@ -105,12 +105,6 @@ public:
         return Handle::invoke(&uv_write2, new uv_write_t, stream(), &buf, 1, send, [](uv_write_t* req, int) {
             delete req;
         });
-    }
-
-    /// Return true if the native stream handle is closed.
-    virtual bool closed() const
-    {
-        return Handle::closed();
     }
 
     /// Return the uv_stream_t pointer.

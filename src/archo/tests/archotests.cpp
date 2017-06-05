@@ -97,29 +97,6 @@ std::string testDataDir(const std::string& file)
 }
 
 
-
-static const char* separatorWin = "\\";
-static const char* separatorUnix = "/";
-#ifdef SCY_WIN
-const char delimiter = '\\';
-const char* separator = separatorWin;
-static const char* sepPattern = "/\\";
-#else
-const char delimiter = '/';
-const char* separator = separatorUnix;
-static const char* sepPattern = "/";
-#endif
-
-
-std::string dirname(const std::string& path)
-{
-    size_t dirp = path.find_last_of(sepPattern);
-    if (dirp == std::string::npos)
-        return ".";
-    return path.substr(0, dirp);
-}
-
-
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new ConsoleChannel("debug", Level::Trace));

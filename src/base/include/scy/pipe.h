@@ -15,7 +15,6 @@
 
 #include "scy/base.h"
 #include "scy/stream.h"
-// #include "scy/stream.h"
 
 
 namespace scy {
@@ -30,8 +29,8 @@ public:
 
     virtual void init(bool ipc = false);
 
-    virtual bool readStart();
-    //virtual bool readStop();
+    virtual bool readStart() override;
+    //virtual bool readStop() override;
 };
 
 

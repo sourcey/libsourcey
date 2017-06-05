@@ -20,9 +20,9 @@ class RelayedStreamingAllocation : public turn::TCPClientObserver
 {
 public:
     turn::TCPClient client;
-    std::string peerIP;
     StreamManager streams;
     StreamingOptions options;
+    std::string peerIP;
     int frameNumber;
     bool connected;
     bool deleted;
@@ -59,7 +59,7 @@ public:
             client.addPermission("127.0.0.1");   // for proxy
             client.addPermission("192.168.1.1"); // for proxy
             client.initiate();
-        } 
+        }
         catch (std::exception& exc) {
             SError << "Error: " << exc.what() << std::endl;
             assert(0);
@@ -74,8 +74,8 @@ public:
             return;
         }
 
-        client.shutdown(); 
-        
+        client.shutdown();
+
         // Free all managed packet streams
         streams.closeAll();
 
@@ -102,10 +102,10 @@ protected:
             case turn::ClientState::Failed:
                 // assert(0 && "Allocation failed");
                 SWarn << "Relay connection lost" << std::endl;
-                // AllocationFailed.emit(/*this, */this->client);
+                // AllocationFailed.emit(this->client);
                 // dispose();
                 break;
-            // case turn::ClientState::Terminated:        
+            // case turn::ClientState::Terminated:
             //    break;
         }
     }
@@ -159,7 +159,7 @@ protected:
             // this->streams.free(peerAddress.toString());
             PacketStream* stream = streams.remove(peerAddress.toString());
             if (stream) {
-                stream->emitter -= packetSlot(reinterpret_cast<net::SocketAdapter*>(socket.get()), 
+                stream->emitter -= packetSlot(reinterpret_cast<net::SocketAdapter*>(socket.get()),
                                               &net::SocketAdapter::sendPacket);
                 //stream->emitter -= packetSlot(static_cast<net::SocketAdapter*>(
                 //                                  const_cast<net::TCPSocket*>(socket.get())),
@@ -214,10 +214,10 @@ public:
     void onRequest(http::Request& request, http::Response& response)
     {
         SDebug << "Running: "
-                     << "\n\tOutput Format: " << options.oformat.name
-                     << "\n\tOutput Encoding: " << options.encoding
-                     << "\n\tOutput Packetizer: " << options.framing
-                     << std::endl;
+               << "\n\tOutput Format: " << options.oformat.name
+               << "\n\tOutput Encoding: " << options.encoding
+               << "\n\tOutput Packetizer: " << options.framing
+               << std::endl;
 
         turn::Client::Options co;
         co.serverAddr = net::Address(kRelayServerIP, 3478);
@@ -247,23 +247,21 @@ public:
         connection().close();
     }
 
-    /*
-    void onAllocationFailed(void* sender, turn::Client&)
-    {
-        allocation->AllocationFailed -= sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
+    // void onAllocationFailed(void* sender, turn::Client&)
+    // {
+    //     allocation->AllocationFailed -= sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
+    //
+    //     SDebug << "Allocation Failed" << std::endl;
+    //
+    //     // Send the relay address response to the initiator
+    //     //connection().socket()->send(address.c_str(), address.length());
+    //     //connection().response().set("Access-Control-Allow-Origin", "*");
+    //
+    //     connection().close();
+    // }
 
-        SDebug << "Allocation Failed" << std::endl;
-        
-        // Send the relay address response to the initiator
-        //connection().socket()->send(address.c_str(), address.length());
-        //connection().response().set("Access-Control-Allow-Origin", "*");
-
-        connection().close();
-    }
-    */
-
-    RelayedStreamingAllocation* allocation;
     StreamingOptions options;
+    RelayedStreamingAllocation* allocation;
     av::FPSCounter fpsCounter;
 };
 

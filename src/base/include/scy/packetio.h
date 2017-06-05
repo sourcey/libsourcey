@@ -48,7 +48,7 @@ public:
         }
     }
 
-    void start()
+    void start() override
     {
         _runner.start([](void* arg) {
             auto self = reinterpret_cast<ThreadedStreamReader*>(arg);
@@ -62,9 +62,8 @@ public:
         }, this);
     }
 
-    void stop()
+    void stop() override
     {
-        // _runner.close();
         _runner.cancel();
     }
 
@@ -113,7 +112,7 @@ public:
         }
     }
 
-    virtual void process(IPacket& packet)
+    virtual void process(IPacket& packet) override
     {
         Buffer buffer;
         packet.write(buffer);
@@ -133,7 +132,7 @@ public:
         return *stream;
     }
 
-    void onStreamStateChange(const PacketStreamState& state)
+    void onStreamStateChange(const PacketStreamState& state) override
     {
         //STrace << "Stream state: " << state << std::endl;
 
@@ -153,7 +152,7 @@ public:
         }
     }
 
-    std::ostream& stream() 
+    std::ostream& stream()
     {
         if (!_ostream)
             throw std::runtime_error("Cannot cast internal stream type.");

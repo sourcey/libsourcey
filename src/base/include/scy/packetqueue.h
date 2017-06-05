@@ -48,8 +48,8 @@ public:
 
     virtual ~SyncPacketQueue() {}
 
-    virtual void process(IPacket& packet);
-    virtual bool accepts(IPacket* packet);
+    virtual void process(IPacket& packet) override;
+    virtual bool accepts(IPacket* packet) override;
 
     PacketSignal emitter;
 
@@ -61,7 +61,7 @@ protected:
 
 
 template <class T>
-inline void  SyncPacketQueue<T>::process(IPacket& packet)
+inline void SyncPacketQueue<T>::process(IPacket& packet)
 {
     if (Queue::cancelled()) {
         SWarn << "Process late packet" << std::endl;
@@ -137,8 +137,8 @@ public:
 
     virtual void close();
 
-    virtual void process(IPacket& packet);
-    virtual bool accepts(IPacket* packet);
+    virtual void process(IPacket& packet) override;
+    virtual bool accepts(IPacket* packet) override;
 
     PacketSignal emitter;
 

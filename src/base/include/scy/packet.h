@@ -143,20 +143,23 @@ public:
     {
     }
 
-    virtual IPacket* clone() const { return new FlagPacket(*this); }
+    virtual IPacket* clone() const override
+    {
+        return new FlagPacket(*this);
+    }
 
     FlagPacket(const FlagPacket& that)
         : IPacket(that)
     {
     }
 
-    virtual ~FlagPacket() {}
+    virtual ~FlagPacket() = default;
 
-    virtual ssize_t read(const ConstBuffer&) { return true; }
+    virtual ssize_t read(const ConstBuffer&) override { return true; }
 
-    virtual void write(Buffer&) const {}
+    virtual void write(Buffer&) const override {}
 
-    virtual const char* className() const { return "FlagPacket"; }
+    virtual const char* className() const override { return "FlagPacket"; }
 };
 
 
@@ -204,13 +207,13 @@ public:
             delete[] _data;
     }
 
-    virtual IPacket* clone() const 
-    { 
-        return new RawPacket(*this); 
+    virtual IPacket* clone() const override
+    {
+        return new RawPacket(*this);
     }
 
-    //virtual void setData(char* data, size_t size)
-    //{
+    // virtual void setData(char* data, size_t size)
+    // {
     //    assert(size > 0);
     //    if (_free) // copy data if reuqested
     //        copyData(data, size);
@@ -218,7 +221,7 @@ public:
     //        _data = data;
     //        _size = size;
     //    }
-    //}
+    // }
 
     virtual void copyData(const void* data, size_t size)
     {
@@ -234,30 +237,30 @@ public:
         }
     }
 
-    virtual ssize_t read(const ConstBuffer& buf)
+    virtual ssize_t read(const ConstBuffer& buf) override
     {
         copyData(bufferCast<const char*>(buf), buf.size());
         return buf.size();
     }
 
-    virtual void write(Buffer& buf) const
+    virtual void write(Buffer& buf) const override
     {
         // buf.insert(a.end(), b.begin(), b.end());
         // buf.append(_data, _size);
         buf.insert(buf.end(), _data, _data + _size);
     }
 
-    virtual char* data() const { return _data; }
+    virtual char* data() const override { return _data; }
 
     // virtual char* cdata() const { return static_cast<char*>(_data); }
 
-    virtual size_t size() const { return _size; }
+    virtual size_t size() const override { return _size; }
 
-    virtual const char* className() const { return "RawPacket"; }
+    virtual const char* className() const override { return "RawPacket"; }
 
-    virtual bool ownsBuffer() const { return _free; }
+    bool ownsBuffer() const { return _free; }
 
-    virtual void assignDataOwnership() { _free = true; }
+    void assignDataOwnership() { _free = true; }
 
 protected:
     char* _data;

@@ -13,10 +13,6 @@
 #define SCY_Symple_Client_H
 
 
-#include "scy/bitwise.h"
-#include "scy/http/websocket.h"
-#include "scy/net/socket.h"
-#include "scy/socketio/client.h"
 #include "scy/symple/symple.h"
 #include "scy/symple/command.h"
 #include "scy/symple/event.h"
@@ -25,6 +21,10 @@
 #include "scy/symple/peer.h"
 #include "scy/symple/presence.h"
 #include "scy/symple/roster.h"
+#include "scy/socketio/client.h"
+#include "scy/bitwise.h"
+#include "scy/http/websocket.h"
+#include "scy/net/socket.h"
 #include "scy/util/timedmanager.h"
 
 
@@ -166,9 +166,9 @@ protected:
     virtual void createPresence(Presence& p);
 
     /// Override PacketSignal::emit
-    virtual void emit(/*void* sender, */ IPacket& packet);
+    virtual void emit(/*void* sender, */ IPacket& packet) override;
 
-    virtual void onOnline();
+    virtual void onOnline() override;
     virtual void onAnnounceState(void* sender, TransactionState& state,
                                  const TransactionState&);
     // virtual void onPacket(sockio::Packet& packet);

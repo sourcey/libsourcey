@@ -48,13 +48,13 @@ public:
     Signal<void(ServerConnection&)> Close; ///< Signals when the connection is closed
 
 protected:
-    virtual void onHeaders();
-    virtual void onPayload(const MutableBuffer& buffer);
-    virtual void onComplete();
-    virtual void onClose();
+    virtual void onHeaders() override;
+    virtual void onPayload(const MutableBuffer& buffer) override;
+    virtual void onComplete() override;
+    virtual void onClose() override;
 
-    http::Message* incomingHeader();
-    http::Message* outgoingHeader();
+    http::Message* incomingHeader() override;
+    http::Message* outgoingHeader() override;
 
 protected:
     Server& _server;
@@ -79,7 +79,7 @@ public:
     {
     }
 
-    virtual ~ServerResponder() {}
+    virtual ~ServerResponder() = default;
 
     virtual void onHeaders(Request& /* request */) {}
     virtual void onPayload(const MutableBuffer& /* body */) {}
@@ -106,9 +106,7 @@ protected:
 
 private:
     ServerResponder(const ServerResponder&) = delete;
-    ServerResponder(ServerResponder&&) = delete;
     ServerResponder& operator=(const ServerResponder&) = delete;
-    ServerResponder& operator=(ServerResponder&&) = delete;
 };
 
 
@@ -121,8 +119,8 @@ private:
 class HTTP_API ServerConnectionFactory
 {
 public:
-    ServerConnectionFactory() {};
-    virtual ~ServerConnectionFactory() {};
+    ServerConnectionFactory() = default;
+    virtual ~ServerConnectionFactory() = default;
 
     /// Factory method for instantiating the ServerConnection
     /// instance using the given Socket.

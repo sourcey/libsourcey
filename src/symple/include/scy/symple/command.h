@@ -35,7 +35,7 @@ public:
     void setNode(const std::string& node);
     void setAction(const std::string& action);
 
-    bool valid() const;
+    bool valid() const override;
 
     std::string param(int n) const;
     std::vector<std::string> params();

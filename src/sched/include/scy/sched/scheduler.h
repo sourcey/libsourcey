@@ -40,8 +40,8 @@ public:
     virtual void cancel(sched::Task* task);
     virtual void clear();
 
-    virtual void serialize(json::value& root);
-    virtual void deserialize(json::value& root);
+    virtual void serialize(json::value& root) override;
+    virtual void deserialize(json::value& root) override;
 
     virtual void print(std::ostream& ost);
 
@@ -54,7 +54,7 @@ public:
     static sched::TaskFactory& factory();
 
 protected:
-    virtual void run();
+    virtual void run() override;
     virtual void update();
 };
 

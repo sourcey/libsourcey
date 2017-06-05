@@ -75,7 +75,7 @@ public:
     Packet& operator=(const Packet& r);
     virtual ~Packet();
 
-    virtual IPacket* clone() const;
+    IPacket* clone() const override;
 
     Frame frame() const;
     Type type() const;
@@ -89,10 +89,10 @@ public:
     void setMessage(const std::string& message);
     void setAck(bool flag);
 
-    ssize_t read(const ConstBuffer& buf);
-    void write(Buffer& buf) const;
+    ssize_t read(const ConstBuffer& buf) override;
+    void write(Buffer& buf) const override;
 
-    virtual size_t size() const;
+    size_t size() const override;
 
     bool valid() const;
 
@@ -101,7 +101,7 @@ public:
     std::string toString() const;
     void print(std::ostream& os) const;
 
-    virtual const char* className() const { return "SocketIO::Packet"; }
+    const char* className() const { return "SocketIO::Packet"; }
 
 protected:
     Frame _frame;

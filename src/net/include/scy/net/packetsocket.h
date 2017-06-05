@@ -42,7 +42,7 @@ public:
 
     virtual ~PacketSocketEmitter();
 
-    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress);
+    virtual void onSocketRecv(Socket& socket, const MutableBuffer& buffer, const Address& peerAddress) override;
 
     virtual void onPacket(IPacket& pkt);
 

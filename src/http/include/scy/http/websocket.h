@@ -200,8 +200,8 @@ public:
     WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode,
                      http::Request& request, http::Response& response);
 
-    virtual ssize_t send(const char* data, size_t len, int flags = 0); // flags = ws::Text || ws::Binary
-    virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override; // flags = ws::Text || ws::Binary
+    virtual ssize_t send(const char* data, size_t len, const net::Address& peerAddr, int flags = 0) override; // flags = ws::Text || ws::Binary
 
     virtual bool shutdown(uint16_t statusCode, const std::string& statusMessage);
 
@@ -225,9 +225,9 @@ public:
     // virtual void verifyServerRequest(http::Request& request);
     // virtual void prepareClientResponse(http::Response& response);
 
-    virtual void onSocketConnect(net::Socket& socket);
-    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress);
-    virtual void onSocketClose(net::Socket& socket);
+    virtual void onSocketConnect(net::Socket& socket) override;
+    virtual void onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, const net::Address& peerAddress) override;
+    virtual void onSocketClose(net::Socket& socket) override;
 
     virtual void onHandshakeComplete();
 

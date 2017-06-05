@@ -76,8 +76,8 @@ struct Trigger : public json::ISerializable
     /// Returns false by default.
     virtual bool expired();
 
-    virtual void serialize(json::value& root);
-    virtual void deserialize(json::value& root);
+    virtual void serialize(json::value& root) override;
+    virtual void deserialize(json::value& root) override;
 
     /// The type of this trigger class.
     std::string type;
@@ -106,13 +106,13 @@ struct OnceOnlyTrigger : public Trigger
 {
     OnceOnlyTrigger();
 
-    virtual void update()
+    virtual void update() override
     {
         // Nothing to do since scheduleAt contains
         // the correct date and we run once only.
     }
 
-    virtual bool expired();
+    virtual bool expired() override;
 };
 
 
@@ -122,11 +122,11 @@ struct IntervalTrigger : public Trigger
 {
     IntervalTrigger();
 
-    virtual void update();
-    virtual bool expired();
+    virtual void update() override;
+    virtual bool expired() override;
 
-    virtual void serialize(json::value& root);
-    virtual void deserialize(json::value& root);
+    virtual void serialize(json::value& root) override;
+    virtual void deserialize(json::value& root) override;
 
     /// This value represents the interval to wait
     /// before running the task.
@@ -145,7 +145,7 @@ struct DailyTrigger : public Trigger
 {
     DailyTrigger();
 
-    virtual void update();
+    virtual void update() override;
 
     /// This value represents the time of day the
     /// task will trigger.

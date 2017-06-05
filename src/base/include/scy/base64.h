@@ -111,12 +111,12 @@ struct Encoder : public basic::Encoder
         delete[] encbuf;
     }
 
-    ssize_t encode(const char* inbuf, size_t nread, char* outbuf)
+    ssize_t encode(const char* inbuf, size_t nread, char* outbuf) override
     {
         return internal::encode_block(inbuf, nread, outbuf, &_state);
     }
 
-    ssize_t finalize(char* outbuf)
+    ssize_t finalize(char* outbuf) override
     {
         return internal::encode_blockend(outbuf, &_state);
     }
@@ -188,7 +188,7 @@ struct Decoder : public basic::Decoder
 
     ssize_t decode(char value_in) { return internal::decode_value(value_in); }
 
-    ssize_t decode(const char* inbuf, size_t nread, char* outbuf)
+    ssize_t decode(const char* inbuf, size_t nread, char* outbuf) override
     {
         return internal::decode_block(inbuf, nread, outbuf, &_state);
     }

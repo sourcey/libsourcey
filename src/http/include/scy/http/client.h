@@ -58,7 +58,7 @@ public:
     /// Calls send() internally.
     ///
     /// Throws an exception if the socket is not already or connected.
-    virtual ssize_t send(const char* data, size_t len, int flags = 0);
+    virtual ssize_t send(const char* data, size_t len, int flags = 0) override;
     // virtual ssize_t send(const std::string& buf, int flags = 0);
     // virtual void sendData(const char* buf, size_t len); //, int flags = 0
     // virtual void sendData(const std::string& buf); //, int flags = 0

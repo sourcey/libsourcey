@@ -32,17 +32,15 @@ class Sched_API Task : public scy::Task, public json::ISerializable
 {
 public:
     Task(const std::string& type = "", const std::string& name = "");
-    Task(Scheduler& scheduler, const std::string& type,
-         const std::string& name = "");
+    Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
 
     // virtual void start();
 
     /// Serializes the task to JSON.
-    virtual void serialize(json::value& root);
+    virtual void serialize(json::value& root) override;
 
     /// Deserializes the task from JSON.
-    virtual void deserialize(json::value& root);
-
+    virtual void deserialize(json::value& root) override;
 
     template <typename T> T* createTrigger()
     {
@@ -50,6 +48,7 @@ public:
         setTrigger(p);
         return p;
     }
+    
     void setTrigger(sched::Trigger* trigger);
 
     /// Returns a reference to the associated

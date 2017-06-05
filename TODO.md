@@ -1,8 +1,7 @@
 # TODO
 
-Archo tests
 Add override tags to virtual methods
-Copy samples data to install folder
+Copy samples data to install folder and add to packages
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Fix deprecated ICE code
 

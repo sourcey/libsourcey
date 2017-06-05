@@ -115,7 +115,7 @@ public:
     virtual ~AsyncLogWriter();
 
     /// Queues the given log message stream.
-    virtual void write(LogStream* stream);
+    virtual void write(LogStream* stream) override;
 
     /// Flushes queued messages.
     void flush();
@@ -372,7 +372,7 @@ public:
                    std::string timeFormat = "%H:%M:%S");
     virtual ~ConsoleChannel() = default;
 
-    virtual void write(const LogStream& stream);
+    virtual void write(const LogStream& stream) override;
 };
 
 
@@ -389,7 +389,7 @@ public:
                 std::string timeFormat = "%H:%M:%S");
     virtual ~FileChannel();
 
-    virtual void write(const LogStream& stream);
+    virtual void write(const LogStream& stream) override;
 
     void setPath(const std::string& path);
     std::string path() const;
@@ -420,7 +420,7 @@ public:
                         std::string timeFormat = "%H:%M:%S");
     virtual ~RotatingFileChannel();
 
-    virtual void write(const LogStream& stream);
+    virtual void write(const LogStream& stream) override;
     virtual void rotate();
 
     std::string dir() const { return _dir; };

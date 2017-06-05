@@ -46,8 +46,6 @@ struct Method
 class HTTP_API Request : public http::Message
 {
 public:
-    // typedef std::shared_ptr<Request> Ptr;
-
     /// Creates a GET / HTTP/1.1 HTTP request.
     Request();
 
@@ -59,8 +57,7 @@ public:
     Request(const std::string& method, const std::string& uri);
 
     /// Creates a HTTP request with the given method, URI and version.
-    Request(const std::string& method, const std::string& uri,
-            const std::string& version);
+    Request(const std::string& method, const std::string& uri, const std::string& version);
 
     /// Destroys the Request.
     virtual ~Request();
@@ -136,10 +133,10 @@ public:
                              const std::string& authInfo);
 
     /// Writes the HTTP request to the given output stream.
-    void write(std::ostream& ostr) const;
+    void write(std::ostream& ostr) const override;
 
     /// Writes the HTTP request to the given output string.
-    void write(std::string& str) const;
+    void write(std::string& str) const override;
 
     friend std::ostream& operator<<(std::ostream& stream, const Request& req)
     {

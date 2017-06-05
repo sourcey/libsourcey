@@ -24,8 +24,8 @@ namespace net {
 /// This class provides request/response functionality for IPacket
 /// types emitted from a Socket.
 template <class PacketT>
-class /* Net_API */ Transaction : public PacketTransaction<PacketT>,
-                                  public PacketSocketEmitter
+class Net_API Transaction : public PacketTransaction<PacketT>,
+                            public PacketSocketEmitter
 {
 public:
 	typedef PacketTransaction<PacketT> BaseT;
@@ -39,7 +39,7 @@ public:
         STrace << "Create" << std::endl;
     }
 
-    virtual bool send()
+    virtual bool send() override
     {
         STrace << "Send" << std::endl;
         if (impl->sendPacket(BaseT::_request, _peerAddress) > 0)
@@ -48,13 +48,13 @@ public:
         return false;
     }
 
-    virtual void cancel()
+    virtual void cancel() override
     {
         STrace << "Cancel" << std::endl;
         BaseT::cancel();
     }
 
-    virtual void dispose()
+    virtual void dispose() override
     {
         STrace << "Dispose" << std::endl;
         BaseT::dispose(); // gc
@@ -66,11 +66,11 @@ public:
     }
 
 protected:
-    virtual ~Transaction() {}
+    virtual ~Transaction() = default;
 
     /// Overrides the PacketSocketEmitter::onPacket
     /// callback for checking potential response candidates.
-    virtual void onPacket(IPacket& packet)
+    virtual void onPacket(IPacket& packet) override
     {
         STrace << "On packet: " << packet.size() << std::endl;
         if (BaseT::handlePotentialResponse(static_cast<PacketT&>(packet))) {
@@ -82,7 +82,7 @@ protected:
     }
 
     /// Called when a successful response match is received.
-    virtual void onResponse()
+    virtual void onResponse() override
     {
         STrace << "On success: " << BaseT::_response.toString() << std::endl;
         PacketSignal::emit(BaseT::_response);
@@ -91,7 +91,7 @@ protected:
     /// Sub classes should derive this method to implement
     /// response checking logic.
     /// The base implementation only performs address matching.
-    virtual bool checkResponse(const PacketT& packet)
+    virtual bool checkResponse(const PacketT& packet) override
     {
         assert(packet.info && "socket must provide packet info");
         if (!packet.info)

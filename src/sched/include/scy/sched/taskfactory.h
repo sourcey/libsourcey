@@ -33,6 +33,7 @@ template <typename T> sched::Task* instantiateTask()
 {
     return new T;
 }
+
 template <typename T> sched::Trigger* instantiateTrigger()
 {
     return new T;
@@ -59,7 +60,7 @@ public:
     sched::Task* createTask(const std::string& type/*, Scheduler& scheduler*/)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        TaskMap::iterator it = _tasks.find(type);
+        auto it = _tasks.find(type);
         if (it == _tasks.end())
             throw std::runtime_error("Failed to create scheduled task: " + type);
         return it->second();
@@ -74,7 +75,7 @@ public:
     void unregisterTask(const std::string& type)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        TaskMap::iterator it = _tasks.find(type);
+        auto it = _tasks.find(type);
         if (it == _tasks.end())
             return;
         _tasks.erase(it);
@@ -94,7 +95,7 @@ public:
     sched::Trigger* createTrigger(const std::string& type)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        TriggerMap::iterator it = _triggers.find(type);
+        auto it = _triggers.find(type);
         if (it == _triggers.end())
             throw std::runtime_error("Failed to create scheduled trigger: " + type);
         return it->second();
@@ -109,7 +110,7 @@ public:
     void unregisterTrigger(const std::string& type)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        TriggerMap::iterator it = _triggers.find(type);
+        auto it = _triggers.find(type);
         if (it == _triggers.end())
             return;
         _triggers.erase(it);
