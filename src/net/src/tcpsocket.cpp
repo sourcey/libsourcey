@@ -122,17 +122,15 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
     else {
         init();
 
-        uv::createRequest<uv::GetAddrInfoReq>([ptr = context()](const uv::GetAddrInfoEvent& event) {
+        net::dns::resolve(host, port, [ptr = context()] (int err, net::Address const& addr) {
             if (!ptr->deleted) {
-                auto handle = reinterpret_cast<TCPSocket *>(ptr->handle);
-                if (event.status) {
-                    LWarn("Cannot resolve DNS : ", uv_strerror(event.status))
-                    handle->setUVError(event.status, "DNS failed to resolve");
-                } else {
-                    handle->connect(net::Address{event.addr->ai_addr, event.addr->ai_addrlen});
-                }
+                auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
+                if (err)
+                    handle->setUVError(err, "DNS failed to resolve");
+                else
+                    handle->connect(addr);
             }
-        }).resolve(host, port, loop());
+        }, loop());
     }
 }
 
