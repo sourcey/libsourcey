@@ -38,7 +38,7 @@ public:
         Answer ///< Operating as answerer
     };
 
-    Peer(PeerManager* manager, 
+    Peer(PeerManager* manager,
          PeerFactoryContext* context,
          const std::string& peerid,
          const std::string& token,
@@ -86,21 +86,21 @@ protected:
     /// inherited from PeerConnectionObserver
     virtual void OnAddStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
     virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream); ///< @deprecated
-    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream); ///< since 7f0676
-    virtual void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream); ///< since 7f0676
-    virtual void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream); ///< since 7f0676
-    virtual void OnIceCandidate(const webrtc::IceCandidateInterface* candidate);
-    virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state);
-    virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
-    virtual void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state);
+    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override; ///< since 7f0676
+    virtual void OnRemoveStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) override; ///< since 7f0676
+    virtual void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> stream) override; ///< since 7f0676
+    virtual void OnIceCandidate(const webrtc::IceCandidateInterface* candidate) override;
+    virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state) override;
+    virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
+    virtual void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state) override;
     virtual void OnRenegotiationNeeded();
 
     /// inherited from CreateSessionDescriptionObserver
-    virtual void OnSuccess(webrtc::SessionDescriptionInterface* desc);
-    virtual void OnFailure(const std::string& error);
+    virtual void OnSuccess(webrtc::SessionDescriptionInterface* desc) override;
+    virtual void OnFailure(const std::string& error) override;
 
-    virtual int AddRef() const { return 1; }
-    virtual int Release() const { return 0; }
+    virtual int AddRef() const override { return 1; }
+    virtual int Release() const override { return 0; }
 
 protected:
     PeerManager* _manager;
@@ -110,7 +110,6 @@ protected:
     Mode _mode;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;
-    //rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
     std::unique_ptr<cricket::BasicPortAllocator> _portAllocator;
@@ -125,12 +124,13 @@ public:
     {
         return new rtc::RefCountedObject<DummySetSessionDescriptionObserver>();
     }
-    virtual void OnSuccess();
-    virtual void OnFailure(const std::string& error);
+
+    virtual void OnSuccess() override;
+    virtual void OnFailure(const std::string& error) override;
 
 protected:
-    DummySetSessionDescriptionObserver() {}
-    ~DummySetSessionDescriptionObserver() {}
+    DummySetSessionDescriptionObserver() = default;
+    ~DummySetSessionDescriptionObserver() = default;
 };
 
 

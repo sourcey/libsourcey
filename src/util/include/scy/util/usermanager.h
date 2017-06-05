@@ -20,9 +20,6 @@
 namespace scy {
 
 
-/// @addtogroup util
-/// @{///
-
 struct IUser
 {
     virtual std::string username() const = 0;
@@ -50,9 +47,9 @@ protected:
 
 typedef std::map<std::string, IUser*> IUserMap;
 
+
 /// @deprecated
-/// This class contains a list of users that have access
-/// on the system.
+/// This class manages a list of users.
 class /* SCY_EXTERN */ UserManager : public LiveCollection<std::string, IUser>
 {
 public:
@@ -60,8 +57,8 @@ public:
     typedef Manager::Map Map;
 
 public:
-    UserManager(){};
-    virtual ~UserManager(){};
+    UserManager() = default;
+    virtual ~UserManager() = default;
 
     virtual bool add(IUser* user)
     {

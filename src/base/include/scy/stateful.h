@@ -37,7 +37,7 @@ public:
     State(ID id = 0);
     State(const State& that);
     State& operator=(const State& that);
-    virtual ~State() {};
+    virtual ~State() = default;
 
     ID id() const;
     void set(ID id);
@@ -67,7 +67,8 @@ protected:
 /// For an example @see PacketStream
 ///
 /// @tparam The derived `State` type.
-template <typename T> class Stateful
+template <typename T>
+class Stateful
 {
 public:
     Stateful() {}

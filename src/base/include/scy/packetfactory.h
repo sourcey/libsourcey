@@ -26,7 +26,7 @@ class /* Base_API */ IPacketCreationStrategy
 {
 public:
     IPacketCreationStrategy() {}
-    virtual ~IPacketCreationStrategy() {};
+    virtual ~IPacketCreationStrategy() = default;
     virtual IPacket* create(const ConstBuffer& buffer, size_t& nread) const = 0;
 
     virtual int priority() const = 0; // 0 - 100

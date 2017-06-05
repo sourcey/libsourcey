@@ -37,7 +37,7 @@ template <typename RT, typename... Args> struct Slot;
 class StopPropagation : public std::exception
 {
 public:
-    virtual ~StopPropagation() throw() {};
+    virtual ~StopPropagation() throw() = default;
 };
 
 

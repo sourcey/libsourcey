@@ -63,9 +63,8 @@ public:
 
     std::string name;        ///< The name of the diagnostic.
     std::string description; ///< The diagnostic description.
-    std::vector<std::string>
-        summary; ///< The diagnostic summary, maybe including
-                 ///< troubleshooting information on failure.
+    std::vector<std::string> summary; ///< The diagnostic summary, maybe including
+                                      ///< troubleshooting information on failure.
 
     virtual void check();
     virtual void reset();
@@ -106,7 +105,7 @@ public:
 
     virtual void run() = 0;
 
-    virtual void check()
+    virtual void check() override
     {
         reset();
         _thread.start(std::bind(&AsyncDiagnostic::run, this));
@@ -148,8 +147,7 @@ public:
 
     NullSignal DiagnosticsComplete;
 
-    virtual void onDiagnosticStateChange(void*, DiagnosticState& state,
-                                         const DiagnosticState&);
+    virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
 };
 
 

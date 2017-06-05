@@ -22,7 +22,8 @@ namespace scy {
 
 /// This is a helper template class for managing
 /// singleton objects allocated on the heap.
-template <class S> class Singleton
+template <class S>
+class Singleton
 {
 public:
     /// Creates the Singleton wrapper.
@@ -31,17 +32,16 @@ public:
     {
     }
 
-    /// Destroys the Singleton wrapper and the
-    /// managed singleton instance it holds.
+    /// Destroys the Singleton wrapper and the managed
+    /// singleton instance it holds.
     ~Singleton()
     {
         if (_ptr)
             delete _ptr;
     }
 
-    /// Returns a pointer to the singleton object
-    /// hold by the Singleton. The first call
-    /// to get on a nullptr singleton will instantiate
+    /// Returns a pointer to the singleton object hold by the Singleton.
+    /// The first call to get on a nullptr singleton will instantiate
     /// the singleton.
     S* get()
     {
@@ -51,8 +51,7 @@ public:
         return _ptr;
     }
 
-    /// Swaps the old pointer with the new one and
-    /// returns the old instance.
+    /// Swaps the old pointer with the new one and returns the old instance.
     S* swap(S* newPtr)
     {
         std::lock_guard<std::mutex> guard(_m);

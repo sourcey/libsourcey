@@ -21,7 +21,6 @@
 namespace scy {
 
 
-/// @addtogroup util
 template <class ItemT> class IRegistry
 {
     template <typename T> ItemT* createT() { return new T(); }
@@ -29,8 +28,8 @@ template <class ItemT> class IRegistry
 public:
     typedef std::map<std::string, ItemT* (*)()> TypeMap;
 
-    IRegistry(){};
-    virtual ~IRegistry(){};
+    IRegistry() = default;
+    virtual ~IRegistry() = default;
 
     virtual ItemT* createInstance(const std::string& s)
     {
@@ -48,7 +47,7 @@ public:
 
     virtual void unregisterType(const std::string& s)
     {
-        TypeMap::iterator it = _types.find(s);
+        auto it = _types.find(s);
         if (it == _types.end())
             return;
         _types.erase(it);

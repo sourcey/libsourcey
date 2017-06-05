@@ -48,8 +48,8 @@ public:
     json::value root;
 
 protected:
-    virtual bool getRaw(const std::string& key, std::string& value) const;
-    virtual void setRaw(const std::string& key, const std::string& value);
+    virtual bool getRaw(const std::string& key, std::string& value) const override;
+    virtual void setRaw(const std::string& key, const std::string& value) override;
 
     bool _loaded;
     std::string _path;

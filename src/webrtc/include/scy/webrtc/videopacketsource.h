@@ -56,15 +56,10 @@ public:
 
 protected:
     cricket::VideoFormat _captureFormat;
-    //bool running_;
-    //int64_t initial_timestamp_;
-    // const bool is_screencast_;
-    //uint32_t _codec;
     webrtc::VideoRotation _rotation;
     int64_t _timestampOffset;
     int64_t _nextTimestamp;
     PacketSignal* _source;
-    //int64_t _fpsInterval;
 };
 
 

@@ -70,7 +70,7 @@ struct VideoPacket : public MediaPacket
     {
     }
 
-    virtual ~VideoPacket() {};
+    virtual ~VideoPacket() = default;
 
     virtual IPacket* clone() const { return new VideoPacket(*this); }
 
@@ -109,7 +109,7 @@ struct AudioPacket : public MediaPacket
     {
     }
 
-    virtual ~AudioPacket() {};
+    virtual ~AudioPacket() = default;
 
     virtual IPacket* clone() const { return new AudioPacket(*this); }
 

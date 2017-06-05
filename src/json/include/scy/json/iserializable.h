@@ -24,7 +24,7 @@ namespace json {
 class ISerializable
 {
 public:
-    virtual ~ISerializable() {};
+    virtual ~ISerializable() = default;
     virtual void serialize(json::value& root) = 0;
     virtual void deserialize(json::value& root) = 0;
 };

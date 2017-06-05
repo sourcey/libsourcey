@@ -40,9 +40,9 @@ public:
     virtual ~RecordingPeer();
 
     /// inherited from PeerObserver
-    virtual void OnAddStream(webrtc::MediaStreamInterface* stream);
-    virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream);
-    virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state);
+    virtual void OnAddStream(webrtc::MediaStreamInterface* stream) override;
+    virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream) override;
+    virtual void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
 
 protected:
     std::unique_ptr<StreamRecorder> _recorder;

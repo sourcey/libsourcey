@@ -101,8 +101,8 @@ template <class TStartable>
 class Base_API AsyncStartable: public TStartable
 {
 public:
-    AsyncStartable() {};
-    virtual ~AsyncStartable() {};
+    AsyncStartable() = default;
+    virtual ~AsyncStartable() = default;
 
     static void runAsync(void* arg) {
         try {

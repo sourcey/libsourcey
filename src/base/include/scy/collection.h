@@ -72,7 +72,7 @@ public:
 
     virtual ~PointerCollection() { clear(); }
 
-    virtual bool add(const TKey& key, TValue* item, bool whiny = true)
+    virtual bool add(const TKey& key, TValue* item, bool whiny = true) override
     {
         if (exists(key)) {
             if (whiny) {
@@ -92,7 +92,7 @@ public:
 
     virtual void update(const TKey& key, TValue* item)
     {
-        /// Note: This method will not delete existing values.
+        // Note: This method will not delete existing values.
         {
             std::lock_guard<std::mutex> guard(_mutex);
             _map[key] = item;
@@ -100,7 +100,7 @@ public:
         onAdd(key, item);
     }
 
-    virtual TValue* get(const TKey& key, bool whiny = true) const
+    virtual TValue* get(const TKey& key, bool whiny = true) const override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         typename Map::const_iterator it = _map.find(key);
@@ -115,7 +115,7 @@ public:
         return nullptr;
     }
 
-    virtual bool free(const TKey& key)
+    virtual bool free(const TKey& key) override
     {
         TValue* item = remove(key);
         if (item) {
@@ -126,7 +126,7 @@ public:
         return false;
     }
 
-    virtual TValue* remove(const TKey& key)
+    virtual TValue* remove(const TKey& key) override
     {
         TValue* item = nullptr;
         {
@@ -142,7 +142,7 @@ public:
         return item;
     }
 
-    virtual bool remove(const TValue* item)
+    virtual bool remove(const TValue* item) override
     {
         TKey key;
         TValue* ptr = nullptr;
@@ -163,14 +163,14 @@ public:
         return ptr != nullptr;
     }
 
-    virtual bool exists(const TKey& key) const
+    virtual bool exists(const TKey& key) const override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         typename Map::const_iterator it = _map.find(key);
         return it != _map.end();
     }
 
-    virtual bool exists(const TValue* item) const
+    virtual bool exists(const TValue* item) const override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         for (typename Map::const_iterator it = _map.begin(); it != _map.end();
@@ -181,19 +181,19 @@ public:
         return false;
     }
 
-    virtual bool empty() const
+    virtual bool empty() const override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _map.empty();
     }
 
-    virtual size_t size() const
+    virtual size_t size() const override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         return _map.size();
     }
 
-    virtual void clear()
+    virtual void clear() override
     {
         std::lock_guard<std::mutex> guard(_mutex);
         util::clearMap<TDeleter>(_map);
@@ -222,8 +222,8 @@ public:
     }
 
 protected:
-    Map _map;
     mutable std::mutex _mutex;
+    Map _map;
 };
 
 
@@ -240,12 +240,12 @@ public:
     typedef PointerCollection<TKey, TValue> Base;
 
 public:
-    virtual void onAdd(const TKey&, TValue* item)
+    virtual void onAdd(const TKey&, TValue* item) override
     {
         ItemAdded.emit(*item);
     }
 
-    virtual void onRemove(const TKey&, TValue* item)
+    virtual void onRemove(const TKey&, TValue* item) override
     {
         ItemRemoved.emit(*item);
     }
@@ -261,14 +261,14 @@ public:
 
 
 /// Reusable stack based unique key-value store for DRY coding.
-template <class TKey, class TValue> 
+template <class TKey, class TValue>
 class /* Base_API */ KVCollection
 {
 public:
     typedef std::map<TKey, TValue> Map;
 
 public:
-    KVCollection() 
+    KVCollection()
     {
     }
 
@@ -370,7 +370,7 @@ public:
     typedef Map::iterator Iterator;
     typedef Map::const_iterator ConstIterator;
 
-    NVCollection() 
+    NVCollection()
     {
     }
 
@@ -379,7 +379,7 @@ public:
     {
     }
 
-    virtual ~NVCollection() 
+    virtual ~NVCollection()
     {
     }
 
@@ -405,8 +405,7 @@ public:
     /// Returns the value of the first name-value pair with the given name.
     /// If no value with the given name has been found, the defaultValue is
     /// returned.
-    const std::string& get(const std::string& name,
-                           const std::string& defaultValue) const;
+    const std::string& get(const std::string& name, const std::string& defaultValue) const;
 
     /// Returns true if there is at least one name-value pair
     /// with the given name.

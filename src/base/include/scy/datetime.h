@@ -18,7 +18,6 @@
 
 #include "scy/base.h"
 #include "scy/packetsignal.h"
-//#include "scy/handle.h"
 #include <ctime>
 
 
@@ -1136,7 +1135,7 @@ public:
 /// This class converts dates and times into strings, supporting a
 /// variety of standard and custom formats.
 ///
-/// There are two kind of static member functions:    
+/// There are two kind of static member functions:
 ///    * format* functions
 /// return a std::string containin the formatted value.
 ///    * append* functions append the formatted value to
@@ -1280,7 +1279,7 @@ public:
 /// strings.
 ///
 /// The returned DateTime will always contain a time in the same
-/// timezone as the time in the string. Call DateTime::makeUTC()    
+/// timezone as the time in the string. Call DateTime::makeUTC()
 /// with the timeZoneDifferential returned by parse() to convert
 /// the DateTime to UTC.
 ///

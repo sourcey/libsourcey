@@ -30,8 +30,8 @@ namespace scy {
 /// provide extra information about packets.
 struct IPacketInfo
 {
-    IPacketInfo() {};
-    virtual ~IPacketInfo() {};
+    IPacketInfo() = default;
+    virtual ~IPacketInfo() = default;
 
     virtual IPacketInfo* clone() const = 0;
 };

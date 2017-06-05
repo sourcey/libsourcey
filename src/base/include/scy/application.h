@@ -54,7 +54,7 @@ public:
     uv::Loop* loop;
 
     //
-    // Event uv::Loop
+    // Event Loop
     //
 
     /// Run the application event loop.

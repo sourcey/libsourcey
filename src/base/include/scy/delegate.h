@@ -47,12 +47,12 @@ struct FunctionDelegate : AbstractDelegate<RT, Args...>
     {
     }
 
-    virtual RT operator()(Args... args) const
+    virtual RT operator()(Args... args) const override
     {
         return func(std::forward<Args>(args)...);
     }
 
-    virtual bool operator==(const AbstractDelegate<RT, Args...>& /* that */) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& /* that */) const override
     {
         return false; // dynamic function delegates cannot be compared
     }
@@ -75,12 +75,12 @@ struct ClassDelegate : AbstractDelegate<RT, Args...>
     {
     }
 
-    virtual RT operator()(Args... args) const
+    virtual RT operator()(Args... args) const override
     {
         return (instance->*method)(std::forward<Args>(args)...);
     }
 
-    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const override
     {
         auto other = dynamic_cast<const ClassDelegate*>(&that);
         return other && other->instance == this->instance &&
@@ -105,12 +105,12 @@ struct ConstClassDelegate : AbstractDelegate<RT, Args...>
     {
     }
 
-    virtual RT operator()(Args... args) const
+    virtual RT operator()(Args... args) const override
     {
         return (instance->*method)(std::forward<Args>(args)...);
     }
 
-    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, Args...>& that) const override
     {
         auto other = dynamic_cast<const ConstClassDelegate*>(&that);
         return other && other->instance == this->instance &&
@@ -136,7 +136,7 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
     {
     }
 
-    virtual RT operator()(IT& object) const
+    virtual RT operator()(IT& object) const override
     {
         auto test = dynamic_cast<PT*>(&object);
         if (test)
@@ -144,7 +144,7 @@ struct PolymorphicDelegate : AbstractDelegate<RT, IT&>
         return RT();
     }
 
-    virtual bool operator==(const AbstractDelegate<RT, IT&>& that) const
+    virtual bool operator==(const AbstractDelegate<RT, IT&>& that) const override
     {
         auto other = dynamic_cast<const PolymorphicDelegate*>(&that);
         return other && other->instance == this->instance &&

@@ -31,7 +31,7 @@ public:
     {
     }
 
-    virtual void process(IPacket& packet)
+    virtual void process(IPacket& packet) override
     {
         RawPacket& p = dynamic_cast<RawPacket&>(packet); // cast or throw
 

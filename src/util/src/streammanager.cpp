@@ -95,7 +95,7 @@ PacketStream* StreamManager::getDafaultStream()
 }
 
 
-void StreamManager::onAdd(PacketStream* stream)
+void StreamManager::onAdd(const std::string&, PacketStream* stream)
 {
     // Stream name can't be empty
     assert(!stream->name().empty());
@@ -107,7 +107,7 @@ void StreamManager::onAdd(PacketStream* stream)
 }
 
 
-void StreamManager::onRemove(PacketStream* stream)
+void StreamManager::onRemove(const std::string&, PacketStream* stream)
 {
     LDebug("stream removed: ", stream->name())
     stream->StateChange -= slot(this, &StreamManager::onStreamStateChange);

@@ -89,7 +89,7 @@ public:
     /// Start the idler with the given callback function.
     virtual void start(std::function<void()> func);
 
-    virtual ~Idler();
+    virtual ~Idler() = default;
 
     uv::Handle<uv_idle_t>& handle();
 

@@ -21,11 +21,7 @@ namespace scy {
 
 
 typedef LiveCollection<std::string, PacketStream,
-                       std::default_delete<PacketStream>
-                       // DeferredDeleter<PacketStream>
-                       // DestroyMethodDeleter<PacketStream>
-                       >
-    StreamManagerBase;
+                       std::default_delete<PacketStream>> StreamManagerBase;
 
 
 class /* SCY_EXTERN */ StreamManager : public StreamManagerBase
@@ -52,13 +48,12 @@ public:
 
 protected:
     /// Called after a stream is added.
-    virtual void onAdd(PacketStream* task);
+    virtual void onAdd(const std::string&, PacketStream* task) override;
 
     /// Called after a stream is removed.
-    virtual void onRemove(PacketStream* task);
+    virtual void onRemove(const std::string&, PacketStream* task) override;
 
-    virtual void onStreamStateChange(void* sender, PacketStreamState& state,
-                                     const PacketStreamState&);
+    virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);
 
     virtual const char* className() const { return "Stream Manager"; };
 

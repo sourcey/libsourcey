@@ -1,18 +1,14 @@
 # TODO
 
-Add override tags to virtual methods
 Copy samples data to install folder and add to packages
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
+Move sched to separate repo
 Fix deprecated ICE code
 
 
 # Documentation
 
-Update docs and sourcey.com linking
 Improve av module documentation
-Describe how to build WebRTC for use with LibSourcey in README
-	- maybe move to article and link
-	- tell macos users to build webrtc from source
 
 
 # Tests

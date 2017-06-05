@@ -26,11 +26,6 @@ Idler::Idler(uv::Loop* loop)
 }
 
 
-Idler::~Idler()
-{
-}
-
-
 void Idler::init()
 {
     _handle.init(&uv_idle_init);

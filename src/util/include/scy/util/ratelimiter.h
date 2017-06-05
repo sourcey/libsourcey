@@ -46,21 +46,21 @@ public:
         lastCheck = current;
         allowance += elapsed * (rate / seconds);
 
-        traceL("RateLimiter")
-            << "Can Send:"
-            << "\n\tAllowance: " << allowance << "\n\tElapsed: " << elapsed
-            << "\n\tRate: " << rate << "\n\tSeconds: " << seconds << std::endl;
+        STrace << "Can send:"
+               << "\n\tAllowance: " << allowance
+               << "\n\tElapsed: " << elapsed
+               << "\n\tRate: " << rate
+               << "\n\tSeconds: " << seconds << std::endl;
 
         if (allowance > rate) {
             allowance = rate; // throttle
-            traceL("RateLimiter") << "Throttling: " << allowance << std::endl;
+            STrace << "Throttling: " << allowance << std::endl;
         } else if (allowance < 1.0) {
-            traceL("RateLimiter") << "Message Rate Exceeded: " << allowance
-                                  << std::endl;
+            STrace << "Message rate exceeded: " << allowance << std::endl;
             return false;
         }
         allowance -= 1.0;
-        traceL("RateLimiter") << "Can Send Message: " << allowance << std::endl;
+        STrace << "Can send message: " << allowance << std::endl;
         return true;
     }
 };

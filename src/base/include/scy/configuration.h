@@ -46,8 +46,7 @@ public:
 
     /// If a property with the given key exists, returns the property's string
     /// value, otherwise returns the given default value.
-    std::string getString(const std::string& key,
-                          const std::string& defaultValue) const;
+    std::string getString(const std::string& key, const std::string& defaultValue) const;
 
     /// Returns the raw string value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
@@ -57,8 +56,7 @@ public:
     /// If a property with the given key exists, returns the property's raw
     /// string value, otherwise returns the given default value.
     /// References to other properties are not expanded.
-    std::string getRawString(const std::string& key,
-                             const std::string& defaultValue) const;
+    std::string getRawString(const std::string& key, const std::string& defaultValue) const;
 
     /// Returns the int value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
@@ -87,8 +85,7 @@ public:
     /// Throws a SyntaxException if the property can not be converted
     /// to an int.
     /// Numbers starting with 0x are treated as hexadecimal.
-    std::int64_t getLargeInt(const std::string& key,
-                             std::int64_t defaultValue) const;
+    std::int64_t getLargeInt(const std::string& key, std::int64_t defaultValue) const;
 
     /// Returns the double value of the property with the given name.
     /// Throws a NotFoundException if the key does not exist.
@@ -109,10 +106,8 @@ public:
     bool getBool(const std::string& key) const;
 
     /// If a property with the given key exists, returns the property's bool
-    /// value,
-    /// otherwise returns the given default value.
-    /// Throws a SyntaxException if the property can not be converted
-    /// to a boolean.
+    /// value, otherwise returns the given default value.
+    /// Throws a SyntaxException if the property can not be converted to a boolean.
     /// The following string values can be converted into a boolean:
     ///   - numerical values: non zero becomes true, zero becomes false
     ///   - strings: true, yes, on become true, false, no, off become false
@@ -152,8 +147,7 @@ protected:
     /// Sets the property with the given key to the given value.
     /// An already existing value for the key is overwritten.
     ///
-    /// The implementation is responsible for emitting the
-    /// PropertyChanged signal.
+    /// The implementation is responsible for emitting the PropertyChanged signal.
     virtual void setRaw(const std::string& key, const std::string& value) = 0;
 
     static int parseInt(const std::string& value);

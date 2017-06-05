@@ -67,7 +67,7 @@ public:
         return setTimeout(item, timeout);
     }
 
-    virtual void clear()
+    virtual void clear() override
     {
         Base::clear();
         std::lock_guard<std::mutex> guard(_tmutex);
@@ -96,7 +96,7 @@ protected:
         return false;
     }
 
-    virtual void onRemove(const TKey& key, TValue* item)
+    virtual void onRemove(const TKey& key, TValue* item) override
     {
         // Remove timeout entry
         std::lock_guard<std::mutex> guard(_tmutex);

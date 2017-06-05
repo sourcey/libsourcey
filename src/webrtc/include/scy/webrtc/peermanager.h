@@ -34,7 +34,7 @@ class Peer;
 class PeerManager : public PointerCollection<std::string, Peer>
 {
 public:
-    PeerManager(); // PeerFactoryContext* context = nullptr);
+    PeerManager();
     virtual ~PeerManager();
 
     virtual void sendSDP(Peer* conn, const std::string& type, const std::string& sdp);
@@ -49,14 +49,6 @@ public:
     virtual void onStable(Peer* conn);
     virtual void onClosed(Peer* conn);
     virtual void onFailure(Peer* conn, const std::string& error);
-
-//    void setContext(PeerFactoryContext* context);
-//
-//    PeerFactoryContext* context() const;
-//    webrtc::PeerConnectionFactoryInterface* factory() const;
-//
-//protected:
-//    std::unique_ptr<PeerFactoryContext> _context;
 };
 
 

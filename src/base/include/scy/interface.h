@@ -33,8 +33,8 @@ namespace basic {
 class Base_API Decoder
 {
 public:
-    Decoder() {}
-    virtual ~Decoder() {}
+    Decoder() = default;
+    virtual ~Decoder() = default;
 
     virtual ssize_t decode(const char* inbuf, size_t nread, char* outbuf) = 0;
     virtual ssize_t finalize(char* /* outbuf */) { return 0; }
@@ -44,8 +44,8 @@ public:
 class Base_API Encoder
 {
 public:
-    Encoder() {}
-    virtual ~Encoder() {}
+    Encoder() = default;
+    virtual ~Encoder() = default;
     virtual ssize_t encode(const char* inbuf, size_t nread, char* outbuf) = 0;
     virtual ssize_t finalize(char* /* outbuf */) { return 0; }
 };
@@ -60,7 +60,7 @@ public:
     {
     }
 
-    virtual ~Runnable() {}
+    virtual ~Runnable() = default;
 
     /// The run method will be called by the asynchronous context.
     virtual void run() = 0;
@@ -97,7 +97,7 @@ class Base_API Sendable
 {
 public:
     virtual bool send() = 0;
-    virtual void cancel() {};
+    virtual void cancel() = 0;
 };
 
 
