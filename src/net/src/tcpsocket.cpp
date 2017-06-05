@@ -122,7 +122,7 @@ void TCPSocket::connect(const std::string& host, uint16_t port)
     else {
         init();
 
-        net::dns::resolve(host, port, [ptr = context()](int err, net::Address const& addr) {
+        net::dns::resolve(host, port, [ptr = context()](int err, const net::Address& addr) {
             if (!ptr->deleted) {
                 auto handle = reinterpret_cast<TCPSocket*>(ptr->handle);
                 if (err)
