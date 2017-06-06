@@ -174,7 +174,7 @@ void MediaCapture::run()
 
         // Realtime variables
         int64_t lastTimestamp = time::hrtime();
-        int64_t frameInterval = _video ? fpsToInterval(_video->iparams.fps) : 0;
+        int64_t frameInterval = _video ? fpsToInterval(int(_video->iparams.fps)) : 0;
 
         // Reset the stream back to the beginning when looping is enabled
         if (_looping) {

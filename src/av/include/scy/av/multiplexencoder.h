@@ -99,7 +99,7 @@ protected:
     AudioEncoder* _audio;
     AVIOContext* _ioCtx;
     uint8_t* _ioBuffer;
-    uint64_t _pts;
+    int64_t _pts;
     mutable std::mutex _mutex;
 };
 

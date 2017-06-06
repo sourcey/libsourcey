@@ -33,7 +33,7 @@ class Base_API Handle;
 /// Default request callback event.
 struct BasicEvent
 {
-    int status{0};
+    int status;
 };
 
 
@@ -66,7 +66,7 @@ struct Request
 
     template<typename F, typename... Args>
     auto invoke(F&& f, Args&&... args)
-    -> std::enable_if_t<not std::is_void<std::result_of_t<F(Args...)>>::value, int>
+    -> std::enable_if_t<!std::is_void<std::result_of_t<F(Args...)>>::value, int>
     {
         auto err = std::forward<F>(f)(std::forward<Args>(args)...);
         if (err && callback) callback(E{err});
@@ -115,8 +115,8 @@ struct ConnectReq : public uv::Request<uv_connect_t>
 /// Get address info request callback event.
 struct GetAddrInfoEvent
 {
-    int status{0};
-    struct addrinfo* addr{nullptr};
+    int status;
+    struct addrinfo* addr;
 };
 
 
@@ -139,7 +139,7 @@ struct GetAddrInfoReq : public uv::Request<uv_getaddrinfo_t, GetAddrInfoEvent>
         delete wrap;
     }
 
-    bool resolve(const std::string& host, int port, uv::Loop* loop = uv::defaultLoop())
+    auto resolve(const std::string& host, int port, uv::Loop* loop = uv::defaultLoop())
     {
         return invoke(&uv_getaddrinfo, loop, &req, &getAddrInfoCallback,
                       host.c_str(), util::itostr(port).c_str(), nullptr);
