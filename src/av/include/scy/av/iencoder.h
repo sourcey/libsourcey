@@ -73,9 +73,7 @@ struct EncoderOptions
     {
     }
 
-    virtual ~EncoderOptions()
-    {
-    }
+    virtual ~EncoderOptions() = default;
 };
 
 /// This is the abstract class for all encoders.

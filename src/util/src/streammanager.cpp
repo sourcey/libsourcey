@@ -27,7 +27,6 @@ StreamManager::StreamManager(bool freeClosedStreams)
 
 StreamManager::~StreamManager()
 {
-    SDebug << "Destroy" << endl;
     closeAll();
 }
 
@@ -41,8 +40,7 @@ void StreamManager::closeAll()
     StreamManager::Map::iterator it2;
     while (it != _map.end()) {
         it2 = it++;
-        (*it2).second->StateChange -=
-            slot(this, &StreamManager::onStreamStateChange);
+        (*it2).second->StateChange -= slot(this, &StreamManager::onStreamStateChange);
         (*it2).second->close();
         if (_freeClosedStreams) {
             StreamManager::Deleter func;
@@ -132,7 +130,7 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state,
             success = !!Manager::remove(stream->name());
         }
         if (!success) {
-            SWarn << "Cannot remove stream: " << stream->name() << endl;
+            LWarn("Cannot remove stream: ", stream->name())
             assert(0);
         }
     }
@@ -149,10 +147,8 @@ StreamManager::Map StreamManager::streams() const
 void StreamManager::print(std::ostream& os) const
 {
     std::lock_guard<std::mutex> guard(_mutex);
-
     os << "StreamManager[";
-    for (StreamManager::Map::const_iterator it = _map.begin(); it != _map.end();
-         ++it) {
+    for (auto it = _map.begin(); it != _map.end(); ++it) {
         os << "\n\t" << it->second << ": " << it->first;
     }
     os << "\n]";

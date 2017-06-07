@@ -190,7 +190,6 @@ public:
     {
         Error error;
         error.err = err;
-        // err.syserr = uv.sys_errno_;
         error.message = formatError(std::move(prefix), err);
         setError(error);
     }
@@ -229,7 +228,7 @@ public:
     {
         if (_context)
             close();
-        _context.reset(new Context<T>(this));
+        _context = std::make_shared<Context<T>>(this);
     }
 
     /// Return a typecasted pointer to the managed handle.

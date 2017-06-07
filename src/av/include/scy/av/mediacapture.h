@@ -47,10 +47,10 @@ public:
     // #endif
     virtual void close();
 
-    virtual void start();
-    virtual void stop();
+    virtual void start() override;
+    virtual void stop() override;
 
-    virtual void run();
+    virtual void run() override;
 
     virtual void getEncoderFormat(Format& format);
     virtual void getEncoderAudioCodec(AudioCodec& params);

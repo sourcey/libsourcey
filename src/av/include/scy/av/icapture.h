@@ -27,8 +27,10 @@ class AV_API ICapture : public PacketSource, public basic::Startable
 {
 public:
     ICapture()
-        : PacketSource(this->emitter){};
-    virtual ~ICapture(){};
+        : PacketSource(this->emitter)
+    {
+    }
+    virtual ~ICapture() = default;
 
     virtual void start() = 0;
     virtual void stop() = 0;
@@ -36,7 +38,7 @@ public:
     /// Sets the input format for encoding with this capture device.
     virtual void getEncoderFormat(Format& iformat) = 0;
 
-    virtual void onStreamStateChange(const PacketStreamState& state)
+    virtual void onStreamStateChange(const PacketStreamState& state) override
     {
         switch (state.id()) {
             case PacketStreamState::Active:

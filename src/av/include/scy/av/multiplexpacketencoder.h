@@ -35,17 +35,15 @@ public:
     virtual void encode(VideoPacket& packet);
     virtual void encode(AudioPacket& packet);
 
-    virtual bool accepts(IPacket* packet);
-    virtual void process(IPacket& packet);
+    virtual bool accepts(IPacket* packet) override;
+    virtual void process(IPacket& packet) override;
 
 protected:
-    virtual void onStreamStateChange(const PacketStreamState& state);
+    virtual void onStreamStateChange(const PacketStreamState& state) override;
 
     friend class PacketStream;
 
     mutable std::mutex _mutex;
-    // bool _muxLiveStreams;
-    // VideoPacket* _lastVideoPacket;
 };
 
 

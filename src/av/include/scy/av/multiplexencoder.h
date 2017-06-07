@@ -22,8 +22,8 @@
 #include "scy/av/iencoder.h"
 #include "scy/av/packet.h"
 #include "scy/av/videoencoder.h"
-#include <mutex>
 #include "scy/packetstream.h"
+#include <mutex>
 #include <fstream>
 
 extern "C" {
@@ -45,8 +45,8 @@ public:
     MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
     virtual ~MultiplexEncoder();
 
-    virtual void init();
-    virtual void uninit();
+    virtual void init() override;
+    virtual void uninit() override;
     virtual void cleanup();
 
     virtual void createVideo();

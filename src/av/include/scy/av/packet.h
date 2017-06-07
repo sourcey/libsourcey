@@ -38,11 +38,11 @@ struct MediaPacket : public RawPacket
     {
     }
 
-    virtual ~MediaPacket() {}
+    virtual ~MediaPacket() = default;
 
-    virtual IPacket* clone() const { return new MediaPacket(*this); }
+    virtual IPacket* clone() const override { return new MediaPacket(*this); }
 
-    virtual const char* className() const { return "MediaPacket"; }
+    virtual const char* className() const override { return "MediaPacket"; }
 };
 
 
@@ -72,16 +72,16 @@ struct VideoPacket : public MediaPacket
 
     virtual ~VideoPacket() = default;
 
-    virtual IPacket* clone() const { return new VideoPacket(*this); }
+    virtual IPacket* clone() const override { return new VideoPacket(*this); }
 
-    virtual const char* className() const { return "VideoPacket"; }
+    virtual const char* className() const override { return "VideoPacket"; }
 };
 
 
 /// Video packet for planar formats
 struct PlanarVideoPacket : public VideoPacket
 {
-    uint8_t* buffer[4] = { nullptr };
+    uint8_t* buffer[4] = nullptr;
     int linesize[4];
     std::string pixelFmt;
 
@@ -111,21 +111,21 @@ struct AudioPacket : public MediaPacket
 
     virtual ~AudioPacket() = default;
 
-    virtual IPacket* clone() const { return new AudioPacket(*this); }
+    virtual IPacket* clone() const override { return new AudioPacket(*this); }
 
     virtual uint8_t* samples() const
     {
         return reinterpret_cast<uint8_t*>(_data);
     }
 
-    virtual const char* className() const { return "AudioPacket"; }
+    virtual const char* className() const  override{ return "AudioPacket"; }
 };
 
 
 /// Audio packet for planar formats
 struct PlanarAudioPacket : public AudioPacket
 {
-    uint8_t* buffer[4] = { nullptr };
+    uint8_t* buffer[4] = nullptr;
     int linesize;
     int channels;
     std::string sampleFmt;
@@ -135,9 +135,9 @@ struct PlanarAudioPacket : public AudioPacket
     PlanarAudioPacket(const PlanarAudioPacket& r);
     virtual ~PlanarAudioPacket();
 
-    virtual IPacket* clone() const { return new PlanarAudioPacket(*this); }
+    virtual IPacket* clone() const override { return new PlanarAudioPacket(*this); }
 
-    virtual const char* className() const { return "PlanarAudioPacket"; }
+    virtual const char* className() const override { return "PlanarAudioPacket"; }
 };
 
 

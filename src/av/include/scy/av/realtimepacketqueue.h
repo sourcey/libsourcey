@@ -39,7 +39,7 @@ public:
     }
 
     // Add an item to the queue
-    virtual void push(PacketT* item)
+    virtual void push(PacketT* item) override
     {
         BaseQueue::push(item);
         BaseQueue::template sort<MediaPacketTimeCompare>();
@@ -52,7 +52,7 @@ public:
     }
 
 protected:
-    virtual PacketT* popNext()
+    virtual PacketT* popNext() override
     {
         if (BaseQueue::empty())
             return nullptr;
@@ -67,7 +67,7 @@ protected:
         return next;
     }
 
-    virtual void onStreamStateChange(const PacketStreamState& state)
+    virtual void onStreamStateChange(const PacketStreamState& state) override
     {
         STrace << "Stream state changed: " << state << std::endl;
 

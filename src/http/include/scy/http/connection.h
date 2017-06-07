@@ -60,7 +60,7 @@ public:
 
     /// Return true if the server did not give us
     /// a proper response within the allotted time.
-    /// bool expired() const;
+    // bool expired() const;
 
     /// Return true if headers should be automatically sent.
     bool shouldSendHeader() const;
