@@ -177,7 +177,7 @@ There are plenty more demos and sample code to play with over on the [examples](
 
 ## Contributors
 
-A big thanks to everyone who has contributed to making C++ the most viable option:
+A massive thanks to everyone who has contributed to making LibSourcey awesome:
 
 * Kam Low ([@auscaster](https://github.com/auscaster)) — Primary developer
 * Yury Shulbn ([@yuryshubin](https://github.com/yuryshubin)) — iOS build toolchain and platform fixes
@@ -187,6 +187,8 @@ A big thanks to everyone who has contributed to making C++ the most viable optio
 * Damian Zelim ([@ZelimDamian](https://github.com/ZelimDamian)) — Fixed compiler flags for OS X build
 * Norm Ovenseri ([@normano](https://github.com/normano)) — Added verbose logging output to build system
 * Alexey ([@deilos](https://github.com/deilos)) — Fixed cross-platform FFmpeg build script
+* Kryton ([@Malesio](https://github.com/Malesio)) — Fixed segfaults in networking layer and tidied up Valgrind warnings
+
 
 ## Contributing
 
