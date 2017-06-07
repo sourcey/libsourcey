@@ -124,7 +124,7 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
     //    iframe->format != /*conv->*/ av_get_pix_fmt(oparams.pixelFmt.c_str())) {
     //if (iframe->width != conv->iparams.width ||
     //    iframe->height != conv->iparams.height ||
-    //    iframe->format != av_get_pix_fmt(conv->iparams.pixelFmt.c_str()) || 
+    //    iframe->format != av_get_pix_fmt(conv->iparams.pixelFmt.c_str()) ||
     //    oparams.width != conv->oparams.width ||
     //    oparams.height != conv->oparams.height ||
     //    av_get_pix_fmt(oparams.pixelFmt.c_str()) != av_get_pix_fmt(conv->oparams.pixelFmt.c_str())) {
@@ -163,7 +163,7 @@ bool VideoContext::recreateConverter()
     // This check if only for when unitialized
     // If iparams or oparams is changed after initialization a conversion
     // context must be created
-    if (!conv && 
+    if (!conv &&
         iparams.width == oparams.width &&
         iparams.height == oparams.height &&
         iparams.pixelFmt == oparams.pixelFmt) {
@@ -259,8 +259,7 @@ AVPixelFormat selectPixelFormat(AVCodec* codec, VideoCodec& params)
     int nplanes = av_pix_fmt_count_planes(requested);
     const enum AVPixelFormat* p = codec->pix_fmts;
     while (*p != AV_PIX_FMT_NONE) {
-        if (compatible == AV_PIX_FMT_NONE &&
-            nplanes == 0 || av_pix_fmt_count_planes(*p) == nplanes)
+        if (compatible == AV_PIX_FMT_NONE && (nplanes == 0 || av_pix_fmt_count_planes(*p) == nplanes))
             compatible = *p; // or use the first compatible format
         if (*p == requested)
             return requested; // always try to return requested format

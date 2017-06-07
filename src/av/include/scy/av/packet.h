@@ -81,7 +81,7 @@ struct VideoPacket : public MediaPacket
 /// Video packet for planar formats
 struct PlanarVideoPacket : public VideoPacket
 {
-    uint8_t* buffer[4] = nullptr;
+    uint8_t* buffer[4] = { nullptr };
     int linesize[4];
     std::string pixelFmt;
 
@@ -125,7 +125,7 @@ struct AudioPacket : public MediaPacket
 /// Audio packet for planar formats
 struct PlanarAudioPacket : public AudioPacket
 {
-    uint8_t* buffer[4] = nullptr;
+    uint8_t* buffer[4] = { nullptr };
     int linesize;
     int channels;
     std::string sampleFmt;
