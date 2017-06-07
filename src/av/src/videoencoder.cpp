@@ -92,7 +92,7 @@ void VideoEncoder::create()
 
     // For fixed-fps content timebase should be 1/framerate
     // and timestamp increments should be identically 1.
-    ctx->time_base.den = (int)oparams.fps ? oparams.fps : 1000;
+    ctx->time_base.den = int(oparams.fps ? oparams.fps : 1000);
     ctx->time_base.num = 1;
 
     // Define encoding parameters
@@ -190,8 +190,6 @@ bool VideoEncoder::encode(uint8_t* data[4], int linesize[4], int64_t pts)
     }
 
     frame->pts = pts;
-
-    AVPacket opacket;
     return encode(frame);
 }
 
@@ -207,7 +205,6 @@ bool VideoEncoder::encode(uint8_t* data, int size, int64_t pts)
     frame->data[0] = reinterpret_cast<uint8_t*>(data);
     frame->pts = pts;
 
-    AVPacket opacket;
     return encode(frame);
 }
 

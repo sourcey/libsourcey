@@ -37,7 +37,7 @@ inline auto resolve(const std::string& host, int port,
             callback(event.status, net::Address{});
         }
         else
-            callback(event.status, net::Address{event.addr->ai_addr, event.addr->ai_addrlen});
+            callback(event.status, net::Address{event.addr->ai_addr, static_cast<socklen_t>(event.addr->ai_addrlen)});
     }).resolve(host, port, loop);
 }
 
