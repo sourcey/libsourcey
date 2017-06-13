@@ -135,9 +135,9 @@ PacketStream stream;
 
 // Setup the encoder options
 av::EncoderOptions options;
-options.oformat = av::Format("MP4", "mp4",
+options.oformat = av::Format{"MP4", "mp4",
     { "H.264", "libx264", 640, 480, 25, 48000, 128000, "yuv420p" },
-    { "AAC", "aac", 2, 44100, 64000, "fltp" });
+    { "AAC", "aac", 2, 44100, 64000, "fltp" }};
 
 // Create a device manager instance to enumerate system devices
 av::DeviceManager devman;
@@ -187,7 +187,7 @@ A massive thanks to everyone who has contributed to making LibSourcey awesome:
 * Damian Zelim ([@ZelimDamian](https://github.com/ZelimDamian)) — Fixed compiler flags for OS X build
 * Norm Ovenseri ([@normano](https://github.com/normano)) — Added verbose logging output to build system
 * Alexey ([@deilos](https://github.com/deilos)) — Fixed cross-platform FFmpeg build script
-* Kryton ([@Malesio](https://github.com/Malesio)) — Fixed segfaults in networking layer and tidied up Valgrind warnings
+* Kryton ([@Malesio](https://github.com/Malesio)) — Fixed segfaults in samples and tidied up Valgrind warnings
 
 
 ## Contributing

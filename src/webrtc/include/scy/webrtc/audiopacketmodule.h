@@ -13,10 +13,11 @@
 #define SCY_WebRTC_AudioPacketModule_H
 
 
-#include "scy/av/av.h"
+#include "scy/base.h"
 
 #ifdef HAVE_FFMPEG
 
+#include "scy/av/av.h"
 #include "scy/av/audiobuffer.h"
 #include "scy/av/packet.h"
 #include "scy/packetsignal.h"

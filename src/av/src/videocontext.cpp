@@ -266,7 +266,7 @@ AVPixelFormat selectPixelFormat(AVCodec* codec, VideoCodec& params)
         p++;
     }
     if (compatible == AV_PIX_FMT_NONE)
-        compatible = codec->pix_fmts[0];
+        compatible = p[0];
     return compatible;
 }
 

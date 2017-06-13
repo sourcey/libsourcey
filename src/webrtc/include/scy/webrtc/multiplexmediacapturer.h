@@ -13,10 +13,11 @@
 #define SCY_WebRTC_MultiplexMediaCapturer_H
 
 
-#include "scy/av/av.h"
+#include "scy/base.h"
 
 #ifdef HAVE_FFMPEG
 
+#include "scy/av/av.h"
 #include "scy/av/mediacapture.h"
 #include "scy/webrtc/audiopacketmodule.h"
 #include "scy/webrtc/videopacketsource.h"

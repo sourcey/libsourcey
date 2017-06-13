@@ -13,10 +13,12 @@
 #define SCY_WebRTC_VideoPacketSource_H
 
 
-#include "scy/av/packet.h"
+#include "scy/base.h"
 #include "scy/packetsignal.h"
 
 #ifdef HAVE_FFMPEG
+
+#include "scy/av/packet.h"
 
 #include "webrtc/media/base/videocapturer.h"
 

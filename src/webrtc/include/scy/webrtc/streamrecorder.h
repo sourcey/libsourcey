@@ -13,10 +13,11 @@
 #define SCY_WebRTC_StreamRecorder_H
 
 
-#include "scy/av/av.h"
+#include "scy/base.h"
 
 #ifdef HAVE_FFMPEG
 
+#include "scy/av/av.h"
 #include "scy/av/multiplexencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"

@@ -13,10 +13,8 @@
 #define SCY_WebRTC_WEBRTC_UTIL_H
 
 
-#include "scy/webrtc/audiopacketmodule.h"
-#include "scy/webrtc/videopacketsource.h"
-
 #include "scy/webrtc/webrtc.h"
+
 #include "webrtc/media/base/videocapturer.h"
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
 #include "webrtc/modules/video_capture/video_capture_factory.h"
