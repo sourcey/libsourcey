@@ -6,15 +6,6 @@ using namespace scy;
 using namespace scy::test;
 
 
-#define SERVER_HOST "localhost"
-#define USE_SSL 0
-#if USE_SSL
-#define SERVER_PORT 443
-#else
-#define SERVER_PORT 4500
-#endif
-
-
 int main(int argc, char** argv)
 {
     // Logger::instance().add(new ConsoleChannel("debug", Level::Trace));

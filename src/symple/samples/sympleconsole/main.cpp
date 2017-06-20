@@ -26,7 +26,7 @@ using namespace scy::util;
 //
 
 
-#define USE_SSL 1
+#define USE_SSL 0
 
 
 class SympleApplication : public scy::Application
@@ -94,7 +94,7 @@ public:
                 auto log = dynamic_cast<FileChannel*>(scy::Logger::instance().get("Symple"));
                 log->setPath(value);
             } else {
-                cerr << "Unrecognized command: " << key << "=" << value << endl;
+                LWarn("Unknown option: ", key, "=", value)
             }
         }
     }
@@ -336,11 +336,10 @@ int main(int argc, char** argv)
 {
     // Setup the logger
     // std::string logPath(getCwd());
-    // fs::addnode(logPath, util::format("Symple_%Ld.log",
-    // static_cast<long>(Timestamp().epochTime())));
+    // fs::addnode(logPath, util::format("Symple_%Ld.log", static_cast<long>(Timestamp().epochTime())));
     // cout << "Log path: " << logPath << endl;
     // Logger::instance().add(new FileChannel("Symple", logPath, Level::Debug));
-    Logger::instance().add(new ConsoleChannel("debug", Level::Trace)); // LDebug
+    Logger::instance().add(new ConsoleChannel("debug", Level::Trace));
 
     // Init SSL client context
 #if USE_SSL

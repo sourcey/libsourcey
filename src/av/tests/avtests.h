@@ -169,6 +169,7 @@ std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, con
 
 #ifdef HAVE_FFMPEG
 
+
 // =============================================================================
 // Video File Transcoder
 //

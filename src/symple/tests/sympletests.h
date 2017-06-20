@@ -11,10 +11,14 @@
 #include "scy/symple/client.h"
 #include "scy/test.h"
 
-using std::cout;
-using std::cerr;
-using std::endl;
-using scy::test::Test;
+
+#define SERVER_HOST "localhost"
+#define USE_SSL 0
+#if USE_SSL
+#define SERVER_PORT 443
+#else
+#define SERVER_PORT 4500
+#endif
 
 
 namespace scy {
@@ -93,7 +97,7 @@ public:
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        SInfo << user << ": On presence: " << presence.dump(4) << endl;
+        SInfo << user << ": On presence: " << presence.dump(4) << std::endl;
 
         expect(presence.data("version").get<std::string>() == "1.0.1");
         if (user == "l") {
@@ -109,7 +113,7 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        SInfo << user << ": On message: " << message.dump(4) << endl;
+        SInfo << user << ": On message: " << message.dump(4) << std::endl;
 
         // Handle incoming Symple messages here
     }
@@ -122,7 +126,7 @@ public:
     void onClientStateChange(void*, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
         SInfo << user << ": Client state changed: " << state << ": "
-              << client.ws().socket->address() << endl;
+              << client.ws().socket->address() << std::endl;
 
         switch (state.id()) {
             case sockio::ClientState::Connecting:
@@ -148,7 +152,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        SInfo << user << ": Updating Client Data" << endl;
+        SInfo << user << ": Updating Client Data" << std::endl;
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.
