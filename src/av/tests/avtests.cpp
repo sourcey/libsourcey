@@ -35,12 +35,6 @@ int main(int argc, char** argv)
 }
 
 
-//av::MediaCapture capture;
-//capture.openFile(sampleDataDir("test.mp4"));
-//capture.setLoopInput(true);
-//capture.start();
-//scy::pause();
-
 // //
 // /// Device Manager Tests
 // //

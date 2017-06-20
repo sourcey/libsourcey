@@ -38,15 +38,12 @@ MediaCapture::MediaCapture()
     , _looping(false)
     , _realtime(false)
 {
-    LTrace("Create")
     initializeFFmpeg();
 }
 
 
 MediaCapture::~MediaCapture()
 {
-    LTrace("Destroy")
-
     close();
     uninitializeFFmpeg();
 }
@@ -146,6 +143,7 @@ void MediaCapture::stop()
     _stopping = true;
     if (_thread.running()) {
         LTrace("Terminating thread")
+        _thread.cancel();
         _thread.join();
     }
 }

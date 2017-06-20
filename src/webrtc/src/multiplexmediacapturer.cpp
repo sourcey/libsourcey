@@ -109,7 +109,7 @@ void MultiplexMediaCapturer::addMediaTracks(
             kVideoLabel, factory->CreateVideoSource(createVideoSource(), nullptr)));
     }
 
-    // Default WebRTC video stream
+    // Default WebRTC video stream for testing
     // stream->AddTrack(factory->CreateVideoTrack(
     //     kVideoLabel, factory->CreateVideoSource(openVideoDefaultWebRtcCaptureDevice(), nullptr)));
 }
@@ -117,14 +117,12 @@ void MultiplexMediaCapturer::addMediaTracks(
 
 void MultiplexMediaCapturer::start()
 {
-    // _videoCapture->start();
     _stream.start();
 }
 
 
 void MultiplexMediaCapturer::stop()
 {
-    // _videoCapture->stop();
     _stream.stop();
 }
 

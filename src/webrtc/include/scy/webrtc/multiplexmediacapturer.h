@@ -33,18 +33,18 @@ class MultiplexMediaCapturer
 {
 public:
     MultiplexMediaCapturer();
-    virtual ~MultiplexMediaCapturer();
+    ~MultiplexMediaCapturer();
 
-    virtual void openFile(const std::string& file, bool loop = true);
+    void openFile(const std::string& file, bool loop = true);
 
-    virtual void addMediaTracks(webrtc::PeerConnectionFactoryInterface* factory,
-                                webrtc::MediaStreamInterface* stream);
+    void addMediaTracks(webrtc::PeerConnectionFactoryInterface* factory,
+                        webrtc::MediaStreamInterface* stream);
 
-    virtual void start();
-    virtual void stop();
+    void start();
+    void stop();
 
-    virtual rtc::scoped_refptr<AudioPacketModule> getAudioModule();
-    virtual VideoPacketSource* createVideoSource();
+    rtc::scoped_refptr<AudioPacketModule> getAudioModule();
+    VideoPacketSource* createVideoSource();
 
 protected:
     PacketStream _stream;

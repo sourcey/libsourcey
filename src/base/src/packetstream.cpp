@@ -26,14 +26,11 @@ PacketStream::PacketStream(const std::string& name)
     , _autoStart(false)
     , _closeOnError(true)
 {
-    LTrace("Create")
 }
 
 
 PacketStream::~PacketStream()
 {
-    LTrace("Destroy")
-
     close();
 
     // Delete managed adapters
@@ -77,7 +74,6 @@ void PacketStream::start()
 void PacketStream::stop()
 {
     LTrace("Stop")
-
 
     if (stateEquals(PacketStreamState::Stopped) ||
         stateEquals(PacketStreamState::Stopping) ||

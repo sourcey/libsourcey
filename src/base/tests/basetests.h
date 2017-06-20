@@ -334,6 +334,7 @@ class ProcessTest : public Test
             proc.spawn();
 
             uv::runLoop();
+        try {
         } catch (std::exception& exc) {
             std::cerr << "Process error: " << exc.what() << std::endl;
             expect(0);

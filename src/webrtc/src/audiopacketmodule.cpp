@@ -107,8 +107,8 @@ void AudioPacketModule::OnMessage(rtc::Message* msg)
             processFrameP();
             break;
         default:
-            // All existing messages should be caught. Getting here should never
-            // happen.
+            // All existing messages should be caught. 
+            // Getting here should never happen.
             assert(false);
     }
 }
@@ -126,6 +126,7 @@ bool AudioPacketModule::Initialize()
 bool AudioPacketModule::shouldStartProcessing()
 {
     return _recording || _playing;
+    // return _recording;
 }
 
 void AudioPacketModule::updateProcessing(bool start)
@@ -176,8 +177,7 @@ void AudioPacketModule::processFrameP()
 
     _nextFrameTime += kTimePerFrameMs;
     const int64_t current_time = rtc::TimeMillis();
-    const int64_t wait_time =
-        (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
+    const int64_t wait_time = (_nextFrameTime > current_time) ? _nextFrameTime - current_time : 0;
     _processThread->PostDelayed(RTC_FROM_HERE, wait_time, this, MSG_RUN_PROCESS);
 }
 
@@ -186,13 +186,10 @@ void AudioPacketModule::sendFrameP()
 {
     assert(_processThread->IsCurrent());
     rtc::CritScope cs(&_critCallback);
+    LDebug("Send audio", _recording)
     if (!_audioCallback) {
         return;
     }
-
-    bool key_pressed = false;
-    uint32_t current_mic_level = 0;
-    MicrophoneVolume(&current_mic_level);
 
     auto samples = &_sendSamples[0];
     if (!_sendFifo.read((void**)&samples, kNumberSamples)) {
@@ -200,8 +197,11 @@ void AudioPacketModule::sendFrameP()
         return;
     }
 
-    LTrace("Send audio")
+    bool key_pressed = false;
+    uint32_t current_mic_level = 0;
+    MicrophoneVolume(&current_mic_level);
 
+    LTrace("Send audio")
     if (_audioCallback->RecordedDataIsAvailable(
             samples, kNumberSamples, kBytesPerSample, kNumberOfChannels,
             kSamplesPerSecond, kTotalDelayMs, kClockDriftMs, current_mic_level,
