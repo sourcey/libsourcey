@@ -1,5 +1,6 @@
 # TODO
 
+BoringSSL not showing in build summary
 Copy samples data to install folder and add to packages
 Replace the use of CMake LibSourcey_XXX variables and set_target_xxx function to set dependencies on a target specific basis
 Move sched to separate repo

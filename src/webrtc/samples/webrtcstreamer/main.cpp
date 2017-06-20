@@ -37,7 +37,7 @@ std::string sampleDataDir(const std::string& file)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", Level::Debug)); // Level::Trace, Level::Debug
+    Logger::instance().add(new ConsoleChannel("debug", Level::Debug));
     // Logger::instance().setWriter(new AsyncLogWriter);
 
 //#if USE_SSL
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
                 sourceFile = value;
             }
             else {
-                std::cerr << "Unrecognized command: " << key << "=" << value << endl;
+                LWarn("Unknown option: ", key, "=", value)
             }
         }
 
@@ -84,18 +84,13 @@ int main(int argc, char** argv)
         app.startStreaming(sourceFile, true);
 
         // Process WebRTC threads on the main loop.
-        Idler rtc(app.loop, [](void* arg) {
-            auto thread = reinterpret_cast<rtc::Thread*>(arg);
-            thread->ProcessMessages(10);
-        }, rtc::Thread::Current());
+        auto rtcthread = rtc::Thread::Current();
+        Idler rtc([=]() {
+            rtcthread->ProcessMessages(1);
+        });
 
         app.waitForShutdown();
-        // app.finalize();
     }
-
-    // Shutdown the media factory and release devices
-    // av::MediaFactory::instance().unloadVideoCaptures();
-    // av::MediaFactory::shutdown();
 
 //#if USE_SSL
     // net::SSLManager::destroy();

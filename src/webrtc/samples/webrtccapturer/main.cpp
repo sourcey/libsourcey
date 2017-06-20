@@ -40,12 +40,13 @@ int main(int argc, char** argv)
 
         // NOTE: The server uses anonymous authentication for this demo.
         // options.token = ""; token based authentication
+        
         Signaler app(options);
 
+        // Process WebRTC threads on the main loop.
         auto rtcthread = rtc::Thread::Current();
         Idler rtc([=]() {
-            // STrace << "Running WebRTC loop" << endl;
-            rtcthread->ProcessMessages(10);
+            rtcthread->ProcessMessages(1);
         });
 
         app.waitForShutdown();

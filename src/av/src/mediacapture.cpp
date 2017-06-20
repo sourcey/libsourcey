@@ -86,7 +86,7 @@ void MediaCapture::openFile(const std::string& file)
 
 void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
-    STrace << "Opening stream: " << filename << endl;
+    LTrace("Opening stream: ", filename)
 
     if (_formatCtx)
         throw std::runtime_error("Capture has already been initialized");
@@ -153,7 +153,7 @@ void MediaCapture::stop()
 
 void MediaCapture::emit(IPacket& packet)
 {
-    STrace << "Emit: " << packet.size() << endl;
+    LTrace("Emit: ", packet.size())
 
     emitter.emit(packet);
 }
@@ -179,6 +179,7 @@ void MediaCapture::run()
         // Reset the stream back to the beginning when looping is enabled
         if (_looping) {
             for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
+                LDebug("Loop streams", i)
                 if (avformat_seek_file(_formatCtx, i, 0, 0, 0, AVSEEK_FLAG_FRAME) < 0) {
                     throw std::runtime_error("Cannot reset media stream");
                 }
@@ -213,9 +214,9 @@ void MediaCapture::run()
                 // Pause the input stream in realtime mode if the
                 // decoder is working too fast
                 if (_realtime) {
-                    while ((time::hrtime() - lastTimestamp) < frameInterval) {
-                        scy::sleep(1);
-                    }
+                    auto nsdelay = frameInterval - (time::hrtime() - lastTimestamp);
+                    // LDebug("Sleep delay: ", nsdelay, ", ", (time::hrtime() - lastTimestamp), ", ", frameInterval)
+                    std::this_thread::sleep_for(std::chrono::nanoseconds(nsdelay));
                     lastTimestamp = time::hrtime();
                 }
             }
@@ -248,10 +249,10 @@ void MediaCapture::run()
         }
 
         // End of file or error
-        STrace << "Decoding: EOF: " << res << endl;
+        LTrace("Decoder EOF: ", res)
     } catch (std::exception& exc) {
         _error = exc.what();
-        SError << "Decoder Error: " << _error << endl;
+        LError("Decoder Error: ", _error)
     } catch (...) {
         _error = "Unknown Error";
         LError("Unknown Error")

@@ -36,16 +36,6 @@ Signaler::Signaler(const smpl::Client::Options& options)
     _client.roster().ItemRemoved += slot(this, &Signaler::onPeerDiconnected);
     _client += packetSlot(this, &Signaler::onPeerMessage);
     _client.connect();
-
-    // Setup a PeerConnectionFactory with our custom ADM
-    //_networkThread = rtc::Thread::CreateWithSocketServer();
-    //_workerThread = rtc::Thread::Create();
-    //if (!_networkThread->Start() || !_workerThread->Start())
-    //    throw std::runtime_error("Failed to start threads");
-
-    //_factory = webrtc::CreatePeerConnectionFactory(
-    //    _networkThread.get(), _workerThread.get(), rtc::Thread::Current(),
-    //    _capturer.getAudioModule(), nullptr, nullptr);
 }
 
 
@@ -56,7 +46,7 @@ Signaler::~Signaler()
 
 void Signaler::startStreaming(const std::string& file, bool looping)
 {
-    // Open the video capture
+    // Open the video file
     _capturer.openFile(file, looping);
     _capturer.start();
 }
@@ -72,6 +62,11 @@ void Signaler::sendSDP(wrtc::Peer* conn, const std::string& type,
     desc[wrtc::kSessionDescriptionSdpName] = sdp;
     m[type] = desc;
 
+    // smpl::Message m({ type, {
+    //     { wrtc::kSessionDescriptionTypeName, type },
+    //     { wrtc::kSessionDescriptionSdpName, sdp} }
+    // });
+
     postMessage(m);
 }
 
@@ -85,6 +80,12 @@ void Signaler::sendCandidate(wrtc::Peer* conn, const std::string& mid,
     desc[wrtc::kCandidateSdpMlineIndexName] = mlineindex;
     desc[wrtc::kCandidateSdpName] = sdp;
     m["candidate"] = desc;
+
+    // smpl::Message m({ "candidate", {
+    //     { wrtc::kCandidateSdpMidName, mid },
+    //     { wrtc::kCandidateSdpMlineIndexName, mlineindex},
+    //     { wrtc::kCandidateSdpName, sdp} }
+    // });
 
     postMessage(m);
 }
@@ -107,7 +108,7 @@ void Signaler::onPeerConnected(smpl::Peer& peer)
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    // Create the media stream and attach decoder  
+    // Create the media stream and attach decoder
     // output to the peer connection
     _capturer.addMediaTracks(_context.factory, conn->createMediaStream());
 
@@ -136,14 +137,14 @@ void Signaler::onPeerMessage(smpl::Message& m)
 
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
-    SDebug << "Peer disconnected" << endl;
+    LDebug("Peer disconnected")
 
     auto conn = wrtc::PeerManager::remove(peer.id());
     if (conn) {
         LDebug("Deleting peer connection: ", peer.id())
         // async delete not essential, but to be safe
         // delete conn;
-        deleteLater<wrtc::Peer>(conn); 
+        deleteLater<wrtc::Peer>(conn);
     }
 }
 

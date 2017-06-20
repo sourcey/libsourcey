@@ -50,11 +50,11 @@ int main(int argc, char** argv)
 
         Signaler app(options);
 
-        Idler rtc(app.loop, [](void* arg) {
-            // LTrace("Running WebRTC loop")
-            auto thread = reinterpret_cast<rtc::Thread*>(arg);
-            thread->ProcessMessages(10);
-        }, rtc::Thread::Current());
+        // Process WebRTC threads on the main loop.
+        auto rtcthread = rtc::Thread::Current();
+        Idler rtc([=]() {
+            rtcthread->ProcessMessages(1);
+        });
 
         app.waitForShutdown();
     }

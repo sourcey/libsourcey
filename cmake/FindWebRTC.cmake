@@ -169,12 +169,6 @@ if(WEBRTC_INCLUDE_DIR)
   # message("WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
 endif()
 
-# ----------------------------------------------------------------------
-# Display status
-# ----------------------------------------------------------------------
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
-
 # HACK: WEBRTC_LIBRARIES and WEBRTC_DEPENDENCIES not propagating to parent scope
 # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
 # Setting PARENT_SCOPE fixes this solves theis issue for now.
@@ -182,6 +176,12 @@ set(WEBRTC_LIBRARIES ${WEBRTC_LIBRARIES} CACHE INTERNAL "")
 set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} CACHE INTERNAL "")
 set(WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIRS} CACHE INTERNAL "")
 set(WEBRTC_FOUND ${WEBRTC_FOUND} CACHE INTERNAL "")
+
+# ----------------------------------------------------------------------
+# Display status
+# ----------------------------------------------------------------------
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARIES WEBRTC_INCLUDE_DIR)
 
 # print_module_variables(WEBRTC)
 
