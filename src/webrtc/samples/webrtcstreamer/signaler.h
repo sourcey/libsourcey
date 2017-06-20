@@ -38,11 +38,14 @@ public:
 protected:
 
     /// PeerManager interface
-    void sendSDP(wrtc::Peer* conn, const std::string& type, const std::string& sdp);
-    void sendCandidate(wrtc::Peer* conn, const std::string& mid, int mlineindex, const std::string& sdp);
-    void onAddRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream);
-    void onRemoveRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream);
-
+    void sendSDP(wrtc::Peer* conn, const std::string& type, const std::string& sdp) override;
+    void sendCandidate(wrtc::Peer* conn, const std::string& mid, int mlineindex, const std::string& sdp) override;
+    void onAddRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream) override;
+    void onRemoveRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream) override;
+    void onStable(wrtc::Peer* conn) override;
+    void onClosed(wrtc::Peer* conn) override;
+    void onFailure(wrtc::Peer* conn, const std::string& error) override;
+    
     void postMessage(const smpl::Message& m);
     void syncMessage(const ipc::Action& action);
 

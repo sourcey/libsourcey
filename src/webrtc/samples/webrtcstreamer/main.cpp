@@ -85,8 +85,8 @@ int main(int argc, char** argv)
 
         // Process WebRTC threads on the main loop.
         auto rtcthread = rtc::Thread::Current();
-        Idler rtc([=]() {
-            rtcthread->ProcessMessages(1);
+        Idler rtc([rtcthread]() {
+            rtcthread->ProcessMessages(3);
         });
 
         app.waitForShutdown();

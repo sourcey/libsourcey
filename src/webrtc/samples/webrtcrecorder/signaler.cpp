@@ -133,8 +133,6 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 
 void Signaler::onAddRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterface* stream)
 {
-    // TODO: StreamRecorder should be a member of PeerConnection
-
     av::EncoderOptions options;
     options.ofile = OUTPUT_FILENAME;
     options.oformat = OUTPUT_FORMAT;

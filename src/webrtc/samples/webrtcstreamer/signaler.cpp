@@ -180,6 +180,26 @@ void Signaler::onRemoveRemoteStream(wrtc::Peer* conn, webrtc::MediaStreamInterfa
 }
 
 
+void Signaler::onStable(wrtc::Peer* conn)
+{
+    // _capturer.start();
+}
+
+
+void Signaler::onClosed(wrtc::Peer* conn)
+{
+    // _capturer.stop();
+    wrtc::PeerManager::onClosed(conn);
+}
+
+
+void Signaler::onFailure(wrtc::Peer* conn, const std::string& error)
+{
+    // _capturer.stop();
+    wrtc::PeerManager::onFailure(conn, error);
+}
+
+
 void Signaler::postMessage(const smpl::Message& m)
 {
     _ipc.push(new ipc::Action(

@@ -88,7 +88,7 @@ void AudioPacketModule::onAudioCaptured(av::AudioPacket& packet)
 
     // assert(_processThread->IsCurrent());
     rtc::CritScope cs(&_critCallback);
-    if (!_audioCallback) {
+    if (!_audioCallback || !_recording) {
         return;
     }
 

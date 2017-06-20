@@ -178,8 +178,8 @@ void MediaCapture::run()
 
         // Reset the stream back to the beginning when looping is enabled
         if (_looping) {
+            LTrace("Looping")
             for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
-                LDebug("Loop streams", i)
                 if (avformat_seek_file(_formatCtx, i, 0, 0, 0, AVSEEK_FLAG_FRAME) < 0) {
                     throw std::runtime_error("Cannot reset media stream");
                 }

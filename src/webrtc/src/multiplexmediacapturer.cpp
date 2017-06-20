@@ -32,8 +32,8 @@ MultiplexMediaCapturer::MultiplexMediaCapturer()
     , _audioModule(AudioPacketModule::Create())
 {
     _stream.attachSource(_videoCapture, true);
-    //_stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(0), 5);
-    //_stream.attach(std::make_shared<av::RealtimePacketQueue<av::PlanarVideoPacket>>(0), 5);
+    // _stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(0), 5);
+    // _stream.attach(std::make_shared<av::RealtimePacketQueue<av::PlanarVideoPacket>>(0), 5);
     _stream.emitter += packetSlot(_audioModule.get(), &AudioPacketModule::onAudioCaptured);
 }
 
@@ -60,7 +60,7 @@ void MultiplexMediaCapturer::openFile(const std::string& file, bool loop)
         // _videoCapture->audio()->resampler->variableOutput = false;
     }
 
-    // Convert to yuv420p for WebRTC compatability 
+    // Convert to yuv420p for WebRTC compatability
     if (_videoCapture->video()) {
         _videoCapture->video()->oparams.pixelFmt = "yuv420p"; // nv12
         // _videoCapture->video()->oparams.width = capture_format.width;
