@@ -148,7 +148,7 @@ bool AudioContext::recreateResampler()
     // }
 
     // Recreate the resampler context
-    SDebug << "Recreating audio resampler context" << endl;
+    LDebug("Recreating audio resampler context")
     if (resampler)
         delete resampler;
     resampler = new AudioResampler();

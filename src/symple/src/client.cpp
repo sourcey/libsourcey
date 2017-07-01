@@ -108,7 +108,7 @@ void assertCanSend(Client* client, Message& m)
     m.setFrom(client->ourPeer()->address());
 
     if (m.to().id == m.from().id) {
-        SError << "Invalid Symple address: " << m.to().id << ": " << m.from().id << endl;
+        LError("Invalid Symple address: ", m.to().id, ": ", m.from().id)
         assert(0);
         throw std::runtime_error("Cannot send message with matching sender and recipient.");
     }
@@ -308,21 +308,21 @@ void Client::emit(IPacket& raw)
             if (type == "message") {
                 Message m(data);
                 if (!m.valid()) {
-                    SWarn << "Dropping invalid message: " << data.dump() << endl;
+                    LWarn("Dropping invalid message: ", data.dump())
                     return;
                 }
                 PacketSignal::emit(m);
             } else if (type == "event") {
                 Event e(data);
                 if (!e.valid()) {
-                    SWarn << "Dropping invalid event: " << data.dump() << endl;
+                    LWarn("Dropping invalid event: ", data.dump())
                     return;
                 }
                 PacketSignal::emit(e);
             } else if (type == "presence") {
                 Presence p(data);
                 if (!p.valid()) {
-                    SWarn << "Dropping invalid presence: " << data.dump() << endl;
+                    LWarn("Dropping invalid presence: ", data.dump())
                     return;
                 }
                 PacketSignal::emit(p);
@@ -334,13 +334,13 @@ void Client::emit(IPacket& raw)
             } else if (type == "command") {
                 Command c(data);
                 if (!c.valid()) {
-                    SWarn << "Dropping invalid command: " << data.dump() << endl;
+                    LWarn("Dropping invalid command: ", data.dump())
                     return;
                 }
                 PacketSignal::emit(c);
                 if (c.isRequest()) {
                     c.setStatus(404);
-                    SWarn << "Command not handled: " << c.id() << ": " << c.node() << endl;
+                    LWarn("Command not handled: " ,  c.id(),  ": ", c.node())
                     respond(c);
                 }
             } else {
@@ -349,14 +349,14 @@ void Client::emit(IPacket& raw)
                 // Attempt to parse custom packets as a message type
                 Message m(data);
                 if (!m.valid()) {
-                    SWarn << "Dropping invalid message: " << data.dump() << endl;
+                    LWarn("Dropping invalid message: ", data.dump())
                     return;
                 }
                 PacketSignal::emit(m);
             }
         } else {
             assert(0 && "invalid packet");
-            SWarn << "Invalid Symple message" << endl;
+            LWarn("Invalid Symple message")
         }
     }
 
@@ -400,7 +400,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
         }
     } else {
         std::string error("Bad presence data: " + data.dump());
-        SError << error << endl;
+        LError(error)
         if (whiny)
             throw std::runtime_error(error);
     }
@@ -428,7 +428,7 @@ void Client::onPresenceData(const json::value& data, bool whiny)
     }
     else {
         std::string error("Bad presence data: " + json::stringify(data));
-        SError << error << endl;
+        LError(error, )
         if (whiny)
             throw std::runtime_error(error);
     }

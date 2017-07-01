@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         // Create and attach the default video capture
         av::VideoCapture video;
         if (devman.getDefaultCamera(device)) {
-            SInfo << "Using video device: " << device.name << endl;
+            LInfo("Using video device: ", device.name)
             video.openVideo(device.id, { 640, 480 });
             video.getEncoderFormat(options.iformat);
             stream.attachSource(&video, false, true);
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
         // Create and attach the default audio capture
         av::AudioCapture audio;
         if (devman.getDefaultMicrophone(device)) {
-            SInfo << "Using audio device: " << device.name << endl;
+            LInfo("Using audio device: ", device.name)
             audio.openAudio(device.id, { 2, 44100 });
             audio.getEncoderFormat(options.iformat);
             stream.attachSource(&audio, false, true);
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         stream.start();
 
         // Keep recording until Ctrl-C is pressed
-        SInfo << "Recording video: " << OUTPUT_FILENAME << endl;
+        LInfo("Recording video: ", OUTPUT_FILENAME)
         waitForShutdown([](void* opaque) {
             reinterpret_cast<PacketStream*>(opaque)->stop();
         }, &stream);

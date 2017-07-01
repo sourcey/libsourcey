@@ -130,7 +130,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         if (type & 0x8000) {
             // RTP and RTCP set MSB of first byte, since first two bits are version,
             // and version is always 2 (10). If set, this is not a STUN packet.
-            SWarn << "Not STUN packet" << endl;
+            LWarn("Not STUN packet")
             return 0;
         }
 
@@ -140,7 +140,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         uint16_t classType = type & 0x0110;
         uint16_t methodType = type & 0x000F;
         if (!isValidMethod(methodType)) {
-            SWarn << "STUN message unknown method: " << methodType << endl;
+            LWarn("STUN message unknown method: ", methodType)
             return 0;
         }
 
@@ -150,7 +150,7 @@ ssize_t Message::read(const ConstBuffer& buf)
         // Message length
         reader.getU16(_size);
         if (_size > buf.size()) {
-            SWarn << "STUN message larger than buffer: " << _size << " > " << buf.size() << endl;
+            LWarn("STUN message larger than buffer: " ,  _size,  " > ", buf.size())
             return 0;
         }
 

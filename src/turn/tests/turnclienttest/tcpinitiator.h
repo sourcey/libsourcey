@@ -39,24 +39,24 @@ struct TCPInitiator : public turn::TCPClientObserver
         , client(*this, opts)
         , success(false)
     {
-        SDebug << id << ": Creating" << endl;
+        LDebug(id, ": Creating")
     }
 
     virtual ~TCPInitiator() 
     { 
-        SDebug << id << ": Destroying" << endl; 
+        LDebug(id, ": Destroying") 
     }
 
     void initiate(const std::string& peerIP)
     {
-        SDebug << id << ": Initializing" << endl;
+        LDebug(id, ": Initializing")
         try {
             client.addPermission(peerIP);
             client.addPermission("127.0.0.1");
             client.addPermission("192.168.1.1");
             client.initiate();
         } catch (std::exception& exc) {
-            SError << id << ": Error: " << exc.what() << std::endl;
+            LError(id, ": Error: ", exc.what())
         }
     }
 
@@ -82,14 +82,14 @@ struct TCPInitiator : public turn::TCPClientObserver
         // payload.append(65536, 'x');
         // payload.append(10000, 'x');
 
-        SDebug << id << ": Sending packet to responder" << endl;
+        LDebug(id, ": Sending packet to responder")
         std::string payload("initiator > responder");
         client.sendData(payload.c_str(), payload.length(), lastPeerAddr);
     }
 
     void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
-        SDebug << id << ": State change: " << state.toString() << endl;
+        LDebug(id, ": State change: ", state.toString())
 
         switch (state.id()) {
             case turn::ClientState::None:
@@ -111,7 +111,7 @@ struct TCPInitiator : public turn::TCPClientObserver
 
     void onRelayConnectionCreated(turn::TCPClient&, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr)
     {
-        SDebug << id << ": Connection Created: " << peerAddr << endl;
+        LDebug(id, ": Connection Created: ", peerAddr)
         
         // Remember the last peer
         lastPeerAddr = peerAddr;
@@ -123,7 +123,7 @@ struct TCPInitiator : public turn::TCPClientObserver
 
     void onRelayConnectionClosed(turn::TCPClient&, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr)
     {
-        SDebug << id << ": Connection Closed" << endl;
+        LDebug(id, ": Connection Closed")
     }
 
     void onRelayDataReceived(turn::Client&, const char* data, size_t size, const net::Address& peerAddr)
@@ -150,21 +150,21 @@ struct TCPInitiator : public turn::TCPClientObserver
                 << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else
-            SDebug << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+            LDebug(id << ": Received dummy data from " << peerAddr << ": size=", size)
 
         // Echo back to peer
-        SDebug << id << ": Received data from  " << peerAddr << ": " << size << endl;
+        LDebug(id << ": Received data from  " << peerAddr << ": ", size)
 
         client.sendData(data, size, peerAddr);
 #endif
-        SDebug << id << ": Data received from responder" << endl;
+        LDebug(id, ": Data received from responder")
 
         sendPacketToResponder();
     }
 
     void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
-        SDebug << id << ": Permissions Created" << endl;
+        LDebug(id, ": Permissions Created")
     }
 };
 

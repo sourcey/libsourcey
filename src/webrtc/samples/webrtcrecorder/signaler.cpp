@@ -101,7 +101,7 @@ void Signaler::onPeerMessage(smpl::Message& m)
 
 void Signaler::onPeerDiconnected(const smpl::Peer& peer)
 {
-    SDebug << "Peer disconnected" << endl;
+    LDebug("Peer disconnected")
 
     auto conn = get(peer.id());
     if (conn) {

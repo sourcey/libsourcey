@@ -134,7 +134,7 @@ public:
 
     void onStreamStateChange(const PacketStreamState& state) override
     {
-        //STrace << "Stream state: " << state << std::endl;
+        //LTrace("Stream state: ", state)
 
         switch (state.id()) {
         // case PacketStreamState::None:

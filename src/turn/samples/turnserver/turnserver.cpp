@@ -69,7 +69,7 @@ public:
         auto nonceAttr = request.get<stun::Nonce>();
         auto integrityAttr = request.get<stun::MessageIntegrity>();
         if (!usernameAttr || !realmAttr || !nonceAttr || !integrityAttr) {
-            SDebug << "Authenticating: Unauthorized STUN Request" << endl;
+            LDebug("Authenticating: Unauthorized STUN Request")
             return turn::NotAuthorized;
         }
 
@@ -95,12 +95,12 @@ public:
 
     virtual void onServerAllocationCreated(Server*, IAllocation* alloc)
     {
-        SDebug << "Allocation Created" << endl;
+        LDebug("Allocation Created")
     }
 
     virtual void onServerAllocationRemoved(Server*, IAllocation* alloc)
     {
-        SDebug << "Allocation Removed" << endl;
+        LDebug("Allocation Removed")
     }
 };
 

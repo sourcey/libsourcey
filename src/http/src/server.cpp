@@ -58,7 +58,7 @@ void Server::start()
     _socket->bind(_address);
     _socket->listen(1000);
 
-    SDebug << "HTTP server listening on " << _address << endl;
+    LDebug("HTTP server listening on ", _address)
 
     _timer.Timeout += slot(this, &Server::onTimer);
     _timer.start();
@@ -133,7 +133,7 @@ void Server::onSocketClose(net::Socket& socket)
 
 void Server::onTimer()
 {
-    // SDebug << "Num active HTTP server connections: " << connections.size() << endl;
+    // LDebug("Num active HTTP server connections: ", connections.size())
 
     // TODO: cleanup timed out pending connections
 }
@@ -168,7 +168,7 @@ ServerConnection::~ServerConnection()
     close();
 
     if (_responder) {
-        STrace << "Destroy: Responder: " << _responder << endl;
+        LTrace("Destroy: Responder: ", _responder)
         delete _responder;
     }
 }
@@ -206,7 +206,7 @@ void ServerConnection::onHeaders()
     if (_upgrade && util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
     // if (util::icompare(request().get("Connection", ""), "upgrade") == 0 &&
     //     util::icompare(request().get("Upgrade", ""), "websocket") == 0) {
-        // STrace << "Upgrading to WebSocket: " << request() << endl;
+        // LTrace("Upgrading to WebSocket: ", request())
 
         // Note: To upgrade the connection we need to replace the
         // underlying SocketAdapter instance. Since we are currently
@@ -248,7 +248,7 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-    // STrace << "On payload: " << buffer.size() << endl;
+    // LTrace("On payload: ", buffer.size())
 
     // The connection may have been closed inside a previous callback.
     if (_closed) {

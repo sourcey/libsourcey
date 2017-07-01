@@ -54,7 +54,7 @@ void PeerManager::recvSDP(const std::string& token, const json::value& message)
     std::string type = message.value(kSessionDescriptionTypeName, "");
     std::string sdp = message.value(kSessionDescriptionSdpName, "");
     if (sdp.empty() || (type != "offer" && type != "answer")) {
-        SError << "Received bad sdp: " << type << ": " << sdp << endl;
+        LError("Received bad sdp: ", type, ": ", sdp)
         assert(0 && "bad sdp");
         return;
     }
@@ -77,7 +77,7 @@ void PeerManager::recvCandidate(const std::string& token, const json::value& mes
     int mlineindex = message.value(kCandidateSdpMlineIndexName, -1);
     std::string sdp = message.value(kCandidateSdpName, "");
     if (mlineindex == -1 || mid.empty() || sdp.empty()) {
-        SError << "Invalid candidate format" << endl;
+        LError("Invalid candidate format")
         assert(0 && "bad candiate");
         return;
     }

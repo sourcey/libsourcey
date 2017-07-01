@@ -101,7 +101,7 @@ ssize_t WebSocketAdapter::send(const char* data, size_t len, int flags)
 
 ssize_t WebSocketAdapter::send(const char* data, size_t len, const net::Address& peerAddr, int flags)
 {
-    STrace << "Send: " << len << ": " << std::string(data, len) << endl;
+    LTrace("Send: ",  len,  ": ", std::string(data, len))
     assert(framer.handshakeComplete());
 
     // Set default text flag if none specified
@@ -125,7 +125,7 @@ void WebSocketAdapter::sendClientRequest()
 
     std::ostringstream oss;
     _request.write(oss);
-    STrace << "Client request: " << oss.str() << endl;
+    LTrace("Client request: ", oss.str())
 
     assert(socket);
     SocketAdapter::send(oss.str().c_str(), oss.str().length());
@@ -134,7 +134,7 @@ void WebSocketAdapter::sendClientRequest()
 
 void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
-    STrace << "Client response: " << buffer.str() << endl;
+    LTrace("Client response: ", buffer.str())
 
     auto data = bufferCast<char*>(buffer);
     http::Parser parser(&_response);
@@ -172,14 +172,14 @@ void WebSocketAdapter::onHandshakeComplete()
 
 void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
-    STrace << "Server request: " << buffer.str() << endl;
+    LTrace("Server request: ", buffer.str())
 
     http::Parser parser(&_request);
     if (!parser.parse(bufferCast<char*>(buffer), buffer.size())) {
         throw std::runtime_error("WebSocket error: Cannot parse request: Incomplete HTTP message");
     }
 
-    STrace << "Verifying handshake: " << _request << endl;
+    LTrace("Verifying handshake: ", _request)
 
     // Allow the application to verify the incoming request.
     // TODO: Handle authentication
@@ -190,7 +190,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const ne
         framer.acceptServerRequest(_request, _response);
         LTrace("Handshake success")
     } catch (std::exception& exc) {
-        SWarn << "Handshake failed: " << exc.what() << endl;
+        LWarn("Handshake failed: ", exc.what())
     }
 
     // Allow the application to override the response
@@ -219,7 +219,7 @@ void WebSocketAdapter::onSocketConnect(net::Socket&)
 
 void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    STrace << "On recv: " << buffer.size() << endl;
+    LTrace("On recv: ", buffer.size())
 
     if (framer.handshakeComplete()) {
 
@@ -260,7 +260,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                 // Update the next frame offset
                 offset = reader.position(); // + payloadLength;
                 if (offset < total)
-                    STrace << "Splitting joined packet at " << offset << " of " << total << endl;
+                    LTrace("Splitting joined packet at ",  offset,  " of ", total)
 
                 // Drop empty packets
                 if (!payloadLength) {
@@ -268,7 +268,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                     continue;
                 }
             } catch (std::exception& exc) {
-                SError << "Parser error: " << exc.what() << endl;
+                LError("Parser error: ", exc.what())
                 socket->setError(exc.what());
                 return;
             }
@@ -288,7 +288,7 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
             else
                 handleServerRequest(buffer, peerAddress);
         } catch (std::exception& exc) {
-            SError << "Read error: " << exc.what() << endl;
+            LError("Read error: ", exc.what())
             socket->setError(exc.what());
         }
         return;

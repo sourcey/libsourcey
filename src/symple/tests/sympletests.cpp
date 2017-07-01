@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
         while (!lclient.completed() || !rclient.completed()) {
 
-            // SDebug << "waiting for test completion" << std::endl;
+            // LDebug("waiting for test completion")
             uv::runLoop(uv::defaultLoop(), UV_RUN_ONCE);
 
             // // Connect the rclient when lclient is online

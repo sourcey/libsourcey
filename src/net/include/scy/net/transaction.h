@@ -36,12 +36,12 @@ public:
         , PacketSocketEmitter(socket)
         , _peerAddress(peerAddress)
     {
-        STrace << "Create" << std::endl;
+        LTrace("Create")
     }
 
     virtual bool send() override
     {
-        STrace << "Send" << std::endl;
+        LTrace("Send")
         if (impl->sendPacket(BaseT::_request, _peerAddress) > 0)
             return BaseT::send();
         BaseT::setState(this, TransactionState::Failed);
@@ -50,13 +50,13 @@ public:
 
     virtual void cancel() override
     {
-        STrace << "Cancel" << std::endl;
+        LTrace("Cancel")
         BaseT::cancel();
     }
 
     virtual void dispose() override
     {
-        STrace << "Dispose" << std::endl;
+        LTrace("Dispose")
         BaseT::dispose(); // gc
     }
 
@@ -72,7 +72,7 @@ protected:
     /// callback for checking potential response candidates.
     virtual void onPacket(IPacket& packet) override
     {
-        STrace << "On packet: " << packet.size() << std::endl;
+        LTrace("On packet: ", packet.size())
         if (BaseT::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
@@ -84,7 +84,7 @@ protected:
     /// Called when a successful response match is received.
     virtual void onResponse() override
     {
-        STrace << "On success: " << BaseT::_response.toString() << std::endl;
+        LTrace("On success: ", BaseT::_response.toString())
         PacketSignal::emit(BaseT::_response);
     }
 

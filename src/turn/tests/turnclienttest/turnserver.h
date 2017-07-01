@@ -50,7 +50,7 @@ struct TestServer : public turn::ServerObserver
 
 
 #define RunTestServer()                                                        \
-    SDebug << "Running TURN Server" << endl;                                   \
+    LDebug("Running TURN Server")                                   \
     turn::ServerOptions so;                                                    \
     so.software = "Sourcey STUN/TURN Server [rfc5766]";                        \
     so.realm = "sourcey.com";                                                  \

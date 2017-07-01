@@ -33,7 +33,7 @@ ClientConnection::ClientConnection(const URL& url, const net::TCPSocket::Ptr& so
     , _active(false)
     , _complete(false)
 {
-    // STrace << "Create: " << url << endl;
+    // LTrace("Create: ", url)
 
     _request.setURI(url.pathEtc());
     _request.setHost(url.host(), url.port());
@@ -126,7 +126,7 @@ void ClientConnection::onSocketConnect(net::Socket& socket)
 
     // Flush queued packets
     if (!_outgoingBuffer.empty()) {
-        // STrace << "Sending buffered: " << _outgoingBuffer.size() << endl;
+        // LTrace("Sending buffered: ", _outgoingBuffer.size())
         for (const auto& packet : _outgoingBuffer) {
             send(packet.c_str(), packet.length());
         }
@@ -163,7 +163,7 @@ void ClientConnection::onHeaders()
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-    // STrace << "On payload: " << buffer.size() << endl;
+    // LTrace("On payload: ", buffer.size())
 
     //// Update download progress
     //IncomingProgress.update(buffer.size());
@@ -177,7 +177,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
 
     // Write to the STL read stream if available
     if (_readStream) {
-        // STrace << "Writing to stream: " << buffer.size() << endl;
+        // LTrace("Writing to stream: ", buffer.size())
         _readStream->write(bufferCast<const char*>(buffer), buffer.size());
         _readStream->flush();
     }
@@ -266,7 +266,7 @@ void Client::shutdown()
     //_connections.clear();
     auto conns = _connections;
     for (auto conn : conns) {
-        // STrace << "Shutdown: " << conn << endl;
+        // LTrace("Shutdown: ", conn)
         conn->close(); // close and remove via callback
     }
     assert(_connections.empty());
@@ -275,7 +275,7 @@ void Client::shutdown()
 
 void Client::addConnection(ClientConnection::Ptr conn)
 {
-    // STrace << "Adding connection: " << conn << endl;
+    // LTrace("Adding connection: ", conn)
 
     // conn->Close += [&](net::Socket&) {
     //     removeConnection(conn.get());
@@ -288,10 +288,10 @@ void Client::addConnection(ClientConnection::Ptr conn)
 
 void Client::removeConnection(ClientConnection* conn)
 {
-    // STrace << "Removing connection: " << conn << endl;
+    // LTrace("Removing connection: ", conn)
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (conn == it->get()) {
-            // STrace << "Removed connection: " << conn << endl;
+            // LTrace("Removed connection: ", conn)
             _connections.erase(it);
             return;
         }
@@ -314,7 +314,7 @@ void Client::onConnectionTimer(void*)
     auto conns = _connections;
     for (auto conn : conns) {
         if (conn->closed()) { // conn->expired()
-            // STrace << "Closing expired connection: " << conn << endl;
+            // LTrace("Closing expired connection: ", conn)
             conn->close();
         }
     }

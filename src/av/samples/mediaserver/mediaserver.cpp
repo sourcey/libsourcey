@@ -30,7 +30,7 @@ MediaServer::MediaServer(uint16_t port)
                    net::makeSocket<net::TCPSocket>(),
                    new HTTPStreamingConnectionFactory(this))
 {
-    SDebug << "Create" << endl;
+    LDebug("Create")
 
     // Register the media formats we will be using
     // FormatRegistry& formats = MediaFactory::instance().formats();
@@ -62,14 +62,14 @@ MediaServer::MediaServer(uint16_t port)
 
 MediaServer::~MediaServer()
 {
-    SDebug << "Destroy" << endl;
+    LDebug("Destroy")
 }
 
 
 void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options,
                                     bool freeCaptures, bool attachPacketizers)
 {
-    SDebug << "Setup Packet Stream" << endl;
+    LDebug("Setup Packet Stream")
 
     // Attach capture sources
 
@@ -194,7 +194,7 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     av::DeviceManager devman;
     if (options.oformat.video.enabled) {
         devman.getDefaultCamera(dev);
-        SInfo << "Default video capture " << dev.id << endl;
+        LInfo("Default video capture ", dev.id)
         options.videoCapture = std::make_shared<av::VideoCapture>(dev.id, options.oformat.video);
         //options.videoCapture->openVideo(dev.id, options.oformat.video.width, 
         //                                   options.oformat.video.height, 
@@ -203,7 +203,7 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     }
     if (options.oformat.audio.enabled) {
         devman.getDefaultMicrophone(dev);
-        SInfo << "Default audio capture " << dev.id << endl;
+        LInfo("Default audio capture ", dev.id)
         options.audioCapture = std::make_shared<av::AudioCapture>(dev.id, options.oformat.audio);
         //options.audioCapture->open(dev.id, options.oformat.audio.channels, 
         //                                   options.oformat.audio.sampleRate);
@@ -251,10 +251,10 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 #endif
     } 
     catch (std::exception& exc) {
-        SError << "Request error: " << exc.what() << endl;
+        LError("Request error: ", exc.what())
     }
 
-    SWarn << "Bad Request" << endl;
+    LWarn("Bad Request")
     conn.response().setStatus(http::StatusCode::BadRequest);
     conn.sendHeader();
     conn.close();

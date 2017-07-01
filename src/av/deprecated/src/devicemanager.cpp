@@ -221,7 +221,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
 #if 0
     for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
         if (name == it->name) {
-            SInfo << "Create VideoCapturer for " << name << endl;
+            LInfo("Create VideoCapturer for ", name)
             out = *it;
             return true;
         }
@@ -231,7 +231,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name,
     // with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
     // for these devices.
     if (talk_base::FileSystem::IsFile(name)) {
-        SInfo << "Create FileVideoCapturer" << endl;
+        LInfo("Create FileVideoCapturer")
         *out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
         return true;
     }
@@ -262,7 +262,7 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 
     // Determine the number of devices available
     auto ndevices = audio.getDeviceCount();
-    STrace << "Get audio devices: " << ndevices << endl;
+    LTrace("Get audio devices: ", ndevices)
 
     // Scan through devices for various capabilities
     RtAudio::DeviceInfo info;
@@ -282,7 +282,7 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
             if (info.probed == true && ((input && info.inputChannels > 0) ||
                                         (!input && info.outputChannels > 0))) {
 
-                STrace << "Adding device: " << info.name << endl;
+                LTrace("Adding device: ", info.name)
                 Device dev(
                     (input ? "audioin" : "audioout"), i, info.name, "",
                     (input ? info.isDefaultInput : info.isDefaultOutput));

@@ -103,12 +103,12 @@ void SSLSocket::listen(int backlog)
 
 ssize_t SSLSocket::send(const char* data, size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
-    // STrace << "Send: " << len << endl;
+    // LTrace("Send: ", len)
     assert(Thread::currentID() == tid());
     // assert(len <= net::MAX_TCP_PACKET_SIZE);
 
     if (!active()) {
-        SWarn << "Send error" << endl;
+        LWarn("Send error")
         return -1;
     }
 
@@ -130,7 +130,7 @@ void SSLSocket::acceptConnection()
     // incremented the accepted socket will be destroyed.
     auto socket = std::make_shared<net::SSLSocket>(_sslContext, loop());
 
-    // STrace << "Accept SSL connection: " << socket->ptr() << endl;
+    // LTrace("Accept SSL connection: ", socket->ptr())
     // invoke(&uv_tcp_init, loop(), socket->get()); // "Cannot initialize SSL socket"
 
     if (uv_accept(get<uv_stream_t>(), socket->get<uv_stream_t>()) == 0) {

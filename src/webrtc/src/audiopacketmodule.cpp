@@ -394,7 +394,7 @@ bool AudioPacketModule::RecordingIsInitialized() const
 
 int32_t AudioPacketModule::StartPlayout()
 {
-    SDebug << "Start playout" << endl;
+    LDebug("Start playout")
     if (!_playIsInitialized) {
         return -1;
     }
@@ -409,7 +409,7 @@ int32_t AudioPacketModule::StartPlayout()
 
 int32_t AudioPacketModule::StopPlayout()
 {
-    SDebug << "Stop playout" << endl;
+    LDebug("Stop playout")
     bool start = false;
     {
         rtc::CritScope cs(&_crit);
@@ -428,7 +428,7 @@ bool AudioPacketModule::Playing() const
 
 int32_t AudioPacketModule::StartRecording()
 {
-    SDebug << "Start recording" << endl;
+    LDebug("Start recording")
     if (!_recIsInitialized) {
         return -1;
     }
@@ -443,7 +443,7 @@ int32_t AudioPacketModule::StartRecording()
 
 int32_t AudioPacketModule::StopRecording()
 {
-    SDebug << "Stop recording" << endl;
+    LDebug("Stop recording")
     bool start = false;
     {
         rtc::CritScope cs(&_crit);

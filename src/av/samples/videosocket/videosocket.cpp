@@ -35,7 +35,7 @@ public:
     MPEGResponder(http::ServerConnection& conn)
         : http::ServerResponder(conn)
     {
-        SDebug << "Creating" << endl;
+        LDebug("Creating")
 
         auto stream = new PacketStream;
 
@@ -70,7 +70,7 @@ public:
 
     ~MPEGResponder()
     {
-        SDebug << "Destroying" << endl;
+        LDebug("Destroying")
         // stream->destroy();
         delete stream;
     }
@@ -84,12 +84,12 @@ public:
 
     void onClose()
     {
-        SDebug << "On close" << endl;
+        LDebug("On close")
 
         stream->emitter -= packetSlot(this, &MPEGResponder::onVideoEncoded);
-        SDebug << "On close 1" << endl;
+        LDebug("On close 1")
         stream->stop();
-        SDebug << "On close 2" << endl;
+        LDebug("On close 2")
     }
 
     void onVideoEncoded(void* sender, RawPacket& packet)

@@ -29,25 +29,25 @@ public:
         : id(id)
         , timer(1000, 1000)
     {
-        SDebug << id << ": Creating" << endl;
+        LDebug(id, ": Creating")
 
         socket.addReceiver(this);
 
         // socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         socket.bind(net::Address("0.0.0.0", 0));
 
-        SDebug << id << ": Listening on: " << socket.address() << endl;
+        LDebug(id, ": Listening on: ", socket.address())
     }
 
     virtual ~UDPResponder()
     {
-        SDebug << id << ": Destroying" << endl;
+        LDebug(id, ": Destroying")
         socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)
     {
-        SDebug << id << ": Starting on: " << relayAddr << endl;
+        LDebug(id, ": Starting on: ", relayAddr)
 
         try {
             this->relayedAddr = relayAddr;
@@ -57,7 +57,7 @@ public:
             // socket.bind(net::Address("0.0.0.0", 4020));
             socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            SError << id << ": ERROR: " << exc.what() << endl;
+            LError(id, ": ERROR: ", exc.what())
             assert(false);
         }
     }
@@ -85,7 +85,7 @@ public:
     void onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddr)
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        SDebug << id << ": On recv: " << peerAddr << ": " << buffer.size() << std::endl;
+        LDebug(id, ": On recv: ", peerAddr, ": ", buffer.size())
 
         // Echo back to client
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
@@ -93,12 +93,12 @@ public:
 
     void onSocketError(net::Socket&, const scy::Error& error)
     {
-        SDebug << id << ": On error: " << error.message << std::endl;
+        LDebug(id, ": On error: ", error.message)
     }
 
     void onSocketClose(net::Socket&)
     {
-        SDebug << id << ": On close" << std::endl;
+        LDebug(id, ": On close")
         shutdown();
     }
 };

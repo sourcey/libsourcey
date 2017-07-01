@@ -78,14 +78,14 @@ void UDPAllocation::handleSendIndication(Request& request)
 
     auto peerAttr = request.get<stun::XorPeerAddress>();
     if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
-        SError << "Send Indication error: No Peer Address" << endl;
+        LError("Send Indication error: No Peer Address")
         // silently discard...
         return;
     }
 
     auto dataAttr = request.get<stun::Data>();
     if (!dataAttr) {
-        SError << "Send Indication error: No Data attribute" << endl;
+        LError("Send Indication error: No Data attribute")
         // silently discard...
         return;
     }
@@ -194,7 +194,7 @@ ssize_t UDPAllocation::send(const char* data, size_t size,
 
     // Check that we have not exceeded our lifetime and bandwidth quota.
     if (IAllocation::deleted()) {
-        SWarn << "Send indication dropped: Allocation quota reached" << endl;
+        LWarn("Send indication dropped: Allocation quota reached")
         return -1;
     }
 

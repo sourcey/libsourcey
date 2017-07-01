@@ -37,7 +37,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate,
     _iParams.firstChannel = 0;
 
     if (_audio.getDeviceCount() < 1) {
-        SWarn << "No audio devices found!" << endl;
+        LWarn("No audio devices found!")
         return;
     }
 
@@ -62,7 +62,7 @@ void AudioCapture::open() // int channels, int sampleRate, RtAudioFormat format
         close();
 
     std::lock_guard<std::mutex> guard(_mutex);
-    STrace << "Opening: " << _channels << ": " << _sampleRate << endl;
+    LTrace("Opening: ",  _channels,  ": ", _sampleRate)
 
     // 1024 is a common frame size for many codecs.
     unsigned int nBufferFrames = 1024; // 256, 512
@@ -149,7 +149,7 @@ void AudioCapture::stop()
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
     PacketSignal::attach(delegate);
-    STrace << "Added Delegate: " << refCount() << endl;
+    LTrace("Added Delegate: ", refCount())
     if (refCount() == 1)
         start();
 }
@@ -158,7 +158,7 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 bool AudioCapture::detach(const PacketDelegateBase& delegate)
 {
     if (PacketSignal::detach(delegate)) {
-        STrace << "Removed Delegate: " << refCount() << endl;
+        LTrace("Removed Delegate: ", refCount())
         if (refCount() == 0)
             stop();
         LTrace("Removed Delegate: OK")
@@ -177,11 +177,11 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     AudioPacket packet;
 
     if (status)
-        SError << "Stream over/underflow detected" << endl;
+        LError("Stream over/underflow detected")
 
     assert(inputBuffer);
     if (inputBuffer == nullptr) {
-        SError << "Input buffer is NULL" << endl;
+        LError("Input buffer is NULL")
         return 2;
     }
 
@@ -199,7 +199,7 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
     //      << "\n\tStream Time: " << packet.time
     //      << endl;
 
-    STrace << "Emitting: " << packet.time << std::endl;
+    LTrace("Emitting: ", packet.time)
     self->emit(packet);
     return 0;
 }
@@ -208,13 +208,13 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer,
 void AudioCapture::errorCallback(RtAudioError::Type type,
                                  const std::string& errorText)
 {
-    SError << "Audio system error: " << errorText << endl;
+    LError("Audio system error: ", errorText)
 }
 
 
 void AudioCapture::setError(const std::string& message, bool throwExec)
 {
-    SError << "Error: " << message << endl;
+    LError("Error: ", message)
     _error = message;
     if (throwExec)
         throw std::runtime_error(message);

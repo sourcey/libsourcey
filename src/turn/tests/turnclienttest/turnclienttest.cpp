@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
         initiator.AllocationCreated += [&]()
         {
-            SDebug << "Initiator allocation created" << endl;
+            LDebug("Initiator allocation created")
 
             // Start the responder when the allocation is created
             responder.connect(initiator.client.relayedAddress());
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
         initiator.TestComplete += [&](bool success)
         {
-            SDebug << "Test complete: " << success << endl;
+            LDebug("Test complete: ", success)
             expect(success);
             initiator.shutdown();
             responder.shutdown();
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 
         initiator.AllocationCreated += [&]()
         {
-            SDebug << "Initiator allocation created" << endl;
+            LDebug("Initiator allocation created")
 
             // Start the responder when the allocation is created
             responder.connect(initiator.client.relayedAddress());
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
         initiator.TestComplete += [&](bool success)
         {
-            SDebug << "Test complete: " << success << endl;
+            LDebug("Test complete: ", success)
             expect(success);
             initiator.shutdown();
             responder.shutdown();

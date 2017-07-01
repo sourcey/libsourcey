@@ -74,7 +74,7 @@ FormatRegistry& MediaFactory::formats()
 
 void MediaFactory::loadVideoCaptures()
 {
-    SDebug << "Loading video captures" << endl;
+    LDebug("Loading video captures")
     assert(Thread::mainID == Thread::currentID());
 
     // Initialize a VideoCapture object for each available device.
@@ -95,7 +95,7 @@ void MediaFactory::loadVideoCaptures()
 
 void MediaFactory::reloadFailedVideoCaptures()
 {
-    SDebug << "Reloading failed video captures" << endl;
+    LDebug("Reloading failed video captures")
     assert(Thread::mainID == Thread::currentID());
 
     // Loop through captures and attempt to reopen any

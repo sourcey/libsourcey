@@ -27,20 +27,20 @@ public:
         : id(id)
         , timer(1000, 1000)
     {
-        SDebug << id << ": Creating" << endl;
+        LDebug(id, ": Creating")
 
         socket.addReceiver(this);
     }
 
     virtual ~TCPResponder()
     {
-        SDebug << id << ": Destroying" << endl;
+        LDebug(id, ": Destroying")
         socket.removeReceiver(this);
     }
 
     void connect(const net::Address& relayAddr)
     {
-        SDebug << id << ": Starting on: " << relayAddr << endl;
+        LDebug(id,": Starting on: ", relayAddr)
 
         try {
             this->relayedAddr = relayAddr;
@@ -49,7 +49,7 @@ public:
             // will be received below.
             socket.connect(relayAddr);
         } catch (std::exception& exc) {
-            SError << id << ": ERROR: " << exc.what() << endl;
+            LError(id, ": ERROR: ", exc.what())
             assert(false);
         }
     }
@@ -72,7 +72,7 @@ public:
 
     void onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
     {
-        SDebug << id << ": On recv: " << peerAddress << ": " << buffer.size() << endl;
+        LDebug(id, ": On recv: ", peerAddress, ": ", buffer.size())
 
         // Echo data back to client
         socket.send(bufferCast<const char*>(buffer), buffer.size());
@@ -80,12 +80,12 @@ public:
 
     void onSocketError(net::Socket&, const scy::Error& error)
     {
-        SDebug << id << ": On error: " << error.message << std::endl;
+        LDebug(id, ": On error: ", error.message)
     }
 
     void onSocketClose(net::Socket&)
     {
-        SDebug << id << ": On close" << std::endl;
+        LDebug(id, ": On close")
     }
 
 #if 0

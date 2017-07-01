@@ -159,7 +159,7 @@ public:
                         auto message = new smpl::Message();
                         message->setData(data);
 
-                        cout << "Sending message: " << data << endl;
+                        cout << "Lending message: " << data << endl;
                         // app->client.send(message, true);
 
                         // Synchronize the message with the main thread
@@ -322,7 +322,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        SDebug << "####### Updating presence data" << endl;
+        LDebug("####### Updating presence data")
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.

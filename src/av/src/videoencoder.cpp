@@ -163,7 +163,7 @@ void VideoEncoder::close()
     if (stream && format && format->nb_streams) {
         for (unsigned int i = 0; i < format->nb_streams; i++) {
             if (format->streams[i] == stream) {
-                STrace << "Closing: Removing stream: " << stream << endl;
+                LTrace("Closing: Removing stream: ", stream)
                 av_freep(&format->streams[i]->codec);
                 av_freep(&format->streams[i]);
                 stream = nullptr;
@@ -259,7 +259,7 @@ bool VideoEncoder::encode(AVFrame* iframe)
     int ret = avcodec_encode_video2(ctx, &opacket, convert(iframe), &frameEncoded);
     if (ret < 0) {
         error = "Video encoder error: " + averror(ret);
-        SError << error << endl;
+        LError(error, )
         throw std::runtime_error(error);
     }
 
@@ -279,7 +279,7 @@ bool VideoEncoder::encode(AVFrame* iframe)
             STrace << "Encoded frame:"
                          << "\n\tScaled PTS: " << opacket.pts
                          << "\n\tScaled DTS: " << opacket.dts
-                         << "\n\tScaled Duration: " << opacket.duration << endl;
+                         << "\n\tLcaled Duration: "(opacket.duration, )
 
             emitPacket(this, opacket);
         }

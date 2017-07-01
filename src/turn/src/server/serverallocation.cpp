@@ -45,7 +45,7 @@ bool ServerAllocation::handleRequest(Request& request)
     LTrace("Handle Request")
 
     if (IAllocation::deleted()) {
-        SWarn << "Dropping request for deleted allocation" << endl;
+        LWarn("Dropping request for deleted allocation")
         return false;
     }
 

@@ -41,14 +41,14 @@ public:
 
     void initiate(const std::string& peerIP)
     {
-        SDebug << id << ": Initializing" << endl;
+        LDebug(id, ": Initializing")
         try {
             client.addPermission(peerIP);
             client.addPermission("127.0.0.1");
             client.addPermission("192.168.1.1");
             client.initiate();
         } catch (std::exception& exc) {
-            SError << id << ": " << exc.what() << std::endl;
+            LError(id, ": ", exc.what())
         }
     }
 
@@ -66,7 +66,7 @@ public:
             return;
         }
 
-        SDebug << id << ": Senidng to responder: " << responderAddress << endl;
+        LDebug(id, ": Senidng to responder: ", responderAddress)
 
         // Send large packets to test throttling
         // payload.append(65536, 'x');
@@ -78,7 +78,7 @@ public:
 protected:
     void onClientStateChange(turn::Client&, turn::ClientState& state, const turn::ClientState&)
     {
-        SDebug << id << ": State change: " << state.toString() << endl;
+        LDebug(id, ": State change: ", state.toString())
 
         switch (state.id()) {
             case turn::ClientState::None:
@@ -123,15 +123,15 @@ protected:
             uint64_t sentAt = util::strtoi<uint64_t>(payload);
             uint64_t latency = time::ticks() - sentAt;
 
-            SDebug << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            LDebug(id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=", latency)
         }
         else
-            SDebug << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+            LDebug(id << ": Received dummy data from " << peerAddr << ": size=", size)
         
         // Echo back to peer
         // client.sendData(data, size, peerAddr);
 #endif
-        SDebug << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
+        LDebug(id, ": Received response data from ", peerAddr, ": size=", size)
 
         // Send the intial data packet to responder 
         sendPacketToResponder();
@@ -139,13 +139,13 @@ protected:
 
     void onAllocationCreated(turn::Client&, const stun::Transaction& transaction) 
     {
-        SDebug << id << ": Permissions Created" << endl;
+        LDebug(id, ": Permissions Created")
         // AllocationCreated
     }
 
     void onAllocationPermissionsCreated(turn::Client&, const turn::PermissionList& permissions)
     {
-        SDebug << id << ": Permissions Created" << endl;
+        LDebug(id, ": Permissions Created")
     }
 };
 

@@ -120,7 +120,7 @@ LinuxDeviceManager::~LinuxDeviceManager()
 //         success = sound_system_->EnumeratePlaybackDevices(&list);
 //     }
 //     if (!success) {
-//         SError << "Can't enumerate devices" << endl;
+//         LError("Can't enumerate devices")
 //         sound_system_.release();
 //         return false;
 //     }
@@ -276,7 +276,7 @@ static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath)
         metaFile.close();
     }
 
-    SError << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
+    LError("Failed to read V4L2 device meta ", deviceMetaPath)
     return "";
 }
 
@@ -319,17 +319,17 @@ static std::string getVideoDeviceName(MetaType meta,
     if (meta == M2_6) {
         metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
 
-        SInfo << "Trying " + metaFilePath << endl;
+        LInfo("Trying " + metaFilePath, )
         deviceName = getVideoDeviceNameK2_6(metaFilePath);
         if (deviceName.empty()) {
             metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";
 
-            SInfo << "Trying " << metaFilePath << endl;
+            LInfo("Trying ", metaFilePath)
             deviceName = getVideoDeviceNameK2_6(metaFilePath);
         }
     } else {
         metaFilePath = kVideoMetaPathK2_4 + deviceFileName;
-        SInfo << "Trying " << metaFilePath << endl;
+        LInfo("Trying ", metaFilePath)
         deviceName = getVideoDeviceNameK2_4(metaFilePath);
     }
 
@@ -339,7 +339,7 @@ static std::string getVideoDeviceName(MetaType meta,
                << deviceName << endl;
     }
 
-    SInfo << "Name for " << deviceFileName << " is " << deviceName << endl;
+    LInfo("Name for " << deviceFileName << " is ", deviceName)
 
     return trim(deviceName);
 }
@@ -347,7 +347,7 @@ static std::string getVideoDeviceName(MetaType meta,
 
 static void scanV4L2Devices(std::vector<Device>& devices)
 {
-    SInfo << "Enumerating V4L2 devices" << endl;
+    LInfo("Enumerating V4L2 devices")
 
     MetaType meta;
     std::string metadataDir;
@@ -363,7 +363,7 @@ static void scanV4L2Devices(std::vector<Device>& devices)
     }
 
     if (meta != NONE) {
-        SInfo << "V4L2 device metadata found at " << metadataDir << endl;
+        LInfo("V4L2 device metadata found at ", metadataDir)
 
         std::vector<std::string> nodes;
         fs::readdir(metadataDir, nodes);
@@ -379,15 +379,15 @@ static void scanV4L2Devices(std::vector<Device>& devices)
             }
         }
     } else {
-        SError << "Unable to detect v4l2 metadata directory" << endl;
+        LError("Unable to detect v4l2 metadata directory")
     }
 
     if (devices.size() == 0) {
-        SInfo << "Plan B. Scanning all video devices in /dev directory" << endl;
+        LInfo("Plan B. Scanning all video devices in /dev directory")
         scanDeviceDirectory("/dev/", devices);
     }
 
-    SInfo << "Total V4L2 devices found : " << devices.size() << endl;
+    LInfo("Total V4L2 devices found : ", devices.size())
 }
 
 
@@ -426,7 +426,7 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     }
 //     udev_ = LATE(udev_new)();
 //     if (!udev_) {
-//         SError << "udev_new()" << endl;
+//         LError("udev_new()")
 //         return true;
 //     }
 //     // The second argument here is the event source. It can be either
@@ -436,7 +436,7 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //     // udev daemon in turn listens on the kernel.
 //     udev_monitor_ = LATE(udev_monitor_new_from_netlink)(udev_, "udev");
 //     if (!udev_monitor_) {
-//         SError << "udev_monitor_new_from_netlink()" << endl;
+//         LError("udev_monitor_new_from_netlink()")
 //         return true;
 //     }
 //     // We only listen for changes in the video devices. Audio devices are
@@ -461,7 +461,7 @@ bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 //             return true;
 //     }
 //     if (LATE(udev_monitor_enable_receiving)(udev_monitor_) < 0) {
-//         SError << "udev_monitor_enable_receiving()" << endl;
+//         LError("udev_monitor_enable_receiving()")
 //         return true;
 //     }
 //     static_cast<talk_base::PhysicalSocketServer*>(

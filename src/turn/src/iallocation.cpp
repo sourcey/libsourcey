@@ -185,7 +185,7 @@ void IAllocation::removeExpiredPermissions()
 
     for (auto it = _permissions.begin(); it != _permissions.end();) {
         if ((*it).timeout.expired()) {
-            SInfo << "Removing Expired Permission: " << (*it).ip << endl;
+            LInfo("Removing Expired Permission: ", (*it).ip)
             it = _permissions.erase(it);
         } else
             ++it;
@@ -202,7 +202,7 @@ bool IAllocation::hasPermission(const std::string& peerIP)
 
 #if ENABLE_LOCAL_IPS
     if (peerIP.find("192.168.") == 0 || peerIP.find("127.") == 0) {
-        SWarn << "Granting permission for local IP without explicit permission: " << peerIP << endl;
+        LWarn("Granting permission for local IP without explicit permission: ", peerIP)
         return true;
     }
 #endif

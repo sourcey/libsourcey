@@ -219,7 +219,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
 
 int flushBuffer(AudioEncoder* enc)
 {
-    // STrace << "Flush" << endl;
+    // LTrace("Flush")
 
     // Read frames from the FIFO while available
     int num = 0;
@@ -239,7 +239,7 @@ int flushBuffer(AudioEncoder* enc)
 
 bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t pts)
 {
-    // STrace << "Encoding audio packet: " << numSamples << endl;
+    // LTrace("Encoding audio packet: ", numSamples)
 
     // Resample input data or add it to the buffer directly
     if (resampler) {
@@ -270,7 +270,7 @@ bool AudioEncoder::encode(uint8_t* samples, const int numSamples, const int64_t 
 
 bool AudioEncoder::encode(uint8_t* samples[4], const int numSamples, const int64_t pts)
 {
-    STrace << "Encoding audio packet: " << numSamples << endl;
+    LTrace("Encoding audio packet: ", numSamples)
 
     // Resample input data or add it to the buffer directly
     if (resampler) {

@@ -50,17 +50,17 @@ public:
                << "\n\tAllowance: " << allowance
                << "\n\tElapsed: " << elapsed
                << "\n\tRate: " << rate
-               << "\n\tSeconds: " << seconds << std::endl;
+               << "\n\tLeconds: "(seconds, )
 
         if (allowance > rate) {
             allowance = rate; // throttle
-            STrace << "Throttling: " << allowance << std::endl;
+            LTrace("Throttling: ", allowance)
         } else if (allowance < 1.0) {
-            STrace << "Message rate exceeded: " << allowance << std::endl;
+            LTrace("Message rate exceeded: ", allowance)
             return false;
         }
         allowance -= 1.0;
-        STrace << "Can send message: " << allowance << std::endl;
+        LTrace("Can send message: ", allowance)
         return true;
     }
 };

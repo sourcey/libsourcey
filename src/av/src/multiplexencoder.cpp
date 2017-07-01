@@ -61,7 +61,7 @@ static int dispatchOutputPacket(void* opaque, uint8_t* buffer, int bufferSize)
     if (klass) {
         LTrace("Dispatching packet: ", bufferSize)
         if (!klass->isActive()) {
-            SWarn << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;
+            LWarn("Dropping packet: " ,  bufferSize,  ": ", klass->state())
             return bufferSize;
         }
         MediaPacket packet(buffer, bufferSize);
@@ -150,7 +150,7 @@ void MultiplexEncoder::init()
 
         setState(this, EncoderState::Ready);
     } catch (std::exception& exc) {
-        SError << "Error: " << exc.what() << endl;
+        LError("Error: ", exc.what())
         setState(this, EncoderState::Error); //, exc.what()
         cleanup();
         throw exc;
@@ -268,7 +268,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 
     // Write the encoded frame to the output file
     if (av_interleaved_write_frame(_formatCtx, &packet) != 0) {
-        SWarn << "Cannot write packet" << endl;
+        LWarn("Cannot write packet")
         return false;
     }
     return true;
@@ -277,7 +277,7 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 
 bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
 {
-    STrace << "Update PTS: last=" << _pts << ", input=" << *pts << endl;
+    LTrace("Update PTS: last=",  _pts,  ", input=", *pts)
 
     // https://docs.thefoundry.co.uk/products/nuke/developers/63/ndkdevguide/examples/ffmpegReader.cpp
     // https://ffmpeg.org/doxygen/trunk/doc_2examples_2muxing_8c-example.html
@@ -294,7 +294,7 @@ bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
     }
 
     if (next == _pts) {
-        SWarn << "Dropping frame at dusplicate PTS: " << next << endl;
+        LWarn("Dropping frame at dusplicate PTS: ", next)
         return false;
     }
 
@@ -333,7 +333,7 @@ void MultiplexEncoder::freeVideo()
 
 bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 {
-    STrace << "Encoding video: " << frame->pts << endl;
+    LTrace("Encoding video: ", frame->pts)
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -358,7 +358,7 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 bool MultiplexEncoder::encodeVideo(uint8_t* data[4], int linesize[4],
                                    int width, int height, int64_t time)
 {
-    STrace << "Encoding video: " << time << endl;
+    LTrace("Encoding video: ", time)
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -385,7 +385,7 @@ bool MultiplexEncoder::encodeVideo(uint8_t* data[4], int linesize[4],
 bool MultiplexEncoder::encodeVideo(uint8_t* buffer, int bufferSize,
                                    int width, int height, int64_t time)
 {
-    STrace << "Encoding video: " << time << endl;
+    LTrace("Encoding video: ", time)
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -459,7 +459,7 @@ void MultiplexEncoder::freeAudio()
 
 bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time)
 {
-    STrace << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
+    LTrace("Encoding audio packet: samples=",  numSamples,  ", time=", time)
     assert(buffer);
     assert(numSamples);
 
@@ -480,7 +480,7 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time
 
 bool MultiplexEncoder::encodeAudio(uint8_t* buffer[4], int numSamples, int64_t time)
 {
-    STrace << "Encoding audio packet: samples=" << numSamples << ", time=" << time << endl;
+    LTrace("Encoding audio packet: samples=",  numSamples,  ", time=", time)
     assert(buffer[0]);
     assert(numSamples);
 

@@ -71,7 +71,7 @@ struct HTTPEchoTest
     http::ClientConnection::Ptr createConnection(const std::string& protocol, const std::string& query)
     {
         std::ostringstream url;
-        url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << endl;
+        url << protocol << "://127.0.0.1:" << query << std::endl;
         conn = client.createConnection(url.str());
         conn->Connect += slot(this, &HTTPEchoTest::onConnect);
         conn->Headers += slot(this, &HTTPEchoTest::onHeaders);
@@ -97,12 +97,12 @@ struct HTTPEchoTest
 
     void onConnect()
     {
-        SDebug << "On connect" << endl;
+        LDebug("On connect")
     }
 
     void onHeaders(http::Response& res)
     {
-        SDebug << "On headers" << endl;
+        LDebug("On headers")
     }
 
     void onComplete(const http::Response& res)
@@ -129,7 +129,7 @@ struct HTTPEchoTest
 
     void onClose(http::Connection&)
     {
-        SDebug << "Connection closed" << endl;
+        LDebug("Connection closed")
         shutdown();
     }
 };

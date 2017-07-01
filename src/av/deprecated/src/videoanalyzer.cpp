@@ -28,13 +28,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options)
     , _audio(nullptr)
     , _videoConv(nullptr)
 {
-    STrace << "Create" << endl;
+    LTrace("Create")
 }
 
 
 VideoAnalyzer::~VideoAnalyzer()
 {
-    STrace << "Destroy" << endl;
+    LTrace("Destroy")
     uninitialize();
 }
 
@@ -44,7 +44,7 @@ void VideoAnalyzer::initialize()
     if (_options.ifile.empty())
         throw std::runtime_error("Please specify an input file.");
 
-    STrace << "Loading: " << _options.ifile << endl;
+    LTrace("Loading: ", _options.ifile)
 
     _error = "";
 
@@ -99,7 +99,7 @@ void VideoAnalyzer::start()
         _reader.start();
     } catch (std::exception& exc) {
         _error = exc.what();
-        SError << "Error: " << _error << endl;
+        LError("Error: ", _error)
         throw exc; //.rethrow()
     }
 }
@@ -235,7 +235,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
 void VideoAnalyzer::onReadComplete(void* sender)
 {
-    STrace << "On Read Complete" << endl;
+    LTrace("On Read Complete")
 
     MediaCapture* reader = reinterpret_cast<MediaCapture*>(sender);
     {
@@ -296,7 +296,7 @@ VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize)
     , filled(0)
 {
     STrace << "[VideoAnalyzerStream: " << this << ": " << name
-           << "] Creating: " << rdftSize << ": " << rdftBits << endl;
+           << "] Creating: " << rdftLize(": ", rdftBits)
 
     assert(rdftSize);
     assert(rdftBits < kMaxFFTPow2Size);

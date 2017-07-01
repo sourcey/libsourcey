@@ -71,7 +71,7 @@ void Roster::update(const json::value& data, bool whiny)
         data.isMember("name") //&&
         //data.isMember("type")
         ) {
-        STrace << "Updating: " << json::stringify(data, true) << endl;
+        LTrace("Updating: ", json::stringify(data, true))
         std::string id = data["id"].get<std::string>();
         Peer* peer = get(id, false);
         if (!peer) {
@@ -87,7 +87,7 @@ void Roster::update(const json::value& data, bool whiny)
     }
     else {
         std::string error("Bad presence data: " + json::stringify(data));
-        SError << error << endl;
+        LError(error, )
         if (whiny)
             throw std::runtime_error(error);
     }

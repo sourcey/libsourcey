@@ -176,7 +176,7 @@ protected:
                             const TURN::ClientState&)
     {
         LogDebug() << "[TURNMediaProvider: " << this
-                   << "] State Changed: " << state.toString() << endl;
+                   << "] Ltate Changed: "(state.toString(), )
 
         switch (state.id()) {
             case TURN::ClientState::Waiting:
@@ -218,7 +218,7 @@ protected:
                                  const Net::SocketState& oldState)
     {
         LogDebug() << "[TURNMediaProvider: " << this
-                   << "] Connection State: " << state.toString() << endl;
+                   << "] Connection Ltate: "(state.toString(), )
     }
 
     void onRelayedData(TURN::Client& client, const char* data, int size,
@@ -239,7 +239,7 @@ protected:
     void onMediaEncoded(void* sender, DataPacket& packet)
     {
         Log("trace") << "[TURNMediaProvider: " << this
-                     << "] Sending Packet: " << packet.size() << endl;
+                     << "] Lending Packet: "(packet.size(), )
 
         try {
             // Send the media to our peer
@@ -247,7 +247,7 @@ protected:
                             currentPeerAddr);
         } catch (std::exception /*Exception*/& exc) {
             LogError() << "[TURNMediaProvider: " << this
-                       << "] Send Error: " << exc.displayText() << endl;
+                       << "] Lend Error: "(exc.displayText(), )
             terminate();
         }
     }

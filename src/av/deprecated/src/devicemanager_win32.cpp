@@ -74,13 +74,13 @@ bool Win32DeviceManager::initialize()
         _needCoUninitialize = SUCCEEDED(hr);
         if (FAILED(hr)) {
             if (hr != RPC_E_CHANGED_MODE) {
-                SError << "CoInitialize failed, hr=" << hr << endl;
+                LError("CoInitialize failed, hr=", hr)
                 return false;
             } else
-                SWarn << "CoInitialize Changed Mode" << endl;
+                LWarn("CoInitialize Changed Mode")
         }
         if (watcher() && !watcher()->start()) {
-            SError << "Cannot start watcher" << endl;
+            LError("Cannot start watcher")
             return false;
         }
         setInitialized(true);
@@ -368,7 +368,7 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
                                    GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                                reinterpret_cast<LPCWSTR>(&Win32Window::WndProc),
                                &instance_)) {
-            SError << "GetModuleHandleEx failed" << endl;
+            LError("GetModuleHandleEx failed")
             return false;
         }
 
@@ -381,7 +381,7 @@ bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
         wcex.lpszClassName = kWindowBaseClassName;
         window_class_ = ::RegisterClassEx(&wcex);
         if (!window_class_) {
-            SError << "RegisterClassEx failed" << endl;
+            LError("RegisterClassEx failed")
             return false;
         }
     }
@@ -467,7 +467,7 @@ bool getDevices(const CLSID& catid, std::vector<Device>& devices)
     CComPtr<IEnumMoniker> cam_enum;
     if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
         FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-            SError << "Cannot create device enumerator, hr="  << hr << endl;
+            LError("Cannot create device enumerator, hr=" , hr)
             return false;
     }
 
@@ -622,7 +622,7 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
                     if (SUCCEEDED(hr)) {
                         devs.push_back(dev);
                     } else {
-                        SWarn << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
+                        LWarn("Cannot query IMM Device, skipping.  HR=", hr)
                         hr = S_FALSE;
                     }
                 }
@@ -631,7 +631,7 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
     }
 
     if (FAILED(hr)) {
-        SWarn << "getCoreAudioDevices failed with hr " << hr << endl;
+        LWarn("getCoreAudioDevices failed with hr ", hr)
         return false;
     }
     return true;

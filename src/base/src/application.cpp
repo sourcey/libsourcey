@@ -42,13 +42,13 @@ Application& Application::getDefault()
 Application::Application(uv::Loop* loop) :
     loop(loop)
 {
-    SDebug << "Create" << std::endl;
+    LDebug("Create")
 }
 
 
 Application::~Application()
 {
-    SDebug << "Destroy" << std::endl;
+    LDebug("Destroy")
 }
 
 
@@ -66,7 +66,7 @@ void Application::stop()
 
 void Application::finalize()
 {
-    SDebug << "Finalizing" << std::endl;
+    LDebug("Finalizing")
 
 #ifdef _DEBUG
     // Print active handles
@@ -81,7 +81,7 @@ void Application::finalize()
     assert(loop->active_handles == 0);
     //assert(loop->active_reqs == 0);
 
-    SDebug << "Finalization complete" << std::endl;
+    LDebug("Finalization complete")
 }
 
 
@@ -101,7 +101,7 @@ void Application::bindShutdownSignal(std::function<void(void*)> callback, void* 
 
 void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 {
-    SDebug << "Wait for shutdown" << std::endl;
+    LDebug("Wait for shutdown")
     bindShutdownSignal(callback, opaque);
     run();
 }
@@ -110,7 +110,7 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
     auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
-    SDebug << "Got shutdown signal" << std::endl;
+    LDebug("Got shutdown signal")
 
     uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
         delete handle;

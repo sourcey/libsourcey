@@ -110,7 +110,7 @@ public:
             static_cast<TStartable*>(arg)->start();
         }
         catch (std::exception& exc) {
-            // errorL("AsyncStartable") << exc.what() << std::endl;
+            // errorL("AsyncLtartable")(exc.what(), )
 #ifdef _DEBUG
             throw exc;
 #endif

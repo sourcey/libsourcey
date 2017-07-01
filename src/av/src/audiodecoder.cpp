@@ -41,7 +41,7 @@ AudioDecoder::~AudioDecoder()
 void AudioDecoder::create()
 {
     assert(stream);
-    STrace << "Create: " << stream->index << endl;
+    LTrace("Create: ", stream->index)
 
     ctx = stream->codec;
 
@@ -95,7 +95,7 @@ bool emitPacket(AudioDecoder* dec)
 
     if (dec->resampler) {
         if (!dec->resampler->resample((uint8_t**)dec->frame->extended_data, dec->frame->nb_samples)) {
-            SDebug << "Samples buffered by resampler" << endl;
+            LDebug("Samples buffered by resampler")
             return false;
         }
 
@@ -184,7 +184,7 @@ bool AudioDecoder::decode(AVPacket& ipacket)
         ret = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
             error = "Audio decoder error: " + averror(ret);
-            SError << error << endl;
+            LError(error, )
             throw std::runtime_error(error);
         }
 
@@ -229,7 +229,7 @@ void AudioDecoder::flush()
     avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
 
     if (frameDecoded) {
-        STrace << "Flushed audio frame: " << frame->pts << endl;
+        LTrace("Flushed audio frame: ", frame->pts)
         assert(0);
         emitPacket(this);
     }

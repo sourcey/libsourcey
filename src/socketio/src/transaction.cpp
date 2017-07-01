@@ -26,7 +26,7 @@ Transaction::Transaction(Client& client, long timeout)
     : PacketTransaction<Packet>(timeout, 0, client.ws().socket->loop())
     , client(client)
 {
-    STrace << "Create" << endl;
+    LTrace("Create")
 }
 
 
@@ -34,19 +34,19 @@ Transaction::Transaction(Client& client, const Packet& request, long timeout)
     : PacketTransaction<Packet>(request, timeout, 0, client.ws().socket->loop())
     , client(client)
 {
-    STrace << "Create" << endl;
+    LTrace("Create")
 }
 
 
 Transaction::~Transaction()
 {
-    STrace << "Destroy" << endl;
+    LTrace("Destroy")
 }
 
 
 bool Transaction::send()
 {
-    STrace << "Send: " << _request.id() << endl;
+    LTrace("Send: ", _request.id())
     _request.setAck(true);
     client += packetSlot(this, &Transaction::onPotentialResponse, -1, 100);
     if (client.send(_request))
@@ -57,21 +57,21 @@ bool Transaction::send()
 
 void Transaction::onPotentialResponse(sockio::Packet& packet)
 {
-    STrace << "On potential response: " << packet.id() << endl;
+    LTrace("On potential response: ", packet.id())
     PacketTransaction<Packet>::handlePotentialResponse(packet);
 }
 
 
 bool Transaction::checkResponse(const Packet& packet)
 {
-    STrace << "Check response: " << packet.id() << endl;
+    LTrace("Check response: ", packet.id())
     return _request.id() == packet.id();
 }
 
 
 void Transaction::onResponse()
 {
-    STrace << "On success" << endl;
+    LTrace("On success")
     client -= packetSlot(this, &Transaction::onPotentialResponse);
     PacketTransaction<Packet>::onResponse();
 }

@@ -92,9 +92,9 @@ void ImageEncoder::process(IPacket& packet)
     mpacket->_data = (char*)&buffer[0];
     mpacket->_size = buffer.size();
 
-    // STrace << "Broadcasting: " << mpacket << endl;
+    // LTrace("Broadcasting: ", mpacket)
     emit(*mpacket); // this,
-    // STrace << "Broadcasting: OK: " << mpacket << endl;
+    // LTrace("Broadcasting: OK: ", mpacket)
 }
 
 

@@ -30,7 +30,7 @@ Transaction::Transaction(const net::Socket::Ptr& socket,
                          const net::Address& peerAddress, long timeout, int retries)
     : net::Transaction<Message>(socket, peerAddress, timeout, retries)
 {
-    SDebug << "Create" << std::endl;
+    LDebug("Create")
 
     // Register STUN message creation strategy
     net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
@@ -39,7 +39,7 @@ Transaction::Transaction(const net::Socket::Ptr& socket,
 
 Transaction::~Transaction()
 {
-    SDebug << "Destroy" << std::endl;
+    LDebug("Destroy")
 }
 
 
@@ -52,7 +52,7 @@ bool Transaction::checkResponse(const Message& message)
 
 void Transaction::onResponse()
 {
-    SDebug << "On response" << std::endl;
+    LDebug("On response")
 
     _response.setMethod(_request.methodType());
     _response.setClass(Message::SuccessResponse);

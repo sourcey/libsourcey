@@ -168,7 +168,7 @@ bool MacDeviceManager::getCameras(std::vector<Device>& devices)
 //                                      kAudioDevicePropertyDeviceName,
 //                                      &nameLength, name);
 //   if (0 != err) {
-//     SError << "No name acquired for device id " << id << endl;
+//     LError("No name acquired for device id ", id)
 //     return false;
 //   }
 //

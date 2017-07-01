@@ -44,7 +44,7 @@ VideoCapture::VideoCapture(int deviceId)
     , _stopping(false)
     , _capturing(false)
 {
-    STrace << "Create: " << deviceId << std::endl;
+    LTrace("Create: ", deviceId)
     open();
     start();
 }
@@ -58,7 +58,7 @@ VideoCapture::VideoCapture(const std::string& filename)
     , _stopping(false)
     , _capturing(false)
 {
-    STrace << "Create: " << filename << std::endl;
+    LTrace("Create: ", filename)
     open();
     start();
 }
@@ -66,7 +66,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 
 VideoCapture::~VideoCapture()
 {
-    STrace << "Destroy" << std::endl;
+    LTrace("Destroy")
     // stop();
 
     // Ensure we are not inside the thread context
@@ -74,7 +74,7 @@ VideoCapture::~VideoCapture()
 
     // Terminate the internal thread
     if (_thread.started()) {
-        STrace << "Destroy: Terminating thread" << std::endl;
+        LTrace("Destroy: Terminating thread")
         _stopping = true;
         _thread.join();
     }
@@ -82,18 +82,18 @@ VideoCapture::~VideoCapture()
     // Try to release the capture (automatic once unrefed)
     // try { release(); } catch (...) {}
 
-    STrace << "Destroy: OK" << std::endl;
+    LTrace("Destroy: OK")
 }
 
 
 void VideoCapture::start()
 {
-    STrace << "Starting" << std::endl;
+    LTrace("Starting")
     {
         std::lock_guard<std::mutex> guard(_mutex);
 
         if (!_started) { //
-            STrace << "Initializing thread" << std::endl;
+            LTrace("Initializing thread")
 
             // The capture must be opened first.
             // open() must be called from the main thread,
@@ -114,17 +114,17 @@ void VideoCapture::start()
         }
     }
     while (!_capturing && error().any()) {
-        STrace << "Starting: Waiting" << std::endl;
+        LTrace("Starting: Waiting")
         scy::sleep(10);
     }
 
-    STrace << "Starting: OK" << std::endl;
+    LTrace("Starting: OK")
 }
 
 
 void VideoCapture::stop()
 {
-    STrace << "Stopping" << std::endl;
+    LTrace("Stopping")
 
 // NOTE: This function no longer does anything.
 // Once the capture is running, it will continue to do
@@ -137,7 +137,7 @@ void VideoCapture::stop()
 
     assert(Thread::currentID() != _thread.tid());
     if (_started && emitter.nslots() == 0) { //_thread.started()
-        STrace << "Terminating thread" << std::endl;
+        LTrace("Terminating thread")
         _stopping = true;
         _thread.join();
     }
@@ -147,7 +147,7 @@ void VideoCapture::stop()
 
 bool VideoCapture::open(bool whiny)
 {
-    STrace << "Open" << std::endl;
+    LTrace("Open")
     std::lock_guard<std::mutex> guard(_mutex);
     assert(Thread::currentID() != _thread.tid());
 
@@ -162,7 +162,7 @@ bool VideoCapture::open(bool whiny)
         throw std::runtime_error(exceptionMessage(
             "Cannot open the video capture device: " + name()));
 
-    STrace << "Open: " << _opened << std::endl;
+    LTrace("Open: ", _opened)
     return _opened;
 }
 
@@ -189,7 +189,7 @@ void VideoCapture::run()
 
             empty = emitter.nslots() == 0;
             if (!empty) {
-                STrace << "Emitting: " << _counter.fps << std::endl;
+                LTrace("Emitting: ", _counter.fps)
                 MatrixPacket out(&frame);
                 emitter.emit(next, out);
             }
@@ -220,10 +220,10 @@ void VideoCapture::run()
 
     // Note: Need to release the capture, otherwise this class instance
     // cannot be reused ie. the next call to open() will fail.
-    STrace << "Releasing" << std::endl;
+    LTrace("Releasing")
     _capture.release();
 
-    STrace << "Exiting" << std::endl;
+    LTrace("Exiting")
 }
 
 
@@ -291,7 +291,7 @@ cv::Mat VideoCapture::lastFrame() const
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-    STrace << "Get frame: " << width << "x" << height << std::endl;
+    LTrace << "Get frame: ",  width("x", height)
 
     // Don't actually grab a frame here, just copy the current frame
     // If no valid frame is available an exception will be thrown
@@ -341,7 +341,7 @@ void VideoCapture::removeEmitter(PacketSignal* emitter)
 
 void VideoCapture::setError(const std::string& error)
 {
-    SError << "Set error: " << error << std::endl;
+    LError("Set error: ", error)
     {
         std::lock_guard<std::mutex> guard(_mutex);
         _error.message = error;

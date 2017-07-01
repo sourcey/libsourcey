@@ -181,7 +181,7 @@ bool VideoContext::recreateConverter()
     }
 
     // Recreate the conversion context
-    SDebug << "Recreating video conversion context" << endl;
+    LDebug("Recreating video conversion context")
     if (conv)
         delete conv;
     conv = new VideoConverter();

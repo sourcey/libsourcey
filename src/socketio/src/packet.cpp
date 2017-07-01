@@ -105,7 +105,7 @@ IPacket* Packet::clone() const
 
 ssize_t Packet::read(const ConstBuffer& buf)
 {
-    STrace << "Read raw packet: " << buf.str() << endl;
+    LTrace("Read raw packet: ", buf.str())
     assert(buf.size() > 0);
 
     // Reset all data
@@ -130,11 +130,11 @@ ssize_t Packet::read(const ConstBuffer& buf)
         reader.get(type, 1);
         _type = static_cast<Packet::Type>(atoi(type)); // std::stoi(std::string(type, 1))
         // if (_type < TypeMin || _type > TypeMax) {
-        //     SWarn << "Invalid message type: " << _type << endl;
+        //     LWarn("Invalid message type: ", _type)
         //     return false;
         // }
 
-        // STrace << "Parse type: " << type << ": " << typeString() << endl;
+        // LTrace("Parse type: ",  type,  ": ", typeString())
     }
 
     // parse attachments if type binary (not implemented)
@@ -171,7 +171,7 @@ ssize_t Packet::read(const ConstBuffer& buf)
 
     _size = reader.position();
 
-    // SDebug << "Parse success: " << toString() << endl;
+    // LDebug("Parse success: ", toString())
 
     return _size;
 }

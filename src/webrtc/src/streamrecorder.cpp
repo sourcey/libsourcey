@@ -115,7 +115,7 @@ void StreamRecorder::OnData(const void* audio_data, int bits_per_sample,
     // FIXME: For some reason the first couple of samples come though as mono,
     // so let's just skip those for now.
     if (number_of_channels < 2) {
-        SWarn << "Dropping initial mono samples" << std::endl;
+        LWarn("Dropping initial mono samples")
         return;
     }
 

@@ -302,7 +302,7 @@ Attribute* Attribute::create(uint16_t type, uint16_t size)
         //    break;
 
         default:
-            SError << "Cannot create attribute for type: " << type << endl;
+            LError("Cannot create attribute for type: ", type)
             break;
     }
 
@@ -766,7 +766,7 @@ bool MessageIntegrity::verifyHmac(const std::string& key) const
 
 void MessageIntegrity::read(BitReader& reader)
 {
-    // SDebug << "Message: Read HMAC" << endl;
+    // LDebug("Message: Read HMAC")
     int sizeBeforeMessageIntegrity = reader.position() - kAttributeHeaderSize;
 
     // Read the HMAC value.

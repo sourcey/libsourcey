@@ -163,7 +163,7 @@ void Server::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer,
         len -= nread;
     }
     if (len == buffer.size())
-        SWarn << "Non STUN packet received" << std::endl;
+        LWarn("Non STUN packet received")
 
 #if 0
     stun::Message message;
@@ -188,7 +188,7 @@ void Server::onTCPSocketClosed(net::Socket& socket)
 
 void Server::releaseTCPSocket(const net::Socket& socket)
 {
-    STrace << "Removing TCP socket: " << &socket << std::endl;
+    LTrace("Removing TCP socket: ", &socket)
     for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) {
         if (it->impl.get() == &socket) {
             it->Recv -= slot(this, &Server::onSocketRecv);
@@ -369,14 +369,14 @@ void Server::handleAllocateRequest(Request& request)
     //
     auto transportAttr = request.get<stun::RequestedTransport>();
     if (!transportAttr) {
-        SError << "No Requested Transport" << endl;
+        LError("No Requested Transport")
         respondError(request, 400, "Bad Request");
         return;
     }
 
     int protocol = transportAttr->value() >> 24;
     if (protocol != 6 && protocol != 17) {
-        SError << "Requested Transport is neither TCP or UDP: " << protocol << endl;
+        LError("Requested Transport is neither TCP or UDP: ", protocol)
         respondError(request, 422, "Unsupported Transport Protocol");
         return;
     }
@@ -384,7 +384,7 @@ void Server::handleAllocateRequest(Request& request)
     FiveTuple tuple(request.remoteAddress, request.localAddress,
                     protocol == 17 ? net::UDP : net::TCP);
     if (getAllocation(tuple)) {
-        SError << "Allocation already exists for 5tuple: " << tuple << endl;
+        LError("Allocation already exists for 5tuple: ", tuple)
         respondError(request, 437, "Allocation Mismatch");
         return;
     }

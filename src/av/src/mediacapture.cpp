@@ -76,7 +76,7 @@ void MediaCapture::close()
 
 void MediaCapture::openFile(const std::string& file)
 {
-    STrace << "Opening file: " << file << endl;
+    LTrace("Opening file: ", file)
     openStream(file, nullptr, nullptr);
 }
 

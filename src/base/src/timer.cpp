@@ -96,7 +96,7 @@ void Timer::start(std::function<void()> func)
 
 void Timer::start()
 {
-    // LTrace("Starting: ", << timeout, ": ", interval)
+    // LTrace("Starting: ",,  timeout, ": ", interval)
     assert(!active());
     assert(_handle.get());
     assert(_timeout > 0 || _interval > 0);

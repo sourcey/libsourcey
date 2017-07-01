@@ -56,14 +56,14 @@ public:
     /// Update the item expiry timeout
     virtual bool expires(const TKey& key, long timeout)
     {
-        STrace << "Set expires: " << key << ": " << timeout << std::endl;
+        LTrace("Set expires: ", key, ": ", timeout)
         return expires(Base::get(key, false), timeout);
     }
 
     /// Update the item expiry timeout
     virtual bool expires(TValue* item, long timeout)
     {
-        STrace << "Set expires: " << item << ": " << timeout << std::endl;
+        LTrace("Set expires: ", item, ": ", timeout)
         return setTimeout(item, timeout);
     }
 
@@ -80,7 +80,7 @@ protected:
         if (item) {
             std::lock_guard<std::mutex> guard(_tmutex);
             if (timeout > 0) {
-                STrace << "Set timeout: " << item << ": " << timeout << std::endl;
+                LTrace("Set timeout: ", item, ": ", timeout)
                 auto& t = _timeouts[item];
                 t.setDelay(timeout);
                 t.start();
@@ -129,7 +129,7 @@ protected:
             //    << it->second.remaining() << std::endl;
             if (it->second.expired()) {
                 // auto item = it->first;
-                STrace << "Item expired: " << it->first << std::endl;
+                LTrace("Item expired: ", it->first)
                 onTimeout(it->first);
                 // it = _timeouts.erase(it);
             }

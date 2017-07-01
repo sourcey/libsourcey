@@ -100,7 +100,7 @@ public:
             case sockio::ClientState::Connecting:
                 break;
             case sockio::ClientState::Connected:
-                SDebug << "Connected" << endl;
+                LDebug("Connected")
                 break;
             case sockio::ClientState::Online:
                 // TODO: Send message

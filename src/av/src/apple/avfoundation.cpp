@@ -32,7 +32,7 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
         case Device::AudioInput:
             return GetAVFoundationVideoDevices(type, &devices);
         default:
-            SWarn << "AVFoundation cannot enumerate output devices: Not implemented" << endl;
+            LWarn("AVFoundation cannot enumerate output devices: Not implemented")
             break;
     }
 

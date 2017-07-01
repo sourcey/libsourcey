@@ -275,7 +275,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 
         assert(pair->isDataConnection);
     } catch (std::exception& exc) {
-        SError << "ConnectionBind error: " << exc.what() << endl;
+        LError("ConnectionBind error: ", exc.what())
         server().respondError(request, 400, "Bad Request");
 
         if (pair && !pair->isDataConnection) {

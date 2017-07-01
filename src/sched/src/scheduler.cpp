@@ -113,26 +113,26 @@ void Scheduler::run()
                     << endl;
             }
 #else
-            STrace << "Running: " << task << endl;
+            LTrace("Running: ", task)
 #endif
             task->run();
             if (task->afterRun())
                 onRun(task);
             else {
-                STrace << "Destroy After Run: " << task << endl;
+                LTrace("Destroy After Run: ", task)
                 task->_destroyed = true; // destroy();
             }
         } else
-            STrace << "Skipping Task: " << task << endl;
+            LTrace("Skipping Task: ", task)
 
         // Destroy the task if needed
         if (task->destroyed()) {
-            STrace << "Destroy Task: " << task << endl;
+            LTrace("Destroy Task: ", task)
             assert(remove(task));
             delete task;
         }
 
-        // STrace << "Running: OK: " << task << endl;
+        // LTrace("Running: OK: ", task)
     }
 
     // Prevent 100% CPU
@@ -144,7 +144,7 @@ void Scheduler::update()
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    // STrace << "Updating: " << _tasks.size() << endl;
+    // LTrace("Updating: ", _tasks.size())
 
     // Update and clean the task list
     auto it = _tasks.begin();
@@ -153,7 +153,7 @@ void Scheduler::update()
         if (task->destroyed()) {
             it = _tasks.erase(it);
             onRemove(task);
-            STrace << "Destroy: " << task << endl;
+            LTrace("Destroy: ", task)
             delete task;
         } else
             ++it;
@@ -172,7 +172,7 @@ void Scheduler::serialize(json::value& root)
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sched::Task* task = reinterpret_cast<sched::Task*>(*it);
-        STrace << "Serializing: " << task << endl;
+        LTrace("Serializing: ", task)
         json::value& entry = root[root.size()];
         task->serialize(entry);
         task->trigger().serialize(entry["trigger"]);
@@ -201,7 +201,7 @@ void Scheduler::deserialize(json::value& root)
                 delete task;
             if (trigger)
                 delete trigger;
-            SError << "Deserialization Error: " << exc.what() << endl;
+            LError("Deserialization Error: ", exc.what())
         }
     }
 }

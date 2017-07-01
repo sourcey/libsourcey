@@ -203,7 +203,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
             closeCurrentFile();
         }
     } catch (std::exception& exc) {
-        SError << "Cannot unzip file: " << exc.what() << endl;
+        LError("Cannot unzip file: ", exc.what())
         if (whiny)
             throw exc;
         return false;

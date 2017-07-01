@@ -97,9 +97,9 @@ int main(int argc, char** argv)
             scheduler.deserialize(json);
 
             // Print to cout
-            // SDebug << "##### Sched Print Output:" << endl;
+            // LDebug("##### Sched Print Output:")
             // scheduler.print(cout);
-            // SDebug << "##### Sched Print Output END" << endl;
+            // LDebug("##### Sched Print Output END")
 
             // Output scheduler tasks as JSON before run
             json::value before;
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     });
 
     describe("interval task", []() {
-        SDebug << "Running Scheduled Task Test" << endl;
+        LDebug("Running Scheduled Task Test")
 
         taskRunTimes = 0;
 
@@ -136,16 +136,16 @@ int main(int argc, char** argv)
             scheduler.start(task);
 
             // Print to cout
-            // SDebug << "##### Sched Print Output:" << endl;
+            // LDebug("##### Sched Print Output:")
             // scheduler.print(cout);
-            // SDebug << "##### Sched Print Output END" << endl;
+            // LDebug("##### Sched Print Output END")
 
             // Wait for the task to complete
             scy::sleep(1000);
             expect(taskRunTimes == 3);
         }
 
-        SDebug << "Running Scheduled Task Test: END" << endl;
+        LDebug("Running Scheduled Task Test: END")
     });
 
     // // Schedule to fire once now, and in two days time.

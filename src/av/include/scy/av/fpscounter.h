@@ -148,7 +148,7 @@ public:
 
     virtual void process(IPacket& packet)
     {
-        // traceL("FPSLimiter", this) << "Processing" << std::endl;
+        // traceL("FPLLimiter", this)("Processing")
 
         // Proxy non video packets if videoOnly is set
         if (_videoOnly && !dynamic_cast<av::VideoPacket*>(&packet))

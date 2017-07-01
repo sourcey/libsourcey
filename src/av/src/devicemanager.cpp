@@ -191,7 +191,7 @@ bool enumerateDeviceList(AVFormatContext* s, Device::Type type,
     // TODO: replace with `list_devices_for_context`
     error = avdevice_list_devices(s, &devlist);
     if (error || !devlist) {
-        SWarn << "Cannot list system devices: " << averror(error) << endl;
+        LWarn("Cannot list system devices: ", averror(error))
         goto fail;
     }
 
@@ -588,12 +588,12 @@ bool enumerateInputDeviceList(AVInputFormat *fmt, Device::Type type, std::vector
     }
 
     if (!fmt->get_device_list) {
-        SWarn << "Cannot list input devices: Not implemented" << endl;
+        LWarn("Cannot list input devices: Not implemented")
         goto fail;
     }
 
     if ((ret = avdevice_list_input_sources(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
-        SWarn << "Cannot list input device: " << averror(ret) << endl;
+        LWarn("Cannot list input device: ", averror(ret))
         goto fail;
     }
 
@@ -626,12 +626,12 @@ bool enumerateOutputDeviceList(AVOutputFormat *fmt, Device::Type type, std::vect
     }
 
     if (!fmt->get_device_list) {
-        SWarn << "Cannot list output devices: Not implemented" << endl;
+        LWarn("Cannot list output devices: Not implemented")
         goto fail;
     }
 
     if ((ret = avdevice_list_output_sinks(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
-        SWarn << "Cannot list output device: " << averror(ret) << endl;
+        LWarn("Cannot list output device: ", averror(ret))
         goto fail;
     }
 

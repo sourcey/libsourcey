@@ -115,14 +115,14 @@ void Client::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, cons
         len -= nread;
     }
     if (len == buffer.size())
-        SWarn << "Non STUN packet received" << endl;
+        LWarn("Non STUN packet received")
 
 #if 0
     stun::Message message;
     if (message.read(constBuffer(packet.data(), packet.size())))
         handleResponse(message);
     else
-        SWarn << "Non STUN packet received" << endl;
+        LWarn("Non STUN packet received")
 #endif
 }
 
@@ -787,7 +787,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 
 void Client::handleCreatePermissionErrorResponse(const stun::Message& /* response */)
 {
-    SWarn << "Permission Creation Failed" << endl;
+    LWarn("Permission Creation Failed")
 
     removeAllPermissions();
 

@@ -63,7 +63,7 @@ public:
 
     void connect()
     {
-        SInfo << user << ": connect" << std::endl;
+        LInfo(user, ": connect")
         client.connect();
     }
 
@@ -97,7 +97,7 @@ public:
 
     void onRecvPresence(smpl::Presence& presence)
     {
-        SInfo << user << ": On presence: " << presence.dump(4) << std::endl;
+        LInfo(user, ": On presence: ", presence.dump(4))
 
         expect(presence.data("version").get<std::string>() == "1.0.1");
         if (user == "l") {
@@ -113,7 +113,7 @@ public:
 
     void onRecvMessage(smpl::Message& message)
     {
-        SInfo << user << ": On message: " << message.dump(4) << std::endl;
+        LInfo(user, ": On message: ", message.dump(4))
 
         // Handle incoming Symple messages here
     }
@@ -152,7 +152,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        SInfo << user << ": Updating Client Data" << std::endl;
+        LInfo(user, ": Updating Client Data")
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.

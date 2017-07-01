@@ -263,7 +263,7 @@ void PacketStream::synchronizeStates()
             _states.pop_front();
         }
 
-        STrace << "Set queued state: " << state << endl;
+        LTrace("Set queued state: ", state)
 
         // Send the stream state to packet adapters.
         // This is done inside the processor thread context so
@@ -357,11 +357,11 @@ void PacketStream::process(IPacket& packet)
 
 void PacketStream::emit(IPacket& packet)
 {
-    STrace << "Emit: " << packet.size() << endl;
+    LTrace("Emit: ", packet.size())
 
     // Ensure the stream is still running
     if (!stateEquals(PacketStreamState::Active)) {
-        STrace << "Dropping packet on inactive stream: " << state() << endl;
+        LTrace("Dropping packet on inactive stream: ", state())
         return;
     }
 
@@ -398,7 +398,7 @@ void PacketStream::setup()
             source->ptr->getEmitter() += slot(this, &PacketStream::process);
         }
     } catch (std::exception& exc) {
-        SError << "Cannot start stream: " << exc.what() << endl;
+        LError("Cannot start stream: ", exc.what())
         setState(this, PacketStreamState::Error); //, exc.what()
         throw exc;
     }
@@ -431,7 +431,7 @@ void PacketStream::teardown()
 
 void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
 {
-    // STrace << "Attach source: " << source << endl;
+    // LTrace("Attach source: ", source)
     attachSource(std::make_shared<PacketAdapterReference>(
         source, freePointer ? new ScopedRawPointer<PacketStreamAdapter>(source) : nullptr, 0, syncState));
 }
@@ -449,7 +449,7 @@ void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 
 void PacketStream::attachSource(PacketSignal& source)
 {
-    // STrace << "Attach source signal: " << &source << endl;
+    // LTrace("Attach source signal: ", &source)
     assertCanModify();
 
     // TODO: unique_ptr for exception safe pointer creation so we
@@ -461,7 +461,7 @@ void PacketStream::attachSource(PacketSignal& source)
 
 bool PacketStream::detachSource(PacketStreamAdapter* source)
 {
-    // STrace << "Detach source adapter: " << source << endl;
+    // LTrace("Detach source adapter: ", source)
     assertCanModify();
 
     std::lock_guard<std::mutex> guard(_mutex);
@@ -478,7 +478,7 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
 
 bool PacketStream::detachSource(PacketSignal& source)
 {
-    // STrace << "Detach source signal: " << &source << endl;
+    // LTrace("Detach source signal: ", &source)
     assertCanModify();
 
     std::lock_guard<std::mutex> guard(_mutex);
@@ -494,7 +494,7 @@ bool PacketStream::detachSource(PacketSignal& source)
 
 void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 {
-    // STrace << "Attach processor: " << proc << endl;
+    // LTrace("Attach processor: ", proc)
     assert(order >= -1 && order <= 101);
     assertCanModify();
 
@@ -509,13 +509,13 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 
 bool PacketStream::detach(PacketProcessor* proc)
 {
-    // STrace << "Detach processor: " << proc << endl;
+    // LTrace("Detach processor: ", proc)
     assertCanModify();
 
     std::lock_guard<std::mutex> guard(_mutex);
     for (auto it = _processors.begin(); it != _processors.end(); ++it) {
         if ((*it)->ptr == proc) {
-            STrace << "Detached processor: " << proc << endl;
+            LTrace("Detached processor: ", proc)
             _processors.erase(it);
             return true;
         }
@@ -542,14 +542,14 @@ void PacketStream::startSources()
         if (source->syncState) {
             auto startable = dynamic_cast<basic::Startable*>(source->ptr);
             if (startable) {
-                STrace << "Start source: " << startable << endl;
+                LTrace("Start source: ", startable)
                 startable->start();
             } else
                 assert(0 && "unknown synchronizable");
 #if 0
             auto runnable = dynamic_cast<basic::Runnable*>(source);
             if (runnable) {
-                STrace << "Starting runnable: " << source << endl;
+                LTrace("Starting runnable: ", source)
                 runnable->run();
             }
 #endif
@@ -565,14 +565,14 @@ void PacketStream::stopSources()
         if (source->syncState) {
             auto startable = dynamic_cast<basic::Startable*>(source->ptr);
             if (startable) {
-                STrace << "Stop source: " << startable << endl;
+                LTrace("Stop source: ", startable)
                 startable->stop();
             } else
                 assert(0 && "unknown synchronizable");
 #if 0
             auto runnable = dynamic_cast<basic::Runnable*>(source);
             if (runnable) {
-                STrace << "Stop runnable: " << source << endl;
+                LTrace("Stop runnable: ", source)
                 runnable->cancel();
             }
 #endif
@@ -583,7 +583,7 @@ void PacketStream::stopSources()
 
 void PacketStream::handleException(std::exception& exc)
 {
-    SError << "Error: " << exc.what() << endl;
+    LError("Error: ", exc.what())
 
     // Set the stream Error state. No need for queueState
     // as we are currently inside the processor context.
@@ -607,7 +607,7 @@ void PacketStream::assertCanModify()
     if (stateEquals(PacketStreamState::Locked) ||
         stateEquals(PacketStreamState::Stopping) ||
         stateEquals(PacketStreamState::Active)) {
-        SError << "Cannot modify an " << state() << " packet stream" << endl;
+        LError("Cannot modify an ", state(), " packet stream")
         assert(0 && "cannot modify active packet stream");
         throw std::runtime_error("Cannot modify an active packet stream.");
     }
@@ -626,7 +626,7 @@ void PacketStream::synchronizeOutput(uv::Loop* loop)
 
 void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {
-    STrace << "On state change: " << oldState << " => " << state << endl;
+    LTrace("On state change: ", oldState, " => ", state)
 
     // Queue state for passing to adapters
     std::lock_guard<std::mutex> guard(_mutex);
@@ -756,7 +756,7 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 // bool waitForStateSync(PacketStream* stream, PacketStreamState::ID state)
 // {
 //     int times = 0;
-//     STrace(stream) << "Wait for sync state: " << state << endl;
+//     LTrace(stream)("Wait for sync state: ", state)
 //     while (!stream->stateEquals(state) || stream->hasQueuedState(state)) {
 //         STrace(stream) << "Wait for sync state: " << state << ": " << times
 //                      << endl;
@@ -765,7 +765,7 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 //             assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
 //         }
 //     }
-//     STrace(stream) << "Wait for sync state: " << state << ": OK" << endl;
+//     LTrace(stream), "Wait for sync state: "(state, ": OK")
 //     return true;
 // }
 

@@ -94,7 +94,7 @@ void FormWriter::addPart(const std::string& name, FormPart* part)
 
 void FormWriter::prepareSubmit()
 {
-    // STrace << "Prepare submit" << std::endl;
+    // LTrace("Prepare submit")
 
     http::Request& request = _stream.connection()->request();
     if (request.getMethod() == http::Method::Post ||
@@ -145,7 +145,7 @@ void FormWriter::prepareSubmit()
 
 void FormWriter::start()
 {
-    // STrace << "Start" << std::endl;
+    // LTrace("Start")
 
     prepareSubmit();
 
@@ -156,7 +156,7 @@ void FormWriter::start()
 
 void FormWriter::stop()
 {
-    // STrace << "Stop" << std::endl;
+    // LTrace("Stop")
 
     //_complete = true;
     _runner->cancel();
@@ -220,7 +220,7 @@ void FormWriter::writeAsync()
         if (complete())
             _runner->cancel();
     } catch (std::exception& exc) {
-        // STrace << "Error: " << exc.what() << std::endl;
+        // LTrace("Error: ", exc.what())
         assert(0);
         throw exc;
         //#ifdef _DEBUG
@@ -274,7 +274,7 @@ void FormWriter::writeMultipart()
 
 void FormWriter::writeMultipartChunk()
 {
-    // STrace << "Writing chunk: " << _writeState << std::endl;
+    // LTrace("Writing chunk: ", _writeState)
 
     switch (_writeState) {
 
@@ -326,7 +326,7 @@ void FormWriter::writeMultipartChunk()
                 if (p.part->writeChunk(*this)) {
                     return; // return after writing a chunk
                 } else {
-                    // STrace << "Part complete: " << p.name << std::endl;
+                    // LTrace("Part complete: ", p.name)
                     delete p.part;
                     _parts.pop_front();
                 }
@@ -349,14 +349,14 @@ void FormWriter::writeMultipartChunk()
                      PacketFlags::NoModify | PacketFlags::Final);
             }
 
-            // STrace << "Request complete" << std::endl;
+            // LTrace("Request complete")
             _complete = true;
             _writeState = -1; // raise error if called again
         } break;
 
         // Invalid state
         default:
-            SError << "Invalid write state: " << _writeState << std::endl;
+            LError("Invalid write state: ", _writeState)
             assert(0 && "invalid write state");
             break;
     }
@@ -533,7 +533,7 @@ FilePart::~FilePart()
 
 void FilePart::open()
 {
-    // STrace << "Open: " << _path << std::endl;
+    // LTrace("Open: ", _path)
 
     _istr.open(_path.c_str(), std::ios::in | std::ios::binary);
     if (!_istr.is_open())
@@ -556,7 +556,7 @@ void FilePart::reset()
 
 bool FilePart::writeChunk(FormWriter& writer)
 {
-    // STrace << "Write chunk" << std::endl;
+    // LTrace("Write chunk")
     assert(!writer.cancelled());
     _initialWrite = false;
 
@@ -583,7 +583,7 @@ bool FilePart::writeChunk(FormWriter& writer)
 
 void FilePart::write(FormWriter& writer)
 {
-    // STrace << "Write" << std::endl;
+    // LTrace("Write")
     _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
@@ -605,7 +605,7 @@ void FilePart::write(FormWriter& writer)
 
 void FilePart::write(std::ostream& ostr)
 {
-    // STrace << "Write" << std::endl;
+    // LTrace("Write")
     _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
@@ -665,7 +665,7 @@ StringPart::~StringPart()
 
 bool StringPart::writeChunk(FormWriter& writer)
 {
-    // STrace << "Write chunk" << std::endl;
+    // LTrace("Write chunk")
     _initialWrite = false;
 
     // TODO: Honour chunk size for large strings
@@ -679,7 +679,7 @@ bool StringPart::writeChunk(FormWriter& writer)
 
 void StringPart::write(FormWriter& writer)
 {
-    // STrace << "Write" << std::endl;
+    // LTrace("Write")
     _initialWrite = false;
 
     writer.emit(_data.c_str(), _data.length());
@@ -689,7 +689,7 @@ void StringPart::write(FormWriter& writer)
 
 void StringPart::write(std::ostream& ostr)
 {
-    // STrace << "Write" << std::endl;
+    // LTrace("Write")
     _initialWrite = false;
 
     ostr.write(_data.c_str(), _data.length());

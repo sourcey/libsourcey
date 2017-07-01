@@ -37,7 +37,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    STrace << "processing" << std::endl;
+    LTrace("processing")
 
     // We may be receiving either audio or video packets
     auto vPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -104,7 +104,7 @@ void MultiplexPacketEncoder::process(IPacket& packet)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    STrace << "Processing" << std::endl;
+    LTrace("Processing")
 
     // We may be receiving either audio or video packets
     auto vPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -153,7 +153,7 @@ bool MultiplexPacketEncoder::accepts(IPacket* packet)
 
 void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
-    STrace << "On stream state change: " << state << endl;
+    LTrace("On stream state change: ", state)
 
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -182,7 +182,7 @@ void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
             // case PacketStreamState::Closed:
     }
 
-    STrace << "Stream state change: OK: " << state << endl;
+    LTrace("Stream state change: OK: ", state)
 }
 
 

@@ -397,14 +397,14 @@ int main(int argc, char** argv)
          //// Test function logging
          //start = clock();
          //for (unsigned i = 0; i < 1000; i++)
-         //    STrace << "test: " << i << endl;
+         //    LTrace("test: ", i)
          //cout << "logger: asynchronous function logging completed after: "
          //     << (clock() - start) << endl;
 
          //// Test function and mem address logging
          //start = clock();
          //for (unsigned i = 0; i < 1000; i++)
-         //    STrace << "test: " << i << endl;
+         //    LTrace("test: ", i)
          //cout << "logger: asynchronous function and mem address logging completed after: "
          //     << (clock() - start) << endl;
 

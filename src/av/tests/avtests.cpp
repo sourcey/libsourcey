@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 // //
 //
 // describe("device manager", []() {
-//     SDebug << "Starting" << endl;
+//     LDebug("Starting")
 //     auto& deviceManager = av::MediaFactory::instance().devices();
 //
 //     av::Device device;
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 //         }
 //     }
 //     else {
-//         SDebug << "No video devices detected!" << endl;
+//         LDebug("No video devices detected!")
 //     }
 //     if (deviceManager.getMicrophones(devices)) {
 //         LDebug("Num audio devices: ", devices.size())
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 //         }
 //     }
 //     else {
-//         SDebug << "No video devices detected!" << endl;
+//         LDebug("No video devices detected!")
 //     }
 //
 //     // TODO: verify data integrity?
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 // //
 //
 // describe("video capture", []() {
-//     SDebug << "Starting" << endl;
+//     LDebug("Starting")
 //
 //     av::VideoCapture::Ptr capture =
 //     MediaFactory::instance().createVideoCapture(0);
@@ -97,11 +97,11 @@ int main(int argc, char** argv)
 //     capture->emitter -= packetSlot(this,
 //     &CallbackContext::onVideoCaptureFrame);
 //
-//     SDebug << "Complete" << endl;
+//     LDebug("Complete")
 // }
 //
 // describe("video capture stream", []() {
-//     SDebug << "Starting" << endl;
+//     LDebug("Starting")
 //
 //     av::VideoCapture::Ptr capture =
 //     MediaFactory::instance().createVideoCapture(0);
@@ -118,5 +118,5 @@ int main(int argc, char** argv)
 //
 //     assert(capture->emitter.nslots() == 0);
 //
-//     SDebug << "Complete" << endl;
+//     LDebug("Complete")
 // });

@@ -32,7 +32,7 @@ Connection::Connection(const net::TCPSocket::Ptr& socket)
     , _closed(false)
     , _shouldSendHeader(true)
 {
-    // STrace << "Create: " << _socket << endl;
+    // LTrace("Create: ", _socket)
 }
 
 
@@ -48,7 +48,7 @@ Connection::~Connection()
 
 ssize_t Connection::send(const char* data, size_t len, int flags)
 {
-    // STrace << "Send: " << len << endl;
+    // LTrace("Send: ", len)
     assert(!_closed);
     if (_closed)
         return -1;
@@ -80,7 +80,7 @@ ssize_t Connection::sendHeader()
 
 void Connection::close()
 {
-    // STrace << "Close: " << _closed << endl;
+    // LTrace("Close: ", _closed)
     if (_closed)
         return;
     _closed = true;
@@ -94,7 +94,7 @@ void Connection::close()
 
 void Connection::replaceAdapter(net::SocketAdapter* adapter)
 {
-    // STrace << "Replace adapter: " << adapter << endl;
+    // LTrace("Replace adapter: ", adapter)
 
     // Detach the old adapter form all callbacks
     if (_adapter) {
@@ -102,7 +102,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
         _adapter->removeReceiver(this);
         _adapter->setSender(nullptr);
 
-        // STrace << "Replace adapter: Delete existing: " << _adapter << endl;
+        // LTrace("Replace adapter: Delete existing: ", _adapter)
         deleteLater<net::SocketAdapter>(_adapter, _socket->loop());
         _adapter = nullptr;
     }
@@ -123,7 +123,7 @@ void Connection::replaceAdapter(net::SocketAdapter* adapter)
 
 void Connection::setError(const scy::Error& err)
 {
-    // STrace << "Set error: " << err.message << endl;
+    // LTrace("Set error: ", err.message)
 
     _error = err;
 }
@@ -148,7 +148,7 @@ void Connection::onSocketRecv(net::Socket& socket, const MutableBuffer& buffer, 
 
 void Connection::onSocketError(net::Socket& socket, const scy::Error& error)
 {
-    // SDebug << "On socket error: " << error.err << ": " << error.message << endl;
+    // LDebug("On socket error: " << error.err << ": ", error.message)
 
     if (error.err == UV_EOF) {
         // Close the connection when the other side does
@@ -227,7 +227,7 @@ ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type ty
     , _connection(connection)
     , _parser(type)
 {
-    // STrace << "Create: " << connection << endl;
+    // LTrace("Create: ", connection)
 
     // Set the connection as the default receiver
     SocketAdapter::addReceiver(connection);
@@ -243,13 +243,13 @@ ConnectionAdapter::ConnectionAdapter(Connection* connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
-    // STrace << "Destroy: " << _connection << endl;
+    // LTrace("Destroy: ", _connection)
 }
 
 
 ssize_t ConnectionAdapter::send(const char* data, size_t len, int flags)
 {
-    // STrace << "Send: " << len << endl;
+    // LTrace("Send: ", len)
 
     // try {
         // Send headers on initial send
@@ -269,7 +269,7 @@ ssize_t ConnectionAdapter::send(const char* data, size_t len, int flags)
         return SocketAdapter::send(data, len, flags);
     // } 
     // catch (std::exception& exc) {
-    //     SError << "Send error: " << exc.what() << endl;
+    //     LError("Send error: ", exc.what())
     //
     //     // Swallow the exception, the socket error will
     //     // cause the connection to close on next iteration.
@@ -289,7 +289,7 @@ void ConnectionAdapter::removeReceiver(SocketAdapter* adapter)
 
 void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& buf, const net::Address&)
 {
-    // STrace << "On socket recv: " << buf.size() << endl;
+    // LTrace("On socket recv: ", buf.size())
 
     if (_parser.complete()) {
         // Buggy HTTP servers might send late data or multiple responses,
@@ -297,7 +297,7 @@ void ConnectionAdapter::onSocketRecv(net::Socket& socket, const MutableBuffer& b
         // In this case we discard the late message and log the error here,
         // rather than complicate the app with this error handling logic.
         // This issue was noted using Webrick with Ruby 1.9.
-        SWarn << "Dropping late HTTP response: " << buf.str() << endl;
+        LWarn("Dropping late HTTP response: ", buf.str())
         return;
     }
 
@@ -317,7 +317,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */,
 
 void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
 {
-    // STrace << "On headers end: " << _parser.upgrade() << endl;
+    // LTrace("On headers end: ", _parser.upgrade())
 
     if (_connection/* && _receiver */)
         _connection->onHeaders();
@@ -331,7 +331,7 @@ void ConnectionAdapter::onParserHeadersEnd(bool upgrade)
 
 void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 {
-    // STrace << "On parser chunk: " << len << endl;
+    // LTrace("On parser chunk: ", len)
 
     // Dispatch the payload
     if (_connection/* && _receiver */) {
@@ -344,7 +344,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 
 void ConnectionAdapter::onParserError(const scy::Error& err)
 {
-    SWarn << "On parser error: " << err.message << endl;
+    LWarn("On parser error: ", err.message)
 
 #if 0
     // HACK: Handle those peski flash policy requests here
@@ -399,7 +399,7 @@ Connection* ConnectionAdapter::connection()
 ConnectionStream::ConnectionStream(Connection::Ptr connection)
     : _connection(connection)
 {
-    // STrace << "Create: " << connection << endl;
+    // LTrace("Create: ", connection)
 
     IncomingProgress.sender = this;
     OutgoingProgress.sender = this;
@@ -429,7 +429,7 @@ ConnectionStream::~ConnectionStream()
 
 ssize_t ConnectionStream::send(const char* data, size_t len, int flags)
 {
-    // STrace << "Send: " << len << endl;
+    // LTrace("Send: ", len)
 
     // Send outgoing data to the stream if adapters are attached,
     // or just proxy to the connection.

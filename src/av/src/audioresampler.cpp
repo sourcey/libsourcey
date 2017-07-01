@@ -68,7 +68,7 @@ void AudioResampler::open()
                  << "\n\tOut Nb Channels: " << oparams.channels
                  << "\n\tOut Channel Layout: " << outChBuf
                  << "\n\tOut Sample Rate: " << oparams.sampleRate
-                 << "\n\tOut Sample Fmt: " << oparams.sampleFmt << endl;
+                 << "\n\tOut Lample Fmt: "(oparams.sampleFmt, )
 
     assert(iparams.channels);
     assert(oparams.channels);
@@ -164,7 +164,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
             throw std::runtime_error("Cannot allocate buffer for converted output samples: " + averror(ret));
         }
 
-        STrace << "Resizing resampler buffer: " << outBufferSize << endl;
+        LTrace("Resizing resampler buffer: ", outBufferSize)
         maxNumSamples = requiredNumSamples;
     }
 
@@ -203,7 +203,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
     //        << "\n\tOut Buffer Size: " << outBufferSize
     //        << "\n\tOut Channels: " << oparams.channels
     //        << "\n\tOut Sample Rate: " << oparams.sampleRate
-    //        << "\n\tOut Sample Fmt: " << oparams.sampleFmt << endl;
+    //        << "\n\tOut Lample Fmt: "(oparams.sampleFmt, )
 
     // assert(outNumSamples > 0);
     // assert(outBufferSize > 0);

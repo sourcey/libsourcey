@@ -200,7 +200,7 @@ class VideoFileTranscoderTest : public Test
         stream.start();
 
         while (!capture->stopping()) {
-            SDebug << "Waiting for completion" << endl;
+            LDebug("Waiting for completion")
             scy::sleep(10);
         }
 
@@ -267,7 +267,7 @@ class MultiplexCaptureEncoderTest : public Test
         // Create and attach the default video capture
         av::VideoCapture video;
         if (devman.getDefaultCamera(device)) {
-            SInfo << "Using video device: " << device.name << endl;
+            LInfo("Using video device: ", device.name)
             video.openVideo(device.id, 640, 480);
             video.getEncoderFormat(options.iformat);
             stream.attachSource(&video, false, true);
@@ -276,7 +276,7 @@ class MultiplexCaptureEncoderTest : public Test
         // Create and attach the default audio capture
         av::AudioCapture audio;
         if (devman.getDefaultMicrophone(device)) {
-            SInfo << "Using audio device: " << device.name << endl;
+            LInfo("Using audio device: ", device.name)
             audio.openAudio(device.id, 2, 44100);
             audio.getEncoderFormat(options.iformat);
             stream.attachSource(&audio, false, true);
@@ -696,7 +696,7 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
 
     void start()
     {
-        SDebug << "Start" << endl;
+        LDebug("Start")
         runner.start([](void* arg) {
             auto self = reinterpret_cast<MockMediaPacketSource*>(arg);
             if (self->numFramesRemaining) {
@@ -717,7 +717,7 @@ struct MockMediaPacketSource : public PacketSource, public basic::Startable
 
     void stop()
     {
-        SDebug << "Stop" << std::endl;
+        LDebug("Stop")
         runner.cancel();
     }
 
@@ -778,7 +778,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     Tests(Application& app) : app(app)
 //     {
-//         SDebug << "Running tests..." << endl;
+//         LDebug("Running tests...")
 //
 //         try {
 //
@@ -819,7 +819,7 @@ class RealtimeMediaQueueTest : public Test
 // #endif
 //         }
 //         catch (std::exception& exc) {
-//             SError << "Error: " << exc.what() << endl;
+//             LError("Error: ", exc.what())
 //         }
 //     };
 //
@@ -897,7 +897,7 @@ class RealtimeMediaQueueTest : public Test
 //             &VideoCaptureThread::onVideo);
 //             capture.stop();
 //
-//             SDebug << " Ended.................." << endl;
+//             LDebug(" Ended..................")
 //         }
 //
 //         void onVideo(void* sender, MatrixPacket& packet)
@@ -918,7 +918,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runVideoCaptureThreadTest()
 //     {
-//         SDebug << "Running video capture test..." << endl;
+//         LDebug("Running video capture test...")
 //
 //
 //         // start and destroy multiple receivers
@@ -929,10 +929,10 @@ class RealtimeMediaQueueTest : public Test
 //                 threads.push_back(new VideoCaptureThread(0));
 //             }
 //
-//             SDebug << " Ending.................." << endl;
+//             LDebug(" Ending..................")
 //         }
 //         catch (std::exception& exc) {
-//             SError << "[VideoCaptureThread] Error: " << exc.what() << endl;
+//             LError("[VideoCaptureThread] Error: ", exc.what())
 //         }
 //
 //         std::puts("Press any key to continue...");
@@ -948,7 +948,7 @@ class RealtimeMediaQueueTest : public Test
 //     //
 //     void testVideoThumbnailer()
 //     {
-//         SDebug << "Starting" << endl;
+//         LDebug("Starting")
 //
 //         try {
 //             assert(0 && "fixme");
@@ -957,13 +957,13 @@ class RealtimeMediaQueueTest : public Test
 //             //thumb.grab();
 //         }
 //         catch (std::exception& exc) {
-//             SError << "VideoThumbnailer: " << exc.what() << endl;
+//             LError("VideoThumbnailer: ", exc.what())
 //         }
 //         catch (...) {
-//             SError << "VideoThumbnailer: Unknown error" << endl;
+//             LError("VideoThumbnailer: Unknown error")
 //         }
 //
-//         SDebug << "Complete" << endl;
+//         LDebug("Complete")
 //     }
 //
 //
@@ -1150,9 +1150,9 @@ class RealtimeMediaQueueTest : public Test
 //
 //         virtual ~StreamEncoderTest()
 //         {
-//             SDebug << "Destroying" << endl;
+//             LDebug("Destroying")
 //             close();
-//             SDebug << "Destroying: OK" << endl;
+//             LDebug("Destroying: OK")
 //         }
 //
 //         void close()
@@ -1231,7 +1231,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runStreamEncoderTest()
 //     {
-//         SDebug << "Running" << endl;
+//         LDebug("Running")
 //         try
 //         {
 //             // Setup encoding format
@@ -1274,13 +1274,13 @@ class RealtimeMediaQueueTest : public Test
 //
 //             // Shutdown the garbage collector so we can free memory.
 //             //GarbageCollector::instance().shutdown();
-//             //SDebug << "#################### Finalizing" << endl;
+//             //LDebug("#################### Finalizing")
 //             //GarbageCollector::instance().shutdown();
-//             //SDebug << "#################### Exiting" << endl;
+//             //LDebug("#################### Exiting")
 //
-//             //SDebug << "#################### Finalizing" << endl;
+//             //LDebug("#################### Finalizing")
 //             //app.cleanup();
-//             //SDebug << "#################### Exiting" << endl;
+//             //LDebug("#################### Exiting")
 //
 //             // Wait for enter keypress
 //             //scy::pause();
@@ -1291,17 +1291,17 @@ class RealtimeMediaQueueTest : public Test
 //         }
 //         catch (std::exception& exc)
 //         {
-//             SError << "Error: " << exc.what() << endl;
+//             LError("Error: ", exc.what())
 //             assert(0);
 //         }
 //
-//         SDebug << "Ended" << endl;
+//         LDebug("Ended")
 //     }
 //
 //
 //     void runCaptureRecorderTest()
 //     {
-//         SDebug << "Starting" << endl;
+//         LDebug("Starting")
 //
 //         /*
 //         av::VideoCapture::Ptr capture(0);
@@ -1329,7 +1329,7 @@ class RealtimeMediaQueueTest : public Test
 //         encoder.stop();
 //         */
 //
-//         SDebug << "Complete" << endl;
+//         LDebug("Complete")
 //     }
 //
 //
@@ -1338,7 +1338,7 @@ class RealtimeMediaQueueTest : public Test
 //     //
 //     void runOpenCVCaptureTest()
 //     {
-//         SDebug << "Starting" << endl;
+//         LDebug("Starting")
 //
 //         cv::VideoCapture cap(0);
 //         if (!cap.isOpened())
@@ -1356,7 +1356,7 @@ class RealtimeMediaQueueTest : public Test
 //             if (cv::waitKey(30) >= 0) break;
 //         }
 //
-//         SDebug << "Complete" << endl;
+//         LDebug("Complete")
 //     }
 //
 //
@@ -1404,7 +1404,7 @@ class RealtimeMediaQueueTest : public Test
 //                 endl;
 //             }
 //
-//             SDebug << "[AudioCaptureThread] Ended.................." << endl;
+//             LDebug("[AudioCaptureThread] Ended..................")
 //             //delete this;
 //         }
 //
@@ -1423,7 +1423,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runAudioCaptureThreadTest()
 //     {
-//         SDebug << "Running Audio Capture Thread test..." << endl;
+//         LDebug("Running Audio Capture Thread test...")
 //
 //         // start and destroy multiple receivers
 //         list<AudioCaptureThread*> threads;
@@ -1449,7 +1449,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runAudioCaptureTest()
 //     {
-//         SDebug << "Running Audio Capture test..." << endl;
+//         LDebug("Running Audio Capture test...")
 //
 //         AudioCapture* capture = new AudioCapture(0, 1, 16000);
 //         capture.attach(packetSlot(this, &Tests::onCaptureTestAudioCapture));
@@ -1585,7 +1585,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runMediaSocketTest()
 //     {
-//         SDebug << "Running Media Socket Test" << endl;
+//         LDebug("Running Media Socket Test")
 //
 //         ServerSocket svs(666);
 //         TCPServer srv(new TCPServerConnectionFactoryImpl<MediaConnection>(),
@@ -1602,7 +1602,7 @@ class RealtimeMediaQueueTest : public Test
 //
 //     void runCaptureRecorderTest()
 //     {
-//         SDebug << "Running Capture Encoder Test" << endl;
+//         LDebug("Running Capture Encoder Test")
 //
 //         av::EncoderOptions options;
 //         options.ofile = "enctest.mp4";
@@ -1626,7 +1626,7 @@ class RealtimeMediaQueueTest : public Test
 //         //scy::pause();
 //         enc.stop();
 //
-//         SDebug << "Running Capture Encoder Test: END" << endl;
+//         LDebug("Running Capture Encoder Test: END")
 //     }
 //
 //     FPSCounter fpsCounter;
@@ -1721,7 +1721,7 @@ class RealtimeMediaQueueTest : public Test
 //             }
 //             catch (std::exception& exc)
 //             {
-//                 SError << "Capture Recorder Error: " << exc.what() << endl;
+//                 LError("Capture Recorder Error: ", exc.what())
 //                 stop();
 //             }
 //         }
@@ -1745,7 +1745,7 @@ class RealtimeMediaQueueTest : public Test
 //         av::Device dev;
 //         auto& media = av::MediaFactory::instance();
 //         media.devices().getDefaultMicrophone(dev);
-//         SInfo << "Default audio capture " << dev.id << endl;
+//         LInfo("Default audio capture ", dev.id)
 //         av::MediaCapture::Ptr audioCapture = media.createAudioCapture(0,
 //         //dev.id
 //             options.oformat.audio.channels,
@@ -1813,7 +1813,7 @@ class RealtimeMediaQueueTest : public Test
 //         av::Device dev;
 //         auto& media = av::MediaFactory::instance();
 //         media.devices().getDefaultMicrophone(dev);
-//         SInfo << "Default audio capture " << dev.id << endl;
+//         LInfo("Default audio capture ", dev.id)
 //         av::MediaCapture::Ptr audioCapture = media.createAudioCapture(0,
 //         //dev.id
 //             options.oformat.audio.channels,

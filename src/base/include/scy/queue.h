@@ -126,7 +126,7 @@ public:
         std::lock_guard<std::mutex> guard(_mutex);
 
         while (_limit > 0 && static_cast<int>(Queue<T*>::size()) >= _limit) {
-            SWarn << "Purging: " << Queue<T*>::size() << std::endl;
+            LWarn("Purging: ", Queue<T*>::size())
             delete Queue<T*>::front();
             Queue<T*>::pop();
         }

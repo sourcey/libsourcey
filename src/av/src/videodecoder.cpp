@@ -39,7 +39,7 @@ VideoDecoder::~VideoDecoder()
 void VideoDecoder::create()
 {
     assert(stream);
-    STrace << "Create: " << stream->index << endl;
+    LTrace("Create: ", stream->index)
 
     ctx = stream->codec;
 
@@ -134,7 +134,7 @@ bool VideoDecoder::decode(AVPacket& ipacket)
         ret = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
             error = "Audio decoder error: " + averror(ret);
-            SError << error << endl;
+            LError(error, )
             throw std::runtime_error(error);
         }
 

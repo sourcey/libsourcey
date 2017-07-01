@@ -64,7 +64,7 @@ Parser::~Parser()
 
 void Parser::init()
 {
-    // STrace << "Init: " << _type << endl;
+    // LTrace("Init: ", _type)
 
     ::http_parser_init(&_parser, _type);
     _parser.data = this;
@@ -83,7 +83,7 @@ void Parser::init()
 
 size_t Parser::parse(const char* data, size_t len)
 {
-    // STrace << "Parse: " << len << endl;
+    // LTrace("Parse: ", len)
 
     if (_complete) {
         throw std::runtime_error("HTTP parser already complete");
@@ -96,7 +96,7 @@ size_t Parser::parse(const char* data, size_t len)
         // may still be unread data from the request body in the buffer.
     }
     else if (nparsed != len) { // parser.http_errno == HPE_OK && !parser.upgrade
-        SWarn << "HTTP parse failed: " << len << " != "<< nparsed << endl;
+        LWarn("HTTP parse failed: ",  len, " != ",  nparsed)
 
         // Handle error. Usually just close the connection.
         onError(_parser.http_errno);
@@ -172,7 +172,7 @@ bool Parser::upgrade() const
 
 void Parser::onURL(const std::string& value)
 {
-    // STrace << "onURL: " << value << endl;
+    // LTrace("onURL: ", value)
 
     if (_request)
         _request->setURI(value);
@@ -181,7 +181,7 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-    // STrace << "On header: " << name << ":" << value << endl;
+    // LTrace("On header: ",  name,  ":", value)
 
     if (message())
         message()->add(name, value);

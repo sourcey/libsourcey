@@ -69,7 +69,7 @@ protected:
 
     virtual void onStreamStateChange(const PacketStreamState& state) override
     {
-        STrace << "Stream state changed: " << state << std::endl;
+        LTrace("Stream state changed: ", state)
 
         if (state.equals(PacketStreamState::Active)) {
             _startTime = time::hrtime();

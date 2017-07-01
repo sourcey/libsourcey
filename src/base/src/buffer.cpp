@@ -183,7 +183,7 @@ const char BitReader::peek()
 {
     if (_limit > _position)
         return (const char)_bytes[_position];
-    // SDebug << "Peeking next character is NULL" << std::endl;
+    // LDebug("Peeking next character is NULL")
     return 0;
 }
 
@@ -196,7 +196,7 @@ const uint8_t BitReader::peekU8()
         _position -= 1;
         return v;
     } catch (std::out_of_range&) {
-        SDebug << "Peeking uint8_t: NULL" << std::endl;
+        LDebug("Peeking uint8_t: NULL")
     }
     return 0;
 }
@@ -210,7 +210,7 @@ const uint16_t BitReader::peekU16()
         _position -= 2;
         return v;
     } catch (std::out_of_range&) {
-        SDebug << "Peeking uint16_t: NULL" << std::endl;
+        LDebug("Peeking uint16_t: NULL")
     }
 
     return 0;
@@ -225,7 +225,7 @@ const uint32_t BitReader::peekU24()
         _position -= 3;
         return v;
     } catch (std::out_of_range&) {
-        SDebug << "Peeking UInt24: NULL" << std::endl;
+        LDebug("Peeking UInt24: NULL")
     }
 
     return 0;
@@ -240,7 +240,7 @@ const uint32_t BitReader::peekU32()
         _position -= 4;
         return v;
     } catch (std::out_of_range&) {
-        SDebug << "Peeking uint32_t: NULL" << std::endl;
+        LDebug("Peeking uint32_t: NULL")
     }
 
     return 0;
@@ -255,7 +255,7 @@ const uint64_t BitReader::peekU64()
         _position -= 8;
         return v;
     } catch (std::out_of_range&) {
-        SDebug << "Peeking uint64_t: NULL" << std::endl;
+        LDebug("Peeking uint64_t: NULL")
     }
 
     return 0;

@@ -240,7 +240,7 @@ void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate)
 {
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
-        SError << _peerid << ": Failed to serialize candidate" << endl;
+        LError(_peerid, ": Failed to serialize candidate")
         assert(0);
         return;
     }
@@ -259,7 +259,7 @@ void Peer::OnSuccess(webrtc::SessionDescriptionInterface* desc)
     // Send an SDP offer to the peer
     std::string sdp;
     if (!desc->ToString(&sdp)) {
-        SError << _peerid << ": Failed to serialize local sdp" << endl;
+        LError(_peerid, ": Failed to serialize local sdp")
         assert(0);
         return;
     }
@@ -270,7 +270,7 @@ void Peer::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 
 void Peer::OnFailure(const std::string& error)
 {
-    SError << _peerid << ": On failure: " << error << endl;
+    LError(_peerid, ": On failure: ", error)
 
     _manager->onFailure(this, error);
 }
@@ -326,13 +326,13 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> Peer::stream() const
 
 void DummySetSessionDescriptionObserver::OnSuccess()
 {
-    SDebug << "On SDP parse success" << endl;
+    LDebug("On SDP parse success")
 }
 
 
 void DummySetSessionDescriptionObserver::OnFailure(const std::string& error)
 {
-    SError << "On SDP parse error: " << error << endl;
+    LError("On SDP parse error: ", error)
     assert(0);
 }
 

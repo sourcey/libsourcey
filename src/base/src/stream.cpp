@@ -49,7 +49,7 @@
 //
 //     // LTrace("Send shutdown")
 //     if (!active()) {
-//         SWarn << "Cannot shutdown a closed stream" << std::endl;
+//         LWarn("Cannot shutdown a closed stream")
 //         return false;
 //     }
 //
@@ -176,7 +176,7 @@
 //     //
 //     //     // Swallow exceptions and set the stream error
 //     //     // This keep errors in the event loop
-//     //     SError << "Exception: " << exc.what() << std::endl;
+//     //     LError("Exception: ", exc.what())
 //     //     self->setUVError(exc.what());
 //     //     return;
 //     // }

@@ -213,7 +213,7 @@ bool FakeAudioDeviceModule::RecordingIsInitialized() const
 
 int32_t FakeAudioDeviceModule::StartPlayout()
 {
-    SDebug << "Start playout" << endl;
+    LDebug("Start playout")
     if (!_playIsInitialized) {
         return -1;
     }
@@ -226,7 +226,7 @@ int32_t FakeAudioDeviceModule::StartPlayout()
 
 int32_t FakeAudioDeviceModule::StopPlayout()
 {
-    SDebug << "Stop playout" << endl;
+    LDebug("Stop playout")
     {
         rtc::CritScope cs(&_crit);
         _playing = false;
@@ -242,7 +242,7 @@ bool FakeAudioDeviceModule::Playing() const
 
 int32_t FakeAudioDeviceModule::StartRecording()
 {
-    SDebug << "Start recording" << endl;
+    LDebug("Start recording")
     if (!_recIsInitialized) {
         return -1;
     }
@@ -255,7 +255,7 @@ int32_t FakeAudioDeviceModule::StartRecording()
 
 int32_t FakeAudioDeviceModule::StopRecording()
 {
-    SDebug << "Stop recording" << endl;
+    LDebug("Stop recording")
     {
         rtc::CritScope cs(&_crit);
         _recording = false;

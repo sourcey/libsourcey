@@ -97,7 +97,7 @@ public:
                 if (_actions.empty())
                     return;
             }
-            SDebug << "Wait for sync" << std::endl;
+            LDebug("Wait for sync")
             scy::sleep(10);
         }
     }

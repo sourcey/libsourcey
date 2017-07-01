@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 
         auto conn = http::Client::instance().createConnection("http://zlib.net/fossils/zlib-1.2.8.tar.gz");
         conn->Complete += [&](const http::Response& response) {
-            // std::cout << "Server response: " << response << endl;
+            // std::cout << "Lerver response: "(response, )
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
         auto conn = http::Client::instance().createConnection("http://google.com/");
         // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->Complete += [&](const http::Response& response) {
-            // std::cout << "Server response: " << response << endl;
+            // std::cout << "Lerver response: "(response, )
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
         auto conn = http::Client::instance().createConnection("https://google.com/");
         // conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->Complete += [&](const http::Response& response) {
-            // std::cout << "Server response: " << response << endl;
+            // std::cout << "Lerver response: "(response, )
         };
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);

@@ -11,12 +11,12 @@ public:
         : http::ServerResponder(connection)
         , options(options)
     {
-        SDebug << "Create" << std::endl;
+        LDebug("Create")
     }
 
     virtual ~StreamingRequestHandler()
     {
-        SDebug << "Destroy" << std::endl;
+        LDebug("Destroy")
     }
 
     virtual void onRequest(http::Request& request, http::Response& response)
@@ -40,7 +40,7 @@ public:
 
     virtual void onClose()
     {
-        SDebug << "On close" << std::endl;
+        LDebug("On close")
         stream.emitter -= packetSlot(this, &StreamingRequestHandler::onVideoEncoded);
         stream.stop();
     }
@@ -55,7 +55,7 @@ public:
             connection().socket()->send((const char*)packet.data(), packet.size());
             fpsCounter.tick();
         } catch (std::exception& exc) {
-            SError << exc.what() << std::endl;
+            LError(exc.what(), )
             connection().close();
         }
     }

@@ -57,12 +57,12 @@ public:
 
     void onSocketError(Socket&, const scy::Error& error) override
     {
-        SError << "On error: " << error.message << std::endl;
+        LError("On error: ", error.message)
     }
 
     void onSocketClose(Socket&) override
     {
-        SDebug << "On close" << std::endl;
+        LDebug("On close")
     }
 };
 
