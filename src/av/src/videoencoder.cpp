@@ -259,7 +259,7 @@ bool VideoEncoder::encode(AVFrame* iframe)
     int ret = avcodec_encode_video2(ctx, &opacket, convert(iframe), &frameEncoded);
     if (ret < 0) {
         error = "Video encoder error: " + averror(ret);
-        LError(error, )
+        LError(error)
         throw std::runtime_error(error);
     }
 
@@ -277,9 +277,9 @@ bool VideoEncoder::encode(AVFrame* iframe)
             //     opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
             STrace << "Encoded frame:"
-                         << "\n\tScaled PTS: " << opacket.pts
-                         << "\n\tScaled DTS: " << opacket.dts
-                         << "\n\tLcaled Duration: "(opacket.duration, )
+                 << "\n\tScaled PTS: " << opacket.pts
+                 << "\n\tScaled DTS: " << opacket.dts
+                 << "\n\tLcaled Duration: " << opacket.duration << std::endl;
 
             emitPacket(this, opacket);
         }

@@ -55,7 +55,7 @@ public:
             connection().socket()->send((const char*)packet.data(), packet.size());
             fpsCounter.tick();
         } catch (std::exception& exc) {
-            LError(exc.what(), )
+            LError(exc.what())
             connection().close();
         }
     }

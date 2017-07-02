@@ -184,7 +184,7 @@ bool AudioDecoder::decode(AVPacket& ipacket)
         ret = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
         if (ret < 0) {
             error = "Audio decoder error: " + averror(ret);
-            LError(error, )
+            LError(error)
             throw std::runtime_error(error);
         }
 

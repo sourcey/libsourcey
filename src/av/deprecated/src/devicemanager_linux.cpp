@@ -319,7 +319,7 @@ static std::string getVideoDeviceName(MetaType meta,
     if (meta == M2_6) {
         metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
 
-        LInfo("Trying " + metaFilePath, )
+        LInfo("Trying " + metaFilePath)
         deviceName = getVideoDeviceNameK2_6(metaFilePath);
         if (deviceName.empty()) {
             metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";

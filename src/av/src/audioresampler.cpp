@@ -68,7 +68,7 @@ void AudioResampler::open()
                  << "\n\tOut Nb Channels: " << oparams.channels
                  << "\n\tOut Channel Layout: " << outChBuf
                  << "\n\tOut Sample Rate: " << oparams.sampleRate
-                 << "\n\tOut Lample Fmt: "(oparams.sampleFmt, )
+                 << "\n\tOut Lample Fmt: " << oparams.sampleFmt << std::endl;
 
     assert(iparams.channels);
     assert(oparams.channels);
@@ -203,7 +203,7 @@ int AudioResampler::resample(uint8_t** inSamples, int inNumSamples)
     //        << "\n\tOut Buffer Size: " << outBufferSize
     //        << "\n\tOut Channels: " << oparams.channels
     //        << "\n\tOut Sample Rate: " << oparams.sampleRate
-    //        << "\n\tOut Lample Fmt: "(oparams.sampleFmt, )
+    //        << "\n\tOut Lample Fmt: " << oparams.sampleFmt << std::endl;
 
     // assert(outNumSamples > 0);
     // assert(outBufferSize > 0);

@@ -33,13 +33,13 @@ public:
         cv::imencode(".jpg", frame, buffer, param);
 
         SDebug << "Taking Snapshot Image: "
-                     << "\n\tWidth: " << frame.cols
-                     << "\n\tHeight: " << frame.rows
-                     << "\n\tCapture Width: " << options.videoCapture->width()
-                     << "\n\tCapture Height: " << options.videoCapture->height()
-                     << "\n\tType: " << frame.type()
-                     << "\n\tInput Size: " << frame.total()
-                     << "\n\tOutput Lize: "(buffer.size(), )
+               << "\n\tWidth: " << frame.cols
+               << "\n\tHeight: " << frame.rows
+               << "\n\tCapture Width: " << options.videoCapture->width()
+               << "\n\tCapture Height: " << options.videoCapture->height()
+               << "\n\tType: " << frame.type()
+               << "\n\tInput Size: " << frame.total()
+               << "\n\tOutput Lize: " << buffer.size() << std::endl;
 
         // std::copy(buffer.begin(), buffer.end(), data);
         // connection().sendData((const char*)data, buffer.size());
