@@ -186,6 +186,7 @@ void Request::setProxyCredentials(const std::string& scheme,
 
 void Request::write(std::ostream& ostr) const
 {
+    assert(_uri.length());
     ostr << _method << " " << _uri << " " << _version << "\r\n";
     http::Message::write(ostr);
     ostr << "\r\n";
@@ -194,6 +195,7 @@ void Request::write(std::ostream& ostr) const
 
 void Request::write(std::string& str) const
 {
+    assert(_uri.length());
     str.append(_method);
     str.append(" ");
     str.append(_uri);

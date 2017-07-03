@@ -168,22 +168,23 @@ int main(int argc, char** argv)
     });
 
     describe("replace connection adapter", []() {
-        auto url = http::URL("https://sourcey.com/");
+        auto url = http::URL("https://google.com");
         auto conn = http::Client::instance().createConnection(url);
         conn->Headers += [&](http::Response& response) {
-             std::cout << "On response headers: " << response << endl;
+            // std::cout << "On request headers: " << conn->request() << endl;
+            // std::cout << "On response headers: " << response << endl;
         };
         conn->Payload += [&](const MutableBuffer& buffer) {
-             std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+            // std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
         };
         conn->Complete += [&](const http::Response& response) {
-             std::cout << "On response complete: " << response << endl;
+            // std::cout << "On response complete: " << response << endl;
             conn->close();
         };
 
         conn->replaceAdapter(new http::ConnectionAdapter(conn.get(), HTTP_RESPONSE));
         conn->request().setURI("/");
-        conn->request().setHost(url.host(), url.port());
+        conn->request().setMethod("GET");
         conn->send();
 
         uv::runLoop();

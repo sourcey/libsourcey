@@ -137,7 +137,7 @@ Pipe& Process::out()
 
 bool Process::kill(int signum)
 {
-    if (!_handle.initialized());
+    if (!_handle.initialized())
         return false;
     assert(pid() > 0);
     return uv_kill(pid(), signum) == 0;

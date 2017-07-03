@@ -191,7 +191,7 @@ void SSLAdapter::flushReadBIO()
     size_t npending = BIO_ctrl_pending(_readBIO);
     if (npending > 0) {
         int nread;
-        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
+        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate only npending bytes
         while ((nread = SSL_read(_ssl, buffer, MAX_TCP_PACKET_SIZE)) > 0) {
             _socket->onRecv(mutableBuffer(buffer, nread));
         }
@@ -203,7 +203,7 @@ void SSLAdapter::flushWriteBIO()
 {
     size_t npending = BIO_ctrl_pending(_writeBIO);
     if (npending > 0) {
-        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
+        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate only npending bytes
         int nread = BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);
         if (nread > 0) {
             _socket->write(buffer, nread);
@@ -227,7 +227,7 @@ void SSLAdapter::handleError(int rc)
             break;
         case SSL_ERROR_WANT_WRITE:
             // LTrace("SSL_ERROR_WANT_WRITE")
-            assert(0 && "TODO");
+            assert(0 && "not implemented");
             break;
         case SSL_ERROR_WANT_CONNECT:
         case SSL_ERROR_WANT_ACCEPT:
@@ -238,7 +238,8 @@ void SSLAdapter::handleError(int rc)
             char buffer[256];
             ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));
             std::string msg(buffer);
-            throw std::runtime_error("SSL connection error: " + msg);
+            // throw std::runtime_error("SSL connection failed: " + msg);
+            _socket->setError("SSL connection failed: " + msg);
             break;
     }
 }
