@@ -38,8 +38,10 @@ macro(find_library_extended prefix)
       ${${prefix}_PATHS}
     )
 
-  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  select_library_configurations(${prefix})
+  if(${prefix}_LIBRARY_DEBUG OR ${prefix}_PATHS_RELEASE)
+    include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+    select_library_configurations(${prefix})
+  endif()
 
   # print_module_variables(${prefix})
 
