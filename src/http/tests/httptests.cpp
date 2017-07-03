@@ -167,6 +167,31 @@ int main(int argc, char** argv)
         expect(!conn->error().any());
     });
 
+    describe("replace connection adapter", []() {
+        auto url = http::URL("https://sourcey.com/");
+        auto conn = http::Client::instance().createConnection(url);
+        conn->Headers += [&](http::Response& response) {
+             std::cout << "On response headers: " << response << endl;
+        };
+        conn->Payload += [&](const MutableBuffer& buffer) {
+             std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
+        };
+        conn->Complete += [&](const http::Response& response) {
+             std::cout << "On response complete: " << response << endl;
+            conn->close();
+        };
+
+        conn->replaceAdapter(new http::ConnectionAdapter(conn.get(), HTTP_RESPONSE));
+        conn->request().setURI("/");
+        conn->request().setHost(url.host(), url.port());
+        conn->send();
+
+        uv::runLoop();
+
+        expect(conn->closed());
+        expect(!conn->error().any());
+    });
+
     //
     /// Standalone HTTP Client Connection Test
     //
@@ -210,6 +235,7 @@ int main(int argc, char** argv)
         expect(conn->closed());
         expect(!conn->error().any());
     });
+
 
     //
     /// Google Drive Upload Test

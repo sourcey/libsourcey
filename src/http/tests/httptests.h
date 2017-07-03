@@ -71,7 +71,7 @@ struct HTTPEchoTest
     http::ClientConnection::Ptr createConnection(const std::string& protocol, const std::string& query)
     {
         std::ostringstream url;
-        url << protocol << "://127.0.0.1:" << query << std::endl;
+        url << protocol << "://127.0.0.1:" << TEST_HTTP_PORT << query << std::endl;
         conn = client.createConnection(url.str());
         conn->Connect += slot(this, &HTTPEchoTest::onConnect);
         conn->Headers += slot(this, &HTTPEchoTest::onHeaders);
