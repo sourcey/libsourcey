@@ -59,8 +59,6 @@ if(WEBRTC_INCLUDE_DIR)
       ${WEBRTC_ROOT_DIR}/out/Release-x64
       ${WEBRTC_ROOT_DIR}/out/Release)
 
-  message("00000000000000 WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
-
   # Attempt to find the monolithic library built with `webrtcbuilds`
   find_library_extended(WEBRTC
     NAMES webrtc webrtc_full libwebrtc_full
@@ -94,9 +92,8 @@ if(WEBRTC_INCLUDE_DIR)
   if(NOT WEBRTC_LIBRARIES)
     #unset(WEBRTC_LIBRARY CACHE)
     #unset(WEBRTC_LIBRARIES CACHE)
-    #message("1122222221 WEBRTC_LIBRARIES: ${WEBRTC_LIBRARIES}")
-
     #set(WEBRTC_LIBRARIES "")
+    
     if(MSVC)
       set(lib_suffix "lib")
     else()

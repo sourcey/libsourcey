@@ -143,7 +143,6 @@ int main(int argc, char** argv)
         conn->Complete += [&](const http::Response& response) {
             // std::cout << "Lerver response: "(response, )
         };
-        conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
         conn->send();
@@ -158,7 +157,6 @@ int main(int argc, char** argv)
         conn->Complete += [&](const http::Response& response) {
             // std::cout << "Lerver response: "(response, )
         };
-        conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
         // conn->setReadStream(new std::stringstream);
         conn->send();
@@ -171,8 +169,8 @@ int main(int argc, char** argv)
         auto url = http::URL("https://google.com");
         auto conn = http::Client::instance().createConnection(url);
         conn->Headers += [&](http::Response& response) {
-            // std::cout << "On request headers: " << conn->request() << endl;
-            // std::cout << "On response headers: " << response << endl;
+             std::cout << "On request headers: " << conn->request() << endl;
+             std::cout << "On response headers: " << response << endl;
         };
         conn->Payload += [&](const MutableBuffer& buffer) {
             // std::cout << "On payload: " << buffer.size() << ": " << buffer.str() << endl;
@@ -183,8 +181,7 @@ int main(int argc, char** argv)
         };
 
         conn->replaceAdapter(new http::ConnectionAdapter(conn.get(), HTTP_RESPONSE));
-        conn->request().setURI("/");
-        conn->request().setMethod("GET");
+        conn->request().setKeepAlive(false);
         conn->send();
 
         uv::runLoop();

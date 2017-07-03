@@ -35,7 +35,9 @@ ClientConnection::ClientConnection(const URL& url, const net::TCPSocket::Ptr& so
 {
     // LTrace("Create: ", url)
 
-    _request.setURI(url.pathEtc());
+    auto uri = url.pathEtc();
+    if (!uri.empty())
+        _request.setURI(uri);
     _request.setHost(url.host(), url.port());
 
     // Set default error status
