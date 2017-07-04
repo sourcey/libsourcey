@@ -204,7 +204,6 @@ void Request::write(std::string& str) const
     str.append("\r\n");
     http::Message::write(str);
     str.append("\r\n");
-    std::cout << "Request::writes:" << _uri << "|" << endl;
 }
 
 

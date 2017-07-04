@@ -347,8 +347,17 @@ install(DIRECTORY ${LibSourcey_DIR}/cmake
 # ----------------------------------------------------------------------------
 #  Install PkgConfig file
 # ----------------------------------------------------------------------------
-set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
+
+set(PKG_CONFIG_LIBS)
+foreach(module ${LibSourcey_BUILD_MODULES})
+  set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} -lscy_${module}")
+endforeach()
+foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
+  set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} -l${dep}")
+endforeach()
+
 status("Creating 'libsourcey.pc'")
+set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
 configure_file(
   ${LibSourcey_DIR}/cmake/libsourcey.pc.cmake.in
 	${LibSourcey_PC} @ONLY)
@@ -366,8 +375,8 @@ set(SCY_ENABLE_LOGGING ${ENABLE_LOGGING})
 set(SCY_EXCEPTION_RECOVERY ${EXCEPTION_RECOVERY})
 set(SCY_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 
-set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 status("Creating 'libsourcey.h'")
+set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
 configure_file(
   ${LibSourcey_DIR}/cmake/libsourcey.h.cmake.in
   ${LibSourcey_CONFIG_FILE})
