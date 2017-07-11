@@ -166,8 +166,11 @@ if(WEBRTC_INCLUDE_DIR)
     list(APPEND WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIR} ${WEBRTC_INCLUDE_DIR}/third_party/boringssl/src/include)
   endif()
 
-  # include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  # select_library_configurations(WEBRTC)
+  # workaround for fixing error WEBRTC_LIBRARY-NOTFOUND
+  set(WEBRTC_LIBRARY_RELEASE ${WEBRTC_LIBRARIES_RELEASE})
+  set(WEBRTC_LIBRARY_DEBUG ${WEBRTC_LIBRARIES_DEBUG})
+  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+  select_library_configurations(WEBRTC)
 
   # message("WEBRTC_LIBRARIES_DEBUG: ${WEBRTC_LIBRARIES_DEBUG}")
   # message("WEBRTC_LIBRARIES_RELEASE: ${WEBRTC_LIBRARIES_RELEASE}")
