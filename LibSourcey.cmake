@@ -192,12 +192,6 @@ if(MSVC)
   add_definitions(-DNOMINMAX)
 endif()
 
-if(APPLE)
-  message("Including APPLE's foundation and AVFoundation frameworks")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation")
-  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
-endif()
 
 # ----------------------------------------------------------------------------
 # Include third party dependencies
@@ -275,6 +269,26 @@ endif()
 if(WITH_WXWIDGETS)
   # TODO: specify required library options
   find_dependency(wxWidgets REQUIRED core base adv)
+endif()
+
+if(APPLE)
+  status("Including APPLE's foundation and AVFoundation frameworks")
+
+  # Don't use RPATH's. The resulting binary could fail a security audit.
+  if (NOT CMAKE_VERSION VERSION_LESS 2.8.12)
+    set(CMAKE_MACOSX_RPATH 0)
+  endif()
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_library(FOUNDATION Foundation)
+    find_library(AVFOUNDATION AVFoundation)
+
+    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${FOUNDATION} ${AVFOUNDATION})
+  endif()
+
+  #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation")
+  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
 
 # ----------------------------------------------------------------------------

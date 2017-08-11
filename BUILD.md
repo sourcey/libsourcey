@@ -30,7 +30,7 @@ node ./node_modules/gitbook-cli/bin/gitbook.js init
 https://github.com/contao/docs/blob/master/cookbook/book.json
 
 ## Default debug build
-cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=ON \
+cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF \
          -DBUILD_MODULES=ON -DBUILD_APPLICATIONS=ON \
          -DBUILD_SAMPLES=ON -DBUILD_TESTS=ON \
          -DWITH_FFMPEG=ON

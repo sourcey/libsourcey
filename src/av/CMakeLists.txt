@@ -7,12 +7,6 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_av))
   #   add_vendor_dependency(RTAUDIO rtaudio)
   # endif()
 
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    find_library(AVFOUNDATION AVFoundation)
-
-    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${AVFOUNDATION})
-  endif()
-
   include_dependency(FFmpeg)
   # include_dependency(OpenCV)
 

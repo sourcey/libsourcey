@@ -24,6 +24,8 @@ project(LibSourcey)
 
 add_definitions(-DUNICODE -D_UNICODE)
 
+# set(CMAKE_MACOSX_RPATH 1)
+
 # Set warning level to W3
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
   add_definitions(/W3)
@@ -31,6 +33,8 @@ endif()
 
 # Remove a couple of annoying CMake warnings
 # cmake_policy(SET CMP0054 OLD)
+# CMP0042
+
 
 include(LibSourcey.cmake REQUIRED)
 # include(cmake/LibSourceyVersion.cmake)
