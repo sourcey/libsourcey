@@ -196,7 +196,7 @@ endmacro()
 macro(set_default_project_directories name)
   # set(MODULE_${name})
   foreach(module ${ARGN})
-    list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_BUILD_DIR}/src/${module})
+    list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_BUILD_DIR}/${module})
     list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_SOURCE_DIR}/${module}/include)
   endforeach()
 

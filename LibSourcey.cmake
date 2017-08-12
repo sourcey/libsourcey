@@ -201,10 +201,13 @@ endif()
 link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
-list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+if (EXISTS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+  list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+endif()
 
 # Prefind external dependencies so we can set defaults
 # find_package(OpenSSL)
+find_package(Threads)
 find_package(OpenCV)
 find_package(FFmpeg)
 
@@ -219,6 +222,28 @@ set_option(WITH_OPENCV          "Include OpenCV support"               OFF) #ON 
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_POCO            "Include Poco support"                 OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
+
+# Include dependencies
+if(APPLE)
+  status("Including APPLE's foundation and AVFoundation frameworks")
+
+  # Don't use RPATH's. The resulting binary could fail a security audit.
+  # if (NOT CMAKE_VERSION VERSION_LESS 2.8.12)
+  #   set(CMAKE_MACOSX_RPATH OFF)
+  # endif()
+  set(CMAKE_MACOSX_RPATH ON)
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_library(FOUNDATION Foundation)
+    find_library(AVFOUNDATION AVFoundation)
+
+    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${FOUNDATION} ${AVFOUNDATION})
+  endif()
+
+  #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation")
+  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+endif()
 
 # Build dependencies
 add_vendor_dependency(LIBUV libuv)
@@ -269,26 +294,6 @@ endif()
 if(WITH_WXWIDGETS)
   # TODO: specify required library options
   find_dependency(wxWidgets REQUIRED core base adv)
-endif()
-
-if(APPLE)
-  status("Including APPLE's foundation and AVFoundation frameworks")
-
-  # Don't use RPATH's. The resulting binary could fail a security audit.
-  if (NOT CMAKE_VERSION VERSION_LESS 2.8.12)
-    set(CMAKE_MACOSX_RPATH 0)
-  endif()
-
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    find_library(FOUNDATION Foundation)
-    find_library(AVFOUNDATION AVFoundation)
-
-    list(APPEND LibSourcey_BUILD_DEPENDENCIES ${FOUNDATION} ${AVFOUNDATION})
-  endif()
-
-  #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation")
-  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
 
 # ----------------------------------------------------------------------------
