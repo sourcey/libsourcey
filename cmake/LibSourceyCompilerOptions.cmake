@@ -33,7 +33,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   endif()
 
   # We need pthread's
-  if(UNIX AND NOT ANDROID)
+  if(UNIX AND NOT ANDROID AND NOT APPLE)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -pthread")
   endif()
 
