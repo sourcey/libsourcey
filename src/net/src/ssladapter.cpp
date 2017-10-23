@@ -191,8 +191,8 @@ void SSLAdapter::flushReadBIO()
     size_t npending = BIO_ctrl_pending(_readBIO);
     if (npending > 0) {
         int nread;
-        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate only npending bytes
-        while ((nread = SSL_read(_ssl, buffer, MAX_TCP_PACKET_SIZE)) > 0) {
+        char buffer[npending];
+        while ((nread = SSL_read(_ssl, buffer, npending)) > 0) {
             _socket->onRecv(mutableBuffer(buffer, nread));
         }
     }
@@ -203,8 +203,8 @@ void SSLAdapter::flushWriteBIO()
 {
     size_t npending = BIO_ctrl_pending(_writeBIO);
     if (npending > 0) {
-        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate only npending bytes
-        int nread = BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);
+        char buffer[npending];
+        int nread = BIO_read(_writeBIO, buffer, npending);
         if (nread > 0) {
             _socket->write(buffer, nread);
         }
