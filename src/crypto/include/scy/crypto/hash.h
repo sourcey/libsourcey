@@ -53,7 +53,12 @@ public:
 protected:
     Hash& operator=(Hash const&);
 
-    EVP_MD_CTX _ctx;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    EVP_MD_CTX    _ctx;
+#else
+    EVP_MD_CTX*   _ctxPtr;
+#endif
+
     const EVP_MD* _md;
     crypto::ByteVec _digest;
     std::string _algorithm;
