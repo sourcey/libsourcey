@@ -249,7 +249,7 @@ void X509Certificate::extractNames(std::string& cmnName,
                     const char* data =
                     reinterpret_cast<char*>(ASN1_STRING_data(name->d.ia5));
                 #else
-                    const char* data = const_cast<
+                    const char* data = 
                     reinterpret_cast<const char*>(ASN1_STRING_get0_data(name->d.ia5));
                 #endif
 
