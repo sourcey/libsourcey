@@ -62,7 +62,8 @@ set(LibSourcey_ALL_MODULES
 )
 
 # Check for cached results. If there are then skip the costly part.
-# set_module_notfound(LibSourcey)
+# FIXME: (michaelfig) I needed to do this, or else include path was not set correctly.
+set_module_notfound(LibSourcey)
 if (NOT LibSourcey_FOUND)
   if(WIN32 AND MSVC)
     set(LibSourcey_MULTI_CONFIGURATION TRUE)

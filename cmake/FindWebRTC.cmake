@@ -51,6 +51,10 @@ if(WEBRTC_INCLUDE_DIR)
       ${WEBRTC_ROOT_DIR}/out/x64/Debug
       ${WEBRTC_ROOT_DIR}/out/Debug_x64
       ${WEBRTC_ROOT_DIR}/out/Debug-x64
+      ${WEBRTC_ROOT_DIR}/lib/x86/Debug
+      ${WEBRTC_ROOT_DIR}/out/x86/Debug
+      ${WEBRTC_ROOT_DIR}/out/Debug_x86
+      ${WEBRTC_ROOT_DIR}/out/Debug-x86
       ${WEBRTC_ROOT_DIR}/out/Debug)
 
   find_existing_directory(release_dir
@@ -58,6 +62,10 @@ if(WEBRTC_INCLUDE_DIR)
       ${WEBRTC_ROOT_DIR}/out/x64/Release
       ${WEBRTC_ROOT_DIR}/out/Release_x64
       ${WEBRTC_ROOT_DIR}/out/Release-x64
+      ${WEBRTC_ROOT_DIR}/lib/x86/Release
+      ${WEBRTC_ROOT_DIR}/out/x86/Release
+      ${WEBRTC_ROOT_DIR}/out/Release_x86
+      ${WEBRTC_ROOT_DIR}/out/Release-x86
       ${WEBRTC_ROOT_DIR}/out/Release)
 
   # Attempt to find the monolithic library built with `webrtcbuilds`
