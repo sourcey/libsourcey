@@ -17,8 +17,9 @@ RUN apt-get update && apt-get install -y \
   cmake \
   libx11-dev \
   libglu1-mesa-dev \
-  gcc g++ \
+  gcc g++ gdb \
   libssl-dev \
+  libx264-dev yasm \
   libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libswresample-dev libpostproc-dev
 
 # Download and extract precompiled WebRTC static libraries
@@ -37,7 +38,7 @@ RUN dir=`ls -d /vendor/webrtc-*` && case "$dir" in *x86) export LDFLAGS=-m32; de
   cd /libsourcey && mkdir build && cd build && \
   cmake -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=ON \
            -DBUILD_MODULES=ON -DBUILD_APPLICATIONS=OFF -DBUILD_SAMPLES=OFF -DBUILD_TESTS=OFF \
-           -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON -DENABLE_LOGGING=OFF \
+           -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON -DENABLE_LOGGING=ON \
            -DWEBRTC_ROOT_DIR="$dir" -DDOCKER_IMAGE="$IMAGE"$def \
            -DCMAKE_INSTALL_PREFIX=/libsourcey/install .. && \
   make VERBOSE=1 && \
