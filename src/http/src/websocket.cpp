@@ -262,10 +262,10 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                 if (offset < total)
                     LTrace("Splitting joined packet at ",  offset,  " of ", total)
 
-                if (framer.frameFlags() == unsigned(ws::Opcode::Ping)) {
-                    // Should reply immediately.
+                if (framer.frameFlags() == unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Ping)) {
+                    // Should reply immediately with same payload.
                     LTrace("Replying to ping length ", payloadLength);
-                    send(payload, payloadLength, unsigned(ws::Opcode::Pong));
+                    send(payload, payloadLength, unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Pong));
                     continue;
                 }
                 
