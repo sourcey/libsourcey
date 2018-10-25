@@ -262,6 +262,13 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                 if (offset < total)
                     LTrace("Splitting joined packet at ",  offset,  " of ", total)
 
+                if (framer.frameFlags() == unsigned(ws::Opcode::Ping)) {
+                    // Should reply immediately.
+                    LTrace("Replying to ping length ", payloadLength);
+                    send(payload, payloadLength, unsigned(ws::Opcode::Pong));
+                    continue;
+                }
+                
                 // Drop empty packets
                 if (!payloadLength) {
                     LDebug("Dropping empty frame")
