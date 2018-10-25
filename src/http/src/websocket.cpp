@@ -460,7 +460,8 @@ void WebSocketFramer::acceptServerRequest(http::Request& request, http::Response
 
 size_t WebSocketFramer::writeFrame(const char* data, size_t len, int flags, BitWriter& frame)
 {
-    assert(flags == ws::SendFlags::Text || flags == ws::SendFlags::Binary);
+    assert(flags == ws::SendFlags::Text || flags == ws::SendFlags::Binary ||
+        flags == ws::SendFlags::Ping || flags == ws::SendFlags::Pong);
     assert(frame.position() == 0);
     // assert(frame.limit() >= size_t(len + MAX_HEADER_LENGTH));
 

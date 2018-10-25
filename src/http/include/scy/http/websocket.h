@@ -65,7 +65,9 @@ enum class Opcode
 enum SendFlags
 {
     Text = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Text),
-    Binary = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Binary)
+    Binary = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Binary),
+    Ping = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Ping),
+    Pong = unsigned(ws::FrameFlags::Fin) | unsigned(ws::Opcode::Pong),
 };
 
 
