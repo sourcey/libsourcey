@@ -122,7 +122,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(LibSourcey_EXTRA_C_FLAGS_DEBUG "${LibSourcey_EXTRA_C_FLAGS_DEBUG} -ggdb3")
   endif()
 
-  if(NOT BUILD_SHARED_LIBS AND NOT ANDROID)
+  if(BUILD_SHARED_LIBS AND NOT ANDROID)
     # Android does not need these settings because they are already set by toolchain file
     set(LibSourcey_LINKER_LIBS ${LibSourcey_LINKER_LIBS} stdc++)
     set(LibSourcey_EXTRA_C_FLAGS "-fPIC ${LibSourcey_EXTRA_C_FLAGS}")
