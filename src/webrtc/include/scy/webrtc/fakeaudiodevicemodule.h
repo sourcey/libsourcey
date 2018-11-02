@@ -13,7 +13,7 @@
 
 #include "scy/base.h"
 
-#include "rtc_base/basictypes.h"
+// #include "rtc_base/basictypes.h"
 #include "rtc_base/criticalsection.h"
 #include "rtc_base/messagehandler.h"
 #include "rtc_base/scoped_ref_ptr.h"

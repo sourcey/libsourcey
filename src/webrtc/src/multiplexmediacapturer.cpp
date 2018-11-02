@@ -100,13 +100,13 @@ void MultiplexMediaCapturer::addMediaTracks(
     // Create and add the audio stream
     if (_videoCapture->audio()) {
         stream->AddTrack(factory->CreateAudioTrack(
-            kAudioLabel, factory->CreateAudioSource(nullptr)));
+            kAudioLabel, factory->CreateAudioSource(cricket::AudioOptions())));
     }
 
     // Create and add the video stream
     if (_videoCapture->video()) {
         stream->AddTrack(factory->CreateVideoTrack(
-            kVideoLabel, factory->CreateVideoSource(createVideoSource(), nullptr)));
+            kVideoLabel, factory->CreateVideoSource(createVideoSource())));
     }
 
     // Default WebRTC video stream for testing

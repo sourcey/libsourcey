@@ -78,6 +78,7 @@ public:
     std::string peerid() const;
     std::string token() const;
     webrtc::FakeConstraints& constraints();
+    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions& offerAnswerOptions();
     webrtc::PeerConnectionFactoryInterface* factory() const;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream() const;
@@ -110,6 +111,7 @@ protected:
     Mode _mode;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;
+    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions _offerAnswerOptions;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
     std::unique_ptr<cricket::BasicPortAllocator> _portAllocator;

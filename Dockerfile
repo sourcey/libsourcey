@@ -24,12 +24,14 @@ RUN apt-get update && apt-get install -y \
 
 # Download and extract precompiled WebRTC static libraries
 # COPY vendor/webrtc-22215-ab42706-linux-x64 /vendor/webrtc-22215-ab42706-linux-x64
+COPY *.tar.gz libsourcey/
 RUN case "$IMAGE" in \
-  *86*) dir=webrtc-22215-ab42706-linux-x86 ;; \
-  *) dir=webrtc-22215-ab42706-linux-x64 ;; \
+  *86*) dir=webrtc-25477-3e4c77f-linux-x86 ;; \
+  *) dir=webrtc-25477-3e4c77f-linux-x64 ;; \
   esac; \
   mkdir -p /vendor/$dir; \
-  curl -sSL https://github.com/sourcey/webrtc-precompiled-builds/raw/master/$dir.tar.gz | tar -xzC /vendor/$dir
+  if test -f libsourcey/$dir.tar.gz; then cat libsourcey/$dir.tar.gz; \
+  else curl -sSL https://github.com/sourcey/webrtc-precompiled-builds/raw/master/$dir.tar.gz; fi | tar -xzC /vendor/$dir
 
 # Install LibSourcey
 #RUN git clone https://github.com/sourcey/libsourcey.git && \

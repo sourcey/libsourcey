@@ -172,7 +172,7 @@ void printEncoders(std::ostream& ost, const char* delim)
     while (p) {
         if (av_codec_is_encoder(p))
             ost << p->name << delim;
-        p = p->next;
+        p = av_codec_next(p);
     }
     uninitializeFFmpeg();
 }

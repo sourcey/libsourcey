@@ -163,7 +163,7 @@ if(WEBRTC_INCLUDE_DIR)
     add_definitions(-DWEBRTC_POSIX)
 
     # For ABI compatability between precompiled WebRTC libraries using clang and new GCC versions
-    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    #add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
     set(WEBRTC_DEPENDENCIES -lrt -lX11 -lGLU) # -lGL
 
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
@@ -172,7 +172,7 @@ if(WEBRTC_INCLUDE_DIR)
 
   # Add vendor include directories
   if(WEBRTC_INCLUDE_DIR AND NOT WEBRTC_INCLUDE_DIRS)
-    list(APPEND WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIR} ${WEBRTC_INCLUDE_DIR}/third_party/boringssl/src/include)
+    list(APPEND WEBRTC_INCLUDE_DIRS ${WEBRTC_INCLUDE_DIR} ${WEBRTC_INCLUDE_DIR}/third_party/boringssl/src/include ${WEBRTC_INCLUDE_DIR}/third_party/abseil-cpp)
   endif()
 
   # Workaround for fixing error WEBRTC_LIBRARY-NOTFOUND

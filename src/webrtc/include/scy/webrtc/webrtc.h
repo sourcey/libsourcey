@@ -16,6 +16,8 @@
 #ifndef SCY_WebRTC_WEBRTC_H
 #define SCY_WebRTC_WEBRTC_H
 
+#define USE_BUILTIN_SW_CODECS 1
+
 
 namespace scy {
 namespace wrtc {

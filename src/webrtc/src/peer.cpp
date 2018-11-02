@@ -43,6 +43,7 @@ Peer::Peer(PeerManager* manager,
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
     // _constraints.SetAllowDtlsSctpDataChannels();
+    // _offerAnswerOptions.* // FIXME: Set as necessary
 }
 
 
@@ -90,7 +91,7 @@ void Peer::setPortRange(int minPort, int maxPort)
 void Peer::createConnection()
 {
     assert(_context->factory);
-    _peerConnection = _context->factory->CreatePeerConnection(_config, &_constraints,
+    _peerConnection = _context->factory->CreatePeerConnection(_config,
                                                               std::move(_portAllocator), nullptr, this);
 
     if (_stream) {
@@ -121,7 +122,13 @@ void Peer::createOffer()
     assert(_mode == Offer);
     assert(_peerConnection);
 
-    _peerConnection->CreateOffer(this, &_constraints);
+    _peerConnection->CreateOffer(this, offerAnswerOptions());
+}
+
+
+webrtc::PeerConnectionInterface::RTCOfferAnswerOptions& Peer::offerAnswerOptions()
+{
+    return _offerAnswerOptions;
 }
 
 
@@ -140,7 +147,7 @@ void Peer::recvSDP(const std::string& type, const std::string& sdp)
 
     if (type == "offer") {
         assert(_mode == Answer);
-        _peerConnection->CreateAnswer(this, &_constraints);
+        _peerConnection->CreateAnswer(this, offerAnswerOptions());
     } else {
         assert(_mode == Offer);
     }

@@ -22,7 +22,6 @@
 #include "p2p/client/basicportallocator.h"
 #include "pc/peerconnection.h"
 
-
 using std::endl;
 
 
