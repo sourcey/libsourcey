@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y \
 # COPY vendor/webrtc-22215-ab42706-linux-x64 /vendor/webrtc-22215-ab42706-linux-x64
 COPY *.tar.gz libsourcey/
 RUN case "$IMAGE" in \
-  *86*) dir=webrtc-25477-3e4c77f-linux-x86 ;; \
-  *) dir=webrtc-25477-3e4c77f-linux-x64 ;; \
+  *86*) dir=webrtc-25491-1bc0b9d-linux-x86 ;; \
+  *) dir=webrtc-25491-1bc0b9d-linux-x64 ;; \
   esac; \
   mkdir -p /vendor/$dir; \
   if test -f libsourcey/$dir.tar.gz; then cat libsourcey/$dir.tar.gz; \
@@ -46,6 +46,9 @@ RUN dir=`ls -d /vendor/webrtc-*` && case "$dir" in *x86) export LDFLAGS=-m32; de
   make VERBOSE=1 && \
   make install
   # cachebust
+#  make VERBOSE=1 && \
+#  make webrtc/fast VERBOSE=1 && \
+
 
 # Set the working directory to the LibSourcey install directory
 WORKDIR /libsourcey/install
