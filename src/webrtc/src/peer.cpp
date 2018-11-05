@@ -128,6 +128,11 @@ void Peer::createOffer()
 
 webrtc::PeerConnectionInterface::RTCOfferAnswerOptions& Peer::offerAnswerOptions()
 {
+    std::string value_str;
+#define CheckTrue(KEY) (_constraints.GetMandatory().FindFirst(KEY, &value_str) && \
+    value_str == rtc::ToString(true) ? 1 : 0)
+    _offerAnswerOptions.offer_to_receive_audio = CheckTrue(webrtc::MediaConstraintsInterface::kOfferToReceiveAudio);
+    _offerAnswerOptions.offer_to_receive_video = CheckTrue(webrtc::MediaConstraintsInterface::kOfferToReceiveVideo);
     return _offerAnswerOptions;
 }
 
