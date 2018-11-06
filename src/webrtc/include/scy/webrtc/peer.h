@@ -78,6 +78,7 @@ public:
     std::string peerid() const;
     std::string token() const;
     webrtc::FakeConstraints& constraints();
+    webrtc::PeerConnectionInterface::RTCConfiguration& config();
     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions& offerAnswerOptions();
     webrtc::PeerConnectionFactoryInterface* factory() const;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;

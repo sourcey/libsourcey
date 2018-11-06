@@ -43,7 +43,6 @@ Peer::Peer(PeerManager* manager,
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
     // _constraints.SetAllowDtlsSctpDataChannels();
-    // _offerAnswerOptions.* // FIXME: Set as necessary
 }
 
 
@@ -55,6 +54,12 @@ Peer::~Peer()
     if (_peerConnection) {
         _peerConnection->Close();
     }
+}
+
+
+webrtc::PeerConnectionInterface::RTCConfiguration& Peer::config()
+{
+    return _config;
 }
 
 
