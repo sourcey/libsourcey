@@ -43,7 +43,7 @@ RUN dir=`ls -d /vendor/webrtc-*` && case "$dir" in *x86) export LDFLAGS=-m32; de
            -DWITH_FFMPEG=ON -DWITH_WEBRTC=ON -DENABLE_LOGGING=ON \
            -DWEBRTC_ROOT_DIR="$dir" -DDOCKER_IMAGE="$IMAGE"$def \
            -DCMAKE_INSTALL_PREFIX=/libsourcey/install .. && \
-  make webrtc/fast VERBOSE=1 && \
+  make http/fast VERBOSE=1 && \
   make VERBOSE=1 && \
   make install
   # cachebust

@@ -176,11 +176,13 @@ protected:
     enum
     {
         FRAME_FLAG_MASK = 0x80,
-        MAX_HEADER_LENGTH = 14
+        MAX_HEADER_LENGTH = 14,
+        DEFAULT_MAX_PAYLOAD_LENGTH = 64 * 1024,
     };
 
 private:
     ws::Mode _mode;
+    uint64_t _maxPayloadLength = DEFAULT_MAX_PAYLOAD_LENGTH;
     int _frameFlags;
     int _headerState;
     bool _maskPayload;
@@ -241,6 +243,7 @@ protected:
     WebSocketFramer framer;
     http::Request& _request;
     http::Response& _response;
+    Buffer _priorData;
 };
 
 

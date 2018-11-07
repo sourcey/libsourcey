@@ -217,18 +217,18 @@ void WebSocketAdapter::onSocketConnect(net::Socket&)
 }
 
 
-void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, const net::Address& peerAddress)
+void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& inBuffer, const net::Address& peerAddress)
 {
+    MutableBuffer buffer = inBuffer;
     LTrace("On recv: ", buffer.size())
-
     if (framer.handshakeComplete()) {
 
-        // Note: The spec wants us to buffer partial frames, but our
-        // software does not require this feature, and furthermore
-        // it goes against our nocopy where possible policy.
-        // This may need to change in the future, but for now
-        // we just parse and emit packets as they arrive.
-        //
+        if (_priorData.size() > 0) {
+            // We have some old data.  Append our new buffer and do it.
+            _priorData.insert(_priorData.end(), buffer.cstr(), buffer.cstr() + buffer.size());
+            buffer = mutableBuffer(_priorData);
+        }
+
         // Incoming frames may be joined, so we parse them
         // in a loop until the read buffer is empty.
         BitReader reader(buffer);
@@ -274,6 +274,14 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                     LDebug("Dropping empty frame")
                     continue;
                 }
+            } catch (std::out_of_range& exc) {
+                // We have a partial buffer.  Keep a copy of it for next time.
+                LDebug("Partial buffer: ", exc.what());
+                if (buffer.size() - offset > 0) {
+                    _priorData.reserve(buffer.size() - offset);
+                    _priorData.assign(buffer.cstr() + offset, buffer.cstr() + buffer.size());
+                }
+                return;
             } catch (std::exception& exc) {
                 LError("Parser error: ", exc.what())
                 socket->setError(exc.what());
@@ -288,6 +296,8 @@ void WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
                 peerAddress);
         }
         assert(offset == total);
+        // We processed the whole buffer, so make sure our priorData is empty.
+        _priorData.resize(0);
     } else {
         try {
             if (framer.mode() == ws::ClientSide)
@@ -548,24 +558,15 @@ uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     if ((lengthByte & 0x7f) == 127) {
         uint64_t l;
         headerReader.getU64(l);
-        if (l > limit)
-            throw std::runtime_error(
-                util::format("WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 8;
     } else if ((lengthByte & 0x7f) == 126) {
         uint16_t l;
         headerReader.getU16(l);
-        if (l > limit)
-            throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
         payloadOffset += 2;
     } else {
         uint8_t l = lengthByte & 0x7f;
-        if (l > limit)
-            throw std::runtime_error(util::format(
-                "WebSocket error: Insufficient buffer for payload size %" PRIu64, l)); //, ws::ErrorPayloadTooBig
         payloadLength = l;
     }
     if (lengthByte & FRAME_FLAG_MASK) {
@@ -573,8 +574,11 @@ uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         payloadOffset += 4;
     }
 
-    if (payloadLength > limit)
+    if (_maxPayloadLength > 0 && payloadLength > _maxPayloadLength)
         throw std::runtime_error(
+            "WebSocket error: Payload length exceeds maximum");
+    if (offset + payloadOffset + payloadLength > limit)
+        throw std::out_of_range(
             "WebSocket error: Incomplete frame received"); //ws::ErrorIncompleteFrame
 
     // Get a reference to the start of the payload
