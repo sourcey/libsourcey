@@ -99,8 +99,19 @@ void MultiplexMediaCapturer::addMediaTracks(
 
     // Create and add the audio stream
     if (_videoCapture->audio()) {
+        // We actually don't want audio processing.
+        auto aopts = cricket::AudioOptions();
+        aopts.auto_gain_control = false;
+        aopts.echo_cancellation = false;
+        aopts.typing_detection = false;
+        aopts.noise_suppression = false;
+        aopts.highpass_filter = false;
+        aopts.extended_filter_aec = false;
+        aopts.experimental_agc = false;
+        aopts.experimental_ns = false;
+        aopts.stereo_swapping = false;
         stream->AddTrack(factory->CreateAudioTrack(
-            kAudioLabel, factory->CreateAudioSource(cricket::AudioOptions())));
+            kAudioLabel, factory->CreateAudioSource(aopts)));
     }
 
     // Create and add the video stream
