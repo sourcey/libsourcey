@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 COPY *.tar.gz libsourcey/
 RUN case "$IMAGE" in \
   *86*) dir=webrtc-25491-1bc0b9d-linux-x86 ;; \
-  *) dir=webrtc-25491-1bc0b9d-linux-x64 ;; \
+  *) dir=webrtc-25740-4a2dd7a-linux-x64 ;; \
   esac; \
   mkdir -p /vendor/$dir; \
   if test -f libsourcey/$dir.tar.gz; then cat libsourcey/$dir.tar.gz; \

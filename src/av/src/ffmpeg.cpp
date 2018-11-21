@@ -76,7 +76,7 @@ static void logCallback(void *ptr, int level, const char *fmt, va_list vl)
     default:
     case AV_LOG_VERBOSE:
     case AV_LOG_DEBUG:
-        // LTrace("FFmpeg: ", util::trimRight<std::string>(logbuf))
+        LTrace("FFmpeg: ", util::trimRight<std::string>(logbuf))
         break;
     }
 }
@@ -171,7 +171,9 @@ void printEncoders(std::ostream& ost, const char* delim)
     AVCodec* p = av_codec_next(nullptr);
     while (p) {
         if (av_codec_is_encoder(p))
-            ost << p->name << delim;
+            ost << "E:" << p->name << delim;
+        if (av_codec_is_decoder(p))
+            ost << "D:" << p->name << delim;
         p = av_codec_next(p);
     }
     uninitializeFFmpeg();
