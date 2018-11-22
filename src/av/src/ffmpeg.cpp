@@ -88,8 +88,8 @@ void init()
 
     if (++_refCount == 1) {
         // Use an internal log callback.
-        // av_log_set_callback(logCallback);
-        // av_log_set_level(AV_LOG_INFO);
+        av_log_set_callback(logCallback);
+        av_log_set_level(AV_LOG_INFO);
 
         // Optionally disable logging.
         // av_log_set_level(AV_LOG_QUIET);
