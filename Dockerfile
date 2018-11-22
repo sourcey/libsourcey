@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y \
 # COPY vendor/webrtc-22215-ab42706-linux-x64 /vendor/webrtc-22215-ab42706-linux-x64
 COPY *.tar.gz libsourcey/
 RUN case "$IMAGE" in \
-  *86*) dir=webrtc-25491-1bc0b9d-linux-x86 ;; \
-  *) dir=webrtc-25759-3955a50-linux-x64 ;; \
+  *86*) dir=`cd libsourcey && ls -t webrtc-*-linux-x86.tar.gz | sed -e 's/\.tar\.gz$//; q'` ;; \
+  *) dir=`cd libsourcey && ls -t webrtc-*-linux-x64.tar.gz | sed -e 's/\.tar\.gz$//; q'` ;; \
   esac; \
   mkdir -p /vendor/$dir; \
   if test -f libsourcey/$dir.tar.gz; then cat libsourcey/$dir.tar.gz; \
