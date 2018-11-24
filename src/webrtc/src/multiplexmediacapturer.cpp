@@ -49,6 +49,9 @@ void MultiplexMediaCapturer::openFile(const std::string& file, bool loop)
     _videoCapture->setLoopInput(loop);
     _videoCapture->setLimitFramerate(true);
     _videoCapture->openFile(file);
+    _videoCapture->Closing += [&]() {
+        Closing.emit();
+    };
 
     // Set the output settings
     if (_videoCapture->audio()) {
