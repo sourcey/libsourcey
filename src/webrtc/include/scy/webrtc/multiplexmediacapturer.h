@@ -46,6 +46,8 @@ public:
     rtc::scoped_refptr<AudioPacketModule> getAudioModule();
     VideoPacketSource* createVideoSource();
 
+    NullSignal Closing;
+
 protected:
     PacketStream _stream;
     av::MediaCapture::Ptr _videoCapture;
