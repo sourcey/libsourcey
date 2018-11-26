@@ -44,8 +44,6 @@ struct VideoDecoder : public VideoContext
     /// This method should be called after decoding
     /// until false is returned.
     virtual void flush();
-
-    uint64_t firstTime = 0;
 };
 
 

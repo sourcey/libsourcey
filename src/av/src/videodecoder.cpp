@@ -16,10 +16,6 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/logger.h"
 
-extern "C" {
-#include "libavutil/time.h"
-}
-
 
 using std::endl;
 
@@ -93,15 +89,6 @@ inline void emitPacket(VideoDecoder* dec, AVFrame* frame)
     int64_t pts = frame->pts;
     dec->time = pts > 0 ? static_cast<int64_t>(pts *
                 av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
-
-    // Automatically use wallclock if we don't have any time.
-    if (!dec->time) {
-        int64_t now = av_gettime_relative();
-        if (!dec->firstTime) {
-            dec->firstTime = now;
-        }
-        dec->time = now - dec->firstTime;
-    }
 
     // Set the decoder pts in stream time base
     dec->pts = pts;
