@@ -36,9 +36,6 @@ Peer::Peer(PeerManager* manager,
     , _peerConnection(nullptr)
     , _stream(nullptr)
 {
-    // webrtc::PeerConnectionInterface::IceServer stun;
-    // stun.uri = kGoogleStunServerUri;
-    // _config.servers.push_back(stun);
 
     // _constraints.SetMandatoryReceiveAudio(true);
     // _constraints.SetMandatoryReceiveVideo(true);
@@ -54,6 +51,19 @@ Peer::~Peer()
     if (_peerConnection) {
         _peerConnection->Close();
     }
+}
+
+
+webrtc::PeerConnectionInterface::RTCConfiguration& Peer::config()
+{
+    // webrtc::PeerConnectionInterface::IceServer stun;
+    // webrtc::PeerConnectionInterface::IceServer stun;
+    // stun.uri = kGoogleStunServerUri;
+    // peer->config().servers.push_back(stun);
+    // stun.uri = kGoogleStunServerUri;
+    // peer->config().servers.push_back(stun);
+
+    return _config;
 }
 
 
@@ -90,7 +100,7 @@ void Peer::setPortRange(int minPort, int maxPort)
 void Peer::createConnection()
 {
     assert(_context->factory);
-    _peerConnection = _context->factory->CreatePeerConnection(_config, &_constraints,
+    _peerConnection = _context->factory->CreatePeerConnection(_config,
                                                               std::move(_portAllocator), nullptr, this);
 
     if (_stream) {
@@ -121,7 +131,18 @@ void Peer::createOffer()
     assert(_mode == Offer);
     assert(_peerConnection);
 
-    _peerConnection->CreateOffer(this, &_constraints);
+    _peerConnection->CreateOffer(this, offerAnswerOptions());
+}
+
+
+webrtc::PeerConnectionInterface::RTCOfferAnswerOptions& Peer::offerAnswerOptions()
+{
+    std::string value_str;
+#define CheckTrue(KEY) (_constraints.GetMandatory().FindFirst(KEY, &value_str) && \
+    value_str == rtc::ToString(true) ? 1 : 0)
+    _offerAnswerOptions.offer_to_receive_audio = CheckTrue(webrtc::MediaConstraintsInterface::kOfferToReceiveAudio);
+    _offerAnswerOptions.offer_to_receive_video = CheckTrue(webrtc::MediaConstraintsInterface::kOfferToReceiveVideo);
+    return _offerAnswerOptions;
 }
 
 
@@ -140,7 +161,7 @@ void Peer::recvSDP(const std::string& type, const std::string& sdp)
 
     if (type == "offer") {
         assert(_mode == Answer);
-        _peerConnection->CreateAnswer(this, &_constraints);
+        _peerConnection->CreateAnswer(this, offerAnswerOptions());
     } else {
         assert(_mode == Offer);
     }
