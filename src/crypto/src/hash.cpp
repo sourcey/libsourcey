@@ -32,7 +32,11 @@ Hash::Hash(const std::string& algorithm)
     if (!_md)
         throw std::runtime_error("Algorithm not supported: " + algorithm);
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_DigestInit(&_ctx, _md);
+#else
+    EVP_DigestInit(_ctxPtr, _md);
+#endif
 }
 
 
@@ -40,7 +44,11 @@ Hash::~Hash()
 {
     crypto::uninitializeEngine();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_MD_CTX_cleanup(&_ctx);
+#else
+    EVP_MD_CTX_free(_ctxPtr);
+#endif
     //EVP_MD_CTX_free(_ctx);
 }
 
@@ -49,15 +57,26 @@ void Hash::reset()
 {
     //EVP_MD_CTX_free(_ctx);
     //_ctx = EVP_MD_CTX_new();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     internal::api(EVP_MD_CTX_cleanup(&_ctx));
     internal::api(EVP_DigestInit(&_ctx, _md));
+#else
+    internal::api(EVP_MD_CTX_cleanup(_ctxPtr));
+    internal::api(EVP_DigestInit(_ctxPtr, _md));
+#endif
+
     _digest.clear();
 }
 
 
 void Hash::update(const void* data, size_t length)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     internal::api(EVP_DigestUpdate(&_ctx, data, length));
+#else
+    internal::api(EVP_DigestUpdate(_ctxPtr, data, length));
+#endif
+
 }
 
 
@@ -79,7 +98,11 @@ const ByteVec& Hash::digest()
     if (_digest.size() == 0) {
         _digest.resize(EVP_MAX_MD_SIZE); // TODO: Get actual algorithm size
         unsigned int len = 0;
+        #if OPENSSL_VERSION_NUMBER < 0x10100000L
         internal::api(EVP_DigestFinal(&_ctx, &_digest[0], &len));
+        #else
+        internal::api(EVP_DigestFinal(_ctxPtr, &_digest[0], &len));
+        #endif
         _digest.resize(len);
     }
     return _digest;

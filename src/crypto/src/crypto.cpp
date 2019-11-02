@@ -120,7 +120,9 @@ void init()
 
     if (++_refCount == 1) {
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
+    #if OPENSSL_VERSION_NUMBER < 0x10100000L
         OPENSSL_config(NULL);
+    #endif
 #endif
         SSL_library_init();
         SSL_load_error_strings();

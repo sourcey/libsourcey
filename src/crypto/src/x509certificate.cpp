@@ -58,9 +58,13 @@ X509Certificate::X509Certificate(X509* pCert, bool shared)
 {
     assert(_certificate);
 
-    if (shared)
+    if (shared) {
+    #if OPENSSL_VERSION_NUMBER < 0x10100000L
         _certificate->references++;
-        // X509_up_ref(_certificate); // OpenSSL >= 1.1.0
+    #else
+        X509_up_ref(_certificate); // OpenSSL >= 1.1.0
+    #endif
+    }
 
     init();
 }
@@ -241,8 +245,14 @@ void X509Certificate::extractNames(std::string& cmnName,
         for (int i = 0; i < sk_GENERAL_NAME_num(names); ++i) {
             const GENERAL_NAME* name = sk_GENERAL_NAME_value(names, i);
             if (name->type == GEN_DNS) {
-                const char* data =
+                #if OPENSSL_VERSION_NUMBER < 0x10100000L
+                    const char* data =
                     reinterpret_cast<char*>(ASN1_STRING_data(name->d.ia5));
+                #else
+                    const char* data = 
+                    reinterpret_cast<const char*>(ASN1_STRING_get0_data(name->d.ia5));
+                #endif
+
                 size_t len = ASN1_STRING_length(name->d.ia5);
                 domainNames.insert(std::string(data, len));
             }
