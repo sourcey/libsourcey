@@ -8,7 +8,7 @@
   "dependencies": {
     "ejs": "*",
     "express": "*",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "symple": "*",
     "symple-client": "*",
     "symple-client-player": "*"
