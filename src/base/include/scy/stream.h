@@ -84,6 +84,8 @@ public:
 
         assert(_started);
 
+        //fix it , when len = 200000, but the call to uv_write may only write 120000 and return,
+        //and need another loop to send the left 80000 bytes, but the data may be already freed
         auto buf = uv_buf_init((char*)data, (int)len);
         return Handle::invoke(&uv_write, new uv_write_t, stream(), &buf, 1, [](uv_write_t* req, int) {
             delete req;

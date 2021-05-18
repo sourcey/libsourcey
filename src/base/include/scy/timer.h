@@ -28,6 +28,8 @@ namespace scy {
 class Base_API Timer : public Runner
 {
 public:
+    typedef std::shared_ptr<Timer> Ptr;
+
     /// Create a timer.
     Timer(uv::Loop* loop = uv::defaultLoop());
 

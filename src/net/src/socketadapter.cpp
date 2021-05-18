@@ -205,7 +205,11 @@ void SocketAdapter::removeReceiver(SocketAdapter* adapter)
     assert(adapter != this);
     auto it = std::find_if(_receivers.begin(), _receivers.end(),
         [&](const Ref* ref) { return ref->ptr == adapter; });
-    if (it != _receivers.end()) { (*it)->alive = false; }
+    if (it != _receivers.end()) {
+        (*it)->alive = false;
+        _dirty = true;
+        cleanupReceivers();
+    }
 }
 
 

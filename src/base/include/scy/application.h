@@ -133,6 +133,7 @@ struct ShutdownCmd
 };
 
 
+//to fix : shutdown should be able normal exit for SIGINT(CTRL+C) and SIGTERM(bash: killall app-name)
 inline void onShutdownSignal(std::function<void(void*)> callback = nullptr,
                              void* opaque = nullptr, uv::Loop* loop = uv::defaultLoop())
 {
@@ -149,6 +150,7 @@ inline void onShutdownSignal(std::function<void(void*)> callback = nullptr,
         if (cmd->callback)
             cmd->callback(cmd->opaque);
         delete cmd;
+        GarbageCollector::destroy();
     }, SIGINT);
 }
 
@@ -158,6 +160,7 @@ inline void waitForShutdown(std::function<void(void*)> callback = nullptr,
 {
     onShutdownSignal(callback, opaque, loop);
     uv_run(loop, UV_RUN_DEFAULT);
+    assert(uv::closeLoop(loop) == true);
 }
 
 
