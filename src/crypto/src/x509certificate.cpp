@@ -59,8 +59,7 @@ X509Certificate::X509Certificate(X509* pCert, bool shared)
     assert(_certificate);
 
     if (shared)
-        _certificate->references++;
-        // X509_up_ref(_certificate); // OpenSSL >= 1.1.0
+        X509_up_ref(_certificate); // OpenSSL >= 1.1.0
 
     init();
 }
