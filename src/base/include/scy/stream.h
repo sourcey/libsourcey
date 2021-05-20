@@ -30,6 +30,12 @@ namespace scy {
 template<typename T>
 class Base_API Stream : public uv::Handle<T>
 {
+    typedef struct
+    {
+        uv_write_t req;
+        uv_buf_t buf;
+    } write_req_t;
+
 public:
     typedef uv::Handle<T> Handle;
 
@@ -79,16 +85,22 @@ public:
     /// This method does not throw an exception.
     bool write(const char* data, size_t len)
     {
+        if (len <= 0)
+            return true;
+
         if (!Handle::active())
             return false;
 
         assert(_started);
 
-        //fix it , when len = 200000, but the call to uv_write may only write 120000 and return,
-        //and need another loop to send the left 80000 bytes, but the data may be already freed
-        auto buf = uv_buf_init((char*)data, (int)len);
-        return Handle::invoke(&uv_write, new uv_write_t, stream(), &buf, 1, [](uv_write_t* req, int) {
-            delete req;
+        write_req_t* req = (write_req_t*)malloc(sizeof(write_req_t));
+        req->buf.base = (char*)malloc(len);
+        req->buf.len = len;
+        memcpy(req->buf.base, data, len);
+        return Handle::invoke(&uv_write, (uv_write_t*)req, stream(), &req->buf, 1, [](uv_write_t* req, int) {
+            write_req_t* wr = (write_req_t*)req;
+            free(wr->buf.base);
+            free(wr);
         });
     }
 

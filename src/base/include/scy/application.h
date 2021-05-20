@@ -150,7 +150,6 @@ inline void onShutdownSignal(std::function<void(void*)> callback = nullptr,
         if (cmd->callback)
             cmd->callback(cmd->opaque);
         delete cmd;
-        GarbageCollector::destroy();
     }, SIGINT);
 }
 
