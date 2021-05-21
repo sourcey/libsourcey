@@ -178,7 +178,6 @@ protected:
 protected:
     net::Address _address;
     net::TCPSocket::Ptr _socket;
-    Timer::Ptr _timer;
     ServerConnectionFactory* _factory;
     std::vector<ServerConnection::Ptr> _connections;
 

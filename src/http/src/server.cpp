@@ -25,7 +25,6 @@ namespace http {
 Server::Server(const std::string& host, short port, net::TCPSocket::Ptr socket, ServerConnectionFactory* factory)
     : _address(host, port)
     , _socket(socket)
-    , _timer(new Timer(5000, 5000, socket->loop()))
     , _factory(factory)
 {
     // LTrace("Create")
@@ -35,7 +34,6 @@ Server::Server(const std::string& host, short port, net::TCPSocket::Ptr socket, 
 Server::Server(const net::Address& address, net::TCPSocket::Ptr socket, ServerConnectionFactory* factory)
     : _address(address)
     , _socket(socket)
-    , _timer(new Timer(5000, 5000, socket->loop()))
     , _factory(factory)
 {
     // LTrace("Create")
@@ -59,9 +57,6 @@ void Server::start()
     _socket->listen(1000);
 
     LDebug("HTTP server listening on ", _address)
-
-    _timer->Timeout += slot(this, &Server::onTimer);
-    _timer->start();
 }
 
 
@@ -75,8 +70,6 @@ void Server::shutdown()
         _socket->close();
     }
 
-    _timer->stop();
-    _timer.reset();
     Shutdown.emit();
 }
 
