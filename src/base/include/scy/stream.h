@@ -93,10 +93,24 @@ public:
 
         assert(_started);
 
+        int nWrite = 0;
+        int nLeft = 0;
+        {
+            auto buf = uv_buf_init((char*)data, (int)len);
+            nWrite = uv_try_write(stream(), &buf, 1);
+            if (nWrite == len) {
+                return true; // 数据全部写成功
+            } else if (nWrite < 0) {
+                nLeft = len;
+            } else {
+                nLeft = len - nWrite;
+            }
+        }
+
         write_req_t* req = (write_req_t*)malloc(sizeof(write_req_t));
-        req->buf.base = (char*)malloc(len);
-        req->buf.len = len;
-        memcpy(req->buf.base, data, len);
+        req->buf.base = (char*)malloc(nLeft);
+        req->buf.len = nLeft;
+        memcpy(req->buf.base, data + len - nLeft, nLeft);
         return Handle::invoke(&uv_write, (uv_write_t*)req, stream(), &req->buf, 1, [](uv_write_t* req, int) {
             write_req_t* wr = (write_req_t*)req;
             free(wr->buf.base);
