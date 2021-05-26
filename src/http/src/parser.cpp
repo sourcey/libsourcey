@@ -183,8 +183,8 @@ void Parser::onHeader(const std::string& name, const std::string& value)
 {
     // LTrace("On header: ",  name,  ":", value)
 
-    if (message())
-        message()->add(name, value);
+    //if (message())
+    //    message()->add(name, value);
     if (_observer)
         _observer->onParserHeader(name, value);
 }
