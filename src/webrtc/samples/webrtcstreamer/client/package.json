@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "symple": "*",
-    "express": "~4.13.3",
+    "express": "~4.17.3",
     "ejs": "~2.3.4"
   }
 }
