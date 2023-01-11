@@ -10,7 +10,7 @@
     "symple": "*",
     "symple-client": "*",
     "symple-client-player": "*",
-    "express": "~4.13.3",
+    "express": "~4.18.2",
     "ejs": "~2.3.4"
   }
 }
