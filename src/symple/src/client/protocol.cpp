@@ -33,6 +33,12 @@ void Client::onSocketRecv(const std::string& data)
             return;
         }
 
+        if (type == "event" &&
+            (msg.value("subtype", "") == "shutdown" ||
+             msg.value("name", "") == "shutdown")) {
+            state.remoteShutdown = true;
+        }
+
         if (type == "welcome") {
             onWelcome(msg);
             return;

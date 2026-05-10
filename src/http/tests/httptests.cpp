@@ -798,13 +798,18 @@ int main(int argc, char** argv)
     });
 
     describe("http server state: websocket upgrade bypasses idle timeout", []() {
-        auto server = makeEchoServer(TEST_HTTP_PORT + 23);
+        auto server = std::make_unique<http::Server>(net::Address("127.0.0.1", TEST_HTTP_PORT + 23));
         server->setKeepAliveTimeout(1);
 
         http::ServerConnection::Ptr serverConn;
         server->Connection += [&](http::ServerConnection::Ptr conn) {
             serverConn = conn;
+            conn->Payload += [](http::ServerConnection& conn, const MutableBuffer& buffer) {
+                expect(conn.sendOwned(Buffer(bufferCast<const char*>(buffer),
+                                             bufferCast<const char*>(buffer) + buffer.size())) > 0);
+            };
         };
+        server->start();
 
         auto conn = http::Client::instance().createConnection(
             "ws://127.0.0.1:" + std::to_string(TEST_HTTP_PORT + 23) + "/websocket");
@@ -815,7 +820,13 @@ int main(int argc, char** argv)
         conn->Close += [&](http::Connection&) { closed = true; };
         conn->send("PING", 4);
 
-        expect(test::waitFor([&] { return connected && serverConn != nullptr; }, 5000));
+        bool ready = test::waitFor([&] { return connected && serverConn != nullptr; }, 5000);
+        expect(ready);
+        if (!ready) {
+            conn->close();
+            server->stop();
+            return;
+        }
         expect(serverConn->state() == http::ServerConnectionState::Upgraded);
 
         test::waitFor([] { return false; }, 2500);
@@ -1114,10 +1125,12 @@ int main(int argc, char** argv)
         res.setStatus(http::StatusCode::OK);
         res.setReason("OK");
         res.set("Content-Type", "text/html");
-        res.setContentLength(13);
+        std::string body = "Hello, world!";
+        res.setContentLength(body.size());
 
         std::ostringstream oss;
         res.write(oss);
+        oss << body;
         std::string raw = oss.str();
 
         expect(raw.find("HTTP/1.1 200 OK") != std::string::npos);

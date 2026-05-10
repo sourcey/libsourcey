@@ -33,6 +33,7 @@ struct Client::ClientData
     int reconnectCount = 0;
     bool wasOnline = false;
     bool closing = false;
+    bool remoteShutdown = false;
 };
 
 

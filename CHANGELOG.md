@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the unused `Base64PacketEncoder` packet-stream adapter and its public header. Use the `icy::base64` namespace helpers directly for Base64 encoding and decoding.
+
 ## [2.4.10] - 2026-04-29
 
 ### Fixed

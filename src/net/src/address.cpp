@@ -114,22 +114,22 @@ class Net_API IPv6AddressBase : public AddressBase
 public:
     IPv6AddressBase(const struct sockaddr_in6* addr)
     {
-        _addr.sin6_family = AF_INET6;
         memcpy(&_addr, addr, sizeof(_addr));
+        _addr.sin6_family = AF_INET6;
     }
 
     IPv6AddressBase(const void* addr, uint16_t port)
     {
-        _addr.sin6_family = AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
+        _addr.sin6_family = AF_INET6;
         memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
         _addr.sin6_port = port;
     }
 
     IPv6AddressBase(const void* addr, uint16_t port, uint32_t scope)
     {
-        _addr.sin6_family = AF_INET6;
         memset(&_addr, 0, sizeof(_addr));
+        _addr.sin6_family = AF_INET6;
         memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
         _addr.sin6_port = port;
         _addr.sin6_scope_id = scope;

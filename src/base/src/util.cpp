@@ -221,21 +221,20 @@ bool compareVersion(std::string_view l, std::string_view r)
     if (r.empty())
         return true;
 
-    bool equal = true;
     std::vector<std::string> lnums, rnums;
     util::split(l, std::string_view("."), lnums);
     util::split(r, std::string_view("."), rnums);
-    for (unsigned i = 0; i < lnums.size(); i++) {
-        if (rnums.size() < i + 1)
-            break;
-        int ln = util::strtoi<int>(lnums[i]);
-        int rn = util::strtoi<int>(rnums[i]);
+
+    const size_t size = std::max(lnums.size(), rnums.size());
+    for (size_t i = 0; i < size; ++i) {
+        int ln = i < lnums.size() ? util::strtoi<int>(lnums[i]) : 0;
+        int rn = i < rnums.size() ? util::strtoi<int>(rnums[i]) : 0;
         if (ln < rn)
             return false;
-        else if (ln > rn)
-            equal = false;
+        if (ln > rn)
+            return true;
     }
-    return !equal;
+    return false;
 }
 
 

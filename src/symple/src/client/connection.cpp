@@ -128,6 +128,15 @@ void Client::stop()
 
 void Client::onTransportError(const icy::Error& error)
 {
+    auto& data = *_data;
+    if (!stateEquals(ClientState::Error) &&
+        (data.remoteShutdown ||
+         (data.wasOnline &&
+          (error.err == UV_ECONNRESET || error.err == UV_EOF)))) {
+        onSocketClose();
+        return;
+    }
+
     onSocketError(error.message.empty() ? "WebSocket transport error" : error.message);
 }
 
@@ -183,6 +192,7 @@ void Client::reset()
     data.announceStatus = 0;
     data.ourID.clear();
     data.wasOnline = false;
+    data.remoteShutdown = false;
 }
 
 

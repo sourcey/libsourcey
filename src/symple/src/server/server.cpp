@@ -95,6 +95,7 @@ void Server::stop()
         std::lock_guard lock(_mutex);
         json::Value notice;
         notice["type"] = "event";
+        notice["name"] = "shutdown";
         notice["subtype"] = "shutdown";
         notice["message"] = "Server shutting down";
         auto str = notice.dump();

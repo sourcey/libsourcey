@@ -427,6 +427,12 @@ int main(int argc, char** argv)
         // expect((util::Version("3") < util::Version("3.7.9")) == true);
         expect((util::Version("1.7.9") < util::Version("3.1")) == true);
 
+        expect(util::compareVersion("2.0.0", "1.1.0"));
+        expect(!util::compareVersion("1.1.0", "2.0.0"));
+        expect(!util::compareVersion("2.0.0", "2.0.0"));
+        expect(util::compareVersion("1.0.1", "1.0"));
+        expect(!util::compareVersion("1.0", "1.0.1"));
+
         cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0") << '\n';
     });
 

@@ -86,7 +86,6 @@ The `base` module contains reusable cross platform tools and utilities.
 | [`AsyncDiagnostic`](#asyncdiagnostic) | Asynchronous diagnostic information collector. |
 | [`DiagnosticManager`](#diagnosticmanager) | Registry and manager for diagnostic providers. |
 | [`PacketTransaction`](#packettransaction) | Request/response transaction with timeout and retry logic. |
-| [`Base64PacketEncoder`](#base64packetencoder) | Packet processor that Base64-encodes packet data. |
 | [`Task`](#task) | Abstract base class for implementing asynchronous tasks. |
 | [`TaskRunner`](#taskrunner) | [Runner](#runner) for tasks that inherit the `[Task](#task)` interface. |
 | [`IPacket`](#ipacket) | The basic packet type which is passed around the icey system. [IPacket](#ipacket) can be extended for each protocol to enable polymorphic processing and callbacks using [PacketStream](#packetstream) and friends. |
@@ -19591,7 +19590,7 @@ Deleted constructor.
 ```
 
 > **Inherits:** [`PacketStreamAdapter`](#packetstreamadapter)
-> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue), [`PlanarAudioPacket >`](#asyncpacketqueue), [`PlanarVideoPacket >`](#asyncpacketqueue), [`AsyncPacketQueue< T >`](#asyncpacketqueue), [`Base64PacketEncoder`](#base64packetencoder), [`StreamWriter`](#streamwriter), [`SyncPacketQueue< T >`](#syncpacketqueue), [`AudioPacketEncoder`](av.md#audiopacketencoder), [`FPSLimiter`](av.md#fpslimiter), [`MultiplexPacketEncoder`](av.md#multiplexpacketencoder), [`VideoPacketEncoder`](av.md#videopacketencoder), [`ChunkedAdapter`](http.md#chunkedadapter), [`MultipartAdapter`](http.md#multipartadapter), [`FrameSampler`](vision.md#framesampler), [`WebRtcTrackSender`](webrtc.md#webrtctracksender)
+> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue), [`PlanarAudioPacket >`](#asyncpacketqueue), [`PlanarVideoPacket >`](#asyncpacketqueue), [`AsyncPacketQueue< T >`](#asyncpacketqueue), [`StreamWriter`](#streamwriter), [`SyncPacketQueue< T >`](#syncpacketqueue), [`AudioPacketEncoder`](av.md#audiopacketencoder), [`FPSLimiter`](av.md#fpslimiter), [`MultiplexPacketEncoder`](av.md#multiplexpacketencoder), [`VideoPacketEncoder`](av.md#videopacketencoder), [`ChunkedAdapter`](http.md#chunkedadapter), [`MultipartAdapter`](http.md#multipartadapter), [`FrameSampler`](vision.md#framesampler), [`WebRtcTrackSender`](webrtc.md#webrtctracksender)
 
 This class is a virtual interface for creating PacketStreamAdapters which process that and emit the [IPacket](#ipacket) type.
 
@@ -22513,72 +22512,6 @@ Called by the timer when the transaction timeout elapses. Retransmits if retries
 ```cpp
 IntrusivePtr< PacketTransaction< PacketT > > Ptr()
 ```
-
-{#base64packetencoder}
-
-## Base64PacketEncoder
-
-```cpp
-#include <icy/base64packetencoder.h>
-```
-
-> **Inherits:** [`PacketProcessor`](#packetprocessor)
-
-Packet processor that Base64-encodes packet data.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `PacketSignal` | [`emitter`](#emitter)  |  |
-
----
-
-{#emitter}
-
-#### emitter
-
-```cpp
-PacketSignal emitter
-```
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Base64PacketEncoder`](#base64packetencoder) `inline` |  |
-| `void` | [`process`](#process) `virtual` `inline` | Base64-encodes the payload of an incoming `[RawPacket](#rawpacket)` and emits the result. |
-
----
-
-{#base64packetencoder}
-
-#### Base64PacketEncoder
-
-`inline`
-
-```cpp
-inline Base64PacketEncoder()
-```
-
----
-
-{#process}
-
-#### process
-
-`virtual` `inline`
-
-```cpp
-virtual inline void process(IPacket & packet)
-```
-
-Base64-encodes the payload of an incoming `[RawPacket](#rawpacket)` and emits the result. 
-#### Parameters
-* `packet` Incoming packet; must be castable to `[RawPacket](#rawpacket)`. 
-
-#### Exceptions
-* `std::bad_cast` if the packet is not a `[RawPacket](#rawpacket)`.
 
 {#task}
 
@@ -26245,4 +26178,3 @@ std::unique_ptr< IPacketInfo > clone() const
 Returns a heap-allocated deep copy of this info object. 
 #### Returns
 Owning pointer to the cloned instance.
-
