@@ -9,9 +9,9 @@
     "site:dev": "sourcey dev"
   },
   "devDependencies": {
-    "moxygen": "file:../../../sourcey/sourcey/engines/moxygen"
+    "moxygen": "^2.1.9"
   },
   "dependencies": {
-    "sourcey": "file:../../../sourcey/sourcey/oss"
+    "sourcey": "^3.6.0"
   }
 }
