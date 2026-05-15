@@ -176,6 +176,31 @@ Defined in src/pacm/include/icy/pacm/installmonitor.h:27
 
 Aggregates multiple install tasks and reports overall progress.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`InstallStateChange`](#installstatechange) | `variable` | Declared here |
+| [`InstallComplete`](#installcomplete) | `variable` | Declared here |
+| [`Progress`](#progress-1) | `variable` | Declared here |
+| [`Complete`](#complete-3) | `variable` | Declared here |
+| [`InstallMonitor`](#installmonitor-1) | `function` | Declared here |
+| [`InstallMonitor`](#installmonitor-2) | `function` | Declared here |
+| [`InstallMonitor`](#installmonitor-3) | `function` | Declared here |
+| [`addTask`](#addtask) | `function` | Declared here |
+| [`startAll`](#startall) | `function` | Declared here |
+| [`cancelAll`](#cancelall) | `function` | Declared here |
+| [`isComplete`](#iscomplete) | `function` | Declared here |
+| [`tasks`](#tasks) | `function` | Declared here |
+| [`packages`](#packages) | `function` | Declared here |
+| [`_mutex`](#_mutex-10) | `variable` | Declared here |
+| [`_tasks`](#_tasks) | `variable` | Declared here |
+| [`_packages`](#_packages) | `variable` | Declared here |
+| [`_progress`](#_progress) | `variable` | Declared here |
+| [`onInstallStateChange`](#oninstallstatechange) | `function` | Declared here |
+| [`onInstallComplete`](#oninstallcomplete) | `function` | Declared here |
+| [`setProgress`](#setprogress) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -516,6 +541,96 @@ Defined in src/pacm/include/icy/pacm/installtask.h:89
 
 Downloads, extracts, and finalizes a single package installation.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PackageManager`](#packagemanager) | `friend` | Declared here |
+| [`InstallMonitor`](#installmonitor-4) | `friend` | Declared here |
+| [`Progress`](#progress-2) | `variable` | Declared here |
+| [`Complete`](#complete-4) | `variable` | Declared here |
+| [`InstallTask`](#installtask-1) | `function` | Declared here |
+| [`InstallTask`](#installtask-2) | `function` | Declared here |
+| [`InstallTask`](#installtask-3) | `function` | Declared here |
+| [`start`](#start-12) | `function` | Declared here |
+| [`cancel`](#cancel-3) | `function` | Declared here |
+| [`doDownload`](#dodownload) | `function` | Declared here |
+| [`doExtract`](#doextract) | `function` | Declared here |
+| [`doFinalize`](#dofinalize) | `function` | Declared here |
+| [`setComplete`](#setcomplete) | `function` | Declared here |
+| [`getRemoteAsset`](#getremoteasset) | `function` | Declared here |
+| [`local`](#local) | `function` | Declared here |
+| [`remote`](#remote) | `function` | Declared here |
+| [`options`](#options-4) | `function` | Declared here |
+| [`loop`](#loop-7) | `function` | Declared here |
+| [`valid`](#valid-2) | `function` | Declared here |
+| [`cancelled`](#cancelled-2) | `function` | Declared here |
+| [`failed`](#failed) | `function` | Declared here |
+| [`success`](#success-1) | `function` | Declared here |
+| [`complete`](#complete-5) | `function` | Declared here |
+| [`progress`](#progress-3) | `function` | Declared here |
+| [`_mutex`](#_mutex-11) | `variable` | Declared here |
+| [`_runner`](#_runner-1) | `variable` | Declared here |
+| [`_error`](#_error-4) | `variable` | Declared here |
+| [`_manager`](#_manager-3) | `variable` | Declared here |
+| [`_local`](#_local) | `variable` | Declared here |
+| [`_remote`](#_remote) | `variable` | Declared here |
+| [`_options`](#_options-1) | `variable` | Declared here |
+| [`_progress`](#_progress-1) | `variable` | Declared here |
+| [`_downloading`](#_downloading) | `variable` | Declared here |
+| [`_dlconn`](#_dlconn) | `variable` | Declared here |
+| [`_loop`](#_loop-2) | `variable` | Declared here |
+| [`run`](#run-5) | `function` | Declared here |
+| [`onStateChange`](#onstatechange) | `function` | Declared here |
+| [`onDownloadProgress`](#ondownloadprogress) | `function` | Declared here |
+| [`onDownloadComplete`](#ondownloadcomplete) | `function` | Declared here |
+| [`setProgress`](#setprogress-1) | `function` | Declared here |
+| [`Ptr`](#ptr-14) | `typedef` | Declared here |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
 ### Friends
 
 | Name | Description |
@@ -695,6 +810,10 @@ Defined in src/pacm/include/icy/pacm/installtask.h:116
 
 Transitions the task to the Cancelled state.
 
+##### Reimplements
+
+- [`cancel`](base.md#cancel-1)
+
 ---
 
 {#dodownload}
@@ -870,6 +989,10 @@ virtual bool cancelled() const override
 Defined in src/pacm/include/icy/pacm/installtask.h:155
 
 Returns true if the task is in the Cancelled state.
+
+##### Reimplements
+
+- [`cancelled`](base.md#cancelled)
 
 ---
 
@@ -1109,6 +1232,10 @@ Defined in src/pacm/include/icy/pacm/installtask.h:179
 
 Called asynchronously by the thread to do the work.
 
+##### Reimplements
+
+- [`run`](base.md#run-4)
+
 ---
 
 {#onstatechange}
@@ -1198,6 +1325,65 @@ class PackageManager
 Defined in src/pacm/include/icy/pacm/packagemanager.h:62
 
 Loads package manifests and coordinates install, update, and uninstall workflows.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`RemotePackageResponse`](#remotepackageresponse) | `variable` | Declared here |
+| [`PackageUninstalled`](#packageuninstalled) | `variable` | Declared here |
+| [`InstallTaskCreated`](#installtaskcreated) | `variable` | Declared here |
+| [`InstallTaskComplete`](#installtaskcomplete) | `variable` | Declared here |
+| [`PackageManager`](#packagemanager-2) | `function` | Declared here |
+| [`PackageManager`](#packagemanager-3) | `function` | Declared here |
+| [`PackageManager`](#packagemanager-4) | `function` | Declared here |
+| [`initialize`](#initialize) | `function` | Declared here |
+| [`uninitialize`](#uninitialize) | `function` | Declared here |
+| [`initialized`](#initialized-3) | `function` | Declared here |
+| [`createDirectories`](#createdirectories) | `function` | Declared here |
+| [`queryRemotePackages`](#queryremotepackages) | `function` | Declared here |
+| [`loadLocalPackages`](#loadlocalpackages) | `function` | Declared here |
+| [`loadLocalPackages`](#loadlocalpackages-1) | `function` | Declared here |
+| [`saveLocalPackages`](#savelocalpackages) | `function` | Declared here |
+| [`saveLocalPackage`](#savelocalpackage) | `function` | Declared here |
+| [`parseRemotePackages`](#parseremotepackages) | `function` | Declared here |
+| [`installPackage`](#installpackage) | `function` | Declared here |
+| [`installPackages`](#installpackages) | `function` | Declared here |
+| [`updatePackage`](#updatepackage) | `function` | Declared here |
+| [`updatePackages`](#updatepackages) | `function` | Declared here |
+| [`updateAllPackages`](#updateallpackages) | `function` | Declared here |
+| [`uninstallPackages`](#uninstallpackages) | `function` | Declared here |
+| [`uninstallPackage`](#uninstallpackage) | `function` | Declared here |
+| [`hasUnfinalizedPackages`](#hasunfinalizedpackages) | `function` | Declared here |
+| [`finalizeInstallations`](#finalizeinstallations) | `function` | Declared here |
+| [`getInstallTask`](#getinstalltask) | `function` | Declared here |
+| [`tasks`](#tasks-1) | `function` | Declared here |
+| [`cancelAllTasks`](#cancelalltasks) | `function` | Declared here |
+| [`getPackagePairs`](#getpackagepairs) | `function` | Declared here |
+| [`getUpdatablePackagePairs`](#getupdatablepackagepairs) | `function` | Declared here |
+| [`getPackagePair`](#getpackagepair) | `function` | Declared here |
+| [`getOrCreatePackagePair`](#getorcreatepackagepair) | `function` | Declared here |
+| [`createInstallTask`](#createinstalltask) | `function` | Declared here |
+| [`installedPackageVersion`](#installedpackageversion) | `function` | Declared here |
+| [`getLatestInstallableAsset`](#getlatestinstallableasset) | `function` | Declared here |
+| [`hasAvailableUpdates`](#hasavailableupdates) | `function` | Declared here |
+| [`clearCache`](#clearcache) | `function` | Declared here |
+| [`clearPackageCache`](#clearpackagecache) | `function` | Declared here |
+| [`clearCacheFile`](#clearcachefile) | `function` | Declared here |
+| [`hasCachedFile`](#hascachedfile) | `function` | Declared here |
+| [`isSupportedFileType`](#issupportedfiletype) | `function` | Declared here |
+| [`getCacheFilePath`](#getcachefilepath) | `function` | Declared here |
+| [`getPackageDataDir`](#getpackagedatadir) | `function` | Declared here |
+| [`mutableOptions`](#mutableoptions) | `function` | Declared here |
+| [`options`](#options-5) | `function` | Declared here |
+| [`remotePackages`](#remotepackages) | `function` | Declared here |
+| [`localPackages`](#localpackages) | `function` | Declared here |
+| [`_mutex`](#_mutex-12) | `variable` | Declared here |
+| [`_localPackages`](#_localpackages) | `variable` | Declared here |
+| [`_remotePackages`](#_remotepackages) | `variable` | Declared here |
+| [`_tasks`](#_tasks-1) | `variable` | Declared here |
+| [`_options`](#_options-2) | `variable` | Declared here |
+| [`onPackageInstallComplete`](#onpackageinstallcomplete) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -2123,6 +2309,23 @@ Defined in src/pacm/include/icy/pacm/packagemanager.h:66
 
 Startup configuration for repository endpoints, credentials, and directories.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`endpoint`](#endpoint) | `variable` | Declared here |
+| [`indexURI`](#indexuri) | `variable` | Declared here |
+| [`httpUsername`](#httpusername) | `variable` | Declared here |
+| [`httpPassword`](#httppassword) | `variable` | Declared here |
+| [`httpOAuthToken`](#httpoauthtoken) | `variable` | Declared here |
+| [`tempDir`](#tempdir) | `variable` | Declared here |
+| [`dataDir`](#datadir) | `variable` | Declared here |
+| [`installDir`](#installdir-2) | `variable` | Declared here |
+| [`platform`](#platform) | `variable` | Declared here |
+| [`checksumAlgorithm`](#checksumalgorithm) | `variable` | Declared here |
+| [`clearFailedCache`](#clearfailedcache) | `variable` | Declared here |
+| [`Options`](#options-7) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -2331,6 +2534,48 @@ Defined in src/pacm/include/icy/pacm/installtask.h:31
 
 [State](base.md#state) machine states for package installation.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`str`](#str-2) | `function` | Declared here |
+| [`Type`](#type-10) | `enum` | Declared here |
+| [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](base.md#state) |
+| [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](base.md#state) |
+| [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](base.md#state) |
+| [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](base.md#state) |
+| [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](base.md#state) |
+| [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](base.md#state) |
+| [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](base.md#state) |
+| [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](base.md#state) |
+| [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](base.md#state) |
+
+### Inherited from [`State`](base.md#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2401,6 +2646,15 @@ struct InstallOptions
 Defined in src/pacm/include/icy/pacm/installtask.h:71
 
 [Package](#package) installation options.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`version`](#version-3) | `variable` | Declared here |
+| [`sdkVersion`](#sdkversion) | `variable` | Declared here |
+| [`installDir`](#installdir) | `variable` | Declared here |
+| [`InstallOptions`](#installoptions-1) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -2489,6 +2743,68 @@ Defined in src/pacm/include/icy/pacm/package.h:189
 > **Inherits:** [`Package`](#package)
 
 [Package](#package) metadata for an installed package on the local filesystem.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`LocalPackage`](#localpackage-1) | `function` | Declared here |
+| [`LocalPackage`](#localpackage-2) | `function` | Declared here |
+| [`LocalPackage`](#localpackage-3) | `function` | Declared here |
+| [`setState`](#setstate-1) | `function` | Declared here |
+| [`setInstallState`](#setinstallstate) | `function` | Declared here |
+| [`setInstallDir`](#setinstalldir) | `function` | Declared here |
+| [`setInstalledAsset`](#setinstalledasset) | `function` | Declared here |
+| [`setVersion`](#setversion-2) | `function` | Declared here |
+| [`setVersionLock`](#setversionlock) | `function` | Declared here |
+| [`setSDKVersionLock`](#setsdkversionlock) | `function` | Declared here |
+| [`version`](#version-4) | `function` | Declared here |
+| [`state`](#state-2) | `function` | Declared here |
+| [`installState`](#installstate) | `function` | Declared here |
+| [`installDir`](#installdir-1) | `function` | Declared here |
+| [`versionLock`](#versionlock) | `function` | Declared here |
+| [`sdkLockedVersion`](#sdklockedversion) | `function` | Declared here |
+| [`asset`](#asset) | `function` | Declared here |
+| [`isInstalled`](#isinstalled) | `function` | Declared here |
+| [`isFailed`](#isfailed) | `function` | Declared here |
+| [`manifest`](#manifest) | `function` | Declared here |
+| [`verifyInstallManifest`](#verifyinstallmanifest) | `function` | Declared here |
+| [`getInstalledFilePath`](#getinstalledfilepath) | `function` | Declared here |
+| [`extensionEntryPointPath`](#extensionentrypointpath) | `function` | Declared here |
+| [`errors`](#errors-2) | `function` | Declared here |
+| [`addError`](#adderror) | `function` | Declared here |
+| [`lastError`](#lasterror) | `function` | Declared here |
+| [`clearErrors`](#clearerrors) | `function` | Declared here |
+| [`valid`](#valid-3) | `function` | Declared here |
+| [`Package`](#package-1) | `function` | Inherited from [`Package`](#package) |
+| [`Package`](#package-2) | `function` | Inherited from [`Package`](#package) |
+| [`id`](#id-2) | `function` | Inherited from [`Package`](#package) |
+| [`name`](#name-6) | `function` | Inherited from [`Package`](#package) |
+| [`type`](#type-11) | `function` | Inherited from [`Package`](#package) |
+| [`author`](#author) | `function` | Inherited from [`Package`](#package) |
+| [`description`](#description) | `function` | Inherited from [`Package`](#package) |
+| [`hasExtension`](#hasextension) | `function` | Inherited from [`Package`](#package) |
+| [`extension`](#extension) | `function` | Inherited from [`Package`](#package) |
+| [`valid`](#valid-4) | `function` | Inherited from [`Package`](#package) |
+| [`toJson`](#tojson) | `function` | Inherited from [`Package`](#package) |
+| [`print`](#print-9) | `function` | Inherited from [`Package`](#package) |
+
+### Inherited from [`Package`](#package)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Package`](#package-1)  | Constructs an empty package. |
+| `function` | [`Package`](#package-2)  | Constructs a package from an existing JSON value. |
+| `function` | [`id`](#id-2) `virtual` `const` | Returns the package unique identifier. |
+| `function` | [`name`](#name-6) `virtual` `const` | Returns the package display name. |
+| `function` | [`type`](#type-11) `virtual` `const` | Returns the package type (e.g. "plugin", "asset"). |
+| `function` | [`author`](#author) `virtual` `const` | Returns the package author string. |
+| `function` | [`description`](#description) `virtual` `const` | Returns the package description string. |
+| `function` | [`hasExtension`](#hasextension) `virtual` `const` | Returns true when the package has an "extension" object. |
+| `function` | [`extension`](#extension) `virtual` `const` | Returns a read-only view of the extension metadata. Throws if no extension object is present. |
+| `function` | [`valid`](#valid-4) `virtual` `const` | Returns true if id, name and type are all non-empty. |
+| `function` | [`toJson`](#tojson) `virtual` `const` `nodiscard` | Returns a plain JSON copy of this package object. |
+| `function` | [`print`](#print-9) `virtual` `const` | Dumps the JSON representation of this package to `ost`. |
 
 ### Public Methods
 
@@ -2967,6 +3283,10 @@ Defined in src/pacm/include/icy/pacm/package.h:319
 
 Returns true if id, name and type are all non-empty.
 
+##### Reimplements
+
+- [`valid`](#valid-4)
+
 {#manifest-1}
 
 ## Manifest
@@ -2982,6 +3302,15 @@ struct Manifest
 Defined in src/pacm/include/icy/pacm/package.h:192
 
 [Manifest](#manifest-1) of installed files recorded for a local package.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`root`](#root-1) | `variable` | Declared here |
+| [`Manifest`](#manifest-2) | `function` | Declared here |
+| [`empty`](#empty-1) | `function` | Declared here |
+| [`addFile`](#addfile) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -3076,6 +3405,23 @@ Defined in src/pacm/include/icy/pacm/package.h:26
 > **Subclassed by:** [`LocalPackage`](#localpackage), [`RemotePackage`](#remotepackage)
 
 JSON-backed package metadata shared by local and remote package records.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Package`](#package-1) | `function` | Declared here |
+| [`Package`](#package-2) | `function` | Declared here |
+| [`id`](#id-2) | `function` | Declared here |
+| [`name`](#name-6) | `function` | Declared here |
+| [`type`](#type-11) | `function` | Declared here |
+| [`author`](#author) | `function` | Declared here |
+| [`description`](#description) | `function` | Declared here |
+| [`hasExtension`](#hasextension) | `function` | Declared here |
+| [`extension`](#extension) | `function` | Declared here |
+| [`valid`](#valid-4) | `function` | Declared here |
+| [`toJson`](#tojson) | `function` | Declared here |
+| [`print`](#print-9) | `function` | Declared here |
 
 ### Public Methods
 
@@ -3252,6 +3598,10 @@ Defined in src/pacm/include/icy/pacm/package.h:135
 
 Returns true if id, name and type are all non-empty.
 
+##### Reimplemented by
+
+- [`valid`](#valid-3)
+
 ---
 
 {#tojson}
@@ -3301,6 +3651,20 @@ struct Extension
 Defined in src/pacm/include/icy/pacm/package.h:29
 
 Optional extension metadata that describes how a packaged runtime unit is loaded.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`root`](#root-2) | `variable` | Declared here |
+| [`Extension`](#extension-2) | `function` | Declared here |
+| [`loader`](#loader) | `function` | Declared here |
+| [`runtime`](#runtime) | `function` | Declared here |
+| [`entryPoint`](#entrypoint) | `function` | Declared here |
+| [`abiVersion`](#abiversion) | `function` | Declared here |
+| [`capabilities`](#capabilities) | `function` | Declared here |
+| [`valid`](#valid-5) | `function` | Declared here |
+| [`hasCapability`](#hascapability) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -3475,6 +3839,24 @@ struct Asset
 Defined in src/pacm/include/icy/pacm/package.h:60
 
 Archive asset metadata for a specific package build.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`root`](#root-3) | `variable` | Declared here |
+| [`Asset`](#asset-2) | `function` | Declared here |
+| [`Asset`](#asset-3) | `function` | Declared here |
+| [`fileName`](#filename-2) | `function` | Declared here |
+| [`version`](#version-5) | `function` | Declared here |
+| [`sdkVersion`](#sdkversion-1) | `function` | Declared here |
+| [`checksum`](#checksum) | `function` | Declared here |
+| [`url`](#url-8) | `function` | Declared here |
+| [`fileSize`](#filesize-1) | `function` | Declared here |
+| [`valid`](#valid-6) | `function` | Declared here |
+| [`print`](#print-10) | `function` | Declared here |
+| [`operator=`](#operator-23) | `function` | Declared here |
+| [`operator==`](#operator-24) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -3722,6 +4104,20 @@ Defined in src/pacm/include/icy/pacm/package.h:328
 
 Pairing of the installed and remote metadata for the same package ID.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`local`](#local-1) | `variable` | Declared here |
+| [`remote`](#remote-1) | `variable` | Declared here |
+| [`PackagePair`](#packagepair-1) | `function` | Declared here |
+| [`valid`](#valid-7) | `function` | Declared here |
+| [`id`](#id-3) | `function` | Declared here |
+| [`name`](#name-7) | `function` | Declared here |
+| [`type`](#type-12) | `function` | Declared here |
+| [`author`](#author-1) | `function` | Declared here |
+| [`hasExtension`](#hasextension-1) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -3897,6 +4293,46 @@ Defined in src/pacm/include/icy/pacm/package.h:151
 > **Inherits:** [`Package`](#package)
 
 [Package](#package) metadata loaded from the remote package index.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`RemotePackage`](#remotepackage-1) | `function` | Declared here |
+| [`RemotePackage`](#remotepackage-2) | `function` | Declared here |
+| [`assets`](#assets) | `function` | Declared here |
+| [`latestAsset`](#latestasset) | `function` | Declared here |
+| [`assetVersion`](#assetversion) | `function` | Declared here |
+| [`latestSDKAsset`](#latestsdkasset) | `function` | Declared here |
+| [`Package`](#package-1) | `function` | Inherited from [`Package`](#package) |
+| [`Package`](#package-2) | `function` | Inherited from [`Package`](#package) |
+| [`id`](#id-2) | `function` | Inherited from [`Package`](#package) |
+| [`name`](#name-6) | `function` | Inherited from [`Package`](#package) |
+| [`type`](#type-11) | `function` | Inherited from [`Package`](#package) |
+| [`author`](#author) | `function` | Inherited from [`Package`](#package) |
+| [`description`](#description) | `function` | Inherited from [`Package`](#package) |
+| [`hasExtension`](#hasextension) | `function` | Inherited from [`Package`](#package) |
+| [`extension`](#extension) | `function` | Inherited from [`Package`](#package) |
+| [`valid`](#valid-4) | `function` | Inherited from [`Package`](#package) |
+| [`toJson`](#tojson) | `function` | Inherited from [`Package`](#package) |
+| [`print`](#print-9) | `function` | Inherited from [`Package`](#package) |
+
+### Inherited from [`Package`](#package)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Package`](#package-1)  | Constructs an empty package. |
+| `function` | [`Package`](#package-2)  | Constructs a package from an existing JSON value. |
+| `function` | [`id`](#id-2) `virtual` `const` | Returns the package unique identifier. |
+| `function` | [`name`](#name-6) `virtual` `const` | Returns the package display name. |
+| `function` | [`type`](#type-11) `virtual` `const` | Returns the package type (e.g. "plugin", "asset"). |
+| `function` | [`author`](#author) `virtual` `const` | Returns the package author string. |
+| `function` | [`description`](#description) `virtual` `const` | Returns the package description string. |
+| `function` | [`hasExtension`](#hasextension) `virtual` `const` | Returns true when the package has an "extension" object. |
+| `function` | [`extension`](#extension) `virtual` `const` | Returns a read-only view of the extension metadata. Throws if no extension object is present. |
+| `function` | [`valid`](#valid-4) `virtual` `const` | Returns true if id, name and type are all non-empty. |
+| `function` | [`toJson`](#tojson) `virtual` `const` `nodiscard` | Returns a plain JSON copy of this package object. |
+| `function` | [`print`](#print-9) `virtual` `const` | Dumps the JSON representation of this package to `ost`. |
 
 ### Public Methods
 

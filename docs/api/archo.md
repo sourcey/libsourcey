@@ -56,6 +56,28 @@ Defined in src/archo/include/icy/archo/zipfile.h:35
 
 ZIP archive reader and writer.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`info`](#info) | `variable` | Declared here |
+| [`fp`](#fp) | `variable` | Declared here |
+| [`ZipFile`](#zipfile-1) | `function` | Declared here |
+| [`ZipFile`](#zipfile-2) | `function` | Declared here |
+| [`~ZipFile`](#zipfile-3) | `function` | Declared here |
+| [`ZipFile`](#zipfile-4) | `function` | Declared here |
+| [`ZipFile`](#zipfile-5) | `function` | Declared here |
+| [`open`](#open-5) | `function` | Declared here |
+| [`opened`](#opened) | `function` | Declared here |
+| [`close`](#close-23) | `function` | Declared here |
+| [`extract`](#extract) | `function` | Declared here |
+| [`extractCurrentFile`](#extractcurrentfile) | `function` | Declared here |
+| [`goToFirstFile`](#gotofirstfile) | `function` | Declared here |
+| [`goToNextFile`](#gotonextfile) | `function` | Declared here |
+| [`openCurrentFile`](#opencurrentfile) | `function` | Declared here |
+| [`closeCurrentFile`](#closecurrentfile) | `function` | Declared here |
+| [`currentFileName`](#currentfilename) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -373,6 +395,14 @@ struct FileInfo
 Defined in src/archo/include/icy/archo/zipfile.h:97
 
 Metadata for a file entry within a ZIP archive.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`path`](#path-2) | `variable` | Declared here |
+| [`compressedSize`](#compressedsize) | `variable` | Declared here |
+| [`uncompressedSize`](#uncompressedsize) | `variable` | Declared here |
 
 ### Public Attributes
 

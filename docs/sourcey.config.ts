@@ -102,10 +102,10 @@ export default defineConfig({
           xml: "../build/doxygen/xml",
           language: "cpp",
           index: "rich",
-          sourceUrl: ({ path }) => {
-            if (path.startsWith("src/graft/")) return undefined;
-            return "https://github.com/nilstate/icey/blob/main";
-          },
+          sourceUrl: [
+            { prefix: "src/graft/" },
+            { prefix: "", url: "https://github.com/nilstate/icey/blob/main/{fullPath}" },
+          ],
         }),
       },
     ],

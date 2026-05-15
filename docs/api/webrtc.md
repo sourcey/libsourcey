@@ -280,6 +280,17 @@ The three message categories:
 
 * Control: call lifecycle (init, accept, reject, hangup)
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SdpReceived`](#sdpreceived) | `variable` | Declared here |
+| [`CandidateReceived`](#candidatereceived) | `variable` | Declared here |
+| [`ControlReceived`](#controlreceived) | `variable` | Declared here |
+| [`sendSdp`](#sendsdp) | `function` | Declared here |
+| [`sendCandidate`](#sendcandidate) | `function` | Declared here |
+| [`sendControl`](#sendcontrol) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -360,6 +371,12 @@ Send an SDP offer or answer to the remote peer.
 
 * `sdp` The SDP string.
 
+##### Reimplemented by
+
+- [`sendSdp`](webrtcsupport.md#sendsdp-3)
+- [`sendSdp`](webrtcsupport.md#sendsdp-2)
+- [`sendSdp`](webrtcsupport.md#sendsdp-1)
+
 ---
 
 {#sendcandidate}
@@ -382,6 +399,12 @@ Send an ICE candidate to the remote peer.
 
 * `mid` The sdpMid value.
 
+##### Reimplemented by
+
+- [`sendCandidate`](webrtcsupport.md#sendcandidate-3)
+- [`sendCandidate`](webrtcsupport.md#sendcandidate-2)
+- [`sendCandidate`](webrtcsupport.md#sendcandidate-1)
+
 ---
 
 {#sendcontrol}
@@ -403,6 +426,12 @@ Send a control message to the remote peer.
 * `type` Control type: "init", "accept", "reject", "hangup". 
 
 * `reason` Optional reason string (for reject/hangup).
+
+##### Reimplemented by
+
+- [`sendControl`](webrtcsupport.md#sendcontrol-3)
+- [`sendControl`](webrtcsupport.md#sendcontrol-2)
+- [`sendControl`](webrtcsupport.md#sendcontrol-1)
 
 {#mediabridge}
 
@@ -437,6 +466,39 @@ Example - receive from browser and record:
 bridge.videoReceiver().emitter += packetSlot(&recorder, &Recorder::onEncodedVideo);
 
 The receiver emits owning encoded packets. Feed those into a decoder or recorder callback; see `samples/media-recorder` for a complete example.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`KeyframeRequested`](#keyframerequested) | `variable` | Declared here |
+| [`BitrateEstimate`](#bitrateestimate) | `variable` | Declared here |
+| [`MediaBridge`](#mediabridge-1) | `function` | Declared here |
+| [`~MediaBridge`](#mediabridge-2) | `function` | Declared here |
+| [`MediaBridge`](#mediabridge-3) | `function` | Declared here |
+| [`attach`](#attach) | `function` | Declared here |
+| [`detach`](#detach) | `function` | Declared here |
+| [`requestKeyframe`](#requestkeyframe) | `function` | Declared here |
+| [`requestBitrate`](#requestbitrate) | `function` | Declared here |
+| [`videoSender`](#videosender) | `function` | Declared here |
+| [`audioSender`](#audiosender) | `function` | Declared here |
+| [`videoReceiver`](#videoreceiver) | `function` | Declared here |
+| [`audioReceiver`](#audioreceiver) | `function` | Declared here |
+| [`videoTrack`](#videotrack) | `function` | Declared here |
+| [`audioTrack`](#audiotrack) | `function` | Declared here |
+| [`hasVideo`](#hasvideo) | `function` | Declared here |
+| [`hasAudio`](#hasaudio) | `function` | Declared here |
+| [`attached`](#attached) | `function` | Declared here |
+| [`_pc`](#_pc) | `variable` | Declared here |
+| [`_videoSender`](#_videosender) | `variable` | Declared here |
+| [`_audioSender`](#_audiosender) | `variable` | Declared here |
+| [`_videoHandle`](#_videohandle) | `variable` | Declared here |
+| [`_audioHandle`](#_audiohandle) | `variable` | Declared here |
+| [`_videoReceiver`](#_videoreceiver) | `variable` | Declared here |
+| [`_audioReceiver`](#_audioreceiver) | `variable` | Declared here |
+| [`_videoReceiveTrack`](#_videoreceivetrack) | `variable` | Declared here |
+| [`_audioReceiveTrack`](#_audioreceivetrack) | `variable` | Declared here |
+| [`_mutex`](#_mutex-17) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -889,6 +951,25 @@ Defined in src/webrtc/include/icy/webrtc/mediabridge.h:73
 
 [Configuration](base.md#configuration) options for the WebRTC media bridge.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`videoCodec`](#videocodec-6) | `variable` | Declared here |
+| [`audioCodec`](#audiocodec-5) | `variable` | Declared here |
+| [`videoSsrc`](#videossrc) | `variable` | Declared here |
+| [`audioSsrc`](#audiossrc) | `variable` | Declared here |
+| [`videoPayloadType`](#videopayloadtype) | `variable` | Declared here |
+| [`audioPayloadType`](#audiopayloadtype) | `variable` | Declared here |
+| [`cname`](#cname) | `variable` | Declared here |
+| [`videoMid`](#videomid) | `variable` | Declared here |
+| [`audioMid`](#audiomid) | `variable` | Declared here |
+| [`videoDirection`](#videodirection) | `variable` | Declared here |
+| [`audioDirection`](#audiodirection) | `variable` | Declared here |
+| [`nackBufferSize`](#nackbuffersize) | `variable` | Declared here |
+| [`videoJitterBuffer`](#videojitterbuffer) | `variable` | Declared here |
+| [`audioJitterBuffer`](#audiojitterbuffer) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1119,6 +1200,53 @@ Manages a WebRTC peer connection lifecycle over any signalling transport that im
 Works with [SympleSignaller](webrtcsupport.md#symplesignaller) (Symple call protocol), [WebSocketSignaller](webrtcsupport.md#websocketsignaller) (plain JSON over WSS), or any custom implementation.
 
 Media is optional. Set `[Config::media](#media-2)` codecs to enable tracks. Leave codec encoders empty for data-channel-only sessions.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`StateChanged`](#statechanged) | `variable` | Declared here |
+| [`IncomingCall`](#incomingcall) | `variable` | Declared here |
+| [`DataReceived`](#datareceived) | `variable` | Declared here |
+| [`PeerSession`](#peersession-1) | `function` | Declared here |
+| [`PeerSession`](#peersession-2) | `function` | Declared here |
+| [`call`](#call) | `function` | Declared here |
+| [`accept`](#accept) | `function` | Declared here |
+| [`reject`](#reject) | `function` | Declared here |
+| [`hangup`](#hangup) | `function` | Declared here |
+| [`sendData`](#senddata-2) | `function` | Declared here |
+| [`sendData`](#senddata-3) | `function` | Declared here |
+| [`state`](#state-3) | `function` | Declared here |
+| [`remotePeerId`](#remotepeerid) | `function` | Declared here |
+| [`media`](#media) | `function` | Declared here |
+| [`media`](#media-1) | `function` | Declared here |
+| [`peerConnection`](#peerconnection) | `function` | Declared here |
+| [`dataChannel`](#datachannel) | `function` | Declared here |
+| [`State`](#state-4) | `enum` | Declared here |
+| [`_signaller`](#_signaller) | `variable` | Declared here |
+| [`_config`](#_config-4) | `variable` | Declared here |
+| [`_media`](#_media) | `variable` | Declared here |
+| [`_state`](#_state-4) | `variable` | Declared here |
+| [`_remotePeerId`](#_remotepeerid) | `variable` | Declared here |
+| [`_pc`](#_pc-1) | `variable` | Declared here |
+| [`_dc`](#_dc) | `variable` | Declared here |
+| [`_callbackGuard`](#_callbackguard) | `variable` | Declared here |
+| [`_remoteDescriptionSet`](#_remotedescriptionset) | `variable` | Declared here |
+| [`_pendingRemoteCandidates`](#_pendingremotecandidates) | `variable` | Declared here |
+| [`_callbackSync`](#_callbacksync) | `variable` | Declared here |
+| [`_pendingCallbacks`](#_pendingcallbacks) | `variable` | Declared here |
+| [`_callbackMutex`](#_callbackmutex) | `variable` | Declared here |
+| [`_mutex`](#_mutex-18) | `variable` | Declared here |
+| [`onSdpReceived`](#onsdpreceived) | `function` | Declared here |
+| [`onCandidateReceived`](#oncandidatereceived) | `function` | Declared here |
+| [`onControlReceived`](#oncontrolreceived) | `function` | Declared here |
+| [`createPeerConnection`](#createpeerconnection) | `function` | Declared here |
+| [`setupPeerConnectionCallbacks`](#setuppeerconnectioncallbacks) | `function` | Declared here |
+| [`beginEndCall`](#beginendcall) | `function` | Declared here |
+| [`finishEndCall`](#finishendcall) | `function` | Declared here |
+| [`transitionEndedToIdle`](#transitionendedtoidle) | `function` | Declared here |
+| [`enqueueCallback`](#enqueuecallback) | `function` | Declared here |
+| [`drainCallbacks`](#draincallbacks) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -1785,6 +1913,17 @@ Defined in src/webrtc/include/icy/webrtc/peersession.h:61
 
 [Configuration](base.md#configuration) for WebRTC peer session establishment.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`videoCodec`](#videocodec-7) | `variable` | Declared here |
+| [`audioCodec`](#audiocodec-6) | `variable` | Declared here |
+| [`videoDirection`](#videodirection-1) | `variable` | Declared here |
+| [`audioDirection`](#audiodirection-1) | `variable` | Declared here |
+| [`videoJitterBuffer`](#videojitterbuffer-1) | `variable` | Declared here |
+| [`audioJitterBuffer`](#audiojitterbuffer-1) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1892,6 +2031,15 @@ Defined in src/webrtc/include/icy/webrtc/peersession.h:72
 
 [Configuration](base.md#configuration) for WebRTC peer session establishment.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`rtcConfig`](#rtcconfig) | `variable` | Declared here |
+| [`media`](#media-2) | `variable` | Declared here |
+| [`enableDataChannel`](#enabledatachannel) | `variable` | Declared here |
+| [`dataChannelLabel`](#datachannellabel) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1967,6 +2115,12 @@ struct CallbackGuard
 
 Defined in src/webrtc/include/icy/webrtc/peersession.h:154
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`alive`](#alive-1) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1994,6 +2148,13 @@ struct PendingCandidate
 ```
 
 Defined in src/webrtc/include/icy/webrtc/peersession.h:159
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`candidate`](#candidate) | `variable` | Declared here |
+| [`mid`](#mid) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -2053,6 +2214,73 @@ Usage: auto vh = createVideoTrack(pc, codec); [WebRtcTrackSender](#webrtctrackse
 Only emits the packet downstream on successful send, so a chained recorder won't record frames that failed to transmit.
 
 Accepts only the packet type that matches the bound track. Non-matching packets are passed through unchanged so mixed audio/video [PacketStream](base.md#packetstream) chains can share one source cleanly.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-10) | `variable` | Declared here |
+| [`WebRtcTrackSender`](#webrtctracksender-1) | `function` | Declared here |
+| [`WebRtcTrackSender`](#webrtctracksender-2) | `function` | Declared here |
+| [`bind`](#bind-5) | `function` | Declared here |
+| [`unbind`](#unbind-1) | `function` | Declared here |
+| [`process`](#process-12) | `function` | Declared here |
+| [`accepts`](#accepts-5) | `function` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-6) | `function` | Declared here |
+| [`isVideo`](#isvideo) | `function` | Declared here |
+| [`bound`](#bound) | `function` | Declared here |
+| [`_track`](#_track) | `variable` | Declared here |
+| [`_rtpConfig`](#_rtpconfig) | `variable` | Declared here |
+| [`_kind`](#_kind) | `variable` | Declared here |
+| [`_mutex`](#_mutex-19) | `variable` | Declared here |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Public Attributes
 
@@ -2162,6 +2390,10 @@ Send an encoded media frame to the bound WebRTC track. Converts the FFmpeg micro
 #### Parameters
 * `packet` An [av::VideoPacket](av.md#videopacket) or [av::AudioPacket](av.md#audiopacket) carrying the encoded frame data and a microsecond timestamp.
 
+##### Reimplements
+
+- [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#accepts-5}
@@ -2183,6 +2415,10 @@ Return true only for the packet type that matches the bound track.
 #### Returns
 True if the packet can be processed by this sender.
 
+##### Reimplements
+
+- [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
+
 ---
 
 {#onstreamstatechange-6}
@@ -2200,6 +2436,10 @@ Defined in src/webrtc/include/icy/webrtc/tracksender.h:88
 Called by the [PacketStream](base.md#packetstream) when stream state changes. Logs when the stream is stopping; no other action is taken. 
 #### Parameters
 * `state` New [PacketStream](base.md#packetstream) state.
+
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
 
 ---
 
@@ -2317,6 +2557,64 @@ videoReceiver.emitter += packetSlot(&recorder, &Recorder::onEncodedVideo);
 Emits owning packets - the frame data is copied, so downstream processors can safely queue packets asynchronously.
 
 Emits VideoPacket for video tracks, AudioPacket for audio tracks. Use those packets to drive a decoder, recorder, or custom pipeline. See `samples/media-recorder` for a complete receive -> decode -> file example.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-11) | `variable` | Declared here |
+| [`WebRtcTrackReceiver`](#webrtctrackreceiver-1) | `function` | Declared here |
+| [`bind`](#bind-6) | `function` | Declared here |
+| [`configureJitterBuffer`](#configurejitterbuffer) | `function` | Declared here |
+| [`jitterBufferConfig`](#jitterbufferconfig-1) | `function` | Declared here |
+| [`jitterBufferEnabled`](#jitterbufferenabled) | `function` | Declared here |
+| [`_dispatch`](#_dispatch) | `variable` | Declared here |
+| [`_timer`](#_timer-3) | `variable` | Declared here |
+| [`_mutex`](#_mutex-20) | `variable` | Declared here |
+| [`_pending`](#_pending) | `variable` | Declared here |
+| [`_jitterBuffer`](#_jitterbuffer) | `variable` | Declared here |
+| [`_jitterConfig`](#_jitterconfig) | `variable` | Declared here |
+| [`_timerTickMs`](#_timertickms) | `variable` | Declared here |
+| [`_timerNeedsUpdate`](#_timerneedsupdate) | `variable` | Declared here |
+| [`_state`](#_state-5) | `variable` | Declared here |
+| [`_generation`](#_generation) | `variable` | Declared here |
+| [`enqueue`](#enqueue) | `function` | Declared here |
+| [`flushPending`](#flushpending) | `function` | Declared here |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Public Attributes
 
@@ -2600,6 +2898,13 @@ struct DispatchState
 
 Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:90
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`alive`](#alive-2) | `variable` | Declared here |
+| [`generation`](#generation) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -2648,6 +2953,29 @@ Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:118
 Maps RTP codec names to FFmpeg encoders and queries FFmpeg at runtime to determine what codecs are available.
 
 This is stateless - all methods are static. Call negotiate*() with a list of RTP codec names offered by the remote peer, and it returns the best match that FFmpeg can encode.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`negotiateVideo`](#negotiatevideo) | `function` | Declared here |
+| [`negotiateAudio`](#negotiateaudio) | `function` | Declared here |
+| [`hasEncoder`](#hasencoder) | `function` | Declared here |
+| [`rtpToFfmpeg`](#rtptoffmpeg) | `function` | Declared here |
+| [`ffmpegToRtp`](#ffmpegtortp) | `function` | Declared here |
+| [`clockRate`](#clockrate-2) | `function` | Declared here |
+| [`defaultPayloadType`](#defaultpayloadtype) | `function` | Declared here |
+| [`specFromRtp`](#specfromrtp) | `function` | Declared here |
+| [`specFromFfmpeg`](#specfromffmpeg) | `function` | Declared here |
+| [`specFromVideoCodec`](#specfromvideocodec) | `function` | Declared here |
+| [`specFromAudioCodec`](#specfromaudiocodec) | `function` | Declared here |
+| [`requireVideoSpec`](#requirevideospec) | `function` | Declared here |
+| [`requireAudioSpec`](#requireaudiospec) | `function` | Declared here |
+| [`resolveWebRtcVideoCodec`](#resolvewebrtcvideocodec) | `function` | Declared here |
+| [`resolveWebRtcAudioCodec`](#resolvewebrtcaudiocodec) | `function` | Declared here |
+| [`detectCodec`](#detectcodec) | `function` | Declared here |
+| [`detectCodecInMedia`](#detectcodecinmedia) | `function` | Declared here |
+| [`decoderCodecId`](#decodercodecid) | `function` | Declared here |
 
 ### Public Static Methods
 
@@ -2976,6 +3304,13 @@ Defined in src/webrtc/include/icy/webrtc/track.h:31
 
 Result of creating a track: the track itself plus its RTP config. Keep the config around - you need it for [WebRtcTrackSender](#webrtctracksender).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`track`](#track-1) | `variable` | Declared here |
+| [`rtpConfig`](#rtpconfig) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -3028,6 +3363,16 @@ Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:30
 Receive-side jitter buffer behaviour for depacketized WebRTC media frames.
 
 The jitter buffer sits after libdatachannel depacketization and before icey emits encoded AudioPacket/VideoPacket objects to downstream decoders or recorders. It reorders frames by RTP-derived media timestamp and delays release long enough to absorb moderate network jitter.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`enabled`](#enabled-1) | `variable` | Declared here |
+| [`minDelayMs`](#mindelayms) | `variable` | Declared here |
+| [`maxDelayMs`](#maxdelayms) | `variable` | Declared here |
+| [`adaptiveFactor`](#adaptivefactor) | `variable` | Declared here |
+| [`tickIntervalMs`](#tickintervalms) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -3124,6 +3469,19 @@ struct CodecSpec
 Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:65
 
 Canonical description of a codec supported by icey's WebRTC helpers.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`id`](#id-10) | `variable` | Declared here |
+| [`mediaType`](#mediatype) | `variable` | Declared here |
+| [`rtpName`](#rtpname) | `variable` | Declared here |
+| [`ffmpegName`](#ffmpegname) | `variable` | Declared here |
+| [`clockRate`](#clockrate) | `variable` | Declared here |
+| [`payloadType`](#payloadtype) | `variable` | Declared here |
+| [`fmtp`](#fmtp) | `variable` | Declared here |
+| [`valid`](#valid-18) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -3270,6 +3628,20 @@ struct NegotiatedCodec
 Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:81
 
 Result of codec negotiation between a remote SDP offer and the local FFmpeg codec inventory.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`rtpName`](#rtpname-1) | `variable` | Declared here |
+| [`ffmpegName`](#ffmpegname-1) | `variable` | Declared here |
+| [`payloadType`](#payloadtype-1) | `variable` | Declared here |
+| [`clockRate`](#clockrate-1) | `variable` | Declared here |
+| [`fmtp`](#fmtp-1) | `variable` | Declared here |
+| [`toVideoCodec`](#tovideocodec) | `function` | Declared here |
+| [`toWebRtcVideoCodec`](#towebrtcvideocodec) | `function` | Declared here |
+| [`toAudioCodec`](#toaudiocodec) | `function` | Declared here |
+| [`toWebRtcAudioCodec`](#towebrtcaudiocodec) | `function` | Declared here |
 
 ### Public Attributes
 

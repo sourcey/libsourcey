@@ -284,6 +284,44 @@ Wrapper class for managing `uv_handle_t` variants.
 
 This class manages the handle during its lifecycle and safely handles the asynchronous destruction mechanism.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Handle`](#handle-3) | `function` | Declared here |
+| [`init`](#init-2) | `function` | Declared here |
+| [`invoke`](#invoke) | `function` | Declared here |
+| [`invokeOrThrow`](#invokeorthrow) | `function` | Declared here |
+| [`close`](#close-11) | `function` | Declared here |
+| [`ref`](#ref) | `function` | Declared here |
+| [`unref`](#unref) | `function` | Declared here |
+| [`initialized`](#initialized-1) | `function` | Declared here |
+| [`active`](#active) | `function` | Declared here |
+| [`closing`](#closing-1) | `function` | Declared here |
+| [`closed`](#closed) | `function` | Declared here |
+| [`error`](#error-4) | `function` | Declared here |
+| [`setError`](#seterror) | `function` | Declared here |
+| [`setUVError`](#setuverror) | `function` | Declared here |
+| [`setAndThrowError`](#setandthrowerror) | `function` | Declared here |
+| [`throwLastError`](#throwlasterror) | `function` | Declared here |
+| [`loop`](#loop-2) | `function` | Declared here |
+| [`reset`](#reset-3) | `function` | Declared here |
+| [`get`](#get-2) | `function` | Declared here |
+| [`tid`](#tid) | `function` | Declared here |
+| [`context`](#context-3) | `function` | Declared here |
+| [`setCloseCleanup`](#setclosecleanup) | `function` | Declared here |
+| [`clearCloseCleanup`](#clearclosecleanup) | `function` | Declared here |
+| [`assertThread`](#assertthread) | `function` | Declared here |
+| [`_loop`](#_loop) | `variable` | Declared here |
+| [`_context`](#_context) | `variable` | Declared here |
+| [`_tid`](#_tid) | `variable` | Declared here |
+| [`_error`](#_error-1) | `variable` | Declared here |
+| [`onError`](#onerror) | `function` | Declared here |
+| [`onClose`](#onclose) | `function` | Declared here |
+| [`Handle`](#handle-4) | `function` | Declared here |
+| [`Handle`](#handle-5) | `function` | Declared here |
+| [`Type`](#type-7) | `typedef` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -427,6 +465,15 @@ Close and destroy the handle.
 
 Releases the `[Context](#context-1)` (which schedules the async `uv_close`) and then fires `[onClose()](#onclose)`. Safe to call more than once; subsequent calls are no-ops.
 
+##### Reimplemented by
+
+- [`close`](net.md#close-14)
+- [`close`](net.md#close-15)
+- [`close`](net.md#close-16)
+- [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341)
+- [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341)
+- [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341)
+
 ---
 
 {#ref}
@@ -529,6 +576,11 @@ Defined in src/base/include/icy/handle.h:274
 
 Return `true` if the handle has been fully closed (context released).
 
+##### Reimplemented by
+
+- [`closed`](net.md#closed-2)
+- [`closed`](net.md#closed-3)
+
 ---
 
 {#error-4}
@@ -563,6 +615,11 @@ Set the error state and invoke `[onError()](#onerror)`.
 
 #### Parameters
 * `error` [Error](base.md#error) value to store and propagate.
+
+##### Reimplemented by
+
+- [`setError`](net.md#seterror-2)
+- [`setError`](net.md#seterror-3)
 
 ---
 
@@ -865,6 +922,11 @@ Override to react to errors. The default implementation is a no-op.
 #### Parameters
 * `error` The error that was set.
 
+##### Reimplemented by
+
+- [`onError`](net.md#onerror-1)
+- [`onError`](net.md#onerror-2)
+
 ---
 
 {#onclose}
@@ -882,6 +944,11 @@ Defined in src/base/include/icy/handle.h:432
 Called by `[close()](#close-11)` after the context has been released.
 
 Override to perform cleanup on handle closure. The default implementation is a no-op.
+
+##### Reimplemented by
+
+- [`onClose`](net.md#onclose-1)
+- [`onClose`](net.md#onclose-2)
 
 ---
 
@@ -946,6 +1013,17 @@ struct ScopedLoop
 Defined in src/base/include/icy/loop.h:77
 
 RAII wrapper for a libuv event loop. Automatically closes and deletes the loop on destruction.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`loop`](#loop-1) | `variable` | Declared here |
+| [`ScopedLoop`](#scopedloop-1) | `function` | Declared here |
+| [`operator Loop *`](#operatorloop) | `function` | Declared here |
+| [`get`](#get-1) | `function` | Declared here |
+| [`ScopedLoop`](#scopedloop-2) | `function` | Declared here |
+| [`ScopedLoop`](#scopedloop-3) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -1068,6 +1146,14 @@ Defined in src/base/include/icy/handle.h:42
 
 Extra storage placed around a raw `libuv` handle for close-time cleanup hooks.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`handle`](#handle) | `variable` | Declared here |
+| [`closeData`](#closedata) | `variable` | Declared here |
+| [`closeCleanup`](#closecleanup) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1136,6 +1222,39 @@ Defined in src/base/include/icy/handle.h:85
 > **Inherits:** [`RefCounted< Context< T > >`](base.md#refcounted)
 
 Shared `libuv` handle context.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`handle`](#handle-1) | `variable` | Declared here |
+| [`storage`](#storage) | `variable` | Declared here |
+| [`ptr`](#ptr-3) | `variable` | Declared here |
+| [`initialized`](#initialized) | `variable` | Declared here |
+| [`deleted`](#deleted) | `variable` | Declared here |
+| [`Context`](#context-2) | `function` | Declared here |
+| [`owner`](#owner) | `function` | Declared here |
+| [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589) | `variable` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+
+### Inherited from [`RefCounted`](base.md#refcounted)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589)  |  |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b)  | Defaulted constructor. |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) `inline` `noexcept` |  |
+| `function` | [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) `inline` `noexcept` |  |
+| `function` | [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) `const` `inline` `noexcept` | Increments the reference count. Called by [IntrusivePtr](base.md#intrusiveptr) on acquisition. |
+| `function` | [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) `const` `inline` `noexcept` | Decrements the reference count. |
+| `function` | [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) `const` `inline` `nodiscard` `noexcept` | Returns the current reference count. |
+| `function` | [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909)  | Defaulted destructor. |
 
 ### Public Attributes
 
@@ -1258,6 +1377,12 @@ Defined in src/base/include/icy/request.h:33
 
 Default request callback event carrying a libuv status code.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`status`](#status) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1296,6 +1421,19 @@ Defined in src/base/include/icy/request.h:45
 Wrapper class for managing `uv_req_t` variants.
 
 This class provides safe access to the parent handle in case the handle gets destroyed before the request callback returns, and should be used whenever the handle pointer is accessed via the callback.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`req`](#req) | `variable` | Declared here |
+| [`callback`](#callback) | `variable` | Declared here |
+| [`Request`](#request-1) | `function` | Declared here |
+| [`invoke`](#invoke-1) | `function` | Declared here |
+| [`invoke`](#invoke-2) | `function` | Declared here |
+| [`defaultCallback`](#defaultcallback) | `function` | Declared here |
+| [`Type`](#type-8) | `typedef` | Declared here |
+| [`Event`](#event) | `typedef` | Declared here |
 
 ### Public Attributes
 
@@ -1479,6 +1617,35 @@ Defined in src/base/include/icy/request.h:149
 
 Asynchronous connection request for TCP sockets and named pipes.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ConnectReq`](#connectreq-1) | `function` | Declared here |
+| [`connect`](#connect) | `function` | Declared here |
+| [`connect`](#connect-1) | `function` | Declared here |
+| [`req`](#req) | `variable` | Inherited from [`Request`](#request) |
+| [`callback`](#callback) | `variable` | Inherited from [`Request`](#request) |
+| [`Request`](#request-1) | `function` | Inherited from [`Request`](#request) |
+| [`invoke`](#invoke-1) | `function` | Inherited from [`Request`](#request) |
+| [`invoke`](#invoke-2) | `function` | Inherited from [`Request`](#request) |
+| [`defaultCallback`](#defaultcallback) | `function` | Inherited from [`Request`](#request) |
+| [`Type`](#type-8) | `typedef` | Inherited from [`Request`](#request) |
+| [`Event`](#event) | `typedef` | Inherited from [`Request`](#request) |
+
+### Inherited from [`Request`](#request)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`req`](#req)  | The underlying libuv request object. |
+| `variable` | [`callback`](#callback)  | Called when the request completes. |
+| `function` | [`Request`](#request-1) `inline` | Construct the request and set `req.data` to `this` so callbacks can recover the wrapper pointer. |
+| `function` | [`invoke`](#invoke-1) `inline` | Call `f` with `args`. If `f` returns a non-zero libuv error code, the `[callback](#callback)` is invoked immediately with that status. |
+| `function` | [`invoke`](#invoke-2) `inline` | Call `f` with `args`. Overload for void-returning functions; no error checking is performed. |
+| `function` | [`defaultCallback`](#defaultcallback) `static` `inline` | Standard libuv completion callback. Invokes `[callback](#callback)` with the status event and then deletes the `[Request](#request)` wrapper. |
+| `typedef` | [`Type`](#type-8)  |  |
+| `typedef` | [`Event`](#event)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1567,6 +1734,13 @@ Defined in src/base/include/icy/request.h:180
 
 Callback event delivered when a `[GetAddrInfoReq](#getaddrinforeq)` resolves.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`status`](#status-1) | `variable` | Declared here |
+| [`addr`](#addr) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1619,6 +1793,36 @@ Defined in src/base/include/icy/request.h:188
 > **Inherits:** [`Request< uv_getaddrinfo_t, GetAddrInfoEvent >`](#request)
 
 DNS resolver request to get the IP address of a hostname.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`GetAddrInfoReq`](#getaddrinforeq-1) | `function` | Declared here |
+| [`resolve`](#resolve) | `function` | Declared here |
+| [`getAddrInfoCallback`](#getaddrinfocallback) | `function` | Declared here |
+| [`Request`](#request-2) | `typedef` | Declared here |
+| [`req`](#req) | `variable` | Inherited from [`Request`](#request) |
+| [`callback`](#callback) | `variable` | Inherited from [`Request`](#request) |
+| [`Request`](#request-1) | `function` | Inherited from [`Request`](#request) |
+| [`invoke`](#invoke-1) | `function` | Inherited from [`Request`](#request) |
+| [`invoke`](#invoke-2) | `function` | Inherited from [`Request`](#request) |
+| [`defaultCallback`](#defaultcallback) | `function` | Inherited from [`Request`](#request) |
+| [`Type`](#type-8) | `typedef` | Inherited from [`Request`](#request) |
+| [`Event`](#event) | `typedef` | Inherited from [`Request`](#request) |
+
+### Inherited from [`Request`](#request)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`req`](#req)  | The underlying libuv request object. |
+| `variable` | [`callback`](#callback)  | Called when the request completes. |
+| `function` | [`Request`](#request-1) `inline` | Construct the request and set `req.data` to `this` so callbacks can recover the wrapper pointer. |
+| `function` | [`invoke`](#invoke-1) `inline` | Call `f` with `args`. If `f` returns a non-zero libuv error code, the `[callback](#callback)` is invoked immediately with that status. |
+| `function` | [`invoke`](#invoke-2) `inline` | Call `f` with `args`. Overload for void-returning functions; no error checking is performed. |
+| `function` | [`defaultCallback`](#defaultcallback) `static` `inline` | Standard libuv completion callback. Invokes `[callback](#callback)` with the status event and then deletes the `[Request](#request)` wrapper. |
+| `typedef` | [`Type`](#type-8)  |  |
+| `typedef` | [`Event`](#event)  |  |
 
 ### Public Methods
 

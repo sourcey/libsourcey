@@ -1878,6 +1878,30 @@ Defined in src/base/include/icy/hex.h:34
 
 Hex encoder.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_linePos`](#_linepos) | `variable` | Declared here |
+| [`_lineLength`](#_linelength) | `variable` | Declared here |
+| [`_uppercase`](#_uppercase) | `variable` | Declared here |
+| [`Encoder`](#encoder-2) | `function` | Declared here |
+| [`encode`](#encode-15) | `function` | Declared here |
+| [`finalize`](#finalize) | `function` | Declared here |
+| [`setUppercase`](#setuppercase) | `function` | Declared here |
+| [`setLineLength`](#setlinelength) | `function` | Declared here |
+| [`Encoder`](#encoder-6) | `function` | Inherited from [`Encoder`](#encoder-5) |
+| [`encode`](#encode-20) | `function` | Inherited from [`Encoder`](#encoder-5) |
+| [`finalize`](#finalize-5) | `function` | Inherited from [`Encoder`](#encoder-5) |
+
+### Inherited from [`Encoder`](#encoder-5)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Encoder`](#encoder-6)  | Defaulted constructor. |
+| `function` | [`encode`](#encode-20) `virtual` | Encodes nread bytes from inbuf and writes encoded output to outbuf. |
+| `function` | [`finalize`](#finalize-5) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1971,6 +1995,10 @@ Encodes binary input as lowercase hex characters, optionally inserting newlines 
 #### Returns
 Number of bytes written to outbuf.
 
+##### Reimplements
+
+- [`encode`](#encode-20)
+
 ---
 
 {#finalize}
@@ -1988,6 +2016,10 @@ Defined in src/base/include/icy/hex.h:72
 No-op finalizer; hex encoding has no pending state. 
 #### Returns
 Always 0.
+
+##### Reimplements
+
+- [`finalize`](#finalize-5)
 
 ---
 
@@ -2042,6 +2074,29 @@ Defined in src/base/include/icy/hex.h:111
 > **Inherits:** [`Decoder`](#decoder-4)
 
 Hex decoder.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`lastbyte`](#lastbyte) | `variable` | Declared here |
+| [`Decoder`](#decoder-1) | `function` | Declared here |
+| [`decode`](#decode-4) | `function` | Declared here |
+| [`finalize`](#finalize-1) | `function` | Declared here |
+| [`readnext`](#readnext) | `function` | Declared here |
+| [`nybble`](#nybble) | `function` | Declared here |
+| [`iswspace`](#iswspace) | `function` | Declared here |
+| [`Decoder`](#decoder-5) | `function` | Inherited from [`Decoder`](#decoder-4) |
+| [`decode`](#decode-9) | `function` | Inherited from [`Decoder`](#decoder-4) |
+| [`finalize`](#finalize-4) | `function` | Inherited from [`Decoder`](#decoder-4) |
+
+### Inherited from [`Decoder`](#decoder-4)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Decoder`](#decoder-5)  | Defaulted constructor. |
+| `function` | [`decode`](#decode-9) `virtual` | Decodes nread bytes from inbuf and writes decoded output to outbuf. |
+| `function` | [`finalize`](#finalize-4) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
 
 ### Public Attributes
 
@@ -2111,6 +2166,10 @@ Decodes hex-encoded input to binary. Whitespace in the input is ignored. A trail
 #### Returns
 Number of decoded bytes written to outbuf.
 
+##### Reimplements
+
+- [`decode`](#decode-9)
+
 ---
 
 {#finalize-1}
@@ -2128,6 +2187,10 @@ Defined in src/base/include/icy/hex.h:152
 No-op finalizer; hex decoding has no pending output state. 
 #### Returns
 Always 0.
+
+##### Reimplements
+
+- [`finalize`](#finalize-4)
 
 ---
 
@@ -2259,6 +2322,20 @@ Defined in src/base/include/icy/ipc.h:57
 
 IPC queue is for safely passing templated actions between threads and processes.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Queue`](#queue-2) | `function` | Declared here |
+| [`push`](#push-1) | `function` | Declared here |
+| [`pop`](#pop) | `function` | Declared here |
+| [`runSync`](#runsync) | `function` | Declared here |
+| [`close`](#close-17) | `function` | Declared here |
+| [`post`](#post) | `function` | Declared here |
+| [`waitForSync`](#waitforsync) | `function` | Declared here |
+| [`_mutex`](#_mutex-7) | `variable` | Declared here |
+| [`_actions`](#_actions) | `variable` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2353,6 +2430,11 @@ Defined in src/base/include/icy/ipc.h:103
 
 Closes the underlying notification handle. No-op in the base implementation.
 
+##### Reimplemented by
+
+- [`close`](#close-18)
+- [`close`](#close-18)
+
 ---
 
 {#post}
@@ -2368,6 +2450,11 @@ virtual inline void post()
 Defined in src/base/include/icy/ipc.h:106
 
 Signals the event loop that new actions are available. No-op in the base implementation.
+
+##### Reimplemented by
+
+- [`post`](#post-1)
+- [`post`](#post-1)
 
 ---
 
@@ -2437,6 +2524,39 @@ Defined in src/base/include/icy/ipc.h:137
 
 IPC synchronization queue is for passing templated actions between threads and the event loop we are synchronizing with.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SyncQueue`](#syncqueue-2) | `function` | Declared here |
+| [`close`](#close-18) | `function` | Declared here |
+| [`post`](#post-1) | `function` | Declared here |
+| [`sync`](#sync) | `function` | Declared here |
+| [`_sync`](#_sync) | `variable` | Declared here |
+| [`Queue`](#queue-2) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`push`](#push-1) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`pop`](#pop) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`runSync`](#runsync) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`close`](#close-17) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`post`](#post) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`waitForSync`](#waitforsync) | `function` | Inherited from [`Queue`](#queue-1) |
+| [`_mutex`](#_mutex-7) | `variable` | Inherited from [`Queue`](#queue-1) |
+| [`_actions`](#_actions) | `variable` | Inherited from [`Queue`](#queue-1) |
+
+### Inherited from [`Queue`](#queue-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Queue`](#queue-2) `inline` |  |
+| `function` | [`push`](#push-1) `virtual` `inline` | Pushes an action onto the queue and triggers a post notification. Takes ownership of action; the queue deletes it after execution. Thread-safe. |
+| `function` | [`pop`](#pop) `virtual` `inline` | Removes and returns the next action from the front of the queue. The caller takes ownership of the returned pointer. Thread-safe. |
+| `function` | [`runSync`](#runsync) `virtual` `inline` | Drains the queue by invoking and deleting every pending action in order. Must be called from the thread that owns the event loop. |
+| `function` | [`close`](#close-17) `virtual` `inline` | Closes the underlying notification handle. No-op in the base implementation. |
+| `function` | [`post`](#post) `virtual` `inline` | Signals the event loop that new actions are available. No-op in the base implementation. |
+| `function` | [`waitForSync`](#waitforsync) `inline` | Blocks the calling thread until the queue is empty or the timeout elapses. Polls every 10 ms. Logs a warning if the timeout is reached. |
+| `variable` | [`_mutex`](#_mutex-7)  |  |
+| `variable` | [`_actions`](#_actions)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2480,6 +2600,10 @@ Defined in src/base/include/icy/ipc.h:150
 
 Closes the underlying [Synchronizer](#synchronizer) handle and stops loop wakeups.
 
+##### Reimplements
+
+- [`close`](#close-17)
+
 ---
 
 {#post-1}
@@ -2495,6 +2619,10 @@ virtual inline void post()
 Defined in src/base/include/icy/ipc.h:153
 
 Wakes up the event loop so pending actions are dispatched via [runSync()](#runsync).
+
+##### Reimplements
+
+- [`post`](#post)
 
 ---
 
@@ -2547,6 +2675,16 @@ struct Action
 Defined in src/base/include/icy/ipc.h:33
 
 Default action type for executing synchronized callbacks.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`target`](#target) | `variable` | Declared here |
+| [`arg`](#arg) | `variable` | Declared here |
+| [`data`](#data) | `variable` | Declared here |
+| [`Action`](#action-1) | `function` | Declared here |
+| [`Callback`](#callback-1) | `typedef` | Declared here |
 
 ### Public Attributes
 
@@ -2814,6 +2952,20 @@ Defined in src/base/include/icy/test.h:81
 
 This class is for implementing any kind of unit test that can be executed by a `[TestRunner](#testrunner-1)`.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TestRunner`](#testrunner) | `friend` | Declared here |
+| [`name`](#name-4) | `variable` | Declared here |
+| [`errors`](#errors) | `variable` | Declared here |
+| [`duration`](#duration-1) | `variable` | Declared here |
+| [`Test`](#test-2) | `function` | Declared here |
+| [`~Test`](#test-3) | `function` | Declared here |
+| [`run`](#run-1) | `function` | Declared here |
+| [`passed`](#passed) | `function` | Declared here |
+| [`Test`](#test-4) | `function` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -2940,6 +3092,10 @@ Defined in src/base/include/icy/test.h:91
 
 Called by the [TestRunner](#testrunner-1) to run the test.
 
+##### Reimplemented by
+
+- [`run`](#run-2)
+
 ---
 
 {#passed}
@@ -2991,6 +3147,37 @@ Defined in src/base/include/icy/test.h:115
 > **Inherits:** [`Test`](#test-1)
 
 [Test](#test-1) wrapper for standalone test functions.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`target`](#target-1) | `variable` | Declared here |
+| [`FunctionTest`](#functiontest-1) | `function` | Declared here |
+| [`run`](#run-2) | `function` | Declared here |
+| [`TestRunner`](#testrunner) | `friend` | Inherited from [`Test`](#test-1) |
+| [`name`](#name-4) | `variable` | Inherited from [`Test`](#test-1) |
+| [`errors`](#errors) | `variable` | Inherited from [`Test`](#test-1) |
+| [`duration`](#duration-1) | `variable` | Inherited from [`Test`](#test-1) |
+| [`Test`](#test-2) | `function` | Inherited from [`Test`](#test-1) |
+| [`~Test`](#test-3) | `function` | Inherited from [`Test`](#test-1) |
+| [`run`](#run-1) | `function` | Inherited from [`Test`](#test-1) |
+| [`passed`](#passed) | `function` | Inherited from [`Test`](#test-1) |
+| [`Test`](#test-4) | `function` | Inherited from [`Test`](#test-1) |
+
+### Inherited from [`Test`](#test-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`TestRunner`](#testrunner)  | Tests belong to a [TestRunner](#testrunner-1) instance. |
+| `variable` | [`name`](#name-4)  | The name of the test. |
+| `variable` | [`errors`](#errors)  | A list of test errors. |
+| `variable` | [`duration`](#duration-1)  | The test run duration for benchmarking. |
+| `function` | [`Test`](#test-2)  |  |
+| `function` | [`~Test`](#test-3) `virtual` | Should remain protected. |
+| `function` | [`run`](#run-1) `virtual` | Called by the [TestRunner](#testrunner-1) to run the test. |
+| `function` | [`passed`](#passed)  | Return true when the test passed without errors. |
+| `function` | [`Test`](#test-4)  | Deleted constructor. |
 
 ### Public Attributes
 
@@ -3057,6 +3244,10 @@ Defined in src/base/include/icy/test.h:132
 
 Called by the [TestRunner](#testrunner-1) to run the test.
 
+##### Reimplements
+
+- [`run`](#run-1)
+
 {#testrunner-1}
 
 ## TestRunner
@@ -3076,6 +3267,24 @@ Defined in src/base/include/icy/test.h:148
 The `[TestRunner](#testrunner-1)` is a queue in charge of running one or many tests.
 
 When `[run()](#run-3)` the `[TestRunner](#testrunner-1)` loops through each test in the list calling the test's `[run()](#run-3)` method.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TestRunner`](#testrunner-2) | `function` | Declared here |
+| [`add`](#add) | `function` | Declared here |
+| [`get`](#get-3) | `function` | Declared here |
+| [`run`](#run-3) | `function` | Declared here |
+| [`clear`](#clear-1) | `function` | Declared here |
+| [`current`](#current) | `function` | Declared here |
+| [`tests`](#tests) | `function` | Declared here |
+| [`errors`](#errors-1) | `function` | Declared here |
+| [`passed`](#passed-1) | `function` | Declared here |
+| [`getDefault`](#getdefault-1) | `function` | Declared here |
+| [`_mutex`](#_mutex-8) | `variable` | Declared here |
+| [`_tests`](#_tests) | `variable` | Declared here |
+| [`_current`](#_current) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -3708,6 +3917,30 @@ Defined in src/base/include/icy/base64.h:102
 
 Base64 encoder.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_state`](#_state) | `variable` | Declared here |
+| [`_buffersize`](#_buffersize) | `variable` | Declared here |
+| [`Encoder`](#encoder-4) | `function` | Declared here |
+| [`encode`](#encode-17) | `function` | Declared here |
+| [`encode`](#encode-18) | `function` | Declared here |
+| [`encode`](#encode-19) | `function` | Declared here |
+| [`finalize`](#finalize-3) | `function` | Declared here |
+| [`setLineLength`](#setlinelength-1) | `function` | Declared here |
+| [`Encoder`](#encoder-6) | `function` | Inherited from [`Encoder`](#encoder-5) |
+| [`encode`](#encode-20) | `function` | Inherited from [`Encoder`](#encoder-5) |
+| [`finalize`](#finalize-5) | `function` | Inherited from [`Encoder`](#encoder-5) |
+
+### Inherited from [`Encoder`](#encoder-5)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Encoder`](#encoder-6)  | Defaulted constructor. |
+| `function` | [`encode`](#encode-20) `virtual` | Encodes nread bytes from inbuf and writes encoded output to outbuf. |
+| `function` | [`finalize`](#finalize-5) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -3832,6 +4065,10 @@ Encodes a raw buffer, writing Base64 characters to `outbuf`. May be called multi
 #### Returns
 Number of Base64 characters written.
 
+##### Reimplements
+
+- [`encode`](#encode-20)
+
 ---
 
 {#finalize-3}
@@ -3852,6 +4089,10 @@ Writes any pending padding and resets the encoder state. Must be called once aft
 
 #### Returns
 Number of characters written.
+
+##### Reimplements
+
+- [`finalize`](#finalize-5)
 
 ---
 
@@ -3888,6 +4129,28 @@ Defined in src/base/include/icy/base64.h:258
 > **Inherits:** [`Decoder`](#decoder-4)
 
 Base64 decoder.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_state`](#_state-1) | `variable` | Declared here |
+| [`_buffersize`](#_buffersize-1) | `variable` | Declared here |
+| [`Decoder`](#decoder-3) | `function` | Declared here |
+| [`decode`](#decode-6) | `function` | Declared here |
+| [`decode`](#decode-7) | `function` | Declared here |
+| [`decode`](#decode-8) | `function` | Declared here |
+| [`Decoder`](#decoder-5) | `function` | Inherited from [`Decoder`](#decoder-4) |
+| [`decode`](#decode-9) | `function` | Inherited from [`Decoder`](#decoder-4) |
+| [`finalize`](#finalize-4) | `function` | Inherited from [`Decoder`](#decoder-4) |
+
+### Inherited from [`Decoder`](#decoder-4)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Decoder`](#decoder-5)  | Defaulted constructor. |
+| `function` | [`decode`](#decode-9) `virtual` | Decodes nread bytes from inbuf and writes decoded output to outbuf. |
+| `function` | [`finalize`](#finalize-4) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
 
 ### Public Attributes
 
@@ -3992,6 +4255,10 @@ Decodes a raw Base64 buffer into binary data.
 #### Returns
 Number of binary bytes written.
 
+##### Reimplements
+
+- [`decode`](#decode-9)
+
 ---
 
 {#decode-8}
@@ -4042,6 +4309,12 @@ Defined in src/base/include/icy/memory.h:220
 
 Deleter functor that calls dispose() on the pointer. Useful with std::unique_ptr for objects that require a dispose() call rather than direct deletion.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator()`](#operator-11) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4082,6 +4355,12 @@ struct Array
 Defined in src/base/include/icy/memory.h:235
 
 Deleter functor for array pointers. Calls delete[] on the pointer.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator()`](#operator-12) | `function` | Declared here |
 
 ### Public Methods
 
@@ -4698,6 +4977,14 @@ Defined in src/base/include/icy/interface.h:33
 
 Abstract interface for stream decoders.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Decoder`](#decoder-5) | `function` | Declared here |
+| [`decode`](#decode-9) | `function` | Declared here |
+| [`finalize`](#finalize-4) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4745,6 +5032,11 @@ Decodes nread bytes from inbuf and writes decoded output to outbuf.
 #### Returns
 Number of bytes written to outbuf, or -1 on error.
 
+##### Reimplemented by
+
+- [`decode`](#decode-7)
+- [`decode`](#decode-4)
+
 ---
 
 {#finalize-4}
@@ -4766,6 +5058,10 @@ Flushes any buffered state and writes final output to outbuf.
 #### Returns
 Number of bytes written, or 0 if nothing to flush.
 
+##### Reimplemented by
+
+- [`finalize`](#finalize-1)
+
 {#encoder-5}
 
 ## Encoder
@@ -4783,6 +5079,14 @@ Defined in src/base/include/icy/interface.h:54
 > **Subclassed by:** [`Encoder`](#encoder-3), [`Encoder`](#encoder-1)
 
 Abstract interface for stream encoders.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Encoder`](#encoder-6) | `function` | Declared here |
+| [`encode`](#encode-20) | `function` | Declared here |
+| [`finalize`](#finalize-5) | `function` | Declared here |
 
 ### Public Methods
 
@@ -4831,6 +5135,11 @@ Encodes nread bytes from inbuf and writes encoded output to outbuf.
 #### Returns
 Number of bytes written to outbuf, or -1 on error.
 
+##### Reimplemented by
+
+- [`encode`](#encode-19)
+- [`encode`](#encode-15)
+
 ---
 
 {#finalize-5}
@@ -4852,6 +5161,11 @@ Flushes any buffered state and writes final output to outbuf.
 #### Returns
 Number of bytes written, or 0 if nothing to flush.
 
+##### Reimplemented by
+
+- [`finalize`](#finalize-3)
+- [`finalize`](#finalize)
+
 {#runnable}
 
 ## Runnable
@@ -4869,6 +5183,16 @@ Defined in src/base/include/icy/interface.h:75
 > **Subclassed by:** [`RunnableQueue< IPacket >`](#runnablequeue), [`PlanarAudioPacket >`](#runnablequeue), [`RunnableQueue< VisionFramePacket >`](#runnablequeue), [`AsyncDiagnostic`](#asyncdiagnostic), [`AsyncLogWriter`](#asynclogwriter), [`RunnableQueue< T >`](#runnablequeue), [`Task`](#task), [`TaskRunner`](#taskrunner), [`MediaCapture`](av.md#mediacapture), [`InstallTask`](pacm.md#installtask)
 
 Abstract interface for classes that can be run and cancelled.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Runnable`](#runnable-1) | `function` | Declared here |
+| [`run`](#run-4) | `function` | Declared here |
+| [`cancel`](#cancel-1) | `function` | Declared here |
+| [`cancelled`](#cancelled) | `function` | Declared here |
+| [`exit`](#exit) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -4909,6 +5233,21 @@ Defined in src/base/include/icy/interface.h:86
 
 The run method will be called by the asynchronous context.
 
+##### Reimplemented by
+
+- [`run`](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663)
+- [`run`](#classicy_1_1AsyncLogWriter_1a9e1bdd7f94dc5b8eb302efc7a32adc7c)
+- [`run`](av.md#run)
+- [`run`](pacm.md#run-5)
+- [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5)
+- [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5)
+- [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5)
+- [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5)
+- [`run`](sched.md#run-6)
+- [`run`](sched.md#run-7)
+- [`run`](#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de)
+- [`run`](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2)
+
 ---
 
 {#cancel-1}
@@ -4925,6 +5264,18 @@ Defined in src/base/include/icy/interface.h:90
 
 Cancel the current task. The [run()](#run-4) method should return ASAP.
 
+##### Reimplemented by
+
+- [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840)
+- [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840)
+- [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840)
+- [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840)
+- [`cancel`](pacm.md#cancel-3)
+- [`cancel`](sched.md#cancel-6)
+- [`cancel`](#classicy_1_1SyncQueue_1a07c735c59351142dc72cee62ee4a6251)
+- [`cancel`](#classicy_1_1SyncQueue_1a07c735c59351142dc72cee62ee4a6251)
+- [`cancel`](#classicy_1_1TaskRunner_1aa2f1d9a49043af08d17669dddfcdc268)
+
 ---
 
 {#cancelled}
@@ -4940,6 +5291,10 @@ virtual inline bool cancelled() const
 Defined in src/base/include/icy/interface.h:96
 
 Returns true when the task has been cancelled.
+
+##### Reimplemented by
+
+- [`cancelled`](pacm.md#cancelled-2)
 
 ### Protected Attributes
 
@@ -4977,6 +5332,13 @@ Defined in src/base/include/icy/interface.h:107
 
 Abstract interface for a classes that can be started and stopped.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`start`](#start-7) | `function` | Declared here |
+| [`stop`](#stop-6) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -5000,6 +5362,13 @@ Defined in src/base/include/icy/interface.h:111
 
 Starts the object (e.g. begins processing or listening).
 
+##### Reimplemented by
+
+- [`start`](av.md#start-1)
+- [`start`](av.md#start-4)
+- [`start`](http.md#start-10)
+- [`start`](#classicy_1_1ThreadedStreamReader_1a8c9a8d156358a5063c25e20eea609c94)
+
 ---
 
 {#stop-6}
@@ -5015,6 +5384,13 @@ virtual void stop()
 Defined in src/base/include/icy/interface.h:114
 
 Stops the object (e.g. halts processing or closes resources).
+
+##### Reimplemented by
+
+- [`stop`](av.md#stop-1)
+- [`stop`](av.md#stop-3)
+- [`stop`](http.md#stop-8)
+- [`stop`](#classicy_1_1ThreadedStreamReader_1a53ec1094fcd77d371c3f600a7dbfd04a)
 
 {#sendable}
 
@@ -5033,6 +5409,13 @@ Defined in src/base/include/icy/interface.h:119
 > **Subclassed by:** [`PacketTransaction< Message >`](#packettransaction), [`PacketTransaction< PacketT >`](#packettransaction)
 
 Abstract interface for classes that can be sent and cancelled.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`send`](#send-9) | `function` | Declared here |
+| [`cancel`](#cancel-2) | `function` | Declared here |
 
 ### Public Methods
 
@@ -5059,6 +5442,13 @@ Initiates the send operation.
 #### Returns
 true if the send was dispatched successfully, false otherwise.
 
+##### Reimplemented by
+
+- [`send`](net.md#send-6)
+- [`send`](net.md#send-6)
+- [`send`](#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4)
+- [`send`](#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4)
+
 ---
 
 {#cancel-2}
@@ -5074,6 +5464,13 @@ virtual void cancel()
 Defined in src/base/include/icy/interface.h:127
 
 Cancels a pending send operation.
+
+##### Reimplemented by
+
+- [`cancel`](net.md#cancel)
+- [`cancel`](net.md#cancel)
+- [`cancel`](#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef)
+- [`cancel`](#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef)
 
 {#fs}
 
@@ -6258,6 +6655,19 @@ Defined in src/base/include/icy/util.h:491
 
 Semantic version number with major, minor, and patch fields.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-13) | `friend` | Declared here |
+| [`major`](#major) | `variable` | Declared here |
+| [`minor`](#minor) | `variable` | Declared here |
+| [`revision`](#revision) | `variable` | Declared here |
+| [`build`](#build) | `variable` | Declared here |
+| [`Version`](#version-1) | `function` | Declared here |
+| [`operator<`](#operator-14) | `function` | Declared here |
+| [`operator==`](#operator-15) | `function` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -6432,6 +6842,143 @@ Named pipe / stdio stream built on `uv_pipe_t`.
 
 Suitable for inter-process communication and for wrapping process stdio (stdin/stdout/stderr). IPC mode allows passing stream handles between processes over the pipe.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Pipe`](#classicy_1_1Pipe_1a9009056e9a37ca0eb5470eeed13247cc) | `function` | Declared here |
+| [`~Pipe`](#classicy_1_1Pipe_1a6dce0ad4b2d9983ca46ebdb62e5a8644) | `function` | Declared here |
+| [`init`](#classicy_1_1Pipe_1a09b32c70eceefd7d2339410b0863ad54) | `function` | Declared here |
+| [`readStart`](#classicy_1_1Pipe_1aa346922ed574ccc39590f7dc3bae7885) | `function` | Declared here |
+| [`Handle`](#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a) | `typedef` | Inherited from [`Stream`](#stream) |
+| [`Read`](#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184) | `variable` | Inherited from [`Stream`](#stream) |
+| [`_buffer`](#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857) | `variable` | Inherited from [`Stream`](#stream) |
+| [`_started`](#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271) | `variable` | Inherited from [`Stream`](#stream) |
+| [`_highWaterMark`](#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf) | `variable` | Inherited from [`Stream`](#stream) |
+| [`_writeReqFree`](#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b) | `variable` | Inherited from [`Stream`](#stream) |
+| [`_ownedWriteReqFree`](#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365) | `variable` | Inherited from [`Stream`](#stream) |
+| [`Stream`](#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) | `function` | Inherited from [`Stream`](#stream) |
+| [`~Stream`](#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) | `function` | Inherited from [`Stream`](#stream) |
+| [`close`](#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) | `function` | Inherited from [`Stream`](#stream) |
+| [`shutdown`](#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) | `function` | Inherited from [`Stream`](#stream) |
+| [`write`](#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) | `function` | Inherited from [`Stream`](#stream) |
+| [`writeOwned`](#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) | `function` | Inherited from [`Stream`](#stream) |
+| [`setHighWaterMark`](#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) | `function` | Inherited from [`Stream`](#stream) |
+| [`write`](#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) | `function` | Inherited from [`Stream`](#stream) |
+| [`stream`](#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) | `function` | Inherited from [`Stream`](#stream) |
+| [`readStart`](#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) | `function` | Inherited from [`Stream`](#stream) |
+| [`readStop`](#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) | `function` | Inherited from [`Stream`](#stream) |
+| [`onRead`](#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) | `function` | Inherited from [`Stream`](#stream) |
+| [`allocWriteReq`](#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) | `function` | Inherited from [`Stream`](#stream) |
+| [`freeWriteReq`](#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) | `function` | Inherited from [`Stream`](#stream) |
+| [`allocOwnedWriteReq`](#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) | `function` | Inherited from [`Stream`](#stream) |
+| [`freeOwnedWriteReq`](#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) | `function` | Inherited from [`Stream`](#stream) |
+| [`canQueueWrite`](#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) | `function` | Inherited from [`Stream`](#stream) |
+| [`handleRead`](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) | `function` | Inherited from [`Stream`](#stream) |
+| [`allocReadBuffer`](#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) | `function` | Inherited from [`Stream`](#stream) |
+| [`Handle`](uv.md#handle-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`init`](uv.md#init-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invoke`](uv.md#invoke) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invokeOrThrow`](uv.md#invokeorthrow) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`close`](uv.md#close-11) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`ref`](uv.md#ref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`unref`](uv.md#unref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`initialized`](uv.md#initialized-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`active`](uv.md#active) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closing`](uv.md#closing-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closed`](uv.md#closed) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`error`](uv.md#error-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setError`](uv.md#seterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setUVError`](uv.md#setuverror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setAndThrowError`](uv.md#setandthrowerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`throwLastError`](uv.md#throwlasterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`loop`](uv.md#loop-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`reset`](uv.md#reset-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`get`](uv.md#get-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`tid`](uv.md#tid) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`context`](uv.md#context-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setCloseCleanup`](uv.md#setclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`clearCloseCleanup`](uv.md#clearclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`assertThread`](uv.md#assertthread) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_loop`](uv.md#_loop) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_context`](uv.md#_context) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_tid`](uv.md#_tid) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_error`](uv.md#_error-1) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onError`](uv.md#onerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onClose`](uv.md#onclose) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-5) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Type`](uv.md#type-7) | `typedef` | Inherited from [`Handle`](uv.md#handle-2) |
+
+### Inherited from [`Stream`](#stream)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Handle`](#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a)  |  |
+| `variable` | [`Read`](#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184)  | Emitted when data has been received from the peer. |
+| `variable` | [`_buffer`](#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857)  |  |
+| `variable` | [`_started`](#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271)  |  |
+| `variable` | [`_highWaterMark`](#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf)  | 16MB default write queue limit |
+| `variable` | [`_writeReqFree`](#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b)  | Freelist for write requests. |
+| `variable` | [`_ownedWriteReqFree`](#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365)  | Freelist for owned write requests. |
+| `function` | [`Stream`](#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) `inline` | Construct the stream bound to `loop` with a 64 KiB read buffer. |
+| `function` | [`~Stream`](#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) `virtual` `inline` | Destroy the stream, stopping reads and freeing pooled write requests. |
+| `function` | [`close`](#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) `virtual` `inline` `override` | Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle. |
+| `function` | [`shutdown`](#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) `inline` | Send a TCP/pipe shutdown request to the connected peer. |
+| `function` | [`write`](#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) `inline` | Write `len` bytes from `data` to the stream. |
+| `function` | [`writeOwned`](#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) `inline` | Write an owned payload buffer to the stream. |
+| `function` | [`setHighWaterMark`](#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) `inline` | Set the high water mark for the write queue (default 16MB). When the write queue exceeds this size, [write()](#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) returns false. |
+| `function` | [`write`](#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) `inline` | Write `len` bytes from `data` together with a stream handle over an IPC pipe (uses `uv_write2`). |
+| `function` | [`stream`](#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) `inline` | Return the underlying `uv_stream_t` pointer cast from the native handle. |
+| `function` | [`readStart`](#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) `virtual` `inline` | Begin reading from the stream by registering libuv read callbacks. |
+| `function` | [`readStop`](#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) `virtual` `inline` | Stop reading from the stream. |
+| `function` | [`onRead`](#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) `virtual` `inline` | Called by `[handleRead](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10)` when `len` bytes of `data` arrive. |
+| `function` | [`allocWriteReq`](#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) `inline` | Return a `uv_write_t` from the freelist, or allocate a new one if the pool is empty. |
+| `function` | [`freeWriteReq`](#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) `inline` | Return `req` to the freelist, or delete it if the pool is at capacity. |
+| `function` | [`allocOwnedWriteReq`](#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) `inline` |  |
+| `function` | [`freeOwnedWriteReq`](#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) `inline` |  |
+| `function` | [`canQueueWrite`](#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) `inline` |  |
+| `function` | [`handleRead`](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) `static` `inline` | UV callbacks. |
+| `function` | [`allocReadBuffer`](#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) `static` `inline` | libuv allocate-buffer callback. Provides the stream's internal buffer, growing it if libuv requests more space than the current allocation. |
+
+### Inherited from [`Handle`](uv.md#handle-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Handle`](uv.md#handle-3) `inline` | Construct the handle bound to the given event loop. |
+| `function` | [`init`](uv.md#init-2) `inline` | Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`. |
+| `function` | [`invoke`](uv.md#invoke) `inline` | Invoke a libuv function `f` with `args` on the initialized handle. |
+| `function` | [`invokeOrThrow`](uv.md#invokeorthrow) `inline` | Invoke a libuv function `f` with `args`, throwing on failure. |
+| `function` | [`close`](uv.md#close-11) `virtual` `inline` | Close and destroy the handle. |
+| `function` | [`ref`](uv.md#ref) `inline` | Re-reference the handle with the event loop after a previous `[unref()](uv.md#unref)`. |
+| `function` | [`unref`](uv.md#unref) `inline` | Unreference the handle from the event loop. |
+| `function` | [`initialized`](uv.md#initialized-1) `const` `inline` | Return `true` if the handle has been successfully initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`active`](uv.md#active) `virtual` `const` `inline` | Return `true` when the handle is active (libuv `uv_is_active`). |
+| `function` | [`closing`](uv.md#closing-1) `virtual` `const` `inline` | Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`). |
+| `function` | [`closed`](uv.md#closed) `virtual` `const` `inline` | Return `true` if the handle has been fully closed (context released). |
+| `function` | [`error`](uv.md#error-4) `const` `inline` | Return the last error set on this handle, or a default-constructed `[Error](#error)` if no error has occurred. |
+| `function` | [`setError`](uv.md#seterror) `virtual` `inline` | Set the error state and invoke `[onError()](uv.md#onerror)`. |
+| `function` | [`setUVError`](uv.md#setuverror) `inline` | Translate a libuv error code into an `[Error](#error)` and call `[setError()](uv.md#seterror)`. |
+| `function` | [`setAndThrowError`](uv.md#setandthrowerror) `inline` | Set the error state from a libuv error code and throw a `std::runtime_error`. |
+| `function` | [`throwLastError`](uv.md#throwlasterror) `inline` | Throw a `std::runtime_error` if the handle currently holds an error. |
+| `function` | [`loop`](uv.md#loop-2) `const` `inline` | Return the event loop this handle is bound to. |
+| `function` | [`reset`](uv.md#reset-3) `inline` | Close the current handle (if open) and allocate a fresh `[Context](uv.md#context-1)`, leaving the handle ready to be re-initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`get`](uv.md#get-2) `const` `inline` | Return the raw libuv handle pointer cast to `[Handle](uv.md#handle-2)`. |
+| `function` | [`tid`](uv.md#tid) `const` `inline` | Return the ID of the thread that constructed this handle. |
+| `function` | [`context`](uv.md#context-3) `const` `inline` | Return the raw `[Context](uv.md#context-1)` that owns the libuv handle memory. |
+| `function` | [`setCloseCleanup`](uv.md#setclosecleanup) `inline` |  |
+| `function` | [`clearCloseCleanup`](uv.md#clearclosecleanup) `inline` |  |
+| `function` | [`assertThread`](uv.md#assertthread) `const` `inline` | Throw `std::logic_error` if called from any thread other than the thread that constructed this handle. |
+| `variable` | [`_loop`](uv.md#_loop)  |  |
+| `variable` | [`_context`](uv.md#_context)  |  |
+| `variable` | [`_tid`](uv.md#_tid)  |  |
+| `variable` | [`_error`](uv.md#_error-1)  |  |
+| `function` | [`onError`](uv.md#onerror) `virtual` `inline` | Called by `[setError()](uv.md#seterror)` after the error state has been updated. |
+| `function` | [`onClose`](uv.md#onclose) `virtual` `inline` | Called by `[close()](uv.md#close-11)` after the context has been released. |
+| `function` | [`Handle`](uv.md#handle-4)  | NonCopyable and NonMovable. |
+| `function` | [`Handle`](uv.md#handle-5)  | Deleted constructor. |
+| `typedef` | [`Type`](uv.md#type-7)  | Define the native handle type. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -6518,6 +7065,10 @@ Delegates to `[Stream](#stream)<uv_pipe_t>::[readStart()](#classicy_1_1Pipe_1aa3
 #### Returns
 `true` if `uv_read_start` was called successfully.
 
+##### Reimplements
+
+- [`readStart`](#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889)
+
 {#idler}
 
 ## Idler
@@ -6537,6 +7088,58 @@ Defined in src/base/include/icy/idler.h:31
 Asynchronous type that triggers callbacks when the event loop is idle.
 
 This class inherits the `[Runner](#runner)` interface and may be used with any implementation that's powered by an asynchronous `[Runner](#runner)`.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_handle`](#classicy_1_1Idler_1a792544d84fe6e042d7b6b2a48c29ed11) | `variable` | Declared here |
+| [`Idler`](#classicy_1_1Idler_1a891d24855f447e75723193fd0100d145) | `function` | Declared here |
+| [`Idler`](#classicy_1_1Idler_1ac93b6cd12ec88d98c368a4e29883c60e) | `function` | Declared here |
+| [`Idler`](#classicy_1_1Idler_1a3281e31750f82e25ec8a850b282e5932) | `function` | Declared here |
+| [`start`](#classicy_1_1Idler_1a50a5a5ab57846a774e93d0bc3a94984c) | `function` | Declared here |
+| [`start`](#classicy_1_1Idler_1ab31f59214d6e68afb3b6e59a3036d608) | `function` | Declared here |
+| [`~Idler`](#classicy_1_1Idler_1a855bc5345304a4bcc856fa9e571ce9b5) | `function` | Declared here |
+| [`handle`](#classicy_1_1Idler_1ae051a46ab1543a6310c31bcfe8895771) | `function` | Declared here |
+| [`init`](#classicy_1_1Idler_1a39b4c4e3629619b98add8d37b9ac4909) | `function` | Declared here |
+| [`async`](#classicy_1_1Idler_1a29edc37083cfb36ba734533cfc6eeb44) | `function` | Declared here |
+| [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95) | `variable` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20) | `function` | Inherited from [`Runner`](#runner) |
+| [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) | `function` | Inherited from [`Runner`](#runner) |
+| [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) | `function` | Inherited from [`Runner`](#runner) |
+| [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) | `function` | Inherited from [`Runner`](#runner) |
+| [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) | `function` | Inherited from [`Runner`](#runner) |
+| [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092) | `function` | Inherited from [`Runner`](#runner) |
+| [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) | `function` | Inherited from [`Runner`](#runner) |
+| [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) | `function` | Inherited from [`Runner`](#runner) |
+| [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa) | `function` | Inherited from [`Runner`](#runner) |
+
+### Inherited from [`Runner`](#runner)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95)  | Shared pointer to the internal [Context](#context). |
+| `function` | [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20)  |  |
+| `function` | [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) `virtual` |  |
+| `function` | [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) `virtual` | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
+| `function` | [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) `const` | Returns true if the async context is currently running. |
+| `function` | [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)  | Signals the async context to stop at the earliest opportunity. |
+| `function` | [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) `const` | Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. |
+| `function` | [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) `const` | Returns true if the runner is in repeating mode. |
+| `function` | [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092)  | Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. |
+| `function` | [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `function` | [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) `const` | Returns the native thread ID of the thread running the async context. |
+| `function` | [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b)  | Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. |
+| `function` | [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb)  | Deleted assignment operator. |
+| `function` | [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa)  | Deleted assignment operator. |
 
 ### Public Methods
 
@@ -6652,6 +7255,10 @@ Start the idler with a type-erased callback (implements `[Runner::start](#classi
 #### Parameters
 * `func` Callback invoked on every idle iteration.
 
+##### Reimplements
+
+- [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)
+
 ---
 
 {#handle}
@@ -6725,6 +7332,10 @@ Defined in src/base/include/icy/idler.h:130
 #### Returns
 `false`; the idler is event-loop-driven, not thread-based.
 
+##### Reimplements
+
+- [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07)
+
 {#queue}
 
 ## Queue
@@ -6741,6 +7352,22 @@ class Queue
 Defined in src/base/include/icy/queue.h:30
 
 Thread-safe queue container.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Declared here |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Declared here |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Declared here |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Declared here |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Declared here |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Declared here |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Declared here |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Declared here |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Declared here |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Declared here |
 
 ### Public Methods
 
@@ -6962,6 +7589,74 @@ Defined in src/base/include/icy/queue.h:113
 
 [Queue](#queue) of runnable tasks for sequential execution.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Declared here |
+| [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Declared here |
+| [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Declared here |
+| [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Declared here |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Declared here |
+| [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Declared here |
+| [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Declared here |
+| [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Declared here |
+| [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Declared here |
+| [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Declared here |
+| [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Declared here |
+| [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Declared here |
+| [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Declared here |
+| [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Declared here |
+| [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Declared here |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Declared here |
+| [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Declared here |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Declared here |
+| [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Declared here |
+| [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Declared here |
+| [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Declared here |
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](#queue) |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](#queue) |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](#queue) |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](#queue) |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](#queue) |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](#queue) |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](#queue) |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](#queue) |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](#queue) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`Queue`](#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -7032,6 +7727,11 @@ Defined in src/base/include/icy/queue.h:136
 
 Push an item onto the queue. The queue takes ownership of the item pointer.
 
+##### Reimplemented by
+
+- [`push`](#classicy_1_1SyncQueue_1a88f3a96973c2a8224a7e1c73665218ab)
+- [`push`](#classicy_1_1SyncQueue_1a88f3a96973c2a8224a7e1c73665218ab)
+
 ---
 
 {#flush}
@@ -7078,6 +7778,10 @@ Defined in src/base/include/icy/queue.h:181
 
 Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called.
 
+##### Reimplements
+
+- [`run`](#run-4)
+
 ---
 
 {#runtimeout}
@@ -7109,6 +7813,11 @@ virtual inline void dispatch(T & item)
 Defined in src/base/include/icy/queue.h:206
 
 Dispatch a single item to listeners.
+
+##### Reimplemented by
+
+- [`dispatch`](#classicy_1_1AsyncPacketQueue_1a408c35d44bef57364c8c29d8ef71736a)
+- [`dispatch`](#classicy_1_1AsyncPacketQueue_1a408c35d44bef57364c8c29d8ef71736a)
 
 ---
 
@@ -7262,6 +7971,10 @@ Defined in src/base/include/icy/queue.h:244
 
 Pops the next waiting item.
 
+##### Reimplemented by
+
+- [`popNext`](av.md#popnext)
+
 ---
 
 {#dispatchnext}
@@ -7296,6 +8009,107 @@ Defined in src/base/include/icy/queue.h:285
 > **Inherits:** [`RunnableQueue< T >`](#runnablequeue)
 
 [SyncQueue](#syncqueue) extends [Synchronizer](#synchronizer) to implement a synchronized FIFO queue which receives T objects from any thread and synchronizes them for safe consumption by the associated event loop.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Queue`](#classicy_1_1SyncQueue_1ac4fb67c6d088efb3fab892fcfde0f8ec) | `typedef` | Declared here |
+| [`_sync`](#classicy_1_1SyncQueue_1a1a984d96b9c2ec8caa9a8d6df61f0eb2) | `variable` | Declared here |
+| [`SyncQueue`](#classicy_1_1SyncQueue_1a0f40b5534739673c975a1f95060e250e) | `function` | Declared here |
+| [`~SyncQueue`](#classicy_1_1SyncQueue_1aa8f7f1d0a54b0666cd89b894816a31f9) | `function` | Declared here |
+| [`push`](#classicy_1_1SyncQueue_1a88f3a96973c2a8224a7e1c73665218ab) | `function` | Declared here |
+| [`cancel`](#classicy_1_1SyncQueue_1a07c735c59351142dc72cee62ee4a6251) | `function` | Declared here |
+| [`sync`](#classicy_1_1SyncQueue_1a419df6e547b6789682e46c76a7c958f3) | `function` | Declared here |
+| [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](#queue) |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](#queue) |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](#queue) |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](#queue) |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](#queue) |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](#queue) |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](#queue) |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](#queue) |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](#queue) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`RunnableQueue`](#runnablequeue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6)  | The default dispatch function. Must be set before the queue is running. |
+| `variable` | [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32)  |  |
+| `variable` | [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903)  |  |
+| `variable` | [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949)  |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) `inline` |  |
+| `function` | [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) `virtual` `inline` |  |
+| `function` | [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
+| `function` | [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) `virtual` `inline` | Flush all outgoing items. |
+| `function` | [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) `inline` |  |
+| `function` | [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `function` | [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
+| `function` | [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) `virtual` `inline` | Dispatch a single item to listeners. |
+| `function` | [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) `inline` |  |
+| `function` | [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
+| `function` | [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) `const` `inline` |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de)  | Deleted assignment operator. |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10)  | Deleted assignment operator. |
+| `function` | [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) `virtual` `inline` | Pops the next waiting item. |
+| `function` | [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) `virtual` `inline` | Pops and dispatches the next waiting item. |
+
+### Inherited from [`Queue`](#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
 
 ### Public Methods
 
@@ -7362,6 +8176,10 @@ Pushes an item onto the queue and wakes the event loop for dispatch. Ownership o
 #### Parameters
 * `item` Heap-allocated item to enqueue; the queue takes ownership.
 
+##### Reimplements
+
+- [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2)
+
 ---
 
 {#cancel}
@@ -7379,6 +8197,10 @@ Defined in src/base/include/icy/queue.h:316
 Cancels the queue and its underlying synchronizer. 
 #### Parameters
 * `flag` True to cancel, false to un-cancel.
+
+##### Reimplements
+
+- [`cancel`](#cancel-1)
 
 ---
 
@@ -7457,6 +8279,105 @@ This queue is useful for deferring load from operation critical system devices b
 
 The thread will call the [RunnableQueue](#runnablequeue)'s [run()](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) method to constantly flush outgoing packets until [cancel()](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) is called.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Queue`](#classicy_1_1AsyncQueue_1a0efd9a7b5b236ed2b9f56ecdde9211a3) | `typedef` | Declared here |
+| [`_thread`](#classicy_1_1AsyncQueue_1a37705714f84f4951fa2befc5a4d070c8) | `variable` | Declared here |
+| [`AsyncQueue`](#classicy_1_1AsyncQueue_1a715382ae33e9191ff5fce23bf6880391) | `function` | Declared here |
+| [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) | `function` | Declared here |
+| [`~AsyncQueue`](#classicy_1_1AsyncQueue_1aa1523689e975842876d971d0083cccad) | `function` | Declared here |
+| [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](#queue) |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](#queue) |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](#queue) |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](#queue) |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](#queue) |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](#queue) |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](#queue) |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](#queue) |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](#queue) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`RunnableQueue`](#runnablequeue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6)  | The default dispatch function. Must be set before the queue is running. |
+| `variable` | [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32)  |  |
+| `variable` | [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903)  |  |
+| `variable` | [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949)  |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) `inline` |  |
+| `function` | [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) `virtual` `inline` |  |
+| `function` | [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
+| `function` | [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) `virtual` `inline` | Flush all outgoing items. |
+| `function` | [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) `inline` |  |
+| `function` | [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `function` | [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
+| `function` | [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) `virtual` `inline` | Dispatch a single item to listeners. |
+| `function` | [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) `inline` |  |
+| `function` | [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
+| `function` | [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) `const` `inline` |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de)  | Deleted assignment operator. |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10)  | Deleted assignment operator. |
+| `function` | [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) `virtual` `inline` | Pops the next waiting item. |
+| `function` | [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) `virtual` `inline` | Pops and dispatches the next waiting item. |
+
+### Inherited from [`Queue`](#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -7498,6 +8419,10 @@ Defined in src/base/include/icy/queue.h:361
 Cancels the queue and joins the dispatch thread. 
 #### Parameters
 * `flag` True to cancel, false to un-cancel.
+
+##### Reimplements
+
+- [`cancel`](#cancel-1)
 
 ### Protected Attributes
 
@@ -7552,6 +8477,75 @@ Defined in src/base/include/icy/timer.h:27
 > **Inherits:** [`Runner`](#runner)
 
 Asynchronous event based timer.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Timeout`](#classicy_1_1Timer_1a4ae45f01b9b2584360c4344c6c2c0af5) | `variable` | Declared here |
+| [`_handle`](#classicy_1_1Timer_1a7b7aa3aeffba0ab79b5f35495baa1433) | `variable` | Declared here |
+| [`_timeout`](#classicy_1_1Timer_1a0ef76d0675cf4d6ab4a36fc8da757991) | `variable` | Declared here |
+| [`_interval`](#classicy_1_1Timer_1ab0e11d36ab52c4b38bfd83d3c98cda66) | `variable` | Declared here |
+| [`_count`](#classicy_1_1Timer_1af167ef63ac2849ac8a7b8fba85943f5c) | `variable` | Declared here |
+| [`Timer`](#classicy_1_1Timer_1ad3080a14c5ee4ad341b5f6883fb1632e) | `function` | Declared here |
+| [`Timer`](#classicy_1_1Timer_1a14eba6a46583f6e65837e38431799c7d) | `function` | Declared here |
+| [`Timer`](#classicy_1_1Timer_1ae197347006f1e06ab5779e86b952807b) | `function` | Declared here |
+| [`~Timer`](#classicy_1_1Timer_1a3fb8072cb9fceafc19e2674988e10d33) | `function` | Declared here |
+| [`start`](#classicy_1_1Timer_1a59e3275d17107212520b362cbf0cb3d5) | `function` | Declared here |
+| [`start`](#classicy_1_1Timer_1a4a5052169986a9d1cf58a284fc365341) | `function` | Declared here |
+| [`stop`](#classicy_1_1Timer_1a01e4919d01d6c8a7e10e052a4f9485b5) | `function` | Declared here |
+| [`restart`](#classicy_1_1Timer_1a0336f464eb76220d5ccb8669e584abc3) | `function` | Declared here |
+| [`again`](#classicy_1_1Timer_1a1479aec7fadd9fdc71a41ed6a51af1c8) | `function` | Declared here |
+| [`setTimeout`](#classicy_1_1Timer_1a4a285ca7a761d69b8540efe57562bd1e) | `function` | Declared here |
+| [`setInterval`](#classicy_1_1Timer_1aa60ea4d6c3478167b90f01c6800706fb) | `function` | Declared here |
+| [`active`](#classicy_1_1Timer_1a982dbf32f72572a1bd755227193a9881) | `function` | Declared here |
+| [`timeout`](#classicy_1_1Timer_1af44b74ecd2ea30000d9719cec9b5226e) | `function` | Declared here |
+| [`interval`](#classicy_1_1Timer_1a2671daa1a1197cce3be431a8c8ef0920) | `function` | Declared here |
+| [`count`](#classicy_1_1Timer_1abc40895add36eaa749ad84e66cbb18e6) | `function` | Declared here |
+| [`handle`](#classicy_1_1Timer_1af0a9258339c3c4b001d92aebb12286ab) | `function` | Declared here |
+| [`async`](#classicy_1_1Timer_1a8796d561ee6363841b0289f68bc49899) | `function` | Declared here |
+| [`Timer`](#classicy_1_1Timer_1a849d1854d0ecc54c0689d4c12d83215b) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timer_1adf7154db8921db711c788f21c55e4274) | `function` | Declared here |
+| [`Timer`](#classicy_1_1Timer_1a9d218aefa2e0bde04dd6b199f8a8fca5) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timer_1ac09edc6ddbfd2706b6a8abddcfec43f2) | `function` | Declared here |
+| [`init`](#classicy_1_1Timer_1ac47c8707478822ea29c5a78445c4076f) | `function` | Declared here |
+| [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95) | `variable` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20) | `function` | Inherited from [`Runner`](#runner) |
+| [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) | `function` | Inherited from [`Runner`](#runner) |
+| [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) | `function` | Inherited from [`Runner`](#runner) |
+| [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) | `function` | Inherited from [`Runner`](#runner) |
+| [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) | `function` | Inherited from [`Runner`](#runner) |
+| [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092) | `function` | Inherited from [`Runner`](#runner) |
+| [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) | `function` | Inherited from [`Runner`](#runner) |
+| [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) | `function` | Inherited from [`Runner`](#runner) |
+| [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa) | `function` | Inherited from [`Runner`](#runner) |
+
+### Inherited from [`Runner`](#runner)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95)  | Shared pointer to the internal [Context](#context). |
+| `function` | [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20)  |  |
+| `function` | [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) `virtual` |  |
+| `function` | [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) `virtual` | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
+| `function` | [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) `const` | Returns true if the async context is currently running. |
+| `function` | [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)  | Signals the async context to stop at the earliest opportunity. |
+| `function` | [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) `const` | Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. |
+| `function` | [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) `const` | Returns true if the runner is in repeating mode. |
+| `function` | [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092)  | Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. |
+| `function` | [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `function` | [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) `const` | Returns the native thread ID of the thread running the async context. |
+| `function` | [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b)  | Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. |
+| `function` | [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb)  | Deleted assignment operator. |
+| `function` | [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa)  | Deleted assignment operator. |
 
 ### Public Attributes
 
@@ -7710,6 +8704,10 @@ Connect `func` to the `[Timeout](#timeout)` signal and start the timer.
 
 #### Parameters
 * `func` Callback invoked on each timeout event.
+
+##### Reimplements
+
+- [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)
 
 ---
 
@@ -7895,6 +8893,10 @@ Defined in src/base/include/icy/timer.h:127
 #### Returns
 `false`; the timer is event-loop-driven, not thread-based.
 
+##### Reimplements
+
+- [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07)
+
 ### Protected Attributes
 
 | Return | Name | Description |
@@ -8015,6 +9017,19 @@ class MutableBuffer
 Defined in src/base/include/icy/buffer.h:40
 
 The [MutableBuffer](#mutablebuffer) class provides a safe representation of a buffer that can be modified. It does not own the underlying data, and so is cheap to copy or assign.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_data`](#classicy_1_1MutableBuffer_1a2f5ab94972eaa835feffda4ea2a28a3d) | `variable` | Declared here |
+| [`_size`](#classicy_1_1MutableBuffer_1afaa9cf3a1b06b214a24b7446090bb9e7) | `variable` | Declared here |
+| [`MutableBuffer`](#classicy_1_1MutableBuffer_1a84449994b5a7e2d5f50a876a1e1eabed) | `function` | Declared here |
+| [`MutableBuffer`](#classicy_1_1MutableBuffer_1a2b37dfae497187479ee062ac7f28bd3e) | `function` | Declared here |
+| [`data`](#classicy_1_1MutableBuffer_1a21080770186a23db05f1912217b9187c) | `function` | Declared here |
+| [`size`](#classicy_1_1MutableBuffer_1a8b603c89bc19fb96023131963e40611b) | `function` | Declared here |
+| [`cstr`](#classicy_1_1MutableBuffer_1ad65d5ffd32dae64bc604ecf8f71aab41) | `function` | Declared here |
+| [`str`](#classicy_1_1MutableBuffer_1aacd75aa1e3397dcdb09a629b5fc36790) | `function` | Declared here |
 
 ### Public Methods
 
@@ -8165,6 +9180,20 @@ class ConstBuffer
 Defined in src/base/include/icy/buffer.h:142
 
 The [ConstBuffer](#constbuffer) class provides a safe representation of a buffer that cannot be modified. It does not own the underlying data, and so is cheap to copy or assign.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_data`](#classicy_1_1ConstBuffer_1aefc03658978c1c98c51a8a50d535b484) | `variable` | Declared here |
+| [`_size`](#classicy_1_1ConstBuffer_1ad61041d8907ff1da8caadad3a0bdbea4) | `variable` | Declared here |
+| [`ConstBuffer`](#classicy_1_1ConstBuffer_1a1ccec7e1c7e07988e1e85b934260d8b1) | `function` | Declared here |
+| [`ConstBuffer`](#classicy_1_1ConstBuffer_1aba74ae2106de61e0799b3a7cca7dda73) | `function` | Declared here |
+| [`ConstBuffer`](#classicy_1_1ConstBuffer_1a1246b48662fabab86c31b38cdaa6a73d) | `function` | Declared here |
+| [`data`](#classicy_1_1ConstBuffer_1a60c3415b1e3090244065947af029401a) | `function` | Declared here |
+| [`size`](#classicy_1_1ConstBuffer_1ae0ac31b194cedd9e7c10876a0e502795) | `function` | Declared here |
+| [`cstr`](#classicy_1_1ConstBuffer_1aa5ad9a3d2d943dad141d1d8fb5b4aa1b) | `function` | Declared here |
+| [`str`](#classicy_1_1ConstBuffer_1a269882e32f4f34e9c9d04592cfb337f4) | `function` | Declared here |
 
 ### Public Methods
 
@@ -8332,6 +9361,51 @@ class BitReader
 Defined in src/base/include/icy/buffer.h:273
 
 Class for reading binary streams.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_position`](#classicy_1_1BitReader_1ab3bf130f15e10dec980ac7be24a23daf) | `variable` | Declared here |
+| [`_limit`](#classicy_1_1BitReader_1af06b93b5cd74dbda5840eac8d428ed51) | `variable` | Declared here |
+| [`_order`](#classicy_1_1BitReader_1a6d096fd970292590154ab738b5024ba5) | `variable` | Declared here |
+| [`_bytes`](#classicy_1_1BitReader_1a067b69c87b286cbe1500f627b10a65d5) | `variable` | Declared here |
+| [`BitReader`](#classicy_1_1BitReader_1a09bd88f89a4f42877d3c42652acb24a0) | `function` | Declared here |
+| [`BitReader`](#classicy_1_1BitReader_1a0a0a6f0716ae12185f50d2aa09fb9bd6) | `function` | Declared here |
+| [`BitReader`](#classicy_1_1BitReader_1ab4dbf4bbb1ba6a7c1d42f79b9e646609) | `function` | Declared here |
+| [`~BitReader`](#classicy_1_1BitReader_1adac747bd828cef97daf3bfa93cb5173a) | `function` | Declared here |
+| [`get`](#classicy_1_1BitReader_1a34b03f00c565dd3d6e12b9054d50e7e6) | `function` | Declared here |
+| [`get`](#classicy_1_1BitReader_1ab1c426cb5a09c930516c1903e2174391) | `function` | Declared here |
+| [`getU8`](#classicy_1_1BitReader_1a572c821d6c16da3835d55196a67f9d80) | `function` | Declared here |
+| [`getU16`](#classicy_1_1BitReader_1af6e29c4242845404106bdb92aeda39ae) | `function` | Declared here |
+| [`getU24`](#classicy_1_1BitReader_1a44bba14a0b9b11b01cd8368bb9063de0) | `function` | Declared here |
+| [`getU32`](#classicy_1_1BitReader_1aa8f29e197ba5ec7c865c03ac89c525e5) | `function` | Declared here |
+| [`getU64`](#classicy_1_1BitReader_1a2feacac2c7603595fd574cdf6b1d0382) | `function` | Declared here |
+| [`peek`](#classicy_1_1BitReader_1a99e50753215e6515befa598a2be55e5c) | `function` | Declared here |
+| [`peekU8`](#classicy_1_1BitReader_1aeda42b50837dcb9916a09fa32a5f9f61) | `function` | Declared here |
+| [`peekU16`](#classicy_1_1BitReader_1a72fa1347726189274d949f664937fff0) | `function` | Declared here |
+| [`peekU24`](#classicy_1_1BitReader_1a40f3d3e1d543cd082df4e17d2eae07ca) | `function` | Declared here |
+| [`peekU32`](#classicy_1_1BitReader_1a76848e73bd7a5877eb00fbeef09750a6) | `function` | Declared here |
+| [`peekU64`](#classicy_1_1BitReader_1aede1c854b19c7532efe7cb3d4e685cf3) | `function` | Declared here |
+| [`skipToChar`](#classicy_1_1BitReader_1a05809062715a3f4a5875755835164f2b) | `function` | Declared here |
+| [`skipWhitespace`](#classicy_1_1BitReader_1a6b6f88c6fb9ef42bce837e823742cd94) | `function` | Declared here |
+| [`skipToNextLine`](#classicy_1_1BitReader_1aa5dd0836be4ab030a49b3b73331a1fd6) | `function` | Declared here |
+| [`skipNextWord`](#classicy_1_1BitReader_1ae0db6ef7404a8e6c8e272caf319e4b6b) | `function` | Declared here |
+| [`readNextWord`](#classicy_1_1BitReader_1a5ce8f44063eda8e1afe2d7f789328b43) | `function` | Declared here |
+| [`readNextNumber`](#classicy_1_1BitReader_1a738673c41f35adc8869e6ebd4c9ec7a6) | `function` | Declared here |
+| [`readLine`](#classicy_1_1BitReader_1ab02389251c08f176fe5aa4a181bf00ea) | `function` | Declared here |
+| [`readToNext`](#classicy_1_1BitReader_1a310c851d77d2257e0a289d3a37993fd7) | `function` | Declared here |
+| [`seek`](#classicy_1_1BitReader_1a0e7838d6ea60f04e4a8e5ef5f1d82b0c) | `function` | Declared here |
+| [`skip`](#classicy_1_1BitReader_1a71bc3b8364071fbbe6998c17b6c29dd1) | `function` | Declared here |
+| [`limit`](#classicy_1_1BitReader_1af2fb1f253a165030eda0c731aa208df2) | `function` | Declared here |
+| [`position`](#classicy_1_1BitReader_1a5c7b848d478d41acdb4300da6ee90cff) | `function` | Declared here |
+| [`available`](#classicy_1_1BitReader_1aa1c309be4b8742ef4c8a45f393c1632c) | `function` | Declared here |
+| [`begin`](#classicy_1_1BitReader_1a054d82ff88ba891ad9eddf212398b1d3) | `function` | Declared here |
+| [`current`](#classicy_1_1BitReader_1a93d6b7acbc8e3343926994231c68f2fc) | `function` | Declared here |
+| [`order`](#classicy_1_1BitReader_1afe4792d43e861d7ac9b09e8ab1b012e0) | `function` | Declared here |
+| [`toString`](#classicy_1_1BitReader_1af35f4ed4a7732620d21798bc0d969af8) | `function` | Declared here |
+| [`operator<<`](#classicy_1_1BitReader_1a6a0e7ee7982b9a58c6144c5c6da1d2e0) | `friend` | Declared here |
+| [`init`](#classicy_1_1BitReader_1a2381ddb4afaa1419e84fe0642b52f268) | `function` | Declared here |
 
 ### Friends
 
@@ -9037,6 +10111,46 @@ Class for reading/writing binary streams.
 
 Note that when using the constructor with the [Buffer](#buffer-2) reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_position`](#classicy_1_1BitWriter_1af7aeb709f7ef74ac64dd014e8408759e) | `variable` | Declared here |
+| [`_limit`](#classicy_1_1BitWriter_1afb4f785c1ca9a016cc2d3b381ff8b727) | `variable` | Declared here |
+| [`_order`](#classicy_1_1BitWriter_1a7d6241e0215dd086db818bf7bcc226b9) | `variable` | Declared here |
+| [`_bytes`](#classicy_1_1BitWriter_1a586fb4627015a66db7b7023c6537417f) | `variable` | Declared here |
+| [`BitWriter`](#classicy_1_1BitWriter_1a87af8b9e663f46d3c43bd77b7bd1f1c9) | `function` | Declared here |
+| [`BitWriter`](#classicy_1_1BitWriter_1a81201c53c9a5257322b69837b401d9a0) | `function` | Declared here |
+| [`BitWriter`](#classicy_1_1BitWriter_1ade227e0aa76380698d4e5dbaaf4fc758) | `function` | Declared here |
+| [`~BitWriter`](#classicy_1_1BitWriter_1ac5d60818741714d86e99f86fd093cca0) | `function` | Declared here |
+| [`put`](#classicy_1_1BitWriter_1a631a0b0870125dcaf6bbec30febe44c7) | `function` | Declared here |
+| [`put`](#classicy_1_1BitWriter_1aa2363b45fb79eece6251ef2dbbad21f7) | `function` | Declared here |
+| [`putU8`](#classicy_1_1BitWriter_1af67660d5a59e92fb364ee6a874804686) | `function` | Declared here |
+| [`putU16`](#classicy_1_1BitWriter_1aea643234ec2bc0bc7cdf80d0b8e4277f) | `function` | Declared here |
+| [`putU24`](#classicy_1_1BitWriter_1a693df1a8c5f2388fc971e33d9b5e2710) | `function` | Declared here |
+| [`putU32`](#classicy_1_1BitWriter_1a98e07fa2588d1ad47b1b28f247c17c3b) | `function` | Declared here |
+| [`putU64`](#classicy_1_1BitWriter_1a14529112bdff14aab40da6a18bc0d62c) | `function` | Declared here |
+| [`update`](#classicy_1_1BitWriter_1a65417b95e9d526c68b5a2b782ef48d90) | `function` | Declared here |
+| [`update`](#classicy_1_1BitWriter_1afce3f1e091855ef18c34e1e88c177d96) | `function` | Declared here |
+| [`updateU8`](#classicy_1_1BitWriter_1a7d714e3b017901697bebd455260c973a) | `function` | Declared here |
+| [`updateU16`](#classicy_1_1BitWriter_1a4f6b946ce9d9e1371aec5af1e302233a) | `function` | Declared here |
+| [`updateU24`](#classicy_1_1BitWriter_1a4a7aabdae7a7790f6907418d5d51794f) | `function` | Declared here |
+| [`updateU32`](#classicy_1_1BitWriter_1a3a542e68e13756ac6cfb502efd9d5e2d) | `function` | Declared here |
+| [`updateU64`](#classicy_1_1BitWriter_1a4c265a1ad388cb0a99b03a12d654c9c8) | `function` | Declared here |
+| [`seek`](#classicy_1_1BitWriter_1a7c161ca4afb1e460978fbe0eb15e1b71) | `function` | Declared here |
+| [`skip`](#classicy_1_1BitWriter_1ab5a5b1f01b4b082bae360065ac462a74) | `function` | Declared here |
+| [`limit`](#classicy_1_1BitWriter_1a80a787f5cc5011d04645a2cf2ec7ae4f) | `function` | Declared here |
+| [`position`](#classicy_1_1BitWriter_1a8d3cbea57dc631a49dd7a02ccb0a3463) | `function` | Declared here |
+| [`available`](#classicy_1_1BitWriter_1a6a9b8afefb6caaf2d6a42f86566efb9f) | `function` | Declared here |
+| [`begin`](#classicy_1_1BitWriter_1a9e121a24036945c77a4bb1058a4d5753) | `function` | Declared here |
+| [`current`](#classicy_1_1BitWriter_1a64878225d5fd54d4b08b232cecfd302a) | `function` | Declared here |
+| [`begin`](#classicy_1_1BitWriter_1ad255aa48e20dae48c85e9e4878735465) | `function` | Declared here |
+| [`current`](#classicy_1_1BitWriter_1a697de7040fdc0a7179ae4b52129ea8b5) | `function` | Declared here |
+| [`order`](#classicy_1_1BitWriter_1aaa821c269e2977c46c0868d5a7b2125e) | `function` | Declared here |
+| [`toString`](#classicy_1_1BitWriter_1abc487d6169e99b61b6c97a92c00f9408) | `function` | Declared here |
+| [`operator<<`](#classicy_1_1BitWriter_1a4b9f432921c04e075123a2916a1158dc) | `friend` | Declared here |
+| [`init`](#classicy_1_1BitWriter_1a3a21be2d100a86a2bc3de56b7dd22593) | `function` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -9162,6 +10276,10 @@ Defined in src/base/include/icy/buffer.h:473
 
 Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit.
 
+##### Reimplemented by
+
+- [`put`](#classicy_1_1DynamicBitWriter_1aa5f9606ec055af5ed23061d9ae9ef6d8)
+
 ---
 
 {#put}
@@ -9273,6 +10391,10 @@ virtual bool update(const char * val, size_t len, size_t pos)
 Defined in src/base/include/icy/buffer.h:500
 
 Update a byte range. Throws a `std::out_of_range` exception if reading past the limit.
+
+##### Reimplemented by
+
+- [`update`](#classicy_1_1DynamicBitWriter_1ab26a61271e68ca72c93d3c854fd55172)
 
 ---
 
@@ -9669,6 +10791,93 @@ Class for reading/writing dynamically resizable binary streams.
 
 Note that when using the constructor with the [Buffer](#buffer-2) reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_buffer`](#classicy_1_1DynamicBitWriter_1a28662bda246cac2f5338a6085f1a58dc) | `variable` | Declared here |
+| [`_offset`](#classicy_1_1DynamicBitWriter_1a259142fd403b4a51f944f0cd37282880) | `variable` | Declared here |
+| [`DynamicBitWriter`](#classicy_1_1DynamicBitWriter_1a42c5c5a8c62aaac5b5d9d784a2d8754e) | `function` | Declared here |
+| [`DynamicBitWriter`](#classicy_1_1DynamicBitWriter_1aa97a7fab42aa3d850308303b8ee018a9) | `function` | Declared here |
+| [`~DynamicBitWriter`](#classicy_1_1DynamicBitWriter_1a1e82f970cc1c954db590f12bcd9cf551) | `function` | Declared here |
+| [`put`](#classicy_1_1DynamicBitWriter_1aa5f9606ec055af5ed23061d9ae9ef6d8) | `function` | Declared here |
+| [`update`](#classicy_1_1DynamicBitWriter_1ab26a61271e68ca72c93d3c854fd55172) | `function` | Declared here |
+| [`_position`](#classicy_1_1BitWriter_1af7aeb709f7ef74ac64dd014e8408759e) | `variable` | Inherited from [`BitWriter`](#bitwriter) |
+| [`_limit`](#classicy_1_1BitWriter_1afb4f785c1ca9a016cc2d3b381ff8b727) | `variable` | Inherited from [`BitWriter`](#bitwriter) |
+| [`_order`](#classicy_1_1BitWriter_1a7d6241e0215dd086db818bf7bcc226b9) | `variable` | Inherited from [`BitWriter`](#bitwriter) |
+| [`_bytes`](#classicy_1_1BitWriter_1a586fb4627015a66db7b7023c6537417f) | `variable` | Inherited from [`BitWriter`](#bitwriter) |
+| [`BitWriter`](#classicy_1_1BitWriter_1a87af8b9e663f46d3c43bd77b7bd1f1c9) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`BitWriter`](#classicy_1_1BitWriter_1a81201c53c9a5257322b69837b401d9a0) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`BitWriter`](#classicy_1_1BitWriter_1ade227e0aa76380698d4e5dbaaf4fc758) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`~BitWriter`](#classicy_1_1BitWriter_1ac5d60818741714d86e99f86fd093cca0) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`put`](#classicy_1_1BitWriter_1a631a0b0870125dcaf6bbec30febe44c7) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`put`](#classicy_1_1BitWriter_1aa2363b45fb79eece6251ef2dbbad21f7) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`putU8`](#classicy_1_1BitWriter_1af67660d5a59e92fb364ee6a874804686) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`putU16`](#classicy_1_1BitWriter_1aea643234ec2bc0bc7cdf80d0b8e4277f) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`putU24`](#classicy_1_1BitWriter_1a693df1a8c5f2388fc971e33d9b5e2710) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`putU32`](#classicy_1_1BitWriter_1a98e07fa2588d1ad47b1b28f247c17c3b) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`putU64`](#classicy_1_1BitWriter_1a14529112bdff14aab40da6a18bc0d62c) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`update`](#classicy_1_1BitWriter_1a65417b95e9d526c68b5a2b782ef48d90) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`update`](#classicy_1_1BitWriter_1afce3f1e091855ef18c34e1e88c177d96) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`updateU8`](#classicy_1_1BitWriter_1a7d714e3b017901697bebd455260c973a) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`updateU16`](#classicy_1_1BitWriter_1a4f6b946ce9d9e1371aec5af1e302233a) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`updateU24`](#classicy_1_1BitWriter_1a4a7aabdae7a7790f6907418d5d51794f) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`updateU32`](#classicy_1_1BitWriter_1a3a542e68e13756ac6cfb502efd9d5e2d) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`updateU64`](#classicy_1_1BitWriter_1a4c265a1ad388cb0a99b03a12d654c9c8) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`seek`](#classicy_1_1BitWriter_1a7c161ca4afb1e460978fbe0eb15e1b71) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`skip`](#classicy_1_1BitWriter_1ab5a5b1f01b4b082bae360065ac462a74) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`limit`](#classicy_1_1BitWriter_1a80a787f5cc5011d04645a2cf2ec7ae4f) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`position`](#classicy_1_1BitWriter_1a8d3cbea57dc631a49dd7a02ccb0a3463) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`available`](#classicy_1_1BitWriter_1a6a9b8afefb6caaf2d6a42f86566efb9f) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`begin`](#classicy_1_1BitWriter_1a9e121a24036945c77a4bb1058a4d5753) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`current`](#classicy_1_1BitWriter_1a64878225d5fd54d4b08b232cecfd302a) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`begin`](#classicy_1_1BitWriter_1ad255aa48e20dae48c85e9e4878735465) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`current`](#classicy_1_1BitWriter_1a697de7040fdc0a7179ae4b52129ea8b5) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`order`](#classicy_1_1BitWriter_1aaa821c269e2977c46c0868d5a7b2125e) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`toString`](#classicy_1_1BitWriter_1abc487d6169e99b61b6c97a92c00f9408) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+| [`operator<<`](#classicy_1_1BitWriter_1a4b9f432921c04e075123a2916a1158dc) | `friend` | Inherited from [`BitWriter`](#bitwriter) |
+| [`init`](#classicy_1_1BitWriter_1a3a21be2d100a86a2bc3de56b7dd22593) | `function` | Inherited from [`BitWriter`](#bitwriter) |
+
+### Inherited from [`BitWriter`](#bitwriter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_position`](#classicy_1_1BitWriter_1af7aeb709f7ef74ac64dd014e8408759e)  |  |
+| `variable` | [`_limit`](#classicy_1_1BitWriter_1afb4f785c1ca9a016cc2d3b381ff8b727)  |  |
+| `variable` | [`_order`](#classicy_1_1BitWriter_1a7d6241e0215dd086db818bf7bcc226b9)  |  |
+| `variable` | [`_bytes`](#classicy_1_1BitWriter_1a586fb4627015a66db7b7023c6537417f)  |  |
+| `function` | [`BitWriter`](#classicy_1_1BitWriter_1a87af8b9e663f46d3c43bd77b7bd1f1c9)  | Constructs a `[BitWriter](#bitwriter)` over a raw byte array with a fixed capacity. |
+| `function` | [`BitWriter`](#classicy_1_1BitWriter_1a81201c53c9a5257322b69837b401d9a0)  | Constructs a `[BitWriter](#bitwriter)` backed by a `[Buffer](#buffer-2)`. Writes are bounded by the buffer's capacity; use `[DynamicBitWriter](#dynamicbitwriter)` for auto-resize. |
+| `function` | [`BitWriter`](#classicy_1_1BitWriter_1ade227e0aa76380698d4e5dbaaf4fc758)  | Constructs a `[BitWriter](#bitwriter)` over a `[MutableBuffer](#mutablebuffer)` with a fixed capacity. |
+| `function` | [`~BitWriter`](#classicy_1_1BitWriter_1ac5d60818741714d86e99f86fd093cca0) `virtual` |  |
+| `function` | [`put`](#classicy_1_1BitWriter_1a631a0b0870125dcaf6bbec30febe44c7) `virtual` | Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit. |
+| `function` | [`put`](#classicy_1_1BitWriter_1aa2363b45fb79eece6251ef2dbbad21f7)  | Appends the contents of a string. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`putU8`](#classicy_1_1BitWriter_1af67660d5a59e92fb364ee6a874804686)  | Appends an unsigned 8-bit integer. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`putU16`](#classicy_1_1BitWriter_1aea643234ec2bc0bc7cdf80d0b8e4277f)  | Appends an unsigned 16-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`putU24`](#classicy_1_1BitWriter_1a693df1a8c5f2388fc971e33d9b5e2710)  | Appends the low 24 bits of a 32-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`putU32`](#classicy_1_1BitWriter_1a98e07fa2588d1ad47b1b28f247c17c3b)  | Appends an unsigned 32-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`putU64`](#classicy_1_1BitWriter_1a14529112bdff14aab40da6a18bc0d62c)  | Appends an unsigned 64-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. |
+| `function` | [`update`](#classicy_1_1BitWriter_1a65417b95e9d526c68b5a2b782ef48d90) `virtual` | Update a byte range. Throws a `std::out_of_range` exception if reading past the limit. |
+| `function` | [`update`](#classicy_1_1BitWriter_1afce3f1e091855ef18c34e1e88c177d96)  | Overwrites a previously written string at the given absolute position. |
+| `function` | [`updateU8`](#classicy_1_1BitWriter_1a7d714e3b017901697bebd455260c973a)  | Overwrites a `uint8_t` at the given absolute position. |
+| `function` | [`updateU16`](#classicy_1_1BitWriter_1a4f6b946ce9d9e1371aec5af1e302233a)  | Overwrites a `uint16_t` at the given absolute position, with byte-order conversion. |
+| `function` | [`updateU24`](#classicy_1_1BitWriter_1a4a7aabdae7a7790f6907418d5d51794f)  | Overwrites 3 bytes (low 24 bits of `val`) at the given absolute position, with byte-order conversion. |
+| `function` | [`updateU32`](#classicy_1_1BitWriter_1a3a542e68e13756ac6cfb502efd9d5e2d)  | Overwrites a `uint32_t` at the given absolute position, with byte-order conversion. |
+| `function` | [`updateU64`](#classicy_1_1BitWriter_1a4c265a1ad388cb0a99b03a12d654c9c8)  | Overwrites a `uint64_t` at the given absolute position, with byte-order conversion. |
+| `function` | [`seek`](#classicy_1_1BitWriter_1a7c161ca4afb1e460978fbe0eb15e1b71)  | Set position pointer to absolute position. Throws a `std::out_of_range` exception if the value exceeds the limit. |
+| `function` | [`skip`](#classicy_1_1BitWriter_1ab5a5b1f01b4b082bae360065ac462a74)  | Set position pointer to relative position. Throws a `std::out_of_range` exception if the value exceeds the limit. |
+| `function` | [`limit`](#classicy_1_1BitWriter_1a80a787f5cc5011d04645a2cf2ec7ae4f) `const` `nodiscard` | Returns the write limit. |
+| `function` | [`position`](#classicy_1_1BitWriter_1a8d3cbea57dc631a49dd7a02ccb0a3463) `const` `inline` `nodiscard` | Returns the current write position. |
+| `function` | [`available`](#classicy_1_1BitWriter_1a6a9b8afefb6caaf2d6a42f86566efb9f) `const` `nodiscard` | Returns the number of elements between the current write position and the limit. |
+| `function` | [`begin`](#classicy_1_1BitWriter_1a9e121a24036945c77a4bb1058a4d5753) `inline` `nodiscard` | Returns a pointer to the start of the write buffer. |
+| `function` | [`current`](#classicy_1_1BitWriter_1a64878225d5fd54d4b08b232cecfd302a) `inline` `nodiscard` | Returns a pointer to the current write position. |
+| `function` | [`begin`](#classicy_1_1BitWriter_1ad255aa48e20dae48c85e9e4878735465) `const` `inline` `nodiscard` | Returns a const pointer to the start of the write buffer. |
+| `function` | [`current`](#classicy_1_1BitWriter_1a697de7040fdc0a7179ae4b52129ea8b5) `const` `inline` `nodiscard` | Returns a const pointer to the current write position. |
+| `function` | [`order`](#classicy_1_1BitWriter_1aaa821c269e2977c46c0868d5a7b2125e) `const` `inline` | Returns the byte order used for multi-byte integer writes. |
+| `function` | [`toString`](#classicy_1_1BitWriter_1abc487d6169e99b61b6c97a92c00f9408)  | Returns all bytes written so far as a `std::string`. |
+| `friend` | [`operator<<`](#classicy_1_1BitWriter_1a4b9f432921c04e075123a2916a1158dc) `inline` |  |
+| `function` | [`init`](#classicy_1_1BitWriter_1a3a21be2d100a86a2bc3de56b7dd22593) `virtual` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -9732,6 +10941,10 @@ Defined in src/base/include/icy/buffer.h:614
 
 Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit.
 
+##### Reimplements
+
+- [`put`](#classicy_1_1BitWriter_1a631a0b0870125dcaf6bbec30febe44c7)
+
 ---
 
 {#update}
@@ -9747,6 +10960,10 @@ virtual bool update(const char * val, size_t len, size_t pos) override
 Defined in src/base/include/icy/buffer.h:618
 
 Update a byte range. Throws a `std::out_of_range` exception if reading past the limit.
+
+##### Reimplements
+
+- [`update`](#classicy_1_1BitWriter_1a65417b95e9d526c68b5a2b782ef48d90)
 
 ### Protected Attributes
 
@@ -9797,6 +11014,14 @@ Defined in src/base/include/icy/logger.h:104
 
 Log output stream writer.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`LogWriter`](#classicy_1_1LogWriter_1accc43567fb47d704673de174ce2cf2bf) | `function` | Declared here |
+| [`~LogWriter`](#classicy_1_1LogWriter_1a0a73ccdba29fda983bdfa64a8db50aab) | `function` | Declared here |
+| [`write`](#classicy_1_1LogWriter_1a2da398eb96662ff6982bb76acdf0e80e) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -9832,6 +11057,10 @@ Defined in src/base/include/icy/logger.h:111
 
 Writes the given log message stream.
 
+##### Reimplemented by
+
+- [`write`](#classicy_1_1AsyncLogWriter_1a3a96e82cb5fe0cee6aa5bc4148af15af)
+
 {#asynclogwriter}
 
 ## AsyncLogWriter
@@ -9849,6 +11078,47 @@ Defined in src/base/include/icy/logger.h:121
 > **Inherits:** [`LogWriter`](#logwriter), [`Runnable`](#runnable)
 
 [Thread](#thread) based log output stream writer.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_thread`](#classicy_1_1AsyncLogWriter_1a3bda109582fea962527c7856e2a1d211) | `variable` | Declared here |
+| [`_pending`](#classicy_1_1AsyncLogWriter_1ab9935227a915e04b6b21e0dddff42eb5) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1AsyncLogWriter_1a1f08f7dc3a167ed41e7d205743bccde3) | `variable` | Declared here |
+| [`AsyncLogWriter`](#classicy_1_1AsyncLogWriter_1a900ec1d522406c2ff0f1d1e8f9ed8399) | `function` | Declared here |
+| [`~AsyncLogWriter`](#classicy_1_1AsyncLogWriter_1a1815fe18f201c85d0fdaeee5b4099c68) | `function` | Declared here |
+| [`write`](#classicy_1_1AsyncLogWriter_1a3a96e82cb5fe0cee6aa5bc4148af15af) | `function` | Declared here |
+| [`flush`](#classicy_1_1AsyncLogWriter_1ac0bc1bab98177334605cb9c3dd89f9ae) | `function` | Declared here |
+| [`run`](#classicy_1_1AsyncLogWriter_1a9e1bdd7f94dc5b8eb302efc7a32adc7c) | `function` | Declared here |
+| [`clear`](#classicy_1_1AsyncLogWriter_1a195fdcc864f140422ef008d0851dd0f2) | `function` | Declared here |
+| [`writeNext`](#classicy_1_1AsyncLogWriter_1a53fd9b38e664825ab6a669287aa6cbc1) | `function` | Declared here |
+| [`LogWriter`](#classicy_1_1LogWriter_1accc43567fb47d704673de174ce2cf2bf) | `function` | Inherited from [`LogWriter`](#logwriter) |
+| [`~LogWriter`](#classicy_1_1LogWriter_1a0a73ccdba29fda983bdfa64a8db50aab) | `function` | Inherited from [`LogWriter`](#logwriter) |
+| [`write`](#classicy_1_1LogWriter_1a2da398eb96662ff6982bb76acdf0e80e) | `function` | Inherited from [`LogWriter`](#logwriter) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`LogWriter`](#logwriter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`LogWriter`](#classicy_1_1LogWriter_1accc43567fb47d704673de174ce2cf2bf)  |  |
+| `function` | [`~LogWriter`](#classicy_1_1LogWriter_1a0a73ccdba29fda983bdfa64a8db50aab) `virtual` |  |
+| `function` | [`write`](#classicy_1_1LogWriter_1a2da398eb96662ff6982bb76acdf0e80e) `virtual` | Writes the given log message stream. |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
 
 ### Public Methods
 
@@ -9888,6 +11158,10 @@ Defined in src/base/include/icy/logger.h:129
 
 Queues the given log message stream.
 
+##### Reimplements
+
+- [`write`](#classicy_1_1LogWriter_1a2da398eb96662ff6982bb76acdf0e80e)
+
 ---
 
 {#flush}
@@ -9917,6 +11191,10 @@ virtual void run() override
 Defined in src/base/include/icy/logger.h:135
 
 Writes queued messages asynchronously.
+
+##### Reimplements
+
+- [`run`](#run-4)
 
 ---
 
@@ -10009,6 +11287,35 @@ class Logger
 Defined in src/base/include/icy/logger.h:155
 
 [Logger](#logger) class.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`LogChannelMap`](#classicy_1_1Logger_1abbed1b24d500813c2a6211fe0d54ec11) | `typedef` | Declared here |
+| [`Singleton< Logger >`](#classicy_1_1Logger_1a3fbf5cac625e943ed92902c08b7858cd) | `friend` | Declared here |
+| [`Thread`](#classicy_1_1Logger_1adbc148eaddd341d7ae4d07c9e9e33bfd) | `friend` | Declared here |
+| [`_mutex`](#classicy_1_1Logger_1adab874af8b158068036f46d6020ece69) | `variable` | Declared here |
+| [`_channels`](#classicy_1_1Logger_1a371f7af5d9f51f6a9f16ca1ac379f18b) | `variable` | Declared here |
+| [`_defaultChannel`](#classicy_1_1Logger_1a5cc2ca74fff5460b2b6be717b79b3fe3) | `variable` | Declared here |
+| [`_writer`](#classicy_1_1Logger_1af7ed3778fda2a1cda8bc4e40e5c03879) | `variable` | Declared here |
+| [`Logger`](#classicy_1_1Logger_1a05ba6b2118be9c29aa35fb01bee2e0cc) | `function` | Declared here |
+| [`~Logger`](#classicy_1_1Logger_1a8fb19332cd1d73378625043d7263465b) | `function` | Declared here |
+| [`add`](#classicy_1_1Logger_1afe2c83da3690b33b03becdb30bd9db4f) | `function` | Declared here |
+| [`remove`](#classicy_1_1Logger_1a74a15168e7c4344d20d1e9c67836ea27) | `function` | Declared here |
+| [`get`](#classicy_1_1Logger_1a4fae9ae3e2c92c9303a15f4dae02eb31) | `function` | Declared here |
+| [`setDefault`](#classicy_1_1Logger_1ada133a7ad299af0bae51f1145dcec04a) | `function` | Declared here |
+| [`setWriter`](#classicy_1_1Logger_1a7c41b73cf911d2f9eca496e04771df75) | `function` | Declared here |
+| [`getDefault`](#classicy_1_1Logger_1a478e2e0b3d05230f549d390453bbc9b2) | `function` | Declared here |
+| [`write`](#classicy_1_1Logger_1a6cee938be29e19bafd29f50b4d9c9ba6) | `function` | Declared here |
+| [`write`](#classicy_1_1Logger_1af2ef47c604b058477b3c308ffc81b677) | `function` | Declared here |
+| [`instance`](#classicy_1_1Logger_1a096786eab5309b7c7787b154cef9d13a) | `function` | Declared here |
+| [`setInstance`](#classicy_1_1Logger_1ad7e9dc4d88139b1cb5490cc6c1919d98) | `function` | Declared here |
+| [`destroy`](#classicy_1_1Logger_1a249657e1ce9304d8d79c3210064adcb5) | `function` | Declared here |
+| [`Logger`](#classicy_1_1Logger_1a9df520b1c8892592249ce6ee1b6ade62) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Logger_1a429bb0b65e545124a7937e4a5405304a) | `function` | Declared here |
+| [`Logger`](#classicy_1_1Logger_1af7082ffa1bbbbfaaa6b0869be43db5a8) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Logger_1a03f206d977f4c28d6bb1bccd73753f80) | `function` | Declared here |
 
 ### Friends
 
@@ -10349,6 +11656,26 @@ Defined in src/base/include/icy/logger.h:346
 
 Named log output channel with configurable severity level and formatting.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d) | `variable` | Declared here |
+| [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8) | `variable` | Declared here |
+| [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab) | `variable` | Declared here |
+| [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439) | `variable` | Declared here |
+| [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f) | `function` | Declared here |
+| [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) | `function` | Declared here |
+| [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) | `function` | Declared here |
+| [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) | `function` | Declared here |
+| [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) | `function` | Declared here |
+| [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) | `function` | Declared here |
+| [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) | `function` | Declared here |
+| [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) | `function` | Declared here |
+| [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) | `function` | Declared here |
+| [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) | `function` | Declared here |
+| [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -10400,6 +11727,12 @@ Defined in src/base/include/icy/logger.h:358
 Writes a log stream entry to this channel. 
 #### Parameters
 * `stream` The log stream to write.
+
+##### Reimplemented by
+
+- [`write`](#classicy_1_1ConsoleChannel_1a5a4a42a9721812600d6fc0235b1b26df)
+- [`write`](#classicy_1_1FileChannel_1a2d9300f3444f0ff3b3eb67411bc62089)
+- [`write`](#classicy_1_1RotatingFileChannel_1a645044eac89455f3f234e2eafd8afaff)
 
 ---
 
@@ -10620,6 +11953,49 @@ Defined in src/base/include/icy/logger.h:414
 
 Log channel that writes formatted messages to standard output.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ConsoleChannel`](#classicy_1_1ConsoleChannel_1a2b23a6281c05e23ea3c07497b87a620a) | `function` | Declared here |
+| [`~ConsoleChannel`](#classicy_1_1ConsoleChannel_1a7b77088a0c0229b3562c1e1617b918f9) | `function` | Declared here |
+| [`write`](#classicy_1_1ConsoleChannel_1a5a4a42a9721812600d6fc0235b1b26df) | `function` | Declared here |
+| [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) | `function` | Inherited from [`LogChannel`](#logchannel) |
+
+### Inherited from [`LogChannel`](#logchannel)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d)  |  |
+| `variable` | [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8)  |  |
+| `variable` | [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab)  |  |
+| `variable` | [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439)  |  |
+| `function` | [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f)  |  |
+| `function` | [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) `virtual` | Defaulted destructor. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) `virtual` | Writes a log stream entry to this channel. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) `virtual` | Writes a plain message to this channel. |
+| `function` | [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) `virtual` | Formats a log stream entry into the given output stream. |
+| `function` | [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) `const` `inline` | Returns the channel name. |
+| `function` | [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) `const` `inline` | Returns the minimum severity level. |
+| `function` | [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) `const` `inline` | Returns the timestamp format string. |
+| `function` | [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) `inline` | Sets the minimum severity level. |
+| `function` | [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) `inline` | Sets the timestamp format string. |
+| `function` | [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) `inline` | Sets a realm filter; only messages whose realm matches are written. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -10664,6 +12040,10 @@ Formats and writes the log stream entry to stdout. Messages below the channel le
 #### Parameters
 * `stream` The log stream to write.
 
+##### Reimplements
+
+- [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72)
+
 {#filechannel}
 
 ## FileChannel
@@ -10681,6 +12061,55 @@ Defined in src/base/include/icy/logger.h:437
 > **Inherits:** [`LogChannel`](#logchannel)
 
 Log channel that writes formatted messages to a file.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_fstream`](#classicy_1_1FileChannel_1ac90d2c62745f97eae299952b0aa1ebbb) | `variable` | Declared here |
+| [`_path`](#classicy_1_1FileChannel_1a24eb6429e3e47d6c5e2e62f800613545) | `variable` | Declared here |
+| [`FileChannel`](#classicy_1_1FileChannel_1a999132afafc7b5d3e5310b865c578137) | `function` | Declared here |
+| [`~FileChannel`](#classicy_1_1FileChannel_1a64429f8a98fb3be7e90c22bba4a6f952) | `function` | Declared here |
+| [`write`](#classicy_1_1FileChannel_1a2d9300f3444f0ff3b3eb67411bc62089) | `function` | Declared here |
+| [`setPath`](#classicy_1_1FileChannel_1ab30f877b3de9d4c83e25d543c23ffef2) | `function` | Declared here |
+| [`path`](#classicy_1_1FileChannel_1abd72dfee7867cd8424bcdec514eef19a) | `function` | Declared here |
+| [`open`](#classicy_1_1FileChannel_1ad72aefc06127f1bd93c1d226c141f6d3) | `function` | Declared here |
+| [`close`](#classicy_1_1FileChannel_1a42d8937c190d7caf2288a1d315f642bb) | `function` | Declared here |
+| [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) | `function` | Inherited from [`LogChannel`](#logchannel) |
+
+### Inherited from [`LogChannel`](#logchannel)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d)  |  |
+| `variable` | [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8)  |  |
+| `variable` | [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab)  |  |
+| `variable` | [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439)  |  |
+| `function` | [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f)  |  |
+| `function` | [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) `virtual` | Defaulted destructor. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) `virtual` | Writes a log stream entry to this channel. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) `virtual` | Writes a plain message to this channel. |
+| `function` | [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) `virtual` | Formats a log stream entry into the given output stream. |
+| `function` | [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) `const` `inline` | Returns the channel name. |
+| `function` | [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) `const` `inline` | Returns the minimum severity level. |
+| `function` | [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) `const` `inline` | Returns the timestamp format string. |
+| `function` | [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) `inline` | Sets the minimum severity level. |
+| `function` | [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) `inline` | Sets the timestamp format string. |
+| `function` | [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) `inline` | Sets a realm filter; only messages whose realm matches are written. |
 
 ### Public Methods
 
@@ -10729,6 +12158,10 @@ Defined in src/base/include/icy/logger.h:452
 Formats and writes the log stream entry to the file. Opens the file on first write if not already open. 
 #### Parameters
 * `stream` The log stream to write.
+
+##### Reimplements
+
+- [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72)
 
 ---
 
@@ -10848,6 +12281,62 @@ Defined in src/base/include/icy/logger.h:478
 
 Log channel that writes to time-rotated log files.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_fstream`](#classicy_1_1RotatingFileChannel_1a22d1aebf3fa2d89a7353213337283984) | `variable` | Declared here |
+| [`_dir`](#classicy_1_1RotatingFileChannel_1a17dade3ccb508d3c4ec0d9594d4ab6cc) | `variable` | Declared here |
+| [`_filename`](#classicy_1_1RotatingFileChannel_1a65983eb5e4292178c4e347b0313b8644) | `variable` | Declared here |
+| [`_extension`](#classicy_1_1RotatingFileChannel_1a0e908fb9923fe080e905ec282f59d5b1) | `variable` | Declared here |
+| [`_rotationInterval`](#classicy_1_1RotatingFileChannel_1a770b9dc22749689111352c3b95c04f4b) | `variable` | Declared here |
+| [`_rotatedAt`](#classicy_1_1RotatingFileChannel_1a4438c710ba09479f08dddd91af38616b) | `variable` | Declared here |
+| [`RotatingFileChannel`](#classicy_1_1RotatingFileChannel_1af2a78dcad20802a13676f3a92b4c2b8d) | `function` | Declared here |
+| [`~RotatingFileChannel`](#classicy_1_1RotatingFileChannel_1a0cf6babf98dc43bd48a9d6830f18c06d) | `function` | Declared here |
+| [`write`](#classicy_1_1RotatingFileChannel_1a645044eac89455f3f234e2eafd8afaff) | `function` | Declared here |
+| [`rotate`](#classicy_1_1RotatingFileChannel_1a7d7c38c8182f46090817cedab933e86f) | `function` | Declared here |
+| [`dir`](#classicy_1_1RotatingFileChannel_1aebd0734016674f66ebbea72c082847fb) | `function` | Declared here |
+| [`filename`](#classicy_1_1RotatingFileChannel_1a26d8c1f6e0bc7ed9016cebbeb21d8e05) | `function` | Declared here |
+| [`rotationInterval`](#classicy_1_1RotatingFileChannel_1a981d683847eb7279549535f6e15aa59d) | `function` | Declared here |
+| [`setDir`](#classicy_1_1RotatingFileChannel_1a826cc9dae0c975638a2811360afd3bdf) | `function` | Declared here |
+| [`setExtension`](#classicy_1_1RotatingFileChannel_1acf5b2332da1b70af8b62cadc13536b07) | `function` | Declared here |
+| [`setRotationInterval`](#classicy_1_1RotatingFileChannel_1a50840779fb71f063aa09d02d5fe28492) | `function` | Declared here |
+| [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439) | `variable` | Inherited from [`LogChannel`](#logchannel) |
+| [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) | `function` | Inherited from [`LogChannel`](#logchannel) |
+| [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) | `function` | Inherited from [`LogChannel`](#logchannel) |
+
+### Inherited from [`LogChannel`](#logchannel)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_name`](#classicy_1_1LogChannel_1a5bf8a31b10141534ad60e704477e907d)  |  |
+| `variable` | [`_level`](#classicy_1_1LogChannel_1ad9a791fdbb53e82cf5d0a1e3fd203df8)  |  |
+| `variable` | [`_timeFormat`](#classicy_1_1LogChannel_1a26f31205f8ca317e23e8ea93db8111ab)  |  |
+| `variable` | [`_filter`](#classicy_1_1LogChannel_1a5b6eb75a28502944aa657eaa17e24439)  |  |
+| `function` | [`LogChannel`](#classicy_1_1LogChannel_1a7053b109f362c23e73cf8cd689c4103f)  |  |
+| `function` | [`~LogChannel`](#classicy_1_1LogChannel_1ac21019a9cfabfb46470855a2a6e4ae28) `virtual` | Defaulted destructor. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72) `virtual` | Writes a log stream entry to this channel. |
+| `function` | [`write`](#classicy_1_1LogChannel_1a8d51ea47ec49d9f25a5f12d6f584cec3) `virtual` | Writes a plain message to this channel. |
+| `function` | [`format`](#classicy_1_1LogChannel_1a5423576a4cde9fb24783dd823691d13b) `virtual` | Formats a log stream entry into the given output stream. |
+| `function` | [`name`](#classicy_1_1LogChannel_1aa87659b6230cb68b8cd121bbdc9e9336) `const` `inline` | Returns the channel name. |
+| `function` | [`level`](#classicy_1_1LogChannel_1addda79e22be14a5813cde27f69308e48) `const` `inline` | Returns the minimum severity level. |
+| `function` | [`timeFormat`](#classicy_1_1LogChannel_1a1187f9c3575f7910141119e2e6672edc) `const` `inline` | Returns the timestamp format string. |
+| `function` | [`setLevel`](#classicy_1_1LogChannel_1a6a4596db8dd183a04b79523e30c94f16) `inline` | Sets the minimum severity level. |
+| `function` | [`setTimeFormat`](#classicy_1_1LogChannel_1a2f347a65f9f266c704e2ce040210ec68) `inline` | Sets the timestamp format string. |
+| `function` | [`setFilter`](#classicy_1_1LogChannel_1ad1efd810b4ecfe73e8e1b5b9f5955207) `inline` | Sets a realm filter; only messages whose realm matches are written. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -10904,6 +12393,10 @@ Defined in src/base/include/icy/logger.h:498
 Formats and writes the log stream entry to the current log file. Rotates the file if the rotation interval has elapsed. 
 #### Parameters
 * `stream` The log stream to write.
+
+##### Reimplements
+
+- [`write`](#classicy_1_1LogChannel_1a54566b531cf48156538634d93ad68a72)
 
 ---
 
@@ -11131,6 +12624,19 @@ Embeds the refcount in the object itself - no separate control block allocation,
 
 Usage: inherit from RefCounted<YourClass>, then use [IntrusivePtr<YourClass>](#intrusiveptr) instead of std::shared_ptr<YourClass>.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_refCount`](#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589) | `variable` | Declared here |
+| [`RefCounted`](#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b) | `function` | Declared here |
+| [`RefCounted`](#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) | `function` | Declared here |
+| [`operator=`](#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) | `function` | Declared here |
+| [`addRef`](#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) | `function` | Declared here |
+| [`releaseRef`](#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) | `function` | Declared here |
+| [`refCount`](#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) | `function` | Declared here |
+| [`~RefCounted`](#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -11263,6 +12769,37 @@ Like std::shared_ptr but with zero allocation overhead:
 * Non-atomic refcount (safe for single-threaded libuv loops)
 
 * Same API as shared_ptr for easy migration
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_ptr`](#classicy_1_1IntrusivePtr_1ac2d6ade734e3534bb2efe23f4514c872) | `variable` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1ae717c705c2043f853e14027973d5d6a4) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1a2c24e838c58aa921993aa7d98a2ff6ba) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1a80588d4d317a3f30ddd1d62314297484) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1ac52fb5e1bfc932392e679f04c7e27491) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1a5a9bcffa97a97b7381656cdec7cf14bf) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1adc38e77899e252a2180552abb02af3bc) | `function` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1IntrusivePtr_1a8ec69a6e843f832c3d6239071af8e1f9) | `function` | Declared here |
+| [`~IntrusivePtr`](#classicy_1_1IntrusivePtr_1a0f2d15fbc1596edc52163d359643d484) | `function` | Declared here |
+| [`operator=`](#classicy_1_1IntrusivePtr_1a15561936a6d16683d9e042fbb0db2f0b) | `function` | Declared here |
+| [`operator=`](#classicy_1_1IntrusivePtr_1adf750df8c4f13a675e994bb1e1a0e7f9) | `function` | Declared here |
+| [`operator=`](#classicy_1_1IntrusivePtr_1acf9d934d1a35a94c53848eb86d7fc3a3) | `function` | Declared here |
+| [`operator=`](#classicy_1_1IntrusivePtr_1a0597e21fa01c43e92f36fba1b4e660be) | `function` | Declared here |
+| [`reset`](#classicy_1_1IntrusivePtr_1a4a063dda4f52cbeac2de30f80418af70) | `function` | Declared here |
+| [`reset`](#classicy_1_1IntrusivePtr_1a9ef686cc8d3ebcb7131c9d6ae5008360) | `function` | Declared here |
+| [`get`](#classicy_1_1IntrusivePtr_1a2f442842ca159bf5c82ee47d1da17b86) | `function` | Declared here |
+| [`operator*`](#classicy_1_1IntrusivePtr_1aca8731edf5b39ee82e675bd0fc7c23f5) | `function` | Declared here |
+| [`operator->`](#classicy_1_1IntrusivePtr_1a91d08ad434020d9211e97c2dce54f395) | `function` | Declared here |
+| [`operator bool`](#classicy_1_1IntrusivePtr_1a4a5f42547a496e1a330f7bbe1f7b152b) | `function` | Declared here |
+| [`swap`](#classicy_1_1IntrusivePtr_1a15c7af5f94197c5d4f3248fbebeabd8a) | `function` | Declared here |
+| [`detach`](#classicy_1_1IntrusivePtr_1a23cf07569dd2994e51850f45f0c6d385) | `function` | Declared here |
+| [`operator==`](#classicy_1_1IntrusivePtr_1a309627bd39e781ef10eaccea61e59d2e) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1IntrusivePtr_1ad8385813d7f1fa962c3a04b76fb2aaa6) | `function` | Declared here |
+| [`operator==`](#classicy_1_1IntrusivePtr_1a4bbc053f5daaf8f6633260a922e175d4) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1IntrusivePtr_1a84de20aba70c144ed68993b649f65ee9) | `function` | Declared here |
+| [`operator<`](#classicy_1_1IntrusivePtr_1a0ce08cb577e0a1bd04dc0aa188d4ea9b) | `function` | Declared here |
 
 ### Public Methods
 
@@ -11629,6 +13166,23 @@ Defined in src/base/include/icy/random.h:25
 
 [Random](#random) implements a pseudo random number generator (PRNG) using the Mersenne Twister algorithm (std::mt19937).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_engine`](#classicy_1_1Random_1a0de3a874cc1c457df23bfe5540d4f3fb) | `variable` | Declared here |
+| [`Random`](#classicy_1_1Random_1a33e86a391fb40fd48e5fdaec61390021) | `function` | Declared here |
+| [`~Random`](#classicy_1_1Random_1ab4aa5bfcbf3e86fad92b61cd1e97bf20) | `function` | Declared here |
+| [`seed`](#classicy_1_1Random_1a394561ffe6754ba6dc9a84faf266e69b) | `function` | Declared here |
+| [`seed`](#classicy_1_1Random_1a2438e669b861a0e137f414ec15981756) | `function` | Declared here |
+| [`next`](#classicy_1_1Random_1abd7fa535d0d406ed3a3da43996c85c87) | `function` | Declared here |
+| [`next`](#classicy_1_1Random_1aadc9e9d8c8a695bfc9120967ba41e19a) | `function` | Declared here |
+| [`nextChar`](#classicy_1_1Random_1a4fdd10d42eabcf71ce323f9294c66d5c) | `function` | Declared here |
+| [`nextBool`](#classicy_1_1Random_1a77f1da2eb25755e27d4aff122cebce0a) | `function` | Declared here |
+| [`nextFloat`](#classicy_1_1Random_1a7c47816e201f75ef5269d2d165a11cf9) | `function` | Declared here |
+| [`nextDouble`](#classicy_1_1Random_1a5e981a274758530a46af8f3ebf678278) | `function` | Declared here |
+| [`getSeed`](#classicy_1_1Random_1ab1cc60b080d91ce8443ebb334de67080) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -11865,6 +13419,27 @@ Defined in src/base/include/icy/runner.h:34
 
 [Runner](#runner) is a virtual interface for implementing asynchronous objects such as threads and futures.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95) | `variable` | Declared here |
+| [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20) | `function` | Declared here |
+| [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) | `function` | Declared here |
+| [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) | `function` | Declared here |
+| [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) | `function` | Declared here |
+| [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7) | `function` | Declared here |
+| [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) | `function` | Declared here |
+| [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) | `function` | Declared here |
+| [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092) | `function` | Declared here |
+| [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) | `function` | Declared here |
+| [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) | `function` | Declared here |
+| [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b) | `function` | Declared here |
+| [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb) | `function` | Declared here |
+| [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -11909,6 +13484,13 @@ Defined in src/base/include/icy/runner.h:43
 Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. 
 #### Parameters
 * `target` Callable to invoke when the context runs.
+
+##### Reimplemented by
+
+- [`start`](#classicy_1_1Idler_1ab31f59214d6e68afb3b6e59a3036d608)
+- [`start`](#classicy_1_1Synchronizer_1a870312ba2980341981b7c84f71153394)
+- [`start`](#classicy_1_1Thread_1a0eba44b07041432f01d8f2eb2c3ea3b9)
+- [`start`](#classicy_1_1Timer_1a4a5052169986a9d1cf58a284fc365341)
 
 ---
 
@@ -12011,6 +13593,13 @@ Defined in src/base/include/icy/runner.h:70
 Returns true if the implementation is thread-based. 
 #### Returns
 True for thread-backed runners, false for event-loop-driven runners.
+
+##### Reimplemented by
+
+- [`async`](#classicy_1_1Idler_1a29edc37083cfb36ba734533cfc6eeb44)
+- [`async`](#classicy_1_1Synchronizer_1a66c51015b992eee80f779bb6586e4adf)
+- [`async`](#classicy_1_1Thread_1a371ac5c45005f3595bc812174e5d36c1)
+- [`async`](#classicy_1_1Timer_1a8796d561ee6363841b0289f68bc49899)
 
 ---
 
@@ -12120,6 +13709,58 @@ class Signal< RT(Args...), MutexT >
 Defined in src/base/include/icy/signal.h:142
 
 Thread-safe signal and slot implementation for callback-based event dispatch.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Function`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ad3a478f874517284f97b88615efb6a21) | `typedef` | Declared here |
+| [`SlotPtr`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ad44dfcd3b949fddac73c8704d8754c3b) | `typedef` | Declared here |
+| [`Slot`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a1c86a797e5aa80ae928ff810757272b6) | `typedef` | Declared here |
+| [`SlotNode`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ab4b89aa2afc62773efc1dc7b8c305e33) | `typedef` | Declared here |
+| [`EmitDepth`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a6d6b8bcb032c9a8cca38ca4f9ce3c851) | `typedef` | Declared here |
+| [`SweepFlag`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1af98f949b3a007936e5ea0833bee1725a) | `typedef` | Declared here |
+| [`threadSafe`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a31580ea2056ae44eb27a9f29e75f3e03) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a45d8805451c94dfb1e5d8d5d3d0708e0) | `variable` | Declared here |
+| [`_head`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a1c0f338a2f16994f2fcbdeab8dcfa922) | `variable` | Declared here |
+| [`_tail`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ac22279a22cadf7b6dd5e634a7e9db48f) | `variable` | Declared here |
+| [`_liveCount`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1aa7bdc7f085284fa2d9659ed4807678ba) | `variable` | Declared here |
+| [`_lastId`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ac5ae6799363943f1e1d77d1a13edbcc1) | `variable` | Declared here |
+| [`_emitDepth`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a2ce0225473c5555a8746da4269356790) | `variable` | Declared here |
+| [`_needsSweep`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a8c50574da10a4c2a8e8d76caa9a24993) | `variable` | Declared here |
+| [`attach`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ab117b8aacf13226bade149c94b6088ed) | `function` | Declared here |
+| [`attach`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a8069521f5542e0893cfa2875789eb768) | `function` | Declared here |
+| [`detach`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1af559f1f6b044f249b3d7b04d80274bab) | `function` | Declared here |
+| [`detach`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a5734fea8bef8b8ec7feb2efaf14bce80) | `function` | Declared here |
+| [`detach`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1aad2399704bd7ff9d36beac77be2458e7) | `function` | Declared here |
+| [`detachAll`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a3521155649191bca2ba43805b75b3050) | `function` | Declared here |
+| [`emit`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a7f1d1a2e8529e62b769a6767ab519c74) | `function` | Declared here |
+| [`slots`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a689141130f5a0daf55ebe1122d5a536c) | `function` | Declared here |
+| [`nslots`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ab987050a876fe4e983601eae08062587) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a36961ce3c4901d6b464b51d6c46c891e) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1abdbbfcfe6a571aab59e80169044b80f3) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a529888b27d2f11215b95363b4e133a0c) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a1c99f0349fe6e1934848a7d015e3a566) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a9b86844a321da79cf2d171777f778988) | `function` | Declared here |
+| [`Signal`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a0fbd65938964f9fec616cf9459b8f1f8) | `function` | Declared here |
+| [`~Signal`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a12a878a7145717161d68a41f3a55210b) | `function` | Declared here |
+| [`Signal`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a973aea1de7901a835a571533bf5bf262) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a738976616c66e9f8c477735c518de1a0) | `function` | Declared here |
+| [`killMatchingLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a21864e8527879063d2685d98c4490ef5) | `function` | Declared here |
+| [`insertSlotLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1aa283b80d28565728201d83036341813c) | `function` | Declared here |
+| [`appendSlotLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a1ed237330eed206bc8a1f7b86338377e) | `function` | Declared here |
+| [`eraseNodeLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1acbc890c019312eb459dc563394974ef8) | `function` | Declared here |
+| [`emitDepthLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ac6dffe385f5cc5b74a97b77bf597185c) | `function` | Declared here |
+| [`beginEmitLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a837c4693d9d4308a300a7cb6e714ba83) | `function` | Declared here |
+| [`endEmitLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a2cce2a6dee08e5eaf7f79be25c8f45b6) | `function` | Declared here |
+| [`requestSweepLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ae7337ca9e7862ed0049358a758b303fe) | `function` | Declared here |
+| [`consumeSweepRequest`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a7923360d3046d22a7bf1f88cbe6f084c) | `function` | Declared here |
+| [`sweepLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ab8a49de0311bd5655cc59f6487174a15) | `function` | Declared here |
+| [`finishEmit`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a5322839f81fc1814637a82803fa91a1e) | `function` | Declared here |
+| [`clearNodesLocked`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a3fa7c9b0086f00d9ad596bd08fc5e225) | `function` | Declared here |
+| [`resetEmitState`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a51f6262036aff805d28aae122a29e629) | `function` | Declared here |
+| [`snapshotState`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a82a8ef77b0be6a686ae4290521fd67fd) | `function` | Declared here |
+| [`restoreState`](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1a5f1dd7d4d8a2156933b1abf1c4889d82) | `function` | Declared here |
 
 ### Public Methods
 
@@ -12928,6 +14569,108 @@ Defined in src/base/include/icy/stream.h:30
 
 Basic stream type for sockets and pipes.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Handle`](#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a) | `typedef` | Declared here |
+| [`Read`](#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184) | `variable` | Declared here |
+| [`_buffer`](#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857) | `variable` | Declared here |
+| [`_started`](#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271) | `variable` | Declared here |
+| [`_highWaterMark`](#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf) | `variable` | Declared here |
+| [`_writeReqFree`](#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b) | `variable` | Declared here |
+| [`_ownedWriteReqFree`](#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365) | `variable` | Declared here |
+| [`Stream`](#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) | `function` | Declared here |
+| [`~Stream`](#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) | `function` | Declared here |
+| [`close`](#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) | `function` | Declared here |
+| [`shutdown`](#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) | `function` | Declared here |
+| [`write`](#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) | `function` | Declared here |
+| [`writeOwned`](#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) | `function` | Declared here |
+| [`setHighWaterMark`](#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) | `function` | Declared here |
+| [`write`](#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) | `function` | Declared here |
+| [`stream`](#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) | `function` | Declared here |
+| [`readStart`](#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) | `function` | Declared here |
+| [`readStop`](#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) | `function` | Declared here |
+| [`onRead`](#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) | `function` | Declared here |
+| [`allocWriteReq`](#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) | `function` | Declared here |
+| [`freeWriteReq`](#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) | `function` | Declared here |
+| [`allocOwnedWriteReq`](#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) | `function` | Declared here |
+| [`freeOwnedWriteReq`](#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) | `function` | Declared here |
+| [`canQueueWrite`](#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) | `function` | Declared here |
+| [`handleRead`](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) | `function` | Declared here |
+| [`allocReadBuffer`](#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) | `function` | Declared here |
+| [`Handle`](uv.md#handle-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`init`](uv.md#init-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invoke`](uv.md#invoke) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invokeOrThrow`](uv.md#invokeorthrow) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`close`](uv.md#close-11) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`ref`](uv.md#ref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`unref`](uv.md#unref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`initialized`](uv.md#initialized-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`active`](uv.md#active) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closing`](uv.md#closing-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closed`](uv.md#closed) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`error`](uv.md#error-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setError`](uv.md#seterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setUVError`](uv.md#setuverror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setAndThrowError`](uv.md#setandthrowerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`throwLastError`](uv.md#throwlasterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`loop`](uv.md#loop-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`reset`](uv.md#reset-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`get`](uv.md#get-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`tid`](uv.md#tid) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`context`](uv.md#context-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setCloseCleanup`](uv.md#setclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`clearCloseCleanup`](uv.md#clearclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`assertThread`](uv.md#assertthread) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_loop`](uv.md#_loop) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_context`](uv.md#_context) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_tid`](uv.md#_tid) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_error`](uv.md#_error-1) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onError`](uv.md#onerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onClose`](uv.md#onclose) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-5) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Type`](uv.md#type-7) | `typedef` | Inherited from [`Handle`](uv.md#handle-2) |
+
+### Inherited from [`Handle`](uv.md#handle-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Handle`](uv.md#handle-3) `inline` | Construct the handle bound to the given event loop. |
+| `function` | [`init`](uv.md#init-2) `inline` | Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`. |
+| `function` | [`invoke`](uv.md#invoke) `inline` | Invoke a libuv function `f` with `args` on the initialized handle. |
+| `function` | [`invokeOrThrow`](uv.md#invokeorthrow) `inline` | Invoke a libuv function `f` with `args`, throwing on failure. |
+| `function` | [`close`](uv.md#close-11) `virtual` `inline` | Close and destroy the handle. |
+| `function` | [`ref`](uv.md#ref) `inline` | Re-reference the handle with the event loop after a previous `[unref()](uv.md#unref)`. |
+| `function` | [`unref`](uv.md#unref) `inline` | Unreference the handle from the event loop. |
+| `function` | [`initialized`](uv.md#initialized-1) `const` `inline` | Return `true` if the handle has been successfully initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`active`](uv.md#active) `virtual` `const` `inline` | Return `true` when the handle is active (libuv `uv_is_active`). |
+| `function` | [`closing`](uv.md#closing-1) `virtual` `const` `inline` | Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`). |
+| `function` | [`closed`](uv.md#closed) `virtual` `const` `inline` | Return `true` if the handle has been fully closed (context released). |
+| `function` | [`error`](uv.md#error-4) `const` `inline` | Return the last error set on this handle, or a default-constructed `[Error](#error)` if no error has occurred. |
+| `function` | [`setError`](uv.md#seterror) `virtual` `inline` | Set the error state and invoke `[onError()](uv.md#onerror)`. |
+| `function` | [`setUVError`](uv.md#setuverror) `inline` | Translate a libuv error code into an `[Error](#error)` and call `[setError()](uv.md#seterror)`. |
+| `function` | [`setAndThrowError`](uv.md#setandthrowerror) `inline` | Set the error state from a libuv error code and throw a `std::runtime_error`. |
+| `function` | [`throwLastError`](uv.md#throwlasterror) `inline` | Throw a `std::runtime_error` if the handle currently holds an error. |
+| `function` | [`loop`](uv.md#loop-2) `const` `inline` | Return the event loop this handle is bound to. |
+| `function` | [`reset`](uv.md#reset-3) `inline` | Close the current handle (if open) and allocate a fresh `[Context](uv.md#context-1)`, leaving the handle ready to be re-initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`get`](uv.md#get-2) `const` `inline` | Return the raw libuv handle pointer cast to `[Handle](uv.md#handle-2)`. |
+| `function` | [`tid`](uv.md#tid) `const` `inline` | Return the ID of the thread that constructed this handle. |
+| `function` | [`context`](uv.md#context-3) `const` `inline` | Return the raw `[Context](uv.md#context-1)` that owns the libuv handle memory. |
+| `function` | [`setCloseCleanup`](uv.md#setclosecleanup) `inline` |  |
+| `function` | [`clearCloseCleanup`](uv.md#clearclosecleanup) `inline` |  |
+| `function` | [`assertThread`](uv.md#assertthread) `const` `inline` | Throw `std::logic_error` if called from any thread other than the thread that constructed this handle. |
+| `variable` | [`_loop`](uv.md#_loop)  |  |
+| `variable` | [`_context`](uv.md#_context)  |  |
+| `variable` | [`_tid`](uv.md#_tid)  |  |
+| `variable` | [`_error`](uv.md#_error-1)  |  |
+| `function` | [`onError`](uv.md#onerror) `virtual` `inline` | Called by `[setError()](uv.md#seterror)` after the error state has been updated. |
+| `function` | [`onClose`](uv.md#onclose) `virtual` `inline` | Called by `[close()](uv.md#close-11)` after the context has been released. |
+| `function` | [`Handle`](uv.md#handle-4)  | NonCopyable and NonMovable. |
+| `function` | [`Handle`](uv.md#handle-5)  | Deleted constructor. |
+| `typedef` | [`Type`](uv.md#type-7)  | Define the native handle type. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -13016,6 +14759,15 @@ Defined in src/base/include/icy/stream.h:67
 Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle.
 
 If the stream is already closed this call will have no side-effects.
+
+##### Reimplements
+
+- [`close`](uv.md#close-11)
+
+##### Reimplemented by
+
+- [`close`](net.md#close-14)
+- [`close`](net.md#close-15)
 
 ---
 
@@ -13261,6 +15013,10 @@ Sets the stream's `data` pointer to `this` so callbacks can recover the C++ obje
 #### Returns
 `true` if `uv_read_start` was called successfully.
 
+##### Reimplemented by
+
+- [`readStart`](#classicy_1_1Pipe_1aa346922ed574ccc39590f7dc3bae7885)
+
 ---
 
 {#readstop}
@@ -13304,6 +15060,11 @@ The default implementation emits the `[Read](#classicy_1_1Stream_1a97b040391e197
 * `data` Pointer into the read buffer; valid only for this call. 
 
 * `len` Number of valid bytes in `data`.
+
+##### Reimplemented by
+
+- [`onRead`](net.md#onread)
+- [`onRead`](net.md#onread-1)
 
 ---
 
@@ -13423,6 +15184,64 @@ Platform-independent wrapper around an operating system thread.
 
 This class inherits the `[Runner](#runner)` interface and may be used with any implementation that's powered by an asynchronous `[Runner](#runner)`.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Ptr`](#classicy_1_1Thread_1a61c0dff721ee93f1719c16b4a7313b76) | `typedef` | Declared here |
+| [`mainID`](#classicy_1_1Thread_1a8a98a5afc15bf71f69c634f2376923eb) | `variable` | Declared here |
+| [`_thread`](#classicy_1_1Thread_1ac58d9376adfbfb7bceb3afeeb29aa76b) | `variable` | Declared here |
+| [`Thread`](#classicy_1_1Thread_1a332b74fcba3bcd67ad3311c3483943cc) | `function` | Declared here |
+| [`Thread`](#classicy_1_1Thread_1a9ddb6391057df0f50abfd7f585968ac9) | `function` | Declared here |
+| [`~Thread`](#classicy_1_1Thread_1aeb141e34238c5445dea9b092dbfb61c6) | `function` | Declared here |
+| [`start`](#classicy_1_1Thread_1ad1f9f47ae525aa1c772441987306190f) | `function` | Declared here |
+| [`start`](#classicy_1_1Thread_1a0eba44b07041432f01d8f2eb2c3ea3b9) | `function` | Declared here |
+| [`join`](#classicy_1_1Thread_1ac7b17c2ffedb954e70d6476bde8727f9) | `function` | Declared here |
+| [`id`](#classicy_1_1Thread_1a47e9463c860676f6aa8f8417f459bcf5) | `function` | Declared here |
+| [`currentID`](#classicy_1_1Thread_1a265499b5c8822f535daa492a4fff5cc5) | `function` | Declared here |
+| [`Thread`](#classicy_1_1Thread_1aed621f14aba083af9fc3bbf9d3a19653) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Thread_1a34a97f9d68f9553d8a25f561d592f9b4) | `function` | Declared here |
+| [`Thread`](#classicy_1_1Thread_1a10428209b0266fe83fd011ca5c9d680b) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Thread_1a0af7f75680224f26a927936bcab44277) | `function` | Declared here |
+| [`async`](#classicy_1_1Thread_1a371ac5c45005f3595bc812174e5d36c1) | `function` | Declared here |
+| [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95) | `variable` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20) | `function` | Inherited from [`Runner`](#runner) |
+| [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) | `function` | Inherited from [`Runner`](#runner) |
+| [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) | `function` | Inherited from [`Runner`](#runner) |
+| [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) | `function` | Inherited from [`Runner`](#runner) |
+| [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) | `function` | Inherited from [`Runner`](#runner) |
+| [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092) | `function` | Inherited from [`Runner`](#runner) |
+| [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) | `function` | Inherited from [`Runner`](#runner) |
+| [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) | `function` | Inherited from [`Runner`](#runner) |
+| [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa) | `function` | Inherited from [`Runner`](#runner) |
+
+### Inherited from [`Runner`](#runner)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95)  | Shared pointer to the internal [Context](#context). |
+| `function` | [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20)  |  |
+| `function` | [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) `virtual` |  |
+| `function` | [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) `virtual` | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
+| `function` | [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) `const` | Returns true if the async context is currently running. |
+| `function` | [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)  | Signals the async context to stop at the earliest opportunity. |
+| `function` | [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) `const` | Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. |
+| `function` | [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) `const` | Returns true if the runner is in repeating mode. |
+| `function` | [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092)  | Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. |
+| `function` | [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `function` | [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) `const` | Returns the native thread ID of the thread running the async context. |
+| `function` | [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b)  | Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. |
+| `function` | [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb)  | Deleted assignment operator. |
+| `function` | [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa)  | Deleted assignment operator. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -13532,6 +15351,10 @@ Defined in src/base/include/icy/thread.h:73
 Starts the thread with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `[start](#classicy_1_1Thread_1ad1f9f47ae525aa1c772441987306190f)` template. 
 #### Parameters
 * `func` Callable to execute on the new thread.
+
+##### Reimplements
+
+- [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)
 
 ---
 
@@ -13679,6 +15502,10 @@ Returns true if the implementation is thread-based.
 #### Returns
 True for thread-backed runners, false for event-loop-driven runners.
 
+##### Reimplements
+
+- [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07)
+
 ### Public Types
 
 | Name | Description |
@@ -13712,6 +15539,40 @@ class Process
 Defined in src/base/include/icy/process.h:32
 
 Spawns and manages a child process with stdin/stdout/stderr pipes.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`file`](#classicy_1_1Process_1a8fbf63ce498f8bce468a6f14e88b42c4) | `variable` | Declared here |
+| [`cwd`](#classicy_1_1Process_1af0d357bbd37c71abd6b9b17449fe0b7e) | `variable` | Declared here |
+| [`args`](#classicy_1_1Process_1ad157d6a59f8e891b07af97b6534379a4) | `variable` | Declared here |
+| [`env`](#classicy_1_1Process_1abeab0dd902d1c16edc9b8d77e2c06ee0) | `variable` | Declared here |
+| [`onstdout`](#classicy_1_1Process_1a3bbf6a9ba484efc33911f35176f56d12) | `variable` | Declared here |
+| [`onstderr`](#classicy_1_1Process_1abc83000f26e7baf82b6777b88d2d7b80) | `variable` | Declared here |
+| [`onexit`](#classicy_1_1Process_1a398eb12827de9dcb75927d69cc262d88) | `variable` | Declared here |
+| [`options`](#classicy_1_1Process_1a1b5efdb05d9e308581186cfc1f257b3c) | `variable` | Declared here |
+| [`_handle`](#classicy_1_1Process_1a5da2b136c6458222b4b0be88e7e663a1) | `variable` | Declared here |
+| [`_stdin`](#classicy_1_1Process_1ad3ffdf2e71cfb510272bde8486b8659a) | `variable` | Declared here |
+| [`_stdout`](#classicy_1_1Process_1a5e11a92b5250e1c9e20f560e4ea1e0bc) | `variable` | Declared here |
+| [`_stderr`](#classicy_1_1Process_1a26f1ea6e594669feff1f7d9be0835077) | `variable` | Declared here |
+| [`_stdio`](#classicy_1_1Process_1ada13e788dc55fdbb4a28509ac6320579) | `variable` | Declared here |
+| [`_cargs`](#classicy_1_1Process_1ad69afbc0cbd2ed428c1d9f39fe16fd85) | `variable` | Declared here |
+| [`_cenv`](#classicy_1_1Process_1a86af6fbd49224f15c9075582315e701e) | `variable` | Declared here |
+| [`Process`](#classicy_1_1Process_1abb46d652cd369064328e177bba02f5db) | `function` | Declared here |
+| [`Process`](#classicy_1_1Process_1aa4b0d163152d0bc404816173d6847645) | `function` | Declared here |
+| [`~Process`](#classicy_1_1Process_1adc48f16e4d564c3e1266e03024f132dc) | `function` | Declared here |
+| [`Process`](#classicy_1_1Process_1afe5de29024e13b81ecd02d9ddd293767) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Process_1af4b420285703865823af277fc17eba95) | `function` | Declared here |
+| [`Process`](#classicy_1_1Process_1a183f4d4bd383105ae561e7297ed6a759) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Process_1a1c4dcc8b4797caa9edbf289ba8d4d2aa) | `function` | Declared here |
+| [`spawn`](#classicy_1_1Process_1a1d4f466c7f2713460ee35954dc6663bc) | `function` | Declared here |
+| [`kill`](#classicy_1_1Process_1a45c272c651dcdefc4edcd86d1285c20b) | `function` | Declared here |
+| [`pid`](#classicy_1_1Process_1a2eba106b76aaa58404c4a935e2a0ed6d) | `function` | Declared here |
+| [`in`](#classicy_1_1Process_1a219be88d0e7f3200ab666b8d6e802211) | `function` | Declared here |
+| [`out`](#classicy_1_1Process_1a7db165fd2a335c2aefd173590a149bac) | `function` | Declared here |
+| [`err`](#classicy_1_1Process_1aca14586907fa856ac5dd283214075681) | `function` | Declared here |
+| [`init`](#classicy_1_1Process_1a27ad76f30e4fad6779408e8ff1e6e3ee) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -14153,6 +16014,28 @@ Defined in src/base/include/icy/timeout.h:32
 
 [Timeout](#timeout) counter which expires after a given delay. Delay is specified in milliseconds.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_startAt`](#classicy_1_1Timeout_1ae2803106c005a9e2ef791195ecf97302) | `variable` | Declared here |
+| [`_delay`](#classicy_1_1Timeout_1a25f7f2bd9eacac9b3e15beba99ffedde) | `variable` | Declared here |
+| [`_running`](#classicy_1_1Timeout_1a2c8a9bd3e3675f2433089b7e363dffa7) | `variable` | Declared here |
+| [`Timeout`](#classicy_1_1Timeout_1af06e5e219a3827e10ca07f362f53a969) | `function` | Declared here |
+| [`Timeout`](#classicy_1_1Timeout_1a253230e267b468cba1840ddac9475877) | `function` | Declared here |
+| [`Timeout`](#classicy_1_1Timeout_1a39e5e6403cdf17a2352451a5e86b7bf4) | `function` | Declared here |
+| [`~Timeout`](#classicy_1_1Timeout_1a334cd837cd7dc0c61ab3043e2649422c) | `function` | Declared here |
+| [`running`](#classicy_1_1Timeout_1a89520c7b79a40f016f20dccb054d103d) | `function` | Declared here |
+| [`start`](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e) | `function` | Declared here |
+| [`stop`](#classicy_1_1Timeout_1a3015db4e29b2d32b54d3816255b61cba) | `function` | Declared here |
+| [`reset`](#classicy_1_1Timeout_1ac99e1975e74242d89a668a6f3bb09d47) | `function` | Declared here |
+| [`remaining`](#classicy_1_1Timeout_1a859375264af7d2d6b3ddfa5f06adbd5b) | `function` | Declared here |
+| [`expired`](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) | `function` | Declared here |
+| [`setDelay`](#classicy_1_1Timeout_1a3a4659601332274527c2c96e8ebedcdb) | `function` | Declared here |
+| [`delay`](#classicy_1_1Timeout_1abd7e310a3ec39570dd7d8343cd716f67) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timeout_1ae22499002615e47d10a532da925f1986) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timeout_1a2e005922d2a1c3a1ee9c42ad23daa6cf) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -14430,6 +16313,56 @@ Defined in src/base/include/icy/timeout.h:95
 
 Token that expires after the specified duration.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_id`](#classicy_1_1TimedToken_1ad8cd841144e681833ad7ea8cb0c5be1d) | `variable` | Declared here |
+| [`TimedToken`](#classicy_1_1TimedToken_1a19c745cfb2c7accc49f970fec47be0d1) | `function` | Declared here |
+| [`TimedToken`](#classicy_1_1TimedToken_1a071f9e0ba50b129fc4c2d953cff66d1b) | `function` | Declared here |
+| [`id`](#classicy_1_1TimedToken_1aced665db8c3025b1f3d354c8784461b3) | `function` | Declared here |
+| [`operator==`](#classicy_1_1TimedToken_1a5cbaa0236dee8d13193fb9600cd643f9) | `function` | Declared here |
+| [`operator==`](#classicy_1_1TimedToken_1a665008e85f9e24a21aeefc82fa9032f8) | `function` | Declared here |
+| [`_startAt`](#classicy_1_1Timeout_1ae2803106c005a9e2ef791195ecf97302) | `variable` | Inherited from [`Timeout`](#timeout) |
+| [`_delay`](#classicy_1_1Timeout_1a25f7f2bd9eacac9b3e15beba99ffedde) | `variable` | Inherited from [`Timeout`](#timeout) |
+| [`_running`](#classicy_1_1Timeout_1a2c8a9bd3e3675f2433089b7e363dffa7) | `variable` | Inherited from [`Timeout`](#timeout) |
+| [`Timeout`](#classicy_1_1Timeout_1af06e5e219a3827e10ca07f362f53a969) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`Timeout`](#classicy_1_1Timeout_1a253230e267b468cba1840ddac9475877) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`Timeout`](#classicy_1_1Timeout_1a39e5e6403cdf17a2352451a5e86b7bf4) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`~Timeout`](#classicy_1_1Timeout_1a334cd837cd7dc0c61ab3043e2649422c) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`running`](#classicy_1_1Timeout_1a89520c7b79a40f016f20dccb054d103d) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`start`](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`stop`](#classicy_1_1Timeout_1a3015db4e29b2d32b54d3816255b61cba) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`reset`](#classicy_1_1Timeout_1ac99e1975e74242d89a668a6f3bb09d47) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`remaining`](#classicy_1_1Timeout_1a859375264af7d2d6b3ddfa5f06adbd5b) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`expired`](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`setDelay`](#classicy_1_1Timeout_1a3a4659601332274527c2c96e8ebedcdb) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`delay`](#classicy_1_1Timeout_1abd7e310a3ec39570dd7d8343cd716f67) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`operator=`](#classicy_1_1Timeout_1ae22499002615e47d10a532da925f1986) | `function` | Inherited from [`Timeout`](#timeout) |
+| [`operator=`](#classicy_1_1Timeout_1a2e005922d2a1c3a1ee9c42ad23daa6cf) | `function` | Inherited from [`Timeout`](#timeout) |
+
+### Inherited from [`Timeout`](#timeout)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_startAt`](#classicy_1_1Timeout_1ae2803106c005a9e2ef791195ecf97302)  |  |
+| `variable` | [`_delay`](#classicy_1_1Timeout_1a25f7f2bd9eacac9b3e15beba99ffedde)  |  |
+| `variable` | [`_running`](#classicy_1_1Timeout_1a2c8a9bd3e3675f2433089b7e363dffa7)  |  |
+| `function` | [`Timeout`](#classicy_1_1Timeout_1af06e5e219a3827e10ca07f362f53a969)  | Constructs a [Timeout](#timeout) with the given delay. |
+| `function` | [`Timeout`](#classicy_1_1Timeout_1a253230e267b468cba1840ddac9475877)  | Copy constructor. |
+| `function` | [`Timeout`](#classicy_1_1Timeout_1a39e5e6403cdf17a2352451a5e86b7bf4) `noexcept` | Defaulted constructor. |
+| `function` | [`~Timeout`](#classicy_1_1Timeout_1a334cd837cd7dc0c61ab3043e2649422c)  |  |
+| `function` | [`running`](#classicy_1_1Timeout_1a89520c7b79a40f016f20dccb054d103d) `const` | Returns true if the timer is currently running. |
+| `function` | [`start`](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e)  | Starts (or restarts) the timer, recording the current time as the start point. |
+| `function` | [`stop`](#classicy_1_1Timeout_1a3015db4e29b2d32b54d3816255b61cba)  | Stops the timer without resetting it. [expired()](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) will return false after this call. |
+| `function` | [`reset`](#classicy_1_1Timeout_1ac99e1975e74242d89a668a6f3bb09d47)  | Restarts the timer from now, equivalent to calling [start()](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e). |
+| `function` | [`remaining`](#classicy_1_1Timeout_1a859375264af7d2d6b3ddfa5f06adbd5b) `const` | Returns the number of milliseconds remaining before expiry. Returns 0 if already expired, or the full delay if not running. |
+| `function` | [`expired`](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) `const` | Returns true if the timer is running and the delay has fully elapsed. |
+| `function` | [`setDelay`](#classicy_1_1Timeout_1a3a4659601332274527c2c96e8ebedcdb) `inline` | Sets the expiry delay without restarting the timer. |
+| `function` | [`delay`](#classicy_1_1Timeout_1abd7e310a3ec39570dd7d8343cd716f67) `const` `inline` | Returns the configured delay in milliseconds. |
+| `function` | [`operator=`](#classicy_1_1Timeout_1ae22499002615e47d10a532da925f1986)  | Copy assignment operator. |
+| `function` | [`operator=`](#classicy_1_1Timeout_1a2e005922d2a1c3a1ee9c42ad23daa6cf) `noexcept` | Defaulted assignment operator. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -14565,6 +16498,42 @@ A [Timestamp](#timestamp) stores a monotonic* time value with (theoretical) micr
 [*] Note that [Timestamp](#timestamp) values are only monotonic as long as the systems's clock is monotonic as well (and not, e.g. set back).
 
 Timestamps are UTC (Coordinated Universal Time) based and thus independent of the timezone in effect on the system.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TimeVal`](#classicy_1_1Timestamp_1a64608e8ded359dd47dc08dec03a2c60e) | `typedef` | Declared here |
+| [`UtcTimeVal`](#classicy_1_1Timestamp_1a5cf22d610ea8ec8ce0143c9f89597d47) | `typedef` | Declared here |
+| [`TimeDiff`](#classicy_1_1Timestamp_1a204bb025454e8cbcc5052cbea7cf02f6) | `typedef` | Declared here |
+| [`_ts`](#classicy_1_1Timestamp_1a6401f5f60e63a0f8ecbae6f8f9fd1fe2) | `variable` | Declared here |
+| [`Timestamp`](#classicy_1_1Timestamp_1a772b4486bcf286983804ddcd6ff4291b) | `function` | Declared here |
+| [`Timestamp`](#classicy_1_1Timestamp_1a1a15fe52904f248b0cd102a9c08744ca) | `function` | Declared here |
+| [`Timestamp`](#classicy_1_1Timestamp_1abc96eb6b9ad0c885ce01c6ab62988fec) | `function` | Declared here |
+| [`~Timestamp`](#classicy_1_1Timestamp_1ab4de468f0c9d818d98a8fe206ce865bd) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timestamp_1a0d8cab012387c54a6ac08686f1af1a79) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timestamp_1ae79e8082e23c62fd83d2ebd9913f262d) | `function` | Declared here |
+| [`swap`](#classicy_1_1Timestamp_1a974b42e6aa1c76ed8729d838e50553e6) | `function` | Declared here |
+| [`update`](#classicy_1_1Timestamp_1a5343041ae8b02b269fd6055f9b1a0c63) | `function` | Declared here |
+| [`operator==`](#classicy_1_1Timestamp_1a060921a856a0b5bd4c99d7c0c31fd390) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1Timestamp_1abbaa2c4e08138a47fbf9f2b2de39f3a6) | `function` | Declared here |
+| [`operator>`](#classicy_1_1Timestamp_1a8b526130f4b21530c6667e8f71c4ed81) | `function` | Declared here |
+| [`operator>=`](#classicy_1_1Timestamp_1a050a5ac0afe137a84dad8df52ab64711) | `function` | Declared here |
+| [`operator<`](#classicy_1_1Timestamp_1aff667a628978ec90a21d5bdfbb9fd0b2) | `function` | Declared here |
+| [`operator<=`](#classicy_1_1Timestamp_1aabd13e178fd87adcdd7a4d1623eadd54) | `function` | Declared here |
+| [`operator+`](#classicy_1_1Timestamp_1a604e4d0850f650d6166139c801385da1) | `function` | Declared here |
+| [`operator-`](#classicy_1_1Timestamp_1af36ea20c3c49e42d2a84a5951581b556) | `function` | Declared here |
+| [`operator-`](#classicy_1_1Timestamp_1ab9335a201ae4b8997d34060f1aad9519) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1Timestamp_1ad2cd6961156439417e0881514d8d3852) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Timestamp_1adc436556c8c3effe9e4f45f63be45678) | `function` | Declared here |
+| [`epochTime`](#classicy_1_1Timestamp_1a19cf3095746f1421157ff6ca1a965d03) | `function` | Declared here |
+| [`utcTime`](#classicy_1_1Timestamp_1a1304efec56755a6c32d2cd19430b1d0e) | `function` | Declared here |
+| [`epochMicroseconds`](#classicy_1_1Timestamp_1aa8fc7548a290f0d3a54c5a193a4398ad) | `function` | Declared here |
+| [`elapsed`](#classicy_1_1Timestamp_1aff9d88bebd14721fffc3ac44db421840) | `function` | Declared here |
+| [`isElapsed`](#classicy_1_1Timestamp_1a2bc55eacf69b8951d081c9805b8970b6) | `function` | Declared here |
+| [`fromEpochTime`](#classicy_1_1Timestamp_1a73b198c74d294fc8bdf868391c89f9f8) | `function` | Declared here |
+| [`fromUtcTime`](#classicy_1_1Timestamp_1a606df6184d76c4fdd5bea9a8f9d90737) | `function` | Declared here |
+| [`resolution`](#classicy_1_1Timestamp_1add91faba9bdf17c8f9228f66b0c30c32) | `function` | Declared here |
 
 ### Public Methods
 
@@ -15050,6 +17019,61 @@ class Timespan
 Defined in src/base/include/icy/datetime.h:119
 
 A class that represents time spans up to microsecond resolution.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TimeDiff`](#classicy_1_1Timespan_1a59b3ac9cd75c8803f647547646563cc9) | `typedef` | Declared here |
+| [`MILLISECONDS`](#classicy_1_1Timespan_1a80339e693561970b48d72b8e8ca63736) | `variable` | Declared here |
+| [`SECONDS`](#classicy_1_1Timespan_1abf938c04047df736a7e5c58293e3f7a9) | `variable` | Declared here |
+| [`MINUTES`](#classicy_1_1Timespan_1a7d1f5839267b6a09fc9f87202202c994) | `variable` | Declared here |
+| [`HOURS`](#classicy_1_1Timespan_1a193ed4b810ea92e086a264f8fddf732f) | `variable` | Declared here |
+| [`DAYS`](#classicy_1_1Timespan_1aaca17f562da525aad03ab96623e90ec9) | `variable` | Declared here |
+| [`_span`](#classicy_1_1Timespan_1af9c86836101c776b784e6aea15c6dcb7) | `variable` | Declared here |
+| [`Timespan`](#classicy_1_1Timespan_1a16e1c671b4fca56065e7429f718838cf) | `function` | Declared here |
+| [`Timespan`](#classicy_1_1Timespan_1a1eb6e08817021ae671aeb2d79a35fc8b) | `function` | Declared here |
+| [`Timespan`](#classicy_1_1Timespan_1af48fe6303ecccee5ef07d1ea3d46878c) | `function` | Declared here |
+| [`Timespan`](#classicy_1_1Timespan_1a531a2bfdd6493e17e4a65aaabda9d057) | `function` | Declared here |
+| [`Timespan`](#classicy_1_1Timespan_1ac6dd2cb246f9519cc4ecee98f13763ca) | `function` | Declared here |
+| [`~Timespan`](#classicy_1_1Timespan_1a2d8cc4189d8402d30e37138a8a0c95c7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timespan_1a0980988b166847e7ba4080b6fe5da6d3) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Timespan_1abf60f7d11c5b0659530e432eea716ef9) | `function` | Declared here |
+| [`assign`](#classicy_1_1Timespan_1af5d6d431522d5fb4bd5a9324775cd266) | `function` | Declared here |
+| [`assign`](#classicy_1_1Timespan_1a9eb0a6bfbac79618fe580d6ba8add196) | `function` | Declared here |
+| [`swap`](#classicy_1_1Timespan_1a076fe5faa413a484034b19289f29c33a) | `function` | Declared here |
+| [`operator==`](#classicy_1_1Timespan_1a0bfa2c6588dde0db0d7457a194379027) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1Timespan_1a1bde84bc42e5f7b882e00e99b926b521) | `function` | Declared here |
+| [`operator>`](#classicy_1_1Timespan_1a53b4e7e4dac1eb0c4cf25068f79f339c) | `function` | Declared here |
+| [`operator>=`](#classicy_1_1Timespan_1af214f6798cea62f00dd4d97f440d59e5) | `function` | Declared here |
+| [`operator<`](#classicy_1_1Timespan_1a4473f8182c826dbb881c85184fbfa9cf) | `function` | Declared here |
+| [`operator<=`](#classicy_1_1Timespan_1a2e888253fa336c6f2936335211802751) | `function` | Declared here |
+| [`operator==`](#classicy_1_1Timespan_1a2f879e851717e49b400fbf91fe3d9eec) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1Timespan_1a1875ad6edc1bf5986b2359d8bbc64637) | `function` | Declared here |
+| [`operator>`](#classicy_1_1Timespan_1a2769c0bc98fc7e7a7f528b59dcaff2cb) | `function` | Declared here |
+| [`operator>=`](#classicy_1_1Timespan_1a66b9600843fb4e28f3385708766570c4) | `function` | Declared here |
+| [`operator<`](#classicy_1_1Timespan_1aee1ef94f0231bf0a6bb755ee531d479f) | `function` | Declared here |
+| [`operator<=`](#classicy_1_1Timespan_1a50a4285c0abe1d990eaa2f21f3fcebf5) | `function` | Declared here |
+| [`operator+`](#classicy_1_1Timespan_1a977f9c72bbc0fac7429986c1f0cf0262) | `function` | Declared here |
+| [`operator-`](#classicy_1_1Timespan_1ad59d097ecddd465330f3fd1fda799253) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1Timespan_1a6fe544a5b88f83f1460e73d8fa9e8394) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Timespan_1aabe3b5f166542910981325658646b7ff) | `function` | Declared here |
+| [`operator+`](#classicy_1_1Timespan_1ab8801b170e8cae6f6a92c5c12bdff172) | `function` | Declared here |
+| [`operator-`](#classicy_1_1Timespan_1ae1f54edaf7f33a7dfb15ccf2573d453c) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1Timespan_1a5fef5def63a67fa069ec95f30dbb0160) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1Timespan_1acb7115a2acd81b6259689af9412fb6bb) | `function` | Declared here |
+| [`days`](#classicy_1_1Timespan_1aac16282073ae46d1efdc8fff3ae67fde) | `function` | Declared here |
+| [`hours`](#classicy_1_1Timespan_1a933c848c9dc06d3856bef8f105c2f877) | `function` | Declared here |
+| [`totalHours`](#classicy_1_1Timespan_1ada918cf0ef0e1c76f518cbaaa39e40f0) | `function` | Declared here |
+| [`minutes`](#classicy_1_1Timespan_1a89e01746d17e3eae527b79159c524e85) | `function` | Declared here |
+| [`totalMinutes`](#classicy_1_1Timespan_1afa42b359db764755c999167137a567fe) | `function` | Declared here |
+| [`seconds`](#classicy_1_1Timespan_1a4a79ed6b4c3ba41f5ce0a436ecb866d7) | `function` | Declared here |
+| [`totalSeconds`](#classicy_1_1Timespan_1ab88b919ea5e64d2eb81dac1c5400acdd) | `function` | Declared here |
+| [`milliseconds`](#classicy_1_1Timespan_1aeaa52d45c2160f7005e4fecc4923af86) | `function` | Declared here |
+| [`totalMilliseconds`](#classicy_1_1Timespan_1aeed5c0572033f6db0afa9a5f43eb3ad0) | `function` | Declared here |
+| [`microseconds`](#classicy_1_1Timespan_1a1fc3811a20a2d59b263a491829398bcb) | `function` | Declared here |
+| [`useconds`](#classicy_1_1Timespan_1ab08dd1332ac59719c5a413d4da8e35d5) | `function` | Declared here |
+| [`totalMicroseconds`](#classicy_1_1Timespan_1a50f0fe332ddfd60a8508489a945b7256) | `function` | Declared here |
 
 ### Public Methods
 
@@ -15882,6 +17906,93 @@ For more information, please see:
 * [http://en.wikipedia.org/wiki/UTC](http://en.wikipedia.org/wiki/UTC)
 
 * [http://en.wikipedia.org/wiki/ISO_8601](http://en.wikipedia.org/wiki/ISO_8601)
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Months`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8) | `enum` | Declared here |
+| [`JANUARY`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a33f3fd039202e65db8a95470a534cd80) | `enumvalue` | Declared here |
+| [`FEBRUARY`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8ad60d5bb7dbc628f7a9c897f9d24545bf) | `enumvalue` | Declared here |
+| [`MARCH`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8af1d7f791467c1c92b4b47b258a6cf4f9) | `enumvalue` | Declared here |
+| [`APRIL`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a499b67b9aeca88c4c7a70087d3f5024c) | `enumvalue` | Declared here |
+| [`MAY`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8aa5b86456f5792b5b3c67d9fe0da9582e) | `enumvalue` | Declared here |
+| [`JUNE`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a47d525dcef47434094b7ed725f335756) | `enumvalue` | Declared here |
+| [`JULY`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a81a104b899debc5db1fc6e49cd3a9474) | `enumvalue` | Declared here |
+| [`AUGUST`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a8e17e1eabc19bace1592512d7412caba) | `enumvalue` | Declared here |
+| [`SEPTEMBER`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8ad5c203808c16ed11ff16abdacd692a52) | `enumvalue` | Declared here |
+| [`OCTOBER`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a1d580fac1097c06e399f2eb3414a81fa) | `enumvalue` | Declared here |
+| [`NOVEMBER`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8a5e4642baf803f3bcd5f73e181043c3fc) | `enumvalue` | Declared here |
+| [`DECEMBER`](#classicy_1_1DateTime_1a89ff805a27d245917d158503cfddcdc8ac25fa6ecbd82bd48b65f150dce833090) | `enumvalue` | Declared here |
+| [`DaysOfWeek`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187) | `enum` | Declared here |
+| [`SUNDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187a04cfcfcfb09b2458402674153c44be6a) | `enumvalue` | Declared here |
+| [`MONDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187adbed4e28ea704a59173caf74b8cb248a) | `enumvalue` | Declared here |
+| [`TUESDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187a18fe9e55c174ede618e42008e0de00df) | `enumvalue` | Declared here |
+| [`WEDNESDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187a40b7c688460bc0b3243f647b79404626) | `enumvalue` | Declared here |
+| [`THURSDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187adf373762e2146644e42d2d9245764e7c) | `enumvalue` | Declared here |
+| [`FRIDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187a56865ad5ad9600029fd7a0057184ee5e) | `enumvalue` | Declared here |
+| [`SATURDAY`](#classicy_1_1DateTime_1a1c7472dff8d52fe488bb7d1774b91187a00ec7ab8b9a91f3097ab25149ed72013) | `enumvalue` | Declared here |
+| [`_utcTime`](#classicy_1_1DateTime_1a3899bc87f5c03e96a167b3fe9bf183a5) | `variable` | Declared here |
+| [`_year`](#classicy_1_1DateTime_1a7f57e2918efba6128a82b0b5c098c00f) | `variable` | Declared here |
+| [`_month`](#classicy_1_1DateTime_1a1486fb4d24e1318aac5d410a6d60519e) | `variable` | Declared here |
+| [`_day`](#classicy_1_1DateTime_1ad2d0b6b91cbe3a637408edacda36561d) | `variable` | Declared here |
+| [`_hour`](#classicy_1_1DateTime_1ad457335b90e6263dfdd592d893ee6a11) | `variable` | Declared here |
+| [`_minute`](#classicy_1_1DateTime_1affe38d6c826a9dcdd8b176f7ccb3f8dc) | `variable` | Declared here |
+| [`_second`](#classicy_1_1DateTime_1ae952cff3ac7674a8882560624181dcc6) | `variable` | Declared here |
+| [`_millisecond`](#classicy_1_1DateTime_1ab06ce69971a71fc19e0a15d6ba35c15a) | `variable` | Declared here |
+| [`_microsecond`](#classicy_1_1DateTime_1a947f737b016cd67184f328b2c757d43d) | `variable` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1a88f18de763da83b8bd5c1061a045f607) | `function` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1a98a38dd5cae41ad5f820b3a848b03a66) | `function` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1acdc77827e37a3c17ea61f4fba40bd7a1) | `function` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1aab006158a82eaa756b0dc3926da70c7f) | `function` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1aceddc2e101ac37b9be345d5124155fa1) | `function` | Declared here |
+| [`DateTime`](#classicy_1_1DateTime_1ad80a1fbc2e7b6aabac0553add8e92fb1) | `function` | Declared here |
+| [`~DateTime`](#classicy_1_1DateTime_1aec6d717e15992cea51ee73292562a5fe) | `function` | Declared here |
+| [`operator=`](#classicy_1_1DateTime_1a041ff846c7d837f53763e32527c5aaa7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1DateTime_1a6f2ad5f89379818b9222979cef4a1f8b) | `function` | Declared here |
+| [`operator=`](#classicy_1_1DateTime_1a3c4a47b193bc49a5081a8b3dc281e00f) | `function` | Declared here |
+| [`assign`](#classicy_1_1DateTime_1a4eae96c78b7a4697ef98be57d8d85cee) | `function` | Declared here |
+| [`swap`](#classicy_1_1DateTime_1ab5570eb74e68a00f431e28c9c1c417e4) | `function` | Declared here |
+| [`year`](#classicy_1_1DateTime_1a5cd0731b407ab7f7639869e7b48273c4) | `function` | Declared here |
+| [`month`](#classicy_1_1DateTime_1a208b8c1fa604bc87566453f6a771713a) | `function` | Declared here |
+| [`week`](#classicy_1_1DateTime_1ac77436331a3f737ff0e5c11edadff7e3) | `function` | Declared here |
+| [`day`](#classicy_1_1DateTime_1ace3773d026336ac93bdd64dd4cb33e71) | `function` | Declared here |
+| [`dayOfWeek`](#classicy_1_1DateTime_1a40536db278411e8d459822021131da8e) | `function` | Declared here |
+| [`dayOfYear`](#classicy_1_1DateTime_1ac1b4e14fa390628cf8fb79de5bbcf855) | `function` | Declared here |
+| [`hour`](#classicy_1_1DateTime_1a7b8526b041219db43c1350848ae6dc30) | `function` | Declared here |
+| [`hourAMPM`](#classicy_1_1DateTime_1adb4a279c389109ad8b53ec800323bdbc) | `function` | Declared here |
+| [`isAM`](#classicy_1_1DateTime_1a08746d2f936443f6ed2cbcc3ccbefa51) | `function` | Declared here |
+| [`isPM`](#classicy_1_1DateTime_1a2ea9fd6e1bb537acf8616985086ecedb) | `function` | Declared here |
+| [`minute`](#classicy_1_1DateTime_1adcf5222b1bc8394b2863e0de89f5c307) | `function` | Declared here |
+| [`second`](#classicy_1_1DateTime_1a86480ab6bac73a5bb8513ab06b4baa36) | `function` | Declared here |
+| [`millisecond`](#classicy_1_1DateTime_1a2922647603454180d9ed84649eea4105) | `function` | Declared here |
+| [`microsecond`](#classicy_1_1DateTime_1ab388d01a53ffc4aa51f1ee8b50139c59) | `function` | Declared here |
+| [`julianDay`](#classicy_1_1DateTime_1ae69ed6bcd72d688343525b7abefe1c87) | `function` | Declared here |
+| [`timestamp`](#classicy_1_1DateTime_1a19dec3aed8ccfb916dbeb261af68760b) | `function` | Declared here |
+| [`utcTime`](#classicy_1_1DateTime_1a6bbd5d25a46b833a212f6f71eb2f0e0f) | `function` | Declared here |
+| [`operator==`](#classicy_1_1DateTime_1aeb5af633f76aa36aecb3e0a23537dfeb) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1DateTime_1a42d389c39f43843d9ff9d6e9f50a0ac0) | `function` | Declared here |
+| [`operator<`](#classicy_1_1DateTime_1afaf4afe3eb9493d18a8c5de742ef8f56) | `function` | Declared here |
+| [`operator<=`](#classicy_1_1DateTime_1a87b4f736aa76a9ce22db6c3982d642f8) | `function` | Declared here |
+| [`operator>`](#classicy_1_1DateTime_1aa7f3e49dd37f1aad4de5a07b8ffe9f5e) | `function` | Declared here |
+| [`operator>=`](#classicy_1_1DateTime_1a92ba51a0bee502b30d62ffab4ea80d07) | `function` | Declared here |
+| [`operator+`](#classicy_1_1DateTime_1aef1f2b8a11f9dd62a1ae02d94d415402) | `function` | Declared here |
+| [`operator-`](#classicy_1_1DateTime_1a500e3b52145d42a07b01eb62d740d39b) | `function` | Declared here |
+| [`operator-`](#classicy_1_1DateTime_1a33665a95762b86fc8196113075243a3e) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1DateTime_1ab3051c9e25dda1a0824450d6e4b3be71) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1DateTime_1a54c3347bd18dd297747328d8dee7ab0f) | `function` | Declared here |
+| [`makeUTC`](#classicy_1_1DateTime_1afb1c31f9f9242ed9987d4c2481579ade) | `function` | Declared here |
+| [`makeLocal`](#classicy_1_1DateTime_1ae2abd55022e7c1ddf91fa1c3fd909687) | `function` | Declared here |
+| [`isLeapYear`](#classicy_1_1DateTime_1afbabfaf3737eb558af1804d990360fa8) | `function` | Declared here |
+| [`daysOfMonth`](#classicy_1_1DateTime_1a760ca3a7aa17b8ea990a37fd24fe6da0) | `function` | Declared here |
+| [`isValid`](#classicy_1_1DateTime_1a6a1373c22572ebae9af08c3eaf3d267e) | `function` | Declared here |
+| [`toJulianDay`](#classicy_1_1DateTime_1a2857dde4b42f2dbb6500dde67181fdd0) | `function` | Declared here |
+| [`toJulianDay`](#classicy_1_1DateTime_1a70b4638881dfab82138251e580e471f3) | `function` | Declared here |
+| [`toUtcTime`](#classicy_1_1DateTime_1a3fd1fcdba7bec8346ce03ac13cfcc0dd) | `function` | Declared here |
+| [`computeGregorian`](#classicy_1_1DateTime_1a385382af17efa3a8610ede3fc06108fc) | `function` | Declared here |
+| [`computeDaytime`](#classicy_1_1DateTime_1a8dfc0759389ff10709f6d94611caa28c) | `function` | Declared here |
+| [`checkLimit`](#classicy_1_1DateTime_1a5dadaf99b3479a259567a03b544f72f5) | `function` | Declared here |
+| [`normalize`](#classicy_1_1DateTime_1acb6209100e1f305fdbc1538b0ab8a59c) | `function` | Declared here |
 
 ### Public Methods
 
@@ -16910,6 +19021,18 @@ Defined in src/base/include/icy/datetime.h:641
 
 This class provides information about the current timezone.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`utcOffset`](#classicy_1_1Timezone_1a170e81d324a7366aecc33909441f8e86) | `function` | Declared here |
+| [`dst`](#classicy_1_1Timezone_1a63486f75f5a20b7c98bbb6509049a8ba) | `function` | Declared here |
+| [`isDst`](#classicy_1_1Timezone_1a37048b7218b561c08f72a02f764aedc5) | `function` | Declared here |
+| [`tzd`](#classicy_1_1Timezone_1a87d9b8c984ea21ee43afb90102d79247) | `function` | Declared here |
+| [`name`](#classicy_1_1Timezone_1a6dfd6870de0f642b8b213cd84bfd1b24) | `function` | Declared here |
+| [`standardName`](#classicy_1_1Timezone_1a3b47dc57a578fb579cac2a2e1600a06c) | `function` | Declared here |
+| [`dstName`](#classicy_1_1Timezone_1a5c786b49f9158b192488057f171ebe7f) | `function` | Declared here |
+
 ### Public Static Methods
 
 | Return | Name | Description |
@@ -17055,6 +19178,66 @@ In addition to the date and time, the class also maintains a time zone different
 Although [LocalDateTime](#localdatetime) supports relational and arithmetic operators, all date/time comparisons and date/time arithmetics should be done in UTC, using the [DateTime](#datetime) or [Timestamp](#timestamp) class for better performance. The relational operators normalize the dates/times involved to UTC before carrying out the comparison.
 
 The time zone differential is based on the input date and time and current time zone. A number of constructors accept an explicit time zone differential parameter. These should not be used since daylight savings time processing is impossible since the time zone is unknown. Each of the constructors accepting a tzd parameter have been marked as deprecated and may be removed in a future revision.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_dateTime`](#classicy_1_1LocalDateTime_1a1b11a41c2cc2c4230b723168b22d4794) | `variable` | Declared here |
+| [`_tzd`](#classicy_1_1LocalDateTime_1a5efb1b1edecc1d23b7585d418e860d0d) | `variable` | Declared here |
+| [`DateTimeFormatter`](#classicy_1_1LocalDateTime_1a75fc75aa1e2b00877360987d79909afa) | `friend` | Declared here |
+| [`DateTimeParser`](#classicy_1_1LocalDateTime_1a0423d1d791d6dc94c5f24716dcbdc047) | `friend` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1ac5059d0ed637788d126102e60b94423b) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a3395047ccfc34d6e89dd272d22add208) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1af5170e821f6bdb56584acd4907a6846d) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a3bd3c9338f6e9e5f1d3d2dbfe9add22e) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1ad517a45e804bdacdccf9a5745b90862a) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a2d3230d4483af6885101c43a3e6fb8c1) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a4e26cc2e006a7ae11feb16523603804f) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1af382fe0cd601d20676718b8edd721ca9) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a432b6e3485a40bba76687de8f1a8e571) | `function` | Declared here |
+| [`~LocalDateTime`](#classicy_1_1LocalDateTime_1ad626293302ada722f6b7640c1bf61500) | `function` | Declared here |
+| [`operator=`](#classicy_1_1LocalDateTime_1ac532659ca9c771ec9c9320d962c1866e) | `function` | Declared here |
+| [`operator=`](#classicy_1_1LocalDateTime_1aa37e7f62da59abaeda788016095e25d8) | `function` | Declared here |
+| [`operator=`](#classicy_1_1LocalDateTime_1a3f846158b3be7008d8158b551360fad9) | `function` | Declared here |
+| [`assign`](#classicy_1_1LocalDateTime_1abe13890bcb8ed0bbf7443e24bcbf1869) | `function` | Declared here |
+| [`assign`](#classicy_1_1LocalDateTime_1a87585f48ca5130ada5743c549f3b1f82) | `function` | Declared here |
+| [`assign`](#classicy_1_1LocalDateTime_1abf3f1e8674d6983bbb3b5ba7d44f9b0b) | `function` | Declared here |
+| [`swap`](#classicy_1_1LocalDateTime_1a5c6ba3682220f0449e193ed517941d7b) | `function` | Declared here |
+| [`year`](#classicy_1_1LocalDateTime_1a61b45f2aa85e920a2fa74fdb25f3f6b2) | `function` | Declared here |
+| [`month`](#classicy_1_1LocalDateTime_1a0ba0c642a4abc37d814d6f60d9537889) | `function` | Declared here |
+| [`week`](#classicy_1_1LocalDateTime_1a7cb5957842a655af1fedfc605b798b03) | `function` | Declared here |
+| [`day`](#classicy_1_1LocalDateTime_1acb962d1254df1d8e3cb298124e151901) | `function` | Declared here |
+| [`dayOfWeek`](#classicy_1_1LocalDateTime_1a69b4da90ec8eaf96b57545fcdfbf5252) | `function` | Declared here |
+| [`dayOfYear`](#classicy_1_1LocalDateTime_1ab7ba2dc43be6ab279f2b7c78c8d9878f) | `function` | Declared here |
+| [`hour`](#classicy_1_1LocalDateTime_1a409e9e1bf8c4d983667184cc4e97ece1) | `function` | Declared here |
+| [`hourAMPM`](#classicy_1_1LocalDateTime_1ab615d7678c933d572b2b4ccce4557d5c) | `function` | Declared here |
+| [`isAM`](#classicy_1_1LocalDateTime_1a587c88ce2b3866e9ffe1a72f945b0f0d) | `function` | Declared here |
+| [`isPM`](#classicy_1_1LocalDateTime_1a6879c416e387b61dfd08d2b68e4c1bb0) | `function` | Declared here |
+| [`minute`](#classicy_1_1LocalDateTime_1a6e882b459f38e1762c15ea0ed3cc8b86) | `function` | Declared here |
+| [`second`](#classicy_1_1LocalDateTime_1a09472b9c48889946b4efd7ec3a00cd8e) | `function` | Declared here |
+| [`millisecond`](#classicy_1_1LocalDateTime_1a6f9bec27c96c133a9cc94234e4e22f41) | `function` | Declared here |
+| [`microsecond`](#classicy_1_1LocalDateTime_1a5053538b87d22a26b4cb3c7045af03f6) | `function` | Declared here |
+| [`julianDay`](#classicy_1_1LocalDateTime_1adac7b9f1d3249c8cf54f153fae10d802) | `function` | Declared here |
+| [`tzd`](#classicy_1_1LocalDateTime_1a019f643bcf7023a32ee5aa1ddee51f34) | `function` | Declared here |
+| [`utc`](#classicy_1_1LocalDateTime_1a39cf2cc628a04585ebb56557c4f206dd) | `function` | Declared here |
+| [`timestamp`](#classicy_1_1LocalDateTime_1af8dea10b15812200c0b1ef56c9e6f42d) | `function` | Declared here |
+| [`utcTime`](#classicy_1_1LocalDateTime_1a162fb1f5ce10a751c18cdc62bbd2e6f1) | `function` | Declared here |
+| [`operator==`](#classicy_1_1LocalDateTime_1a3304ed590c393388e7d08a0737879a84) | `function` | Declared here |
+| [`operator!=`](#classicy_1_1LocalDateTime_1afa5bdbd4e9489d36f41c0271adb544d9) | `function` | Declared here |
+| [`operator<`](#classicy_1_1LocalDateTime_1aa935475707ddd250c9520c0892f557f8) | `function` | Declared here |
+| [`operator<=`](#classicy_1_1LocalDateTime_1a20d06882000b6eb869e267f6a3d139e5) | `function` | Declared here |
+| [`operator>`](#classicy_1_1LocalDateTime_1abed1d6cae15d69a4eca9e5435ba52c5b) | `function` | Declared here |
+| [`operator>=`](#classicy_1_1LocalDateTime_1ad59111804d384d26a2c8891f1068d770) | `function` | Declared here |
+| [`operator+`](#classicy_1_1LocalDateTime_1a294bda8fad95cc6fb9876c2f7e27dee2) | `function` | Declared here |
+| [`operator-`](#classicy_1_1LocalDateTime_1ada0d22fefba101dcb1d8920be3dcad7f) | `function` | Declared here |
+| [`operator-`](#classicy_1_1LocalDateTime_1a2606bd0bbfcc884aec81cac317b803ae) | `function` | Declared here |
+| [`operator+=`](#classicy_1_1LocalDateTime_1a565bb1850d266c029ff96d7a3dbe1d14) | `function` | Declared here |
+| [`operator-=`](#classicy_1_1LocalDateTime_1a7967078370f76313458885248773d13b) | `function` | Declared here |
+| [`LocalDateTime`](#classicy_1_1LocalDateTime_1a1bd8f83dd706baf06dc0c4a5757cb41d) | `function` | Declared here |
+| [`determineTzd`](#classicy_1_1LocalDateTime_1a11d370280ea67111e929a0944dbd0df6) | `function` | Declared here |
+| [`adjustForTzd`](#classicy_1_1LocalDateTime_1a12b329ccf06bdc8c089785f46992faf4) | `function` | Declared here |
+| [`dstOffset`](#classicy_1_1LocalDateTime_1a42f976ef35460c53ce6f018190e5b4fa) | `function` | Declared here |
 
 ### Friends
 
@@ -18017,6 +20200,22 @@ Defined in src/base/include/icy/datetime.h:1055
 
 Definition of date/time formats and various constants used by [DateTimeFormatter](#datetimeformatter) and [DateTimeParser](#datetimeparser).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ISO8601_FORMAT`](#classicy_1_1DateTimeFormat_1a2493408c6c2a4b8629143587ab8e269a) | `variable` | Declared here |
+| [`ISO8601_FRAC_FORMAT`](#classicy_1_1DateTimeFormat_1a597b8956e4748a28ceea25618083b811) | `variable` | Declared here |
+| [`RFC822_FORMAT`](#classicy_1_1DateTimeFormat_1a721e5df4de3dd66fd35ecb4694f65862) | `variable` | Declared here |
+| [`RFC1123_FORMAT`](#classicy_1_1DateTimeFormat_1a7933bb3be903e72fcda5e1fd9b8c3af5) | `variable` | Declared here |
+| [`HTTP_FORMAT`](#classicy_1_1DateTimeFormat_1a3f2e2c6ebbc354ec8385365532e28b99) | `variable` | Declared here |
+| [`RFC850_FORMAT`](#classicy_1_1DateTimeFormat_1aa19c062730f11d2764f066c7dd7c1eeb) | `variable` | Declared here |
+| [`RFC1036_FORMAT`](#classicy_1_1DateTimeFormat_1ad2ff06fe9ad501a6fa95a242db76accf) | `variable` | Declared here |
+| [`ASCTIME_FORMAT`](#classicy_1_1DateTimeFormat_1aa21a22b8cfbdfaa3a9a92845aca09c68) | `variable` | Declared here |
+| [`SORTABLE_FORMAT`](#classicy_1_1DateTimeFormat_1a244f63e1d1902893b509da67851e22ec) | `variable` | Declared here |
+| [`WEEKDAY_NAMES`](#classicy_1_1DateTimeFormat_1a503415e44444852daa6721c976512be1) | `variable` | Declared here |
+| [`MONTH_NAMES`](#classicy_1_1DateTimeFormat_1a2d345c657064595dc3294da06621b7df) | `variable` | Declared here |
+
 ### Public Static Attributes
 
 | Return | Name | Description |
@@ -18248,6 +20447,25 @@ There are two kind of static member functions:
 * format* functions return a std::string containin the formatted value.
 
 * append* functions append the formatted value to an existing string.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`@324166125375040071131114040250204055235371364256`](#classicy_1_1DateTimeFormatter_1a2eb640b6e510bc875b47f0391198fed7) | `enum` | Declared here |
+| [`UTC`](#classicy_1_1DateTimeFormatter_1a2eb640b6e510bc875b47f0391198fed7ab7ec04f948602e76b1fa7a0e3684ce06) | `enumvalue` | Declared here |
+| [`format`](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) | `function` | Declared here |
+| [`format`](#classicy_1_1DateTimeFormatter_1aefda8028073809c7f3e59a172ee9f81b) | `function` | Declared here |
+| [`format`](#classicy_1_1DateTimeFormatter_1a632cf2a69d2f6ffc80eaa719f687c8d0) | `function` | Declared here |
+| [`format`](#classicy_1_1DateTimeFormatter_1a9078493b700795138176b84e98b74085) | `function` | Declared here |
+| [`append`](#classicy_1_1DateTimeFormatter_1a5a94fe6c2841f35640837b4f43c4ef12) | `function` | Declared here |
+| [`append`](#classicy_1_1DateTimeFormatter_1af6dd2c4b537c3fb3536e6cfd17e3a85f) | `function` | Declared here |
+| [`append`](#classicy_1_1DateTimeFormatter_1af7fe26da1cca76cf577979153e32e2f8) | `function` | Declared here |
+| [`append`](#classicy_1_1DateTimeFormatter_1a8219cd92f6d2912a3bc9a614c0bb6edf) | `function` | Declared here |
+| [`tzdISO`](#classicy_1_1DateTimeFormatter_1ae434a0926c7364f532aaf9dad3b89792) | `function` | Declared here |
+| [`tzdRFC`](#classicy_1_1DateTimeFormatter_1a1df2ea914063b4fb460e0fcc5c11125f) | `function` | Declared here |
+| [`tzdISO`](#classicy_1_1DateTimeFormatter_1aa02e1d6af13f671278e4dec97f7fe776) | `function` | Declared here |
+| [`tzdRFC`](#classicy_1_1DateTimeFormatter_1abb82d2afeb304c5ef65cedeca7bbc348) | `function` | Declared here |
 
 ### Public Static Methods
 
@@ -18584,6 +20802,21 @@ Note: When parsing a time in 12-hour (AM/PM) format, the hour (h) must be parsed
 
 See the [DateTimeFormatter](#datetimeformatter) class for a list of supported format specifiers. In addition to the format specifiers supported by [DateTimeFormatter](#datetimeformatter), an additional specifier is supported: r will parse a year given by either two or four digits. Years 69-00 are interpreted in the 20th century (1969-2000), years 01-68 in the 21th century (2001-2068).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`parse`](#classicy_1_1DateTimeParser_1afaf62f609110897d879ec98f45c9752f) | `function` | Declared here |
+| [`parse`](#classicy_1_1DateTimeParser_1a0871489bf0a3a77753a6edef52f4bb3e) | `function` | Declared here |
+| [`tryParse`](#classicy_1_1DateTimeParser_1abb8d8351f137bc5b99854a75f4cab133) | `function` | Declared here |
+| [`parse`](#classicy_1_1DateTimeParser_1a94962b5f8f9ae148409bee214a96160e) | `function` | Declared here |
+| [`parse`](#classicy_1_1DateTimeParser_1abbb881f29c401183ee9a6ddd867a505b) | `function` | Declared here |
+| [`tryParse`](#classicy_1_1DateTimeParser_1a367c4a598cbd25b9ea41638774ff467b) | `function` | Declared here |
+| [`parseMonth`](#classicy_1_1DateTimeParser_1a7f1d6585923066f46ba914779c6e872d) | `function` | Declared here |
+| [`parseDayOfWeek`](#classicy_1_1DateTimeParser_1a064dd580a95102f1f3a518021c3dbfc9) | `function` | Declared here |
+| [`parseTZD`](#classicy_1_1DateTimeParser_1a7c68798ef9ce9e4c03ee3a26ea92304f) | `function` | Declared here |
+| [`parseAMPM`](#classicy_1_1DateTimeParser_1adde6a639a1b45b2a8b48b712cfdb16b4) | `function` | Declared here |
+
 ### Public Static Methods
 
 | Return | Name | Description |
@@ -18742,6 +20975,26 @@ Defined in src/base/include/icy/datetime.h:1733
 A simple facility to measure time intervals with microsecond resolution.
 
 The [Stopwatch](#stopwatch) uses the current system time, so if the system time changes the measured time will be incorrect.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_start`](#classicy_1_1Stopwatch_1a1052bf6eff4f326768c5d13dcbc47ba0) | `variable` | Declared here |
+| [`_elapsed`](#classicy_1_1Stopwatch_1a451f230bf02d43507b95af724e67a243) | `variable` | Declared here |
+| [`_running`](#classicy_1_1Stopwatch_1ad79ba3ba87310aa9ca8c854eaaa3fc0c) | `variable` | Declared here |
+| [`Stopwatch`](#classicy_1_1Stopwatch_1ae855c3f8373ca90aa45a5f5bddd88900) | `function` | Declared here |
+| [`~Stopwatch`](#classicy_1_1Stopwatch_1abcc2a922273ae8f0de06beb1c522bbff) | `function` | Declared here |
+| [`start`](#classicy_1_1Stopwatch_1af20767e8d78941a739f8c4dda2cf1c54) | `function` | Declared here |
+| [`stop`](#classicy_1_1Stopwatch_1a3bb477d16b4c59f079dd9705a83357eb) | `function` | Declared here |
+| [`reset`](#classicy_1_1Stopwatch_1a2347d9ca1c4e40912b85a8cfa7230a33) | `function` | Declared here |
+| [`restart`](#classicy_1_1Stopwatch_1a6d3d335a7886c7680823ee79a440a7e9) | `function` | Declared here |
+| [`elapsed`](#classicy_1_1Stopwatch_1ae04c36c1269ccfdb3b6a18c163ad4cb4) | `function` | Declared here |
+| [`elapsedSeconds`](#classicy_1_1Stopwatch_1a1947f62aa94a5dd5653c4a7ece1df257) | `function` | Declared here |
+| [`elapsedMilliseconds`](#classicy_1_1Stopwatch_1a7e81177009f0451c4482d096e1fc0366) | `function` | Declared here |
+| [`resolution`](#classicy_1_1Stopwatch_1a7a553c76ce6888931782b75ddd3df657) | `function` | Declared here |
+| [`Stopwatch`](#classicy_1_1Stopwatch_1ae6f1ab5bb090b4d034fb4d8d6dcdabf8) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Stopwatch_1aa408e2c425869c382d3d9ca453ef34ff) | `function` | Declared here |
 
 ### Public Methods
 
@@ -18978,6 +21231,64 @@ Threaded stream reader class.
 
 This class can be connected to a `[PacketStream](#packetstream)` to read input from any class that derives from `std::istream`. It's most regularly used for reading input files.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#classicy_1_1ThreadedStreamReader_1a41711d2938180b055aa2535ed0bda81e) | `variable` | Declared here |
+| [`_runner`](#classicy_1_1ThreadedStreamReader_1acfadac171f05bdc3b021848b5e6b6f01) | `variable` | Declared here |
+| [`_istream`](#classicy_1_1ThreadedStreamReader_1aaa2a2e6fd62c397ef97eab5780106d1d) | `variable` | Declared here |
+| [`ThreadedStreamReader`](#classicy_1_1ThreadedStreamReader_1a38e44165b4b57132525c7fc96c5e034e) | `function` | Declared here |
+| [`~ThreadedStreamReader`](#classicy_1_1ThreadedStreamReader_1a56963b5ac281ffd5bedd0aded85414e6) | `function` | Declared here |
+| [`start`](#classicy_1_1ThreadedStreamReader_1a8c9a8d156358a5063c25e20eea609c94) | `function` | Declared here |
+| [`stop`](#classicy_1_1ThreadedStreamReader_1a53ec1094fcd77d371c3f600a7dbfd04a) | `function` | Declared here |
+| [`stream`](#classicy_1_1ThreadedStreamReader_1a9f6f9a1b0b3bc2babeed459af9f883f6) | `function` | Declared here |
+| [`stream`](#classicy_1_1ThreadedStreamReader_1ac52b454b9bc6370b7c223c6126180439) | `function` | Declared here |
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`start`](#start-7) | `function` | Inherited from [`Startable`](#startable) |
+| [`stop`](#stop-6) | `function` | Inherited from [`Startable`](#startable) |
+
+### Inherited from [`PacketStreamAdapter`](#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
+### Inherited from [`Startable`](#startable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`start`](#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `function` | [`stop`](#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -19056,6 +21367,10 @@ Defined in src/base/include/icy/packetio.h:55
 
 Starts the reader thread; emits one line per iteration as a [RawPacket](#rawpacket). Emits a [FlagPacket](#flagpacket) with `[PacketFlags::Final](#namespaceicy_1a3d1e0d9028d45b9ec824bf4306047f18abeae421a14a34f831c113f61323d1ab3)` on EOF.
 
+##### Reimplements
+
+- [`start`](#start-7)
+
 ---
 
 {#stop}
@@ -19071,6 +21386,10 @@ virtual inline void stop() override
 Defined in src/base/include/icy/packetio.h:71
 
 Cancels the reader thread.
+
+##### Reimplements
+
+- [`stop`](#stop-6)
 
 ---
 
@@ -19164,6 +21483,67 @@ Packet stream writer class.
 
 This class can be connected to a `[PacketStream](#packetstream)` to write output to any class that derives from `std::ostream`. It's most regularly used for writing output files.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#classicy_1_1StreamWriter_1a8693224aa34120d2e982f9d44c17b879) | `variable` | Declared here |
+| [`_ostream`](#classicy_1_1StreamWriter_1ac16dec8de3a002ab765204f6bafc35ea) | `variable` | Declared here |
+| [`StreamWriter`](#classicy_1_1StreamWriter_1a35ea47630089c398535a2c93850419ba) | `function` | Declared here |
+| [`~StreamWriter`](#classicy_1_1StreamWriter_1a709a08c0bfe68c8c368971f9bc331312) | `function` | Declared here |
+| [`process`](#classicy_1_1StreamWriter_1a75045418bd235790d9e05a237c42e248) | `function` | Declared here |
+| [`stream`](#classicy_1_1StreamWriter_1a6f0604386c0f75ead5457c491fb6607c) | `function` | Declared here |
+| [`onStreamStateChange`](#classicy_1_1StreamWriter_1a08e66729ff2bd1edb13b3cae561a6d2e) | `function` | Declared here |
+| [`stream`](#classicy_1_1StreamWriter_1afc447f171076faf1cd0aeffd1057f46e) | `function` | Declared here |
+| [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+
+### Inherited from [`PacketProcessor`](#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -19244,6 +21624,10 @@ Serializes the packet via `write()`, flushes it to the output stream, then forwa
 #### Parameters
 * `packet` Incoming packet to process.
 
+##### Reimplements
+
+- [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#stream}
@@ -19285,6 +21669,10 @@ Defined in src/base/include/icy/packetio.h:159
 Closes the output file on `Closed` or `[Error](#error)` stream state transitions. 
 #### Parameters
 * `state` New stream state.
+
+##### Reimplements
+
+- [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
 
 ---
 
@@ -19345,6 +21733,26 @@ Defined in src/base/include/icy/stateful.h:31
 This class defines the state for a state machine, and should be extended and passed to implementations of the `[Stateful](#stateful)` template.
 
 For an example **See also**: [PacketStreamState](#packetstreamstate)
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Declared here |
+| [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Declared here |
+| [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Declared here |
+| [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Declared here |
+| [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Declared here |
+| [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Declared here |
+| [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Declared here |
+| [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Declared here |
+| [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Declared here |
+| [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Declared here |
+| [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Declared here |
+| [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Declared here |
+| [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Declared here |
+| [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Declared here |
+| [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Declared here |
 
 ### Friends
 
@@ -19502,6 +21910,10 @@ Returns a human-readable string for the current state [ID](#classicy_1_1State_1a
 #### Returns
 Result of `str(id())`.
 
+##### Reimplemented by
+
+- [`toString`](turn.md#tostring-6)
+
 ---
 
 {#equals}
@@ -19631,6 +22043,23 @@ For an example **See also**: [PacketStream](#packetstream)
 
 #### Parameters
 * `The` derived `[State](#state)` type.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Declared here |
+| [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Declared here |
+| [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Declared here |
+| [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Declared here |
+| [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Declared here |
+| [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Declared here |
+| [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Declared here |
+| [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Declared here |
+| [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Declared here |
+| [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Declared here |
+| [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Declared here |
+| [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -19815,6 +22244,12 @@ Defined in src/base/include/icy/stateful.h:143
 
 Override to handle post state change logic.
 
+##### Reimplemented by
+
+- [`onStateChange`](#classicy_1_1PacketStream_1a3645dffc04da5aff079593b1a511d950)
+- [`onStateChange`](#classicy_1_1PacketTransaction_1a14bf74aa47986f672b4f711a2f98e38d)
+- [`onStateChange`](#classicy_1_1PacketTransaction_1a14bf74aa47986f672b4f711a2f98e38d)
+
 ---
 
 {#setstate}
@@ -19863,6 +22298,22 @@ class IRegistry
 Defined in src/base/include/icy/iregistry.h:25
 
 Abstract interface for object registries.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TypeMap`](#classicy_1_1IRegistry_1ac7bedf7dea46b4a2ada9bd15b1356d03) | `typedef` | Declared here |
+| [`TypeRegistered`](#classicy_1_1IRegistry_1ad3d327be6ce5ed63ba5c2dfe947b6cac) | `variable` | Declared here |
+| [`TypeUnregistered`](#classicy_1_1IRegistry_1a59769db29787afa862a2ef319a534c45) | `variable` | Declared here |
+| [`_types`](#classicy_1_1IRegistry_1a9bef5a13306f2d3fe15f2a5923c9dd99) | `variable` | Declared here |
+| [`createT`](#classicy_1_1IRegistry_1a246fd645f1e11c80baa8cc80f4bdb29c) | `function` | Declared here |
+| [`IRegistry`](#classicy_1_1IRegistry_1a8328ce9b3e9f9fdbbb8e37661efa5dcc) | `function` | Declared here |
+| [`~IRegistry`](#classicy_1_1IRegistry_1abdfd0491091e68b1d6b2a717b30946a6) | `function` | Declared here |
+| [`createInstance`](#classicy_1_1IRegistry_1a1ade9b7a962e5f644659fafd0b176ecd) | `function` | Declared here |
+| [`registerType`](#classicy_1_1IRegistry_1a6af8f0e214b578681c7458374ca5d679) | `function` | Declared here |
+| [`unregisterType`](#classicy_1_1IRegistry_1a72047f736d4637b89776a4a50da49df1) | `function` | Declared here |
+| [`types`](#classicy_1_1IRegistry_1aa03df539da1930ce8ecc6515ad39d6f3) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -20070,6 +22521,18 @@ Defined in src/base/include/icy/singleton.h:24
 
 Helper template class for managing singleton objects allocated on the heap.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_ptr`](#classicy_1_1Singleton_1a4803d5b16eced1a141b4e3c3a1c35c08) | `variable` | Declared here |
+| [`_m`](#classicy_1_1Singleton_1a2aa8084833ade8548f51dd47df0bb489) | `variable` | Declared here |
+| [`Singleton`](#classicy_1_1Singleton_1a1c3a3ec6b0eb90364f278b31a7f6e987) | `function` | Declared here |
+| [`~Singleton`](#classicy_1_1Singleton_1a2fa461cb42e4dd0052b86601706fdc48) | `function` | Declared here |
+| [`get`](#classicy_1_1Singleton_1a70a81922695c54470415180465f0ac0b) | `function` | Declared here |
+| [`swap`](#classicy_1_1Singleton_1abf48353d3f1a36013a18e7d429c8deec) | `function` | Declared here |
+| [`destroy`](#classicy_1_1Singleton_1a1ce9e89cd2e8ddd7d20e81cf125a6044) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -20199,6 +22662,36 @@ Defined in src/base/include/icy/collection.h:37
 A keyed store of unique_ptr values with optional lifecycle hooks. Not thread-safe; designed for single-threaded event loop contexts.
 
 Subclasses can override onAdd/onRemove for lifecycle reactions, and add [Signal](#signal) members for external observers.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0) | `typedef` | Declared here |
+| [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8) | `variable` | Declared here |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754) | `function` | Declared here |
+| [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) | `function` | Declared here |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834) | `function` | Declared here |
+| [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba) | `function` | Declared here |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f) | `function` | Declared here |
+| [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d) | `function` | Declared here |
+| [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) | `function` | Declared here |
+| [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) | `function` | Declared here |
+| [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) | `function` | Declared here |
+| [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) | `function` | Declared here |
+| [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) | `function` | Declared here |
+| [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) | `function` | Declared here |
+| [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) | `function` | Declared here |
+| [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) | `function` | Declared here |
+| [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) | `function` | Declared here |
+| [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) | `function` | Declared here |
+| [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) | `function` | Declared here |
+| [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) | `function` | Declared here |
+| [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) | `function` | Declared here |
+| [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) | `function` | Declared here |
+| [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) | `function` | Declared here |
+| [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) | `function` | Declared here |
+| [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) | `function` | Declared here |
 
 ### Public Methods
 
@@ -20532,6 +23025,10 @@ Defined in src/base/include/icy/collection.h:121
 
 Override for lifecycle reactions.
 
+##### Reimplemented by
+
+- [`onAdd`](#classicy_1_1StreamManager_1a63721fa626c5ba5ff2d84a245a0a2d4c)
+
 ---
 
 {#onremove}
@@ -20545,6 +23042,11 @@ virtual inline void onRemove(const TKey &, TValue *)
 ```
 
 Defined in src/base/include/icy/collection.h:122
+
+##### Reimplemented by
+
+- [`onRemove`](#classicy_1_1StreamManager_1aed7b3b6024466fb2c2cca9e0fc5b9d6c)
+- [`onRemove`](#classicy_1_1TimedManager_1a9ff37108e3aa2a3e75d29f15049162e4)
 
 ### Public Types
 
@@ -20580,6 +23082,25 @@ class KVCollection
 Defined in src/base/include/icy/collection.h:135
 
 A keyed value store (values stored by copy, not pointer).
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Map`](#classicy_1_1KVCollection_1a6f97687f2052f1b86746069b47d79e47) | `typedef` | Declared here |
+| [`_map`](#classicy_1_1KVCollection_1ac358016fcf90570f51af092762d08c77) | `variable` | Declared here |
+| [`KVCollection`](#classicy_1_1KVCollection_1aa2fbddd3372617f967b1663664221667) | `function` | Declared here |
+| [`~KVCollection`](#classicy_1_1KVCollection_1ad2fa8643b1f0bcb43f688cd77be54096) | `function` | Declared here |
+| [`add`](#classicy_1_1KVCollection_1a07792f1ffe421ca31c9d1574879da187) | `function` | Declared here |
+| [`get`](#classicy_1_1KVCollection_1aa31184e3766e544d0fda3c89d0ae0cde) | `function` | Declared here |
+| [`get`](#classicy_1_1KVCollection_1a8a1c9f45dd8183f7403eb945b9369b75) | `function` | Declared here |
+| [`remove`](#classicy_1_1KVCollection_1a80f852657c2b7a4838808ce9cfe37432) | `function` | Declared here |
+| [`has`](#classicy_1_1KVCollection_1a03ff1e9fc498f093b0cdab280c057b7d) | `function` | Declared here |
+| [`empty`](#classicy_1_1KVCollection_1a723bc4be31e4d39d4fd103fd23b2a59e) | `function` | Declared here |
+| [`size`](#classicy_1_1KVCollection_1add8dbe55b0d7e1fc50d7494cab742706) | `function` | Declared here |
+| [`clear`](#classicy_1_1KVCollection_1a7f5472aa3bbab8e2575bcc9da3c254e6) | `function` | Declared here |
+| [`map`](#classicy_1_1KVCollection_1a900e73347278c3ccc9da940576231c53) | `function` | Declared here |
+| [`map`](#classicy_1_1KVCollection_1a6076a629d0cfeaa57109beb4c5f4dc1b) | `function` | Declared here |
 
 ### Public Methods
 
@@ -20810,6 +23331,35 @@ Defined in src/base/include/icy/collection.h:187
 > **Subclassed by:** [`FormWriter`](http.md#formwriter), [`Message`](http.md#message)
 
 A storage container for a name value collections. This collection can store multiple entries for each name, and it's getters are case-insensitive.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Map`](#classicy_1_1NVCollection_1a346e768abb8e4dfa43fc57c90ee149cd) | `typedef` | Declared here |
+| [`Iterator`](#classicy_1_1NVCollection_1a2b2018a59a63e491872699771a8e6420) | `typedef` | Declared here |
+| [`ConstIterator`](#classicy_1_1NVCollection_1aab2d7bfc0eaac4d1952c6b5eb9b77307) | `typedef` | Declared here |
+| [`_map`](#classicy_1_1NVCollection_1a14a8ac82189888dbf19bcbbce40f2a7a) | `variable` | Declared here |
+| [`NVCollection`](#classicy_1_1NVCollection_1af43823d5237c1a90fbf652f98aec7912) | `function` | Declared here |
+| [`NVCollection`](#classicy_1_1NVCollection_1a52af6ee7ab85b69a3ff31df95b029e71) | `function` | Declared here |
+| [`NVCollection`](#classicy_1_1NVCollection_1a7f132277d410f85986216b7394a2aa81) | `function` | Declared here |
+| [`~NVCollection`](#classicy_1_1NVCollection_1a24eaec442d4eb0a5f1441ef74501d6d7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1NVCollection_1ab2fe383fb6735e746965dd2a465a09e4) | `function` | Declared here |
+| [`operator=`](#classicy_1_1NVCollection_1a4bef21c9a6411057331288f2fa7b5842) | `function` | Declared here |
+| [`operator[]`](#classicy_1_1NVCollection_1a276d20b2027bf449f6d2d68384fa33fa) | `function` | Declared here |
+| [`set`](#classicy_1_1NVCollection_1afd0842bd3573ba60590adf6a5f5311ee) | `function` | Declared here |
+| [`add`](#classicy_1_1NVCollection_1adb0af30c09a0e80b9be8524c3daf655e) | `function` | Declared here |
+| [`add`](#classicy_1_1NVCollection_1a41d0a32b0637030f1cd6df793630b7fe) | `function` | Declared here |
+| [`get`](#classicy_1_1NVCollection_1a74ab3e57d795c866354a454fe8781922) | `function` | Declared here |
+| [`get`](#classicy_1_1NVCollection_1ae37e753102f9d263e7aac47c1902b658) | `function` | Declared here |
+| [`has`](#classicy_1_1NVCollection_1a632976f567b162b769dd33318e0f6c97) | `function` | Declared here |
+| [`find`](#classicy_1_1NVCollection_1a40fc7a1569a3473c00193ef5b2a1fd8e) | `function` | Declared here |
+| [`begin`](#classicy_1_1NVCollection_1a50a14fb7f99eefa85967636416b6e079) | `function` | Declared here |
+| [`end`](#classicy_1_1NVCollection_1a8eba87f785fef81e0163e4bbcf5d6cb0) | `function` | Declared here |
+| [`empty`](#classicy_1_1NVCollection_1a167bd396d5526d4b6921a1523ca98b7b) | `function` | Declared here |
+| [`size`](#classicy_1_1NVCollection_1a8615f9ba49b297ac13de226c676fd260) | `function` | Declared here |
+| [`erase`](#classicy_1_1NVCollection_1a8ceae5ee48cf5fe8eeb06863b6885a55) | `function` | Declared here |
+| [`clear`](#classicy_1_1NVCollection_1a30b92ee8e5dab6f5a6311ca3b3b2680e) | `function` | Declared here |
 
 ### Public Methods
 
@@ -21182,7 +23732,7 @@ Defined in src/base/include/icy/collection.h:270
 class Application
 ```
 
-Defined in src/base/include/icy/application.h:36
+Defined in src/base/include/icy/application.h:39
 
 Main icey application class.
 
@@ -21195,6 +23745,39 @@ This class exposes basic features required by most applications:
 * Shutdown signal (Ctrl-C) handling
 
 * Garbage collection
+
+#### Example
+
+```cpp
+#include <icy/application.h>
+
+int main()
+{
+    icy::Application app;
+    app.waitForShutdown();
+    return 0;
+}
+```
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`loop`](#classicy_1_1Application_1a67ae23fc28185840efb45b700016ac9b) | `variable` | Declared here |
+| [`Application`](#classicy_1_1Application_1a939bb480152e4e2d7019e7c75c324114) | `function` | Declared here |
+| [`~Application`](#classicy_1_1Application_1a276a028406f59c698628162b88b87ed3) | `function` | Declared here |
+| [`run`](#classicy_1_1Application_1a15a0aec40fd6f8af86639b6c7d84d08e) | `function` | Declared here |
+| [`stop`](#classicy_1_1Application_1a8c7be34ec6d62894e5229341bdb92092) | `function` | Declared here |
+| [`finalize`](#classicy_1_1Application_1a52401f02c8adbd3d5115bfee91c99ef0) | `function` | Declared here |
+| [`waitForShutdown`](#classicy_1_1Application_1a315243fd1e4732695a119821e9b155ae) | `function` | Declared here |
+| [`bindShutdownSignal`](#classicy_1_1Application_1a82768c096853a7c6bdddd6fed979e813) | `function` | Declared here |
+| [`getDefault`](#classicy_1_1Application_1a9239b7f8c9fb3452c431d213e67d4f8e) | `function` | Declared here |
+| [`Application`](#classicy_1_1Application_1aa4da49511a107327f0dd71e8a7548045) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Application_1af8b035b1bbbb799dc0a2cb5dd926d36a) | `function` | Declared here |
+| [`Application`](#classicy_1_1Application_1a4043fa33b3c1580bd1d01d206e5fffa9) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Application_1a42c0ed9e160bf62cb7f508d08cd2c202) | `function` | Declared here |
+| [`onShutdownSignal`](#classicy_1_1Application_1a953a89122ce02763bb665b6fba9813a5) | `function` | Declared here |
+| [`onPrintHandle`](#classicy_1_1Application_1aaeb919798b63e99f7dda7e9579be8e71) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -21212,7 +23795,7 @@ This class exposes basic features required by most applications:
 uv::Loop * loop
 ```
 
-Defined in src/base/include/icy/application.h:53
+Defined in src/base/include/icy/application.h:56
 
 Active event loop.
 
@@ -21240,7 +23823,7 @@ The event loop may be assigned on construction, otherwise the default event loop
 Application(uv::Loop * loop = uv::defaultLoop())
 ```
 
-Defined in src/base/include/icy/application.h:40
+Defined in src/base/include/icy/application.h:43
 
 Constructor.
 
@@ -21254,7 +23837,7 @@ Constructor.
 ~Application()
 ```
 
-Defined in src/base/include/icy/application.h:43
+Defined in src/base/include/icy/application.h:46
 
 Destructor.
 
@@ -21268,7 +23851,7 @@ Destructor.
 void run()
 ```
 
-Defined in src/base/include/icy/application.h:60
+Defined in src/base/include/icy/application.h:63
 
 Run the application event loop.
 
@@ -21282,7 +23865,7 @@ Run the application event loop.
 void stop()
 ```
 
-Defined in src/base/include/icy/application.h:63
+Defined in src/base/include/icy/application.h:66
 
 Stop the application event loop.
 
@@ -21296,7 +23879,7 @@ Stop the application event loop.
 void finalize()
 ```
 
-Defined in src/base/include/icy/application.h:67
+Defined in src/base/include/icy/application.h:70
 
 Finalize and free any remaining pointers still held by the application event loop.
 
@@ -21310,7 +23893,7 @@ Finalize and free any remaining pointers still held by the application event loo
 void waitForShutdown(std::function< void(void *)> callback = nullptr, void * opaque = nullptr)
 ```
 
-Defined in src/base/include/icy/application.h:74
+Defined in src/base/include/icy/application.h:77
 
 Bind the shutdown signal and run the main event loop.
 
@@ -21324,7 +23907,7 @@ Bind the shutdown signal and run the main event loop.
 void bindShutdownSignal(std::function< void(void *)> callback = nullptr, void * opaque = nullptr)
 ```
 
-Defined in src/base/include/icy/application.h:78
+Defined in src/base/include/icy/application.h:81
 
 Bind the shutdown signal.
 
@@ -21346,7 +23929,7 @@ Bind the shutdown signal.
 static Application & getDefault()
 ```
 
-Defined in src/base/include/icy/application.h:47
+Defined in src/base/include/icy/application.h:50
 
 Returns the default [Application](#application) singleton, although [Application](#application) instances may be initialized individually.
 
@@ -21367,7 +23950,7 @@ Returns the default [Application](#application) singleton, although [Application
 Application(const Application &) = delete
 ```
 
-Defined in src/base/include/icy/application.h:82
+Defined in src/base/include/icy/application.h:85
 
 Deleted constructor.
 
@@ -21381,7 +23964,7 @@ Deleted constructor.
 Application(Application &&) = delete
 ```
 
-Defined in src/base/include/icy/application.h:84
+Defined in src/base/include/icy/application.h:87
 
 Deleted constructor.
 
@@ -21403,6 +23986,178 @@ Defined in src/base/include/icy/packetqueue.h:31
 > **Inherits:** [`SyncQueue< IPacket >`](#syncqueue), [`PacketProcessor`](#packetprocessor)
 
 Synchronized packet queue for event loop integration.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Queue`](#classicy_1_1SyncPacketQueue_1ad0d3b690306d80240059c8960e576732) | `typedef` | Declared here |
+| [`Processor`](#classicy_1_1SyncPacketQueue_1a86bb946cc59f4922a54e6103b090ea16) | `typedef` | Declared here |
+| [`emitter`](#classicy_1_1SyncPacketQueue_1a5e9953f5f28fa6999517735bfc87cdde) | `variable` | Declared here |
+| [`SyncPacketQueue`](#classicy_1_1SyncPacketQueue_1ac9c926d42154c74a9cbc810daff68ee1) | `function` | Declared here |
+| [`SyncPacketQueue`](#classicy_1_1SyncPacketQueue_1a5c23d283a9de9baf8f38c90404248a6d) | `function` | Declared here |
+| [`~SyncPacketQueue`](#classicy_1_1SyncPacketQueue_1afe25e26915a867965020b7e16a20862b) | `function` | Declared here |
+| [`process`](#classicy_1_1SyncPacketQueue_1ad4f540fac848151043a7c647c2fde604) | `function` | Declared here |
+| [`accepts`](#classicy_1_1SyncPacketQueue_1a377e2ceb0365f7681f52ba9ff1df0bc4) | `function` | Declared here |
+| [`retention`](#classicy_1_1SyncPacketQueue_1a20cc008de2ff57689dd26c020365cf04) | `function` | Declared here |
+| [`dispatch`](#classicy_1_1SyncPacketQueue_1ad9db7879efb13ec07a0e9a0df93c18b4) | `function` | Declared here |
+| [`onStreamStateChange`](#classicy_1_1SyncPacketQueue_1a80bcc6d47b6729028504e1136552475e) | `function` | Declared here |
+| [`Queue`](#classicy_1_1SyncQueue_1ac4fb67c6d088efb3fab892fcfde0f8ec) | `typedef` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`_sync`](#classicy_1_1SyncQueue_1a1a984d96b9c2ec8caa9a8d6df61f0eb2) | `variable` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`SyncQueue`](#classicy_1_1SyncQueue_1a0f40b5534739673c975a1f95060e250e) | `function` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`~SyncQueue`](#classicy_1_1SyncQueue_1aa8f7f1d0a54b0666cd89b894816a31f9) | `function` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`push`](#classicy_1_1SyncQueue_1a88f3a96973c2a8224a7e1c73665218ab) | `function` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`cancel`](#classicy_1_1SyncQueue_1a07c735c59351142dc72cee62ee4a6251) | `function` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`sync`](#classicy_1_1SyncQueue_1a419df6e547b6789682e46c76a7c958f3) | `function` | Inherited from [`SyncQueue`](#syncqueue) |
+| [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](#queue) |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](#queue) |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](#queue) |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](#queue) |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](#queue) |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](#queue) |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](#queue) |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](#queue) |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](#queue) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+| [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+
+### Inherited from [`SyncQueue`](#syncqueue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Queue`](#classicy_1_1SyncQueue_1ac4fb67c6d088efb3fab892fcfde0f8ec)  |  |
+| `variable` | [`_sync`](#classicy_1_1SyncQueue_1a1a984d96b9c2ec8caa9a8d6df61f0eb2)  |  |
+| `function` | [`SyncQueue`](#classicy_1_1SyncQueue_1a0f40b5534739673c975a1f95060e250e) `inline` |  |
+| `function` | [`~SyncQueue`](#classicy_1_1SyncQueue_1aa8f7f1d0a54b0666cd89b894816a31f9) `virtual` `inline` | Destruction is deferred to allow enough time for all callbacks to return. |
+| `function` | [`push`](#classicy_1_1SyncQueue_1a88f3a96973c2a8224a7e1c73665218ab) `virtual` `inline` `override` | Pushes an item onto the queue and wakes the event loop for dispatch. Ownership of `item` is transferred to the queue. |
+| `function` | [`cancel`](#classicy_1_1SyncQueue_1a07c735c59351142dc72cee62ee4a6251) `virtual` `inline` `override` | Cancels the queue and its underlying synchronizer. |
+| `function` | [`sync`](#classicy_1_1SyncQueue_1a419df6e547b6789682e46c76a7c958f3) `inline` |  |
+
+### Inherited from [`RunnableQueue`](#runnablequeue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6)  | The default dispatch function. Must be set before the queue is running. |
+| `variable` | [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32)  |  |
+| `variable` | [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903)  |  |
+| `variable` | [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949)  |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) `inline` |  |
+| `function` | [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) `virtual` `inline` |  |
+| `function` | [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
+| `function` | [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) `virtual` `inline` | Flush all outgoing items. |
+| `function` | [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) `inline` |  |
+| `function` | [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `function` | [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
+| `function` | [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) `virtual` `inline` | Dispatch a single item to listeners. |
+| `function` | [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) `inline` |  |
+| `function` | [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
+| `function` | [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) `const` `inline` |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de)  | Deleted assignment operator. |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10)  | Deleted assignment operator. |
+| `function` | [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) `virtual` `inline` | Pops the next waiting item. |
+| `function` | [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) `virtual` `inline` | Pops and dispatches the next waiting item. |
+
+### Inherited from [`Queue`](#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
+
+### Inherited from [`PacketProcessor`](#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Public Attributes
 
@@ -21487,6 +24242,10 @@ Clones the incoming packet and pushes it onto the queue for synchronized dispatc
 #### Parameters
 * `packet` Incoming packet to enqueue.
 
+##### Reimplements
+
+- [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#accepts}
@@ -21508,6 +24267,10 @@ Returns true if the packet can be cast to type `T`.
 #### Returns
 True if `dynamic_cast<T*>(packet)` succeeds.
 
+##### Reimplements
+
+- [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
+
 ---
 
 {#retention}
@@ -21523,6 +24286,10 @@ True if `dynamic_cast<T*>(packet)` succeeds.
 Defined in src/base/include/icy/packetqueue.h:67
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
+
+##### Reimplements
+
+- [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928)
 
 ### Protected Methods
 
@@ -21566,6 +24333,10 @@ Defined in src/base/include/icy/packetqueue.h:81
 Cancels the queue on `Closed` or `[Error](#error)` stream state transitions. 
 #### Parameters
 * `state` New stream state.
+
+##### Reimplements
+
+- [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
 
 ### Public Types
 
@@ -21616,6 +24387,174 @@ Defined in src/base/include/icy/packetqueue.h:145
 > **Inherits:** [`AsyncQueue< IPacket >`](#asyncqueue), [`PacketProcessor`](#packetprocessor)
 
 Thread-based asynchronous packet dispatch queue.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Queue`](#classicy_1_1AsyncPacketQueue_1a3763065dd10e885cf0e2320bd4082fee) | `typedef` | Declared here |
+| [`Processor`](#classicy_1_1AsyncPacketQueue_1adbccde7917d3283e9ee35cb1bb9b5b98) | `typedef` | Declared here |
+| [`emitter`](#classicy_1_1AsyncPacketQueue_1abde947198221d9a966197bd5c78d9f8a) | `variable` | Declared here |
+| [`AsyncPacketQueue`](#classicy_1_1AsyncPacketQueue_1aefce3e0be625f5be5747005d801bb44d) | `function` | Declared here |
+| [`~AsyncPacketQueue`](#classicy_1_1AsyncPacketQueue_1ab7f1123ee0cff95c3c149f2ae5fd8598) | `function` | Declared here |
+| [`close`](#classicy_1_1AsyncPacketQueue_1aaa410cd686acde18f9b4806664265509) | `function` | Declared here |
+| [`process`](#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d) | `function` | Declared here |
+| [`accepts`](#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7) | `function` | Declared here |
+| [`retention`](#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281) | `function` | Declared here |
+| [`dispatch`](#classicy_1_1AsyncPacketQueue_1a408c35d44bef57364c8c29d8ef71736a) | `function` | Declared here |
+| [`onStreamStateChange`](#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd) | `function` | Declared here |
+| [`Queue`](#classicy_1_1AsyncQueue_1a0efd9a7b5b236ed2b9f56ecdde9211a3) | `typedef` | Inherited from [`AsyncQueue`](#asyncqueue) |
+| [`_thread`](#classicy_1_1AsyncQueue_1a37705714f84f4951fa2befc5a4d070c8) | `variable` | Inherited from [`AsyncQueue`](#asyncqueue) |
+| [`AsyncQueue`](#classicy_1_1AsyncQueue_1a715382ae33e9191ff5fce23bf6880391) | `function` | Inherited from [`AsyncQueue`](#asyncqueue) |
+| [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) | `function` | Inherited from [`AsyncQueue`](#asyncqueue) |
+| [`~AsyncQueue`](#classicy_1_1AsyncQueue_1aa1523689e975842876d971d0083cccad) | `function` | Inherited from [`AsyncQueue`](#asyncqueue) |
+| [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Inherited from [`RunnableQueue`](#runnablequeue) |
+| [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](#queue) |
+| [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](#queue) |
+| [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](#queue) |
+| [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](#queue) |
+| [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](#queue) |
+| [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](#queue) |
+| [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](#queue) |
+| [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](#queue) |
+| [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](#queue) |
+| [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](#queue) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+| [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](#packetprocessor) |
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+
+### Inherited from [`AsyncQueue`](#asyncqueue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Queue`](#classicy_1_1AsyncQueue_1a0efd9a7b5b236ed2b9f56ecdde9211a3)  |  |
+| `variable` | [`_thread`](#classicy_1_1AsyncQueue_1a37705714f84f4951fa2befc5a4d070c8)  |  |
+| `function` | [`AsyncQueue`](#classicy_1_1AsyncQueue_1a715382ae33e9191ff5fce23bf6880391) `inline` |  |
+| `function` | [`cancel`](#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) `virtual` `inline` `override` | Cancels the queue and joins the dispatch thread. |
+| `function` | [`~AsyncQueue`](#classicy_1_1AsyncQueue_1aa1523689e975842876d971d0083cccad) `virtual` `inline` |  |
+
+### Inherited from [`RunnableQueue`](#runnablequeue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`ondispatch`](#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6)  | The default dispatch function. Must be set before the queue is running. |
+| `variable` | [`_limit`](#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32)  |  |
+| `variable` | [`_timeout`](#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903)  |  |
+| `variable` | [`_dropped`](#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949)  |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) `inline` |  |
+| `function` | [`~RunnableQueue`](#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) `virtual` `inline` |  |
+| `function` | [`push`](#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
+| `function` | [`flush`](#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) `virtual` `inline` | Flush all outgoing items. |
+| `function` | [`clear`](#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) `inline` |  |
+| `function` | [`run`](#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `function` | [`runTimeout`](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
+| `function` | [`dispatch`](#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) `virtual` `inline` | Dispatch a single item to listeners. |
+| `function` | [`timeout`](#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) `inline` |  |
+| `function` | [`setTimeout`](#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
+| `function` | [`dropped`](#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) `const` `inline` |  |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de)  | Deleted assignment operator. |
+| `function` | [`RunnableQueue`](#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10)  | Deleted assignment operator. |
+| `function` | [`popNext`](#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) `virtual` `inline` | Pops the next waiting item. |
+| `function` | [`dispatchNext`](#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) `virtual` `inline` | Pops and dispatches the next waiting item. |
+
+### Inherited from [`Queue`](#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
+
+### Inherited from [`PacketProcessor`](#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Public Attributes
 
@@ -21696,6 +24635,10 @@ Clones the incoming packet and pushes it onto the async queue. This queue is the
 #### Parameters
 * `packet` Incoming packet to enqueue.
 
+##### Reimplements
+
+- [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#accepts}
@@ -21717,6 +24660,10 @@ Returns true if the packet can be cast to type `T`.
 #### Returns
 True if `dynamic_cast<T*>(packet)` succeeds.
 
+##### Reimplements
+
+- [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
+
 ---
 
 {#retention}
@@ -21732,6 +24679,10 @@ True if `dynamic_cast<T*>(packet)` succeeds.
 Defined in src/base/include/icy/packetqueue.h:175
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
+
+##### Reimplements
+
+- [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928)
 
 ### Protected Methods
 
@@ -21775,6 +24726,14 @@ Defined in src/base/include/icy/packetqueue.h:189
 Closes the queue on `[Error](#error)` or `Closed` stream state transitions. 
 #### Parameters
 * `state` New stream state.
+
+##### Reimplements
+
+- [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
+
+##### Reimplemented by
+
+- [`onStreamStateChange`](av.md#onstreamstatechange-4)
 
 ### Public Types
 
@@ -21822,6 +24781,18 @@ class RateLimiter
 Defined in src/base/include/icy/ratelimiter.h:23
 
 Token bucket rate limiter for throttling message send frequency.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`rate`](#classicy_1_1RateLimiter_1a7aa1e7600ad9cca74b0135d3314dde1b) | `variable` | Declared here |
+| [`seconds`](#classicy_1_1RateLimiter_1ad3acd55e01967d7bd4767bbf8ed00d08) | `variable` | Declared here |
+| [`allowance`](#classicy_1_1RateLimiter_1a3ee6b04aa9c54297d618ccf321b10eac) | `variable` | Declared here |
+| [`_lastCheck`](#classicy_1_1RateLimiter_1aea3adfc240ccf7da3e0c71a14d7efa78) | `variable` | Declared here |
+| [`_started`](#classicy_1_1RateLimiter_1aac4204bcea287d5b0288446c4faaac32) | `variable` | Declared here |
+| [`RateLimiter`](#classicy_1_1RateLimiter_1ac90177249efc6816d679c8466e969f69) | `function` | Declared here |
+| [`canSend`](#classicy_1_1RateLimiter_1a06e446fc94aef8f1e57379771a89cc95) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -21967,6 +24938,26 @@ Defined in src/base/include/icy/packetstream.h:42
 
 This class is a wrapper for integrating external classes with the a [PacketStream](#packetstream)'s data flow and state machine.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Declared here |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Declared here |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Declared here |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Declared here |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Declared here |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Declared here |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Declared here |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -22097,6 +25088,10 @@ Emit an existing packet directly onto the outgoing signal.
 #### Parameters
 * `packet` The packet to forward; must remain valid for the duration of the call.
 
+##### Reimplemented by
+
+- [`emit`](av.md#emit)
+
 ---
 
 {#getemitter}
@@ -22127,6 +25122,14 @@ Defined in src/base/include/icy/packetstream.h:84
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
 
+##### Reimplemented by
+
+- [`retention`](#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281)
+- [`retention`](#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281)
+- [`retention`](#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281)
+- [`retention`](#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281)
+- [`retention`](#classicy_1_1SyncPacketQueue_1a20cc008de2ff57689dd26c020365cf04)
+
 ---
 
 {#onstreamstatechange}
@@ -22142,6 +25145,22 @@ virtual inline void onStreamStateChange(const PacketStreamState &)
 Defined in src/base/include/icy/packetstream.h:91
 
 Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
+
+##### Reimplemented by
+
+- [`onStreamStateChange`](#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd)
+- [`onStreamStateChange`](#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd)
+- [`onStreamStateChange`](#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd)
+- [`onStreamStateChange`](#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd)
+- [`onStreamStateChange`](av.md#onstreamstatechange-2)
+- [`onStreamStateChange`](av.md#onstreamstatechange-1)
+- [`onStreamStateChange`](av.md#onstreamstatechange)
+- [`onStreamStateChange`](av.md#onstreamstatechange-5)
+- [`onStreamStateChange`](av.md#onstreamstatechange-4)
+- [`onStreamStateChange`](av.md#onstreamstatechange-3)
+- [`onStreamStateChange`](#classicy_1_1StreamWriter_1a08e66729ff2bd1edb13b3cae561a6d2e)
+- [`onStreamStateChange`](#classicy_1_1SyncPacketQueue_1a80bcc6d47b6729028504e1136552475e)
+- [`onStreamStateChange`](webrtc.md#onstreamstatechange-6)
 
 ### Protected Attributes
 
@@ -22215,6 +25234,50 @@ Defined in src/base/include/icy/packetstream.h:114
 
 This class is a virtual interface for creating PacketStreamAdapters which process that and emit the [IPacket](#ipacket) type.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PacketProcessor`](#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Declared here |
+| [`process`](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Declared here |
+| [`accepts`](#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Declared here |
+| [`operator<<`](#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Declared here |
+| [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+| [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](#packetstreamadapter) |
+
+### Inherited from [`PacketStreamAdapter`](#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -22256,6 +25319,24 @@ This method performs processing on the given packet and emits the result.
 
 Processors that defer work asynchronously must either clone the packet or retain an owned equivalent. See [retention()](#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928).
 
+##### Reimplemented by
+
+- [`process`](#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d)
+- [`process`](#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d)
+- [`process`](#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d)
+- [`process`](#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d)
+- [`process`](av.md#process-2)
+- [`process`](av.md#process-1)
+- [`process`](av.md#process-4)
+- [`process`](av.md#process-3)
+- [`process`](http.md#process-5)
+- [`process`](http.md#process-6)
+- [`process`](#classicy_1_1StreamWriter_1a75045418bd235790d9e05a237c42e248)
+- [`process`](#classicy_1_1SyncPacketQueue_1ad4f540fac848151043a7c647c2fde604)
+- [`process`](vision.md#process-9)
+- [`process`](vision.md#process-10)
+- [`process`](webrtc.md#process-12)
+
 ---
 
 {#accepts}
@@ -22271,6 +25352,20 @@ virtual inline bool accepts(IPacket *)
 Defined in src/base/include/icy/packetstream.h:131
 
 This method ensures compatibility with the given packet type. Return false to reject the packet.
+
+##### Reimplemented by
+
+- [`accepts`](#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7)
+- [`accepts`](#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7)
+- [`accepts`](#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7)
+- [`accepts`](#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7)
+- [`accepts`](av.md#accepts)
+- [`accepts`](av.md#accepts-2)
+- [`accepts`](av.md#accepts-1)
+- [`accepts`](#classicy_1_1SyncPacketQueue_1a377e2ceb0365f7681f52ba9ff1df0bc4)
+- [`accepts`](vision.md#accepts-3)
+- [`accepts`](vision.md#accepts-4)
+- [`accepts`](webrtc.md#accepts-5)
 
 ---
 
@@ -22315,6 +25410,108 @@ Note that [PacketStream](#packetstream) itself inherits from [PacketStreamAdapte
 All [PacketStream](#packetstream) methods are thread-safe, but once the stream is running you will not be able to attach or detach stream adapters.
 
 In order to synchronize output packets with the application event loop take a look at the [SyncPacketQueue](#syncpacketqueue) class. For lengthy operations you can add an [AsyncPacketQueue](#asyncpacketqueue) to the start of the stream to defer processing from the [PacketSource](#packetsource) thread.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Ptr`](#classicy_1_1PacketStream_1a4b3d88b1cc54cbdbd047460fdadea893) | `typedef` | Declared here |
+| [`emitter`](#classicy_1_1PacketStream_1adc148eb61c088baa5737dc299ecd9599) | `variable` | Declared here |
+| [`Error`](#classicy_1_1PacketStream_1a4a2af483755c436fcf91c773a652ba8b) | `variable` | Declared here |
+| [`Close`](#classicy_1_1PacketStream_1ad08277ba04d7bd0c148151704e836ab7) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1PacketStream_1a1c58a646d8cb218191537e602ddfd900) | `variable` | Declared here |
+| [`_procMutex`](#classicy_1_1PacketStream_1aebb28f676eb1c695fcfe7d853c9391ae) | `variable` | Declared here |
+| [`_name`](#classicy_1_1PacketStream_1a70291beb9d5a1992d5f4ca00bc5fb7ac) | `variable` | Declared here |
+| [`_sources`](#classicy_1_1PacketStream_1a7c807fd4f6200de79ae801be31d183b7) | `variable` | Declared here |
+| [`_processors`](#classicy_1_1PacketStream_1aeba70cec3d2443e147d3976880317cd5) | `variable` | Declared here |
+| [`_states`](#classicy_1_1PacketStream_1aa4b5a9898bba5d2ed1e983b171686cc2) | `variable` | Declared here |
+| [`_error`](#classicy_1_1PacketStream_1aaf4822e15b3939918ebec2a273ae4568) | `variable` | Declared here |
+| [`_autoStart`](#classicy_1_1PacketStream_1ae6d6c729d99071a1a195c3d6aa586c6d) | `variable` | Declared here |
+| [`_closeOnError`](#classicy_1_1PacketStream_1a46782d7bf715c7ac57c475dc7b4b0517) | `variable` | Declared here |
+| [`_wired`](#classicy_1_1PacketStream_1a5414704cbaa18053636eea7825fa5ba5) | `variable` | Declared here |
+| [`PacketStream`](#classicy_1_1PacketStream_1a9a85e6753d0911b9f2d151e5eba9e10b) | `function` | Declared here |
+| [`~PacketStream`](#classicy_1_1PacketStream_1ae935ce044d91bf8047f10db521cd916c) | `function` | Declared here |
+| [`PacketStream`](#classicy_1_1PacketStream_1a4e3058aea80c88993c9ae245bfa73ff0) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketStream_1a693a597f201a6611d044ce01429eeb5d) | `function` | Declared here |
+| [`PacketStream`](#classicy_1_1PacketStream_1a5ac1f526c524dd2dd2f3c20485bde313) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketStream_1a35a3ba0eebba42d9e68916db28f68606) | `function` | Declared here |
+| [`start`](#classicy_1_1PacketStream_1ac6843f20698879acdaabd8110b440c55) | `function` | Declared here |
+| [`stop`](#classicy_1_1PacketStream_1acdcc92bdfd8ed2c2ad9b60fabeef3976) | `function` | Declared here |
+| [`pause`](#classicy_1_1PacketStream_1a4ac90acd94f8271d52942434659c965d) | `function` | Declared here |
+| [`resume`](#classicy_1_1PacketStream_1adced6670bbeded716354354315b6cf97) | `function` | Declared here |
+| [`close`](#classicy_1_1PacketStream_1a744ce42be8c86ada9cf8d8c85e080d37) | `function` | Declared here |
+| [`reset`](#classicy_1_1PacketStream_1a92bc04f29c224402edb681c55c648eb0) | `function` | Declared here |
+| [`active`](#classicy_1_1PacketStream_1add7bd9bae7572571c91a059e424a0141) | `function` | Declared here |
+| [`stopped`](#classicy_1_1PacketStream_1a260a9ab66a4c40e8abbad025965b6493) | `function` | Declared here |
+| [`closed`](#classicy_1_1PacketStream_1aab2a625768f6057f7295b03d4df623d8) | `function` | Declared here |
+| [`lock`](#classicy_1_1PacketStream_1acf5cc6099295dc28a5c36fd4996de7a7) | `function` | Declared here |
+| [`locked`](#classicy_1_1PacketStream_1a830927a1f51f64a3d1083b76ebcb281d) | `function` | Declared here |
+| [`write`](#classicy_1_1PacketStream_1a22f83c8eda142efab8d21ea04a88137a) | `function` | Declared here |
+| [`write`](#classicy_1_1PacketStream_1a342fcda586e120f159ef6accfb4da0ff) | `function` | Declared here |
+| [`write`](#classicy_1_1PacketStream_1a2b8d49461d707471e33d25eafd26d89b) | `function` | Declared here |
+| [`attachSource`](#classicy_1_1PacketStream_1ad11e84f0c24b4a75e53da886a3d7ca82) | `function` | Declared here |
+| [`attachSource`](#classicy_1_1PacketStream_1ac75ac23e66c313a776cfdd3700f78023) | `function` | Declared here |
+| [`attachSource`](#classicy_1_1PacketStream_1a6a6da35db5c2cf8977a56cfaab7924c2) | `function` | Declared here |
+| [`detachSource`](#classicy_1_1PacketStream_1a8bebf2a326304ce7a7ac9081fe276a43) | `function` | Declared here |
+| [`detachSource`](#classicy_1_1PacketStream_1a669c8c65394a1c8d264d38bdc42a2d65) | `function` | Declared here |
+| [`attach`](#classicy_1_1PacketStream_1aba8378605cf58b27daf31c91c1edcd37) | `function` | Declared here |
+| [`attach`](#classicy_1_1PacketStream_1aa907d86c1059a31db5a634562e02814e) | `function` | Declared here |
+| [`detach`](#classicy_1_1PacketStream_1ab2b32b4afd659831581e48f60557b215) | `function` | Declared here |
+| [`synchronizeOutput`](#classicy_1_1PacketStream_1a246c1677eb9526056d99193e04d3be60) | `function` | Declared here |
+| [`autoStart`](#classicy_1_1PacketStream_1a9550a1dbce5ff61608f37b0f08cf8e14) | `function` | Declared here |
+| [`closeOnError`](#classicy_1_1PacketStream_1a00c2d30e3674650a59017341dad8646d) | `function` | Declared here |
+| [`error`](#classicy_1_1PacketStream_1a074efc55a0a130b33a4c2437b8ce589c) | `function` | Declared here |
+| [`name`](#classicy_1_1PacketStream_1aca9112cf15b593b895f40f945813cb59) | `function` | Declared here |
+| [`adapters`](#classicy_1_1PacketStream_1af967091a3bfbc55d0250ff8ea0b38b50) | `function` | Declared here |
+| [`sources`](#classicy_1_1PacketStream_1a7538dd076a0dec62adbc2174723e7ca3) | `function` | Declared here |
+| [`processors`](#classicy_1_1PacketStream_1a4c9d068c157176b179aa606e81f91058) | `function` | Declared here |
+| [`numSources`](#classicy_1_1PacketStream_1a978dbea3cfa07192d41d4e4e0af127a9) | `function` | Declared here |
+| [`numProcessors`](#classicy_1_1PacketStream_1aa2b1f5ac5fe2be23ada18a906f0894bf) | `function` | Declared here |
+| [`numAdapters`](#classicy_1_1PacketStream_1a5a60f6be20403946cc7509579edcad0f) | `function` | Declared here |
+| [`getSource`](#classicy_1_1PacketStream_1a561245d7176b42ab80878e05c245bc2c) | `function` | Declared here |
+| [`getProcessor`](#classicy_1_1PacketStream_1ae6542fbec1abaa2ef70e777c64f660c1) | `function` | Declared here |
+| [`getProcessor`](#classicy_1_1PacketStream_1aea737979c37d992ad2ddef0e8edc897c) | `function` | Declared here |
+| [`setup`](#classicy_1_1PacketStream_1a49cff91ecada18d68e948b90e3a37486) | `function` | Declared here |
+| [`teardown`](#classicy_1_1PacketStream_1af848788e301020b7660fa2259709b8fe) | `function` | Declared here |
+| [`attachSource`](#classicy_1_1PacketStream_1a29ebdbc22ac63dd5681c8d770dce57ad) | `function` | Declared here |
+| [`attach`](#classicy_1_1PacketStream_1a1b7654b9393aab692e5c4e618cbdc056) | `function` | Declared here |
+| [`startSources`](#classicy_1_1PacketStream_1a5e958f0d995288047462e89ade440084) | `function` | Declared here |
+| [`stopSources`](#classicy_1_1PacketStream_1ac22c322fbd5ff12d64a63a61f37c9ab4) | `function` | Declared here |
+| [`process`](#classicy_1_1PacketStream_1ad5a93a94d2b8694b517438935c435397) | `function` | Declared here |
+| [`emit`](#classicy_1_1PacketStream_1a462ac3992c87d7b0404299f51ddca203) | `function` | Declared here |
+| [`synchronizeStates`](#classicy_1_1PacketStream_1a55e00a1afe54228fb1ee25fd45c588ec) | `function` | Declared here |
+| [`onStateChange`](#classicy_1_1PacketStream_1a3645dffc04da5aff079593b1a511d950) | `function` | Declared here |
+| [`assertCanModify`](#classicy_1_1PacketStream_1ad95eccd177ec3ad1a50458da497ad51e) | `function` | Declared here |
+| [`handleException`](#classicy_1_1PacketStream_1a29d2815aa509772cf6817d1fe360e13a) | `function` | Declared here |
+| [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](#stateful) |
+
+### Inherited from [`Stateful`](#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
 
 ### Public Attributes
 
@@ -23433,6 +26630,10 @@ Defined in src/base/include/icy/packetstream.h:621
 
 Override the [Stateful::onStateChange](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) method.
 
+##### Reimplements
+
+- [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d)
+
 ---
 
 {#assertcanmodify}
@@ -23500,6 +26701,60 @@ Defined in src/base/include/icy/synchronizer.h:38
 [Synchronizer](#synchronizer) enables any thread to communicate with the associated event loop via synchronized callbacks.
 
 This class inherits the `[Runner](#runner)` interface and may be used with any implementation that's powered by an asynchronous `[Runner](#runner)`.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_handle`](#classicy_1_1Synchronizer_1a6d02fe0af4749db715c847e12eec783d) | `variable` | Declared here |
+| [`Synchronizer`](#classicy_1_1Synchronizer_1accc77170c28de0d592863b653107f7af) | `function` | Declared here |
+| [`Synchronizer`](#classicy_1_1Synchronizer_1a5e7b8cd9304cebce9e0e99da4118b4be) | `function` | Declared here |
+| [`Synchronizer`](#classicy_1_1Synchronizer_1a8d98402e334f28ae803f80d73caeb02e) | `function` | Declared here |
+| [`~Synchronizer`](#classicy_1_1Synchronizer_1acbc1e044ccb791ad3ef6fe5e19875c8f) | `function` | Declared here |
+| [`post`](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb) | `function` | Declared here |
+| [`start`](#classicy_1_1Synchronizer_1a535a1605fc8902d814f9f5ab5e213a66) | `function` | Declared here |
+| [`start`](#classicy_1_1Synchronizer_1a870312ba2980341981b7c84f71153394) | `function` | Declared here |
+| [`cancel`](#classicy_1_1Synchronizer_1a28d3f9f3e98155a4804f8ce5c726620f) | `function` | Declared here |
+| [`close`](#classicy_1_1Synchronizer_1a76ee4f3d550251abd1c54dc20fbab913) | `function` | Declared here |
+| [`handle`](#classicy_1_1Synchronizer_1a4bd370d0da4d5b1a8fa25cbd50570df9) | `function` | Declared here |
+| [`async`](#classicy_1_1Synchronizer_1a66c51015b992eee80f779bb6586e4adf) | `function` | Declared here |
+| [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95) | `variable` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20) | `function` | Inherited from [`Runner`](#runner) |
+| [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) | `function` | Inherited from [`Runner`](#runner) |
+| [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) | `function` | Inherited from [`Runner`](#runner) |
+| [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7) | `function` | Inherited from [`Runner`](#runner) |
+| [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) | `function` | Inherited from [`Runner`](#runner) |
+| [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) | `function` | Inherited from [`Runner`](#runner) |
+| [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092) | `function` | Inherited from [`Runner`](#runner) |
+| [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) | `function` | Inherited from [`Runner`](#runner) |
+| [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) | `function` | Inherited from [`Runner`](#runner) |
+| [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb) | `function` | Inherited from [`Runner`](#runner) |
+| [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6) | `function` | Inherited from [`Runner`](#runner) |
+| [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa) | `function` | Inherited from [`Runner`](#runner) |
+
+### Inherited from [`Runner`](#runner)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_context`](#classicy_1_1Runner_1ab603ce009893678f07f6126d44cb5d95)  | Shared pointer to the internal [Context](#context). |
+| `function` | [`Runner`](#classicy_1_1Runner_1ac0c4533119dc4b941a57a2673fe67e20)  |  |
+| `function` | [`~Runner`](#classicy_1_1Runner_1a73f29199bca9d02b4abc2088bbeee0e6) `virtual` |  |
+| `function` | [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd) `virtual` | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
+| `function` | [`running`](#classicy_1_1Runner_1ac81593e773d7de17a57859adb04fcd05) `const` | Returns true if the async context is currently running. |
+| `function` | [`cancel`](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)  | Signals the async context to stop at the earliest opportunity. |
+| `function` | [`cancelled`](#classicy_1_1Runner_1a6a0c34bc077eb7455e012bf4795656ad) `const` | Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. |
+| `function` | [`repeating`](#classicy_1_1Runner_1a0f637f2251e84345c361cd75e3e78beb) `const` | Returns true if the runner is in repeating mode. |
+| `function` | [`setRepeating`](#classicy_1_1Runner_1afff1de2aa768363cdbc2b684d7b9f092)  | Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. |
+| `function` | [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `function` | [`tid`](#classicy_1_1Runner_1a9e98d40a96d3c6ddabc0665ed554592a) `const` | Returns the native thread ID of the thread running the async context. |
+| `function` | [`waitForExit`](#classicy_1_1Runner_1aff302722bc9f38db1725a8f8682b748b)  | Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. |
+| `function` | [`Runner`](#classicy_1_1Runner_1af60b7c3451cc91995712013a69d3dfe7)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a69935278f907bbab4811dcc574d147fb)  | Deleted assignment operator. |
+| `function` | [`Runner`](#classicy_1_1Runner_1a24abb255094cf79892cd9644863257c6)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1Runner_1a7b20a0d27d1399bb2dcc941b93fc09fa)  | Deleted assignment operator. |
 
 ### Public Methods
 
@@ -23650,6 +26905,10 @@ Starts the synchronizer with a `std::function` callback. Overrides `[Runner::sta
 #### Parameters
 * `func` Callback invoked from the event loop on each `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` call.
 
+##### Reimplements
+
+- [`start`](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)
+
 ---
 
 {#cancel}
@@ -23740,6 +26999,10 @@ Returns true if the implementation is thread-based.
 #### Returns
 True for thread-backed runners, false for event-loop-driven runners.
 
+##### Reimplements
+
+- [`async`](#classicy_1_1Runner_1a495227243c074331d41a9800c6ac8e07)
+
 {#timedmanager}
 
 ## TimedManager
@@ -23760,6 +27023,81 @@ Defined in src/base/include/icy/timedmanager.h:29
 Timed pointer manager
 
 Provides timed persistent data storage for class instances. TValue must implement the clone() method.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Base`](#classicy_1_1TimedManager_1aca2cf37698345dd29dd9cc7a57f9cfb7) | `typedef` | Declared here |
+| [`TimeoutMap`](#classicy_1_1TimedManager_1aa7aa3db00e380d9897e3356e194d95cd) | `typedef` | Declared here |
+| [`_tmutex`](#classicy_1_1TimedManager_1a51e926ce960f0b5faa5f44b932f116ec) | `variable` | Declared here |
+| [`_timeouts`](#classicy_1_1TimedManager_1a96c03187387916cce30d1b0fb3b58067) | `variable` | Declared here |
+| [`_timer`](#classicy_1_1TimedManager_1a4af504b9ba1bdafa875553147ef01b20) | `variable` | Declared here |
+| [`TimedManager`](#classicy_1_1TimedManager_1a362f1dc0a7cd88e43151cea3190a178d) | `function` | Declared here |
+| [`~TimedManager`](#classicy_1_1TimedManager_1a0d24cb04ab069a2fc4d838d13934e9e2) | `function` | Declared here |
+| [`add`](#classicy_1_1TimedManager_1a16b3f670a0bcc5e1ea65ec36b5044245) | `function` | Declared here |
+| [`expires`](#classicy_1_1TimedManager_1a304bdada2949ac64fc59aa00a116bbc6) | `function` | Declared here |
+| [`expires`](#classicy_1_1TimedManager_1ab2b2cef4cfe6aeef8282d8e4cf449206) | `function` | Declared here |
+| [`clear`](#classicy_1_1TimedManager_1aa18df7c1ad83ff19efa47cb2919a7d4c) | `function` | Declared here |
+| [`setTimeout`](#classicy_1_1TimedManager_1a1e8226fdedce73572ba8c42ee39c9041) | `function` | Declared here |
+| [`onRemove`](#classicy_1_1TimedManager_1a9ff37108e3aa2a3e75d29f15049162e4) | `function` | Declared here |
+| [`onTimeout`](#classicy_1_1TimedManager_1a81f3927772f9e446aa04be7837215180) | `function` | Declared here |
+| [`onTimerUpdate`](#classicy_1_1TimedManager_1a55d733e92c5b1927b3b4d4a5cf63e43a) | `function` | Declared here |
+| [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0) | `typedef` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8) | `variable` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+
+### Inherited from [`KeyedStore`](#keyedstore)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0)  |  |
+| `variable` | [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8)  |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754)  | Defaulted constructor. |
+| `function` | [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) `virtual` `inline` |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba)  | Deleted assignment operator. |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f)  | Defaulted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d)  | Defaulted assignment operator. |
+| `function` | [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) `const` `inline` | Returns the item for `key`, or nullptr if not found. |
+| `function` | [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) `inline` | Inserts a uniquely owned item. Returns a reference to the stored item. |
+| `function` | [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) `inline` | Inserts if absent; returns false on duplicate (never throws). |
+| `function` | [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) `inline` | Inserts or replaces the item under `key`. |
+| `function` | [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) `inline` | Removes and destroys the item under `key`. |
+| `function` | [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) `const` `inline` |  |
+| `function` | [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) `const` `inline` |  |
+| `function` | [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) `const` `inline` |  |
+| `function` | [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) `inline` |  |
+| `function` | [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) `inline` | Direct map access for iteration. |
+| `function` | [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) `const` `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) `const` `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) `const` `inline` |  |
+| `function` | [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) `virtual` `inline` | Override for lifecycle reactions. |
+| `function` | [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) `virtual` `inline` |  |
 
 ### Public Methods
 
@@ -23952,6 +27290,10 @@ Called when an item is removed from the collection. Erases the item's timeout en
 
 * `item` Pointer to the removed item.
 
+##### Reimplements
+
+- [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a)
+
 ---
 
 {#ontimeout}
@@ -24035,6 +27377,15 @@ Defined in src/base/include/icy/packetfactory.h:29
 
 Abstract strategy for creating typed packets from raw buffer data.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a1aeefce81f5ba54a0b00a270dc429212) | `function` | Declared here |
+| [`~IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a238bd1edeaa96acbbd9973fb952e5291) | `function` | Declared here |
+| [`create`](#classicy_1_1IPacketCreationStrategy_1aabd76e765992789690fedc949aa989da) | `function` | Declared here |
+| [`priority`](#classicy_1_1IPacketCreationStrategy_1a4e377aa4829fca6b66a293757acd48a8) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -24080,6 +27431,10 @@ Attempts to create a typed packet from the given buffer.
 #### Returns
 Newly allocated packet on success, nullptr if the buffer does not match.
 
+##### Reimplemented by
+
+- [`create`](#structicy_1_1PacketCreationStrategy_1a23dcd84d9384557d85a7f667fedfecb9)
+
 ---
 
 {#priority}
@@ -24096,6 +27451,10 @@ Defined in src/base/include/icy/packetfactory.h:41
 
 Returns the dispatch priority of this strategy (0–100; higher runs first).
 
+##### Reimplemented by
+
+- [`priority`](#structicy_1_1PacketCreationStrategy_1a4e5f6af1316418fb7c160b4d6b3cfa47)
+
 {#packetfactory}
 
 ## PacketFactory
@@ -24111,6 +27470,27 @@ class PacketFactory
 Defined in src/base/include/icy/packetfactory.h:95
 
 Priority-ordered factory that creates typed packets from raw buffers using registered strategies.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_types`](#classicy_1_1PacketFactory_1a01857248325566a636109faabebe0d39) | `variable` | Declared here |
+| [`PacketFactory`](#classicy_1_1PacketFactory_1a3961af54992eab10dbee9d239c0142b3) | `function` | Declared here |
+| [`PacketFactory`](#classicy_1_1PacketFactory_1ac1f8389630d9dfd5a1064d3ed6734fb7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketFactory_1aeee9f9bbfd1d0b8f9f8a2a376cf9df03) | `function` | Declared here |
+| [`PacketFactory`](#classicy_1_1PacketFactory_1a70a2b261e928e62a7368bf0dfb4a0201) | `function` | Declared here |
+| [`operator=`](#classicy_1_1PacketFactory_1ade20a776082aa0f605b7193696baf8df) | `function` | Declared here |
+| [`~PacketFactory`](#classicy_1_1PacketFactory_1ab7f4299f0006cc43d05713070a8a2408) | `function` | Declared here |
+| [`registerPacketType`](#classicy_1_1PacketFactory_1a4cc3511fe13ce82fe4e3f1695f0646a1) | `function` | Declared here |
+| [`unregisterPacketType`](#classicy_1_1PacketFactory_1ae6a4d3e3e01086cd00b4e7503a222109) | `function` | Declared here |
+| [`registerStrategy`](#classicy_1_1PacketFactory_1a68b84b997ec0baaa9f7360cc69a8a521) | `function` | Declared here |
+| [`unregisterStrategy`](#classicy_1_1PacketFactory_1a94c34a893ebcae3df41ba9aa9a2f7acc) | `function` | Declared here |
+| [`types`](#classicy_1_1PacketFactory_1a9b38bccf3227e05307d1d9ec500d6c7f) | `function` | Declared here |
+| [`types`](#classicy_1_1PacketFactory_1ac9d2f05aac0a4ea1bc0742314744dce4) | `function` | Declared here |
+| [`onPacketCreated`](#classicy_1_1PacketFactory_1ac555475fc5ee4cd0efacbe701315b54d) | `function` | Declared here |
+| [`createPacket`](#classicy_1_1PacketFactory_1ad72e774cd4b0d0ad8e9520530474e59e) | `function` | Declared here |
+| [`sortTypes`](#classicy_1_1PacketFactory_1a200a6e4b9a1d21a4d8a24a7cbfc388e4) | `function` | Declared here |
 
 ### Public Methods
 
@@ -24385,6 +27765,79 @@ Defined in src/base/include/icy/streammanager.h:23
 
 Manages a named collection of [PacketStream](#packetstream) instances with lifecycle callbacks.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`StreamManager`](#classicy_1_1StreamManager_1a97272b720c152a88291d8a5c5f189662) | `function` | Declared here |
+| [`~StreamManager`](#classicy_1_1StreamManager_1a0615513829601936851a1a60fd8a13e1) | `function` | Declared here |
+| [`addStream`](#classicy_1_1StreamManager_1afb85e2ed37220ce4d855bfe89efe8431) | `function` | Declared here |
+| [`addStream`](#classicy_1_1StreamManager_1a8c47d159b388dc738d8017b8503c80e4) | `function` | Declared here |
+| [`closeStream`](#classicy_1_1StreamManager_1a608c594baeab7181ab2b4f376c0b031e) | `function` | Declared here |
+| [`closeAll`](#classicy_1_1StreamManager_1ab32e31fc28654209de53435ba86cc9c0) | `function` | Declared here |
+| [`getStream`](#classicy_1_1StreamManager_1a2ace1be59b16c52869fde7155b811e51) | `function` | Declared here |
+| [`getDefaultStream`](#classicy_1_1StreamManager_1a12631a9bfc47b96a21eedb308162882f) | `function` | Declared here |
+| [`print`](#classicy_1_1StreamManager_1a4f74a34d39183d1313b5d24e2bf0e133) | `function` | Declared here |
+| [`onAdd`](#classicy_1_1StreamManager_1a63721fa626c5ba5ff2d84a245a0a2d4c) | `function` | Declared here |
+| [`onRemove`](#classicy_1_1StreamManager_1aed7b3b6024466fb2c2cca9e0fc5b9d6c) | `function` | Declared here |
+| [`onStreamStateChange`](#classicy_1_1StreamManager_1a44fc224a7c26d2d457343ea3b1054291) | `function` | Declared here |
+| [`className`](#classicy_1_1StreamManager_1a6ffbfc205cd2d6a12561519cc1c6d468) | `function` | Declared here |
+| [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0) | `typedef` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8) | `variable` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+
+### Inherited from [`KeyedStore`](#keyedstore)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0)  |  |
+| `variable` | [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8)  |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754)  | Defaulted constructor. |
+| `function` | [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) `virtual` `inline` |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba)  | Deleted assignment operator. |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f)  | Defaulted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d)  | Defaulted assignment operator. |
+| `function` | [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) `const` `inline` | Returns the item for `key`, or nullptr if not found. |
+| `function` | [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) `inline` | Inserts a uniquely owned item. Returns a reference to the stored item. |
+| `function` | [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) `inline` | Inserts if absent; returns false on duplicate (never throws). |
+| `function` | [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) `inline` | Inserts or replaces the item under `key`. |
+| `function` | [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) `inline` | Removes and destroys the item under `key`. |
+| `function` | [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) `const` `inline` |  |
+| `function` | [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) `const` `inline` |  |
+| `function` | [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) `const` `inline` |  |
+| `function` | [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) `inline` |  |
+| `function` | [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) `inline` | Direct map access for iteration. |
+| `function` | [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) `const` `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) `const` `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) `const` `inline` |  |
+| `function` | [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) `virtual` `inline` | Override for lifecycle reactions. |
+| `function` | [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) `virtual` `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -24525,6 +27978,10 @@ Defined in src/base/include/icy/streammanager.h:40
 
 Override for lifecycle reactions.
 
+##### Reimplements
+
+- [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec)
+
 ---
 
 {#onremove}
@@ -24538,6 +27995,10 @@ virtual void onRemove(const std::string &, PacketStream * stream) override
 ```
 
 Defined in src/base/include/icy/streammanager.h:41
+
+##### Reimplements
+
+- [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a)
 
 ---
 
@@ -24583,6 +28044,55 @@ Defined in src/base/include/icy/diagnosticmanager.h:64
 > **Subclassed by:** [`AsyncDiagnostic`](#asyncdiagnostic)
 
 Abstract interface for diagnostic information providers.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`name`](#classicy_1_1IDiagnostic_1a4104fcad3cbf2a8f42800551c359f940) | `variable` | Declared here |
+| [`description`](#classicy_1_1IDiagnostic_1ae666aec0ec50e8860b31e6f6ce31927a) | `variable` | Declared here |
+| [`summary`](#classicy_1_1IDiagnostic_1a76c45fd49e48498ce08978c962b358cf) | `variable` | Declared here |
+| [`SummaryUpdated`](#classicy_1_1IDiagnostic_1a5c67da7d366784bb68d391f17dafca55) | `variable` | Declared here |
+| [`IDiagnostic`](#classicy_1_1IDiagnostic_1af6e8fa9413f5850eddf8527fcc2db826) | `function` | Declared here |
+| [`~IDiagnostic`](#classicy_1_1IDiagnostic_1a2f1b2a10d963b8d82c8ee0ad0b05c80e) | `function` | Declared here |
+| [`check`](#classicy_1_1IDiagnostic_1a4367e482a84bc8cd45c53a8c9280dd48) | `function` | Declared here |
+| [`reset`](#classicy_1_1IDiagnostic_1a99a2a5ca1034482290b07f4ceaf5b51d) | `function` | Declared here |
+| [`complete`](#classicy_1_1IDiagnostic_1a24cf7ba939704df740ad0f069e81c0ea) | `function` | Declared here |
+| [`passed`](#classicy_1_1IDiagnostic_1ae483e46a69e636212e8cfa9b0d6d0049) | `function` | Declared here |
+| [`failed`](#classicy_1_1IDiagnostic_1a8e3c4daa558c261f4307f14faab8cc5f) | `function` | Declared here |
+| [`run`](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) | `function` | Declared here |
+| [`pass`](#classicy_1_1IDiagnostic_1a39eee13946e3919729b69cedcca74dd8) | `function` | Declared here |
+| [`fail`](#classicy_1_1IDiagnostic_1a6cfabad1050954c7b83a320de8aaac97) | `function` | Declared here |
+| [`addSummary`](#classicy_1_1IDiagnostic_1a30e23cd0ff90f76bf7244792739a4471) | `function` | Declared here |
+| [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](#stateful) |
+
+### Inherited from [`Stateful`](#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
 
 ### Public Attributes
 
@@ -24688,6 +28198,10 @@ Defined in src/base/include/icy/diagnosticmanager.h:76
 
 Resets state to None and invokes [run()](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) to perform the diagnostic check.
 
+##### Reimplemented by
+
+- [`check`](#classicy_1_1AsyncDiagnostic_1a2d538f974c454ff1281e8056bcbe014d)
+
 ---
 
 {#reset}
@@ -24785,6 +28299,10 @@ Override to implement diagnostic logic.
 
 The StateChange signal will dispatch diagnostic test results to delegates.
 
+##### Reimplemented by
+
+- [`run`](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663)
+
 ---
 
 {#pass}
@@ -24857,6 +28375,94 @@ Defined in src/base/include/icy/diagnosticmanager.h:124
 
 Asynchronous diagnostic information collector.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_thread`](#classicy_1_1AsyncDiagnostic_1aefef5c745562f6592e832bcb30f48624) | `variable` | Declared here |
+| [`~AsyncDiagnostic`](#classicy_1_1AsyncDiagnostic_1afd8eef438ef66edf8ec188d111a8030b) | `function` | Declared here |
+| [`run`](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663) | `function` | Declared here |
+| [`check`](#classicy_1_1AsyncDiagnostic_1a2d538f974c454ff1281e8056bcbe014d) | `function` | Declared here |
+| [`name`](#classicy_1_1IDiagnostic_1a4104fcad3cbf2a8f42800551c359f940) | `variable` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`description`](#classicy_1_1IDiagnostic_1ae666aec0ec50e8860b31e6f6ce31927a) | `variable` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`summary`](#classicy_1_1IDiagnostic_1a76c45fd49e48498ce08978c962b358cf) | `variable` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`SummaryUpdated`](#classicy_1_1IDiagnostic_1a5c67da7d366784bb68d391f17dafca55) | `variable` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`IDiagnostic`](#classicy_1_1IDiagnostic_1af6e8fa9413f5850eddf8527fcc2db826) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`~IDiagnostic`](#classicy_1_1IDiagnostic_1a2f1b2a10d963b8d82c8ee0ad0b05c80e) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`check`](#classicy_1_1IDiagnostic_1a4367e482a84bc8cd45c53a8c9280dd48) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`reset`](#classicy_1_1IDiagnostic_1a99a2a5ca1034482290b07f4ceaf5b51d) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`complete`](#classicy_1_1IDiagnostic_1a24cf7ba939704df740ad0f069e81c0ea) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`passed`](#classicy_1_1IDiagnostic_1ae483e46a69e636212e8cfa9b0d6d0049) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`failed`](#classicy_1_1IDiagnostic_1a8e3c4daa558c261f4307f14faab8cc5f) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`run`](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`pass`](#classicy_1_1IDiagnostic_1a39eee13946e3919729b69cedcca74dd8) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`fail`](#classicy_1_1IDiagnostic_1a6cfabad1050954c7b83a320de8aaac97) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`addSummary`](#classicy_1_1IDiagnostic_1a30e23cd0ff90f76bf7244792739a4471) | `function` | Inherited from [`IDiagnostic`](#idiagnostic) |
+| [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`IDiagnostic`](#idiagnostic)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`name`](#classicy_1_1IDiagnostic_1a4104fcad3cbf2a8f42800551c359f940)  | The name of the diagnostic. |
+| `variable` | [`description`](#classicy_1_1IDiagnostic_1ae666aec0ec50e8860b31e6f6ce31927a)  | The diagnostic description. |
+| `variable` | [`summary`](#classicy_1_1IDiagnostic_1a76c45fd49e48498ce08978c962b358cf)  | The diagnostic summary, maybe including troubleshooting information on failure. |
+| `variable` | [`SummaryUpdated`](#classicy_1_1IDiagnostic_1a5c67da7d366784bb68d391f17dafca55)  | Signals when a new text item is added to the summary. |
+| `function` | [`IDiagnostic`](#classicy_1_1IDiagnostic_1af6e8fa9413f5850eddf8527fcc2db826)  |  |
+| `function` | [`~IDiagnostic`](#classicy_1_1IDiagnostic_1a2f1b2a10d963b8d82c8ee0ad0b05c80e) `virtual` |  |
+| `function` | [`check`](#classicy_1_1IDiagnostic_1a4367e482a84bc8cd45c53a8c9280dd48) `virtual` | Resets state to None and invokes [run()](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) to perform the diagnostic check. |
+| `function` | [`reset`](#classicy_1_1IDiagnostic_1a99a2a5ca1034482290b07f4ceaf5b51d) `virtual` | Clears the summary and resets state to None. |
+| `function` | [`complete`](#classicy_1_1IDiagnostic_1a24cf7ba939704df740ad0f069e81c0ea) `virtual` `const` | Returns true if the diagnostic has reached a terminal state (Passed or Failed). |
+| `function` | [`passed`](#classicy_1_1IDiagnostic_1ae483e46a69e636212e8cfa9b0d6d0049) `virtual` `const` | Returns true if the diagnostic state is Passed. |
+| `function` | [`failed`](#classicy_1_1IDiagnostic_1a8e3c4daa558c261f4307f14faab8cc5f) `virtual` `const` | Returns true if the diagnostic state is Failed. |
+| `function` | [`run`](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) `virtual` | Override to implement diagnostic logic. |
+| `function` | [`pass`](#classicy_1_1IDiagnostic_1a39eee13946e3919729b69cedcca74dd8) `virtual` | Transitions the state to Passed. |
+| `function` | [`fail`](#classicy_1_1IDiagnostic_1a6cfabad1050954c7b83a320de8aaac97) `virtual` | Transitions the state to Failed. |
+| `function` | [`addSummary`](#classicy_1_1IDiagnostic_1a30e23cd0ff90f76bf7244792739a4471) `virtual` | Appends text to the summary list and emits SummaryUpdated. |
+
+### Inherited from [`Stateful`](#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -24882,6 +28488,10 @@ Override to implement diagnostic logic.
 
 The StateChange signal will dispatch diagnostic test results to delegates.
 
+##### Reimplements
+
+- [`run`](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497)
+
 ---
 
 {#check}
@@ -24897,6 +28507,10 @@ virtual inline void check() override
 Defined in src/base/include/icy/diagnosticmanager.h:133
 
 Resets the diagnostic and launches [run()](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663) on a background thread.
+
+##### Reimplements
+
+- [`check`](#classicy_1_1IDiagnostic_1a4367e482a84bc8cd45c53a8c9280dd48)
 
 ### Protected Attributes
 
@@ -24933,6 +28547,76 @@ Defined in src/base/include/icy/diagnosticmanager.h:150
 > **Inherits:** [`string, IDiagnostic >`](#keyedstore)
 
 Registry and manager for diagnostic providers.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`DiagnosticsComplete`](#classicy_1_1DiagnosticManager_1ada56d0c11098e02fcd17dfda79af8c29) | `variable` | Declared here |
+| [`DiagnosticManager`](#classicy_1_1DiagnosticManager_1a70ed1e036f4c99548bbdb55c901f842d) | `function` | Declared here |
+| [`~DiagnosticManager`](#classicy_1_1DiagnosticManager_1a94d30380c38cb89d944214d02400dbe5) | `function` | Declared here |
+| [`addDiagnostic`](#classicy_1_1DiagnosticManager_1a34e34fbb46d78edbdb0ba94f5769c9c0) | `function` | Declared here |
+| [`freeDiagnostic`](#classicy_1_1DiagnosticManager_1ab27d13d2e1cc3e95b3422980a19a2232) | `function` | Declared here |
+| [`getDiagnostic`](#classicy_1_1DiagnosticManager_1a57789615ec94eb82172704e4d8f32d00) | `function` | Declared here |
+| [`resetAll`](#classicy_1_1DiagnosticManager_1a9c7e7433d77fa10c9532e9200ff15364) | `function` | Declared here |
+| [`checkAll`](#classicy_1_1DiagnosticManager_1ac10bb957354901e382fc5c77b2829b38) | `function` | Declared here |
+| [`allComplete`](#classicy_1_1DiagnosticManager_1ae707d30211304e472973950976558792) | `function` | Declared here |
+| [`onDiagnosticStateChange`](#classicy_1_1DiagnosticManager_1a1714271ff360cf4d56211c8d8eee5805) | `function` | Declared here |
+| [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0) | `typedef` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8) | `variable` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+| [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) | `function` | Inherited from [`KeyedStore`](#keyedstore) |
+
+### Inherited from [`KeyedStore`](#keyedstore)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Map`](#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0)  |  |
+| `variable` | [`_map`](#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8)  |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754)  | Defaulted constructor. |
+| `function` | [`~KeyedStore`](#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) `virtual` `inline` |  |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834)  | Deleted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba)  | Deleted assignment operator. |
+| `function` | [`KeyedStore`](#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f)  | Defaulted constructor. |
+| `function` | [`operator=`](#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d)  | Defaulted assignment operator. |
+| `function` | [`get`](#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) `const` `inline` | Returns the item for `key`, or nullptr if not found. |
+| `function` | [`add`](#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) `inline` | Inserts a uniquely owned item. Returns a reference to the stored item. |
+| `function` | [`tryAdd`](#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) `inline` | Inserts if absent; returns false on duplicate (never throws). |
+| `function` | [`put`](#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) `inline` | Inserts or replaces the item under `key`. |
+| `function` | [`erase`](#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) `inline` | Removes and destroys the item under `key`. |
+| `function` | [`contains`](#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) `const` `inline` |  |
+| `function` | [`empty`](#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) `const` `inline` |  |
+| `function` | [`size`](#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) `const` `inline` |  |
+| `function` | [`clear`](#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) `inline` |  |
+| `function` | [`map`](#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) `inline` | Direct map access for iteration. |
+| `function` | [`map`](#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) `const` `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) `inline` |  |
+| `function` | [`begin`](#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) `const` `inline` |  |
+| `function` | [`end`](#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) `const` `inline` |  |
+| `function` | [`onAdd`](#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) `virtual` `inline` | Override for lifecycle reactions. |
+| `function` | [`onRemove`](#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) `virtual` `inline` |  |
 
 ### Public Attributes
 
@@ -25095,6 +28779,98 @@ Lifetime is managed by [IntrusivePtr](#intrusiveptr) via the [RefCounted](#refco
 
 When a terminal state (Success or Failed) is reached, the transaction cleans up its timer but does NOT delete itself. The [IntrusivePtr](#intrusiveptr) destructor handles deletion when the last reference is released.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Ptr`](#classicy_1_1PacketTransaction_1a44ea6d9d47efb59eebdc71158c0158c5) | `typedef` | Declared here |
+| [`IntrusivePtr`](#classicy_1_1PacketTransaction_1a04a374ecab2499e81653198fd49ff15e) | `friend` | Declared here |
+| [`_request`](#classicy_1_1PacketTransaction_1a03e21f66e0f957926f03f37b48276dca) | `variable` | Declared here |
+| [`_response`](#classicy_1_1PacketTransaction_1a6322ae70f87db74c1d5c130b7fec7eb8) | `variable` | Declared here |
+| [`_timer`](#classicy_1_1PacketTransaction_1a1b02dbf0ac65fcad82c50a6867f81a79) | `variable` | Declared here |
+| [`_retries`](#classicy_1_1PacketTransaction_1a8c76a907486cae828c77f0302d20a844) | `variable` | Declared here |
+| [`_attempts`](#classicy_1_1PacketTransaction_1ace42ededd6279b9a3ce13bdfd6619c11) | `variable` | Declared here |
+| [`_disposed`](#classicy_1_1PacketTransaction_1a70d8cc5501fba3b9c26426af411241a4) | `variable` | Declared here |
+| [`PacketTransaction`](#classicy_1_1PacketTransaction_1a5b3c9258f951866005347123bdf7a7ff) | `function` | Declared here |
+| [`PacketTransaction`](#classicy_1_1PacketTransaction_1a711873135d73ab6cb3426db65e980196) | `function` | Declared here |
+| [`send`](#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4) | `function` | Declared here |
+| [`cancel`](#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef) | `function` | Declared here |
+| [`cancelled`](#classicy_1_1PacketTransaction_1a24663172b10c70530b29c9dccdf5813d) | `function` | Declared here |
+| [`dispose`](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) | `function` | Declared here |
+| [`disposed`](#classicy_1_1PacketTransaction_1a2a85d3be5eb4088c1f033c04c0a0342c) | `function` | Declared here |
+| [`canResend`](#classicy_1_1PacketTransaction_1aca2387c6623fb21b6345bf7a1e45612b) | `function` | Declared here |
+| [`attempts`](#classicy_1_1PacketTransaction_1a7c19c40febe7e9f6471a7ea5624c933e) | `function` | Declared here |
+| [`retries`](#classicy_1_1PacketTransaction_1a81bb9f59219ebd7399dfdbafe821dcb4) | `function` | Declared here |
+| [`request`](#classicy_1_1PacketTransaction_1a3a5ebb2afffd6d94e465a1db318161e5) | `function` | Declared here |
+| [`request`](#classicy_1_1PacketTransaction_1abe8ba9b6ee2c439944d84386204d5818) | `function` | Declared here |
+| [`response`](#classicy_1_1PacketTransaction_1a16cdc5ec77f02ab8213de87bb56f709f) | `function` | Declared here |
+| [`response`](#classicy_1_1PacketTransaction_1a50e68834b240b876dae1a7d1f84afb56) | `function` | Declared here |
+| [`~PacketTransaction`](#classicy_1_1PacketTransaction_1ac118e461ae9ba6fc8f3b69fe82fda134) | `function` | Declared here |
+| [`onStateChange`](#classicy_1_1PacketTransaction_1a14bf74aa47986f672b4f711a2f98e38d) | `function` | Declared here |
+| [`handlePotentialResponse`](#classicy_1_1PacketTransaction_1ad392bb447a02bcd8425614589966613a) | `function` | Declared here |
+| [`checkResponse`](#classicy_1_1PacketTransaction_1a36b55484206d69dff6375d61b5fb834b) | `function` | Declared here |
+| [`onResponse`](#classicy_1_1PacketTransaction_1a2ba8f73029cf89d03c1d641c8c3a42f3) | `function` | Declared here |
+| [`onTimeout`](#classicy_1_1PacketTransaction_1ad515edcc4134a741acea3f407409fc56) | `function` | Declared here |
+| [`send`](#send-9) | `function` | Inherited from [`Sendable`](#sendable) |
+| [`cancel`](#cancel-2) | `function` | Inherited from [`Sendable`](#sendable) |
+| [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](#stateful) |
+| [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](#stateful) |
+| [`_refCount`](#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589) | `variable` | Inherited from [`RefCounted`](#refcounted) |
+| [`RefCounted`](#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`RefCounted`](#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`operator=`](#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`addRef`](#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`releaseRef`](#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`refCount`](#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) | `function` | Inherited from [`RefCounted`](#refcounted) |
+| [`~RefCounted`](#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909) | `function` | Inherited from [`RefCounted`](#refcounted) |
+
+### Inherited from [`Sendable`](#sendable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`send`](#send-9) `virtual` | Initiates the send operation. |
+| `function` | [`cancel`](#cancel-2) `virtual` | Cancels a pending send operation. |
+
+### Inherited from [`Stateful`](#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`RefCounted`](#refcounted)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_refCount`](#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589)  |  |
+| `function` | [`RefCounted`](#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b)  | Defaulted constructor. |
+| `function` | [`RefCounted`](#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) `inline` `noexcept` |  |
+| `function` | [`operator=`](#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) `inline` `noexcept` |  |
+| `function` | [`addRef`](#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) `const` `inline` `noexcept` | Increments the reference count. Called by [IntrusivePtr](#intrusiveptr) on acquisition. |
+| `function` | [`releaseRef`](#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) `const` `inline` `noexcept` | Decrements the reference count. |
+| `function` | [`refCount`](#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) `const` `inline` `nodiscard` `noexcept` | Returns the current reference count. |
+| `function` | [`~RefCounted`](#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909)  | Defaulted destructor. |
+
 ### Friends
 
 | Name | Description |
@@ -25192,6 +28968,15 @@ Defined in src/base/include/icy/packettransaction.h:103
 
 Starts the transaction timer and sends the request. Overriding classes should implement send logic here.
 
+##### Reimplements
+
+- [`send`](#send-9)
+
+##### Reimplemented by
+
+- [`send`](net.md#send-6)
+- [`send`](net.md#send-6)
+
 ---
 
 {#cancel}
@@ -25207,6 +28992,15 @@ virtual inline void cancel() override
 Defined in src/base/include/icy/packettransaction.h:122
 
 Cancellation means that the agent will not retransmit the request, will not treat the lack of response to be a failure, but will wait the duration of the transaction timeout for a response. Transitions the transaction to the `Cancelled` state.
+
+##### Reimplements
+
+- [`cancel`](#cancel-2)
+
+##### Reimplemented by
+
+- [`cancel`](net.md#cancel)
+- [`cancel`](net.md#cancel)
 
 ---
 
@@ -25240,6 +29034,11 @@ virtual inline void dispose()
 Defined in src/base/include/icy/packettransaction.h:130
 
 Stops the timer and unregisters callbacks. Does NOT delete the object; the [IntrusivePtr](#intrusiveptr) destructor handles deletion when the last reference is released. Safe to call multiple times.
+
+##### Reimplemented by
+
+- [`dispose`](net.md#dispose)
+- [`dispose`](net.md#dispose)
 
 ---
 
@@ -25492,6 +29291,10 @@ Defined in src/base/include/icy/packettransaction.h:174
 
 Post state change hook. Calls [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) on terminal states to stop the timer, but does not delete the object; [IntrusivePtr](#intrusiveptr) handles that.
 
+##### Reimplements
+
+- [`onStateChange`](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d)
+
 ---
 
 {#handlepotentialresponse}
@@ -25524,6 +29327,11 @@ Defined in src/base/include/icy/packettransaction.h:198
 
 Checks a potential response candidate and returns true on successful match.
 
+##### Reimplemented by
+
+- [`checkResponse`](net.md#checkresponse)
+- [`checkResponse`](net.md#checkresponse)
+
 ---
 
 {#onresponse}
@@ -25539,6 +29347,12 @@ virtual inline void onResponse()
 Defined in src/base/include/icy/packettransaction.h:201
 
 Called when a successful response is received.
+
+##### Reimplemented by
+
+- [`onResponse`](net.md#onresponse)
+- [`onResponse`](net.md#onresponse)
+- [`onResponse`](stun.md#onresponse-1)
 
 ---
 
@@ -25594,6 +29408,41 @@ Defined in src/base/include/icy/task.h:32
 Abstract base class for implementing asynchronous tasks.
 
 Tasks are designed to be run by a [TaskRunner](#taskrunner).
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TaskRunner`](#classicy_1_1Task_1a1956d94b45592a4096a335641aab65f8) | `friend` | Declared here |
+| [`_id`](#classicy_1_1Task_1ac1ee918bfc4a8bef0dd1661f4cbe680a) | `variable` | Declared here |
+| [`_repeating`](#classicy_1_1Task_1a348904116c7dd4d3f415452681599b0e) | `variable` | Declared here |
+| [`_destroyed`](#classicy_1_1Task_1aa0692b25828d7a0da407a17d137ff782) | `variable` | Declared here |
+| [`Task`](#classicy_1_1Task_1aa74fdf87d9f64104eef70e879ea6bd27) | `function` | Declared here |
+| [`destroy`](#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) | `function` | Declared here |
+| [`destroyed`](#classicy_1_1Task_1acee30db8dbcdc6a7508e3d407b923cce) | `function` | Declared here |
+| [`repeating`](#classicy_1_1Task_1ac5c935259f0e714c209834faad6ef106) | `function` | Declared here |
+| [`id`](#classicy_1_1Task_1a763945e1432e4db22ed5dbcb9682fadb) | `function` | Declared here |
+| [`~Task`](#classicy_1_1Task_1a3844bd8461c7b8d295c5807fe9ae8b2d) | `function` | Declared here |
+| [`Task`](#classicy_1_1Task_1acbb62d60d08febc0f2eb088aaf938116) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Task_1a0239870fcbb01195d6d53c7ef83a7c68) | `function` | Declared here |
+| [`Task`](#classicy_1_1Task_1a9df1005fc4dafee44be6246cd03cb8c6) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Task_1a89132b582d3c178b01e4c102aac03f9a) | `function` | Declared here |
+| [`run`](#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de) | `function` | Declared here |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
 
 ### Friends
 
@@ -25800,6 +29649,14 @@ Defined in src/base/include/icy/task.h:74
 
 Called by the [TaskRunner](#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration.
 
+##### Reimplements
+
+- [`run`](#run-4)
+
+##### Reimplemented by
+
+- [`run`](sched.md#run-7)
+
 {#taskrunner}
 
 ## TaskRunner
@@ -25822,6 +29679,57 @@ Defined in src/base/include/icy/task.h:93
 The `[TaskRunner](#taskrunner)` continually loops through each task in the task list calling the task's `[run()](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2)` method.
 
 The `[TaskRunner](#taskrunner)` is powered by an abstract `[Runner](#runner)` instance, which means that tasks can be executed in a thread or event loop context.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TaskList`](#classicy_1_1TaskRunner_1ab5b34efcc94074c47bfeb15bf163e51c) | `typedef` | Declared here |
+| [`Idle`](#classicy_1_1TaskRunner_1a30a56b557732d674eb8c56a92a3b39bf) | `variable` | Declared here |
+| [`Shutdown`](#classicy_1_1TaskRunner_1a4536c462174e6dbea54ad084549b3be5) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1TaskRunner_1a8ed72724333410e042b847ac19daf9c4) | `variable` | Declared here |
+| [`_runner`](#classicy_1_1TaskRunner_1a315262f5ecce82c4db6e45063c2df1ac) | `variable` | Declared here |
+| [`_tasks`](#classicy_1_1TaskRunner_1a1cec7a3c24c2aece661b60d6405cd3c5) | `variable` | Declared here |
+| [`TaskRunner`](#classicy_1_1TaskRunner_1a9b67f07ab9746294356df14a1a860f04) | `function` | Declared here |
+| [`~TaskRunner`](#classicy_1_1TaskRunner_1a7c0c280f3659c5d9064ac8476b223cb2) | `function` | Declared here |
+| [`TaskRunner`](#classicy_1_1TaskRunner_1a7da8c31a699f676e059bb39f3e97f76c) | `function` | Declared here |
+| [`operator=`](#classicy_1_1TaskRunner_1a9c146e31a6df7fdf7148fd33799d1ea3) | `function` | Declared here |
+| [`TaskRunner`](#classicy_1_1TaskRunner_1adde5e6835fb88de26936c1cd7a724f00) | `function` | Declared here |
+| [`operator=`](#classicy_1_1TaskRunner_1a46409938bd8d3f0e6c46c33ac1dce823) | `function` | Declared here |
+| [`start`](#classicy_1_1TaskRunner_1a88082927b85c8136b10bbb6151f00d22) | `function` | Declared here |
+| [`cancel`](#classicy_1_1TaskRunner_1aa69462588279f04fc131be61adc98d0d) | `function` | Declared here |
+| [`destroy`](#classicy_1_1TaskRunner_1a6aa88f4f738cfb22d6033c2897c7208d) | `function` | Declared here |
+| [`exists`](#classicy_1_1TaskRunner_1a6869bb7ff601ca2ed84024091a474652) | `function` | Declared here |
+| [`get`](#classicy_1_1TaskRunner_1adeb64f098c412f3149c489d9df7b1109) | `function` | Declared here |
+| [`setRunner`](#classicy_1_1TaskRunner_1a8a6bfd5f77b9a25b59f5e0e137cd8782) | `function` | Declared here |
+| [`className`](#classicy_1_1TaskRunner_1ad9bf53e52d61b811ffa85bc911620a22) | `function` | Declared here |
+| [`cancel`](#classicy_1_1TaskRunner_1aa2f1d9a49043af08d17669dddfcdc268) | `function` | Declared here |
+| [`getDefault`](#classicy_1_1TaskRunner_1ae223a7b6cdefc4ff1dfb0d74785ce101) | `function` | Declared here |
+| [`run`](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) | `function` | Declared here |
+| [`add`](#classicy_1_1TaskRunner_1a6ff09a58487ce9be902ac0e8415a2cca) | `function` | Declared here |
+| [`remove`](#classicy_1_1TaskRunner_1ae6bf3614249df759f7bcc611fec5a3e5) | `function` | Declared here |
+| [`next`](#classicy_1_1TaskRunner_1a766c070279f7f038ff242d8f1df81a3d) | `function` | Declared here |
+| [`clear`](#classicy_1_1TaskRunner_1a37a9f66c38ea632138c8d4f1951cd28c) | `function` | Declared here |
+| [`onAdd`](#classicy_1_1TaskRunner_1a5f720ac54054e1533bd25bbe43788756) | `function` | Declared here |
+| [`onStart`](#classicy_1_1TaskRunner_1a59c646e3779deb0fda66bddf02616724) | `function` | Declared here |
+| [`onCancel`](#classicy_1_1TaskRunner_1a36503096ac04ea774bb1e78b1ecdf0ef) | `function` | Declared here |
+| [`onRemove`](#classicy_1_1TaskRunner_1ac28c9029f03f161c3d5f375ee38140d4) | `function` | Declared here |
+| [`onRun`](#classicy_1_1TaskRunner_1a4e1e0694127e7aa909f4d6ef6b717e4c) | `function` | Declared here |
+| [`Runnable`](#runnable-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`run`](#run-4) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancel`](#cancel-1) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`cancelled`](#cancelled) | `function` | Inherited from [`Runnable`](#runnable) |
+| [`exit`](#exit) | `variable` | Inherited from [`Runnable`](#runnable) |
+
+### Inherited from [`Runnable`](#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](#runnable-1) `inline` |  |
+| `function` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
+| `function` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](#exit)  |  |
 
 ### Public Attributes
 
@@ -25951,6 +29859,10 @@ Cancels a task.
 
 The task reference will be managed by the [TaskRunner](#taskrunner) until the task is destroyed.
 
+##### Reimplemented by
+
+- [`cancel`](sched.md#cancel-5)
+
 ---
 
 {#destroy}
@@ -26044,6 +29956,10 @@ virtual inline void cancel(bool flag = true)
 Defined in src/base/include/icy/task.h:108
 
 Cancel the current task. The [run()](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) method should return ASAP.
+
+##### Reimplements
+
+- [`cancel`](#cancel-1)
 
 ### Public Static Methods
 
@@ -26142,6 +30058,10 @@ Defined in src/base/include/icy/task.h:147
 
 Called by the async context to run the next task.
 
+##### Reimplements
+
+- [`run`](#run-4)
+
 ---
 
 {#add}
@@ -26205,6 +30125,10 @@ virtual void clear()
 Defined in src/base/include/icy/task.h:159
 
 Destroys and clears all manages tasks.
+
+##### Reimplemented by
+
+- [`clear`](sched.md#clear-2)
 
 ---
 
@@ -26303,6 +30227,28 @@ Defined in src/base/include/icy/packet.h:47
 > **Subclassed by:** [`FlagPacket`](#flagpacket), [`RawPacket`](#rawpacket), [`Message`](symple.md#message-10), [`Message`](stun.md#message-5)
 
 The basic packet type which is passed around the icey system. [IPacket](#ipacket) can be extended for each protocol to enable polymorphic processing and callbacks using [PacketStream](#packetstream) and friends.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`opaque`](#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Declared here |
+| [`info`](#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Declared here |
+| [`flags`](#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Declared here |
+| [`IPacket`](#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Declared here |
+| [`IPacket`](#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Declared here |
+| [`operator=`](#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Declared here |
+| [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Declared here |
+| [`~IPacket`](#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Declared here |
+| [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Declared here |
+| [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Declared here |
+| [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Declared here |
+| [`hasData`](#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Declared here |
+| [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Declared here |
+| [`constData`](#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Declared here |
+| [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Declared here |
+| [`print`](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Declared here |
+| [`operator<<`](#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Declared here |
 
 ### Friends
 
@@ -26476,6 +30422,20 @@ Returns a heap-allocated deep copy of this packet.
 #### Returns
 Owning pointer to the cloned packet.
 
+##### Reimplemented by
+
+- [`clone`](av.md#clone-3)
+- [`clone`](av.md#clone)
+- [`clone`](av.md#clone-4)
+- [`clone`](av.md#clone-2)
+- [`clone`](av.md#clone-1)
+- [`clone`](#classicy_1_1FlagPacket_1a69328672683488c8c19f0f55ec174fda)
+- [`clone`](net.md#clone-6)
+- [`clone`](#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c)
+- [`clone`](symple.md#clone-18)
+- [`clone`](stun.md#clone-11)
+- [`clone`](vision.md#clone-19)
+
 ---
 
 {#read}
@@ -26491,6 +30451,14 @@ virtual ssize_t read(const ConstBuffer &)
 Defined in src/base/include/icy/packet.h:96
 
 Read/parse to the packet from the given input buffer. The number of bytes read is returned.
+
+##### Reimplemented by
+
+- [`read`](#classicy_1_1FlagPacket_1af60c63d2bc0d20d39ea7deb8d7aabc51)
+- [`read`](net.md#read-1)
+- [`read`](#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769)
+- [`read`](symple.md#read-13)
+- [`read`](stun.md#read-6)
 
 ---
 
@@ -26510,6 +30478,14 @@ Copy/generate to the packet given output buffer. The number of bytes written can
 
 Todo: It may be preferable to use our pod types here instead of buffer input, but the current codebase requires that the buffer be dynamically resizable for some protocols...
 
+##### Reimplemented by
+
+- [`write`](#classicy_1_1FlagPacket_1a31cc8c877a980b0986a7e15fde7f5fb8)
+- [`write`](net.md#write-1)
+- [`write`](#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4)
+- [`write`](symple.md#write-28)
+- [`write`](stun.md#write-21)
+
 ---
 
 {#size}
@@ -26528,6 +30504,12 @@ The size of the packet in bytes.
 
 This is the number of bytes that will be written on a call to [write()](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c), but may not be the number of bytes that will be consumed by [read()](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b).
 
+##### Reimplemented by
+
+- [`size`](#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf)
+- [`size`](symple.md#size-12)
+- [`size`](stun.md#size-6)
+
 ---
 
 {#hasdata}
@@ -26544,6 +30526,10 @@ Defined in src/base/include/icy/packet.h:115
 
 Returns true if the packet has a non-null data pointer.
 
+##### Reimplemented by
+
+- [`hasData`](symple.md#hasdata-1)
+
 ---
 
 {#data}
@@ -26559,6 +30545,11 @@ virtual inline char * data() const
 Defined in src/base/include/icy/packet.h:118
 
 The packet data pointer for buffered packets.
+
+##### Reimplemented by
+
+- [`data`](#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20)
+- [`data`](symple.md#data-6)
 
 ---
 
@@ -26592,6 +30583,20 @@ Defined in src/base/include/icy/packet.h:124
 
 Returns the class name of this packet type for logging and diagnostics.
 
+##### Reimplemented by
+
+- [`className`](av.md#classname-3)
+- [`className`](av.md#classname)
+- [`className`](av.md#classname-4)
+- [`className`](av.md#classname-2)
+- [`className`](av.md#classname-1)
+- [`className`](#classicy_1_1FlagPacket_1a4b1fc27e3104913746bf4bcf329d8c03)
+- [`className`](net.md#classname-5)
+- [`className`](#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828)
+- [`className`](symple.md#classname-8)
+- [`className`](stun.md#classname-7)
+- [`className`](vision.md#classname-11)
+
 ---
 
 {#print}
@@ -26610,6 +30615,12 @@ Prints a human-readable representation to the given stream.
 #### Parameters
 * `os` Output stream.
 
+##### Reimplemented by
+
+- [`print`](net.md#print-6)
+- [`print`](symple.md#print-16)
+- [`print`](stun.md#print-13)
+
 {#flagpacket}
 
 ## FlagPacket
@@ -26627,6 +30638,57 @@ Defined in src/base/include/icy/packet.h:146
 > **Inherits:** [`IPacket`](#ipacket)
 
 Packet for sending bitwise flags along the packet stream.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`FlagPacket`](#classicy_1_1FlagPacket_1a0b7730ab14825a17ba3f1df0946221dd) | `function` | Declared here |
+| [`clone`](#classicy_1_1FlagPacket_1a69328672683488c8c19f0f55ec174fda) | `function` | Declared here |
+| [`FlagPacket`](#classicy_1_1FlagPacket_1a514092656659b27bf0e6e3136820ed62) | `function` | Declared here |
+| [`~FlagPacket`](#classicy_1_1FlagPacket_1adc58952b89b7b5fe22667181944a6230) | `function` | Declared here |
+| [`read`](#classicy_1_1FlagPacket_1af60c63d2bc0d20d39ea7deb8d7aabc51) | `function` | Declared here |
+| [`write`](#classicy_1_1FlagPacket_1a31cc8c877a980b0986a7e15fde7f5fb8) | `function` | Declared here |
+| [`className`](#classicy_1_1FlagPacket_1a4b1fc27e3104913746bf4bcf329d8c03) | `function` | Declared here |
+| [`opaque`](#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`info`](#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`flags`](#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`IPacket`](#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`IPacket`](#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`operator=`](#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`~IPacket`](#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`hasData`](#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`constData`](#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`print`](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`operator<<`](#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](#ipacket) |
+
+### Inherited from [`IPacket`](#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](#stream) insertion operator; delegates to [print()](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Methods
 
@@ -26673,6 +30735,10 @@ Defined in src/base/include/icy/packet.h:156
 #### Returns
 Owning pointer to a deep copy of this packet.
 
+##### Reimplements
+
+- [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7)
+
 ---
 
 {#flagpacket}
@@ -26708,6 +30774,10 @@ No-op read; [FlagPacket](#flagpacket) carries no payload data.
 #### Returns
 Always returns true (1).
 
+##### Reimplements
+
+- [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b)
+
 ---
 
 {#write}
@@ -26724,6 +30794,10 @@ Defined in src/base/include/icy/packet.h:174
 
 No-op write; [FlagPacket](#flagpacket) carries no payload data.
 
+##### Reimplements
+
+- [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c)
+
 ---
 
 {#classname}
@@ -26739,6 +30813,10 @@ virtual inline const char * className() const override
 Defined in src/base/include/icy/packet.h:176
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1)
 
 {#rawpacket}
 
@@ -26758,6 +30836,65 @@ Defined in src/base/include/icy/packet.h:182
 > **Subclassed by:** [`MediaPacket`](av.md#mediapacket), [`SocketPacket`](net.md#socketpacket)
 
 [RawPacket](#rawpacket) is the default data packet type which consists of an optionally managed char pointer and a size value.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_data`](#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Declared here |
+| [`_size`](#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Declared here |
+| [`_owned`](#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Declared here |
+| [`RawPacket`](#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Declared here |
+| [`RawPacket`](#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Declared here |
+| [`RawPacket`](#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Declared here |
+| [`~RawPacket`](#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Declared here |
+| [`clone`](#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Declared here |
+| [`copyData`](#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Declared here |
+| [`read`](#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Declared here |
+| [`write`](#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Declared here |
+| [`data`](#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Declared here |
+| [`size`](#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Declared here |
+| [`className`](#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Declared here |
+| [`ownsBuffer`](#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Declared here |
+| [`opaque`](#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`info`](#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`flags`](#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](#ipacket) |
+| [`IPacket`](#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`IPacket`](#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`operator=`](#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`~IPacket`](#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`hasData`](#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`constData`](#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`print`](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](#ipacket) |
+| [`operator<<`](#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](#ipacket) |
+
+### Inherited from [`IPacket`](#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](#stream) insertion operator; delegates to [print()](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Methods
 
@@ -26840,6 +30977,20 @@ Defined in src/base/include/icy/packet.h:216
 #### Returns
 Owning pointer to a deep copy of this packet (always copies data).
 
+##### Reimplements
+
+- [`clone`](#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7)
+
+##### Reimplemented by
+
+- [`clone`](av.md#clone-3)
+- [`clone`](av.md#clone)
+- [`clone`](av.md#clone-4)
+- [`clone`](av.md#clone-2)
+- [`clone`](av.md#clone-1)
+- [`clone`](net.md#clone-6)
+- [`clone`](vision.md#clone-19)
+
 ---
 
 {#copydata}
@@ -26881,6 +31032,14 @@ Reads from the buffer by copying its contents into an owned buffer.
 #### Returns
 Number of bytes consumed (equal to buf.size()).
 
+##### Reimplements
+
+- [`read`](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b)
+
+##### Reimplemented by
+
+- [`read`](net.md#read-1)
+
 ---
 
 {#write}
@@ -26899,6 +31058,14 @@ Appends the packet data to the given output buffer.
 #### Parameters
 * `buf` [Buffer](#buffer-2) to write into.
 
+##### Reimplements
+
+- [`write`](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c)
+
+##### Reimplemented by
+
+- [`write`](net.md#write-1)
+
 ---
 
 {#data}
@@ -26915,6 +31082,10 @@ Defined in src/base/include/icy/packet.h:251
 
 #### Returns
 Mutable pointer to the raw packet data, or nullptr if empty.
+
+##### Reimplements
+
+- [`data`](#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951)
 
 ---
 
@@ -26933,6 +31104,10 @@ Defined in src/base/include/icy/packet.h:254
 #### Returns
 Size of the packet data in bytes.
 
+##### Reimplements
+
+- [`size`](#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c)
+
 ---
 
 {#classname}
@@ -26948,6 +31123,20 @@ virtual inline const char * className() const override
 Defined in src/base/include/icy/packet.h:256
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1)
+
+##### Reimplemented by
+
+- [`className`](av.md#classname-3)
+- [`className`](av.md#classname)
+- [`className`](av.md#classname-4)
+- [`className`](av.md#classname-2)
+- [`className`](av.md#classname-1)
+- [`className`](net.md#classname-5)
+- [`className`](vision.md#classname-11)
 
 ---
 
@@ -27032,6 +31221,42 @@ Subclasses must override the [getRaw()](#classicy_1_1Configuration_1a93755fec329
 
 This class is safe for multithreaded use.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PropertyChanged`](#classicy_1_1Configuration_1a1a5aeb22b43da7e846041f07f2955e4c) | `variable` | Declared here |
+| [`_mutex`](#classicy_1_1Configuration_1a7e91976a39cb67eecf32a6758b957921) | `variable` | Declared here |
+| [`Configuration`](#classicy_1_1Configuration_1a75c92fc758b3cc1d4baa823963064675) | `function` | Declared here |
+| [`~Configuration`](#classicy_1_1Configuration_1a548f226233f711a8a5f16a00c5810835) | `function` | Declared here |
+| [`exists`](#classicy_1_1Configuration_1a7eaffe5a3b1b79237b6c6d9179b55437) | `function` | Declared here |
+| [`getString`](#classicy_1_1Configuration_1ae6ab05b68fdca0ad845059060443bd8c) | `function` | Declared here |
+| [`getString`](#classicy_1_1Configuration_1a77d3e6a3ef35c3042f3c677f5b9ed787) | `function` | Declared here |
+| [`getRawString`](#classicy_1_1Configuration_1a24af13805d96c22c53f8e73be207cdee) | `function` | Declared here |
+| [`getRawString`](#classicy_1_1Configuration_1aab24d10ef25aba0ad368ff1c00c7fce9) | `function` | Declared here |
+| [`getInt`](#classicy_1_1Configuration_1a2e300793742ae29a47472bab453964c6) | `function` | Declared here |
+| [`getInt`](#classicy_1_1Configuration_1a9eab78dfe24588237f69190fb70cbbe7) | `function` | Declared here |
+| [`getLargeInt`](#classicy_1_1Configuration_1a0f7ac22a9d553a6281cba59aa034ceea) | `function` | Declared here |
+| [`getLargeInt`](#classicy_1_1Configuration_1ab75b1cb29cc2ec51d542359b7a56db55) | `function` | Declared here |
+| [`getDouble`](#classicy_1_1Configuration_1aefe855a3d5cb2375724752eb11cadd4e) | `function` | Declared here |
+| [`getDouble`](#classicy_1_1Configuration_1a1b93522d09372c0b21341b7accaa6ceb) | `function` | Declared here |
+| [`getBool`](#classicy_1_1Configuration_1a3be8357df952d372df53d11280d3a467) | `function` | Declared here |
+| [`getBool`](#classicy_1_1Configuration_1aa27cff84e4da853bd8e9bc5192851078) | `function` | Declared here |
+| [`setString`](#classicy_1_1Configuration_1a7c4010bb5d93dca257aae621b9ec18d8) | `function` | Declared here |
+| [`setInt`](#classicy_1_1Configuration_1a692e21f77b8113343e5ea19e155284d9) | `function` | Declared here |
+| [`setLargeInt`](#classicy_1_1Configuration_1a9cdfe32156b29e1c87d1dec8059729cc) | `function` | Declared here |
+| [`setDouble`](#classicy_1_1Configuration_1a1d590599f581d7eb843bf6d32f40b71b) | `function` | Declared here |
+| [`setBool`](#classicy_1_1Configuration_1aa8107039d5ce981fecc2c77277de05f4) | `function` | Declared here |
+| [`getRaw`](#classicy_1_1Configuration_1a93755fec3296753ec88e909095026046) | `function` | Declared here |
+| [`setRaw`](#classicy_1_1Configuration_1afe19c7376a327bb2cc117f7a1b1a3b40) | `function` | Declared here |
+| [`Configuration`](#classicy_1_1Configuration_1a611845aa71dc48450656598d6526d4b7) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Configuration_1a8a46d2b2acce5739e4fae6a8b4a960eb) | `function` | Declared here |
+| [`Configuration`](#classicy_1_1Configuration_1a73cc87c056e9fdad43603715fa387210) | `function` | Declared here |
+| [`operator=`](#classicy_1_1Configuration_1a87a14bac02f0f3198f89fced9bc083af) | `function` | Declared here |
+| [`parseInt`](#classicy_1_1Configuration_1a5cc03196e6e67f4423ae1a136de80266) | `function` | Declared here |
+| [`parseLargeInt`](#classicy_1_1Configuration_1acdca7992c57f3c927849388b562ecac8) | `function` | Declared here |
+| [`parseBool`](#classicy_1_1Configuration_1a9195d710a7b0d1f72b764fa3fa1381f6) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -27106,6 +31331,10 @@ virtual ~Configuration()
 Defined in src/base/include/icy/configuration.h:38
 
 Destroys the [Configuration](#configuration).
+
+##### Reimplemented by
+
+- [`~Configuration`](json.md#configuration-3)
 
 ---
 
@@ -27416,6 +31645,10 @@ If the property with the given key exists, stores the property's value in value 
 
 Must be overridden by subclasses.
 
+##### Reimplemented by
+
+- [`getRaw`](json.md#getraw)
+
 ---
 
 {#setraw}
@@ -27433,6 +31666,10 @@ Defined in src/base/include/icy/configuration.h:151
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
 The implementation is responsible for emitting the PropertyChanged signal.
+
+##### Reimplemented by
+
+- [`setRaw`](json.md#setraw)
 
 ---
 
@@ -27497,6 +31734,28 @@ Defined in src/base/include/icy/configuration.h:195
 [ScopedConfiguration](#scopedconfiguration) provides multiple levels of configuration for a module. Multiple levels means that there is a module level scope, and a default scope. When a property is accessed, the module scope value will be used if available, otherwise the default scope value will be used.
 
 Example scoping: Module: channels.[name].modes.[name].[value] Default: modes.[name].[value]
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`config`](#classicy_1_1ScopedConfiguration_1a46672b7fe2ac40254d926b465f7bb520) | `variable` | Declared here |
+| [`currentScope`](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703) | `variable` | Declared here |
+| [`defaultScope`](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68) | `variable` | Declared here |
+| [`ScopedConfiguration`](#classicy_1_1ScopedConfiguration_1abd7f20d253242f52fedf3288873508c1) | `function` | Declared here |
+| [`ScopedConfiguration`](#classicy_1_1ScopedConfiguration_1a402bc7bbe1caf98b3f995f76de7c90fc) | `function` | Declared here |
+| [`getString`](#classicy_1_1ScopedConfiguration_1a47ff7e52c9da20bf090dfc49e846549f) | `function` | Declared here |
+| [`getInt`](#classicy_1_1ScopedConfiguration_1af21e6b8e60e248506c7c5f3b09c2ebf6) | `function` | Declared here |
+| [`getDouble`](#classicy_1_1ScopedConfiguration_1a0d2b0e4d8cf867822f7a759541c9fd29) | `function` | Declared here |
+| [`getBool`](#classicy_1_1ScopedConfiguration_1ac1fc7e9ad94c5ff134ae9ded5f94f0d3) | `function` | Declared here |
+| [`setString`](#classicy_1_1ScopedConfiguration_1abe5a1a722dcc2c8e0f6e77e1178df10f) | `function` | Declared here |
+| [`setInt`](#classicy_1_1ScopedConfiguration_1a83333850d5633f765affd4a9e0c84a0c) | `function` | Declared here |
+| [`setDouble`](#classicy_1_1ScopedConfiguration_1a5fa036e3e4314d6d57fe475088c5c907) | `function` | Declared here |
+| [`setBool`](#classicy_1_1ScopedConfiguration_1a57319d812e386b57477a8bcb43c5ff69) | `function` | Declared here |
+| [`getCurrentScope`](#classicy_1_1ScopedConfiguration_1ad94111043735b35964824cb7521bef9f) | `function` | Declared here |
+| [`getDafaultKey`](#classicy_1_1ScopedConfiguration_1ae2055b915d9d1319d3ad91aaf7a79815) | `function` | Declared here |
+| [`getScopedKey`](#classicy_1_1ScopedConfiguration_1ab88a6f5c5a66fa8cfcf43a4b5dceeb64) | `function` | Declared here |
+| [`operator=`](#classicy_1_1ScopedConfiguration_1af722c45b330b1cec32f9ece9a15b7e92) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -27851,6 +32110,21 @@ Basic error type.
 
 Errors contain an error code, message, and exception pointer.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`err`](#structicy_1_1Error_1a5d5ed842c5f9f4564739262d81025e8b) | `variable` | Declared here |
+| [`message`](#structicy_1_1Error_1a808990bfb390b906a88adf03f07c01d8) | `variable` | Declared here |
+| [`exception`](#structicy_1_1Error_1a77a10c10703b1ad91bcd52ee5e05accf) | `variable` | Declared here |
+| [`Error`](#structicy_1_1Error_1a44e8e7868b610f62f37b085f38c5b3ea) | `function` | Declared here |
+| [`Error`](#structicy_1_1Error_1a12b7879ac6120a858e72ddb15557fa6c) | `function` | Declared here |
+| [`Error`](#structicy_1_1Error_1a152c54b8bcbe8050e0282fad6c919a76) | `function` | Declared here |
+| [`any`](#structicy_1_1Error_1af91a19aa063d9c40e314e4a167cf0272) | `function` | Declared here |
+| [`reset`](#structicy_1_1Error_1a10c6aa747345625f541bdba4326904cf) | `function` | Declared here |
+| [`rethrow`](#structicy_1_1Error_1a7f7b3a10ed0fa8cea9ad61d77d717b53) | `function` | Declared here |
+| [`operator<<`](#structicy_1_1Error_1a228a8d1bae8e02c51b98b5ca0f1c8671) | `friend` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -28044,6 +32318,17 @@ Defined in src/base/include/icy/logger.h:314
 
 No-op log record used when logging is compiled out.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`LogStream`](#structicy_1_1LogStream_1a765e471a837b52c31955c481a69ae95a) | `function` | Declared here |
+| [`LogStream`](#structicy_1_1LogStream_1ade94927cd76751a0e515dfc78248c782) | `function` | Declared here |
+| [`~LogStream`](#structicy_1_1LogStream_1aba09063c2b49fab91cfc7ba0cac9fc3e) | `function` | Declared here |
+| [`write`](#structicy_1_1LogStream_1a11e254c1f635b36fe9a2c60b7638c4d7) | `function` | Declared here |
+| [`operator<<`](#structicy_1_1LogStream_1ac21d144ac014116f53d1f731cdf020fb) | `function` | Declared here |
+| [`operator<<`](#structicy_1_1LogStream_1a038a1a97bd124d3c92ef40e3e8a3a92a) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -28140,6 +32425,15 @@ Defined in src/base/include/icy/signal.h:30
 
 No-op mutex for single-threaded signal usage. When all signal operations occur on a single libuv event loop thread, the shared_mutex is unnecessary overhead.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`lock`](#structicy_1_1NullSharedMutex_1a13e61a006cee4e12fd16b18e86732f91) | `function` | Declared here |
+| [`unlock`](#structicy_1_1NullSharedMutex_1a3c855dedeadc97d179ee67a72013edb5) | `function` | Declared here |
+| [`lock_shared`](#structicy_1_1NullSharedMutex_1a669b9b6f72c0d22da9d62a7eb9880454) | `function` | Declared here |
+| [`unlock_shared`](#structicy_1_1NullSharedMutex_1a9ef30dee110d44dc870f19456c1f460d) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -28220,6 +32514,19 @@ struct Bitwise
 Defined in src/base/include/icy/bitwise.h:22
 
 Container for smart management of bitwise integer flags.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`data`](#structicy_1_1Bitwise_1acc204ee3149f17b0979d1d8a32be6bd7) | `variable` | Declared here |
+| [`Bitwise`](#structicy_1_1Bitwise_1aafb5da8bea2f1ca7b7b88c1efaa2652b) | `function` | Declared here |
+| [`reset`](#structicy_1_1Bitwise_1abc3c08008a96dea5daf0917a6efa2323) | `function` | Declared here |
+| [`set`](#structicy_1_1Bitwise_1af75c1e396857b6f8af92ab942d24a15d) | `function` | Declared here |
+| [`add`](#structicy_1_1Bitwise_1a2f766d6ffff92cd541e8140767619bce) | `function` | Declared here |
+| [`remove`](#structicy_1_1Bitwise_1a72695a946e907f580d68bbb58b1d3b31) | `function` | Declared here |
+| [`toggle`](#structicy_1_1Bitwise_1aa94cf226ab45b2f891c89e44d4427aca) | `function` | Declared here |
+| [`has`](#structicy_1_1Bitwise_1a3def087c528a5f91ac06d4611fa56799) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -28399,6 +32706,14 @@ Abstract delegate interface.
 
 The `Delegate` class contains a pointer to a function. This wrapper class is used instead of `std::function` since it is interchangable with fast delegates and also provides an equality operator for comparing the underlying function where supported.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) | `function` | Declared here |
+| [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) | `function` | Declared here |
+| [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -28427,6 +32742,12 @@ Invokes the underlying callable with the supplied arguments.
 #### Returns
 Result of the wrapped function call.
 
+##### Reimplemented by
+
+- [`operator()`](#structicy_1_1ClassDelegate_1ae40a0a9c4d2a31e5af445bf4e36a8fe4)
+- [`operator()`](#structicy_1_1ConstClassDelegate_1a8758c915a7ada51fa065ba521f20806c)
+- [`operator()`](#structicy_1_1FunctionDelegate_1a13a4156b0c7f06a1f0192e73e5bae92a)
+
 ---
 
 {#operator}
@@ -28448,6 +32769,12 @@ Compares two delegates for equality (same target function and instance).
 #### Returns
 True if both delegates refer to the same callable target.
 
+##### Reimplemented by
+
+- [`operator==`](#structicy_1_1ClassDelegate_1a2857ddefcac40fc30669d6af724bd04d)
+- [`operator==`](#structicy_1_1ConstClassDelegate_1a443578d4dbcf225dcd1644102277979f)
+- [`operator==`](#structicy_1_1FunctionDelegate_1a155f545b8cc1db1eea1276b5296ea8b8)
+
 {#functiondelegate}
 
 ## FunctionDelegate
@@ -28466,6 +32793,26 @@ Defined in src/base/include/icy/delegate.h:48
 > **Inherits:** [`AbstractDelegate< RT, Args... >`](#abstractdelegate)
 
 The `[FunctionDelegate](#functiondelegate)` contains a `std::function`.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`func`](#structicy_1_1FunctionDelegate_1a3da8a5559b2fdd9dac2e104862871676) | `variable` | Declared here |
+| [`FunctionDelegate`](#structicy_1_1FunctionDelegate_1a86b6822d25f1e251fb817f537439218f) | `function` | Declared here |
+| [`operator()`](#structicy_1_1FunctionDelegate_1a13a4156b0c7f06a1f0192e73e5bae92a) | `function` | Declared here |
+| [`operator==`](#structicy_1_1FunctionDelegate_1a155f545b8cc1db1eea1276b5296ea8b8) | `function` | Declared here |
+| [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+
+### Inherited from [`AbstractDelegate`](#abstractdelegate)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) `virtual` `inline` |  |
+| `function` | [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) `virtual` `const` | Invokes the underlying callable with the supplied arguments. |
+| `function` | [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) `virtual` `const` | Compares two delegates for equality (same target function and instance). |
 
 ### Public Attributes
 
@@ -28531,6 +32878,10 @@ Calls the wrapped `std::function`.
 #### Returns
 Function result.
 
+##### Reimplements
+
+- [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09)
+
 ---
 
 {#operator}
@@ -28546,6 +32897,10 @@ virtual inline bool operator==(const AbstractDelegate< RT, Args... > &) const ov
 Defined in src/base/include/icy/delegate.h:67
 
 Always returns false; `std::function` targets cannot be compared for equality.
+
+##### Reimplements
+
+- [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3)
 
 {#classdelegate}
 
@@ -28567,6 +32922,27 @@ Defined in src/base/include/icy/delegate.h:79
 The `[ClassDelegate](#classdelegate)` contains a pointer to a class member.
 
 This class implements fast delegates and function comparison.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`instance`](#structicy_1_1ClassDelegate_1a1412fc98659c1148559e2cf42a2af610) | `variable` | Declared here |
+| [`method`](#structicy_1_1ClassDelegate_1abbbd4af24dbab15b3934560eceae733a) | `variable` | Declared here |
+| [`ClassDelegate`](#structicy_1_1ClassDelegate_1adbc591f929d4e18891e6d7bf36d22842) | `function` | Declared here |
+| [`operator()`](#structicy_1_1ClassDelegate_1ae40a0a9c4d2a31e5af445bf4e36a8fe4) | `function` | Declared here |
+| [`operator==`](#structicy_1_1ClassDelegate_1a2857ddefcac40fc30669d6af724bd04d) | `function` | Declared here |
+| [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+
+### Inherited from [`AbstractDelegate`](#abstractdelegate)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) `virtual` `inline` |  |
+| `function` | [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) `virtual` `const` | Invokes the underlying callable with the supplied arguments. |
+| `function` | [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) `virtual` `const` | Compares two delegates for equality (same target function and instance). |
 
 ### Public Attributes
 
@@ -28647,6 +33023,10 @@ Calls the member function on `[instance](#structicy_1_1ClassDelegate_1a1412fc986
 #### Returns
 Method result.
 
+##### Reimplements
+
+- [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09)
+
 ---
 
 {#operator}
@@ -28666,6 +33046,10 @@ Defined in src/base/include/icy/delegate.h:102
 
 #### Returns
 True if both delegates wrap the same instance/method pair.
+
+##### Reimplements
+
+- [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3)
 
 {#constclassdelegate}
 
@@ -28687,6 +33071,27 @@ Defined in src/base/include/icy/delegate.h:116
 The `[ConstClassDelegate](#constclassdelegate)` contains a pointer to a `const` class member.
 
 This class implements fast delegates and function comparison.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`instance`](#structicy_1_1ConstClassDelegate_1a5385d947b50390c33d9e7d6157b23c69) | `variable` | Declared here |
+| [`method`](#structicy_1_1ConstClassDelegate_1a92eb5c56df377cb559c3945cd5e48423) | `variable` | Declared here |
+| [`ConstClassDelegate`](#structicy_1_1ConstClassDelegate_1aab4944e1a0b0b6379e028b498dc6b198) | `function` | Declared here |
+| [`operator()`](#structicy_1_1ConstClassDelegate_1a8758c915a7ada51fa065ba521f20806c) | `function` | Declared here |
+| [`operator==`](#structicy_1_1ConstClassDelegate_1a443578d4dbcf225dcd1644102277979f) | `function` | Declared here |
+| [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+
+### Inherited from [`AbstractDelegate`](#abstractdelegate)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) `virtual` `inline` |  |
+| `function` | [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) `virtual` `const` | Invokes the underlying callable with the supplied arguments. |
+| `function` | [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) `virtual` `const` | Compares two delegates for equality (same target function and instance). |
 
 ### Public Attributes
 
@@ -28767,6 +33172,10 @@ Calls the const member function on `[instance](#structicy_1_1ConstClassDelegate_
 #### Returns
 Method result.
 
+##### Reimplements
+
+- [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09)
+
 ---
 
 {#operator}
@@ -28786,6 +33195,10 @@ Defined in src/base/include/icy/delegate.h:139
 
 #### Returns
 True if both delegates wrap the same instance/method pair.
+
+##### Reimplements
+
+- [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3)
 
 {#polymorphicdelegate}
 
@@ -28807,6 +33220,27 @@ Defined in src/base/include/icy/delegate.h:154
 Polymorphic function delegate.
 
 Theis class contains a pointer to a class member that receices a derived subclass (`PT`) of the base type specified by the `IT` param.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`instance`](#structicy_1_1PolymorphicDelegate_1a794214879132b3b682c5ed2abb6777c4) | `variable` | Declared here |
+| [`method`](#structicy_1_1PolymorphicDelegate_1ab2c0c345f1cf82e6080fe85fa7d37093) | `variable` | Declared here |
+| [`PolymorphicDelegate`](#structicy_1_1PolymorphicDelegate_1a1514b3ee392d44cb30d8fdafe8ad3983) | `function` | Declared here |
+| [`operator()`](#structicy_1_1PolymorphicDelegate_1a5086c3cb0e062e0203475f3d73555c29) | `function` | Declared here |
+| [`operator==`](#structicy_1_1PolymorphicDelegate_1acf1f499701d502b5a77cacee18f68cec) | `function` | Declared here |
+| [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+| [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) | `function` | Inherited from [`AbstractDelegate`](#abstractdelegate) |
+
+### Inherited from [`AbstractDelegate`](#abstractdelegate)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`~AbstractDelegate`](#structicy_1_1AbstractDelegate_1ac79a79a6ca53a03c65be8e2c2e286c7a) `virtual` `inline` |  |
+| `function` | [`operator()`](#structicy_1_1AbstractDelegate_1a93d7bc17eb4769fbabe2c6920b29ad09) `virtual` `const` | Invokes the underlying callable with the supplied arguments. |
+| `function` | [`operator==`](#structicy_1_1AbstractDelegate_1a9b4fa28e06dbae1ad37be3ea93d5b0f3) `virtual` `const` | Compares two delegates for equality (same target function and instance). |
 
 ### Public Attributes
 
@@ -28919,9 +33353,20 @@ True if both delegates wrap the same instance/method pair.
 struct OptionParser
 ```
 
-Defined in src/base/include/icy/application.h:100
+Defined in src/base/include/icy/application.h:103
 
 Command-line option parser.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`exepath`](#structicy_1_1OptionParser_1a330bcdaf56bd24e3c58f3fa27b528339) | `variable` | Declared here |
+| [`args`](#structicy_1_1OptionParser_1ab06543b8bbab250d0df2b7a976a355ab) | `variable` | Declared here |
+| [`OptionParser`](#structicy_1_1OptionParser_1a95300ed3b1914841c53990def2f84efe) | `function` | Declared here |
+| [`has`](#structicy_1_1OptionParser_1a3711899ac6abc329d4e2e99ab6eb0d40) | `function` | Declared here |
+| [`get`](#structicy_1_1OptionParser_1a9c6d9c4a19c16430f88e959a66330441) | `function` | Declared here |
+| [`get`](#structicy_1_1OptionParser_1a6750c89bc69f76fc2ba7280bda84eba7) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -28940,7 +33385,7 @@ Command-line option parser.
 std::string exepath
 ```
 
-Defined in src/base/include/icy/application.h:102
+Defined in src/base/include/icy/application.h:105
 
 ---
 
@@ -28952,7 +33397,7 @@ Defined in src/base/include/icy/application.h:102
 OptionMap args
 ```
 
-Defined in src/base/include/icy/application.h:103
+Defined in src/base/include/icy/application.h:106
 
 ### Public Methods
 
@@ -28973,7 +33418,7 @@ Defined in src/base/include/icy/application.h:103
 OptionParser(int argc, char * argv, const char * delim)
 ```
 
-Defined in src/base/include/icy/application.h:109
+Defined in src/base/include/icy/application.h:112
 
 Parses command-line arguments from `argc`/`argv`. 
 #### Parameters
@@ -28995,7 +33440,7 @@ Parses command-line arguments from `argc`/`argv`.
 inline bool has(const char * key)
 ```
 
-Defined in src/base/include/icy/application.h:114
+Defined in src/base/include/icy/application.h:117
 
 Returns true if the given option key was present on the command line. 
 #### Parameters
@@ -29016,7 +33461,7 @@ True if the key exists in the parsed argument map.
 inline std::string get(const char * key)
 ```
 
-Defined in src/base/include/icy/application.h:120
+Defined in src/base/include/icy/application.h:123
 
 Returns the string value associated with the given option key. Returns an empty string if the key was not found. 
 #### Parameters
@@ -29037,7 +33482,7 @@ Value string, or empty string if not present.
 template<typename NumericType> inline NumericType get(const char * key)
 ```
 
-Defined in src/base/include/icy/application.h:133
+Defined in src/base/include/icy/application.h:136
 
 Returns the value associated with the given option key, converted to a numeric type. 
 #### Parameters
@@ -29061,9 +33506,16 @@ Converted numeric value.
 struct ShutdownCmd
 ```
 
-Defined in src/base/include/icy/application.h:148
+Defined in src/base/include/icy/application.h:151
 
 Shutdown command packet for signalling process termination.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`opaque`](#structicy_1_1ShutdownCmd_1ab6ae1dccf6601eba9e8a5a9724ae0253) | `variable` | Declared here |
+| [`callback`](#structicy_1_1ShutdownCmd_1afe51a6a3775ba3732ffae53da40ee256) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -29082,7 +33534,7 @@ Shutdown command packet for signalling process termination.
 void * opaque
 ```
 
-Defined in src/base/include/icy/application.h:150
+Defined in src/base/include/icy/application.h:153
 
 ---
 
@@ -29094,7 +33546,7 @@ Defined in src/base/include/icy/application.h:150
 std::function< void(void *)> callback
 ```
 
-Defined in src/base/include/icy/application.h:151
+Defined in src/base/include/icy/application.h:154
 
 {#packetadapterreference}
 
@@ -29111,6 +33563,19 @@ struct PacketAdapterReference
 Defined in src/base/include/icy/packetstream.h:148
 
 Provides a reference to a [PacketStreamAdapter](#packetstreamadapter) with optional ownership.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Ptr`](#structicy_1_1PacketAdapterReference_1a987e5369e97ad16642ea9df9012f6e2c) | `typedef` | Declared here |
+| [`ptr`](#structicy_1_1PacketAdapterReference_1aeb4d998a3135f9434868bdf6b08d8612) | `variable` | Declared here |
+| [`_prevent_deletion`](#structicy_1_1PacketAdapterReference_1a5e275c890f3af6e5a6388dfa77b4a541) | `variable` | Declared here |
+| [`order`](#structicy_1_1PacketAdapterReference_1a926ae6afe8e6490689cc1e270ed28253) | `variable` | Declared here |
+| [`syncState`](#structicy_1_1PacketAdapterReference_1a80180f222307782d28f4e67f49db228c) | `variable` | Declared here |
+| [`PacketAdapterReference`](#structicy_1_1PacketAdapterReference_1a756732f066615cabde8b176b1eb7795a) | `function` | Declared here |
+| [`PacketAdapterReference`](#structicy_1_1PacketAdapterReference_1a0df5fba4caa595d532fd8e34605a5193) | `function` | Declared here |
+| [`compareOrder`](#structicy_1_1PacketAdapterReference_1a3e7e64bd3b722c4b987168f35406e8eb) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -29272,6 +33737,64 @@ Defined in src/base/include/icy/packetstream.h:228
 > **Inherits:** [`State`](#state)
 
 [State](#state) machine states for [PacketStream](#packetstream).
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Type`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293f) | `enum` | Declared here |
+| [`None`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fa6adf97f83acf6453d4a6a4b1070f3754) | `enumvalue` | Declared here |
+| [`Locked`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fad0f2e5376298c880665077b565ffd7dd) | `enumvalue` | Declared here |
+| [`Active`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fa4d3d769b812b6faa6b76e1a8abaece2d) | `enumvalue` | Declared here |
+| [`Paused`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fae99180abf47a8b3a856e0bcb2656990a) | `enumvalue` | Declared here |
+| [`Stopping`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fa7b7ecb39b9e110c2a31409a1672bad23) | `enumvalue` | Declared here |
+| [`Stopped`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fac23e2b09ebe6bf4cb5e2a9abe85c0be2) | `enumvalue` | Declared here |
+| [`Closed`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fa03f4a47830f97377a35321051685071e) | `enumvalue` | Declared here |
+| [`Error`](#structicy_1_1PacketStreamState_1a87e26af9c98b31be40db363ae7db293fa902b0d55fddef6f8d651fe1035b7d4bd) | `enumvalue` | Declared here |
+| [`None`](#structicy_1_1PacketStreamState_1a2bab29a624dd73bff771182463d2fd77) | `variable` | Declared here |
+| [`Locked`](#structicy_1_1PacketStreamState_1a1226bf4d8064c0e6bcf456f273182999) | `variable` | Declared here |
+| [`Active`](#structicy_1_1PacketStreamState_1a77cbf4974c595b4fc88adecdaf864378) | `variable` | Declared here |
+| [`Paused`](#structicy_1_1PacketStreamState_1a4eb690ecd32e1368302ea39a6042c823) | `variable` | Declared here |
+| [`Stopping`](#structicy_1_1PacketStreamState_1a6a11522ba2c5046850537f7d399ca880) | `variable` | Declared here |
+| [`Stopped`](#structicy_1_1PacketStreamState_1a994caa572652072a93dd7cdbd171a44f) | `variable` | Declared here |
+| [`Closed`](#structicy_1_1PacketStreamState_1a3214a319ec7494001c18479e1f1d3d73) | `variable` | Declared here |
+| [`Error`](#structicy_1_1PacketStreamState_1a1e68dad5b61b705bb1af9bd506d30a77) | `variable` | Declared here |
+| [`str`](#structicy_1_1PacketStreamState_1a163082a3c81abce22244eed97595061e) | `function` | Declared here |
+| [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](#state) |
+| [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](#state) |
+| [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](#state) |
+| [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](#state) |
+| [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](#state) |
+| [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](#state) |
+| [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](#state) |
+| [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](#state) |
+| [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](#state) |
+| [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](#state) |
+| [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](#state) |
+
+### Inherited from [`State`](#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
 
 ### Public Methods
 
@@ -29466,6 +33989,28 @@ Defined in src/base/include/icy/packetfactory.h:55
 
 This template class implements an adapter that sits between an SignalBase and an object receiving notifications from it.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_priority`](#structicy_1_1PacketCreationStrategy_1af3864d9f001ef1e86b84125af4dc473f) | `variable` | Declared here |
+| [`PacketCreationStrategy`](#structicy_1_1PacketCreationStrategy_1a9cda93d3a296386ae707f1e250085494) | `function` | Declared here |
+| [`create`](#structicy_1_1PacketCreationStrategy_1a23dcd84d9384557d85a7f667fedfecb9) | `function` | Declared here |
+| [`priority`](#structicy_1_1PacketCreationStrategy_1a4e5f6af1316418fb7c160b4d6b3cfa47) | `function` | Declared here |
+| [`IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a1aeefce81f5ba54a0b00a270dc429212) | `function` | Inherited from [`IPacketCreationStrategy`](#ipacketcreationstrategy) |
+| [`~IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a238bd1edeaa96acbbd9973fb952e5291) | `function` | Inherited from [`IPacketCreationStrategy`](#ipacketcreationstrategy) |
+| [`create`](#classicy_1_1IPacketCreationStrategy_1aabd76e765992789690fedc949aa989da) | `function` | Inherited from [`IPacketCreationStrategy`](#ipacketcreationstrategy) |
+| [`priority`](#classicy_1_1IPacketCreationStrategy_1a4e377aa4829fca6b66a293757acd48a8) | `function` | Inherited from [`IPacketCreationStrategy`](#ipacketcreationstrategy) |
+
+### Inherited from [`IPacketCreationStrategy`](#ipacketcreationstrategy)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a1aeefce81f5ba54a0b00a270dc429212)  | Defaulted constructor. |
+| `function` | [`~IPacketCreationStrategy`](#classicy_1_1IPacketCreationStrategy_1a238bd1edeaa96acbbd9973fb952e5291) `virtual` | Defaulted destructor. |
+| `function` | [`create`](#classicy_1_1IPacketCreationStrategy_1aabd76e765992789690fedc949aa989da) `virtual` `const` | Attempts to create a typed packet from the given buffer. |
+| `function` | [`priority`](#classicy_1_1IPacketCreationStrategy_1a4e377aa4829fca6b66a293757acd48a8) `virtual` `const` | Returns the dispatch priority of this strategy (0–100; higher runs first). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -29517,6 +34062,10 @@ Attempts to default-construct a `PacketT`, calling its `read()` method.
 #### Returns
 Newly allocated `PacketT` on success, nullptr if read() returns 0.
 
+##### Reimplements
+
+- [`create`](#classicy_1_1IPacketCreationStrategy_1aabd76e765992789690fedc949aa989da)
+
 ---
 
 {#priority}
@@ -29533,6 +34082,10 @@ Defined in src/base/include/icy/packetfactory.h:79
 
 #### Returns
 The priority value assigned at construction.
+
+##### Reimplements
+
+- [`priority`](#classicy_1_1IPacketCreationStrategy_1a4e377aa4829fca6b66a293757acd48a8)
 
 ### Protected Attributes
 
@@ -29567,6 +34120,18 @@ struct SharedLibrary
 Defined in src/base/include/icy/sharedlibrary.h:24
 
 Loads a shared library at runtime and resolves exported symbols.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`_lib`](#structicy_1_1SharedLibrary_1a460de776819a3a6972e4a84f85618222) | `variable` | Declared here |
+| [`_error`](#structicy_1_1SharedLibrary_1af436388653bb5314d52387f4cb1894ba) | `variable` | Declared here |
+| [`open`](#structicy_1_1SharedLibrary_1afd37a3a7726824cd38f374679fad99c7) | `function` | Declared here |
+| [`close`](#structicy_1_1SharedLibrary_1ace961178b2107e0bee61b31ed7d7f667) | `function` | Declared here |
+| [`sym`](#structicy_1_1SharedLibrary_1a30e6818f037652da2d4aa2778ec164af) | `function` | Declared here |
+| [`setError`](#structicy_1_1SharedLibrary_1a6ac5f2cc9cb2883df675da47cf844fbf) | `function` | Declared here |
+| [`error`](#structicy_1_1SharedLibrary_1a884ec111fdba82e16e31feaaf65bd4fd) | `function` | Declared here |
 
 ### Public Methods
 
@@ -29714,6 +34279,52 @@ Defined in src/base/include/icy/diagnosticmanager.h:26
 
 [State](#state) definitions for diagnostic providers.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Type`](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065) | `enum` | Declared here |
+| [`None`](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065a65b6eed70bfc814e285b08b15941d491) | `enumvalue` | Declared here |
+| [`Checking`](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065ade4782d079b2864734cea2331b616f32) | `enumvalue` | Declared here |
+| [`Passed`](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065a16acfe0a550a3c94a2840f285f859388) | `enumvalue` | Declared here |
+| [`Failed`](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065a8caa5089d587c3cede4713ac98d88f52) | `enumvalue` | Declared here |
+| [`str`](#structicy_1_1DiagnosticState_1a58e18f62050c07668f3412c35393d79d) | `function` | Declared here |
+| [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](#state) |
+| [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](#state) |
+| [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](#state) |
+| [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](#state) |
+| [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](#state) |
+| [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](#state) |
+| [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](#state) |
+| [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](#state) |
+| [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](#state) |
+| [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](#state) |
+| [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](#state) |
+
+### Inherited from [`State`](#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -29787,6 +34398,53 @@ Defined in src/base/include/icy/packettransaction.h:27
 
 [State](#state) machine states for [PacketTransaction](#packettransaction).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Type`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434) | `enum` | Declared here |
+| [`Waiting`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434af361366cd86b15a9ee776d227e7ae72a) | `enumvalue` | Declared here |
+| [`Running`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434a083f8f9b085f499f87e7c3e301903e7a) | `enumvalue` | Declared here |
+| [`Success`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434a989ba33def1109d128089b9c380a2b22) | `enumvalue` | Declared here |
+| [`Cancelled`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434adcc76f2fd7b2a6e26dfb4dc90a950aa9) | `enumvalue` | Declared here |
+| [`Failed`](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434a73e6dc6a8906ec24de2ce998862c4e4d) | `enumvalue` | Declared here |
+| [`str`](#structicy_1_1TransactionState_1acc6d87cce56bd733d7e2d60e75aaa891) | `function` | Declared here |
+| [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](#state) |
+| [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](#state) |
+| [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](#state) |
+| [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](#state) |
+| [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](#state) |
+| [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](#state) |
+| [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](#state) |
+| [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](#state) |
+| [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](#state) |
+| [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](#state) |
+| [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](#state) |
+| [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](#state) |
+| [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](#state) |
+
+### Inherited from [`State`](#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -29857,6 +34515,14 @@ Defined in src/base/include/icy/packet.h:33
 
 An abstract interface for packet sources to provide extra information about packets.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`IPacketInfo`](#structicy_1_1IPacketInfo_1acc94711631f475526138b8ead9859289) | `function` | Declared here |
+| [`~IPacketInfo`](#structicy_1_1IPacketInfo_1a9ca2452f67ad2bad882fd6644427cb3d) | `function` | Declared here |
+| [`clone`](#structicy_1_1IPacketInfo_1a77aed2ef78b6b18eaeb652bf9583f2ce) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -29895,4 +34561,8 @@ Defined in src/base/include/icy/packet.h:40
 Returns a heap-allocated deep copy of this info object. 
 #### Returns
 Owning pointer to the cloned instance.
+
+##### Reimplemented by
+
+- [`clone`](net.md#clone-5)
 

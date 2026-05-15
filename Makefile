@@ -41,6 +41,7 @@ docs-site: docs-install docs-xml
 docs-check: docs-api-md
 	$(DOCS_RUN) site:build
 	node docs/scripts/check-api-quality.mjs
+	$(DOCS_RUN) site:check
 
 ## Dev server with live reload
 docs-dev: docs-install docs-xml

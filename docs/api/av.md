@@ -695,6 +695,22 @@ Defined in src/av/include/icy/av/fpscounter.h:86
 
 Legacy frames-per-second counter.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`start`](#start-3) | `variable` | Declared here |
+| [`end`](#end) | `variable` | Declared here |
+| [`frames`](#frames) | `variable` | Declared here |
+| [`total`](#total) | `variable` | Declared here |
+| [`fps`](#fps-1) | `variable` | Declared here |
+| [`FPSCounter`](#fpscounter-1) | `function` | Declared here |
+| [`tick`](#tick) | `function` | Declared here |
+| [`reset`](#reset) | `function` | Declared here |
+| [`started`](#started) | `function` | Declared here |
+| [`startFrame`](#startframe) | `function` | Declared here |
+| [`endFrame`](#endframe) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -984,6 +1000,27 @@ Defined in src/av/include/icy/av/linux/v4l2.h:45
 
 Monitors device add/remove events via libudev.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`LinuxDeviceWatcher`](#linuxdevicewatcher-1) | `function` | Declared here |
+| [`start`](#start) | `function` | Declared here |
+| [`stop`](#stop) | `function` | Declared here |
+| [`_impl`](#_impl) | `variable` | Declared here |
+| [`_manager`](#_manager) | `variable` | Declared here |
+| [`DeviceWatcher`](#devicewatcher-1) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`start`](#start-5) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`stop`](#stop-4) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+
+### Inherited from [`DeviceWatcher`](#devicewatcher)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`DeviceWatcher`](#devicewatcher-1) `inline` `explicit` |  |
+| `function` | [`start`](#start-5) `virtual` `inline` |  |
+| `function` | [`stop`](#stop-4) `virtual` `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1027,6 +1064,10 @@ Begin monitoring via libudev inotify events.
 #### Returns
 True if the udev monitor was successfully started.
 
+##### Reimplements
+
+- [`start`](#start-5)
+
 ---
 
 {#stop}
@@ -1042,6 +1083,10 @@ virtual void stop() override
 Defined in src/av/include/icy/av/linux/v4l2.h:57
 
 Stop monitoring and close the udev monitor.
+
+##### Reimplements
+
+- [`stop`](#stop-4)
 
 ### Private Attributes
 
@@ -1092,6 +1137,68 @@ Defined in src/av/include/icy/av/icapture.h:31
 > **Subclassed by:** [`MediaCapture`](#mediacapture)
 
 Abstract interface for audio and video capture devices.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter) | `variable` | Declared here |
+| [`ICapture`](#icapture-1) | `function` | Declared here |
+| [`start`](#start-1) | `function` | Declared here |
+| [`stop`](#stop-1) | `function` | Declared here |
+| [`openFile`](#openfile) | `function` | Declared here |
+| [`close`](#close) | `function` | Declared here |
+| [`getEncoderFormat`](#getencoderformat) | `function` | Declared here |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec) | `function` | Declared here |
+| [`getEncoderVideoCodec`](#getencodervideocodec) | `function` | Declared here |
+| [`openAudio`](#openaudio) | `function` | Declared here |
+| [`openVideo`](#openvideo) | `function` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange) | `function` | Declared here |
+| [`openStream`](#openstream) | `function` | Declared here |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`start`](base.md#start-7) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`stop`](base.md#stop-6) | `function` | Inherited from [`Startable`](base.md#startable) |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
+### Inherited from [`Startable`](base.md#startable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`start`](base.md#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `function` | [`stop`](base.md#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
 
 ### Public Attributes
 
@@ -1157,6 +1264,14 @@ Defined in src/av/include/icy/av/icapture.h:42
 
 Start capturing and emitting packets.
 
+##### Reimplements
+
+- [`start`](base.md#start-7)
+
+##### Reimplemented by
+
+- [`start`](#start-4)
+
 ---
 
 {#stop-1}
@@ -1172,6 +1287,14 @@ virtual void stop() override
 Defined in src/av/include/icy/av/icapture.h:45
 
 Stop capturing and release device resources.
+
+##### Reimplements
+
+- [`stop`](base.md#stop-6)
+
+##### Reimplemented by
+
+- [`stop`](#stop-3)
 
 ---
 
@@ -1191,6 +1314,10 @@ Open a media file as the capture source.
 #### Parameters
 * `file` Path to the media file.
 
+##### Reimplemented by
+
+- [`openFile`](#openfile-1)
+
 ---
 
 {#close}
@@ -1206,6 +1333,10 @@ virtual inline void close()
 Defined in src/av/include/icy/av/icapture.h:52
 
 Release the capture source and any associated resources.
+
+##### Reimplemented by
+
+- [`close`](#close-5)
 
 ---
 
@@ -1225,6 +1356,10 @@ Populate `iformat` with the encoder-ready format derived from this capture sourc
 #### Parameters
 * `iformat` Output [Format](#format) struct to fill.
 
+##### Reimplemented by
+
+- [`getEncoderFormat`](#getencoderformat-1)
+
 ---
 
 {#getencoderaudiocodec}
@@ -1243,6 +1378,10 @@ Populate `params` with the encoder-ready audio codec parameters.
 #### Parameters
 * `params` Output [AudioCodec](#audiocodec) struct to fill.
 
+##### Reimplemented by
+
+- [`getEncoderAudioCodec`](#getencoderaudiocodec-1)
+
 ---
 
 {#getencodervideocodec}
@@ -1260,6 +1399,10 @@ Defined in src/av/include/icy/av/icapture.h:64
 Populate `params` with the encoder-ready video codec parameters. 
 #### Parameters
 * `params` Output [VideoCodec](#videocodec) struct to fill.
+
+##### Reimplemented by
+
+- [`getEncoderVideoCodec`](#getencodervideocodec-1)
 
 ---
 
@@ -1281,6 +1424,10 @@ Open an audio capture device with the given parameters.
 
 * `params` The desired capture parameters.
 
+##### Reimplemented by
+
+- [`openAudio`](#openaudio-1)
+
 ---
 
 {#openvideo}
@@ -1301,6 +1448,10 @@ Open a video capture device with the given parameters.
 
 * `params` The desired capture parameters.
 
+##### Reimplemented by
+
+- [`openVideo`](#openvideo-1)
+
 ---
 
 {#onstreamstatechange}
@@ -1316,6 +1467,10 @@ virtual inline void onStreamStateChange(const PacketStreamState & state) overrid
 Defined in src/av/include/icy/av/icapture.h:77
 
 React to [PacketStream](base.md#packetstream) state transitions by starting or stopping capture.
+
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
 
 ### Protected Methods
 
@@ -1337,6 +1492,10 @@ virtual inline void openStream(const std::string & filename, const AVInputFormat
 
 Defined in src/av/include/icy/av/icapture.h:92
 
+##### Reimplemented by
+
+- [`openStream`](#openstream-1)
+
 {#iencoder}
 
 ## IEncoder
@@ -1355,6 +1514,57 @@ Defined in src/av/include/icy/av/iencoder.h:81
 > **Subclassed by:** [`MultiplexEncoder`](#multiplexencoder)
 
 This is the abstract class for all encoders.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`init`](#init) | `function` | Declared here |
+| [`uninit`](#uninit) | `function` | Declared here |
+| [`cleanup`](#cleanup) | `function` | Declared here |
+| [`options`](#options-1) | `function` | Declared here |
+| [`createVideo`](#createvideo) | `function` | Declared here |
+| [`freeVideo`](#freevideo) | `function` | Declared here |
+| [`encodeVideo`](#encodevideo) | `function` | Declared here |
+| [`createAudio`](#createaudio) | `function` | Declared here |
+| [`freeAudio`](#freeaudio) | `function` | Declared here |
+| [`flush`](#flush) | `function` | Declared here |
+| [`isNone`](#isnone) | `function` | Declared here |
+| [`isReady`](#isready) | `function` | Declared here |
+| [`isEncoding`](#isencoding) | `function` | Declared here |
+| [`isActive`](#isactive) | `function` | Declared here |
+| [`isStopped`](#isstopped) | `function` | Declared here |
+| [`isError`](#iserror) | `function` | Declared here |
+| [`Type`](#type-3) | `enum` | Declared here |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
 
 ### Public Methods
 
@@ -1393,6 +1603,10 @@ Defined in src/av/include/icy/av/iencoder.h:93
 
 Initialise the encoder, open codec contexts, and transition to Ready or Encoding state.
 
+##### Reimplemented by
+
+- [`init`](#init-1)
+
 ---
 
 {#uninit}
@@ -1409,6 +1623,10 @@ Defined in src/av/include/icy/av/iencoder.h:96
 
 Flush remaining packets, close codec contexts, and release all encoder resources.
 
+##### Reimplemented by
+
+- [`uninit`](#uninit-1)
+
 ---
 
 {#cleanup}
@@ -1424,6 +1642,10 @@ virtual inline void cleanup()
 Defined in src/av/include/icy/av/iencoder.h:99
 
 Perform any additional cleanup after [uninit()](#uninit). Default is a no-op.
+
+##### Reimplemented by
+
+- [`cleanup`](#cleanup-1)
 
 ---
 
@@ -1442,6 +1664,10 @@ Defined in src/av/include/icy/av/iencoder.h:102
 #### Returns
 A read-only view of the encoder's configuration options.
 
+##### Reimplemented by
+
+- [`options`](#options-2)
+
 ---
 
 {#createvideo}
@@ -1458,6 +1684,10 @@ Defined in src/av/include/icy/av/iencoder.h:105
 
 Initialise the video codec context and stream.
 
+##### Reimplemented by
+
+- [`createVideo`](#createvideo-1)
+
 ---
 
 {#freevideo}
@@ -1473,6 +1703,10 @@ virtual inline void freeVideo()
 Defined in src/av/include/icy/av/iencoder.h:108
 
 Free the video codec context and stream.
+
+##### Reimplemented by
+
+- [`freeVideo`](#freevideo-1)
 
 ---
 
@@ -1495,6 +1729,10 @@ Encode a single AVFrame of video.
 #### Returns
 True if a packet was successfully encoded and written.
 
+##### Reimplemented by
+
+- [`encodeVideo`](#encodevideo-1)
+
 ---
 
 {#createaudio}
@@ -1510,6 +1748,10 @@ virtual inline void createAudio()
 Defined in src/av/include/icy/av/iencoder.h:116
 
 Initialise the audio codec context and stream.
+
+##### Reimplemented by
+
+- [`createAudio`](#createaudio-1)
 
 ---
 
@@ -1527,6 +1769,10 @@ Defined in src/av/include/icy/av/iencoder.h:119
 
 Free the audio codec context and stream.
 
+##### Reimplemented by
+
+- [`freeAudio`](#freeaudio-1)
+
 ---
 
 {#flush}
@@ -1542,6 +1788,10 @@ virtual inline void flush()
 Defined in src/av/include/icy/av/iencoder.h:122
 
 Flush any internally buffered packets to the output.
+
+##### Reimplemented by
+
+- [`flush`](#flush-7)
 
 ---
 
@@ -1688,6 +1938,27 @@ Defined in src/av/include/icy/av/apple/coreaudio.h:46
 
 Monitors device add/remove events via AVFoundation notifications and CoreAudio property listeners.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`AppleDeviceWatcher`](#appledevicewatcher-1) | `function` | Declared here |
+| [`start`](#start-2) | `function` | Declared here |
+| [`stop`](#stop-2) | `function` | Declared here |
+| [`_impl`](#_impl-1) | `variable` | Declared here |
+| [`_manager`](#_manager-1) | `variable` | Declared here |
+| [`DeviceWatcher`](#devicewatcher-1) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`start`](#start-5) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`stop`](#stop-4) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+
+### Inherited from [`DeviceWatcher`](#devicewatcher)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`DeviceWatcher`](#devicewatcher-1) `inline` `explicit` |  |
+| `function` | [`start`](#start-5) `virtual` `inline` |  |
+| `function` | [`stop`](#stop-4) `virtual` `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1731,6 +2002,10 @@ Begin monitoring for device connect/disconnect events.
 #### Returns
 True if monitoring was successfully started.
 
+##### Reimplements
+
+- [`start`](#start-5)
+
 ---
 
 {#stop-2}
@@ -1746,6 +2021,10 @@ virtual void stop() override
 Defined in src/av/include/icy/av/apple/coreaudio.h:58
 
 Stop monitoring and release all notification observers.
+
+##### Reimplements
+
+- [`stop`](#stop-4)
 
 ### Private Attributes
 
@@ -1793,6 +2072,22 @@ class FPSCounter
 Defined in src/av/include/icy/av/fpscounter.h:27
 
 FPS counter based on the simple moving average (SMA) algorithm.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`fps`](#fps-2) | `variable` | Declared here |
+| [`frames`](#frames-1) | `variable` | Declared here |
+| [`FPSCounter`](#fpscounter-3) | `function` | Declared here |
+| [`reset`](#reset-1) | `function` | Declared here |
+| [`tick`](#tick-1) | `function` | Declared here |
+| [`tickIndex`](#tickindex) | `variable` | Declared here |
+| [`prevTick`](#prevtick) | `variable` | Declared here |
+| [`tickSum`](#ticksum) | `variable` | Declared here |
+| [`tickList`](#ticklist) | `variable` | Declared here |
+| [`updateAvg`](#updateavg) | `function` | Declared here |
+| [`MAX`](#max) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -2000,6 +2295,66 @@ If the observed frame rate exceeds the configured FPS budget, packets are droppe
 
 Note that previous processors must not fragment packets, otherwise this class will not be accurate, and the packet drop rate will be too high.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-1) | `variable` | Declared here |
+| [`FPSLimiter`](#fpslimiter-1) | `function` | Declared here |
+| [`process`](#process-1) | `function` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-1) | `function` | Declared here |
+| [`_max`](#_max) | `variable` | Declared here |
+| [`_videoOnly`](#_videoonly) | `variable` | Declared here |
+| [`_counter`](#_counter) | `variable` | Declared here |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -2064,6 +2419,10 @@ Defined in src/av/include/icy/av/fpscounter.h:167
 #### Parameters
 * `packet` The incoming packet to evaluate.
 
+##### Reimplements
+
+- [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#onstreamstatechange-1}
@@ -2079,6 +2438,10 @@ virtual inline void onStreamStateChange(const PacketStreamState &)
 Defined in src/av/include/icy/av/fpscounter.h:187
 
 Reset the FPS counter when the stream state changes.
+
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
 
 ### Protected Attributes
 
@@ -2141,6 +2504,188 @@ Defined in src/av/include/icy/av/audiocapture.h:26
 > **Inherits:** [`MediaCapture`](#mediacapture)
 
 Cross-platform audio capture device backed by FFmpeg input devices.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`AudioCapture`](#audiocapture-1) | `function` | Declared here |
+| [`AudioCapture`](#audiocapture-2) | `function` | Declared here |
+| [`AudioCapture`](#audiocapture-3) | `function` | Declared here |
+| [`openAudio`](#openaudio-1) | `function` | Declared here |
+| [`openAudio`](#openaudio-2) | `function` | Declared here |
+| [`Ptr`](#ptr) | `typedef` | Declared here |
+| [`Closing`](#closing) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-2) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-3) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`openFile`](#openfile-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`close`](#close-5) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`start`](#start-4) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`stop`](#stop-3) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`run`](#run) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderFormat`](#getencoderformat-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderVideoCodec`](#getencodervideocodec-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setLoopInput`](#setloopinput) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setLimitFramerate`](#setlimitframerate) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setRealtimePTS`](#setrealtimepts) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setOpenOptions`](#setopenoptions) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setPassthroughVideo`](#setpassthroughvideo) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`formatCtx`](#formatctx) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`video`](#video-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`audio`](#audio-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`stopping`](#stopping) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`error`](#error-2) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_mutex`](#_mutex) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_thread`](#_thread) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_formatCtx`](#_formatctx) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_video`](#_video) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_audio`](#_audio) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_error`](#_error) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_stopping`](#_stopping) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_looping`](#_looping) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_realtime`](#_realtime) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_ratelimit`](#_ratelimit) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_passthroughVideo`](#_passthroughvideo) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_openOptions`](#_openoptions) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_videoStream`](#_videostream) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`openStream`](#openstream-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`emit`](#emit) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`Ptr`](#ptr-1) | `typedef` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`emitter`](#emitter) | `variable` | Inherited from [`ICapture`](#icapture) |
+| [`ICapture`](#icapture-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`start`](#start-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`stop`](#stop-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openFile`](#openfile) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`close`](#close) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderFormat`](#getencoderformat) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderVideoCodec`](#getencodervideocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openAudio`](#openaudio) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openVideo`](#openvideo) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`onStreamStateChange`](#onstreamstatechange) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openStream`](#openstream) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`start`](base.md#start-7) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`stop`](base.md#stop-6) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+
+### Inherited from [`MediaCapture`](#mediacapture)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`Closing`](#closing)  | Signals that the capture thread is closing. This signal is emitted from the capture thread context. |
+| `function` | [`MediaCapture`](#mediacapture-1)  |  |
+| `function` | [`MediaCapture`](#mediacapture-2)  | Deleted constructor. |
+| `function` | [`MediaCapture`](#mediacapture-3)  | Deleted constructor. |
+| `function` | [`openFile`](#openfile-1) `virtual` `override` | Open a media file for decoding. Automatically detects video and audio streams. |
+| `function` | [`close`](#close-5) `virtual` `override` | Stop the capture thread and close the media stream and all decoders. |
+| `function` | [`start`](#start-4) `virtual` `override` | Start the background capture and decode thread. Throws std::runtime_error if no media streams have been opened. |
+| `function` | [`stop`](#stop-3) `virtual` `override` | [Signal](base.md#signal) the capture thread to stop and join it before returning. |
+| `function` | [`run`](#run) `virtual` `override` | Entry point for the background capture thread. Reads and decodes packets from the format context until EOF or [stop()](#stop-3) is called. |
+| `function` | [`getEncoderFormat`](#getencoderformat-1) `virtual` `override` | Fill `format` with the combined encoder-ready video and audio codec parameters. |
+| `function` | [`getEncoderAudioCodec`](#getencoderaudiocodec-1) `virtual` `override` | Fill `params` with the decoder's output audio codec parameters. Throws std::runtime_error if audio parameters have not been initialised. |
+| `function` | [`getEncoderVideoCodec`](#getencodervideocodec-1) `virtual` `override` | Fill `params` with the decoder's output video codec parameters. Throws std::runtime_error if video parameters have not been initialised. |
+| `function` | [`setLoopInput`](#setloopinput)  | Continuously loop the input file when set. |
+| `function` | [`setLimitFramerate`](#setlimitframerate)  | Limit playback to video FPS. |
+| `function` | [`setRealtimePTS`](#setrealtimepts)  | Set to use realtime PTS calculation. This is preferred when using live captures as FFmpeg-provided values are not always reliable. |
+| `function` | [`setOpenOptions`](#setopenoptions)  | Set demuxer options applied at the next [openFile()](#openfile-1) call. Keys map to libavformat AVOption entries (e.g. "rtsp_transport", "fflags", "analyzeduration", "probesize"). Useful for live network sources that need low-latency hints. Pass an empty map to clear. |
+| `function` | [`setPassthroughVideo`](#setpassthroughvideo)  | Skip the video decoder. Encoded video AVPackets from the input stream are emitted directly as `[av::VideoPacket](#videopacket)` without decoding. The emitted packets carry the source's encoded payload and a `time` in microseconds rescaled from the stream's timebase. The `iframe` flag is set from `AV_PKT_FLAG_KEY`. |
+| `function` | [`formatCtx`](#formatctx) `const` |  |
+| `function` | [`video`](#video-1) `const` |  |
+| `function` | [`audio`](#audio-1) `const` |  |
+| `function` | [`stopping`](#stopping) `const` |  |
+| `function` | [`error`](#error-2) `const` |  |
+| `variable` | [`_mutex`](#_mutex)  |  |
+| `variable` | [`_thread`](#_thread)  |  |
+| `variable` | [`_formatCtx`](#_formatctx)  |  |
+| `variable` | [`_video`](#_video)  |  |
+| `variable` | [`_audio`](#_audio)  |  |
+| `variable` | [`_error`](#_error)  |  |
+| `variable` | [`_stopping`](#_stopping)  |  |
+| `variable` | [`_looping`](#_looping)  |  |
+| `variable` | [`_realtime`](#_realtime)  |  |
+| `variable` | [`_ratelimit`](#_ratelimit)  |  |
+| `variable` | [`_passthroughVideo`](#_passthroughvideo)  |  |
+| `variable` | [`_openOptions`](#_openoptions)  |  |
+| `variable` | [`_videoStream`](#_videostream)  |  |
+| `function` | [`openStream`](#openstream-1) `virtual` `override` | Open the underlying media stream. |
+| `function` | [`emit`](#emit) `virtual` `override` | Emit an existing packet directly onto the outgoing signal. |
+| `typedef` | [`Ptr`](#ptr-1)  |  |
+
+### Inherited from [`ICapture`](#icapture)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter)  |  |
+| `function` | [`ICapture`](#icapture-1) `inline` |  |
+| `function` | [`start`](#start-1) `virtual` `override` | Start capturing and emitting packets. |
+| `function` | [`stop`](#stop-1) `virtual` `override` | Stop capturing and release device resources. |
+| `function` | [`openFile`](#openfile) `virtual` `inline` | Open a media file as the capture source. |
+| `function` | [`close`](#close) `virtual` `inline` | Release the capture source and any associated resources. |
+| `function` | [`getEncoderFormat`](#getencoderformat) `virtual` | Populate `iformat` with the encoder-ready format derived from this capture source. |
+| `function` | [`getEncoderAudioCodec`](#getencoderaudiocodec) `virtual` `inline` | Populate `params` with the encoder-ready audio codec parameters. |
+| `function` | [`getEncoderVideoCodec`](#getencodervideocodec) `virtual` `inline` | Populate `params` with the encoder-ready video codec parameters. |
+| `function` | [`openAudio`](#openaudio) `virtual` `inline` | Open an audio capture device with the given parameters. |
+| `function` | [`openVideo`](#openvideo) `virtual` `inline` | Open a video capture device with the given parameters. |
+| `function` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | React to [PacketStream](base.md#packetstream) state transitions by starting or stopping capture. |
+| `function` | [`openStream`](#openstream) `virtual` `inline` |  |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
+### Inherited from [`Startable`](base.md#startable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`start`](base.md#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `function` | [`stop`](base.md#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
 
 ### Public Methods
 
@@ -2226,6 +2771,10 @@ Open the given audio device using an [AudioCodec](#audiocodec) params struct.
 
 * `params` The desired capture parameters.
 
+##### Reimplements
+
+- [`openAudio`](#openaudio)
+
 ---
 
 {#openaudio-2}
@@ -2286,6 +2835,139 @@ Defined in src/av/include/icy/av/mediacapture.h:37
 > **Subclassed by:** [`AudioCapture`](#audiocapture), [`VideoCapture`](#videocapture)
 
 Unified capture and decode source for files and live media devices.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Closing`](#closing) | `variable` | Declared here |
+| [`MediaCapture`](#mediacapture-1) | `function` | Declared here |
+| [`MediaCapture`](#mediacapture-2) | `function` | Declared here |
+| [`MediaCapture`](#mediacapture-3) | `function` | Declared here |
+| [`openFile`](#openfile-1) | `function` | Declared here |
+| [`close`](#close-5) | `function` | Declared here |
+| [`start`](#start-4) | `function` | Declared here |
+| [`stop`](#stop-3) | `function` | Declared here |
+| [`run`](#run) | `function` | Declared here |
+| [`getEncoderFormat`](#getencoderformat-1) | `function` | Declared here |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec-1) | `function` | Declared here |
+| [`getEncoderVideoCodec`](#getencodervideocodec-1) | `function` | Declared here |
+| [`setLoopInput`](#setloopinput) | `function` | Declared here |
+| [`setLimitFramerate`](#setlimitframerate) | `function` | Declared here |
+| [`setRealtimePTS`](#setrealtimepts) | `function` | Declared here |
+| [`setOpenOptions`](#setopenoptions) | `function` | Declared here |
+| [`setPassthroughVideo`](#setpassthroughvideo) | `function` | Declared here |
+| [`formatCtx`](#formatctx) | `function` | Declared here |
+| [`video`](#video-1) | `function` | Declared here |
+| [`audio`](#audio-1) | `function` | Declared here |
+| [`stopping`](#stopping) | `function` | Declared here |
+| [`error`](#error-2) | `function` | Declared here |
+| [`_mutex`](#_mutex) | `variable` | Declared here |
+| [`_thread`](#_thread) | `variable` | Declared here |
+| [`_formatCtx`](#_formatctx) | `variable` | Declared here |
+| [`_video`](#_video) | `variable` | Declared here |
+| [`_audio`](#_audio) | `variable` | Declared here |
+| [`_error`](#_error) | `variable` | Declared here |
+| [`_stopping`](#_stopping) | `variable` | Declared here |
+| [`_looping`](#_looping) | `variable` | Declared here |
+| [`_realtime`](#_realtime) | `variable` | Declared here |
+| [`_ratelimit`](#_ratelimit) | `variable` | Declared here |
+| [`_passthroughVideo`](#_passthroughvideo) | `variable` | Declared here |
+| [`_openOptions`](#_openoptions) | `variable` | Declared here |
+| [`_videoStream`](#_videostream) | `variable` | Declared here |
+| [`openStream`](#openstream-1) | `function` | Declared here |
+| [`emit`](#emit) | `function` | Declared here |
+| [`Ptr`](#ptr-1) | `typedef` | Declared here |
+| [`emitter`](#emitter) | `variable` | Inherited from [`ICapture`](#icapture) |
+| [`ICapture`](#icapture-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`start`](#start-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`stop`](#stop-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openFile`](#openfile) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`close`](#close) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderFormat`](#getencoderformat) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderVideoCodec`](#getencodervideocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openAudio`](#openaudio) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openVideo`](#openvideo) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`onStreamStateChange`](#onstreamstatechange) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openStream`](#openstream) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`start`](base.md#start-7) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`stop`](base.md#stop-6) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+
+### Inherited from [`ICapture`](#icapture)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter)  |  |
+| `function` | [`ICapture`](#icapture-1) `inline` |  |
+| `function` | [`start`](#start-1) `virtual` `override` | Start capturing and emitting packets. |
+| `function` | [`stop`](#stop-1) `virtual` `override` | Stop capturing and release device resources. |
+| `function` | [`openFile`](#openfile) `virtual` `inline` | Open a media file as the capture source. |
+| `function` | [`close`](#close) `virtual` `inline` | Release the capture source and any associated resources. |
+| `function` | [`getEncoderFormat`](#getencoderformat) `virtual` | Populate `iformat` with the encoder-ready format derived from this capture source. |
+| `function` | [`getEncoderAudioCodec`](#getencoderaudiocodec) `virtual` `inline` | Populate `params` with the encoder-ready audio codec parameters. |
+| `function` | [`getEncoderVideoCodec`](#getencodervideocodec) `virtual` `inline` | Populate `params` with the encoder-ready video codec parameters. |
+| `function` | [`openAudio`](#openaudio) `virtual` `inline` | Open an audio capture device with the given parameters. |
+| `function` | [`openVideo`](#openvideo) `virtual` `inline` | Open a video capture device with the given parameters. |
+| `function` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | React to [PacketStream](base.md#packetstream) state transitions by starting or stopping capture. |
+| `function` | [`openStream`](#openstream) `virtual` `inline` |  |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
+### Inherited from [`Startable`](base.md#startable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`start`](base.md#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `function` | [`stop`](base.md#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
 
 ### Public Attributes
 
@@ -2391,6 +3073,10 @@ Open a media file for decoding. Automatically detects video and audio streams.
 #### Parameters
 * `file` Path to the media file.
 
+##### Reimplements
+
+- [`openFile`](#openfile)
+
 ---
 
 {#close-5}
@@ -2406,6 +3092,10 @@ virtual void close() override
 Defined in src/av/include/icy/av/mediacapture.h:60
 
 Stop the capture thread and close the media stream and all decoders.
+
+##### Reimplements
+
+- [`close`](#close)
 
 ---
 
@@ -2423,6 +3113,10 @@ Defined in src/av/include/icy/av/mediacapture.h:64
 
 Start the background capture and decode thread. Throws std::runtime_error if no media streams have been opened.
 
+##### Reimplements
+
+- [`start`](#start-1)
+
 ---
 
 {#stop-3}
@@ -2439,6 +3133,10 @@ Defined in src/av/include/icy/av/mediacapture.h:67
 
 [Signal](base.md#signal) the capture thread to stop and join it before returning.
 
+##### Reimplements
+
+- [`stop`](#stop-1)
+
 ---
 
 {#run}
@@ -2454,6 +3152,10 @@ virtual void run() override
 Defined in src/av/include/icy/av/mediacapture.h:71
 
 Entry point for the background capture thread. Reads and decodes packets from the format context until EOF or [stop()](#stop-3) is called.
+
+##### Reimplements
+
+- [`run`](base.md#run-4)
 
 ---
 
@@ -2473,6 +3175,10 @@ Fill `format` with the combined encoder-ready video and audio codec parameters.
 #### Parameters
 * `format` Output [Format](#format) struct to populate.
 
+##### Reimplements
+
+- [`getEncoderFormat`](#getencoderformat)
+
 ---
 
 {#getencoderaudiocodec-1}
@@ -2491,6 +3197,10 @@ Fill `params` with the decoder's output audio codec parameters. Throws std::runt
 #### Parameters
 * `params` Output [AudioCodec](#audiocodec) struct to populate.
 
+##### Reimplements
+
+- [`getEncoderAudioCodec`](#getencoderaudiocodec)
+
 ---
 
 {#getencodervideocodec-1}
@@ -2508,6 +3218,10 @@ Defined in src/av/include/icy/av/mediacapture.h:85
 Fill `params` with the decoder's output video codec parameters. Throws std::runtime_error if video parameters have not been initialised. 
 #### Parameters
 * `params` Output [VideoCodec](#videocodec) struct to populate.
+
+##### Reimplements
+
+- [`getEncoderVideoCodec`](#getencodervideocodec)
 
 ---
 
@@ -2870,6 +3584,10 @@ Open the underlying media stream.
 
 * `formatParams` Optional format parameters; may be updated by FFmpeg on return.
 
+##### Reimplements
+
+- [`openStream`](#openstream)
+
 ---
 
 {#emit}
@@ -2887,6 +3605,10 @@ Defined in src/av/include/icy/av/mediacapture.h:143
 Emit an existing packet directly onto the outgoing signal. 
 #### Parameters
 * `packet` The packet to forward; must remain valid for the duration of the call.
+
+##### Reimplements
+
+- [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831)
 
 ### Public Types
 
@@ -2923,6 +3645,188 @@ Defined in src/av/include/icy/av/videocapture.h:26
 > **Inherits:** [`MediaCapture`](#mediacapture)
 
 Cross-platform video device capturer backed by FFmpeg avdevice.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`VideoCapture`](#videocapture-1) | `function` | Declared here |
+| [`VideoCapture`](#videocapture-2) | `function` | Declared here |
+| [`VideoCapture`](#videocapture-3) | `function` | Declared here |
+| [`openVideo`](#openvideo-1) | `function` | Declared here |
+| [`openVideo`](#openvideo-2) | `function` | Declared here |
+| [`Ptr`](#ptr-2) | `typedef` | Declared here |
+| [`Closing`](#closing) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-2) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`MediaCapture`](#mediacapture-3) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`openFile`](#openfile-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`close`](#close-5) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`start`](#start-4) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`stop`](#stop-3) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`run`](#run) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderFormat`](#getencoderformat-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`getEncoderVideoCodec`](#getencodervideocodec-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setLoopInput`](#setloopinput) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setLimitFramerate`](#setlimitframerate) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setRealtimePTS`](#setrealtimepts) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setOpenOptions`](#setopenoptions) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`setPassthroughVideo`](#setpassthroughvideo) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`formatCtx`](#formatctx) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`video`](#video-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`audio`](#audio-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`stopping`](#stopping) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`error`](#error-2) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_mutex`](#_mutex) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_thread`](#_thread) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_formatCtx`](#_formatctx) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_video`](#_video) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_audio`](#_audio) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_error`](#_error) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_stopping`](#_stopping) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_looping`](#_looping) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_realtime`](#_realtime) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_ratelimit`](#_ratelimit) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_passthroughVideo`](#_passthroughvideo) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_openOptions`](#_openoptions) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`_videoStream`](#_videostream) | `variable` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`openStream`](#openstream-1) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`emit`](#emit) | `function` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`Ptr`](#ptr-1) | `typedef` | Inherited from [`MediaCapture`](#mediacapture) |
+| [`emitter`](#emitter) | `variable` | Inherited from [`ICapture`](#icapture) |
+| [`ICapture`](#icapture-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`start`](#start-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`stop`](#stop-1) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openFile`](#openfile) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`close`](#close) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderFormat`](#getencoderformat) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderAudioCodec`](#getencoderaudiocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`getEncoderVideoCodec`](#getencodervideocodec) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openAudio`](#openaudio) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openVideo`](#openvideo) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`onStreamStateChange`](#onstreamstatechange) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`openStream`](#openstream) | `function` | Inherited from [`ICapture`](#icapture) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`start`](base.md#start-7) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`stop`](base.md#stop-6) | `function` | Inherited from [`Startable`](base.md#startable) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+
+### Inherited from [`MediaCapture`](#mediacapture)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`Closing`](#closing)  | Signals that the capture thread is closing. This signal is emitted from the capture thread context. |
+| `function` | [`MediaCapture`](#mediacapture-1)  |  |
+| `function` | [`MediaCapture`](#mediacapture-2)  | Deleted constructor. |
+| `function` | [`MediaCapture`](#mediacapture-3)  | Deleted constructor. |
+| `function` | [`openFile`](#openfile-1) `virtual` `override` | Open a media file for decoding. Automatically detects video and audio streams. |
+| `function` | [`close`](#close-5) `virtual` `override` | Stop the capture thread and close the media stream and all decoders. |
+| `function` | [`start`](#start-4) `virtual` `override` | Start the background capture and decode thread. Throws std::runtime_error if no media streams have been opened. |
+| `function` | [`stop`](#stop-3) `virtual` `override` | [Signal](base.md#signal) the capture thread to stop and join it before returning. |
+| `function` | [`run`](#run) `virtual` `override` | Entry point for the background capture thread. Reads and decodes packets from the format context until EOF or [stop()](#stop-3) is called. |
+| `function` | [`getEncoderFormat`](#getencoderformat-1) `virtual` `override` | Fill `format` with the combined encoder-ready video and audio codec parameters. |
+| `function` | [`getEncoderAudioCodec`](#getencoderaudiocodec-1) `virtual` `override` | Fill `params` with the decoder's output audio codec parameters. Throws std::runtime_error if audio parameters have not been initialised. |
+| `function` | [`getEncoderVideoCodec`](#getencodervideocodec-1) `virtual` `override` | Fill `params` with the decoder's output video codec parameters. Throws std::runtime_error if video parameters have not been initialised. |
+| `function` | [`setLoopInput`](#setloopinput)  | Continuously loop the input file when set. |
+| `function` | [`setLimitFramerate`](#setlimitframerate)  | Limit playback to video FPS. |
+| `function` | [`setRealtimePTS`](#setrealtimepts)  | Set to use realtime PTS calculation. This is preferred when using live captures as FFmpeg-provided values are not always reliable. |
+| `function` | [`setOpenOptions`](#setopenoptions)  | Set demuxer options applied at the next [openFile()](#openfile-1) call. Keys map to libavformat AVOption entries (e.g. "rtsp_transport", "fflags", "analyzeduration", "probesize"). Useful for live network sources that need low-latency hints. Pass an empty map to clear. |
+| `function` | [`setPassthroughVideo`](#setpassthroughvideo)  | Skip the video decoder. Encoded video AVPackets from the input stream are emitted directly as `[av::VideoPacket](#videopacket)` without decoding. The emitted packets carry the source's encoded payload and a `time` in microseconds rescaled from the stream's timebase. The `iframe` flag is set from `AV_PKT_FLAG_KEY`. |
+| `function` | [`formatCtx`](#formatctx) `const` |  |
+| `function` | [`video`](#video-1) `const` |  |
+| `function` | [`audio`](#audio-1) `const` |  |
+| `function` | [`stopping`](#stopping) `const` |  |
+| `function` | [`error`](#error-2) `const` |  |
+| `variable` | [`_mutex`](#_mutex)  |  |
+| `variable` | [`_thread`](#_thread)  |  |
+| `variable` | [`_formatCtx`](#_formatctx)  |  |
+| `variable` | [`_video`](#_video)  |  |
+| `variable` | [`_audio`](#_audio)  |  |
+| `variable` | [`_error`](#_error)  |  |
+| `variable` | [`_stopping`](#_stopping)  |  |
+| `variable` | [`_looping`](#_looping)  |  |
+| `variable` | [`_realtime`](#_realtime)  |  |
+| `variable` | [`_ratelimit`](#_ratelimit)  |  |
+| `variable` | [`_passthroughVideo`](#_passthroughvideo)  |  |
+| `variable` | [`_openOptions`](#_openoptions)  |  |
+| `variable` | [`_videoStream`](#_videostream)  |  |
+| `function` | [`openStream`](#openstream-1) `virtual` `override` | Open the underlying media stream. |
+| `function` | [`emit`](#emit) `virtual` `override` | Emit an existing packet directly onto the outgoing signal. |
+| `typedef` | [`Ptr`](#ptr-1)  |  |
+
+### Inherited from [`ICapture`](#icapture)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter)  |  |
+| `function` | [`ICapture`](#icapture-1) `inline` |  |
+| `function` | [`start`](#start-1) `virtual` `override` | Start capturing and emitting packets. |
+| `function` | [`stop`](#stop-1) `virtual` `override` | Stop capturing and release device resources. |
+| `function` | [`openFile`](#openfile) `virtual` `inline` | Open a media file as the capture source. |
+| `function` | [`close`](#close) `virtual` `inline` | Release the capture source and any associated resources. |
+| `function` | [`getEncoderFormat`](#getencoderformat) `virtual` | Populate `iformat` with the encoder-ready format derived from this capture source. |
+| `function` | [`getEncoderAudioCodec`](#getencoderaudiocodec) `virtual` `inline` | Populate `params` with the encoder-ready audio codec parameters. |
+| `function` | [`getEncoderVideoCodec`](#getencodervideocodec) `virtual` `inline` | Populate `params` with the encoder-ready video codec parameters. |
+| `function` | [`openAudio`](#openaudio) `virtual` `inline` | Open an audio capture device with the given parameters. |
+| `function` | [`openVideo`](#openvideo) `virtual` `inline` | Open a video capture device with the given parameters. |
+| `function` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | React to [PacketStream](base.md#packetstream) state transitions by starting or stopping capture. |
+| `function` | [`openStream`](#openstream) `virtual` `inline` |  |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
+### Inherited from [`Startable`](base.md#startable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`start`](base.md#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `function` | [`stop`](base.md#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
 
 ### Public Methods
 
@@ -3010,6 +3914,10 @@ Open the given video device using a [VideoCodec](#videocodec) params struct.
 
 * `params` The desired capture parameters.
 
+##### Reimplements
+
+- [`openVideo`](#openvideo)
+
 ---
 
 {#openvideo-2}
@@ -3074,6 +3982,14 @@ Base class for platform-specific device change monitors.
 
 Call [start()](#start-5) to begin monitoring and [stop()](#stop-4) to end. The watcher is NOT auto-started; callers must explicitly start it.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`DeviceWatcher`](#devicewatcher-1) | `function` | Declared here |
+| [`start`](#start-5) | `function` | Declared here |
+| [`stop`](#stop-4) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -3110,6 +4026,12 @@ virtual inline bool start()
 
 Defined in src/av/include/icy/av/devicemanager.h:199
 
+##### Reimplemented by
+
+- [`start`](#start-2)
+- [`start`](#start)
+- [`start`](#start-6)
+
 ---
 
 {#stop-4}
@@ -3123,6 +4045,12 @@ virtual inline void stop()
 ```
 
 Defined in src/av/include/icy/av/devicemanager.h:200
+
+##### Reimplemented by
+
+- [`stop`](#stop-2)
+- [`stop`](#stop)
+- [`stop`](#stop-5)
 
 {#devicemanager}
 
@@ -3139,6 +4067,35 @@ class DeviceManager
 Defined in src/av/include/icy/av/devicemanager.h:210
 
 Enumerates and manages system audio and video devices.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`DevicesChanged`](#deviceschanged) | `variable` | Declared here |
+| [`DeviceManager`](#devicemanager-1) | `function` | Declared here |
+| [`getCameras`](#getcameras) | `function` | Declared here |
+| [`getMicrophones`](#getmicrophones) | `function` | Declared here |
+| [`getSpeakers`](#getspeakers) | `function` | Declared here |
+| [`getDefaultCamera`](#getdefaultcamera) | `function` | Declared here |
+| [`getDefaultMicrophone`](#getdefaultmicrophone) | `function` | Declared here |
+| [`getDefaultSpeaker`](#getdefaultspeaker) | `function` | Declared here |
+| [`findCamera`](#findcamera) | `function` | Declared here |
+| [`findMicrophone`](#findmicrophone) | `function` | Declared here |
+| [`findSpeaker`](#findspeaker) | `function` | Declared here |
+| [`getDeviceList`](#getdevicelist-3) | `function` | Declared here |
+| [`getCapabilities`](#getcapabilities) | `function` | Declared here |
+| [`setWatcher`](#setwatcher) | `function` | Declared here |
+| [`watcher`](#watcher) | `function` | Declared here |
+| [`print`](#print-5) | `function` | Declared here |
+| [`getHardwareCodecs`](#gethardwarecodecs) | `function` | Declared here |
+| [`negotiateVideoCapture`](#negotiatevideocapture) | `function` | Declared here |
+| [`negotiateAudioCapture`](#negotiateaudiocapture) | `function` | Declared here |
+| [`findVideoInputFormat`](#findvideoinputformat) | `function` | Declared here |
+| [`findAudioInputFormat`](#findaudioinputformat) | `function` | Declared here |
+| [`instance`](#instance) | `function` | Declared here |
+| [`shutdown`](#shutdown) | `function` | Declared here |
+| [`_watcher`](#_watcher) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -3638,6 +4595,13 @@ Defined in src/av/include/icy/av/devicemanager.h:300
 
 Hardware codec descriptor.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`name`](#name-3) | `variable` | Declared here |
+| [`type`](#type-6) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -3684,6 +4648,30 @@ class FormatRegistry
 Defined in src/av/include/icy/av/formatregistry.h:26
 
 [Singleton](base.md#singleton) registry of available media container formats for encoding and decoding.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`FormatRegistry`](#formatregistry-1) | `function` | Declared here |
+| [`get`](#get) | `function` | Declared here |
+| [`getByID`](#getbyid) | `function` | Declared here |
+| [`getOrDefault`](#getordefault) | `function` | Declared here |
+| [`getDefault`](#getdefault) | `function` | Declared here |
+| [`registerFormat`](#registerformat) | `function` | Declared here |
+| [`unregisterFormat`](#unregisterformat) | `function` | Declared here |
+| [`setDefault`](#setdefault) | `function` | Declared here |
+| [`exists`](#exists) | `function` | Declared here |
+| [`clear`](#clear) | `function` | Declared here |
+| [`formats`](#formats) | `function` | Declared here |
+| [`instance`](#instance-1) | `function` | Declared here |
+| [`_formats`](#_formats) | `variable` | Declared here |
+| [`_default`](#_default) | `variable` | Declared here |
+| [`_mutex`](#_mutex-1) | `variable` | Declared here |
+| [`FormatRegistry`](#formatregistry-2) | `function` | Declared here |
+| [`FormatRegistry`](#formatregistry-3) | `function` | Declared here |
+| [`findByName`](#findbyname) | `function` | Declared here |
+| [`defaultLocked`](#defaultlocked) | `function` | Declared here |
 
 ### Public Methods
 
@@ -4029,6 +5017,27 @@ Defined in src/av/include/icy/av/win32/mediafoundation.h:61
 
 Monitors device add/remove events via IMMNotificationClient (audio) and RegisterDeviceNotification (video).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`WindowsDeviceWatcher`](#windowsdevicewatcher-1) | `function` | Declared here |
+| [`start`](#start-6) | `function` | Declared here |
+| [`stop`](#stop-5) | `function` | Declared here |
+| [`_impl`](#_impl-2) | `variable` | Declared here |
+| [`_manager`](#_manager-2) | `variable` | Declared here |
+| [`DeviceWatcher`](#devicewatcher-1) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`start`](#start-5) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+| [`stop`](#stop-4) | `function` | Inherited from [`DeviceWatcher`](#devicewatcher) |
+
+### Inherited from [`DeviceWatcher`](#devicewatcher)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`DeviceWatcher`](#devicewatcher-1) `inline` `explicit` |  |
+| `function` | [`start`](#start-5) `virtual` `inline` |  |
+| `function` | [`stop`](#stop-4) `virtual` `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4072,6 +5081,10 @@ Begin monitoring via IMMNotificationClient and RegisterDeviceNotification.
 #### Returns
 True if monitoring was successfully started.
 
+##### Reimplements
+
+- [`start`](#start-5)
+
 ---
 
 {#stop-5}
@@ -4087,6 +5100,10 @@ virtual void stop() override
 Defined in src/av/include/icy/av/win32/mediafoundation.h:73
 
 Stop monitoring and unregister all device notifications.
+
+##### Reimplements
+
+- [`stop`](#stop-4)
 
 ### Private Attributes
 
@@ -4137,6 +5154,111 @@ Defined in src/av/include/icy/av/multiplexencoder.h:41
 > **Subclassed by:** [`MultiplexPacketEncoder`](#multiplexpacketencoder)
 
 Multiplexing encoder that writes synchronized audio and video streams.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-4) | `variable` | Declared here |
+| [`MultiplexEncoder`](#multiplexencoder-1) | `function` | Declared here |
+| [`MultiplexEncoder`](#multiplexencoder-2) | `function` | Declared here |
+| [`MultiplexEncoder`](#multiplexencoder-3) | `function` | Declared here |
+| [`init`](#init-1) | `function` | Declared here |
+| [`uninit`](#uninit-1) | `function` | Declared here |
+| [`cleanup`](#cleanup-1) | `function` | Declared here |
+| [`createVideo`](#createvideo-1) | `function` | Declared here |
+| [`freeVideo`](#freevideo-1) | `function` | Declared here |
+| [`encodeVideo`](#encodevideo-1) | `function` | Declared here |
+| [`encodeVideo`](#encodevideo-2) | `function` | Declared here |
+| [`encodeVideo`](#encodevideo-3) | `function` | Declared here |
+| [`createAudio`](#createaudio-1) | `function` | Declared here |
+| [`freeAudio`](#freeaudio-1) | `function` | Declared here |
+| [`encodeAudio`](#encodeaudio) | `function` | Declared here |
+| [`encodeAudio`](#encodeaudio-1) | `function` | Declared here |
+| [`flush`](#flush-7) | `function` | Declared here |
+| [`options`](#options-2) | `function` | Declared here |
+| [`video`](#video-2) | `function` | Declared here |
+| [`audio`](#audio-2) | `function` | Declared here |
+| [`_options`](#_options) | `variable` | Declared here |
+| [`_formatCtx`](#_formatctx-1) | `variable` | Declared here |
+| [`_video`](#_video-1) | `variable` | Declared here |
+| [`_audio`](#_audio-1) | `variable` | Declared here |
+| [`_ioCtx`](#_ioctx) | `variable` | Declared here |
+| [`_ioBuffer`](#_iobuffer) | `variable` | Declared here |
+| [`_pts`](#_pts) | `variable` | Declared here |
+| [`_mutex`](#_mutex-2) | `variable` | Declared here |
+| [`writeOutputPacket`](#writeoutputpacket) | `function` | Declared here |
+| [`updateStreamPts`](#updatestreampts) | `function` | Declared here |
+| [`onVideoEncoded`](#onvideoencoded) | `function` | Declared here |
+| [`onAudioEncoded`](#onaudioencoded) | `function` | Declared here |
+| [`init`](#init) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`uninit`](#uninit) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`cleanup`](#cleanup) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`options`](#options-1) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`createVideo`](#createvideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`freeVideo`](#freevideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`encodeVideo`](#encodevideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`createAudio`](#createaudio) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`freeAudio`](#freeaudio) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`flush`](#flush) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isNone`](#isnone) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isReady`](#isready) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isEncoding`](#isencoding) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isActive`](#isactive) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isStopped`](#isstopped) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isError`](#iserror) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`Type`](#type-3) | `enum` | Inherited from [`IEncoder`](#iencoder) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+
+### Inherited from [`IEncoder`](#iencoder)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`init`](#init) `virtual` | Initialise the encoder, open codec contexts, and transition to Ready or Encoding state. |
+| `function` | [`uninit`](#uninit) `virtual` | Flush remaining packets, close codec contexts, and release all encoder resources. |
+| `function` | [`cleanup`](#cleanup) `virtual` `inline` | Perform any additional cleanup after [uninit()](#uninit). Default is a no-op. |
+| `function` | [`options`](#options-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`createVideo`](#createvideo) `virtual` `inline` | Initialise the video codec context and stream. |
+| `function` | [`freeVideo`](#freevideo) `virtual` `inline` | Free the video codec context and stream. |
+| `function` | [`encodeVideo`](#encodevideo) `virtual` `inline` `nodiscard` | Encode a single AVFrame of video. |
+| `function` | [`createAudio`](#createaudio) `virtual` `inline` | Initialise the audio codec context and stream. |
+| `function` | [`freeAudio`](#freeaudio) `virtual` `inline` | Free the audio codec context and stream. |
+| `function` | [`flush`](#flush) `virtual` `inline` | Flush any internally buffered packets to the output. |
+| `function` | [`isNone`](#isnone) `const` `inline` |  |
+| `function` | [`isReady`](#isready) `const` `inline` |  |
+| `function` | [`isEncoding`](#isencoding) `virtual` `const` `inline` |  |
+| `function` | [`isActive`](#isactive) `virtual` `const` `inline` |  |
+| `function` | [`isStopped`](#isstopped) `virtual` `const` `inline` |  |
+| `function` | [`isError`](#iserror) `virtual` `const` `inline` |  |
+| `enum` | [`Type`](#type-3)  |  |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
 
 ### Public Attributes
 
@@ -4240,6 +5362,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:55
 
 Open the output container, create codec streams, and write the format header.
 
+##### Reimplements
+
+- [`init`](#init)
+
 ---
 
 {#uninit-1}
@@ -4255,6 +5381,10 @@ virtual void uninit() override
 Defined in src/av/include/icy/av/multiplexencoder.h:58
 
 Flush encoded packets, write the format trailer, and close the output container.
+
+##### Reimplements
+
+- [`uninit`](#uninit)
 
 ---
 
@@ -4272,6 +5402,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:61
 
 Release all resources allocated by [init()](#init-1) without writing a trailer.
 
+##### Reimplements
+
+- [`cleanup`](#cleanup)
+
 ---
 
 {#createvideo-1}
@@ -4287,6 +5421,10 @@ virtual void createVideo() override
 Defined in src/av/include/icy/av/multiplexencoder.h:64
 
 Create the video encoder and add the stream to the output container.
+
+##### Reimplements
+
+- [`createVideo`](#createvideo)
 
 ---
 
@@ -4304,6 +5442,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:67
 
 Flush and free the video encoder and its stream.
 
+##### Reimplements
+
+- [`freeVideo`](#freevideo)
+
 ---
 
 {#encodevideo-1}
@@ -4319,6 +5461,10 @@ Flush and free the video encoder and its stream.
 Defined in src/av/include/icy/av/multiplexencoder.h:71
 
 Encode a single video frame. All frame values must be set, such as size, pixel format, and PTS.
+
+##### Reimplements
+
+- [`encodeVideo`](#encodevideo)
 
 ---
 
@@ -4390,6 +5536,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:97
 
 Create the audio encoder and add the stream to the output container.
 
+##### Reimplements
+
+- [`createAudio`](#createaudio)
+
 ---
 
 {#freeaudio-1}
@@ -4405,6 +5555,10 @@ virtual void freeAudio() override
 Defined in src/av/include/icy/av/multiplexencoder.h:100
 
 Flush and free the audio encoder and its stream.
+
+##### Reimplements
+
+- [`freeAudio`](#freeaudio)
 
 ---
 
@@ -4468,6 +5622,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:119
 
 Flush any buffered or queued packets to the output container.
 
+##### Reimplements
+
+- [`flush`](#flush)
+
 ---
 
 {#options-2}
@@ -4484,6 +5642,10 @@ Defined in src/av/include/icy/av/multiplexencoder.h:122
 
 #### Returns
 A read-only view of the encoder's configuration options.
+
+##### Reimplements
+
+- [`options`](#options-1)
 
 ---
 
@@ -4714,6 +5876,147 @@ auto encoder = std::make_shared<av::AudioPacketEncoder>(); encoder->oparams = [a
 
 [PacketStream](base.md#packetstream) stream; stream.attachSource(capture); stream.attach(encoder, 1, true); stream.attach(&webrtcSender, 5, false); stream.start();
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PacketStream`](#packetstream-1) | `friend` | Declared here |
+| [`AudioPacketEncoder`](#audiopacketencoder-1) | `function` | Declared here |
+| [`AudioPacketEncoder`](#audiopacketencoder-2) | `function` | Declared here |
+| [`process`](#process-2) | `function` | Declared here |
+| [`accepts`](#accepts) | `function` | Declared here |
+| [`_initialized`](#_initialized) | `variable` | Declared here |
+| [`_mutex`](#_mutex-3) | `variable` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-2) | `function` | Declared here |
+| [`fifo`](#fifo-1) | `variable` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`format`](#format-6) | `variable` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`nextOutputPts`](#nextoutputpts) | `variable` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`AudioEncoder`](#audioencoder-1) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`create`](#create-2) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`close`](#close-4) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`encode`](#encode-3) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`encode`](#encode-4) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`encode`](#encode-5) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`flush`](#flush-3) | `function` | Inherited from [`AudioEncoder`](#audioencoder) |
+| [`emitter`](#emitter-2) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`iparams`](#iparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`oparams`](#oparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`stream`](#stream-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`ctx`](#ctx) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`codec`](#codec-5) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`frame`](#frame) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`resampler`](#resampler) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`outputFrameSize`](#outputframesize) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`time`](#time) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`pts`](#pts) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`seconds`](#seconds) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`error`](#error-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-3) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`create`](#create) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`open`](#open) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`close`](#close-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`decode`](#decode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`flush`](#flush-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`recreateResampler`](#recreateresampler) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`AudioEncoder`](#audioencoder)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`fifo`](#fifo-1)  |  |
+| `variable` | [`format`](#format-6)  |  |
+| `variable` | [`nextOutputPts`](#nextoutputpts)  | Running PTS counter for encoder output, in encoder time_base units. Anchored to the first input packet's PTS, then advanced by frame->nb_samples per encoded frame. AV_NOPTS_VALUE before anchoring. |
+| `function` | [`AudioEncoder`](#audioencoder-1)  | Construct an encoder, optionally tied to an existing muxer context. |
+| `function` | [`create`](#create-2) `virtual` `override` | Initialise the AVCodecContext using oparams. Adds an audio stream to `format` if one was provided at construction. |
+| `function` | [`close`](#close-4) `virtual` `override` | Close and free the AVCodecContext, FIFO buffer, and associated resources. |
+| `function` | [`encode`](#encode-3) `virtual` `nodiscard` `override` | Encode interleaved audio samples. |
+| `function` | [`encode`](#encode-4) `virtual` `nodiscard` `override` | Encode planar audio samples. |
+| `function` | [`encode`](#encode-5) `virtual` `nodiscard` `override` | Encode a single AVFrame (typically from a decoder or resampler). |
+| `function` | [`flush`](#flush-3) `virtual` `override` | Flush remaining packets to be encoded. This method should be called once before stream closure. |
+
+### Inherited from [`AudioContext`](#audiocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-2)  |  |
+| `variable` | [`iparams`](#iparams)  | input parameters |
+| `variable` | [`oparams`](#oparams)  | output parameters |
+| `variable` | [`stream`](#stream-1)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-5)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame)  | last encoded or decoded frame |
+| `variable` | [`resampler`](#resampler)  | audio resampler |
+| `variable` | [`outputFrameSize`](#outputframesize)  | encoder or decoder output frame size |
+| `variable` | [`time`](#time)  | stream time in codec time base |
+| `variable` | [`pts`](#pts)  | last packet pts value |
+| `variable` | [`seconds`](#seconds)  | audio time in seconds |
+| `variable` | [`error`](#error-1)  | error message |
+| `function` | [`AudioContext`](#audiocontext-1)  |  |
+| `function` | [`AudioContext`](#audiocontext-2)  | Deleted constructor. |
+| `function` | [`AudioContext`](#audiocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Implemented by [AudioEncoder](#audioencoder) and [AudioDecoder](#audiodecoder). |
+| `function` | [`open`](#open) `virtual` | Open the codec and create the resampler if input/output parameters differ. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-2) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode) `virtual` `nodiscard` | Decode a compressed audio packet and emit the resulting samples. |
+| `function` | [`encode`](#encode) `virtual` `nodiscard` | Encode a buffer of interleaved audio samples. |
+| `function` | [`encode`](#encode-1) `virtual` `nodiscard` | Encode a buffer of planar audio samples. |
+| `function` | [`encode`](#encode-2) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-1) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`recreateResampler`](#recreateresampler) `virtual` | Recreate the [AudioResampler](#audioresampler) using the current iparams and oparams. Called automatically by [open()](#open) when format conversion is required. |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
+
 ### Friends
 
 | Name | Description |
@@ -4783,6 +6086,10 @@ Defined in src/av/include/icy/av/audiopacketencoder.h:56
 
 [Process](base.md#process) an [AudioPacket](#audiopacket) or [PlanarAudioPacket](#planaraudiopacket) from the stream. Encodes the samples and emits the resulting compressed packet.
 
+##### Reimplements
+
+- [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#accepts}
@@ -4798,6 +6105,10 @@ virtual bool accepts(IPacket * packet) override
 Defined in src/av/include/icy/av/audiopacketencoder.h:59
 
 Accept [AudioPacket](#audiopacket) and [PlanarAudioPacket](#planaraudiopacket) types.
+
+##### Reimplements
+
+- [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
 
 ### Protected Attributes
 
@@ -4852,6 +6163,10 @@ Defined in src/av/include/icy/av/audiopacketencoder.h:62
 
 Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
 
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
+
 {#videopacketencoder}
 
 ## VideoPacketEncoder
@@ -4877,6 +6192,143 @@ Example:
 auto encoder = std::make_shared<av::VideoPacketEncoder>(); encoder->iparams = capture->videoCodec(); // decoded format encoder->oparams = [av::VideoCodec](#videocodec)("H264", "libx264", 640, 480, 30);
 
 [PacketStream](base.md#packetstream) stream; stream.attachSource(capture); stream.attach(encoder, 1, true); stream.attach(&webrtcSender, 5, false); stream.start();
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PacketStream`](#packetstream-2) | `friend` | Declared here |
+| [`VideoPacketEncoder`](#videopacketencoder-1) | `function` | Declared here |
+| [`VideoPacketEncoder`](#videopacketencoder-2) | `function` | Declared here |
+| [`process`](#process-3) | `function` | Declared here |
+| [`accepts`](#accepts-1) | `function` | Declared here |
+| [`_initialized`](#_initialized-1) | `variable` | Declared here |
+| [`_mutex`](#_mutex-4) | `variable` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-3) | `function` | Declared here |
+| [`format`](#format-7) | `variable` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`VideoEncoder`](#videoencoder-1) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`create`](#create-5) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`close`](#close-8) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`encode`](#encode-9) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`encode`](#encode-10) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`encode`](#encode-11) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`flush`](#flush-6) | `function` | Inherited from [`VideoEncoder`](#videoencoder) |
+| [`emitter`](#emitter-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`iparams`](#iparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`oparams`](#oparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`stream`](#stream-2) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`ctx`](#ctx-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`codec`](#codec-6) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`frame`](#frame-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`conv`](#conv) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`time`](#time-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`pts`](#pts-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`seconds`](#seconds-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`error`](#error-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`create`](#create-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`open`](#open-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`close`](#close-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`decode`](#decode-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-7) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-8) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`flush`](#flush-4) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`convert`](#convert) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`recreateConverter`](#recreateconverter) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`VideoEncoder`](#videoencoder)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`format`](#format-7)  |  |
+| `function` | [`VideoEncoder`](#videoencoder-1)  | Construct an encoder, optionally tied to an existing muxer context. |
+| `function` | [`create`](#create-5) `virtual` `override` | Initialise the AVCodecContext using oparams. Adds a video stream to `format` if one was provided at construction. |
+| `function` | [`close`](#close-8) `virtual` `override` | Close and free the AVCodecContext and associated resources. |
+| `function` | [`encode`](#encode-9) `virtual` `nodiscard` `override` | Encode a single video frame. This method is for interleaved video formats. |
+| `function` | [`encode`](#encode-10) `virtual` `nodiscard` `override` | Encode a single video frame. This method is for planar video formats. |
+| `function` | [`encode`](#encode-11) `virtual` `nodiscard` `override` | Encode a single AVFrame (typically from a decoder or converter). |
+| `function` | [`flush`](#flush-6) `virtual` `override` | Flush remaining packets to be encoded. This method should be called once before stream closure. |
+
+### Inherited from [`VideoContext`](#videocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-3)  |  |
+| `variable` | [`iparams`](#iparams-1)  | input parameters |
+| `variable` | [`oparams`](#oparams-1)  | output parameters |
+| `variable` | [`stream`](#stream-2)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx-1)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-6)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame-1)  | encoder or decoder frame |
+| `variable` | [`conv`](#conv)  | video conversion context |
+| `variable` | [`time`](#time-1)  | stream time in codec time base |
+| `variable` | [`pts`](#pts-1)  | last packet pts value |
+| `variable` | [`seconds`](#seconds-1)  | video time in seconds |
+| `variable` | [`error`](#error-3)  | error message |
+| `function` | [`VideoContext`](#videocontext-1)  |  |
+| `function` | [`VideoContext`](#videocontext-2)  | Deleted constructor. |
+| `function` | [`VideoContext`](#videocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create-3) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Overridden by [VideoEncoder](#videoencoder) and [VideoDecoder](#videodecoder). |
+| `function` | [`open`](#open-1) `virtual` | Open the codec and create the pixel format conversion context if required. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-6) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode-2) `virtual` `nodiscard` | Decode a compressed video packet and emit the resulting frame. |
+| `function` | [`encode`](#encode-6) `virtual` `nodiscard` | Encode a buffer of interleaved video data. |
+| `function` | [`encode`](#encode-7) `virtual` `nodiscard` | Encode a planar video frame. |
+| `function` | [`encode`](#encode-8) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-4) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`convert`](#convert) `virtual` | Convert the video frame and return the result. |
+| `function` | [`recreateConverter`](#recreateconverter) `virtual` | Recreate the [VideoConverter](#videoconverter) if the input or output parameters have changed. Called automatically by [open()](#open-1) and [convert()](#convert). |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Friends
 
@@ -4947,6 +6399,10 @@ Defined in src/av/include/icy/av/videopacketencoder.h:57
 
 [Process](base.md#process) a [VideoPacket](#videopacket) or [PlanarVideoPacket](#planarvideopacket) from the stream. Encodes the frame and emits the resulting compressed packet.
 
+##### Reimplements
+
+- [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+
 ---
 
 {#accepts-1}
@@ -4962,6 +6418,10 @@ virtual bool accepts(IPacket * packet) override
 Defined in src/av/include/icy/av/videopacketencoder.h:60
 
 Accept [VideoPacket](#videopacket) and [PlanarVideoPacket](#planarvideopacket) types.
+
+##### Reimplements
+
+- [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
 
 ### Protected Attributes
 
@@ -5016,6 +6476,10 @@ Defined in src/av/include/icy/av/videopacketencoder.h:63
 
 Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
 
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
+
 {#realtimepacketqueue}
 
 ## RealtimePacketQueue
@@ -5036,6 +6500,197 @@ Defined in src/av/include/icy/av/realtimepacketqueue.h:30
 [Queue](base.md#queue) that emits media packets in presentation-timestamp order relative to a realtime clock.
 
 Packets are sorted by their `[time](base.md#time-3)` field on insertion. On each pop attempt the queue checks whether the wall-clock time since stream activation has reached the next packet's timestamp; if not, the packet is held back. This provides a soft realtime playback scheduler.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`RealtimePacketQueue`](#realtimepacketqueue-1) | `function` | Declared here |
+| [`push`](#push) | `function` | Declared here |
+| [`realTime`](#realtime) | `function` | Declared here |
+| [`_startTime`](#_starttime) | `variable` | Declared here |
+| [`popNext`](#popnext) | `function` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-4) | `function` | Declared here |
+| [`BaseQueue`](#basequeue) | `typedef` | Declared here |
+| [`Queue`](base.md#classicy_1_1AsyncPacketQueue_1a3763065dd10e885cf0e2320bd4082fee) | `typedef` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`Processor`](base.md#classicy_1_1AsyncPacketQueue_1adbccde7917d3283e9ee35cb1bb9b5b98) | `typedef` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`emitter`](base.md#classicy_1_1AsyncPacketQueue_1abde947198221d9a966197bd5c78d9f8a) | `variable` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`AsyncPacketQueue`](base.md#classicy_1_1AsyncPacketQueue_1aefce3e0be625f5be5747005d801bb44d) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`~AsyncPacketQueue`](base.md#classicy_1_1AsyncPacketQueue_1ab7f1123ee0cff95c3c149f2ae5fd8598) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`close`](base.md#classicy_1_1AsyncPacketQueue_1aaa410cd686acde18f9b4806664265509) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`process`](base.md#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`accepts`](base.md#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`retention`](base.md#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`dispatch`](base.md#classicy_1_1AsyncPacketQueue_1a408c35d44bef57364c8c29d8ef71736a) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`onStreamStateChange`](base.md#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd) | `function` | Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue) |
+| [`Queue`](base.md#classicy_1_1AsyncQueue_1a0efd9a7b5b236ed2b9f56ecdde9211a3) | `typedef` | Inherited from [`AsyncQueue`](base.md#asyncqueue) |
+| [`_thread`](base.md#classicy_1_1AsyncQueue_1a37705714f84f4951fa2befc5a4d070c8) | `variable` | Inherited from [`AsyncQueue`](base.md#asyncqueue) |
+| [`AsyncQueue`](base.md#classicy_1_1AsyncQueue_1a715382ae33e9191ff5fce23bf6880391) | `function` | Inherited from [`AsyncQueue`](base.md#asyncqueue) |
+| [`cancel`](base.md#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) | `function` | Inherited from [`AsyncQueue`](base.md#asyncqueue) |
+| [`~AsyncQueue`](base.md#classicy_1_1AsyncQueue_1aa1523689e975842876d971d0083cccad) | `function` | Inherited from [`AsyncQueue`](base.md#asyncqueue) |
+| [`ondispatch`](base.md#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6) | `variable` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`_limit`](base.md#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32) | `variable` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`_timeout`](base.md#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903) | `variable` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`_dropped`](base.md#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949) | `variable` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`~RunnableQueue`](base.md#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`push`](base.md#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`flush`](base.md#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`clear`](base.md#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`run`](base.md#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`runTimeout`](base.md#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`dispatch`](base.md#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`timeout`](base.md#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`setTimeout`](base.md#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`dropped`](base.md#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`operator=`](base.md#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`operator=`](base.md#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`popNext`](base.md#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`dispatchNext`](base.md#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) | `function` | Inherited from [`RunnableQueue`](base.md#runnablequeue) |
+| [`_queue`](base.md#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80) | `variable` | Inherited from [`Queue`](base.md#queue) |
+| [`_mutex`](base.md#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1) | `variable` | Inherited from [`Queue`](base.md#queue) |
+| [`push`](base.md#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`push`](base.md#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`empty`](base.md#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`front`](base.md#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`back`](base.md#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`pop`](base.md#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`sort`](base.md#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`size`](base.md#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`queue`](base.md#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) | `function` | Inherited from [`Queue`](base.md#queue) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`AsyncPacketQueue`](base.md#asyncpacketqueue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Queue`](base.md#classicy_1_1AsyncPacketQueue_1a3763065dd10e885cf0e2320bd4082fee)  |  |
+| `typedef` | [`Processor`](base.md#classicy_1_1AsyncPacketQueue_1adbccde7917d3283e9ee35cb1bb9b5b98)  |  |
+| `variable` | [`emitter`](base.md#classicy_1_1AsyncPacketQueue_1abde947198221d9a966197bd5c78d9f8a)  |  |
+| `function` | [`AsyncPacketQueue`](base.md#classicy_1_1AsyncPacketQueue_1aefce3e0be625f5be5747005d801bb44d) `inline` |  |
+| `function` | [`~AsyncPacketQueue`](base.md#classicy_1_1AsyncPacketQueue_1ab7f1123ee0cff95c3c149f2ae5fd8598) `virtual` `inline` |  |
+| `function` | [`close`](base.md#classicy_1_1AsyncPacketQueue_1aaa410cd686acde18f9b4806664265509) `virtual` `inline` | Flushes remaining packets, cancels the queue, and joins the dispatch thread. |
+| `function` | [`process`](base.md#classicy_1_1AsyncPacketQueue_1a5abef9a24f57c362b5dd4cca24763d0d) `virtual` `inline` `override` | Clones the incoming packet and pushes it onto the async queue. This queue is therefore an explicit [PacketStream](base.md#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. |
+| `function` | [`accepts`](base.md#classicy_1_1AsyncPacketQueue_1aeba7d79e174d7dab6331b1e269bbdbf7) `virtual` `inline` `override` | Returns true if the packet can be cast to type `T`. |
+| `function` | [`retention`](base.md#classicy_1_1AsyncPacketQueue_1ab558156ee591962b33efe97c450cd281) `virtual` `const` `inline` `nodiscard` `override` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`dispatch`](base.md#classicy_1_1AsyncPacketQueue_1a408c35d44bef57364c8c29d8ef71736a) `inline` `override` | Emits the packet to downstream processors from the async thread. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd) `virtual` `inline` `override` | Closes the queue on `[Error](base.md#error)` or `Closed` stream state transitions. |
+
+### Inherited from [`AsyncQueue`](base.md#asyncqueue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Queue`](base.md#classicy_1_1AsyncQueue_1a0efd9a7b5b236ed2b9f56ecdde9211a3)  |  |
+| `variable` | [`_thread`](base.md#classicy_1_1AsyncQueue_1a37705714f84f4951fa2befc5a4d070c8)  |  |
+| `function` | [`AsyncQueue`](base.md#classicy_1_1AsyncQueue_1a715382ae33e9191ff5fce23bf6880391) `inline` |  |
+| `function` | [`cancel`](base.md#classicy_1_1AsyncQueue_1a23b99d0d77fb154c027fa717e7949840) `virtual` `inline` `override` | Cancels the queue and joins the dispatch thread. |
+| `function` | [`~AsyncQueue`](base.md#classicy_1_1AsyncQueue_1aa1523689e975842876d971d0083cccad) `virtual` `inline` |  |
+
+### Inherited from [`RunnableQueue`](base.md#runnablequeue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`ondispatch`](base.md#classicy_1_1RunnableQueue_1a02563ef55460453fd9e822af064316a6)  | The default dispatch function. Must be set before the queue is running. |
+| `variable` | [`_limit`](base.md#classicy_1_1RunnableQueue_1ad3f2479067668f92d6f07506337bfe32)  |  |
+| `variable` | [`_timeout`](base.md#classicy_1_1RunnableQueue_1a5da27c54589bb327589fd45ee56c5903)  |  |
+| `variable` | [`_dropped`](base.md#classicy_1_1RunnableQueue_1a62a495bba1ae7d7f3585619ca06a8949)  |  |
+| `function` | [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a22c19a890dfb624a9f5d31858a01fb97) `inline` |  |
+| `function` | [`~RunnableQueue`](base.md#classicy_1_1RunnableQueue_1ae70216329e516b2c4b2bbba7019fc176) `virtual` `inline` |  |
+| `function` | [`push`](base.md#classicy_1_1RunnableQueue_1ab8e8d0837033ba51fe2166d109b69cf2) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
+| `function` | [`flush`](base.md#classicy_1_1RunnableQueue_1aa64b944c8418d51a2ded9a24491e78af) `virtual` `inline` | Flush all outgoing items. |
+| `function` | [`clear`](base.md#classicy_1_1RunnableQueue_1a188099034c08a78c8b48d3e9d1c68c25) `inline` |  |
+| `function` | [`run`](base.md#classicy_1_1RunnableQueue_1a23ae7b15a81f939ea603d123d9aec2d5) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](base.md#cancel-1) is called, otherwise [runTimeout()](base.md#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `function` | [`runTimeout`](base.md#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
+| `function` | [`dispatch`](base.md#classicy_1_1RunnableQueue_1a3c1108da9fee63978f063e7356ea9831) `virtual` `inline` | Dispatch a single item to listeners. |
+| `function` | [`timeout`](base.md#classicy_1_1RunnableQueue_1a5275ca6accec833cdf9b843fb0a60c06) `inline` |  |
+| `function` | [`setTimeout`](base.md#classicy_1_1RunnableQueue_1a68e7e548b094964ee6054def7a44ce98) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
+| `function` | [`dropped`](base.md#classicy_1_1RunnableQueue_1a66ee632ab0176617bacf4381b9b223dd) `const` `inline` |  |
+| `function` | [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a48c9d6925977e89b420e3e80f8dbf6da)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1RunnableQueue_1a1e020ab7cfabb36b6c9d3dc15d8f02de)  | Deleted assignment operator. |
+| `function` | [`RunnableQueue`](base.md#classicy_1_1RunnableQueue_1a5429d61def63e54d3c8162eacdca71ed)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1RunnableQueue_1a0b1f772d9fcdce516393df33b38ecb10)  | Deleted assignment operator. |
+| `function` | [`popNext`](base.md#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6) `virtual` `inline` | Pops the next waiting item. |
+| `function` | [`dispatchNext`](base.md#classicy_1_1RunnableQueue_1a48df29dc62d24f471c445d77bdff4d70) `virtual` `inline` | Pops and dispatches the next waiting item. |
+
+### Inherited from [`Queue`](base.md#queue)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_queue`](base.md#classicy_1_1Queue_1ae99eb1f829857ecdc75119fa1291ab80)  |  |
+| `variable` | [`_mutex`](base.md#classicy_1_1Queue_1a8910d3c08198c72787af4a03054891b1)  |  |
+| `function` | [`push`](base.md#classicy_1_1Queue_1ad76910b55b4c648794fd755a22317c15) `inline` | Appends an item to the back of the queue (thread-safe). |
+| `function` | [`push`](base.md#classicy_1_1Queue_1a76cd03a71cdf41ea458e93079d8006a0) `inline` | Appends an item to the back of the queue by move (thread-safe). |
+| `function` | [`empty`](base.md#classicy_1_1Queue_1abe8f5d6e2a4247cf5994b13cdfe7a5c6) `const` `inline` |  |
+| `function` | [`front`](base.md#classicy_1_1Queue_1a2461185a30f8ce5987787e28d94a98bf) `const` `inline` |  |
+| `function` | [`back`](base.md#classicy_1_1Queue_1a80fce4e8936f5b74f036549801bcd123) `const` `inline` |  |
+| `function` | [`pop`](base.md#classicy_1_1Queue_1a43400b817e9ffe6ac3109c720c674c68) `inline` | Removes the front item from the queue (thread-safe). |
+| `function` | [`sort`](base.md#classicy_1_1Queue_1a5634cd774ad88850416d35995b5779eb) `inline` | Sorts all queued items using the given comparator (thread-safe). |
+| `function` | [`size`](base.md#classicy_1_1Queue_1a5532fcef4a4a3ccdeea15924fda51a9a) `const` `inline` |  |
+| `function` | [`queue`](base.md#classicy_1_1Queue_1a6d1ad3ee070f37e25304cfde94494947) `const` `inline` |  |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Public Methods
 
@@ -5138,6 +6793,10 @@ Defined in src/av/include/icy/av/realtimepacketqueue.h:62
 
 Return the next packet whose timestamp is <= [realTime()](#realtime), or nullptr if none is ready.
 
+##### Reimplements
+
+- [`popNext`](base.md#classicy_1_1RunnableQueue_1a56c74bc69705754b8670f60972b6e5a6)
+
 ---
 
 {#onstreamstatechange-4}
@@ -5153,6 +6812,10 @@ virtual inline void onStreamStateChange(const PacketStreamState & state) overrid
 Defined in src/av/include/icy/av/realtimepacketqueue.h:78
 
 Record the stream start time when the stream becomes active.
+
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1AsyncPacketQueue_1af168c83b4468f735a0419fabe79b2cdd)
 
 ### Public Types
 
@@ -5187,6 +6850,12 @@ struct MediaPacketTimeCompare
 Defined in src/av/include/icy/av/realtimepacketqueue.h:90
 
 Comparator for ordering media packets by presentation timestamp.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator()`](#operator-3) | `function` | Declared here |
 
 ### Public Methods
 
@@ -5225,6 +6894,206 @@ Defined in src/av/include/icy/av/multiplexpacketencoder.h:28
 > **Inherits:** [`MultiplexEncoder`](#multiplexencoder), [`PacketProcessor`](base.md#packetprocessor)
 
 Encodes and multiplexes a realtime video stream form audio / video capture sources. FFmpeg is used for encoding.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PacketStream`](#packetstream-3) | `friend` | Declared here |
+| [`MultiplexPacketEncoder`](#multiplexpacketencoder-1) | `function` | Declared here |
+| [`MultiplexPacketEncoder`](#multiplexpacketencoder-2) | `function` | Declared here |
+| [`MultiplexPacketEncoder`](#multiplexpacketencoder-3) | `function` | Declared here |
+| [`encode`](#encode-12) | `function` | Declared here |
+| [`encode`](#encode-13) | `function` | Declared here |
+| [`accepts`](#accepts-2) | `function` | Declared here |
+| [`process`](#process-4) | `function` | Declared here |
+| [`_mutex`](#_mutex-5) | `variable` | Declared here |
+| [`onStreamStateChange`](#onstreamstatechange-5) | `function` | Declared here |
+| [`emitter`](#emitter-4) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`MultiplexEncoder`](#multiplexencoder-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`MultiplexEncoder`](#multiplexencoder-2) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`MultiplexEncoder`](#multiplexencoder-3) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`init`](#init-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`uninit`](#uninit-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`cleanup`](#cleanup-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`createVideo`](#createvideo-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`freeVideo`](#freevideo-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`encodeVideo`](#encodevideo-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`encodeVideo`](#encodevideo-2) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`encodeVideo`](#encodevideo-3) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`createAudio`](#createaudio-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`freeAudio`](#freeaudio-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`encodeAudio`](#encodeaudio) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`encodeAudio`](#encodeaudio-1) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`flush`](#flush-7) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`options`](#options-2) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`video`](#video-2) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`audio`](#audio-2) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_options`](#_options) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_formatCtx`](#_formatctx-1) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_video`](#_video-1) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_audio`](#_audio-1) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_ioCtx`](#_ioctx) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_ioBuffer`](#_iobuffer) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_pts`](#_pts) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`_mutex`](#_mutex-2) | `variable` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`writeOutputPacket`](#writeoutputpacket) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`updateStreamPts`](#updatestreampts) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`onVideoEncoded`](#onvideoencoded) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`onAudioEncoded`](#onaudioencoded) | `function` | Inherited from [`MultiplexEncoder`](#multiplexencoder) |
+| [`init`](#init) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`uninit`](#uninit) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`cleanup`](#cleanup) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`options`](#options-1) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`createVideo`](#createvideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`freeVideo`](#freevideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`encodeVideo`](#encodevideo) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`createAudio`](#createaudio) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`freeAudio`](#freeaudio) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`flush`](#flush) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isNone`](#isnone) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isReady`](#isready) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isEncoding`](#isencoding) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isActive`](#isactive) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isStopped`](#isstopped) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`isError`](#iserror) | `function` | Inherited from [`IEncoder`](#iencoder) |
+| [`Type`](#type-3) | `enum` | Inherited from [`IEncoder`](#iencoder) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) | `function` | Inherited from [`PacketProcessor`](base.md#packetprocessor) |
+| [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd) | `variable` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+| [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481) | `function` | Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter) |
+
+### Inherited from [`MultiplexEncoder`](#multiplexencoder)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-4)  |  |
+| `function` | [`MultiplexEncoder`](#multiplexencoder-1)  | Construct the encoder with the given options. |
+| `function` | [`MultiplexEncoder`](#multiplexencoder-2)  | Deleted constructor. |
+| `function` | [`MultiplexEncoder`](#multiplexencoder-3)  | Deleted constructor. |
+| `function` | [`init`](#init-1) `virtual` `override` | Open the output container, create codec streams, and write the format header. |
+| `function` | [`uninit`](#uninit-1) `virtual` `override` | Flush encoded packets, write the format trailer, and close the output container. |
+| `function` | [`cleanup`](#cleanup-1) `virtual` `override` | Release all resources allocated by [init()](#init-1) without writing a trailer. |
+| `function` | [`createVideo`](#createvideo-1) `virtual` `override` | Create the video encoder and add the stream to the output container. |
+| `function` | [`freeVideo`](#freevideo-1) `virtual` `override` | Flush and free the video encoder and its stream. |
+| `function` | [`encodeVideo`](#encodevideo-1) `virtual` `nodiscard` `override` | Encode a single video frame. All frame values must be set, such as size, pixel format, and PTS. |
+| `function` | [`encodeVideo`](#encodevideo-2) `virtual` `nodiscard` | Encode a single interleaved video frame. If the frame time is specified it should be the microseconds offset since the start of the input stream. If no time is specified a real-time value will be assigned to the frame. |
+| `function` | [`encodeVideo`](#encodevideo-3) `virtual` `nodiscard` | Encode a single planar video frame. |
+| `function` | [`createAudio`](#createaudio-1) `virtual` `override` | Create the audio encoder and add the stream to the output container. |
+| `function` | [`freeAudio`](#freeaudio-1) `virtual` `override` | Flush and free the audio encoder and its stream. |
+| `function` | [`encodeAudio`](#encodeaudio) `virtual` `nodiscard` | Encode a single interleaved audio frame. |
+| `function` | [`encodeAudio`](#encodeaudio-1) `virtual` `nodiscard` | Encode a single planar audio frame. |
+| `function` | [`flush`](#flush-7) `virtual` `override` | Flush any buffered or queued packets to the output container. |
+| `function` | [`options`](#options-2) `virtual` `const` `nodiscard` `override` |  |
+| `function` | [`video`](#video-2)  |  |
+| `function` | [`audio`](#audio-2)  |  |
+| `variable` | [`_options`](#_options)  |  |
+| `variable` | [`_formatCtx`](#_formatctx-1)  |  |
+| `variable` | [`_video`](#_video-1)  |  |
+| `variable` | [`_audio`](#_audio-1)  |  |
+| `variable` | [`_ioCtx`](#_ioctx)  |  |
+| `variable` | [`_ioBuffer`](#_iobuffer)  |  |
+| `variable` | [`_pts`](#_pts)  |  |
+| `variable` | [`_mutex`](#_mutex-2)  |  |
+| `function` | [`writeOutputPacket`](#writeoutputpacket)  |  |
+| `function` | [`updateStreamPts`](#updatestreampts)  | Convert input microseconds to the stream time base. |
+| `function` | [`onVideoEncoded`](#onvideoencoded)  |  |
+| `function` | [`onAudioEncoded`](#onaudioencoded)  |  |
+
+### Inherited from [`IEncoder`](#iencoder)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`init`](#init) `virtual` | Initialise the encoder, open codec contexts, and transition to Ready or Encoding state. |
+| `function` | [`uninit`](#uninit) `virtual` | Flush remaining packets, close codec contexts, and release all encoder resources. |
+| `function` | [`cleanup`](#cleanup) `virtual` `inline` | Perform any additional cleanup after [uninit()](#uninit). Default is a no-op. |
+| `function` | [`options`](#options-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`createVideo`](#createvideo) `virtual` `inline` | Initialise the video codec context and stream. |
+| `function` | [`freeVideo`](#freevideo) `virtual` `inline` | Free the video codec context and stream. |
+| `function` | [`encodeVideo`](#encodevideo) `virtual` `inline` `nodiscard` | Encode a single AVFrame of video. |
+| `function` | [`createAudio`](#createaudio) `virtual` `inline` | Initialise the audio codec context and stream. |
+| `function` | [`freeAudio`](#freeaudio) `virtual` `inline` | Free the audio codec context and stream. |
+| `function` | [`flush`](#flush) `virtual` `inline` | Flush any internally buffered packets to the output. |
+| `function` | [`isNone`](#isnone) `const` `inline` |  |
+| `function` | [`isReady`](#isready) `const` `inline` |  |
+| `function` | [`isEncoding`](#isencoding) `virtual` `const` `inline` |  |
+| `function` | [`isActive`](#isactive) `virtual` `const` `inline` |  |
+| `function` | [`isStopped`](#isstopped) `virtual` `const` `inline` |  |
+| `function` | [`isError`](#iserror) `virtual` `const` `inline` |  |
+| `enum` | [`Type`](#type-3)  |  |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`PacketProcessor`](base.md#packetprocessor)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`PacketProcessor`](base.md#classicy_1_1PacketProcessor_1aa9a61f3eb4c53e7673b29d4c97686d9a) `inline` |  |
+| `function` | [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) `virtual` | This method performs processing on the given packet and emits the result. |
+| `function` | [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
+| `function` | [`operator<<`](base.md#classicy_1_1PacketProcessor_1ae8908612aea63a6e5b3d3f7714a8e7a3) `virtual` `inline` | [Stream](base.md#stream) operator alias for [process()](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
+
+### Inherited from [`PacketStreamAdapter`](base.md#packetstreamadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_emitter`](base.md#classicy_1_1PacketStreamAdapter_1ad954a1cd2f20587a622abd9dcebb56cd)  |  |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a904abfd9eb913c034a3648dc1fce3f57)  | Construct the adapter, binding it to the given packet signal. |
+| `function` | [`~PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a48b7da7a145125866e041c3d2cc7396c) `virtual` `inline` |  |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a6762a9434263339d1a477e72de59704c) `virtual` | Emit a mutable raw buffer as a packet. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a797c0aa60e4999527e8efc3b2fdc88fd) `virtual` | Emit a read-only raw buffer as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a4c605d524a538bfcc1cdf30ad4c22ce3) `virtual` | Emit a string as a packet (data is copied internally). |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1a10da09b2bf9b5b39c88e97813f99cbee) `virtual` | Emit a flag-only packet carrying no payload data. |
+| `function` | [`emit`](base.md#classicy_1_1PacketStreamAdapter_1abb0394d938214165fc89e999e6937831) `virtual` | Emit an existing packet directly onto the outgoing signal. |
+| `function` | [`getEmitter`](base.md#classicy_1_1PacketStreamAdapter_1a20cfe30f1db9ef46f9db060581fd2ff7)  | Returns a reference to the outgoing packet signal. |
+| `function` | [`retention`](base.md#classicy_1_1PacketStreamAdapter_1a37a1aa11e35a20a7c527efa78e99e928) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `function` | [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83) `virtual` `inline` | Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1a5915b4a54729309a0fc12ee9c0107339)  | NonCopyable and NonMovable. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1aeec4b3367101ffd07e3050cbfd726705)  | Deleted assignment operator. |
+| `function` | [`PacketStreamAdapter`](base.md#classicy_1_1PacketStreamAdapter_1abf38bdf926762063adfd29427cad1362)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1PacketStreamAdapter_1ac7fe6a98e57151ad909715f77e192481)  | Deleted assignment operator. |
 
 ### Friends
 
@@ -5353,6 +7222,10 @@ Defined in src/av/include/icy/av/multiplexpacketencoder.h:51
 #### Returns
 True if the packet is an [av::MediaPacket](#mediapacket) (audio or video).
 
+##### Reimplements
+
+- [`accepts`](base.md#classicy_1_1PacketProcessor_1a838d9d75f81bd943b40efcbe683394b7)
+
 ---
 
 {#process-4}
@@ -5370,6 +7243,10 @@ Defined in src/av/include/icy/av/multiplexpacketencoder.h:56
 Dispatch the incoming packet to [encode(VideoPacket&)](#encode-12) or [encode(AudioPacket&)](#encode-13). Throws std::invalid_argument if the packet type is unrecognised. 
 #### Parameters
 * `packet` The incoming media packet.
+
+##### Reimplements
+
+- [`process`](base.md#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
 
 ### Protected Attributes
 
@@ -5411,6 +7288,10 @@ Defined in src/av/include/icy/av/multiplexpacketencoder.h:59
 
 Called by the [PacketStream](base.md#packetstream) to notify when the internal [Stream](base.md#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
 
+##### Reimplements
+
+- [`onStreamStateChange`](base.md#classicy_1_1PacketStreamAdapter_1a86f0e2dc118359a83b8cbb996da6dc83)
+
 {#codec}
 
 ## Codec
@@ -5428,6 +7309,26 @@ Defined in src/av/include/icy/av/codec.h:29
 > **Subclassed by:** [`AudioCodec`](#audiocodec), [`VideoCodec`](#videocodec)
 
 [Codec](#codec) for encoding/decoding media.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`name`](#name) | `variable` | Declared here |
+| [`encoder`](#encoder) | `variable` | Declared here |
+| [`sampleRate`](#samplerate) | `variable` | Declared here |
+| [`bitRate`](#bitrate) | `variable` | Declared here |
+| [`quality`](#quality) | `variable` | Declared here |
+| [`compliance`](#compliance) | `variable` | Declared here |
+| [`enabled`](#enabled) | `variable` | Declared here |
+| [`options`](#options) | `variable` | Declared here |
+| [`Codec`](#codec-1) | `function` | Declared here |
+| [`Codec`](#codec-2) | `function` | Declared here |
+| [`Codec`](#codec-3) | `function` | Declared here |
+| [`~Codec`](#codec-4) | `function` | Declared here |
+| [`toString`](#tostring) | `function` | Declared here |
+| [`specified`](#specified) | `function` | Declared here |
+| [`print`](#print) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -5660,6 +7561,11 @@ Return a compact string representation of this codec.
 #### Returns
 A string in the form "Codec[name:encoder:sampleRate:enabled]".
 
+##### Reimplemented by
+
+- [`toString`](#tostring-1)
+- [`toString`](#tostring-2)
+
 ---
 
 {#specified}
@@ -5694,6 +7600,11 @@ Print a multi-line human-readable description to the given stream.
 #### Parameters
 * `ost` The output stream to write to.
 
+##### Reimplemented by
+
+- [`print`](#print-1)
+- [`print`](#print-2)
+
 {#audiocodec}
 
 ## AudioCodec
@@ -5711,6 +7622,54 @@ Defined in src/av/include/icy/av/codec.h:102
 > **Inherits:** [`Codec`](#codec)
 
 Audio codec parameters including channels, sample rate, and sample format.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`channels`](#channels) | `variable` | Declared here |
+| [`sampleFmt`](#samplefmt) | `variable` | Declared here |
+| [`AudioCodec`](#audiocodec-1) | `function` | Declared here |
+| [`AudioCodec`](#audiocodec-2) | `function` | Declared here |
+| [`AudioCodec`](#audiocodec-3) | `function` | Declared here |
+| [`AudioCodec`](#audiocodec-4) | `function` | Declared here |
+| [`toString`](#tostring-1) | `function` | Declared here |
+| [`print`](#print-1) | `function` | Declared here |
+| [`name`](#name) | `variable` | Inherited from [`Codec`](#codec) |
+| [`encoder`](#encoder) | `variable` | Inherited from [`Codec`](#codec) |
+| [`sampleRate`](#samplerate) | `variable` | Inherited from [`Codec`](#codec) |
+| [`bitRate`](#bitrate) | `variable` | Inherited from [`Codec`](#codec) |
+| [`quality`](#quality) | `variable` | Inherited from [`Codec`](#codec) |
+| [`compliance`](#compliance) | `variable` | Inherited from [`Codec`](#codec) |
+| [`enabled`](#enabled) | `variable` | Inherited from [`Codec`](#codec) |
+| [`options`](#options) | `variable` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-1) | `function` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-2) | `function` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-3) | `function` | Inherited from [`Codec`](#codec) |
+| [`~Codec`](#codec-4) | `function` | Inherited from [`Codec`](#codec) |
+| [`toString`](#tostring) | `function` | Inherited from [`Codec`](#codec) |
+| [`specified`](#specified) | `function` | Inherited from [`Codec`](#codec) |
+| [`print`](#print) | `function` | Inherited from [`Codec`](#codec) |
+
+### Inherited from [`Codec`](#codec)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`name`](#name)  | The display name for this codec. |
+| `variable` | [`encoder`](#encoder)  | The encoder name for FFmpeg. |
+| `variable` | [`sampleRate`](#samplerate)  | The sampling rate or RTP clock rate. |
+| `variable` | [`bitRate`](#bitrate)  | The bit rate to encode at. |
+| `variable` | [`quality`](#quality)  | Optional quality value, variable range depending on codec. |
+| `variable` | [`compliance`](#compliance)  | FFmpeg strict_std_compliance level (default: FF_COMPLIANCE_EXPERIMENTAL). |
+| `variable` | [`enabled`](#enabled)  | Weather or not the codec is available for use. |
+| `variable` | [`options`](#options)  | Arbitrary encoder options passed to FFmpeg via av_opt_set(). Keys are FFmpeg option names (e.g. "preset", "tune", "profile"). Applied after codec-specific defaults, so they override everything. |
+| `function` | [`Codec`](#codec-1)  | Construct a disabled codec with zeroed parameters. |
+| `function` | [`Codec`](#codec-2)  | Construct a codec with a display name, sample rate, bit rate, and enabled flag. |
+| `function` | [`Codec`](#codec-3)  | Construct a codec with an explicit FFmpeg encoder name. |
+| `function` | [`~Codec`](#codec-4) `virtual` `noexcept` | Codec(const Codec& r);. |
+| `function` | [`toString`](#tostring) `virtual` `const` | Return a compact string representation of this codec. |
+| `function` | [`specified`](#specified) `const` `nodiscard` | Returns true when this codec explicitly names either an RTP/media codec or an FFmpeg encoder and is enabled for use. |
+| `function` | [`print`](#print) `virtual` | Print a multi-line human-readable description to the given stream. |
 
 ### Public Attributes
 
@@ -5859,6 +7818,10 @@ Defined in src/av/include/icy/av/codec.h:149
 #### Returns
 A string in the form "AudioCodec[name:encoder:sampleRate:bitRate:channels:sampleFmt:enabled]".
 
+##### Reimplements
+
+- [`toString`](#tostring)
+
 ---
 
 {#print-1}
@@ -5877,6 +7840,10 @@ Print a multi-line human-readable description to the given stream.
 #### Parameters
 * `ost` The output stream to write to.
 
+##### Reimplements
+
+- [`print`](#print)
+
 {#videocodec}
 
 ## VideoCodec
@@ -5894,6 +7861,57 @@ Defined in src/av/include/icy/av/codec.h:169
 > **Inherits:** [`Codec`](#codec)
 
 Video codec parameters including resolution, frame rate, and pixel format.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`width`](#width) | `variable` | Declared here |
+| [`height`](#height) | `variable` | Declared here |
+| [`fps`](#fps) | `variable` | Declared here |
+| [`pixelFmt`](#pixelfmt) | `variable` | Declared here |
+| [`VideoCodec`](#videocodec-1) | `function` | Declared here |
+| [`VideoCodec`](#videocodec-2) | `function` | Declared here |
+| [`VideoCodec`](#videocodec-3) | `function` | Declared here |
+| [`VideoCodec`](#videocodec-4) | `function` | Declared here |
+| [`VideoCodec`](#videocodec-5) | `function` | Declared here |
+| [`toString`](#tostring-2) | `function` | Declared here |
+| [`print`](#print-2) | `function` | Declared here |
+| [`name`](#name) | `variable` | Inherited from [`Codec`](#codec) |
+| [`encoder`](#encoder) | `variable` | Inherited from [`Codec`](#codec) |
+| [`sampleRate`](#samplerate) | `variable` | Inherited from [`Codec`](#codec) |
+| [`bitRate`](#bitrate) | `variable` | Inherited from [`Codec`](#codec) |
+| [`quality`](#quality) | `variable` | Inherited from [`Codec`](#codec) |
+| [`compliance`](#compliance) | `variable` | Inherited from [`Codec`](#codec) |
+| [`enabled`](#enabled) | `variable` | Inherited from [`Codec`](#codec) |
+| [`options`](#options) | `variable` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-1) | `function` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-2) | `function` | Inherited from [`Codec`](#codec) |
+| [`Codec`](#codec-3) | `function` | Inherited from [`Codec`](#codec) |
+| [`~Codec`](#codec-4) | `function` | Inherited from [`Codec`](#codec) |
+| [`toString`](#tostring) | `function` | Inherited from [`Codec`](#codec) |
+| [`specified`](#specified) | `function` | Inherited from [`Codec`](#codec) |
+| [`print`](#print) | `function` | Inherited from [`Codec`](#codec) |
+
+### Inherited from [`Codec`](#codec)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`name`](#name)  | The display name for this codec. |
+| `variable` | [`encoder`](#encoder)  | The encoder name for FFmpeg. |
+| `variable` | [`sampleRate`](#samplerate)  | The sampling rate or RTP clock rate. |
+| `variable` | [`bitRate`](#bitrate)  | The bit rate to encode at. |
+| `variable` | [`quality`](#quality)  | Optional quality value, variable range depending on codec. |
+| `variable` | [`compliance`](#compliance)  | FFmpeg strict_std_compliance level (default: FF_COMPLIANCE_EXPERIMENTAL). |
+| `variable` | [`enabled`](#enabled)  | Weather or not the codec is available for use. |
+| `variable` | [`options`](#options)  | Arbitrary encoder options passed to FFmpeg via av_opt_set(). Keys are FFmpeg option names (e.g. "preset", "tune", "profile"). Applied after codec-specific defaults, so they override everything. |
+| `function` | [`Codec`](#codec-1)  | Construct a disabled codec with zeroed parameters. |
+| `function` | [`Codec`](#codec-2)  | Construct a codec with a display name, sample rate, bit rate, and enabled flag. |
+| `function` | [`Codec`](#codec-3)  | Construct a codec with an explicit FFmpeg encoder name. |
+| `function` | [`~Codec`](#codec-4) `virtual` `noexcept` | Codec(const Codec& r);. |
+| `function` | [`toString`](#tostring) `virtual` `const` | Return a compact string representation of this codec. |
+| `function` | [`specified`](#specified) `const` `nodiscard` | Returns true when this codec explicitly names either an RTP/media codec or an FFmpeg encoder and is enabled for use. |
+| `function` | [`print`](#print) `virtual` | Print a multi-line human-readable description to the given stream. |
 
 ### Public Attributes
 
@@ -6091,6 +8109,10 @@ Defined in src/av/include/icy/av/codec.h:223
 #### Returns
 A string in the form "VideoCodec[name:encoder:width:height:fps:pixelFmt:enabled]".
 
+##### Reimplements
+
+- [`toString`](#tostring)
+
 ---
 
 {#print-2}
@@ -6108,6 +8130,10 @@ Defined in src/av/include/icy/av/codec.h:227
 Print a multi-line human-readable description to the given stream. 
 #### Parameters
 * `ost` The output stream to write to.
+
+##### Reimplements
+
+- [`print`](#print)
 
 {#deleter-1}
 
@@ -6127,6 +8153,12 @@ Defined in src/av/include/icy/av/ffmpeg.h:70
 RAII helpers for owning FFmpeg allocation types.
 
 [Deleter](#deleter-1) adaptor for functions like av_free that take a pointer.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator()`](#operator) | `function` | Declared here |
 
 ### Public Methods
 
@@ -6165,6 +8197,12 @@ Defined in src/av/include/icy/av/ffmpeg.h:81
 
 [Deleter](#deleter-1) adaptor for functions like av_freep that take a pointer to a pointer.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator()`](#operator-1) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -6202,6 +8240,26 @@ Defined in src/av/include/icy/av/format.h:30
 Defines a media container format which is available through the [FormatRegistry](#formatregistry) for encoding or decoding.
 
 A format bundles the preferred default audio and video codec settings for a named container such as MP4, MKV, or WAV.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`name`](#name-1) | `variable` | Declared here |
+| [`id`](#id) | `variable` | Declared here |
+| [`video`](#video) | `variable` | Declared here |
+| [`audio`](#audio) | `variable` | Declared here |
+| [`priority`](#priority) | `variable` | Declared here |
+| [`Format`](#format-1) | `function` | Declared here |
+| [`Format`](#format-2) | `function` | Declared here |
+| [`Format`](#format-3) | `function` | Declared here |
+| [`Format`](#format-4) | `function` | Declared here |
+| [`Format`](#format-5) | `function` | Declared here |
+| [`type`](#type) | `function` | Declared here |
+| [`toString`](#tostring-3) | `function` | Declared here |
+| [`print`](#print-3) | `function` | Declared here |
+| [`preferable`](#preferable) | `function` | Declared here |
+| [`Type`](#type-1) | `enum` | Declared here |
 
 ### Public Attributes
 
@@ -6517,6 +8575,48 @@ Defined in src/av/include/icy/av/iencoder.h:26
 
 [State](base.md#state) machine states for the encoder pipeline.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`str`](#str) | `function` | Declared here |
+| [`Type`](#type-2) | `enum` | Declared here |
+| [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](base.md#state) |
+| [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](base.md#state) |
+| [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](base.md#state) |
+| [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](base.md#state) |
+| [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](base.md#state) |
+| [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](base.md#state) |
+| [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](base.md#state) |
+| [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](base.md#state) |
+| [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](base.md#state) |
+
+### Inherited from [`State`](base.md#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -6578,6 +8678,17 @@ struct EncoderOptions
 Defined in src/av/include/icy/av/iencoder.h:57
 
 [Configuration](base.md#configuration) options for audio and video encoders.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`iformat`](#iformat) | `variable` | Declared here |
+| [`oformat`](#oformat) | `variable` | Declared here |
+| [`ifile`](#ifile) | `variable` | Declared here |
+| [`ofile`](#ofile) | `variable` | Declared here |
+| [`duration`](#duration) | `variable` | Declared here |
+| [`EncoderOptions`](#encoderoptions-1) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -6694,6 +8805,21 @@ struct AudioBuffer
 Defined in src/av/include/icy/av/audiobuffer.h:31
 
 FIFO buffer for queuing audio samples between encoding stages.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`fifo`](#fifo) | `variable` | Declared here |
+| [`AudioBuffer`](#audiobuffer-1) | `function` | Declared here |
+| [`AudioBuffer`](#audiobuffer-2) | `function` | Declared here |
+| [`AudioBuffer`](#audiobuffer-3) | `function` | Declared here |
+| [`alloc`](#alloc) | `function` | Declared here |
+| [`reset`](#reset-2) | `function` | Declared here |
+| [`close`](#close-1) | `function` | Declared here |
+| [`write`](#write) | `function` | Declared here |
+| [`read`](#read) | `function` | Declared here |
+| [`available`](#available) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -6894,6 +9020,36 @@ Defined in src/av/include/icy/av/audiocontext.h:39
 > **Subclassed by:** [`AudioDecoder`](#audiodecoder), [`AudioEncoder`](#audioencoder)
 
 Base context for audio encoding and decoding via FFmpeg.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-2) | `variable` | Declared here |
+| [`iparams`](#iparams) | `variable` | Declared here |
+| [`oparams`](#oparams) | `variable` | Declared here |
+| [`stream`](#stream-1) | `variable` | Declared here |
+| [`ctx`](#ctx) | `variable` | Declared here |
+| [`codec`](#codec-5) | `variable` | Declared here |
+| [`frame`](#frame) | `variable` | Declared here |
+| [`resampler`](#resampler) | `variable` | Declared here |
+| [`outputFrameSize`](#outputframesize) | `variable` | Declared here |
+| [`time`](#time) | `variable` | Declared here |
+| [`pts`](#pts) | `variable` | Declared here |
+| [`seconds`](#seconds) | `variable` | Declared here |
+| [`error`](#error-1) | `variable` | Declared here |
+| [`AudioContext`](#audiocontext-1) | `function` | Declared here |
+| [`AudioContext`](#audiocontext-2) | `function` | Declared here |
+| [`AudioContext`](#audiocontext-3) | `function` | Declared here |
+| [`create`](#create) | `function` | Declared here |
+| [`open`](#open) | `function` | Declared here |
+| [`close`](#close-2) | `function` | Declared here |
+| [`decode`](#decode) | `function` | Declared here |
+| [`encode`](#encode) | `function` | Declared here |
+| [`encode`](#encode-1) | `function` | Declared here |
+| [`encode`](#encode-2) | `function` | Declared here |
+| [`flush`](#flush-1) | `function` | Declared here |
+| [`recreateResampler`](#recreateresampler) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -7166,6 +9322,11 @@ Defined in src/av/include/icy/av/audiocontext.h:51
 
 Initialise the AVCodecContext with codec-specific defaults. Implemented by [AudioEncoder](#audioencoder) and [AudioDecoder](#audiodecoder).
 
+##### Reimplemented by
+
+- [`create`](#create-1)
+- [`create`](#create-2)
+
 ---
 
 {#open}
@@ -7198,6 +9359,11 @@ Defined in src/av/include/icy/av/audiocontext.h:58
 
 Close the codec context, free the frame, and reset timestamps.
 
+##### Reimplemented by
+
+- [`close`](#close-3)
+- [`close`](#close-4)
+
 ---
 
 {#decode}
@@ -7218,6 +9384,10 @@ Decode a compressed audio packet and emit the resulting samples.
 
 #### Returns
 True if one or more decoded frames were emitted, false otherwise.
+
+##### Reimplemented by
+
+- [`decode`](#decode-1)
 
 ---
 
@@ -7244,6 +9414,10 @@ Encode a buffer of interleaved audio samples.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-3)
+
 ---
 
 {#encode-1}
@@ -7269,6 +9443,10 @@ Encode a buffer of planar audio samples.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-4)
+
 ---
 
 {#encode-2}
@@ -7290,6 +9468,10 @@ Encode a single AVFrame.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-5)
+
 ---
 
 {#flush-1}
@@ -7305,6 +9487,11 @@ virtual void flush()
 Defined in src/av/include/icy/av/audiocontext.h:85
 
 Flush any frames buffered inside the codec and emit remaining output.
+
+##### Reimplemented by
+
+- [`flush`](#flush-2)
+- [`flush`](#flush-3)
 
 ---
 
@@ -7341,6 +9528,71 @@ Defined in src/av/include/icy/av/audiodecoder.h:28
 > **Inherits:** [`AudioContext`](#audiocontext)
 
 Decodes compressed audio packets into raw sample frames.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`AudioDecoder`](#audiodecoder-1) | `function` | Declared here |
+| [`create`](#create-1) | `function` | Declared here |
+| [`close`](#close-3) | `function` | Declared here |
+| [`decode`](#decode-1) | `function` | Declared here |
+| [`flush`](#flush-2) | `function` | Declared here |
+| [`emitter`](#emitter-2) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`iparams`](#iparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`oparams`](#oparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`stream`](#stream-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`ctx`](#ctx) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`codec`](#codec-5) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`frame`](#frame) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`resampler`](#resampler) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`outputFrameSize`](#outputframesize) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`time`](#time) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`pts`](#pts) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`seconds`](#seconds) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`error`](#error-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-3) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`create`](#create) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`open`](#open) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`close`](#close-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`decode`](#decode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`flush`](#flush-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`recreateResampler`](#recreateresampler) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+
+### Inherited from [`AudioContext`](#audiocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-2)  |  |
+| `variable` | [`iparams`](#iparams)  | input parameters |
+| `variable` | [`oparams`](#oparams)  | output parameters |
+| `variable` | [`stream`](#stream-1)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-5)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame)  | last encoded or decoded frame |
+| `variable` | [`resampler`](#resampler)  | audio resampler |
+| `variable` | [`outputFrameSize`](#outputframesize)  | encoder or decoder output frame size |
+| `variable` | [`time`](#time)  | stream time in codec time base |
+| `variable` | [`pts`](#pts)  | last packet pts value |
+| `variable` | [`seconds`](#seconds)  | audio time in seconds |
+| `variable` | [`error`](#error-1)  | error message |
+| `function` | [`AudioContext`](#audiocontext-1)  |  |
+| `function` | [`AudioContext`](#audiocontext-2)  | Deleted constructor. |
+| `function` | [`AudioContext`](#audiocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Implemented by [AudioEncoder](#audioencoder) and [AudioDecoder](#audiodecoder). |
+| `function` | [`open`](#open) `virtual` | Open the codec and create the resampler if input/output parameters differ. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-2) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode) `virtual` `nodiscard` | Decode a compressed audio packet and emit the resulting samples. |
+| `function` | [`encode`](#encode) `virtual` `nodiscard` | Encode a buffer of interleaved audio samples. |
+| `function` | [`encode`](#encode-1) `virtual` `nodiscard` | Encode a buffer of planar audio samples. |
+| `function` | [`encode`](#encode-2) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-1) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`recreateResampler`](#recreateresampler) `virtual` | Recreate the [AudioResampler](#audioresampler) using the current iparams and oparams. Called automatically by [open()](#open) when format conversion is required. |
 
 ### Public Methods
 
@@ -7384,6 +9636,10 @@ Defined in src/av/include/icy/av/audiodecoder.h:37
 
 Initialise the AVCodecContext from the stream's codec parameters.
 
+##### Reimplements
+
+- [`create`](#create)
+
 ---
 
 {#close-3}
@@ -7399,6 +9655,10 @@ virtual void close() override
 Defined in src/av/include/icy/av/audiodecoder.h:40
 
 Close and free the AVCodecContext and associated resources.
+
+##### Reimplements
+
+- [`close`](#close-2)
 
 ---
 
@@ -7421,6 +9681,10 @@ Decode the given compressed audio packet and emit the decoded samples.
 #### Returns
 True if one or more output frames were decoded and emitted, false otherwise.
 
+##### Reimplements
+
+- [`decode`](#decode)
+
 ---
 
 {#flush-2}
@@ -7436,6 +9700,10 @@ virtual void flush() override
 Defined in src/av/include/icy/av/audiodecoder.h:49
 
 Flush any frames buffered inside the decoder. Call this after the last packet to retrieve all remaining decoded output.
+
+##### Reimplements
+
+- [`flush`](#flush-1)
 
 {#audioencoder}
 
@@ -7455,6 +9723,76 @@ Defined in src/av/include/icy/av/audioencoder.h:37
 > **Subclassed by:** [`AudioPacketEncoder`](#audiopacketencoder)
 
 Encodes raw audio samples into a compressed format.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`fifo`](#fifo-1) | `variable` | Declared here |
+| [`format`](#format-6) | `variable` | Declared here |
+| [`nextOutputPts`](#nextoutputpts) | `variable` | Declared here |
+| [`AudioEncoder`](#audioencoder-1) | `function` | Declared here |
+| [`create`](#create-2) | `function` | Declared here |
+| [`close`](#close-4) | `function` | Declared here |
+| [`encode`](#encode-3) | `function` | Declared here |
+| [`encode`](#encode-4) | `function` | Declared here |
+| [`encode`](#encode-5) | `function` | Declared here |
+| [`flush`](#flush-3) | `function` | Declared here |
+| [`emitter`](#emitter-2) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`iparams`](#iparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`oparams`](#oparams) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`stream`](#stream-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`ctx`](#ctx) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`codec`](#codec-5) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`frame`](#frame) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`resampler`](#resampler) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`outputFrameSize`](#outputframesize) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`time`](#time) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`pts`](#pts) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`seconds`](#seconds) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`error`](#error-1) | `variable` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`AudioContext`](#audiocontext-3) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`create`](#create) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`open`](#open) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`close`](#close-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`decode`](#decode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`encode`](#encode-2) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`flush`](#flush-1) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+| [`recreateResampler`](#recreateresampler) | `function` | Inherited from [`AudioContext`](#audiocontext) |
+
+### Inherited from [`AudioContext`](#audiocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-2)  |  |
+| `variable` | [`iparams`](#iparams)  | input parameters |
+| `variable` | [`oparams`](#oparams)  | output parameters |
+| `variable` | [`stream`](#stream-1)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-5)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame)  | last encoded or decoded frame |
+| `variable` | [`resampler`](#resampler)  | audio resampler |
+| `variable` | [`outputFrameSize`](#outputframesize)  | encoder or decoder output frame size |
+| `variable` | [`time`](#time)  | stream time in codec time base |
+| `variable` | [`pts`](#pts)  | last packet pts value |
+| `variable` | [`seconds`](#seconds)  | audio time in seconds |
+| `variable` | [`error`](#error-1)  | error message |
+| `function` | [`AudioContext`](#audiocontext-1)  |  |
+| `function` | [`AudioContext`](#audiocontext-2)  | Deleted constructor. |
+| `function` | [`AudioContext`](#audiocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Implemented by [AudioEncoder](#audioencoder) and [AudioDecoder](#audiodecoder). |
+| `function` | [`open`](#open) `virtual` | Open the codec and create the resampler if input/output parameters differ. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-2) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode) `virtual` `nodiscard` | Decode a compressed audio packet and emit the resulting samples. |
+| `function` | [`encode`](#encode) `virtual` `nodiscard` | Encode a buffer of interleaved audio samples. |
+| `function` | [`encode`](#encode-1) `virtual` `nodiscard` | Encode a buffer of planar audio samples. |
+| `function` | [`encode`](#encode-2) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-1) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`recreateResampler`](#recreateresampler) `virtual` | Recreate the [AudioResampler](#audioresampler) using the current iparams and oparams. Called automatically by [open()](#open) when format conversion is required. |
 
 ### Public Attributes
 
@@ -7546,6 +9884,10 @@ Defined in src/av/include/icy/av/audioencoder.h:46
 
 Initialise the AVCodecContext using oparams. Adds an audio stream to `format` if one was provided at construction.
 
+##### Reimplements
+
+- [`create`](#create)
+
 ---
 
 {#close-4}
@@ -7561,6 +9903,10 @@ virtual void close() override
 Defined in src/av/include/icy/av/audioencoder.h:49
 
 Close and free the AVCodecContext, FIFO buffer, and associated resources.
+
+##### Reimplements
+
+- [`close`](#close-2)
 
 ---
 
@@ -7585,6 +9931,10 @@ Encode interleaved audio samples.
 
 * `pts` The input samples presentation timestamp.
 
+##### Reimplements
+
+- [`encode`](#encode)
+
 ---
 
 {#encode-4}
@@ -7608,6 +9958,10 @@ Encode planar audio samples.
 
 * `pts` The input samples presentation timestamp.
 
+##### Reimplements
+
+- [`encode`](#encode-1)
+
 ---
 
 {#encode-5}
@@ -7629,6 +9983,10 @@ Encode a single AVFrame (typically from a decoder or resampler).
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplements
+
+- [`encode`](#encode-2)
+
 ---
 
 {#flush-3}
@@ -7644,6 +10002,10 @@ virtual void flush() override
 Defined in src/av/include/icy/av/audioencoder.h:72
 
 Flush remaining packets to be encoded. This method should be called once before stream closure.
+
+##### Reimplements
+
+- [`flush`](#flush-1)
 
 {#videocontext}
 
@@ -7662,6 +10024,36 @@ Defined in src/av/include/icy/av/videocontext.h:42
 > **Subclassed by:** [`VideoDecoder`](#videodecoder), [`VideoEncoder`](#videoencoder)
 
 Base video context from which all video encoders and decoders derive.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`emitter`](#emitter-3) | `variable` | Declared here |
+| [`iparams`](#iparams-1) | `variable` | Declared here |
+| [`oparams`](#oparams-1) | `variable` | Declared here |
+| [`stream`](#stream-2) | `variable` | Declared here |
+| [`ctx`](#ctx-1) | `variable` | Declared here |
+| [`codec`](#codec-6) | `variable` | Declared here |
+| [`frame`](#frame-1) | `variable` | Declared here |
+| [`conv`](#conv) | `variable` | Declared here |
+| [`time`](#time-1) | `variable` | Declared here |
+| [`pts`](#pts-1) | `variable` | Declared here |
+| [`seconds`](#seconds-1) | `variable` | Declared here |
+| [`error`](#error-3) | `variable` | Declared here |
+| [`VideoContext`](#videocontext-1) | `function` | Declared here |
+| [`VideoContext`](#videocontext-2) | `function` | Declared here |
+| [`VideoContext`](#videocontext-3) | `function` | Declared here |
+| [`create`](#create-3) | `function` | Declared here |
+| [`open`](#open-1) | `function` | Declared here |
+| [`close`](#close-6) | `function` | Declared here |
+| [`decode`](#decode-2) | `function` | Declared here |
+| [`encode`](#encode-6) | `function` | Declared here |
+| [`encode`](#encode-7) | `function` | Declared here |
+| [`encode`](#encode-8) | `function` | Declared here |
+| [`flush`](#flush-4) | `function` | Declared here |
+| [`convert`](#convert) | `function` | Declared here |
+| [`recreateConverter`](#recreateconverter) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -7920,6 +10312,11 @@ Defined in src/av/include/icy/av/videocontext.h:54
 
 Initialise the AVCodecContext with codec-specific defaults. Overridden by [VideoEncoder](#videoencoder) and [VideoDecoder](#videodecoder).
 
+##### Reimplemented by
+
+- [`create`](#create-4)
+- [`create`](#create-5)
+
 ---
 
 {#open-1}
@@ -7936,6 +10333,10 @@ Defined in src/av/include/icy/av/videocontext.h:58
 
 Open the codec and create the pixel format conversion context if required. Throws std::runtime_error if the codec context has not been created.
 
+##### Reimplemented by
+
+- [`open`](#open-2)
+
 ---
 
 {#close-6}
@@ -7951,6 +10352,11 @@ virtual void close()
 Defined in src/av/include/icy/av/videocontext.h:61
 
 Close the codec context, free the frame, and reset timestamps.
+
+##### Reimplemented by
+
+- [`close`](#close-7)
+- [`close`](#close-8)
 
 ---
 
@@ -7972,6 +10378,10 @@ Decode a compressed video packet and emit the resulting frame.
 
 #### Returns
 True if an output frame was decoded and emitted, false otherwise.
+
+##### Reimplemented by
+
+- [`decode`](#decode-3)
 
 ---
 
@@ -7998,6 +10408,10 @@ Encode a buffer of interleaved video data.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-9)
+
 ---
 
 {#encode-7}
@@ -8023,6 +10437,10 @@ Encode a planar video frame.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-10)
+
 ---
 
 {#encode-8}
@@ -8044,6 +10462,10 @@ Encode a single AVFrame.
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplemented by
+
+- [`encode`](#encode-11)
+
 ---
 
 {#flush-4}
@@ -8059,6 +10481,11 @@ virtual void flush()
 Defined in src/av/include/icy/av/videocontext.h:88
 
 Flush any frames buffered inside the codec and emit remaining output.
+
+##### Reimplemented by
+
+- [`flush`](#flush-5)
+- [`flush`](#flush-6)
 
 ---
 
@@ -8114,6 +10541,72 @@ Defined in src/av/include/icy/av/videodecoder.h:28
 
 Decodes compressed video packets into raw frames.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`VideoDecoder`](#videodecoder-1) | `function` | Declared here |
+| [`create`](#create-4) | `function` | Declared here |
+| [`open`](#open-2) | `function` | Declared here |
+| [`close`](#close-7) | `function` | Declared here |
+| [`decode`](#decode-3) | `function` | Declared here |
+| [`flush`](#flush-5) | `function` | Declared here |
+| [`emitter`](#emitter-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`iparams`](#iparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`oparams`](#oparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`stream`](#stream-2) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`ctx`](#ctx-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`codec`](#codec-6) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`frame`](#frame-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`conv`](#conv) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`time`](#time-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`pts`](#pts-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`seconds`](#seconds-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`error`](#error-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`create`](#create-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`open`](#open-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`close`](#close-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`decode`](#decode-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-7) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-8) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`flush`](#flush-4) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`convert`](#convert) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`recreateConverter`](#recreateconverter) | `function` | Inherited from [`VideoContext`](#videocontext) |
+
+### Inherited from [`VideoContext`](#videocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-3)  |  |
+| `variable` | [`iparams`](#iparams-1)  | input parameters |
+| `variable` | [`oparams`](#oparams-1)  | output parameters |
+| `variable` | [`stream`](#stream-2)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx-1)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-6)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame-1)  | encoder or decoder frame |
+| `variable` | [`conv`](#conv)  | video conversion context |
+| `variable` | [`time`](#time-1)  | stream time in codec time base |
+| `variable` | [`pts`](#pts-1)  | last packet pts value |
+| `variable` | [`seconds`](#seconds-1)  | video time in seconds |
+| `variable` | [`error`](#error-3)  | error message |
+| `function` | [`VideoContext`](#videocontext-1)  |  |
+| `function` | [`VideoContext`](#videocontext-2)  | Deleted constructor. |
+| `function` | [`VideoContext`](#videocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create-3) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Overridden by [VideoEncoder](#videoencoder) and [VideoDecoder](#videodecoder). |
+| `function` | [`open`](#open-1) `virtual` | Open the codec and create the pixel format conversion context if required. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-6) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode-2) `virtual` `nodiscard` | Decode a compressed video packet and emit the resulting frame. |
+| `function` | [`encode`](#encode-6) `virtual` `nodiscard` | Encode a buffer of interleaved video data. |
+| `function` | [`encode`](#encode-7) `virtual` `nodiscard` | Encode a planar video frame. |
+| `function` | [`encode`](#encode-8) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-4) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`convert`](#convert) `virtual` | Convert the video frame and return the result. |
+| `function` | [`recreateConverter`](#recreateconverter) `virtual` | Recreate the [VideoConverter](#videoconverter) if the input or output parameters have changed. Called automatically by [open()](#open-1) and [convert()](#convert). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -8157,6 +10650,10 @@ Defined in src/av/include/icy/av/videodecoder.h:37
 
 Initialise the AVCodecContext from the stream's codec parameters.
 
+##### Reimplements
+
+- [`create`](#create-3)
+
 ---
 
 {#open-2}
@@ -8173,6 +10670,10 @@ Defined in src/av/include/icy/av/videodecoder.h:40
 
 Open the codec and initialise any required pixel format conversion context.
 
+##### Reimplements
+
+- [`open`](#open-1)
+
 ---
 
 {#close-7}
@@ -8188,6 +10689,10 @@ virtual void close() override
 Defined in src/av/include/icy/av/videodecoder.h:43
 
 Close and free the AVCodecContext and associated resources.
+
+##### Reimplements
+
+- [`close`](#close-6)
 
 ---
 
@@ -8210,6 +10715,10 @@ Decode the given compressed video packet and emit the decoded frame. Input packe
 #### Returns
 True if an output frame was decoded and emitted, false otherwise.
 
+##### Reimplements
+
+- [`decode`](#decode-2)
+
 ---
 
 {#flush-5}
@@ -8225,6 +10734,10 @@ virtual void flush() override
 Defined in src/av/include/icy/av/videodecoder.h:54
 
 Flush any frames buffered inside the decoder. Call repeatedly after the last packet until false is returned.
+
+##### Reimplements
+
+- [`flush`](#flush-4)
 
 {#videoencoder}
 
@@ -8244,6 +10757,74 @@ Defined in src/av/include/icy/av/videoencoder.h:30
 > **Subclassed by:** [`VideoPacketEncoder`](#videopacketencoder)
 
 Encodes raw video frames into a compressed format.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`format`](#format-7) | `variable` | Declared here |
+| [`VideoEncoder`](#videoencoder-1) | `function` | Declared here |
+| [`create`](#create-5) | `function` | Declared here |
+| [`close`](#close-8) | `function` | Declared here |
+| [`encode`](#encode-9) | `function` | Declared here |
+| [`encode`](#encode-10) | `function` | Declared here |
+| [`encode`](#encode-11) | `function` | Declared here |
+| [`flush`](#flush-6) | `function` | Declared here |
+| [`emitter`](#emitter-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`iparams`](#iparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`oparams`](#oparams-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`stream`](#stream-2) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`ctx`](#ctx-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`codec`](#codec-6) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`frame`](#frame-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`conv`](#conv) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`time`](#time-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`pts`](#pts-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`seconds`](#seconds-1) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`error`](#error-3) | `variable` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`VideoContext`](#videocontext-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`create`](#create-3) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`open`](#open-1) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`close`](#close-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`decode`](#decode-2) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-6) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-7) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`encode`](#encode-8) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`flush`](#flush-4) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`convert`](#convert) | `function` | Inherited from [`VideoContext`](#videocontext) |
+| [`recreateConverter`](#recreateconverter) | `function` | Inherited from [`VideoContext`](#videocontext) |
+
+### Inherited from [`VideoContext`](#videocontext)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`emitter`](#emitter-3)  |  |
+| `variable` | [`iparams`](#iparams-1)  | input parameters |
+| `variable` | [`oparams`](#oparams-1)  | output parameters |
+| `variable` | [`stream`](#stream-2)  | encoder or decoder stream |
+| `variable` | [`ctx`](#ctx-1)  | encoder or decoder context |
+| `variable` | [`codec`](#codec-6)  | encoder or decoder codec |
+| `variable` | [`frame`](#frame-1)  | encoder or decoder frame |
+| `variable` | [`conv`](#conv)  | video conversion context |
+| `variable` | [`time`](#time-1)  | stream time in codec time base |
+| `variable` | [`pts`](#pts-1)  | last packet pts value |
+| `variable` | [`seconds`](#seconds-1)  | video time in seconds |
+| `variable` | [`error`](#error-3)  | error message |
+| `function` | [`VideoContext`](#videocontext-1)  |  |
+| `function` | [`VideoContext`](#videocontext-2)  | Deleted constructor. |
+| `function` | [`VideoContext`](#videocontext-3)  | Deleted constructor. |
+| `function` | [`create`](#create-3) `virtual` | Initialise the AVCodecContext with codec-specific defaults. Overridden by [VideoEncoder](#videoencoder) and [VideoDecoder](#videodecoder). |
+| `function` | [`open`](#open-1) `virtual` | Open the codec and create the pixel format conversion context if required. Throws std::runtime_error if the codec context has not been created. |
+| `function` | [`close`](#close-6) `virtual` | Close the codec context, free the frame, and reset timestamps. |
+| `function` | [`decode`](#decode-2) `virtual` `nodiscard` | Decode a compressed video packet and emit the resulting frame. |
+| `function` | [`encode`](#encode-6) `virtual` `nodiscard` | Encode a buffer of interleaved video data. |
+| `function` | [`encode`](#encode-7) `virtual` `nodiscard` | Encode a planar video frame. |
+| `function` | [`encode`](#encode-8) `virtual` `nodiscard` | Encode a single AVFrame. |
+| `function` | [`flush`](#flush-4) `virtual` | Flush any frames buffered inside the codec and emit remaining output. |
+| `function` | [`convert`](#convert) `virtual` | Convert the video frame and return the result. |
+| `function` | [`recreateConverter`](#recreateconverter) `virtual` | Recreate the [VideoConverter](#videoconverter) if the input or output parameters have changed. Called automatically by [open()](#open-1) and [convert()](#convert). |
 
 ### Public Attributes
 
@@ -8307,6 +10888,10 @@ Defined in src/av/include/icy/av/videoencoder.h:39
 
 Initialise the AVCodecContext using oparams. Adds a video stream to `format` if one was provided at construction.
 
+##### Reimplements
+
+- [`create`](#create-3)
+
 ---
 
 {#close-8}
@@ -8322,6 +10907,10 @@ virtual void close() override
 Defined in src/av/include/icy/av/videoencoder.h:42
 
 Close and free the AVCodecContext and associated resources.
+
+##### Reimplements
+
+- [`close`](#close-6)
 
 ---
 
@@ -8346,6 +10935,10 @@ Encode a single video frame. This method is for interleaved video formats.
 
 * `pts` The presentation timestamp in stream time base units.
 
+##### Reimplements
+
+- [`encode`](#encode-6)
+
 ---
 
 {#encode-10}
@@ -8369,6 +10962,10 @@ Encode a single video frame. This method is for planar video formats.
 
 * `pts` The presentation timestamp in stream time base units.
 
+##### Reimplements
+
+- [`encode`](#encode-7)
+
 ---
 
 {#encode-11}
@@ -8390,6 +10987,10 @@ Encode a single AVFrame (typically from a decoder or converter).
 #### Returns
 True if an encoded packet was produced and emitted.
 
+##### Reimplements
+
+- [`encode`](#encode-8)
+
 ---
 
 {#flush-6}
@@ -8406,6 +11007,10 @@ Defined in src/av/include/icy/av/videoencoder.h:67
 
 Flush remaining packets to be encoded. This method should be called once before stream closure.
 
+##### Reimplements
+
+- [`flush`](#flush-4)
+
 {#device}
 
 ## Device
@@ -8421,6 +11026,26 @@ struct Device
 Defined in src/av/include/icy/av/devicemanager.h:44
 
 Represents a system audio, video or render device.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`type`](#type-4) | `variable` | Declared here |
+| [`id`](#id-1) | `variable` | Declared here |
+| [`name`](#name-2) | `variable` | Declared here |
+| [`isDefault`](#isdefault) | `variable` | Declared here |
+| [`isConnected`](#isconnected) | `variable` | Declared here |
+| [`isInUse`](#isinuse) | `variable` | Declared here |
+| [`videoCapabilities`](#videocapabilities) | `variable` | Declared here |
+| [`audioCapabilities`](#audiocapabilities) | `variable` | Declared here |
+| [`Device`](#device-1) | `function` | Declared here |
+| [`Device`](#device-2) | `function` | Declared here |
+| [`print`](#print-4) | `function` | Declared here |
+| [`operator==`](#operator-2) | `function` | Declared here |
+| [`bestVideoCapability`](#bestvideocapability) | `function` | Declared here |
+| [`bestAudioCapability`](#bestaudiocapability) | `function` | Declared here |
+| [`Type`](#type-5) | `enum` | Declared here |
 
 ### Public Attributes
 
@@ -8694,6 +11319,16 @@ Defined in src/av/include/icy/av/devicemanager.h:56
 
 A video format supported by the device.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`width`](#width-1) | `variable` | Declared here |
+| [`height`](#height-1) | `variable` | Declared here |
+| [`minFps`](#minfps) | `variable` | Declared here |
+| [`maxFps`](#maxfps) | `variable` | Declared here |
+| [`pixelFormat`](#pixelformat) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -8780,6 +11415,14 @@ Defined in src/av/include/icy/av/devicemanager.h:66
 
 An audio format supported by the device.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`sampleRate`](#samplerate-1) | `variable` | Declared here |
+| [`channels`](#channels-1) | `variable` | Declared here |
+| [`sampleFormat`](#sampleformat) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -8839,6 +11482,26 @@ struct AudioResampler
 Defined in src/av/include/icy/av/audioresampler.h:39
 
 Converts audio samples between different formats, sample rates, and channel layouts.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ctx`](#ctx-2) | `variable` | Declared here |
+| [`iparams`](#iparams-2) | `variable` | Declared here |
+| [`oparams`](#oparams-2) | `variable` | Declared here |
+| [`outSamples`](#outsamples) | `variable` | Declared here |
+| [`outNumSamples`](#outnumsamples) | `variable` | Declared here |
+| [`outBufferSize`](#outbuffersize) | `variable` | Declared here |
+| [`maxNumSamples`](#maxnumsamples) | `variable` | Declared here |
+| [`inSampleFmt`](#insamplefmt) | `variable` | Declared here |
+| [`outSampleFmt`](#outsamplefmt) | `variable` | Declared here |
+| [`AudioResampler`](#audioresampler-1) | `function` | Declared here |
+| [`AudioResampler`](#audioresampler-2) | `function` | Declared here |
+| [`AudioResampler`](#audioresampler-3) | `function` | Declared here |
+| [`open`](#open-3) | `function` | Declared here |
+| [`close`](#close-9) | `function` | Declared here |
+| [`resample`](#resample) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -9099,6 +11762,21 @@ Defined in src/av/include/icy/av/videoconverter.h:32
 
 Converts video frames between pixel formats and resolutions.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ctx`](#ctx-3) | `variable` | Declared here |
+| [`oframe`](#oframe) | `variable` | Declared here |
+| [`iparams`](#iparams-3) | `variable` | Declared here |
+| [`oparams`](#oparams-3) | `variable` | Declared here |
+| [`VideoConverter`](#videoconverter-1) | `function` | Declared here |
+| [`VideoConverter`](#videoconverter-2) | `function` | Declared here |
+| [`VideoConverter`](#videoconverter-3) | `function` | Declared here |
+| [`create`](#create-6) | `function` | Declared here |
+| [`close`](#close-10) | `function` | Declared here |
+| [`convert`](#convert-1) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -9287,6 +11965,91 @@ Defined in src/av/include/icy/av/packet.h:28
 
 Timestamped media packet carrying raw audio or video data.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`time`](#time-2) | `variable` | Declared here |
+| [`MediaPacket`](#mediapacket-1) | `function` | Declared here |
+| [`MediaPacket`](#mediapacket-2) | `function` | Declared here |
+| [`MediaPacket`](#mediapacket-3) | `function` | Declared here |
+| [`clone`](#clone) | `function` | Declared here |
+| [`className`](#classname) | `function` | Declared here |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -9394,6 +12157,18 @@ Defined in src/av/include/icy/av/packet.h:62
 #### Returns
 A heap-allocated copy of this packet.
 
+##### Reimplements
+
+- [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c)
+
+##### Reimplemented by
+
+- [`clone`](#clone-3)
+- [`clone`](#clone-4)
+- [`clone`](#clone-2)
+- [`clone`](#clone-1)
+- [`clone`](vision.md#clone-19)
+
 ---
 
 {#classname}
@@ -9409,6 +12184,18 @@ virtual inline const char * className() const override
 Defined in src/av/include/icy/av/packet.h:64
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828)
+
+##### Reimplemented by
+
+- [`className`](#classname-3)
+- [`className`](#classname-4)
+- [`className`](#classname-2)
+- [`className`](#classname-1)
+- [`className`](vision.md#classname-11)
 
 {#videopacket}
 
@@ -9428,6 +12215,110 @@ Defined in src/av/include/icy/av/packet.h:69
 > **Subclassed by:** [`PlanarVideoPacket`](#planarvideopacket)
 
 Video packet for interleaved formats.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`width`](#width-2) | `variable` | Declared here |
+| [`height`](#height-2) | `variable` | Declared here |
+| [`iframe`](#iframe) | `variable` | Declared here |
+| [`avpacket`](#avpacket) | `variable` | Declared here |
+| [`VideoPacket`](#videopacket-1) | `function` | Declared here |
+| [`VideoPacket`](#videopacket-2) | `function` | Declared here |
+| [`clone`](#clone-1) | `function` | Declared here |
+| [`className`](#classname-1) | `function` | Declared here |
+| [`time`](#time-2) | `variable` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-1) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-2) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-3) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`clone`](#clone) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`className`](#classname) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`MediaPacket`](#mediapacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`time`](#time-2)  | Presentation timestamp in microseconds. |
+| `function` | [`MediaPacket`](#mediapacket-1) `inline` | Construct with a non-owning or owning mutable buffer. |
+| `function` | [`MediaPacket`](#mediapacket-2) `inline` | Construct with const data (copied, owning). |
+| `function` | [`MediaPacket`](#mediapacket-3) `inline` | Copy constructor. |
+| `function` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Attributes
 
@@ -9562,6 +12453,15 @@ Defined in src/av/include/icy/av/packet.h:107
 #### Returns
 A heap-allocated copy of this packet.
 
+##### Reimplements
+
+- [`clone`](#clone)
+
+##### Reimplemented by
+
+- [`clone`](#clone-2)
+- [`clone`](vision.md#clone-19)
+
 ---
 
 {#classname-1}
@@ -9577,6 +12477,15 @@ virtual inline const char * className() const override
 Defined in src/av/include/icy/av/packet.h:109
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](#classname)
+
+##### Reimplemented by
+
+- [`className`](#classname-2)
+- [`className`](vision.md#classname-11)
 
 {#planarvideopacket}
 
@@ -9609,6 +12518,132 @@ Video packet for planar formats.
 * `height` The frame height in pixels. 
 
 * `time` The timestamp in microseconds.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`buffer`](#buffer) | `variable` | Declared here |
+| [`linesize`](#linesize) | `variable` | Declared here |
+| [`pixelFmt`](#pixelfmt-1) | `variable` | Declared here |
+| [`owns_buffer`](#owns_buffer) | `variable` | Declared here |
+| [`avframe`](#avframe) | `variable` | Declared here |
+| [`PlanarVideoPacket`](#planarvideopacket-1) | `function` | Declared here |
+| [`PlanarVideoPacket`](#planarvideopacket-2) | `function` | Declared here |
+| [`clone`](#clone-2) | `function` | Declared here |
+| [`className`](#classname-2) | `function` | Declared here |
+| [`width`](#width-2) | `variable` | Inherited from [`VideoPacket`](#videopacket) |
+| [`height`](#height-2) | `variable` | Inherited from [`VideoPacket`](#videopacket) |
+| [`iframe`](#iframe) | `variable` | Inherited from [`VideoPacket`](#videopacket) |
+| [`avpacket`](#avpacket) | `variable` | Inherited from [`VideoPacket`](#videopacket) |
+| [`VideoPacket`](#videopacket-1) | `function` | Inherited from [`VideoPacket`](#videopacket) |
+| [`VideoPacket`](#videopacket-2) | `function` | Inherited from [`VideoPacket`](#videopacket) |
+| [`clone`](#clone-1) | `function` | Inherited from [`VideoPacket`](#videopacket) |
+| [`className`](#classname-1) | `function` | Inherited from [`VideoPacket`](#videopacket) |
+| [`time`](#time-2) | `variable` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-1) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-2) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-3) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`clone`](#clone) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`className`](#classname) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`VideoPacket`](#videopacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`width`](#width-2)  | Frame width in pixels. |
+| `variable` | [`height`](#height-2)  | Frame height in pixels. |
+| `variable` | [`iframe`](#iframe)  | True if this is an intra (keyframe) frame. |
+| `variable` | [`avpacket`](#avpacket)  | Non-owning pointer to the encoded AVPacket from FFmpeg. Set by [VideoEncoder](#videoencoder), read by [MultiplexEncoder](#multiplexencoder). |
+| `function` | [`VideoPacket`](#videopacket-1) `inline` | Construct a video packet with an interleaved buffer. |
+| `function` | [`VideoPacket`](#videopacket-2) `inline` | Copy constructor. The avpacket pointer is shallow-copied (non-owning). |
+| `function` | [`clone`](#clone-1) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](#classname-1) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`MediaPacket`](#mediapacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`time`](#time-2)  | Presentation timestamp in microseconds. |
+| `function` | [`MediaPacket`](#mediapacket-1) `inline` | Construct with a non-owning or owning mutable buffer. |
+| `function` | [`MediaPacket`](#mediapacket-2) `inline` | Construct with const data (copied, owning). |
+| `function` | [`MediaPacket`](#mediapacket-3) `inline` | Copy constructor. |
+| `function` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Attributes
 
@@ -9748,6 +12783,14 @@ Defined in src/av/include/icy/av/packet.h:147
 #### Returns
 A heap-allocated deep copy of this packet.
 
+##### Reimplements
+
+- [`clone`](#clone-1)
+
+##### Reimplemented by
+
+- [`clone`](vision.md#clone-19)
+
 ---
 
 {#classname-2}
@@ -9763,6 +12806,14 @@ virtual inline const char * className() const override
 Defined in src/av/include/icy/av/packet.h:149
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](#classname-1)
+
+##### Reimplemented by
+
+- [`className`](vision.md#classname-11)
 
 {#audiopacket}
 
@@ -9782,6 +12833,108 @@ Defined in src/av/include/icy/av/packet.h:154
 > **Subclassed by:** [`PlanarAudioPacket`](#planaraudiopacket)
 
 Audio packet for interleaved formats.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`numSamples`](#numsamples) | `variable` | Declared here |
+| [`avpacket`](#avpacket-1) | `variable` | Declared here |
+| [`AudioPacket`](#audiopacket-1) | `function` | Declared here |
+| [`clone`](#clone-3) | `function` | Declared here |
+| [`samples`](#samples) | `function` | Declared here |
+| [`className`](#classname-3) | `function` | Declared here |
+| [`time`](#time-2) | `variable` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-1) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-2) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-3) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`clone`](#clone) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`className`](#classname) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`MediaPacket`](#mediapacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`time`](#time-2)  | Presentation timestamp in microseconds. |
+| `function` | [`MediaPacket`](#mediapacket-1) `inline` | Construct with a non-owning or owning mutable buffer. |
+| `function` | [`MediaPacket`](#mediapacket-2) `inline` | Construct with const data (copied, owning). |
+| `function` | [`MediaPacket`](#mediapacket-3) `inline` | Copy constructor. |
+| `function` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Attributes
 
@@ -9868,6 +13021,14 @@ Defined in src/av/include/icy/av/packet.h:178
 #### Returns
 A heap-allocated copy of this packet.
 
+##### Reimplements
+
+- [`clone`](#clone)
+
+##### Reimplemented by
+
+- [`clone`](#clone-4)
+
 ---
 
 {#samples}
@@ -9901,6 +13062,14 @@ Defined in src/av/include/icy/av/packet.h:186
 
 Returns the class name of this packet type for logging and diagnostics.
 
+##### Reimplements
+
+- [`className`](#classname)
+
+##### Reimplemented by
+
+- [`className`](#classname-4)
+
 {#planaraudiopacket}
 
 ## PlanarAudioPacket
@@ -9929,6 +13098,128 @@ Audio packet for planar formats.
 * `sampleFmt` The sample format name (e.g. "fltp"). 
 
 * `time` The timestamp in microseconds.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`buffer`](#buffer-1) | `variable` | Declared here |
+| [`linesize`](#linesize-1) | `variable` | Declared here |
+| [`channels`](#channels-2) | `variable` | Declared here |
+| [`sampleFmt`](#samplefmt-1) | `variable` | Declared here |
+| [`owns_buffer`](#owns_buffer-1) | `variable` | Declared here |
+| [`PlanarAudioPacket`](#planaraudiopacket-1) | `function` | Declared here |
+| [`PlanarAudioPacket`](#planaraudiopacket-2) | `function` | Declared here |
+| [`clone`](#clone-4) | `function` | Declared here |
+| [`className`](#classname-4) | `function` | Declared here |
+| [`numSamples`](#numsamples) | `variable` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`avpacket`](#avpacket-1) | `variable` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`AudioPacket`](#audiopacket-1) | `function` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`clone`](#clone-3) | `function` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`samples`](#samples) | `function` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`className`](#classname-3) | `function` | Inherited from [`AudioPacket`](#audiopacket) |
+| [`time`](#time-2) | `variable` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-1) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-2) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`MediaPacket`](#mediapacket-3) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`clone`](#clone) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`className`](#classname) | `function` | Inherited from [`MediaPacket`](#mediapacket) |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`AudioPacket`](#audiopacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`numSamples`](#numsamples)  | Number of audio samples per channel. |
+| `variable` | [`avpacket`](#avpacket-1)  | Non-owning pointer to the encoded AVPacket from FFmpeg. Set by [AudioEncoder](#audioencoder), read by [MultiplexEncoder](#multiplexencoder). |
+| `function` | [`AudioPacket`](#audiopacket-1) `inline` | Construct an audio packet with an interleaved sample buffer. |
+| `function` | [`clone`](#clone-3) `virtual` `const` `inline` `override` |  |
+| `function` | [`samples`](#samples) `virtual` `const` `inline` |  |
+| `function` | [`className`](#classname-3) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`MediaPacket`](#mediapacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`time`](#time-2)  | Presentation timestamp in microseconds. |
+| `function` | [`MediaPacket`](#mediapacket-1) `inline` | Construct with a non-owning or owning mutable buffer. |
+| `function` | [`MediaPacket`](#mediapacket-2) `inline` | Construct with const data (copied, owning). |
+| `function` | [`MediaPacket`](#mediapacket-3) `inline` | Copy constructor. |
+| `function` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Attributes
 
@@ -10064,6 +13355,10 @@ Defined in src/av/include/icy/av/packet.h:219
 #### Returns
 A heap-allocated deep copy of this packet.
 
+##### Reimplements
+
+- [`clone`](#clone-3)
+
 ---
 
 {#classname-4}
@@ -10079,4 +13374,8 @@ virtual inline const char * className() const override
 Defined in src/av/include/icy/av/packet.h:221
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](#classname-3)
 

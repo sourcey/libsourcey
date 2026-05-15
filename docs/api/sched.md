@@ -151,6 +151,115 @@ Defined in src/sched/include/icy/sched/scheduler.h:31
 
 The [Scheduler](#scheduler) manages and runs tasks that need to be executed at specific times.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Scheduler`](#scheduler-1) | `function` | Declared here |
+| [`schedule`](#schedule) | `function` | Declared here |
+| [`cancel`](#cancel-4) | `function` | Declared here |
+| [`clear`](#clear-2) | `function` | Declared here |
+| [`serialize`](#serialize-3) | `function` | Declared here |
+| [`deserialize`](#deserialize-3) | `function` | Declared here |
+| [`print`](#print-14) | `function` | Declared here |
+| [`cancel`](#cancel-5) | `function` | Declared here |
+| [`cancel`](#cancel-6) | `function` | Declared here |
+| [`getDefault`](#getdefault-2) | `function` | Declared here |
+| [`factory`](#factory-1) | `function` | Declared here |
+| [`run`](#run-6) | `function` | Declared here |
+| [`update`](#update-5) | `function` | Declared here |
+| [`TaskList`](base.md#classicy_1_1TaskRunner_1ab5b34efcc94074c47bfeb15bf163e51c) | `typedef` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`Idle`](base.md#classicy_1_1TaskRunner_1a30a56b557732d674eb8c56a92a3b39bf) | `variable` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`Shutdown`](base.md#classicy_1_1TaskRunner_1a4536c462174e6dbea54ad084549b3be5) | `variable` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`_mutex`](base.md#classicy_1_1TaskRunner_1a8ed72724333410e042b847ac19daf9c4) | `variable` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`_runner`](base.md#classicy_1_1TaskRunner_1a315262f5ecce82c4db6e45063c2df1ac) | `variable` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`_tasks`](base.md#classicy_1_1TaskRunner_1a1cec7a3c24c2aece661b60d6405cd3c5) | `variable` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`TaskRunner`](base.md#classicy_1_1TaskRunner_1a9b67f07ab9746294356df14a1a860f04) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`~TaskRunner`](base.md#classicy_1_1TaskRunner_1a7c0c280f3659c5d9064ac8476b223cb2) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`TaskRunner`](base.md#classicy_1_1TaskRunner_1a7da8c31a699f676e059bb39f3e97f76c) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`operator=`](base.md#classicy_1_1TaskRunner_1a9c146e31a6df7fdf7148fd33799d1ea3) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`TaskRunner`](base.md#classicy_1_1TaskRunner_1adde5e6835fb88de26936c1cd7a724f00) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`operator=`](base.md#classicy_1_1TaskRunner_1a46409938bd8d3f0e6c46c33ac1dce823) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`start`](base.md#classicy_1_1TaskRunner_1a88082927b85c8136b10bbb6151f00d22) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`cancel`](base.md#classicy_1_1TaskRunner_1aa69462588279f04fc131be61adc98d0d) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`destroy`](base.md#classicy_1_1TaskRunner_1a6aa88f4f738cfb22d6033c2897c7208d) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`exists`](base.md#classicy_1_1TaskRunner_1a6869bb7ff601ca2ed84024091a474652) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`get`](base.md#classicy_1_1TaskRunner_1adeb64f098c412f3149c489d9df7b1109) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`setRunner`](base.md#classicy_1_1TaskRunner_1a8a6bfd5f77b9a25b59f5e0e137cd8782) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`className`](base.md#classicy_1_1TaskRunner_1ad9bf53e52d61b811ffa85bc911620a22) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`cancel`](base.md#classicy_1_1TaskRunner_1aa2f1d9a49043af08d17669dddfcdc268) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`getDefault`](base.md#classicy_1_1TaskRunner_1ae223a7b6cdefc4ff1dfb0d74785ce101) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`run`](base.md#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`add`](base.md#classicy_1_1TaskRunner_1a6ff09a58487ce9be902ac0e8415a2cca) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`remove`](base.md#classicy_1_1TaskRunner_1ae6bf3614249df759f7bcc611fec5a3e5) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`next`](base.md#classicy_1_1TaskRunner_1a766c070279f7f038ff242d8f1df81a3d) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`clear`](base.md#classicy_1_1TaskRunner_1a37a9f66c38ea632138c8d4f1951cd28c) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`onAdd`](base.md#classicy_1_1TaskRunner_1a5f720ac54054e1533bd25bbe43788756) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`onStart`](base.md#classicy_1_1TaskRunner_1a59c646e3779deb0fda66bddf02616724) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`onCancel`](base.md#classicy_1_1TaskRunner_1a36503096ac04ea774bb1e78b1ecdf0ef) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`onRemove`](base.md#classicy_1_1TaskRunner_1ac28c9029f03f161c3d5f375ee38140d4) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`onRun`](base.md#classicy_1_1TaskRunner_1a4e1e0694127e7aa909f4d6ef6b717e4c) | `function` | Inherited from [`TaskRunner`](base.md#taskrunner) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`TaskRunner`](base.md#taskrunner)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`TaskList`](base.md#classicy_1_1TaskRunner_1ab5b34efcc94074c47bfeb15bf163e51c)  |  |
+| `variable` | [`Idle`](base.md#classicy_1_1TaskRunner_1a30a56b557732d674eb8c56a92a3b39bf)  | Fires after completing an iteration of all tasks. |
+| `variable` | [`Shutdown`](base.md#classicy_1_1TaskRunner_1a4536c462174e6dbea54ad084549b3be5)  | Signals when the `[TaskRunner](base.md#taskrunner)` is shutting down. |
+| `variable` | [`_mutex`](base.md#classicy_1_1TaskRunner_1a8ed72724333410e042b847ac19daf9c4)  |  |
+| `variable` | [`_runner`](base.md#classicy_1_1TaskRunner_1a315262f5ecce82c4db6e45063c2df1ac)  |  |
+| `variable` | [`_tasks`](base.md#classicy_1_1TaskRunner_1a1cec7a3c24c2aece661b60d6405cd3c5)  |  |
+| `function` | [`TaskRunner`](base.md#classicy_1_1TaskRunner_1a9b67f07ab9746294356df14a1a860f04)  |  |
+| `function` | [`~TaskRunner`](base.md#classicy_1_1TaskRunner_1a7c0c280f3659c5d9064ac8476b223cb2) `virtual` |  |
+| `function` | [`TaskRunner`](base.md#classicy_1_1TaskRunner_1a7da8c31a699f676e059bb39f3e97f76c)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1TaskRunner_1a9c146e31a6df7fdf7148fd33799d1ea3)  | Deleted assignment operator. |
+| `function` | [`TaskRunner`](base.md#classicy_1_1TaskRunner_1adde5e6835fb88de26936c1cd7a724f00)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1TaskRunner_1a46409938bd8d3f0e6c46c33ac1dce823)  | Deleted assignment operator. |
+| `function` | [`start`](base.md#classicy_1_1TaskRunner_1a88082927b85c8136b10bbb6151f00d22) `virtual` | Starts a task, adding it if it doesn't exist. |
+| `function` | [`cancel`](base.md#classicy_1_1TaskRunner_1aa69462588279f04fc131be61adc98d0d) `virtual` | Cancels a task. |
+| `function` | [`destroy`](base.md#classicy_1_1TaskRunner_1a6aa88f4f738cfb22d6033c2897c7208d) `virtual` | Queues a task for destruction. |
+| `function` | [`exists`](base.md#classicy_1_1TaskRunner_1a6869bb7ff601ca2ed84024091a474652) `virtual` `const` | Returns whether a task exists. |
+| `function` | [`get`](base.md#classicy_1_1TaskRunner_1adeb64f098c412f3149c489d9df7b1109) `virtual` `const` | Returns the task pointer matching the given ID, or nullptr if no task exists. |
+| `function` | [`setRunner`](base.md#classicy_1_1TaskRunner_1a8a6bfd5f77b9a25b59f5e0e137cd8782) `virtual` | Set the asynchronous context for packet processing. This may be a [Thread](base.md#thread) or another derivative of Async. Must be set before the stream is activated. |
+| `function` | [`className`](base.md#classicy_1_1TaskRunner_1ad9bf53e52d61b811ffa85bc911620a22) `virtual` `const` `inline` |  |
+| `function` | [`cancel`](base.md#classicy_1_1TaskRunner_1aa2f1d9a49043af08d17669dddfcdc268) `virtual` `inline` | Cancel the current task. The [run()](base.md#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) method should return ASAP. |
+| `function` | [`getDefault`](base.md#classicy_1_1TaskRunner_1ae223a7b6cdefc4ff1dfb0d74785ce101) `static` | Returns the default `[TaskRunner](base.md#taskrunner)` singleton, although [TaskRunner](base.md#taskrunner) instances may be initialized individually. The default runner should be kept for short running tasks such as timers in order to maintain performance. |
+| `function` | [`run`](base.md#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) `virtual` `override` | Called by the async context to run the next task. |
+| `function` | [`add`](base.md#classicy_1_1TaskRunner_1a6ff09a58487ce9be902ac0e8415a2cca) `virtual` | Adds a task to the runner. |
+| `function` | [`remove`](base.md#classicy_1_1TaskRunner_1ae6bf3614249df759f7bcc611fec5a3e5) `virtual` | Removes a task from the runner. |
+| `function` | [`next`](base.md#classicy_1_1TaskRunner_1a766c070279f7f038ff242d8f1df81a3d) `virtual` `const` | Returns the next task to be run. |
+| `function` | [`clear`](base.md#classicy_1_1TaskRunner_1a37a9f66c38ea632138c8d4f1951cd28c) `virtual` | Destroys and clears all manages tasks. |
+| `function` | [`onAdd`](base.md#classicy_1_1TaskRunner_1a5f720ac54054e1533bd25bbe43788756) `virtual` | Called after a task is added. |
+| `function` | [`onStart`](base.md#classicy_1_1TaskRunner_1a59c646e3779deb0fda66bddf02616724) `virtual` | Called after a task is started. |
+| `function` | [`onCancel`](base.md#classicy_1_1TaskRunner_1a36503096ac04ea774bb1e78b1ecdf0ef) `virtual` | Called after a task is cancelled. |
+| `function` | [`onRemove`](base.md#classicy_1_1TaskRunner_1ac28c9029f03f161c3d5f375ee38140d4) `virtual` | Called after a task is removed. |
+| `function` | [`onRun`](base.md#classicy_1_1TaskRunner_1a4e1e0694127e7aa909f4d6ef6b717e4c) `virtual` | Called after a task has run. |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -229,6 +338,10 @@ Defined in src/sched/include/icy/sched/scheduler.h:50
 
 Removes all scheduled tasks.
 
+##### Reimplements
+
+- [`clear`](base.md#classicy_1_1TaskRunner_1a37a9f66c38ea632138c8d4f1951cd28c)
+
 ---
 
 {#serialize-3}
@@ -247,6 +360,10 @@ Serializes all scheduled tasks and their triggers to `root`.
 #### Parameters
 * `root` JSON array to append serialized task entries to.
 
+##### Reimplements
+
+- [`serialize`](json.md#serialize-1)
+
 ---
 
 {#deserialize-3}
@@ -264,6 +381,10 @@ Defined in src/sched/include/icy/sched/scheduler.h:59
 Reconstructs the task list from `root` using the [TaskFactory](#taskfactory). Skips entries that fail to deserialize and logs the error. 
 #### Parameters
 * `root` JSON array previously produced by [serialize()](#serialize-3).
+
+##### Reimplements
+
+- [`deserialize`](json.md#deserialize-1)
 
 ---
 
@@ -301,6 +422,10 @@ Cancels a task.
 
 The task reference will be managed by the [TaskRunner](base.md#taskrunner) until the task is destroyed.
 
+##### Reimplements
+
+- [`cancel`](base.md#classicy_1_1TaskRunner_1aa69462588279f04fc131be61adc98d0d)
+
 ---
 
 {#cancel-6}
@@ -316,6 +441,10 @@ virtual inline void cancel(bool flag = true)
 Defined in src/sched/include/icy/sched/scheduler.h:43
 
 Cancel the current task. The [run()](#run-6) method should return ASAP.
+
+##### Reimplements
+
+- [`cancel`](base.md#cancel-1)
 
 ### Public Static Methods
 
@@ -379,6 +508,10 @@ Defined in src/sched/include/icy/sched/scheduler.h:74
 
 The run method will be called by the asynchronous context.
 
+##### Reimplements
+
+- [`run`](base.md#run-4)
+
 ---
 
 {#update-5}
@@ -410,6 +543,91 @@ Defined in src/sched/include/icy/sched/task.h:32
 > **Inherits:** [`Task`](base.md#task), [`ISerializable`](json.md#iserializable)
 
 Scheduled task with an attached trigger and scheduler association.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Scheduler`](#scheduler-2) | `friend` | Declared here |
+| [`Task`](#task-2) | `function` | Declared here |
+| [`Task`](#task-3) | `function` | Declared here |
+| [`serialize`](#serialize-4) | `function` | Declared here |
+| [`deserialize`](#deserialize-4) | `function` | Declared here |
+| [`createTrigger`](#createtrigger) | `function` | Declared here |
+| [`setTrigger`](#settrigger) | `function` | Declared here |
+| [`trigger`](#trigger) | `function` | Declared here |
+| [`scheduler`](#scheduler-3) | `function` | Declared here |
+| [`remaining`](#remaining) | `function` | Declared here |
+| [`type`](#type-16) | `function` | Declared here |
+| [`name`](#name-9) | `function` | Declared here |
+| [`setName`](#setname-1) | `function` | Declared here |
+| [`_type`](#_type-2) | `variable` | Declared here |
+| [`_name`](#_name-1) | `variable` | Declared here |
+| [`_scheduler`](#_scheduler) | `variable` | Declared here |
+| [`_trigger`](#_trigger) | `variable` | Declared here |
+| [`_mutex`](#_mutex-14) | `variable` | Declared here |
+| [`beforeRun`](#beforerun) | `function` | Declared here |
+| [`run`](#run-7) | `function` | Declared here |
+| [`afterRun`](#afterrun) | `function` | Declared here |
+| [`TaskRunner`](base.md#classicy_1_1Task_1a1956d94b45592a4096a335641aab65f8) | `friend` | Inherited from [`Task`](base.md#task) |
+| [`_id`](base.md#classicy_1_1Task_1ac1ee918bfc4a8bef0dd1661f4cbe680a) | `variable` | Inherited from [`Task`](base.md#task) |
+| [`_repeating`](base.md#classicy_1_1Task_1a348904116c7dd4d3f415452681599b0e) | `variable` | Inherited from [`Task`](base.md#task) |
+| [`_destroyed`](base.md#classicy_1_1Task_1aa0692b25828d7a0da407a17d137ff782) | `variable` | Inherited from [`Task`](base.md#task) |
+| [`Task`](base.md#classicy_1_1Task_1aa74fdf87d9f64104eef70e879ea6bd27) | `function` | Inherited from [`Task`](base.md#task) |
+| [`destroy`](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) | `function` | Inherited from [`Task`](base.md#task) |
+| [`destroyed`](base.md#classicy_1_1Task_1acee30db8dbcdc6a7508e3d407b923cce) | `function` | Inherited from [`Task`](base.md#task) |
+| [`repeating`](base.md#classicy_1_1Task_1ac5c935259f0e714c209834faad6ef106) | `function` | Inherited from [`Task`](base.md#task) |
+| [`id`](base.md#classicy_1_1Task_1a763945e1432e4db22ed5dbcb9682fadb) | `function` | Inherited from [`Task`](base.md#task) |
+| [`~Task`](base.md#classicy_1_1Task_1a3844bd8461c7b8d295c5807fe9ae8b2d) | `function` | Inherited from [`Task`](base.md#task) |
+| [`Task`](base.md#classicy_1_1Task_1acbb62d60d08febc0f2eb088aaf938116) | `function` | Inherited from [`Task`](base.md#task) |
+| [`operator=`](base.md#classicy_1_1Task_1a0239870fcbb01195d6d53c7ef83a7c68) | `function` | Inherited from [`Task`](base.md#task) |
+| [`Task`](base.md#classicy_1_1Task_1a9df1005fc4dafee44be6246cd03cb8c6) | `function` | Inherited from [`Task`](base.md#task) |
+| [`operator=`](base.md#classicy_1_1Task_1a89132b582d3c178b01e4c102aac03f9a) | `function` | Inherited from [`Task`](base.md#task) |
+| [`run`](base.md#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de) | `function` | Inherited from [`Task`](base.md#task) |
+| [`Runnable`](base.md#runnable-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`run`](base.md#run-4) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancel`](base.md#cancel-1) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`cancelled`](base.md#cancelled) | `function` | Inherited from [`Runnable`](base.md#runnable) |
+| [`exit`](base.md#exit) | `variable` | Inherited from [`Runnable`](base.md#runnable) |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`Task`](base.md#task)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`TaskRunner`](base.md#classicy_1_1Task_1a1956d94b45592a4096a335641aab65f8)  | Tasks belong to a [TaskRunner](base.md#taskrunner) instance. |
+| `variable` | [`_id`](base.md#classicy_1_1Task_1ac1ee918bfc4a8bef0dd1661f4cbe680a)  |  |
+| `variable` | [`_repeating`](base.md#classicy_1_1Task_1a348904116c7dd4d3f415452681599b0e)  |  |
+| `variable` | [`_destroyed`](base.md#classicy_1_1Task_1aa0692b25828d7a0da407a17d137ff782)  |  |
+| `function` | [`Task`](base.md#classicy_1_1Task_1aa74fdf87d9f64104eef70e879ea6bd27)  |  |
+| `function` | [`destroy`](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) `virtual` | Sets the task to destroyed state. |
+| `function` | [`destroyed`](base.md#classicy_1_1Task_1acee30db8dbcdc6a7508e3d407b923cce) `virtual` `const` | Signals that the task should be disposed of. |
+| `function` | [`repeating`](base.md#classicy_1_1Task_1ac5c935259f0e714c209834faad6ef106) `virtual` `const` | Signals that the task should be called repeatedly by the [TaskRunner](base.md#taskrunner). If this returns false the task will be cancelled. |
+| `function` | [`id`](base.md#classicy_1_1Task_1a763945e1432e4db22ed5dbcb9682fadb) `virtual` `const` | Unique task ID. |
+| `function` | [`~Task`](base.md#classicy_1_1Task_1a3844bd8461c7b8d295c5807fe9ae8b2d) `virtual` |  |
+| `function` | [`Task`](base.md#classicy_1_1Task_1acbb62d60d08febc0f2eb088aaf938116)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1Task_1a0239870fcbb01195d6d53c7ef83a7c68)  | Deleted assignment operator. |
+| `function` | [`Task`](base.md#classicy_1_1Task_1a9df1005fc4dafee44be6246cd03cb8c6)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1Task_1a89132b582d3c178b01e4c102aac03f9a)  | Deleted assignment operator. |
+| `function` | [`run`](base.md#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de) `virtual` `override` | Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration. |
+
+### Inherited from [`Runnable`](base.md#runnable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Runnable`](base.md#runnable-1) `inline` |  |
+| `function` | [`run`](base.md#run-4) `virtual` | The run method will be called by the asynchronous context. |
+| `function` | [`cancel`](base.md#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](base.md#run-4) method should return ASAP. |
+| `function` | [`cancelled`](base.md#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
+| `variable` | [`exit`](base.md#exit)  |  |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
 
 ### Friends
 
@@ -500,6 +718,10 @@ Defined in src/sched/include/icy/sched/task.h:51
 
 Serializes the task to JSON.
 
+##### Reimplements
+
+- [`serialize`](json.md#serialize-1)
+
 ---
 
 {#deserialize-4}
@@ -515,6 +737,10 @@ virtual void deserialize(json::Value & root) override
 Defined in src/sched/include/icy/sched/task.h:54
 
 Deserializes the task from JSON.
+
+##### Reimplements
+
+- [`deserialize`](json.md#deserialize-1)
 
 ---
 
@@ -753,6 +979,10 @@ Defined in src/sched/include/icy/sched/task.h:101
 
 Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration.
 
+##### Reimplements
+
+- [`run`](base.md#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de)
+
 ---
 
 {#afterrun}
@@ -782,6 +1012,25 @@ class TaskFactory
 Defined in src/sched/include/icy/sched/taskfactory.h:49
 
 The [TaskFactory](#taskfactory) can dynamically instantiate registered [sched::Task](#task-1) and [sched::Trigger](#trigger-1) classes from named strings.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`createTask`](#createtask) | `function` | Declared here |
+| [`registerTask`](#registertask) | `function` | Declared here |
+| [`unregisterTask`](#unregistertask) | `function` | Declared here |
+| [`tasks`](#tasks-2) | `function` | Declared here |
+| [`createTrigger`](#createtrigger-1) | `function` | Declared here |
+| [`registerTrigger`](#registertrigger) | `function` | Declared here |
+| [`unregisterTrigger`](#unregistertrigger) | `function` | Declared here |
+| [`triggers`](#triggers) | `function` | Declared here |
+| [`getDefault`](#getdefault-3) | `function` | Declared here |
+| [`_mutex`](#_mutex-15) | `variable` | Declared here |
+| [`_tasks`](#_tasks-2) | `variable` | Declared here |
+| [`_triggers`](#_triggers) | `variable` | Declared here |
+| [`TaskMap`](#taskmap) | `typedef` | Declared here |
+| [`TriggerMap`](#triggermap) | `typedef` | Declared here |
 
 ### Public Methods
 
@@ -1073,6 +1322,55 @@ Defined in src/sched/include/icy/sched/trigger.h:167
 
 [Trigger](#trigger-1) that fires once per day at a configured time, with optional day-of-week exclusions.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`timeOfDay`](#timeofday) | `variable` | Declared here |
+| [`daysExcluded`](#daysexcluded) | `variable` | Declared here |
+| [`DailyTrigger`](#dailytrigger-1) | `function` | Declared here |
+| [`update`](#update-2) | `function` | Declared here |
+| [`type`](#type-17) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`name`](#name-10) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`timesRun`](#timesrun) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`createdAt`](#createdat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`scheduleAt`](#scheduleat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`lastRunAt`](#lastrunat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`Trigger`](#trigger-2) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`update`](#update-6) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`remaining`](#remaining-1) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`timeout`](#timeout-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`expired`](#expired-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](#serialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`deserialize`](#deserialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`Trigger`](#trigger-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`type`](#type-17)  | The type of this trigger class. |
+| `variable` | [`name`](#name-10)  | The display name of this trigger class. |
+| `variable` | [`timesRun`](#timesrun)  | The number of times the task has run since creation; |
+| `variable` | [`createdAt`](#createdat)  | The time the task was created. |
+| `variable` | [`scheduleAt`](#scheduleat)  | The time the task is scheduled to run. |
+| `variable` | [`lastRunAt`](#lastrunat)  | The time the task was last run. |
+| `function` | [`Trigger`](#trigger-2)  |  |
+| `function` | [`update`](#update-6) `virtual` | Updates the scheduleAt value to the next scheduled time. |
+| `function` | [`remaining`](#remaining-1) `virtual` | Returns the milliseconds remaining until the next scheduled timeout. |
+| `function` | [`timeout`](#timeout-4) `virtual` | Returns true if the task is ready to be run, false otherwise. |
+| `function` | [`expired`](#expired-4) `virtual` | Returns true if the task is expired and should be destroyed. Returns false by default. |
+| `function` | [`serialize`](#serialize-5) `virtual` `override` | Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. |
+| `function` | [`deserialize`](#deserialize-5) `virtual` `override` | Deserializes timing state from `root`. |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1145,6 +1443,10 @@ Defined in src/sched/include/icy/sched/trigger.h:174
 
 Computes the next scheduleAt value by advancing to the next non-excluded weekday at the configured timeOfDay.
 
+##### Reimplements
+
+- [`update`](#update-6)
+
 {#intervaltrigger}
 
 ## IntervalTrigger
@@ -1162,6 +1464,58 @@ Defined in src/sched/include/icy/sched/trigger.h:133
 > **Inherits:** [`Trigger`](#trigger-1)
 
 [Trigger](#trigger-1) that fires repeatedly at a fixed time interval.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`interval`](#interval) | `variable` | Declared here |
+| [`maxTimes`](#maxtimes) | `variable` | Declared here |
+| [`IntervalTrigger`](#intervaltrigger-1) | `function` | Declared here |
+| [`update`](#update-3) | `function` | Declared here |
+| [`expired`](#expired-2) | `function` | Declared here |
+| [`serialize`](#serialize-2) | `function` | Declared here |
+| [`deserialize`](#deserialize-2) | `function` | Declared here |
+| [`type`](#type-17) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`name`](#name-10) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`timesRun`](#timesrun) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`createdAt`](#createdat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`scheduleAt`](#scheduleat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`lastRunAt`](#lastrunat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`Trigger`](#trigger-2) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`update`](#update-6) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`remaining`](#remaining-1) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`timeout`](#timeout-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`expired`](#expired-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](#serialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`deserialize`](#deserialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`Trigger`](#trigger-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`type`](#type-17)  | The type of this trigger class. |
+| `variable` | [`name`](#name-10)  | The display name of this trigger class. |
+| `variable` | [`timesRun`](#timesrun)  | The number of times the task has run since creation; |
+| `variable` | [`createdAt`](#createdat)  | The time the task was created. |
+| `variable` | [`scheduleAt`](#scheduleat)  | The time the task is scheduled to run. |
+| `variable` | [`lastRunAt`](#lastrunat)  | The time the task was last run. |
+| `function` | [`Trigger`](#trigger-2)  |  |
+| `function` | [`update`](#update-6) `virtual` | Updates the scheduleAt value to the next scheduled time. |
+| `function` | [`remaining`](#remaining-1) `virtual` | Returns the milliseconds remaining until the next scheduled timeout. |
+| `function` | [`timeout`](#timeout-4) `virtual` | Returns true if the task is ready to be run, false otherwise. |
+| `function` | [`expired`](#expired-4) `virtual` | Returns true if the task is expired and should be destroyed. Returns false by default. |
+| `function` | [`serialize`](#serialize-5) `virtual` `override` | Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. |
+| `function` | [`deserialize`](#deserialize-5) `virtual` `override` | Deserializes timing state from `root`. |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
 
 ### Public Attributes
 
@@ -1238,6 +1592,10 @@ Defined in src/sched/include/icy/sched/trigger.h:139
 
 Advances scheduleAt by one `[interval](#interval)` period.
 
+##### Reimplements
+
+- [`update`](#update-6)
+
 ---
 
 {#expired-2}
@@ -1253,6 +1611,10 @@ virtual bool expired() override
 Defined in src/sched/include/icy/sched/trigger.h:142
 
 Returns true when maxTimes > 0 and timesRun >= maxTimes.
+
+##### Reimplements
+
+- [`expired`](#expired-4)
 
 ---
 
@@ -1272,6 +1634,10 @@ Serializes interval fields (days, hours, minutes, seconds) in addition to base f
 #### Parameters
 * `root` JSON object to populate.
 
+##### Reimplements
+
+- [`serialize`](#serialize-5)
+
 ---
 
 {#deserialize-2}
@@ -1290,6 +1656,10 @@ Deserializes interval fields from `root`. Throws if the resulting interval is ze
 #### Parameters
 * `root` JSON object previously produced by [serialize()](#serialize-2).
 
+##### Reimplements
+
+- [`deserialize`](#deserialize-5)
+
 {#onceonlytrigger}
 
 ## OnceOnlyTrigger
@@ -1307,6 +1677,54 @@ Defined in src/sched/include/icy/sched/trigger.h:113
 > **Inherits:** [`Trigger`](#trigger-1)
 
 [Trigger](#trigger-1) that fires exactly once at the scheduled time and then expires.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`OnceOnlyTrigger`](#onceonlytrigger-1) | `function` | Declared here |
+| [`update`](#update-4) | `function` | Declared here |
+| [`expired`](#expired-3) | `function` | Declared here |
+| [`type`](#type-17) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`name`](#name-10) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`timesRun`](#timesrun) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`createdAt`](#createdat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`scheduleAt`](#scheduleat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`lastRunAt`](#lastrunat) | `variable` | Inherited from [`Trigger`](#trigger-1) |
+| [`Trigger`](#trigger-2) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`update`](#update-6) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`remaining`](#remaining-1) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`timeout`](#timeout-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`expired`](#expired-4) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](#serialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`deserialize`](#deserialize-5) | `function` | Inherited from [`Trigger`](#trigger-1) |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`Trigger`](#trigger-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`type`](#type-17)  | The type of this trigger class. |
+| `variable` | [`name`](#name-10)  | The display name of this trigger class. |
+| `variable` | [`timesRun`](#timesrun)  | The number of times the task has run since creation; |
+| `variable` | [`createdAt`](#createdat)  | The time the task was created. |
+| `variable` | [`scheduleAt`](#scheduleat)  | The time the task is scheduled to run. |
+| `variable` | [`lastRunAt`](#lastrunat)  | The time the task was last run. |
+| `function` | [`Trigger`](#trigger-2)  |  |
+| `function` | [`update`](#update-6) `virtual` | Updates the scheduleAt value to the next scheduled time. |
+| `function` | [`remaining`](#remaining-1) `virtual` | Returns the milliseconds remaining until the next scheduled timeout. |
+| `function` | [`timeout`](#timeout-4) `virtual` | Returns true if the task is ready to be run, false otherwise. |
+| `function` | [`expired`](#expired-4) `virtual` | Returns true if the task is expired and should be destroyed. Returns false by default. |
+| `function` | [`serialize`](#serialize-5) `virtual` `override` | Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. |
+| `function` | [`deserialize`](#deserialize-5) `virtual` `override` | Deserializes timing state from `root`. |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
 
 ### Public Methods
 
@@ -1346,6 +1764,10 @@ Defined in src/sched/include/icy/sched/trigger.h:119
 
 No-op; scheduleAt is set once at construction and never advanced.
 
+##### Reimplements
+
+- [`update`](#update-6)
+
 ---
 
 {#expired-3}
@@ -1361,6 +1783,10 @@ virtual bool expired() override
 Defined in src/sched/include/icy/sched/trigger.h:126
 
 Returns true after the task has run at least once.
+
+##### Reimplements
+
+- [`expired`](#expired-4)
 
 {#trigger-1}
 
@@ -1380,6 +1806,33 @@ Defined in src/sched/include/icy/sched/trigger.h:58
 > **Subclassed by:** [`DailyTrigger`](#dailytrigger), [`IntervalTrigger`](#intervaltrigger), [`OnceOnlyTrigger`](#onceonlytrigger)
 
 Base class for scheduled task triggers that determine when a task should run.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`type`](#type-17) | `variable` | Declared here |
+| [`name`](#name-10) | `variable` | Declared here |
+| [`timesRun`](#timesrun) | `variable` | Declared here |
+| [`createdAt`](#createdat) | `variable` | Declared here |
+| [`scheduleAt`](#scheduleat) | `variable` | Declared here |
+| [`lastRunAt`](#lastrunat) | `variable` | Declared here |
+| [`Trigger`](#trigger-2) | `function` | Declared here |
+| [`update`](#update-6) | `function` | Declared here |
+| [`remaining`](#remaining-1) | `function` | Declared here |
+| [`timeout`](#timeout-4) | `function` | Declared here |
+| [`expired`](#expired-4) | `function` | Declared here |
+| [`serialize`](#serialize-5) | `function` | Declared here |
+| [`deserialize`](#deserialize-5) | `function` | Declared here |
+| [`serialize`](json.md#serialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+| [`deserialize`](json.md#deserialize-1) | `function` | Inherited from [`ISerializable`](json.md#iserializable) |
+
+### Inherited from [`ISerializable`](json.md#iserializable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`serialize`](json.md#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `function` | [`deserialize`](json.md#deserialize-1) `virtual` | Populates this object's state from `root`. |
 
 ### Public Attributes
 
@@ -1521,6 +1974,12 @@ Defined in src/sched/include/icy/sched/trigger.h:66
 
 Updates the scheduleAt value to the next scheduled time.
 
+##### Reimplemented by
+
+- [`update`](#update-2)
+- [`update`](#update-3)
+- [`update`](#update-4)
+
 ---
 
 {#remaining-1}
@@ -1569,6 +2028,11 @@ Defined in src/sched/include/icy/sched/trigger.h:79
 
 Returns true if the task is expired and should be destroyed. Returns false by default.
 
+##### Reimplemented by
+
+- [`expired`](#expired-2)
+- [`expired`](#expired-3)
+
 ---
 
 {#serialize-5}
@@ -1587,6 +2051,14 @@ Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun)
 #### Parameters
 * `root` JSON object to populate.
 
+##### Reimplements
+
+- [`serialize`](json.md#serialize-1)
+
+##### Reimplemented by
+
+- [`serialize`](#serialize-2)
+
 ---
 
 {#deserialize-5}
@@ -1604,4 +2076,12 @@ Defined in src/sched/include/icy/sched/trigger.h:87
 Deserializes timing state from `root`. 
 #### Parameters
 * `root` JSON object previously produced by [serialize()](#serialize-5).
+
+##### Reimplements
+
+- [`deserialize`](json.md#deserialize-1)
+
+##### Reimplemented by
+
+- [`deserialize`](#deserialize-2)
 

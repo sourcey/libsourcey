@@ -71,6 +71,78 @@ Messages are emitted as polymorphic [IPacket](base.md#ipacket) via [PacketSignal
 
 Use [packetSlot()](base.md#packetslot) with the specific type to filter.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Announce`](#announce) | `variable` | Declared here |
+| [`PeerConnected`](#peerconnected) | `variable` | Declared here |
+| [`PeerDisconnected`](#peerdisconnected) | `variable` | Declared here |
+| [`CreatePresence`](#createpresence) | `variable` | Declared here |
+| [`Client`](#client-6) | `function` | Declared here |
+| [`Client`](#client-7) | `function` | Declared here |
+| [`start`](#start-16) | `function` | Declared here |
+| [`stop`](#stop-13) | `function` | Declared here |
+| [`send`](#send-17) | `function` | Declared here |
+| [`send`](#send-18) | `function` | Declared here |
+| [`respond`](#respond-1) | `function` | Declared here |
+| [`sendPresence`](#sendpresence) | `function` | Declared here |
+| [`sendPresence`](#sendpresence-1) | `function` | Declared here |
+| [`joinRoom`](#joinroom) | `function` | Declared here |
+| [`leaveRoom`](#leaveroom) | `function` | Declared here |
+| [`isOnline`](#isonline) | `function` | Declared here |
+| [`ourID`](#ourid) | `function` | Declared here |
+| [`ourPeer`](#ourpeer) | `function` | Declared here |
+| [`rooms`](#rooms) | `function` | Declared here |
+| [`roster`](#roster) | `function` | Declared here |
+| [`options`](#options-12) | `function` | Declared here |
+| [`setOptions`](#setoptions) | `function` | Declared here |
+| [`setError`](#seterror-6) | `function` | Declared here |
+| [`createPresence`](#createpresence-1) | `function` | Declared here |
+| [`onPresenceData`](#onpresencedata) | `function` | Declared here |
+| [`_data`](#_data-1) | `variable` | Declared here |
+| [`doConnect`](#doconnect) | `function` | Declared here |
+| [`onTransportError`](#ontransporterror) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv-9) | `function` | Declared here |
+| [`onSocketClose`](#onsocketclose-6) | `function` | Declared here |
+| [`onSocketError`](#onsocketerror-4) | `function` | Declared here |
+| [`onWelcome`](#onwelcome) | `function` | Declared here |
+| [`onServerMessage`](#onservermessage) | `function` | Declared here |
+| [`startReconnect`](#startreconnect) | `function` | Declared here |
+| [`reset`](#reset-15) | `function` | Declared here |
+| [`syncDesiredRooms`](#syncdesiredrooms) | `function` | Declared here |
+| [`sendJson`](#sendjson) | `function` | Declared here |
+| [`buildUrl`](#buildurl) | `function` | Declared here |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -686,6 +758,22 @@ Defined in src/symple/include/icy/symple/client.h:93
 
 Connection and authentication options for the Symple client.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`host`](#host-2) | `variable` | Declared here |
+| [`port`](#port-2) | `variable` | Declared here |
+| [`secure`](#secure-1) | `variable` | Declared here |
+| [`reconnection`](#reconnection) | `variable` | Declared here |
+| [`reconnectAttempts`](#reconnectattempts) | `variable` | Declared here |
+| [`reconnectDelay`](#reconnectdelay) | `variable` | Declared here |
+| [`user`](#user-1) | `variable` | Declared here |
+| [`name`](#name-12) | `variable` | Declared here |
+| [`type`](#type-19) | `variable` | Declared here |
+| [`token`](#token) | `variable` | Declared here |
+| [`Options`](#options-14) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -870,6 +958,27 @@ struct ClientData
 ```
 
 Defined in src/symple/src/client/detail.h:13
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`options`](#options-15) | `variable` | Declared here |
+| [`loop`](#loop-8) | `variable` | Declared here |
+| [`ws`](#ws-1) | `variable` | Declared here |
+| [`roster`](#roster-1) | `variable` | Declared here |
+| [`ourID`](#ourid-1) | `variable` | Declared here |
+| [`currentRooms`](#currentrooms) | `variable` | Declared here |
+| [`desiredRooms`](#desiredrooms) | `variable` | Declared here |
+| [`pendingJoins`](#pendingjoins) | `variable` | Declared here |
+| [`pendingLeaves`](#pendingleaves) | `variable` | Declared here |
+| [`announceStatus`](#announcestatus) | `variable` | Declared here |
+| [`reconnectTimer`](#reconnecttimer) | `variable` | Declared here |
+| [`reconnectCount`](#reconnectcount) | `variable` | Declared here |
+| [`wasOnline`](#wasonline) | `variable` | Declared here |
+| [`closing`](#closing-2) | `variable` | Declared here |
+| [`remoteShutdown`](#remoteshutdown) | `variable` | Declared here |
+| [`ClientData`](#clientdata-1) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -1119,6 +1228,158 @@ Symple command message with a node path and action verb.
 
 The `[node](#node)` field is a colon-delimited path (e.g. "camera:zoom:in"). Individual path segments can be retrieved with [param()](#param).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Command`](#command-1) | `function` | Declared here |
+| [`Command`](#command-2) | `function` | Declared here |
+| [`Command`](#command-3) | `function` | Declared here |
+| [`node`](#node) | `function` | Declared here |
+| [`action`](#action-2) | `function` | Declared here |
+| [`setNode`](#setnode) | `function` | Declared here |
+| [`setAction`](#setaction) | `function` | Declared here |
+| [`valid`](#valid-11) | `function` | Declared here |
+| [`param`](#param) | `function` | Declared here |
+| [`params`](#params) | `function` | Declared here |
+| [`matches`](#matches-3) | `function` | Declared here |
+| [`Message`](#message-11) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`clone`](#clone-18) | `function` | Inherited from [`Message`](#message-10) |
+| [`valid`](#valid-15) | `function` | Inherited from [`Message`](#message-10) |
+| [`clear`](#clear-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearData`](#cleardata) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearNotes`](#clearnotes) | `function` | Inherited from [`Message`](#message-10) |
+| [`type`](#type-22) | `function` | Inherited from [`Message`](#message-10) |
+| [`id`](#id-7) | `function` | Inherited from [`Message`](#message-10) |
+| [`to`](#to) | `function` | Inherited from [`Message`](#message-10) |
+| [`from`](#from) | `function` | Inherited from [`Message`](#message-10) |
+| [`toUser`](#touser) | `function` | Inherited from [`Message`](#message-10) |
+| [`toId`](#toid) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromUser`](#fromuser) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromId`](#fromid) | `function` | Inherited from [`Message`](#message-10) |
+| [`status`](#status-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setType`](#settype-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setStatus`](#setstatus-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`notes`](#notes) | `function` | Inherited from [`Message`](#message-10) |
+| [`setNote`](#setnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`addNote`](#addnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-5) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`removeData`](#removedata) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-14) | `function` | Inherited from [`Message`](#message-10) |
+| [`write`](#write-28) | `function` | Inherited from [`Message`](#message-10) |
+| [`isRequest`](#isrequest) | `function` | Inherited from [`Message`](#message-10) |
+| [`size`](#size-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`print`](#print-16) | `function` | Inherited from [`Message`](#message-10) |
+| [`className`](#classname-8) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-6) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`Message`](#message-10)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Message`](#message-11)  | Constructs a new message with a random ID and type set to "message". |
+| `function` | [`Message`](#message-12)  | Constructs a message from a JSON value; sets missing id/type fields. |
+| `function` | [`Message`](#message-13)  | Copy constructor; preserves or generates id/type fields. |
+| `function` | [`clone`](#clone-18) `virtual` `const` `override` | Returns a heap-allocated copy of this message. |
+| `function` | [`valid`](#valid-15) `virtual` `const` | Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields. |
+| `function` | [`clear`](#clear-4) `virtual` | Clears all JSON fields from this message. |
+| `function` | [`clearData`](#cleardata) `virtual` | Clears the `[data](#data-4)` sub-object. |
+| `function` | [`clearNotes`](#clearnotes) `virtual` | Clears the `[notes](#notes)` array. |
+| `function` | [`type`](#type-22) `const` `nodiscard` | Returns the message type string (defaults to "message"). |
+| `function` | [`id`](#id-7) `const` `nodiscard` | Returns the message ID string. |
+| `function` | [`to`](#to) `const` `nodiscard` | Returns the recipient address parsed from the `[to](#to)` field. |
+| `function` | [`from`](#from) `const` `nodiscard` | Returns the sender address parsed from the `[from](#from)` field. |
+| `function` | [`toUser`](#touser) `const` `nodiscard` | Returns the user component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`toId`](#toid) `const` `nodiscard` | Returns the id component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`fromUser`](#fromuser) `const` `nodiscard` | Returns the user component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`fromId`](#fromid) `const` `nodiscard` | Returns the id component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`status`](#status-3) `const` `nodiscard` | Returns the HTTP status code, or -1 if not set. |
+| `function` | [`setType`](#settype-2)  | Sets the message type field. |
+| `function` | [`setTo`](#setto)  | Sets the `[to](#to)` field from a peer's address. |
+| `function` | [`setTo`](#setto-1)  | Sets the `[to](#to)` field from an address object. |
+| `function` | [`setTo`](#setto-2)  | Sets the `[to](#to)` field from an address string. |
+| `function` | [`setFrom`](#setfrom)  | Sets the `[from](#from)` field from a peer's address. |
+| `function` | [`setFrom`](#setfrom-1)  | Sets the `[from](#from)` field from an address object. |
+| `function` | [`setFrom`](#setfrom-2)  | Sets the `[from](#from)` field from an address string. |
+| `function` | [`setStatus`](#setstatus-1)  | HTTP status codes are used to describe the message response. Throws std::invalid_argument if code is outside [101, 504]. |
+| `function` | [`notes`](#notes)  | Returns a reference to the `[notes](#notes)` JSON array. |
+| `function` | [`setNote`](#setnote)  | Replaces all notes with a single note. |
+| `function` | [`addNote`](#addnote)  | Appends a note to the `[notes](#notes)` array. |
+| `function` | [`data`](#data-4) `const` | Returns a copy of the named data field. |
+| `function` | [`data`](#data-5)  | Returns a reference to the named data field (creates it if absent). |
+| `function` | [`setData`](#setdata)  | Creates or replaces a named data field; returns a reference to it. |
+| `function` | [`setData`](#setdata-1)  | Sets a named data field to a C-string value. |
+| `function` | [`setData`](#setdata-2)  | Sets a named data field to a string value. |
+| `function` | [`setData`](#setdata-3)  | Sets a named data field to a JSON value. |
+| `function` | [`setData`](#setdata-4)  | Sets a named data field to an integer value. |
+| `function` | [`removeData`](#removedata)  | Removes a named field from the `[data](#data-4)` sub-object. |
+| `function` | [`hasData`](#hasdata)  | Returns true if the named field exists in the `[data](#data-4)` sub-object. |
+| `function` | [`read`](#read-13) `virtual` `override` | Deserialises the message from a raw buffer. |
+| `function` | [`read`](#read-14) `virtual` | Deserialises the message from a JSON string. |
+| `function` | [`write`](#write-28) `virtual` `const` `override` | Serialises the message as JSON into a buffer. |
+| `function` | [`isRequest`](#isrequest) `const` `nodiscard` | Returns true if no status code has been set (i.e. [status()](#status-3) == -1). |
+| `function` | [`size`](#size-12) `virtual` `const` `override` | Returns the serialised JSON size in bytes. |
+| `function` | [`print`](#print-16) `virtual` `const` `override` | Pretty-prints the message JSON to the given stream. |
+| `function` | [`className`](#classname-8) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`data`](#data-6) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`hasData`](#hasdata-1) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1261,6 +1522,10 @@ Defined in src/symple/include/icy/symple/command.h:59
 
 Returns true if the base message is valid and the `[node](#node)` field is set.
 
+##### Reimplements
+
+- [`valid`](#valid-15)
+
 ---
 
 {#param}
@@ -1336,6 +1601,155 @@ Symple event message carrying a named occurrence with a timestamp.
 
 The `[name](#name-13)` field identifies the event. The `[time](base.md#time-3)` field is stored as a Unix timestamp (seconds since epoch).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Event`](#event-3) | `function` | Declared here |
+| [`Event`](#event-4) | `function` | Declared here |
+| [`Event`](#event-5) | `function` | Declared here |
+| [`valid`](#valid-12) | `function` | Declared here |
+| [`name`](#name-13) | `function` | Declared here |
+| [`time`](#time-4) | `function` | Declared here |
+| [`setName`](#setname-2) | `function` | Declared here |
+| [`setTime`](#settime) | `function` | Declared here |
+| [`Message`](#message-11) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`clone`](#clone-18) | `function` | Inherited from [`Message`](#message-10) |
+| [`valid`](#valid-15) | `function` | Inherited from [`Message`](#message-10) |
+| [`clear`](#clear-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearData`](#cleardata) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearNotes`](#clearnotes) | `function` | Inherited from [`Message`](#message-10) |
+| [`type`](#type-22) | `function` | Inherited from [`Message`](#message-10) |
+| [`id`](#id-7) | `function` | Inherited from [`Message`](#message-10) |
+| [`to`](#to) | `function` | Inherited from [`Message`](#message-10) |
+| [`from`](#from) | `function` | Inherited from [`Message`](#message-10) |
+| [`toUser`](#touser) | `function` | Inherited from [`Message`](#message-10) |
+| [`toId`](#toid) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromUser`](#fromuser) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromId`](#fromid) | `function` | Inherited from [`Message`](#message-10) |
+| [`status`](#status-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setType`](#settype-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setStatus`](#setstatus-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`notes`](#notes) | `function` | Inherited from [`Message`](#message-10) |
+| [`setNote`](#setnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`addNote`](#addnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-5) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`removeData`](#removedata) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-14) | `function` | Inherited from [`Message`](#message-10) |
+| [`write`](#write-28) | `function` | Inherited from [`Message`](#message-10) |
+| [`isRequest`](#isrequest) | `function` | Inherited from [`Message`](#message-10) |
+| [`size`](#size-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`print`](#print-16) | `function` | Inherited from [`Message`](#message-10) |
+| [`className`](#classname-8) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-6) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`Message`](#message-10)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Message`](#message-11)  | Constructs a new message with a random ID and type set to "message". |
+| `function` | [`Message`](#message-12)  | Constructs a message from a JSON value; sets missing id/type fields. |
+| `function` | [`Message`](#message-13)  | Copy constructor; preserves or generates id/type fields. |
+| `function` | [`clone`](#clone-18) `virtual` `const` `override` | Returns a heap-allocated copy of this message. |
+| `function` | [`valid`](#valid-15) `virtual` `const` | Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields. |
+| `function` | [`clear`](#clear-4) `virtual` | Clears all JSON fields from this message. |
+| `function` | [`clearData`](#cleardata) `virtual` | Clears the `[data](#data-4)` sub-object. |
+| `function` | [`clearNotes`](#clearnotes) `virtual` | Clears the `[notes](#notes)` array. |
+| `function` | [`type`](#type-22) `const` `nodiscard` | Returns the message type string (defaults to "message"). |
+| `function` | [`id`](#id-7) `const` `nodiscard` | Returns the message ID string. |
+| `function` | [`to`](#to) `const` `nodiscard` | Returns the recipient address parsed from the `[to](#to)` field. |
+| `function` | [`from`](#from) `const` `nodiscard` | Returns the sender address parsed from the `[from](#from)` field. |
+| `function` | [`toUser`](#touser) `const` `nodiscard` | Returns the user component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`toId`](#toid) `const` `nodiscard` | Returns the id component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`fromUser`](#fromuser) `const` `nodiscard` | Returns the user component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`fromId`](#fromid) `const` `nodiscard` | Returns the id component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`status`](#status-3) `const` `nodiscard` | Returns the HTTP status code, or -1 if not set. |
+| `function` | [`setType`](#settype-2)  | Sets the message type field. |
+| `function` | [`setTo`](#setto)  | Sets the `[to](#to)` field from a peer's address. |
+| `function` | [`setTo`](#setto-1)  | Sets the `[to](#to)` field from an address object. |
+| `function` | [`setTo`](#setto-2)  | Sets the `[to](#to)` field from an address string. |
+| `function` | [`setFrom`](#setfrom)  | Sets the `[from](#from)` field from a peer's address. |
+| `function` | [`setFrom`](#setfrom-1)  | Sets the `[from](#from)` field from an address object. |
+| `function` | [`setFrom`](#setfrom-2)  | Sets the `[from](#from)` field from an address string. |
+| `function` | [`setStatus`](#setstatus-1)  | HTTP status codes are used to describe the message response. Throws std::invalid_argument if code is outside [101, 504]. |
+| `function` | [`notes`](#notes)  | Returns a reference to the `[notes](#notes)` JSON array. |
+| `function` | [`setNote`](#setnote)  | Replaces all notes with a single note. |
+| `function` | [`addNote`](#addnote)  | Appends a note to the `[notes](#notes)` array. |
+| `function` | [`data`](#data-4) `const` | Returns a copy of the named data field. |
+| `function` | [`data`](#data-5)  | Returns a reference to the named data field (creates it if absent). |
+| `function` | [`setData`](#setdata)  | Creates or replaces a named data field; returns a reference to it. |
+| `function` | [`setData`](#setdata-1)  | Sets a named data field to a C-string value. |
+| `function` | [`setData`](#setdata-2)  | Sets a named data field to a string value. |
+| `function` | [`setData`](#setdata-3)  | Sets a named data field to a JSON value. |
+| `function` | [`setData`](#setdata-4)  | Sets a named data field to an integer value. |
+| `function` | [`removeData`](#removedata)  | Removes a named field from the `[data](#data-4)` sub-object. |
+| `function` | [`hasData`](#hasdata)  | Returns true if the named field exists in the `[data](#data-4)` sub-object. |
+| `function` | [`read`](#read-13) `virtual` `override` | Deserialises the message from a raw buffer. |
+| `function` | [`read`](#read-14) `virtual` | Deserialises the message from a JSON string. |
+| `function` | [`write`](#write-28) `virtual` `const` `override` | Serialises the message as JSON into a buffer. |
+| `function` | [`isRequest`](#isrequest) `const` `nodiscard` | Returns true if no status code has been set (i.e. [status()](#status-3) == -1). |
+| `function` | [`size`](#size-12) `virtual` `const` `override` | Returns the serialised JSON size in bytes. |
+| `function` | [`print`](#print-16) `virtual` `const` `override` | Pretty-prints the message JSON to the given stream. |
+| `function` | [`className`](#classname-8) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`data`](#data-6) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`hasData`](#hasdata-1) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1410,6 +1824,10 @@ Copy constructor; preserves or sets missing time to now.
 Defined in src/symple/include/icy/symple/event.h:46
 
 Returns true if the base message is valid and the `[name](#name-13)` field is set.
+
+##### Reimplements
+
+- [`valid`](#valid-15)
 
 ---
 
@@ -1494,6 +1912,80 @@ Defined in src/symple/include/icy/symple/form.h:178
 Interactive form with pages, sections, and fields for command data exchange.
 
 Attach a [Form](#form) to a [Command](#command) message to carry structured input/output. The `[action](#action-3)` field governs the exchange direction; `[partial](#partial)` enables live/auto-complete field submission.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Form`](#form-1) | `function` | Declared here |
+| [`Form`](#form-2) | `function` | Declared here |
+| [`Form`](#form-3) | `function` | Declared here |
+| [`valid`](#valid-13) | `function` | Declared here |
+| [`action`](#action-3) | `function` | Declared here |
+| [`partial`](#partial) | `function` | Declared here |
+| [`setAction`](#setaction-1) | `function` | Declared here |
+| [`setPartial`](#setpartial) | `function` | Declared here |
+| [`FormElement`](#formelement-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`FormElement`](#formelement-2) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`FormElement`](#formelement-3) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`operator=`](#operator-37) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`type`](#type-21) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`id`](#id-6) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`label`](#label) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setType`](#settype-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setId`](#setid) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setLabel`](#setlabel) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setHint`](#sethint) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setError`](#seterror-7) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addPage`](#addpage) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addSection`](#addsection) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addField`](#addfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`getField`](#getfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`getField`](#getfield-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasField`](#hasfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setLive`](#setlive) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`live`](#live) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`clearElements`](#clearelements) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`clear`](#clear-3) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`valid`](#valid-14) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`numElements`](#numelements) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasErrors`](#haserrors) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasPages`](#haspages) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`root`](#root-4) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`_root`](#_root) | `variable` | Inherited from [`FormElement`](#formelement) |
+
+### Inherited from [`FormElement`](#formelement)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`FormElement`](#formelement-1)  | Constructs an unbound element (root pointer is null). |
+| `function` | [`FormElement`](#formelement-2)  | Constructs an element bound to the given JSON node. |
+| `function` | [`FormElement`](#formelement-3)  | Copy constructor; copies the root pointer reference (shallow). |
+| `function` | [`operator=`](#operator-37)  | Copy-assigns the root pointer reference. |
+| `function` | [`type`](#type-21) `const` `nodiscard` | Returns the element type string. |
+| `function` | [`id`](#id-6) `const` `nodiscard` | Returns the element ID string. |
+| `function` | [`label`](#label) `const` `nodiscard` | Returns the display label string. |
+| `function` | [`setType`](#settype-1)  | Sets the element type. Possible values: page, section, text, text-multi, list, list-multi, checkbox, media, custom |
+| `function` | [`setId`](#setid)  | Sets the element ID field. |
+| `function` | [`setLabel`](#setlabel)  | Sets the display label field. |
+| `function` | [`setHint`](#sethint)  | Sets the hint/description field shown below the element. |
+| `function` | [`setError`](#seterror-7)  | Sets an optional validation error message. |
+| `function` | [`addPage`](#addpage)  | Appends a page child element and returns a handle to it. |
+| `function` | [`addSection`](#addsection)  | Appends a section child element and returns a handle to it. |
+| `function` | [`addField`](#addfield)  | Appends a typed field child element and returns a handle to it. Throws std::invalid_argument if type is not a recognised field type. |
+| `function` | [`getField`](#getfield)  | Searches child elements for the field with the given ID. |
+| `function` | [`getField`](#getfield-1)  | Populates a [FormField](#formfield) by searching child elements for the given ID. |
+| `function` | [`hasField`](#hasfield)  | Returns true if any child element has an ID matching the given value. |
+| `function` | [`setLive`](#setlive)  | Sets the live flag on this element. Live elements are used to submit partial form sections (e.g. for auto-complete) without sending the entire form. |
+| `function` | [`live`](#live) `const` `nodiscard` | Returns true if this field is live, meaning the form-processing entity should auto-update this field's value whenever it changes. |
+| `function` | [`clearElements`](#clearelements)  | Removes all child elements whose ID matches the given value. |
+| `function` | [`clear`](#clear-3)  | Clears all fields from the underlying JSON node. |
+| `function` | [`valid`](#valid-14) `const` `nodiscard` | Returns true if the form element is valid. |
+| `function` | [`numElements`](#numelements)  | Returns the number of child elements. |
+| `function` | [`hasErrors`](#haserrors)  | Returns true if any fields have errors. |
+| `function` | [`hasPages`](#haspages)  | Returns true if the form has multiple pages. |
+| `function` | [`root`](#root-4) `const` `nodiscard` | Returns a reference to the underlying JSON node. Throws std::runtime_error if the root pointer is null. |
+| `variable` | [`_root`](#_root)  | The root pointer is just a reference to the externally managed JSON value memory. |
 
 ### Public Methods
 
@@ -1651,6 +2143,39 @@ Defined in src/symple/include/icy/symple/form.h:33
 Base element within a Symple form.
 
 [FormElement](#formelement) wraps a reference to an external JSON node and provides typed accessors for the common `[type](#type-21)`, `[id](#id-6)`, `[label](#label)`, and `elements` fields. Pages, sections, and fields all derive from this base.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`FormElement`](#formelement-1) | `function` | Declared here |
+| [`FormElement`](#formelement-2) | `function` | Declared here |
+| [`FormElement`](#formelement-3) | `function` | Declared here |
+| [`operator=`](#operator-37) | `function` | Declared here |
+| [`type`](#type-21) | `function` | Declared here |
+| [`id`](#id-6) | `function` | Declared here |
+| [`label`](#label) | `function` | Declared here |
+| [`setType`](#settype-1) | `function` | Declared here |
+| [`setId`](#setid) | `function` | Declared here |
+| [`setLabel`](#setlabel) | `function` | Declared here |
+| [`setHint`](#sethint) | `function` | Declared here |
+| [`setError`](#seterror-7) | `function` | Declared here |
+| [`addPage`](#addpage) | `function` | Declared here |
+| [`addSection`](#addsection) | `function` | Declared here |
+| [`addField`](#addfield) | `function` | Declared here |
+| [`getField`](#getfield) | `function` | Declared here |
+| [`getField`](#getfield-1) | `function` | Declared here |
+| [`hasField`](#hasfield) | `function` | Declared here |
+| [`setLive`](#setlive) | `function` | Declared here |
+| [`live`](#live) | `function` | Declared here |
+| [`clearElements`](#clearelements) | `function` | Declared here |
+| [`clear`](#clear-3) | `function` | Declared here |
+| [`valid`](#valid-14) | `function` | Declared here |
+| [`numElements`](#numelements) | `function` | Declared here |
+| [`hasErrors`](#haserrors) | `function` | Declared here |
+| [`hasPages`](#haspages) | `function` | Declared here |
+| [`root`](#root-4) | `function` | Declared here |
+| [`_root`](#_root) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -2188,6 +2713,89 @@ Defined in src/symple/include/icy/symple/form.h:227
 
 Values are stored as strings in a JSON array. Typed accessors (intValue, doubleValue, boolValue) parse the first string on demand.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`FormField`](#formfield-1) | `function` | Declared here |
+| [`FormField`](#formfield-2) | `function` | Declared here |
+| [`addOption`](#addoption) | `function` | Declared here |
+| [`addOption`](#addoption-1) | `function` | Declared here |
+| [`setValue`](#setvalue-4) | `function` | Declared here |
+| [`setValue`](#setvalue-5) | `function` | Declared here |
+| [`setValue`](#setvalue-6) | `function` | Declared here |
+| [`setValue`](#setvalue-7) | `function` | Declared here |
+| [`addValue`](#addvalue) | `function` | Declared here |
+| [`addValue`](#addvalue-1) | `function` | Declared here |
+| [`addValue`](#addvalue-2) | `function` | Declared here |
+| [`addValue`](#addvalue-3) | `function` | Declared here |
+| [`values`](#values) | `function` | Declared here |
+| [`value`](#value-4) | `function` | Declared here |
+| [`intValue`](#intvalue) | `function` | Declared here |
+| [`doubleValue`](#doublevalue) | `function` | Declared here |
+| [`boolValue`](#boolvalue) | `function` | Declared here |
+| [`FormElement`](#formelement-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`FormElement`](#formelement-2) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`FormElement`](#formelement-3) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`operator=`](#operator-37) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`type`](#type-21) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`id`](#id-6) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`label`](#label) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setType`](#settype-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setId`](#setid) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setLabel`](#setlabel) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setHint`](#sethint) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setError`](#seterror-7) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addPage`](#addpage) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addSection`](#addsection) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`addField`](#addfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`getField`](#getfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`getField`](#getfield-1) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasField`](#hasfield) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`setLive`](#setlive) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`live`](#live) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`clearElements`](#clearelements) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`clear`](#clear-3) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`valid`](#valid-14) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`numElements`](#numelements) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasErrors`](#haserrors) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`hasPages`](#haspages) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`root`](#root-4) | `function` | Inherited from [`FormElement`](#formelement) |
+| [`_root`](#_root) | `variable` | Inherited from [`FormElement`](#formelement) |
+
+### Inherited from [`FormElement`](#formelement)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`FormElement`](#formelement-1)  | Constructs an unbound element (root pointer is null). |
+| `function` | [`FormElement`](#formelement-2)  | Constructs an element bound to the given JSON node. |
+| `function` | [`FormElement`](#formelement-3)  | Copy constructor; copies the root pointer reference (shallow). |
+| `function` | [`operator=`](#operator-37)  | Copy-assigns the root pointer reference. |
+| `function` | [`type`](#type-21) `const` `nodiscard` | Returns the element type string. |
+| `function` | [`id`](#id-6) `const` `nodiscard` | Returns the element ID string. |
+| `function` | [`label`](#label) `const` `nodiscard` | Returns the display label string. |
+| `function` | [`setType`](#settype-1)  | Sets the element type. Possible values: page, section, text, text-multi, list, list-multi, checkbox, media, custom |
+| `function` | [`setId`](#setid)  | Sets the element ID field. |
+| `function` | [`setLabel`](#setlabel)  | Sets the display label field. |
+| `function` | [`setHint`](#sethint)  | Sets the hint/description field shown below the element. |
+| `function` | [`setError`](#seterror-7)  | Sets an optional validation error message. |
+| `function` | [`addPage`](#addpage)  | Appends a page child element and returns a handle to it. |
+| `function` | [`addSection`](#addsection)  | Appends a section child element and returns a handle to it. |
+| `function` | [`addField`](#addfield)  | Appends a typed field child element and returns a handle to it. Throws std::invalid_argument if type is not a recognised field type. |
+| `function` | [`getField`](#getfield)  | Searches child elements for the field with the given ID. |
+| `function` | [`getField`](#getfield-1)  | Populates a [FormField](#formfield) by searching child elements for the given ID. |
+| `function` | [`hasField`](#hasfield)  | Returns true if any child element has an ID matching the given value. |
+| `function` | [`setLive`](#setlive)  | Sets the live flag on this element. Live elements are used to submit partial form sections (e.g. for auto-complete) without sending the entire form. |
+| `function` | [`live`](#live) `const` `nodiscard` | Returns true if this field is live, meaning the form-processing entity should auto-update this field's value whenever it changes. |
+| `function` | [`clearElements`](#clearelements)  | Removes all child elements whose ID matches the given value. |
+| `function` | [`clear`](#clear-3)  | Clears all fields from the underlying JSON node. |
+| `function` | [`valid`](#valid-14) `const` `nodiscard` | Returns true if the form element is valid. |
+| `function` | [`numElements`](#numelements)  | Returns the number of child elements. |
+| `function` | [`hasErrors`](#haserrors)  | Returns true if any fields have errors. |
+| `function` | [`hasPages`](#haspages)  | Returns true if the form has multiple pages. |
+| `function` | [`root`](#root-4) `const` `nodiscard` | Returns a reference to the underlying JSON node. Throws std::runtime_error if the root pointer is null. |
+| `variable` | [`_root`](#_root)  | The root pointer is just a reference to the externally managed JSON value memory. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2505,6 +3113,96 @@ Defined in src/symple/include/icy/symple/message.h:27
 
 Base Symple protocol message with addressing, status, data, and notes.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Message`](#message-11) | `function` | Declared here |
+| [`Message`](#message-12) | `function` | Declared here |
+| [`Message`](#message-13) | `function` | Declared here |
+| [`clone`](#clone-18) | `function` | Declared here |
+| [`valid`](#valid-15) | `function` | Declared here |
+| [`clear`](#clear-4) | `function` | Declared here |
+| [`clearData`](#cleardata) | `function` | Declared here |
+| [`clearNotes`](#clearnotes) | `function` | Declared here |
+| [`type`](#type-22) | `function` | Declared here |
+| [`id`](#id-7) | `function` | Declared here |
+| [`to`](#to) | `function` | Declared here |
+| [`from`](#from) | `function` | Declared here |
+| [`toUser`](#touser) | `function` | Declared here |
+| [`toId`](#toid) | `function` | Declared here |
+| [`fromUser`](#fromuser) | `function` | Declared here |
+| [`fromId`](#fromid) | `function` | Declared here |
+| [`status`](#status-3) | `function` | Declared here |
+| [`setType`](#settype-2) | `function` | Declared here |
+| [`setTo`](#setto) | `function` | Declared here |
+| [`setTo`](#setto-1) | `function` | Declared here |
+| [`setTo`](#setto-2) | `function` | Declared here |
+| [`setFrom`](#setfrom) | `function` | Declared here |
+| [`setFrom`](#setfrom-1) | `function` | Declared here |
+| [`setFrom`](#setfrom-2) | `function` | Declared here |
+| [`setStatus`](#setstatus-1) | `function` | Declared here |
+| [`notes`](#notes) | `function` | Declared here |
+| [`setNote`](#setnote) | `function` | Declared here |
+| [`addNote`](#addnote) | `function` | Declared here |
+| [`data`](#data-4) | `function` | Declared here |
+| [`data`](#data-5) | `function` | Declared here |
+| [`setData`](#setdata) | `function` | Declared here |
+| [`setData`](#setdata-1) | `function` | Declared here |
+| [`setData`](#setdata-2) | `function` | Declared here |
+| [`setData`](#setdata-3) | `function` | Declared here |
+| [`setData`](#setdata-4) | `function` | Declared here |
+| [`removeData`](#removedata) | `function` | Declared here |
+| [`hasData`](#hasdata) | `function` | Declared here |
+| [`read`](#read-13) | `function` | Declared here |
+| [`read`](#read-14) | `function` | Declared here |
+| [`write`](#write-28) | `function` | Declared here |
+| [`isRequest`](#isrequest) | `function` | Declared here |
+| [`size`](#size-12) | `function` | Declared here |
+| [`print`](#print-16) | `function` | Declared here |
+| [`className`](#classname-8) | `function` | Declared here |
+| [`data`](#data-6) | `function` | Declared here |
+| [`hasData`](#hasdata-1) | `function` | Declared here |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2618,6 +3316,10 @@ Defined in src/symple/include/icy/symple/message.h:49
 
 Returns a heap-allocated copy of this message.
 
+##### Reimplements
+
+- [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7)
+
 ---
 
 {#valid-15}
@@ -2633,6 +3335,11 @@ virtual bool valid() const
 Defined in src/symple/include/icy/symple/message.h:52
 
 Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields.
+
+##### Reimplemented by
+
+- [`valid`](#valid-11)
+- [`valid`](#valid-12)
 
 ---
 
@@ -3181,6 +3888,10 @@ Deserialises the message from a raw buffer.
 #### Returns
 Number of bytes consumed.
 
+##### Reimplements
+
+- [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b)
+
 ---
 
 {#read-14}
@@ -3220,6 +3931,10 @@ Serialises the message as JSON into a buffer.
 #### Parameters
 * `buf` [Buffer](base.md#buffer-2) to append to.
 
+##### Reimplements
+
+- [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c)
+
 ---
 
 {#isrequest}
@@ -3252,6 +3967,10 @@ Defined in src/symple/include/icy/symple/message.h:195
 
 Returns the serialised JSON size in bytes.
 
+##### Reimplements
+
+- [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c)
+
 ---
 
 {#print-16}
@@ -3270,6 +3989,10 @@ Pretty-prints the message JSON to the given stream.
 #### Parameters
 * `os` Output stream.
 
+##### Reimplements
+
+- [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc)
+
 ---
 
 {#classname-8}
@@ -3285,6 +4008,10 @@ virtual inline const char * className() const override
 Defined in src/symple/include/icy/symple/message.h:201
 
 Returns the class name of this packet type for logging and diagnostics.
+
+##### Reimplements
+
+- [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1)
 
 ---
 
@@ -3302,6 +4029,10 @@ Defined in src/symple/include/icy/symple/message.h:31
 
 The packet data pointer for buffered packets.
 
+##### Reimplements
+
+- [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951)
+
 ---
 
 {#hasdata-1}
@@ -3317,6 +4048,10 @@ virtual inline bool hasData() const
 Defined in src/symple/include/icy/symple/message.h:32
 
 Returns true if the packet has a non-null data pointer.
+
+##### Reimplements
+
+- [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80)
 
 {#peer-1}
 
@@ -3337,6 +4072,30 @@ Defined in src/symple/include/icy/symple/peer.h:30
 Symple peer record containing identity, presence, and custom fields.
 
 A [Peer](#peer-1) object may also contain arbitrary application data set by the client to share with other peers on the network. **See also**: [Address](#address-13) for further methods and [basic](base.md#basic) accessors.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-38) | `friend` | Declared here |
+| [`Peer`](#peer-2) | `function` | Declared here |
+| [`Peer`](#peer-3) | `function` | Declared here |
+| [`operator=`](#operator-39) | `function` | Declared here |
+| [`Peer`](#peer-4) | `function` | Declared here |
+| [`address`](#address-17) | `function` | Declared here |
+| [`id`](#id-8) | `function` | Declared here |
+| [`user`](#user-2) | `function` | Declared here |
+| [`name`](#name-14) | `function` | Declared here |
+| [`type`](#type-23) | `function` | Declared here |
+| [`host`](#host-3) | `function` | Declared here |
+| [`setID`](#setid-1) | `function` | Declared here |
+| [`setUser`](#setuser) | `function` | Declared here |
+| [`setName`](#setname-3) | `function` | Declared here |
+| [`setType`](#settype-3) | `function` | Declared here |
+| [`setHost`](#sethost-2) | `function` | Declared here |
+| [`valid`](#valid-16) | `function` | Declared here |
+| [`print`](#print-17) | `function` | Declared here |
+| [`className`](#classname-9) | `function` | Declared here |
 
 ### Friends
 
@@ -3691,6 +4450,152 @@ Symple presence message indicating a peer's online status.
 
 [Presence](#presence) messages carry peer data in the `[data](#data-4)` field. When `probe` is true the recipient should respond with their own presence.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Presence`](#presence-1) | `function` | Declared here |
+| [`Presence`](#presence-2) | `function` | Declared here |
+| [`Presence`](#presence-3) | `function` | Declared here |
+| [`isProbe`](#isprobe) | `function` | Declared here |
+| [`setProbe`](#setprobe) | `function` | Declared here |
+| [`Message`](#message-11) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`Message`](#message-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`clone`](#clone-18) | `function` | Inherited from [`Message`](#message-10) |
+| [`valid`](#valid-15) | `function` | Inherited from [`Message`](#message-10) |
+| [`clear`](#clear-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearData`](#cleardata) | `function` | Inherited from [`Message`](#message-10) |
+| [`clearNotes`](#clearnotes) | `function` | Inherited from [`Message`](#message-10) |
+| [`type`](#type-22) | `function` | Inherited from [`Message`](#message-10) |
+| [`id`](#id-7) | `function` | Inherited from [`Message`](#message-10) |
+| [`to`](#to) | `function` | Inherited from [`Message`](#message-10) |
+| [`from`](#from) | `function` | Inherited from [`Message`](#message-10) |
+| [`toUser`](#touser) | `function` | Inherited from [`Message`](#message-10) |
+| [`toId`](#toid) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromUser`](#fromuser) | `function` | Inherited from [`Message`](#message-10) |
+| [`fromId`](#fromid) | `function` | Inherited from [`Message`](#message-10) |
+| [`status`](#status-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setType`](#settype-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setTo`](#setto-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setFrom`](#setfrom-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setStatus`](#setstatus-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`notes`](#notes) | `function` | Inherited from [`Message`](#message-10) |
+| [`setNote`](#setnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`addNote`](#addnote) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-5) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-2) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-3) | `function` | Inherited from [`Message`](#message-10) |
+| [`setData`](#setdata-4) | `function` | Inherited from [`Message`](#message-10) |
+| [`removeData`](#removedata) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-13) | `function` | Inherited from [`Message`](#message-10) |
+| [`read`](#read-14) | `function` | Inherited from [`Message`](#message-10) |
+| [`write`](#write-28) | `function` | Inherited from [`Message`](#message-10) |
+| [`isRequest`](#isrequest) | `function` | Inherited from [`Message`](#message-10) |
+| [`size`](#size-12) | `function` | Inherited from [`Message`](#message-10) |
+| [`print`](#print-16) | `function` | Inherited from [`Message`](#message-10) |
+| [`className`](#classname-8) | `function` | Inherited from [`Message`](#message-10) |
+| [`data`](#data-6) | `function` | Inherited from [`Message`](#message-10) |
+| [`hasData`](#hasdata-1) | `function` | Inherited from [`Message`](#message-10) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`Message`](#message-10)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Message`](#message-11)  | Constructs a new message with a random ID and type set to "message". |
+| `function` | [`Message`](#message-12)  | Constructs a message from a JSON value; sets missing id/type fields. |
+| `function` | [`Message`](#message-13)  | Copy constructor; preserves or generates id/type fields. |
+| `function` | [`clone`](#clone-18) `virtual` `const` `override` | Returns a heap-allocated copy of this message. |
+| `function` | [`valid`](#valid-15) `virtual` `const` | Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields. |
+| `function` | [`clear`](#clear-4) `virtual` | Clears all JSON fields from this message. |
+| `function` | [`clearData`](#cleardata) `virtual` | Clears the `[data](#data-4)` sub-object. |
+| `function` | [`clearNotes`](#clearnotes) `virtual` | Clears the `[notes](#notes)` array. |
+| `function` | [`type`](#type-22) `const` `nodiscard` | Returns the message type string (defaults to "message"). |
+| `function` | [`id`](#id-7) `const` `nodiscard` | Returns the message ID string. |
+| `function` | [`to`](#to) `const` `nodiscard` | Returns the recipient address parsed from the `[to](#to)` field. |
+| `function` | [`from`](#from) `const` `nodiscard` | Returns the sender address parsed from the `[from](#from)` field. |
+| `function` | [`toUser`](#touser) `const` `nodiscard` | Returns the user component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`toId`](#toid) `const` `nodiscard` | Returns the id component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `function` | [`fromUser`](#fromuser) `const` `nodiscard` | Returns the user component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`fromId`](#fromid) `const` `nodiscard` | Returns the id component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `function` | [`status`](#status-3) `const` `nodiscard` | Returns the HTTP status code, or -1 if not set. |
+| `function` | [`setType`](#settype-2)  | Sets the message type field. |
+| `function` | [`setTo`](#setto)  | Sets the `[to](#to)` field from a peer's address. |
+| `function` | [`setTo`](#setto-1)  | Sets the `[to](#to)` field from an address object. |
+| `function` | [`setTo`](#setto-2)  | Sets the `[to](#to)` field from an address string. |
+| `function` | [`setFrom`](#setfrom)  | Sets the `[from](#from)` field from a peer's address. |
+| `function` | [`setFrom`](#setfrom-1)  | Sets the `[from](#from)` field from an address object. |
+| `function` | [`setFrom`](#setfrom-2)  | Sets the `[from](#from)` field from an address string. |
+| `function` | [`setStatus`](#setstatus-1)  | HTTP status codes are used to describe the message response. Throws std::invalid_argument if code is outside [101, 504]. |
+| `function` | [`notes`](#notes)  | Returns a reference to the `[notes](#notes)` JSON array. |
+| `function` | [`setNote`](#setnote)  | Replaces all notes with a single note. |
+| `function` | [`addNote`](#addnote)  | Appends a note to the `[notes](#notes)` array. |
+| `function` | [`data`](#data-4) `const` | Returns a copy of the named data field. |
+| `function` | [`data`](#data-5)  | Returns a reference to the named data field (creates it if absent). |
+| `function` | [`setData`](#setdata)  | Creates or replaces a named data field; returns a reference to it. |
+| `function` | [`setData`](#setdata-1)  | Sets a named data field to a C-string value. |
+| `function` | [`setData`](#setdata-2)  | Sets a named data field to a string value. |
+| `function` | [`setData`](#setdata-3)  | Sets a named data field to a JSON value. |
+| `function` | [`setData`](#setdata-4)  | Sets a named data field to an integer value. |
+| `function` | [`removeData`](#removedata)  | Removes a named field from the `[data](#data-4)` sub-object. |
+| `function` | [`hasData`](#hasdata)  | Returns true if the named field exists in the `[data](#data-4)` sub-object. |
+| `function` | [`read`](#read-13) `virtual` `override` | Deserialises the message from a raw buffer. |
+| `function` | [`read`](#read-14) `virtual` | Deserialises the message from a JSON string. |
+| `function` | [`write`](#write-28) `virtual` `const` `override` | Serialises the message as JSON into a buffer. |
+| `function` | [`isRequest`](#isrequest) `const` `nodiscard` | Returns true if no status code has been set (i.e. [status()](#status-3) == -1). |
+| `function` | [`size`](#size-12) `virtual` `const` `override` | Returns the serialised JSON size in bytes. |
+| `function` | [`print`](#print-16) `virtual` `const` `override` | Pretty-prints the message JSON to the given stream. |
+| `function` | [`className`](#classname-8) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`data`](#data-6) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`hasData`](#hasdata-1) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -3794,6 +4699,75 @@ Defined in src/symple/include/icy/symple/roster.h:29
 > **Inherits:** [`string, Peer >`](base.md#keyedstore)
 
 The [Roster](#roster-2) provides a registry for active network peers indexed by session ID.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PeerAdded`](#peeradded) | `variable` | Declared here |
+| [`PeerRemoved`](#peerremoved) | `variable` | Declared here |
+| [`Roster`](#roster-3) | `function` | Declared here |
+| [`getByHost`](#getbyhost) | `function` | Declared here |
+| [`peers`](#peers) | `function` | Declared here |
+| [`print`](#print-18) | `function` | Declared here |
+| [`className`](#classname-10) | `function` | Declared here |
+| [`onAdd`](#onadd) | `function` | Declared here |
+| [`onRemove`](#onremove) | `function` | Declared here |
+| [`Map`](base.md#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0) | `typedef` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`_map`](base.md#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8) | `variable` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`~KeyedStore`](base.md#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`operator=`](base.md#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`operator=`](base.md#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`get`](base.md#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`add`](base.md#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`tryAdd`](base.md#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`put`](base.md#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`erase`](base.md#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`contains`](base.md#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`empty`](base.md#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`size`](base.md#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`clear`](base.md#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`map`](base.md#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`map`](base.md#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`begin`](base.md#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`end`](base.md#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`begin`](base.md#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`end`](base.md#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`onAdd`](base.md#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+| [`onRemove`](base.md#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) | `function` | Inherited from [`KeyedStore`](base.md#keyedstore) |
+
+### Inherited from [`KeyedStore`](base.md#keyedstore)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Map`](base.md#classicy_1_1KeyedStore_1a36d59fd48cab6c0964ec71601c705ac0)  |  |
+| `variable` | [`_map`](base.md#classicy_1_1KeyedStore_1a13893537ec3ed8f225451bd21ecc61f8)  |  |
+| `function` | [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a38afd30d2e186ebeaeabe1400d15a754)  | Defaulted constructor. |
+| `function` | [`~KeyedStore`](base.md#classicy_1_1KeyedStore_1a3c6b29a646771b0e0221873afce1e7b2) `virtual` `inline` |  |
+| `function` | [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a7a5eee882aa83b90629a55b5843e7834)  | Deleted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1KeyedStore_1af09e123a8b3b0e63e3557bf1e37b9cba)  | Deleted assignment operator. |
+| `function` | [`KeyedStore`](base.md#classicy_1_1KeyedStore_1a02b030b0c8acbeadc8fd273e98e6cc6f)  | Defaulted constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1KeyedStore_1a9bea475c7afe32a7ee63b281bc0a182d)  | Defaulted assignment operator. |
+| `function` | [`get`](base.md#classicy_1_1KeyedStore_1a80b4ffad8b24a21d1f56e90ba610cd4e) `const` `inline` | Returns the item for `key`, or nullptr if not found. |
+| `function` | [`add`](base.md#classicy_1_1KeyedStore_1a773198fbe5a781bb98d5f8e969e063c8) `inline` | Inserts a uniquely owned item. Returns a reference to the stored item. |
+| `function` | [`tryAdd`](base.md#classicy_1_1KeyedStore_1a9c9cc5e6202efec22967709a55ddca99) `inline` | Inserts if absent; returns false on duplicate (never throws). |
+| `function` | [`put`](base.md#classicy_1_1KeyedStore_1a7fe7fb266aefbf815206270b8a13794e) `inline` | Inserts or replaces the item under `key`. |
+| `function` | [`erase`](base.md#classicy_1_1KeyedStore_1a0bac5c9b3814e9e5838fded3c9b0b811) `inline` | Removes and destroys the item under `key`. |
+| `function` | [`contains`](base.md#classicy_1_1KeyedStore_1a5b71fda08a410b5bcc62e0c963909656) `const` `inline` |  |
+| `function` | [`empty`](base.md#classicy_1_1KeyedStore_1ab1055567facaac7db3026732e49e0271) `const` `inline` |  |
+| `function` | [`size`](base.md#classicy_1_1KeyedStore_1ab0a21578a16ed774614383d3099de919) `const` `inline` |  |
+| `function` | [`clear`](base.md#classicy_1_1KeyedStore_1aa3d4f575a7ed510d26ee5b733912e642) `inline` |  |
+| `function` | [`map`](base.md#classicy_1_1KeyedStore_1a72b696edc553ed4d19df38f3c77980f7) `inline` | Direct map access for iteration. |
+| `function` | [`map`](base.md#classicy_1_1KeyedStore_1ac048ac94fe6c90e6b49104caf154570a) `const` `inline` |  |
+| `function` | [`begin`](base.md#classicy_1_1KeyedStore_1a1a71782a34581fc6da3a8b727f717e6e) `inline` |  |
+| `function` | [`end`](base.md#classicy_1_1KeyedStore_1a3130dd9916889fa505c1a62e9e08d6f9) `inline` |  |
+| `function` | [`begin`](base.md#classicy_1_1KeyedStore_1a2489acbcc1e01460e8b340322349f523) `const` `inline` |  |
+| `function` | [`end`](base.md#classicy_1_1KeyedStore_1a70d706b031fd3a707c62077df4aa2965) `const` `inline` |  |
+| `function` | [`onAdd`](base.md#classicy_1_1KeyedStore_1a560a59fffcae55b224ea1783a0da3cec) `virtual` `inline` | Override for lifecycle reactions. |
+| `function` | [`onRemove`](base.md#classicy_1_1KeyedStore_1a0320226740ba9782db07380fd100749a) `virtual` `inline` |  |
 
 ### Public Attributes
 
@@ -3966,6 +4940,48 @@ Usage: [smpl::Server](#server-10) server; server.start({.port = 4500});
 // Optional: custom authentication server.Authenticate += []([ServerPeer](#serverpeer)& peer, const [json::Value](json.md#value)& auth, bool& allowed, std::vector<std::string>& rooms) { allowed = (auth.value("token", "") == "secret"); rooms.push_back("team-a"); };
 
 The server also serves as an HTTP server, so you can serve static files (e.g. a web UI) on the same port.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Factory`](#factory-2) | `friend` | Declared here |
+| [`Authenticate`](#authenticate-2) | `variable` | Declared here |
+| [`PeerConnected`](#peerconnected-1) | `variable` | Declared here |
+| [`PeerDisconnected`](#peerdisconnected-1) | `variable` | Declared here |
+| [`Server`](#server-11) | `function` | Declared here |
+| [`Server`](#server-12) | `function` | Declared here |
+| [`start`](#start-17) | `function` | Declared here |
+| [`start`](#start-18) | `function` | Declared here |
+| [`stop`](#stop-14) | `function` | Declared here |
+| [`broadcast`](#broadcast) | `function` | Declared here |
+| [`broadcastRooms`](#broadcastrooms) | `function` | Declared here |
+| [`sendTo`](#sendto) | `function` | Declared here |
+| [`sendToUser`](#sendtouser) | `function` | Declared here |
+| [`getPeer`](#getpeer) | `function` | Declared here |
+| [`getPeersInRoom`](#getpeersinroom) | `function` | Declared here |
+| [`peerCount`](#peercount) | `function` | Declared here |
+| [`addVirtualPeer`](#addvirtualpeer) | `function` | Declared here |
+| [`removeVirtualPeer`](#removevirtualpeer) | `function` | Declared here |
+| [`httpServer`](#httpserver) | `function` | Declared here |
+| [`loop`](#loop-9) | `function` | Declared here |
+| [`_opts`](#_opts) | `variable` | Declared here |
+| [`_loop`](#_loop-3) | `variable` | Declared here |
+| [`_http`](#_http) | `variable` | Declared here |
+| [`_peerRegistry`](#_peerregistry) | `variable` | Declared here |
+| [`_roomIndex`](#_roomindex) | `variable` | Declared here |
+| [`_mutex`](#_mutex-16) | `variable` | Declared here |
+| [`_shuttingDown`](#_shuttingdown) | `variable` | Declared here |
+| [`_httpFallback`](#_httpfallback) | `variable` | Declared here |
+| [`onAuth`](#onauth) | `function` | Declared here |
+| [`onMessage`](#onmessage) | `function` | Declared here |
+| [`onJoin`](#onjoin) | `function` | Declared here |
+| [`onLeave`](#onleave) | `function` | Declared here |
+| [`onDisconnect`](#ondisconnect) | `function` | Declared here |
+| [`route`](#route) | `function` | Declared here |
+| [`deliver`](#deliver) | `function` | Declared here |
+| [`deliverSerialized`](#deliverserialized) | `function` | Declared here |
+| [`sendPresenceSnapshot`](#sendpresencesnapshot) | `function` | Declared here |
 
 ### Friends
 
@@ -4554,6 +5570,29 @@ class PeerRegistry
 
 Defined in src/symple/src/server/detail.h:27
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`add`](#add-3) | `function` | Declared here |
+| [`addVirtual`](#addvirtual) | `function` | Declared here |
+| [`bind`](#bind-4) | `function` | Declared here |
+| [`unbind`](#unbind) | `function` | Declared here |
+| [`erase`](#erase) | `function` | Declared here |
+| [`eraseVirtual`](#erasevirtual) | `function` | Declared here |
+| [`clear`](#clear-5) | `function` | Declared here |
+| [`find`](#find) | `function` | Declared here |
+| [`find`](#find-1) | `function` | Declared here |
+| [`findVirtual`](#findvirtual) | `function` | Declared here |
+| [`findVirtual`](#findvirtual-1) | `function` | Declared here |
+| [`findByConnection`](#findbyconnection) | `function` | Declared here |
+| [`findByConnection`](#findbyconnection-1) | `function` | Declared here |
+| [`size`](#size-13) | `function` | Declared here |
+| [`peers`](#peers-1) | `function` | Declared here |
+| [`_peers`](#_peers) | `variable` | Declared here |
+| [`_virtualPeers`](#_virtualpeers) | `variable` | Declared here |
+| [`_connToPeer`](#_conntopeer) | `variable` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4828,6 +5867,19 @@ class RoomIndex
 
 Defined in src/symple/src/server/detail.h:58
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`join`](#join) | `function` | Declared here |
+| [`leave`](#leave) | `function` | Declared here |
+| [`leaveAll`](#leaveall) | `function` | Declared here |
+| [`clear`](#clear-6) | `function` | Declared here |
+| [`members`](#members) | `function` | Declared here |
+| [`collectRecipients`](#collectrecipients) | `function` | Declared here |
+| [`MemberSet`](#memberset) | `typedef` | Declared here |
+| [`_rooms`](#_rooms) | `variable` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4966,6 +6018,20 @@ struct Options
 Defined in src/symple/include/icy/symple/server.h:140
 
 [Configuration](base.md#configuration) options for the Symple server.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`host`](#host-4) | `variable` | Declared here |
+| [`port`](#port-3) | `variable` | Declared here |
+| [`socket`](#socket-7) | `variable` | Declared here |
+| [`authentication`](#authentication) | `variable` | Declared here |
+| [`dynamicRooms`](#dynamicrooms) | `variable` | Declared here |
+| [`maxConnections`](#maxconnections) | `variable` | Declared here |
+| [`maxMessageSize`](#maxmessagesize) | `variable` | Declared here |
+| [`rateLimit`](#ratelimit) | `variable` | Declared here |
+| [`rateSeconds`](#rateseconds) | `variable` | Declared here |
 
 ### Public Attributes
 
@@ -5117,6 +6183,14 @@ struct VirtualPeer
 
 Defined in src/symple/src/server/detail.h:19
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`peer`](#peer-5) | `variable` | Declared here |
+| [`rooms`](#rooms-1) | `variable` | Declared here |
+| [`handler`](#handler) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -5174,6 +6248,15 @@ struct RoutingPolicy
 ```
 
 Defined in src/symple/src/server/detail.h:78
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`sharesAnyRoom`](#sharesanyroom) | `function` | Declared here |
+| [`canDirectMessage`](#candirectmessage) | `function` | Declared here |
+| [`canDirectMessage`](#candirectmessage-1) | `function` | Declared here |
+| [`canBroadcastToRoom`](#canbroadcasttoroom) | `function` | Declared here |
 
 ### Public Static Methods
 
@@ -5257,6 +6340,32 @@ Defined in src/symple/include/icy/symple/server.h:43
 Per-connection state for a connected Symple peer.
 
 Created by the server after successful authentication. Holds the peer data, room memberships, and a reference to the underlying WebSocket connection for sending.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ServerPeer`](#serverpeer-1) | `function` | Declared here |
+| [`send`](#send-19) | `function` | Declared here |
+| [`sendSerialized`](#sendserialized) | `function` | Declared here |
+| [`join`](#join-1) | `function` | Declared here |
+| [`leave`](#leave-1) | `function` | Declared here |
+| [`leaveAll`](#leaveall-1) | `function` | Declared here |
+| [`peer`](#peer-6) | `function` | Declared here |
+| [`peer`](#peer-7) | `function` | Declared here |
+| [`id`](#id-9) | `function` | Declared here |
+| [`rooms`](#rooms-2) | `function` | Declared here |
+| [`authenticated`](#authenticated) | `function` | Declared here |
+| [`setAuthenticated`](#setauthenticated) | `function` | Declared here |
+| [`setPeer`](#setpeer) | `function` | Declared here |
+| [`connection`](#connection-10) | `function` | Declared here |
+| [`checkRate`](#checkrate) | `function` | Declared here |
+| [`setRateLimit`](#setratelimit) | `function` | Declared here |
+| [`_conn`](#_conn) | `variable` | Declared here |
+| [`_peer`](#_peer-1) | `variable` | Declared here |
+| [`_rooms`](#_rooms-1) | `variable` | Declared here |
+| [`_rateLimiter`](#_ratelimiter) | `variable` | Declared here |
+| [`_authenticated`](#_authenticated) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -5627,6 +6736,23 @@ Defined in src/symple/include/icy/symple/address.h:28
 
 The [Address](#address-13) structure is an endpoint identifier for a peer on the network. The format is like so: user|id
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-34) | `friend` | Declared here |
+| [`user`](#user) | `variable` | Declared here |
+| [`id`](#id-5) | `variable` | Declared here |
+| [`Address`](#address-14) | `function` | Declared here |
+| [`Address`](#address-15) | `function` | Declared here |
+| [`Address`](#address-16) | `function` | Declared here |
+| [`parse`](#parse-2) | `function` | Declared here |
+| [`valid`](#valid-10) | `function` | Declared here |
+| [`print`](#print-15) | `function` | Declared here |
+| [`toString`](#tostring-9) | `function` | Declared here |
+| [`operator==`](#operator-35) | `function` | Declared here |
+| [`operator==`](#operator-36) | `function` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -5864,6 +6990,48 @@ Defined in src/symple/include/icy/symple/client.h:38
 > **Inherits:** [`State`](base.md#state)
 
 [Client](#client-5) connection states.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`str`](#str-3) | `function` | Declared here |
+| [`Type`](#type-20) | `enum` | Declared here |
+| [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](base.md#state) |
+| [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](base.md#state) |
+| [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](base.md#state) |
+| [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](base.md#state) |
+| [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](base.md#state) |
+| [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](base.md#state) |
+| [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](base.md#state) |
+| [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](base.md#state) |
+| [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](base.md#state) |
+
+### Inherited from [`State`](base.md#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
 
 ### Public Methods
 

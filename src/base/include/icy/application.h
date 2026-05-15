@@ -33,6 +33,9 @@ namespace icy {
 ///   * Shutdown signal (Ctrl-C) handling
 ///   * Garbage collection
 ///
+/// @par Example
+/// @include application-basic.cpp
+///
 class Base_API Application
 {
 public:

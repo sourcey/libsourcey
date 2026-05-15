@@ -30,6 +30,40 @@ Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:29
 
 [SignallingInterface](webrtc.md#signallinginterface) implementation using plain JSON over WebSocket.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SendMessage`](#sendmessage) | `variable` | Declared here |
+| [`WebSocketSignaller`](#websocketsignaller-1) | `function` | Declared here |
+| [`WebSocketSignaller`](#websocketsignaller-2) | `function` | Declared here |
+| [`sendSdp`](#sendsdp-1) | `function` | Declared here |
+| [`sendCandidate`](#sendcandidate-1) | `function` | Declared here |
+| [`sendControl`](#sendcontrol-1) | `function` | Declared here |
+| [`receive`](#receive) | `function` | Declared here |
+| [`setLocalPeerId`](#setlocalpeerid) | `function` | Declared here |
+| [`localPeerId`](#localpeerid) | `function` | Declared here |
+| [`_localPeerId`](#_localpeerid) | `variable` | Declared here |
+| [`_mutex`](#_mutex-21) | `variable` | Declared here |
+| [`sendJson`](#sendjson-1) | `function` | Declared here |
+| [`SdpReceived`](webrtc.md#sdpreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`CandidateReceived`](webrtc.md#candidatereceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`ControlReceived`](webrtc.md#controlreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendSdp`](webrtc.md#sendsdp) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendCandidate`](webrtc.md#sendcandidate) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendControl`](webrtc.md#sendcontrol) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+
+### Inherited from [`SignallingInterface`](webrtc.md#signallinginterface)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`SdpReceived`](webrtc.md#sdpreceived)  | Fires when an SDP offer or answer arrives from a remote peer. Parameters: peerId, type ("offer"/"answer"), sdp. |
+| `variable` | [`CandidateReceived`](webrtc.md#candidatereceived)  | Fires when an ICE candidate arrives from a remote peer. Parameters: peerId, candidate, mid. |
+| `variable` | [`ControlReceived`](webrtc.md#controlreceived)  | Fires when a control message arrives from a remote peer. Parameters: peerId, type ("init"/"accept"/"reject"/"hangup"), reason. |
+| `function` | [`sendSdp`](webrtc.md#sendsdp) `virtual` | Send an SDP offer or answer to the remote peer. |
+| `function` | [`sendCandidate`](webrtc.md#sendcandidate) `virtual` | Send an ICE candidate to the remote peer. |
+| `function` | [`sendControl`](webrtc.md#sendcontrol) `virtual` | Send a control message to the remote peer. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -111,6 +145,10 @@ Send an SDP offer or answer to the remote peer.
 
 * `sdp` The SDP string.
 
+##### Reimplements
+
+- [`sendSdp`](webrtc.md#sendsdp)
+
 ---
 
 {#sendcandidate-1}
@@ -133,6 +171,10 @@ Send an ICE candidate to the remote peer.
 
 * `mid` The sdpMid value.
 
+##### Reimplements
+
+- [`sendCandidate`](webrtc.md#sendcandidate)
+
 ---
 
 {#sendcontrol-1}
@@ -154,6 +196,10 @@ Send a control message to the remote peer.
 * `type` Control type: "init", "accept", "reject", "hangup". 
 
 * `reason` Optional reason string (for reject/hangup).
+
+##### Reimplements
+
+- [`sendControl`](webrtc.md#sendcontrol)
 
 ---
 
@@ -266,6 +312,36 @@ Speaks the `call:init`, `call:accept`, `call:reject`, `call:offer`, `call:answer
 
 The remote peer identifier on this signalling boundary is the full Symple address string (`user|id`).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SympleSignaller`](#symplesignaller-1) | `function` | Declared here |
+| [`SympleSignaller`](#symplesignaller-2) | `function` | Declared here |
+| [`sendSdp`](#sendsdp-2) | `function` | Declared here |
+| [`sendCandidate`](#sendcandidate-2) | `function` | Declared here |
+| [`sendControl`](#sendcontrol-2) | `function` | Declared here |
+| [`_client`](#_client) | `variable` | Declared here |
+| [`onMessage`](#onmessage-1) | `function` | Declared here |
+| [`send`](#send-20) | `function` | Declared here |
+| [`SdpReceived`](webrtc.md#sdpreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`CandidateReceived`](webrtc.md#candidatereceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`ControlReceived`](webrtc.md#controlreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendSdp`](webrtc.md#sendsdp) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendCandidate`](webrtc.md#sendcandidate) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendControl`](webrtc.md#sendcontrol) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+
+### Inherited from [`SignallingInterface`](webrtc.md#signallinginterface)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`SdpReceived`](webrtc.md#sdpreceived)  | Fires when an SDP offer or answer arrives from a remote peer. Parameters: peerId, type ("offer"/"answer"), sdp. |
+| `variable` | [`CandidateReceived`](webrtc.md#candidatereceived)  | Fires when an ICE candidate arrives from a remote peer. Parameters: peerId, candidate, mid. |
+| `variable` | [`ControlReceived`](webrtc.md#controlreceived)  | Fires when a control message arrives from a remote peer. Parameters: peerId, type ("init"/"accept"/"reject"/"hangup"), reason. |
+| `function` | [`sendSdp`](webrtc.md#sendsdp) `virtual` | Send an SDP offer or answer to the remote peer. |
+| `function` | [`sendCandidate`](webrtc.md#sendcandidate) `virtual` | Send an ICE candidate to the remote peer. |
+| `function` | [`sendControl`](webrtc.md#sendcontrol) `virtual` | Send a control message to the remote peer. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -326,6 +402,10 @@ Send an SDP offer or answer to the remote peer.
 
 * `sdp` The SDP string.
 
+##### Reimplements
+
+- [`sendSdp`](webrtc.md#sendsdp)
+
 ---
 
 {#sendcandidate-2}
@@ -348,6 +428,10 @@ Send an ICE candidate to the remote peer.
 
 * `mid` The sdpMid value.
 
+##### Reimplements
+
+- [`sendCandidate`](webrtc.md#sendcandidate)
+
 ---
 
 {#sendcontrol-2}
@@ -369,6 +453,10 @@ Send a control message to the remote peer.
 * `type` Control type: "init", "accept", "reject", "hangup". 
 
 * `reason` Optional reason string (for reject/hangup).
+
+##### Reimplements
+
+- [`sendControl`](webrtc.md#sendcontrol)
 
 ### Private Attributes
 
@@ -441,6 +529,47 @@ This adapter sends signalling messages through a `[smpl::Server](symple.md#serve
 
 The remote peer identifier on this signalling boundary is the full Symple address string (`user|id`).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SympleServerSignaller`](#sympleserversignaller-1) | `function` | Declared here |
+| [`SympleServerSignaller`](#sympleserversignaller-2) | `function` | Declared here |
+| [`sendSdp`](#sendsdp-3) | `function` | Declared here |
+| [`sendCandidate`](#sendcandidate-3) | `function` | Declared here |
+| [`sendControl`](#sendcontrol-3) | `function` | Declared here |
+| [`onMessage`](#onmessage-2) | `function` | Declared here |
+| [`setRemoteAddress`](#setremoteaddress) | `function` | Declared here |
+| [`localAddress`](#localaddress-1) | `function` | Declared here |
+| [`remoteAddress`](#remoteaddress-1) | `function` | Declared here |
+| [`_server`](#_server-2) | `variable` | Declared here |
+| [`_localAddress`](#_localaddress) | `variable` | Declared here |
+| [`_remoteAddress`](#_remoteaddress) | `variable` | Declared here |
+| [`_dispatch`](#_dispatch-1) | `variable` | Declared here |
+| [`_mutex`](#_mutex-22) | `variable` | Declared here |
+| [`_pending`](#_pending-1) | `variable` | Declared here |
+| [`_closing`](#_closing) | `variable` | Declared here |
+| [`send`](#send-21) | `function` | Declared here |
+| [`sendNow`](#sendnow) | `function` | Declared here |
+| [`flushPending`](#flushpending-1) | `function` | Declared here |
+| [`SdpReceived`](webrtc.md#sdpreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`CandidateReceived`](webrtc.md#candidatereceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`ControlReceived`](webrtc.md#controlreceived) | `variable` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendSdp`](webrtc.md#sendsdp) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendCandidate`](webrtc.md#sendcandidate) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+| [`sendControl`](webrtc.md#sendcontrol) | `function` | Inherited from [`SignallingInterface`](webrtc.md#signallinginterface) |
+
+### Inherited from [`SignallingInterface`](webrtc.md#signallinginterface)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`SdpReceived`](webrtc.md#sdpreceived)  | Fires when an SDP offer or answer arrives from a remote peer. Parameters: peerId, type ("offer"/"answer"), sdp. |
+| `variable` | [`CandidateReceived`](webrtc.md#candidatereceived)  | Fires when an ICE candidate arrives from a remote peer. Parameters: peerId, candidate, mid. |
+| `variable` | [`ControlReceived`](webrtc.md#controlreceived)  | Fires when a control message arrives from a remote peer. Parameters: peerId, type ("init"/"accept"/"reject"/"hangup"), reason. |
+| `function` | [`sendSdp`](webrtc.md#sendsdp) `virtual` | Send an SDP offer or answer to the remote peer. |
+| `function` | [`sendCandidate`](webrtc.md#sendcandidate) `virtual` | Send an ICE candidate to the remote peer. |
+| `function` | [`sendControl`](webrtc.md#sendcontrol) `virtual` | Send a control message to the remote peer. |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -503,6 +632,10 @@ Send an SDP offer or answer to the remote peer.
 
 * `sdp` The SDP string.
 
+##### Reimplements
+
+- [`sendSdp`](webrtc.md#sendsdp)
+
 ---
 
 {#sendcandidate-3}
@@ -525,6 +658,10 @@ Send an ICE candidate to the remote peer.
 
 * `mid` The sdpMid value.
 
+##### Reimplements
+
+- [`sendCandidate`](webrtc.md#sendcandidate)
+
 ---
 
 {#sendcontrol-3}
@@ -546,6 +683,10 @@ Send a control message to the remote peer.
 * `type` Control type: "init", "accept", "reject", "hangup". 
 
 * `reason` Optional reason string (for reject/hangup).
+
+##### Reimplements
+
+- [`sendControl`](webrtc.md#sendcontrol)
 
 ---
 
@@ -748,6 +889,13 @@ struct OutboundMessage
 ```
 
 Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:69
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`peerAddress`](#peeraddress-6) | `variable` | Declared here |
+| [`msg`](#msg) | `variable` | Declared here |
 
 ### Public Attributes
 

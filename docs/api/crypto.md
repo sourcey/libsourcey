@@ -319,6 +319,52 @@ Defined in src/crypto/include/icy/crypto/cipher.h:40
 
 Provides symmetric algorithms for encryption and decryption. The algorithms that are available depend on the particular version of OpenSSL that is installed.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Cipher`](#cipher-1) | `function` | Declared here |
+| [`Cipher`](#cipher-2) | `function` | Declared here |
+| [`Cipher`](#cipher-3) | `function` | Declared here |
+| [`~Cipher`](#cipher-4) | `function` | Declared here |
+| [`initEncryptor`](#initencryptor) | `function` | Declared here |
+| [`initDecryptor`](#initdecryptor) | `function` | Declared here |
+| [`update`](#update-7) | `function` | Declared here |
+| [`update`](#update-8) | `function` | Declared here |
+| [`final`](#final) | `function` | Declared here |
+| [`final`](#final-1) | `function` | Declared here |
+| [`encrypt`](#encrypt) | `function` | Declared here |
+| [`encrypt`](#encrypt-1) | `function` | Declared here |
+| [`encryptString`](#encryptstring-1) | `function` | Declared here |
+| [`decryptString`](#decryptstring-1) | `function` | Declared here |
+| [`encryptStream`](#encryptstream) | `function` | Declared here |
+| [`decryptStream`](#decryptstream) | `function` | Declared here |
+| [`setKey`](#setkey-1) | `function` | Declared here |
+| [`setIV`](#setiv) | `function` | Declared here |
+| [`setPadding`](#setpadding) | `function` | Declared here |
+| [`getKey`](#getkey) | `function` | Declared here |
+| [`getIV`](#getiv) | `function` | Declared here |
+| [`name`](#name-11) | `function` | Declared here |
+| [`blockSize`](#blocksize) | `function` | Declared here |
+| [`keySize`](#keysize) | `function` | Declared here |
+| [`ivSize`](#ivsize) | `function` | Declared here |
+| [`cipher`](#cipher-5) | `function` | Declared here |
+| [`_initialized`](#_initialized-2) | `variable` | Declared here |
+| [`_encrypt`](#_encrypt) | `variable` | Declared here |
+| [`_cipher`](#_cipher) | `variable` | Declared here |
+| [`_ctx`](#_ctx) | `variable` | Declared here |
+| [`_name`](#_name-2) | `variable` | Declared here |
+| [`_key`](#_key-2) | `variable` | Declared here |
+| [`_iv`](#_iv) | `variable` | Declared here |
+| [`Cipher`](#cipher-6) | `function` | Declared here |
+| [`Cipher`](#cipher-7) | `function` | Declared here |
+| [`Cipher`](#cipher-8) | `function` | Declared here |
+| [`generateKey`](#generatekey) | `function` | Declared here |
+| [`setRandomKey`](#setrandomkey) | `function` | Declared here |
+| [`setRandomIV`](#setrandomiv) | `function` | Declared here |
+| [`init`](#init-9) | `function` | Declared here |
+| [`Encoding`](#encoding-1) | `enum` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1203,6 +1249,24 @@ Incremental cryptographic hash engine wrapping OpenSSL EVP digest functions.
 
 Construct with an algorithm name recognized by OpenSSL (e.g. "sha256", "md5"). Feed data with one or more calls to [update()](#update-9), then call [digest()](#digest) or [digestStr()](#digeststr) to finalize and retrieve the result. Call [reset()](#reset-13) to reuse the engine for a new computation without reallocating the context.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Hash`](#hash-4) | `function` | Declared here |
+| [`~Hash`](#hash-5) | `function` | Declared here |
+| [`update`](#update-9) | `function` | Declared here |
+| [`update`](#update-10) | `function` | Declared here |
+| [`update`](#update-11) | `function` | Declared here |
+| [`digest`](#digest) | `function` | Declared here |
+| [`digestStr`](#digeststr) | `function` | Declared here |
+| [`reset`](#reset-13) | `function` | Declared here |
+| [`algorithm`](#algorithm) | `function` | Declared here |
+| [`_ctx`](#_ctx-1) | `variable` | Declared here |
+| [`_md`](#_md) | `variable` | Declared here |
+| [`_digest`](#_digest) | `variable` | Declared here |
+| [`_algorithm`](#_algorithm) | `variable` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1451,6 +1515,41 @@ class X509Certificate
 Defined in src/crypto/include/icy/crypto/x509certificate.h:33
 
 RAII wrapper for an OpenSSL X509 certificate with PEM loading and inspection.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`X509Certificate`](#x509certificate-1) | `function` | Declared here |
+| [`X509Certificate`](#x509certificate-2) | `function` | Declared here |
+| [`X509Certificate`](#x509certificate-3) | `function` | Declared here |
+| [`X509Certificate`](#x509certificate-4) | `function` | Declared here |
+| [`X509Certificate`](#x509certificate-5) | `function` | Declared here |
+| [`X509Certificate`](#x509certificate-6) | `function` | Declared here |
+| [`operator=`](#operator-32) | `function` | Declared here |
+| [`operator=`](#operator-33) | `function` | Declared here |
+| [`swap`](#swap-6) | `function` | Declared here |
+| [`~X509Certificate`](#x509certificate-7) | `function` | Declared here |
+| [`issuerName`](#issuername) | `function` | Declared here |
+| [`issuerName`](#issuername-1) | `function` | Declared here |
+| [`subjectName`](#subjectname) | `function` | Declared here |
+| [`subjectName`](#subjectname-1) | `function` | Declared here |
+| [`commonName`](#commonname) | `function` | Declared here |
+| [`extractNames`](#extractnames) | `function` | Declared here |
+| [`validFrom`](#validfrom) | `function` | Declared here |
+| [`expiresOn`](#expireson) | `function` | Declared here |
+| [`save`](#save-1) | `function` | Declared here |
+| [`save`](#save-2) | `function` | Declared here |
+| [`issuedBy`](#issuedby) | `function` | Declared here |
+| [`certificate`](#certificate-1) | `function` | Declared here |
+| [`certificate`](#certificate-2) | `function` | Declared here |
+| [`load`](#load-2) | `function` | Declared here |
+| [`load`](#load-3) | `function` | Declared here |
+| [`init`](#init-10) | `function` | Declared here |
+| [`NID`](#nid) | `enum` | Declared here |
+| [`_issuerName`](#_issuername) | `variable` | Declared here |
+| [`_subjectName`](#_subjectname) | `variable` | Declared here |
+| [`_certificate`](#_certificate) | `variable` | Declared here |
 
 ### Public Methods
 

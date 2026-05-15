@@ -328,6 +328,37 @@ Defined in src/net/include/icy/net/address.h:28
 
 Represents an IPv4 or IPv6 socket address with host and port.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-4) | `friend` | Declared here |
+| [`Address`](#address-1) | `function` | Declared here |
+| [`Address`](#address-2) | `function` | Declared here |
+| [`Address`](#address-3) | `function` | Declared here |
+| [`Address`](#address-4) | `function` | Declared here |
+| [`Address`](#address-5) | `function` | Declared here |
+| [`Address`](#address-6) | `function` | Declared here |
+| [`~Address`](#address-7) | `function` | Declared here |
+| [`operator=`](#operator-5) | `function` | Declared here |
+| [`swap`](#swap) | `function` | Declared here |
+| [`host`](#host) | `function` | Declared here |
+| [`port`](#port) | `function` | Declared here |
+| [`length`](#length) | `function` | Declared here |
+| [`addr`](#addr-1) | `function` | Declared here |
+| [`af`](#af) | `function` | Declared here |
+| [`toString`](#tostring-4) | `function` | Declared here |
+| [`family`](#family) | `function` | Declared here |
+| [`valid`](#valid) | `function` | Declared here |
+| [`operator<`](#operator-6) | `function` | Declared here |
+| [`operator==`](#operator-7) | `function` | Declared here |
+| [`operator!=`](#operator-8) | `function` | Declared here |
+| [`resolveService`](#resolveservice) | `function` | Declared here |
+| [`validateIP`](#validateip) | `function` | Declared here |
+| [`init`](#init-3) | `function` | Declared here |
+| [`Family`](#family-1) | `enum` | Declared here |
+| [`_base`](#_base) | `variable` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -827,6 +858,107 @@ Defined in src/net/include/icy/net/packetsocket.h:32
 
 [Socket](#socket-1) adapter that emits received data as packets.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`factory`](#factory) | `variable` | Declared here |
+| [`PacketSocketEmitter`](#packetsocketemitter-1) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv) | `function` | Declared here |
+| [`onPacket`](#onpacket) | `function` | Declared here |
+| [`Connect`](#connect-4) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Recv`](#recv) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Error`](#error-6) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Close`](#close-13) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`impl`](#impl) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`SocketEmitter`](#socketemitter-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`SocketEmitter`](#socketemitter-2) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`~SocketEmitter`](#socketemitter-3) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`addReceiver`](#addreceiver-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`removeReceiver`](#removereceiver-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`swap`](#swap-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`as`](#as) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`operator->`](#operator-9) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketConnect`](#onsocketconnect-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketRecv`](#onsocketrecv-2) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketError`](#onsocketerror-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketClose`](#onsocketclose-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`SocketEmitter`](#socketemitter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`Connect`](#connect-4)  | Signals that the socket is connected. |
+| `variable` | [`Recv`](#recv)  | Signals when data is received by the socket. |
+| `variable` | [`Error`](#error-6)  | Signals that the socket is closed in error. This signal will be sent just before the Closed signal. |
+| `variable` | [`Close`](#close-13)  | Signals that the underlying socket is closed. |
+| `variable` | [`impl`](#impl)  | Pointer to the underlying socket. Sent data will be proxied to this socket. |
+| `function` | [`SocketEmitter`](#socketemitter-1)  | Creates the [SocketEmitter](#socketemitter) and optionally attaches it to a socket. If `socket` is provided, this emitter registers itself as a receiver. |
+| `function` | [`SocketEmitter`](#socketemitter-2)  | Copy constructor; copies all signal connections and attaches to the same socket. |
+| `function` | [`~SocketEmitter`](#socketemitter-3) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`addReceiver`](#addreceiver-1) `virtual` `override` | Attaches a [SocketAdapter](#socketadapter) as a receiver; wires it to all four socket signals. |
+| `function` | [`removeReceiver`](#removereceiver-1) `virtual` `override` | Detaches a [SocketAdapter](#socketadapter) from all four socket signals. |
+| `function` | [`swap`](#swap-1) `virtual` | Replaces the underlying socket with `socket`. |
+| `function` | [`as`](#as) `inline` | Returns the underlying socket cast to type T, or nullptr if the cast fails. |
+| `function` | [`operator->`](#operator-9) `const` `inline` | Returns a raw pointer to the underlying socket for direct method access. Follows shared_ptr semantics; the caller must not delete the returned pointer. |
+| `function` | [`onSocketConnect`](#onsocketconnect-1) `virtual` `override` | Forwards the connect event to chained adapters, then fires the Connect signal. |
+| `function` | [`onSocketRecv`](#onsocketrecv-2) `virtual` `override` | Forwards the recv event to chained adapters, then fires the Recv signal. |
+| `function` | [`onSocketError`](#onsocketerror-1) `virtual` `override` | Forwards the error event to chained adapters, then fires the [Error](base.md#error) signal. |
+| `function` | [`onSocketClose`](#onsocketclose-1) `virtual` `override` | Forwards the close event to chained adapters, then fires the Close signal. |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -898,6 +1030,10 @@ Parses raw received data into packets via the factory and forwards each parsed p
 #### Returns
 true if the event was consumed and should not propagate further.
 
+##### Reimplements
+
+- [`onSocketRecv`](#onsocketrecv-1)
+
 ---
 
 {#onpacket}
@@ -913,6 +1049,11 @@ virtual bool onPacket(IPacket & pkt)
 Defined in src/net/include/icy/net/packetsocket.h:56
 
 [Process](base.md#process) a parsed packet. Returns true to stop propagation.
+
+##### Reimplemented by
+
+- [`onPacket`](#onpacket-1)
+- [`onPacket`](#onpacket-1)
 
 {#socket-1}
 
@@ -932,6 +1073,88 @@ Defined in src/net/include/icy/net/socket.h:49
 > **Subclassed by:** [`TCPSocket`](#tcpsocket), [`UDPSocket`](#udpsocket)
 
 Base socket implementation from which all sockets derive.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`opaque`](#opaque) | `variable` | Declared here |
+| [`Socket`](#socket-2) | `function` | Declared here |
+| [`Socket`](#socket-3) | `function` | Declared here |
+| [`Socket`](#socket-4) | `function` | Declared here |
+| [`connect`](#connect-2) | `function` | Declared here |
+| [`connect`](#connect-3) | `function` | Declared here |
+| [`bind`](#bind) | `function` | Declared here |
+| [`listen`](#listen) | `function` | Declared here |
+| [`shutdown`](#shutdown-1) | `function` | Declared here |
+| [`sendOwned`](#sendowned) | `function` | Declared here |
+| [`sendOwned`](#sendowned-1) | `function` | Declared here |
+| [`close`](#close-12) | `function` | Declared here |
+| [`address`](#address-8) | `function` | Declared here |
+| [`peerAddress`](#peeraddress-1) | `function` | Declared here |
+| [`transport`](#transport) | `function` | Declared here |
+| [`setError`](#seterror-1) | `function` | Declared here |
+| [`error`](#error-5) | `function` | Declared here |
+| [`closed`](#closed-1) | `function` | Declared here |
+| [`loop`](#loop-3) | `function` | Declared here |
+| [`_af`](#_af) | `variable` | Declared here |
+| [`init`](#init-4) | `function` | Declared here |
+| [`reset`](#reset-4) | `function` | Declared here |
+| [`Ptr`](#ptr-4) | `typedef` | Declared here |
+| [`Vec`](#vec) | `typedef` | Declared here |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
 
 ### Public Attributes
 
@@ -1038,6 +1261,12 @@ Connects to the given peer IP address.
 
 Throws an exception if the address is malformed. Connection errors can be handled via the [Error](base.md#error) signal.
 
+##### Reimplemented by
+
+- [`connect`](#connect-5)
+- [`connect`](#connect-7)
+- [`connect`](#connect-9)
+
 ---
 
 {#connect-3}
@@ -1055,6 +1284,12 @@ Defined in src/net/include/icy/net/socket.h:74
 Resolves and connects to the given host address.
 
 Throws an Exception if the host is malformed. Since the DNS callback is asynchronous implementations need to listen for the [Error](base.md#error) signal for handling connection errors.
+
+##### Reimplemented by
+
+- [`connect`](#connect-6)
+- [`connect`](#connect-8)
+- [`connect`](#connect-10)
 
 ---
 
@@ -1074,6 +1309,12 @@ Bind a local address to the socket. The address may be IPv4 or IPv6 (if supporte
 
 Throws an Exception on error.
 
+##### Reimplemented by
+
+- [`bind`](#bind-1)
+- [`bind`](#bind-2)
+- [`bind`](#bind-3)
+
 ---
 
 {#listen}
@@ -1092,6 +1333,11 @@ Listens the socket on the given address.
 
 Throws an Exception on error.
 
+##### Reimplemented by
+
+- [`listen`](#listen-1)
+- [`listen`](#listen-2)
+
 ---
 
 {#shutdown-1}
@@ -1107,6 +1353,11 @@ Throws an Exception on error.
 Defined in src/net/include/icy/net/socket.h:89
 
 Sends the shutdown packet which should result is socket closure via callback.
+
+##### Reimplemented by
+
+- [`shutdown`](#shutdown-4)
+- [`shutdown`](#shutdown-5)
 
 ---
 
@@ -1124,6 +1375,16 @@ Defined in src/net/include/icy/net/socket.h:95
 
 Sends an owned payload buffer to the connected peer.
 
+##### Reimplements
+
+- [`sendOwned`](#sendowned-2)
+
+##### Reimplemented by
+
+- [`sendOwned`](#sendowned-4)
+- [`sendOwned`](#sendowned-6)
+- [`sendOwned`](#sendowned-8)
+
 ---
 
 {#sendowned-1}
@@ -1137,6 +1398,16 @@ Sends an owned payload buffer to the connected peer.
 ```
 
 Defined in src/net/include/icy/net/socket.h:96
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned-3)
+
+##### Reimplemented by
+
+- [`sendOwned`](#sendowned-5)
+- [`sendOwned`](#sendowned-7)
+- [`sendOwned`](#sendowned-9)
 
 ---
 
@@ -1153,6 +1424,12 @@ virtual void close()
 Defined in src/net/include/icy/net/socket.h:99
 
 Closes the underlying socket.
+
+##### Reimplemented by
+
+- [`close`](#close-14)
+- [`close`](#close-15)
+- [`close`](#close-16)
 
 ---
 
@@ -1172,6 +1449,11 @@ The locally bound address.
 
 This function will not throw. A Wildcard 0.0.0.0:0 address is returned if the socket is closed or invalid.
 
+##### Reimplemented by
+
+- [`address`](#address-9)
+- [`address`](#address-10)
+
 ---
 
 {#peeraddress-1}
@@ -1190,6 +1472,11 @@ The connected peer address.
 
 This function will not throw. A Wildcard 0.0.0.0:0 address is returned if the socket is closed or invalid.
 
+##### Reimplemented by
+
+- [`peerAddress`](#peeraddress-2)
+- [`peerAddress`](#peeraddress-4)
+
 ---
 
 {#transport}
@@ -1205,6 +1492,12 @@ virtual net::TransportType transport() const
 Defined in src/net/include/icy/net/socket.h:116
 
 The transport protocol: TCP, UDP or SSLTCP.
+
+##### Reimplemented by
+
+- [`transport`](#transport-1)
+- [`transport`](#transport-2)
+- [`transport`](#transport-3)
 
 ---
 
@@ -1224,6 +1517,11 @@ Sets the socket error.
 
 Setting the error will result in socket closure.
 
+##### Reimplemented by
+
+- [`setError`](#seterror-2)
+- [`setError`](#seterror-3)
+
 ---
 
 {#error-5}
@@ -1239,6 +1537,11 @@ virtual const icy::Error & error() const
 Defined in src/net/include/icy/net/socket.h:124
 
 Return the socket error if any.
+
+##### Reimplemented by
+
+- [`error`](#error-7)
+- [`error`](#error-8)
 
 ---
 
@@ -1256,6 +1559,11 @@ Defined in src/net/include/icy/net/socket.h:127
 
 Returns true if the native socket handle is closed.
 
+##### Reimplemented by
+
+- [`closed`](#closed-2)
+- [`closed`](#closed-3)
+
 ---
 
 {#loop-3}
@@ -1271,6 +1579,11 @@ virtual uv::Loop * loop() const
 Defined in src/net/include/icy/net/socket.h:130
 
 Returns the socket event loop.
+
+##### Reimplemented by
+
+- [`loop`](#loop-4)
+- [`loop`](#loop-5)
 
 ### Protected Attributes
 
@@ -1313,6 +1626,11 @@ Defined in src/net/include/icy/net/socket.h:139
 
 Initializes the underlying socket context.
 
+##### Reimplemented by
+
+- [`init`](#init-5)
+- [`init`](#init-6)
+
 ---
 
 {#reset-4}
@@ -1328,6 +1646,11 @@ virtual void reset()
 Defined in src/net/include/icy/net/socket.h:142
 
 Resets the socket context for reuse.
+
+##### Reimplemented by
+
+- [`reset`](#reset-5)
+- [`reset`](#reset-6)
 
 ### Public Types
 
@@ -1381,6 +1704,35 @@ Abstract adapter interface for socket send/receive chains.
 [SocketAdapter](#socketadapter) is the abstract interface for all socket classes. A [SocketAdapter](#socketadapter) can also be attached to a [Socket](#socket-1) in order to override default [Socket](#socket-1) callbacks and behaviour, while still maintaining the default [Socket](#socket-1) interface (see Socket::setAdapter).
 
 This class can also be extended to implement custom processing for received socket data before it is dispatched to the application (see [PacketSocketEmitter](#packetsocketemitter) and [Transaction](#transaction) classes).
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`priority`](#priority-1) | `variable` | Declared here |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Declared here |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Declared here |
+| [`send`](#send) | `function` | Declared here |
+| [`send`](#send-1) | `function` | Declared here |
+| [`sendOwned`](#sendowned-2) | `function` | Declared here |
+| [`sendOwned`](#sendowned-3) | `function` | Declared here |
+| [`sendPacket`](#sendpacket) | `function` | Declared here |
+| [`sendPacket`](#sendpacket-1) | `function` | Declared here |
+| [`sendPacket`](#sendpacket-2) | `function` | Declared here |
+| [`setSender`](#setsender) | `function` | Declared here |
+| [`sender`](#sender) | `function` | Declared here |
+| [`addReceiver`](#addreceiver) | `function` | Declared here |
+| [`removeReceiver`](#removereceiver) | `function` | Declared here |
+| [`hasReceiver`](#hasreceiver) | `function` | Declared here |
+| [`receivers`](#receivers) | `function` | Declared here |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Declared here |
+| [`onSocketError`](#onsocketerror) | `function` | Declared here |
+| [`onSocketClose`](#onsocketclose) | `function` | Declared here |
+| [`_sender`](#_sender) | `variable` | Declared here |
+| [`_receivers`](#_receivers) | `variable` | Declared here |
+| [`_dirty`](#_dirty) | `variable` | Declared here |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -1472,6 +1824,17 @@ Defined in src/net/include/icy/net/socketadapter.h:55
 
 Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address.
 
+##### Reimplemented by
+
+- [`send`](http.md#send-10)
+- [`send`](http.md#send-11)
+- [`send`](http.md#send-12)
+- [`send`](http.md#send-13)
+- [`send`](http.md#send-14)
+- [`send`](#send-2)
+- [`send`](#send-4)
+- [`send`](#send-7)
+
 ---
 
 {#send-1}
@@ -1485,6 +1848,13 @@ Sends the given data buffer to the connected peer. Returns the number of bytes s
 ```
 
 Defined in src/net/include/icy/net/socketadapter.h:56
+
+##### Reimplemented by
+
+- [`send`](http.md#send-15)
+- [`send`](#send-3)
+- [`send`](#send-5)
+- [`send`](#send-8)
 
 ---
 
@@ -1504,6 +1874,16 @@ Sends an owned payload buffer to the connected peer.
 
 The buffer is moved through the adapter chain and retained by the transport layer until async write completion.
 
+##### Reimplemented by
+
+- [`sendOwned`](http.md#sendowned-10)
+- [`sendOwned`](http.md#sendowned-11)
+- [`sendOwned`](http.md#sendowned-12)
+- [`sendOwned`](#sendowned)
+- [`sendOwned`](#sendowned-4)
+- [`sendOwned`](#sendowned-6)
+- [`sendOwned`](#sendowned-8)
+
 ---
 
 {#sendowned-3}
@@ -1517,6 +1897,14 @@ The buffer is moved through the adapter chain and retained by the transport laye
 ```
 
 Defined in src/net/include/icy/net/socketadapter.h:63
+
+##### Reimplemented by
+
+- [`sendOwned`](http.md#sendowned-13)
+- [`sendOwned`](#sendowned-1)
+- [`sendOwned`](#sendowned-5)
+- [`sendOwned`](#sendowned-7)
+- [`sendOwned`](#sendowned-9)
 
 ---
 
@@ -1610,6 +1998,10 @@ Defined in src/net/include/icy/net/socketadapter.h:88
 
 Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default.
 
+##### Reimplemented by
+
+- [`addReceiver`](#addreceiver-1)
+
 ---
 
 {#removereceiver}
@@ -1627,6 +2019,10 @@ Defined in src/net/include/icy/net/socketadapter.h:94
 Remove the given receiver.
 
 By default this function does nothing unless the given receiver matches the current receiver.
+
+##### Reimplemented by
+
+- [`removeReceiver`](#removereceiver-1)
 
 ---
 
@@ -1679,6 +2075,13 @@ Called when the socket establishes a connection. Forwards the event to all regis
 #### Returns
 true to stop propagation to subsequent receivers.
 
+##### Reimplemented by
+
+- [`onSocketConnect`](http.md#onsocketconnect-2)
+- [`onSocketConnect`](http.md#onsocketconnect-3)
+- [`onSocketConnect`](http.md#onsocketconnect-4)
+- [`onSocketConnect`](#onsocketconnect-1)
+
 ---
 
 {#onsocketrecv-1}
@@ -1704,6 +2107,15 @@ Called when data is received from the socket. Forwards the event to all register
 #### Returns
 true to stop propagation to subsequent receivers.
 
+##### Reimplemented by
+
+- [`onSocketRecv`](http.md#onsocketrecv-3)
+- [`onSocketRecv`](http.md#onsocketrecv-4)
+- [`onSocketRecv`](http.md#onsocketrecv-5)
+- [`onSocketRecv`](http.md#onsocketrecv-6)
+- [`onSocketRecv`](#onsocketrecv)
+- [`onSocketRecv`](#onsocketrecv-2)
+
 ---
 
 {#onsocketerror}
@@ -1727,6 +2139,12 @@ Called when the socket encounters an error. Forwards the event to all registered
 #### Returns
 true to stop propagation to subsequent receivers.
 
+##### Reimplemented by
+
+- [`onSocketError`](http.md#onsocketerror-2)
+- [`onSocketError`](http.md#onsocketerror-3)
+- [`onSocketError`](#onsocketerror-1)
+
 ---
 
 {#onsocketclose}
@@ -1747,6 +2165,13 @@ Called when the socket is closed. Forwards the event to all registered receivers
 
 #### Returns
 true to stop propagation to subsequent receivers.
+
+##### Reimplemented by
+
+- [`onSocketClose`](http.md#onsocketclose-2)
+- [`onSocketClose`](http.md#onsocketclose-3)
+- [`onSocketClose`](http.md#onsocketclose-4)
+- [`onSocketClose`](#onsocketclose-1)
 
 ### Protected Attributes
 
@@ -1828,6 +2253,13 @@ Defined in src/net/include/icy/net/socketadapter.h:138
 
 Reference-counted handle to a [SocketAdapter](#socketadapter).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ptr`](#ptr-5) | `variable` | Declared here |
+| [`alive`](#alive) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1879,6 +2311,81 @@ Defined in src/net/include/icy/net/socketemitter.h:32
 [SocketAdapter](#socketadapter) that exposes socket events as signals.
 
 Aside from adding a signal interface, the class wraps the underlying socket instance and is designed to be used much like a `std::unique_ptr` by overriding the `->` operator.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Connect`](#connect-4) | `variable` | Declared here |
+| [`Recv`](#recv) | `variable` | Declared here |
+| [`Error`](#error-6) | `variable` | Declared here |
+| [`Close`](#close-13) | `variable` | Declared here |
+| [`impl`](#impl) | `variable` | Declared here |
+| [`SocketEmitter`](#socketemitter-1) | `function` | Declared here |
+| [`SocketEmitter`](#socketemitter-2) | `function` | Declared here |
+| [`~SocketEmitter`](#socketemitter-3) | `function` | Declared here |
+| [`addReceiver`](#addreceiver-1) | `function` | Declared here |
+| [`removeReceiver`](#removereceiver-1) | `function` | Declared here |
+| [`swap`](#swap-1) | `function` | Declared here |
+| [`as`](#as) | `function` | Declared here |
+| [`operator->`](#operator-9) | `function` | Declared here |
+| [`onSocketConnect`](#onsocketconnect-1) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv-2) | `function` | Declared here |
+| [`onSocketError`](#onsocketerror-1) | `function` | Declared here |
+| [`onSocketClose`](#onsocketclose-1) | `function` | Declared here |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
 
 ### Public Attributes
 
@@ -2039,6 +2546,10 @@ Attaches a [SocketAdapter](#socketadapter) as a receiver; wires it to all four s
 #### Parameters
 * `adapter` The adapter to attach; its priority determines signal ordering.
 
+##### Reimplements
+
+- [`addReceiver`](#addreceiver)
+
 ---
 
 {#removereceiver-1}
@@ -2056,6 +2567,10 @@ Defined in src/net/include/icy/net/socketemitter.h:67
 Detaches a [SocketAdapter](#socketadapter) from all four socket signals. 
 #### Parameters
 * `adapter` The adapter to detach.
+
+##### Reimplements
+
+- [`removeReceiver`](#removereceiver)
 
 ---
 
@@ -2141,6 +2656,14 @@ Defined in src/net/include/icy/net/socketemitter.h:98
 
 Forwards the connect event to chained adapters, then fires the Connect signal.
 
+##### Reimplements
+
+- [`onSocketConnect`](#onsocketconnect)
+
+##### Reimplemented by
+
+- [`onSocketConnect`](http.md#onsocketconnect-4)
+
 ---
 
 {#onsocketrecv-2}
@@ -2156,6 +2679,14 @@ virtual bool onSocketRecv(Socket & socket, const MutableBuffer & buffer, const A
 Defined in src/net/include/icy/net/socketemitter.h:100
 
 Forwards the recv event to chained adapters, then fires the Recv signal.
+
+##### Reimplements
+
+- [`onSocketRecv`](#onsocketrecv-1)
+
+##### Reimplemented by
+
+- [`onSocketRecv`](http.md#onsocketrecv-6)
 
 ---
 
@@ -2173,6 +2704,10 @@ Defined in src/net/include/icy/net/socketemitter.h:102
 
 Forwards the error event to chained adapters, then fires the [Error](base.md#error) signal.
 
+##### Reimplements
+
+- [`onSocketError`](#onsocketerror)
+
 ---
 
 {#onsocketclose-1}
@@ -2188,6 +2723,14 @@ virtual bool onSocketClose(Socket & socket) override
 Defined in src/net/include/icy/net/socketemitter.h:104
 
 Forwards the close event to chained adapters, then fires the Close signal.
+
+##### Reimplements
+
+- [`onSocketClose`](#onsocketclose)
+
+##### Reimplemented by
+
+- [`onSocketClose`](http.md#onsocketclose-4)
 
 {#socketpacket}
 
@@ -2210,6 +2753,93 @@ Default packet type emitted by sockets.
 [SocketPacket](#socketpacket) carries the remote peer address plus a borrowed view of the received byte buffer for zero-copy processing inside the receive callback.
 
 The referenced packet buffer lifetime is only guaranteed for the duration of the receiver callback.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SocketPacket`](#socketpacket-1) | `function` | Declared here |
+| [`SocketPacket`](#socketpacket-2) | `function` | Declared here |
+| [`packetInfo`](#packetinfo-3) | `function` | Declared here |
+| [`print`](#print-6) | `function` | Declared here |
+| [`clone`](#clone-6) | `function` | Declared here |
+| [`read`](#read-1) | `function` | Declared here |
+| [`write`](#write-1) | `function` | Declared here |
+| [`className`](#classname-5) | `function` | Declared here |
+| [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb) | `variable` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) | `function` | Inherited from [`RawPacket`](base.md#rawpacket) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`RawPacket`](base.md#rawpacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_data`](base.md#classicy_1_1RawPacket_1a31d0726502c953df1deea617ac639554)  |  |
+| `variable` | [`_size`](base.md#classicy_1_1RawPacket_1a3e4ce8b933205ec4d1f62af467245dcd)  |  |
+| `variable` | [`_owned`](base.md#classicy_1_1RawPacket_1a0a7cfa5a326df6b328d582f88f085ccb)  |  |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1afdfbea094d4a084cedc6889dc29a39d4) `inline` | Construct with borrowed (non-owning) buffer. |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a2cabea1456be6e46c7b21874f330b7ee) `inline` | Construct with const data (copied, owning). |
+| `function` | [`RawPacket`](base.md#classicy_1_1RawPacket_1a782274116d8a9ac3ade6d1f47a072f4c) `inline` | Copy constructor (always copies data). |
+| `function` | [`~RawPacket`](base.md#classicy_1_1RawPacket_1a7018944eaa3a16a43a5b8de6554ffe56) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c) `virtual` `const` `inline` `override` |  |
+| `function` | [`copyData`](base.md#classicy_1_1RawPacket_1a1bb606fd34a1f45e1a90d046607886de) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
+| `function` | [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `function` | [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `function` | [`data`](base.md#classicy_1_1RawPacket_1af40e88a78b327a4a3c609769ad1c9c20) `virtual` `const` `inline` `override` |  |
+| `function` | [`size`](base.md#classicy_1_1RawPacket_1a9834f3f56c5ee160575a8fe6a4809dbf) `virtual` `const` `inline` `override` |  |
+| `function` | [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`ownsBuffer`](base.md#classicy_1_1RawPacket_1a9e5982738a696bd9db11e74897194068) `const` `inline` |  |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
 
 ### Public Methods
 
@@ -2302,6 +2932,10 @@ Prints a one-line description of the packet to `os`.
 #### Parameters
 * `os` Output stream to write to.
 
+##### Reimplements
+
+- [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc)
+
 ---
 
 {#clone-6}
@@ -2318,6 +2952,10 @@ Defined in src/net/include/icy/net/socket.h:240
 
 Returns a heap-allocated copy of this [SocketPacket](#socketpacket).
 
+##### Reimplements
+
+- [`clone`](base.md#classicy_1_1RawPacket_1a1ac09a8e23494bbd52939fedfe5a6a8c)
+
 ---
 
 {#read-1}
@@ -2333,6 +2971,10 @@ virtual inline ssize_t read(const ConstBuffer &)
 Defined in src/net/include/icy/net/socket.h:243
 
 Not supported; always throws std::logic_error.
+
+##### Reimplements
+
+- [`read`](base.md#classicy_1_1RawPacket_1a606a9688958cbc74f146d28c3042b769)
 
 ---
 
@@ -2352,6 +2994,10 @@ Appends the packet payload to `buf`.
 #### Parameters
 * `buf` Destination buffer to append raw bytes to.
 
+##### Reimplements
+
+- [`write`](base.md#classicy_1_1RawPacket_1a6864137826313bac337b46de7d8ae2f4)
+
 ---
 
 {#classname-5}
@@ -2369,6 +3015,10 @@ Defined in src/net/include/icy/net/socket.h:258
 #### Returns
 The string "SocketPacket".
 
+##### Reimplements
+
+- [`className`](base.md#classicy_1_1RawPacket_1a41d94a78cbe6d6e7c074aa632deb6828)
+
 {#ssladapter}
 
 ## SSLAdapter
@@ -2384,6 +3034,37 @@ class SSLAdapter
 Defined in src/net/include/icy/net/ssladapter.h:38
 
 Manages the OpenSSL context and BIO buffers for an SSL socket connection.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SSLSocket`](#net-sslsocket) | `friend` | Declared here |
+| [`SSLAdapter`](#ssladapter-1) | `function` | Declared here |
+| [`SSLAdapter`](#ssladapter-2) | `function` | Declared here |
+| [`SSLAdapter`](#ssladapter-3) | `function` | Declared here |
+| [`initClient`](#initclient) | `function` | Declared here |
+| [`initServer`](#initserver) | `function` | Declared here |
+| [`initialized`](#initialized-2) | `function` | Declared here |
+| [`ready`](#ready) | `function` | Declared here |
+| [`handshake`](#handshake) | `function` | Declared here |
+| [`available`](#available-1) | `function` | Declared here |
+| [`shutdown`](#shutdown-2) | `function` | Declared here |
+| [`flush`](#flush-8) | `function` | Declared here |
+| [`setHostname`](#sethostname) | `function` | Declared here |
+| [`addIncomingData`](#addincomingdata) | `function` | Declared here |
+| [`addOutgoingData`](#addoutgoingdata) | `function` | Declared here |
+| [`addOutgoingData`](#addoutgoingdata-1) | `function` | Declared here |
+| [`addOutgoingData`](#addoutgoingdata-2) | `function` | Declared here |
+| [`_socket`](#_socket) | `variable` | Declared here |
+| [`_ssl`](#_ssl) | `variable` | Declared here |
+| [`_readBIO`](#_readbio) | `variable` | Declared here |
+| [`_writeBIO`](#_writebio) | `variable` | Declared here |
+| [`_bufferOut`](#_bufferout) | `variable` | Declared here |
+| [`_hostname`](#_hostname) | `variable` | Declared here |
+| [`handleError`](#handleerror) | `function` | Declared here |
+| [`flushReadBIO`](#flushreadbio) | `function` | Declared here |
+| [`flushWriteBIO`](#flushwritebio) | `function` | Declared here |
 
 ### Friends
 
@@ -2820,6 +3501,42 @@ OpenSSL SSL_CTX wrapper for client and server TLS configuration.
 This class encapsulates context information for an SSL server or client, such as the certificate verification mode and the location of certificates and private key files, as well as the list of supported ciphers.
 
 The Context class is also used to control SSL session caching on the server and client side.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SSLContext`](#sslcontext-1) | `function` | Declared here |
+| [`SSLContext`](#sslcontext-2) | `function` | Declared here |
+| [`~SSLContext`](#sslcontext-3) | `function` | Declared here |
+| [`useCertificate`](#usecertificate) | `function` | Declared here |
+| [`addChainCertificate`](#addchaincertificate) | `function` | Declared here |
+| [`addVerificationCertificate`](#addverificationcertificate) | `function` | Declared here |
+| [`sslContext`](#sslcontext-4) | `function` | Declared here |
+| [`usage`](#usage) | `function` | Declared here |
+| [`isForServerUse`](#isforserveruse) | `function` | Declared here |
+| [`verificationMode`](#verificationmode) | `function` | Declared here |
+| [`enableSessionCache`](#enablesessioncache) | `function` | Declared here |
+| [`enableSessionCache`](#enablesessioncache-1) | `function` | Declared here |
+| [`sessionCacheEnabled`](#sessioncacheenabled) | `function` | Declared here |
+| [`setSessionCacheSize`](#setsessioncachesize) | `function` | Declared here |
+| [`getSessionCacheSize`](#getsessioncachesize) | `function` | Declared here |
+| [`setSessionTimeout`](#setsessiontimeout) | `function` | Declared here |
+| [`getSessionTimeout`](#getsessiontimeout) | `function` | Declared here |
+| [`flushSessionCache`](#flushsessioncache) | `function` | Declared here |
+| [`disableStatelessSessionResumption`](#disablestatelesssessionresumption) | `function` | Declared here |
+| [`setALPNProtocols`](#setalpnprotocols) | `function` | Declared here |
+| [`SSLContext`](#sslcontext-5) | `function` | Declared here |
+| [`SSLContext`](#sslcontext-6) | `function` | Declared here |
+| [`enableSNI`](#enablesni) | `function` | Declared here |
+| [`Usage`](#usage-1) | `enum` | Declared here |
+| [`VerificationMode`](#verificationmode-1) | `enum` | Declared here |
+| [`Ptr`](#ptr-6) | `typedef` | Declared here |
+| [`_usage`](#_usage) | `variable` | Declared here |
+| [`_mode`](#_mode) | `variable` | Declared here |
+| [`_sslContext`](#_sslcontext) | `variable` | Declared here |
+| [`_alpnWire`](#_alpnwire) | `variable` | Declared here |
+| [`createSSLContext`](#createsslcontext) | `function` | Declared here |
 
 ### Public Methods
 
@@ -3411,6 +4128,33 @@ Defined in src/net/include/icy/net/sslmanager.h:31
 
 [Singleton](base.md#singleton) that owns the default client/server TLS contexts and related callbacks.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Singleton< SSLManager >`](#singletonsslmanager) | `friend` | Declared here |
+| [`SSLContext`](#sslcontext-7) | `friend` | Declared here |
+| [`ServerVerificationError`](#serververificationerror) | `variable` | Declared here |
+| [`ClientVerificationError`](#clientverificationerror) | `variable` | Declared here |
+| [`PrivateKeyPassphraseRequired`](#privatekeypassphraserequired) | `variable` | Declared here |
+| [`initializeServer`](#initializeserver) | `function` | Declared here |
+| [`initializeClient`](#initializeclient) | `function` | Declared here |
+| [`defaultServerContext`](#defaultservercontext) | `function` | Declared here |
+| [`defaultClientContext`](#defaultclientcontext) | `function` | Declared here |
+| [`shutdown`](#shutdown-3) | `function` | Declared here |
+| [`instance`](#instance-2) | `function` | Declared here |
+| [`destroy`](#destroy) | `function` | Declared here |
+| [`initNoVerifyClient`](#initnoverifyclient) | `function` | Declared here |
+| [`initNoVerifyServer`](#initnoverifyserver) | `function` | Declared here |
+| [`_defaultServerContext`](#_defaultservercontext) | `variable` | Declared here |
+| [`_defaultClientContext`](#_defaultclientcontext) | `variable` | Declared here |
+| [`_mutex`](#_mutex-6) | `variable` | Declared here |
+| [`SSLManager`](#sslmanager-1) | `function` | Declared here |
+| [`~SSLManager`](#sslmanager-2) | `function` | Declared here |
+| [`SSLManager`](#sslmanager-3) | `function` | Declared here |
+| [`SSLManager`](#sslmanager-4) | `function` | Declared here |
+| [`verifyCallback`](#verifycallback) | `function` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -3798,6 +4542,19 @@ Cached SSL/TLS session wrapper used for client-side resumption.
 
 For session caching to work, a client must save the session object from an existing connection, if it wants to reuse it with a future connection.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`sslSession`](#sslsession-1) | `function` | Declared here |
+| [`SSLSession`](#sslsession-2) | `function` | Declared here |
+| [`~SSLSession`](#sslsession-3) | `function` | Declared here |
+| [`SSLSession`](#sslsession-4) | `function` | Declared here |
+| [`SSLSession`](#sslsession-5) | `function` | Declared here |
+| [`SSLSession`](#sslsession-6) | `function` | Declared here |
+| [`_ptr`](#_ptr) | `variable` | Declared here |
+| [`Ptr`](#ptr-7) | `typedef` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -3957,6 +4714,359 @@ Defined in src/net/include/icy/net/sslsocket.h:30
 
 SSL socket implementation.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`SSLAdapter`](#net-ssladapter) | `friend` | Declared here |
+| [`SSLSocket`](#sslsocket-1) | `function` | Declared here |
+| [`SSLSocket`](#sslsocket-2) | `function` | Declared here |
+| [`SSLSocket`](#sslsocket-3) | `function` | Declared here |
+| [`connect`](#connect-5) | `function` | Declared here |
+| [`connect`](#connect-6) | `function` | Declared here |
+| [`bind`](#bind-1) | `function` | Declared here |
+| [`listen`](#listen-1) | `function` | Declared here |
+| [`shutdown`](#shutdown-4) | `function` | Declared here |
+| [`close`](#close-14) | `function` | Declared here |
+| [`send`](#send-2) | `function` | Declared here |
+| [`sendOwned`](#sendowned-4) | `function` | Declared here |
+| [`send`](#send-3) | `function` | Declared here |
+| [`sendOwned`](#sendowned-5) | `function` | Declared here |
+| [`setHostname`](#sethostname-1) | `function` | Declared here |
+| [`useContext`](#usecontext) | `function` | Declared here |
+| [`context`](#context-4) | `function` | Declared here |
+| [`useSession`](#usesession) | `function` | Declared here |
+| [`currentSession`](#currentsession) | `function` | Declared here |
+| [`sessionWasReused`](#sessionwasreused) | `function` | Declared here |
+| [`available`](#available-2) | `function` | Declared here |
+| [`peerCertificate`](#peercertificate) | `function` | Declared here |
+| [`transport`](#transport-1) | `function` | Declared here |
+| [`acceptConnection`](#acceptconnection) | `function` | Declared here |
+| [`onConnect`](#onconnect) | `function` | Declared here |
+| [`onRead`](#onread) | `function` | Declared here |
+| [`_sslContext`](#_sslcontext-1) | `variable` | Declared here |
+| [`_sslSession`](#_sslsession) | `variable` | Declared here |
+| [`_sslAdapter`](#_ssladapter) | `variable` | Declared here |
+| [`Ptr`](#ptr-8) | `typedef` | Declared here |
+| [`Vec`](#vec-1) | `typedef` | Declared here |
+| [`AcceptConnection`](#acceptconnection-1) | `variable` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`TCPSocket`](#tcpsocket-1) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`TCPSocket`](#tcpsocket-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`TCPSocket`](#tcpsocket-3) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`shutdown`](#shutdown-5) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`close`](#close-15) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`connect`](#connect-7) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`connect`](#connect-8) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`send`](#send-4) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`sendOwned`](#sendowned-6) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`send`](#send-5) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`sendOwned`](#sendowned-7) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`bind`](#bind-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`listen`](#listen-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`acceptConnection`](#acceptconnection-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setReusePort`](#setreuseport) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setNoDelay`](#setnodelay) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setKeepAlive`](#setkeepalive) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setSimultaneousAccepts`](#setsimultaneousaccepts) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setMode`](#setmode) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`mode`](#mode) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`setError`](#seterror-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`error`](#error-7) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`closed`](#closed-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`address`](#address-9) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`peerAddress`](#peeraddress-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`transport`](#transport-2) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`loop`](#loop-4) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`onConnect`](#onconnect-1) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`onRead`](#onread-1) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`onRecv`](#onrecv) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`onError`](#onerror-1) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`onClose`](#onclose-1) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`_mode`](#_mode-1) | `variable` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`_peerAddress`](#_peeraddress) | `variable` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`init`](#init-5) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`reset`](#reset-5) | `function` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`Ptr`](#ptr-9) | `typedef` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`Vec`](#vec-2) | `typedef` | Inherited from [`TCPSocket`](#tcpsocket) |
+| [`Handle`](base.md#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a) | `typedef` | Inherited from [`Stream`](base.md#stream) |
+| [`Read`](base.md#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_buffer`](base.md#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_started`](base.md#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_highWaterMark`](base.md#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_writeReqFree`](base.md#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_ownedWriteReqFree`](base.md#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`Stream`](base.md#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`~Stream`](base.md#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`shutdown`](base.md#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`write`](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`writeOwned`](base.md#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`setHighWaterMark`](base.md#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`write`](base.md#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`stream`](base.md#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`readStart`](base.md#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`readStop`](base.md#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`onRead`](base.md#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocWriteReq`](base.md#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`freeWriteReq`](base.md#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocOwnedWriteReq`](base.md#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`freeOwnedWriteReq`](base.md#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`canQueueWrite`](base.md#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`handleRead`](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocReadBuffer`](base.md#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`Handle`](uv.md#handle-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`init`](uv.md#init-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invoke`](uv.md#invoke) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invokeOrThrow`](uv.md#invokeorthrow) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`close`](uv.md#close-11) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`ref`](uv.md#ref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`unref`](uv.md#unref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`initialized`](uv.md#initialized-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`active`](uv.md#active) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closing`](uv.md#closing-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closed`](uv.md#closed) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`error`](uv.md#error-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setError`](uv.md#seterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setUVError`](uv.md#setuverror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setAndThrowError`](uv.md#setandthrowerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`throwLastError`](uv.md#throwlasterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`loop`](uv.md#loop-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`reset`](uv.md#reset-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`get`](uv.md#get-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`tid`](uv.md#tid) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`context`](uv.md#context-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setCloseCleanup`](uv.md#setclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`clearCloseCleanup`](uv.md#clearclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`assertThread`](uv.md#assertthread) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_loop`](uv.md#_loop) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_context`](uv.md#_context) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_tid`](uv.md#_tid) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_error`](uv.md#_error-1) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onError`](uv.md#onerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onClose`](uv.md#onclose) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-5) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Type`](uv.md#type-7) | `typedef` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`opaque`](#opaque) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`bind`](#bind) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`listen`](#listen) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`shutdown`](#shutdown-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`close`](#close-12) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`address`](#address-8) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`peerAddress`](#peeraddress-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`transport`](#transport) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`setError`](#seterror-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`error`](#error-5) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`closed`](#closed-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`loop`](#loop-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`_af`](#_af) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`init`](#init-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`reset`](#reset-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Ptr`](#ptr-4) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`Vec`](#vec) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`TCPSocket`](#tcpsocket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`AcceptConnection`](#acceptconnection-1)  | Fired when a new client connection is accepted; carries a shared_ptr to the new socket. |
+| `function` | [`TCPSocket`](#tcpsocket-1)  | Constructs the [TCPSocket](#tcpsocket) and initializes the underlying libuv handle. |
+| `function` | [`TCPSocket`](#tcpsocket-2)  | Deleted constructor. |
+| `function` | [`TCPSocket`](#tcpsocket-3)  | Deleted constructor. |
+| `function` | [`shutdown`](#shutdown-5) `virtual` `nodiscard` `override` | Sends a TCP shutdown request; the socket closes after the peer acknowledges. |
+| `function` | [`close`](#close-15) `virtual` `override` | Closes the socket immediately, releasing all associated resources. |
+| `function` | [`connect`](#connect-7) `virtual` `override` | Connects to `peerAddress` using a libuv connect request. On success, calls [onConnect()](#onconnect-1); on failure, calls [setUVError()](uv.md#setuverror). |
+| `function` | [`connect`](#connect-8) `virtual` `override` | Resolves `host` via DNS (or maps "localhost"), then connects. |
+| `function` | [`send`](#send-4) `virtual` `nodiscard` `override` | Writes `len` bytes to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-6) `virtual` `nodiscard` `override` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`send`](#send-5) `virtual` `nodiscard` `override` | Writes `len` bytes; `peerAddress` is ignored for TCP (connected stream). |
+| `function` | [`sendOwned`](#sendowned-7) `virtual` `nodiscard` `override` |  |
+| `function` | [`bind`](#bind-2) `virtual` `override` | Binds the socket to `address`. Resets and reinitializes the handle if the address family changes. |
+| `function` | [`listen`](#listen-2) `virtual` `override` | Starts listening for incoming connections with the given backlog. |
+| `function` | [`acceptConnection`](#acceptconnection-2) `virtual` | Accepts the next pending client connection and fires AcceptConnection. |
+| `function` | [`setReusePort`](#setreuseport) `nodiscard` | Enables SO_REUSEPORT on Linux kernel >= 3.9 for multi-thread load balancing. Must be called after [bind()](#bind-2). No-op and returns false on unsupported platforms. |
+| `function` | [`setNoDelay`](#setnodelay) `nodiscard` | Enables or disables TCP_NODELAY (Nagle's algorithm). |
+| `function` | [`setKeepAlive`](#setkeepalive) `nodiscard` | Enables or disables TCP keep-alive probes. |
+| `function` | [`setSimultaneousAccepts`](#setsimultaneousaccepts) `nodiscard` | Enables or disables simultaneous accepts on Windows. No-op and returns false on non-Windows platforms. |
+| `function` | [`setMode`](#setmode)  | Sets the socket mode (ServerSide or ClientSide). |
+| `function` | [`mode`](#mode) `const` | Returns the current socket mode. |
+| `function` | [`setError`](#seterror-2) `virtual` `override` | Sets the socket error; ignores the call if an error is already recorded. Setting an error causes the socket to close. |
+| `function` | [`error`](#error-7) `virtual` `const` `override` | Returns the current socket error, if any. |
+| `function` | [`closed`](#closed-2) `virtual` `const` `override` | Returns true if the native socket handle is closed. |
+| `function` | [`address`](#address-9) `virtual` `const` `override` | Returns the IP address and port number of the socket. A wildcard address is returned if the socket is not connected. |
+| `function` | [`peerAddress`](#peeraddress-2) `virtual` `const` `override` | Returns the IP address and port number of the peer socket. A wildcard address is returned if the socket is not connected. |
+| `function` | [`transport`](#transport-2) `virtual` `const` `override` | Returns the TCP transport protocol. |
+| `function` | [`loop`](#loop-4) `virtual` `const` `override` | Returns the event loop associated with this socket. |
+| `function` | [`onConnect`](#onconnect-1) `virtual` | Called by the stream layer when the TCP connection is established. |
+| `function` | [`onRead`](#onread-1) `virtual` `override` | Called by the stream layer with raw received bytes; wraps them in a [MutableBuffer](base.md#mutablebuffer). |
+| `function` | [`onRecv`](#onrecv) `virtual` | Dispatches a received buffer to all socket adapters via onSocketRecv. |
+| `function` | [`onError`](#onerror-1) `virtual` `override` | Dispatches the error to adapters and closes the socket. |
+| `function` | [`onClose`](#onclose-1) `virtual` `override` | Dispatches the close event to all socket adapters. |
+| `variable` | [`_mode`](#_mode-1)  |  |
+| `variable` | [`_peerAddress`](#_peeraddress)  | Cached peer address (avoids syscall per recv). |
+| `function` | [`init`](#init-5) `virtual` `override` | Initializes the underlying socket context. |
+| `function` | [`reset`](#reset-5) `virtual` `override` | Resets the socket context for reuse. |
+| `typedef` | [`Ptr`](#ptr-9)  |  |
+| `typedef` | [`Vec`](#vec-2)  |  |
+
+### Inherited from [`Stream`](base.md#stream)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Handle`](base.md#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a)  |  |
+| `variable` | [`Read`](base.md#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184)  | Emitted when data has been received from the peer. |
+| `variable` | [`_buffer`](base.md#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857)  |  |
+| `variable` | [`_started`](base.md#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271)  |  |
+| `variable` | [`_highWaterMark`](base.md#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf)  | 16MB default write queue limit |
+| `variable` | [`_writeReqFree`](base.md#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b)  | Freelist for write requests. |
+| `variable` | [`_ownedWriteReqFree`](base.md#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365)  | Freelist for owned write requests. |
+| `function` | [`Stream`](base.md#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) `inline` | Construct the stream bound to `loop` with a 64 KiB read buffer. |
+| `function` | [`~Stream`](base.md#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) `virtual` `inline` | Destroy the stream, stopping reads and freeing pooled write requests. |
+| `function` | [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) `virtual` `inline` `override` | Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle. |
+| `function` | [`shutdown`](base.md#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) `inline` | Send a TCP/pipe shutdown request to the connected peer. |
+| `function` | [`write`](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) `inline` | Write `len` bytes from `data` to the stream. |
+| `function` | [`writeOwned`](base.md#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) `inline` | Write an owned payload buffer to the stream. |
+| `function` | [`setHighWaterMark`](base.md#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) `inline` | Set the high water mark for the write queue (default 16MB). When the write queue exceeds this size, [write()](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) returns false. |
+| `function` | [`write`](base.md#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) `inline` | Write `len` bytes from `data` together with a stream handle over an IPC pipe (uses `uv_write2`). |
+| `function` | [`stream`](base.md#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) `inline` | Return the underlying `uv_stream_t` pointer cast from the native handle. |
+| `function` | [`readStart`](base.md#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) `virtual` `inline` | Begin reading from the stream by registering libuv read callbacks. |
+| `function` | [`readStop`](base.md#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) `virtual` `inline` | Stop reading from the stream. |
+| `function` | [`onRead`](base.md#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) `virtual` `inline` | Called by `[handleRead](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10)` when `len` bytes of `data` arrive. |
+| `function` | [`allocWriteReq`](base.md#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) `inline` | Return a `uv_write_t` from the freelist, or allocate a new one if the pool is empty. |
+| `function` | [`freeWriteReq`](base.md#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) `inline` | Return `req` to the freelist, or delete it if the pool is at capacity. |
+| `function` | [`allocOwnedWriteReq`](base.md#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) `inline` |  |
+| `function` | [`freeOwnedWriteReq`](base.md#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) `inline` |  |
+| `function` | [`canQueueWrite`](base.md#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) `inline` |  |
+| `function` | [`handleRead`](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) `static` `inline` | UV callbacks. |
+| `function` | [`allocReadBuffer`](base.md#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) `static` `inline` | libuv allocate-buffer callback. Provides the stream's internal buffer, growing it if libuv requests more space than the current allocation. |
+
+### Inherited from [`Handle`](uv.md#handle-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Handle`](uv.md#handle-3) `inline` | Construct the handle bound to the given event loop. |
+| `function` | [`init`](uv.md#init-2) `inline` | Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`. |
+| `function` | [`invoke`](uv.md#invoke) `inline` | Invoke a libuv function `f` with `args` on the initialized handle. |
+| `function` | [`invokeOrThrow`](uv.md#invokeorthrow) `inline` | Invoke a libuv function `f` with `args`, throwing on failure. |
+| `function` | [`close`](uv.md#close-11) `virtual` `inline` | Close and destroy the handle. |
+| `function` | [`ref`](uv.md#ref) `inline` | Re-reference the handle with the event loop after a previous `[unref()](uv.md#unref)`. |
+| `function` | [`unref`](uv.md#unref) `inline` | Unreference the handle from the event loop. |
+| `function` | [`initialized`](uv.md#initialized-1) `const` `inline` | Return `true` if the handle has been successfully initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`active`](uv.md#active) `virtual` `const` `inline` | Return `true` when the handle is active (libuv `uv_is_active`). |
+| `function` | [`closing`](uv.md#closing-1) `virtual` `const` `inline` | Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`). |
+| `function` | [`closed`](uv.md#closed) `virtual` `const` `inline` | Return `true` if the handle has been fully closed (context released). |
+| `function` | [`error`](uv.md#error-4) `const` `inline` | Return the last error set on this handle, or a default-constructed `[Error](base.md#error)` if no error has occurred. |
+| `function` | [`setError`](uv.md#seterror) `virtual` `inline` | Set the error state and invoke `[onError()](uv.md#onerror)`. |
+| `function` | [`setUVError`](uv.md#setuverror) `inline` | Translate a libuv error code into an `[Error](base.md#error)` and call `[setError()](uv.md#seterror)`. |
+| `function` | [`setAndThrowError`](uv.md#setandthrowerror) `inline` | Set the error state from a libuv error code and throw a `std::runtime_error`. |
+| `function` | [`throwLastError`](uv.md#throwlasterror) `inline` | Throw a `std::runtime_error` if the handle currently holds an error. |
+| `function` | [`loop`](uv.md#loop-2) `const` `inline` | Return the event loop this handle is bound to. |
+| `function` | [`reset`](uv.md#reset-3) `inline` | Close the current handle (if open) and allocate a fresh `[Context](uv.md#context-1)`, leaving the handle ready to be re-initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`get`](uv.md#get-2) `const` `inline` | Return the raw libuv handle pointer cast to `[Handle](uv.md#handle-2)`. |
+| `function` | [`tid`](uv.md#tid) `const` `inline` | Return the ID of the thread that constructed this handle. |
+| `function` | [`context`](uv.md#context-3) `const` `inline` | Return the raw `[Context](uv.md#context-1)` that owns the libuv handle memory. |
+| `function` | [`setCloseCleanup`](uv.md#setclosecleanup) `inline` |  |
+| `function` | [`clearCloseCleanup`](uv.md#clearclosecleanup) `inline` |  |
+| `function` | [`assertThread`](uv.md#assertthread) `const` `inline` | Throw `std::logic_error` if called from any thread other than the thread that constructed this handle. |
+| `variable` | [`_loop`](uv.md#_loop)  |  |
+| `variable` | [`_context`](uv.md#_context)  |  |
+| `variable` | [`_tid`](uv.md#_tid)  |  |
+| `variable` | [`_error`](uv.md#_error-1)  |  |
+| `function` | [`onError`](uv.md#onerror) `virtual` `inline` | Called by `[setError()](uv.md#seterror)` after the error state has been updated. |
+| `function` | [`onClose`](uv.md#onclose) `virtual` `inline` | Called by `[close()](uv.md#close-11)` after the context has been released. |
+| `function` | [`Handle`](uv.md#handle-4)  | NonCopyable and NonMovable. |
+| `function` | [`Handle`](uv.md#handle-5)  | Deleted constructor. |
+| `typedef` | [`Type`](uv.md#type-7)  | Define the native handle type. |
+
+### Inherited from [`Socket`](#socket-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](#opaque)  | Optional client data. |
+| `function` | [`Socket`](#socket-2)  | Defaulted constructor. |
+| `function` | [`Socket`](#socket-3)  | Deleted constructor. |
+| `function` | [`Socket`](#socket-4)  | Deleted constructor. |
+| `function` | [`connect`](#connect-2) `virtual` | Connects to the given peer IP address. |
+| `function` | [`connect`](#connect-3) `virtual` | Resolves and connects to the given host address. |
+| `function` | [`bind`](#bind) `virtual` | Bind a local address to the socket. The address may be IPv4 or IPv6 (if supported). |
+| `function` | [`listen`](#listen) `virtual` `inline` | Listens the socket on the given address. |
+| `function` | [`shutdown`](#shutdown-1) `virtual` `inline` `nodiscard` | Sends the shutdown packet which should result is socket closure via callback. |
+| `function` | [`sendOwned`](#sendowned) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-1) `virtual` `nodiscard` |  |
+| `function` | [`close`](#close-12) `virtual` | Closes the underlying socket. |
+| `function` | [`address`](#address-8) `virtual` `const` | The locally bound address. |
+| `function` | [`peerAddress`](#peeraddress-1) `virtual` `const` | The connected peer address. |
+| `function` | [`transport`](#transport) `virtual` `const` | The transport protocol: TCP, UDP or SSLTCP. |
+| `function` | [`setError`](#seterror-1) `virtual` | Sets the socket error. |
+| `function` | [`error`](#error-5) `virtual` `const` | Return the socket error if any. |
+| `function` | [`closed`](#closed-1) `virtual` `const` | Returns true if the native socket handle is closed. |
+| `function` | [`loop`](#loop-3) `virtual` `const` | Returns the socket event loop. |
+| `variable` | [`_af`](#_af)  |  |
+| `function` | [`init`](#init-4) `virtual` | Initializes the underlying socket context. |
+| `function` | [`reset`](#reset-4) `virtual` | Resets the socket context for reuse. |
+| `typedef` | [`Ptr`](#ptr-4)  |  |
+| `typedef` | [`Vec`](#vec)  |  |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
+
 ### Friends
 
 | Name | Description |
@@ -4081,6 +5191,10 @@ The SSL handshake begins automatically once the TCP connection is established.
 #### Parameters
 * `peerAddress` The remote address to connect to.
 
+##### Reimplements
+
+- [`connect`](#connect-7)
+
 ---
 
 {#connect-6}
@@ -4103,6 +5217,10 @@ Sets the hostname on the SSL adapter for SNI and certificate verification before
 
 * `port` Destination port.
 
+##### Reimplements
+
+- [`connect`](#connect-8)
+
 ---
 
 {#bind-1}
@@ -4123,6 +5241,10 @@ Binds the socket to `address` for server-side use. Throws std::logic_error if th
 
 * `flags` Optional bind flags (passed to uv_tcp_bind).
 
+##### Reimplements
+
+- [`bind`](#bind-2)
+
 ---
 
 {#listen-1}
@@ -4141,6 +5263,10 @@ Starts listening for incoming connections. Throws std::logic_error if the contex
 #### Parameters
 * `backlog` Maximum number of pending connections.
 
+##### Reimplements
+
+- [`listen`](#listen-2)
+
 ---
 
 {#shutdown-4}
@@ -4157,6 +5283,10 @@ Defined in src/net/include/icy/net/sslsocket.h:85
 
 Shuts down the connection by attempting an orderly SSL shutdown, then actually shutting down the TCP connection.
 
+##### Reimplements
+
+- [`shutdown`](#shutdown-1)
+
 ---
 
 {#close-14}
@@ -4172,6 +5302,10 @@ virtual void close() override
 Defined in src/net/include/icy/net/sslsocket.h:88
 
 Closes the socket forcefully.
+
+##### Reimplements
+
+- [`close`](#close-15)
 
 ---
 
@@ -4198,6 +5332,10 @@ Encrypts and sends `len` bytes to the connected peer.
 #### Returns
 Number of plaintext bytes accepted, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send-4)
+
 ---
 
 {#sendowned-4}
@@ -4213,6 +5351,10 @@ Number of plaintext bytes accepted, or -1 on error.
 Defined in src/net/include/icy/net/sslsocket.h:96
 
 Sends an owned payload buffer to the connected peer.
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned-6)
 
 ---
 
@@ -4241,6 +5383,10 @@ Encrypts and sends `len` bytes, ignoring `peerAddress` (TCP is connected).
 #### Returns
 Number of plaintext bytes accepted, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send-5)
+
 ---
 
 {#sendowned-5}
@@ -4254,6 +5400,10 @@ Number of plaintext bytes accepted, or -1 on error.
 ```
 
 Defined in src/net/include/icy/net/sslsocket.h:106
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned-7)
 
 ---
 
@@ -4395,6 +5545,10 @@ Defined in src/net/include/icy/net/sslsocket.h:148
 
 Returns the SSLTCP transport protocol identifier.
 
+##### Reimplements
+
+- [`transport`](#transport)
+
 ---
 
 {#acceptconnection}
@@ -4411,6 +5565,10 @@ Defined in src/net/include/icy/net/sslsocket.h:152
 
 Accepts a pending client connection, initializes the server-side SSL context on the new socket, and fires the AcceptConnection signal.
 
+##### Reimplements
+
+- [`acceptConnection`](#acceptconnection-2)
+
 ---
 
 {#onconnect}
@@ -4426,6 +5584,10 @@ virtual void onConnect() override
 Defined in src/net/include/icy/net/sslsocket.h:156
 
 Called when the TCP connection is established; starts reading and initiates the client-side SSL handshake.
+
+##### Reimplements
+
+- [`onConnect`](#onconnect-1)
 
 ---
 
@@ -4446,6 +5608,10 @@ Feeds raw encrypted bytes from the network into the SSL adapter. Called by the s
 * `data` Pointer to the encrypted bytes. 
 
 * `len` Number of bytes received.
+
+##### Reimplements
+
+- [`onRead`](#onread-1)
 
 ### Protected Attributes
 
@@ -4540,6 +5706,284 @@ Defined in src/net/include/icy/net/tcpsocket.h:30
 > **Subclassed by:** [`SSLSocket`](#sslsocket)
 
 TCP socket implementation.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`AcceptConnection`](#acceptconnection-1) | `variable` | Declared here |
+| [`TCPSocket`](#tcpsocket-1) | `function` | Declared here |
+| [`TCPSocket`](#tcpsocket-2) | `function` | Declared here |
+| [`TCPSocket`](#tcpsocket-3) | `function` | Declared here |
+| [`shutdown`](#shutdown-5) | `function` | Declared here |
+| [`close`](#close-15) | `function` | Declared here |
+| [`connect`](#connect-7) | `function` | Declared here |
+| [`connect`](#connect-8) | `function` | Declared here |
+| [`send`](#send-4) | `function` | Declared here |
+| [`sendOwned`](#sendowned-6) | `function` | Declared here |
+| [`send`](#send-5) | `function` | Declared here |
+| [`sendOwned`](#sendowned-7) | `function` | Declared here |
+| [`bind`](#bind-2) | `function` | Declared here |
+| [`listen`](#listen-2) | `function` | Declared here |
+| [`acceptConnection`](#acceptconnection-2) | `function` | Declared here |
+| [`setReusePort`](#setreuseport) | `function` | Declared here |
+| [`setNoDelay`](#setnodelay) | `function` | Declared here |
+| [`setKeepAlive`](#setkeepalive) | `function` | Declared here |
+| [`setSimultaneousAccepts`](#setsimultaneousaccepts) | `function` | Declared here |
+| [`setMode`](#setmode) | `function` | Declared here |
+| [`mode`](#mode) | `function` | Declared here |
+| [`setError`](#seterror-2) | `function` | Declared here |
+| [`error`](#error-7) | `function` | Declared here |
+| [`closed`](#closed-2) | `function` | Declared here |
+| [`address`](#address-9) | `function` | Declared here |
+| [`peerAddress`](#peeraddress-2) | `function` | Declared here |
+| [`transport`](#transport-2) | `function` | Declared here |
+| [`loop`](#loop-4) | `function` | Declared here |
+| [`onConnect`](#onconnect-1) | `function` | Declared here |
+| [`onRead`](#onread-1) | `function` | Declared here |
+| [`onRecv`](#onrecv) | `function` | Declared here |
+| [`onError`](#onerror-1) | `function` | Declared here |
+| [`onClose`](#onclose-1) | `function` | Declared here |
+| [`_mode`](#_mode-1) | `variable` | Declared here |
+| [`_peerAddress`](#_peeraddress) | `variable` | Declared here |
+| [`init`](#init-5) | `function` | Declared here |
+| [`reset`](#reset-5) | `function` | Declared here |
+| [`Ptr`](#ptr-9) | `typedef` | Declared here |
+| [`Vec`](#vec-2) | `typedef` | Declared here |
+| [`Handle`](base.md#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a) | `typedef` | Inherited from [`Stream`](base.md#stream) |
+| [`Read`](base.md#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_buffer`](base.md#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_started`](base.md#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_highWaterMark`](base.md#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_writeReqFree`](base.md#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`_ownedWriteReqFree`](base.md#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365) | `variable` | Inherited from [`Stream`](base.md#stream) |
+| [`Stream`](base.md#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`~Stream`](base.md#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`shutdown`](base.md#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`write`](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`writeOwned`](base.md#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`setHighWaterMark`](base.md#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`write`](base.md#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`stream`](base.md#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`readStart`](base.md#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`readStop`](base.md#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`onRead`](base.md#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocWriteReq`](base.md#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`freeWriteReq`](base.md#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocOwnedWriteReq`](base.md#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`freeOwnedWriteReq`](base.md#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`canQueueWrite`](base.md#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`handleRead`](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`allocReadBuffer`](base.md#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) | `function` | Inherited from [`Stream`](base.md#stream) |
+| [`Handle`](uv.md#handle-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`init`](uv.md#init-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invoke`](uv.md#invoke) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invokeOrThrow`](uv.md#invokeorthrow) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`close`](uv.md#close-11) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`ref`](uv.md#ref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`unref`](uv.md#unref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`initialized`](uv.md#initialized-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`active`](uv.md#active) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closing`](uv.md#closing-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closed`](uv.md#closed) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`error`](uv.md#error-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setError`](uv.md#seterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setUVError`](uv.md#setuverror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setAndThrowError`](uv.md#setandthrowerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`throwLastError`](uv.md#throwlasterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`loop`](uv.md#loop-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`reset`](uv.md#reset-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`get`](uv.md#get-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`tid`](uv.md#tid) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`context`](uv.md#context-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setCloseCleanup`](uv.md#setclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`clearCloseCleanup`](uv.md#clearclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`assertThread`](uv.md#assertthread) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_loop`](uv.md#_loop) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_context`](uv.md#_context) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_tid`](uv.md#_tid) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_error`](uv.md#_error-1) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onError`](uv.md#onerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onClose`](uv.md#onclose) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-5) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Type`](uv.md#type-7) | `typedef` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`opaque`](#opaque) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`bind`](#bind) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`listen`](#listen) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`shutdown`](#shutdown-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`close`](#close-12) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`address`](#address-8) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`peerAddress`](#peeraddress-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`transport`](#transport) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`setError`](#seterror-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`error`](#error-5) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`closed`](#closed-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`loop`](#loop-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`_af`](#_af) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`init`](#init-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`reset`](#reset-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Ptr`](#ptr-4) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`Vec`](#vec) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`Stream`](base.md#stream)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Handle`](base.md#classicy_1_1Stream_1a3cffeb0dacfbc1ced054bd40ba0d198a)  |  |
+| `variable` | [`Read`](base.md#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184)  | Emitted when data has been received from the peer. |
+| `variable` | [`_buffer`](base.md#classicy_1_1Stream_1a947a340e14aaeaa8164d5d822a327857)  |  |
+| `variable` | [`_started`](base.md#classicy_1_1Stream_1a9db4e719d928ab7ee93cbe5672fa8271)  |  |
+| `variable` | [`_highWaterMark`](base.md#classicy_1_1Stream_1aa05d9882aaf5b99452c81ccb7b9effdf)  | 16MB default write queue limit |
+| `variable` | [`_writeReqFree`](base.md#classicy_1_1Stream_1a37c46db727e34bf48851b3f2c7e40b0b)  | Freelist for write requests. |
+| `variable` | [`_ownedWriteReqFree`](base.md#classicy_1_1Stream_1abfe77906ad79a929cf4c9f3dac6d3365)  | Freelist for owned write requests. |
+| `function` | [`Stream`](base.md#classicy_1_1Stream_1aa89bd769ee5af9812776575c114ced1a) `inline` | Construct the stream bound to `loop` with a 64 KiB read buffer. |
+| `function` | [`~Stream`](base.md#classicy_1_1Stream_1a846a88720d4484531aa275e9158e7e8a) `virtual` `inline` | Destroy the stream, stopping reads and freeing pooled write requests. |
+| `function` | [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341) `virtual` `inline` `override` | Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle. |
+| `function` | [`shutdown`](base.md#classicy_1_1Stream_1af4524ac354596db24f2b8de1fde027ba) `inline` | Send a TCP/pipe shutdown request to the connected peer. |
+| `function` | [`write`](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) `inline` | Write `len` bytes from `data` to the stream. |
+| `function` | [`writeOwned`](base.md#classicy_1_1Stream_1a2cd782ba47e07ad03ea83eb088780fa2) `inline` | Write an owned payload buffer to the stream. |
+| `function` | [`setHighWaterMark`](base.md#classicy_1_1Stream_1af8bea25a99110f9ebdd4c61a70750961) `inline` | Set the high water mark for the write queue (default 16MB). When the write queue exceeds this size, [write()](base.md#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) returns false. |
+| `function` | [`write`](base.md#classicy_1_1Stream_1a01d508b9541f4c4ff983be14887f8ee1) `inline` | Write `len` bytes from `data` together with a stream handle over an IPC pipe (uses `uv_write2`). |
+| `function` | [`stream`](base.md#classicy_1_1Stream_1a5d9205b236601db698897ada20795c1a) `inline` | Return the underlying `uv_stream_t` pointer cast from the native handle. |
+| `function` | [`readStart`](base.md#classicy_1_1Stream_1a56e0d361385f0b1a3795979c6de1b889) `virtual` `inline` | Begin reading from the stream by registering libuv read callbacks. |
+| `function` | [`readStop`](base.md#classicy_1_1Stream_1ae5ae85e023f0e245cbc56d0956baa74e) `virtual` `inline` | Stop reading from the stream. |
+| `function` | [`onRead`](base.md#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab) `virtual` `inline` | Called by `[handleRead](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10)` when `len` bytes of `data` arrive. |
+| `function` | [`allocWriteReq`](base.md#classicy_1_1Stream_1a12dd6ceb997f9c5ebcdaae1baf203d8a) `inline` | Return a `uv_write_t` from the freelist, or allocate a new one if the pool is empty. |
+| `function` | [`freeWriteReq`](base.md#classicy_1_1Stream_1a2d8d36707eb1844afcd08557d2702e36) `inline` | Return `req` to the freelist, or delete it if the pool is at capacity. |
+| `function` | [`allocOwnedWriteReq`](base.md#classicy_1_1Stream_1a64c87a4f11e5c9cbf4e9700b8d01bfb5) `inline` |  |
+| `function` | [`freeOwnedWriteReq`](base.md#classicy_1_1Stream_1ace2be7e7601ac8c112180e2a7b9dd026) `inline` |  |
+| `function` | [`canQueueWrite`](base.md#classicy_1_1Stream_1ae1087b59e3ef730967e0beaa7b3a9561) `inline` |  |
+| `function` | [`handleRead`](base.md#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10) `static` `inline` | UV callbacks. |
+| `function` | [`allocReadBuffer`](base.md#classicy_1_1Stream_1a4b2854f2d85d98ea51f012f3b0b5c099) `static` `inline` | libuv allocate-buffer callback. Provides the stream's internal buffer, growing it if libuv requests more space than the current allocation. |
+
+### Inherited from [`Handle`](uv.md#handle-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Handle`](uv.md#handle-3) `inline` | Construct the handle bound to the given event loop. |
+| `function` | [`init`](uv.md#init-2) `inline` | Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`. |
+| `function` | [`invoke`](uv.md#invoke) `inline` | Invoke a libuv function `f` with `args` on the initialized handle. |
+| `function` | [`invokeOrThrow`](uv.md#invokeorthrow) `inline` | Invoke a libuv function `f` with `args`, throwing on failure. |
+| `function` | [`close`](uv.md#close-11) `virtual` `inline` | Close and destroy the handle. |
+| `function` | [`ref`](uv.md#ref) `inline` | Re-reference the handle with the event loop after a previous `[unref()](uv.md#unref)`. |
+| `function` | [`unref`](uv.md#unref) `inline` | Unreference the handle from the event loop. |
+| `function` | [`initialized`](uv.md#initialized-1) `const` `inline` | Return `true` if the handle has been successfully initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`active`](uv.md#active) `virtual` `const` `inline` | Return `true` when the handle is active (libuv `uv_is_active`). |
+| `function` | [`closing`](uv.md#closing-1) `virtual` `const` `inline` | Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`). |
+| `function` | [`closed`](uv.md#closed) `virtual` `const` `inline` | Return `true` if the handle has been fully closed (context released). |
+| `function` | [`error`](uv.md#error-4) `const` `inline` | Return the last error set on this handle, or a default-constructed `[Error](base.md#error)` if no error has occurred. |
+| `function` | [`setError`](uv.md#seterror) `virtual` `inline` | Set the error state and invoke `[onError()](uv.md#onerror)`. |
+| `function` | [`setUVError`](uv.md#setuverror) `inline` | Translate a libuv error code into an `[Error](base.md#error)` and call `[setError()](uv.md#seterror)`. |
+| `function` | [`setAndThrowError`](uv.md#setandthrowerror) `inline` | Set the error state from a libuv error code and throw a `std::runtime_error`. |
+| `function` | [`throwLastError`](uv.md#throwlasterror) `inline` | Throw a `std::runtime_error` if the handle currently holds an error. |
+| `function` | [`loop`](uv.md#loop-2) `const` `inline` | Return the event loop this handle is bound to. |
+| `function` | [`reset`](uv.md#reset-3) `inline` | Close the current handle (if open) and allocate a fresh `[Context](uv.md#context-1)`, leaving the handle ready to be re-initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`get`](uv.md#get-2) `const` `inline` | Return the raw libuv handle pointer cast to `[Handle](uv.md#handle-2)`. |
+| `function` | [`tid`](uv.md#tid) `const` `inline` | Return the ID of the thread that constructed this handle. |
+| `function` | [`context`](uv.md#context-3) `const` `inline` | Return the raw `[Context](uv.md#context-1)` that owns the libuv handle memory. |
+| `function` | [`setCloseCleanup`](uv.md#setclosecleanup) `inline` |  |
+| `function` | [`clearCloseCleanup`](uv.md#clearclosecleanup) `inline` |  |
+| `function` | [`assertThread`](uv.md#assertthread) `const` `inline` | Throw `std::logic_error` if called from any thread other than the thread that constructed this handle. |
+| `variable` | [`_loop`](uv.md#_loop)  |  |
+| `variable` | [`_context`](uv.md#_context)  |  |
+| `variable` | [`_tid`](uv.md#_tid)  |  |
+| `variable` | [`_error`](uv.md#_error-1)  |  |
+| `function` | [`onError`](uv.md#onerror) `virtual` `inline` | Called by `[setError()](uv.md#seterror)` after the error state has been updated. |
+| `function` | [`onClose`](uv.md#onclose) `virtual` `inline` | Called by `[close()](uv.md#close-11)` after the context has been released. |
+| `function` | [`Handle`](uv.md#handle-4)  | NonCopyable and NonMovable. |
+| `function` | [`Handle`](uv.md#handle-5)  | Deleted constructor. |
+| `typedef` | [`Type`](uv.md#type-7)  | Define the native handle type. |
+
+### Inherited from [`Socket`](#socket-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](#opaque)  | Optional client data. |
+| `function` | [`Socket`](#socket-2)  | Defaulted constructor. |
+| `function` | [`Socket`](#socket-3)  | Deleted constructor. |
+| `function` | [`Socket`](#socket-4)  | Deleted constructor. |
+| `function` | [`connect`](#connect-2) `virtual` | Connects to the given peer IP address. |
+| `function` | [`connect`](#connect-3) `virtual` | Resolves and connects to the given host address. |
+| `function` | [`bind`](#bind) `virtual` | Bind a local address to the socket. The address may be IPv4 or IPv6 (if supported). |
+| `function` | [`listen`](#listen) `virtual` `inline` | Listens the socket on the given address. |
+| `function` | [`shutdown`](#shutdown-1) `virtual` `inline` `nodiscard` | Sends the shutdown packet which should result is socket closure via callback. |
+| `function` | [`sendOwned`](#sendowned) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-1) `virtual` `nodiscard` |  |
+| `function` | [`close`](#close-12) `virtual` | Closes the underlying socket. |
+| `function` | [`address`](#address-8) `virtual` `const` | The locally bound address. |
+| `function` | [`peerAddress`](#peeraddress-1) `virtual` `const` | The connected peer address. |
+| `function` | [`transport`](#transport) `virtual` `const` | The transport protocol: TCP, UDP or SSLTCP. |
+| `function` | [`setError`](#seterror-1) `virtual` | Sets the socket error. |
+| `function` | [`error`](#error-5) `virtual` `const` | Return the socket error if any. |
+| `function` | [`closed`](#closed-1) `virtual` `const` | Returns true if the native socket handle is closed. |
+| `function` | [`loop`](#loop-3) `virtual` `const` | Returns the socket event loop. |
+| `variable` | [`_af`](#_af)  |  |
+| `function` | [`init`](#init-4) `virtual` | Initializes the underlying socket context. |
+| `function` | [`reset`](#reset-4) `virtual` | Resets the socket context for reuse. |
+| `typedef` | [`Ptr`](#ptr-4)  |  |
+| `typedef` | [`Vec`](#vec)  |  |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
 
 ### Public Attributes
 
@@ -4660,6 +6104,10 @@ Sends a TCP shutdown request; the socket closes after the peer acknowledges.
 #### Returns
 true if the shutdown request was queued successfully.
 
+##### Reimplements
+
+- [`shutdown`](#shutdown-1)
+
 ---
 
 {#close-15}
@@ -4675,6 +6123,14 @@ virtual void close() override
 Defined in src/net/include/icy/net/tcpsocket.h:52
 
 Closes the socket immediately, releasing all associated resources.
+
+##### Reimplements
+
+- [`close`](base.md#classicy_1_1Stream_1a702473d53d40bc5f19b997a84817a341)
+
+##### Reimplemented by
+
+- [`close`](#close-14)
 
 ---
 
@@ -4693,6 +6149,14 @@ Defined in src/net/include/icy/net/tcpsocket.h:57
 Connects to `peerAddress` using a libuv connect request. On success, calls [onConnect()](#onconnect-1); on failure, calls [setUVError()](uv.md#setuverror). 
 #### Parameters
 * `peerAddress` The remote address to connect to.
+
+##### Reimplements
+
+- [`connect`](#connect-2)
+
+##### Reimplemented by
+
+- [`connect`](#connect-5)
 
 ---
 
@@ -4713,6 +6177,14 @@ Resolves `host` via DNS (or maps "localhost"), then connects.
 * `host` Hostname or IP address string. 
 
 * `port` Destination port.
+
+##### Reimplements
+
+- [`connect`](#connect-3)
+
+##### Reimplemented by
+
+- [`connect`](#connect-6)
 
 ---
 
@@ -4739,6 +6211,14 @@ Writes `len` bytes to the connected peer.
 #### Returns
 Number of bytes sent, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send)
+
+##### Reimplemented by
+
+- [`send`](#send-2)
+
 ---
 
 {#sendowned-6}
@@ -4754,6 +6234,14 @@ Number of bytes sent, or -1 on error.
 Defined in src/net/include/icy/net/tcpsocket.h:70
 
 Sends an owned payload buffer to the connected peer.
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned)
+
+##### Reimplemented by
+
+- [`sendOwned`](#sendowned-4)
 
 ---
 
@@ -4782,6 +6270,14 @@ Writes `len` bytes; `peerAddress` is ignored for TCP (connected stream).
 #### Returns
 Number of bytes sent, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send-1)
+
+##### Reimplemented by
+
+- [`send`](#send-3)
+
 ---
 
 {#sendowned-7}
@@ -4795,6 +6291,14 @@ Number of bytes sent, or -1 on error.
 ```
 
 Defined in src/net/include/icy/net/tcpsocket.h:79
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned-1)
+
+##### Reimplemented by
+
+- [`sendOwned`](#sendowned-5)
 
 ---
 
@@ -4816,6 +6320,14 @@ Binds the socket to `address`. Resets and reinitializes the handle if the addres
 
 * `flags` Optional bind flags (e.g. UV_TCP_IPV6ONLY is added automatically for IPv6).
 
+##### Reimplements
+
+- [`bind`](#bind)
+
+##### Reimplemented by
+
+- [`bind`](#bind-1)
+
 ---
 
 {#listen-2}
@@ -4834,6 +6346,14 @@ Starts listening for incoming connections with the given backlog.
 #### Parameters
 * `backlog` Maximum length of the pending connection queue.
 
+##### Reimplements
+
+- [`listen`](#listen)
+
+##### Reimplemented by
+
+- [`listen`](#listen-1)
+
 ---
 
 {#acceptconnection-2}
@@ -4849,6 +6369,10 @@ virtual void acceptConnection()
 Defined in src/net/include/icy/net/tcpsocket.h:92
 
 Accepts the next pending client connection and fires AcceptConnection.
+
+##### Reimplemented by
+
+- [`acceptConnection`](#acceptconnection)
 
 ---
 
@@ -4983,6 +6507,10 @@ Sets the socket error; ignores the call if an error is already recorded. Setting
 #### Parameters
 * `err` The error to record.
 
+##### Reimplements
+
+- [`setError`](uv.md#seterror)
+
 ---
 
 {#error-7}
@@ -4998,6 +6526,10 @@ virtual const icy::Error & error() const override
 Defined in src/net/include/icy/net/tcpsocket.h:129
 
 Returns the current socket error, if any.
+
+##### Reimplements
+
+- [`error`](#error-5)
 
 ---
 
@@ -5015,6 +6547,10 @@ Defined in src/net/include/icy/net/tcpsocket.h:132
 
 Returns true if the native socket handle is closed.
 
+##### Reimplements
+
+- [`closed`](uv.md#closed)
+
 ---
 
 {#address-9}
@@ -5030,6 +6566,10 @@ virtual net::Address address() const override
 Defined in src/net/include/icy/net/tcpsocket.h:136
 
 Returns the IP address and port number of the socket. A wildcard address is returned if the socket is not connected.
+
+##### Reimplements
+
+- [`address`](#address-8)
 
 ---
 
@@ -5047,6 +6587,10 @@ Defined in src/net/include/icy/net/tcpsocket.h:140
 
 Returns the IP address and port number of the peer socket. A wildcard address is returned if the socket is not connected.
 
+##### Reimplements
+
+- [`peerAddress`](#peeraddress-1)
+
 ---
 
 {#transport-2}
@@ -5062,6 +6606,10 @@ virtual net::TransportType transport() const override
 Defined in src/net/include/icy/net/tcpsocket.h:143
 
 Returns the TCP transport protocol.
+
+##### Reimplements
+
+- [`transport`](#transport)
 
 ---
 
@@ -5079,6 +6627,10 @@ Defined in src/net/include/icy/net/tcpsocket.h:146
 
 Returns the event loop associated with this socket.
 
+##### Reimplements
+
+- [`loop`](#loop-3)
+
 ---
 
 {#onconnect-1}
@@ -5094,6 +6646,10 @@ virtual void onConnect()
 Defined in src/net/include/icy/net/tcpsocket.h:153
 
 Called by the stream layer when the TCP connection is established.
+
+##### Reimplemented by
+
+- [`onConnect`](#onconnect)
 
 ---
 
@@ -5114,6 +6670,14 @@ Called by the stream layer with raw received bytes; wraps them in a [MutableBuff
 * `data` Pointer to received bytes. 
 
 * `len` Number of bytes received.
+
+##### Reimplements
+
+- [`onRead`](base.md#classicy_1_1Stream_1ad60923c284f29eae162e2d977ebebcab)
+
+##### Reimplemented by
+
+- [`onRead`](#onread)
 
 ---
 
@@ -5151,6 +6715,10 @@ Dispatches the error to adapters and closes the socket.
 #### Parameters
 * `error` The error that occurred.
 
+##### Reimplements
+
+- [`onError`](uv.md#onerror)
+
 ---
 
 {#onclose-1}
@@ -5166,6 +6734,10 @@ virtual void onClose() override
 Defined in src/net/include/icy/net/tcpsocket.h:169
 
 Dispatches the close event to all socket adapters.
+
+##### Reimplements
+
+- [`onClose`](uv.md#onclose)
 
 ### Protected Attributes
 
@@ -5223,6 +6795,10 @@ Defined in src/net/include/icy/net/tcpsocket.h:172
 
 Initializes the underlying socket context.
 
+##### Reimplements
+
+- [`init`](#init-4)
+
 ---
 
 {#reset-5}
@@ -5238,6 +6814,10 @@ virtual void reset() override
 Defined in src/net/include/icy/net/tcpsocket.h:173
 
 Resets the socket context for reuse.
+
+##### Reimplements
+
+- [`reset`](#reset-4)
 
 ### Public Types
 
@@ -5288,6 +6868,247 @@ Defined in src/net/include/icy/net/transaction.h:27
 > **Inherits:** [`PacketTransaction< PacketT >`](base.md#packettransaction), [`PacketSocketEmitter`](#packetsocketemitter)
 
 Request/response helper for packet types emitted from a socket.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`IntrusivePtr`](#icy-intrusiveptr) | `friend` | Declared here |
+| [`Transaction`](#transaction-1) | `function` | Declared here |
+| [`send`](#send-6) | `function` | Declared here |
+| [`cancel`](#cancel) | `function` | Declared here |
+| [`dispose`](#dispose) | `function` | Declared here |
+| [`peerAddress`](#peeraddress-3) | `function` | Declared here |
+| [`_peerAddress`](#_peeraddress-1) | `variable` | Declared here |
+| [`onPacket`](#onpacket-1) | `function` | Declared here |
+| [`onResponse`](#onresponse) | `function` | Declared here |
+| [`checkResponse`](#checkresponse) | `function` | Declared here |
+| [`BaseT`](#baset) | `typedef` | Declared here |
+| [`Ptr`](base.md#classicy_1_1PacketTransaction_1a44ea6d9d47efb59eebdc71158c0158c5) | `typedef` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`IntrusivePtr`](base.md#classicy_1_1PacketTransaction_1a04a374ecab2499e81653198fd49ff15e) | `friend` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_request`](base.md#classicy_1_1PacketTransaction_1a03e21f66e0f957926f03f37b48276dca) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_response`](base.md#classicy_1_1PacketTransaction_1a6322ae70f87db74c1d5c130b7fec7eb8) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_timer`](base.md#classicy_1_1PacketTransaction_1a1b02dbf0ac65fcad82c50a6867f81a79) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_retries`](base.md#classicy_1_1PacketTransaction_1a8c76a907486cae828c77f0302d20a844) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_attempts`](base.md#classicy_1_1PacketTransaction_1ace42ededd6279b9a3ce13bdfd6619c11) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`_disposed`](base.md#classicy_1_1PacketTransaction_1a70d8cc5501fba3b9c26426af411241a4) | `variable` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`PacketTransaction`](base.md#classicy_1_1PacketTransaction_1a5b3c9258f951866005347123bdf7a7ff) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`PacketTransaction`](base.md#classicy_1_1PacketTransaction_1a711873135d73ab6cb3426db65e980196) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`send`](base.md#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`cancel`](base.md#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`cancelled`](base.md#classicy_1_1PacketTransaction_1a24663172b10c70530b29c9dccdf5813d) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`dispose`](base.md#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`disposed`](base.md#classicy_1_1PacketTransaction_1a2a85d3be5eb4088c1f033c04c0a0342c) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`canResend`](base.md#classicy_1_1PacketTransaction_1aca2387c6623fb21b6345bf7a1e45612b) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`attempts`](base.md#classicy_1_1PacketTransaction_1a7c19c40febe7e9f6471a7ea5624c933e) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`retries`](base.md#classicy_1_1PacketTransaction_1a81bb9f59219ebd7399dfdbafe821dcb4) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`request`](base.md#classicy_1_1PacketTransaction_1a3a5ebb2afffd6d94e465a1db318161e5) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`request`](base.md#classicy_1_1PacketTransaction_1abe8ba9b6ee2c439944d84386204d5818) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`response`](base.md#classicy_1_1PacketTransaction_1a16cdc5ec77f02ab8213de87bb56f709f) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`response`](base.md#classicy_1_1PacketTransaction_1a50e68834b240b876dae1a7d1f84afb56) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`~PacketTransaction`](base.md#classicy_1_1PacketTransaction_1ac118e461ae9ba6fc8f3b69fe82fda134) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`onStateChange`](base.md#classicy_1_1PacketTransaction_1a14bf74aa47986f672b4f711a2f98e38d) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`handlePotentialResponse`](base.md#classicy_1_1PacketTransaction_1ad392bb447a02bcd8425614589966613a) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`checkResponse`](base.md#classicy_1_1PacketTransaction_1a36b55484206d69dff6375d61b5fb834b) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`onResponse`](base.md#classicy_1_1PacketTransaction_1a2ba8f73029cf89d03c1d641c8c3a42f3) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`onTimeout`](base.md#classicy_1_1PacketTransaction_1ad515edcc4134a741acea3f407409fc56) | `function` | Inherited from [`PacketTransaction`](base.md#packettransaction) |
+| [`send`](base.md#send-9) | `function` | Inherited from [`Sendable`](base.md#sendable) |
+| [`cancel`](base.md#cancel-2) | `function` | Inherited from [`Sendable`](base.md#sendable) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589) | `variable` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`factory`](#factory) | `variable` | Inherited from [`PacketSocketEmitter`](#packetsocketemitter) |
+| [`PacketSocketEmitter`](#packetsocketemitter-1) | `function` | Inherited from [`PacketSocketEmitter`](#packetsocketemitter) |
+| [`onSocketRecv`](#onsocketrecv) | `function` | Inherited from [`PacketSocketEmitter`](#packetsocketemitter) |
+| [`onPacket`](#onpacket) | `function` | Inherited from [`PacketSocketEmitter`](#packetsocketemitter) |
+| [`Connect`](#connect-4) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Recv`](#recv) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Error`](#error-6) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`Close`](#close-13) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`impl`](#impl) | `variable` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`SocketEmitter`](#socketemitter-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`SocketEmitter`](#socketemitter-2) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`~SocketEmitter`](#socketemitter-3) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`addReceiver`](#addreceiver-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`removeReceiver`](#removereceiver-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`swap`](#swap-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`as`](#as) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`operator->`](#operator-9) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketConnect`](#onsocketconnect-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketRecv`](#onsocketrecv-2) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketError`](#onsocketerror-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`onSocketClose`](#onsocketclose-1) | `function` | Inherited from [`SocketEmitter`](#socketemitter) |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`PacketTransaction`](base.md#packettransaction)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`Ptr`](base.md#classicy_1_1PacketTransaction_1a44ea6d9d47efb59eebdc71158c0158c5)  |  |
+| `friend` | [`IntrusivePtr`](base.md#classicy_1_1PacketTransaction_1a04a374ecab2499e81653198fd49ff15e)  |  |
+| `variable` | [`_request`](base.md#classicy_1_1PacketTransaction_1a03e21f66e0f957926f03f37b48276dca)  |  |
+| `variable` | [`_response`](base.md#classicy_1_1PacketTransaction_1a6322ae70f87db74c1d5c130b7fec7eb8)  |  |
+| `variable` | [`_timer`](base.md#classicy_1_1PacketTransaction_1a1b02dbf0ac65fcad82c50a6867f81a79)  | The request timeout callback. |
+| `variable` | [`_retries`](base.md#classicy_1_1PacketTransaction_1a8c76a907486cae828c77f0302d20a844)  | The maximum number of attempts before the transaction is considered failed. |
+| `variable` | [`_attempts`](base.md#classicy_1_1PacketTransaction_1ace42ededd6279b9a3ce13bdfd6619c11)  | The number of times the transaction has been sent. |
+| `variable` | [`_disposed`](base.md#classicy_1_1PacketTransaction_1a70d8cc5501fba3b9c26426af411241a4)  |  |
+| `function` | [`PacketTransaction`](base.md#classicy_1_1PacketTransaction_1a5b3c9258f951866005347123bdf7a7ff) `inline` |  |
+| `function` | [`PacketTransaction`](base.md#classicy_1_1PacketTransaction_1a711873135d73ab6cb3426db65e980196) `inline` |  |
+| `function` | [`send`](base.md#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4) `virtual` `inline` `override` | Starts the transaction timer and sends the request. Overriding classes should implement send logic here. |
+| `function` | [`cancel`](base.md#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef) `virtual` `inline` `override` | Cancellation means that the agent will not retransmit the request, will not treat the lack of response to be a failure, but will wait the duration of the transaction timeout for a response. Transitions the transaction to the `Cancelled` state. |
+| `function` | [`cancelled`](base.md#classicy_1_1PacketTransaction_1a24663172b10c70530b29c9dccdf5813d) `const` `inline` |  |
+| `function` | [`dispose`](base.md#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) `virtual` `inline` | Stops the timer and unregisters callbacks. Does NOT delete the object; the [IntrusivePtr](base.md#intrusiveptr) destructor handles deletion when the last reference is released. Safe to call multiple times. |
+| `function` | [`disposed`](base.md#classicy_1_1PacketTransaction_1a2a85d3be5eb4088c1f033c04c0a0342c) `const` `inline` `nodiscard` |  |
+| `function` | [`canResend`](base.md#classicy_1_1PacketTransaction_1aca2387c6623fb21b6345bf7a1e45612b) `virtual` `inline` |  |
+| `function` | [`attempts`](base.md#classicy_1_1PacketTransaction_1a7c19c40febe7e9f6471a7ea5624c933e) `const` `inline` |  |
+| `function` | [`retries`](base.md#classicy_1_1PacketTransaction_1a81bb9f59219ebd7399dfdbafe821dcb4) `const` `inline` |  |
+| `function` | [`request`](base.md#classicy_1_1PacketTransaction_1a3a5ebb2afffd6d94e465a1db318161e5) `inline` |  |
+| `function` | [`request`](base.md#classicy_1_1PacketTransaction_1abe8ba9b6ee2c439944d84386204d5818) `const` `inline` |  |
+| `function` | [`response`](base.md#classicy_1_1PacketTransaction_1a16cdc5ec77f02ab8213de87bb56f709f) `inline` |  |
+| `function` | [`response`](base.md#classicy_1_1PacketTransaction_1a50e68834b240b876dae1a7d1f84afb56) `const` `inline` |  |
+| `function` | [`~PacketTransaction`](base.md#classicy_1_1PacketTransaction_1ac118e461ae9ba6fc8f3b69fe82fda134) `virtual` `inline` |  |
+| `function` | [`onStateChange`](base.md#classicy_1_1PacketTransaction_1a14bf74aa47986f672b4f711a2f98e38d) `virtual` `inline` `override` | Post state change hook. Calls [dispose()](base.md#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) on terminal states to stop the timer, but does not delete the object; [IntrusivePtr](base.md#intrusiveptr) handles that. |
+| `function` | [`handlePotentialResponse`](base.md#classicy_1_1PacketTransaction_1ad392bb447a02bcd8425614589966613a) `virtual` `inline` | Processes a potential response candidate and updates the state accordingly. |
+| `function` | [`checkResponse`](base.md#classicy_1_1PacketTransaction_1a36b55484206d69dff6375d61b5fb834b) `virtual` | Checks a potential response candidate and returns true on successful match. |
+| `function` | [`onResponse`](base.md#classicy_1_1PacketTransaction_1a2ba8f73029cf89d03c1d641c8c3a42f3) `virtual` `inline` | Called when a successful response is received. |
+| `function` | [`onTimeout`](base.md#classicy_1_1PacketTransaction_1ad515edcc4134a741acea3f407409fc56) `virtual` `inline` | Called by the timer when the transaction timeout elapses. Retransmits if retries remain, otherwise transitions to `Failed`. |
+
+### Inherited from [`Sendable`](base.md#sendable)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`send`](base.md#send-9) `virtual` | Initiates the send operation. |
+| `function` | [`cancel`](base.md#cancel-2) `virtual` | Cancels a pending send operation. |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`RefCounted`](base.md#refcounted)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589)  |  |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b)  | Defaulted constructor. |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) `inline` `noexcept` |  |
+| `function` | [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) `inline` `noexcept` |  |
+| `function` | [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) `const` `inline` `noexcept` | Increments the reference count. Called by [IntrusivePtr](base.md#intrusiveptr) on acquisition. |
+| `function` | [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) `const` `inline` `noexcept` | Decrements the reference count. |
+| `function` | [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) `const` `inline` `nodiscard` `noexcept` | Returns the current reference count. |
+| `function` | [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909)  | Defaulted destructor. |
+
+### Inherited from [`PacketSocketEmitter`](#packetsocketemitter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`factory`](#factory)  | The packet factory. |
+| `function` | [`PacketSocketEmitter`](#packetsocketemitter-1)  | Creates the [PacketSocketEmitter](#packetsocketemitter) and attaches it to the given socket. |
+| `function` | [`onSocketRecv`](#onsocketrecv) `virtual` `override` | Parses raw received data into packets via the factory and forwards each parsed packet to [onPacket()](#onpacket). Returns true if propagation should stop. |
+| `function` | [`onPacket`](#onpacket) `virtual` | [Process](base.md#process) a parsed packet. Returns true to stop propagation. |
+
+### Inherited from [`SocketEmitter`](#socketemitter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`Connect`](#connect-4)  | Signals that the socket is connected. |
+| `variable` | [`Recv`](#recv)  | Signals when data is received by the socket. |
+| `variable` | [`Error`](#error-6)  | Signals that the socket is closed in error. This signal will be sent just before the Closed signal. |
+| `variable` | [`Close`](#close-13)  | Signals that the underlying socket is closed. |
+| `variable` | [`impl`](#impl)  | Pointer to the underlying socket. Sent data will be proxied to this socket. |
+| `function` | [`SocketEmitter`](#socketemitter-1)  | Creates the [SocketEmitter](#socketemitter) and optionally attaches it to a socket. If `socket` is provided, this emitter registers itself as a receiver. |
+| `function` | [`SocketEmitter`](#socketemitter-2)  | Copy constructor; copies all signal connections and attaches to the same socket. |
+| `function` | [`~SocketEmitter`](#socketemitter-3) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`addReceiver`](#addreceiver-1) `virtual` `override` | Attaches a [SocketAdapter](#socketadapter) as a receiver; wires it to all four socket signals. |
+| `function` | [`removeReceiver`](#removereceiver-1) `virtual` `override` | Detaches a [SocketAdapter](#socketadapter) from all four socket signals. |
+| `function` | [`swap`](#swap-1) `virtual` | Replaces the underlying socket with `socket`. |
+| `function` | [`as`](#as) `inline` | Returns the underlying socket cast to type T, or nullptr if the cast fails. |
+| `function` | [`operator->`](#operator-9) `const` `inline` | Returns a raw pointer to the underlying socket for direct method access. Follows shared_ptr semantics; the caller must not delete the returned pointer. |
+| `function` | [`onSocketConnect`](#onsocketconnect-1) `virtual` `override` | Forwards the connect event to chained adapters, then fires the Connect signal. |
+| `function` | [`onSocketRecv`](#onsocketrecv-2) `virtual` `override` | Forwards the recv event to chained adapters, then fires the Recv signal. |
+| `function` | [`onSocketError`](#onsocketerror-1) `virtual` `override` | Forwards the error event to chained adapters, then fires the [Error](base.md#error) signal. |
+| `function` | [`onSocketClose`](#onsocketclose-1) `virtual` `override` | Forwards the close event to chained adapters, then fires the Close signal. |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
 
 ### Friends
 
@@ -5359,6 +7180,10 @@ Sends the request packet to the peer address and starts the timeout timer. Sets 
 #### Returns
 true if the packet was sent and the timer started successfully.
 
+##### Reimplements
+
+- [`send`](base.md#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4)
+
 ---
 
 {#cancel}
@@ -5375,6 +7200,10 @@ Defined in src/net/include/icy/net/transaction.h:61
 
 Cancels the transaction and stops the timeout timer.
 
+##### Reimplements
+
+- [`cancel`](base.md#classicy_1_1PacketTransaction_1ab7c1e492203b850fc9b5c1aa4f97c3ef)
+
 ---
 
 {#dispose}
@@ -5390,6 +7219,10 @@ virtual inline void dispose() override
 Defined in src/net/include/icy/net/transaction.h:68
 
 Stops the timer and unregisters callbacks.
+
+##### Reimplements
+
+- [`dispose`](base.md#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec)
 
 ---
 
@@ -5454,6 +7287,10 @@ Checks whether `packet` is a matching response for the pending request. If it ma
 #### Returns
 true to stop further propagation of the socket data event.
 
+##### Reimplements
+
+- [`onPacket`](#onpacket)
+
 ---
 
 {#onresponse}
@@ -5469,6 +7306,14 @@ virtual inline void onResponse() override
 Defined in src/net/include/icy/net/transaction.h:97
 
 Called when a confirmed response is received; emits the response via [PacketSignal](base.md#packetsignal).
+
+##### Reimplements
+
+- [`onResponse`](base.md#classicy_1_1PacketTransaction_1a2ba8f73029cf89d03c1d641c8c3a42f3)
+
+##### Reimplemented by
+
+- [`onResponse`](stun.md#onresponse-1)
 
 ---
 
@@ -5492,6 +7337,10 @@ The base implementation matches the local socket address against the [PacketInfo
 
 #### Returns
 true if the packet satisfies the response criteria.
+
+##### Reimplements
+
+- [`checkResponse`](base.md#classicy_1_1PacketTransaction_1a36b55484206d69dff6375d61b5fb834b)
 
 ### Public Types
 
@@ -5528,6 +7377,220 @@ Defined in src/net/include/icy/net/udpsocket.h:28
 > **Inherits:** [`Handle< uv_udp_t >`](uv.md#handle-2), [`Socket`](#socket-1)
 
 UDP socket implementation.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`UDPSocket`](#udpsocket-1) | `function` | Declared here |
+| [`UDPSocket`](#udpsocket-2) | `function` | Declared here |
+| [`UDPSocket`](#udpsocket-3) | `function` | Declared here |
+| [`connect`](#connect-9) | `function` | Declared here |
+| [`connect`](#connect-10) | `function` | Declared here |
+| [`close`](#close-16) | `function` | Declared here |
+| [`bind`](#bind-3) | `function` | Declared here |
+| [`send`](#send-7) | `function` | Declared here |
+| [`sendOwned`](#sendowned-8) | `function` | Declared here |
+| [`send`](#send-8) | `function` | Declared here |
+| [`sendOwned`](#sendowned-9) | `function` | Declared here |
+| [`setBroadcast`](#setbroadcast) | `function` | Declared here |
+| [`setMulticastLoop`](#setmulticastloop) | `function` | Declared here |
+| [`setMulticastTTL`](#setmulticastttl) | `function` | Declared here |
+| [`address`](#address-10) | `function` | Declared here |
+| [`peerAddress`](#peeraddress-4) | `function` | Declared here |
+| [`transport`](#transport-3) | `function` | Declared here |
+| [`setError`](#seterror-3) | `function` | Declared here |
+| [`error`](#error-8) | `function` | Declared here |
+| [`closed`](#closed-3) | `function` | Declared here |
+| [`loop`](#loop-5) | `function` | Declared here |
+| [`onRecv`](#onrecv-1) | `function` | Declared here |
+| [`_peer`](#_peer) | `variable` | Declared here |
+| [`_buffer`](#_buffer) | `variable` | Declared here |
+| [`init`](#init-6) | `function` | Declared here |
+| [`reset`](#reset-6) | `function` | Declared here |
+| [`onError`](#onerror-2) | `function` | Declared here |
+| [`onClose`](#onclose-2) | `function` | Declared here |
+| [`recvStart`](#recvstart) | `function` | Declared here |
+| [`recvStop`](#recvstop) | `function` | Declared here |
+| [`Ptr`](#ptr-10) | `typedef` | Declared here |
+| [`Vec`](#vec-3) | `typedef` | Declared here |
+| [`Handle`](uv.md#handle-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`init`](uv.md#init-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invoke`](uv.md#invoke) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`invokeOrThrow`](uv.md#invokeorthrow) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`close`](uv.md#close-11) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`ref`](uv.md#ref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`unref`](uv.md#unref) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`initialized`](uv.md#initialized-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`active`](uv.md#active) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closing`](uv.md#closing-1) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`closed`](uv.md#closed) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`error`](uv.md#error-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setError`](uv.md#seterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setUVError`](uv.md#setuverror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setAndThrowError`](uv.md#setandthrowerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`throwLastError`](uv.md#throwlasterror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`loop`](uv.md#loop-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`reset`](uv.md#reset-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`get`](uv.md#get-2) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`tid`](uv.md#tid) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`context`](uv.md#context-3) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`setCloseCleanup`](uv.md#setclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`clearCloseCleanup`](uv.md#clearclosecleanup) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`assertThread`](uv.md#assertthread) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_loop`](uv.md#_loop) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_context`](uv.md#_context) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_tid`](uv.md#_tid) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`_error`](uv.md#_error-1) | `variable` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onError`](uv.md#onerror) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`onClose`](uv.md#onclose) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-4) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Handle`](uv.md#handle-5) | `function` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`Type`](uv.md#type-7) | `typedef` | Inherited from [`Handle`](uv.md#handle-2) |
+| [`opaque`](#opaque) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Socket`](#socket-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-2) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`connect`](#connect-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`bind`](#bind) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`listen`](#listen) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`shutdown`](#shutdown-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`sendOwned`](#sendowned-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`close`](#close-12) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`address`](#address-8) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`peerAddress`](#peeraddress-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`transport`](#transport) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`setError`](#seterror-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`error`](#error-5) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`closed`](#closed-1) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`loop`](#loop-3) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`_af`](#_af) | `variable` | Inherited from [`Socket`](#socket-1) |
+| [`init`](#init-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`reset`](#reset-4) | `function` | Inherited from [`Socket`](#socket-1) |
+| [`Ptr`](#ptr-4) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`Vec`](#vec) | `typedef` | Inherited from [`Socket`](#socket-1) |
+| [`priority`](#priority-1) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`SocketAdapter`](#socketadapter-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`~SocketAdapter`](#socketadapter-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`send`](#send-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendOwned`](#sendowned-3) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sendPacket`](#sendpacket-2) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`setSender`](#setsender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`sender`](#sender) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`addReceiver`](#addreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`removeReceiver`](#removereceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`hasReceiver`](#hasreceiver) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`receivers`](#receivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketConnect`](#onsocketconnect) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketRecv`](#onsocketrecv-1) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketError`](#onsocketerror) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`onSocketClose`](#onsocketclose) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_sender`](#_sender) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_receivers`](#_receivers) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`_dirty`](#_dirty) | `variable` | Inherited from [`SocketAdapter`](#socketadapter) |
+| [`cleanupReceivers`](#cleanupreceivers) | `function` | Inherited from [`SocketAdapter`](#socketadapter) |
+
+### Inherited from [`Handle`](uv.md#handle-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Handle`](uv.md#handle-3) `inline` | Construct the handle bound to the given event loop. |
+| `function` | [`init`](uv.md#init-2) `inline` | Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`. |
+| `function` | [`invoke`](uv.md#invoke) `inline` | Invoke a libuv function `f` with `args` on the initialized handle. |
+| `function` | [`invokeOrThrow`](uv.md#invokeorthrow) `inline` | Invoke a libuv function `f` with `args`, throwing on failure. |
+| `function` | [`close`](uv.md#close-11) `virtual` `inline` | Close and destroy the handle. |
+| `function` | [`ref`](uv.md#ref) `inline` | Re-reference the handle with the event loop after a previous `[unref()](uv.md#unref)`. |
+| `function` | [`unref`](uv.md#unref) `inline` | Unreference the handle from the event loop. |
+| `function` | [`initialized`](uv.md#initialized-1) `const` `inline` | Return `true` if the handle has been successfully initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`active`](uv.md#active) `virtual` `const` `inline` | Return `true` when the handle is active (libuv `uv_is_active`). |
+| `function` | [`closing`](uv.md#closing-1) `virtual` `const` `inline` | Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`). |
+| `function` | [`closed`](uv.md#closed) `virtual` `const` `inline` | Return `true` if the handle has been fully closed (context released). |
+| `function` | [`error`](uv.md#error-4) `const` `inline` | Return the last error set on this handle, or a default-constructed `[Error](base.md#error)` if no error has occurred. |
+| `function` | [`setError`](uv.md#seterror) `virtual` `inline` | Set the error state and invoke `[onError()](uv.md#onerror)`. |
+| `function` | [`setUVError`](uv.md#setuverror) `inline` | Translate a libuv error code into an `[Error](base.md#error)` and call `[setError()](uv.md#seterror)`. |
+| `function` | [`setAndThrowError`](uv.md#setandthrowerror) `inline` | Set the error state from a libuv error code and throw a `std::runtime_error`. |
+| `function` | [`throwLastError`](uv.md#throwlasterror) `inline` | Throw a `std::runtime_error` if the handle currently holds an error. |
+| `function` | [`loop`](uv.md#loop-2) `const` `inline` | Return the event loop this handle is bound to. |
+| `function` | [`reset`](uv.md#reset-3) `inline` | Close the current handle (if open) and allocate a fresh `[Context](uv.md#context-1)`, leaving the handle ready to be re-initialized via `[init()](uv.md#init-2)`. |
+| `function` | [`get`](uv.md#get-2) `const` `inline` | Return the raw libuv handle pointer cast to `[Handle](uv.md#handle-2)`. |
+| `function` | [`tid`](uv.md#tid) `const` `inline` | Return the ID of the thread that constructed this handle. |
+| `function` | [`context`](uv.md#context-3) `const` `inline` | Return the raw `[Context](uv.md#context-1)` that owns the libuv handle memory. |
+| `function` | [`setCloseCleanup`](uv.md#setclosecleanup) `inline` |  |
+| `function` | [`clearCloseCleanup`](uv.md#clearclosecleanup) `inline` |  |
+| `function` | [`assertThread`](uv.md#assertthread) `const` `inline` | Throw `std::logic_error` if called from any thread other than the thread that constructed this handle. |
+| `variable` | [`_loop`](uv.md#_loop)  |  |
+| `variable` | [`_context`](uv.md#_context)  |  |
+| `variable` | [`_tid`](uv.md#_tid)  |  |
+| `variable` | [`_error`](uv.md#_error-1)  |  |
+| `function` | [`onError`](uv.md#onerror) `virtual` `inline` | Called by `[setError()](uv.md#seterror)` after the error state has been updated. |
+| `function` | [`onClose`](uv.md#onclose) `virtual` `inline` | Called by `[close()](uv.md#close-11)` after the context has been released. |
+| `function` | [`Handle`](uv.md#handle-4)  | NonCopyable and NonMovable. |
+| `function` | [`Handle`](uv.md#handle-5)  | Deleted constructor. |
+| `typedef` | [`Type`](uv.md#type-7)  | Define the native handle type. |
+
+### Inherited from [`Socket`](#socket-1)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](#opaque)  | Optional client data. |
+| `function` | [`Socket`](#socket-2)  | Defaulted constructor. |
+| `function` | [`Socket`](#socket-3)  | Deleted constructor. |
+| `function` | [`Socket`](#socket-4)  | Deleted constructor. |
+| `function` | [`connect`](#connect-2) `virtual` | Connects to the given peer IP address. |
+| `function` | [`connect`](#connect-3) `virtual` | Resolves and connects to the given host address. |
+| `function` | [`bind`](#bind) `virtual` | Bind a local address to the socket. The address may be IPv4 or IPv6 (if supported). |
+| `function` | [`listen`](#listen) `virtual` `inline` | Listens the socket on the given address. |
+| `function` | [`shutdown`](#shutdown-1) `virtual` `inline` `nodiscard` | Sends the shutdown packet which should result is socket closure via callback. |
+| `function` | [`sendOwned`](#sendowned) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-1) `virtual` `nodiscard` |  |
+| `function` | [`close`](#close-12) `virtual` | Closes the underlying socket. |
+| `function` | [`address`](#address-8) `virtual` `const` | The locally bound address. |
+| `function` | [`peerAddress`](#peeraddress-1) `virtual` `const` | The connected peer address. |
+| `function` | [`transport`](#transport) `virtual` `const` | The transport protocol: TCP, UDP or SSLTCP. |
+| `function` | [`setError`](#seterror-1) `virtual` | Sets the socket error. |
+| `function` | [`error`](#error-5) `virtual` `const` | Return the socket error if any. |
+| `function` | [`closed`](#closed-1) `virtual` `const` | Returns true if the native socket handle is closed. |
+| `function` | [`loop`](#loop-3) `virtual` `const` | Returns the socket event loop. |
+| `variable` | [`_af`](#_af)  |  |
+| `function` | [`init`](#init-4) `virtual` | Initializes the underlying socket context. |
+| `function` | [`reset`](#reset-4) `virtual` | Resets the socket context for reuse. |
+| `typedef` | [`Ptr`](#ptr-4)  |  |
+| `typedef` | [`Vec`](#vec)  |  |
+
+### Inherited from [`SocketAdapter`](#socketadapter)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`priority`](#priority-1)  | The priority of this adapter for STL sort operations. |
+| `function` | [`SocketAdapter`](#socketadapter-1)  | Creates the [SocketAdapter](#socketadapter). |
+| `function` | [`~SocketAdapter`](#socketadapter-2) `virtual` `noexcept` | Destroys the [SocketAdapter](#socketadapter). |
+| `function` | [`send`](#send) `virtual` `nodiscard` | Sends the given data buffer to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`send`](#send-1) `virtual` `nodiscard` |  |
+| `function` | [`sendOwned`](#sendowned-2) `virtual` `nodiscard` | Sends an owned payload buffer to the connected peer. |
+| `function` | [`sendOwned`](#sendowned-3) `virtual` `nodiscard` |  |
+| `function` | [`sendPacket`](#sendpacket) `virtual` | Sends the given packet to the connected peer. Returns the number of bytes sent or -1 on error. No exception will be thrown. For TCP sockets the given peer address must match the connected peer address. |
+| `function` | [`sendPacket`](#sendpacket-1) `virtual` |  |
+| `function` | [`sendPacket`](#sendpacket-2) `virtual` | Sends the given packet to the connected peer. This method provides delegate compatibility, and unlike other send methods throws an exception if the underlying socket is closed. |
+| `function` | [`setSender`](#setsender) `virtual` | Sets the pointer to the outgoing data adapter. Send methods proxy data to this adapter by default. |
+| `function` | [`sender`](#sender)  | Returns the output [SocketAdapter](#socketadapter) pointer. |
+| `function` | [`addReceiver`](#addreceiver) `virtual` | Sets the pointer to the incoming data adapter. Events proxy data to this adapter by default. |
+| `function` | [`removeReceiver`](#removereceiver) `virtual` | Remove the given receiver. |
+| `function` | [`hasReceiver`](#hasreceiver) `virtual` | Returns true if the given receiver is connected. |
+| `function` | [`receivers`](#receivers)  | Returns all currently registered input [SocketAdapter](#socketadapter) pointers. Dead (removed) entries are excluded from the returned list. |
+| `function` | [`onSocketConnect`](#onsocketconnect) `virtual` | Called when the socket establishes a connection. Forwards the event to all registered receivers in priority order. Override to intercept before the application sees the event. |
+| `function` | [`onSocketRecv`](#onsocketrecv-1) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketError`](#onsocketerror) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `function` | [`onSocketClose`](#onsocketclose) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `variable` | [`_sender`](#_sender)  |  |
+| `variable` | [`_receivers`](#_receivers)  |  |
+| `variable` | [`_dirty`](#_dirty)  |  |
+| `function` | [`cleanupReceivers`](#cleanupreceivers) `virtual` |  |
 
 ### Public Methods
 
@@ -5618,6 +7681,10 @@ Records the peer address and fires the Connect signal to mimic TCP socket behavi
 #### Parameters
 * `peerAddress` The remote address to associate with this socket.
 
+##### Reimplements
+
+- [`connect`](#connect-2)
+
 ---
 
 {#connect-10}
@@ -5638,6 +7705,10 @@ Resolves `host` via DNS (or maps "localhost"), then calls connect(Address).
 
 * `port` Destination port.
 
+##### Reimplements
+
+- [`connect`](#connect-3)
+
 ---
 
 {#close-16}
@@ -5653,6 +7724,10 @@ virtual void close() override
 Defined in src/net/include/icy/net/udpsocket.h:56
 
 Stops receiving and closes the underlying UDP handle.
+
+##### Reimplements
+
+- [`close`](uv.md#close-11)
 
 ---
 
@@ -5673,6 +7748,10 @@ Binds the socket to `address` and starts the receive loop.
 * `address` Local address to bind to. 
 
 * `flags` Optional bind flags (UV_UDP_IPV6ONLY is added automatically for IPv6).
+
+##### Reimplements
+
+- [`bind`](#bind)
 
 ---
 
@@ -5699,6 +7778,10 @@ Sends `len` bytes to the previously connected peer address. Returns -1 if no pee
 #### Returns
 Number of bytes accepted for sending, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send)
+
 ---
 
 {#sendowned-8}
@@ -5714,6 +7797,10 @@ Number of bytes accepted for sending, or -1 on error.
 Defined in src/net/include/icy/net/udpsocket.h:70
 
 Sends an owned payload buffer to the connected peer.
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned)
 
 ---
 
@@ -5742,6 +7829,10 @@ Sends `len` bytes to `peerAddress`. Returns -1 if the socket is uninitialized or
 #### Returns
 Number of bytes accepted for sending, or -1 on error.
 
+##### Reimplements
+
+- [`send`](#send-1)
+
 ---
 
 {#sendowned-9}
@@ -5755,6 +7846,10 @@ Number of bytes accepted for sending, or -1 on error.
 ```
 
 Defined in src/net/include/icy/net/udpsocket.h:81
+
+##### Reimplements
+
+- [`sendOwned`](#sendowned-1)
 
 ---
 
@@ -5838,6 +7933,10 @@ Defined in src/net/include/icy/net/udpsocket.h:101
 
 Returns the locally bound address, or a wildcard address if unbound.
 
+##### Reimplements
+
+- [`address`](#address-8)
+
 ---
 
 {#peeraddress-4}
@@ -5854,6 +7953,10 @@ Defined in src/net/include/icy/net/udpsocket.h:104
 
 Returns the connected peer address set by [connect()](#connect-9), or a wildcard address if unconnected.
 
+##### Reimplements
+
+- [`peerAddress`](#peeraddress-1)
+
 ---
 
 {#transport-3}
@@ -5869,6 +7972,10 @@ virtual net::TransportType transport() const override
 Defined in src/net/include/icy/net/udpsocket.h:107
 
 Returns the UDP transport protocol.
+
+##### Reimplements
+
+- [`transport`](#transport)
 
 ---
 
@@ -5888,6 +7995,10 @@ Sets the socket error and triggers close.
 #### Parameters
 * `err` The error to record.
 
+##### Reimplements
+
+- [`setError`](uv.md#seterror)
+
 ---
 
 {#error-8}
@@ -5903,6 +8014,10 @@ virtual const icy::Error & error() const override
 Defined in src/net/include/icy/net/udpsocket.h:114
 
 Returns the current socket error, if any.
+
+##### Reimplements
+
+- [`error`](#error-5)
 
 ---
 
@@ -5920,6 +8035,10 @@ Defined in src/net/include/icy/net/udpsocket.h:117
 
 Returns true if the native socket handle is closed.
 
+##### Reimplements
+
+- [`closed`](uv.md#closed)
+
 ---
 
 {#loop-5}
@@ -5935,6 +8054,10 @@ virtual uv::Loop * loop() const override
 Defined in src/net/include/icy/net/udpsocket.h:120
 
 Returns the event loop associated with this socket.
+
+##### Reimplements
+
+- [`loop`](#loop-3)
 
 ---
 
@@ -6014,6 +8137,10 @@ Defined in src/net/include/icy/net/udpsocket.h:128
 
 Initializes the underlying socket context.
 
+##### Reimplements
+
+- [`init`](#init-4)
+
 ---
 
 {#reset-6}
@@ -6029,6 +8156,10 @@ virtual void reset() override
 Defined in src/net/include/icy/net/udpsocket.h:129
 
 Resets the socket context for reuse.
+
+##### Reimplements
+
+- [`reset`](#reset-4)
 
 ---
 
@@ -6051,6 +8182,10 @@ Override to react to errors. The default implementation is a no-op.
 #### Parameters
 * `error` The error that was set.
 
+##### Reimplements
+
+- [`onError`](uv.md#onerror)
+
 ---
 
 {#onclose-2}
@@ -6068,6 +8203,10 @@ Defined in src/net/include/icy/net/udpsocket.h:132
 Called by `[close()](#close-16)` after the context has been released.
 
 Override to perform cleanup on handle closure. The default implementation is a no-op.
+
+##### Reimplements
+
+- [`onClose`](uv.md#onclose)
 
 ---
 
@@ -6143,6 +8282,24 @@ class VerificationErrorDetails
 Defined in src/net/include/icy/net/sslmanager.h:134
 
 A utility class for certificate error handling.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`VerificationErrorDetails`](#verificationerrordetails-1) | `function` | Declared here |
+| [`~VerificationErrorDetails`](#verificationerrordetails-2) | `function` | Declared here |
+| [`certificate`](#certificate) | `function` | Declared here |
+| [`errorDepth`](#errordepth) | `function` | Declared here |
+| [`errorNumber`](#errornumber) | `function` | Declared here |
+| [`errorMessage`](#errormessage) | `function` | Declared here |
+| [`setIgnoreError`](#setignoreerror) | `function` | Declared here |
+| [`getIgnoreError`](#getignoreerror) | `function` | Declared here |
+| [`_cert`](#_cert) | `variable` | Declared here |
+| [`_errorDepth`](#_errordepth) | `variable` | Declared here |
+| [`_errorNumber`](#_errornumber) | `variable` | Declared here |
+| [`_errorMessage`](#_errormessage) | `variable` | Declared here |
+| [`_ignoreError`](#_ignoreerror) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -6371,6 +8528,27 @@ Defined in src/net/include/icy/net/socket.h:155
 
 Provides information about packets emitted from a socket. See [SocketPacket](#socketpacket).
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`socket`](#socket) | `variable` | Declared here |
+| [`peerAddress`](#peeraddress) | `variable` | Declared here |
+| [`PacketInfo`](#packetinfo-1) | `function` | Declared here |
+| [`PacketInfo`](#packetinfo-2) | `function` | Declared here |
+| [`clone`](#clone-5) | `function` | Declared here |
+| [`IPacketInfo`](base.md#structicy_1_1IPacketInfo_1acc94711631f475526138b8ead9859289) | `function` | Inherited from [`IPacketInfo`](base.md#ipacketinfo) |
+| [`~IPacketInfo`](base.md#structicy_1_1IPacketInfo_1a9ca2452f67ad2bad882fd6644427cb3d) | `function` | Inherited from [`IPacketInfo`](base.md#ipacketinfo) |
+| [`clone`](base.md#structicy_1_1IPacketInfo_1a77aed2ef78b6b18eaeb652bf9583f2ce) | `function` | Inherited from [`IPacketInfo`](base.md#ipacketinfo) |
+
+### Inherited from [`IPacketInfo`](base.md#ipacketinfo)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`IPacketInfo`](base.md#structicy_1_1IPacketInfo_1acc94711631f475526138b8ead9859289)  | Defaulted constructor. |
+| `function` | [`~IPacketInfo`](base.md#structicy_1_1IPacketInfo_1a9ca2452f67ad2bad882fd6644427cb3d) `virtual` | Defaulted destructor. |
+| `function` | [`clone`](base.md#structicy_1_1IPacketInfo_1a77aed2ef78b6b18eaeb652bf9583f2ce) `virtual` `const` | Returns a heap-allocated deep copy of this info object. |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -6467,6 +8645,10 @@ virtual inline std::unique_ptr< IPacketInfo > clone() const
 Defined in src/net/include/icy/net/socket.h:182
 
 Returns a heap-allocated copy of this [PacketInfo](#packetinfo).
+
+##### Reimplements
+
+- [`clone`](base.md#structicy_1_1IPacketInfo_1a77aed2ef78b6b18eaeb652bf9583f2ce)
 
 {#dns}
 

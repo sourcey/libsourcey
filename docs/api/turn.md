@@ -611,6 +611,169 @@ Defined in src/turn/include/icy/turn/client/client.h:124
 
 TURN client that manages relay allocations, permissions, and data relay via RFC 5766.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Client`](#client-3) | `function` | Declared here |
+| [`start`](#start-13) | `function` | Declared here |
+| [`stop`](#stop-10) | `function` | Declared here |
+| [`sendAllocate`](#sendallocate) | `function` | Declared here |
+| [`addPermission`](#addpermission) | `function` | Declared here |
+| [`addPermission`](#addpermission-1) | `function` | Declared here |
+| [`sendCreatePermission`](#sendcreatepermission) | `function` | Declared here |
+| [`sendChannelBind`](#sendchannelbind) | `function` | Declared here |
+| [`sendRefresh`](#sendrefresh) | `function` | Declared here |
+| [`sendData`](#senddata) | `function` | Declared here |
+| [`handleResponse`](#handleresponse) | `function` | Declared here |
+| [`handleAllocateResponse`](#handleallocateresponse) | `function` | Declared here |
+| [`handleAllocateErrorResponse`](#handleallocateerrorresponse) | `function` | Declared here |
+| [`handleCreatePermissionResponse`](#handlecreatepermissionresponse) | `function` | Declared here |
+| [`handleCreatePermissionErrorResponse`](#handlecreatepermissionerrorresponse) | `function` | Declared here |
+| [`handleRefreshResponse`](#handlerefreshresponse) | `function` | Declared here |
+| [`handleDataIndication`](#handledataindication) | `function` | Declared here |
+| [`transportProtocol`](#transportprotocol) | `function` | Declared here |
+| [`createTransaction`](#createtransaction) | `function` | Declared here |
+| [`authenticateRequest`](#authenticaterequest) | `function` | Declared here |
+| [`sendAuthenticatedTransaction`](#sendauthenticatedtransaction) | `function` | Declared here |
+| [`removeTransaction`](#removetransaction) | `function` | Declared here |
+| [`mappedAddress`](#mappedaddress) | `function` | Declared here |
+| [`relayedAddress`](#relayedaddress) | `function` | Declared here |
+| [`closed`](#closed-5) | `function` | Declared here |
+| [`observer`](#observer-1) | `function` | Declared here |
+| [`options`](#options-8) | `function` | Declared here |
+| [`addPermission`](#addpermission-2) | `function` | Declared here |
+| [`hasPermission`](#haspermission) | `function` | Declared here |
+| [`hasPermission`](#haspermission-1) | `function` | Declared here |
+| [`removePermission`](#removepermission) | `function` | Declared here |
+| [`removePermission`](#removepermission-1) | `function` | Declared here |
+| [`_observer`](#_observer-1) | `variable` | Declared here |
+| [`_options`](#_options-3) | `variable` | Declared here |
+| [`_socket`](#_socket-3) | `variable` | Declared here |
+| [`_timer`](#_timer-1) | `variable` | Declared here |
+| [`_error`](#_error-5) | `variable` | Declared here |
+| [`_mappedAddress`](#_mappedaddress) | `variable` | Declared here |
+| [`_relayedAddress`](#_relayedaddress) | `variable` | Declared here |
+| [`_realm`](#_realm) | `variable` | Declared here |
+| [`_nonce`](#_nonce) | `variable` | Declared here |
+| [`_pendingIndications`](#_pendingindications) | `variable` | Declared here |
+| [`_transactions`](#_transactions) | `variable` | Declared here |
+| [`setError`](#seterror-5) | `function` | Declared here |
+| [`onSocketConnect`](#onsocketconnect-5) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv-7) | `function` | Declared here |
+| [`onSocketClose`](#onsocketclose-5) | `function` | Declared here |
+| [`onTransactionProgress`](#ontransactionprogress) | `function` | Declared here |
+| [`onStateChange`](#onstatechange-1) | `function` | Declared here |
+| [`onTimer`](#ontimer-1) | `function` | Declared here |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -683,6 +846,10 @@ Defined in src/turn/include/icy/turn/client/client.h:166
 
 Connects the socket to the TURN server and starts the allocation sequence. Permissions must be added via [addPermission()](#addpermission) before calling this.
 
+##### Reimplemented by
+
+- [`start`](#start-15)
+
 ---
 
 {#stop-10}
@@ -698,6 +865,10 @@ virtual void stop()
 Defined in src/turn/include/icy/turn/client/client.h:169
 
 Stops the timer, cancels pending transactions, and closes the socket.
+
+##### Reimplemented by
+
+- [`stop`](#stop-12)
 
 ---
 
@@ -750,6 +921,10 @@ Defined in src/turn/include/icy/turn/client/client.h:186
 Adds a single peer IP to the permission list, or refreshes it if already present. Permissions should be added before [start()](#start-13); they may also be added later, in which case a new CreatePermission request is required. 
 #### Parameters
 * `ip` IPv4 address string of the permitted peer.
+
+##### Reimplements
+
+- [`addPermission`](#addpermission-3)
 
 ---
 
@@ -823,6 +998,10 @@ Sends a Send Indication to relay `data` to `peerAddress` through the TURN server
 
 * `peerAddress` Destination peer address (must have an active permission).
 
+##### Reimplemented by
+
+- [`sendData`](#senddata-1)
+
 ---
 
 {#handleresponse}
@@ -843,6 +1022,10 @@ Dispatches an incoming STUN/TURN response to the appropriate handler.
 
 #### Returns
 true if the message was handled, false if it was unrecognised.
+
+##### Reimplemented by
+
+- [`handleResponse`](#handleresponse-1)
 
 ---
 
@@ -969,6 +1152,10 @@ Defined in src/turn/include/icy/turn/client/client.h:253
 #### Returns
 The IANA protocol number for the underlying transport (kProtocolUDP or kProtocolTCP).
 
+##### Reimplemented by
+
+- [`transportProtocol`](#transportprotocol-1)
+
 ---
 
 {#createtransaction}
@@ -1084,6 +1271,10 @@ Defined in src/turn/include/icy/turn/client/client.h:281
 #### Returns
 The relayed transport address assigned by the TURN server.
 
+##### Reimplements
+
+- [`relayedAddress`](#relayedaddress-1)
+
 ---
 
 {#closed-5}
@@ -1149,6 +1340,10 @@ Defined in src/turn/include/icy/turn/client/client.h:154
 
 Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only.
 
+##### Reimplements
+
+- [`addPermission`](#addpermission-4)
+
 ---
 
 {#haspermission}
@@ -1170,6 +1365,10 @@ Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x an
 #### Returns
 true if a valid (non-expired) permission exists.
 
+##### Reimplements
+
+- [`hasPermission`](#haspermission-2)
+
 ---
 
 {#haspermission-1}
@@ -1185,6 +1384,10 @@ true if a valid (non-expired) permission exists.
 Defined in src/turn/include/icy/turn/client/client.h:155
 
 Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only.
+
+##### Reimplements
+
+- [`hasPermission`](#haspermission-3)
 
 ---
 
@@ -1204,6 +1407,10 @@ Removes the permission for `ip` if present.
 #### Parameters
 * `ip` IPv4 address string to remove.
 
+##### Reimplements
+
+- [`removePermission`](#removepermission-2)
+
 ---
 
 {#removepermission-1}
@@ -1219,6 +1426,10 @@ virtual void removePermission(const net::Address & address)
 Defined in src/turn/include/icy/turn/client/client.h:156
 
 Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only.
+
+##### Reimplements
+
+- [`removePermission`](#removepermission-3)
 
 ### Protected Attributes
 
@@ -1528,6 +1739,19 @@ Defined in src/turn/include/icy/turn/client/client.h:129
 
 [Configuration](base.md#configuration) options for the TURN client.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`software`](#software) | `variable` | Declared here |
+| [`username`](#username-2) | `variable` | Declared here |
+| [`password`](#password-2) | `variable` | Declared here |
+| [`timeout`](#timeout-1) | `variable` | Declared here |
+| [`lifetime`](#lifetime) | `variable` | Declared here |
+| [`timerInterval`](#timerinterval) | `variable` | Declared here |
+| [`serverAddr`](#serveraddr) | `variable` | Declared here |
+| [`Options`](#options-10) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -1700,6 +1924,27 @@ Allocations    Address      Address     Address          Address
                        Internal                External
                        5-Tuple                 5-tuple
 ```
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-25) | `friend` | Declared here |
+| [`FiveTuple`](#fivetuple-1) | `function` | Declared here |
+| [`FiveTuple`](#fivetuple-2) | `function` | Declared here |
+| [`FiveTuple`](#fivetuple-3) | `function` | Declared here |
+| [`remote`](#remote-2) | `function` | Declared here |
+| [`local`](#local-2) | `function` | Declared here |
+| [`transport`](#transport-4) | `function` | Declared here |
+| [`remote`](#remote-3) | `function` | Declared here |
+| [`local`](#local-3) | `function` | Declared here |
+| [`transport`](#transport-5) | `function` | Declared here |
+| [`operator==`](#operator-26) | `function` | Declared here |
+| [`operator<`](#operator-27) | `function` | Declared here |
+| [`toString`](#tostring-7) | `function` | Declared here |
+| [`_remote`](#_remote-1) | `variable` | Declared here |
+| [`_local`](#_local-1) | `variable` | Declared here |
+| [`_transport`](#_transport) | `variable` | Declared here |
 
 ### Friends
 
@@ -2024,6 +2269,48 @@ The authentication information, such as username, password, realm, and nonce, is
 
 The time-to-expiry is the time left until the allocation expires. Each Allocate or Refresh transaction resets this timer, which then ticks down toward zero. By default, each Allocate or Refresh resets the lifetime to 600 seconds (10 minutes), but the client can request a different value in the Allocate and Refresh requests. Allocations can only be refreshed using Refresh; sending data to a peer does not refresh an allocation. When an allocation expires, the state data associated with it can be freed.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`operator<<`](#operator-28) | `friend` | Declared here |
+| [`IAllocation`](#iallocation-1) | `function` | Declared here |
+| [`IAllocation`](#iallocation-2) | `function` | Declared here |
+| [`IAllocation`](#iallocation-3) | `function` | Declared here |
+| [`updateUsage`](#updateusage) | `function` | Declared here |
+| [`setLifetime`](#setlifetime) | `function` | Declared here |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Declared here |
+| [`expired`](#expired) | `function` | Declared here |
+| [`deleted`](#deleted-1) | `function` | Declared here |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Declared here |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Declared here |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Declared here |
+| [`timeRemaining`](#timeremaining) | `function` | Declared here |
+| [`tuple`](#tuple) | `function` | Declared here |
+| [`username`](#username-3) | `function` | Declared here |
+| [`lifetime`](#lifetime-1) | `function` | Declared here |
+| [`permissions`](#permissions) | `function` | Declared here |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Declared here |
+| [`addPermission`](#addpermission-3) | `function` | Declared here |
+| [`addPermission`](#addpermission-4) | `function` | Declared here |
+| [`addPermissions`](#addpermissions) | `function` | Declared here |
+| [`removePermission`](#removepermission-2) | `function` | Declared here |
+| [`removePermission`](#removepermission-3) | `function` | Declared here |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Declared here |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Declared here |
+| [`hasPermission`](#haspermission-2) | `function` | Declared here |
+| [`hasPermission`](#haspermission-3) | `function` | Declared here |
+| [`print`](#print-11) | `function` | Declared here |
+| [`_tuple`](#_tuple) | `variable` | Declared here |
+| [`_username`](#_username-2) | `variable` | Declared here |
+| [`_permissions`](#_permissions) | `variable` | Declared here |
+| [`_lifetime`](#_lifetime) | `variable` | Declared here |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Declared here |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Declared here |
+| [`_createdAt`](#_createdat) | `variable` | Declared here |
+| [`_updatedAt`](#_updatedat) | `variable` | Declared here |
+| [`_deleted`](#_deleted) | `variable` | Declared here |
+
 ### Friends
 
 | Name | Description |
@@ -2280,6 +2567,10 @@ Defined in src/turn/include/icy/turn/iallocation.h:129
 #### Returns
 Seconds until the allocation expires (0 if already expired).
 
+##### Reimplemented by
+
+- [`timeRemaining`](#timeremaining-1)
+
 ---
 
 {#tuple}
@@ -2365,6 +2656,12 @@ Defined in src/turn/include/icy/turn/iallocation.h:144
 #### Returns
 The relay transport address assigned to this allocation.
 
+##### Reimplemented by
+
+- [`relayedAddress`](#relayedaddress)
+- [`relayedAddress`](#relayedaddress-2)
+- [`relayedAddress`](#relayedaddress-3)
+
 ---
 
 {#addpermission-3}
@@ -2383,6 +2680,10 @@ Adds a permission for `ip`, or refreshes the existing one.
 #### Parameters
 * `ip` IPv4 address string to permit.
 
+##### Reimplemented by
+
+- [`addPermission`](#addpermission-1)
+
 ---
 
 {#addpermission-4}
@@ -2398,6 +2699,10 @@ virtual void addPermission(const net::Address & address)
 Defined in src/turn/include/icy/turn/iallocation.h:152
 
 Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only.
+
+##### Reimplemented by
+
+- [`addPermission`](#addpermission-2)
 
 ---
 
@@ -2435,6 +2740,10 @@ Removes the permission for `ip` if present.
 #### Parameters
 * `ip` IPv4 address string to remove.
 
+##### Reimplemented by
+
+- [`removePermission`](#removepermission)
+
 ---
 
 {#removepermission-3}
@@ -2450,6 +2759,10 @@ virtual void removePermission(const net::Address & address)
 Defined in src/turn/include/icy/turn/iallocation.h:164
 
 Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only.
+
+##### Reimplemented by
+
+- [`removePermission`](#removepermission-1)
 
 ---
 
@@ -2504,6 +2817,11 @@ Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x an
 #### Returns
 true if a valid (non-expired) permission exists.
 
+##### Reimplemented by
+
+- [`hasPermission`](#haspermission)
+- [`hasPermission`](#haspermission-4)
+
 ---
 
 {#haspermission-3}
@@ -2520,6 +2838,11 @@ Defined in src/turn/include/icy/turn/iallocation.h:180
 
 Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only.
 
+##### Reimplemented by
+
+- [`hasPermission`](#haspermission-1)
+- [`hasPermission`](#haspermission-5)
+
 ---
 
 {#print-11}
@@ -2533,6 +2856,10 @@ virtual inline void print(std::ostream & os) const
 ```
 
 Defined in src/turn/include/icy/turn/iallocation.h:182
+
+##### Reimplemented by
+
+- [`print`](#print-12)
 
 ### Protected Attributes
 
@@ -2674,6 +3001,17 @@ Lightweight server-side TURN permission policy.
 
 Keeps the explicit permission list fast and binary, while making server exceptions such as local-IP auto-grants explicit and auditable.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`PermissionPolicy`](#permissionpolicy-1) | `function` | Declared here |
+| [`allowsExplicit`](#allowsexplicit) | `function` | Declared here |
+| [`allowsImplicit`](#allowsimplicit) | `function` | Declared here |
+| [`allows`](#allows) | `function` | Declared here |
+| [`_enableLocalIPPermissions`](#_enablelocalippermissions) | `variable` | Declared here |
+| [`isLocalAutoGrantAddress`](#islocalautograntaddress) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -2795,6 +3133,130 @@ Defined in src/turn/include/icy/turn/types.h:61
 
 A STUN message annotated with the transport type and source/destination addresses needed for server-side routing and response generation.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`transport`](#transport-6) | `variable` | Declared here |
+| [`localAddress`](#localaddress) | `variable` | Declared here |
+| [`remoteAddress`](#remoteaddress) | `variable` | Declared here |
+| [`hash`](#hash) | `variable` | Declared here |
+| [`Request`](#request-13) | `function` | Declared here |
+| [`Message`](stun.md#message-6) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`Message`](stun.md#message-7) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`Message`](stun.md#message-8) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`Message`](stun.md#message-9) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`operator=`](stun.md#operator-30) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`operator=`](stun.md#operator-31) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`clone`](stun.md#clone-11) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`setClass`](stun.md#setclass) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`setMethod`](stun.md#setmethod-1) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`setTransactionID`](stun.md#settransactionid) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`classType`](stun.md#classtype) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`methodType`](stun.md#methodtype) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`transactionID`](stun.md#transactionid-2) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`size`](stun.md#size-6) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`methodString`](stun.md#methodstring) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`classString`](stun.md#classstring) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`errorString`](stun.md#errorstring) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`add`](stun.md#add-1) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`add`](stun.md#add-2) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`get`](stun.md#get-5) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`get`](stun.md#get-6) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`read`](stun.md#read-6) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`write`](stun.md#write-21) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`toString`](stun.md#tostring-8) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`print`](stun.md#print-13) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`className`](stun.md#classname-7) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`_class`](stun.md#_class-1) | `variable` | Inherited from [`Message`](stun.md#message-5) |
+| [`_method`](stun.md#_method-1) | `variable` | Inherited from [`Message`](stun.md#message-5) |
+| [`_size`](stun.md#_size-1) | `variable` | Inherited from [`Message`](stun.md#message-5) |
+| [`_transactionID`](stun.md#_transactionid) | `variable` | Inherited from [`Message`](stun.md#message-5) |
+| [`_attrs`](stun.md#_attrs) | `variable` | Inherited from [`Message`](stun.md#message-5) |
+| [`MethodType`](stun.md#methodtype-1) | `enum` | Inherited from [`Message`](stun.md#message-5) |
+| [`ClassType`](stun.md#classtype-1) | `enum` | Inherited from [`Message`](stun.md#message-5) |
+| [`ErrorCodes`](stun.md#errorcodes) | `enum` | Inherited from [`Message`](stun.md#message-5) |
+| [`computeBodySize`](stun.md#computebodysize) | `function` | Inherited from [`Message`](stun.md#message-5) |
+| [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0) | `variable` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) | `function` | Inherited from [`IPacket`](base.md#ipacket) |
+| [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) | `friend` | Inherited from [`IPacket`](base.md#ipacket) |
+
+### Inherited from [`Message`](stun.md#message-5)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Message`](stun.md#message-6)  | Constructs a default message (Request class, Undefined method) with a randomly generated 12-byte transaction ID. |
+| `function` | [`Message`](stun.md#message-7)  | Constructs a message with explicit class and method. |
+| `function` | [`Message`](stun.md#message-8)  | Deep-copy constructor; clones all attributes. |
+| `function` | [`Message`](stun.md#message-9) `noexcept` | Move constructor. |
+| `function` | [`operator=`](stun.md#operator-30)  | Deep-copy assignment; clones all attributes from `that`. |
+| `function` | [`operator=`](stun.md#operator-31) `noexcept` | Move assignment. |
+| `function` | [`clone`](stun.md#clone-11) `virtual` `const` `override` |  |
+| `function` | [`setClass`](stun.md#setclass)  | Sets the message class field. |
+| `function` | [`setMethod`](stun.md#setmethod-1)  | Sets the message method field. |
+| `function` | [`setTransactionID`](stun.md#settransactionid)  | Sets the 12-byte transaction ID. |
+| `function` | [`classType`](stun.md#classtype) `const` `nodiscard` |  |
+| `function` | [`methodType`](stun.md#methodtype) `const` `nodiscard` |  |
+| `function` | [`transactionID`](stun.md#transactionid-2) `const` `inline` `nodiscard` |  |
+| `function` | [`size`](stun.md#size-6) `virtual` `const` `inline` `nodiscard` `override` |  |
+| `function` | [`methodString`](stun.md#methodstring) `const` `nodiscard` |  |
+| `function` | [`classString`](stun.md#classstring) `const` `nodiscard` |  |
+| `function` | [`errorString`](stun.md#errorstring) `const` `nodiscard` | Maps a numeric error code to its canonical string description. |
+| `function` | [`add`](stun.md#add-1) `inline` | Constructs an attribute of type T in-place and appends it to the message. Returns a reference to the new attribute for further configuration. |
+| `function` | [`add`](stun.md#add-2)  | Appends an attribute to the message, taking ownership via unique_ptr. |
+| `function` | [`get`](stun.md#get-5) `const` `nodiscard` | Returns the Nth attribute of the given type, or nullptr if not found. |
+| `function` | [`get`](stun.md#get-6) `const` `inline` `nodiscard` | Type-safe attribute accessor using the concrete attribute's TypeID. |
+| `function` | [`read`](stun.md#read-6) `virtual` `override` | Parses a STUN/TURN packet from the given buffer. |
+| `function` | [`write`](stun.md#write-21) `virtual` `const` `override` | Serialises this message into a STUN/TURN wire-format packet. |
+| `function` | [`toString`](stun.md#tostring-8) `const` `nodiscard` |  |
+| `function` | [`print`](stun.md#print-13) `virtual` `const` `override` | Writes the same representation as [toString()](stun.md#tostring-8) to the given stream. |
+| `function` | [`className`](stun.md#classname-7) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `variable` | [`_class`](stun.md#_class-1)  |  |
+| `variable` | [`_method`](stun.md#_method-1)  |  |
+| `variable` | [`_size`](stun.md#_size-1)  | Set by [read()](stun.md#read-6); [write()](stun.md#write-21) uses computeBodySize() instead. |
+| `variable` | [`_transactionID`](stun.md#_transactionid)  |  |
+| `variable` | [`_attrs`](stun.md#_attrs)  |  |
+| `enum` | [`MethodType`](stun.md#methodtype-1)  |  |
+| `enum` | [`ClassType`](stun.md#classtype-1)  |  |
+| `enum` | [`ErrorCodes`](stun.md#errorcodes)  |  |
+| `function` | [`computeBodySize`](stun.md#computebodysize) `const` `nodiscard` | Computes the wire body size from the current attribute list. |
+
+### Inherited from [`IPacket`](base.md#ipacket)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`opaque`](base.md#classicy_1_1IPacket_1aa66babf1218198553ca9adede7618930)  | Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime. |
+| `variable` | [`info`](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)  | Optional extra information about the packet. |
+| `variable` | [`flags`](base.md#classicy_1_1IPacket_1a9b3947336184d08d69f70f406b84cdf0)  | Provides basic information about the packet. |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1af237b656e089ab2576cad8324769cbe0) `inline` |  |
+| `function` | [`IPacket`](base.md#classicy_1_1IPacket_1aae812f8e7e880df66d95eedf160c993b) `inline` | Copy constructor; clones the info object if present. |
+| `function` | [`operator=`](base.md#classicy_1_1IPacket_1adedceb54266652b65e183fd2c2882881) `inline` | Copy assignment; clones the info object if present. |
+| `function` | [`clone`](base.md#classicy_1_1IPacket_1a0a71c618520cdb93b89f5e29f8f145c7) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `function` | [`~IPacket`](base.md#classicy_1_1IPacket_1a0419279bf5a558ec6d850fefcd44b437) `virtual` | Defaulted destructor. |
+| `function` | [`read`](base.md#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `function` | [`write`](base.md#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `function` | [`size`](base.md#classicy_1_1IPacket_1a86bfdad925cd6943165c3f8b4637db8c) `virtual` `const` `inline` | The size of the packet in bytes. |
+| `function` | [`hasData`](base.md#classicy_1_1IPacket_1afacbc458f0ce7820ef1345d85f7d6f80) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
+| `function` | [`data`](base.md#classicy_1_1IPacket_1a2e31cef156789c02205ec5c470d8c951) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
+| `function` | [`constData`](base.md#classicy_1_1IPacket_1a80c71c363bb1e20a5e24841d1f3e470c) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
+| `function` | [`className`](base.md#classicy_1_1IPacket_1abbbdc14886e839a7c09bd0eeac423ee1) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `function` | [`print`](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
+| `friend` | [`operator<<`](base.md#classicy_1_1IPacket_1a5157a8d7d50d1ff3c829e9c44c0a38ee) `inline` | [Stream](base.md#stream) insertion operator; delegates to [print()](base.md#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -2905,6 +3367,49 @@ class Server
 Defined in src/turn/include/icy/turn/server/server.h:126
 
 TURN server RFC 5766 / RFC 6062 implementation. Listens on UDP and/or TCP, authenticates requests via [ServerObserver](#serverobserver), and manages [ServerAllocation](#serverallocation) objects for each 5-tuple.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Server`](#server-7) | `function` | Declared here |
+| [`start`](#start-14) | `function` | Declared here |
+| [`stop`](#stop-11) | `function` | Declared here |
+| [`handleRequest`](#handlerequest) | `function` | Declared here |
+| [`handleAuthorizedRequest`](#handleauthorizedrequest) | `function` | Declared here |
+| [`handleBindingRequest`](#handlebindingrequest) | `function` | Declared here |
+| [`handleAllocateRequest`](#handleallocaterequest) | `function` | Declared here |
+| [`handleConnectionBindRequest`](#handleconnectionbindrequest) | `function` | Declared here |
+| [`respond`](#respond) | `function` | Declared here |
+| [`respondError`](#responderror) | `function` | Declared here |
+| [`allocations`](#allocations) | `function` | Declared here |
+| [`addAllocation`](#addallocation) | `function` | Declared here |
+| [`removeAllocation`](#removeallocation) | `function` | Declared here |
+| [`getAllocation`](#getallocation) | `function` | Declared here |
+| [`getTCPAllocation`](#gettcpallocation) | `function` | Declared here |
+| [`getTCPSocket`](#gettcpsocket) | `function` | Declared here |
+| [`releaseTCPSocket`](#releasetcpsocket) | `function` | Declared here |
+| [`observer`](#observer-2) | `function` | Declared here |
+| [`options`](#options-11) | `function` | Declared here |
+| [`udpSocket`](#udpsocket-4) | `function` | Declared here |
+| [`tcpSocket`](#tcpsocket-4) | `function` | Declared here |
+| [`timer`](#timer-1) | `function` | Declared here |
+| [`onTCPAcceptConnection`](#ontcpacceptconnection) | `function` | Declared here |
+| [`onTCPSocketClosed`](#ontcpsocketclosed) | `function` | Declared here |
+| [`onSocketRecv`](#onsocketrecv-8) | `function` | Declared here |
+| [`onTimer`](#ontimer-3) | `function` | Declared here |
+| [`scheduleDeferredTCPSocketRelease`](#scheduledeferredtcpsocketrelease) | `function` | Declared here |
+| [`drainReleasedTCPSockets`](#drainreleasedtcpsockets) | `function` | Declared here |
+| [`_mutex`](#_mutex-13) | `variable` | Declared here |
+| [`_observer`](#_observer-2) | `variable` | Declared here |
+| [`_options`](#_options-4) | `variable` | Declared here |
+| [`_udpSocket`](#_udpsocket) | `variable` | Declared here |
+| [`_tcpSocket`](#_tcpsocket) | `variable` | Declared here |
+| [`_tcpSockets`](#_tcpsockets) | `variable` | Declared here |
+| [`_pendingReleasedTCPSockets`](#_pendingreleasedtcpsockets) | `variable` | Declared here |
+| [`_tcpSocketReleaseScheduled`](#_tcpsocketreleasescheduled) | `variable` | Declared here |
+| [`_allocations`](#_allocations) | `variable` | Declared here |
+| [`_timer`](#_timer-2) | `variable` | Declared here |
 
 ### Public Methods
 
@@ -3560,6 +4065,109 @@ Defined in src/turn/include/icy/turn/server/serverallocation.h:29
 
 Server-side TURN allocation that tracks permissions, lifetime, and relay state. Handles Refresh and CreatePermission requests common to both UDP and TCP allocations. Subclassed by [UDPAllocation](#udpallocation) and [TCPAllocation](#tcpallocation) for transport-specific behaviour.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Server`](#server-8) | `friend` | Declared here |
+| [`ServerAllocation`](#serverallocation-1) | `function` | Declared here |
+| [`handleRequest`](#handlerequest-1) | `function` | Declared here |
+| [`handleRefreshRequest`](#handlerefreshrequest) | `function` | Declared here |
+| [`handleCreatePermission`](#handlecreatepermission) | `function` | Declared here |
+| [`onTimer`](#ontimer-4) | `function` | Declared here |
+| [`timeRemaining`](#timeremaining-1) | `function` | Declared here |
+| [`maxTimeRemaining`](#maxtimeremaining) | `function` | Declared here |
+| [`hasPermission`](#haspermission-4) | `function` | Declared here |
+| [`hasPermission`](#haspermission-5) | `function` | Declared here |
+| [`server`](#server-9) | `function` | Declared here |
+| [`print`](#print-12) | `function` | Declared here |
+| [`refreshDeleteRequested`](#refreshdeleterequested) | `function` | Declared here |
+| [`_maxLifetime`](#_maxlifetime) | `variable` | Declared here |
+| [`_server`](#_server-1) | `variable` | Declared here |
+| [`_permissionPolicy`](#_permissionpolicy) | `variable` | Declared here |
+| [`_refreshDeleteRequested`](#_refreshdeleterequested) | `variable` | Declared here |
+| [`ServerAllocation`](#serverallocation-2) | `function` | Declared here |
+| [`ServerAllocation`](#serverallocation-3) | `function` | Declared here |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
+
 ### Friends
 
 | Name | Description |
@@ -3637,6 +4245,11 @@ Dispatches incoming STUN requests to [handleCreatePermission()](#handlecreateper
 #### Returns
 true if the request was handled; false signals the server to respond with a 600 "Operation Not Supported" error.
 
+##### Reimplemented by
+
+- [`handleRequest`](#handlerequest-2)
+- [`handleRequest`](#handlerequest-3)
+
 ---
 
 {#handlerefreshrequest}
@@ -3708,6 +4321,10 @@ Defined in src/turn/include/icy/turn/server/serverallocation.h:64
 #### Returns
 The lesser of [IAllocation::timeRemaining()](#timeremaining) and [maxTimeRemaining()](#maxtimeremaining).
 
+##### Reimplements
+
+- [`timeRemaining`](#timeremaining)
+
 ---
 
 {#maxtimeremaining}
@@ -3741,6 +4358,10 @@ Defined in src/turn/include/icy/turn/server/serverallocation.h:70
 
 Checks permission, auto-granting local IPs if enabled in server options.
 
+##### Reimplements
+
+- [`hasPermission`](#haspermission-2)
+
 ---
 
 {#haspermission-5}
@@ -3756,6 +4377,10 @@ Checks permission, auto-granting local IPs if enabled in server options.
 Defined in src/turn/include/icy/turn/server/serverallocation.h:71
 
 Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only.
+
+##### Reimplements
+
+- [`hasPermission`](#haspermission-3)
 
 ---
 
@@ -3789,6 +4414,10 @@ virtual void print(std::ostream & os) const override
 Defined in src/turn/include/icy/turn/server/serverallocation.h:77
 
 Writes a detailed diagnostic dump of this allocation to `os`.
+
+##### Reimplements
+
+- [`print`](#print-11)
 
 ---
 
@@ -3916,6 +4545,148 @@ Defined in src/turn/include/icy/turn/server/tcpallocation.h:36
 
 Server-side TCP TURN allocation with connection pair management per RFC 6062. Maintains a control connection for STUN signalling and an acceptor socket for incoming peer TCP connections. Each peer connection is tracked as a [TCPConnectionPair](#tcpconnectionpair) and bridged to the client after a successful ConnectionBind.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TCPAllocation`](#tcpallocation-1) | `function` | Declared here |
+| [`handleRequest`](#handlerequest-2) | `function` | Declared here |
+| [`handleConnectRequest`](#handleconnectrequest) | `function` | Declared here |
+| [`handleConnectionBindRequest`](#handleconnectionbindrequest-1) | `function` | Declared here |
+| [`sendPeerConnectResponse`](#sendpeerconnectresponse) | `function` | Declared here |
+| [`sendToControl`](#sendtocontrol) | `function` | Declared here |
+| [`control`](#control) | `function` | Declared here |
+| [`relayedAddress`](#relayedaddress-2) | `function` | Declared here |
+| [`pairs`](#pairs) | `function` | Declared here |
+| [`onTimer`](#ontimer-5) | `function` | Declared here |
+| [`onPeerAccept`](#onpeeraccept) | `function` | Declared here |
+| [`onControlClosed`](#oncontrolclosed) | `function` | Declared here |
+| [`_control`](#_control) | `variable` | Declared here |
+| [`_acceptor`](#_acceptor) | `variable` | Declared here |
+| [`_pairs`](#_pairs) | `variable` | Declared here |
+| [`Server`](#server-8) | `friend` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleRequest`](#handlerequest-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleRefreshRequest`](#handlerefreshrequest) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleCreatePermission`](#handlecreatepermission) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`onTimer`](#ontimer-4) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`timeRemaining`](#timeremaining-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`maxTimeRemaining`](#maxtimeremaining) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`hasPermission`](#haspermission-4) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`hasPermission`](#haspermission-5) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`server`](#server-9) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`print`](#print-12) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`refreshDeleteRequested`](#refreshdeleterequested) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_maxLifetime`](#_maxlifetime) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_server`](#_server-1) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_permissionPolicy`](#_permissionpolicy) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_refreshDeleteRequested`](#_refreshdeleterequested) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-2) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-3) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`ServerAllocation`](#serverallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`Server`](#server-8)  |  |
+| `function` | [`ServerAllocation`](#serverallocation-1)  |  |
+| `function` | [`handleRequest`](#handlerequest-1) `virtual` | Dispatches incoming STUN requests to [handleCreatePermission()](#handlecreatepermission) or [handleRefreshRequest()](#handlerefreshrequest). Subclasses override to add transport-specific methods. |
+| `function` | [`handleRefreshRequest`](#handlerefreshrequest) `virtual` | Processes a Refresh request; updates the lifetime or sets the delete flag if the requested lifetime is 0, then sends a success response. |
+| `function` | [`handleCreatePermission`](#handlecreatepermission) `virtual` | Processes a CreatePermission request; installs or refreshes permissions for each XOR-PEER-ADDRESS attribute, then sends a success response. |
+| `function` | [`onTimer`](#ontimer-4) `nodiscard` | Periodic maintenance callback called by [Server::onTimer()](#ontimer-3). Removes expired permissions. Returns false to signal that this allocation should be destroyed. |
+| `function` | [`timeRemaining`](#timeremaining-1) `virtual` `const` `nodiscard` `override` |  |
+| `function` | [`maxTimeRemaining`](#maxtimeremaining) `const` `nodiscard` |  |
+| `function` | [`hasPermission`](#haspermission-4) `virtual` `nodiscard` `override` | Checks permission, auto-granting local IPs if enabled in server options. |
+| `function` | [`hasPermission`](#haspermission-5) `virtual` `nodiscard` `override` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`server`](#server-9) `virtual` |  |
+| `function` | [`print`](#print-12) `virtual` `const` `override` | Writes a detailed diagnostic dump of this allocation to `os`. |
+| `function` | [`refreshDeleteRequested`](#refreshdeleterequested) `const` `inline` `nodiscard` | Returns true if the refresh request set lifetime to 0, signaling the parent [Server](#server-6) to delete this allocation. |
+| `variable` | [`_maxLifetime`](#_maxlifetime)  |  |
+| `variable` | [`_server`](#_server-1)  |  |
+| `variable` | [`_permissionPolicy`](#_permissionpolicy)  |  |
+| `variable` | [`_refreshDeleteRequested`](#_refreshdeleterequested)  |  |
+| `function` | [`ServerAllocation`](#serverallocation-2)  | NonCopyable and NonMovable. |
+| `function` | [`ServerAllocation`](#serverallocation-3)  | Deleted constructor. |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -3976,6 +4747,10 @@ Extends the base handler with Connect and ConnectionBind methods.
 
 #### Returns
 true if handled.
+
+##### Reimplements
+
+- [`handleRequest`](#handlerequest-1)
 
 ---
 
@@ -4077,6 +4852,10 @@ Defined in src/turn/include/icy/turn/server/tcpallocation.h:78
 
 #### Returns
 The listen address of the peer acceptor socket (used as the relayed address).
+
+##### Reimplements
+
+- [`relayedAddress`](#relayedaddress-1)
 
 ---
 
@@ -4206,6 +4985,246 @@ Defined in src/turn/include/icy/turn/client/tcpclient.h:87
 
 TCP transport TURN client with relay connection management per RFC 6062. Uses a single TCP control connection for STUN signalling and opens additional TCP relay connections for each peer via the Connect / ConnectionBind flow.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`TCPClient`](#tcpclient-1) | `function` | Declared here |
+| [`start`](#start-15) | `function` | Declared here |
+| [`stop`](#stop-12) | `function` | Declared here |
+| [`sendConnectRequest`](#sendconnectrequest) | `function` | Declared here |
+| [`sendData`](#senddata-1) | `function` | Declared here |
+| [`handleResponse`](#handleresponse-1) | `function` | Declared here |
+| [`handleConnectResponse`](#handleconnectresponse) | `function` | Declared here |
+| [`handleConnectErrorResponse`](#handleconnecterrorresponse) | `function` | Declared here |
+| [`handleConnectionBindResponse`](#handleconnectionbindresponse) | `function` | Declared here |
+| [`handleConnectionBindErrorResponse`](#handleconnectionbinderrorresponse) | `function` | Declared here |
+| [`handleConnectionAttemptIndication`](#handleconnectionattemptindication) | `function` | Declared here |
+| [`createAndBindConnection`](#createandbindconnection) | `function` | Declared here |
+| [`onRelayConnectionConnect`](#onrelayconnectionconnect) | `function` | Declared here |
+| [`onRelayDataReceived`](#onrelaydatareceived-1) | `function` | Declared here |
+| [`onRelayConnectionError`](#onrelayconnectionerror) | `function` | Declared here |
+| [`onRelayConnectionClosed`](#onrelayconnectionclosed) | `function` | Declared here |
+| [`freeConnection`](#freeconnection) | `function` | Declared here |
+| [`transportProtocol`](#transportprotocol-1) | `function` | Declared here |
+| [`connections`](#connections) | `function` | Declared here |
+| [`className`](#classname-6) | `function` | Declared here |
+| [`_observer`](#_observer-3) | `variable` | Declared here |
+| [`_connections`](#_connections-2) | `variable` | Declared here |
+| [`Client`](#client-3) | `function` | Inherited from [`Client`](#client-2) |
+| [`start`](#start-13) | `function` | Inherited from [`Client`](#client-2) |
+| [`stop`](#stop-10) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendAllocate`](#sendallocate) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendCreatePermission`](#sendcreatepermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendChannelBind`](#sendchannelbind) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendRefresh`](#sendrefresh) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendData`](#senddata) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleResponse`](#handleresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleAllocateResponse`](#handleallocateresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleAllocateErrorResponse`](#handleallocateerrorresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleCreatePermissionResponse`](#handlecreatepermissionresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleCreatePermissionErrorResponse`](#handlecreatepermissionerrorresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleRefreshResponse`](#handlerefreshresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleDataIndication`](#handledataindication) | `function` | Inherited from [`Client`](#client-2) |
+| [`transportProtocol`](#transportprotocol) | `function` | Inherited from [`Client`](#client-2) |
+| [`createTransaction`](#createtransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`authenticateRequest`](#authenticaterequest) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendAuthenticatedTransaction`](#sendauthenticatedtransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`removeTransaction`](#removetransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`mappedAddress`](#mappedaddress) | `function` | Inherited from [`Client`](#client-2) |
+| [`relayedAddress`](#relayedaddress) | `function` | Inherited from [`Client`](#client-2) |
+| [`closed`](#closed-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`observer`](#observer-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`options`](#options-8) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission-2) | `function` | Inherited from [`Client`](#client-2) |
+| [`hasPermission`](#haspermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`hasPermission`](#haspermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`removePermission`](#removepermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`removePermission`](#removepermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`_observer`](#_observer-1) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_options`](#_options-3) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_socket`](#_socket-3) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_timer`](#_timer-1) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_error`](#_error-5) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_mappedAddress`](#_mappedaddress) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_relayedAddress`](#_relayedaddress) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_realm`](#_realm) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_nonce`](#_nonce) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_pendingIndications`](#_pendingindications) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_transactions`](#_transactions) | `variable` | Inherited from [`Client`](#client-2) |
+| [`setError`](#seterror-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketConnect`](#onsocketconnect-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketRecv`](#onsocketrecv-7) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketClose`](#onsocketclose-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onTransactionProgress`](#ontransactionprogress) | `function` | Inherited from [`Client`](#client-2) |
+| [`onStateChange`](#onstatechange-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`onTimer`](#ontimer-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`Client`](#client-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Client`](#client-3)  |  |
+| `function` | [`start`](#start-13) `virtual` | Connects the socket to the TURN server and starts the allocation sequence. Permissions must be added via [addPermission()](#addpermission) before calling this. |
+| `function` | [`stop`](#stop-10) `virtual` | Stops the timer, cancels pending transactions, and closes the socket. |
+| `function` | [`sendAllocate`](#sendallocate) `virtual` | Sends an Allocate request to the server with the configured transport and lifetime. On first call the server will typically respond with a 401 challenge; the client re-sends with credentials automatically. |
+| `function` | [`addPermission`](#addpermission) `virtual` | Adds multiple peer IP addresses to the permission list. |
+| `function` | [`addPermission`](#addpermission-1) `virtual` `override` | Adds a single peer IP to the permission list, or refreshes it if already present. Permissions should be added before [start()](#start-13); they may also be added later, in which case a new CreatePermission request is required. |
+| `function` | [`sendCreatePermission`](#sendcreatepermission) `virtual` | Sends a CreatePermission request for all IPs currently in the permission list. Called automatically after allocation succeeds and periodically by the timer to refresh expiring permissions. |
+| `function` | [`sendChannelBind`](#sendchannelbind) `virtual` | Channel bindings (RFC 5766 Section 11) are intentionally not implemented. They are a bandwidth optimization that replaces STUN-framed Send/Data indications with a compact 4-byte ChannelData header. This only benefits high-throughput media relay scenarios; in practice, media flows directly via ICE/DTLS rather than through this TURN client's data path, so the optimization is not worth the complexity (channel number allocation, 10-minute binding refresh timers, ChannelData wire framing). Data relay uses [sendData()](#senddata) with Send Indications instead. |
+| `function` | [`sendRefresh`](#sendrefresh) `virtual` | Sends a Refresh request to extend the allocation lifetime. Called automatically by the timer when roughly one-third of the lifetime remains. |
+| `function` | [`sendData`](#senddata) `virtual` | Sends a Send Indication to relay `data` to `peerAddress` through the TURN server. If permissions are still being negotiated the indication is queued and flushed once CreatePermission succeeds. |
+| `function` | [`handleResponse`](#handleresponse) `virtual` | Dispatches an incoming STUN/TURN response to the appropriate handler. |
+| `function` | [`handleAllocateResponse`](#handleallocateresponse) `virtual` | Processes a successful Allocate response; extracts mapped/relayed addresses and advances the state to Authorizing, then sends CreatePermission. |
+| `function` | [`handleAllocateErrorResponse`](#handleallocateerrorresponse) `virtual` | Handles an Allocate error response; manages the 401 challenge/re-send flow and sets the client to Failed for unrecoverable errors. |
+| `function` | [`handleCreatePermissionResponse`](#handlecreatepermissionresponse) `virtual` | Handles a successful CreatePermission response; flushes queued Send Indications and advances state to Success. |
+| `function` | [`handleCreatePermissionErrorResponse`](#handlecreatepermissionerrorresponse) `virtual` | Handles a failed CreatePermission response; clears all permissions and sets the client to Failed. |
+| `function` | [`handleRefreshResponse`](#handlerefreshresponse) `virtual` | Handles a Refresh response; updates the stored lifetime. |
+| `function` | [`handleDataIndication`](#handledataindication) `virtual` | Handles an incoming Data Indication; extracts peer address and data and forwards to [ClientObserver::onRelayDataReceived()](#onrelaydatareceived). |
+| `function` | [`transportProtocol`](#transportprotocol) `virtual` |  |
+| `function` | [`createTransaction`](#createtransaction) `virtual` | Creates a new STUN transaction, registers the progress callback, and adds it to the active transaction list. |
+| `function` | [`authenticateRequest`](#authenticaterequest) `virtual` | Adds STUN long-term credential attributes (Username, Realm, Nonce, MessageIntegrity) to `request` if the realm has been received from the server. |
+| `function` | [`sendAuthenticatedTransaction`](#sendauthenticatedtransaction) `virtual` | Calls [authenticateRequest()](#authenticaterequest) then sends the transaction. |
+| `function` | [`removeTransaction`](#removetransaction) `virtual` | Removes a transaction from the active list. The [IntrusivePtr](base.md#intrusiveptr) keeps the object alive until the caller's copy is released. |
+| `function` | [`mappedAddress`](#mappedaddress) `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress) `virtual` `const` `nodiscard` `override` |  |
+| `function` | [`closed`](#closed-5) `const` `nodiscard` |  |
+| `function` | [`observer`](#observer-1)  |  |
+| `function` | [`options`](#options-8) `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-2) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`hasPermission`](#haspermission) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-1) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removePermission`](#removepermission) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-1) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `variable` | [`_observer`](#_observer-1)  |  |
+| `variable` | [`_options`](#_options-3)  |  |
+| `variable` | [`_socket`](#_socket-3)  |  |
+| `variable` | [`_timer`](#_timer-1)  |  |
+| `variable` | [`_error`](#_error-5)  |  |
+| `variable` | [`_mappedAddress`](#_mappedaddress)  |  |
+| `variable` | [`_relayedAddress`](#_relayedaddress)  |  |
+| `variable` | [`_realm`](#_realm)  |  |
+| `variable` | [`_nonce`](#_nonce)  |  |
+| `variable` | [`_pendingIndications`](#_pendingindications)  | A list of queued Send indication packets awaiting server permissions. |
+| `variable` | [`_transactions`](#_transactions)  | A list containing currently active transactions. |
+| `function` | [`setError`](#seterror-5) `virtual` | Sets the error field and transitions the client to the Failed state. |
+| `function` | [`onSocketConnect`](#onsocketconnect-5) `virtual` | Socket connect callback; starts the timer and sends the first Allocate request. |
+| `function` | [`onSocketRecv`](#onsocketrecv-7) `virtual` | Socket receive callback; parses STUN messages from the buffer and dispatches them. |
+| `function` | [`onSocketClose`](#onsocketclose-5) `virtual` | Socket close callback; shuts down the client and records the socket error. |
+| `function` | [`onTransactionProgress`](#ontransactionprogress) `virtual` | STUN transaction state-change callback; handles Success and Failed outcomes. |
+| `function` | [`onStateChange`](#onstatechange-1) `override` | Forwards state-change events to the observer. |
+| `function` | [`onTimer`](#ontimer-1) `virtual` | Periodic timer callback; re-allocates on expiry or refreshes when lifetime is below one-third remaining. Also calls [ClientObserver::onTimer()](#ontimer-2). |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4264,6 +5283,10 @@ Defined in src/turn/include/icy/turn/client/tcpclient.h:96
 
 Connects the socket to the TURN server and starts the allocation sequence. Permissions must be added via [addPermission()](#addpermission) before calling this.
 
+##### Reimplements
+
+- [`start`](#start-13)
+
 ---
 
 {#stop-12}
@@ -4279,6 +5302,10 @@ virtual void stop() override
 Defined in src/turn/include/icy/turn/client/tcpclient.h:100
 
 Stops the control connection, cancels all relay connections, and calls the base class [stop()](#stop-12).
+
+##### Reimplements
+
+- [`stop`](#stop-10)
 
 ---
 
@@ -4320,6 +5347,10 @@ Sends raw data to `peerAddress` over the established relay connection. The peer 
 
 * `peerAddress` Destination peer (must have an entry in [connections()](#connections)).
 
+##### Reimplements
+
+- [`sendData`](#senddata)
+
 ---
 
 {#handleresponse-1}
@@ -4340,6 +5371,10 @@ Extends the base handler with Connect, ConnectionBind, and ConnectionAttempt res
 
 #### Returns
 true if the message was handled.
+
+##### Reimplements
+
+- [`handleResponse`](#handleresponse)
 
 ---
 
@@ -4565,6 +5600,10 @@ Defined in src/turn/include/icy/turn/client/tcpclient.h:175
 #### Returns
 kProtocolTCP (6).
 
+##### Reimplements
+
+- [`transportProtocol`](#transportprotocol)
+
 ---
 
 {#connections}
@@ -4642,6 +5681,57 @@ Defined in src/turn/include/icy/turn/server/tcpconnectionpair.h:35
 > **Inherits:** [`RefCounted< TCPConnectionPair >`](base.md#refcounted)
 
 Paired TCP connections forming a single TURN relay pipe between a client and a peer. Lifetime managed by [IntrusivePtr](base.md#intrusiveptr); the owning [TCPAllocation](#tcpallocation) holds the [Ptr](#ptr-15) in its pair map.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`allocation`](#allocation) | `variable` | Declared here |
+| [`client`](#client-4) | `variable` | Declared here |
+| [`peer`](#peer) | `variable` | Declared here |
+| [`earlyPeerData`](#earlypeerdata) | `variable` | Declared here |
+| [`connectionID`](#connectionid-1) | `variable` | Declared here |
+| [`isDataConnection`](#isdataconnection) | `variable` | Declared here |
+| [`pendingDelete`](#pendingdelete) | `variable` | Declared here |
+| [`timeout`](#timeout-3) | `variable` | Declared here |
+| [`transactionID`](#transactionid) | `variable` | Declared here |
+| [`TCPConnectionPair`](#tcpconnectionpair-1) | `function` | Declared here |
+| [`doPeerConnect`](#dopeerconnect) | `function` | Declared here |
+| [`makeDataConnection`](#makedataconnection) | `function` | Declared here |
+| [`setPeerSocket`](#setpeersocket) | `function` | Declared here |
+| [`setClientSocket`](#setclientsocket) | `function` | Declared here |
+| [`onPeerConnectSuccess`](#onpeerconnectsuccess) | `function` | Declared here |
+| [`onPeerConnectError`](#onpeerconnecterror) | `function` | Declared here |
+| [`onClientDataReceived`](#onclientdatareceived) | `function` | Declared here |
+| [`onPeerDataReceived`](#onpeerdatareceived) | `function` | Declared here |
+| [`onConnectionClosed`](#onconnectionclosed) | `function` | Declared here |
+| [`startTimeout`](#starttimeout) | `function` | Declared here |
+| [`requestDeletion`](#requestdeletion) | `function` | Declared here |
+| [`expired`](#expired-1) | `function` | Declared here |
+| [`Ptr`](#ptr-15) | `typedef` | Declared here |
+| [`TCPConnectionPair`](#tcpconnectionpair-2) | `function` | Declared here |
+| [`TCPConnectionPair`](#tcpconnectionpair-3) | `function` | Declared here |
+| [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589) | `variable` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+| [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909) | `function` | Inherited from [`RefCounted`](base.md#refcounted) |
+
+### Inherited from [`RefCounted`](base.md#refcounted)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`_refCount`](base.md#classicy_1_1RefCounted_1a9ad69b4e82cc4cce1d55780afea9e589)  |  |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a69db516c7fc776ec189af3cbd4c9804b)  | Defaulted constructor. |
+| `function` | [`RefCounted`](base.md#classicy_1_1RefCounted_1a4c715cce08cc8f065a0740716d828c51) `inline` `noexcept` |  |
+| `function` | [`operator=`](base.md#classicy_1_1RefCounted_1a40bc82fe701cbdad57046c7b0ebd782b) `inline` `noexcept` |  |
+| `function` | [`addRef`](base.md#classicy_1_1RefCounted_1a8d439708a2a8535bd0f98d58ba8b8950) `const` `inline` `noexcept` | Increments the reference count. Called by [IntrusivePtr](base.md#intrusiveptr) on acquisition. |
+| `function` | [`releaseRef`](base.md#classicy_1_1RefCounted_1a842da5db14ba73d10c95b5be072cbd1f) `const` `inline` `noexcept` | Decrements the reference count. |
+| `function` | [`refCount`](base.md#classicy_1_1RefCounted_1a0bd7a4e6db7b4582fcec1e632901ad2f) `const` `inline` `nodiscard` `noexcept` | Returns the current reference count. |
+| `function` | [`~RefCounted`](base.md#classicy_1_1RefCounted_1a605be798c4be05f218ef0e84f5c5e909)  | Defaulted destructor. |
 
 ### Public Attributes
 
@@ -5016,6 +6106,140 @@ Defined in src/turn/include/icy/turn/server/udpallocation.h:31
 
 Server-side UDP TURN allocation that relays datagrams to permitted peers. Binds a dedicated UDP relay socket for peer communication and forwards incoming datagrams to the client as Data Indications.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`UDPAllocation`](#udpallocation-1) | `function` | Declared here |
+| [`onPeerDataReceived`](#onpeerdatareceived-1) | `function` | Declared here |
+| [`handleRequest`](#handlerequest-3) | `function` | Declared here |
+| [`handleSendIndication`](#handlesendindication) | `function` | Declared here |
+| [`send`](#send-16) | `function` | Declared here |
+| [`relayedAddress`](#relayedaddress-3) | `function` | Declared here |
+| [`_relaySocket`](#_relaysocket) | `variable` | Declared here |
+| [`Server`](#server-8) | `friend` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleRequest`](#handlerequest-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleRefreshRequest`](#handlerefreshrequest) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`handleCreatePermission`](#handlecreatepermission) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`onTimer`](#ontimer-4) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`timeRemaining`](#timeremaining-1) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`maxTimeRemaining`](#maxtimeremaining) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`hasPermission`](#haspermission-4) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`hasPermission`](#haspermission-5) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`server`](#server-9) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`print`](#print-12) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`refreshDeleteRequested`](#refreshdeleterequested) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_maxLifetime`](#_maxlifetime) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_server`](#_server-1) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_permissionPolicy`](#_permissionpolicy) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`_refreshDeleteRequested`](#_refreshdeleterequested) | `variable` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-2) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`ServerAllocation`](#serverallocation-3) | `function` | Inherited from [`ServerAllocation`](#serverallocation) |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`ServerAllocation`](#serverallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`Server`](#server-8)  |  |
+| `function` | [`ServerAllocation`](#serverallocation-1)  |  |
+| `function` | [`handleRequest`](#handlerequest-1) `virtual` | Dispatches incoming STUN requests to [handleCreatePermission()](#handlecreatepermission) or [handleRefreshRequest()](#handlerefreshrequest). Subclasses override to add transport-specific methods. |
+| `function` | [`handleRefreshRequest`](#handlerefreshrequest) `virtual` | Processes a Refresh request; updates the lifetime or sets the delete flag if the requested lifetime is 0, then sends a success response. |
+| `function` | [`handleCreatePermission`](#handlecreatepermission) `virtual` | Processes a CreatePermission request; installs or refreshes permissions for each XOR-PEER-ADDRESS attribute, then sends a success response. |
+| `function` | [`onTimer`](#ontimer-4) `nodiscard` | Periodic maintenance callback called by [Server::onTimer()](#ontimer-3). Removes expired permissions. Returns false to signal that this allocation should be destroyed. |
+| `function` | [`timeRemaining`](#timeremaining-1) `virtual` `const` `nodiscard` `override` |  |
+| `function` | [`maxTimeRemaining`](#maxtimeremaining) `const` `nodiscard` |  |
+| `function` | [`hasPermission`](#haspermission-4) `virtual` `nodiscard` `override` | Checks permission, auto-granting local IPs if enabled in server options. |
+| `function` | [`hasPermission`](#haspermission-5) `virtual` `nodiscard` `override` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`server`](#server-9) `virtual` |  |
+| `function` | [`print`](#print-12) `virtual` `const` `override` | Writes a detailed diagnostic dump of this allocation to `os`. |
+| `function` | [`refreshDeleteRequested`](#refreshdeleterequested) `const` `inline` `nodiscard` | Returns true if the refresh request set lifetime to 0, signaling the parent [Server](#server-6) to delete this allocation. |
+| `variable` | [`_maxLifetime`](#_maxlifetime)  |  |
+| `variable` | [`_server`](#_server-1)  |  |
+| `variable` | [`_permissionPolicy`](#_permissionpolicy)  |  |
+| `variable` | [`_refreshDeleteRequested`](#_refreshdeleterequested)  |  |
+| `function` | [`ServerAllocation`](#serverallocation-2)  | NonCopyable and NonMovable. |
+| `function` | [`ServerAllocation`](#serverallocation-3)  | Deleted constructor. |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -5090,6 +6314,10 @@ Extends the base handler with Send Indication support.
 #### Returns
 true if handled.
 
+##### Reimplements
+
+- [`handleRequest`](#handlerequest-1)
+
 ---
 
 {#handlesendindication}
@@ -5146,6 +6374,10 @@ Defined in src/turn/include/icy/turn/server/udpallocation.h:72
 #### Returns
 The bound address of the relay UDP socket.
 
+##### Reimplements
+
+- [`relayedAddress`](#relayedaddress-1)
+
 ### Private Attributes
 
 | Return | Name | Description |
@@ -5181,6 +6413,225 @@ Defined in src/turn/include/icy/turn/client/udpclient.h:31
 > **Inherits:** [`Client`](#client-2)
 
 UDP transport TURN client for datagram-based relay allocations. Uses a single UDP socket for both STUN signalling and Send/Data Indications. All [Client](#client-2) methods apply; data is relayed via [sendData()](#senddata) using Send Indications.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`UDPClient`](#udpclient-1) | `function` | Declared here |
+| [`Client`](#client-3) | `function` | Inherited from [`Client`](#client-2) |
+| [`start`](#start-13) | `function` | Inherited from [`Client`](#client-2) |
+| [`stop`](#stop-10) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendAllocate`](#sendallocate) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendCreatePermission`](#sendcreatepermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendChannelBind`](#sendchannelbind) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendRefresh`](#sendrefresh) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendData`](#senddata) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleResponse`](#handleresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleAllocateResponse`](#handleallocateresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleAllocateErrorResponse`](#handleallocateerrorresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleCreatePermissionResponse`](#handlecreatepermissionresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleCreatePermissionErrorResponse`](#handlecreatepermissionerrorresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleRefreshResponse`](#handlerefreshresponse) | `function` | Inherited from [`Client`](#client-2) |
+| [`handleDataIndication`](#handledataindication) | `function` | Inherited from [`Client`](#client-2) |
+| [`transportProtocol`](#transportprotocol) | `function` | Inherited from [`Client`](#client-2) |
+| [`createTransaction`](#createtransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`authenticateRequest`](#authenticaterequest) | `function` | Inherited from [`Client`](#client-2) |
+| [`sendAuthenticatedTransaction`](#sendauthenticatedtransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`removeTransaction`](#removetransaction) | `function` | Inherited from [`Client`](#client-2) |
+| [`mappedAddress`](#mappedaddress) | `function` | Inherited from [`Client`](#client-2) |
+| [`relayedAddress`](#relayedaddress) | `function` | Inherited from [`Client`](#client-2) |
+| [`closed`](#closed-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`observer`](#observer-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`options`](#options-8) | `function` | Inherited from [`Client`](#client-2) |
+| [`addPermission`](#addpermission-2) | `function` | Inherited from [`Client`](#client-2) |
+| [`hasPermission`](#haspermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`hasPermission`](#haspermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`removePermission`](#removepermission) | `function` | Inherited from [`Client`](#client-2) |
+| [`removePermission`](#removepermission-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`_observer`](#_observer-1) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_options`](#_options-3) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_socket`](#_socket-3) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_timer`](#_timer-1) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_error`](#_error-5) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_mappedAddress`](#_mappedaddress) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_relayedAddress`](#_relayedaddress) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_realm`](#_realm) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_nonce`](#_nonce) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_pendingIndications`](#_pendingindications) | `variable` | Inherited from [`Client`](#client-2) |
+| [`_transactions`](#_transactions) | `variable` | Inherited from [`Client`](#client-2) |
+| [`setError`](#seterror-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketConnect`](#onsocketconnect-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketRecv`](#onsocketrecv-7) | `function` | Inherited from [`Client`](#client-2) |
+| [`onSocketClose`](#onsocketclose-5) | `function` | Inherited from [`Client`](#client-2) |
+| [`onTransactionProgress`](#ontransactionprogress) | `function` | Inherited from [`Client`](#client-2) |
+| [`onStateChange`](#onstatechange-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`onTimer`](#ontimer-1) | `function` | Inherited from [`Client`](#client-2) |
+| [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d) | `variable` | Inherited from [`Stateful`](base.md#stateful) |
+| [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) | `function` | Inherited from [`Stateful`](base.md#stateful) |
+| [`operator<<`](#operator-28) | `friend` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`IAllocation`](#iallocation-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`updateUsage`](#updateusage) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setLifetime`](#setlifetime) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`setBandwidthLimit`](#setbandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`expired`](#expired) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`deleted`](#deleted-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthLimit`](#bandwidthlimit) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthUsed`](#bandwidthused) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`bandwidthRemaining`](#bandwidthremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`timeRemaining`](#timeremaining) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`tuple`](#tuple) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`username`](#username-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`lifetime`](#lifetime-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`permissions`](#permissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`relayedAddress`](#relayedaddress-1) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermission`](#addpermission-4) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`addPermissions`](#addpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removePermission`](#removepermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeAllPermissions`](#removeallpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`removeExpiredPermissions`](#removeexpiredpermissions) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-2) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`hasPermission`](#haspermission-3) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`print`](#print-11) | `function` | Inherited from [`IAllocation`](#iallocation) |
+| [`_tuple`](#_tuple) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_username`](#_username-2) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_permissions`](#_permissions) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_lifetime`](#_lifetime) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthLimit`](#_bandwidthlimit) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_bandwidthUsed`](#_bandwidthused) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_createdAt`](#_createdat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_updatedAt`](#_updatedat) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+| [`_deleted`](#_deleted) | `variable` | Inherited from [`IAllocation`](#iallocation) |
+
+### Inherited from [`Client`](#client-2)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`Client`](#client-3)  |  |
+| `function` | [`start`](#start-13) `virtual` | Connects the socket to the TURN server and starts the allocation sequence. Permissions must be added via [addPermission()](#addpermission) before calling this. |
+| `function` | [`stop`](#stop-10) `virtual` | Stops the timer, cancels pending transactions, and closes the socket. |
+| `function` | [`sendAllocate`](#sendallocate) `virtual` | Sends an Allocate request to the server with the configured transport and lifetime. On first call the server will typically respond with a 401 challenge; the client re-sends with credentials automatically. |
+| `function` | [`addPermission`](#addpermission) `virtual` | Adds multiple peer IP addresses to the permission list. |
+| `function` | [`addPermission`](#addpermission-1) `virtual` `override` | Adds a single peer IP to the permission list, or refreshes it if already present. Permissions should be added before [start()](#start-13); they may also be added later, in which case a new CreatePermission request is required. |
+| `function` | [`sendCreatePermission`](#sendcreatepermission) `virtual` | Sends a CreatePermission request for all IPs currently in the permission list. Called automatically after allocation succeeds and periodically by the timer to refresh expiring permissions. |
+| `function` | [`sendChannelBind`](#sendchannelbind) `virtual` | Channel bindings (RFC 5766 Section 11) are intentionally not implemented. They are a bandwidth optimization that replaces STUN-framed Send/Data indications with a compact 4-byte ChannelData header. This only benefits high-throughput media relay scenarios; in practice, media flows directly via ICE/DTLS rather than through this TURN client's data path, so the optimization is not worth the complexity (channel number allocation, 10-minute binding refresh timers, ChannelData wire framing). Data relay uses [sendData()](#senddata) with Send Indications instead. |
+| `function` | [`sendRefresh`](#sendrefresh) `virtual` | Sends a Refresh request to extend the allocation lifetime. Called automatically by the timer when roughly one-third of the lifetime remains. |
+| `function` | [`sendData`](#senddata) `virtual` | Sends a Send Indication to relay `data` to `peerAddress` through the TURN server. If permissions are still being negotiated the indication is queued and flushed once CreatePermission succeeds. |
+| `function` | [`handleResponse`](#handleresponse) `virtual` | Dispatches an incoming STUN/TURN response to the appropriate handler. |
+| `function` | [`handleAllocateResponse`](#handleallocateresponse) `virtual` | Processes a successful Allocate response; extracts mapped/relayed addresses and advances the state to Authorizing, then sends CreatePermission. |
+| `function` | [`handleAllocateErrorResponse`](#handleallocateerrorresponse) `virtual` | Handles an Allocate error response; manages the 401 challenge/re-send flow and sets the client to Failed for unrecoverable errors. |
+| `function` | [`handleCreatePermissionResponse`](#handlecreatepermissionresponse) `virtual` | Handles a successful CreatePermission response; flushes queued Send Indications and advances state to Success. |
+| `function` | [`handleCreatePermissionErrorResponse`](#handlecreatepermissionerrorresponse) `virtual` | Handles a failed CreatePermission response; clears all permissions and sets the client to Failed. |
+| `function` | [`handleRefreshResponse`](#handlerefreshresponse) `virtual` | Handles a Refresh response; updates the stored lifetime. |
+| `function` | [`handleDataIndication`](#handledataindication) `virtual` | Handles an incoming Data Indication; extracts peer address and data and forwards to [ClientObserver::onRelayDataReceived()](#onrelaydatareceived). |
+| `function` | [`transportProtocol`](#transportprotocol) `virtual` |  |
+| `function` | [`createTransaction`](#createtransaction) `virtual` | Creates a new STUN transaction, registers the progress callback, and adds it to the active transaction list. |
+| `function` | [`authenticateRequest`](#authenticaterequest) `virtual` | Adds STUN long-term credential attributes (Username, Realm, Nonce, MessageIntegrity) to `request` if the realm has been received from the server. |
+| `function` | [`sendAuthenticatedTransaction`](#sendauthenticatedtransaction) `virtual` | Calls [authenticateRequest()](#authenticaterequest) then sends the transaction. |
+| `function` | [`removeTransaction`](#removetransaction) `virtual` | Removes a transaction from the active list. The [IntrusivePtr](base.md#intrusiveptr) keeps the object alive until the caller's copy is released. |
+| `function` | [`mappedAddress`](#mappedaddress) `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress) `virtual` `const` `nodiscard` `override` |  |
+| `function` | [`closed`](#closed-5) `const` `nodiscard` |  |
+| `function` | [`observer`](#observer-1)  |  |
+| `function` | [`options`](#options-8) `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-2) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`hasPermission`](#haspermission) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-1) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removePermission`](#removepermission) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-1) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `variable` | [`_observer`](#_observer-1)  |  |
+| `variable` | [`_options`](#_options-3)  |  |
+| `variable` | [`_socket`](#_socket-3)  |  |
+| `variable` | [`_timer`](#_timer-1)  |  |
+| `variable` | [`_error`](#_error-5)  |  |
+| `variable` | [`_mappedAddress`](#_mappedaddress)  |  |
+| `variable` | [`_relayedAddress`](#_relayedaddress)  |  |
+| `variable` | [`_realm`](#_realm)  |  |
+| `variable` | [`_nonce`](#_nonce)  |  |
+| `variable` | [`_pendingIndications`](#_pendingindications)  | A list of queued Send indication packets awaiting server permissions. |
+| `variable` | [`_transactions`](#_transactions)  | A list containing currently active transactions. |
+| `function` | [`setError`](#seterror-5) `virtual` | Sets the error field and transitions the client to the Failed state. |
+| `function` | [`onSocketConnect`](#onsocketconnect-5) `virtual` | Socket connect callback; starts the timer and sends the first Allocate request. |
+| `function` | [`onSocketRecv`](#onsocketrecv-7) `virtual` | Socket receive callback; parses STUN messages from the buffer and dispatches them. |
+| `function` | [`onSocketClose`](#onsocketclose-5) `virtual` | Socket close callback; shuts down the client and records the socket error. |
+| `function` | [`onTransactionProgress`](#ontransactionprogress) `virtual` | STUN transaction state-change callback; handles Success and Failed outcomes. |
+| `function` | [`onStateChange`](#onstatechange-1) `override` | Forwards state-change events to the observer. |
+| `function` | [`onTimer`](#ontimer-1) `virtual` | Periodic timer callback; re-allocates on expiry or refreshes when lifetime is below one-third remaining. Also calls [ClientObserver::onTimer()](#ontimer-2). |
+
+### Inherited from [`Stateful`](base.md#stateful)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `variable` | [`StateChange`](base.md#classicy_1_1Stateful_1adba38e2b8a737448d48fc56b4bbe1dc0)  | Signals when the state changes. |
+| `variable` | [`_state`](base.md#classicy_1_1Stateful_1a45326923d41e72e4afc70d9ed8acc15d)  |  |
+| `function` | [`Stateful`](base.md#classicy_1_1Stateful_1a444344bc5f8563af4d289be6beb693a0) `inline` |  |
+| `function` | [`~Stateful`](base.md#classicy_1_1Stateful_1a70818a671339a0468ef71e6d54c97c77) `virtual` `inline` |  |
+| `function` | [`stateEquals`](base.md#classicy_1_1Stateful_1a8c8bd62dbd4251749150ed7f95bdb875) `virtual` `const` `inline` | Returns true if the current state ID equals the given ID. |
+| `function` | [`stateBetween`](base.md#classicy_1_1Stateful_1a702bf6338c45b6ce75540a2d7f03a18f) `virtual` `const` `inline` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ae1082bd323b27b8eb1022f160d77a6e6) `virtual` `inline` | Returns a mutable reference to the current state. |
+| `function` | [`state`](base.md#classicy_1_1Stateful_1ab63e2709491c8fb841f7dd5720c15020) `virtual` `const` `inline` | Returns a copy of the current state. |
+| `function` | [`beforeStateChange`](base.md#classicy_1_1Stateful_1a0ae9d2650c9a6fdb276b88e0b2d3ca34) `virtual` `inline` | Override to handle pre state change logic. Return false to prevent state change. |
+| `function` | [`onStateChange`](base.md#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) `virtual` `inline` | Override to handle post state change logic. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a88cfa69863f505b8232c7cce5989a395) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+| `function` | [`setState`](base.md#classicy_1_1Stateful_1a9d5c3013be4fb7508266ed0b950694aa) `virtual` `inline` | Sets the state and sends the state signal if the state change was successful. |
+
+### Inherited from [`IAllocation`](#iallocation)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `friend` | [`operator<<`](#operator-28) `inline` |  |
+| `function` | [`IAllocation`](#iallocation-1)  |  |
+| `function` | [`IAllocation`](#iallocation-2)  | Deleted constructor. |
+| `function` | [`IAllocation`](#iallocation-3)  | Deleted constructor. |
+| `function` | [`updateUsage`](#updateusage) `virtual` | Updates the last-activity timestamp and accumulates bandwidth usage. Call this whenever data is relayed through the allocation. |
+| `function` | [`setLifetime`](#setlifetime) `virtual` | Sets the allocation lifetime in seconds and resets the activity timestamp, effectively extending the expiry from the current moment. |
+| `function` | [`setBandwidthLimit`](#setbandwidthlimit) `virtual` | Sets the maximum number of bytes this allocation may relay in its lifetime. Pass 0 to disable bandwidth limiting. |
+| `function` | [`expired`](#expired) `virtual` `const` `nodiscard` |  |
+| `function` | [`deleted`](#deleted-1) `virtual` `const` `nodiscard` | Returns true if the allocation's deleted flag is set and or if the allocation has expired. |
+| `function` | [`bandwidthLimit`](#bandwidthlimit) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthUsed`](#bandwidthused) `virtual` `const` `nodiscard` |  |
+| `function` | [`bandwidthRemaining`](#bandwidthremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`timeRemaining`](#timeremaining) `virtual` `const` `nodiscard` |  |
+| `function` | [`tuple`](#tuple) `virtual` |  |
+| `function` | [`username`](#username-3) `virtual` `const` `nodiscard` |  |
+| `function` | [`lifetime`](#lifetime-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`permissions`](#permissions) `virtual` `const` `nodiscard` |  |
+| `function` | [`relayedAddress`](#relayedaddress-1) `virtual` `const` `nodiscard` |  |
+| `function` | [`addPermission`](#addpermission-3) `virtual` | Adds a permission for `ip`, or refreshes the existing one. |
+| `function` | [`addPermission`](#addpermission-4) `virtual` | Adds a permission for `address`, or refreshes the existing one. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`addPermissions`](#addpermissions) `virtual` | Adds (or refreshes) permissions for multiple IPs. |
+| `function` | [`removePermission`](#removepermission-2) `virtual` | Removes the permission for `ip` if present. |
+| `function` | [`removePermission`](#removepermission-3) `virtual` | Removes the permission for `address` if present. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`removeAllPermissions`](#removeallpermissions) `virtual` | Removes all permissions from the list. |
+| `function` | [`removeExpiredPermissions`](#removeexpiredpermissions) `virtual` | Removes any permissions whose 5-minute lifetime has elapsed. |
+| `function` | [`hasPermission`](#haspermission-2) `virtual` `nodiscard` | Checks whether a permission exists for `peerIP`. Local addresses (192.168.x.x and 127.x.x.x) are always permitted. |
+| `function` | [`hasPermission`](#haspermission-3) `virtual` `nodiscard` | Checks whether a permission exists for `peerAddress`. The port is ignored; TURN permissions are IP-only. |
+| `function` | [`print`](#print-11) `virtual` `const` `inline` |  |
+| `variable` | [`_tuple`](#_tuple)  |  |
+| `variable` | [`_username`](#_username-2)  |  |
+| `variable` | [`_permissions`](#_permissions)  |  |
+| `variable` | [`_lifetime`](#_lifetime)  |  |
+| `variable` | [`_bandwidthLimit`](#_bandwidthlimit)  |  |
+| `variable` | [`_bandwidthUsed`](#_bandwidthused)  |  |
+| `variable` | [`_createdAt`](#_createdat)  |  |
+| `variable` | [`_updatedAt`](#_updatedat)  |  |
+| `variable` | [`_deleted`](#_deleted)  |  |
 
 ### Public Methods
 
@@ -5222,6 +6673,18 @@ Defined in src/turn/include/icy/turn/client/client.h:69
 > **Subclassed by:** [`TCPClientObserver`](#tcpclientobserver)
 
 Abstract observer interface for TURN client events. Callers subclass this to receive allocation lifecycle and data relay callbacks.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`onClientStateChange`](#onclientstatechange) | `function` | Declared here |
+| [`onRelayDataReceived`](#onrelaydatareceived) | `function` | Declared here |
+| [`onAllocationFailed`](#onallocationfailed) | `function` | Declared here |
+| [`onAllocationDeleted`](#onallocationdeleted) | `function` | Declared here |
+| [`onAllocationPermissionsCreated`](#onallocationpermissionscreated) | `function` | Declared here |
+| [`onTransactionResponse`](#ontransactionresponse) | `function` | Declared here |
+| [`onTimer`](#ontimer-2) | `function` | Declared here |
 
 ### Public Methods
 
@@ -5399,6 +6862,48 @@ Defined in src/turn/include/icy/turn/client/client.h:30
 
 [State](base.md#state) machine states for the TURN client.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`toString`](#tostring-6) | `function` | Declared here |
+| [`Type`](#type-13) | `enum` | Declared here |
+| [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) | `typedef` | Inherited from [`State`](base.md#state) |
+| [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde) | `variable` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0) | `function` | Inherited from [`State`](base.md#state) |
+| [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd) | `function` | Inherited from [`State`](base.md#state) |
+| [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) | `function` | Inherited from [`State`](base.md#state) |
+| [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) | `function` | Inherited from [`State`](base.md#state) |
+| [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0) | `function` | Inherited from [`State`](base.md#state) |
+| [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) | `function` | Inherited from [`State`](base.md#state) |
+| [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) | `function` | Inherited from [`State`](base.md#state) |
+| [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) | `function` | Inherited from [`State`](base.md#state) |
+| [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) | `function` | Inherited from [`State`](base.md#state) |
+| [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) | `friend` | Inherited from [`State`](base.md#state) |
+
+### Inherited from [`State`](base.md#state)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `typedef` | [`ID`](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3)  |  |
+| `variable` | [`_id`](base.md#classicy_1_1State_1ab9d37cc2fcfbd3a73f34d3016b208fde)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a59becee99ad348d1ee73bc01e68363a0)  |  |
+| `function` | [`State`](base.md#classicy_1_1State_1a79e71a24ac604ffb994dcf7502bc66fc)  | Copy constructor. |
+| `function` | [`operator=`](base.md#classicy_1_1State_1a3f125b4a7aaa9949d3adcdf6de4600dd)  | Copy assignment. |
+| `function` | [`~State`](base.md#classicy_1_1State_1aaee58de683ac259ac707f5930893277d) `virtual` | Defaulted destructor. |
+| `function` | [`id`](base.md#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) `const` | Returns the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`set`](base.md#classicy_1_1State_1a5e8499ade2da1c1ad1c668c0107dc4d0)  | Sets the state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`str`](base.md#classicy_1_1State_1afaef9ebd5e0434dbd6c2d6cf0dde6f07) `virtual` `const` | Returns a human-readable string for the given state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `function` | [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c) `virtual` `const` | Returns a human-readable string for the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`equals`](base.md#classicy_1_1State_1a47caae3d559489f145840fa68fe3f66c) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `function` | [`between`](base.md#classicy_1_1State_1a354d30c75b8097a61b34804a36fb6097) `const` | Returns true if the current state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a75c8aeafab4c7c8f314c5417e2907e3a) `const` `inline` |  |
+| `function` | [`operator==`](base.md#classicy_1_1State_1a15607010e464e8dc2bb368274483d364) `const` `inline` |  |
+| `friend` | [`operator<<`](base.md#classicy_1_1State_1a6c293f08ac54988431d4f11454aa7bbd) `inline` |  |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -5421,6 +6926,10 @@ Defined in src/turn/include/icy/turn/client/client.h:43
 
 #### Returns
 Human-readable name for the current state.
+
+##### Reimplements
+
+- [`toString`](base.md#classicy_1_1State_1ab14617c2967319793f296006b3cb175c)
 
 ### Public Types
 
@@ -5463,6 +6972,19 @@ struct Permission
 Defined in src/turn/include/icy/turn/permission.h:37
 
 A single TURN permission entry associating a peer IP with a 5-minute expiry timer. Per RFC 5766 section 8, permissions last exactly 300 seconds and must be refreshed via a new CreatePermission request before they expire.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`ip`](#ip) | `variable` | Declared here |
+| [`key`](#key) | `variable` | Declared here |
+| [`timeout`](#timeout-2) | `variable` | Declared here |
+| [`Permission`](#permission-1) | `function` | Declared here |
+| [`Permission`](#permission-2) | `function` | Declared here |
+| [`refresh`](#refresh) | `function` | Declared here |
+| [`operator==`](#operator-29) | `function` | Declared here |
+| [`matches`](#matches) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -5627,6 +7149,19 @@ struct Key
 
 Defined in src/turn/include/icy/turn/permission.h:39
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`af`](#af-1) | `variable` | Declared here |
+| [`bytes`](#bytes) | `variable` | Declared here |
+| [`size`](#size-3) | `variable` | Declared here |
+| [`valid`](#valid-8) | `function` | Declared here |
+| [`matches`](#matches-1) | `function` | Declared here |
+| [`matches`](#matches-2) | `function` | Declared here |
+| [`fromAddress`](#fromaddress) | `function` | Declared here |
+| [`fromIP`](#fromip) | `function` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -5772,6 +7307,13 @@ Defined in src/turn/include/icy/turn/client/tcpclient.h:70
 
 Binding metadata stored as socket opaque data during a ConnectionBind handshake. Associates a relay socket with its TURN connection ID and peer address.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`connectionID`](#connectionid) | `variable` | Declared here |
+| [`peerAddress`](#peeraddress-5) | `variable` | Declared here |
+
 ### Public Attributes
 
 | Return | Name | Description |
@@ -5824,6 +7366,14 @@ Defined in src/turn/include/icy/turn/server/server.h:96
 Observer interface that the application must implement to participate in server-side allocation management and authentication.
 
 The observer is responsible for enforcing per-user allocation quotas and bandwidth limits. Implementations may perform authentication synchronously (returning Authorized/NotAuthorized immediately) or asynchronously (returning Authenticating and calling handleRequest() again later).
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`onServerAllocationCreated`](#onserverallocationcreated) | `function` | Declared here |
+| [`onServerAllocationRemoved`](#onserverallocationremoved) | `function` | Declared here |
+| [`authenticateRequest`](#authenticaterequest-1) | `function` | Declared here |
 
 ### Public Methods
 
@@ -5911,6 +7461,24 @@ struct ServerOptions
 Defined in src/turn/include/icy/turn/server/server.h:53
 
 [Configuration](base.md#configuration) options for the TURN server.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`software`](#software-1) | `variable` | Declared here |
+| [`realm`](#realm) | `variable` | Declared here |
+| [`allocationDefaultLifetime`](#allocationdefaultlifetime) | `variable` | Declared here |
+| [`allocationMaxLifetime`](#allocationmaxlifetime) | `variable` | Declared here |
+| [`allocationMaxPermissions`](#allocationmaxpermissions) | `variable` | Declared here |
+| [`timerInterval`](#timerinterval-1) | `variable` | Declared here |
+| [`earlyMediaBufferSize`](#earlymediabuffersize) | `variable` | Declared here |
+| [`listenAddr`](#listenaddr) | `variable` | Declared here |
+| [`externalIP`](#externalip) | `variable` | Declared here |
+| [`enableTCP`](#enabletcp) | `variable` | Declared here |
+| [`enableUDP`](#enableudp) | `variable` | Declared here |
+| [`enableLocalIPPermissions`](#enablelocalippermissions) | `variable` | Declared here |
+| [`ServerOptions`](#serveroptions-1) | `function` | Declared here |
 
 ### Public Attributes
 
@@ -6116,6 +7684,35 @@ Defined in src/turn/include/icy/turn/client/tcpclient.h:31
 > **Inherits:** [`ClientObserver`](#clientobserver)
 
 Observer interface for TCP TURN client events (RFC 6062). Extends [ClientObserver](#clientobserver) with callbacks specific to TCP relay connections.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`onRelayConnectionCreated`](#onrelayconnectioncreated) | `function` | Declared here |
+| [`onRelayConnectionError`](#onrelayconnectionerror-1) | `function` | Declared here |
+| [`onRelayConnectionClosed`](#onrelayconnectionclosed-1) | `function` | Declared here |
+| [`onRelayConnectionBindingFailed`](#onrelayconnectionbindingfailed) | `function` | Declared here |
+| [`onPeerConnectionAttempt`](#onpeerconnectionattempt) | `function` | Declared here |
+| [`onClientStateChange`](#onclientstatechange) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onRelayDataReceived`](#onrelaydatareceived) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onAllocationFailed`](#onallocationfailed) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onAllocationDeleted`](#onallocationdeleted) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onAllocationPermissionsCreated`](#onallocationpermissionscreated) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onTransactionResponse`](#ontransactionresponse) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+| [`onTimer`](#ontimer-2) | `function` | Inherited from [`ClientObserver`](#clientobserver) |
+
+### Inherited from [`ClientObserver`](#clientobserver)
+
+| Kind | Name | Description |
+|------|------|-------------|
+| `function` | [`onClientStateChange`](#onclientstatechange) `virtual` | Called whenever the client's state machine transitions to a new state. |
+| `function` | [`onRelayDataReceived`](#onrelaydatareceived) `virtual` | Called when relayed data is received from a peer via a Data Indication. |
+| `function` | [`onAllocationFailed`](#onallocationfailed) `virtual` `inline` | Called when the server rejects an Allocate request with an error. |
+| `function` | [`onAllocationDeleted`](#onallocationdeleted) `virtual` `inline` | Called when the server confirms deletion of the allocation. |
+| `function` | [`onAllocationPermissionsCreated`](#onallocationpermissionscreated) `virtual` `inline` | Called after a CreatePermission request succeeds. |
+| `function` | [`onTransactionResponse`](#ontransactionresponse) `virtual` `inline` | All received transaction responses will be routed here after local processing so the observer can easily implement extra functionality. |
+| `function` | [`onTimer`](#ontimer-2) `virtual` `inline` | Fires after the client's internal timer callback. Handy for performing extra async cleanup tasks. |
 
 ### Public Methods
 

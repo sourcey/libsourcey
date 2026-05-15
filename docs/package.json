@@ -5,6 +5,7 @@
   "description": "Sourcey and Moxygen toolchain for icey documentation",
   "scripts": {
     "site:build": "sourcey build -o ../dist",
+    "site:check": "node scripts/check-sourcey-quality.mjs ../dist",
     "site:dev": "sourcey dev"
   },
   "devDependencies": {

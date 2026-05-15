@@ -176,6 +176,27 @@ Defined in src/graft/include/icy/graft/graft.h:90
 
 Loads a native plugin library and resolves its typed entrypoint.
 
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`Library`](#library-1) | `function` | Declared here |
+| [`Library`](#library-2) | `function` | Declared here |
+| [`Library`](#library-3) | `function` | Declared here |
+| [`open`](#open-6) | `function` | Declared here |
+| [`close`](#close-24) | `function` | Declared here |
+| [`isOpen`](#isopen) | `function` | Declared here |
+| [`path`](#path-3) | `function` | Declared here |
+| [`manifest`](#manifest-4) | `function` | Declared here |
+| [`requireSymbolAddress`](#requiresymboladdress) | `function` | Declared here |
+| [`requireSymbol`](#requiresymbol) | `function` | Declared here |
+| [`entrypoint`](#entrypoint-2) | `function` | Declared here |
+| [`_library`](#_library) | `variable` | Declared here |
+| [`_path`](#_path-4) | `variable` | Declared here |
+| [`_manifest`](#_manifest) | `variable` | Declared here |
+| [`_open`](#_open) | `variable` | Declared here |
+| [`loadManifest`](#loadmanifest) | `function` | Declared here |
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -434,6 +455,18 @@ struct Manifest
 Defined in src/graft/include/icy/graft/graft.h:70
 
 Metadata exported by a plugin under `icy_graft_manifest`.
+
+### List of all members
+
+| Name | Kind | Owner |
+|------|------|-------|
+| [`abiVersion`](#abiversion-1) | `variable` | Declared here |
+| [`fileName`](#filename-3) | `variable` | Declared here |
+| [`id`](#id-4) | `variable` | Declared here |
+| [`name`](#name-8) | `variable` | Declared here |
+| [`version`](#version-6) | `variable` | Declared here |
+| [`runtime`](#runtime-1) | `variable` | Declared here |
+| [`entrypoint`](#entrypoint-1) | `variable` | Declared here |
 
 ### Public Attributes
 
