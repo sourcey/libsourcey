@@ -2,7 +2,7 @@
 
 # base
 
-The `base` module contains reusable cross platform tools and utilities.
+The `[Base module](#basemodule)` module contains reusable cross platform tools and utilities.
 
 ### Namespaces
 
@@ -226,7 +226,7 @@ Flags which determine how the packet is handled by the [PacketStream](#packetstr
 #### Buffer
 
 ```cpp
-std::vector< char > Buffer()
+using Buffer = std::vector< char >
 ```
 
 Core buffer type.
@@ -238,12 +238,12 @@ Core buffer type.
 #### NullChannel
 
 ```cpp
-LogChannel NullChannel()
+using NullChannel = LogChannel
 ```
 
 Null log channel.
 
-Redifine the base `[LogChannel](#logchannel)` as `NullChannel` so it can be logically used as a disabled log channel.
+Redifine the base `[LogChannel](#logchannel)` as `[NullChannel](#nullchannel)` so it can be logically used as a disabled log channel.
 
 ---
 
@@ -252,7 +252,7 @@ Redifine the base `[LogChannel](#logchannel)` as `NullChannel` so it can be logi
 #### NullSignal
 
 ```cpp
-Signal< void()> NullSignal()
+using NullSignal = Signal< void()>
 ```
 
 Zero-argument signal alias used for simple local event notifications.
@@ -264,7 +264,7 @@ Zero-argument signal alias used for simple local event notifications.
 #### ThreadSignal
 
 ```cpp
-template<typename RT> Signal< RT, std::shared_mutex > ThreadSignal()
+using ThreadSignal = Signal< RT, std::shared_mutex >
 ```
 
 Cross-thread signal variant.
@@ -276,7 +276,7 @@ Cross-thread signal variant.
 #### LocalSignal
 
 ```cpp
-template<typename RT> Signal< RT, NullSharedMutex > LocalSignal()
+using LocalSignal = Signal< RT, NullSharedMutex >
 ```
 
 Compatibility alias for the single-threaded fast path.
@@ -288,7 +288,7 @@ Compatibility alias for the single-threaded fast path.
 #### ProcessOptions
 
 ```cpp
-uv_process_options_t ProcessOptions()
+using ProcessOptions = uv_process_options_t
 ```
 
 Raw `libuv` process spawn options passed through to `uv_spawn`.
@@ -300,7 +300,7 @@ Raw `libuv` process spawn options passed through to `uv_spawn`.
 #### StringMap
 
 ```cpp
-std::map< std::string, std::string > StringMap()
+using StringMap = std::map< std::string, std::string >
 ```
 
 Generic string-to-string map used for headers, options, and environment-style metadata.
@@ -312,7 +312,7 @@ Generic string-to-string map used for headers, options, and environment-style me
 #### StringVec
 
 ```cpp
-std::vector< std::string > StringVec()
+using StringVec = std::vector< std::string >
 ```
 
 Generic string vector used for argument lists and ordered string collections.
@@ -324,7 +324,7 @@ Generic string vector used for argument lists and ordered string collections.
 #### OptionMap
 
 ```cpp
-std::map< std::string, std::string > OptionMap()
+using OptionMap = std::map< std::string, std::string >
 ```
 
 Command Line Option Parser.
@@ -336,7 +336,7 @@ Command Line Option Parser.
 #### PacketSignal
 
 ```cpp
-Signal< void(IPacket &)> PacketSignal()
+using PacketSignal = Signal< void(IPacket &)>
 ```
 
 [Signal](#signal) that broadcasts `[IPacket](#ipacket)` types.
@@ -348,7 +348,7 @@ Signal< void(IPacket &)> PacketSignal()
 #### PacketSource
 
 ```cpp
-PacketStreamAdapter PacketSource()
+using PacketSource = PacketStreamAdapter
 ```
 
 For 0.8.x compatibility.
@@ -360,7 +360,7 @@ For 0.8.x compatibility.
 #### IPacketizer
 
 ```cpp
-PacketProcessor IPacketizer()
+using IPacketizer = PacketProcessor
 ```
 
 Compatibility alias for a packet processor that packetizes stream output.
@@ -372,7 +372,7 @@ Compatibility alias for a packet processor that packetizes stream output.
 #### IDepacketizer
 
 ```cpp
-PacketProcessor IDepacketizer()
+using IDepacketizer = PacketProcessor
 ```
 
 For 0.8.x compatibility.
@@ -384,7 +384,7 @@ For 0.8.x compatibility.
 #### PacketAdapterVec
 
 ```cpp
-std::vector< PacketAdapterReference::Ptr > PacketAdapterVec()
+using PacketAdapterVec = std::vector< PacketAdapterReference::Ptr >
 ```
 
 Ordered list of packet adapter references used for sources and processors.
@@ -396,7 +396,7 @@ Ordered list of packet adapter references used for sources and processors.
 #### PacketStreamVec
 
 ```cpp
-std::vector< PacketStream * > PacketStreamVec()
+using PacketStreamVec = std::vector< PacketStream * >
 ```
 
 Non-owning list of packet stream pointers used for graph traversal helpers.
@@ -408,7 +408,7 @@ Non-owning list of packet stream pointers used for graph traversal helpers.
 #### PacketStreamPtrVec
 
 ```cpp
-std::vector< PacketStream::Ptr > PacketStreamPtrVec()
+using PacketStreamPtrVec = std::vector< PacketStream::Ptr >
 ```
 
 Owning list of packet stream handles retained across stream graphs.
@@ -420,7 +420,7 @@ Owning list of packet stream handles retained across stream graphs.
 #### PacketCreationStrategyPtr
 
 ```cpp
-std::unique_ptr< IPacketCreationStrategy > PacketCreationStrategyPtr()
+using PacketCreationStrategyPtr = std::unique_ptr< IPacketCreationStrategy >
 ```
 
 Owning handle for one packet creation strategy.
@@ -432,7 +432,7 @@ Owning handle for one packet creation strategy.
 #### PacketCreationStrategyList
 
 ```cpp
-std::vector< PacketCreationStrategyPtr > PacketCreationStrategyList()
+using PacketCreationStrategyList = std::vector< PacketCreationStrategyPtr >
 ```
 
 Ordered list of packet creation strategies consulted by a packet factory.
@@ -448,24 +448,24 @@ Ordered list of packet creation strategies consulted by a packet factory.
 | `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-2) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a `std::string`. |
 | `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-3) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a const `std::string`. Casts away constness; use with care. |
 | `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-4) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a const `std::vector`. Casts away constness; use with care. |
-| `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-5) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a `Buffer`. |
-| `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-6) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a const `Buffer`. Casts away constness; use with care. |
+| `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-5) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a `[Buffer](#buffer-2)`. |
+| `MutableBuffer` | [`mutableBuffer`](#mutablebuffer-6) `inline` | Creates a `[MutableBuffer](#mutablebuffer)` from a const `[Buffer](#buffer-2)`. Casts away constness; use with care. |
 | `ConstBuffer` | [`constBuffer`](#constbuffer-1) `inline` | Creates a `[ConstBuffer](#constbuffer)` from an arbitrary pointer and size. |
 | `ConstBuffer` | [`constBuffer`](#constbuffer-2) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a `std::string`. |
 | `ConstBuffer` | [`constBuffer`](#constbuffer-3) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a `std::vector`. |
-| `constexpr ConstBuffer` | [`constBuffer`](#constbuffer-4) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a `[MutableBuffer](#mutablebuffer)`. |
-| `ConstBuffer` | [`constBuffer`](#constbuffer-5) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a `Buffer`. |
-| `ConstBuffer` | [`constBuffer`](#constbuffer-6) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a const `Buffer`. Casts away constness internally; use with care. |
-| `constexpr PointerToPodType` | [`bufferCast`](#buffercast) `inline` | Casts a `[MutableBuffer](#mutablebuffer)` to a specified pointer-to-POD type. |
-| `constexpr PointerToPodType` | [`bufferCast`](#buffercast-1) `inline` | Casts a `[ConstBuffer](#constbuffer)` to a specified pointer-to-POD type. |
-| `Level` | [`getLevelFromString`](#getlevelfromstring) `inline` | Converts a log level string to its corresponding `Level` enum value. Unrecognized strings default to `[Level::Trace](#namespaceicy_1aad3e81b3cd2daab89338dae9b5323f6badd4ec0ac4e58f7c32a01244ae91150b1)`. |
-| `const char *` | [`getStringFromLevel`](#getstringfromlevel) `inline` | Converts a `Level` enum value to its lowercase string representation. |
+| `ConstBuffer` | [`constBuffer`](#constbuffer-4) `inline` `constexpr` | Creates a `[ConstBuffer](#constbuffer)` from a `[MutableBuffer](#mutablebuffer)`. |
+| `ConstBuffer` | [`constBuffer`](#constbuffer-5) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a `[Buffer](#buffer-2)`. |
+| `ConstBuffer` | [`constBuffer`](#constbuffer-6) `inline` | Creates a `[ConstBuffer](#constbuffer)` from a const `[Buffer](#buffer-2)`. Casts away constness internally; use with care. |
+| `PointerToPodType` | [`bufferCast`](#buffercast) `inline` `constexpr` | Casts a `[MutableBuffer](#mutablebuffer)` to a specified pointer-to-POD type. |
+| `PointerToPodType` | [`bufferCast`](#buffercast-1) `inline` `constexpr` | Casts a `[ConstBuffer](#constbuffer)` to a specified pointer-to-POD type. |
+| `Level` | [`getLevelFromString`](#getlevelfromstring) `inline` | Converts a log level string to its corresponding `[Level](#level)` enum value. Unrecognized strings default to `[Level::Trace](#namespaceicy_1aad3e81b3cd2daab89338dae9b5323f6badd4ec0ac4e58f7c32a01244ae91150b1)`. |
+| `const char *` | [`getStringFromLevel`](#getstringfromlevel) `inline` | Converts a `[Level](#level)` enum value to its lowercase string representation. |
 | `void` | [`logArgs`](#logargs)  | Write a single logging argument into the destination stream. |
 | `void` | [`logArgs`](#logargs-1)  | Write multiple logging arguments into the destination stream in order. |
-| `constexpr const char *` | [`str_end`](#str_end)  | Return a pointer to the null terminator of a C string. |
-| `constexpr bool` | [`str_slant`](#str_slant)  | Return true if the C string contains a forward or back slash. |
-| `constexpr const char *` | [`r_slant`](#r_slant)  | Walk backward to the character after the last path separator. |
-| `constexpr const char *` | [`_fileName`](#_filename)  | Return the filename portion of a compile-time path string. |
+| `const char *` | [`str_end`](#str_end) `constexpr` | Return a pointer to the null terminator of a C string. |
+| `bool` | [`str_slant`](#str_slant) `constexpr` | Return true if the C string contains a forward or back slash. |
+| `const char *` | [`r_slant`](#r_slant) `constexpr` | Walk backward to the character after the last path separator. |
+| `const char *` | [`_fileName`](#_filename) `constexpr` | Return the filename portion of a compile-time path string. |
 | `std::string` | [`_methodName`](#_methodname) `inline` | Extract the class-qualified method name from a compiler pretty-function string. |
 | `void` | [`deleteLater`](#deletelater) `inline` | Schedules deferred deletion of ptr on the next event loop iteration. This is essential for deleting objects that may still be referenced by pending libuv callbacks (e.g. socket adapters with in-flight I/O). Uses a self-cleaning uv_idle_t handle that fires once and then closes itself. |
 | `IntrusivePtr< T >` | [`makeIntrusive`](#makeintrusive)  | Creates an [IntrusivePtr](#intrusiveptr) managing a newly heap-allocated T. Equivalent to std::make_shared. |
@@ -509,7 +509,7 @@ Ordered list of packet creation strategies consulted by a packet factory.
 | `void` | [`onShutdownSignal`](#onshutdownsignal) `inline` | Installs a SIGINT handler on the given event loop. When the signal fires, `callback` is invoked with `opaque` and the signal handle is closed. |
 | `void` | [`waitForShutdown`](#waitforshutdown) `inline` | Installs a SIGINT handler and runs the event loop until shutdown. Equivalent to calling `[onShutdownSignal()](#onshutdownsignal)` then `uv_run()`. |
 | `std::shared_ptr< internal::Slot< RT, IT & > >` | [`packetSlot`](#packetslot)  | Creates a signal slot that filters by packet subtype `PT` before invoking `method`. |
-| `constexpr unsigned` | [`operator|`](#operator-9)  | Combine PacketFlags values into a bitmask. |
+| `unsigned` | [`operator|`](#operator-10) `constexpr` | Combine [PacketFlags](#packetflags) values into a bitmask. |
 | `RawPacket` | [`rawPacket`](#rawpacket-1) `inline` | Constructs a non-owning [RawPacket](#rawpacket) from a mutable buffer (borrowed pointer). |
 | `RawPacket` | [`rawPacket`](#rawpacket-2) `inline` | Constructs an owning [RawPacket](#rawpacket) from a const buffer (data is copied). |
 | `RawPacket` | [`rawPacket`](#rawpacket-3) `inline` | Constructs a non-owning [RawPacket](#rawpacket) from a raw mutable pointer (borrowed). |
@@ -542,7 +542,7 @@ Schedules func to run once at the beginning of the next event loop iteration. Us
 `inline`
 
 ```cpp
-inline std::string formatError(std::string_view message, int err)
+inline std::string formatError(std::string_view message, int err = UV_UNKNOWN)
 ```
 
 Formats a human-readable error string from a message and a libuv error code. If `err` is not `UV_UNKNOWN`, the libuv error description is appended after a colon. 
@@ -563,7 +563,7 @@ Formatted error string.
 `inline`
 
 ```cpp
-inline void throwError(std::string_view message, int err)
+inline void throwError(std::string_view message, int err = UV_UNKNOWN)
 ```
 
 Throws a `std::runtime_error` with a formatted error message. 
@@ -668,7 +668,7 @@ Creates a `[MutableBuffer](#mutablebuffer)` from a const `std::vector`. Casts aw
 inline MutableBuffer mutableBuffer(Buffer & buf)
 ```
 
-Creates a `[MutableBuffer](#mutablebuffer)` from a `Buffer`. 
+Creates a `[MutableBuffer](#mutablebuffer)` from a `[Buffer](#buffer-2)`. 
 #### Parameters
 * `buf` Source buffer. Must remain valid while the buffer is in use. 
 
@@ -687,7 +687,7 @@ Creates a `[MutableBuffer](#mutablebuffer)` from a `Buffer`.
 inline MutableBuffer mutableBuffer(const Buffer & buf)
 ```
 
-Creates a `[MutableBuffer](#mutablebuffer)` from a const `Buffer`. Casts away constness; use with care. 
+Creates a `[MutableBuffer](#mutablebuffer)` from a const `[Buffer](#buffer-2)`. Casts away constness; use with care. 
 #### Parameters
 * `buf` Source buffer. Must remain valid while the buffer is in use. 
 
@@ -765,10 +765,10 @@ Creates a `[ConstBuffer](#constbuffer)` from a `std::vector`.
 
 #### constBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr ConstBuffer constBuffer(const MutableBuffer & buf)
+constexpr inline ConstBuffer constBuffer(const MutableBuffer & buf)
 ```
 
 Creates a `[ConstBuffer](#constbuffer)` from a `[MutableBuffer](#mutablebuffer)`. 
@@ -790,7 +790,7 @@ Creates a `[ConstBuffer](#constbuffer)` from a `[MutableBuffer](#mutablebuffer)`
 template<typename T> inline ConstBuffer constBuffer(Buffer & buf)
 ```
 
-Creates a `[ConstBuffer](#constbuffer)` from a `Buffer`. 
+Creates a `[ConstBuffer](#constbuffer)` from a `[Buffer](#buffer-2)`. 
 #### Parameters
 * `T` Unused; kept for overload symmetry. 
 
@@ -812,7 +812,7 @@ Creates a `[ConstBuffer](#constbuffer)` from a `Buffer`.
 template<typename T> inline ConstBuffer constBuffer(const Buffer & buf)
 ```
 
-Creates a `[ConstBuffer](#constbuffer)` from a const `Buffer`. Casts away constness internally; use with care. 
+Creates a `[ConstBuffer](#constbuffer)` from a const `[Buffer](#buffer-2)`. Casts away constness internally; use with care. 
 #### Parameters
 * `T` Unused; kept for overload symmetry. 
 
@@ -828,10 +828,10 @@ Creates a `[ConstBuffer](#constbuffer)` from a const `Buffer`. Casts away constn
 
 #### bufferCast
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-template<typename PointerToPodType> inline constexpr PointerToPodType bufferCast(const MutableBuffer & b)
+template<typename PointerToPodType> constexpr inline PointerToPodType bufferCast(const MutableBuffer & b)
 ```
 
 Casts a `[MutableBuffer](#mutablebuffer)` to a specified pointer-to-POD type. 
@@ -850,10 +850,10 @@ Pointer to the buffer's data, cast to `PointerToPodType`.
 
 #### bufferCast
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-template<typename PointerToPodType> inline constexpr PointerToPodType bufferCast(const ConstBuffer & b)
+template<typename PointerToPodType> constexpr inline PointerToPodType bufferCast(const ConstBuffer & b)
 ```
 
 Casts a `[ConstBuffer](#constbuffer)` to a specified pointer-to-POD type. 
@@ -878,12 +878,12 @@ Pointer to the buffer's data, cast to `PointerToPodType`.
 inline Level getLevelFromString(const char * level)
 ```
 
-Converts a log level string to its corresponding `Level` enum value. Unrecognized strings default to `[Level::Trace](#namespaceicy_1aad3e81b3cd2daab89338dae9b5323f6badd4ec0ac4e58f7c32a01244ae91150b1)`. 
+Converts a log level string to its corresponding `[Level](#level)` enum value. Unrecognized strings default to `[Level::Trace](#namespaceicy_1aad3e81b3cd2daab89338dae9b5323f6badd4ec0ac4e58f7c32a01244ae91150b1)`. 
 #### Parameters
 * `level` Lowercase level string: "trace", "debug", "info", "warn", "error", or "fatal". 
 
 #### Returns
-The matching `Level` enum value.
+The matching `[Level](#level)` enum value.
 
 ---
 
@@ -897,7 +897,7 @@ The matching `Level` enum value.
 inline const char * getStringFromLevel(Level level)
 ```
 
-Converts a `Level` enum value to its lowercase string representation. 
+Converts a `[Level](#level)` enum value to its lowercase string representation. 
 #### Parameters
 * `level` The log level to convert. 
 
@@ -944,6 +944,8 @@ Write multiple logging arguments into the destination stream in order.
 
 #### str_end
 
+`constexpr`
+
 ```cpp
 constexpr const char * str_end(const char * str)
 ```
@@ -955,6 +957,8 @@ Return a pointer to the null terminator of a C string.
 {#str_slant}
 
 #### str_slant
+
+`constexpr`
 
 ```cpp
 constexpr bool str_slant(const char * str)
@@ -968,6 +972,8 @@ Return true if the C string contains a forward or back slash.
 
 #### r_slant
 
+`constexpr`
+
 ```cpp
 constexpr const char * r_slant(const char * str)
 ```
@@ -979,6 +985,8 @@ Walk backward to the character after the last path separator.
 {#_filename}
 
 #### _fileName
+
+`constexpr`
 
 ```cpp
 constexpr const char * _fileName(const char * str)
@@ -1033,13 +1041,13 @@ template<typename T, typename... Args> IntrusivePtr< T > makeIntrusive(Args &&..
 
 Creates an [IntrusivePtr](#intrusiveptr) managing a newly heap-allocated T. Equivalent to std::make_shared. 
 #### Parameters
-* `T` Type to construct; must inherit from RefCounted<T>. 
+* `T` Type to construct; must inherit from [RefCounted<T>](#refcounted). 
 
 #### Parameters
 * `args` Arguments forwarded to T's constructor. 
 
 #### Returns
-IntrusivePtr<T> owning the new object.
+[IntrusivePtr<T>](#intrusiveptr) owning the new object.
 
 ---
 
@@ -1048,7 +1056,7 @@ IntrusivePtr<T> owning the new object.
 #### slot
 
 ```cpp
-template<class Class, class RT, typename... Args> std::shared_ptr< internal::Slot< RT, Args... > > slot(Class * instance, RT(Class::*)(Args...) method, int id, int priority)
+template<class Class, class RT, typename... Args> std::shared_ptr< internal::Slot< RT, Args... > > slot(Class * instance, RT(Class::*)(Args...) method, int id = -1, int priority = -1)
 ```
 
 Creates a slot that binds a non-const class member function to an instance.
@@ -1083,7 +1091,7 @@ Creates a slot that binds a `const` class member function to an instance. Uses t
 #### slot
 
 ```cpp
-template<class RT, typename... Args> std::shared_ptr< internal::Slot< RT, Args... > > slot(RT(*)(Args...) method, int id, int priority)
+template<class RT, typename... Args> std::shared_ptr< internal::Slot< RT, Args... > > slot(RT(*)(Args...) method, int id = -1, int priority = -1)
 ```
 
 Creates a slot that wraps a free (static) function pointer.
@@ -1264,7 +1272,7 @@ Return the system hostname.
 #### getEnv
 
 ```cpp
-std::string getEnv(std::string_view name, std::string_view defaultValue)
+std::string getEnv(std::string_view name, std::string_view defaultValue = "")
 ```
 
 Return an environment variable or the default value.
@@ -1683,7 +1691,7 @@ Value in host byte order.
 `inline`
 
 ```cpp
-inline void onShutdownSignal(std::function< void(void *)> callback, void * opaque, uv::Loop * loop)
+inline void onShutdownSignal(std::function< void(void *)> callback = nullptr, void * opaque = nullptr, uv::Loop * loop = uv::defaultLoop())
 ```
 
 Installs a SIGINT handler on the given event loop. When the signal fires, `callback` is invoked with `opaque` and the signal handle is closed. 
@@ -1703,7 +1711,7 @@ Installs a SIGINT handler on the given event loop. When the signal fires, `callb
 `inline`
 
 ```cpp
-inline void waitForShutdown(std::function< void(void *)> callback, void * opaque, uv::Loop * loop)
+inline void waitForShutdown(std::function< void(void *)> callback = nullptr, void * opaque = nullptr, uv::Loop * loop = uv::defaultLoop())
 ```
 
 Installs a SIGINT handler and runs the event loop until shutdown. Equivalent to calling `[onShutdownSignal()](#onshutdownsignal)` then `uv_run()`. 
@@ -1721,12 +1729,12 @@ Installs a SIGINT handler and runs the event loop until shutdown. Equivalent to 
 #### packetSlot
 
 ```cpp
-template<class Class, class RT, class PT, class IT> std::shared_ptr< internal::Slot< RT, IT & > > packetSlot(Class * instance, RT(Class::*)(PT &) method, int id, int priority)
+template<class Class, class RT, class PT, class IT = IPacket> std::shared_ptr< internal::Slot< RT, IT & > > packetSlot(Class * instance, RT(Class::*)(PT &) method, int id = -1, int priority = -1)
 ```
 
 Creates a signal slot that filters by packet subtype `PT` before invoking `method`.
 
-The returned slot is connected to a `PacketSignal` (which broadcasts `[IPacket](#ipacket)&`). The slot performs a `dynamic_cast` on each received packet; if the cast succeeds, the listener method is called with the derived type `PT`. Non-matching packets are silently ignored.
+The returned slot is connected to a `[PacketSignal](#packetsignal)` (which broadcasts `[IPacket](#ipacket)&`). The slot performs a `dynamic_cast` on each received packet; if the cast succeeds, the listener method is called with the derived type `PT`. Non-matching packets are silently ignored.
 
 #### Parameters
 * `Class` Listener class type. 
@@ -1747,19 +1755,21 @@ The returned slot is connected to a `PacketSignal` (which broadcasts `[IPacket](
 * `priority` Optional slot priority; higher values run first. 
 
 #### Returns
-A shared slot suitable for connecting to a `PacketSignal`.
+A shared slot suitable for connecting to a `[PacketSignal](#packetsignal)`.
 
 ---
 
-{#operator-9}
+{#operator-10}
 
 #### operator|
+
+`constexpr`
 
 ```cpp
 constexpr unsigned operator|(PacketFlags lhs, PacketFlags rhs)
 ```
 
-Combine PacketFlags values into a bitmask.
+Combine [PacketFlags](#packetflags) values into a bitmask.
 
 ---
 
@@ -1770,7 +1780,7 @@ Combine PacketFlags values into a bitmask.
 `inline`
 
 ```cpp
-inline RawPacket rawPacket(const MutableBuffer & buf, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket rawPacket(const MutableBuffer & buf, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
 
 Constructs a non-owning [RawPacket](#rawpacket) from a mutable buffer (borrowed pointer).
@@ -1784,7 +1794,7 @@ Constructs a non-owning [RawPacket](#rawpacket) from a mutable buffer (borrowed 
 `inline`
 
 ```cpp
-inline RawPacket rawPacket(const ConstBuffer & buf, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket rawPacket(const ConstBuffer & buf, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
 
 Constructs an owning [RawPacket](#rawpacket) from a const buffer (data is copied).
@@ -1798,7 +1808,7 @@ Constructs an owning [RawPacket](#rawpacket) from a const buffer (data is copied
 `inline`
 
 ```cpp
-inline RawPacket rawPacket(char * data, size_t size, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket rawPacket(char * data = nullptr, size_t size = 0, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
 
 Constructs a non-owning [RawPacket](#rawpacket) from a raw mutable pointer (borrowed).
@@ -1812,7 +1822,7 @@ Constructs a non-owning [RawPacket](#rawpacket) from a raw mutable pointer (borr
 `inline`
 
 ```cpp
-inline RawPacket rawPacket(const char * data, size_t size, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket rawPacket(const char * data = nullptr, size_t size = 0, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
 
 Constructs an owning [RawPacket](#rawpacket) from a const char pointer (data is copied).
@@ -1827,8 +1837,8 @@ Hexadecimal encoding and decoding helpers.
 
 | Name | Description |
 |------|-------------|
-| [`Decoder`](#decoder) | Hex decoder. |
 | [`Encoder`](#encoder-1) | Hex encoder. |
+| [`Decoder`](#decoder) | Hex decoder. |
 
 ### Functions
 
@@ -1850,6 +1860,171 @@ template<typename T> inline std::string encode(const T & bytes)
 
 Converts the STL container to Hex.
 
+{#encoder-1}
+
+## Encoder
+
+```cpp
+#include <icy/hex.h>
+```
+
+```cpp
+struct Encoder
+```
+
+Defined in src/base/include/icy/hex.h:34
+
+> **Inherits:** [`Encoder`](#encoder-5)
+
+Hex encoder.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `int` | [`_linePos`](#_linepos)  |  |
+| `int` | [`_lineLength`](#_linelength)  |  |
+| `int` | [`_uppercase`](#_uppercase)  |  |
+
+---
+
+{#_linepos}
+
+#### _linePos
+
+```cpp
+int _linePos
+```
+
+Defined in src/base/include/icy/hex.h:83
+
+---
+
+{#_linelength}
+
+#### _lineLength
+
+```cpp
+int _lineLength
+```
+
+Defined in src/base/include/icy/hex.h:84
+
+---
+
+{#_uppercase}
+
+#### _uppercase
+
+```cpp
+int _uppercase
+```
+
+Defined in src/base/include/icy/hex.h:85
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Encoder`](#encoder-2) `inline` |  |
+| `ssize_t` | [`encode`](#encode-15) `virtual` `inline` `override` | Encodes binary input as lowercase hex characters, optionally inserting newlines every `[_lineLength](#_linelength)` output characters. |
+| `ssize_t` | [`finalize`](#finalize) `virtual` `inline` `override` | No-op finalizer; hex encoding has no pending state. |
+| `void` | [`setUppercase`](#setuppercase) `inline` | Controls whether encoded output uses uppercase hex digits (A-F) or lowercase (a-f). |
+| `void` | [`setLineLength`](#setlinelength) `inline` | Sets the maximum number of output characters per line before a newline is inserted. Set to 0 to disable line wrapping. |
+
+---
+
+{#encoder-2}
+
+#### Encoder
+
+`inline`
+
+```cpp
+inline Encoder()
+```
+
+Defined in src/base/include/icy/hex.h:36
+
+---
+
+{#encode-15}
+
+#### encode
+
+`virtual` `inline` `override`
+
+```cpp
+virtual inline ssize_t encode(const char * inbuf, size_t nread, char * outbuf) override
+```
+
+Defined in src/base/include/icy/hex.h:49
+
+Encodes binary input as lowercase hex characters, optionally inserting newlines every `[_lineLength](#_linelength)` output characters. 
+#### Parameters
+* `inbuf` Input buffer to encode. 
+
+* `nread` Number of bytes to read from inbuf. 
+
+* `outbuf` Destination buffer; must have capacity >= nread * 2 + nread/_lineLength + 1. 
+
+#### Returns
+Number of bytes written to outbuf.
+
+---
+
+{#finalize}
+
+#### finalize
+
+`virtual` `inline` `override`
+
+```cpp
+virtual inline ssize_t finalize(char *) override
+```
+
+Defined in src/base/include/icy/hex.h:72
+
+No-op finalizer; hex encoding has no pending state. 
+#### Returns
+Always 0.
+
+---
+
+{#setuppercase}
+
+#### setUppercase
+
+`inline`
+
+```cpp
+inline void setUppercase(bool flag)
+```
+
+Defined in src/base/include/icy/hex.h:76
+
+Controls whether encoded output uses uppercase hex digits (A-F) or lowercase (a-f). 
+#### Parameters
+* `flag` true for uppercase, false for lowercase.
+
+---
+
+{#setlinelength}
+
+#### setLineLength
+
+`inline`
+
+```cpp
+inline void setLineLength(int lineLength)
+```
+
+Defined in src/base/include/icy/hex.h:81
+
+Sets the maximum number of output characters per line before a newline is inserted. Set to 0 to disable line wrapping. 
+#### Parameters
+* `lineLength` Characters per line.
+
 {#decoder}
 
 ## Decoder
@@ -1857,6 +2032,12 @@ Converts the STL container to Hex.
 ```cpp
 #include <icy/hex.h>
 ```
+
+```cpp
+struct Decoder
+```
+
+Defined in src/base/include/icy/hex.h:111
 
 > **Inherits:** [`Decoder`](#decoder-4)
 
@@ -1878,13 +2059,15 @@ Hex decoder.
 char lastbyte
 ```
 
+Defined in src/base/include/icy/hex.h:201
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Decoder`](#decoder-1) `inline` |  |
-| `ssize_t` | [`decode`](#decode-4) `virtual` `inline` | Decodes hex-encoded input to binary. Whitespace in the input is ignored. A trailing unpaired nibble is buffered and prepended on the next call. |
-| `ssize_t` | [`finalize`](#finalize) `virtual` `inline` | No-op finalizer; hex decoding has no pending output state. |
+| `ssize_t` | [`decode`](#decode-4) `virtual` `inline` `override` | Decodes hex-encoded input to binary. Whitespace in the input is ignored. A trailing unpaired nibble is buffered and prepended on the next call. |
+| `ssize_t` | [`finalize`](#finalize-1) `virtual` `inline` `override` | No-op finalizer; hex decoding has no pending output state. |
 | `bool` | [`readnext`](#readnext) `inline` | Reads the next non-whitespace character from inbuf, prepending any buffered lastbyte before consuming from the stream. |
 | `int` | [`nybble`](#nybble) `inline` | Converts an ASCII hex character to its 4-bit integer value. |
 | `bool` | [`iswspace`](#iswspace) `inline` | Returns true if c is an ASCII whitespace character (space, CR, tab, LF). |
@@ -1901,17 +2084,21 @@ char lastbyte
 inline Decoder()
 ```
 
+Defined in src/base/include/icy/hex.h:113
+
 ---
 
 {#decode-4}
 
 #### decode
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline ssize_t decode(const char * inbuf, size_t nread, char * outbuf)
+virtual inline ssize_t decode(const char * inbuf, size_t nread, char * outbuf) override
 ```
+
+Defined in src/base/include/icy/hex.h:125
 
 Decodes hex-encoded input to binary. Whitespace in the input is ignored. A trailing unpaired nibble is buffered and prepended on the next call. 
 #### Parameters
@@ -1926,15 +2113,17 @@ Number of decoded bytes written to outbuf.
 
 ---
 
-{#finalize}
+{#finalize-1}
 
 #### finalize
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline ssize_t finalize(char *)
+virtual inline ssize_t finalize(char *) override
 ```
+
+Defined in src/base/include/icy/hex.h:152
 
 No-op finalizer; hex decoding has no pending output state. 
 #### Returns
@@ -1951,6 +2140,8 @@ Always 0.
 ```cpp
 inline bool readnext(const char * inbuf, size_t nread, size_t & rpos, char & c)
 ```
+
+Defined in src/base/include/icy/hex.h:161
 
 Reads the next non-whitespace character from inbuf, prepending any buffered lastbyte before consuming from the stream. 
 #### Parameters
@@ -1977,6 +2168,8 @@ true if more input remains after c was read, false otherwise.
 inline int nybble(const int n)
 ```
 
+Defined in src/base/include/icy/hex.h:181
+
 Converts an ASCII hex character to its 4-bit integer value. 
 #### Parameters
 * `n` ASCII character ('0'-'9', 'a'-'f', 'A'-'F'). 
@@ -1999,155 +2192,14 @@ Integer value in the range [0, 15].
 inline bool iswspace(const char c)
 ```
 
+Defined in src/base/include/icy/hex.h:196
+
 Returns true if c is an ASCII whitespace character (space, CR, tab, LF). 
 #### Parameters
 * `c` Character to test. 
 
 #### Returns
 true if c is whitespace.
-
-{#encoder-1}
-
-## Encoder
-
-```cpp
-#include <icy/hex.h>
-```
-
-> **Inherits:** [`Encoder`](#encoder-5)
-
-Hex encoder.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `int` | [`_linePos`](#_linepos)  |  |
-| `int` | [`_lineLength`](#_linelength)  |  |
-| `int` | [`_uppercase`](#_uppercase)  |  |
-
----
-
-{#_linepos}
-
-#### _linePos
-
-```cpp
-int _linePos
-```
-
----
-
-{#_linelength}
-
-#### _lineLength
-
-```cpp
-int _lineLength
-```
-
----
-
-{#_uppercase}
-
-#### _uppercase
-
-```cpp
-int _uppercase
-```
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Encoder`](#encoder-2) `inline` |  |
-| `ssize_t` | [`encode`](#encode-15) `virtual` `inline` | Encodes binary input as lowercase hex characters, optionally inserting newlines every `_lineLength` output characters. |
-| `ssize_t` | [`finalize`](#finalize-1) `virtual` `inline` | No-op finalizer; hex encoding has no pending state. |
-| `void` | [`setUppercase`](#setuppercase) `inline` | Controls whether encoded output uses uppercase hex digits (A-F) or lowercase (a-f). |
-| `void` | [`setLineLength`](#setlinelength) `inline` | Sets the maximum number of output characters per line before a newline is inserted. Set to 0 to disable line wrapping. |
-
----
-
-{#encoder-2}
-
-#### Encoder
-
-`inline`
-
-```cpp
-inline Encoder()
-```
-
----
-
-{#encode-15}
-
-#### encode
-
-`virtual` `inline`
-
-```cpp
-virtual inline ssize_t encode(const char * inbuf, size_t nread, char * outbuf)
-```
-
-Encodes binary input as lowercase hex characters, optionally inserting newlines every `_lineLength` output characters. 
-#### Parameters
-* `inbuf` Input buffer to encode. 
-
-* `nread` Number of bytes to read from inbuf. 
-
-* `outbuf` Destination buffer; must have capacity >= nread * 2 + nread/_lineLength + 1. 
-
-#### Returns
-Number of bytes written to outbuf.
-
----
-
-{#finalize-1}
-
-#### finalize
-
-`virtual` `inline`
-
-```cpp
-virtual inline ssize_t finalize(char *)
-```
-
-No-op finalizer; hex encoding has no pending state. 
-#### Returns
-Always 0.
-
----
-
-{#setuppercase}
-
-#### setUppercase
-
-`inline`
-
-```cpp
-inline void setUppercase(bool flag)
-```
-
-Controls whether encoded output uses uppercase hex digits (A-F) or lowercase (a-f). 
-#### Parameters
-* `flag` true for uppercase, false for lowercase.
-
----
-
-{#setlinelength}
-
-#### setLineLength
-
-`inline`
-
-```cpp
-inline void setLineLength(int lineLength)
-```
-
-Sets the maximum number of output characters per line before a newline is inserted. Set to 0 to disable line wrapping. 
-#### Parameters
-* `lineLength` Characters per line.
 
 {#ipc}
 
@@ -2177,7 +2229,7 @@ Classes for inter-process communication.
 #### ActionQueue
 
 ```cpp
-ipc::Queue< ipc::Action > ActionQueue()
+using ActionQueue = ipc::Queue< ipc::Action >
 ```
 
 ---
@@ -2187,7 +2239,7 @@ ipc::Queue< ipc::Action > ActionQueue()
 #### ActionSyncQueue
 
 ```cpp
-ipc::SyncQueue< ipc::Action > ActionSyncQueue()
+using ActionSyncQueue = ipc::SyncQueue< ipc::Action >
 ```
 
 {#queue-1}
@@ -2198,7 +2250,12 @@ ipc::SyncQueue< ipc::Action > ActionSyncQueue()
 #include <icy/ipc.h>
 ```
 
-> **Subclassed by:** [`SyncQueue< TAction >`](#syncqueue-1)
+```cpp
+template<typename TAction = ipc::Action>
+class Queue
+```
+
+Defined in src/base/include/icy/ipc.h:57
 
 IPC queue is for safely passing templated actions between threads and processes.
 
@@ -2226,6 +2283,8 @@ IPC queue is for safely passing templated actions between threads and processes.
 inline Queue()
 ```
 
+Defined in src/base/include/icy/ipc.h:60
+
 ---
 
 {#push-1}
@@ -2237,6 +2296,8 @@ inline Queue()
 ```cpp
 virtual inline void push(TAction * action)
 ```
+
+Defined in src/base/include/icy/ipc.h:68
 
 Pushes an action onto the queue and triggers a post notification. Takes ownership of action; the queue deletes it after execution. Thread-safe. 
 #### Parameters
@@ -2254,6 +2315,8 @@ Pushes an action onto the queue and triggers a post notification. Takes ownershi
 virtual inline TAction * pop()
 ```
 
+Defined in src/base/include/icy/ipc.h:81
+
 Removes and returns the next action from the front of the queue. The caller takes ownership of the returned pointer. Thread-safe. 
 #### Returns
 Pointer to the next action, or nullptr if the queue is empty.
@@ -2270,6 +2333,8 @@ Pointer to the next action, or nullptr if the queue is empty.
 virtual inline void runSync()
 ```
 
+Defined in src/base/include/icy/ipc.h:93
+
 Drains the queue by invoking and deleting every pending action in order. Must be called from the thread that owns the event loop.
 
 ---
@@ -2283,6 +2348,8 @@ Drains the queue by invoking and deleting every pending action in order. Must be
 ```cpp
 virtual inline void close()
 ```
+
+Defined in src/base/include/icy/ipc.h:103
 
 Closes the underlying notification handle. No-op in the base implementation.
 
@@ -2298,6 +2365,8 @@ Closes the underlying notification handle. No-op in the base implementation.
 virtual inline void post()
 ```
 
+Defined in src/base/include/icy/ipc.h:106
+
 Signals the event loop that new actions are available. No-op in the base implementation.
 
 ---
@@ -2309,8 +2378,10 @@ Signals the event loop that new actions are available. No-op in the base impleme
 `inline`
 
 ```cpp
-inline void waitForSync(std::chrono::milliseconds timeout)
+inline void waitForSync(std::chrono::milliseconds timeout = std::chrono::milliseconds(5000))
 ```
+
+Defined in src/base/include/icy/ipc.h:111
 
 Blocks the calling thread until the queue is empty or the timeout elapses. Polls every 10 ms. Logs a warning if the timeout is reached. 
 #### Parameters
@@ -2333,6 +2404,8 @@ Blocks the calling thread until the queue is empty or the timeout elapses. Polls
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/ipc.h:127
+
 ---
 
 {#_actions}
@@ -2343,6 +2416,8 @@ std::mutex _mutex
 std::deque< TAction * > _actions
 ```
 
+Defined in src/base/include/icy/ipc.h:128
+
 {#syncqueue-1}
 
 ## SyncQueue
@@ -2350,6 +2425,13 @@ std::deque< TAction * > _actions
 ```cpp
 #include <icy/ipc.h>
 ```
+
+```cpp
+template<typename TAction = ipc::Action>
+class SyncQueue
+```
+
+Defined in src/base/include/icy/ipc.h:137
 
 > **Inherits:** [`Action >`](#queue-1)
 
@@ -2373,8 +2455,10 @@ IPC synchronization queue is for passing templated actions between threads and t
 `inline`
 
 ```cpp
-inline SyncQueue(uv::Loop * loop)
+inline SyncQueue(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/ipc.h:142
 
 Constructs a [SyncQueue](#syncqueue-1) bound to the given libuv event loop. 
 #### Parameters
@@ -2392,6 +2476,8 @@ Constructs a [SyncQueue](#syncqueue-1) bound to the given libuv event loop.
 virtual inline void close()
 ```
 
+Defined in src/base/include/icy/ipc.h:150
+
 Closes the underlying [Synchronizer](#synchronizer) handle and stops loop wakeups.
 
 ---
@@ -2406,6 +2492,8 @@ Closes the underlying [Synchronizer](#synchronizer) handle and stops loop wakeup
 virtual inline void post()
 ```
 
+Defined in src/base/include/icy/ipc.h:153
+
 Wakes up the event loop so pending actions are dispatched via [runSync()](#runsync).
 
 ---
@@ -2419,6 +2507,8 @@ Wakes up the event loop so pending actions are dispatched via [runSync()](#runsy
 ```cpp
 virtual inline Synchronizer & sync()
 ```
+
+Defined in src/base/include/icy/ipc.h:157
 
 Returns a reference to the internal [Synchronizer](#synchronizer). 
 #### Returns
@@ -2440,6 +2530,8 @@ Reference to the [Synchronizer](#synchronizer) used for loop wakeup.
 Synchronizer _sync
 ```
 
+Defined in src/base/include/icy/ipc.h:160
+
 {#action}
 
 ## Action
@@ -2447,6 +2539,12 @@ Synchronizer _sync
 ```cpp
 #include <icy/ipc.h>
 ```
+
+```cpp
+struct Action
+```
+
+Defined in src/base/include/icy/ipc.h:33
 
 Default action type for executing synchronized callbacks.
 
@@ -2468,6 +2566,8 @@ Default action type for executing synchronized callbacks.
 Callback target
 ```
 
+Defined in src/base/include/icy/ipc.h:37
+
 The callable to invoke when the action is dispatched.
 
 ---
@@ -2480,6 +2580,8 @@ The callable to invoke when the action is dispatched.
 void * arg
 ```
 
+Defined in src/base/include/icy/ipc.h:38
+
 Optional opaque pointer passed to the callback.
 
 ---
@@ -2491,6 +2593,8 @@ Optional opaque pointer passed to the callback.
 ```cpp
 std::string data
 ```
+
+Defined in src/base/include/icy/ipc.h:39
 
 Optional string payload passed to the callback.
 
@@ -2509,12 +2613,14 @@ Optional string payload passed to the callback.
 `inline`
 
 ```cpp
-inline Action(Callback target, void * arg, const std::string & data)
+inline Action(Callback target, void * arg = nullptr, const std::string & data = "")
 ```
+
+Defined in src/base/include/icy/ipc.h:45
 
 Constructs an [Action](#action) with the given callback, optional argument, and optional data. 
 #### Parameters
-* `target` Callback to invoke on dispatch. 
+* `target` [Callback](#callback-1) to invoke on dispatch. 
 
 * `arg` Opaque pointer passed to the callback (default: nullptr). 
 
@@ -2533,8 +2639,10 @@ Constructs an [Action](#action) with the given callback, optional argument, and 
 #### Callback
 
 ```cpp
-std::function< void(const Action &)> Callback()
+using Callback = std::function< void(const Action &)>
 ```
+
+Defined in src/base/include/icy/ipc.h:35
 
 {#test}
 
@@ -2546,9 +2654,9 @@ Modern unit testing framework.
 
 | Name | Description |
 |------|-------------|
-| [`FunctionTest`](#functiontest) | [Test](#test-1) wrapper for standalone test functions. |
 | [`Test`](#test-1) | [Test](#test-1) wrapper class. |
-| [`TestRunner`](#testrunner) | [Test](#test-1) manager queue. |
+| [`FunctionTest`](#functiontest) | [Test](#test-1) wrapper for standalone test functions. |
+| [`TestRunner`](#testrunner-1) | [Test](#test-1) manager queue. |
 
 ### Typedefs
 
@@ -2565,7 +2673,7 @@ Modern unit testing framework.
 #### TestList
 
 ```cpp
-std::list< Test * > TestList()
+using TestList = std::list< Test * >
 ```
 
 ---
@@ -2575,7 +2683,7 @@ std::list< Test * > TestList()
 #### SErrorist
 
 ```cpp
-std::list< std::string > SErrorist()
+using SErrorist = std::list< std::string >
 ```
 
 ---
@@ -2585,7 +2693,7 @@ std::list< std::string > SErrorist()
 #### ErrorMap
 
 ```cpp
-std::map< Test *, SErrorist > ErrorMap()
+using ErrorMap = std::map< Test *, SErrorist >
 ```
 
 ### Functions
@@ -2624,7 +2732,7 @@ int finalize()
 
 Finalize the test environment.
 
-Destroy the [TestRunner](#testrunner) singleton instance and return the exit code.
+Destroy the [TestRunner](#testrunner-1) singleton instance and return the exit code.
 
 ---
 
@@ -2681,10 +2789,190 @@ Expect asserts that a condition is true (use [expect()](#test_8h_1a92645105a4c87
 #### waitFor
 
 ```cpp
-bool waitFor(std::function< bool()> condition, int timeoutMs)
+bool waitFor(std::function< bool()> condition, int timeoutMs = 3000)
 ```
 
 Run the event loop until a condition is met or timeout expires. Returns true if the condition was satisfied, false on timeout. Useful for testing async operations that complete via libuv callbacks.
+
+{#test-1}
+
+## Test
+
+```cpp
+#include <icy/test.h>
+```
+
+```cpp
+class Test
+```
+
+Defined in src/base/include/icy/test.h:81
+
+> **Subclassed by:** [`FunctionTest`](#functiontest)
+
+[Test](#test-1) wrapper class.
+
+This class is for implementing any kind of unit test that can be executed by a `[TestRunner](#testrunner-1)`.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`TestRunner`](#testrunner)  | Tests belong to a [TestRunner](#testrunner-1) instance. |
+
+---
+
+{#testrunner}
+
+#### TestRunner
+
+```cpp
+friend class TestRunner
+```
+
+Defined in src/base/include/icy/test.h:110
+
+Tests belong to a [TestRunner](#testrunner-1) instance.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `std::string` | [`name`](#name-4)  | The name of the test. |
+| `SErrorist` | [`errors`](#errors)  | A list of test errors. |
+| `double` | [`duration`](#duration-1)  | The test run duration for benchmarking. |
+
+---
+
+{#name-4}
+
+#### name
+
+```cpp
+std::string name
+```
+
+Defined in src/base/include/icy/test.h:97
+
+The name of the test.
+
+---
+
+{#errors}
+
+#### errors
+
+```cpp
+SErrorist errors
+```
+
+Defined in src/base/include/icy/test.h:100
+
+A list of test errors.
+
+---
+
+{#duration-1}
+
+#### duration
+
+```cpp
+double duration
+```
+
+Defined in src/base/include/icy/test.h:103
+
+The test run duration for benchmarking.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Test`](#test-2)  |  |
+|  | [`~Test`](#test-3) `virtual` | Should remain protected. |
+| `void` | [`run`](#run-1) `virtual` | Called by the [TestRunner](#testrunner-1) to run the test. |
+| `bool` | [`passed`](#passed)  | Return true when the test passed without errors. |
+
+---
+
+{#test-2}
+
+#### Test
+
+```cpp
+Test(const std::string & name = "Unnamed Test")
+```
+
+Defined in src/base/include/icy/test.h:85
+
+#### Parameters
+* `name` Human-readable name displayed in test output.
+
+---
+
+{#test-3}
+
+#### ~Test
+
+`virtual`
+
+```cpp
+virtual ~Test()
+```
+
+Defined in src/base/include/icy/test.h:88
+
+Should remain protected.
+
+---
+
+{#run-1}
+
+#### run
+
+`virtual`
+
+```cpp
+virtual void run()
+```
+
+Defined in src/base/include/icy/test.h:91
+
+Called by the [TestRunner](#testrunner-1) to run the test.
+
+---
+
+{#passed}
+
+#### passed
+
+```cpp
+bool passed()
+```
+
+Defined in src/base/include/icy/test.h:94
+
+Return true when the test passed without errors.
+
+### Protected Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Test`](#test-4)  | Deleted constructor. |
+
+---
+
+{#test-4}
+
+#### Test
+
+```cpp
+Test(const Test & test) = delete
+```
+
+Defined in src/base/include/icy/test.h:106
+
+Deleted constructor.
 
 {#functiontest}
 
@@ -2693,6 +2981,12 @@ Run the event loop until a condition is met or timeout expires. Returns true if 
 ```cpp
 #include <icy/test.h>
 ```
+
+```cpp
+class FunctionTest
+```
+
+Defined in src/base/include/icy/test.h:115
 
 > **Inherits:** [`Test`](#test-1)
 
@@ -2714,11 +3008,13 @@ Run the event loop until a condition is met or timeout expires. Returns true if 
 std::function< void()> target
 ```
 
+Defined in src/base/include/icy/test.h:118
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`FunctionTest`](#functiontest-1) `inline` | #### Parameters |
+|  | [`FunctionTest`](#functiontest-1) `inline` |  |
 
 ---
 
@@ -2729,8 +3025,10 @@ std::function< void()> target
 `inline`
 
 ```cpp
-inline FunctionTest(std::function< void()> target, const std::string & name)
+inline FunctionTest(std::function< void()> target, const std::string & name = "Unnamed Test")
 ```
+
+Defined in src/base/include/icy/test.h:122
 
 #### Parameters
 * `target` Lambda or function to execute as the test body. 
@@ -2741,115 +3039,7 @@ inline FunctionTest(std::function< void()> target, const std::string & name)
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run-1) `virtual` `inline` | Called by the [TestRunner](#testrunner) to run the test. |
-
----
-
-{#run-1}
-
-#### run
-
-`virtual` `inline`
-
-```cpp
-virtual inline void run()
-```
-
-Called by the [TestRunner](#testrunner) to run the test.
-
-{#test-1}
-
-## Test
-
-```cpp
-#include <icy/test.h>
-```
-
-> **Subclassed by:** [`FunctionTest`](#functiontest)
-
-[Test](#test-1) wrapper class.
-
-This class is for implementing any kind of unit test that can be executed by a `[TestRunner](#testrunner)`.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `std::string` | [`name`](#name-4)  | The name of the test. |
-| `SErrorist` | [`errors`](#errors)  | A list of test errors. |
-| `double` | [`duration`](#duration-1)  | The test run duration for benchmarking. |
-
----
-
-{#name-4}
-
-#### name
-
-```cpp
-std::string name
-```
-
-The name of the test.
-
----
-
-{#errors}
-
-#### errors
-
-```cpp
-SErrorist errors
-```
-
-A list of test errors.
-
----
-
-{#duration-1}
-
-#### duration
-
-```cpp
-double duration
-```
-
-The test run duration for benchmarking.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Test`](#test-2)  | #### Parameters |
-|  | [`~Test`](#test-3) `virtual` | Should remain protected. |
-| `void` | [`run`](#run-2)  | Called by the [TestRunner](#testrunner) to run the test. |
-| `bool` | [`passed`](#passed)  | Return true when the test passed without errors. |
-
----
-
-{#test-2}
-
-#### Test
-
-```cpp
-Test(const std::string & name)
-```
-
-#### Parameters
-* `name` Human-readable name displayed in test output.
-
----
-
-{#test-3}
-
-#### ~Test
-
-`virtual`
-
-```cpp
-virtual ~Test()
-```
-
-Should remain protected.
+| `void` | [`run`](#run-2) `virtual` `inline` `override` | Called by the [TestRunner](#testrunner-1) to run the test. |
 
 ---
 
@@ -2857,43 +3047,17 @@ Should remain protected.
 
 #### run
 
-```cpp
-void run()
-```
-
-Called by the [TestRunner](#testrunner) to run the test.
-
----
-
-{#passed}
-
-#### passed
+`virtual` `inline` `override`
 
 ```cpp
-bool passed()
+virtual inline void run() override
 ```
 
-Return true when the test passed without errors.
+Defined in src/base/include/icy/test.h:132
 
-### Protected Methods
+Called by the [TestRunner](#testrunner-1) to run the test.
 
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Test`](#test-4)  | Deleted constructor. |
-
----
-
-{#test-4}
-
-#### Test
-
-```cpp
-Test(const Test & test) = delete
-```
-
-Deleted constructor.
-
-{#testrunner}
+{#testrunner-1}
 
 ## TestRunner
 
@@ -2901,17 +3065,23 @@ Deleted constructor.
 #include <icy/test.h>
 ```
 
+```cpp
+class TestRunner
+```
+
+Defined in src/base/include/icy/test.h:148
+
 [Test](#test-1) manager queue.
 
-The `[TestRunner](#testrunner)` is a queue in charge of running one or many tests.
+The `[TestRunner](#testrunner-1)` is a queue in charge of running one or many tests.
 
-When `[run()](#run-3)` the `[TestRunner](#testrunner)` loops through each test in the list calling the test's `[run()](#run-3)` method.
+When `[run()](#run-3)` the `[TestRunner](#testrunner-1)` loops through each test in the list calling the test's `[run()](#run-3)` method.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`TestRunner`](#testrunner-1)  |  |
+|  | [`TestRunner`](#testrunner-2)  |  |
 | `void` | [`add`](#add)  | Adds a test to the runner and prints its name to stdout. |
 | `Test *` | [`get`](#get-3) `const` | Return a pointer to the test matching the given name, or nullptr if no matching test exists. |
 | `void` | [`run`](#run-3)  | Runs all registered tests sequentially, printing results to stdout. |
@@ -2923,13 +3093,15 @@ When `[run()](#run-3)` the `[TestRunner](#testrunner)` loops through each test i
 
 ---
 
-{#testrunner-1}
+{#testrunner-2}
 
 #### TestRunner
 
 ```cpp
 TestRunner()
 ```
+
+Defined in src/base/include/icy/test.h:151
 
 ---
 
@@ -2940,6 +3112,8 @@ TestRunner()
 ```cpp
 void add(Test * test)
 ```
+
+Defined in src/base/include/icy/test.h:156
 
 Adds a test to the runner and prints its name to stdout. 
 #### Parameters
@@ -2956,6 +3130,8 @@ Adds a test to the runner and prints its name to stdout.
 ```cpp
 Test * get(std::string_view name) const
 ```
+
+Defined in src/base/include/icy/test.h:162
 
 Return a pointer to the test matching the given name, or nullptr if no matching test exists. 
 #### Parameters
@@ -2974,6 +3150,8 @@ Matching test pointer or nullptr.
 void run()
 ```
 
+Defined in src/base/include/icy/test.h:165
+
 Runs all registered tests sequentially, printing results to stdout.
 
 ---
@@ -2985,6 +3163,8 @@ Runs all registered tests sequentially, printing results to stdout.
 ```cpp
 void clear()
 ```
+
+Defined in src/base/include/icy/test.h:168
 
 Destroy and clears all managed tests.
 
@@ -3000,6 +3180,8 @@ Destroy and clears all managed tests.
 Test * current() const
 ```
 
+Defined in src/base/include/icy/test.h:171
+
 Return the currently active [Test](#test-1) or nullptr.
 
 ---
@@ -3013,6 +3195,8 @@ Return the currently active [Test](#test-1) or nullptr.
 ```cpp
 TestList tests() const
 ```
+
+Defined in src/base/include/icy/test.h:174
 
 Return the list of tests.
 
@@ -3028,6 +3212,8 @@ Return the list of tests.
 ErrorMap errors() const
 ```
 
+Defined in src/base/include/icy/test.h:177
+
 Return a map of tests and errors.
 
 ---
@@ -3042,13 +3228,15 @@ Return a map of tests and errors.
 bool passed() const
 ```
 
+Defined in src/base/include/icy/test.h:180
+
 Return true if all tests passed.
 
 ### Public Static Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `TestRunner &` | [`getDefault`](#getdefault-1) `static` | Return the default `[TestRunner](#testrunner)` singleton, although `[TestRunner](#testrunner)` instances may also be initialized individually. |
+| `TestRunner &` | [`getDefault`](#getdefault-1) `static` | Return the default `[TestRunner](#testrunner-1)` singleton, although `[TestRunner](#testrunner-1)` instances may also be initialized individually. |
 
 ---
 
@@ -3062,7 +3250,9 @@ Return true if all tests passed.
 static TestRunner & getDefault()
 ```
 
-Return the default `[TestRunner](#testrunner)` singleton, although `[TestRunner](#testrunner)` instances may also be initialized individually.
+Defined in src/base/include/icy/test.h:184
+
+Return the default `[TestRunner](#testrunner-1)` singleton, although `[TestRunner](#testrunner-1)` instances may also be initialized individually.
 
 ### Protected Attributes
 
@@ -3082,6 +3272,8 @@ Return the default `[TestRunner](#testrunner)` singleton, although `[TestRunner]
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/test.h:187
+
 ---
 
 {#_tests}
@@ -3092,6 +3284,8 @@ std::mutex _mutex
 TestList _tests
 ```
 
+Defined in src/base/include/icy/test.h:188
+
 ---
 
 {#_current}
@@ -3101,6 +3295,8 @@ TestList _tests
 ```cpp
 Test * _current
 ```
+
+Defined in src/base/include/icy/test.h:189
 
 {#time-3}
 
@@ -3158,7 +3354,7 @@ Returns the elapsed process time in decimal seconds using a monotonic clock.
 #### print
 
 ```cpp
-std::string print(const std::tm & dt, const char * fmt)
+std::string print(const std::tm & dt, const char * fmt = ISO8601Format)
 ```
 
 Formats a broken-down time value using the given strftime format string. 
@@ -3177,7 +3373,7 @@ Formatted time string.
 #### printLocal
 
 ```cpp
-std::string printLocal(const char * fmt)
+std::string printLocal(const char * fmt = ISO8601Format)
 ```
 
 Formats the current local time using the given strftime format string. 
@@ -3194,7 +3390,7 @@ Formatted local time string.
 #### printUTC
 
 ```cpp
-std::string printUTC(const char * fmt)
+std::string printUTC(const char * fmt = ISO8601Format)
 ```
 
 Formats the current UTC time using the given strftime format string. 
@@ -3392,8 +3588,8 @@ Base64 encoding and decoding helpers.
 
 | Name | Description |
 |------|-------------|
-| [`Decoder`](#decoder-2) | Base64 decoder. |
 | [`Encoder`](#encoder-3) | Base64 encoder. |
+| [`Decoder`](#decoder-2) | Base64 decoder. |
 
 ### Functions
 
@@ -3412,7 +3608,7 @@ Base64 encoding and decoding helpers.
 `inline`
 
 ```cpp
-inline size_t encodedBufferCapacity(size_t inputSize, int lineLength)
+inline size_t encodedBufferCapacity(size_t inputSize, int lineLength = LINE_LENGTH)
 ```
 
 Returns a safe temporary buffer size for encoding up to `inputSize` bytes. Includes padding/newline slack so callers can reuse the same buffer for finalize().
@@ -3426,7 +3622,7 @@ Returns a safe temporary buffer size for encoding up to `inputSize` bytes. Inclu
 `inline`
 
 ```cpp
-template<typename T> inline std::string encode(const T & bytes, int lineLength)
+template<typename T> inline std::string encode(const T & bytes, int lineLength = LINE_LENGTH)
 ```
 
 Encodes an STL byte container to a Base64 string. 
@@ -3467,8 +3663,8 @@ Decoded binary string.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr int` | [`BUFFER_SIZE`](#buffer_size)  |  |
-| `constexpr int` | [`LINE_LENGTH`](#line_length)  |  |
+| `int` | [`BUFFER_SIZE`](#buffer_size) `constexpr` |  |
+| `int` | [`LINE_LENGTH`](#line_length) `constexpr` |  |
 
 ---
 
@@ -3476,8 +3672,10 @@ Decoded binary string.
 
 #### BUFFER_SIZE
 
+`constexpr`
+
 ```cpp
-constexpr int BUFFER_SIZE = 16384
+int BUFFER_SIZE = 16384
 ```
 
 ---
@@ -3486,27 +3684,35 @@ constexpr int BUFFER_SIZE = 16384
 
 #### LINE_LENGTH
 
+`constexpr`
+
 ```cpp
-constexpr int LINE_LENGTH = 72
+int LINE_LENGTH = 72
 ```
 
-{#decoder-2}
+{#encoder-3}
 
-## Decoder
+## Encoder
 
 ```cpp
 #include <icy/base64.h>
 ```
 
-> **Inherits:** [`Decoder`](#decoder-4)
+```cpp
+struct Encoder
+```
 
-Base64 decoder.
+Defined in src/base/include/icy/base64.h:102
+
+> **Inherits:** [`Encoder`](#encoder-5)
+
+Base64 encoder.
 
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `internal::decodestate` | [`_state`](#_state)  |  |
+| `internal::encodestate` | [`_state`](#_state)  |  |
 | `int` | [`_buffersize`](#_buffersize)  |  |
 
 ---
@@ -3516,8 +3722,10 @@ Base64 decoder.
 #### _state
 
 ```cpp
-internal::decodestate _state
+internal::encodestate _state
 ```
+
+Defined in src/base/include/icy/base64.h:178
 
 ---
 
@@ -3529,13 +3737,196 @@ internal::decodestate _state
 int _buffersize
 ```
 
+Defined in src/base/include/icy/base64.h:179
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Decoder`](#decoder-3) `inline` | #### Parameters |
+|  | [`Encoder`](#encoder-4) `inline` |  |
+| `void` | [`encode`](#encode-17) `inline` | Encodes the entire input stream and writes Base64 output to `ostrm`. Resets the encoder state after completion. |
+| `void` | [`encode`](#encode-18) `inline` | Encodes a string to Base64 and appends the result to `out`. Resets the encoder state after completion. |
+| `ssize_t` | [`encode`](#encode-19) `virtual` `inline` `override` | Encodes a raw buffer, writing Base64 characters to `outbuf`. May be called multiple times before calling `[finalize()](#finalize-3)`. |
+| `ssize_t` | [`finalize`](#finalize-3) `virtual` `inline` `override` | Writes any pending padding and resets the encoder state. Must be called once after all `[encode()](#encode-17)` calls to flush the final block. |
+| `void` | [`setLineLength`](#setlinelength-1) `inline` | Sets the line wrap length for encoded output (0 disables line wrapping). |
+
+---
+
+{#encoder-4}
+
+#### Encoder
+
+`inline`
+
+```cpp
+inline Encoder(int buffersize = BUFFER_SIZE)
+```
+
+Defined in src/base/include/icy/base64.h:105
+
+#### Parameters
+* `buffersize` Internal read buffer size in bytes.
+
+---
+
+{#encode-17}
+
+#### encode
+
+`inline`
+
+```cpp
+inline void encode(std::istream & istrm, std::ostream & ostrm)
+```
+
+Defined in src/base/include/icy/base64.h:115
+
+Encodes the entire input stream and writes Base64 output to `ostrm`. Resets the encoder state after completion. 
+#### Parameters
+* `istrm` Source stream to encode. 
+
+* `ostrm` Destination stream for Base64 output.
+
+---
+
+{#encode-18}
+
+#### encode
+
+`inline`
+
+```cpp
+inline void encode(const std::string & in, std::string & out)
+```
+
+Defined in src/base/include/icy/base64.h:141
+
+Encodes a string to Base64 and appends the result to `out`. Resets the encoder state after completion. 
+#### Parameters
+* `in` Input string. 
+
+* `out` Output string to which Base64 characters are appended.
+
+---
+
+{#encode-19}
+
+#### encode
+
+`virtual` `inline` `override`
+
+```cpp
+virtual inline ssize_t encode(const char * inbuf, size_t nread, char * outbuf) override
+```
+
+Defined in src/base/include/icy/base64.h:160
+
+Encodes a raw buffer, writing Base64 characters to `outbuf`. May be called multiple times before calling `[finalize()](#finalize-3)`. 
+#### Parameters
+* `inbuf` Input binary data. 
+
+* `nread` Number of bytes to encode. 
+
+* `outbuf` Output buffer; must be at least `nread * 4 / 3 + 4` bytes. 
+
+#### Returns
+Number of Base64 characters written.
+
+---
+
+{#finalize-3}
+
+#### finalize
+
+`virtual` `inline` `override`
+
+```cpp
+virtual inline ssize_t finalize(char * outbuf) override
+```
+
+Defined in src/base/include/icy/base64.h:169
+
+Writes any pending padding and resets the encoder state. Must be called once after all `[encode()](#encode-17)` calls to flush the final block. 
+#### Parameters
+* `outbuf` Output buffer; must be at least 5 bytes. 
+
+#### Returns
+Number of characters written.
+
+---
+
+{#setlinelength-1}
+
+#### setLineLength
+
+`inline`
+
+```cpp
+inline void setLineLength(int lineLength)
+```
+
+Defined in src/base/include/icy/base64.h:176
+
+Sets the line wrap length for encoded output (0 disables line wrapping). 
+#### Parameters
+* `lineLength` Characters per line; use 0 to disable.
+
+{#decoder-2}
+
+## Decoder
+
+```cpp
+#include <icy/base64.h>
+```
+
+```cpp
+struct Decoder
+```
+
+Defined in src/base/include/icy/base64.h:258
+
+> **Inherits:** [`Decoder`](#decoder-4)
+
+Base64 decoder.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `internal::decodestate` | [`_state`](#_state-1)  |  |
+| `int` | [`_buffersize`](#_buffersize-1)  |  |
+
+---
+
+{#_state-1}
+
+#### _state
+
+```cpp
+internal::decodestate _state
+```
+
+Defined in src/base/include/icy/base64.h:304
+
+---
+
+{#_buffersize-1}
+
+#### _buffersize
+
+```cpp
+int _buffersize
+```
+
+Defined in src/base/include/icy/base64.h:305
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Decoder`](#decoder-3) `inline` |  |
 | `ssize_t` | [`decode`](#decode-6) `inline` | Decodes a single Base64 character to its 6-bit value. |
-| `ssize_t` | [`decode`](#decode-7) `virtual` `inline` | Decodes a raw Base64 buffer into binary data. |
+| `ssize_t` | [`decode`](#decode-7) `virtual` `inline` `override` | Decodes a raw Base64 buffer into binary data. |
 | `void` | [`decode`](#decode-8) `inline` | Decodes the entire input stream and writes binary output to `ostrm`. Resets the decoder state after completion. |
 
 ---
@@ -3547,8 +3938,10 @@ int _buffersize
 `inline`
 
 ```cpp
-inline Decoder(int buffersize)
+inline Decoder(int buffersize = BUFFER_SIZE)
 ```
+
+Defined in src/base/include/icy/base64.h:261
 
 #### Parameters
 * `buffersize` Internal read buffer size in bytes.
@@ -3565,6 +3958,8 @@ inline Decoder(int buffersize)
 inline ssize_t decode(char value_in)
 ```
 
+Defined in src/base/include/icy/base64.h:270
+
 Decodes a single Base64 character to its 6-bit value. 
 #### Parameters
 * `value_in` Base64 character. 
@@ -3578,11 +3973,13 @@ Decoded 6-bit value, or a negative sentinel on invalid input.
 
 #### decode
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline ssize_t decode(const char * inbuf, size_t nread, char * outbuf)
+virtual inline ssize_t decode(const char * inbuf, size_t nread, char * outbuf) override
 ```
+
+Defined in src/base/include/icy/base64.h:277
 
 Decodes a raw Base64 buffer into binary data. 
 #### Parameters
@@ -3607,170 +4004,13 @@ Number of binary bytes written.
 inline void decode(std::istream & istrm, std::ostream & ostrm)
 ```
 
+Defined in src/base/include/icy/base64.h:286
+
 Decodes the entire input stream and writes binary output to `ostrm`. Resets the decoder state after completion. 
 #### Parameters
 * `istrm` Source stream of Base64 data. 
 
 * `ostrm` Destination stream for decoded binary output.
-
-{#encoder-3}
-
-## Encoder
-
-```cpp
-#include <icy/base64.h>
-```
-
-> **Inherits:** [`Encoder`](#encoder-5)
-
-Base64 encoder.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `internal::encodestate` | [`_state`](#_state-1)  |  |
-| `int` | [`_buffersize`](#_buffersize-1)  |  |
-
----
-
-{#_state-1}
-
-#### _state
-
-```cpp
-internal::encodestate _state
-```
-
----
-
-{#_buffersize-1}
-
-#### _buffersize
-
-```cpp
-int _buffersize
-```
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Encoder`](#encoder-4) `inline` | #### Parameters |
-| `void` | [`encode`](#encode-17) `inline` | Encodes the entire input stream and writes Base64 output to `ostrm`. Resets the encoder state after completion. |
-| `void` | [`encode`](#encode-18) `inline` | Encodes a string to Base64 and appends the result to `out`. Resets the encoder state after completion. |
-| `ssize_t` | [`encode`](#encode-19) `virtual` `inline` | Encodes a raw buffer, writing Base64 characters to `outbuf`. May be called multiple times before calling `[finalize()](#finalize-3)`. |
-| `ssize_t` | [`finalize`](#finalize-3) `virtual` `inline` | Writes any pending padding and resets the encoder state. Must be called once after all `[encode()](#encode-17)` calls to flush the final block. |
-| `void` | [`setLineLength`](#setlinelength-1) `inline` | Sets the line wrap length for encoded output (0 disables line wrapping). |
-
----
-
-{#encoder-4}
-
-#### Encoder
-
-`inline`
-
-```cpp
-inline Encoder(int buffersize)
-```
-
-#### Parameters
-* `buffersize` Internal read buffer size in bytes.
-
----
-
-{#encode-17}
-
-#### encode
-
-`inline`
-
-```cpp
-inline void encode(std::istream & istrm, std::ostream & ostrm)
-```
-
-Encodes the entire input stream and writes Base64 output to `ostrm`. Resets the encoder state after completion. 
-#### Parameters
-* `istrm` Source stream to encode. 
-
-* `ostrm` Destination stream for Base64 output.
-
----
-
-{#encode-18}
-
-#### encode
-
-`inline`
-
-```cpp
-inline void encode(const std::string & in, std::string & out)
-```
-
-Encodes a string to Base64 and appends the result to `out`. Resets the encoder state after completion. 
-#### Parameters
-* `in` Input string. 
-
-* `out` Output string to which Base64 characters are appended.
-
----
-
-{#encode-19}
-
-#### encode
-
-`virtual` `inline`
-
-```cpp
-virtual inline ssize_t encode(const char * inbuf, size_t nread, char * outbuf)
-```
-
-Encodes a raw buffer, writing Base64 characters to `outbuf`. May be called multiple times before calling `[finalize()](#finalize-3)`. 
-#### Parameters
-* `inbuf` Input binary data. 
-
-* `nread` Number of bytes to encode. 
-
-* `outbuf` Output buffer; must be at least `nread * 4 / 3 + 4` bytes. 
-
-#### Returns
-Number of Base64 characters written.
-
----
-
-{#finalize-3}
-
-#### finalize
-
-`virtual` `inline`
-
-```cpp
-virtual inline ssize_t finalize(char * outbuf)
-```
-
-Writes any pending padding and resets the encoder state. Must be called once after all `[encode()](#encode-17)` calls to flush the final block. 
-#### Parameters
-* `outbuf` Output buffer; must be at least 5 bytes. 
-
-#### Returns
-Number of characters written.
-
----
-
-{#setlinelength-1}
-
-#### setLineLength
-
-`inline`
-
-```cpp
-inline void setLineLength(int lineLength)
-```
-
-Sets the line wrap length for encoded output (0 disables line wrapping). 
-#### Parameters
-* `lineLength` Characters per line; use 0 to disable.
 
 {#deleter-2}
 
@@ -3782,40 +4022,23 @@ Deleter helpers for objects managed through custom destruction routines.
 
 | Name | Description |
 |------|-------------|
-| [`Array`](#array) | Deleter functor for array pointers. Calls delete[] on the pointer. |
 | [`Dispose`](#dispose-1) | Deleter functor that calls dispose() on the pointer. Useful with std::unique_ptr for objects that require a dispose() call rather than direct deletion. |
-
-{#array}
-
-## Array
-
-Deleter functor for array pointers. Calls delete[] on the pointer.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `void` | [`operator()`](#operator-10) `inline` | Calls delete[] on ptr if non-null. |
-
----
-
-{#operator-10}
-
-#### operator()
-
-`inline`
-
-```cpp
-inline void operator()(T * ptr)
-```
-
-Calls delete[] on ptr if non-null. 
-#### Parameters
-* `ptr` Array pointer to delete; may be nullptr.
+| [`Array`](#array) | Deleter functor for array pointers. Calls delete[] on the pointer. |
 
 {#dispose-1}
 
 ## Dispose
+
+```cpp
+#include <icy/memory.h>
+```
+
+```cpp
+template<class T>
+struct Dispose
+```
+
+Defined in src/base/include/icy/memory.h:220
 
 Deleter functor that calls dispose() on the pointer. Useful with std::unique_ptr for objects that require a dispose() call rather than direct deletion.
 
@@ -3837,9 +4060,52 @@ Deleter functor that calls dispose() on the pointer. Useful with std::unique_ptr
 inline void operator()(T * ptr)
 ```
 
+Defined in src/base/include/icy/memory.h:224
+
 Calls ptr->dispose() if ptr is non-null. 
 #### Parameters
 * `ptr` Pointer to dispose; may be nullptr.
+
+{#array}
+
+## Array
+
+```cpp
+#include <icy/memory.h>
+```
+
+```cpp
+template<class T>
+struct Array
+```
+
+Defined in src/base/include/icy/memory.h:235
+
+Deleter functor for array pointers. Calls delete[] on the pointer.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `void` | [`operator()`](#operator-12) `inline` | Calls delete[] on ptr if non-null. |
+
+---
+
+{#operator-12}
+
+#### operator()
+
+`inline`
+
+```cpp
+inline void operator()(T * ptr)
+```
+
+Defined in src/base/include/icy/memory.h:239
+
+Calls delete[] on ptr if non-null. 
+#### Parameters
+* `ptr` [Array](#array) pointer to delete; may be nullptr.
 
 {#numeric}
 
@@ -4411,8 +4677,8 @@ Interface classes.
 | [`Decoder`](#decoder-4) | Abstract interface for stream decoders. |
 | [`Encoder`](#encoder-5) | Abstract interface for stream encoders. |
 | [`Runnable`](#runnable) | Abstract interface for classes that can be run and cancelled. |
-| [`Sendable`](#sendable) | Abstract interface for classes that can be sent and cancelled. |
 | [`Startable`](#startable) | Abstract interface for a classes that can be started and stopped. |
+| [`Sendable`](#sendable) | Abstract interface for classes that can be sent and cancelled. |
 
 {#decoder-4}
 
@@ -4421,6 +4687,12 @@ Interface classes.
 ```cpp
 #include <icy/interface.h>
 ```
+
+```cpp
+class Decoder
+```
+
+Defined in src/base/include/icy/interface.h:33
 
 > **Subclassed by:** [`Decoder`](#decoder-2), [`Decoder`](#decoder)
 
@@ -4431,7 +4703,7 @@ Abstract interface for stream decoders.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Decoder`](#decoder-5)  | Defaulted constructor. |
-| `ssize_t` | [`decode`](#decode-9)  | Decodes nread bytes from inbuf and writes decoded output to outbuf. |
+| `ssize_t` | [`decode`](#decode-9) `virtual` | Decodes nread bytes from inbuf and writes decoded output to outbuf. |
 | `ssize_t` | [`finalize`](#finalize-4) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
 
 ---
@@ -4444,6 +4716,8 @@ Abstract interface for stream decoders.
 Decoder() = default
 ```
 
+Defined in src/base/include/icy/interface.h:36
+
 Defaulted constructor.
 
 ---
@@ -4452,9 +4726,13 @@ Defaulted constructor.
 
 #### decode
 
+`virtual`
+
 ```cpp
-ssize_t decode(const char * inbuf, size_t nread, char * outbuf)
+virtual ssize_t decode(const char * inbuf, size_t nread, char * outbuf)
 ```
+
+Defined in src/base/include/icy/interface.h:44
 
 Decodes nread bytes from inbuf and writes decoded output to outbuf. 
 #### Parameters
@@ -4479,6 +4757,8 @@ Number of bytes written to outbuf, or -1 on error.
 virtual inline ssize_t finalize(char * outbuf)
 ```
 
+Defined in src/base/include/icy/interface.h:49
+
 Flushes any buffered state and writes final output to outbuf. 
 #### Parameters
 * `outbuf` Destination buffer for any remaining output. 
@@ -4494,6 +4774,12 @@ Number of bytes written, or 0 if nothing to flush.
 #include <icy/interface.h>
 ```
 
+```cpp
+class Encoder
+```
+
+Defined in src/base/include/icy/interface.h:54
+
 > **Subclassed by:** [`Encoder`](#encoder-3), [`Encoder`](#encoder-1)
 
 Abstract interface for stream encoders.
@@ -4503,7 +4789,7 @@ Abstract interface for stream encoders.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Encoder`](#encoder-6)  | Defaulted constructor. |
-| `ssize_t` | [`encode`](#encode-20)  | Encodes nread bytes from inbuf and writes encoded output to outbuf. |
+| `ssize_t` | [`encode`](#encode-20) `virtual` | Encodes nread bytes from inbuf and writes encoded output to outbuf. |
 | `ssize_t` | [`finalize`](#finalize-5) `virtual` `inline` | Flushes any buffered state and writes final output to outbuf. |
 
 ---
@@ -4516,6 +4802,8 @@ Abstract interface for stream encoders.
 Encoder() = default
 ```
 
+Defined in src/base/include/icy/interface.h:57
+
 Defaulted constructor.
 
 ---
@@ -4524,9 +4812,13 @@ Defaulted constructor.
 
 #### encode
 
+`virtual`
+
 ```cpp
-ssize_t encode(const char * inbuf, size_t nread, char * outbuf)
+virtual ssize_t encode(const char * inbuf, size_t nread, char * outbuf)
 ```
+
+Defined in src/base/include/icy/interface.h:65
 
 Encodes nread bytes from inbuf and writes encoded output to outbuf. 
 #### Parameters
@@ -4551,6 +4843,8 @@ Number of bytes written to outbuf, or -1 on error.
 virtual inline ssize_t finalize(char * outbuf)
 ```
 
+Defined in src/base/include/icy/interface.h:70
+
 Flushes any buffered state and writes final output to outbuf. 
 #### Parameters
 * `outbuf` Destination buffer for any remaining output. 
@@ -4566,7 +4860,13 @@ Number of bytes written, or 0 if nothing to flush.
 #include <icy/interface.h>
 ```
 
-> **Subclassed by:** [`RunnableQueue< IPacket >`](#runnablequeue), [`RunnableQueue< PacketT >`](#runnablequeue), [`PlanarAudioPacket >`](#runnablequeue), [`PlanarVideoPacket >`](#runnablequeue), [`AsyncDiagnostic`](#asyncdiagnostic), [`AsyncLogWriter`](#asynclogwriter), [`RunnableQueue< T >`](#runnablequeue), [`Task`](#task), [`TaskRunner`](#taskrunner), [`MediaCapture`](av.md#mediacapture), [`InstallTask`](pacm.md#installtask)
+```cpp
+class Runnable
+```
+
+Defined in src/base/include/icy/interface.h:75
+
+> **Subclassed by:** [`RunnableQueue< IPacket >`](#runnablequeue), [`PlanarAudioPacket >`](#runnablequeue), [`RunnableQueue< VisionFramePacket >`](#runnablequeue), [`AsyncDiagnostic`](#asyncdiagnostic), [`AsyncLogWriter`](#asynclogwriter), [`RunnableQueue< T >`](#runnablequeue), [`Task`](#task), [`TaskRunner`](#taskrunner), [`MediaCapture`](av.md#mediacapture), [`InstallTask`](pacm.md#installtask)
 
 Abstract interface for classes that can be run and cancelled.
 
@@ -4575,7 +4875,7 @@ Abstract interface for classes that can be run and cancelled.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Runnable`](#runnable-1) `inline` |  |
-| `void` | [`run`](#run-4)  | The run method will be called by the asynchronous context. |
+| `void` | [`run`](#run-4) `virtual` | The run method will be called by the asynchronous context. |
 | `void` | [`cancel`](#cancel-1) `virtual` `inline` | Cancel the current task. The [run()](#run-4) method should return ASAP. |
 | `bool` | [`cancelled`](#cancelled) `virtual` `const` `inline` | Returns true when the task has been cancelled. |
 
@@ -4591,15 +4891,21 @@ Abstract interface for classes that can be run and cancelled.
 inline Runnable()
 ```
 
+Defined in src/base/include/icy/interface.h:78
+
 ---
 
 {#run-4}
 
 #### run
 
+`virtual`
+
 ```cpp
-void run()
+virtual void run()
 ```
+
+Defined in src/base/include/icy/interface.h:86
 
 The run method will be called by the asynchronous context.
 
@@ -4612,8 +4918,10 @@ The run method will be called by the asynchronous context.
 `virtual` `inline`
 
 ```cpp
-virtual inline void cancel(bool flag)
+virtual inline void cancel(bool flag = true)
 ```
+
+Defined in src/base/include/icy/interface.h:90
 
 Cancel the current task. The [run()](#run-4) method should return ASAP.
 
@@ -4628,6 +4936,8 @@ Cancel the current task. The [run()](#run-4) method should return ASAP.
 ```cpp
 virtual inline bool cancelled() const
 ```
+
+Defined in src/base/include/icy/interface.h:96
 
 Returns true when the task has been cancelled.
 
@@ -4647,6 +4957,65 @@ Returns true when the task has been cancelled.
 std::atomic< bool > exit
 ```
 
+Defined in src/base/include/icy/interface.h:102
+
+{#startable}
+
+## Startable
+
+```cpp
+#include <icy/interface.h>
+```
+
+```cpp
+class Startable
+```
+
+Defined in src/base/include/icy/interface.h:107
+
+> **Subclassed by:** [`ThreadedStreamReader`](#threadedstreamreader), [`ICapture`](av.md#icapture), [`FormWriter`](http.md#formwriter)
+
+Abstract interface for a classes that can be started and stopped.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `void` | [`start`](#start-7) `virtual` | Starts the object (e.g. begins processing or listening). |
+| `void` | [`stop`](#stop-6) `virtual` | Stops the object (e.g. halts processing or closes resources). |
+
+---
+
+{#start-7}
+
+#### start
+
+`virtual`
+
+```cpp
+virtual void start()
+```
+
+Defined in src/base/include/icy/interface.h:111
+
+Starts the object (e.g. begins processing or listening).
+
+---
+
+{#stop-6}
+
+#### stop
+
+`virtual`
+
+```cpp
+virtual void stop()
+```
+
+Defined in src/base/include/icy/interface.h:114
+
+Stops the object (e.g. halts processing or closes resources).
+
 {#sendable}
 
 ## Sendable
@@ -4654,6 +5023,12 @@ std::atomic< bool > exit
 ```cpp
 #include <icy/interface.h>
 ```
+
+```cpp
+class Sendable
+```
+
+Defined in src/base/include/icy/interface.h:119
 
 > **Subclassed by:** [`PacketTransaction< Message >`](#packettransaction), [`PacketTransaction< PacketT >`](#packettransaction)
 
@@ -4663,8 +5038,8 @@ Abstract interface for classes that can be sent and cancelled.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`send`](#send-9)  | Initiates the send operation. |
-| `void` | [`cancel`](#cancel-2)  | Cancels a pending send operation. |
+| `bool` | [`send`](#send-9) `virtual` | Initiates the send operation. |
+| `void` | [`cancel`](#cancel-2) `virtual` | Cancels a pending send operation. |
 
 ---
 
@@ -4672,9 +5047,13 @@ Abstract interface for classes that can be sent and cancelled.
 
 #### send
 
+`virtual`
+
 ```cpp
-bool send()
+virtual bool send()
 ```
+
+Defined in src/base/include/icy/interface.h:124
 
 Initiates the send operation. 
 #### Returns
@@ -4686,54 +5065,15 @@ true if the send was dispatched successfully, false otherwise.
 
 #### cancel
 
+`virtual`
+
 ```cpp
-void cancel()
+virtual void cancel()
 ```
+
+Defined in src/base/include/icy/interface.h:127
 
 Cancels a pending send operation.
-
-{#startable}
-
-## Startable
-
-```cpp
-#include <icy/interface.h>
-```
-
-> **Subclassed by:** [`ThreadedStreamReader`](#threadedstreamreader), [`ICapture`](av.md#icapture), [`FormWriter`](http.md#formwriter)
-
-Abstract interface for a classes that can be started and stopped.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `void` | [`start`](#start-7)  | Starts the object (e.g. begins processing or listening). |
-| `void` | [`stop`](#stop-6)  | Stops the object (e.g. halts processing or closes resources). |
-
----
-
-{#start-7}
-
-#### start
-
-```cpp
-void start()
-```
-
-Starts the object (e.g. begins processing or listening).
-
----
-
-{#stop-6}
-
-#### stop
-
-```cpp
-void stop()
-```
-
-Stops the object (e.g. halts processing or closes resources).
 
 {#fs}
 
@@ -4823,7 +5163,7 @@ Directory component including trailing separator (e.g. "/usr/local/").
 #### extname
 
 ```cpp
-std::string extname(std::string_view path, bool includeDot)
+std::string extname(std::string_view path, bool includeDot = true)
 ```
 
 Returns the file extension part of the path. 
@@ -4909,7 +5249,7 @@ Populates `res` with the names of all entries in the given directory.
 #### mkdir
 
 ```cpp
-void mkdir(std::string_view path, int mode)
+void mkdir(std::string_view path, int mode = 0755)
 ```
 
 Creates a single directory. 
@@ -4925,7 +5265,7 @@ Creates a single directory.
 #### mkdirr
 
 ```cpp
-void mkdirr(std::string_view path, int mode)
+void mkdirr(std::string_view path, int mode = 0755)
 ```
 
 Creates a directory and all missing parent directories. 
@@ -5068,7 +5408,7 @@ Transcoded path string.
 #### savefile
 
 ```cpp
-bool savefile(std::string_view path, const char * data, size_t size, bool whiny)
+bool savefile(std::string_view path, const char * data, size_t size, bool whiny = false)
 ```
 
 Writes `size` bytes from `data` to the file at `path`, creating or overwriting it. 
@@ -5252,7 +5592,7 @@ true if str ends with suffix.
 #### removeSpecialCharacters
 
 ```cpp
-void removeSpecialCharacters(std::string & str, bool allowSpaces)
+void removeSpecialCharacters(std::string & str, bool allowSpaces = false)
 ```
 
 Replaces non-alphanumeric characters. Removes all non-alphanumeric characters from str in place. 
@@ -5268,7 +5608,7 @@ Replaces non-alphanumeric characters. Removes all non-alphanumeric characters fr
 #### replaceSpecialCharacters
 
 ```cpp
-void replaceSpecialCharacters(std::string & str, char with, bool allowSpaces)
+void replaceSpecialCharacters(std::string & str, char with = '_', bool allowSpaces = false)
 ```
 
 Replaces all non-alphanumeric characters in str with `with` in place. 
@@ -5363,7 +5703,7 @@ true if l is strictly greater than r, false if l is equal or less.
 #### matchNodes
 
 ```cpp
-bool matchNodes(std::string_view node, std::string_view xnode, std::string_view delim)
+bool matchNodes(std::string_view node, std::string_view xnode, std::string_view delim = "\r\n")
 ```
 
 Checks whether node matches xnode by splitting both on delim and comparing element-wise. 
@@ -5491,7 +5831,7 @@ Generates a random alphanumeric string of the given length.
 #### randomBinaryString
 
 ```cpp
-std::string randomBinaryString(int size, bool doBase64)
+std::string randomBinaryString(int size, bool doBase64 = false)
 ```
 
 Generates a random binary string of the given byte length. 
@@ -5510,7 +5850,7 @@ Generates a random binary string of the given byte length.
 #### split
 
 ```cpp
-void split(std::string_view str, std::string_view delim, std::vector< std::string > & elems, int limit)
+void split(std::string_view str, std::string_view delim, std::vector< std::string > & elems, int limit = -1)
 ```
 
 Splits str on the delimiter string and appends tokens to elems. 
@@ -5530,7 +5870,7 @@ Splits str on the delimiter string and appends tokens to elems.
 #### split
 
 ```cpp
-std::vector< std::string > split(std::string_view str, std::string_view delim, int limit)
+std::vector< std::string > split(std::string_view str, std::string_view delim, int limit = -1)
 ```
 
 Splits str on the delimiter string and returns the tokens as a vector. 
@@ -5551,7 +5891,7 @@ Vector of token strings.
 #### split
 
 ```cpp
-void split(std::string_view str, char delim, std::vector< std::string > & elems, int limit)
+void split(std::string_view str, char delim, std::vector< std::string > & elems, int limit = -1)
 ```
 
 Splits str on the delimiter character and appends tokens to elems. 
@@ -5571,7 +5911,7 @@ Splits str on the delimiter character and appends tokens to elems.
 #### split
 
 ```cpp
-std::vector< std::string > split(std::string_view str, char delim, int limit)
+std::vector< std::string > split(std::string_view str, char delim, int limit = -1)
 ```
 
 Splits str on the delimiter character and returns the tokens as a vector. 
@@ -5592,7 +5932,7 @@ Vector of token strings.
 #### replaceInPlace
 
 ```cpp
-template<class S> S & replaceInPlace(S & str, const S & from, const S & to, typename S::size_type start)
+template<class S> S & replaceInPlace(S & str, const S & from, const S & to, typename S::size_type start = 0)
 ```
 
 Replace all occurrences of `from` in `str` with `to`, starting at position `start`. Modifies and returns `str` in place. `from` must not be empty.
@@ -5604,7 +5944,7 @@ Replace all occurrences of `from` in `str` with `to`, starting at position `star
 #### replaceInPlace
 
 ```cpp
-template<class S> S & replaceInPlace(S & str, const typename S::value_type * from, const typename S::value_type * to, typename S::size_type start)
+template<class S> S & replaceInPlace(S & str, const typename S::value_type * from, const typename S::value_type * to, typename S::size_type start = 0)
 ```
 
 Replace all occurrences of `from` in `str` with `to`, starting at position `start`. C-string overload. Modifies and returns `str` in place.
@@ -5616,7 +5956,7 @@ Replace all occurrences of `from` in `str` with `to`, starting at position `star
 #### replace
 
 ```cpp
-template<class S> S replace(const S & str, const S & from, const S & to, typename S::size_type start)
+template<class S> S replace(const S & str, const S & from, const S & to, typename S::size_type start = 0)
 ```
 
 Replace all occurences of from (which must not be the empty string) in str with to, starting at position start.
@@ -5628,7 +5968,7 @@ Replace all occurences of from (which must not be the empty string) in str with 
 #### replace
 
 ```cpp
-template<class S> S replace(const S & str, const typename S::value_type * from, const typename S::value_type * to, typename S::size_type start)
+template<class S> S replace(const S & str, const typename S::value_type * from, const typename S::value_type * to, typename S::size_type start = 0)
 ```
 
 Returns a copy of str with all occurrences of from replaced by to (C-string overload). 
@@ -5811,7 +6151,7 @@ Total number of bytes copied.
 #### copyStream
 
 ```cpp
-std::streamsize copyStream(std::istream & istr, std::ostream & ostr, size_t bufferSize)
+std::streamsize copyStream(std::istream & istr, std::ostream & ostr, size_t bufferSize = 8192)
 ```
 
 Copies all bytes from istr to ostr using an internal buffer. 
@@ -5832,7 +6172,7 @@ Total number of bytes copied.
 #### copyToString
 
 ```cpp
-std::streamsize copyToString(std::istream & istr, std::string & str, size_t bufferSize)
+std::streamsize copyToString(std::istream & istr, std::string & str, size_t bufferSize = 8192)
 ```
 
 Reads all bytes from istr and appends them to str. 
@@ -5910,7 +6250,42 @@ Delete all associated values from a map (not the key elements).
 #include <icy/util.h>
 ```
 
+```cpp
+struct Version
+```
+
+Defined in src/base/include/icy/util.h:491
+
 Semantic version number with major, minor, and patch fields.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-13) `inline` | Writes the version to a stream in "major.minor.revision.build" format. |
+
+---
+
+{#operator-13}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const Version & ver)
+```
+
+Defined in src/base/include/icy/util.h:547
+
+Writes the version to a stream in "major.minor.revision.build" format. 
+#### Parameters
+* `stream` Output stream. 
+
+* `ver` [Version](#version) to format. 
+
+#### Returns
+Reference to stream.
 
 ### Public Attributes
 
@@ -5931,6 +6306,8 @@ Semantic version number with major, minor, and patch fields.
 int major
 ```
 
+Defined in src/base/include/icy/util.h:559
+
 ---
 
 {#minor}
@@ -5940,6 +6317,8 @@ int major
 ```cpp
 int minor
 ```
+
+Defined in src/base/include/icy/util.h:559
 
 ---
 
@@ -5951,6 +6330,8 @@ int minor
 int revision
 ```
 
+Defined in src/base/include/icy/util.h:559
+
 ---
 
 {#build}
@@ -5961,13 +6342,15 @@ int revision
 int build
 ```
 
+Defined in src/base/include/icy/util.h:559
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Version`](#version-1) `inline` | Parses a dot-separated version string into up to four numeric fields. Unspecified fields default to 0. Examples: "1.2.3", "2.0", "3.7.8.0". |
-| `bool` | [`operator<`](#operator-12) `inline` | Returns true if this version is strictly less than other. Compares fields in major, minor, revision, build order. |
-| `bool` | [`operator==`](#operator-13) `const` `inline` | Returns true if all four version fields are equal. |
+| `bool` | [`operator<`](#operator-14) `inline` | Returns true if this version is strictly less than other. Compares fields in major, minor, revision, build order. |
+| `bool` | [`operator==`](#operator-15) `const` `inline` | Returns true if all four version fields are equal. |
 
 ---
 
@@ -5981,13 +6364,15 @@ int build
 inline Version(std::string_view version)
 ```
 
+Defined in src/base/include/icy/util.h:496
+
 Parses a dot-separated version string into up to four numeric fields. Unspecified fields default to 0. Examples: "1.2.3", "2.0", "3.7.8.0". 
 #### Parameters
 * `version` Dot-separated version string.
 
 ---
 
-{#operator-12}
+{#operator-14}
 
 #### operator<
 
@@ -5996,6 +6381,8 @@ Parses a dot-separated version string into up to four numeric fields. Unspecifie
 ```cpp
 inline bool operator<(const Version & other)
 ```
+
+Defined in src/base/include/icy/util.h:521
 
 Returns true if this version is strictly less than other. Compares fields in major, minor, revision, build order. 
 #### Parameters
@@ -6006,7 +6393,7 @@ true if this < other.
 
 ---
 
-{#operator-13}
+{#operator-15}
 
 #### operator==
 
@@ -6015,6 +6402,8 @@ true if this < other.
 ```cpp
 inline bool operator==(const Version & other) const
 ```
+
+Defined in src/base/include/icy/util.h:537
 
 Returns true if all four version fields are equal. 
 #### Parameters
@@ -6031,6 +6420,12 @@ true if this == other.
 #include <icy/pipe.h>
 ```
 
+```cpp
+class Pipe
+```
+
+Defined in src/base/include/icy/pipe.h:27
+
 > **Inherits:** [`Stream< uv_pipe_t >`](#stream)
 
 Named pipe / stdio stream built on `uv_pipe_t`.
@@ -6044,7 +6439,7 @@ Suitable for inter-process communication and for wrapping process stdio (stdin/s
 |  | [`Pipe`](#pipe)  | Construct a `[Pipe](#pipe)` bound to `loop` without initializing the libuv handle. |
 |  | [`~Pipe`](#pipe) `virtual` | Destroy the pipe, stopping reads and closing the handle. |
 | `void` | [`init`](#init) `virtual` | Initialize the underlying `uv_pipe_t` handle. |
-| `bool` | [`readStart`](#readstart) `virtual` | Start reading from the pipe. |
+| `bool` | [`readStart`](#readstart) `virtual` `override` | Start reading from the pipe. |
 
 ---
 
@@ -6053,8 +6448,10 @@ Suitable for inter-process communication and for wrapping process stdio (stdin/s
 #### Pipe
 
 ```cpp
-Pipe(uv::Loop * loop)
+Pipe(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/pipe.h:35
 
 Construct a `[Pipe](#pipe)` bound to `loop` without initializing the libuv handle.
 
@@ -6075,6 +6472,8 @@ Call `[init()](#classicy_1_1Pipe_1a09b32c70eceefd7d2339410b0863ad54)` before per
 virtual ~Pipe()
 ```
 
+Defined in src/base/include/icy/pipe.h:38
+
 Destroy the pipe, stopping reads and closing the handle.
 
 ---
@@ -6086,8 +6485,10 @@ Destroy the pipe, stopping reads and closing the handle.
 `virtual`
 
 ```cpp
-virtual void init(bool ipc)
+virtual void init(bool ipc = false)
 ```
+
+Defined in src/base/include/icy/pipe.h:46
 
 Initialize the underlying `uv_pipe_t` handle.
 
@@ -6102,15 +6503,17 @@ Must be called before `[readStart()](#classicy_1_1Pipe_1aa346922ed574ccc39590f7d
 
 #### readStart
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool readStart()
+virtual bool readStart() override
 ```
+
+Defined in src/base/include/icy/pipe.h:54
 
 Start reading from the pipe.
 
-Delegates to `[Stream](#stream)<uv_pipe_t>::[readStart()](#classicy_1_1Pipe_1aa346922ed574ccc39590f7dc3bae7885)`. Emits the `Read` signal as data arrives.
+Delegates to `[Stream](#stream)<uv_pipe_t>::[readStart()](#classicy_1_1Pipe_1aa346922ed574ccc39590f7dc3bae7885)`. Emits the `[Read](#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184)` signal as data arrives.
 
 #### Returns
 `true` if `uv_read_start` was called successfully.
@@ -6122,6 +6525,12 @@ Delegates to `[Stream](#stream)<uv_pipe_t>::[readStart()](#classicy_1_1Pipe_1aa3
 ```cpp
 #include <icy/idler.h>
 ```
+
+```cpp
+class Idler
+```
+
+Defined in src/base/include/icy/idler.h:31
 
 > **Inherits:** [`Runner`](#runner)
 
@@ -6137,8 +6546,8 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 |  | [`Idler`](#idler) `inline` `explicit` | Create and immediately start the idler on the default loop. |
 |  | [`Idler`](#idler) `inline` `explicit` | Create and immediately start the idler on the given loop. |
 | `void` | [`start`](#start) `inline` | Start the idler, invoking `func` (with `args`) on every idle iteration. |
-| `void` | [`start`](#start) `virtual` | Start the idler with a type-erased callback (implements `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`). |
-| `uv::Handle< uv_idle_t > &` | [`handle`](#handle)  | #### Returns |
+| `void` | [`start`](#start) `virtual` `override` | Start the idler with a type-erased callback (implements `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`). |
+| `uv::Handle< uv_idle_t > &` | [`handle`](#handle)  |  |
 
 ---
 
@@ -6147,8 +6556,10 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 #### Idler
 
 ```cpp
-Idler(uv::Loop * loop)
+Idler(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/idler.h:37
 
 Create the idler bound to `loop` without starting it.
 
@@ -6166,6 +6577,8 @@ Create the idler bound to `loop` without starting it.
 ```cpp
 template<typename Function, typename... Args> inline explicit Idler(Function && func, Args &&... args)
 ```
+
+Defined in src/base/include/icy/idler.h:44
 
 Create and immediately start the idler on the default loop.
 
@@ -6185,6 +6598,8 @@ Create and immediately start the idler on the default loop.
 ```cpp
 template<typename Function, typename... Args> inline explicit Idler(uv::Loop * loop, Function && func, Args &&... args)
 ```
+
+Defined in src/base/include/icy/idler.h:57
 
 Create and immediately start the idler on the given loop.
 
@@ -6207,6 +6622,8 @@ Create and immediately start the idler on the given loop.
 template<typename Function, typename... Args> inline void start(Function && func, Args &&... args)
 ```
 
+Defined in src/base/include/icy/idler.h:73
+
 Start the idler, invoking `func` (with `args`) on every idle iteration.
 
 The idler always runs in repeating mode; cancel via `[Runner::cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)`. Throws `std::logic_error` if the handle is already active or the runner context reports it is still running.
@@ -6222,11 +6639,13 @@ The idler always runs in repeating mode; cancel via `[Runner::cancel()](#classic
 
 #### start
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void start(std::function< void()> func)
+virtual void start(std::function< void()> func) override
 ```
+
+Defined in src/base/include/icy/idler.h:118
 
 Start the idler with a type-erased callback (implements `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`).
 
@@ -6242,6 +6661,8 @@ Start the idler with a type-erased callback (implements `[Runner::start](#classi
 ```cpp
 uv::Handle< uv_idle_t > & handle()
 ```
+
+Defined in src/base/include/icy/idler.h:123
 
 #### Returns
 Reference to the underlying `uv_idle_t` handle wrapper.
@@ -6262,12 +6683,14 @@ Reference to the underlying `uv_idle_t` handle wrapper.
 uv::Handle< uv_idle_t > _handle
 ```
 
+Defined in src/base/include/icy/idler.h:132
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `void` | [`init`](#init) `virtual` | Initialize the underlying `uv_idle_t` handle and unref it from the loop. |
-| `bool` | [`async`](#async) `virtual` `const` | #### Returns |
+| `bool` | [`async`](#async) `virtual` `const` `override` |  |
 
 ---
 
@@ -6281,6 +6704,8 @@ uv::Handle< uv_idle_t > _handle
 virtual void init()
 ```
 
+Defined in src/base/include/icy/idler.h:127
+
 Initialize the underlying `uv_idle_t` handle and unref it from the loop.
 
 ---
@@ -6289,11 +6714,13 @@ Initialize the underlying `uv_idle_t` handle and unref it from the loop.
 
 #### async
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool async() const
+virtual bool async() const override
 ```
+
+Defined in src/base/include/icy/idler.h:130
 
 #### Returns
 `false`; the idler is event-loop-driven, not thread-based.
@@ -6306,7 +6733,12 @@ virtual bool async() const
 #include <icy/queue.h>
 ```
 
-> **Subclassed by:** [`RunnableQueue< IPacket >`](#runnablequeue), [`RunnableQueue< PacketT >`](#runnablequeue), [`PlanarAudioPacket >`](#runnablequeue), [`PlanarVideoPacket >`](#runnablequeue)
+```cpp
+template<typename T>
+class Queue
+```
+
+Defined in src/base/include/icy/queue.h:30
 
 Thread-safe queue container.
 
@@ -6316,13 +6748,13 @@ Thread-safe queue container.
 |--------|------|-------------|
 | `void` | [`push`](#push) `inline` | Appends an item to the back of the queue (thread-safe). |
 | `void` | [`push`](#push) `inline` | Appends an item to the back of the queue by move (thread-safe). |
-| `bool` | [`empty`](#empty) `const` `inline` | #### Returns |
-| `T` | [`front`](#front) `const` `inline` | #### Returns |
-| `T` | [`back`](#back) `const` `inline` | #### Returns |
+| `bool` | [`empty`](#empty) `const` `inline` |  |
+| `T` | [`front`](#front) `const` `inline` |  |
+| `T` | [`back`](#back) `const` `inline` |  |
 | `void` | [`pop`](#pop) `inline` | Removes the front item from the queue (thread-safe). |
 | `void` | [`sort`](#sort) `inline` | Sorts all queued items using the given comparator (thread-safe). |
-| `size_t` | [`size`](#size) `const` `inline` | #### Returns |
-| `std::deque< T >` | [`queue`](#queue) `const` `inline` | #### Returns |
+| `size_t` | [`size`](#size) `const` `inline` |  |
+| `std::deque< T >` | [`queue`](#queue) `const` `inline` |  |
 
 ---
 
@@ -6335,6 +6767,8 @@ Thread-safe queue container.
 ```cpp
 inline void push(const T & data)
 ```
+
+Defined in src/base/include/icy/queue.h:35
 
 Appends an item to the back of the queue (thread-safe). 
 #### Parameters
@@ -6352,6 +6786,8 @@ Appends an item to the back of the queue (thread-safe).
 inline void push(T && data)
 ```
 
+Defined in src/base/include/icy/queue.h:43
+
 Appends an item to the back of the queue by move (thread-safe). 
 #### Parameters
 * `data` Item to enqueue.
@@ -6368,6 +6804,8 @@ Appends an item to the back of the queue by move (thread-safe).
 inline bool empty() const
 ```
 
+Defined in src/base/include/icy/queue.h:50
+
 #### Returns
 True if the queue contains no items.
 
@@ -6382,6 +6820,8 @@ True if the queue contains no items.
 ```cpp
 inline T front() const
 ```
+
+Defined in src/base/include/icy/queue.h:57
 
 #### Returns
 Copy of the front item.
@@ -6398,6 +6838,8 @@ Copy of the front item.
 inline T back() const
 ```
 
+Defined in src/base/include/icy/queue.h:64
+
 #### Returns
 Copy of the back item.
 
@@ -6413,6 +6855,8 @@ Copy of the back item.
 inline void pop()
 ```
 
+Defined in src/base/include/icy/queue.h:71
+
 Removes the front item from the queue (thread-safe).
 
 ---
@@ -6426,6 +6870,8 @@ Removes the front item from the queue (thread-safe).
 ```cpp
 template<typename Compare> inline void sort()
 ```
+
+Defined in src/base/include/icy/queue.h:80
 
 Sorts all queued items using the given comparator (thread-safe). 
 #### Parameters
@@ -6443,6 +6889,8 @@ Sorts all queued items using the given comparator (thread-safe).
 inline size_t size() const
 ```
 
+Defined in src/base/include/icy/queue.h:87
+
 #### Returns
 Number of items currently in the queue (thread-safe).
 
@@ -6457,6 +6905,8 @@ Number of items currently in the queue (thread-safe).
 ```cpp
 inline std::deque< T > queue() const
 ```
+
+Defined in src/base/include/icy/queue.h:94
 
 #### Returns
 Copy of the underlying deque.
@@ -6478,6 +6928,8 @@ Copy of the underlying deque.
 std::deque< T > _queue
 ```
 
+Defined in src/base/include/icy/queue.h:101
+
 ---
 
 {#_mutex}
@@ -6488,6 +6940,8 @@ std::deque< T > _queue
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/queue.h:102
+
 {#runnablequeue}
 
 ## RunnableQueue
@@ -6496,8 +6950,15 @@ std::mutex _mutex
 #include <icy/queue.h>
 ```
 
+```cpp
+template<class T>
+class RunnableQueue
+```
+
+Defined in src/base/include/icy/queue.h:113
+
 > **Inherits:** [`Queue< T * >`](#queue), [`Runnable`](#runnable)
-> **Subclassed by:** [`AsyncQueue< IPacket >`](#asyncqueue), [`AsyncQueue< PacketT >`](#asyncqueue), [`PlanarAudioPacket >`](#asyncqueue), [`PlanarVideoPacket >`](#asyncqueue), [`SyncQueue< IPacket >`](#syncqueue), [`AsyncQueue< T >`](#asyncqueue), [`SyncQueue< T >`](#syncqueue)
+> **Subclassed by:** [`AsyncQueue< T >`](#asyncqueue), [`SyncQueue< T >`](#syncqueue)
 
 [Queue](#queue) of runnable tasks for sequential execution.
 
@@ -6517,22 +6978,24 @@ std::mutex _mutex
 std::function< void(T &)> ondispatch
 ```
 
+Defined in src/base/include/icy/queue.h:119
+
 The default dispatch function. Must be set before the queue is running.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`RunnableQueue`](#runnablequeue) `inline` | #### Parameters |
+|  | [`RunnableQueue`](#runnablequeue) `inline` |  |
 | `void` | [`push`](#push) `virtual` `inline` | Push an item onto the queue. The queue takes ownership of the item pointer. |
 | `void` | [`flush`](#flush) `virtual` `inline` | Flush all outgoing items. |
 | `void` | [`clear`](#clear) `inline` |  |
-| `void` | [`run`](#run) `virtual` `inline` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
+| `void` | [`run`](#run) `virtual` `inline` `override` | Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called. |
 | `void` | [`runTimeout`](#runtimeout) `virtual` `inline` | Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability. |
 | `void` | [`dispatch`](#dispatch) `virtual` `inline` | Dispatch a single item to listeners. |
-| `int` | [`timeout`](#timeout) `inline` | #### Returns |
+| `int` | [`timeout`](#timeout) `inline` |  |
 | `void` | [`setTimeout`](#settimeout) `inline` | Sets the dispatch timeout. Must only be called when the queue is empty. |
-| `size_t` | [`dropped`](#dropped) `const` `inline` | #### Returns |
+| `size_t` | [`dropped`](#dropped) `const` `inline` |  |
 
 ---
 
@@ -6543,8 +7006,10 @@ The default dispatch function. Must be set before the queue is running.
 `inline`
 
 ```cpp
-inline RunnableQueue(int limit, int timeout)
+inline RunnableQueue(int limit = 2048, int timeout = 0)
 ```
+
+Defined in src/base/include/icy/queue.h:123
 
 #### Parameters
 * `limit` Maximum number of queued items; oldest are purged when exceeded (0 = unlimited). 
@@ -6563,6 +7028,8 @@ inline RunnableQueue(int limit, int timeout)
 virtual inline void push(T * item)
 ```
 
+Defined in src/base/include/icy/queue.h:136
+
 Push an item onto the queue. The queue takes ownership of the item pointer.
 
 ---
@@ -6576,6 +7043,8 @@ Push an item onto the queue. The queue takes ownership of the item pointer.
 ```cpp
 virtual inline void flush()
 ```
+
+Defined in src/base/include/icy/queue.h:151
 
 Flush all outgoing items.
 
@@ -6591,17 +7060,21 @@ Flush all outgoing items.
 inline void clear()
 ```
 
+Defined in src/base/include/icy/queue.h:169
+
 ---
 
 {#run}
 
 #### run
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void run()
+virtual inline void run() override
 ```
+
+Defined in src/base/include/icy/queue.h:181
 
 Called asynchronously to dispatch queued items. If not timeout is set this method blocks until [cancel()](#cancel-1) is called, otherwise [runTimeout()](#classicy_1_1RunnableQueue_1a32e7d20cdbcd09993ba0c76830faf833) will be called.
 
@@ -6617,6 +7090,8 @@ Called asynchronously to dispatch queued items. If not timeout is set this metho
 virtual inline void runTimeout()
 ```
 
+Defined in src/base/include/icy/queue.h:196
+
 Called asynchronously to dispatch queued items until the queue is empty or the timeout expires. Pseudo protected for std::bind compatability.
 
 ---
@@ -6630,6 +7105,8 @@ Called asynchronously to dispatch queued items until the queue is empty or the t
 ```cpp
 virtual inline void dispatch(T & item)
 ```
+
+Defined in src/base/include/icy/queue.h:206
 
 Dispatch a single item to listeners.
 
@@ -6645,6 +7122,8 @@ Dispatch a single item to listeners.
 inline int timeout()
 ```
 
+Defined in src/base/include/icy/queue.h:213
+
 #### Returns
 Current dispatch timeout in milliseconds.
 
@@ -6659,6 +7138,8 @@ Current dispatch timeout in milliseconds.
 ```cpp
 inline void setTimeout(int milliseconds)
 ```
+
+Defined in src/base/include/icy/queue.h:222
 
 Sets the dispatch timeout. Must only be called when the queue is empty. 
 #### Parameters
@@ -6678,6 +7159,8 @@ Sets the dispatch timeout. Must only be called when the queue is empty.
 ```cpp
 inline size_t dropped() const
 ```
+
+Defined in src/base/include/icy/queue.h:231
 
 #### Returns
 Number of items purged because the queue limit was exceeded.
@@ -6700,6 +7183,8 @@ Number of items purged because the queue limit was exceeded.
 int _limit
 ```
 
+Defined in src/base/include/icy/queue.h:270
+
 ---
 
 {#_timeout}
@@ -6710,6 +7195,8 @@ int _limit
 int _timeout
 ```
 
+Defined in src/base/include/icy/queue.h:271
+
 ---
 
 {#_dropped}
@@ -6719,6 +7206,8 @@ int _timeout
 ```cpp
 size_t _dropped = 0
 ```
+
+Defined in src/base/include/icy/queue.h:272
 
 ### Protected Methods
 
@@ -6739,6 +7228,8 @@ size_t _dropped = 0
 RunnableQueue(const RunnableQueue &) = delete
 ```
 
+Defined in src/base/include/icy/queue.h:238
+
 Deleted constructor.
 
 ---
@@ -6750,6 +7241,8 @@ Deleted constructor.
 ```cpp
 RunnableQueue(RunnableQueue &&) = delete
 ```
+
+Defined in src/base/include/icy/queue.h:240
 
 Deleted constructor.
 
@@ -6765,6 +7258,8 @@ Deleted constructor.
 virtual inline T * popNext()
 ```
 
+Defined in src/base/include/icy/queue.h:244
+
 Pops the next waiting item.
 
 ---
@@ -6779,6 +7274,8 @@ Pops the next waiting item.
 virtual inline bool dispatchNext()
 ```
 
+Defined in src/base/include/icy/queue.h:259
+
 Pops and dispatches the next waiting item.
 
 {#syncqueue}
@@ -6789,8 +7286,14 @@ Pops and dispatches the next waiting item.
 #include <icy/queue.h>
 ```
 
+```cpp
+template<class T>
+class SyncQueue
+```
+
+Defined in src/base/include/icy/queue.h:285
+
 > **Inherits:** [`RunnableQueue< T >`](#runnablequeue)
-> **Subclassed by:** [`SyncPacketQueue< T >`](#syncpacketqueue)
 
 [SyncQueue](#syncqueue) extends [Synchronizer](#synchronizer) to implement a synchronized FIFO queue which receives T objects from any thread and synchronizes them for safe consumption by the associated event loop.
 
@@ -6798,11 +7301,11 @@ Pops and dispatches the next waiting item.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`SyncQueue`](#syncqueue) `inline` | #### Parameters |
+|  | [`SyncQueue`](#syncqueue) `inline` |  |
 |  | [`~SyncQueue`](#syncqueue) `virtual` `inline` | Destruction is deferred to allow enough time for all callbacks to return. |
-| `void` | [`push`](#push) `virtual` `inline` | Pushes an item onto the queue and wakes the event loop for dispatch. Ownership of `item` is transferred to the queue. |
-| `void` | [`cancel`](#cancel) `virtual` `inline` | Cancels the queue and its underlying synchronizer. |
-| `Synchronizer &` | [`sync`](#sync) `inline` | #### Returns |
+| `void` | [`push`](#push) `virtual` `inline` `override` | Pushes an item onto the queue and wakes the event loop for dispatch. Ownership of `item` is transferred to the queue. |
+| `void` | [`cancel`](#cancel) `virtual` `inline` `override` | Cancels the queue and its underlying synchronizer. |
+| `Synchronizer &` | [`sync`](#sync) `inline` |  |
 
 ---
 
@@ -6813,8 +7316,10 @@ Pops and dispatches the next waiting item.
 `inline`
 
 ```cpp
-inline SyncQueue(uv::Loop * loop, int limit, int timeout)
+inline SyncQueue(uv::Loop * loop, int limit = 2048, int timeout = 20)
 ```
+
+Defined in src/base/include/icy/queue.h:293
 
 #### Parameters
 * `loop` Event loop used by the internal `[Synchronizer](#synchronizer)`. 
@@ -6835,6 +7340,8 @@ inline SyncQueue(uv::Loop * loop, int limit, int timeout)
 virtual inline ~SyncQueue()
 ```
 
+Defined in src/base/include/icy/queue.h:301
+
 Destruction is deferred to allow enough time for all callbacks to return.
 
 ---
@@ -6843,11 +7350,13 @@ Destruction is deferred to allow enough time for all callbacks to return.
 
 #### push
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void push(T * item)
+virtual inline void push(T * item) override
 ```
+
+Defined in src/base/include/icy/queue.h:308
 
 Pushes an item onto the queue and wakes the event loop for dispatch. Ownership of `item` is transferred to the queue. 
 #### Parameters
@@ -6859,11 +7368,13 @@ Pushes an item onto the queue and wakes the event loop for dispatch. Ownership o
 
 #### cancel
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void cancel(bool flag)
+virtual inline void cancel(bool flag = true) override
 ```
+
+Defined in src/base/include/icy/queue.h:316
 
 Cancels the queue and its underlying synchronizer. 
 #### Parameters
@@ -6880,6 +7391,8 @@ Cancels the queue and its underlying synchronizer.
 ```cpp
 inline Synchronizer & sync()
 ```
+
+Defined in src/base/include/icy/queue.h:326
 
 #### Returns
 Reference to the underlying `[Synchronizer](#synchronizer)` handle.
@@ -6900,6 +7413,8 @@ Reference to the underlying `[Synchronizer](#synchronizer)` handle.
 Synchronizer _sync
 ```
 
+Defined in src/base/include/icy/queue.h:329
+
 ### Public Types
 
 | Name | Description |
@@ -6913,8 +7428,10 @@ Synchronizer _sync
 #### Queue
 
 ```cpp
-RunnableQueue< T > Queue()
+using Queue = RunnableQueue< T >
 ```
+
+Defined in src/base/include/icy/queue.h:288
 
 {#asyncqueue}
 
@@ -6924,8 +7441,15 @@ RunnableQueue< T > Queue()
 #include <icy/queue.h>
 ```
 
+```cpp
+template<class T>
+class AsyncQueue
+```
+
+Defined in src/base/include/icy/queue.h:347
+
 > **Inherits:** [`RunnableQueue< T >`](#runnablequeue)
-> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue), [`PlanarAudioPacket >`](#asyncpacketqueue), [`PlanarVideoPacket >`](#asyncpacketqueue), [`AsyncPacketQueue< T >`](#asyncpacketqueue)
+> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue)
 
 [AsyncQueue](#asyncqueue) is a thread-based queue which receives packets from any thread source and dispatches them asynchronously.
 
@@ -6937,8 +7461,8 @@ The thread will call the [RunnableQueue](#runnablequeue)'s [run()](#classicy_1_1
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`AsyncQueue`](#asyncqueue) `inline` | #### Parameters |
-| `void` | [`cancel`](#cancel) `virtual` `inline` | Cancels the queue and joins the dispatch thread. |
+|  | [`AsyncQueue`](#asyncqueue) `inline` |  |
+| `void` | [`cancel`](#cancel) `virtual` `inline` `override` | Cancels the queue and joins the dispatch thread. |
 
 ---
 
@@ -6949,8 +7473,10 @@ The thread will call the [RunnableQueue](#runnablequeue)'s [run()](#classicy_1_1
 `inline`
 
 ```cpp
-inline AsyncQueue(int limit)
+inline AsyncQueue(int limit = 2048)
 ```
+
+Defined in src/base/include/icy/queue.h:353
 
 #### Parameters
 * `limit` Maximum number of queued items before oldest are dropped.
@@ -6961,11 +7487,13 @@ inline AsyncQueue(int limit)
 
 #### cancel
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void cancel(bool flag)
+virtual inline void cancel(bool flag = true) override
 ```
+
+Defined in src/base/include/icy/queue.h:361
 
 Cancels the queue and joins the dispatch thread. 
 #### Parameters
@@ -6987,6 +7515,8 @@ Cancels the queue and joins the dispatch thread.
 Thread _thread
 ```
 
+Defined in src/base/include/icy/queue.h:372
+
 ### Public Types
 
 | Name | Description |
@@ -7000,8 +7530,10 @@ Thread _thread
 #### Queue
 
 ```cpp
-RunnableQueue< T > Queue()
+using Queue = RunnableQueue< T >
 ```
+
+Defined in src/base/include/icy/queue.h:350
 
 {#timer}
 
@@ -7010,6 +7542,12 @@ RunnableQueue< T > Queue()
 ```cpp
 #include <icy/timer.h>
 ```
+
+```cpp
+class Timer
+```
+
+Defined in src/base/include/icy/timer.h:27
 
 > **Inherits:** [`Runner`](#runner)
 
@@ -7031,6 +7569,8 @@ Asynchronous event based timer.
 NullSignal Timeout
 ```
 
+Defined in src/base/include/icy/timer.h:130
+
 [Signal](#signal) that gets triggered on timeout.
 
 ### Public Methods
@@ -7042,18 +7582,18 @@ NullSignal Timeout
 |  | [`Timer`](#timer)  | Create a repeating timer with an initial delay and a repeat period. |
 |  | [`~Timer`](#timer) `virtual` | Destructor. |
 | `void` | [`start`](#start)  | Start the timer using the previously configured timeout and interval. |
-| `void` | [`start`](#start) `virtual` | Connect `func` to the `[Timeout](#timeout)` signal and start the timer. |
+| `void` | [`start`](#start) `virtual` `override` | Connect `func` to the `[Timeout](#timeout)` signal and start the timer. |
 | `void` | [`stop`](#stop)  | Stop the timer. Resets the fire count to zero. |
 | `void` | [`restart`](#restart)  | Restart the timer. |
 | `void` | [`again`](#again)  | Reset the countdown without stopping and restarting the timer. |
 | `void` | [`setTimeout`](#settimeout)  | Set the initial delay before the first timeout event. |
 | `void` | [`setInterval`](#setinterval)  | Set the repeat interval (calls `uv_timer_set_repeat`). |
-| `bool` | [`active`](#active) `const` | #### Returns |
-| `std::int64_t` | [`timeout`](#timeout) `const` | #### Returns |
-| `std::int64_t` | [`interval`](#interval) `const` | #### Returns |
-| `std::int64_t` | [`count`](#count)  | #### Returns |
-| `uv::Handle< uv_timer_t > &` | [`handle`](#handle)  | #### Returns |
-| `bool` | [`async`](#async) `virtual` `const` | #### Returns |
+| `bool` | [`active`](#active) `const` |  |
+| `std::int64_t` | [`timeout`](#timeout) `const` |  |
+| `std::int64_t` | [`interval`](#interval) `const` |  |
+| `std::int64_t` | [`count`](#count)  |  |
+| `uv::Handle< uv_timer_t > &` | [`handle`](#handle)  |  |
+| `bool` | [`async`](#async) `virtual` `const` `override` |  |
 
 ---
 
@@ -7062,8 +7602,10 @@ NullSignal Timeout
 #### Timer
 
 ```cpp
-Timer(uv::Loop * loop)
+Timer(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/timer.h:33
 
 Create a timer without a timeout or interval; values must be set before `[start()](#classicy_1_1Timer_1a59e3275d17107212520b362cbf0cb3d5)`.
 
@@ -7077,8 +7619,10 @@ Create a timer without a timeout or interval; values must be set before `[start(
 #### Timer
 
 ```cpp
-Timer(std::int64_t timeout, uv::Loop * loop, std::function< void()> func)
+Timer(std::int64_t timeout, uv::Loop * loop = uv::defaultLoop(), std::function< void()> func = nullptr)
 ```
+
+Defined in src/base/include/icy/timer.h:44
 
 Create a one-shot timer that fires after `timeout` milliseconds.
 
@@ -7098,8 +7642,10 @@ If `func` is provided the timer starts immediately; otherwise call `[start()](#c
 #### Timer
 
 ```cpp
-Timer(std::int64_t timeout, std::int64_t interval, uv::Loop * loop, std::function< void()> func)
+Timer(std::int64_t timeout, std::int64_t interval, uv::Loop * loop = uv::defaultLoop(), std::function< void()> func = nullptr)
 ```
+
+Defined in src/base/include/icy/timer.h:57
 
 Create a repeating timer with an initial delay and a repeat period.
 
@@ -7126,6 +7672,8 @@ Fires once after `timeout` milliseconds, then repeatedly every `interval` millis
 virtual ~Timer()
 ```
 
+Defined in src/base/include/icy/timer.h:60
+
 Destructor.
 
 ---
@@ -7138,6 +7686,8 @@ Destructor.
 void start()
 ```
 
+Defined in src/base/include/icy/timer.h:67
+
 Start the timer using the previously configured timeout and interval.
 
 Throws `std::logic_error` if neither a timeout nor an interval has been set, or if the handle has not been allocated. Has no effect if already active.
@@ -7148,11 +7698,13 @@ Throws `std::logic_error` if neither a timeout nor an interval has been set, or 
 
 #### start
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void start(std::function< void()> func)
+virtual void start(std::function< void()> func) override
 ```
+
+Defined in src/base/include/icy/timer.h:72
 
 Connect `func` to the `[Timeout](#timeout)` signal and start the timer.
 
@@ -7169,6 +7721,8 @@ Connect `func` to the `[Timeout](#timeout)` signal and start the timer.
 void stop()
 ```
 
+Defined in src/base/include/icy/timer.h:77
+
 Stop the timer. Resets the fire count to zero.
 
 Has no effect if the timer is not active.
@@ -7182,6 +7736,8 @@ Has no effect if the timer is not active.
 ```cpp
 void restart()
 ```
+
+Defined in src/base/include/icy/timer.h:85
 
 Restart the timer.
 
@@ -7197,6 +7753,8 @@ If the timer is not currently active, behaves like `[start()](#classicy_1_1Timer
 void again()
 ```
 
+Defined in src/base/include/icy/timer.h:93
+
 Reset the countdown without stopping and restarting the timer.
 
 For repeating timers this restarts the repeat interval from now. For non-repeating timers this has the same effect as stopping the timer. Throws on error if `uv_timer_again` fails (e.g. the timer was never started). Resets the fire count to zero.
@@ -7210,6 +7768,8 @@ For repeating timers this restarts the repeat interval from now. For non-repeati
 ```cpp
 void setTimeout(std::int64_t timeout)
 ```
+
+Defined in src/base/include/icy/timer.h:100
 
 Set the initial delay before the first timeout event.
 
@@ -7227,6 +7787,8 @@ Has no effect if the timer is currently active.
 ```cpp
 void setInterval(std::int64_t interval)
 ```
+
+Defined in src/base/include/icy/timer.h:109
 
 Set the repeat interval (calls `uv_timer_set_repeat`).
 
@@ -7247,6 +7809,8 @@ Takes effect from the next timeout event. If set from within a timer callback on
 bool active() const
 ```
 
+Defined in src/base/include/icy/timer.h:112
+
 #### Returns
 `true` if the timer is currently counting down.
 
@@ -7261,6 +7825,8 @@ bool active() const
 ```cpp
 std::int64_t timeout() const
 ```
+
+Defined in src/base/include/icy/timer.h:115
 
 #### Returns
 The configured initial timeout in milliseconds.
@@ -7277,6 +7843,8 @@ The configured initial timeout in milliseconds.
 std::int64_t interval() const
 ```
 
+Defined in src/base/include/icy/timer.h:118
+
 #### Returns
 The effective repeat interval reported by libuv, in milliseconds.
 
@@ -7289,6 +7857,8 @@ The effective repeat interval reported by libuv, in milliseconds.
 ```cpp
 std::int64_t count()
 ```
+
+Defined in src/base/include/icy/timer.h:121
 
 #### Returns
 The number of times the timer has fired since the last start or [again()](#classicy_1_1Timer_1a1479aec7fadd9fdc71a41ed6a51af1c8).
@@ -7303,6 +7873,8 @@ The number of times the timer has fired since the last start or [again()](#class
 uv::Handle< uv_timer_t > & handle()
 ```
 
+Defined in src/base/include/icy/timer.h:124
+
 #### Returns
 Reference to the underlying `uv_timer_t` handle wrapper.
 
@@ -7312,11 +7884,13 @@ Reference to the underlying `uv_timer_t` handle wrapper.
 
 #### async
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool async() const
+virtual bool async() const override
 ```
+
+Defined in src/base/include/icy/timer.h:127
 
 #### Returns
 `false`; the timer is event-loop-driven, not thread-based.
@@ -7340,6 +7914,8 @@ virtual bool async() const
 uv::Handle< uv_timer_t > _handle
 ```
 
+Defined in src/base/include/icy/timer.h:140
+
 ---
 
 {#_timeout}
@@ -7349,6 +7925,8 @@ uv::Handle< uv_timer_t > _handle
 ```cpp
 std::int64_t _timeout
 ```
+
+Defined in src/base/include/icy/timer.h:141
 
 ---
 
@@ -7360,6 +7938,8 @@ std::int64_t _timeout
 std::int64_t _interval
 ```
 
+Defined in src/base/include/icy/timer.h:142
+
 ---
 
 {#_count}
@@ -7369,6 +7949,8 @@ std::int64_t _interval
 ```cpp
 std::int64_t _count
 ```
+
+Defined in src/base/include/icy/timer.h:143
 
 ### Protected Methods
 
@@ -7388,6 +7970,8 @@ std::int64_t _count
 Timer(const Timer &) = delete
 ```
 
+Defined in src/base/include/icy/timer.h:133
+
 Deleted constructor.
 
 ---
@@ -7399,6 +7983,8 @@ Deleted constructor.
 ```cpp
 Timer(Timer &&) = delete
 ```
+
+Defined in src/base/include/icy/timer.h:135
 
 Deleted constructor.
 
@@ -7412,6 +7998,8 @@ Deleted constructor.
 void init()
 ```
 
+Defined in src/base/include/icy/timer.h:138
+
 {#mutablebuffer}
 
 ## MutableBuffer
@@ -7420,17 +8008,23 @@ void init()
 #include <icy/buffer.h>
 ```
 
+```cpp
+class MutableBuffer
+```
+
+Defined in src/base/include/icy/buffer.h:40
+
 The [MutableBuffer](#mutablebuffer) class provides a safe representation of a buffer that can be modified. It does not own the underlying data, and so is cheap to copy or assign.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr` | [`MutableBuffer`](#mutablebuffer) `inline` | Construct an empty buffer. |
-| `constexpr` | [`MutableBuffer`](#mutablebuffer) `inline` | Construct a buffer to represent the given memory range. |
-| `constexpr void *` | [`data`](#data) `const` `inline` |  |
-| `constexpr size_t` | [`size`](#size) `const` `inline` |  |
-| `char *` | [`cstr`](#cstr) `const` `inline` | Cast the buffer as a char pointer. |
+| `constexpr` | [`MutableBuffer`](#mutablebuffer) `inline` `constexpr` | Construct an empty buffer. |
+| `constexpr` | [`MutableBuffer`](#mutablebuffer) `inline` `constexpr` | Construct a buffer to represent the given memory range. |
+| `void *` | [`data`](#data) `const` `inline` `nodiscard` `constexpr` |  |
+| `size_t` | [`size`](#size) `const` `inline` `nodiscard` `constexpr` |  |
+| `char *` | [`cstr`](#cstr) `const` `inline` `nodiscard` | Cast the buffer as a char pointer. |
 | `std::string` | [`str`](#str) `const` `inline` | Returns the buffer as a string. |
 
 ---
@@ -7439,11 +8033,13 @@ The [MutableBuffer](#mutablebuffer) class provides a safe representation of a bu
 
 #### MutableBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr MutableBuffer()
+constexpr inline constexpr MutableBuffer()
 ```
+
+Defined in src/base/include/icy/buffer.h:44
 
 Construct an empty buffer.
 
@@ -7453,11 +8049,13 @@ Construct an empty buffer.
 
 #### MutableBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr MutableBuffer(void * data, size_t size)
+constexpr inline constexpr MutableBuffer(void * data, size_t size)
 ```
+
+Defined in src/base/include/icy/buffer.h:51
 
 Construct a buffer to represent the given memory range.
 
@@ -7467,11 +8065,13 @@ Construct a buffer to represent the given memory range.
 
 #### data
 
-`const` `inline`
+`const` `inline` `nodiscard` `constexpr`
 
 ```cpp
-inline constexpr void * data() const
+[[nodiscard]] constexpr inline void * data() const
 ```
+
+Defined in src/base/include/icy/buffer.h:57
 
 ---
 
@@ -7479,11 +8079,13 @@ inline constexpr void * data() const
 
 #### size
 
-`const` `inline`
+`const` `inline` `nodiscard` `constexpr`
 
 ```cpp
-inline constexpr size_t size() const
+[[nodiscard]] constexpr inline size_t size() const
 ```
+
+Defined in src/base/include/icy/buffer.h:58
 
 ---
 
@@ -7491,11 +8093,13 @@ inline constexpr size_t size() const
 
 #### cstr
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline char * cstr() const
+[[nodiscard]] inline char * cstr() const
 ```
+
+Defined in src/base/include/icy/buffer.h:61
 
 Cast the buffer as a char pointer.
 
@@ -7510,6 +8114,8 @@ Cast the buffer as a char pointer.
 ```cpp
 inline std::string str() const
 ```
+
+Defined in src/base/include/icy/buffer.h:64
 
 Returns the buffer as a string.
 
@@ -7530,6 +8136,8 @@ Returns the buffer as a string.
 void * _data
 ```
 
+Defined in src/base/include/icy/buffer.h:67
+
 ---
 
 {#_size}
@@ -7540,6 +8148,8 @@ void * _data
 size_t _size
 ```
 
+Defined in src/base/include/icy/buffer.h:68
+
 {#constbuffer}
 
 ## ConstBuffer
@@ -7548,18 +8158,24 @@ size_t _size
 #include <icy/buffer.h>
 ```
 
+```cpp
+class ConstBuffer
+```
+
+Defined in src/base/include/icy/buffer.h:142
+
 The [ConstBuffer](#constbuffer) class provides a safe representation of a buffer that cannot be modified. It does not own the underlying data, and so is cheap to copy or assign.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` | Construct an empty buffer. |
-| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` | Construct a buffer to represent the given memory range. |
-| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` | Construct a non-modifiable buffer from a modifiable one. |
-| `constexpr const void *` | [`data`](#data) `const` `inline` |  |
-| `constexpr size_t` | [`size`](#size) `const` `inline` |  |
-| `const char *` | [`cstr`](#cstr) `const` `inline` | Cast the buffer as a const char pointer. |
+| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` `constexpr` | Construct an empty buffer. |
+| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` `constexpr` | Construct a buffer to represent the given memory range. |
+| `constexpr` | [`ConstBuffer`](#constbuffer) `inline` `constexpr` | Construct a non-modifiable buffer from a modifiable one. |
+| `const void *` | [`data`](#data) `const` `inline` `nodiscard` `constexpr` |  |
+| `size_t` | [`size`](#size) `const` `inline` `nodiscard` `constexpr` |  |
+| `const char *` | [`cstr`](#cstr) `const` `inline` `nodiscard` | Cast the buffer as a const char pointer. |
 | `std::string` | [`str`](#str) `const` `inline` | Returns the buffer as a string. |
 
 ---
@@ -7568,11 +8184,13 @@ The [ConstBuffer](#constbuffer) class provides a safe representation of a buffer
 
 #### ConstBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr ConstBuffer()
+constexpr inline constexpr ConstBuffer()
 ```
+
+Defined in src/base/include/icy/buffer.h:146
 
 Construct an empty buffer.
 
@@ -7582,11 +8200,13 @@ Construct an empty buffer.
 
 #### ConstBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr ConstBuffer(const void * data, size_t size)
+constexpr inline constexpr ConstBuffer(const void * data, size_t size)
 ```
+
+Defined in src/base/include/icy/buffer.h:153
 
 Construct a buffer to represent the given memory range.
 
@@ -7596,11 +8216,13 @@ Construct a buffer to represent the given memory range.
 
 #### ConstBuffer
 
-`inline`
+`inline` `constexpr`
 
 ```cpp
-inline constexpr ConstBuffer(const MutableBuffer & b)
+constexpr inline constexpr ConstBuffer(const MutableBuffer & b)
 ```
+
+Defined in src/base/include/icy/buffer.h:160
 
 Construct a non-modifiable buffer from a modifiable one.
 
@@ -7610,11 +8232,13 @@ Construct a non-modifiable buffer from a modifiable one.
 
 #### data
 
-`const` `inline`
+`const` `inline` `nodiscard` `constexpr`
 
 ```cpp
-inline constexpr const void * data() const
+[[nodiscard]] constexpr inline const void * data() const
 ```
+
+Defined in src/base/include/icy/buffer.h:166
 
 ---
 
@@ -7622,11 +8246,13 @@ inline constexpr const void * data() const
 
 #### size
 
-`const` `inline`
+`const` `inline` `nodiscard` `constexpr`
 
 ```cpp
-inline constexpr size_t size() const
+[[nodiscard]] constexpr inline size_t size() const
 ```
+
+Defined in src/base/include/icy/buffer.h:167
 
 ---
 
@@ -7634,11 +8260,13 @@ inline constexpr size_t size() const
 
 #### cstr
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * cstr() const
+[[nodiscard]] inline const char * cstr() const
 ```
+
+Defined in src/base/include/icy/buffer.h:170
 
 Cast the buffer as a const char pointer.
 
@@ -7653,6 +8281,8 @@ Cast the buffer as a const char pointer.
 ```cpp
 inline std::string str() const
 ```
+
+Defined in src/base/include/icy/buffer.h:173
 
 Returns the buffer as a string.
 
@@ -7673,6 +8303,8 @@ Returns the buffer as a string.
 const void * _data
 ```
 
+Defined in src/base/include/icy/buffer.h:176
+
 ---
 
 {#_size}
@@ -7683,6 +8315,8 @@ const void * _data
 size_t _size
 ```
 
+Defined in src/base/include/icy/buffer.h:177
+
 {#bitreader}
 
 ## BitReader
@@ -7691,14 +8325,40 @@ size_t _size
 #include <icy/buffer.h>
 ```
 
+```cpp
+class BitReader
+```
+
+Defined in src/base/include/icy/buffer.h:273
+
 Class for reading binary streams.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator) `inline` |  |
+
+---
+
+{#operator}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const BitReader & buf)
+```
+
+Defined in src/base/include/icy/buffer.h:423
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`BitReader`](#bitreader)  | Constructs a `[BitReader](#bitreader)` over a raw byte array. |
-|  | [`BitReader`](#bitreader)  | Constructs a `[BitReader](#bitreader)` over a `Buffer`. |
+|  | [`BitReader`](#bitreader)  | Constructs a `[BitReader](#bitreader)` over a `[Buffer](#buffer-2)`. |
 |  | [`BitReader`](#bitreader)  | Constructs a `[BitReader](#bitreader)` over a `[ConstBuffer](#constbuffer)`. |
 | `void` | [`get`](#get)  | Reads a value from the [BitReader](#bitreader). Returns false if there isn't enough data left for the specified type. Throws a std::out_of_range exception if reading past the limit. Reads `len` raw bytes into `val`. Throws `std::out_of_range` if insufficient data remains. |
 | `void` | [`get`](#get)  | Reads `len` bytes and appends them to `val`. Throws `std::out_of_range` if insufficient data remains. |
@@ -7723,11 +8383,11 @@ Class for reading binary streams.
 | `size_t` | [`readToNext`](#readtonext)  | Reads bytes up to (but not including) the next occurrence of `c` into `val`. |
 | `void` | [`seek`](#seek)  | Set position pointer to absolute position. Throws a std::out_of_range exception if the value exceeds the limit. |
 | `void` | [`skip`](#skip)  | Set position pointer to relative position. Throws a std::out_of_range exception if the value exceeds the limit. |
-| `size_t` | [`limit`](#limit) `const` | Returns the read limit. |
-| `size_t` | [`position`](#position) `const` `inline` | Returns the current read position. |
-| `size_t` | [`available`](#available) `const` | Returns the number of elements between the current position and the limit. |
-| `const char *` | [`begin`](#begin) `const` `inline` | Returns a pointer to the start of the buffer. |
-| `const char *` | [`current`](#current) `const` `inline` | Returns a pointer to the current read position. |
+| `size_t` | [`limit`](#limit) `const` `nodiscard` | Returns the read limit. |
+| `size_t` | [`position`](#position) `const` `inline` `nodiscard` | Returns the current read position. |
+| `size_t` | [`available`](#available) `const` `nodiscard` | Returns the number of elements between the current position and the limit. |
+| `const char *` | [`begin`](#begin) `const` `inline` `nodiscard` | Returns a pointer to the start of the buffer. |
+| `const char *` | [`current`](#current) `const` `inline` `nodiscard` | Returns a pointer to the current read position. |
 | `ByteOrder` | [`order`](#order) `const` `inline` | Returns the byte order used for multi-byte integer reads. |
 | `std::string` | [`toString`](#tostring)  | Returns the remaining unread bytes as a `std::string`. |
 
@@ -7738,8 +8398,10 @@ Class for reading binary streams.
 #### BitReader
 
 ```cpp
-BitReader(const char * bytes, size_t size, ByteOrder order)
+BitReader(const char * bytes, size_t size, ByteOrder order = ByteOrder::Network)
 ```
+
+Defined in src/base/include/icy/buffer.h:280
 
 Constructs a `[BitReader](#bitreader)` over a raw byte array. 
 #### Parameters
@@ -7756,10 +8418,12 @@ Constructs a `[BitReader](#bitreader)` over a raw byte array.
 #### BitReader
 
 ```cpp
-BitReader(const Buffer & buf, ByteOrder order)
+BitReader(const Buffer & buf, ByteOrder order = ByteOrder::Network)
 ```
 
-Constructs a `[BitReader](#bitreader)` over a `Buffer`. 
+Defined in src/base/include/icy/buffer.h:285
+
+Constructs a `[BitReader](#bitreader)` over a `[Buffer](#buffer-2)`. 
 #### Parameters
 * `buf` Source buffer. Must remain valid for the lifetime of the reader. 
 
@@ -7772,8 +8436,10 @@ Constructs a `[BitReader](#bitreader)` over a `Buffer`.
 #### BitReader
 
 ```cpp
-BitReader(const ConstBuffer & pod, ByteOrder order)
+BitReader(const ConstBuffer & pod, ByteOrder order = ByteOrder::Network)
 ```
+
+Defined in src/base/include/icy/buffer.h:290
 
 Constructs a `[BitReader](#bitreader)` over a `[ConstBuffer](#constbuffer)`. 
 #### Parameters
@@ -7791,6 +8457,8 @@ Constructs a `[BitReader](#bitreader)` over a `[ConstBuffer](#constbuffer)`.
 void get(char * val, size_t len)
 ```
 
+Defined in src/base/include/icy/buffer.h:299
+
 Reads a value from the [BitReader](#bitreader). Returns false if there isn't enough data left for the specified type. Throws a std::out_of_range exception if reading past the limit. Reads `len` raw bytes into `val`. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
 * `val` Destination buffer; must have capacity of at least `len` bytes. 
@@ -7806,6 +8474,8 @@ Reads a value from the [BitReader](#bitreader). Returns false if there isn't eno
 ```cpp
 void get(std::string & val, size_t len)
 ```
+
+Defined in src/base/include/icy/buffer.h:304
 
 Reads `len` bytes and appends them to `val`. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
@@ -7823,6 +8493,8 @@ Reads `len` bytes and appends them to `val`. Throws `std::out_of_range` if insuf
 void getU8(uint8_t & val)
 ```
 
+Defined in src/base/include/icy/buffer.h:308
+
 Reads an unsigned 8-bit integer. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
 * `val` Output parameter receiving the read value.
@@ -7836,6 +8508,8 @@ Reads an unsigned 8-bit integer. Throws `std::out_of_range` if insufficient data
 ```cpp
 void getU16(uint16_t & val)
 ```
+
+Defined in src/base/include/icy/buffer.h:312
 
 Reads an unsigned 16-bit integer, applying byte-order conversion. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
@@ -7851,6 +8525,8 @@ Reads an unsigned 16-bit integer, applying byte-order conversion. Throws `std::o
 void getU24(uint32_t & val)
 ```
 
+Defined in src/base/include/icy/buffer.h:316
+
 Reads an unsigned 24-bit integer into a 32-bit variable, applying byte-order conversion. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
 * `val` Output parameter receiving the read value.
@@ -7864,6 +8540,8 @@ Reads an unsigned 24-bit integer into a 32-bit variable, applying byte-order con
 ```cpp
 void getU32(uint32_t & val)
 ```
+
+Defined in src/base/include/icy/buffer.h:320
 
 Reads an unsigned 32-bit integer, applying byte-order conversion. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
@@ -7879,6 +8557,8 @@ Reads an unsigned 32-bit integer, applying byte-order conversion. Throws `std::o
 void getU64(uint64_t & val)
 ```
 
+Defined in src/base/include/icy/buffer.h:324
+
 Reads an unsigned 64-bit integer, applying byte-order conversion. Throws `std::out_of_range` if insufficient data remains. 
 #### Parameters
 * `val` Output parameter receiving the read value.
@@ -7892,6 +8572,8 @@ Reads an unsigned 64-bit integer, applying byte-order conversion. Throws `std::o
 ```cpp
 char peek()
 ```
+
+Defined in src/base/include/icy/buffer.h:328
 
 Peeks at the current byte without advancing the position. 
 #### Returns
@@ -7907,6 +8589,8 @@ Current byte as `char`, or 0 if at the end of the buffer.
 uint8_t peekU8()
 ```
 
+Defined in src/base/include/icy/buffer.h:332
+
 Peeks at the current byte as a `uint8_t` without advancing the position. 
 #### Returns
 Current value, or 0 if at the end of the buffer.
@@ -7920,6 +8604,8 @@ Current value, or 0 if at the end of the buffer.
 ```cpp
 uint16_t peekU16()
 ```
+
+Defined in src/base/include/icy/buffer.h:336
 
 Peeks at the next two bytes as a `uint16_t` without advancing the position. 
 #### Returns
@@ -7935,6 +8621,8 @@ Current value with byte-order conversion applied, or 0 on failure.
 uint32_t peekU24()
 ```
 
+Defined in src/base/include/icy/buffer.h:340
+
 Peeks at the next three bytes as a `uint32_t` without advancing the position. 
 #### Returns
 Current value with byte-order conversion applied, or 0 on failure.
@@ -7948,6 +8636,8 @@ Current value with byte-order conversion applied, or 0 on failure.
 ```cpp
 uint32_t peekU32()
 ```
+
+Defined in src/base/include/icy/buffer.h:344
 
 Peeks at the next four bytes as a `uint32_t` without advancing the position. 
 #### Returns
@@ -7963,6 +8653,8 @@ Current value with byte-order conversion applied, or 0 on failure.
 uint64_t peekU64()
 ```
 
+Defined in src/base/include/icy/buffer.h:348
+
 Peeks data from the [BitReader](#bitreader). -1 is returned if reading past boundary.
 
 ---
@@ -7974,6 +8666,8 @@ Peeks data from the [BitReader](#bitreader). -1 is returned if reading past boun
 ```cpp
 size_t skipToChar(char c)
 ```
+
+Defined in src/base/include/icy/buffer.h:357
 
 Advances the position until the given character is found, stopping before it. 
 #### Parameters
@@ -7992,6 +8686,8 @@ Number of bytes skipped.
 size_t skipWhitespace()
 ```
 
+Defined in src/base/include/icy/buffer.h:361
+
 Advances the position past any leading space characters. 
 #### Returns
 Number of bytes skipped.
@@ -8005,6 +8701,8 @@ Number of bytes skipped.
 ```cpp
 size_t skipToNextLine()
 ```
+
+Defined in src/base/include/icy/buffer.h:365
 
 Advances the position past the end of the current line (past the newline). 
 #### Returns
@@ -8020,6 +8718,8 @@ Number of bytes skipped including the newline character.
 size_t skipNextWord()
 ```
 
+Defined in src/base/include/icy/buffer.h:369
+
 Advances the position past the next whitespace-delimited word. 
 #### Returns
 Number of bytes skipped.
@@ -8033,6 +8733,8 @@ Number of bytes skipped.
 ```cpp
 size_t readNextWord(std::string & val)
 ```
+
+Defined in src/base/include/icy/buffer.h:374
 
 Reads the next whitespace-delimited word into `val`. 
 #### Parameters
@@ -8051,6 +8753,8 @@ Number of bytes consumed.
 size_t readNextNumber(unsigned int & val)
 ```
 
+Defined in src/base/include/icy/buffer.h:379
+
 Reads the next whitespace-delimited decimal number into `val`. 
 #### Parameters
 * `val` Output parameter receiving the parsed unsigned integer. 
@@ -8068,6 +8772,8 @@ Number of bytes consumed.
 size_t readLine(std::string & val)
 ```
 
+Defined in src/base/include/icy/buffer.h:384
+
 Reads bytes up to (but not including) the next newline into `val`. 
 #### Parameters
 * `val` String to receive the line content. 
@@ -8084,6 +8790,8 @@ Number of bytes consumed including the newline.
 ```cpp
 size_t readToNext(std::string & val, char c)
 ```
+
+Defined in src/base/include/icy/buffer.h:390
 
 Reads bytes up to (but not including) the next occurrence of `c` into `val`. 
 #### Parameters
@@ -8104,6 +8812,8 @@ Number of bytes consumed.
 void seek(size_t val)
 ```
 
+Defined in src/base/include/icy/buffer.h:394
+
 Set position pointer to absolute position. Throws a std::out_of_range exception if the value exceeds the limit.
 
 ---
@@ -8116,6 +8826,8 @@ Set position pointer to absolute position. Throws a std::out_of_range exception 
 void skip(size_t size)
 ```
 
+Defined in src/base/include/icy/buffer.h:398
+
 Set position pointer to relative position. Throws a std::out_of_range exception if the value exceeds the limit.
 
 ---
@@ -8124,11 +8836,13 @@ Set position pointer to relative position. Throws a std::out_of_range exception 
 
 #### limit
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t limit() const
+[[nodiscard]] size_t limit() const
 ```
+
+Defined in src/base/include/icy/buffer.h:401
 
 Returns the read limit.
 
@@ -8138,11 +8852,13 @@ Returns the read limit.
 
 #### position
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t position() const
+[[nodiscard]] inline size_t position() const
 ```
+
+Defined in src/base/include/icy/buffer.h:404
 
 Returns the current read position.
 
@@ -8152,11 +8868,13 @@ Returns the current read position.
 
 #### available
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t available() const
+[[nodiscard]] size_t available() const
 ```
+
+Defined in src/base/include/icy/buffer.h:408
 
 Returns the number of elements between the current position and the limit.
 
@@ -8166,11 +8884,13 @@ Returns the number of elements between the current position and the limit.
 
 #### begin
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * begin() const
+[[nodiscard]] inline const char * begin() const
 ```
+
+Defined in src/base/include/icy/buffer.h:411
 
 Returns a pointer to the start of the buffer.
 
@@ -8180,11 +8900,13 @@ Returns a pointer to the start of the buffer.
 
 #### current
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * current() const
+[[nodiscard]] inline const char * current() const
 ```
+
+Defined in src/base/include/icy/buffer.h:414
 
 Returns a pointer to the current read position.
 
@@ -8200,6 +8922,8 @@ Returns a pointer to the current read position.
 inline ByteOrder order() const
 ```
 
+Defined in src/base/include/icy/buffer.h:417
+
 Returns the byte order used for multi-byte integer reads.
 
 ---
@@ -8211,6 +8935,8 @@ Returns the byte order used for multi-byte integer reads.
 ```cpp
 std::string toString()
 ```
+
+Defined in src/base/include/icy/buffer.h:421
 
 Returns the remaining unread bytes as a `std::string`. 
 #### Returns
@@ -8235,6 +8961,8 @@ String containing bytes from the current position to the end.
 size_t _position
 ```
 
+Defined in src/base/include/icy/buffer.h:431
+
 ---
 
 {#_limit}
@@ -8244,6 +8972,8 @@ size_t _position
 ```cpp
 size_t _limit
 ```
+
+Defined in src/base/include/icy/buffer.h:432
 
 ---
 
@@ -8255,6 +8985,8 @@ size_t _limit
 ByteOrder _order
 ```
 
+Defined in src/base/include/icy/buffer.h:433
+
 ---
 
 {#_bytes}
@@ -8264,6 +8996,8 @@ ByteOrder _order
 ```cpp
 const char * _bytes
 ```
+
+Defined in src/base/include/icy/buffer.h:434
 
 ### Protected Methods
 
@@ -8281,6 +9015,8 @@ const char * _bytes
 void init(const char * bytes, size_t size, ByteOrder order)
 ```
 
+Defined in src/base/include/icy/buffer.h:429
+
 {#bitwriter}
 
 ## BitWriter
@@ -8289,18 +9025,44 @@ void init(const char * bytes, size_t size, ByteOrder order)
 #include <icy/buffer.h>
 ```
 
+```cpp
+class BitWriter
+```
+
+Defined in src/base/include/icy/buffer.h:450
+
 > **Subclassed by:** [`DynamicBitWriter`](#dynamicbitwriter)
 
 Class for reading/writing binary streams.
 
-Note that when using the constructor with the Buffer reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
+Note that when using the constructor with the [Buffer](#buffer-2) reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator) `inline` |  |
+
+---
+
+{#operator}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const BitWriter & wr)
+```
+
+Defined in src/base/include/icy/buffer.h:574
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`BitWriter`](#bitwriter)  | Constructs a `[BitWriter](#bitwriter)` over a raw byte array with a fixed capacity. |
-|  | [`BitWriter`](#bitwriter)  | Constructs a `[BitWriter](#bitwriter)` backed by a `Buffer`. Writes are bounded by the buffer's capacity; use `[DynamicBitWriter](#dynamicbitwriter)` for auto-resize. |
+|  | [`BitWriter`](#bitwriter)  | Constructs a `[BitWriter](#bitwriter)` backed by a `[Buffer](#buffer-2)`. Writes are bounded by the buffer's capacity; use `[DynamicBitWriter](#dynamicbitwriter)` for auto-resize. |
 |  | [`BitWriter`](#bitwriter)  | Constructs a `[BitWriter](#bitwriter)` over a `[MutableBuffer](#mutablebuffer)` with a fixed capacity. |
 | `void` | [`put`](#put) `virtual` | Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit. |
 | `void` | [`put`](#put)  | Appends the contents of a string. Throws `std::out_of_range` if capacity is exceeded. |
@@ -8318,13 +9080,13 @@ Note that when using the constructor with the Buffer reference as an argument, t
 | `bool` | [`updateU64`](#updateu64)  | Overwrites a `uint64_t` at the given absolute position, with byte-order conversion. |
 | `void` | [`seek`](#seek)  | Set position pointer to absolute position. Throws a `std::out_of_range` exception if the value exceeds the limit. |
 | `void` | [`skip`](#skip)  | Set position pointer to relative position. Throws a `std::out_of_range` exception if the value exceeds the limit. |
-| `size_t` | [`limit`](#limit) `const` | Returns the write limit. |
-| `size_t` | [`position`](#position) `const` `inline` | Returns the current write position. |
-| `size_t` | [`available`](#available) `const` | Returns the number of elements between the current write position and the limit. |
-| `char *` | [`begin`](#begin) `inline` | Returns a pointer to the start of the write buffer. |
-| `char *` | [`current`](#current) `inline` | Returns a pointer to the current write position. |
-| `const char *` | [`begin`](#begin) `const` `inline` | Returns a const pointer to the start of the write buffer. |
-| `const char *` | [`current`](#current) `const` `inline` | Returns a const pointer to the current write position. |
+| `size_t` | [`limit`](#limit) `const` `nodiscard` | Returns the write limit. |
+| `size_t` | [`position`](#position) `const` `inline` `nodiscard` | Returns the current write position. |
+| `size_t` | [`available`](#available) `const` `nodiscard` | Returns the number of elements between the current write position and the limit. |
+| `char *` | [`begin`](#begin) `inline` `nodiscard` | Returns a pointer to the start of the write buffer. |
+| `char *` | [`current`](#current) `inline` `nodiscard` | Returns a pointer to the current write position. |
+| `const char *` | [`begin`](#begin) `const` `inline` `nodiscard` | Returns a const pointer to the start of the write buffer. |
+| `const char *` | [`current`](#current) `const` `inline` `nodiscard` | Returns a const pointer to the current write position. |
 | `ByteOrder` | [`order`](#order) `const` `inline` | Returns the byte order used for multi-byte integer writes. |
 | `std::string` | [`toString`](#tostring)  | Returns all bytes written so far as a `std::string`. |
 
@@ -8335,8 +9097,10 @@ Note that when using the constructor with the Buffer reference as an argument, t
 #### BitWriter
 
 ```cpp
-BitWriter(char * bytes, size_t size, ByteOrder order)
+BitWriter(char * bytes, size_t size, ByteOrder order = ByteOrder::Network)
 ```
+
+Defined in src/base/include/icy/buffer.h:457
 
 Constructs a `[BitWriter](#bitwriter)` over a raw byte array with a fixed capacity. 
 #### Parameters
@@ -8353,10 +9117,12 @@ Constructs a `[BitWriter](#bitwriter)` over a raw byte array with a fixed capaci
 #### BitWriter
 
 ```cpp
-BitWriter(Buffer & buf, ByteOrder order)
+BitWriter(Buffer & buf, ByteOrder order = ByteOrder::Network)
 ```
 
-Constructs a `[BitWriter](#bitwriter)` backed by a `Buffer`. Writes are bounded by the buffer's capacity; use `[DynamicBitWriter](#dynamicbitwriter)` for auto-resize. 
+Defined in src/base/include/icy/buffer.h:463
+
+Constructs a `[BitWriter](#bitwriter)` backed by a `[Buffer](#buffer-2)`. Writes are bounded by the buffer's capacity; use `[DynamicBitWriter](#dynamicbitwriter)` for auto-resize. 
 #### Parameters
 * `buf` Source buffer. Must remain valid for the writer's lifetime. 
 
@@ -8369,8 +9135,10 @@ Constructs a `[BitWriter](#bitwriter)` backed by a `Buffer`. Writes are bounded 
 #### BitWriter
 
 ```cpp
-BitWriter(MutableBuffer & pod, ByteOrder order)
+BitWriter(MutableBuffer & pod, ByteOrder order = ByteOrder::Network)
 ```
+
+Defined in src/base/include/icy/buffer.h:468
 
 Constructs a `[BitWriter](#bitwriter)` over a `[MutableBuffer](#mutablebuffer)` with a fixed capacity. 
 #### Parameters
@@ -8390,6 +9158,8 @@ Constructs a `[BitWriter](#bitwriter)` over a `[MutableBuffer](#mutablebuffer)` 
 virtual void put(const char * val, size_t len)
 ```
 
+Defined in src/base/include/icy/buffer.h:473
+
 Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit.
 
 ---
@@ -8401,6 +9171,8 @@ Append bytes to the buffer. Throws a `std::out_of_range` exception if reading pa
 ```cpp
 void put(const std::string & val)
 ```
+
+Defined in src/base/include/icy/buffer.h:476
 
 Appends the contents of a string. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
@@ -8416,6 +9188,8 @@ Appends the contents of a string. Throws `std::out_of_range` if capacity is exce
 void putU8(uint8_t val)
 ```
 
+Defined in src/base/include/icy/buffer.h:480
+
 Appends an unsigned 8-bit integer. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
 * `val` Value to write.
@@ -8429,6 +9203,8 @@ Appends an unsigned 8-bit integer. Throws `std::out_of_range` if capacity is exc
 ```cpp
 void putU16(uint16_t val)
 ```
+
+Defined in src/base/include/icy/buffer.h:484
 
 Appends an unsigned 16-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
@@ -8444,6 +9220,8 @@ Appends an unsigned 16-bit integer with byte-order conversion. Throws `std::out_
 void putU24(uint32_t val)
 ```
 
+Defined in src/base/include/icy/buffer.h:488
+
 Appends the low 24 bits of a 32-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
 * `val` Value to write (only the lower 3 bytes are written).
@@ -8458,6 +9236,8 @@ Appends the low 24 bits of a 32-bit integer with byte-order conversion. Throws `
 void putU32(uint32_t val)
 ```
 
+Defined in src/base/include/icy/buffer.h:492
+
 Appends an unsigned 32-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
 * `val` Value to write.
@@ -8471,6 +9251,8 @@ Appends an unsigned 32-bit integer with byte-order conversion. Throws `std::out_
 ```cpp
 void putU64(uint64_t val)
 ```
+
+Defined in src/base/include/icy/buffer.h:496
 
 Appends an unsigned 64-bit integer with byte-order conversion. Throws `std::out_of_range` if capacity is exceeded. 
 #### Parameters
@@ -8488,6 +9270,8 @@ Appends an unsigned 64-bit integer with byte-order conversion. Throws `std::out_
 virtual bool update(const char * val, size_t len, size_t pos)
 ```
 
+Defined in src/base/include/icy/buffer.h:500
+
 Update a byte range. Throws a `std::out_of_range` exception if reading past the limit.
 
 ---
@@ -8499,6 +9283,8 @@ Update a byte range. Throws a `std::out_of_range` exception if reading past the 
 ```cpp
 bool update(const std::string & val, size_t pos)
 ```
+
+Defined in src/base/include/icy/buffer.h:505
 
 Overwrites a previously written string at the given absolute position. 
 #### Parameters
@@ -8519,6 +9305,8 @@ True on success, false if the range exceeds available space.
 bool updateU8(uint8_t val, size_t pos)
 ```
 
+Defined in src/base/include/icy/buffer.h:511
+
 Overwrites a `uint8_t` at the given absolute position. 
 #### Parameters
 * `val` Value to write. 
@@ -8537,6 +9325,8 @@ True on success, false if the range exceeds available space.
 ```cpp
 bool updateU16(uint16_t val, size_t pos)
 ```
+
+Defined in src/base/include/icy/buffer.h:517
 
 Overwrites a `uint16_t` at the given absolute position, with byte-order conversion. 
 #### Parameters
@@ -8557,6 +9347,8 @@ True on success, false if the range exceeds available space.
 bool updateU24(uint32_t val, size_t pos)
 ```
 
+Defined in src/base/include/icy/buffer.h:523
+
 Overwrites 3 bytes (low 24 bits of `val`) at the given absolute position, with byte-order conversion. 
 #### Parameters
 * `val` Value to write. 
@@ -8575,6 +9367,8 @@ True on success, false if the range exceeds available space.
 ```cpp
 bool updateU32(uint32_t val, size_t pos)
 ```
+
+Defined in src/base/include/icy/buffer.h:529
 
 Overwrites a `uint32_t` at the given absolute position, with byte-order conversion. 
 #### Parameters
@@ -8595,6 +9389,8 @@ True on success, false if the range exceeds available space.
 bool updateU64(uint64_t val, size_t pos)
 ```
 
+Defined in src/base/include/icy/buffer.h:535
+
 Overwrites a `uint64_t` at the given absolute position, with byte-order conversion. 
 #### Parameters
 * `val` Value to write. 
@@ -8614,6 +9410,8 @@ True on success, false if the range exceeds available space.
 void seek(size_t val)
 ```
 
+Defined in src/base/include/icy/buffer.h:539
+
 Set position pointer to absolute position. Throws a `std::out_of_range` exception if the value exceeds the limit.
 
 ---
@@ -8626,6 +9424,8 @@ Set position pointer to absolute position. Throws a `std::out_of_range` exceptio
 void skip(size_t size)
 ```
 
+Defined in src/base/include/icy/buffer.h:543
+
 Set position pointer to relative position. Throws a `std::out_of_range` exception if the value exceeds the limit.
 
 ---
@@ -8634,11 +9434,13 @@ Set position pointer to relative position. Throws a `std::out_of_range` exceptio
 
 #### limit
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t limit() const
+[[nodiscard]] size_t limit() const
 ```
+
+Defined in src/base/include/icy/buffer.h:546
 
 Returns the write limit.
 
@@ -8648,11 +9450,13 @@ Returns the write limit.
 
 #### position
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t position() const
+[[nodiscard]] inline size_t position() const
 ```
+
+Defined in src/base/include/icy/buffer.h:549
 
 Returns the current write position.
 
@@ -8662,11 +9466,13 @@ Returns the current write position.
 
 #### available
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t available() const
+[[nodiscard]] size_t available() const
 ```
+
+Defined in src/base/include/icy/buffer.h:553
 
 Returns the number of elements between the current write position and the limit.
 
@@ -8676,11 +9482,13 @@ Returns the number of elements between the current write position and the limit.
 
 #### begin
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline char * begin()
+[[nodiscard]] inline char * begin()
 ```
+
+Defined in src/base/include/icy/buffer.h:556
 
 Returns a pointer to the start of the write buffer.
 
@@ -8690,11 +9498,13 @@ Returns a pointer to the start of the write buffer.
 
 #### current
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline char * current()
+[[nodiscard]] inline char * current()
 ```
+
+Defined in src/base/include/icy/buffer.h:559
 
 Returns a pointer to the current write position.
 
@@ -8704,11 +9514,13 @@ Returns a pointer to the current write position.
 
 #### begin
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * begin() const
+[[nodiscard]] inline const char * begin() const
 ```
+
+Defined in src/base/include/icy/buffer.h:562
 
 Returns a const pointer to the start of the write buffer.
 
@@ -8718,11 +9530,13 @@ Returns a const pointer to the start of the write buffer.
 
 #### current
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * current() const
+[[nodiscard]] inline const char * current() const
 ```
+
+Defined in src/base/include/icy/buffer.h:565
 
 Returns a const pointer to the current write position.
 
@@ -8738,6 +9552,8 @@ Returns a const pointer to the current write position.
 inline ByteOrder order() const
 ```
 
+Defined in src/base/include/icy/buffer.h:568
+
 Returns the byte order used for multi-byte integer writes.
 
 ---
@@ -8749,6 +9565,8 @@ Returns the byte order used for multi-byte integer writes.
 ```cpp
 std::string toString()
 ```
+
+Defined in src/base/include/icy/buffer.h:572
 
 Returns all bytes written so far as a `std::string`. 
 #### Returns
@@ -8773,6 +9591,8 @@ String containing bytes from the start of the buffer up to the current position.
 size_t _position
 ```
 
+Defined in src/base/include/icy/buffer.h:582
+
 ---
 
 {#_limit}
@@ -8782,6 +9602,8 @@ size_t _position
 ```cpp
 size_t _limit
 ```
+
+Defined in src/base/include/icy/buffer.h:583
 
 ---
 
@@ -8793,6 +9615,8 @@ size_t _limit
 ByteOrder _order
 ```
 
+Defined in src/base/include/icy/buffer.h:584
+
 ---
 
 {#_bytes}
@@ -8802,6 +9626,8 @@ ByteOrder _order
 ```cpp
 char * _bytes
 ```
+
+Defined in src/base/include/icy/buffer.h:585
 
 ### Protected Methods
 
@@ -8821,6 +9647,8 @@ char * _bytes
 virtual void init(char * bytes, size_t size, ByteOrder order)
 ```
 
+Defined in src/base/include/icy/buffer.h:580
+
 {#dynamicbitwriter}
 
 ## DynamicBitWriter
@@ -8829,20 +9657,26 @@ virtual void init(char * bytes, size_t size, ByteOrder order)
 #include <icy/buffer.h>
 ```
 
+```cpp
+class DynamicBitWriter
+```
+
+Defined in src/base/include/icy/buffer.h:596
+
 > **Inherits:** [`BitWriter`](#bitwriter)
 
 Class for reading/writing dynamically resizable binary streams.
 
-Note that when using the constructor with the Buffer reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
+Note that when using the constructor with the [Buffer](#buffer-2) reference as an argument, the writer will dynamically expand the given buffer when writing passed the buffer capacity. All other cases will throw a std::out_of_range error when writing past the buffer capacity.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`DynamicBitWriter`](#dynamicbitwriter)  | Constructs a `[DynamicBitWriter](#dynamicbitwriter)` backed by a dynamically resizable `Buffer`. The buffer is expanded automatically as data is written. |
+|  | [`DynamicBitWriter`](#dynamicbitwriter)  | Constructs a `[DynamicBitWriter](#dynamicbitwriter)` backed by a dynamically resizable `[Buffer](#buffer-2)`. The buffer is expanded automatically as data is written. |
 |  | [`DynamicBitWriter`](#dynamicbitwriter)  | Constructs a `[DynamicBitWriter](#dynamicbitwriter)` that inserts data starting at a specific iterator position. |
-| `void` | [`put`](#put) `virtual` | Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit. |
-| `bool` | [`update`](#update) `virtual` | Update a byte range. Throws a `std::out_of_range` exception if reading past the limit. |
+| `void` | [`put`](#put) `virtual` `override` | Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit. |
+| `bool` | [`update`](#update) `virtual` `override` | Update a byte range. Throws a `std::out_of_range` exception if reading past the limit. |
 
 ---
 
@@ -8851,12 +9685,14 @@ Note that when using the constructor with the Buffer reference as an argument, t
 #### DynamicBitWriter
 
 ```cpp
-DynamicBitWriter(Buffer & buf, ByteOrder order)
+DynamicBitWriter(Buffer & buf, ByteOrder order = ByteOrder::Network)
 ```
 
-Constructs a `[DynamicBitWriter](#dynamicbitwriter)` backed by a dynamically resizable `Buffer`. The buffer is expanded automatically as data is written. 
+Defined in src/base/include/icy/buffer.h:603
+
+Constructs a `[DynamicBitWriter](#dynamicbitwriter)` backed by a dynamically resizable `[Buffer](#buffer-2)`. The buffer is expanded automatically as data is written. 
 #### Parameters
-* `buf` Buffer to write into; expanded as needed. 
+* `buf` [Buffer](#buffer-2) to write into; expanded as needed. 
 
 * `order` Byte order used for multi-byte integer writes.
 
@@ -8867,12 +9703,14 @@ Constructs a `[DynamicBitWriter](#dynamicbitwriter)` backed by a dynamically res
 #### DynamicBitWriter
 
 ```cpp
-DynamicBitWriter(Buffer & buf, Buffer::iterator offset, ByteOrder order)
+DynamicBitWriter(Buffer & buf, Buffer::iterator offset, ByteOrder order = ByteOrder::Network)
 ```
+
+Defined in src/base/include/icy/buffer.h:609
 
 Constructs a `[DynamicBitWriter](#dynamicbitwriter)` that inserts data starting at a specific iterator position. 
 #### Parameters
-* `buf` Buffer to write into; expanded as needed. 
+* `buf` [Buffer](#buffer-2) to write into; expanded as needed. 
 
 * `offset` Iterator into `buf` indicating the insertion start point. 
 
@@ -8884,11 +9722,13 @@ Constructs a `[DynamicBitWriter](#dynamicbitwriter)` that inserts data starting 
 
 #### put
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void put(const char * val, size_t len)
+virtual void put(const char * val, size_t len) override
 ```
+
+Defined in src/base/include/icy/buffer.h:614
 
 Append bytes to the buffer. Throws a `std::out_of_range` exception if reading past the limit.
 
@@ -8898,11 +9738,13 @@ Append bytes to the buffer. Throws a `std::out_of_range` exception if reading pa
 
 #### update
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool update(const char * val, size_t len, size_t pos)
+virtual bool update(const char * val, size_t len, size_t pos) override
 ```
+
+Defined in src/base/include/icy/buffer.h:618
 
 Update a byte range. Throws a `std::out_of_range` exception if reading past the limit.
 
@@ -8923,6 +9765,8 @@ Update a byte range. Throws a `std::out_of_range` exception if reading past the 
 Buffer & _buffer
 ```
 
+Defined in src/base/include/icy/buffer.h:621
+
 ---
 
 {#_offset}
@@ -8933,6 +9777,8 @@ Buffer & _buffer
 size_t _offset
 ```
 
+Defined in src/base/include/icy/buffer.h:622
+
 {#logwriter}
 
 ## LogWriter
@@ -8940,6 +9786,12 @@ size_t _offset
 ```cpp
 #include <icy/logger.h>
 ```
+
+```cpp
+class LogWriter
+```
+
+Defined in src/base/include/icy/logger.h:104
 
 > **Subclassed by:** [`AsyncLogWriter`](#asynclogwriter)
 
@@ -8962,6 +9814,8 @@ Log output stream writer.
 LogWriter()
 ```
 
+Defined in src/base/include/icy/logger.h:107
+
 ---
 
 {#write}
@@ -8974,6 +9828,8 @@ LogWriter()
 virtual void write(std::unique_ptr< LogStream > stream)
 ```
 
+Defined in src/base/include/icy/logger.h:111
+
 Writes the given log message stream.
 
 {#asynclogwriter}
@@ -8984,6 +9840,12 @@ Writes the given log message stream.
 #include <icy/logger.h>
 ```
 
+```cpp
+class AsyncLogWriter
+```
+
+Defined in src/base/include/icy/logger.h:121
+
 > **Inherits:** [`LogWriter`](#logwriter), [`Runnable`](#runnable)
 
 [Thread](#thread) based log output stream writer.
@@ -8993,9 +9855,9 @@ Writes the given log message stream.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`AsyncLogWriter`](#asynclogwriter)  |  |
-| `void` | [`write`](#write) `virtual` | Queues the given log message stream. |
+| `void` | [`write`](#write) `virtual` `override` | Queues the given log message stream. |
 | `void` | [`flush`](#flush)  | Flushes queued messages. |
-| `void` | [`run`](#run) `virtual` | Writes queued messages asynchronously. |
+| `void` | [`run`](#run) `virtual` `override` | Writes queued messages asynchronously. |
 | `void` | [`clear`](#clear)  | Clears all queued messages. |
 
 ---
@@ -9008,17 +9870,21 @@ Writes the given log message stream.
 AsyncLogWriter()
 ```
 
+Defined in src/base/include/icy/logger.h:125
+
 ---
 
 {#write}
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(std::unique_ptr< LogStream > stream)
+virtual void write(std::unique_ptr< LogStream > stream) override
 ```
+
+Defined in src/base/include/icy/logger.h:129
 
 Queues the given log message stream.
 
@@ -9032,6 +9898,8 @@ Queues the given log message stream.
 void flush()
 ```
 
+Defined in src/base/include/icy/logger.h:132
+
 Flushes queued messages.
 
 ---
@@ -9040,11 +9908,13 @@ Flushes queued messages.
 
 #### run
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void run()
+virtual void run() override
 ```
+
+Defined in src/base/include/icy/logger.h:135
 
 Writes queued messages asynchronously.
 
@@ -9057,6 +9927,8 @@ Writes queued messages asynchronously.
 ```cpp
 void clear()
 ```
+
+Defined in src/base/include/icy/logger.h:138
 
 Clears all queued messages.
 
@@ -9078,6 +9950,8 @@ Clears all queued messages.
 Thread _thread
 ```
 
+Defined in src/base/include/icy/logger.h:143
+
 ---
 
 {#_pending}
@@ -9088,6 +9962,8 @@ Thread _thread
 std::deque< std::unique_ptr< LogStream > > _pending
 ```
 
+Defined in src/base/include/icy/logger.h:144
+
 ---
 
 {#_mutex}
@@ -9097,6 +9973,8 @@ std::deque< std::unique_ptr< LogStream > > _pending
 ```cpp
 std::mutex _mutex
 ```
+
+Defined in src/base/include/icy/logger.h:145
 
 ### Protected Methods
 
@@ -9114,6 +9992,8 @@ std::mutex _mutex
 bool writeNext()
 ```
 
+Defined in src/base/include/icy/logger.h:141
+
 {#logger}
 
 ## Logger
@@ -9122,7 +10002,44 @@ bool writeNext()
 #include <icy/logger.h>
 ```
 
+```cpp
+class Logger
+```
+
+Defined in src/base/include/icy/logger.h:155
+
 [Logger](#logger) class.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`Singleton< Logger >`](#singletonlogger)  |  |
+| [`Thread`](#thread)  |  |
+
+---
+
+{#singletonlogger}
+
+#### Singleton< Logger >
+
+```cpp
+friend class Singleton< Logger >
+```
+
+Defined in src/base/include/icy/logger.h:203
+
+---
+
+{#thread}
+
+#### Thread
+
+```cpp
+friend class Thread
+```
+
+Defined in src/base/include/icy/logger.h:208
 
 ### Public Methods
 
@@ -9148,6 +10065,8 @@ bool writeNext()
 Logger()
 ```
 
+Defined in src/base/include/icy/logger.h:158
+
 ---
 
 {#add}
@@ -9157,6 +10076,8 @@ Logger()
 ```cpp
 void add(std::unique_ptr< LogChannel > channel)
 ```
+
+Defined in src/base/include/icy/logger.h:172
 
 Adds the given log channel. Takes ownership.
 
@@ -9170,6 +10091,8 @@ Adds the given log channel. Takes ownership.
 void remove(std::string_view name)
 ```
 
+Defined in src/base/include/icy/logger.h:175
+
 Removes the given log channel by name.
 
 ---
@@ -9181,8 +10104,10 @@ Removes the given log channel by name.
 `const`
 
 ```cpp
-LogChannel * get(std::string_view name, bool whiny) const
+LogChannel * get(std::string_view name, bool whiny = true) const
 ```
+
+Defined in src/base/include/icy/logger.h:179
 
 Returns the specified log channel. Throws an exception if the channel doesn't exist.
 
@@ -9196,6 +10121,8 @@ Returns the specified log channel. Throws an exception if the channel doesn't ex
 void setDefault(std::string_view name)
 ```
 
+Defined in src/base/include/icy/logger.h:182
+
 Sets the default log to the specified log channel.
 
 ---
@@ -9207,6 +10134,8 @@ Sets the default log to the specified log channel.
 ```cpp
 void setWriter(std::unique_ptr< LogWriter > writer)
 ```
+
+Defined in src/base/include/icy/logger.h:185
 
 Sets the log writer instance. Takes ownership.
 
@@ -9222,6 +10151,8 @@ Sets the log writer instance. Takes ownership.
 LogChannel * getDefault() const
 ```
 
+Defined in src/base/include/icy/logger.h:189
+
 Returns the default log channel, or the nullptr channel if no default channel has been set.
 
 ---
@@ -9234,6 +10165,8 @@ Returns the default log channel, or the nullptr channel if no default channel ha
 void write(const LogStream & stream)
 ```
 
+Defined in src/base/include/icy/logger.h:193
+
 Writes the given message to the default log channel. The message will be copied.
 
 ---
@@ -9245,6 +10178,8 @@ Writes the given message to the default log channel. The message will be copied.
 ```cpp
 void write(std::unique_ptr< LogStream > stream)
 ```
+
+Defined in src/base/include/icy/logger.h:196
 
 Writes the given message to the default log channel.
 
@@ -9268,6 +10203,8 @@ Writes the given message to the default log channel.
 static Logger & instance()
 ```
 
+Defined in src/base/include/icy/logger.h:163
+
 Returns the default logger singleton. [Logger](#logger) instances may be created separately as needed.
 
 ---
@@ -9279,8 +10216,10 @@ Returns the default logger singleton. [Logger](#logger) instances may be created
 `static`
 
 ```cpp
-static void setInstance(Logger * logger, bool freeExisting)
+static void setInstance(Logger * logger, bool freeExisting = true)
 ```
+
+Defined in src/base/include/icy/logger.h:166
 
 Sets the default logger singleton instance.
 
@@ -9295,6 +10234,8 @@ Sets the default logger singleton instance.
 ```cpp
 static void destroy()
 ```
+
+Defined in src/base/include/icy/logger.h:169
 
 Destroys the default logger singleton instance.
 
@@ -9317,6 +10258,8 @@ Destroys the default logger singleton instance.
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/logger.h:210
+
 ---
 
 {#_channels}
@@ -9326,6 +10269,8 @@ std::mutex _mutex
 ```cpp
 LogChannelMap _channels
 ```
+
+Defined in src/base/include/icy/logger.h:211
 
 ---
 
@@ -9337,6 +10282,8 @@ LogChannelMap _channels
 LogChannel * _defaultChannel
 ```
 
+Defined in src/base/include/icy/logger.h:212
+
 ---
 
 {#_writer}
@@ -9346,6 +10293,8 @@ LogChannel * _defaultChannel
 ```cpp
 std::unique_ptr< LogWriter > _writer
 ```
+
+Defined in src/base/include/icy/logger.h:213
 
 ### Protected Methods
 
@@ -9364,6 +10313,8 @@ std::unique_ptr< LogWriter > _writer
 Logger(const Logger &) = delete
 ```
 
+Defined in src/base/include/icy/logger.h:200
+
 NonCopyable and NonMovable.
 
 ---
@@ -9376,6 +10327,8 @@ NonCopyable and NonMovable.
 Logger(Logger &&) = delete
 ```
 
+Defined in src/base/include/icy/logger.h:202
+
 Deleted constructor.
 
 {#logchannel}
@@ -9386,6 +10339,12 @@ Deleted constructor.
 #include <icy/logger.h>
 ```
 
+```cpp
+class LogChannel
+```
+
+Defined in src/base/include/icy/logger.h:346
+
 > **Subclassed by:** [`ConsoleChannel`](#consolechannel), [`FileChannel`](#filechannel), [`RotatingFileChannel`](#rotatingfilechannel)
 
 Named log output channel with configurable severity level and formatting.
@@ -9394,7 +10353,7 @@ Named log output channel with configurable severity level and formatting.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`LogChannel`](#logchannel)  | #### Parameters |
+|  | [`LogChannel`](#logchannel)  |  |
 | `void` | [`write`](#write) `virtual` | Writes a log stream entry to this channel. |
 | `void` | [`write`](#write) `virtual` | Writes a plain message to this channel. |
 | `void` | [`format`](#format) `virtual` | Formats a log stream entry into the given output stream. |
@@ -9412,8 +10371,10 @@ Named log output channel with configurable severity level and formatting.
 #### LogChannel
 
 ```cpp
-LogChannel(std::string name, Level level, std::string timeFormat)
+LogChannel(std::string name, Level level = Level::Debug, std::string timeFormat = "%H:%M:%S")
 ```
+
+Defined in src/base/include/icy/logger.h:352
 
 #### Parameters
 * `name` Unique channel name. 
@@ -9434,6 +10395,8 @@ LogChannel(std::string name, Level level, std::string timeFormat)
 virtual void write(const LogStream & stream)
 ```
 
+Defined in src/base/include/icy/logger.h:358
+
 Writes a log stream entry to this channel. 
 #### Parameters
 * `stream` The log stream to write.
@@ -9447,8 +10410,10 @@ Writes a log stream entry to this channel.
 `virtual`
 
 ```cpp
-virtual void write(std::string message, Level level, std::string realm)
+virtual void write(std::string message, Level level = Level::Debug, std::string realm = "")
 ```
+
+Defined in src/base/include/icy/logger.h:364
 
 Writes a plain message to this channel. 
 #### Parameters
@@ -9470,6 +10435,8 @@ Writes a plain message to this channel.
 virtual void format(const LogStream & stream, std::ostream & ost)
 ```
 
+Defined in src/base/include/icy/logger.h:370
+
 Formats a log stream entry into the given output stream. 
 #### Parameters
 * `stream` The log stream to format. 
@@ -9488,6 +10455,8 @@ Formats a log stream entry into the given output stream.
 inline std::string name() const
 ```
 
+Defined in src/base/include/icy/logger.h:373
+
 Returns the channel name.
 
 ---
@@ -9501,6 +10470,8 @@ Returns the channel name.
 ```cpp
 inline Level level() const
 ```
+
+Defined in src/base/include/icy/logger.h:376
 
 Returns the minimum severity level.
 
@@ -9516,6 +10487,8 @@ Returns the minimum severity level.
 inline std::string timeFormat() const
 ```
 
+Defined in src/base/include/icy/logger.h:379
+
 Returns the timestamp format string.
 
 ---
@@ -9529,6 +10502,8 @@ Returns the timestamp format string.
 ```cpp
 inline void setLevel(Level level)
 ```
+
+Defined in src/base/include/icy/logger.h:383
 
 Sets the minimum severity level. 
 #### Parameters
@@ -9546,6 +10521,8 @@ Sets the minimum severity level.
 inline void setTimeFormat(std::string format)
 ```
 
+Defined in src/base/include/icy/logger.h:387
+
 Sets the timestamp format string. 
 #### Parameters
 * `format` strftime-compatible format string.
@@ -9561,6 +10538,8 @@ Sets the timestamp format string.
 ```cpp
 inline void setFilter(std::string filter)
 ```
+
+Defined in src/base/include/icy/logger.h:391
 
 Sets a realm filter; only messages whose realm matches are written. 
 #### Parameters
@@ -9585,6 +10564,8 @@ Sets a realm filter; only messages whose realm matches are written.
 std::string _name
 ```
 
+Defined in src/base/include/icy/logger.h:394
+
 ---
 
 {#_level}
@@ -9594,6 +10575,8 @@ std::string _name
 ```cpp
 Level _level
 ```
+
+Defined in src/base/include/icy/logger.h:395
 
 ---
 
@@ -9605,6 +10588,8 @@ Level _level
 std::string _timeFormat
 ```
 
+Defined in src/base/include/icy/logger.h:396
+
 ---
 
 {#_filter}
@@ -9615,6 +10600,8 @@ std::string _timeFormat
 std::string _filter
 ```
 
+Defined in src/base/include/icy/logger.h:397
+
 {#consolechannel}
 
 ## ConsoleChannel
@@ -9622,6 +10609,12 @@ std::string _filter
 ```cpp
 #include <icy/logger.h>
 ```
+
+```cpp
+class ConsoleChannel
+```
+
+Defined in src/base/include/icy/logger.h:414
 
 > **Inherits:** [`LogChannel`](#logchannel)
 
@@ -9631,8 +10624,8 @@ Log channel that writes formatted messages to standard output.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ConsoleChannel`](#consolechannel)  | #### Parameters |
-| `void` | [`write`](#write) `virtual` | Formats and writes the log stream entry to stdout. Messages below the channel level or filtered by realm are silently dropped. |
+|  | [`ConsoleChannel`](#consolechannel)  |  |
+| `void` | [`write`](#write) `virtual` `override` | Formats and writes the log stream entry to stdout. Messages below the channel level or filtered by realm are silently dropped. |
 
 ---
 
@@ -9641,8 +10634,10 @@ Log channel that writes formatted messages to standard output.
 #### ConsoleChannel
 
 ```cpp
-ConsoleChannel(std::string name, Level level, std::string timeFormat)
+ConsoleChannel(std::string name, Level level = Level::Debug, std::string timeFormat = "%H:%M:%S")
 ```
+
+Defined in src/base/include/icy/logger.h:420
 
 #### Parameters
 * `name` Unique channel name. 
@@ -9657,11 +10652,13 @@ ConsoleChannel(std::string name, Level level, std::string timeFormat)
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(const LogStream & stream)
+virtual void write(const LogStream & stream) override
 ```
+
+Defined in src/base/include/icy/logger.h:427
 
 Formats and writes the log stream entry to stdout. Messages below the channel level or filtered by realm are silently dropped. 
 #### Parameters
@@ -9675,6 +10672,12 @@ Formats and writes the log stream entry to stdout. Messages below the channel le
 #include <icy/logger.h>
 ```
 
+```cpp
+class FileChannel
+```
+
+Defined in src/base/include/icy/logger.h:437
+
 > **Inherits:** [`LogChannel`](#logchannel)
 
 Log channel that writes formatted messages to a file.
@@ -9683,8 +10686,8 @@ Log channel that writes formatted messages to a file.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`FileChannel`](#filechannel)  | #### Parameters |
-| `void` | [`write`](#write) `virtual` | Formats and writes the log stream entry to the file. Opens the file on first write if not already open. |
+|  | [`FileChannel`](#filechannel)  |  |
+| `void` | [`write`](#write) `virtual` `override` | Formats and writes the log stream entry to the file. Opens the file on first write if not already open. |
 | `void` | [`setPath`](#setpath)  | Sets the file path and reopens the file stream. |
 | `std::string` | [`path`](#path) `const` | Returns the current log file path. |
 
@@ -9695,8 +10698,10 @@ Log channel that writes formatted messages to a file.
 #### FileChannel
 
 ```cpp
-FileChannel(std::string name, std::string path, Level level, std::string timeFormat)
+FileChannel(std::string name, std::string path, Level level = Level::Debug, std::string timeFormat = "%H:%M:%S")
 ```
+
+Defined in src/base/include/icy/logger.h:444
 
 #### Parameters
 * `name` Unique channel name. 
@@ -9713,11 +10718,13 @@ FileChannel(std::string name, std::string path, Level level, std::string timeFor
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(const LogStream & stream)
+virtual void write(const LogStream & stream) override
 ```
+
+Defined in src/base/include/icy/logger.h:452
 
 Formats and writes the log stream entry to the file. Opens the file on first write if not already open. 
 #### Parameters
@@ -9732,6 +10739,8 @@ Formats and writes the log stream entry to the file. Opens the file on first wri
 ```cpp
 void setPath(const std::string & path)
 ```
+
+Defined in src/base/include/icy/logger.h:456
 
 Sets the file path and reopens the file stream. 
 #### Parameters
@@ -9748,6 +10757,8 @@ Sets the file path and reopens the file stream.
 ```cpp
 std::string path() const
 ```
+
+Defined in src/base/include/icy/logger.h:460
 
 Returns the current log file path. 
 #### Returns
@@ -9770,6 +10781,8 @@ Absolute or relative path to the log file.
 std::ofstream _fstream
 ```
 
+Defined in src/base/include/icy/logger.h:467
+
 ---
 
 {#_path}
@@ -9779,6 +10792,8 @@ std::ofstream _fstream
 ```cpp
 std::string _path
 ```
+
+Defined in src/base/include/icy/logger.h:468
 
 ### Protected Methods
 
@@ -9799,6 +10814,8 @@ std::string _path
 virtual void open()
 ```
 
+Defined in src/base/include/icy/logger.h:463
+
 ---
 
 {#close}
@@ -9811,6 +10828,8 @@ virtual void open()
 virtual void close()
 ```
 
+Defined in src/base/include/icy/logger.h:464
+
 {#rotatingfilechannel}
 
 ## RotatingFileChannel
@@ -9818,6 +10837,12 @@ virtual void close()
 ```cpp
 #include <icy/logger.h>
 ```
+
+```cpp
+class RotatingFileChannel
+```
+
+Defined in src/base/include/icy/logger.h:478
 
 > **Inherits:** [`LogChannel`](#logchannel)
 
@@ -9827,8 +10852,8 @@ Log channel that writes to time-rotated log files.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`RotatingFileChannel`](#rotatingfilechannel)  | #### Parameters |
-| `void` | [`write`](#write) `virtual` | Formats and writes the log stream entry to the current log file. Rotates the file if the rotation interval has elapsed. |
+|  | [`RotatingFileChannel`](#rotatingfilechannel)  |  |
+| `void` | [`write`](#write) `virtual` `override` | Formats and writes the log stream entry to the current log file. Rotates the file if the rotation interval has elapsed. |
 | `void` | [`rotate`](#rotate) `virtual` | Closes the current log file and opens a new one with a timestamped filename. |
 | `std::string` | [`dir`](#dir) `const` `inline` | Returns the directory where log files are written. |
 | `std::string` | [`filename`](#filename) `const` `inline` | Returns the filename of the currently open log file. |
@@ -9844,8 +10869,10 @@ Log channel that writes to time-rotated log files.
 #### RotatingFileChannel
 
 ```cpp
-RotatingFileChannel(std::string name, std::string dir, Level level, std::string extension, int rotationInterval, std::string timeFormat)
+RotatingFileChannel(std::string name, std::string dir, Level level = Level::Debug, std::string extension = "log", int rotationInterval = 12 *3600, std::string timeFormat = "%H:%M:%S")
 ```
+
+Defined in src/base/include/icy/logger.h:487
 
 #### Parameters
 * `name` Unique channel name. 
@@ -9866,11 +10893,13 @@ RotatingFileChannel(std::string name, std::string dir, Level level, std::string 
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(const LogStream & stream)
+virtual void write(const LogStream & stream) override
 ```
+
+Defined in src/base/include/icy/logger.h:498
 
 Formats and writes the log stream entry to the current log file. Rotates the file if the rotation interval has elapsed. 
 #### Parameters
@@ -9888,6 +10917,8 @@ Formats and writes the log stream entry to the current log file. Rotates the fil
 virtual void rotate()
 ```
 
+Defined in src/base/include/icy/logger.h:501
+
 Closes the current log file and opens a new one with a timestamped filename.
 
 ---
@@ -9901,6 +10932,8 @@ Closes the current log file and opens a new one with a timestamped filename.
 ```cpp
 inline std::string dir() const
 ```
+
+Defined in src/base/include/icy/logger.h:504
 
 Returns the directory where log files are written.
 
@@ -9916,6 +10949,8 @@ Returns the directory where log files are written.
 inline std::string filename() const
 ```
 
+Defined in src/base/include/icy/logger.h:507
+
 Returns the filename of the currently open log file.
 
 ---
@@ -9930,6 +10965,8 @@ Returns the filename of the currently open log file.
 inline int rotationInterval() const
 ```
 
+Defined in src/base/include/icy/logger.h:510
+
 Returns the rotation interval in seconds.
 
 ---
@@ -9943,6 +10980,8 @@ Returns the rotation interval in seconds.
 ```cpp
 inline void setDir(std::string dir)
 ```
+
+Defined in src/base/include/icy/logger.h:514
 
 Sets the output directory for rotated log files. 
 #### Parameters
@@ -9960,6 +10999,8 @@ Sets the output directory for rotated log files.
 inline void setExtension(std::string ext)
 ```
 
+Defined in src/base/include/icy/logger.h:518
+
 Sets the file extension for rotated log files. 
 #### Parameters
 * `ext` Extension without leading dot (e.g. "log").
@@ -9975,6 +11016,8 @@ Sets the file extension for rotated log files.
 ```cpp
 inline void setRotationInterval(int interval)
 ```
+
+Defined in src/base/include/icy/logger.h:522
 
 Sets the rotation interval. 
 #### Parameters
@@ -10001,6 +11044,8 @@ Sets the rotation interval.
 std::unique_ptr< std::ofstream > _fstream
 ```
 
+Defined in src/base/include/icy/logger.h:525
+
 ---
 
 {#_dir}
@@ -10010,6 +11055,8 @@ std::unique_ptr< std::ofstream > _fstream
 ```cpp
 std::string _dir
 ```
+
+Defined in src/base/include/icy/logger.h:526
 
 ---
 
@@ -10021,6 +11068,8 @@ std::string _dir
 std::string _filename
 ```
 
+Defined in src/base/include/icy/logger.h:527
+
 ---
 
 {#_extension}
@@ -10031,6 +11080,8 @@ std::string _filename
 std::string _extension
 ```
 
+Defined in src/base/include/icy/logger.h:528
+
 ---
 
 {#_rotationinterval}
@@ -10040,6 +11091,8 @@ std::string _extension
 ```cpp
 int _rotationInterval
 ```
+
+Defined in src/base/include/icy/logger.h:529
 
 The log rotation interval in seconds.
 
@@ -10053,6 +11106,8 @@ The log rotation interval in seconds.
 time_t _rotatedAt
 ```
 
+Defined in src/base/include/icy/logger.h:530
+
 The time the log was last rotated.
 
 {#refcounted}
@@ -10063,23 +11118,28 @@ The time the log was last rotated.
 #include <icy/memory.h>
 ```
 
-> **Subclassed by:** [`PacketTransaction< Message >`](#packettransaction), [`Context< uv_pipe_t >`](uv.md#context-1), [`Context< uv_tcp_t >`](uv.md#context-1), [`Context< uv_udp_t >`](uv.md#context-1), [`Context< uv_idle_t >`](uv.md#context-1), [`Context< uv_process_t >`](uv.md#context-1), [`Context< uv_async_t >`](uv.md#context-1), [`Context< uv_timer_t >`](uv.md#context-1)
+```cpp
+template<typename T>
+class RefCounted
+```
+
+Defined in src/base/include/icy/memory.h:57
 
 Base class for intrusive reference counting.
 
 Embeds the refcount in the object itself - no separate control block allocation, no atomic operations. Safe for single-threaded libuv loops.
 
-Usage: inherit from RefCounted<YourClass>, then use IntrusivePtr<YourClass> instead of std::shared_ptr<YourClass>.
+Usage: inherit from RefCounted<YourClass>, then use [IntrusivePtr<YourClass>](#intrusiveptr) instead of std::shared_ptr<YourClass>.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`RefCounted`](#refcounted)  | Defaulted constructor. |
-|  | [`RefCounted`](#refcounted) `inline` |  |
-| `void` | [`addRef`](#addref) `const` `inline` | Increments the reference count. Called by [IntrusivePtr](#intrusiveptr) on acquisition. |
-| `bool` | [`releaseRef`](#releaseref) `const` `inline` | Decrements the reference count. |
-| `int` | [`refCount`](#refcount) `const` `inline` | Returns the current reference count. |
+|  | [`RefCounted`](#refcounted) `inline` `noexcept` |  |
+| `void` | [`addRef`](#addref) `const` `inline` `noexcept` | Increments the reference count. Called by [IntrusivePtr](#intrusiveptr) on acquisition. |
+| `bool` | [`releaseRef`](#releaseref) `const` `inline` `noexcept` | Decrements the reference count. |
+| `int` | [`refCount`](#refcount) `const` `inline` `nodiscard` `noexcept` | Returns the current reference count. |
 
 ---
 
@@ -10091,6 +11151,8 @@ Usage: inherit from RefCounted<YourClass>, then use IntrusivePtr<YourClass> inst
 RefCounted() = default
 ```
 
+Defined in src/base/include/icy/memory.h:60
+
 Defaulted constructor.
 
 ---
@@ -10099,11 +11161,13 @@ Defaulted constructor.
 
 #### RefCounted
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline RefCounted(const RefCounted &) noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:61
 
 ---
 
@@ -10111,11 +11175,13 @@ inline RefCounted(const RefCounted &) noexcept
 
 #### addRef
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline void addRef() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:65
 
 Increments the reference count. Called by [IntrusivePtr](#intrusiveptr) on acquisition.
 
@@ -10125,11 +11191,13 @@ Increments the reference count. Called by [IntrusivePtr](#intrusiveptr) on acqui
 
 #### releaseRef
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool releaseRef() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:69
 
 Decrements the reference count. 
 #### Returns
@@ -10141,11 +11209,13 @@ true if the count reached zero (caller should delete the object).
 
 #### refCount
 
-`const` `inline`
+`const` `inline` `nodiscard` `noexcept`
 
 ```cpp
-inline int refCount() const noexcept
+[[nodiscard]] inline int refCount() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:73
 
 Returns the current reference count. 
 #### Returns
@@ -10167,6 +11237,8 @@ Current reference count.
 int _refCount = 0
 ```
 
+Defined in src/base/include/icy/memory.h:79
+
 {#intrusiveptr}
 
 ## IntrusivePtr
@@ -10174,6 +11246,13 @@ int _refCount = 0
 ```cpp
 #include <icy/memory.h>
 ```
+
+```cpp
+template<typename T>
+class IntrusivePtr
+```
+
+Defined in src/base/include/icy/memory.h:90
 
 Intrusive smart pointer for [RefCounted](#refcounted) objects.
 
@@ -10189,26 +11268,26 @@ Like std::shared_ptr but with zero allocation overhead:
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` `explicit` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-|  | [`IntrusivePtr`](#intrusiveptr) `inline` |  |
-| `void` | [`reset`](#reset) `inline` | Releases ownership of the current pointer, decrementing its refcount. The pointer is set to null. |
-| `void` | [`reset`](#reset) `inline` | Releases the current pointer and takes ownership of p, incrementing its refcount. |
-| `T *` | [`get`](#get) `const` `inline` | Returns the raw pointer without transferring ownership. |
-| `T &` | [`operator*`](#operator) `const` `inline` | Dereferences the managed pointer. |
-| `T *` | [`operator->`](#operator) `const` `inline` | Member access on the managed pointer. |
-|  | [`operator bool`](#operatorbool) `const` `inline` `explicit` | Returns true if the pointer is non-null. |
-| `void` | [`swap`](#swap) `inline` | Swaps the managed pointer with another [IntrusivePtr](#intrusiveptr). |
-| `void` | [`detach`](#detach) `inline` | Release ownership without decrementing refcount. Used internally for move construction across types. |
-| `bool` | [`operator==`](#operator) `const` `inline` |  |
-| `bool` | [`operator!=`](#operator) `const` `inline` |  |
-| `bool` | [`operator==`](#operator) `const` `inline` |  |
-| `bool` | [`operator!=`](#operator) `const` `inline` |  |
-| `bool` | [`operator<`](#operator) `const` `inline` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `explicit` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+|  | [`IntrusivePtr`](#intrusiveptr) `inline` `noexcept` |  |
+| `void` | [`reset`](#reset) `inline` `noexcept` | Releases ownership of the current pointer, decrementing its refcount. The pointer is set to null. |
+| `void` | [`reset`](#reset) `inline` `noexcept` | Releases the current pointer and takes ownership of p, incrementing its refcount. |
+| `T *` | [`get`](#get) `const` `inline` `noexcept` | Returns the raw pointer without transferring ownership. |
+| `T &` | [`operator*`](#operator) `const` `inline` `noexcept` | Dereferences the managed pointer. |
+| `T *` | [`operator->`](#operator) `const` `inline` `noexcept` | Member access on the managed pointer. |
+|  | [`operator bool`](#operatorbool) `const` `inline` `explicit` `noexcept` | Returns true if the pointer is non-null. |
+| `void` | [`swap`](#swap) `inline` `noexcept` | Swaps the managed pointer with another [IntrusivePtr](#intrusiveptr). |
+| `void` | [`detach`](#detach) `inline` `noexcept` | Release ownership without decrementing refcount. Used internally for move construction across types. |
+| `bool` | [`operator==`](#operator) `const` `inline` `noexcept` |  |
+| `bool` | [`operator!=`](#operator) `const` `inline` `noexcept` |  |
+| `bool` | [`operator==`](#operator) `const` `inline` `noexcept` |  |
+| `bool` | [`operator!=`](#operator) `const` `inline` `noexcept` |  |
+| `bool` | [`operator<`](#operator) `const` `inline` `noexcept` |  |
 
 ---
 
@@ -10216,83 +11295,97 @@ Like std::shared_ptr but with zero allocation overhead:
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline IntrusivePtr() noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:93
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline IntrusivePtr(std::nullptr_t) noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:94
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline` `explicit`
+`inline` `explicit` `noexcept`
 
 ```cpp
 inline explicit IntrusivePtr(T * p) noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:96
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline IntrusivePtr(const IntrusivePtr & r) noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:101
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 template<typename U> inline IntrusivePtr(const IntrusivePtr< U > & r) noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:107
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline IntrusivePtr(IntrusivePtr && r) noexcept
 ```
 
+Defined in src/base/include/icy/memory.h:112
+
 ---
 
 {#intrusiveptr}
 
 #### IntrusivePtr
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 template<typename U> inline IntrusivePtr(IntrusivePtr< U > && r) noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:118
 
 ---
 
@@ -10300,11 +11393,13 @@ template<typename U> inline IntrusivePtr(IntrusivePtr< U > && r) noexcept
 
 #### reset
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline void reset() noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:155
 
 Releases ownership of the current pointer, decrementing its refcount. The pointer is set to null.
 
@@ -10314,11 +11409,13 @@ Releases ownership of the current pointer, decrementing its refcount. The pointe
 
 #### reset
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline void reset(T * p) noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:162
 
 Releases the current pointer and takes ownership of p, incrementing its refcount. 
 #### Parameters
@@ -10330,11 +11427,13 @@ Releases the current pointer and takes ownership of p, incrementing its refcount
 
 #### get
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline T * get() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:169
 
 Returns the raw pointer without transferring ownership. 
 #### Returns
@@ -10346,11 +11445,13 @@ Raw pointer to the managed object, or nullptr.
 
 #### operator*
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline T & operator*() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:173
 
 Dereferences the managed pointer. 
 #### Returns
@@ -10362,11 +11463,13 @@ Reference to the managed object.
 
 #### operator->
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline T * operator->() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:177
 
 Member access on the managed pointer. 
 #### Returns
@@ -10378,11 +11481,13 @@ Raw pointer to the managed object.
 
 #### operator bool
 
-`const` `inline` `explicit`
+`const` `inline` `explicit` `noexcept`
 
 ```cpp
 inline explicit operator bool() const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:180
 
 Returns true if the pointer is non-null.
 
@@ -10392,11 +11497,13 @@ Returns true if the pointer is non-null.
 
 #### swap
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline void swap(IntrusivePtr & r) noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:184
 
 Swaps the managed pointer with another [IntrusivePtr](#intrusiveptr). 
 #### Parameters
@@ -10408,11 +11515,13 @@ Swaps the managed pointer with another [IntrusivePtr](#intrusiveptr).
 
 #### detach
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline void detach() noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:188
 
 Release ownership without decrementing refcount. Used internally for move construction across types.
 
@@ -10422,11 +11531,13 @@ Release ownership without decrementing refcount. Used internally for move constr
 
 #### operator==
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool operator==(const IntrusivePtr & r) const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:190
 
 ---
 
@@ -10434,11 +11545,13 @@ inline bool operator==(const IntrusivePtr & r) const noexcept
 
 #### operator!=
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool operator!=(const IntrusivePtr & r) const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:191
 
 ---
 
@@ -10446,11 +11559,13 @@ inline bool operator!=(const IntrusivePtr & r) const noexcept
 
 #### operator==
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool operator==(std::nullptr_t) const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:192
 
 ---
 
@@ -10458,11 +11573,13 @@ inline bool operator==(std::nullptr_t) const noexcept
 
 #### operator!=
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool operator!=(std::nullptr_t) const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:193
 
 ---
 
@@ -10470,11 +11587,13 @@ inline bool operator!=(std::nullptr_t) const noexcept
 
 #### operator<
 
-`const` `inline`
+`const` `inline` `noexcept`
 
 ```cpp
 inline bool operator<(const IntrusivePtr & r) const noexcept
 ```
+
+Defined in src/base/include/icy/memory.h:194
 
 ### Private Attributes
 
@@ -10492,6 +11611,8 @@ inline bool operator<(const IntrusivePtr & r) const noexcept
 T * _ptr
 ```
 
+Defined in src/base/include/icy/memory.h:197
+
 {#random}
 
 ## Random
@@ -10499,6 +11620,12 @@ T * _ptr
 ```cpp
 #include <icy/random.h>
 ```
+
+```cpp
+class Random
+```
+
+Defined in src/base/include/icy/random.h:25
 
 [Random](#random) implements a pseudo random number generator (PRNG) using the Mersenne Twister algorithm (std::mt19937).
 
@@ -10524,8 +11651,10 @@ T * _ptr
 #### Random
 
 ```cpp
-Random(int stateSize)
+Random(int stateSize = 256)
 ```
+
+Defined in src/base/include/icy/random.h:32
 
 Creates and initializes the PRNG. The stateSize parameter is accepted for API compatibility but is ignored; the engine always uses mt19937's fixed state size. 
 #### Parameters
@@ -10541,6 +11670,8 @@ Creates and initializes the PRNG. The stateSize parameter is accepted for API co
 ~Random()
 ```
 
+Defined in src/base/include/icy/random.h:35
+
 Destroys the PRNG.
 
 ---
@@ -10552,6 +11683,8 @@ Destroys the PRNG.
 ```cpp
 void seed(uint32_t seed)
 ```
+
+Defined in src/base/include/icy/random.h:39
 
 Seeds the pseudo random generator with the given seed. 
 #### Parameters
@@ -10567,6 +11700,8 @@ Seeds the pseudo random generator with the given seed.
 void seed()
 ```
 
+Defined in src/base/include/icy/random.h:42
+
 Seeds the pseudo random generator with entropy from std::random_device.
 
 ---
@@ -10578,6 +11713,8 @@ Seeds the pseudo random generator with entropy from std::random_device.
 ```cpp
 uint32_t next()
 ```
+
+Defined in src/base/include/icy/random.h:46
 
 Returns the next pseudo random number from the mt19937 engine. 
 #### Returns
@@ -10592,6 +11729,8 @@ Pseudo random uint32_t value.
 ```cpp
 uint32_t next(uint32_t n)
 ```
+
+Defined in src/base/include/icy/random.h:51
 
 Returns the next pseudo random number in the range [0, n). 
 #### Parameters
@@ -10610,6 +11749,8 @@ Pseudo random value in [0, n).
 char nextChar()
 ```
 
+Defined in src/base/include/icy/random.h:55
+
 Returns the next pseudo random byte as a char. 
 #### Returns
 Pseudo random char value.
@@ -10623,6 +11764,8 @@ Pseudo random char value.
 ```cpp
 bool nextBool()
 ```
+
+Defined in src/base/include/icy/random.h:59
 
 Returns the next pseudo random boolean value. 
 #### Returns
@@ -10638,6 +11781,8 @@ true or false with equal probability.
 float nextFloat()
 ```
 
+Defined in src/base/include/icy/random.h:63
+
 Returns the next pseudo random float in [0.0, 1.0]. 
 #### Returns
 Pseudo random float value.
@@ -10651,6 +11796,8 @@ Pseudo random float value.
 ```cpp
 double nextDouble()
 ```
+
+Defined in src/base/include/icy/random.h:67
 
 Returns the next pseudo random double in [0.0, 1.0]. 
 #### Returns
@@ -10674,9 +11821,11 @@ Pseudo random double value.
 static void getSeed(char * seed, unsigned length)
 ```
 
+Defined in src/base/include/icy/random.h:72
+
 Fills the buffer with cryptographically random bytes from std::random_device. 
 #### Parameters
-* `seed` Buffer to fill. 
+* `seed` [Buffer](#buffer-2) to fill. 
 
 * `length` Number of bytes to write into seed.
 
@@ -10696,6 +11845,8 @@ Fills the buffer with cryptographically random bytes from std::random_device.
 std::mt19937 _engine
 ```
 
+Defined in src/base/include/icy/random.h:75
+
 {#runner}
 
 ## Runner
@@ -10703,6 +11854,12 @@ std::mt19937 _engine
 ```cpp
 #include <icy/runner.h>
 ```
+
+```cpp
+class Runner
+```
+
+Defined in src/base/include/icy/runner.h:34
 
 > **Subclassed by:** [`Idler`](#idler), [`Synchronizer`](#synchronizer), [`Thread`](#thread), [`Timer`](#timer)
 
@@ -10713,13 +11870,13 @@ std::mt19937 _engine
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Runner`](#runner)  |  |
-| `void` | [`start`](#start)  | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
+| `void` | [`start`](#start) `virtual` | Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. |
 | `bool` | [`running`](#running) `const` | Returns true if the async context is currently running. |
 | `void` | [`cancel`](#cancel)  | Signals the async context to stop at the earliest opportunity. |
 | `bool` | [`cancelled`](#cancelled) `const` | Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. |
 | `bool` | [`repeating`](#repeating) `const` | Returns true if the runner is in repeating mode. |
 | `void` | [`setRepeating`](#setrepeating)  | Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. |
-| `bool` | [`async`](#async) `const` | Returns true if the implementation is thread-based. |
+| `bool` | [`async`](#async) `virtual` `const` | Returns true if the implementation is thread-based. |
 | `std::thread::id` | [`tid`](#tid) `const` | Returns the native thread ID of the thread running the async context. |
 | `bool` | [`waitForExit`](#waitforexit)  | Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. |
 
@@ -10733,15 +11890,21 @@ std::mt19937 _engine
 Runner()
 ```
 
+Defined in src/base/include/icy/runner.h:37
+
 ---
 
 {#start}
 
 #### start
 
+`virtual`
+
 ```cpp
-void start(std::function< void()> target)
+virtual void start(std::function< void()> target)
 ```
+
+Defined in src/base/include/icy/runner.h:43
 
 Starts the asynchronous context with the given callback. The callback must remain valid for the lifetime of the `[Runner](#runner)`. 
 #### Parameters
@@ -10759,6 +11922,8 @@ Starts the asynchronous context with the given callback. The callback must remai
 bool running() const
 ```
 
+Defined in src/base/include/icy/runner.h:47
+
 Returns true if the async context is currently running. 
 #### Returns
 True if the runner's context has been started and has not yet stopped.
@@ -10773,6 +11938,8 @@ True if the runner's context has been started and has not yet stopped.
 void cancel()
 ```
 
+Defined in src/base/include/icy/runner.h:50
+
 Signals the async context to stop at the earliest opportunity.
 
 ---
@@ -10786,6 +11953,8 @@ Signals the async context to stop at the earliest opportunity.
 ```cpp
 bool cancelled() const
 ```
+
+Defined in src/base/include/icy/runner.h:55
 
 Returns true if the context has been cancelled. The implementation is responsible for exiting as soon as possible after cancellation. 
 #### Returns
@@ -10803,6 +11972,8 @@ True if `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` has
 bool repeating() const
 ```
 
+Defined in src/base/include/icy/runner.h:59
+
 Returns true if the runner is in repeating mode. 
 #### Returns
 True if the target function is invoked in a loop until cancelled.
@@ -10817,6 +11988,8 @@ True if the target function is invoked in a loop until cancelled.
 void setRepeating(bool flag)
 ```
 
+Defined in src/base/include/icy/runner.h:66
+
 Enables or disables repeating mode. When repeating, the target function is invoked repeatedly until `[cancel()](#classicy_1_1Runner_1a53b3794fbd4ace235771a4e84f93f1e7)` is called. This normalizes behaviour across thread-based and event-loop-based `[Runner](#runner)` implementations. Must be called before `[start()](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`. 
 #### Parameters
 * `flag` True to enable repeating mode, false to run the target once.
@@ -10827,11 +12000,13 @@ Enables or disables repeating mode. When repeating, the target function is invok
 
 #### async
 
-`const`
+`virtual` `const`
 
 ```cpp
-bool async() const
+virtual bool async() const
 ```
+
+Defined in src/base/include/icy/runner.h:70
 
 Returns true if the implementation is thread-based. 
 #### Returns
@@ -10849,6 +12024,8 @@ True for thread-backed runners, false for event-loop-driven runners.
 std::thread::id tid() const
 ```
 
+Defined in src/base/include/icy/runner.h:74
+
 Returns the native thread ID of the thread running the async context. 
 #### Returns
 `std::thread::id` of the runner thread, or a default-constructed ID if not started.
@@ -10860,8 +12037,10 @@ Returns the native thread ID of the thread running the async context.
 #### waitForExit
 
 ```cpp
-bool waitForExit(int timeout)
+bool waitForExit(int timeout = 5000)
 ```
+
+Defined in src/base/include/icy/runner.h:81
 
 Blocks until the async context exits or the timeout elapses. The context should be cancelled before calling this method. Must be called from outside the runner's own thread to avoid deadlock. 
 #### Parameters
@@ -10886,6 +12065,8 @@ True if the context exited cleanly, false if the timeout was reached (throws ins
 std::shared_ptr< Context > _context
 ```
 
+Defined in src/base/include/icy/runner.h:117
+
 Shared pointer to the internal [Context](#context).
 
 ### Protected Methods
@@ -10905,6 +12086,8 @@ Shared pointer to the internal [Context](#context).
 Runner(const Runner &) = delete
 ```
 
+Defined in src/base/include/icy/runner.h:111
+
 NonCopyable and NonMovable.
 
 ---
@@ -10917,6 +12100,8 @@ NonCopyable and NonMovable.
 Runner(Runner &&) = delete
 ```
 
+Defined in src/base/include/icy/runner.h:113
+
 Deleted constructor.
 
 {#signalrtargsmutext}
@@ -10927,26 +12112,33 @@ Deleted constructor.
 #include <icy/signal.h>
 ```
 
+```cpp
+template<typename RT, typename... Args, typename MutexT>
+class Signal< RT(Args...), MutexT >
+```
+
+Defined in src/base/include/icy/signal.h:142
+
 Thread-safe signal and slot implementation for callback-based event dispatch.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `int` | [`attach`](#attach) `const` `inline` | Connects a `lambda` or `std::function` to the signal. |
-| `int` | [`attach`](#attach) `const` `inline` | Connects a pre-constructed `SlotPtr` to the signal. |
+| `int` | [`attach`](#attach) `const` `inline` `nodiscard` | Connects a `lambda` or `std::function` to the signal. |
+| `int` | [`attach`](#attach) `const` `inline` `nodiscard` | Connects a pre-constructed `[SlotPtr](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ad44dfcd3b949fddac73c8704d8754c3b)` to the signal. |
 | `bool` | [`detach`](#detach) `const` `inline` | Detaches the slot with the given ID. |
 | `bool` | [`detach`](#detach) `const` `inline` | Detaches all slots associated with the given instance pointer. |
 | `bool` | [`detach`](#detach) `const` `inline` | Detaches the slot whose delegate compares equal to `other->delegate`. |
 | `void` | [`detachAll`](#detachall) `const` `inline` | Detaches and destroys all currently attached slots. |
 | `RT` | [`emit`](#emit) `virtual` `inline` | Emits the signal, invoking all live attached slots in priority order. |
 | `std::vector< SlotPtr >` | [`slots`](#slots) `const` `inline` | Returns a snapshot copy of the current slot list. |
-| `size_t` | [`nslots`](#nslots) `const` `inline` | Returns the number of slots currently registered with this signal. |
+| `size_t` | [`nslots`](#nslots) `const` `inline` `nodiscard` | Returns the number of slots currently registered with this signal. |
 | `int` | [`operator+=`](#operator) `inline` | Attaches a function; equivalent to `attach(func)`. |
 | `int` | [`operator+=`](#operator) `inline` | Attaches a pre-constructed slot; equivalent to `attach(slot)`. |
 | `bool` | [`operator-=`](#operator) `inline` | Detaches the slot with the given ID; equivalent to `detach(id)`. |
 | `bool` | [`operator-=`](#operator) `inline` | Detaches all slots for the given instance; equivalent to `detach(instance)`. |
-| `bool` | [`operator-=`](#operator) `inline` | Detaches the slot matching `slot`'s delegate; equivalent to `detach(slot)`. |
+| `bool` | [`operator-=`](#operator) `inline` | Detaches the slot matching `[slot](#slot)`'s delegate; equivalent to `detach(slot)`. |
 |  | [`Signal`](#signal)  | Defaulted constructor. |
 |  | [`Signal`](#signal) `inline` | Copy constructor; copies the slot list and last-assigned ID from `r`. |
 | `Signal &` | [`operator=`](#operator) `inline` | Copy assignment operator; copies the slot list and last-assigned ID from `r`. |
@@ -10957,11 +12149,13 @@ Thread-safe signal and slot implementation for callback-based event dispatch.
 
 #### attach
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline int attach(Function const & func, void * instance, int id, int priority) const
+[[nodiscard]] inline int attach(Function const & func, void * instance = nullptr, int id = -1, int priority = -1) const
 ```
+
+Defined in src/base/include/icy/signal.h:157
 
 Connects a `lambda` or `std::function` to the signal.
 
@@ -10983,13 +12177,15 @@ The assigned slot ID, which can be passed to `[detach()](#classicy_1_1Signal_3_0
 
 #### attach
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline int attach(SlotPtr slot) const
+[[nodiscard]] inline int attach(SlotPtr slot) const
 ```
 
-Connects a pre-constructed `SlotPtr` to the signal.
+Defined in src/base/include/icy/signal.h:171
+
+Connects a pre-constructed `[SlotPtr](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ad44dfcd3b949fddac73c8704d8754c3b)` to the signal.
 
 Duplicate slots (matched by delegate equality) are removed before insertion. Slots are kept sorted in descending priority order after insertion.
 
@@ -11014,6 +12210,8 @@ The assigned slot ID, which can be passed to `[detach()](#classicy_1_1Signal_3_0
 inline bool detach(int id) const
 ```
 
+Defined in src/base/include/icy/signal.h:202
+
 Detaches the slot with the given ID.
 
 Safe to call from within a slot's callback (the slot is marked dead before erasure).
@@ -11035,6 +12233,8 @@ Safe to call from within a slot's callback (the slot is marked dead before erasu
 ```cpp
 inline bool detach(const void * instance) const
 ```
+
+Defined in src/base/include/icy/signal.h:219
 
 Detaches all slots associated with the given instance pointer.
 
@@ -11058,6 +12258,8 @@ Useful for bulk disconnect when an object is destroyed. Matches slots by their s
 inline bool detach(SlotPtr other) const
 ```
 
+Defined in src/base/include/icy/signal.h:236
+
 Detaches the slot whose delegate compares equal to `other->delegate`.
 
 Used by the `[slot()](#slot)` helper overloads and `operator-=` to disconnect a specific class-member or function binding by value.
@@ -11080,6 +12282,8 @@ Used by the `[slot()](#slot)` helper overloads and `operator-=` to disconnect a 
 inline void detachAll() const
 ```
 
+Defined in src/base/include/icy/signal.h:249
+
 Detaches and destroys all currently attached slots.
 
 Each slot is marked dead before removal. After this call `[nslots()](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ab987050a876fe4e983601eae08062587)` returns 0.
@@ -11096,13 +12300,15 @@ Each slot is marked dead before removal. After this call `[nslots()](#classicy_1
 virtual inline RT emit(Args... args)
 ```
 
+Defined in src/base/include/icy/signal.h:283
+
 Emits the signal, invoking all live attached slots in priority order.
 
 For `[Signal](#signal)<bool(...)>`: iterates slots and returns `true` as soon as any slot returns `true`, stopping further propagation. Returns `false` if no slot handled the event.
 
 For `[Signal](#signal)<void(...)>`: calls every live slot unconditionally.
 
-Emission snapshots raw slot pointers under a shared lock, then invokes delegates without holding the lock. Dead slots are swept after the outermost emission returns, allowing attach/detach inside callbacks without copying `shared_ptr`s on the hot path.
+Local `[Signal](#signal)<...>` traverses the stable slot list directly without any snapshot allocation. `[ThreadSignal](#threadsignal)<...>` snapshots raw node pointers under a shared lock, then invokes delegates without holding the lock. Dead slots are swept after the outermost emission returns, allowing attach/detach inside callbacks without copying `shared_ptr`s on the hot path.
 
 #### Parameters
 * `args` Arguments forwarded to each connected slot. 
@@ -11122,12 +12328,14 @@ For `bool` return type: `true` if any slot handled the event, `false` otherwise.
 inline std::vector< SlotPtr > slots() const
 ```
 
+Defined in src/base/include/icy/signal.h:354
+
 Returns a snapshot copy of the current slot list.
 
 The copy is taken under a shared lock, so it is safe to call concurrently with attach/detach operations. Only currently live slots are returned.
 
 #### Returns
-A vector of `SlotPtr` representing all currently registered slots.
+A vector of `[SlotPtr](#classicy_1_1Signal_3_01RT_07Args_8_8_8_08_00_01MutexT_01_4_1ad44dfcd3b949fddac73c8704d8754c3b)` representing all currently registered slots.
 
 ---
 
@@ -11135,15 +12343,17 @@ A vector of `SlotPtr` representing all currently registered slots.
 
 #### nslots
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t nslots() const
+[[nodiscard]] inline size_t nslots() const
 ```
+
+Defined in src/base/include/icy/signal.h:372
 
 Returns the number of slots currently registered with this signal.
 
-The count is taken under a shared lock. Slots that were concurrently killed but not yet erased may still be included in the count.
+The count is taken under a shared lock and tracks only currently live slots. Dead-but-not-yet-swept nodes are excluded.
 
 #### Returns
 The number of entries in the internal slot list.
@@ -11159,6 +12369,8 @@ The number of entries in the internal slot list.
 ```cpp
 inline int operator+=(Function const & func)
 ```
+
+Defined in src/base/include/icy/signal.h:379
 
 Attaches a function; equivalent to `attach(func)`.
 
@@ -11177,6 +12389,8 @@ Assigned slot ID.
 inline int operator+=(SlotPtr slot)
 ```
 
+Defined in src/base/include/icy/signal.h:381
+
 Attaches a pre-constructed slot; equivalent to `attach(slot)`.
 
 #### Returns
@@ -11193,6 +12407,8 @@ Assigned slot ID.
 ```cpp
 inline bool operator-=(int id)
 ```
+
+Defined in src/base/include/icy/signal.h:383
 
 Detaches the slot with the given ID; equivalent to `detach(id)`.
 
@@ -11211,6 +12427,8 @@ Detaches the slot with the given ID; equivalent to `detach(id)`.
 inline bool operator-=(const void * instance)
 ```
 
+Defined in src/base/include/icy/signal.h:385
+
 Detaches all slots for the given instance; equivalent to `detach(instance)`.
 
 #### Returns
@@ -11228,7 +12446,9 @@ Detaches all slots for the given instance; equivalent to `detach(instance)`.
 inline bool operator-=(SlotPtr slot)
 ```
 
-Detaches the slot matching `slot`'s delegate; equivalent to `detach(slot)`.
+Defined in src/base/include/icy/signal.h:387
+
+Detaches the slot matching `[slot](#slot)`'s delegate; equivalent to `detach(slot)`.
 
 #### Returns
 `true` if removed.
@@ -11243,6 +12463,8 @@ Detaches the slot matching `slot`'s delegate; equivalent to `detach(slot)`.
 Signal() = default
 ```
 
+Defined in src/base/include/icy/signal.h:389
+
 Defaulted constructor.
 
 ---
@@ -11256,6 +12478,8 @@ Defaulted constructor.
 ```cpp
 inline Signal(const Signal & r)
 ```
+
+Defined in src/base/include/icy/signal.h:398
 
 Copy constructor; copies the slot list and last-assigned ID from `r`. 
 #### Parameters
@@ -11273,6 +12497,8 @@ Copy constructor; copies the slot list and last-assigned ID from `r`.
 inline Signal & operator=(const Signal & r)
 ```
 
+Defined in src/base/include/icy/signal.h:407
+
 Copy assignment operator; copies the slot list and last-assigned ID from `r`. 
 #### Parameters
 * `r` The signal to copy from. 
@@ -11287,6 +12513,7 @@ Reference to this signal.
 | [`Function`](#function)  |  |
 | [`SlotPtr`](#slotptr)  |  |
 | [`Slot`](#slot)  |  |
+| [`SlotNode`](#slotnode)  |  |
 
 ---
 
@@ -11295,8 +12522,10 @@ Reference to this signal.
 #### Function
 
 ```cpp
-std::function< RT(Args...)> Function()
+using Function = std::function< RT(Args...)>
 ```
+
+Defined in src/base/include/icy/signal.h:145
 
 ---
 
@@ -11305,8 +12534,10 @@ std::function< RT(Args...)> Function()
 #### SlotPtr
 
 ```cpp
-std::shared_ptr< internal::Slot< RT, Args... > > SlotPtr()
+using SlotPtr = std::shared_ptr< internal::Slot< RT, Args... > >
 ```
+
+Defined in src/base/include/icy/signal.h:146
 
 ---
 
@@ -11315,15 +12546,30 @@ std::shared_ptr< internal::Slot< RT, Args... > > SlotPtr()
 #### Slot
 
 ```cpp
-internal::Slot< RT, Args... > Slot()
+using Slot = internal::Slot< RT, Args... >
 ```
+
+Defined in src/base/include/icy/signal.h:147
+
+---
+
+{#slotnode}
+
+#### SlotNode
+
+```cpp
+using SlotNode = internal::SlotNode< RT, Args... >
+```
+
+Defined in src/base/include/icy/signal.h:148
 
 ### Private Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `MutexT` | [`_mutex`](#_mutex)  |  |
-| `std::vector< SlotPtr >` | [`_slots`](#_slots)  |  |
+| `SlotNode *` | [`_head`](#_head)  |  |
+| `SlotNode *` | [`_tail`](#_tail)  |  |
 | `size_t` | [`_liveCount`](#_livecount)  |  |
 | `int` | [`_lastId`](#_lastid)  |  |
 | `EmitDepth` | [`_emitDepth`](#_emitdepth)  |  |
@@ -11339,15 +12585,31 @@ internal::Slot< RT, Args... > Slot()
 MutexT _mutex
 ```
 
+Defined in src/base/include/icy/signal.h:615
+
 ---
 
-{#_slots}
+{#_head}
 
-#### _slots
+#### _head
 
 ```cpp
-std::vector< SlotPtr > _slots
+SlotNode * _head = nullptr
 ```
+
+Defined in src/base/include/icy/signal.h:616
+
+---
+
+{#_tail}
+
+#### _tail
+
+```cpp
+SlotNode * _tail = nullptr
+```
+
+Defined in src/base/include/icy/signal.h:617
 
 ---
 
@@ -11359,6 +12621,8 @@ std::vector< SlotPtr > _slots
 size_t _liveCount = 0
 ```
 
+Defined in src/base/include/icy/signal.h:618
+
 ---
 
 {#_lastid}
@@ -11368,6 +12632,8 @@ size_t _liveCount = 0
 ```cpp
 int _lastId = 0
 ```
+
+Defined in src/base/include/icy/signal.h:619
 
 ---
 
@@ -11379,6 +12645,8 @@ int _lastId = 0
 EmitDepth _emitDepth {}
 ```
 
+Defined in src/base/include/icy/signal.h:620
+
 ---
 
 {#_needssweep}
@@ -11389,11 +12657,16 @@ EmitDepth _emitDepth {}
 SweepFlag _needsSweep {}
 ```
 
+Defined in src/base/include/icy/signal.h:621
+
 ### Private Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `size_t` | [`killMatchingLocked`](#killmatchinglocked) `const` `inline` |  |
+| `void` | [`insertSlotLocked`](#insertslotlocked) `const` `inline` |  |
+| `void` | [`appendSlotLocked`](#appendslotlocked) `const` `inline` |  |
+| `void` | [`eraseNodeLocked`](#erasenodelocked) `const` `inline` |  |
 | `size_t` | [`emitDepthLocked`](#emitdepthlocked) `const` `inline` |  |
 | `void` | [`beginEmitLocked`](#beginemitlocked) `const` `inline` |  |
 | `bool` | [`endEmitLocked`](#endemitlocked) `const` `inline` |  |
@@ -11401,7 +12674,10 @@ SweepFlag _needsSweep {}
 | `bool` | [`consumeSweepRequest`](#consumesweeprequest) `const` `inline` |  |
 | `void` | [`sweepLocked`](#sweeplocked) `const` `inline` |  |
 | `void` | [`finishEmit`](#finishemit) `inline` |  |
+| `void` | [`clearNodesLocked`](#clearnodeslocked) `const` `inline` |  |
 | `void` | [`resetEmitState`](#resetemitstate) `inline` |  |
+| `std::pair< std::vector< SlotPtr >, int >` | [`snapshotState`](#snapshotstate) `const` `inline` |  |
+| `void` | [`restoreState`](#restorestate) `inline` |  |
 
 ---
 
@@ -11415,6 +12691,50 @@ SweepFlag _needsSweep {}
 template<typename Matcher> inline size_t killMatchingLocked(Matcher && matcher, bool removeAll) const
 ```
 
+Defined in src/base/include/icy/signal.h:422
+
+---
+
+{#insertslotlocked}
+
+#### insertSlotLocked
+
+`const` `inline`
+
+```cpp
+inline void insertSlotLocked(SlotPtr slot) const
+```
+
+Defined in src/base/include/icy/signal.h:448
+
+---
+
+{#appendslotlocked}
+
+#### appendSlotLocked
+
+`const` `inline`
+
+```cpp
+inline void appendSlotLocked(SlotPtr slot) const
+```
+
+Defined in src/base/include/icy/signal.h:475
+
+---
+
+{#erasenodelocked}
+
+#### eraseNodeLocked
+
+`const` `inline`
+
+```cpp
+inline void eraseNodeLocked(SlotNode * node) const
+```
+
+Defined in src/base/include/icy/signal.h:487
+
 ---
 
 {#emitdepthlocked}
@@ -11426,6 +12746,8 @@ template<typename Matcher> inline size_t killMatchingLocked(Matcher && matcher, 
 ```cpp
 inline size_t emitDepthLocked() const
 ```
+
+Defined in src/base/include/icy/signal.h:502
 
 ---
 
@@ -11439,6 +12761,8 @@ inline size_t emitDepthLocked() const
 inline void beginEmitLocked() const
 ```
 
+Defined in src/base/include/icy/signal.h:510
+
 ---
 
 {#endemitlocked}
@@ -11450,6 +12774,8 @@ inline void beginEmitLocked() const
 ```cpp
 inline bool endEmitLocked() const
 ```
+
+Defined in src/base/include/icy/signal.h:518
 
 ---
 
@@ -11463,6 +12789,8 @@ inline bool endEmitLocked() const
 inline void requestSweepLocked() const
 ```
 
+Defined in src/base/include/icy/signal.h:526
+
 ---
 
 {#consumesweeprequest}
@@ -11474,6 +12802,8 @@ inline void requestSweepLocked() const
 ```cpp
 inline bool consumeSweepRequest() const
 ```
+
+Defined in src/base/include/icy/signal.h:534
 
 ---
 
@@ -11487,6 +12817,8 @@ inline bool consumeSweepRequest() const
 inline void sweepLocked() const
 ```
 
+Defined in src/base/include/icy/signal.h:545
+
 ---
 
 {#finishemit}
@@ -11498,6 +12830,22 @@ inline void sweepLocked() const
 ```cpp
 inline void finishEmit()
 ```
+
+Defined in src/base/include/icy/signal.h:555
+
+---
+
+{#clearnodeslocked}
+
+#### clearNodesLocked
+
+`const` `inline`
+
+```cpp
+inline void clearNodesLocked() const
+```
+
+Defined in src/base/include/icy/signal.h:570
 
 ---
 
@@ -11511,6 +12859,56 @@ inline void finishEmit()
 inline void resetEmitState()
 ```
 
+Defined in src/base/include/icy/signal.h:583
+
+---
+
+{#snapshotstate}
+
+#### snapshotState
+
+`const` `inline`
+
+```cpp
+inline std::pair< std::vector< SlotPtr >, int > snapshotState() const
+```
+
+Defined in src/base/include/icy/signal.h:594
+
+---
+
+{#restorestate}
+
+#### restoreState
+
+`inline`
+
+```cpp
+inline void restoreState(std::vector< SlotPtr > snapshot, int lastId)
+```
+
+Defined in src/base/include/icy/signal.h:606
+
+### Private Static Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `bool` | [`threadSafe`](#threadsafe) `static` `constexpr` |  |
+
+---
+
+{#threadsafe}
+
+#### threadSafe
+
+`static` `constexpr`
+
+```cpp
+bool threadSafe = !std::is_same_v<MutexT, >
+```
+
+Defined in src/base/include/icy/signal.h:417
+
 {#stream}
 
 ## Stream
@@ -11518,6 +12916,13 @@ inline void resetEmitState()
 ```cpp
 #include <icy/stream.h>
 ```
+
+```cpp
+template<typename T>
+class Stream
+```
+
+Defined in src/base/include/icy/stream.h:30
 
 > **Inherits:** [`Handle< T >`](uv.md#handle-2)
 
@@ -11539,6 +12944,8 @@ Basic stream type for sockets and pipes.
 Signal< void(const char *, const int &)> Read
 ```
 
+Defined in src/base/include/icy/stream.h:210
+
 Emitted when data has been received from the peer.
 
 Slot signature: `void(const char* data, const int& len)`
@@ -11549,7 +12956,7 @@ Slot signature: `void(const char* data, const int& len)`
 |--------|------|-------------|
 |  | [`Stream`](#stream) `inline` | Construct the stream bound to `loop` with a 64 KiB read buffer. |
 |  | [`~Stream`](#stream) `virtual` `inline` | Destroy the stream, stopping reads and freeing pooled write requests. |
-| `void` | [`close`](#close) `virtual` `inline` | Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle. |
+| `void` | [`close`](#close) `virtual` `inline` `override` | Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle. |
 | `bool` | [`shutdown`](#shutdown) `inline` | Send a TCP/pipe shutdown request to the connected peer. |
 | `bool` | [`write`](#write) `inline` | Write `len` bytes from `data` to the stream. |
 | `bool` | [`writeOwned`](#writeowned) `inline` | Write an owned payload buffer to the stream. |
@@ -11566,8 +12973,10 @@ Slot signature: `void(const char* data, const int& len)`
 `inline`
 
 ```cpp
-inline Stream(uv::Loop * loop)
+inline Stream(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/stream.h:47
 
 Construct the stream bound to `loop` with a 64 KiB read buffer.
 
@@ -11586,6 +12995,8 @@ Construct the stream bound to `loop` with a 64 KiB read buffer.
 virtual inline ~Stream()
 ```
 
+Defined in src/base/include/icy/stream.h:54
+
 Destroy the stream, stopping reads and freeing pooled write requests.
 
 ---
@@ -11594,11 +13005,13 @@ Destroy the stream, stopping reads and freeing pooled write requests.
 
 #### close
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void close()
+virtual inline void close() override
 ```
+
+Defined in src/base/include/icy/stream.h:67
 
 Closes and resets the stream handle. This will close the active socket/pipe and destroy the handle.
 
@@ -11615,6 +13028,8 @@ If the stream is already closed this call will have no side-effects.
 ```cpp
 inline bool shutdown()
 ```
+
+Defined in src/base/include/icy/stream.h:82
 
 Send a TCP/pipe shutdown request to the connected peer.
 
@@ -11634,6 +13049,8 @@ Issues a half-close: no further writes will be accepted after this, but the stre
 ```cpp
 inline bool write(const char * data, size_t len)
 ```
+
+Defined in src/base/include/icy/stream.h:105
 
 Write `len` bytes from `data` to the stream.
 
@@ -11659,6 +13076,8 @@ The write is non-blocking; data is buffered by libuv. Returns `false` without th
 inline bool writeOwned(Buffer && buffer)
 ```
 
+Defined in src/base/include/icy/stream.h:140
+
 Write an owned payload buffer to the stream.
 
 The buffer is moved into the queued write request and retained until the libuv completion callback fires. Use this path whenever the caller does not naturally own storage beyond the current stack frame.
@@ -11681,6 +13100,8 @@ The buffer is moved into the queued write request and retained until the libuv c
 inline void setHighWaterMark(size_t bytes)
 ```
 
+Defined in src/base/include/icy/stream.h:166
+
 Set the high water mark for the write queue (default 16MB). When the write queue exceeds this size, [write()](#classicy_1_1Stream_1a56926a6ac3ba433aed1414ffb1d20cf0) returns false.
 
 ---
@@ -11694,6 +13115,8 @@ Set the high water mark for the write queue (default 16MB). When the write queue
 ```cpp
 inline bool write(const char * data, size_t len, uv_stream_t * send)
 ```
+
+Defined in src/base/include/icy/stream.h:178
 
 Write `len` bytes from `data` together with a stream handle over an IPC pipe (uses `uv_write2`).
 
@@ -11721,6 +13144,8 @@ Only valid for named-pipe handles opened with IPC mode enabled. Throws `std::log
 inline uv_stream_t * stream()
 ```
 
+Defined in src/base/include/icy/stream.h:202
+
 Return the underlying `uv_stream_t` pointer cast from the native handle.
 
 #### Returns
@@ -11746,6 +13171,8 @@ Pointer to the `uv_stream_t`, or `nullptr` if the handle is closed.
 Buffer _buffer
 ```
 
+Defined in src/base/include/icy/stream.h:374
+
 ---
 
 {#_started}
@@ -11756,6 +13183,8 @@ Buffer _buffer
 bool _started {false}
 ```
 
+Defined in src/base/include/icy/stream.h:375
+
 ---
 
 {#_highwatermark}
@@ -11765,6 +13194,8 @@ bool _started {false}
 ```cpp
 size_t _highWaterMark {16 * 1024 * 1024}
 ```
+
+Defined in src/base/include/icy/stream.h:376
 
 16MB default write queue limit
 
@@ -11778,6 +13209,8 @@ size_t _highWaterMark {16 * 1024 * 1024}
 std::vector< uv_write_t * > _writeReqFree
 ```
 
+Defined in src/base/include/icy/stream.h:377
+
 Freelist for write requests.
 
 ---
@@ -11790,6 +13223,8 @@ Freelist for write requests.
 std::vector< OwnedWriteReq * > _ownedWriteReqFree
 ```
 
+Defined in src/base/include/icy/stream.h:378
+
 Freelist for owned write requests.
 
 ### Protected Methods
@@ -11798,7 +13233,7 @@ Freelist for owned write requests.
 |--------|------|-------------|
 | `bool` | [`readStart`](#readstart) `virtual` `inline` | Begin reading from the stream by registering libuv read callbacks. |
 | `bool` | [`readStop`](#readstop) `virtual` `inline` | Stop reading from the stream. |
-| `void` | [`onRead`](#onread) `virtual` `inline` | Called by `handleRead` when `len` bytes of `data` arrive. |
+| `void` | [`onRead`](#onread) `virtual` `inline` | Called by `[handleRead](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10)` when `len` bytes of `data` arrive. |
 | `uv_write_t *` | [`allocWriteReq`](#allocwritereq) `inline` | Return a `uv_write_t` from the freelist, or allocate a new one if the pool is empty. |
 | `void` | [`freeWriteReq`](#freewritereq) `inline` | Return `req` to the freelist, or delete it if the pool is at capacity. |
 | `OwnedWriteReq *` | [`allocOwnedWriteReq`](#allocownedwritereq) `inline` |  |
@@ -11816,6 +13251,8 @@ Freelist for owned write requests.
 ```cpp
 virtual inline bool readStart()
 ```
+
+Defined in src/base/include/icy/stream.h:219
 
 Begin reading from the stream by registering libuv read callbacks.
 
@@ -11836,6 +13273,8 @@ Sets the stream's `data` pointer to `this` so callbacks can recover the C++ obje
 virtual inline bool readStop()
 ```
 
+Defined in src/base/include/icy/stream.h:236
+
 Stop reading from the stream.
 
 No further read callbacks will fire after this returns. Has no effect and returns `false` if not currently started.
@@ -11855,9 +13294,11 @@ No further read callbacks will fire after this returns. Has no effect and return
 virtual inline void onRead(const char * data, size_t len)
 ```
 
-Called by `handleRead` when `len` bytes of `data` arrive.
+Defined in src/base/include/icy/stream.h:253
 
-The default implementation emits the `Read` signal. Override to intercept data before it reaches signal subscribers.
+Called by `[handleRead](#classicy_1_1Stream_1ac74fea672c0d281f2a4f51bee6943b10)` when `len` bytes of `data` arrive.
+
+The default implementation emits the `[Read](#classicy_1_1Stream_1a97b040391e1972b8599599a101be2184)` signal. Override to intercept data before it reaches signal subscribers.
 
 #### Parameters
 * `data` Pointer into the read buffer; valid only for this call. 
@@ -11876,6 +13317,8 @@ The default implementation emits the `Read` signal. Override to intercept data b
 inline uv_write_t * allocWriteReq()
 ```
 
+Defined in src/base/include/icy/stream.h:318
+
 Return a `uv_write_t` from the freelist, or allocate a new one if the pool is empty.
 
 #### Returns
@@ -11892,6 +13335,8 @@ Pointer to an unused `uv_write_t`.
 ```cpp
 inline void freeWriteReq(uv_write_t * req)
 ```
+
+Defined in src/base/include/icy/stream.h:331
 
 Return `req` to the freelist, or delete it if the pool is at capacity.
 
@@ -11910,6 +13355,8 @@ Return `req` to the freelist, or delete it if the pool is at capacity.
 inline OwnedWriteReq * allocOwnedWriteReq()
 ```
 
+Defined in src/base/include/icy/stream.h:340
+
 ---
 
 {#freeownedwritereq}
@@ -11922,6 +13369,8 @@ inline OwnedWriteReq * allocOwnedWriteReq()
 inline void freeOwnedWriteReq(OwnedWriteReq * req)
 ```
 
+Defined in src/base/include/icy/stream.h:350
+
 ---
 
 {#canqueuewrite}
@@ -11933,6 +13382,8 @@ inline void freeOwnedWriteReq(OwnedWriteReq * req)
 ```cpp
 inline bool canQueueWrite(size_t len)
 ```
+
+Defined in src/base/include/icy/stream.h:361
 
 ### Public Types
 
@@ -11947,8 +13398,10 @@ inline bool canQueueWrite(size_t len)
 #### Handle
 
 ```cpp
-uv::Handle< T > Handle()
+using Handle = uv::Handle< T >
 ```
+
+Defined in src/base/include/icy/stream.h:33
 
 {#thread}
 
@@ -11957,6 +13410,12 @@ uv::Handle< T > Handle()
 ```cpp
 #include <icy/thread.h>
 ```
+
+```cpp
+class Thread
+```
+
+Defined in src/base/include/icy/thread.h:32
 
 > **Inherits:** [`Runner`](#runner)
 
@@ -11972,7 +13431,7 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 |  | [`Thread`](#thread) `inline` `explicit` | Constructs a `[Thread](#thread)` and immediately starts it with the given function and arguments. |
 |  | [`~Thread`](#thread) `virtual` | Destructor. |
 | `void` | [`start`](#start) `inline` | Starts the thread with a variadic function and arguments. The thread is started immediately; the previous thread must have exited before calling again. |
-| `void` | [`start`](#start) `virtual` | Starts the thread with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `start` template. |
+| `void` | [`start`](#start) `virtual` `override` | Starts the thread with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `[start](#classicy_1_1Thread_1ad1f9f47ae525aa1c772441987306190f)` template. |
 | `void` | [`join`](#join)  | Wait until the thread exits. |
 | `std::thread::id` | [`id`](#id) `const` | Return the native thread handle. |
 
@@ -11985,6 +13444,8 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 ```cpp
 Thread()
 ```
+
+Defined in src/base/include/icy/thread.h:38
 
 Default constructor.
 
@@ -11999,6 +13460,8 @@ Default constructor.
 ```cpp
 template<typename Function, typename... Args> inline explicit Thread(Function && func, Args &&... args)
 ```
+
+Defined in src/base/include/icy/thread.h:46
 
 Constructs a `[Thread](#thread)` and immediately starts it with the given function and arguments. 
 #### Parameters
@@ -12023,6 +13486,8 @@ Constructs a `[Thread](#thread)` and immediately starts it with the given functi
 virtual ~Thread()
 ```
 
+Defined in src/base/include/icy/thread.h:54
+
 Destructor.
 
 ---
@@ -12036,6 +13501,8 @@ Destructor.
 ```cpp
 template<typename Function, typename... Args> inline void start(Function && func, Args &&... args)
 ```
+
+Defined in src/base/include/icy/thread.h:63
 
 Starts the thread with a variadic function and arguments. The thread is started immediately; the previous thread must have exited before calling again. 
 #### Parameters
@@ -12054,13 +13521,15 @@ Starts the thread with a variadic function and arguments. The thread is started 
 
 #### start
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void start(std::function< void()> func)
+virtual void start(std::function< void()> func) override
 ```
 
-Starts the thread with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `start` template. 
+Defined in src/base/include/icy/thread.h:73
+
+Starts the thread with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `[start](#classicy_1_1Thread_1ad1f9f47ae525aa1c772441987306190f)` template. 
 #### Parameters
 * `func` Callable to execute on the new thread.
 
@@ -12073,6 +13542,8 @@ Starts the thread with a `std::function` callback. Overrides `[Runner::start](#c
 ```cpp
 void join()
 ```
+
+Defined in src/base/include/icy/thread.h:76
 
 Wait until the thread exits.
 
@@ -12087,6 +13558,8 @@ Wait until the thread exits.
 ```cpp
 std::thread::id id() const
 ```
+
+Defined in src/base/include/icy/thread.h:79
 
 Return the native thread handle.
 
@@ -12108,6 +13581,8 @@ Return the native thread handle.
 const std::thread::id mainID
 ```
 
+Defined in src/base/include/icy/thread.h:85
+
 Accessor for the main thread ID.
 
 ### Public Static Methods
@@ -12128,6 +13603,8 @@ Accessor for the main thread ID.
 static std::thread::id currentID()
 ```
 
+Defined in src/base/include/icy/thread.h:82
+
 Return the native thread ID of the current thread.
 
 ### Protected Attributes
@@ -12146,13 +13623,15 @@ Return the native thread ID of the current thread.
 std::thread _thread
 ```
 
+Defined in src/base/include/icy/thread.h:96
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Thread`](#thread)  | NonCopyable and NonMovable. |
 |  | [`Thread`](#thread)  | Deleted constructor. |
-| `bool` | [`async`](#async) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `bool` | [`async`](#async) `virtual` `const` `override` | Returns true if the implementation is thread-based. |
 
 ---
 
@@ -12163,6 +13642,8 @@ std::thread _thread
 ```cpp
 Thread(const Thread &) = delete
 ```
+
+Defined in src/base/include/icy/thread.h:89
 
 NonCopyable and NonMovable.
 
@@ -12176,6 +13657,8 @@ NonCopyable and NonMovable.
 Thread(Thread &&) = delete
 ```
 
+Defined in src/base/include/icy/thread.h:91
+
 Deleted constructor.
 
 ---
@@ -12184,11 +13667,13 @@ Deleted constructor.
 
 #### async
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool async() const
+virtual bool async() const override
 ```
+
+Defined in src/base/include/icy/thread.h:94
 
 Returns true if the implementation is thread-based. 
 #### Returns
@@ -12207,8 +13692,10 @@ True for thread-backed runners, false for event-loop-driven runners.
 #### Ptr
 
 ```cpp
-std::shared_ptr< Thread > Ptr()
+using Ptr = std::shared_ptr< Thread >
 ```
+
+Defined in src/base/include/icy/thread.h:35
 
 {#process}
 
@@ -12217,6 +13704,12 @@ std::shared_ptr< Thread > Ptr()
 ```cpp
 #include <icy/process.h>
 ```
+
+```cpp
+class Process
+```
+
+Defined in src/base/include/icy/process.h:32
 
 Spawns and manages a child process with stdin/stdout/stderr pipes.
 
@@ -12243,6 +13736,8 @@ Spawns and manages a child process with stdin/stdout/stderr pipes.
 std::string file
 ```
 
+Defined in src/base/include/icy/process.h:55
+
 Path to the program to execute. Convenience proxy for options.file. Must be set before `[spawn()](#classicy_1_1Process_1a1d4f466c7f2713460ee35954dc6663bc)`
 
 ---
@@ -12254,6 +13749,8 @@ Path to the program to execute. Convenience proxy for options.file. Must be set 
 ```cpp
 std::string cwd
 ```
+
+Defined in src/base/include/icy/process.h:60
 
 Set the current working directory. Convenience proxy for options.cwd. Must be set before `[spawn()](#classicy_1_1Process_1a1d4f466c7f2713460ee35954dc6663bc)`
 
@@ -12267,6 +13764,8 @@ Set the current working directory. Convenience proxy for options.cwd. Must be se
 std::vector< std::string > args
 ```
 
+Defined in src/base/include/icy/process.h:65
+
 Command line arguments to pass to the process. Convenience proxy for options.args. Must be set before `[spawn()](#classicy_1_1Process_1a1d4f466c7f2713460ee35954dc6663bc)`
 
 ---
@@ -12278,6 +13777,8 @@ Command line arguments to pass to the process. Convenience proxy for options.arg
 ```cpp
 std::vector< std::string > env
 ```
+
+Defined in src/base/include/icy/process.h:71
 
 Environment variables for the process. Each entry should be in "KEY=VALUE" format. If empty, the child inherits the parent environment. Must be set before `[spawn()](#classicy_1_1Process_1a1d4f466c7f2713460ee35954dc6663bc)`
 
@@ -12291,6 +13792,8 @@ Environment variables for the process. Each entry should be in "KEY=VALUE" forma
 std::function< void(std::string)> onstdout
 ```
 
+Defined in src/base/include/icy/process.h:97
+
 Stdout callback. Called when a line has been output from the process.
 
 ---
@@ -12302,6 +13805,8 @@ Stdout callback. Called when a line has been output from the process.
 ```cpp
 std::function< void(std::string)> onstderr
 ```
+
+Defined in src/base/include/icy/process.h:101
 
 Stderr callback. Called when a line has been output on stderr.
 
@@ -12315,6 +13820,8 @@ Stderr callback. Called when a line has been output on stderr.
 std::function< void(std::int64_t)> onexit
 ```
 
+Defined in src/base/include/icy/process.h:105
+
 Exit callback. Called with process exit status code.
 
 ---
@@ -12326,6 +13833,8 @@ Exit callback. Called with process exit status code.
 ```cpp
 ProcessOptions options
 ```
+
+Defined in src/base/include/icy/process.h:109
 
 LibUV C options. Available for advanced use cases.
 
@@ -12352,8 +13861,10 @@ LibUV C options. Available for advanced use cases.
 #### Process
 
 ```cpp
-Process(uv::Loop * loop)
+Process(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/process.h:37
 
 Constructs a `[Process](#process)` attached to the given event loop. 
 #### Parameters
@@ -12366,8 +13877,10 @@ Constructs a `[Process](#process)` attached to the given event loop.
 #### Process
 
 ```cpp
-Process(std::initializer_list< std::string > args, uv::Loop * loop)
+Process(std::initializer_list< std::string > args, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/process.h:42
 
 Constructs a `[Process](#process)` with initial command-line arguments. 
 #### Parameters
@@ -12385,6 +13898,8 @@ Constructs a `[Process](#process)` with initial command-line arguments.
 ~Process()
 ```
 
+Defined in src/base/include/icy/process.h:45
+
 Destructor.
 
 ---
@@ -12396,6 +13911,8 @@ Destructor.
 ```cpp
 Process(const Process &) = delete
 ```
+
+Defined in src/base/include/icy/process.h:47
 
 Deleted constructor.
 
@@ -12409,6 +13926,8 @@ Deleted constructor.
 Process(Process &&) = delete
 ```
 
+Defined in src/base/include/icy/process.h:49
+
 Deleted constructor.
 
 ---
@@ -12421,6 +13940,8 @@ Deleted constructor.
 void spawn()
 ```
 
+Defined in src/base/include/icy/process.h:76
+
 Spawns the process. Options must be properly set. Throws an exception on error.
 
 ---
@@ -12430,8 +13951,10 @@ Spawns the process. Options must be properly set. Throws an exception on error.
 #### kill
 
 ```cpp
-bool kill(int signum)
+bool kill(int signum = SIGTERM)
 ```
+
+Defined in src/base/include/icy/process.h:81
 
 Sends a signal to the process. 
 #### Parameters
@@ -12452,6 +13975,8 @@ True if the signal was sent successfully, false if the process is not running or
 int pid() const
 ```
 
+Defined in src/base/include/icy/process.h:84
+
 Returns the process PID, or 0 if not spawned.
 
 ---
@@ -12463,6 +13988,8 @@ Returns the process PID, or 0 if not spawned.
 ```cpp
 Pipe & in()
 ```
+
+Defined in src/base/include/icy/process.h:87
 
 Returns the stdin pipe.
 
@@ -12476,6 +14003,8 @@ Returns the stdin pipe.
 Pipe & out()
 ```
 
+Defined in src/base/include/icy/process.h:90
+
 Returns the stdout pipe.
 
 ---
@@ -12487,6 +14016,8 @@ Returns the stdout pipe.
 ```cpp
 Pipe & err()
 ```
+
+Defined in src/base/include/icy/process.h:93
 
 Returns the stderr pipe.
 
@@ -12512,6 +14043,8 @@ Returns the stderr pipe.
 uv::Handle< uv_process_t > _handle
 ```
 
+Defined in src/base/include/icy/process.h:114
+
 ---
 
 {#_stdin}
@@ -12521,6 +14054,8 @@ uv::Handle< uv_process_t > _handle
 ```cpp
 Pipe _stdin
 ```
+
+Defined in src/base/include/icy/process.h:115
 
 ---
 
@@ -12532,6 +14067,8 @@ Pipe _stdin
 Pipe _stdout
 ```
 
+Defined in src/base/include/icy/process.h:116
+
 ---
 
 {#_stderr}
@@ -12541,6 +14078,8 @@ Pipe _stdout
 ```cpp
 Pipe _stderr
 ```
+
+Defined in src/base/include/icy/process.h:117
 
 ---
 
@@ -12552,6 +14091,8 @@ Pipe _stderr
 uv_stdio_container_t _stdio
 ```
 
+Defined in src/base/include/icy/process.h:118
+
 ---
 
 {#_cargs}
@@ -12562,6 +14103,8 @@ uv_stdio_container_t _stdio
 std::vector< char * > _cargs
 ```
 
+Defined in src/base/include/icy/process.h:119
+
 ---
 
 {#_cenv}
@@ -12571,6 +14114,8 @@ std::vector< char * > _cargs
 ```cpp
 std::vector< char * > _cenv
 ```
+
+Defined in src/base/include/icy/process.h:120
 
 ### Protected Methods
 
@@ -12588,6 +14133,8 @@ std::vector< char * > _cenv
 void init()
 ```
 
+Defined in src/base/include/icy/process.h:112
+
 {#timeout}
 
 ## Timeout
@@ -12595,6 +14142,12 @@ void init()
 ```cpp
 #include <icy/timeout.h>
 ```
+
+```cpp
+class Timeout
+```
+
+Defined in src/base/include/icy/timeout.h:32
 
 > **Subclassed by:** [`TimedToken`](#timedtoken)
 
@@ -12606,7 +14159,7 @@ void init()
 |--------|------|-------------|
 |  | [`Timeout`](#timeout)  | Constructs a [Timeout](#timeout) with the given delay. |
 |  | [`Timeout`](#timeout)  | Copy constructor. |
-|  | [`Timeout`](#timeout)  | Defaulted constructor. |
+|  | [`Timeout`](#timeout) `noexcept` | Defaulted constructor. |
 | `bool` | [`running`](#running) `const` | Returns true if the timer is currently running. |
 | `void` | [`start`](#start)  | Starts (or restarts) the timer, recording the current time as the start point. |
 | `void` | [`stop`](#stop)  | Stops the timer without resetting it. [expired()](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) will return false after this call. |
@@ -12624,8 +14177,10 @@ void init()
 #### Timeout
 
 ```cpp
-Timeout(long delay, bool autoStart)
+Timeout(long delay = 0, bool autoStart = false)
 ```
+
+Defined in src/base/include/icy/timeout.h:38
 
 Constructs a [Timeout](#timeout) with the given delay. 
 #### Parameters
@@ -12643,6 +14198,8 @@ Constructs a [Timeout](#timeout) with the given delay.
 Timeout(const Timeout & src)
 ```
 
+Defined in src/base/include/icy/timeout.h:42
+
 Copy constructor. 
 #### Parameters
 * `src` Source [Timeout](#timeout) to copy state from.
@@ -12653,9 +14210,13 @@ Copy constructor.
 
 #### Timeout
 
+`noexcept`
+
 ```cpp
-Timeout(Timeout && src) = default
+Timeout(Timeout && src) noexcept = default
 ```
+
+Defined in src/base/include/icy/timeout.h:44
 
 Defaulted constructor.
 
@@ -12671,6 +14232,8 @@ Defaulted constructor.
 bool running() const
 ```
 
+Defined in src/base/include/icy/timeout.h:49
+
 Returns true if the timer is currently running. 
 #### Returns
 true if [start()](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e) has been called and [stop()](#classicy_1_1Timeout_1a3015db4e29b2d32b54d3816255b61cba) has not.
@@ -12685,6 +14248,8 @@ true if [start()](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e) has b
 void start()
 ```
 
+Defined in src/base/include/icy/timeout.h:52
+
 Starts (or restarts) the timer, recording the current time as the start point.
 
 ---
@@ -12697,6 +14262,8 @@ Starts (or restarts) the timer, recording the current time as the start point.
 void stop()
 ```
 
+Defined in src/base/include/icy/timeout.h:55
+
 Stops the timer without resetting it. [expired()](#classicy_1_1Timeout_1a9f4b4b19851da30eca70e18fd369a2e7) will return false after this call.
 
 ---
@@ -12708,6 +14275,8 @@ Stops the timer without resetting it. [expired()](#classicy_1_1Timeout_1a9f4b4b1
 ```cpp
 void reset()
 ```
+
+Defined in src/base/include/icy/timeout.h:58
 
 Restarts the timer from now, equivalent to calling [start()](#classicy_1_1Timeout_1a53c636b9d861ad0fcc4051fdc2fb007e).
 
@@ -12722,6 +14291,8 @@ Restarts the timer from now, equivalent to calling [start()](#classicy_1_1Timeou
 ```cpp
 long remaining() const
 ```
+
+Defined in src/base/include/icy/timeout.h:63
 
 Returns the number of milliseconds remaining before expiry. Returns 0 if already expired, or the full delay if not running. 
 #### Returns
@@ -12739,6 +14310,8 @@ Milliseconds until expiry.
 bool expired() const
 ```
 
+Defined in src/base/include/icy/timeout.h:67
+
 Returns true if the timer is running and the delay has fully elapsed. 
 #### Returns
 true if expired, false if stopped or not yet elapsed.
@@ -12754,6 +14327,8 @@ true if expired, false if stopped or not yet elapsed.
 ```cpp
 inline void setDelay(long delay)
 ```
+
+Defined in src/base/include/icy/timeout.h:71
 
 Sets the expiry delay without restarting the timer. 
 #### Parameters
@@ -12771,6 +14346,8 @@ Sets the expiry delay without restarting the timer.
 inline long delay() const
 ```
 
+Defined in src/base/include/icy/timeout.h:75
+
 Returns the configured delay in milliseconds. 
 #### Returns
 Delay in milliseconds.
@@ -12784,6 +14361,8 @@ Delay in milliseconds.
 ```cpp
 Timeout & operator=(const Timeout & src)
 ```
+
+Defined in src/base/include/icy/timeout.h:79
 
 Copy assignment operator. 
 #### Parameters
@@ -12807,6 +14386,8 @@ Copy assignment operator.
 std::chrono::steady_clock::time_point _startAt
 ```
 
+Defined in src/base/include/icy/timeout.h:83
+
 ---
 
 {#_delay}
@@ -12816,6 +14397,8 @@ std::chrono::steady_clock::time_point _startAt
 ```cpp
 long _delay
 ```
+
+Defined in src/base/include/icy/timeout.h:84
 
 ---
 
@@ -12827,6 +14410,8 @@ long _delay
 bool _running
 ```
 
+Defined in src/base/include/icy/timeout.h:85
+
 {#timedtoken}
 
 ## TimedToken
@@ -12834,6 +14419,12 @@ bool _running
 ```cpp
 #include <icy/timeout.h>
 ```
+
+```cpp
+class TimedToken
+```
+
+Defined in src/base/include/icy/timeout.h:95
 
 > **Inherits:** [`Timeout`](#timeout)
 
@@ -12858,8 +14449,10 @@ Token that expires after the specified duration.
 `explicit`
 
 ```cpp
-explicit TimedToken(long duration)
+explicit TimedToken(long duration = 1000)
 ```
+
+Defined in src/base/include/icy/timeout.h:101
 
 Constructs a [TimedToken](#timedtoken) with a randomly generated 32-character ID, started immediately with the given duration. 
 #### Parameters
@@ -12874,8 +14467,10 @@ Constructs a [TimedToken](#timedtoken) with a randomly generated 32-character ID
 `explicit`
 
 ```cpp
-explicit TimedToken(const std::string & id, long duration)
+explicit TimedToken(const std::string & id, long duration = 1000)
 ```
+
+Defined in src/base/include/icy/timeout.h:106
 
 Constructs a [TimedToken](#timedtoken) with an explicit ID, started immediately. 
 #### Parameters
@@ -12895,6 +14490,8 @@ Constructs a [TimedToken](#timedtoken) with an explicit ID, started immediately.
 inline std::string id() const
 ```
 
+Defined in src/base/include/icy/timeout.h:110
+
 Returns the token's identifier string. 
 #### Returns
 Token ID.
@@ -12911,6 +14508,8 @@ Token ID.
 inline bool operator==(const TimedToken & r) const
 ```
 
+Defined in src/base/include/icy/timeout.h:113
+
 Compares two tokens by ID.
 
 ---
@@ -12924,6 +14523,8 @@ Compares two tokens by ID.
 ```cpp
 inline bool operator==(std::string_view r) const
 ```
+
+Defined in src/base/include/icy/timeout.h:116
 
 Compares this token's ID against a string.
 
@@ -12943,6 +14544,8 @@ Compares this token's ID against a string.
 std::string _id
 ```
 
+Defined in src/base/include/icy/timeout.h:119
+
 {#timestamp}
 
 ## Timestamp
@@ -12950,6 +14553,12 @@ std::string _id
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class Timestamp
+```
+
+Defined in src/base/include/icy/datetime.h:36
 
 A [Timestamp](#timestamp) stores a monotonic* time value with (theoretical) microseconds resolution. Timestamps can be compared with each other and simple arithmetics are supported.
 
@@ -12994,6 +14603,8 @@ Timestamps are UTC (Coordinated Universal Time) based and thus independent of th
 Timestamp()
 ```
 
+Defined in src/base/include/icy/datetime.h:44
+
 Creates a timestamp with the current time.
 
 ---
@@ -13005,6 +14616,8 @@ Creates a timestamp with the current time.
 ```cpp
 Timestamp(TimeVal tv)
 ```
+
+Defined in src/base/include/icy/datetime.h:47
 
 Creates a timestamp from the given time value.
 
@@ -13018,6 +14631,8 @@ Creates a timestamp from the given time value.
 Timestamp(const Timestamp & other)
 ```
 
+Defined in src/base/include/icy/datetime.h:50
+
 Copy constructor.
 
 ---
@@ -13029,6 +14644,8 @@ Copy constructor.
 ```cpp
 ~Timestamp()
 ```
+
+Defined in src/base/include/icy/datetime.h:53
 
 Destroys the timestamp.
 
@@ -13042,6 +14659,8 @@ Destroys the timestamp.
 void swap(Timestamp & timestamp)
 ```
 
+Defined in src/base/include/icy/datetime.h:59
+
 Swaps the [Timestamp](#timestamp) with another one.
 
 ---
@@ -13053,6 +14672,8 @@ Swaps the [Timestamp](#timestamp) with another one.
 ```cpp
 void update()
 ```
+
+Defined in src/base/include/icy/datetime.h:62
 
 Updates the [Timestamp](#timestamp) with the current time.
 
@@ -13068,6 +14689,8 @@ Updates the [Timestamp](#timestamp) with the current time.
 inline bool operator==(const Timestamp & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:64
+
 ---
 
 {#operator}
@@ -13079,6 +14702,8 @@ inline bool operator==(const Timestamp & ts) const
 ```cpp
 inline bool operator!=(const Timestamp & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:65
 
 ---
 
@@ -13092,6 +14717,8 @@ inline bool operator!=(const Timestamp & ts) const
 inline bool operator>(const Timestamp & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:66
+
 ---
 
 {#operator}
@@ -13103,6 +14730,8 @@ inline bool operator>(const Timestamp & ts) const
 ```cpp
 inline bool operator>=(const Timestamp & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:67
 
 ---
 
@@ -13116,6 +14745,8 @@ inline bool operator>=(const Timestamp & ts) const
 inline bool operator<(const Timestamp & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:68
+
 ---
 
 {#operator}
@@ -13127,6 +14758,8 @@ inline bool operator<(const Timestamp & ts) const
 ```cpp
 inline bool operator<=(const Timestamp & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:69
 
 ---
 
@@ -13140,6 +14773,8 @@ inline bool operator<=(const Timestamp & ts) const
 inline Timestamp operator+(TimeDiff d) const
 ```
 
+Defined in src/base/include/icy/datetime.h:71
+
 ---
 
 {#operator}
@@ -13151,6 +14786,8 @@ inline Timestamp operator+(TimeDiff d) const
 ```cpp
 inline Timestamp operator-(TimeDiff d) const
 ```
+
+Defined in src/base/include/icy/datetime.h:72
 
 ---
 
@@ -13164,6 +14801,8 @@ inline Timestamp operator-(TimeDiff d) const
 inline TimeDiff operator-(const Timestamp & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:73
+
 ---
 
 {#operator}
@@ -13175,6 +14814,8 @@ inline TimeDiff operator-(const Timestamp & ts) const
 ```cpp
 inline Timestamp & operator+=(TimeDiff d)
 ```
+
+Defined in src/base/include/icy/datetime.h:74
 
 ---
 
@@ -13188,6 +14829,8 @@ inline Timestamp & operator+=(TimeDiff d)
 inline Timestamp & operator-=(TimeDiff d)
 ```
 
+Defined in src/base/include/icy/datetime.h:75
+
 ---
 
 {#epochtime}
@@ -13199,6 +14842,8 @@ inline Timestamp & operator-=(TimeDiff d)
 ```cpp
 inline std::time_t epochTime() const
 ```
+
+Defined in src/base/include/icy/datetime.h:80
 
 Returns the timestamp expressed in time_t. time_t base time is midnight, January 1, 1970. Resolution is one second.
 
@@ -13214,6 +14859,8 @@ Returns the timestamp expressed in time_t. time_t base time is midnight, January
 inline UtcTimeVal utcTime() const
 ```
 
+Defined in src/base/include/icy/datetime.h:85
+
 Returns the timestamp expressed in UTC-based time. UTC base time is midnight, October 15, 1582. Resolution is 100 nanoseconds.
 
 ---
@@ -13227,6 +14874,8 @@ Returns the timestamp expressed in UTC-based time. UTC base time is midnight, Oc
 ```cpp
 inline TimeVal epochMicroseconds() const
 ```
+
+Defined in src/base/include/icy/datetime.h:89
 
 Returns the timestamp expressed in microseconds since the Unix epoch, midnight, January 1, 1970.
 
@@ -13242,6 +14891,8 @@ Returns the timestamp expressed in microseconds since the Unix epoch, midnight, 
 inline TimeDiff elapsed() const
 ```
 
+Defined in src/base/include/icy/datetime.h:93
+
 Returns the time elapsed since the time denoted by the timestamp. Equivalent to [Timestamp()](#classicy_1_1Timestamp_1a772b4486bcf286983804ddcd6ff4291b) - *this.
 
 ---
@@ -13255,6 +14906,8 @@ Returns the time elapsed since the time denoted by the timestamp. Equivalent to 
 ```cpp
 inline bool isElapsed(TimeDiff interval) const
 ```
+
+Defined in src/base/include/icy/datetime.h:97
 
 Returns true iff the given interval has passed since the time denoted by the timestamp.
 
@@ -13278,6 +14931,8 @@ Returns true iff the given interval has passed since the time denoted by the tim
 static Timestamp fromEpochTime(std::time_t t)
 ```
 
+Defined in src/base/include/icy/datetime.h:100
+
 Creates a timestamp from a std::time_t.
 
 ---
@@ -13292,6 +14947,8 @@ Creates a timestamp from a std::time_t.
 static Timestamp fromUtcTime(UtcTimeVal val)
 ```
 
+Defined in src/base/include/icy/datetime.h:103
+
 Creates a timestamp from a UTC time value.
 
 ---
@@ -13305,6 +14962,8 @@ Creates a timestamp from a UTC time value.
 ```cpp
 static inline TimeVal resolution()
 ```
+
+Defined in src/base/include/icy/datetime.h:108
 
 Returns the resolution in units per second. Since the timestamp has microsecond resolution, the returned value is always 1000000.
 
@@ -13323,8 +14982,10 @@ Returns the resolution in units per second. Since the timestamp has microsecond 
 #### TimeVal
 
 ```cpp
-std::int64_t TimeVal()
+using TimeVal = std::int64_t
 ```
+
+Defined in src/base/include/icy/datetime.h:39
 
 monotonic UTC time value in microsecond resolution
 
@@ -13335,8 +14996,10 @@ monotonic UTC time value in microsecond resolution
 #### UtcTimeVal
 
 ```cpp
-std::int64_t UtcTimeVal()
+using UtcTimeVal = std::int64_t
 ```
+
+Defined in src/base/include/icy/datetime.h:40
 
 monotonic UTC time value in 100 nanosecond resolution
 
@@ -13347,8 +15010,10 @@ monotonic UTC time value in 100 nanosecond resolution
 #### TimeDiff
 
 ```cpp
-std::int64_t TimeDiff()
+using TimeDiff = std::int64_t
 ```
+
+Defined in src/base/include/icy/datetime.h:41
 
 difference between two timestamps in microseconds
 
@@ -13368,6 +15033,8 @@ difference between two timestamps in microseconds
 TimeVal _ts
 ```
 
+Defined in src/base/include/icy/datetime.h:111
+
 {#timespan}
 
 ## Timespan
@@ -13375,6 +15042,12 @@ TimeVal _ts
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class Timespan
+```
+
+Defined in src/base/include/icy/datetime.h:119
 
 A class that represents time spans up to microsecond resolution.
 
@@ -13436,6 +15109,8 @@ A class that represents time spans up to microsecond resolution.
 Timespan()
 ```
 
+Defined in src/base/include/icy/datetime.h:125
+
 Creates a zero [Timespan](#timespan).
 
 ---
@@ -13447,6 +15122,8 @@ Creates a zero [Timespan](#timespan).
 ```cpp
 Timespan(TimeDiff microseconds)
 ```
+
+Defined in src/base/include/icy/datetime.h:128
 
 Creates a [Timespan](#timespan).
 
@@ -13460,6 +15137,8 @@ Creates a [Timespan](#timespan).
 Timespan(long seconds, long microseconds)
 ```
 
+Defined in src/base/include/icy/datetime.h:132
+
 Creates a [Timespan](#timespan). Useful for creating a [Timespan](#timespan) from a struct timeval.
 
 ---
@@ -13471,6 +15150,8 @@ Creates a [Timespan](#timespan). Useful for creating a [Timespan](#timespan) fro
 ```cpp
 Timespan(int days, int hours, int minutes, int seconds, int microseconds)
 ```
+
+Defined in src/base/include/icy/datetime.h:135
 
 Creates a [Timespan](#timespan).
 
@@ -13484,6 +15165,8 @@ Creates a [Timespan](#timespan).
 Timespan(const Timespan & timespan)
 ```
 
+Defined in src/base/include/icy/datetime.h:138
+
 Creates a [Timespan](#timespan) from another one.
 
 ---
@@ -13495,6 +15178,8 @@ Creates a [Timespan](#timespan) from another one.
 ```cpp
 ~Timespan()
 ```
+
+Defined in src/base/include/icy/datetime.h:141
 
 Destroys the [Timespan](#timespan).
 
@@ -13508,6 +15193,8 @@ Destroys the [Timespan](#timespan).
 Timespan & operator=(const Timespan & timespan)
 ```
 
+Defined in src/base/include/icy/datetime.h:144
+
 Assignment operator.
 
 ---
@@ -13519,6 +15206,8 @@ Assignment operator.
 ```cpp
 Timespan & operator=(TimeDiff microseconds)
 ```
+
+Defined in src/base/include/icy/datetime.h:147
 
 Assignment operator.
 
@@ -13532,6 +15221,8 @@ Assignment operator.
 Timespan & assign(int days, int hours, int minutes, int seconds, int microseconds)
 ```
 
+Defined in src/base/include/icy/datetime.h:150
+
 Assigns a new span.
 
 ---
@@ -13544,6 +15235,8 @@ Assigns a new span.
 Timespan & assign(long seconds, long microseconds)
 ```
 
+Defined in src/base/include/icy/datetime.h:154
+
 Assigns a new span. Useful for assigning from a struct timeval.
 
 ---
@@ -13555,6 +15248,8 @@ Assigns a new span. Useful for assigning from a struct timeval.
 ```cpp
 void swap(Timespan & timespan)
 ```
+
+Defined in src/base/include/icy/datetime.h:157
 
 Swaps the [Timespan](#timespan) with another one.
 
@@ -13570,6 +15265,8 @@ Swaps the [Timespan](#timespan) with another one.
 inline bool operator==(const Timespan & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:159
+
 ---
 
 {#operator}
@@ -13581,6 +15278,8 @@ inline bool operator==(const Timespan & ts) const
 ```cpp
 inline bool operator!=(const Timespan & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:160
 
 ---
 
@@ -13594,6 +15293,8 @@ inline bool operator!=(const Timespan & ts) const
 inline bool operator>(const Timespan & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:161
+
 ---
 
 {#operator}
@@ -13605,6 +15306,8 @@ inline bool operator>(const Timespan & ts) const
 ```cpp
 inline bool operator>=(const Timespan & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:162
 
 ---
 
@@ -13618,6 +15321,8 @@ inline bool operator>=(const Timespan & ts) const
 inline bool operator<(const Timespan & ts) const
 ```
 
+Defined in src/base/include/icy/datetime.h:163
+
 ---
 
 {#operator}
@@ -13629,6 +15334,8 @@ inline bool operator<(const Timespan & ts) const
 ```cpp
 inline bool operator<=(const Timespan & ts) const
 ```
+
+Defined in src/base/include/icy/datetime.h:164
 
 ---
 
@@ -13642,6 +15349,8 @@ inline bool operator<=(const Timespan & ts) const
 inline bool operator==(TimeDiff microseconds) const
 ```
 
+Defined in src/base/include/icy/datetime.h:166
+
 ---
 
 {#operator}
@@ -13653,6 +15362,8 @@ inline bool operator==(TimeDiff microseconds) const
 ```cpp
 inline bool operator!=(TimeDiff microseconds) const
 ```
+
+Defined in src/base/include/icy/datetime.h:167
 
 ---
 
@@ -13666,6 +15377,8 @@ inline bool operator!=(TimeDiff microseconds) const
 inline bool operator>(TimeDiff microseconds) const
 ```
 
+Defined in src/base/include/icy/datetime.h:168
+
 ---
 
 {#operator}
@@ -13677,6 +15390,8 @@ inline bool operator>(TimeDiff microseconds) const
 ```cpp
 inline bool operator>=(TimeDiff microseconds) const
 ```
+
+Defined in src/base/include/icy/datetime.h:169
 
 ---
 
@@ -13690,6 +15405,8 @@ inline bool operator>=(TimeDiff microseconds) const
 inline bool operator<(TimeDiff microseconds) const
 ```
 
+Defined in src/base/include/icy/datetime.h:170
+
 ---
 
 {#operator}
@@ -13701,6 +15418,8 @@ inline bool operator<(TimeDiff microseconds) const
 ```cpp
 inline bool operator<=(TimeDiff microseconds) const
 ```
+
+Defined in src/base/include/icy/datetime.h:171
 
 ---
 
@@ -13714,6 +15433,8 @@ inline bool operator<=(TimeDiff microseconds) const
 Timespan operator+(const Timespan & d) const
 ```
 
+Defined in src/base/include/icy/datetime.h:173
+
 ---
 
 {#operator}
@@ -13726,6 +15447,8 @@ Timespan operator+(const Timespan & d) const
 Timespan operator-(const Timespan & d) const
 ```
 
+Defined in src/base/include/icy/datetime.h:174
+
 ---
 
 {#operator}
@@ -13736,6 +15459,8 @@ Timespan operator-(const Timespan & d) const
 Timespan & operator+=(const Timespan & d)
 ```
 
+Defined in src/base/include/icy/datetime.h:175
+
 ---
 
 {#operator}
@@ -13745,6 +15470,8 @@ Timespan & operator+=(const Timespan & d)
 ```cpp
 Timespan & operator-=(const Timespan & d)
 ```
+
+Defined in src/base/include/icy/datetime.h:176
 
 ---
 
@@ -13758,6 +15485,8 @@ Timespan & operator-=(const Timespan & d)
 Timespan operator+(TimeDiff microseconds) const
 ```
 
+Defined in src/base/include/icy/datetime.h:178
+
 ---
 
 {#operator}
@@ -13770,6 +15499,8 @@ Timespan operator+(TimeDiff microseconds) const
 Timespan operator-(TimeDiff microseconds) const
 ```
 
+Defined in src/base/include/icy/datetime.h:179
+
 ---
 
 {#operator}
@@ -13780,6 +15511,8 @@ Timespan operator-(TimeDiff microseconds) const
 Timespan & operator+=(TimeDiff microseconds)
 ```
 
+Defined in src/base/include/icy/datetime.h:180
+
 ---
 
 {#operator}
@@ -13789,6 +15522,8 @@ Timespan & operator+=(TimeDiff microseconds)
 ```cpp
 Timespan & operator-=(TimeDiff microseconds)
 ```
+
+Defined in src/base/include/icy/datetime.h:181
 
 ---
 
@@ -13801,6 +15536,8 @@ Timespan & operator-=(TimeDiff microseconds)
 ```cpp
 inline int days() const
 ```
+
+Defined in src/base/include/icy/datetime.h:184
 
 Returns the number of days.
 
@@ -13816,6 +15553,8 @@ Returns the number of days.
 inline int hours() const
 ```
 
+Defined in src/base/include/icy/datetime.h:187
+
 Returns the number of hours (0 to 23).
 
 ---
@@ -13829,6 +15568,8 @@ Returns the number of hours (0 to 23).
 ```cpp
 inline int totalHours() const
 ```
+
+Defined in src/base/include/icy/datetime.h:190
 
 Returns the total number of hours.
 
@@ -13844,6 +15585,8 @@ Returns the total number of hours.
 inline int minutes() const
 ```
 
+Defined in src/base/include/icy/datetime.h:193
+
 Returns the number of minutes (0 to 59).
 
 ---
@@ -13857,6 +15600,8 @@ Returns the number of minutes (0 to 59).
 ```cpp
 inline int totalMinutes() const
 ```
+
+Defined in src/base/include/icy/datetime.h:196
 
 Returns the total number of minutes.
 
@@ -13872,6 +15617,8 @@ Returns the total number of minutes.
 inline int seconds() const
 ```
 
+Defined in src/base/include/icy/datetime.h:199
+
 Returns the number of seconds (0 to 59).
 
 ---
@@ -13885,6 +15632,8 @@ Returns the number of seconds (0 to 59).
 ```cpp
 inline int totalSeconds() const
 ```
+
+Defined in src/base/include/icy/datetime.h:202
 
 Returns the total number of seconds.
 
@@ -13900,6 +15649,8 @@ Returns the total number of seconds.
 inline int milliseconds() const
 ```
 
+Defined in src/base/include/icy/datetime.h:205
+
 Returns the number of milliseconds (0 to 999).
 
 ---
@@ -13913,6 +15664,8 @@ Returns the number of milliseconds (0 to 999).
 ```cpp
 inline TimeDiff totalMilliseconds() const
 ```
+
+Defined in src/base/include/icy/datetime.h:208
 
 Returns the total number of milliseconds.
 
@@ -13928,6 +15681,8 @@ Returns the total number of milliseconds.
 inline int microseconds() const
 ```
 
+Defined in src/base/include/icy/datetime.h:212
+
 Returns the fractions of a millisecond in microseconds (0 to 999).
 
 ---
@@ -13942,6 +15697,8 @@ Returns the fractions of a millisecond in microseconds (0 to 999).
 inline int useconds() const
 ```
 
+Defined in src/base/include/icy/datetime.h:216
+
 Returns the fractions of a second in microseconds (0 to 999999).
 
 ---
@@ -13955,6 +15712,8 @@ Returns the fractions of a second in microseconds (0 to 999999).
 ```cpp
 inline TimeDiff totalMicroseconds() const
 ```
+
+Defined in src/base/include/icy/datetime.h:219
 
 Returns the total number of microseconds.
 
@@ -13980,6 +15739,8 @@ Returns the total number of microseconds.
 const TimeDiff MILLISECONDS
 ```
 
+Defined in src/base/include/icy/datetime.h:221
+
 The number of microseconds in a millisecond.
 
 ---
@@ -13993,6 +15754,8 @@ The number of microseconds in a millisecond.
 ```cpp
 const TimeDiff SECONDS
 ```
+
+Defined in src/base/include/icy/datetime.h:222
 
 The number of microseconds in a second.
 
@@ -14008,6 +15771,8 @@ The number of microseconds in a second.
 const TimeDiff MINUTES
 ```
 
+Defined in src/base/include/icy/datetime.h:223
+
 The number of microseconds in a minute.
 
 ---
@@ -14022,6 +15787,8 @@ The number of microseconds in a minute.
 const TimeDiff HOURS
 ```
 
+Defined in src/base/include/icy/datetime.h:224
+
 The number of microseconds in a hour.
 
 ---
@@ -14035,6 +15802,8 @@ The number of microseconds in a hour.
 ```cpp
 const TimeDiff DAYS
 ```
+
+Defined in src/base/include/icy/datetime.h:225
 
 The number of microseconds in a day.
 
@@ -14051,8 +15820,10 @@ The number of microseconds in a day.
 #### TimeDiff
 
 ```cpp
-Timestamp::TimeDiff TimeDiff()
+using TimeDiff = Timestamp::TimeDiff
 ```
+
+Defined in src/base/include/icy/datetime.h:122
 
 ### Private Attributes
 
@@ -14070,6 +15841,8 @@ Timestamp::TimeDiff TimeDiff()
 TimeDiff _span
 ```
 
+Defined in src/base/include/icy/datetime.h:228
+
 {#datetime}
 
 ## DateTime
@@ -14077,6 +15850,12 @@ TimeDiff _span
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class DateTime
+```
+
+Defined in src/base/include/icy/datetime.h:265
 
 This class represents an instant in time, expressed in years, months, days, hours, minutes, seconds and milliseconds based on the Gregorian calendar. The class is mainly useful for conversions between UTC, Julian day and Gregorian calendar dates.
 
@@ -14132,8 +15911,8 @@ For more information, please see:
 | `bool` | [`isPM`](#ispm) `const` `inline` | Returns true if hour >= 12. |
 | `int` | [`minute`](#minute) `const` `inline` | Returns the minute (0 to 59). |
 | `int` | [`second`](#second) `const` `inline` | Returns the second (0 to 59). |
-| `int` | [`millisecond`](#millisecond) `const` `inline` | Returns the millisecond (0 to 999) |
-| `int` | [`microsecond`](#microsecond) `const` `inline` | Returns the microsecond (0 to 999) |
+| `int` | [`millisecond`](#millisecond) `const` `inline` | Returns the millisecond (0 to 999). |
+| `int` | [`microsecond`](#microsecond) `const` `inline` | Returns the microsecond (0 to 999). |
 | `double` | [`julianDay`](#julianday) `const` | Returns the julian day for the date and time. |
 | `Timestamp` | [`timestamp`](#timestamp) `const` `inline` | Returns the date and time expressed as a [Timestamp](#timestamp). |
 | `Timestamp::UtcTimeVal` | [`utcTime`](#utctime) `const` `inline` | Returns the date and time expressed in UTC-based time. UTC base time is midnight, October 15, 1582. Resolution is 100 nanoseconds. |
@@ -14161,6 +15940,8 @@ For more information, please see:
 DateTime()
 ```
 
+Defined in src/base/include/icy/datetime.h:298
+
 Creates a [DateTime](#datetime) for the current date and time.
 
 ---
@@ -14173,6 +15954,8 @@ Creates a [DateTime](#datetime) for the current date and time.
 DateTime(const Timestamp & timestamp)
 ```
 
+Defined in src/base/include/icy/datetime.h:302
+
 Creates a [DateTime](#datetime) for the date and time given in a [Timestamp](#timestamp).
 
 ---
@@ -14182,8 +15965,10 @@ Creates a [DateTime](#datetime) for the date and time given in a [Timestamp](#ti
 #### DateTime
 
 ```cpp
-DateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+DateTime(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0)
 ```
+
+Defined in src/base/include/icy/datetime.h:313
 
 Creates a [DateTime](#datetime) for the given Gregorian date and time.
 
@@ -14213,6 +15998,8 @@ Creates a [DateTime](#datetime) for the given Gregorian date and time.
 DateTime(double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:317
+
 Creates a [DateTime](#datetime) for the given Julian day.
 
 ---
@@ -14224,6 +16011,8 @@ Creates a [DateTime](#datetime) for the given Julian day.
 ```cpp
 DateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff)
 ```
+
+Defined in src/base/include/icy/datetime.h:322
 
 Creates a [DateTime](#datetime) from an UtcTimeVal and a TimeDiff.
 
@@ -14239,6 +16028,8 @@ Mainly used internally by [DateTime](#datetime) and friends.
 DateTime(const DateTime & dateTime)
 ```
 
+Defined in src/base/include/icy/datetime.h:325
+
 Copy constructor. Creates the [DateTime](#datetime) from another one.
 
 ---
@@ -14250,6 +16041,8 @@ Copy constructor. Creates the [DateTime](#datetime) from another one.
 ```cpp
 ~DateTime()
 ```
+
+Defined in src/base/include/icy/datetime.h:328
 
 Destroys the [DateTime](#datetime).
 
@@ -14263,6 +16056,8 @@ Destroys the [DateTime](#datetime).
 DateTime & operator=(const DateTime & dateTime)
 ```
 
+Defined in src/base/include/icy/datetime.h:331
+
 Assigns another [DateTime](#datetime).
 
 ---
@@ -14274,6 +16069,8 @@ Assigns another [DateTime](#datetime).
 ```cpp
 DateTime & operator=(const Timestamp & timestamp)
 ```
+
+Defined in src/base/include/icy/datetime.h:334
 
 Assigns a [Timestamp](#timestamp).
 
@@ -14287,6 +16084,8 @@ Assigns a [Timestamp](#timestamp).
 DateTime & operator=(double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:337
+
 Assigns a Julian day.
 
 ---
@@ -14296,8 +16095,10 @@ Assigns a Julian day.
 #### assign
 
 ```cpp
-DateTime & assign(int year, int month, int day, int hour, int minute, int second, int millisecond, int microseconds)
+DateTime & assign(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microseconds = 0)
 ```
+
+Defined in src/base/include/icy/datetime.h:348
 
 Assigns a Gregorian date and time.
 
@@ -14327,6 +16128,8 @@ Assigns a Gregorian date and time.
 void swap(DateTime & dateTime)
 ```
 
+Defined in src/base/include/icy/datetime.h:352
+
 Swaps the [DateTime](#datetime) with another one.
 
 ---
@@ -14340,6 +16143,8 @@ Swaps the [DateTime](#datetime) with another one.
 ```cpp
 inline int year() const
 ```
+
+Defined in src/base/include/icy/datetime.h:355
 
 Returns the year.
 
@@ -14355,6 +16160,8 @@ Returns the year.
 inline int month() const
 ```
 
+Defined in src/base/include/icy/datetime.h:358
+
 Returns the month (1 to 12).
 
 ---
@@ -14366,8 +16173,10 @@ Returns the month (1 to 12).
 `const`
 
 ```cpp
-int week(int firstDayOfWeek) const
+int week(int firstDayOfWeek = MONDAY) const
 ```
+
+Defined in src/base/include/icy/datetime.h:374
 
 Returns the week number within the year. FirstDayOfWeek should be either SUNDAY (0) or MONDAY (1). The returned week number will be from 0 to 53. Week number 1 is the week containing January 4. This is in accordance to ISO 8601.
 
@@ -14387,6 +16196,8 @@ For 2007, which starts on a Monday, week 1 will be the week startung on Monday, 
 inline int day() const
 ```
 
+Defined in src/base/include/icy/datetime.h:377
+
 Returns the day witin the month (1 to 31).
 
 ---
@@ -14400,6 +16211,8 @@ Returns the day witin the month (1 to 31).
 ```cpp
 int dayOfWeek() const
 ```
+
+Defined in src/base/include/icy/datetime.h:381
 
 Returns the weekday (0 to 6, where 0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 
@@ -14415,6 +16228,8 @@ Returns the weekday (0 to 6, where 0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 int dayOfYear() const
 ```
 
+Defined in src/base/include/icy/datetime.h:385
+
 Returns the number of the day in the year. January 1 is 1, February 1 is 32, etc.
 
 ---
@@ -14428,6 +16243,8 @@ Returns the number of the day in the year. January 1 is 1, February 1 is 32, etc
 ```cpp
 inline int hour() const
 ```
+
+Defined in src/base/include/icy/datetime.h:388
 
 Returns the hour (0 to 23).
 
@@ -14443,6 +16260,8 @@ Returns the hour (0 to 23).
 inline int hourAMPM() const
 ```
 
+Defined in src/base/include/icy/datetime.h:391
+
 Returns the hour (0 to 12).
 
 ---
@@ -14456,6 +16275,8 @@ Returns the hour (0 to 12).
 ```cpp
 inline bool isAM() const
 ```
+
+Defined in src/base/include/icy/datetime.h:394
 
 Returns true if hour < 12;.
 
@@ -14471,6 +16292,8 @@ Returns true if hour < 12;.
 inline bool isPM() const
 ```
 
+Defined in src/base/include/icy/datetime.h:397
+
 Returns true if hour >= 12.
 
 ---
@@ -14484,6 +16307,8 @@ Returns true if hour >= 12.
 ```cpp
 inline int minute() const
 ```
+
+Defined in src/base/include/icy/datetime.h:400
 
 Returns the minute (0 to 59).
 
@@ -14499,6 +16324,8 @@ Returns the minute (0 to 59).
 inline int second() const
 ```
 
+Defined in src/base/include/icy/datetime.h:403
+
 Returns the second (0 to 59).
 
 ---
@@ -14513,7 +16340,9 @@ Returns the second (0 to 59).
 inline int millisecond() const
 ```
 
-Returns the millisecond (0 to 999)
+Defined in src/base/include/icy/datetime.h:406
+
+Returns the millisecond (0 to 999).
 
 ---
 
@@ -14527,7 +16356,9 @@ Returns the millisecond (0 to 999)
 inline int microsecond() const
 ```
 
-Returns the microsecond (0 to 999)
+Defined in src/base/include/icy/datetime.h:409
+
+Returns the microsecond (0 to 999).
 
 ---
 
@@ -14540,6 +16371,8 @@ Returns the microsecond (0 to 999)
 ```cpp
 double julianDay() const
 ```
+
+Defined in src/base/include/icy/datetime.h:412
 
 Returns the julian day for the date and time.
 
@@ -14555,6 +16388,8 @@ Returns the julian day for the date and time.
 inline Timestamp timestamp() const
 ```
 
+Defined in src/base/include/icy/datetime.h:415
+
 Returns the date and time expressed as a [Timestamp](#timestamp).
 
 ---
@@ -14568,6 +16403,8 @@ Returns the date and time expressed as a [Timestamp](#timestamp).
 ```cpp
 inline Timestamp::UtcTimeVal utcTime() const
 ```
+
+Defined in src/base/include/icy/datetime.h:420
 
 Returns the date and time expressed in UTC-based time. UTC base time is midnight, October 15, 1582. Resolution is 100 nanoseconds.
 
@@ -14583,6 +16420,8 @@ Returns the date and time expressed in UTC-based time. UTC base time is midnight
 inline bool operator==(const DateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:422
+
 ---
 
 {#operator}
@@ -14594,6 +16433,8 @@ inline bool operator==(const DateTime & dateTime) const
 ```cpp
 inline bool operator!=(const DateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:423
 
 ---
 
@@ -14607,6 +16448,8 @@ inline bool operator!=(const DateTime & dateTime) const
 inline bool operator<(const DateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:424
+
 ---
 
 {#operator}
@@ -14618,6 +16461,8 @@ inline bool operator<(const DateTime & dateTime) const
 ```cpp
 inline bool operator<=(const DateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:425
 
 ---
 
@@ -14631,6 +16476,8 @@ inline bool operator<=(const DateTime & dateTime) const
 inline bool operator>(const DateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:426
+
 ---
 
 {#operator}
@@ -14642,6 +16489,8 @@ inline bool operator>(const DateTime & dateTime) const
 ```cpp
 inline bool operator>=(const DateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:427
 
 ---
 
@@ -14655,6 +16504,8 @@ inline bool operator>=(const DateTime & dateTime) const
 DateTime operator+(const Timespan & span) const
 ```
 
+Defined in src/base/include/icy/datetime.h:429
+
 ---
 
 {#operator}
@@ -14666,6 +16517,8 @@ DateTime operator+(const Timespan & span) const
 ```cpp
 DateTime operator-(const Timespan & span) const
 ```
+
+Defined in src/base/include/icy/datetime.h:430
 
 ---
 
@@ -14679,6 +16532,8 @@ DateTime operator-(const Timespan & span) const
 Timespan operator-(const DateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:431
+
 ---
 
 {#operator}
@@ -14688,6 +16543,8 @@ Timespan operator-(const DateTime & dateTime) const
 ```cpp
 DateTime & operator+=(const Timespan & span)
 ```
+
+Defined in src/base/include/icy/datetime.h:432
 
 ---
 
@@ -14699,6 +16556,8 @@ DateTime & operator+=(const Timespan & span)
 DateTime & operator-=(const Timespan & span)
 ```
 
+Defined in src/base/include/icy/datetime.h:433
+
 ---
 
 {#makeutc}
@@ -14708,6 +16567,8 @@ DateTime & operator-=(const Timespan & span)
 ```cpp
 void makeUTC(int tzd)
 ```
+
+Defined in src/base/include/icy/datetime.h:437
 
 Converts a local time into UTC, by applying the given time zone differential.
 
@@ -14720,6 +16581,8 @@ Converts a local time into UTC, by applying the given time zone differential.
 ```cpp
 void makeLocal(int tzd)
 ```
+
+Defined in src/base/include/icy/datetime.h:441
 
 Converts a UTC time into a local time, by applying the given time zone differential.
 
@@ -14743,6 +16606,8 @@ Converts a UTC time into a local time, by applying the given time zone different
 static inline bool isLeapYear(int year)
 ```
 
+Defined in src/base/include/icy/datetime.h:445
+
 Returns true if the given year is a leap year; false otherwise.
 
 ---
@@ -14757,6 +16622,8 @@ Returns true if the given year is a leap year; false otherwise.
 static int daysOfMonth(int year, int month)
 ```
 
+Defined in src/base/include/icy/datetime.h:449
+
 Returns the number of days in the given month and year. Month is from 1 to 12.
 
 ---
@@ -14768,8 +16635,10 @@ Returns the number of days in the given month and year. Month is from 1 to 12.
 `static`
 
 ```cpp
-static bool isValid(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+static bool isValid(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0)
 ```
+
+Defined in src/base/include/icy/datetime.h:455
 
 Checks if the given date and time is valid (all arguments are within a proper range).
 
@@ -14792,6 +16661,8 @@ Returns true if all arguments are valid, false otherwise.
 void computeGregorian(double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:477
+
 Computes the Gregorian date for the given Julian day. See [http://vsg.cape.com/~pbaum/date/injdimp.htm](http://vsg.cape.com/~pbaum/date/injdimp.htm), section 3.3.1 for the algorithm.
 
 ---
@@ -14803,6 +16674,8 @@ Computes the Gregorian date for the given Julian day. See [http://vsg.cape.com/~
 ```cpp
 void computeDaytime()
 ```
+
+Defined in src/base/include/icy/datetime.h:481
 
 Extracts the daytime (hours, minutes, seconds, etc.) from the stored utcTime.
 
@@ -14822,6 +16695,8 @@ Extracts the daytime (hours, minutes, seconds, etc.) from the stored utcTime.
 ```cpp
 enum Months
 ```
+
+Defined in src/base/include/icy/datetime.h:269
 
 Symbolic names for month numbers (1 to 12).
 
@@ -14849,6 +16724,8 @@ Symbolic names for month numbers (1 to 12).
 ```cpp
 enum DaysOfWeek
 ```
+
+Defined in src/base/include/icy/datetime.h:286
 
 Symbolic names for week day numbers (0 to 6).
 
@@ -14886,6 +16763,8 @@ Symbolic names for week day numbers (0 to 6).
 Timestamp::UtcTimeVal _utcTime
 ```
 
+Defined in src/base/include/icy/datetime.h:488
+
 ---
 
 {#_year}
@@ -14895,6 +16774,8 @@ Timestamp::UtcTimeVal _utcTime
 ```cpp
 short _year
 ```
+
+Defined in src/base/include/icy/datetime.h:489
 
 ---
 
@@ -14906,6 +16787,8 @@ short _year
 short _month
 ```
 
+Defined in src/base/include/icy/datetime.h:490
+
 ---
 
 {#_day}
@@ -14915,6 +16798,8 @@ short _month
 ```cpp
 short _day
 ```
+
+Defined in src/base/include/icy/datetime.h:491
 
 ---
 
@@ -14926,6 +16811,8 @@ short _day
 short _hour
 ```
 
+Defined in src/base/include/icy/datetime.h:492
+
 ---
 
 {#_minute}
@@ -14935,6 +16822,8 @@ short _hour
 ```cpp
 short _minute
 ```
+
+Defined in src/base/include/icy/datetime.h:493
 
 ---
 
@@ -14946,6 +16835,8 @@ short _minute
 short _second
 ```
 
+Defined in src/base/include/icy/datetime.h:494
+
 ---
 
 {#_millisecond}
@@ -14956,6 +16847,8 @@ short _second
 short _millisecond
 ```
 
+Defined in src/base/include/icy/datetime.h:495
+
 ---
 
 {#_microsecond}
@@ -14965,6 +16858,8 @@ short _millisecond
 ```cpp
 short _microsecond
 ```
+
+Defined in src/base/include/icy/datetime.h:496
 
 ### Private Methods
 
@@ -14983,6 +16878,8 @@ short _microsecond
 void checkLimit(short & lower, short & higher, short limit)
 ```
 
+Defined in src/base/include/icy/datetime.h:485
+
 Utility functions used to correct the overflow in computeGregorian.
 
 ---
@@ -14995,6 +16892,8 @@ Utility functions used to correct the overflow in computeGregorian.
 void normalize()
 ```
 
+Defined in src/base/include/icy/datetime.h:486
+
 {#timezone}
 
 ## Timezone
@@ -15002,6 +16901,12 @@ void normalize()
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class Timezone
+```
+
+Defined in src/base/include/icy/datetime.h:641
 
 This class provides information about the current timezone.
 
@@ -15029,6 +16934,8 @@ This class provides information about the current timezone.
 static int utcOffset()
 ```
 
+Defined in src/base/include/icy/datetime.h:646
+
 Returns the offset of local time to UTC, in seconds. local time = UTC + [utcOffset()](#classicy_1_1Timezone_1a170e81d324a7366aecc33909441f8e86) + [dst()](#classicy_1_1Timezone_1a63486f75f5a20b7c98bbb6509049a8ba).
 
 ---
@@ -15042,6 +16949,8 @@ Returns the offset of local time to UTC, in seconds. local time = UTC + [utcOffs
 ```cpp
 static int dst()
 ```
+
+Defined in src/base/include/icy/datetime.h:651
 
 Returns the daylight saving time offset in seconds if daylight saving time is in use. local time = UTC + [utcOffset()](#classicy_1_1Timezone_1a170e81d324a7366aecc33909441f8e86) + [dst()](#classicy_1_1Timezone_1a63486f75f5a20b7c98bbb6509049a8ba).
 
@@ -15057,6 +16966,8 @@ Returns the daylight saving time offset in seconds if daylight saving time is in
 static bool isDst(const Timestamp & timestamp)
 ```
 
+Defined in src/base/include/icy/datetime.h:658
+
 Returns true if daylight saving time is in effect for the given time. Depending on the operating system platform this might only work reliably for certain date ranges, as the C library's localtime() function is used.
 
 ---
@@ -15070,6 +16981,8 @@ Returns true if daylight saving time is in effect for the given time. Depending 
 ```cpp
 static int tzd()
 ```
+
+Defined in src/base/include/icy/datetime.h:663
 
 Returns the time zone differential for the current timezone. The timezone differential is computed as [utcOffset()](#classicy_1_1Timezone_1a170e81d324a7366aecc33909441f8e86) + [dst()](#classicy_1_1Timezone_1a63486f75f5a20b7c98bbb6509049a8ba) /// and is expressed in seconds.
 
@@ -15085,6 +16998,8 @@ Returns the time zone differential for the current timezone. The timezone differ
 static std::string name()
 ```
 
+Defined in src/base/include/icy/datetime.h:666
+
 Returns the timezone name currently in effect.
 
 ---
@@ -15098,6 +17013,8 @@ Returns the timezone name currently in effect.
 ```cpp
 static std::string standardName()
 ```
+
+Defined in src/base/include/icy/datetime.h:669
 
 Returns the timezone name if not daylight saving time is in effect.
 
@@ -15113,6 +17030,8 @@ Returns the timezone name if not daylight saving time is in effect.
 static std::string dstName()
 ```
 
+Defined in src/base/include/icy/datetime.h:672
+
 Returns the timezone name if daylight saving time is in effect.
 
 {#localdatetime}
@@ -15123,6 +17042,12 @@ Returns the timezone name if daylight saving time is in effect.
 #include <icy/datetime.h>
 ```
 
+```cpp
+class LocalDateTime
+```
+
+Defined in src/base/include/icy/datetime.h:703
+
 This class represents an instant in local time (as opposed to UTC), expressed in years, months, days, hours, minutes, seconds and milliseconds based on the Gregorian calendar.
 
 In addition to the date and time, the class also maintains a time zone differential, which denotes the difference in seconds from UTC to local time, i.e. UTC = local time - time zone differential.
@@ -15130,6 +17055,37 @@ In addition to the date and time, the class also maintains a time zone different
 Although [LocalDateTime](#localdatetime) supports relational and arithmetic operators, all date/time comparisons and date/time arithmetics should be done in UTC, using the [DateTime](#datetime) or [Timestamp](#timestamp) class for better performance. The relational operators normalize the dates/times involved to UTC before carrying out the comparison.
 
 The time zone differential is based on the input date and time and current time zone. A number of constructors accept an explicit time zone differential parameter. These should not be used since daylight savings time processing is impossible since the time zone is unknown. Each of the constructors accepting a tzd parameter have been marked as deprecated and may be removed in a future revision.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`DateTimeFormatter`](#datetimeformatter)  |  |
+| [`DateTimeParser`](#datetimeparser)  |  |
+
+---
+
+{#datetimeformatter}
+
+#### DateTimeFormatter
+
+```cpp
+friend class DateTimeFormatter
+```
+
+Defined in src/base/include/icy/datetime.h:919
+
+---
+
+{#datetimeparser}
+
+#### DateTimeParser
+
+```cpp
+friend class DateTimeParser
+```
+
+Defined in src/base/include/icy/datetime.h:920
 
 ### Public Methods
 
@@ -15164,8 +17120,8 @@ The time zone differential is based on the input date and time and current time 
 | `bool` | [`isPM`](#ispm) `const` `inline` | Returns true if hour >= 12. |
 | `int` | [`minute`](#minute) `const` `inline` | Returns the minute (0 to 59). |
 | `int` | [`second`](#second) `const` `inline` | Returns the second (0 to 59). |
-| `int` | [`millisecond`](#millisecond) `const` `inline` | Returns the millisecond (0 to 999) |
-| `int` | [`microsecond`](#microsecond) `const` `inline` | Returns the microsecond (0 to 999) |
+| `int` | [`millisecond`](#millisecond) `const` `inline` | Returns the millisecond (0 to 999). |
+| `int` | [`microsecond`](#microsecond) `const` `inline` | Returns the microsecond (0 to 999). |
 | `double` | [`julianDay`](#julianday) `const` `inline` | Returns the julian day for the date. |
 | `int` | [`tzd`](#tzd) `const` `inline` | Returns the time zone differential. |
 | `DateTime` | [`utc`](#utc) `const` | Returns the UTC equivalent for the local date and time. |
@@ -15193,6 +17149,8 @@ The time zone differential is based on the input date and time and current time 
 LocalDateTime()
 ```
 
+Defined in src/base/include/icy/datetime.h:708
+
 Creates a [LocalDateTime](#localdatetime) with the current date/time for the current time zone.
 
 ---
@@ -15202,8 +17160,10 @@ Creates a [LocalDateTime](#localdatetime) with the current date/time for the cur
 #### LocalDateTime
 
 ```cpp
-LocalDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+LocalDateTime(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0)
 ```
+
+Defined in src/base/include/icy/datetime.h:719
 
 Creates a [LocalDateTime](#localdatetime) for the given Gregorian local date and time.
 
@@ -15232,6 +17192,8 @@ Creates a [LocalDateTime](#localdatetime) for the given Gregorian local date and
 ```cpp
 LocalDateTime(int tzd, int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
 ```
+
+Defined in src/base/include/icy/datetime.h:734
 
 @ deprecated Creates a [LocalDateTime](#localdatetime) for the given Gregorian date and time in the time zone denoted by the time zone differential in tzd.
 
@@ -15263,6 +17225,8 @@ LocalDateTime(int tzd, int year, int month, int day, int hour, int minute, int s
 LocalDateTime(const DateTime & dateTime)
 ```
 
+Defined in src/base/include/icy/datetime.h:739
+
 Creates a [LocalDateTime](#localdatetime) from the UTC time given in dateTime, using the time zone differential of the current time zone.
 
 ---
@@ -15274,6 +17238,8 @@ Creates a [LocalDateTime](#localdatetime) from the UTC time given in dateTime, u
 ```cpp
 LocalDateTime(int tzd, const DateTime & dateTime)
 ```
+
+Defined in src/base/include/icy/datetime.h:745
 
 @ deprecated Creates a [LocalDateTime](#localdatetime) from the UTC time given in dateTime, using the given time zone differential. Adjusts dateTime for the given time zone differential.
 
@@ -15287,6 +17253,8 @@ LocalDateTime(int tzd, const DateTime & dateTime)
 LocalDateTime(int tzd, const DateTime & dateTime, bool adjust)
 ```
 
+Defined in src/base/include/icy/datetime.h:752
+
 @ deprecated Creates a [LocalDateTime](#localdatetime) from the UTC time given in dateTime, using the given time zone differential. If adjust is true, adjusts dateTime for the given time zone differential.
 
 ---
@@ -15298,6 +17266,8 @@ LocalDateTime(int tzd, const DateTime & dateTime, bool adjust)
 ```cpp
 LocalDateTime(double julianDay)
 ```
+
+Defined in src/base/include/icy/datetime.h:755
 
 Creates a [LocalDateTime](#localdatetime) for the given Julian day in the local time zone.
 
@@ -15311,6 +17281,8 @@ Creates a [LocalDateTime](#localdatetime) for the given Julian day in the local 
 LocalDateTime(int tzd, double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:761
+
 @ deprecated Creates a [LocalDateTime](#localdatetime) for the given Julian day in the time zone denoted by the time zone differential in tzd.
 
 ---
@@ -15322,6 +17294,8 @@ LocalDateTime(int tzd, double julianDay)
 ```cpp
 LocalDateTime(const LocalDateTime & dateTime)
 ```
+
+Defined in src/base/include/icy/datetime.h:764
 
 Copy constructor. Creates the [LocalDateTime](#localdatetime) from another one.
 
@@ -15335,6 +17309,8 @@ Copy constructor. Creates the [LocalDateTime](#localdatetime) from another one.
 ~LocalDateTime()
 ```
 
+Defined in src/base/include/icy/datetime.h:767
+
 Destroys the [LocalDateTime](#localdatetime).
 
 ---
@@ -15346,6 +17322,8 @@ Destroys the [LocalDateTime](#localdatetime).
 ```cpp
 LocalDateTime & operator=(const LocalDateTime & dateTime)
 ```
+
+Defined in src/base/include/icy/datetime.h:770
 
 Assigns another [LocalDateTime](#localdatetime).
 
@@ -15359,6 +17337,8 @@ Assigns another [LocalDateTime](#localdatetime).
 LocalDateTime & operator=(const Timestamp & timestamp)
 ```
 
+Defined in src/base/include/icy/datetime.h:773
+
 Assigns a timestamp.
 
 ---
@@ -15371,6 +17351,8 @@ Assigns a timestamp.
 LocalDateTime & operator=(double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:776
+
 Assigns a Julian day in the local time zone.
 
 ---
@@ -15380,8 +17362,10 @@ Assigns a Julian day in the local time zone.
 #### assign
 
 ```cpp
-LocalDateTime & assign(int year, int month, int day, int hour, int minute, int second, int millisecond, int microseconds)
+LocalDateTime & assign(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microseconds = 0)
 ```
+
+Defined in src/base/include/icy/datetime.h:787
 
 Assigns a Gregorian local date and time.
 
@@ -15410,6 +17394,8 @@ Assigns a Gregorian local date and time.
 ```cpp
 LocalDateTime & assign(int tzd, int year, int month, int day, int hour, int minute, int second, int millisecond, int microseconds)
 ```
+
+Defined in src/base/include/icy/datetime.h:803
 
 @ deprecated Assigns a Gregorian local date and time in the time zone denoted by the time zone differential in tzd.
 
@@ -15441,6 +17427,8 @@ LocalDateTime & assign(int tzd, int year, int month, int day, int hour, int minu
 LocalDateTime & assign(int tzd, double julianDay)
 ```
 
+Defined in src/base/include/icy/datetime.h:810
+
 @ deprecated Assigns a Julian day in the time zone denoted by the time zone differential in tzd.
 
 ---
@@ -15452,6 +17440,8 @@ LocalDateTime & assign(int tzd, double julianDay)
 ```cpp
 void swap(LocalDateTime & dateTime)
 ```
+
+Defined in src/base/include/icy/datetime.h:813
 
 Swaps the [LocalDateTime](#localdatetime) with another one.
 
@@ -15467,6 +17457,8 @@ Swaps the [LocalDateTime](#localdatetime) with another one.
 inline int year() const
 ```
 
+Defined in src/base/include/icy/datetime.h:816
+
 Returns the year.
 
 ---
@@ -15481,6 +17473,8 @@ Returns the year.
 inline int month() const
 ```
 
+Defined in src/base/include/icy/datetime.h:819
+
 Returns the month (1 to 12).
 
 ---
@@ -15492,8 +17486,10 @@ Returns the month (1 to 12).
 `const` `inline`
 
 ```cpp
-inline int week(int firstDayOfWeek) const
+inline int week(int firstDayOfWeek = DateTime::MONDAY) const
 ```
+
+Defined in src/base/include/icy/datetime.h:835
 
 Returns the week number within the year. FirstDayOfWeek should be either SUNDAY (0) or MONDAY (1). The returned week number will be from 0 to 53. Week number 1 is the week containing January 4. This is in accordance to ISO 8601.
 
@@ -15513,6 +17509,8 @@ For 2007, which starts on a Monday, week 1 will be the week startung on Monday, 
 inline int day() const
 ```
 
+Defined in src/base/include/icy/datetime.h:838
+
 Returns the day witin the month (1 to 31).
 
 ---
@@ -15526,6 +17524,8 @@ Returns the day witin the month (1 to 31).
 ```cpp
 inline int dayOfWeek() const
 ```
+
+Defined in src/base/include/icy/datetime.h:842
 
 Returns the weekday (0 to 6, where 0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 
@@ -15541,6 +17541,8 @@ Returns the weekday (0 to 6, where 0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 inline int dayOfYear() const
 ```
 
+Defined in src/base/include/icy/datetime.h:846
+
 Returns the number of the day in the year. January 1 is 1, February 1 is 32, etc.
 
 ---
@@ -15554,6 +17556,8 @@ Returns the number of the day in the year. January 1 is 1, February 1 is 32, etc
 ```cpp
 inline int hour() const
 ```
+
+Defined in src/base/include/icy/datetime.h:849
 
 Returns the hour (0 to 23).
 
@@ -15569,6 +17573,8 @@ Returns the hour (0 to 23).
 inline int hourAMPM() const
 ```
 
+Defined in src/base/include/icy/datetime.h:852
+
 Returns the hour (0 to 12).
 
 ---
@@ -15582,6 +17588,8 @@ Returns the hour (0 to 12).
 ```cpp
 inline bool isAM() const
 ```
+
+Defined in src/base/include/icy/datetime.h:855
 
 Returns true if hour < 12;.
 
@@ -15597,6 +17605,8 @@ Returns true if hour < 12;.
 inline bool isPM() const
 ```
 
+Defined in src/base/include/icy/datetime.h:858
+
 Returns true if hour >= 12.
 
 ---
@@ -15610,6 +17620,8 @@ Returns true if hour >= 12.
 ```cpp
 inline int minute() const
 ```
+
+Defined in src/base/include/icy/datetime.h:861
 
 Returns the minute (0 to 59).
 
@@ -15625,6 +17637,8 @@ Returns the minute (0 to 59).
 inline int second() const
 ```
 
+Defined in src/base/include/icy/datetime.h:864
+
 Returns the second (0 to 59).
 
 ---
@@ -15639,7 +17653,9 @@ Returns the second (0 to 59).
 inline int millisecond() const
 ```
 
-Returns the millisecond (0 to 999)
+Defined in src/base/include/icy/datetime.h:867
+
+Returns the millisecond (0 to 999).
 
 ---
 
@@ -15653,7 +17669,9 @@ Returns the millisecond (0 to 999)
 inline int microsecond() const
 ```
 
-Returns the microsecond (0 to 999)
+Defined in src/base/include/icy/datetime.h:870
+
+Returns the microsecond (0 to 999).
 
 ---
 
@@ -15666,6 +17684,8 @@ Returns the microsecond (0 to 999)
 ```cpp
 inline double julianDay() const
 ```
+
+Defined in src/base/include/icy/datetime.h:873
 
 Returns the julian day for the date.
 
@@ -15681,6 +17701,8 @@ Returns the julian day for the date.
 inline int tzd() const
 ```
 
+Defined in src/base/include/icy/datetime.h:876
+
 Returns the time zone differential.
 
 ---
@@ -15694,6 +17716,8 @@ Returns the time zone differential.
 ```cpp
 DateTime utc() const
 ```
+
+Defined in src/base/include/icy/datetime.h:879
 
 Returns the UTC equivalent for the local date and time.
 
@@ -15709,6 +17733,8 @@ Returns the UTC equivalent for the local date and time.
 inline Timestamp timestamp() const
 ```
 
+Defined in src/base/include/icy/datetime.h:882
+
 Returns the date and time expressed as a [Timestamp](#timestamp).
 
 ---
@@ -15722,6 +17748,8 @@ Returns the date and time expressed as a [Timestamp](#timestamp).
 ```cpp
 inline Timestamp::UtcTimeVal utcTime() const
 ```
+
+Defined in src/base/include/icy/datetime.h:885
 
 Returns the UTC equivalent for the local date and time.
 
@@ -15737,6 +17765,8 @@ Returns the UTC equivalent for the local date and time.
 bool operator==(const LocalDateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:887
+
 ---
 
 {#operator}
@@ -15748,6 +17778,8 @@ bool operator==(const LocalDateTime & dateTime) const
 ```cpp
 bool operator!=(const LocalDateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:888
 
 ---
 
@@ -15761,6 +17793,8 @@ bool operator!=(const LocalDateTime & dateTime) const
 bool operator<(const LocalDateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:889
+
 ---
 
 {#operator}
@@ -15772,6 +17806,8 @@ bool operator<(const LocalDateTime & dateTime) const
 ```cpp
 bool operator<=(const LocalDateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:890
 
 ---
 
@@ -15785,6 +17821,8 @@ bool operator<=(const LocalDateTime & dateTime) const
 bool operator>(const LocalDateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:891
+
 ---
 
 {#operator}
@@ -15796,6 +17834,8 @@ bool operator>(const LocalDateTime & dateTime) const
 ```cpp
 bool operator>=(const LocalDateTime & dateTime) const
 ```
+
+Defined in src/base/include/icy/datetime.h:892
 
 ---
 
@@ -15809,6 +17849,8 @@ bool operator>=(const LocalDateTime & dateTime) const
 LocalDateTime operator+(const Timespan & span) const
 ```
 
+Defined in src/base/include/icy/datetime.h:894
+
 ---
 
 {#operator}
@@ -15820,6 +17862,8 @@ LocalDateTime operator+(const Timespan & span) const
 ```cpp
 LocalDateTime operator-(const Timespan & span) const
 ```
+
+Defined in src/base/include/icy/datetime.h:895
 
 ---
 
@@ -15833,6 +17877,8 @@ LocalDateTime operator-(const Timespan & span) const
 Timespan operator-(const LocalDateTime & dateTime) const
 ```
 
+Defined in src/base/include/icy/datetime.h:896
+
 ---
 
 {#operator}
@@ -15843,6 +17889,8 @@ Timespan operator-(const LocalDateTime & dateTime) const
 LocalDateTime & operator+=(const Timespan & span)
 ```
 
+Defined in src/base/include/icy/datetime.h:897
+
 ---
 
 {#operator}
@@ -15852,6 +17900,8 @@ LocalDateTime & operator+=(const Timespan & span)
 ```cpp
 LocalDateTime & operator-=(const Timespan & span)
 ```
+
+Defined in src/base/include/icy/datetime.h:898
 
 ### Protected Methods
 
@@ -15872,6 +17922,8 @@ LocalDateTime & operator-=(const Timespan & span)
 LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff, int tzd)
 ```
 
+Defined in src/base/include/icy/datetime.h:901
+
 ---
 
 {#determinetzd}
@@ -15879,8 +17931,10 @@ LocalDateTime(Timestamp::UtcTimeVal utcTime, Timestamp::TimeDiff diff, int tzd)
 #### determineTzd
 
 ```cpp
-void determineTzd(bool adjust)
+void determineTzd(bool adjust = false)
 ```
+
+Defined in src/base/include/icy/datetime.h:907
 
 Recalculate the tzd based on the _dateTime member based on the current timezone using the Standard C runtime functions. If adjust is true, then [adjustForTzd()](#classicy_1_1LocalDateTime_1a12b329ccf06bdc8c089785f46992faf4) is called after the differential is calculated.
 
@@ -15896,6 +17950,8 @@ Recalculate the tzd based on the _dateTime member based on the current timezone 
 inline void adjustForTzd()
 ```
 
+Defined in src/base/include/icy/datetime.h:910
+
 Adjust the _dateTime member based on the _tzd member.
 
 ---
@@ -15909,6 +17965,8 @@ Adjust the _dateTime member based on the _tzd member.
 ```cpp
 std::time_t dstOffset(int & dstOffset) const
 ```
+
+Defined in src/base/include/icy/datetime.h:913
 
 Determine the DST offset for the current date/time.
 
@@ -15929,6 +17987,8 @@ Determine the DST offset for the current date/time.
 DateTime _dateTime
 ```
 
+Defined in src/base/include/icy/datetime.h:916
+
 ---
 
 {#_tzd}
@@ -15939,6 +17999,8 @@ DateTime _dateTime
 int _tzd
 ```
 
+Defined in src/base/include/icy/datetime.h:917
+
 {#datetimeformat}
 
 ## DateTimeFormat
@@ -15946,6 +18008,12 @@ int _tzd
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class DateTimeFormat
+```
+
+Defined in src/base/include/icy/datetime.h:1055
 
 Definition of date/time formats and various constants used by [DateTimeFormatter](#datetimeformatter) and [DateTimeParser](#datetimeparser).
 
@@ -15977,6 +18045,8 @@ Definition of date/time formats and various constants used by [DateTimeFormatter
 const std::string ISO8601_FORMAT
 ```
 
+Defined in src/base/include/icy/datetime.h:1064
+
 predefined date formats The date/time format defined in the ISO 8601 standard.
 
 Examples: 2005-01-01T12:00:00+01:00 2005-01-01T11:00:00Z
@@ -15992,6 +18062,8 @@ Examples: 2005-01-01T12:00:00+01:00 2005-01-01T11:00:00Z
 ```cpp
 const std::string ISO8601_FRAC_FORMAT
 ```
+
+Defined in src/base/include/icy/datetime.h:1072
 
 The date/time format defined in the ISO 8601 standard, with fractional seconds.
 
@@ -16009,6 +18081,8 @@ Examples: 2005-01-01T12:00:00.000000+01:00 2005-01-01T11:00:00.000000Z
 const std::string RFC822_FORMAT
 ```
 
+Defined in src/base/include/icy/datetime.h:1079
+
 The date/time format defined in RFC 822 (obsoleted by RFC 1123).
 
 Examples: Sat, 1 Jan 05 12:00:00 +0100 Sat, 1 Jan 05 11:00:00 GMT
@@ -16024,6 +18098,8 @@ Examples: Sat, 1 Jan 05 12:00:00 +0100 Sat, 1 Jan 05 11:00:00 GMT
 ```cpp
 const std::string RFC1123_FORMAT
 ```
+
+Defined in src/base/include/icy/datetime.h:1086
 
 The date/time format defined in RFC 1123 (obsoletes RFC 822).
 
@@ -16041,6 +18117,8 @@ Examples: Sat, 1 Jan 2005 12:00:00 +0100 Sat, 1 Jan 2005 11:00:00 GMT
 const std::string HTTP_FORMAT
 ```
 
+Defined in src/base/include/icy/datetime.h:1094
+
 The date/time format defined in the HTTP specification (RFC 2616), which is basically a variant of RFC 1036 with a zero-padded day field.
 
 Examples: Sat, 01 Jan 2005 12:00:00 +0100 Sat, 01 Jan 2005 11:00:00 GMT
@@ -16056,6 +18134,8 @@ Examples: Sat, 01 Jan 2005 12:00:00 +0100 Sat, 01 Jan 2005 11:00:00 GMT
 ```cpp
 const std::string RFC850_FORMAT
 ```
+
+Defined in src/base/include/icy/datetime.h:1101
 
 The date/time format defined in RFC 850 (obsoleted by RFC 1036).
 
@@ -16073,6 +18153,8 @@ Examples: Saturday, 1-Jan-05 12:00:00 +0100 Saturday, 1-Jan-05 11:00:00 GMT
 const std::string RFC1036_FORMAT
 ```
 
+Defined in src/base/include/icy/datetime.h:1108
+
 The date/time format defined in RFC 1036 (obsoletes RFC 850).
 
 Examples: Saturday, 1 Jan 05 12:00:00 +0100 Saturday, 1 Jan 05 11:00:00 GMT
@@ -16088,6 +18170,8 @@ Examples: Saturday, 1 Jan 05 12:00:00 +0100 Saturday, 1 Jan 05 11:00:00 GMT
 ```cpp
 const std::string ASCTIME_FORMAT
 ```
+
+Defined in src/base/include/icy/datetime.h:1114
 
 The date/time format produced by the ANSI C asctime() function.
 
@@ -16105,6 +18189,8 @@ Example: Sat Jan 1 12:00:00 2005
 const std::string SORTABLE_FORMAT
 ```
 
+Defined in src/base/include/icy/datetime.h:1120
+
 A simple, sortable date/time format.
 
 Example: 2005-01-01 12:00:00
@@ -16121,6 +18207,8 @@ Example: 2005-01-01 12:00:00
 const std::string WEEKDAY_NAMES
 ```
 
+Defined in src/base/include/icy/datetime.h:1124
+
 names used by formatter and parser English names of week days (Sunday, Monday, Tuesday, ...).
 
 ---
@@ -16135,6 +18223,8 @@ names used by formatter and parser English names of week days (Sunday, Monday, T
 const std::string MONTH_NAMES
 ```
 
+Defined in src/base/include/icy/datetime.h:1127
+
 English names of months (January, February, ...).
 
 {#datetimeformatter}
@@ -16144,6 +18234,12 @@ English names of months (January, February, ...).
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class DateTimeFormatter
+```
+
+Defined in src/base/include/icy/datetime.h:1142
 
 This class converts dates and times into strings, supporting a variety of standard and custom formats.
 
@@ -16179,8 +18275,10 @@ There are two kind of static member functions:
 `static` `inline`
 
 ```cpp
-static inline std::string format(const Timestamp & timestamp, std::string_view fmt, int timeZoneDifferential)
+static inline std::string format(const Timestamp & timestamp, std::string_view fmt, int timeZoneDifferential = UTC)
 ```
+
+Defined in src/base/include/icy/datetime.h:1183
 
 Formats the given timestamp according to the given format. The format string is used as a template to format the date and is copied character by character except for the following special characters, which are replaced by the corresponding value.
 
@@ -16245,8 +18343,10 @@ Class [DateTimeFormat](#datetimeformat) defines format strings for various stand
 `static` `inline`
 
 ```cpp
-static inline std::string format(const DateTime & dateTime, std::string_view fmt, int timeZoneDifferential)
+static inline std::string format(const DateTime & dateTime, std::string_view fmt, int timeZoneDifferential = UTC)
 ```
+
+Defined in src/base/include/icy/datetime.h:1190
 
 Formats the given date and time according to the given format. See [format(const Timestamp&, std::string_view, int)](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for more information.
 
@@ -16262,6 +18362,8 @@ Formats the given date and time according to the given format. See [format(const
 static inline std::string format(const LocalDateTime & dateTime, std::string_view fmt)
 ```
 
+Defined in src/base/include/icy/datetime.h:1196
+
 Formats the given local date and time according to the given format. See [format(const Timestamp&, std::string_view, int)](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for more information.
 
 ---
@@ -16273,8 +18375,10 @@ Formats the given local date and time according to the given format. See [format
 `static` `inline`
 
 ```cpp
-static inline std::string format(const Timespan & timespan, std::string_view fmt)
+static inline std::string format(const Timespan & timespan, std::string_view fmt = "%dd %H:%M:%S.%i")
 ```
+
+Defined in src/base/include/icy/datetime.h:1215
 
 Formats the given timespan according to the given format. The format string is used as a template to format the date and is copied character by character except for the following special characters, which are replaced by the corresponding value.
 
@@ -16309,8 +18413,10 @@ Formats the given timespan according to the given format. The format string is u
 `static` `inline`
 
 ```cpp
-static inline void append(std::string & str, const Timestamp & timestamp, std::string_view fmt, int timeZoneDifferential)
+static inline void append(std::string & str, const Timestamp & timestamp, std::string_view fmt, int timeZoneDifferential = UTC)
 ```
+
+Defined in src/base/include/icy/datetime.h:1222
 
 Formats the given timestamp according to the given format and appends it to str.
 
@@ -16325,8 +18431,10 @@ See [format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487
 `static`
 
 ```cpp
-static void append(std::string & str, const DateTime & dateTime, std::string_view fmt, int timeZoneDifferential)
+static void append(std::string & str, const DateTime & dateTime, std::string_view fmt, int timeZoneDifferential = UTC)
 ```
+
+Defined in src/base/include/icy/datetime.h:1229
 
 Formats the given date and time according to the given format and appends it to str.
 
@@ -16344,6 +18452,8 @@ See [format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487
 static void append(std::string & str, const LocalDateTime & dateTime, std::string_view fmt)
 ```
 
+Defined in src/base/include/icy/datetime.h:1236
+
 Formats the given local date and time according to the given format and appends it to str.
 
 See [format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for documentation of the formatting string.
@@ -16357,8 +18467,10 @@ See [format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487
 `static`
 
 ```cpp
-static void append(std::string & str, const Timespan & timespan, std::string_view fmt)
+static void append(std::string & str, const Timespan & timespan, std::string_view fmt = "%dd %H:%M:%S.%i")
 ```
+
+Defined in src/base/include/icy/datetime.h:1243
 
 Formats the given timespan according to the given format and appends it to str.
 
@@ -16376,6 +18488,8 @@ See [format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487
 static inline std::string tzdISO(int timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1249
+
 Formats the given timezone differential in ISO format. If timeZoneDifferential is UTC, "Z" is returned, otherwise, +HH.MM (or -HH.MM) is returned.
 
 ---
@@ -16389,6 +18503,8 @@ Formats the given timezone differential in ISO format. If timeZoneDifferential i
 ```cpp
 static inline std::string tzdRFC(int timeZoneDifferential)
 ```
+
+Defined in src/base/include/icy/datetime.h:1254
 
 Formats the given timezone differential in RFC format. If timeZoneDifferential is UTC, "GMT" is returned, otherwise ++HHMM (or -HHMM) is returned.
 
@@ -16404,6 +18520,8 @@ Formats the given timezone differential in RFC format. If timeZoneDifferential i
 static void tzdISO(std::string & str, int timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1260
+
 Formats the given timezone differential in ISO format and appends it to the given string. If timeZoneDifferential is UTC, "Z" is returned, otherwise, +HH.MM (or -HH.MM) is returned.
 
 ---
@@ -16418,23 +18536,27 @@ Formats the given timezone differential in ISO format and appends it to the give
 static void tzdRFC(std::string & str, int timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1266
+
 Formats the given timezone differential in RFC format and appends it to the given string. If timeZoneDifferential is UTC, "GMT" is returned, otherwise ++HHMM (or -HHMM) is returned.
 
 ### Public Types
 
 | Name | Description |
 |------|-------------|
-| [``](#classicy_1_1datetimeformatter_1aecc87c353df5e93ffe5ce179f14efc06)  |  |
+| [`@324166125375040071131114040250204055235371364256`](#324166125375040071131114040250204055235371364256)  |  |
 
 ---
 
-{#classicy_1_1datetimeformatter_1aecc87c353df5e93ffe5ce179f14efc06}
+{#324166125375040071131114040250204055235371364256}
 
-#### 
+#### @324166125375040071131114040250204055235371364256
 
 ```cpp
-enum 
+enum @324166125375040071131114040250204055235371364256
 ```
+
+Defined in src/base/include/icy/datetime.h:1145
 
 | Value | Description |
 |-------|-------------|
@@ -16447,6 +18569,12 @@ enum
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class DateTimeParser
+```
+
+Defined in src/base/include/icy/datetime.h:1294
 
 This class provides a method for parsing dates and times from strings. All parsing methods do their best to parse a meaningful result, even from malformed input strings.
 
@@ -16481,6 +18609,8 @@ See the [DateTimeFormatter](#datetimeformatter) class for a list of supported fo
 static void parse(std::string_view fmt, std::string_view str, DateTime & dateTime, int & timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1303
+
 Parses a date and time in the given format from the given string. Throws a SyntaxException if the string cannot be successfully parsed. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
 ---
@@ -16494,6 +18624,8 @@ Parses a date and time in the given format from the given string. Throws a Synta
 ```cpp
 static DateTime parse(std::string_view fmt, std::string_view str, int & timeZoneDifferential)
 ```
+
+Defined in src/base/include/icy/datetime.h:1312
 
 Parses a date and time in the given format from the given string. Throws a SyntaxException if the string cannot be successfully parsed. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
@@ -16509,6 +18641,8 @@ Parses a date and time in the given format from the given string. Throws a Synta
 static bool tryParse(std::string_view fmt, std::string_view str, DateTime & dateTime, int & timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1322
+
 Parses a date and time in the given format from the given string. Returns true if the string has been successfully parsed, false otherwise. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
 ---
@@ -16522,6 +18656,8 @@ Parses a date and time in the given format from the given string. Returns true i
 ```cpp
 static void parse(std::string_view str, DateTime & dateTime, int & timeZoneDifferential)
 ```
+
+Defined in src/base/include/icy/datetime.h:1333
 
 Parses a date and time from the given dateTime string. Before parsing, the method examines the dateTime string for a known date/time format. Throws a SyntaxException if the string cannot be successfully parsed. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
@@ -16537,6 +18673,8 @@ Parses a date and time from the given dateTime string. Before parsing, the metho
 static DateTime parse(std::string_view str, int & timeZoneDifferential)
 ```
 
+Defined in src/base/include/icy/datetime.h:1343
+
 Parses a date and time from the given dateTime string. Before parsing, the method examines the dateTime string for a known date/time format. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
 ---
@@ -16550,6 +18688,8 @@ Parses a date and time from the given dateTime string. Before parsing, the metho
 ```cpp
 static bool tryParse(std::string_view str, DateTime & dateTime, int & timeZoneDifferential)
 ```
+
+Defined in src/base/include/icy/datetime.h:1352
 
 Parses a date and time from the given dateTime string. Before parsing, the method examines the dateTime string for a known date/time format. Please see [DateTimeFormatter::format()](#classicy_1_1DateTimeFormatter_1a5e24b7cfd3f21050283962aa47df6487) for a description of the format string. Class [DateTimeFormat](#datetimeformat) defines format strings for various standard date/time formats.
 
@@ -16565,6 +18705,8 @@ Parses a date and time from the given dateTime string. Before parsing, the metho
 static int parseMonth(const char *& it, const char * end)
 ```
 
+Defined in src/base/include/icy/datetime.h:1361
+
 Tries to interpret the given range as a month name. The range must be at least three characters long. Returns the month number (1 .. 12) if the month name is valid. Otherwise throws a SyntaxException.
 
 ---
@@ -16579,6 +18721,8 @@ Tries to interpret the given range as a month name. The range must be at least t
 static int parseDayOfWeek(const char *& it, const char * end)
 ```
 
+Defined in src/base/include/icy/datetime.h:1369
+
 Tries to interpret the given range as a weekday name. The range must be at least three characters long. Returns the weekday number (0 .. 6, where 0 = Synday, 1 = Monday, etc.) if the weekday name is valid. Otherwise throws a SyntaxException.
 
 {#stopwatch}
@@ -16588,6 +18732,12 @@ Tries to interpret the given range as a weekday name. The range must be at least
 ```cpp
 #include <icy/datetime.h>
 ```
+
+```cpp
+class Stopwatch
+```
+
+Defined in src/base/include/icy/datetime.h:1733
 
 A simple facility to measure time intervals with microsecond resolution.
 
@@ -16616,6 +18766,8 @@ The [Stopwatch](#stopwatch) uses the current system time, so if the system time 
 Stopwatch()
 ```
 
+Defined in src/base/include/icy/datetime.h:1736
+
 ---
 
 {#start}
@@ -16625,6 +18777,8 @@ Stopwatch()
 ```cpp
 void start()
 ```
+
+Defined in src/base/include/icy/datetime.h:1740
 
 Starts (or restarts) the stopwatch.
 
@@ -16638,6 +18792,8 @@ Starts (or restarts) the stopwatch.
 void stop()
 ```
 
+Defined in src/base/include/icy/datetime.h:1743
+
 Stops or pauses the stopwatch.
 
 ---
@@ -16650,6 +18806,8 @@ Stops or pauses the stopwatch.
 void reset()
 ```
 
+Defined in src/base/include/icy/datetime.h:1746
+
 Resets the stopwatch.
 
 ---
@@ -16661,6 +18819,8 @@ Resets the stopwatch.
 ```cpp
 void restart()
 ```
+
+Defined in src/base/include/icy/datetime.h:1749
 
 Resets and starts the stopwatch.
 
@@ -16676,6 +18836,8 @@ Resets and starts the stopwatch.
 Timestamp::TimeDiff elapsed() const
 ```
 
+Defined in src/base/include/icy/datetime.h:1753
+
 Returns the elapsed time in microseconds since the stopwatch started.
 
 ---
@@ -16690,6 +18852,8 @@ Returns the elapsed time in microseconds since the stopwatch started.
 int elapsedSeconds() const
 ```
 
+Defined in src/base/include/icy/datetime.h:1757
+
 Returns the number of seconds elapsed since the stopwatch started.
 
 ---
@@ -16703,6 +18867,8 @@ Returns the number of seconds elapsed since the stopwatch started.
 ```cpp
 int elapsedMilliseconds() const
 ```
+
+Defined in src/base/include/icy/datetime.h:1761
 
 Returns the number of milliseconds elapsed since the stopwatch started.
 
@@ -16724,6 +18890,8 @@ Returns the number of milliseconds elapsed since the stopwatch started.
 static Timestamp::TimeVal resolution()
 ```
 
+Defined in src/base/include/icy/datetime.h:1764
+
 Returns the resolution of the stopwatch.
 
 ### Private Attributes
@@ -16744,6 +18912,8 @@ Returns the resolution of the stopwatch.
 Timestamp _start
 ```
 
+Defined in src/base/include/icy/datetime.h:1770
+
 ---
 
 {#_elapsed}
@@ -16754,6 +18924,8 @@ Timestamp _start
 Timestamp::TimeDiff _elapsed
 ```
 
+Defined in src/base/include/icy/datetime.h:1771
+
 ---
 
 {#_running}
@@ -16763,6 +18935,8 @@ Timestamp::TimeDiff _elapsed
 ```cpp
 bool _running
 ```
+
+Defined in src/base/include/icy/datetime.h:1772
 
 ### Private Methods
 
@@ -16780,6 +18954,8 @@ bool _running
 Stopwatch(const Stopwatch &) = delete
 ```
 
+Defined in src/base/include/icy/datetime.h:1767
+
 Deleted constructor.
 
 {#threadedstreamreader}
@@ -16789,6 +18965,12 @@ Deleted constructor.
 ```cpp
 #include <icy/packetio.h>
 ```
+
+```cpp
+class ThreadedStreamReader
+```
+
+Defined in src/base/include/icy/packetio.h:31
 
 > **Inherits:** [`PacketStreamAdapter`](#packetstreamadapter), [`Startable`](#startable)
 
@@ -16812,16 +18994,18 @@ This class can be connected to a `[PacketStream](#packetstream)` to read input f
 PacketSignal emitter
 ```
 
+Defined in src/base/include/icy/packetio.h:93
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ThreadedStreamReader`](#threadedstreamreader) `inline` | #### Parameters |
+|  | [`ThreadedStreamReader`](#threadedstreamreader) `inline` |  |
 |  | [`~ThreadedStreamReader`](#threadedstreamreader) `inline` | Stops the reader thread and deletes the owned stream. |
-| `void` | [`start`](#start) `virtual` `inline` | Starts the reader thread; emits one line per iteration as a [RawPacket](#rawpacket). Emits a [FlagPacket](#flagpacket) with `[PacketFlags::Final](#namespaceicy_1a3d1e0d9028d45b9ec824bf4306047f18abeae421a14a34f831c113f61323d1ab3)` on EOF. |
-| `void` | [`stop`](#stop) `virtual` `inline` | Cancels the reader thread. |
+| `void` | [`start`](#start) `virtual` `inline` `override` | Starts the reader thread; emits one line per iteration as a [RawPacket](#rawpacket). Emits a [FlagPacket](#flagpacket) with `[PacketFlags::Final](#namespaceicy_1a3d1e0d9028d45b9ec824bf4306047f18abeae421a14a34f831c113f61323d1ab3)` on EOF. |
+| `void` | [`stop`](#stop) `virtual` `inline` `override` | Cancels the reader thread. |
 | `StreamT &` | [`stream`](#stream) `inline` | Returns the internal stream cast to `StreamT`. |
-| `std::istream &` | [`stream`](#stream) `inline` | #### Returns |
+| `std::istream &` | [`stream`](#stream) `inline` |  |
 
 ---
 
@@ -16834,6 +19018,8 @@ PacketSignal emitter
 ```cpp
 inline ThreadedStreamReader(std::istream * is)
 ```
+
+Defined in src/base/include/icy/packetio.h:36
 
 #### Parameters
 * `is` Input stream to read from; takes ownership.
@@ -16850,6 +19036,8 @@ inline ThreadedStreamReader(std::istream * is)
 inline ~ThreadedStreamReader()
 ```
 
+Defined in src/base/include/icy/packetio.h:44
+
 Stops the reader thread and deletes the owned stream.
 
 ---
@@ -16858,11 +19046,13 @@ Stops the reader thread and deletes the owned stream.
 
 #### start
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void start()
+virtual inline void start() override
 ```
+
+Defined in src/base/include/icy/packetio.h:55
 
 Starts the reader thread; emits one line per iteration as a [RawPacket](#rawpacket). Emits a [FlagPacket](#flagpacket) with `[PacketFlags::Final](#namespaceicy_1a3d1e0d9028d45b9ec824bf4306047f18abeae421a14a34f831c113f61323d1ab3)` on EOF.
 
@@ -16872,11 +19062,13 @@ Starts the reader thread; emits one line per iteration as a [RawPacket](#rawpack
 
 #### stop
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void stop()
+virtual inline void stop() override
 ```
+
+Defined in src/base/include/icy/packetio.h:71
 
 Cancels the reader thread.
 
@@ -16891,6 +19083,8 @@ Cancels the reader thread.
 ```cpp
 template<class StreamT> inline StreamT & stream()
 ```
+
+Defined in src/base/include/icy/packetio.h:81
 
 Returns the internal stream cast to `StreamT`. 
 #### Parameters
@@ -16914,6 +19108,8 @@ Reference to the cast stream.
 inline std::istream & stream()
 ```
 
+Defined in src/base/include/icy/packetio.h:91
+
 #### Returns
 Reference to the underlying input stream.
 
@@ -16934,6 +19130,8 @@ Reference to the underlying input stream.
 Thread _runner
 ```
 
+Defined in src/base/include/icy/packetio.h:96
+
 ---
 
 {#_istream}
@@ -16944,6 +19142,8 @@ Thread _runner
 std::istream * _istream
 ```
 
+Defined in src/base/include/icy/packetio.h:97
+
 {#streamwriter}
 
 ## StreamWriter
@@ -16951,6 +19151,12 @@ std::istream * _istream
 ```cpp
 #include <icy/packetio.h>
 ```
+
+```cpp
+class StreamWriter
+```
+
+Defined in src/base/include/icy/packetio.h:108
 
 > **Inherits:** [`PacketProcessor`](#packetprocessor)
 
@@ -16974,16 +19180,18 @@ This class can be connected to a `[PacketStream](#packetstream)` to write output
 PacketSignal emitter
 ```
 
+Defined in src/base/include/icy/packetio.h:188
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`StreamWriter`](#streamwriter) `inline` | #### Parameters |
+|  | [`StreamWriter`](#streamwriter) `inline` |  |
 |  | [`~StreamWriter`](#streamwriter) `virtual` `inline` | Closes any open `std::ofstream` and deletes the owned stream. |
-| `void` | [`process`](#process) `virtual` `inline` | Serializes the packet via `write()`, flushes it to the output stream, then forwards the packet to the next processor. |
+| `void` | [`process`](#process) `virtual` `inline` `override` | Serializes the packet via `write()`, flushes it to the output stream, then forwards the packet to the next processor. |
 | `StreamT &` | [`stream`](#stream) `inline` | Returns the internal output stream cast to `StreamT`. |
-| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` | Closes the output file on `Closed` or `[Error](#error)` stream state transitions. |
-| `std::ostream &` | [`stream`](#stream) `inline` | #### Returns |
+| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | Closes the output file on `Closed` or `[Error](#error)` stream state transitions. |
+| `std::ostream &` | [`stream`](#stream) `inline` |  |
 
 ---
 
@@ -16996,6 +19204,8 @@ PacketSignal emitter
 ```cpp
 inline StreamWriter(std::ostream * stream)
 ```
+
+Defined in src/base/include/icy/packetio.h:112
 
 #### Parameters
 * `stream` Output stream to write to; takes ownership.
@@ -17012,6 +19222,8 @@ inline StreamWriter(std::ostream * stream)
 virtual inline ~StreamWriter()
 ```
 
+Defined in src/base/include/icy/packetio.h:119
+
 Closes any open `std::ofstream` and deletes the owned stream.
 
 ---
@@ -17020,11 +19232,13 @@ Closes any open `std::ofstream` and deletes the owned stream.
 
 #### process
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void process(IPacket & packet)
+virtual inline void process(IPacket & packet) override
 ```
+
+Defined in src/base/include/icy/packetio.h:132
 
 Serializes the packet via `write()`, flushes it to the output stream, then forwards the packet to the next processor. 
 #### Parameters
@@ -17042,6 +19256,8 @@ Serializes the packet via `write()`, flushes it to the output stream, then forwa
 template<class StreamT> inline StreamT & stream()
 ```
 
+Defined in src/base/include/icy/packetio.h:148
+
 Returns the internal output stream cast to `StreamT`. 
 #### Parameters
 * `StreamT` Target stream type derived from `std::ostream`. 
@@ -17058,11 +19274,13 @@ Reference to the cast stream.
 
 #### onStreamStateChange
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void onStreamStateChange(const PacketStreamState & state)
+virtual inline void onStreamStateChange(const PacketStreamState & state) override
 ```
+
+Defined in src/base/include/icy/packetio.h:159
 
 Closes the output file on `Closed` or `[Error](#error)` stream state transitions. 
 #### Parameters
@@ -17079,6 +19297,8 @@ Closes the output file on `Closed` or `[Error](#error)` stream state transitions
 ```cpp
 inline std::ostream & stream()
 ```
+
+Defined in src/base/include/icy/packetio.h:181
 
 #### Returns
 Reference to the underlying output stream. 
@@ -17102,6 +19322,8 @@ Reference to the underlying output stream.
 std::ostream * _ostream
 ```
 
+Defined in src/base/include/icy/packetio.h:191
+
 {#state}
 
 ## State
@@ -17109,6 +19331,12 @@ std::ostream * _ostream
 ```cpp
 #include <icy/stateful.h>
 ```
+
+```cpp
+class State
+```
+
+Defined in src/base/include/icy/stateful.h:31
 
 > **Subclassed by:** [`DiagnosticState`](#diagnosticstate), [`PacketStreamState`](#packetstreamstate), [`TransactionState`](#transactionstate), [`EncoderState`](av.md#encoderstate), [`InstallationState`](pacm.md#installationstate), [`ClientState`](symple.md#clientstate-1), [`ClientState`](turn.md#clientstate)
 
@@ -17118,19 +19346,39 @@ This class defines the state for a state machine, and should be extended and pas
 
 For an example **See also**: [PacketStreamState](#packetstreamstate)
 
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator) `inline` |  |
+
+---
+
+{#operator}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & os, const State & state)
+```
+
+Defined in src/base/include/icy/stateful.h:80
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`State`](#state)  | #### Parameters |
+|  | [`State`](#state)  |  |
 |  | [`State`](#state)  | Copy constructor. |
 | `State &` | [`operator=`](#operator)  | Copy assignment. |
-| `ID` | [`id`](#id) `const` | Returns the current state ID. |
-| `void` | [`set`](#set)  | Sets the state ID. |
-| `std::string` | [`str`](#str) `virtual` `const` | Returns a human-readable string for the given state ID. Override in derived classes to provide meaningful names. |
-| `std::string` | [`toString`](#tostring) `virtual` `const` | Returns a human-readable string for the current state ID. |
-| `bool` | [`equals`](#equals) `const` | Returns true if the current state ID equals the given ID. |
-| `bool` | [`between`](#between) `const` | Returns true if the current state ID is in the inclusive range [lid, rid]. |
+| `ID` | [`id`](#id) `const` | Returns the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `void` | [`set`](#set)  | Sets the state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `std::string` | [`str`](#str) `virtual` `const` | Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. |
+| `std::string` | [`toString`](#tostring) `virtual` `const` | Returns a human-readable string for the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `bool` | [`equals`](#equals) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
+| `bool` | [`between`](#between) `const` | Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. |
 | `bool` | [`operator==`](#operator) `const` `inline` |  |
 | `bool` | [`operator==`](#operator) `const` `inline` |  |
 
@@ -17141,11 +19389,13 @@ For an example **See also**: [PacketStreamState](#packetstreamstate)
 #### State
 
 ```cpp
-State(ID id)
+State(ID id = 0)
 ```
 
+Defined in src/base/include/icy/stateful.h:37
+
 #### Parameters
-* `id` Initial state ID. Defaults to 0.
+* `id` Initial state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Defaults to 0.
 
 ---
 
@@ -17156,6 +19406,8 @@ State(ID id)
 ```cpp
 State(const State & that)
 ```
+
+Defined in src/base/include/icy/stateful.h:41
 
 Copy constructor. 
 #### Parameters
@@ -17170,6 +19422,8 @@ Copy constructor.
 ```cpp
 State & operator=(const State & that)
 ```
+
+Defined in src/base/include/icy/stateful.h:45
 
 Copy assignment. 
 #### Parameters
@@ -17187,9 +19441,11 @@ Copy assignment.
 ID id() const
 ```
 
-Returns the current state ID. 
+Defined in src/base/include/icy/stateful.h:50
+
+Returns the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 #### Returns
-Atomic state ID value.
+Atomic state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) value.
 
 ---
 
@@ -17201,9 +19457,11 @@ Atomic state ID value.
 void set(ID id)
 ```
 
-Sets the state ID. 
+Defined in src/base/include/icy/stateful.h:54
+
+Sets the state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 #### Parameters
-* `id` New state ID to assign.
+* `id` New state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) to assign.
 
 ---
 
@@ -17217,9 +19475,11 @@ Sets the state ID.
 virtual std::string str(ID id) const
 ```
 
-Returns a human-readable string for the given state ID. Override in derived classes to provide meaningful names. 
+Defined in src/base/include/icy/stateful.h:60
+
+Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). Override in derived classes to provide meaningful names. 
 #### Parameters
-* `id` [State](#state) ID to convert. 
+* `id` [State](#state)[ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) to convert. 
 
 #### Returns
 String representation of the state, or "undefined" by default.
@@ -17236,7 +19496,9 @@ String representation of the state, or "undefined" by default.
 virtual std::string toString() const
 ```
 
-Returns a human-readable string for the current state ID. 
+Defined in src/base/include/icy/stateful.h:64
+
+Returns a human-readable string for the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 #### Returns
 Result of `str(id())`.
 
@@ -17252,9 +19514,11 @@ Result of `str(id())`.
 bool equals(ID id) const
 ```
 
-Returns true if the current state ID equals the given ID. 
+Defined in src/base/include/icy/stateful.h:69
+
+Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) equals the given [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 #### Parameters
-* `id` [State](#state) ID to compare against. 
+* `id` [State](#state)[ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) to compare against. 
 
 #### Returns
 True if IDs match.
@@ -17271,11 +19535,13 @@ True if IDs match.
 bool between(ID lid, ID rid) const
 ```
 
-Returns true if the current state ID is in the inclusive range [lid, rid]. 
-#### Parameters
-* `lid` Lower bound state ID. 
+Defined in src/base/include/icy/stateful.h:75
 
-* `rid` Upper bound state ID. 
+Returns true if the current state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) is in the inclusive range [lid, rid]. 
+#### Parameters
+* `lid` Lower bound state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
+
+* `rid` Upper bound state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 
 #### Returns
 True if lid <= [id()](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) <= rid.
@@ -17292,6 +19558,8 @@ True if lid <= [id()](#classicy_1_1State_1ad1f3cf6094d92da45a8863ccd05a4dd2) <= 
 inline bool operator==(const State & that) const
 ```
 
+Defined in src/base/include/icy/stateful.h:77
+
 ---
 
 {#operator}
@@ -17303,6 +19571,8 @@ inline bool operator==(const State & that) const
 ```cpp
 inline bool operator==(const State::ID & that) const
 ```
+
+Defined in src/base/include/icy/stateful.h:78
 
 ### Protected Attributes
 
@@ -17320,6 +19590,8 @@ inline bool operator==(const State::ID & that) const
 std::atomic< ID > _id
 ```
 
+Defined in src/base/include/icy/stateful.h:87
+
 ### Public Types
 
 | Name | Description |
@@ -17333,8 +19605,10 @@ std::atomic< ID > _id
 #### ID
 
 ```cpp
-uint32_t ID()
+using ID = uint32_t
 ```
+
+Defined in src/base/include/icy/stateful.h:34
 
 {#stateful}
 
@@ -17343,6 +19617,13 @@ uint32_t ID()
 ```cpp
 #include <icy/stateful.h>
 ```
+
+```cpp
+template<typename T>
+class Stateful
+```
+
+Defined in src/base/include/icy/stateful.h:97
 
 [State](#state) machine implementation.
 
@@ -17366,6 +19647,8 @@ For an example **See also**: [PacketStream](#packetstream)
 ```cpp
 Signal< void(void *, T &, const T &)> StateChange
 ```
+
+Defined in src/base/include/icy/stateful.h:130
 
 Signals when the state changes.
 
@@ -17391,6 +19674,8 @@ Signals when the state changes.
 inline Stateful()
 ```
 
+Defined in src/base/include/icy/stateful.h:100
+
 ---
 
 {#stateequals}
@@ -17402,6 +19687,8 @@ inline Stateful()
 ```cpp
 virtual inline bool stateEquals(typename T::ID id) const
 ```
+
+Defined in src/base/include/icy/stateful.h:107
 
 Returns true if the current state ID equals the given ID. 
 #### Parameters
@@ -17421,6 +19708,8 @@ True if the current state matches.
 ```cpp
 virtual inline bool stateBetween(typename T::ID lid, typename T::ID rid) const
 ```
+
+Defined in src/base/include/icy/stateful.h:116
 
 Returns true if the current state ID is in the inclusive range [lid, rid]. 
 #### Parameters
@@ -17443,6 +19732,8 @@ True if lid <= state.id() <= rid.
 virtual inline T & state()
 ```
 
+Defined in src/base/include/icy/stateful.h:123
+
 Returns a mutable reference to the current state. 
 #### Returns
 Reference to the internal state object.
@@ -17458,6 +19749,8 @@ Reference to the internal state object.
 ```cpp
 virtual inline const T state() const
 ```
+
+Defined in src/base/include/icy/stateful.h:127
 
 Returns a copy of the current state. 
 #### Returns
@@ -17478,6 +19771,8 @@ Current state value.
 ```cpp
 T _state
 ```
+
+Defined in src/base/include/icy/stateful.h:170
 
 ### Protected Methods
 
@@ -17500,6 +19795,8 @@ T _state
 virtual inline bool beforeStateChange(const T & state)
 ```
 
+Defined in src/base/include/icy/stateful.h:135
+
 Override to handle pre state change logic. Return false to prevent state change.
 
 ---
@@ -17513,6 +19810,8 @@ Override to handle pre state change logic. Return false to prevent state change.
 ```cpp
 virtual inline void onStateChange(T &, const T &)
 ```
+
+Defined in src/base/include/icy/stateful.h:143
 
 Override to handle post state change logic.
 
@@ -17528,6 +19827,8 @@ Override to handle post state change logic.
 virtual inline bool setState(void * sender, typename T::ID id)
 ```
 
+Defined in src/base/include/icy/stateful.h:147
+
 Sets the state and sends the state signal if the state change was successful.
 
 ---
@@ -17542,6 +19843,8 @@ Sets the state and sends the state signal if the state change was successful.
 virtual inline bool setState(void * sender, const T & state)
 ```
 
+Defined in src/base/include/icy/stateful.h:156
+
 Sets the state and sends the state signal if the state change was successful.
 
 {#iregistry}
@@ -17551,6 +19854,13 @@ Sets the state and sends the state signal if the state change was successful.
 ```cpp
 #include <icy/iregistry.h>
 ```
+
+```cpp
+template<class ItemT>
+class IRegistry
+```
+
+Defined in src/base/include/icy/iregistry.h:25
 
 Abstract interface for object registries.
 
@@ -17571,6 +19881,8 @@ Abstract interface for object registries.
 Signal< void(const std::string &)> TypeRegistered
 ```
 
+Defined in src/base/include/icy/iregistry.h:77
+
 ---
 
 {#typeunregistered}
@@ -17580,6 +19892,8 @@ Signal< void(const std::string &)> TypeRegistered
 ```cpp
 Signal< void(const std::string &)> TypeUnregistered
 ```
+
+Defined in src/base/include/icy/iregistry.h:78
 
 ### Public Methods
 
@@ -17601,6 +19915,8 @@ Signal< void(const std::string &)> TypeUnregistered
 IRegistry() = default
 ```
 
+Defined in src/base/include/icy/iregistry.h:36
+
 Defaulted constructor.
 
 ---
@@ -17614,6 +19930,8 @@ Defaulted constructor.
 ```cpp
 virtual inline ItemT * createInstance(const std::string & s)
 ```
+
+Defined in src/base/include/icy/iregistry.h:42
 
 Creates and returns a new heap-allocated instance of the type registered under key s. 
 #### Parameters
@@ -17634,6 +19952,8 @@ Pointer to the new instance, or nullptr if s is not registered.
 template<typename T> inline void registerType(const std::string & s)
 ```
 
+Defined in src/base/include/icy/iregistry.h:55
+
 Registers type T under the given key s. Emits TypeRegistered. Subsequent calls to createInstance(s) will return `new T()`. 
 #### Parameters
 * `T` Concrete type to register; must be default-constructible and derive from ItemT. 
@@ -17653,6 +19973,8 @@ Registers type T under the given key s. Emits TypeRegistered. Subsequent calls t
 virtual inline void unregisterType(const std::string & s)
 ```
 
+Defined in src/base/include/icy/iregistry.h:64
+
 Removes the type registered under key s. Emits TypeUnregistered. Does nothing if s is not registered. 
 #### Parameters
 * `s` Registration key to remove.
@@ -17668,6 +19990,8 @@ Removes the type registered under key s. Emits TypeUnregistered. Does nothing if
 ```cpp
 inline TypeMap types() const
 ```
+
+Defined in src/base/include/icy/iregistry.h:75
 
 Returns a copy of the current type map. 
 #### Returns
@@ -17686,8 +20010,10 @@ Map of registration keys to factory function pointers.
 #### TypeMap
 
 ```cpp
-std::map< std::string, ItemT *(*)()> TypeMap()
+using TypeMap = std::map< std::string, ItemT *(*)()>
 ```
+
+Defined in src/base/include/icy/iregistry.h:34
 
 ### Private Attributes
 
@@ -17704,6 +20030,8 @@ std::map< std::string, ItemT *(*)()> TypeMap()
 ```cpp
 TypeMap _types
 ```
+
+Defined in src/base/include/icy/iregistry.h:81
 
 ### Private Static Methods
 
@@ -17723,6 +20051,8 @@ TypeMap _types
 template<typename T> static inline ItemT * createT()
 ```
 
+Defined in src/base/include/icy/iregistry.h:28
+
 {#singleton}
 
 ## Singleton
@@ -17730,6 +20060,13 @@ template<typename T> static inline ItemT * createT()
 ```cpp
 #include <icy/singleton.h>
 ```
+
+```cpp
+template<class S>
+class Singleton
+```
+
+Defined in src/base/include/icy/singleton.h:24
 
 Helper template class for managing singleton objects allocated on the heap.
 
@@ -17752,6 +20089,8 @@ Helper template class for managing singleton objects allocated on the heap.
 Singleton() = default
 ```
 
+Defined in src/base/include/icy/singleton.h:27
+
 Defaulted constructor.
 
 ---
@@ -17765,6 +20104,8 @@ Defaulted constructor.
 ```cpp
 inline S * get()
 ```
+
+Defined in src/base/include/icy/singleton.h:34
 
 Returns a pointer to the managed singleton, instantiating it on first call. Thread-safe; protected by an internal mutex. 
 #### Returns
@@ -17781,6 +20122,8 @@ Pointer to the singleton instance (never null).
 ```cpp
 inline S * swap(S * newPtr)
 ```
+
+Defined in src/base/include/icy/singleton.h:47
 
 Replaces the managed singleton with newPtr and returns the previous instance. The caller takes ownership of the returned pointer. Thread-safe; protected by an internal mutex. 
 #### Parameters
@@ -17801,6 +20144,8 @@ Previously managed pointer (caller must delete if non-null).
 inline void destroy()
 ```
 
+Defined in src/base/include/icy/singleton.h:57
+
 Destroys the managed singleton instance and resets the internal pointer to null. Thread-safe; protected by an internal mutex.
 
 ### Private Attributes
@@ -17820,6 +20165,8 @@ Destroys the managed singleton instance and resets the internal pointer to null.
 std::unique_ptr< S, Deleter > _ptr
 ```
 
+Defined in src/base/include/icy/singleton.h:70
+
 ---
 
 {#_m}
@@ -17830,6 +20177,8 @@ std::unique_ptr< S, Deleter > _ptr
 std::mutex _m
 ```
 
+Defined in src/base/include/icy/singleton.h:71
+
 {#keyedstore}
 
 ## KeyedStore
@@ -17837,6 +20186,13 @@ std::mutex _m
 ```cpp
 #include <icy/collection.h>
 ```
+
+```cpp
+template<class TKey, class TValue>
+class KeyedStore
+```
+
+Defined in src/base/include/icy/collection.h:37
 
 > **Subclassed by:** [`TimedManager< TKey, TValue >`](#timedmanager)
 
@@ -17877,6 +20233,8 @@ Subclasses can override onAdd/onRemove for lifecycle reactions, and add [Signal]
 KeyedStore() = default
 ```
 
+Defined in src/base/include/icy/collection.h:42
+
 Defaulted constructor.
 
 ---
@@ -17886,8 +20244,10 @@ Defaulted constructor.
 #### KeyedStore
 
 ```cpp
-KeyedStore(constKeyedStore &) = delete
+KeyedStore(const KeyedStore &) = delete
 ```
+
+Defined in src/base/include/icy/collection.h:46
 
 Deleted constructor.
 
@@ -17901,6 +20261,8 @@ Deleted constructor.
 KeyedStore(KeyedStore &&) = default
 ```
 
+Defined in src/base/include/icy/collection.h:48
+
 Defaulted constructor.
 
 ---
@@ -17912,8 +20274,10 @@ Defaulted constructor.
 `const` `inline`
 
 ```cpp
-inline TValue * get(constTKey & key) const
+inline TValue * get(const TKey & key) const
 ```
+
+Defined in src/base/include/icy/collection.h:52
 
 Returns the item for `key`, or nullptr if not found.
 
@@ -17926,8 +20290,10 @@ Returns the item for `key`, or nullptr if not found.
 `inline`
 
 ```cpp
-inline TValue & add(constTKey & key, std::unique_ptr< TValue > item)
+inline TValue & add(const TKey & key, std::unique_ptr< TValue > item)
 ```
+
+Defined in src/base/include/icy/collection.h:60
 
 Inserts a uniquely owned item. Returns a reference to the stored item. 
 #### Exceptions
@@ -17942,8 +20308,10 @@ Inserts a uniquely owned item. Returns a reference to the stored item.
 `inline`
 
 ```cpp
-inline bool tryAdd(constTKey & key, std::unique_ptr< TValue > item)
+inline bool tryAdd(const TKey & key, std::unique_ptr< TValue > item)
 ```
+
+Defined in src/base/include/icy/collection.h:71
 
 Inserts if absent; returns false on duplicate (never throws).
 
@@ -17956,8 +20324,10 @@ Inserts if absent; returns false on duplicate (never throws).
 `inline`
 
 ```cpp
-inline TValue & put(constTKey & key, std::unique_ptr< TValue > item)
+inline TValue & put(const TKey & key, std::unique_ptr< TValue > item)
 ```
+
+Defined in src/base/include/icy/collection.h:82
 
 Inserts or replaces the item under `key`.
 
@@ -17970,8 +20340,10 @@ Inserts or replaces the item under `key`.
 `inline`
 
 ```cpp
-inline bool erase(constTKey & key)
+inline bool erase(const TKey & key)
 ```
+
+Defined in src/base/include/icy/collection.h:92
 
 Removes and destroys the item under `key`. 
 #### Returns
@@ -17986,8 +20358,10 @@ true if the item existed and was removed.
 `const` `inline`
 
 ```cpp
-inline bool contains(constTKey & key) const
+inline bool contains(const TKey & key) const
 ```
+
+Defined in src/base/include/icy/collection.h:104
 
 ---
 
@@ -18001,6 +20375,8 @@ inline bool contains(constTKey & key) const
 inline bool empty() const
 ```
 
+Defined in src/base/include/icy/collection.h:105
+
 ---
 
 {#size}
@@ -18012,6 +20388,8 @@ inline bool empty() const
 ```cpp
 inline size_t size() const
 ```
+
+Defined in src/base/include/icy/collection.h:106
 
 ---
 
@@ -18025,6 +20403,8 @@ inline size_t size() const
 inline void clear()
 ```
 
+Defined in src/base/include/icy/collection.h:107
+
 ---
 
 {#map}
@@ -18036,6 +20416,8 @@ inline void clear()
 ```cpp
 inline Map & map()
 ```
+
+Defined in src/base/include/icy/collection.h:110
 
 Direct map access for iteration.
 
@@ -18051,6 +20433,8 @@ Direct map access for iteration.
 inline const Map & map() const
 ```
 
+Defined in src/base/include/icy/collection.h:111
+
 ---
 
 {#begin}
@@ -18062,6 +20446,8 @@ inline const Map & map() const
 ```cpp
 inline auto begin()
 ```
+
+Defined in src/base/include/icy/collection.h:114
 
 ---
 
@@ -18075,6 +20461,8 @@ inline auto begin()
 inline auto end()
 ```
 
+Defined in src/base/include/icy/collection.h:115
+
 ---
 
 {#begin}
@@ -18087,6 +20475,8 @@ inline auto end()
 inline auto begin() const
 ```
 
+Defined in src/base/include/icy/collection.h:116
+
 ---
 
 {#end}
@@ -18098,6 +20488,8 @@ inline auto begin() const
 ```cpp
 inline auto end() const
 ```
+
+Defined in src/base/include/icy/collection.h:117
 
 ### Protected Attributes
 
@@ -18115,6 +20507,8 @@ inline auto end() const
 Map _map
 ```
 
+Defined in src/base/include/icy/collection.h:124
+
 ### Protected Methods
 
 | Return | Name | Description |
@@ -18131,8 +20525,10 @@ Map _map
 `virtual` `inline`
 
 ```cpp
-virtual inline void onAdd(constTKey &, TValue *)
+virtual inline void onAdd(const TKey &, TValue *)
 ```
+
+Defined in src/base/include/icy/collection.h:121
 
 Override for lifecycle reactions.
 
@@ -18145,8 +20541,10 @@ Override for lifecycle reactions.
 `virtual` `inline`
 
 ```cpp
-virtual inline void onRemove(constTKey &, TValue *)
+virtual inline void onRemove(const TKey &, TValue *)
 ```
+
+Defined in src/base/include/icy/collection.h:122
 
 ### Public Types
 
@@ -18161,8 +20559,10 @@ virtual inline void onRemove(constTKey &, TValue *)
 #### Map
 
 ```cpp
-std::map< TKey, std::unique_ptr< TValue > > Map()
+using Map = std::map< TKey, std::unique_ptr< TValue > >
 ```
+
+Defined in src/base/include/icy/collection.h:40
 
 {#kvcollection}
 
@@ -18171,6 +20571,13 @@ std::map< TKey, std::unique_ptr< TValue > > Map()
 ```cpp
 #include <icy/collection.h>
 ```
+
+```cpp
+template<class TKey, class TValue>
+class KVCollection
+```
+
+Defined in src/base/include/icy/collection.h:135
 
 A keyed value store (values stored by copy, not pointer).
 
@@ -18181,7 +20588,7 @@ A keyed value store (values stored by copy, not pointer).
 |  | [`KVCollection`](#kvcollection)  | Defaulted constructor. |
 | `bool` | [`add`](#add) `inline` | Inserts a value; returns false if key already exists. |
 | `TValue &` | [`get`](#get) `inline` | Returns the value or throws. |
-| `constTValue &` | [`get`](#get) `const` `inline` | Returns the value or defaultValue. |
+| `const TValue &` | [`get`](#get) `const` `inline` | Returns the value or defaultValue. |
 | `bool` | [`remove`](#remove) `inline` |  |
 | `bool` | [`has`](#has) `const` `inline` |  |
 | `bool` | [`empty`](#empty) `const` `inline` |  |
@@ -18200,6 +20607,8 @@ A keyed value store (values stored by copy, not pointer).
 KVCollection() = default
 ```
 
+Defined in src/base/include/icy/collection.h:140
+
 Defaulted constructor.
 
 ---
@@ -18211,8 +20620,10 @@ Defaulted constructor.
 `inline`
 
 ```cpp
-inline bool add(constTKey & key, constTValue & item)
+inline bool add(const TKey & key, const TValue & item)
 ```
+
+Defined in src/base/include/icy/collection.h:144
 
 Inserts a value; returns false if key already exists.
 
@@ -18225,8 +20636,10 @@ Inserts a value; returns false if key already exists.
 `inline`
 
 ```cpp
-inline TValue & get(constTKey & key)
+inline TValue & get(const TKey & key)
 ```
+
+Defined in src/base/include/icy/collection.h:151
 
 Returns the value or throws.
 
@@ -18239,8 +20652,10 @@ Returns the value or throws.
 `const` `inline`
 
 ```cpp
-inline constTValue & get(constTKey & key, constTValue & defaultValue) const
+inline const TValue & get(const TKey & key, const TValue & defaultValue) const
 ```
+
+Defined in src/base/include/icy/collection.h:160
 
 Returns the value or defaultValue.
 
@@ -18253,8 +20668,10 @@ Returns the value or defaultValue.
 `inline`
 
 ```cpp
-inline bool remove(constTKey & key)
+inline bool remove(const TKey & key)
 ```
+
+Defined in src/base/include/icy/collection.h:166
 
 ---
 
@@ -18265,8 +20682,10 @@ inline bool remove(constTKey & key)
 `const` `inline`
 
 ```cpp
-inline bool has(constTKey & key) const
+inline bool has(const TKey & key) const
 ```
+
+Defined in src/base/include/icy/collection.h:167
 
 ---
 
@@ -18280,6 +20699,8 @@ inline bool has(constTKey & key) const
 inline bool empty() const
 ```
 
+Defined in src/base/include/icy/collection.h:168
+
 ---
 
 {#size}
@@ -18291,6 +20712,8 @@ inline bool empty() const
 ```cpp
 inline size_t size() const
 ```
+
+Defined in src/base/include/icy/collection.h:169
 
 ---
 
@@ -18304,6 +20727,8 @@ inline size_t size() const
 inline void clear()
 ```
 
+Defined in src/base/include/icy/collection.h:170
+
 ---
 
 {#map}
@@ -18316,6 +20741,8 @@ inline void clear()
 inline Map & map()
 ```
 
+Defined in src/base/include/icy/collection.h:171
+
 ---
 
 {#map}
@@ -18327,6 +20754,8 @@ inline Map & map()
 ```cpp
 inline const Map & map() const
 ```
+
+Defined in src/base/include/icy/collection.h:172
 
 ### Protected Attributes
 
@@ -18344,6 +20773,8 @@ inline const Map & map() const
 Map _map
 ```
 
+Defined in src/base/include/icy/collection.h:175
+
 ### Public Types
 
 | Name | Description |
@@ -18357,8 +20788,10 @@ Map _map
 #### Map
 
 ```cpp
-std::map< TKey, TValue > Map()
+using Map = std::map< TKey, TValue >
 ```
+
+Defined in src/base/include/icy/collection.h:138
 
 {#nvcollection}
 
@@ -18367,6 +20800,12 @@ std::map< TKey, TValue > Map()
 ```cpp
 #include <icy/collection.h>
 ```
+
+```cpp
+class NVCollection
+```
+
+Defined in src/base/include/icy/collection.h:187
 
 > **Subclassed by:** [`FormWriter`](http.md#formwriter), [`Message`](http.md#message)
 
@@ -18378,7 +20817,7 @@ A storage container for a name value collections. This collection can store mult
 |--------|------|-------------|
 |  | [`NVCollection`](#nvcollection) `inline` |  |
 |  | [`NVCollection`](#nvcollection) `inline` |  |
-|  | [`NVCollection`](#nvcollection) `inline` |  |
+|  | [`NVCollection`](#nvcollection) `inline` `noexcept` |  |
 | `NVCollection &` | [`operator=`](#operator)  | Assigns the name-value pairs of another [NVCollection](#nvcollection) to this one. |
 | `const std::string &` | [`operator[]`](#operator) `const` | Returns the value of the (first) name-value pair with the given name. |
 | `void` | [`set`](#set)  | Sets the value of the (first) name-value pair with the given name. |
@@ -18407,6 +20846,8 @@ A storage container for a name value collections. This collection can store mult
 inline NVCollection()
 ```
 
+Defined in src/base/include/icy/collection.h:194
+
 ---
 
 {#nvcollection}
@@ -18419,17 +20860,21 @@ inline NVCollection()
 inline NVCollection(const NVCollection & nvc)
 ```
 
+Defined in src/base/include/icy/collection.h:198
+
 ---
 
 {#nvcollection}
 
 #### NVCollection
 
-`inline`
+`inline` `noexcept`
 
 ```cpp
 inline NVCollection(NVCollection && nvc) noexcept
 ```
+
+Defined in src/base/include/icy/collection.h:203
 
 ---
 
@@ -18440,6 +20885,8 @@ inline NVCollection(NVCollection && nvc) noexcept
 ```cpp
 NVCollection & operator=(const NVCollection & nvc)
 ```
+
+Defined in src/base/include/icy/collection.h:213
 
 Assigns the name-value pairs of another [NVCollection](#nvcollection) to this one.
 
@@ -18455,6 +20902,8 @@ Assigns the name-value pairs of another [NVCollection](#nvcollection) to this on
 const std::string & operator[](std::string_view name) const
 ```
 
+Defined in src/base/include/icy/collection.h:219
+
 Returns the value of the (first) name-value pair with the given name.
 
 Throws a NotFoundException if the name-value pair does not exist.
@@ -18469,6 +20918,8 @@ Throws a NotFoundException if the name-value pair does not exist.
 void set(const std::string & name, const std::string & value)
 ```
 
+Defined in src/base/include/icy/collection.h:222
+
 Sets the value of the (first) name-value pair with the given name.
 
 ---
@@ -18481,6 +20932,8 @@ Sets the value of the (first) name-value pair with the given name.
 void add(const std::string & name, const std::string & value)
 ```
 
+Defined in src/base/include/icy/collection.h:225
+
 Adds a new name-value pair with the given name and value.
 
 ---
@@ -18492,6 +20945,8 @@ Adds a new name-value pair with the given name and value.
 ```cpp
 void add(std::string && name, std::string && value)
 ```
+
+Defined in src/base/include/icy/collection.h:228
 
 Adds a new name-value pair using move semantics.
 
@@ -18506,6 +20961,8 @@ Adds a new name-value pair using move semantics.
 ```cpp
 const std::string & get(std::string_view name) const
 ```
+
+Defined in src/base/include/icy/collection.h:233
 
 Returns the value of the first name-value pair with the given name.
 
@@ -18523,6 +20980,8 @@ Throws a NotFoundException if the name-value pair does not exist.
 const std::string & get(std::string_view name, const std::string & defaultValue) const
 ```
 
+Defined in src/base/include/icy/collection.h:238
+
 Returns the value of the first name-value pair with the given name. If no value with the given name has been found, the defaultValue is returned.
 
 ---
@@ -18536,6 +20995,8 @@ Returns the value of the first name-value pair with the given name. If no value 
 ```cpp
 bool has(std::string_view name) const
 ```
+
+Defined in src/base/include/icy/collection.h:242
 
 Returns true if there is at least one name-value pair with the given name.
 
@@ -18551,6 +21012,8 @@ Returns true if there is at least one name-value pair with the given name.
 ConstIterator find(std::string_view name) const
 ```
 
+Defined in src/base/include/icy/collection.h:246
+
 Returns an iterator pointing to the first name-value pair with the given name.
 
 ---
@@ -18564,6 +21027,8 @@ Returns an iterator pointing to the first name-value pair with the given name.
 ```cpp
 ConstIterator begin() const
 ```
+
+Defined in src/base/include/icy/collection.h:250
 
 Returns an iterator pointing to the begin of the name-value pair collection.
 
@@ -18579,6 +21044,8 @@ Returns an iterator pointing to the begin of the name-value pair collection.
 ConstIterator end() const
 ```
 
+Defined in src/base/include/icy/collection.h:254
+
 Returns an iterator pointing to the end of the name-value pair collection.
 
 ---
@@ -18592,6 +21059,8 @@ Returns an iterator pointing to the end of the name-value pair collection.
 ```cpp
 bool empty() const
 ```
+
+Defined in src/base/include/icy/collection.h:257
 
 Returns true iff the header does not have any content.
 
@@ -18607,6 +21076,8 @@ Returns true iff the header does not have any content.
 int size() const
 ```
 
+Defined in src/base/include/icy/collection.h:261
+
 Returns the number of name-value pairs in the collection.
 
 ---
@@ -18619,6 +21090,8 @@ Returns the number of name-value pairs in the collection.
 void erase(std::string_view name)
 ```
 
+Defined in src/base/include/icy/collection.h:264
+
 Removes all name-value pairs with the given name.
 
 ---
@@ -18630,6 +21103,8 @@ Removes all name-value pairs with the given name.
 ```cpp
 void clear()
 ```
+
+Defined in src/base/include/icy/collection.h:267
 
 Removes all name-value pairs and their values.
 
@@ -18648,8 +21123,10 @@ Removes all name-value pairs and their values.
 #### Map
 
 ```cpp
-std::vector< std::pair< std::string, std::string > > Map()
+using Map = std::vector< std::pair< std::string, std::string > >
 ```
+
+Defined in src/base/include/icy/collection.h:190
 
 ---
 
@@ -18658,8 +21135,10 @@ std::vector< std::pair< std::string, std::string > > Map()
 #### Iterator
 
 ```cpp
-Map::iterator Iterator()
+using Iterator = Map::iterator
 ```
+
+Defined in src/base/include/icy/collection.h:191
 
 ---
 
@@ -18668,8 +21147,10 @@ Map::iterator Iterator()
 #### ConstIterator
 
 ```cpp
-Map::const_iterator ConstIterator()
+using ConstIterator = Map::const_iterator
 ```
+
+Defined in src/base/include/icy/collection.h:192
 
 ### Private Attributes
 
@@ -18687,6 +21168,8 @@ Map::const_iterator ConstIterator()
 Map _map
 ```
 
+Defined in src/base/include/icy/collection.h:270
+
 {#application}
 
 ## Application
@@ -18694,6 +21177,12 @@ Map _map
 ```cpp
 #include <icy/application.h>
 ```
+
+```cpp
+class Application
+```
+
+Defined in src/base/include/icy/application.h:36
 
 Main icey application class.
 
@@ -18723,6 +21212,8 @@ This class exposes basic features required by most applications:
 uv::Loop * loop
 ```
 
+Defined in src/base/include/icy/application.h:53
+
 Active event loop.
 
 The event loop may be assigned on construction, otherwise the default event loop will be used.
@@ -18746,8 +21237,10 @@ The event loop may be assigned on construction, otherwise the default event loop
 #### Application
 
 ```cpp
-Application(uv::Loop * loop)
+Application(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/application.h:40
 
 Constructor.
 
@@ -18761,6 +21254,8 @@ Constructor.
 ~Application()
 ```
 
+Defined in src/base/include/icy/application.h:43
+
 Destructor.
 
 ---
@@ -18772,6 +21267,8 @@ Destructor.
 ```cpp
 void run()
 ```
+
+Defined in src/base/include/icy/application.h:60
 
 Run the application event loop.
 
@@ -18785,6 +21282,8 @@ Run the application event loop.
 void stop()
 ```
 
+Defined in src/base/include/icy/application.h:63
+
 Stop the application event loop.
 
 ---
@@ -18797,6 +21296,8 @@ Stop the application event loop.
 void finalize()
 ```
 
+Defined in src/base/include/icy/application.h:67
+
 Finalize and free any remaining pointers still held by the application event loop.
 
 ---
@@ -18806,8 +21307,10 @@ Finalize and free any remaining pointers still held by the application event loo
 #### waitForShutdown
 
 ```cpp
-void waitForShutdown(std::function< void(void *)> callback, void * opaque)
+void waitForShutdown(std::function< void(void *)> callback = nullptr, void * opaque = nullptr)
 ```
+
+Defined in src/base/include/icy/application.h:74
 
 Bind the shutdown signal and run the main event loop.
 
@@ -18818,8 +21321,10 @@ Bind the shutdown signal and run the main event loop.
 #### bindShutdownSignal
 
 ```cpp
-void bindShutdownSignal(std::function< void(void *)> callback, void * opaque)
+void bindShutdownSignal(std::function< void(void *)> callback = nullptr, void * opaque = nullptr)
 ```
+
+Defined in src/base/include/icy/application.h:78
 
 Bind the shutdown signal.
 
@@ -18841,6 +21346,8 @@ Bind the shutdown signal.
 static Application & getDefault()
 ```
 
+Defined in src/base/include/icy/application.h:47
+
 Returns the default [Application](#application) singleton, although [Application](#application) instances may be initialized individually.
 
 ### Protected Methods
@@ -18860,6 +21367,8 @@ Returns the default [Application](#application) singleton, although [Application
 Application(const Application &) = delete
 ```
 
+Defined in src/base/include/icy/application.h:82
+
 Deleted constructor.
 
 ---
@@ -18872,6 +21381,8 @@ Deleted constructor.
 Application(Application &&) = delete
 ```
 
+Defined in src/base/include/icy/application.h:84
+
 Deleted constructor.
 
 {#syncpacketqueue}
@@ -18881,6 +21392,13 @@ Deleted constructor.
 ```cpp
 #include <icy/packetqueue.h>
 ```
+
+```cpp
+template<class T = IPacket>
+class SyncPacketQueue
+```
+
+Defined in src/base/include/icy/packetqueue.h:31
 
 > **Inherits:** [`SyncQueue< IPacket >`](#syncqueue), [`PacketProcessor`](#packetprocessor)
 
@@ -18902,15 +21420,17 @@ Synchronized packet queue for event loop integration.
 PacketSignal emitter
 ```
 
+Defined in src/base/include/icy/packetqueue.h:72
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`SyncPacketQueue`](#syncpacketqueue) `inline` | #### Parameters |
+|  | [`SyncPacketQueue`](#syncpacketqueue) `inline` |  |
 |  | [`SyncPacketQueue`](#syncpacketqueue) `inline` | Uses the default libuv event loop. |
-| `void` | [`process`](#process) `virtual` `inline` | Clones the incoming packet and pushes it onto the queue for synchronized dispatch. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. |
-| `bool` | [`accepts`](#accepts) `virtual` `inline` | Returns true if the packet can be cast to type `T`. |
-| `PacketRetention` | [`retention`](#retention) `virtual` `const` `inline` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `void` | [`process`](#process) `virtual` `inline` `override` | Clones the incoming packet and pushes it onto the queue for synchronized dispatch. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. |
+| `bool` | [`accepts`](#accepts) `virtual` `inline` `override` | Returns true if the packet can be cast to type `T`. |
+| `PacketRetention` | [`retention`](#retention) `virtual` `const` `inline` `nodiscard` `override` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
 
 ---
 
@@ -18921,8 +21441,10 @@ PacketSignal emitter
 `inline`
 
 ```cpp
-inline SyncPacketQueue(uv::Loop * loop, int maxSize)
+inline SyncPacketQueue(uv::Loop * loop, int maxSize = 1024)
 ```
+
+Defined in src/base/include/icy/packetqueue.h:40
 
 #### Parameters
 * `loop` Event loop to synchronize dispatch onto. 
@@ -18938,8 +21460,10 @@ inline SyncPacketQueue(uv::Loop * loop, int maxSize)
 `inline`
 
 ```cpp
-inline SyncPacketQueue(int maxSize)
+inline SyncPacketQueue(int maxSize = 1024)
 ```
+
+Defined in src/base/include/icy/packetqueue.h:48
 
 Uses the default libuv event loop. 
 #### Parameters
@@ -18951,11 +21475,13 @@ Uses the default libuv event loop.
 
 #### process
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void process(IPacket & packet)
+virtual inline void process(IPacket & packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:60
 
 Clones the incoming packet and pushes it onto the queue for synchronized dispatch. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. 
 #### Parameters
@@ -18967,11 +21493,13 @@ Clones the incoming packet and pushes it onto the queue for synchronized dispatc
 
 #### accepts
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline bool accepts(IPacket * packet)
+virtual inline bool accepts(IPacket * packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:65
 
 Returns true if the packet can be cast to type `T`. 
 #### Parameters
@@ -18986,11 +21514,13 @@ True if `dynamic_cast<T*>(packet)` succeeds.
 
 #### retention
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `nodiscard` `override`
 
 ```cpp
-virtual inline PacketRetention retention() const
+[[nodiscard]] virtual inline PacketRetention retention() const override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:67
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
 
@@ -18998,8 +21528,8 @@ Returns how this adapter treats incoming packet lifetime. Most adapters are sync
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`dispatch`](#dispatch) `virtual` `inline` | Emits the packet to downstream processors from the event loop thread. |
-| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` | Cancels the queue on `Closed` or `[Error](#error)` stream state transitions. |
+| `void` | [`dispatch`](#dispatch) `inline` `override` | Emits the packet to downstream processors from the event loop thread. |
+| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | Cancels the queue on `Closed` or `[Error](#error)` stream state transitions. |
 
 ---
 
@@ -19007,11 +21537,13 @@ Returns how this adapter treats incoming packet lifetime. Most adapters are sync
 
 #### dispatch
 
-`virtual` `inline`
+`inline` `override`
 
 ```cpp
-virtual inline void dispatch(T & packet)
+inline void dispatch(T & packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:77
 
 Emits the packet to downstream processors from the event loop thread. 
 #### Parameters
@@ -19023,11 +21555,13 @@ Emits the packet to downstream processors from the event loop thread.
 
 #### onStreamStateChange
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void onStreamStateChange(const PacketStreamState &)
+virtual inline void onStreamStateChange(const PacketStreamState &) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:81
 
 Cancels the queue on `Closed` or `[Error](#error)` stream state transitions. 
 #### Parameters
@@ -19047,8 +21581,10 @@ Cancels the queue on `Closed` or `[Error](#error)` stream state transitions.
 #### Queue
 
 ```cpp
-SyncQueue< T > Queue()
+using Queue = SyncQueue< T >
 ```
+
+Defined in src/base/include/icy/packetqueue.h:35
 
 ---
 
@@ -19057,8 +21593,10 @@ SyncQueue< T > Queue()
 #### Processor
 
 ```cpp
-PacketProcessor Processor()
+using Processor = PacketProcessor
 ```
+
+Defined in src/base/include/icy/packetqueue.h:36
 
 {#asyncpacketqueue}
 
@@ -19067,6 +21605,13 @@ PacketProcessor Processor()
 ```cpp
 #include <icy/packetqueue.h>
 ```
+
+```cpp
+template<class T = IPacket>
+class AsyncPacketQueue
+```
+
+Defined in src/base/include/icy/packetqueue.h:145
 
 > **Inherits:** [`AsyncQueue< IPacket >`](#asyncqueue), [`PacketProcessor`](#packetprocessor)
 
@@ -19088,15 +21633,17 @@ Thread-based asynchronous packet dispatch queue.
 PacketSignal emitter
 ```
 
+Defined in src/base/include/icy/packetqueue.h:180
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`AsyncPacketQueue`](#asyncpacketqueue) `inline` | #### Parameters |
+|  | [`AsyncPacketQueue`](#asyncpacketqueue) `inline` |  |
 | `void` | [`close`](#close) `virtual` `inline` | Flushes remaining packets, cancels the queue, and joins the dispatch thread. |
-| `void` | [`process`](#process) `virtual` `inline` | Clones the incoming packet and pushes it onto the async queue. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. |
-| `bool` | [`accepts`](#accepts) `virtual` `inline` | Returns true if the packet can be cast to type `T`. |
-| `PacketRetention` | [`retention`](#retention) `virtual` `const` `inline` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `void` | [`process`](#process) `virtual` `inline` `override` | Clones the incoming packet and pushes it onto the async queue. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. |
+| `bool` | [`accepts`](#accepts) `virtual` `inline` `override` | Returns true if the packet can be cast to type `T`. |
+| `PacketRetention` | [`retention`](#retention) `virtual` `const` `inline` `nodiscard` `override` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
 
 ---
 
@@ -19107,8 +21654,10 @@ PacketSignal emitter
 `inline`
 
 ```cpp
-inline AsyncPacketQueue(int maxSize)
+inline AsyncPacketQueue(int maxSize = 1024)
 ```
+
+Defined in src/base/include/icy/packetqueue.h:153
 
 #### Parameters
 * `maxSize` Maximum number of queued packets before oldest are dropped.
@@ -19125,6 +21674,8 @@ inline AsyncPacketQueue(int maxSize)
 virtual inline void close()
 ```
 
+Defined in src/base/include/icy/packetqueue.h:162
+
 Flushes remaining packets, cancels the queue, and joins the dispatch thread.
 
 ---
@@ -19133,11 +21684,13 @@ Flushes remaining packets, cancels the queue, and joins the dispatch thread.
 
 #### process
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void process(IPacket & packet)
+virtual inline void process(IPacket & packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:168
 
 Clones the incoming packet and pushes it onto the async queue. This queue is therefore an explicit [PacketStream](#packetstream) ownership boundary. Drops the packet with a warning if the queue has been cancelled. 
 #### Parameters
@@ -19149,11 +21702,13 @@ Clones the incoming packet and pushes it onto the async queue. This queue is the
 
 #### accepts
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline bool accepts(IPacket * packet)
+virtual inline bool accepts(IPacket * packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:173
 
 Returns true if the packet can be cast to type `T`. 
 #### Parameters
@@ -19168,11 +21723,13 @@ True if `dynamic_cast<T*>(packet)` succeeds.
 
 #### retention
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `nodiscard` `override`
 
 ```cpp
-virtual inline PacketRetention retention() const
+[[nodiscard]] virtual inline PacketRetention retention() const override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:175
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
 
@@ -19180,8 +21737,8 @@ Returns how this adapter treats incoming packet lifetime. Most adapters are sync
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`dispatch`](#dispatch) `virtual` `inline` | Emits the packet to downstream processors from the async thread. |
-| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` | Closes the queue on `[Error](#error)` or `Closed` stream state transitions. |
+| `void` | [`dispatch`](#dispatch) `inline` `override` | Emits the packet to downstream processors from the async thread. |
+| `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` `override` | Closes the queue on `[Error](#error)` or `Closed` stream state transitions. |
 
 ---
 
@@ -19189,11 +21746,13 @@ Returns how this adapter treats incoming packet lifetime. Most adapters are sync
 
 #### dispatch
 
-`virtual` `inline`
+`inline` `override`
 
 ```cpp
-virtual inline void dispatch(T & packet)
+inline void dispatch(T & packet) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:185
 
 Emits the packet to downstream processors from the async thread. 
 #### Parameters
@@ -19205,11 +21764,13 @@ Emits the packet to downstream processors from the async thread.
 
 #### onStreamStateChange
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void onStreamStateChange(const PacketStreamState &)
+virtual inline void onStreamStateChange(const PacketStreamState &) override
 ```
+
+Defined in src/base/include/icy/packetqueue.h:189
 
 Closes the queue on `[Error](#error)` or `Closed` stream state transitions. 
 #### Parameters
@@ -19229,8 +21790,10 @@ Closes the queue on `[Error](#error)` or `Closed` stream state transitions.
 #### Queue
 
 ```cpp
-AsyncQueue< T > Queue()
+using Queue = AsyncQueue< T >
 ```
+
+Defined in src/base/include/icy/packetqueue.h:149
 
 ---
 
@@ -19239,8 +21802,10 @@ AsyncQueue< T > Queue()
 #### Processor
 
 ```cpp
-PacketProcessor Processor()
+using Processor = PacketProcessor
 ```
+
+Defined in src/base/include/icy/packetqueue.h:150
 
 {#ratelimiter}
 
@@ -19249,6 +21814,12 @@ PacketProcessor Processor()
 ```cpp
 #include <icy/ratelimiter.h>
 ```
+
+```cpp
+class RateLimiter
+```
+
+Defined in src/base/include/icy/ratelimiter.h:23
 
 Token bucket rate limiter for throttling message send frequency.
 
@@ -19270,6 +21841,8 @@ Token bucket rate limiter for throttling message send frequency.
 double rate
 ```
 
+Defined in src/base/include/icy/ratelimiter.h:26
+
 How many messages.
 
 ---
@@ -19282,6 +21855,8 @@ How many messages.
 double seconds
 ```
 
+Defined in src/base/include/icy/ratelimiter.h:27
+
 Over how many seconds.
 
 ---
@@ -19293,6 +21868,8 @@ Over how many seconds.
 ```cpp
 double allowance
 ```
+
+Defined in src/base/include/icy/ratelimiter.h:28
 
 Remaining send allowance.
 
@@ -19312,8 +21889,10 @@ Remaining send allowance.
 `inline`
 
 ```cpp
-inline RateLimiter(double rate, double seconds)
+inline RateLimiter(double rate = 5.0, double seconds = 6.0)
 ```
+
+Defined in src/base/include/icy/ratelimiter.h:33
 
 Constructs a token bucket limiter. 
 #### Parameters
@@ -19332,6 +21911,8 @@ Constructs a token bucket limiter.
 ```cpp
 inline bool canSend()
 ```
+
+Defined in src/base/include/icy/ratelimiter.h:46
 
 Returns true if a message may be sent without exceeding the rate limit. Replenishes the token bucket based on elapsed time since the last check, then consumes one token. Returns false if the bucket is empty. 
 #### Returns
@@ -19354,6 +21935,8 @@ true if sending is allowed, false if the rate limit is exceeded.
 std::chrono::steady_clock::time_point _lastCheck
 ```
 
+Defined in src/base/include/icy/ratelimiter.h:76
+
 ---
 
 {#_started}
@@ -19364,6 +21947,8 @@ std::chrono::steady_clock::time_point _lastCheck
 bool _started
 ```
 
+Defined in src/base/include/icy/ratelimiter.h:77
+
 {#packetstreamadapter}
 
 ## PacketStreamAdapter
@@ -19371,6 +21956,12 @@ bool _started
 ```cpp
 #include <icy/packetstream.h>
 ```
+
+```cpp
+class PacketStreamAdapter
+```
+
+Defined in src/base/include/icy/packetstream.h:42
 
 > **Subclassed by:** [`PacketProcessor`](#packetprocessor), [`ThreadedStreamReader`](#threadedstreamreader), [`ICapture`](av.md#icapture), [`FormWriter`](http.md#formwriter), [`WebRtcTrackReceiver`](webrtc.md#webrtctrackreceiver)
 
@@ -19387,7 +21978,7 @@ This class is a wrapper for integrating external classes with the a [PacketStrea
 | `void` | [`emit`](#emit) `virtual` | Emit a flag-only packet carrying no payload data. |
 | `void` | [`emit`](#emit) `virtual` | Emit an existing packet directly onto the outgoing signal. |
 | `PacketSignal &` | [`getEmitter`](#getemitter)  | Returns a reference to the outgoing packet signal. |
-| `PacketRetention` | [`retention`](#retention) `virtual` `const` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
+| `PacketRetention` | [`retention`](#retention) `virtual` `const` `nodiscard` | Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph. |
 | `void` | [`onStreamStateChange`](#onstreamstatechange) `virtual` `inline` | Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios. |
 
 ---
@@ -19399,6 +21990,8 @@ This class is a wrapper for integrating external classes with the a [PacketStrea
 ```cpp
 PacketStreamAdapter(PacketSignal & emitter)
 ```
+
+Defined in src/base/include/icy/packetstream.h:47
 
 Construct the adapter, binding it to the given packet signal. 
 #### Parameters
@@ -19413,8 +22006,10 @@ Construct the adapter, binding it to the given packet signal.
 `virtual`
 
 ```cpp
-virtual void emit(char * data, size_t len, unsigned flags)
+virtual void emit(char * data, size_t len, unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:54
 
 Emit a mutable raw buffer as a packet. 
 #### Parameters
@@ -19422,7 +22017,7 @@ Emit a mutable raw buffer as a packet.
 
 * `len` Number of bytes in the buffer. 
 
-* `flags` Optional packet flags (see PacketFlags).
+* `flags` Optional packet flags (see [PacketFlags](#packetflags)).
 
 ---
 
@@ -19433,8 +22028,10 @@ Emit a mutable raw buffer as a packet.
 `virtual`
 
 ```cpp
-virtual void emit(const char * data, size_t len, unsigned flags)
+virtual void emit(const char * data, size_t len, unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:60
 
 Emit a read-only raw buffer as a packet (data is copied internally). 
 #### Parameters
@@ -19442,7 +22039,7 @@ Emit a read-only raw buffer as a packet (data is copied internally).
 
 * `len` Number of bytes in the buffer. 
 
-* `flags` Optional packet flags (see PacketFlags).
+* `flags` Optional packet flags (see [PacketFlags](#packetflags)).
 
 ---
 
@@ -19453,14 +22050,16 @@ Emit a read-only raw buffer as a packet (data is copied internally).
 `virtual`
 
 ```cpp
-virtual void emit(const std::string & str, unsigned flags)
+virtual void emit(const std::string & str, unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:65
 
 Emit a string as a packet (data is copied internally). 
 #### Parameters
 * `str` String payload. 
 
-* `flags` Optional packet flags (see PacketFlags).
+* `flags` Optional packet flags (see [PacketFlags](#packetflags)).
 
 ---
 
@@ -19471,8 +22070,10 @@ Emit a string as a packet (data is copied internally).
 `virtual`
 
 ```cpp
-virtual void emit(unsigned flags)
+virtual void emit(unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:69
 
 Emit a flag-only packet carrying no payload data. 
 #### Parameters
@@ -19490,6 +22091,8 @@ Emit a flag-only packet carrying no payload data.
 virtual void emit(IPacket & packet)
 ```
 
+Defined in src/base/include/icy/packetstream.h:73
+
 Emit an existing packet directly onto the outgoing signal. 
 #### Parameters
 * `packet` The packet to forward; must remain valid for the duration of the call.
@@ -19504,6 +22107,8 @@ Emit an existing packet directly onto the outgoing signal.
 PacketSignal & getEmitter()
 ```
 
+Defined in src/base/include/icy/packetstream.h:76
+
 Returns a reference to the outgoing packet signal.
 
 ---
@@ -19512,11 +22117,13 @@ Returns a reference to the outgoing packet signal.
 
 #### retention
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual PacketRetention retention() const
+[[nodiscard]] virtual PacketRetention retention() const
 ```
+
+Defined in src/base/include/icy/packetstream.h:84
 
 Returns how this adapter treats incoming packet lifetime. Most adapters are synchronous and therefore only borrow the packet for the current call chain. Queue-style adapters override this to advertise that they clone before deferred use. Callers may treat the first adapter reporting Cloned or Retained as the explicit ownership boundary in the stream graph.
 
@@ -19531,6 +22138,8 @@ Returns how this adapter treats incoming packet lifetime. Most adapters are sync
 ```cpp
 virtual inline void onStreamStateChange(const PacketStreamState &)
 ```
+
+Defined in src/base/include/icy/packetstream.h:91
 
 Called by the [PacketStream](#packetstream) to notify when the internal [Stream](#stream) state changes. On receiving the Stopped state, it is the responsibility of the adapter to have ceased all outgoing packet transmission, especially in multi-thread scenarios.
 
@@ -19550,6 +22159,8 @@ Called by the [PacketStream](#packetstream) to notify when the internal [Stream]
 PacketSignal & _emitter
 ```
 
+Defined in src/base/include/icy/packetstream.h:100
+
 ### Protected Methods
 
 | Return | Name | Description |
@@ -19567,6 +22178,8 @@ PacketSignal & _emitter
 PacketStreamAdapter(const PacketStreamAdapter &) = delete
 ```
 
+Defined in src/base/include/icy/packetstream.h:95
+
 NonCopyable and NonMovable.
 
 ---
@@ -19579,6 +22192,8 @@ NonCopyable and NonMovable.
 PacketStreamAdapter(PacketStreamAdapter &&) = delete
 ```
 
+Defined in src/base/include/icy/packetstream.h:97
+
 Deleted constructor.
 
 {#packetprocessor}
@@ -19589,8 +22204,14 @@ Deleted constructor.
 #include <icy/packetstream.h>
 ```
 
+```cpp
+class PacketProcessor
+```
+
+Defined in src/base/include/icy/packetstream.h:114
+
 > **Inherits:** [`PacketStreamAdapter`](#packetstreamadapter)
-> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue), [`PlanarAudioPacket >`](#asyncpacketqueue), [`PlanarVideoPacket >`](#asyncpacketqueue), [`AsyncPacketQueue< T >`](#asyncpacketqueue), [`StreamWriter`](#streamwriter), [`SyncPacketQueue< T >`](#syncpacketqueue), [`AudioPacketEncoder`](av.md#audiopacketencoder), [`FPSLimiter`](av.md#fpslimiter), [`MultiplexPacketEncoder`](av.md#multiplexpacketencoder), [`VideoPacketEncoder`](av.md#videopacketencoder), [`ChunkedAdapter`](http.md#chunkedadapter), [`MultipartAdapter`](http.md#multipartadapter), [`FrameSampler`](vision.md#framesampler), [`WebRtcTrackSender`](webrtc.md#webrtctracksender)
+> **Subclassed by:** [`AsyncPacketQueue< PacketT >`](#asyncpacketqueue), [`PlanarAudioPacket >`](#asyncpacketqueue), [`AsyncPacketQueue< VisionFramePacket >`](#asyncpacketqueue), [`AsyncPacketQueue< T >`](#asyncpacketqueue), [`StreamWriter`](#streamwriter), [`SyncPacketQueue< T >`](#syncpacketqueue), [`AudioPacketEncoder`](av.md#audiopacketencoder), [`FPSLimiter`](av.md#fpslimiter), [`MultiplexPacketEncoder`](av.md#multiplexpacketencoder), [`VideoPacketEncoder`](av.md#videopacketencoder), [`ChunkedAdapter`](http.md#chunkedadapter), [`MultipartAdapter`](http.md#multipartadapter), [`FrameNormalizer`](vision.md#framenormalizer), [`FrameSampler`](vision.md#framesampler), [`WebRtcTrackSender`](webrtc.md#webrtctracksender)
 
 This class is a virtual interface for creating PacketStreamAdapters which process that and emit the [IPacket](#ipacket) type.
 
@@ -19599,9 +22220,9 @@ This class is a virtual interface for creating PacketStreamAdapters which proces
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`PacketProcessor`](#packetprocessor) `inline` |  |
-| `void` | [`process`](#process)  | This method performs processing on the given packet and emits the result. |
+| `void` | [`process`](#process) `virtual` | This method performs processing on the given packet and emits the result. |
 | `bool` | [`accepts`](#accepts) `virtual` `inline` | This method ensures compatibility with the given packet type. Return false to reject the packet. |
-| `void` | [`operator<<`](#operator) `virtual` `inline` | [Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294) |
+| `void` | [`operator<<`](#operator) `virtual` `inline` | [Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294). |
 
 ---
 
@@ -19615,15 +22236,21 @@ This class is a virtual interface for creating PacketStreamAdapters which proces
 inline PacketProcessor(PacketSignal & emitter)
 ```
 
+Defined in src/base/include/icy/packetstream.h:117
+
 ---
 
 {#process}
 
 #### process
 
+`virtual`
+
 ```cpp
-void process(IPacket & packet)
+virtual void process(IPacket & packet)
 ```
+
+Defined in src/base/include/icy/packetstream.h:127
 
 This method performs processing on the given packet and emits the result.
 
@@ -19641,6 +22268,8 @@ Processors that defer work asynchronously must either clone the packet or retain
 virtual inline bool accepts(IPacket *)
 ```
 
+Defined in src/base/include/icy/packetstream.h:131
+
 This method ensures compatibility with the given packet type. Return false to reject the packet.
 
 ---
@@ -19655,7 +22284,9 @@ This method ensures compatibility with the given packet type. Return false to re
 virtual inline void operator<<(IPacket & packet)
 ```
 
-[Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294)
+Defined in src/base/include/icy/packetstream.h:134
+
+[Stream](#stream) operator alias for [process()](#classicy_1_1PacketProcessor_1acd9fb1a5fa525c0a2d96971fe6c06294).
 
 {#packetstream}
 
@@ -19664,6 +22295,12 @@ virtual inline void operator<<(IPacket & packet)
 ```cpp
 #include <icy/packetstream.h>
 ```
+
+```cpp
+class PacketStream
+```
+
+Defined in src/base/include/icy/packetstream.h:306
 
 > **Inherits:** [`Stateful< PacketStreamState >`](#stateful)
 
@@ -19677,7 +22314,7 @@ Note that [PacketStream](#packetstream) itself inherits from [PacketStreamAdapte
 
 All [PacketStream](#packetstream) methods are thread-safe, but once the stream is running you will not be able to attach or detach stream adapters.
 
-In order to synchronize output packets with the application event loop take a look at the [SyncPacketQueue](#syncpacketqueue) class. For lengthy operations you can add an [AsyncPacketQueue](#asyncpacketqueue) to the start of the stream to defer processing from the PacketSource thread.
+In order to synchronize output packets with the application event loop take a look at the [SyncPacketQueue](#syncpacketqueue) class. For lengthy operations you can add an [AsyncPacketQueue](#asyncpacketqueue) to the start of the stream to defer processing from the [PacketSource](#packetsource) thread.
 
 ### Public Attributes
 
@@ -19697,6 +22334,8 @@ In order to synchronize output packets with the application event loop take a lo
 PacketSignal emitter
 ```
 
+Defined in src/base/include/icy/packetstream.h:495
+
 Signals to delegates on outgoing packets.
 
 ---
@@ -19709,6 +22348,8 @@ Signals to delegates on outgoing packets.
 ThreadSignal< void(PacketStream &, const std::exception_ptr &)> Error
 ```
 
+Defined in src/base/include/icy/packetstream.h:501
+
 Signals that the [PacketStream](#packetstream) is in [Error](#error) state. If stream output is synchronized then the [Error](#error) signal will be sent from the synchronization context, otherwise it will be sent from the async processor context. See [synchronizeOutput()](#classicy_1_1PacketStream_1a246c1677eb9526056d99193e04d3be60)
 
 ---
@@ -19720,6 +22361,8 @@ Signals that the [PacketStream](#packetstream) is in [Error](#error) state. If s
 ```cpp
 ThreadSignal< void(PacketStream &)> Close
 ```
+
+Defined in src/base/include/icy/packetstream.h:506
 
 Signals that the [PacketStream](#packetstream) is in Close state. This signal is sent immediately via the [close()](#classicy_1_1PacketStream_1a744ce42be8c86ada9cf8d8c85e080d37) method, and as such will be sent from the calling thread context.
 
@@ -19775,8 +22418,10 @@ Signals that the [PacketStream](#packetstream) is in Close state. This signal is
 #### PacketStream
 
 ```cpp
-PacketStream(const std::string & name)
+PacketStream(const std::string & name = "")
 ```
+
+Defined in src/base/include/icy/packetstream.h:313
 
 Construct a named packet stream. 
 #### Parameters
@@ -19794,6 +22439,8 @@ Construct a named packet stream.
 virtual ~PacketStream()
 ```
 
+Defined in src/base/include/icy/packetstream.h:316
+
 Destroy the stream; calls [close()](#classicy_1_1PacketStream_1a744ce42be8c86ada9cf8d8c85e080d37) then [reset()](#classicy_1_1PacketStream_1a92bc04f29c224402edb681c55c648eb0) to release all adapters.
 
 ---
@@ -19806,6 +22453,8 @@ Destroy the stream; calls [close()](#classicy_1_1PacketStream_1a744ce42be8c86ada
 PacketStream(const PacketStream &) = delete
 ```
 
+Defined in src/base/include/icy/packetstream.h:318
+
 Deleted constructor.
 
 ---
@@ -19817,6 +22466,8 @@ Deleted constructor.
 ```cpp
 PacketStream(PacketStream &&) = delete
 ```
+
+Defined in src/base/include/icy/packetstream.h:320
 
 Deleted constructor.
 
@@ -19832,6 +22483,8 @@ Deleted constructor.
 virtual void start()
 ```
 
+Defined in src/base/include/icy/packetstream.h:324
+
 Start the stream and synchronized sources.
 
 ---
@@ -19845,6 +22498,8 @@ Start the stream and synchronized sources.
 ```cpp
 virtual void stop()
 ```
+
+Defined in src/base/include/icy/packetstream.h:327
 
 Stop the stream and synchronized sources.
 
@@ -19860,6 +22515,8 @@ Stop the stream and synchronized sources.
 virtual void pause()
 ```
 
+Defined in src/base/include/icy/packetstream.h:330
+
 Pause the stream.
 
 ---
@@ -19873,6 +22530,8 @@ Pause the stream.
 ```cpp
 virtual void resume()
 ```
+
+Defined in src/base/include/icy/packetstream.h:333
 
 Resume the stream.
 
@@ -19888,6 +22547,8 @@ Resume the stream.
 virtual void close()
 ```
 
+Defined in src/base/include/icy/packetstream.h:336
+
 Close the stream and transition the internal state to Closed.
 
 ---
@@ -19901,6 +22562,8 @@ Close the stream and transition the internal state to Closed.
 ```cpp
 virtual void reset()
 ```
+
+Defined in src/base/include/icy/packetstream.h:339
 
 Cleanup all managed stream adapters and reset the stream state.
 
@@ -19916,6 +22579,8 @@ Cleanup all managed stream adapters and reset the stream state.
 virtual bool active() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:342
+
 Returns true when the stream is in the Active state.
 
 ---
@@ -19929,6 +22594,8 @@ Returns true when the stream is in the Active state.
 ```cpp
 virtual bool stopped() const
 ```
+
+Defined in src/base/include/icy/packetstream.h:345
 
 Returns true when the stream is in the Stopping or Stopped state.
 
@@ -19944,6 +22611,8 @@ Returns true when the stream is in the Stopping or Stopped state.
 virtual bool closed() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:348
+
 Returns true when the stream is in the Closed or [Error](#error) state.
 
 ---
@@ -19957,6 +22626,8 @@ Returns true when the stream is in the Closed or [Error](#error) state.
 ```cpp
 virtual bool lock()
 ```
+
+Defined in src/base/include/icy/packetstream.h:353
 
 Sets the stream to locked state. In a locked state no new adapters can be added or removed from the stream until the stream is stopped.
 
@@ -19972,6 +22643,8 @@ Sets the stream to locked state. In a locked state no new adapters can be added 
 virtual bool locked() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:356
+
 Returns true is the stream is currently locked.
 
 ---
@@ -19985,6 +22658,8 @@ Returns true is the stream is currently locked.
 ```cpp
 virtual void write(char * data, size_t len)
 ```
+
+Defined in src/base/include/icy/packetstream.h:364
 
 Write a mutable buffer into the stream without copying. The caller must keep the buffer alive until processing crosses a Cloned/Retained boundary or, if the graph is fully synchronous, until [write()](#classicy_1_1PacketStream_1a22f83c8eda142efab8d21ea04a88137a) returns. 
 #### Parameters
@@ -20004,6 +22679,8 @@ Write a mutable buffer into the stream without copying. The caller must keep the
 virtual void write(const char * data, size_t len)
 ```
 
+Defined in src/base/include/icy/packetstream.h:370
+
 Write a read-only buffer into the stream; data is copied immediately into an owning [RawPacket](#rawpacket) before any adapter sees it. 
 #### Parameters
 * `data` Pointer to the raw data buffer. 
@@ -20022,6 +22699,8 @@ Write a read-only buffer into the stream; data is copied immediately into an own
 virtual void write(IPacket && packet)
 ```
 
+Defined in src/base/include/icy/packetstream.h:374
+
 Write a packet directly into the processing chain. 
 #### Parameters
 * `packet` Packet to process; moved into the stream.
@@ -20038,6 +22717,8 @@ Write a packet directly into the processing chain.
 virtual void attachSource(PacketSignal & source)
 ```
 
+Defined in src/base/include/icy/packetstream.h:380
+
 Attach a bare packet signal as a stream source. The signal is wrapped in an unowned [PacketStreamAdapter](#packetstreamadapter) internally. Useful when the source is another [PacketStream::emitter](#classicy_1_1PacketStream_1adc148eb61c088baa5737dc299ecd9599). 
 #### Parameters
 * `source` The packet signal to attach; must outlive the stream.
@@ -20051,8 +22732,10 @@ Attach a bare packet signal as a stream source. The signal is wrapped in an unow
 `virtual`
 
 ```cpp
-virtual void attachSource(PacketStreamAdapter * source, bool owned, bool syncState)
+virtual void attachSource(PacketStreamAdapter * source, bool owned = true, bool syncState = false)
 ```
+
+Defined in src/base/include/icy/packetstream.h:390
 
 Attach a [PacketStreamAdapter](#packetstreamadapter) as a source. Source adapters default to Borrowed retention unless overridden; they must not retain inbound packet storage asynchronously without reporting Cloned or Retained. 
 #### Parameters
@@ -20071,8 +22754,10 @@ Attach a [PacketStreamAdapter](#packetstreamadapter) as a source. Source adapter
 `inline`
 
 ```cpp
-template<class C> inline void attachSource(std::shared_ptr< C > ptr, bool syncState)
+template<class C> inline void attachSource(std::shared_ptr< C > ptr, bool syncState = false)
 ```
+
+Defined in src/base/include/icy/packetstream.h:400
 
 Attach a shared_ptr-managed source adapter to the stream. The stream shares ownership; the adapter is kept alive at least until teardown. Throws std::runtime_error if `ptr` does not derive from [PacketStreamAdapter](#packetstreamadapter). 
 #### Parameters
@@ -20095,6 +22780,8 @@ Attach a shared_ptr-managed source adapter to the stream. The stream shares owne
 virtual bool detachSource(PacketSignal & source)
 ```
 
+Defined in src/base/include/icy/packetstream.h:415
+
 Detach a source by its packet signal. Disconnects the signal from the stream's process slot and removes the adapter entry. 
 #### Parameters
 * `source` The packet signal previously attached via [attachSource(PacketSignal&)](#classicy_1_1PacketStream_1ad11e84f0c24b4a75e53da886a3d7ca82). 
@@ -20114,6 +22801,8 @@ true if the source was found and removed, false otherwise.
 virtual bool detachSource(PacketStreamAdapter * source)
 ```
 
+Defined in src/base/include/icy/packetstream.h:421
+
 Detach a source by its adapter pointer. Disconnects the adapter's emitter from the stream's process slot and removes the entry. 
 #### Parameters
 * `source` Pointer to the adapter previously attached. 
@@ -20130,8 +22819,10 @@ true if the source was found and removed, false otherwise.
 `virtual`
 
 ```cpp
-virtual void attach(PacketProcessor * proc, int order, bool owned)
+virtual void attach(PacketProcessor * proc, int order = 0, bool owned = true)
 ```
+
+Defined in src/base/include/icy/packetstream.h:433
 
 Attach a packet processor to the stream. Processors are executed in ascending order of their `order` value. Pass order = -1 to append at the end of the current processor list. Valid range is -1 to 101; values outside this range throw std::invalid_argument. Borrowed processors must finish with the packet before [process()](#classicy_1_1PacketStream_1ad5a93a94d2b8694b517438935c435397) returns. Queue/processors that defer work must report Cloned or Retained via retention() so upstream code has an explicit ownership boundary. 
 #### Parameters
@@ -20150,8 +22841,10 @@ Attach a packet processor to the stream. Processors are executed in ascending or
 `inline`
 
 ```cpp
-template<class C> inline void attach(std::shared_ptr< C > ptr, int order, bool syncState)
+template<class C> inline void attach(std::shared_ptr< C > ptr, int order = 0, bool syncState = false)
 ```
+
+Defined in src/base/include/icy/packetstream.h:443
 
 Attach a shared_ptr-managed processor to the stream. The stream shares ownership; the processor is kept alive at least until teardown. Throws std::runtime_error if `ptr` does not derive from [PacketProcessor](#packetprocessor). 
 #### Parameters
@@ -20176,6 +22869,8 @@ Attach a shared_ptr-managed processor to the stream. The stream shares ownership
 virtual bool detach(PacketProcessor * proc)
 ```
 
+Defined in src/base/include/icy/packetstream.h:459
+
 Detach a packet processor from the stream. The processor's delegate connections are removed; ownership is released if held. 
 #### Parameters
 * `proc` Pointer to the processor to remove. 
@@ -20195,6 +22890,8 @@ true if the processor was found and removed, false otherwise.
 virtual void synchronizeOutput(uv::Loop * loop)
 ```
 
+Defined in src/base/include/icy/packetstream.h:466
+
 Synchronize stream output packets with a libuv event loop. Internally attaches a [SyncPacketQueue](#syncpacketqueue) at order 101 so that all packets emitted by the processor chain are dispatched from the loop thread rather than the source thread. Must be called before [start()](#classicy_1_1PacketStream_1ac6843f20698879acdaabd8110b440c55). 
 #### Parameters
 * `loop` The event loop to synchronize output onto; must not be null.
@@ -20210,6 +22907,8 @@ Synchronize stream output packets with a libuv event loop. Internally attaches a
 ```cpp
 virtual void autoStart(bool flag)
 ```
+
+Defined in src/base/include/icy/packetstream.h:473
 
 Enable or disable auto-start behaviour (default: false). When enabled, the stream automatically transitions to Active state upon receiving the first packet while in the None or Locked state. Must be called before [start()](#classicy_1_1PacketStream_1ac6843f20698879acdaabd8110b440c55). 
 #### Parameters
@@ -20227,6 +22926,8 @@ Enable or disable auto-start behaviour (default: false). When enabled, the strea
 virtual void closeOnError(bool flag)
 ```
 
+Defined in src/base/include/icy/packetstream.h:479
+
 Enable or disable close-on-error behaviour (default: true). When enabled, an unhandled processor exception causes the stream to transition from [Error](#error) to Closed state automatically. 
 #### Parameters
 * `flag` true to close the stream on error, false to remain in [Error](#error) state.
@@ -20240,6 +22941,8 @@ Enable or disable close-on-error behaviour (default: true). When enabled, an unh
 ```cpp
 const std::exception_ptr & error()
 ```
+
+Defined in src/base/include/icy/packetstream.h:488
 
 Accessors for the unmanaged client data pointer.
 
@@ -20259,6 +22962,8 @@ A reference to the stored exception_ptr; empty if no error.
 std::string name() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:492
+
 Return the name assigned to this stream at construction. 
 #### Returns
 The stream name; empty string if none was provided.
@@ -20275,6 +22980,8 @@ The stream name; empty string if none was provided.
 PacketAdapterVec adapters() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:509
+
 Returns a combined list of all stream sources and processors.
 
 ---
@@ -20288,6 +22995,8 @@ Returns a combined list of all stream sources and processors.
 ```cpp
 PacketAdapterVec sources() const
 ```
+
+Defined in src/base/include/icy/packetstream.h:512
 
 Returns a list of all stream sources.
 
@@ -20303,6 +23012,8 @@ Returns a list of all stream sources.
 PacketAdapterVec processors() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:515
+
 Returns a list of all stream processors.
 
 ---
@@ -20316,6 +23027,8 @@ Returns a list of all stream processors.
 ```cpp
 int numSources() const
 ```
+
+Defined in src/base/include/icy/packetstream.h:519
 
 Return the number of source adapters currently registered. 
 #### Returns
@@ -20333,6 +23046,8 @@ Source count; thread-safe.
 int numProcessors() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:523
+
 Return the number of processor adapters currently registered. 
 #### Returns
 Processor count; thread-safe.
@@ -20349,6 +23064,8 @@ Processor count; thread-safe.
 int numAdapters() const
 ```
 
+Defined in src/base/include/icy/packetstream.h:527
+
 Return the total number of adapters (sources + processors). 
 #### Returns
 Combined adapter count; thread-safe.
@@ -20362,8 +23079,10 @@ Combined adapter count; thread-safe.
 `inline`
 
 ```cpp
-template<class AdapterT> inline AdapterT * getSource(int index)
+template<class AdapterT> inline AdapterT * getSource(int index = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:536
 
 Return the nth source of type AdapterT, or nullptr if not found. Sources are searched in their registered order; only adapters that dynamic_cast successfully to AdapterT are counted. 
 #### Parameters
@@ -20384,8 +23103,10 @@ Pointer to the matching adapter, or nullptr.
 `inline`
 
 ```cpp
-template<class AdapterT> inline AdapterT * getProcessor(int index)
+template<class AdapterT> inline AdapterT * getProcessor(int index = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:559
 
 Return the nth processor of type AdapterT, or nullptr if not found. Processors are searched in their registered order; only adapters that dynamic_cast successfully to AdapterT are counted. 
 #### Parameters
@@ -20406,8 +23127,10 @@ Pointer to the matching processor, or nullptr.
 `inline`
 
 ```cpp
-inline PacketProcessor * getProcessor(int order)
+inline PacketProcessor * getProcessor(int order = 0)
 ```
+
+Defined in src/base/include/icy/packetstream.h:579
 
 Return the processor registered at a specific order value. Unlike the template overload, this searches by order rather than by type and index. 
 #### Parameters
@@ -20441,6 +23164,8 @@ Pointer to the matching processor, or nullptr if none registered at that order.
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/packetstream.h:633
+
 ---
 
 {#_procmutex}
@@ -20450,6 +23175,8 @@ std::mutex _mutex
 ```cpp
 std::mutex _procMutex
 ```
+
+Defined in src/base/include/icy/packetstream.h:634
 
 ---
 
@@ -20461,6 +23188,8 @@ std::mutex _procMutex
 std::string _name
 ```
 
+Defined in src/base/include/icy/packetstream.h:635
+
 ---
 
 {#_sources}
@@ -20470,6 +23199,8 @@ std::string _name
 ```cpp
 PacketAdapterVec _sources
 ```
+
+Defined in src/base/include/icy/packetstream.h:636
 
 ---
 
@@ -20481,6 +23212,8 @@ PacketAdapterVec _sources
 PacketAdapterVec _processors
 ```
 
+Defined in src/base/include/icy/packetstream.h:637
+
 ---
 
 {#_states}
@@ -20490,6 +23223,8 @@ PacketAdapterVec _processors
 ```cpp
 std::deque< PacketStreamState > _states
 ```
+
+Defined in src/base/include/icy/packetstream.h:638
 
 ---
 
@@ -20501,6 +23236,8 @@ std::deque< PacketStreamState > _states
 std::exception_ptr _error
 ```
 
+Defined in src/base/include/icy/packetstream.h:639
+
 ---
 
 {#_autostart}
@@ -20510,6 +23247,8 @@ std::exception_ptr _error
 ```cpp
 bool _autoStart
 ```
+
+Defined in src/base/include/icy/packetstream.h:640
 
 ---
 
@@ -20521,6 +23260,8 @@ bool _autoStart
 bool _closeOnError
 ```
 
+Defined in src/base/include/icy/packetstream.h:641
+
 ---
 
 {#_wired}
@@ -20530,6 +23271,8 @@ bool _closeOnError
 ```cpp
 bool _wired
 ```
+
+Defined in src/base/include/icy/packetstream.h:642
 
 ### Protected Methods
 
@@ -20544,7 +23287,7 @@ bool _wired
 | `void` | [`process`](#process) `virtual` | [Process](#process) incoming packets. |
 | `void` | [`emit`](#emit)  | Emit the final packet to listeners. |
 | `void` | [`synchronizeStates`](#synchronizestates)  | Synchronize queued states with adapters. |
-| `void` | [`onStateChange`](#onstatechange) `virtual` | Override the [Stateful::onStateChange](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) method. |
+| `void` | [`onStateChange`](#onstatechange) `virtual` `override` | Override the [Stateful::onStateChange](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) method. |
 | `void` | [`assertCanModify`](#assertcanmodify)  | Returns true if the given state ID is queued. |
 | `void` | [`handleException`](#handleexception)  | Handle an internal exception. |
 
@@ -20558,6 +23301,8 @@ bool _wired
 void setup()
 ```
 
+Defined in src/base/include/icy/packetstream.h:594
+
 Attach the source and processor delegate chain.
 
 ---
@@ -20569,6 +23314,8 @@ Attach the source and processor delegate chain.
 ```cpp
 void teardown()
 ```
+
+Defined in src/base/include/icy/packetstream.h:597
 
 Detach the source and processor delegate chain.
 
@@ -20582,6 +23329,8 @@ Detach the source and processor delegate chain.
 void attachSource(PacketAdapterReference::Ptr ref)
 ```
 
+Defined in src/base/include/icy/packetstream.h:599
+
 ---
 
 {#attach}
@@ -20592,6 +23341,8 @@ void attachSource(PacketAdapterReference::Ptr ref)
 void attach(PacketAdapterReference::Ptr ref)
 ```
 
+Defined in src/base/include/icy/packetstream.h:600
+
 ---
 
 {#startsources}
@@ -20601,6 +23352,8 @@ void attach(PacketAdapterReference::Ptr ref)
 ```cpp
 void startSources()
 ```
+
+Defined in src/base/include/icy/packetstream.h:603
 
 Start synchronized sources.
 
@@ -20613,6 +23366,8 @@ Start synchronized sources.
 ```cpp
 void stopSources()
 ```
+
+Defined in src/base/include/icy/packetstream.h:606
 
 Stop synchronized sources.
 
@@ -20628,6 +23383,8 @@ Stop synchronized sources.
 virtual void process(IPacket & packet)
 ```
 
+Defined in src/base/include/icy/packetstream.h:609
+
 [Process](#process) incoming packets.
 
 ---
@@ -20639,6 +23396,8 @@ virtual void process(IPacket & packet)
 ```cpp
 void emit(IPacket & packet)
 ```
+
+Defined in src/base/include/icy/packetstream.h:615
 
 Emit the final packet to listeners.
 
@@ -20654,6 +23413,8 @@ Synchronized signals such as Close and [Error](#error) are sent from this method
 void synchronizeStates()
 ```
 
+Defined in src/base/include/icy/packetstream.h:618
+
 Synchronize queued states with adapters.
 
 ---
@@ -20662,11 +23423,13 @@ Synchronize queued states with adapters.
 
 #### onStateChange
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onStateChange(PacketStreamState & state, const PacketStreamState & oldState)
+virtual void onStateChange(PacketStreamState & state, const PacketStreamState & oldState) override
 ```
+
+Defined in src/base/include/icy/packetstream.h:621
 
 Override the [Stateful::onStateChange](#classicy_1_1Stateful_1a06e5572c313c3b54db932c922166079d) method.
 
@@ -20679,6 +23442,8 @@ Override the [Stateful::onStateChange](#classicy_1_1Stateful_1a06e5572c313c3b54d
 ```cpp
 void assertCanModify()
 ```
+
+Defined in src/base/include/icy/packetstream.h:628
 
 Returns true if the given state ID is queued.
 
@@ -20693,6 +23458,8 @@ Asserts that the stream can be modified, ie is not in the Locked, Stopping or Ac
 ```cpp
 void handleException(std::exception & exc)
 ```
+
+Defined in src/base/include/icy/packetstream.h:631
 
 Handle an internal exception.
 
@@ -20709,8 +23476,10 @@ Handle an internal exception.
 #### Ptr
 
 ```cpp
-std::shared_ptr< PacketStream > Ptr()
+using Ptr = std::shared_ptr< PacketStream >
 ```
+
+Defined in src/base/include/icy/packetstream.h:309
 
 {#synchronizer}
 
@@ -20719,6 +23488,12 @@ std::shared_ptr< PacketStream > Ptr()
 ```cpp
 #include <icy/synchronizer.h>
 ```
+
+```cpp
+class Synchronizer
+```
+
+Defined in src/base/include/icy/synchronizer.h:38
 
 > **Inherits:** [`Runner`](#runner)
 
@@ -20736,7 +23511,7 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 |  | [`~Synchronizer`](#synchronizer) `virtual` | Destructor. |
 | `void` | [`post`](#post)  | Send a synchronization request to the event loop. Call this each time you want the target method called synchronously. The synchronous method will be called on next iteration. This is not atomic, so do not expect a callback for every request. |
 | `void` | [`start`](#start) `inline` | Starts the synchronizer with a variadic callback function. The callback is invoked from the event loop each time `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` is called. Throws `std::logic_error` if already running or if the handle is null. |
-| `void` | [`start`](#start) `virtual` | Starts the synchronizer with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `start` template. |
+| `void` | [`start`](#start) `virtual` `override` | Starts the synchronizer with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `[start](#classicy_1_1Synchronizer_1a535a1605fc8902d814f9f5ab5e213a66)` template. |
 | `void` | [`cancel`](#cancel) `virtual` | Cancels the synchronizer, signalling the associated callback to stop. A subsequent `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` is needed to wake up the event loop so it can process the cancellation. |
 | `void` | [`close`](#close) `virtual` | Cancels the synchronizer and closes the underlying `uv_async_t` handle. Safe to call multiple times; no-op if already closed. |
 | `uv::Handle< uv_async_t > &` | [`handle`](#handle)  | Returns a reference to the underlying libuv async handle. |
@@ -20751,6 +23526,8 @@ This class inherits the `[Runner](#runner)` interface and may be used with any i
 Synchronizer(uv::Loop * loop)
 ```
 
+Defined in src/base/include/icy/synchronizer.h:46
+
 Creates a synchronizer attached to the given event loop without a callback. Call `[start()](#classicy_1_1Synchronizer_1a535a1605fc8902d814f9f5ab5e213a66)` separately to register the callback before using `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)`. 
 #### Parameters
 * `loop` Event loop to attach the async handle to.
@@ -20762,8 +23539,10 @@ Creates a synchronizer attached to the given event loop without a callback. Call
 #### Synchronizer
 
 ```cpp
-Synchronizer(std::function< void()> target, uv::Loop * loop)
+Synchronizer(std::function< void()> target, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/synchronizer.h:52
 
 Creates and immediately starts a synchronizer with a single callback function. The target is invoked from the event loop context each time `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` is called. 
 #### Parameters
@@ -20780,8 +23559,10 @@ Creates and immediately starts a synchronizer with a single callback function. T
 `inline` `explicit`
 
 ```cpp
-template<typename Function, typename... Args> inline explicit Synchronizer(Function && func, Args &&... args, uv::Loop * loop)
+template<typename Function, typename... Args> inline explicit Synchronizer(Function && func, Args &&... args, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/synchronizer.h:61
 
 Creates and immediately starts a synchronizer with a variadic callback. 
 #### Parameters
@@ -20808,6 +23589,8 @@ Creates and immediately starts a synchronizer with a variadic callback.
 virtual ~Synchronizer()
 ```
 
+Defined in src/base/include/icy/synchronizer.h:69
+
 Destructor.
 
 ---
@@ -20819,6 +23602,8 @@ Destructor.
 ```cpp
 void post()
 ```
+
+Defined in src/base/include/icy/synchronizer.h:75
 
 Send a synchronization request to the event loop. Call this each time you want the target method called synchronously. The synchronous method will be called on next iteration. This is not atomic, so do not expect a callback for every request.
 
@@ -20833,6 +23618,8 @@ Send a synchronization request to the event loop. Call this each time you want t
 ```cpp
 template<typename Function, typename... Args> inline void start(Function && func, Args &&... args)
 ```
+
+Defined in src/base/include/icy/synchronizer.h:85
 
 Starts the synchronizer with a variadic callback function. The callback is invoked from the event loop each time `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` is called. Throws `std::logic_error` if already running or if the handle is null. 
 #### Parameters
@@ -20851,13 +23638,15 @@ Starts the synchronizer with a variadic callback function. The callback is invok
 
 #### start
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void start(std::function< void()> func)
+virtual void start(std::function< void()> func) override
 ```
 
-Starts the synchronizer with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `start` template. 
+Defined in src/base/include/icy/synchronizer.h:131
+
+Starts the synchronizer with a `std::function` callback. Overrides `[Runner::start](#classicy_1_1Runner_1a5969e823f1ce0bdd8730d3108bf13fbd)`; delegates to the variadic `[start](#classicy_1_1Synchronizer_1a535a1605fc8902d814f9f5ab5e213a66)` template. 
 #### Parameters
 * `func` Callback invoked from the event loop on each `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` call.
 
@@ -20873,6 +23662,8 @@ Starts the synchronizer with a `std::function` callback. Overrides `[Runner::sta
 virtual void cancel()
 ```
 
+Defined in src/base/include/icy/synchronizer.h:135
+
 Cancels the synchronizer, signalling the associated callback to stop. A subsequent `[post()](#classicy_1_1Synchronizer_1a1400f8a4c294ba3d4a9d9d1887131abb)` is needed to wake up the event loop so it can process the cancellation.
 
 ---
@@ -20887,6 +23678,8 @@ Cancels the synchronizer, signalling the associated callback to stop. A subseque
 virtual void close()
 ```
 
+Defined in src/base/include/icy/synchronizer.h:139
+
 Cancels the synchronizer and closes the underlying `uv_async_t` handle. Safe to call multiple times; no-op if already closed.
 
 ---
@@ -20898,6 +23691,8 @@ Cancels the synchronizer and closes the underlying `uv_async_t` handle. Safe to 
 ```cpp
 uv::Handle< uv_async_t > & handle()
 ```
+
+Defined in src/base/include/icy/synchronizer.h:143
 
 Returns a reference to the underlying libuv async handle. 
 #### Returns
@@ -20919,11 +23714,13 @@ Reference to the `[uv::Handle](uv.md#handle-2)<uv_async_t>`.
 uv::Handle< uv_async_t > _handle
 ```
 
+Defined in src/base/include/icy/synchronizer.h:148
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`async`](#async) `virtual` `const` | Returns true if the implementation is thread-based. |
+| `bool` | [`async`](#async) `virtual` `const` `override` | Returns true if the implementation is thread-based. |
 
 ---
 
@@ -20931,11 +23728,13 @@ uv::Handle< uv_async_t > _handle
 
 #### async
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool async() const
+virtual bool async() const override
 ```
+
+Defined in src/base/include/icy/synchronizer.h:146
 
 Returns true if the implementation is thread-based. 
 #### Returns
@@ -20948,6 +23747,13 @@ True for thread-backed runners, false for event-loop-driven runners.
 ```cpp
 #include <icy/timedmanager.h>
 ```
+
+```cpp
+template<class TKey, class TValue>
+class TimedManager
+```
+
+Defined in src/base/include/icy/timedmanager.h:29
 
 > **Inherits:** [`KeyedStore< TKey, TValue >`](#keyedstore)
 
@@ -20963,7 +23769,7 @@ Provides timed persistent data storage for class instances. TValue must implemen
 | `void` | [`add`](#add) `inline` | Add an item which will expire (and be deleted) after the specified timeout value. If the timeout is 0 the item will be stored indefinitely. The [TimedManager](#timedmanager) assumes ownership of the given pointer. |
 | `bool` | [`expires`](#expires) `virtual` `inline` | Update the item expiry timeout. |
 | `bool` | [`expires`](#expires) `virtual` `inline` | Update the item expiry timeout. |
-| `void` | [`clear`](#clear) `virtual` `inline` | Removes all items and their associated timeouts. |
+| `void` | [`clear`](#clear) `virtual` `inline` `override` | Removes all items and their associated timeouts. |
 
 ---
 
@@ -20974,8 +23780,10 @@ Provides timed persistent data storage for class instances. TValue must implemen
 `inline`
 
 ```cpp
-inline TimedManager(uv::Loop * loop)
+inline TimedManager(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/timedmanager.h:37
 
 Constructs a [TimedManager](#timedmanager) and starts the internal expiry-check timer. 
 #### Parameters
@@ -20990,8 +23798,10 @@ Constructs a [TimedManager](#timedmanager) and starts the internal expiry-check 
 `inline`
 
 ```cpp
-inline void add(constTKey & key, std::unique_ptr< TValue > item, long timeout)
+inline void add(const TKey & key, std::unique_ptr< TValue > item, long timeout = 0)
 ```
+
+Defined in src/base/include/icy/timedmanager.h:51
 
 Add an item which will expire (and be deleted) after the specified timeout value. If the timeout is 0 the item will be stored indefinitely. The [TimedManager](#timedmanager) assumes ownership of the given pointer.
 
@@ -21004,8 +23814,10 @@ Add an item which will expire (and be deleted) after the specified timeout value
 `virtual` `inline`
 
 ```cpp
-virtual inline bool expires(constTKey & key, long timeout)
+virtual inline bool expires(const TKey & key, long timeout)
 ```
+
+Defined in src/base/include/icy/timedmanager.h:60
 
 Update the item expiry timeout.
 
@@ -21021,6 +23833,8 @@ Update the item expiry timeout.
 virtual inline bool expires(TValue * item, long timeout)
 ```
 
+Defined in src/base/include/icy/timedmanager.h:67
+
 Update the item expiry timeout.
 
 ---
@@ -21029,11 +23843,13 @@ Update the item expiry timeout.
 
 #### clear
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void clear()
+virtual inline void clear() override
 ```
+
+Defined in src/base/include/icy/timedmanager.h:74
 
 Removes all items and their associated timeouts.
 
@@ -21055,6 +23871,8 @@ Removes all items and their associated timeouts.
 std::mutex _tmutex
 ```
 
+Defined in src/base/include/icy/timedmanager.h:153
+
 ---
 
 {#_timeouts}
@@ -21064,6 +23882,8 @@ std::mutex _tmutex
 ```cpp
 TimeoutMap _timeouts
 ```
+
+Defined in src/base/include/icy/timedmanager.h:154
 
 ---
 
@@ -21075,12 +23895,14 @@ TimeoutMap _timeouts
 Timer _timer
 ```
 
+Defined in src/base/include/icy/timedmanager.h:155
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `bool` | [`setTimeout`](#settimeout) `virtual` `inline` | Sets or removes the expiry timeout for a specific item pointer. If timeout > 0, starts a countdown; if timeout == 0, removes any existing timeout. |
-| `void` | [`onRemove`](#onremove) `virtual` `inline` | Called when an item is removed from the collection. Erases the item's timeout entry and calls the base implementation. |
+| `void` | [`onRemove`](#onremove) `virtual` `inline` `override` | Called when an item is removed from the collection. Erases the item's timeout entry and calls the base implementation. |
 | `void` | [`onTimeout`](#ontimeout) `virtual` `inline` | Called when an item's timeout expires. Default implementation removes and deletes the item. |
 | `void` | [`onTimerUpdate`](#ontimerupdate) `inline` | Internal timer callback; iterates all tracked timeouts and calls [onTimeout()](#classicy_1_1TimedManager_1a81f3927772f9e446aa04be7837215180) for any that have expired. |
 
@@ -21095,6 +23917,8 @@ Timer _timer
 ```cpp
 virtual inline bool setTimeout(TValue * item, long timeout)
 ```
+
+Defined in src/base/include/icy/timedmanager.h:88
 
 Sets or removes the expiry timeout for a specific item pointer. If timeout > 0, starts a countdown; if timeout == 0, removes any existing timeout. 
 #### Parameters
@@ -21114,11 +23938,13 @@ true on success.
 
 #### onRemove
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void onRemove(constTKey & key, TValue * item)
+virtual inline void onRemove(const TKey & key, TValue * item) override
 ```
+
+Defined in src/base/include/icy/timedmanager.h:113
 
 Called when an item is removed from the collection. Erases the item's timeout entry and calls the base implementation. 
 #### Parameters
@@ -21138,6 +23964,8 @@ Called when an item is removed from the collection. Erases the item's timeout en
 virtual inline void onTimeout(TValue * item)
 ```
 
+Defined in src/base/include/icy/timedmanager.h:126
+
 Called when an item's timeout expires. Default implementation removes and deletes the item. 
 #### Parameters
 * `item` Pointer to the expired item.
@@ -21153,6 +23981,8 @@ Called when an item's timeout expires. Default implementation removes and delete
 ```cpp
 inline void onTimerUpdate()
 ```
+
+Defined in src/base/include/icy/timedmanager.h:139
 
 Internal timer callback; iterates all tracked timeouts and calls [onTimeout()](#classicy_1_1TimedManager_1a81f3927772f9e446aa04be7837215180) for any that have expired.
 
@@ -21170,8 +24000,10 @@ Internal timer callback; iterates all tracked timeouts and calls [onTimeout()](#
 #### Base
 
 ```cpp
-KeyedStore< TKey, TValue > Base()
+using Base = KeyedStore< TKey, TValue >
 ```
+
+Defined in src/base/include/icy/timedmanager.h:32
 
 ---
 
@@ -21180,8 +24012,10 @@ KeyedStore< TKey, TValue > Base()
 #### TimeoutMap
 
 ```cpp
-std::map< TValue *, Timeout > TimeoutMap()
+using TimeoutMap = std::map< TValue *, Timeout >
 ```
+
+Defined in src/base/include/icy/timedmanager.h:33
 
 {#ipacketcreationstrategy}
 
@@ -21190,6 +24024,12 @@ std::map< TValue *, Timeout > TimeoutMap()
 ```cpp
 #include <icy/packetfactory.h>
 ```
+
+```cpp
+class IPacketCreationStrategy
+```
+
+Defined in src/base/include/icy/packetfactory.h:29
 
 > **Subclassed by:** [`PacketCreationStrategy< PacketT >`](#packetcreationstrategy)
 
@@ -21200,8 +24040,8 @@ Abstract strategy for creating typed packets from raw buffer data.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`IPacketCreationStrategy`](#ipacketcreationstrategy)  | Defaulted constructor. |
-| `IPacket *` | [`create`](#create) `const` | Attempts to create a typed packet from the given buffer. |
-| `int` | [`priority`](#priority) `const` | Returns the dispatch priority of this strategy (0–100; higher runs first). |
+| `IPacket *` | [`create`](#create) `virtual` `const` | Attempts to create a typed packet from the given buffer. |
+| `int` | [`priority`](#priority) `virtual` `const` | Returns the dispatch priority of this strategy (0–100; higher runs first). |
 
 ---
 
@@ -21213,6 +24053,8 @@ Abstract strategy for creating typed packets from raw buffer data.
 IPacketCreationStrategy() = default
 ```
 
+Defined in src/base/include/icy/packetfactory.h:32
+
 Defaulted constructor.
 
 ---
@@ -21221,11 +24063,13 @@ Defaulted constructor.
 
 #### create
 
-`const`
+`virtual` `const`
 
 ```cpp
-IPacket * create(const ConstBuffer & buffer, size_t & nread) const
+virtual IPacket * create(const ConstBuffer & buffer, size_t & nread) const
 ```
+
+Defined in src/base/include/icy/packetfactory.h:38
 
 Attempts to create a typed packet from the given buffer. 
 #### Parameters
@@ -21242,11 +24086,13 @@ Newly allocated packet on success, nullptr if the buffer does not match.
 
 #### priority
 
-`const`
+`virtual` `const`
 
 ```cpp
-int priority() const
+virtual int priority() const
 ```
+
+Defined in src/base/include/icy/packetfactory.h:41
 
 Returns the dispatch priority of this strategy (0–100; higher runs first).
 
@@ -21257,6 +24103,12 @@ Returns the dispatch priority of this strategy (0–100; higher runs first).
 ```cpp
 #include <icy/packetfactory.h>
 ```
+
+```cpp
+class PacketFactory
+```
+
+Defined in src/base/include/icy/packetfactory.h:95
 
 Priority-ordered factory that creates typed packets from raw buffers using registered strategies.
 
@@ -21271,8 +24123,8 @@ Priority-ordered factory that creates typed packets from raw buffers using regis
 | `void` | [`unregisterPacketType`](#unregisterpackettype) `inline` | Removes the `[PacketCreationStrategy](#packetcreationstrategy)<PacketT>` from the factory, if present. |
 | `void` | [`registerStrategy`](#registerstrategy) `inline` | Registers an arbitrary `[IPacketCreationStrategy](#ipacketcreationstrategy)` subclass at the given priority. Any previously registered instance of the same type is replaced. |
 | `void` | [`unregisterStrategy`](#unregisterstrategy) `inline` | Removes the `StrategyT` instance from the factory, if present. |
-| `PacketCreationStrategyList &` | [`types`](#types) `inline` | #### Returns |
-| `const PacketCreationStrategyList &` | [`types`](#types) `const` `inline` | #### Returns |
+| `PacketCreationStrategyList &` | [`types`](#types) `inline` |  |
+| `const PacketCreationStrategyList &` | [`types`](#types) `const` `inline` |  |
 | `bool` | [`onPacketCreated`](#onpacketcreated) `virtual` `inline` | Called after a packet is successfully created by a strategy. Override to apply filtering; return false to reject the packet (it will be deleted). |
 | `IPacket *` | [`createPacket`](#createpacket) `virtual` `inline` | Iterates registered strategies in priority order and returns the first successfully created packet. |
 
@@ -21286,6 +24138,8 @@ Priority-ordered factory that creates typed packets from raw buffers using regis
 PacketFactory() = default
 ```
 
+Defined in src/base/include/icy/packetfactory.h:98
+
 Defaulted constructor.
 
 ---
@@ -21298,6 +24152,8 @@ Defaulted constructor.
 PacketFactory(const PacketFactory &) = delete
 ```
 
+Defined in src/base/include/icy/packetfactory.h:99
+
 Deleted constructor.
 
 ---
@@ -21309,6 +24165,8 @@ Deleted constructor.
 ```cpp
 PacketFactory(PacketFactory &&) = default
 ```
+
+Defined in src/base/include/icy/packetfactory.h:101
 
 Defaulted constructor.
 
@@ -21323,6 +24181,8 @@ Defaulted constructor.
 ```cpp
 template<class PacketT> inline void registerPacketType(int priority)
 ```
+
+Defined in src/base/include/icy/packetfactory.h:110
 
 Registers a `[PacketCreationStrategy](#packetcreationstrategy)<PacketT>` at the given priority. Any previously registered strategy for `PacketT` is replaced. 
 #### Parameters
@@ -21343,6 +24203,8 @@ Registers a `[PacketCreationStrategy](#packetcreationstrategy)<PacketT>` at the 
 template<class PacketT> inline void unregisterPacketType()
 ```
 
+Defined in src/base/include/icy/packetfactory.h:120
+
 Removes the `[PacketCreationStrategy](#packetcreationstrategy)<PacketT>` from the factory, if present. 
 #### Parameters
 * `PacketT` Packet type whose strategy should be removed.
@@ -21358,6 +24220,8 @@ Removes the `[PacketCreationStrategy](#packetcreationstrategy)<PacketT>` from th
 ```cpp
 template<class StrategyT> inline void registerStrategy(int priority)
 ```
+
+Defined in src/base/include/icy/packetfactory.h:134
 
 Registers an arbitrary `[IPacketCreationStrategy](#ipacketcreationstrategy)` subclass at the given priority. Any previously registered instance of the same type is replaced. 
 #### Parameters
@@ -21378,6 +24242,8 @@ Registers an arbitrary `[IPacketCreationStrategy](#ipacketcreationstrategy)` sub
 template<class StrategyT> inline void unregisterStrategy()
 ```
 
+Defined in src/base/include/icy/packetfactory.h:144
+
 Removes the `StrategyT` instance from the factory, if present. 
 #### Parameters
 * `StrategyT` Strategy type to remove.
@@ -21394,6 +24260,8 @@ Removes the `StrategyT` instance from the factory, if present.
 inline PacketCreationStrategyList & types()
 ```
 
+Defined in src/base/include/icy/packetfactory.h:154
+
 #### Returns
 Mutable reference to the ordered list of registered strategies.
 
@@ -21409,6 +24277,8 @@ Mutable reference to the ordered list of registered strategies.
 inline const PacketCreationStrategyList & types() const
 ```
 
+Defined in src/base/include/icy/packetfactory.h:160
+
 #### Returns
 Const reference to the ordered list of registered strategies.
 
@@ -21423,6 +24293,8 @@ Const reference to the ordered list of registered strategies.
 ```cpp
 virtual inline bool onPacketCreated(IPacket * packet)
 ```
+
+Defined in src/base/include/icy/packetfactory.h:169
 
 Called after a packet is successfully created by a strategy. Override to apply filtering; return false to reject the packet (it will be deleted). 
 #### Parameters
@@ -21442,6 +24314,8 @@ True to accept the packet, false to discard it and try the next strategy.
 ```cpp
 virtual inline IPacket * createPacket(const ConstBuffer & buffer, size_t & nread)
 ```
+
+Defined in src/base/include/icy/packetfactory.h:181
 
 Iterates registered strategies in priority order and returns the first successfully created packet. 
 #### Parameters
@@ -21471,6 +24345,8 @@ Newly allocated packet, or nullptr if no strategy matched.
 PacketCreationStrategyList _types
 ```
 
+Defined in src/base/include/icy/packetfactory.h:200
+
 ### Private Methods
 
 | Return | Name | Description |
@@ -21489,6 +24365,8 @@ PacketCreationStrategyList _types
 inline void sortTypes()
 ```
 
+Defined in src/base/include/icy/packetfactory.h:203
+
 {#streammanager}
 
 ## StreamManager
@@ -21496,6 +24374,12 @@ inline void sortTypes()
 ```cpp
 #include <icy/streammanager.h>
 ```
+
+```cpp
+class StreamManager
+```
+
+Defined in src/base/include/icy/streammanager.h:23
 
 > **Inherits:** [`string, PacketStream >`](#keyedstore)
 
@@ -21524,15 +24408,7 @@ Manages a named collection of [PacketStream](#packetstream) instances with lifec
 StreamManager()
 ```
 
----
-
-{#addstream}
-
-#### addStream
-
-```cpp
-bool addStream(PacketStream * stream, bool whiny)
-```
+Defined in src/base/include/icy/streammanager.h:26
 
 ---
 
@@ -21541,8 +24417,22 @@ bool addStream(PacketStream * stream, bool whiny)
 #### addStream
 
 ```cpp
-bool addStream(std::unique_ptr< PacketStream > stream, bool whiny)
+bool addStream(PacketStream * stream, bool whiny = true)
 ```
+
+Defined in src/base/include/icy/streammanager.h:29
+
+---
+
+{#addstream}
+
+#### addStream
+
+```cpp
+bool addStream(std::unique_ptr< PacketStream > stream, bool whiny = true)
+```
+
+Defined in src/base/include/icy/streammanager.h:30
 
 ---
 
@@ -21551,8 +24441,10 @@ bool addStream(std::unique_ptr< PacketStream > stream, bool whiny)
 #### closeStream
 
 ```cpp
-bool closeStream(const std::string & name, bool whiny)
+bool closeStream(const std::string & name, bool whiny = true)
 ```
+
+Defined in src/base/include/icy/streammanager.h:31
 
 ---
 
@@ -21564,6 +24456,8 @@ bool closeStream(const std::string & name, bool whiny)
 void closeAll()
 ```
 
+Defined in src/base/include/icy/streammanager.h:32
+
 ---
 
 {#getstream}
@@ -21573,8 +24467,10 @@ void closeAll()
 `const`
 
 ```cpp
-PacketStream * getStream(const std::string & name, bool whiny) const
+PacketStream * getStream(const std::string & name, bool whiny = true) const
 ```
+
+Defined in src/base/include/icy/streammanager.h:34
 
 ---
 
@@ -21588,6 +24484,8 @@ PacketStream * getStream(const std::string & name, bool whiny) const
 PacketStream * getDefaultStream() const
 ```
 
+Defined in src/base/include/icy/streammanager.h:35
+
 ---
 
 {#print}
@@ -21600,14 +24498,16 @@ PacketStream * getDefaultStream() const
 void print(std::ostream & os) const
 ```
 
+Defined in src/base/include/icy/streammanager.h:37
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onAdd`](#onadd) `virtual` | Override for lifecycle reactions. |
-| `void` | [`onRemove`](#onremove) `virtual` |  |
+| `void` | [`onAdd`](#onadd) `virtual` `override` | Override for lifecycle reactions. |
+| `void` | [`onRemove`](#onremove) `virtual` `override` |  |
 | `void` | [`onStreamStateChange`](#onstreamstatechange)  |  |
-| `constchar *` | [`className`](#classname) `virtual` `const` `inline` |  |
+| `const char *` | [`className`](#classname) `virtual` `const` `inline` |  |
 
 ---
 
@@ -21615,11 +24515,13 @@ void print(std::ostream & os) const
 
 #### onAdd
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onAdd(const std::string &, PacketStream *)
+virtual void onAdd(const std::string &, PacketStream * stream) override
 ```
+
+Defined in src/base/include/icy/streammanager.h:40
 
 Override for lifecycle reactions.
 
@@ -21629,11 +24531,13 @@ Override for lifecycle reactions.
 
 #### onRemove
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onRemove(const std::string &, PacketStream * stream)
+virtual void onRemove(const std::string &, PacketStream * stream) override
 ```
+
+Defined in src/base/include/icy/streammanager.h:41
 
 ---
 
@@ -21642,8 +24546,10 @@ virtual void onRemove(const std::string &, PacketStream * stream)
 #### onStreamStateChange
 
 ```cpp
-void onStreamStateChange(void * sender, PacketStreamState & state, constPacketStreamState &)
+void onStreamStateChange(void * sender, PacketStreamState & state, const PacketStreamState &)
 ```
+
+Defined in src/base/include/icy/streammanager.h:43
 
 ---
 
@@ -21654,8 +24560,10 @@ void onStreamStateChange(void * sender, PacketStreamState & state, constPacketSt
 `virtual` `const` `inline`
 
 ```cpp
-virtual inline constchar * className() const
+virtual inline const char * className() const
 ```
+
+Defined in src/base/include/icy/streammanager.h:45
 
 {#idiagnostic}
 
@@ -21664,6 +24572,12 @@ virtual inline constchar * className() const
 ```cpp
 #include <icy/diagnosticmanager.h>
 ```
+
+```cpp
+class IDiagnostic
+```
+
+Defined in src/base/include/icy/diagnosticmanager.h:64
 
 > **Inherits:** [`Stateful< DiagnosticState >`](#stateful)
 > **Subclassed by:** [`AsyncDiagnostic`](#asyncdiagnostic)
@@ -21689,6 +24603,8 @@ Abstract interface for diagnostic information providers.
 std::string name
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:70
+
 The name of the diagnostic.
 
 ---
@@ -21700,6 +24616,8 @@ The name of the diagnostic.
 ```cpp
 std::string description
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:71
 
 The diagnostic description.
 
@@ -21713,6 +24631,8 @@ The diagnostic description.
 std::vector< std::string > summary
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:72
+
 The diagnostic summary, maybe including troubleshooting information on failure.
 
 ---
@@ -21724,6 +24644,8 @@ The diagnostic summary, maybe including troubleshooting information on failure.
 ```cpp
 ThreadSignal< void(const std::string &)> SummaryUpdated
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:95
 
 Signals when a new text item is added to the summary.
 
@@ -21748,6 +24670,8 @@ Signals when a new text item is added to the summary.
 IDiagnostic()
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:67
+
 ---
 
 {#check}
@@ -21759,6 +24683,8 @@ IDiagnostic()
 ```cpp
 virtual void check()
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:76
 
 Resets state to None and invokes [run()](#classicy_1_1IDiagnostic_1a052a9fcd71565081be080e9c285b7497) to perform the diagnostic check.
 
@@ -21774,6 +24700,8 @@ Resets state to None and invokes [run()](#classicy_1_1IDiagnostic_1a052a9fcd7156
 virtual void reset()
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:79
+
 Clears the summary and resets state to None.
 
 ---
@@ -21787,6 +24715,8 @@ Clears the summary and resets state to None.
 ```cpp
 virtual bool complete() const
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:83
 
 Returns true if the diagnostic has reached a terminal state (Passed or Failed). 
 #### Returns
@@ -21804,6 +24734,8 @@ true if complete.
 virtual bool passed() const
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:87
+
 Returns true if the diagnostic state is Passed. 
 #### Returns
 true if passed.
@@ -21820,6 +24752,8 @@ true if passed.
 virtual bool failed() const
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:91
+
 Returns true if the diagnostic state is Failed. 
 #### Returns
 true if failed.
@@ -21828,7 +24762,7 @@ true if failed.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run)  | Override to implement diagnostic logic. |
+| `void` | [`run`](#run) `virtual` | Override to implement diagnostic logic. |
 | `bool` | [`pass`](#pass) `virtual` | Transitions the state to Passed. |
 | `bool` | [`fail`](#fail) `virtual` | Transitions the state to Failed. |
 | `void` | [`addSummary`](#addsummary) `virtual` | Appends text to the summary list and emits SummaryUpdated. |
@@ -21839,9 +24773,13 @@ true if failed.
 
 #### run
 
+`virtual`
+
 ```cpp
-void run()
+virtual void run()
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:102
 
 Override to implement diagnostic logic.
 
@@ -21859,6 +24797,8 @@ The StateChange signal will dispatch diagnostic test results to delegates.
 virtual bool pass()
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:106
+
 Transitions the state to Passed. 
 #### Returns
 true if the state transition succeeded.
@@ -21874,6 +24814,8 @@ true if the state transition succeeded.
 ```cpp
 virtual bool fail()
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:110
 
 Transitions the state to Failed. 
 #### Returns
@@ -21891,6 +24833,8 @@ true if the state transition succeeded.
 virtual void addSummary(const std::string & text)
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:114
+
 Appends text to the summary list and emits SummaryUpdated. 
 #### Parameters
 * `text` Summary line to append.
@@ -21903,6 +24847,12 @@ Appends text to the summary list and emits SummaryUpdated.
 #include <icy/diagnosticmanager.h>
 ```
 
+```cpp
+class AsyncDiagnostic
+```
+
+Defined in src/base/include/icy/diagnosticmanager.h:124
+
 > **Inherits:** [`IDiagnostic`](#idiagnostic), [`Runnable`](#runnable)
 
 Asynchronous diagnostic information collector.
@@ -21911,8 +24861,8 @@ Asynchronous diagnostic information collector.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run)  | Override to implement diagnostic logic. |
-| `void` | [`check`](#check) `virtual` `inline` | Resets the diagnostic and launches [run()](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663) on a background thread. |
+| `void` | [`run`](#run) `virtual` `override` | Override to implement diagnostic logic. |
+| `void` | [`check`](#check) `virtual` `inline` `override` | Resets the diagnostic and launches [run()](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663) on a background thread. |
 
 ---
 
@@ -21920,9 +24870,13 @@ Asynchronous diagnostic information collector.
 
 #### run
 
+`virtual` `override`
+
 ```cpp
-void run()
+virtual void run() override
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:130
 
 Override to implement diagnostic logic.
 
@@ -21934,11 +24888,13 @@ The StateChange signal will dispatch diagnostic test results to delegates.
 
 #### check
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void check()
+virtual inline void check() override
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:133
 
 Resets the diagnostic and launches [run()](#classicy_1_1AsyncDiagnostic_1aff8234cc3095de10aea49dbb9cceb663) on a background thread.
 
@@ -21958,6 +24914,8 @@ Resets the diagnostic and launches [run()](#classicy_1_1AsyncDiagnostic_1aff8234
 Thread _thread
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:140
+
 {#diagnosticmanager}
 
 ## DiagnosticManager
@@ -21965,6 +24923,12 @@ Thread _thread
 ```cpp
 #include <icy/diagnosticmanager.h>
 ```
+
+```cpp
+class DiagnosticManager
+```
+
+Defined in src/base/include/icy/diagnosticmanager.h:150
 
 > **Inherits:** [`string, IDiagnostic >`](#keyedstore)
 
@@ -21985,6 +24949,8 @@ Registry and manager for diagnostic providers.
 ```cpp
 NullSignal DiagnosticsComplete
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:169
 
 ### Public Methods
 
@@ -22009,6 +24975,8 @@ NullSignal DiagnosticsComplete
 DiagnosticManager()
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:153
+
 ---
 
 {#adddiagnostic}
@@ -22018,6 +24986,8 @@ DiagnosticManager()
 ```cpp
 bool addDiagnostic(std::unique_ptr< IDiagnostic > test)
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:157
 
 Adds a diagnostic, taking ownership.
 
@@ -22030,6 +25000,8 @@ Adds a diagnostic, taking ownership.
 ```cpp
 bool freeDiagnostic(const std::string & name)
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:160
 
 Removes and deletes the diagnostic registered under name.
 
@@ -22045,6 +25017,8 @@ Removes and deletes the diagnostic registered under name.
 IDiagnostic * getDiagnostic(const std::string & name) const
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:163
+
 Returns the diagnostic or nullptr.
 
 ---
@@ -22057,6 +25031,8 @@ Returns the diagnostic or nullptr.
 void resetAll()
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:165
+
 ---
 
 {#checkall}
@@ -22066,6 +25042,8 @@ void resetAll()
 ```cpp
 void checkAll()
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:166
 
 ---
 
@@ -22079,6 +25057,8 @@ void checkAll()
 bool allComplete() const
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:167
+
 ---
 
 {#ondiagnosticstatechange}
@@ -22086,8 +25066,10 @@ bool allComplete() const
 #### onDiagnosticStateChange
 
 ```cpp
-void onDiagnosticStateChange(void *, DiagnosticState & state, constDiagnosticState &)
+void onDiagnosticStateChange(void *, DiagnosticState & state, const DiagnosticState &)
 ```
+
+Defined in src/base/include/icy/diagnosticmanager.h:171
 
 {#packettransaction}
 
@@ -22097,33 +25079,58 @@ void onDiagnosticStateChange(void *, DiagnosticState & state, constDiagnosticSta
 #include <icy/packettransaction.h>
 ```
 
+```cpp
+template<class PacketT>
+class PacketTransaction
+```
+
+Defined in src/base/include/icy/packettransaction.h:70
+
 > **Inherits:** [`Sendable`](#sendable), [`Stateful< TransactionState >`](#stateful), [`RefCounted< PacketTransaction< PacketT > >`](#refcounted)
-> **Subclassed by:** [`Transaction< Message >`](net.md#transaction), [`Transaction< PacketT >`](net.md#transaction)
+> **Subclassed by:** [`Transaction< PacketT >`](net.md#transaction)
 
 Request/response transaction with timeout and retry logic.
 
-Lifetime is managed by [IntrusivePtr](#intrusiveptr) via the [RefCounted](#refcounted) base class. The transaction is kept alive as long as at least one [IntrusivePtr](#intrusiveptr) references it. The owning client holds a Ptr in its transaction list; callbacks should capture a Ptr copy to prevent premature deletion.
+Lifetime is managed by [IntrusivePtr](#intrusiveptr) via the [RefCounted](#refcounted) base class. The transaction is kept alive as long as at least one [IntrusivePtr](#intrusiveptr) references it. The owning client holds a [Ptr](#classicy_1_1PacketTransaction_1a44ea6d9d47efb59eebdc71158c0158c5) in its transaction list; callbacks should capture a [Ptr](#classicy_1_1PacketTransaction_1a44ea6d9d47efb59eebdc71158c0158c5) copy to prevent premature deletion.
 
 When a terminal state (Success or Failed) is reached, the transaction cleans up its timer but does NOT delete itself. The [IntrusivePtr](#intrusiveptr) destructor handles deletion when the last reference is released.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`IntrusivePtr`](#intrusiveptr)  |  |
+
+---
+
+{#intrusiveptr}
+
+#### IntrusivePtr
+
+```cpp
+template<typename U> friend class IntrusivePtr
+```
+
+Defined in src/base/include/icy/packettransaction.h:165
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`PacketTransaction`](#packettransaction) `inline` | #### Parameters |
-|  | [`PacketTransaction`](#packettransaction) `inline` | #### Parameters |
-| `bool` | [`send`](#send) `virtual` `inline` | Starts the transaction timer and sends the request. Overriding classes should implement send logic here. |
-| `void` | [`cancel`](#cancel) `virtual` `inline` | Cancellation means that the agent will not retransmit the request, will not treat the lack of response to be a failure, but will wait the duration of the transaction timeout for a response. Transitions the transaction to the `Cancelled` state. |
-| `bool` | [`cancelled`](#cancelled) `const` `inline` | #### Returns |
+|  | [`PacketTransaction`](#packettransaction) `inline` |  |
+|  | [`PacketTransaction`](#packettransaction) `inline` |  |
+| `bool` | [`send`](#send) `virtual` `inline` `override` | Starts the transaction timer and sends the request. Overriding classes should implement send logic here. |
+| `void` | [`cancel`](#cancel) `virtual` `inline` `override` | Cancellation means that the agent will not retransmit the request, will not treat the lack of response to be a failure, but will wait the duration of the transaction timeout for a response. Transitions the transaction to the `Cancelled` state. |
+| `bool` | [`cancelled`](#cancelled) `const` `inline` |  |
 | `void` | [`dispose`](#dispose) `virtual` `inline` | Stops the timer and unregisters callbacks. Does NOT delete the object; the [IntrusivePtr](#intrusiveptr) destructor handles deletion when the last reference is released. Safe to call multiple times. |
-| `bool` | [`disposed`](#disposed) `const` `inline` | #### Returns |
-| `bool` | [`canResend`](#canresend) `virtual` `inline` | #### Returns |
-| `int` | [`attempts`](#attempts) `const` `inline` | #### Returns |
-| `int` | [`retries`](#retries) `const` `inline` | #### Returns |
-| `PacketT &` | [`request`](#request) `inline` | #### Returns |
-| `PacketT` | [`request`](#request) `const` `inline` | #### Returns |
-| `PacketT &` | [`response`](#response) `inline` | #### Returns |
-| `PacketT` | [`response`](#response) `const` `inline` | #### Returns |
+| `bool` | [`disposed`](#disposed) `const` `inline` `nodiscard` |  |
+| `bool` | [`canResend`](#canresend) `virtual` `inline` |  |
+| `int` | [`attempts`](#attempts) `const` `inline` |  |
+| `int` | [`retries`](#retries) `const` `inline` |  |
+| `PacketT &` | [`request`](#request) `inline` |  |
+| `PacketT` | [`request`](#request) `const` `inline` |  |
+| `PacketT &` | [`response`](#response) `inline` |  |
+| `PacketT` | [`response`](#response) `const` `inline` |  |
 
 ---
 
@@ -22134,8 +25141,10 @@ When a terminal state (Success or Failed) is reached, the transaction cleans up 
 `inline`
 
 ```cpp
-inline PacketTransaction(long timeout, int retries, uv::Loop * loop)
+inline PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/packettransaction.h:80
 
 #### Parameters
 * `timeout` Transaction timeout in milliseconds before failure or retry. 
@@ -22153,8 +25162,10 @@ inline PacketTransaction(long timeout, int retries, uv::Loop * loop)
 `inline`
 
 ```cpp
-inline PacketTransaction(const PacketT & request, long timeout, int retries, uv::Loop * loop)
+inline PacketTransaction(const PacketT & request, long timeout = 10000, int retries = 0, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/packettransaction.h:92
 
 #### Parameters
 * `request` Initial request packet to store and send. 
@@ -22171,11 +25182,13 @@ inline PacketTransaction(const PacketT & request, long timeout, int retries, uv:
 
 #### send
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline bool send()
+virtual inline bool send() override
 ```
+
+Defined in src/base/include/icy/packettransaction.h:103
 
 Starts the transaction timer and sends the request. Overriding classes should implement send logic here.
 
@@ -22185,11 +25198,13 @@ Starts the transaction timer and sends the request. Overriding classes should im
 
 #### cancel
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void cancel()
+virtual inline void cancel() override
 ```
+
+Defined in src/base/include/icy/packettransaction.h:122
 
 Cancellation means that the agent will not retransmit the request, will not treat the lack of response to be a failure, but will wait the duration of the transaction timeout for a response. Transitions the transaction to the `Cancelled` state.
 
@@ -22204,6 +25219,8 @@ Cancellation means that the agent will not retransmit the request, will not trea
 ```cpp
 inline bool cancelled() const
 ```
+
+Defined in src/base/include/icy/packettransaction.h:125
 
 #### Returns
 True if the transaction is in the `Cancelled` state.
@@ -22220,6 +25237,8 @@ True if the transaction is in the `Cancelled` state.
 virtual inline void dispose()
 ```
 
+Defined in src/base/include/icy/packettransaction.h:130
+
 Stops the timer and unregisters callbacks. Does NOT delete the object; the [IntrusivePtr](#intrusiveptr) destructor handles deletion when the last reference is released. Safe to call multiple times.
 
 ---
@@ -22228,11 +25247,13 @@ Stops the timer and unregisters callbacks. Does NOT delete the object; the [Intr
 
 #### disposed
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool disposed() const
+[[nodiscard]] inline bool disposed() const
 ```
+
+Defined in src/base/include/icy/packettransaction.h:141
 
 #### Returns
 True if [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) has been called.
@@ -22249,6 +25270,8 @@ True if [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4
 virtual inline bool canResend()
 ```
 
+Defined in src/base/include/icy/packettransaction.h:144
+
 #### Returns
 True if the transaction is not cancelled and has attempts remaining.
 
@@ -22263,6 +25286,8 @@ True if the transaction is not cancelled and has attempts remaining.
 ```cpp
 inline int attempts() const
 ```
+
+Defined in src/base/include/icy/packettransaction.h:147
 
 #### Returns
 The number of times `[send()](#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c0c227cb36f9cfd4)` has been called for this transaction.
@@ -22279,6 +25304,8 @@ The number of times `[send()](#classicy_1_1PacketTransaction_1acf7a9bbcfff95999c
 inline int retries() const
 ```
 
+Defined in src/base/include/icy/packettransaction.h:150
+
 #### Returns
 The configured maximum number of retransmissions.
 
@@ -22293,6 +25320,8 @@ The configured maximum number of retransmissions.
 ```cpp
 inline PacketT & request()
 ```
+
+Defined in src/base/include/icy/packettransaction.h:153
 
 #### Returns
 Mutable reference to the outgoing request packet.
@@ -22309,6 +25338,8 @@ Mutable reference to the outgoing request packet.
 inline PacketT request() const
 ```
 
+Defined in src/base/include/icy/packettransaction.h:156
+
 #### Returns
 Copy of the outgoing request packet.
 
@@ -22324,6 +25355,8 @@ Copy of the outgoing request packet.
 inline PacketT & response()
 ```
 
+Defined in src/base/include/icy/packettransaction.h:159
+
 #### Returns
 Mutable reference to the received response packet.
 
@@ -22338,6 +25371,8 @@ Mutable reference to the received response packet.
 ```cpp
 inline PacketT response() const
 ```
+
+Defined in src/base/include/icy/packettransaction.h:162
 
 #### Returns
 Copy of the received response packet.
@@ -22363,6 +25398,8 @@ Copy of the received response packet.
 PacketT _request
 ```
 
+Defined in src/base/include/icy/packettransaction.h:219
+
 ---
 
 {#_response}
@@ -22373,6 +25410,8 @@ PacketT _request
 PacketT _response
 ```
 
+Defined in src/base/include/icy/packettransaction.h:220
+
 ---
 
 {#_timer}
@@ -22382,6 +25421,8 @@ PacketT _response
 ```cpp
 Timer _timer
 ```
+
+Defined in src/base/include/icy/packettransaction.h:221
 
 The request timeout callback.
 
@@ -22395,6 +25436,8 @@ The request timeout callback.
 int _retries
 ```
 
+Defined in src/base/include/icy/packettransaction.h:222
+
 The maximum number of attempts before the transaction is considered failed.
 
 ---
@@ -22406,6 +25449,8 @@ The maximum number of attempts before the transaction is considered failed.
 ```cpp
 int _attempts
 ```
+
+Defined in src/base/include/icy/packettransaction.h:223
 
 The number of times the transaction has been sent.
 
@@ -22419,13 +25464,15 @@ The number of times the transaction has been sent.
 bool _disposed = false
 ```
 
+Defined in src/base/include/icy/packettransaction.h:224
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onStateChange`](#onstatechange) `virtual` `inline` | Post state change hook. Calls [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) on terminal states to stop the timer, but does not delete the object; [IntrusivePtr](#intrusiveptr) handles that. |
+| `void` | [`onStateChange`](#onstatechange) `virtual` `inline` `override` | Post state change hook. Calls [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) on terminal states to stop the timer, but does not delete the object; [IntrusivePtr](#intrusiveptr) handles that. |
 | `bool` | [`handlePotentialResponse`](#handlepotentialresponse) `virtual` `inline` | Processes a potential response candidate and updates the state accordingly. |
-| `bool` | [`checkResponse`](#checkresponse)  | Checks a potential response candidate and returns true on successful match. |
+| `bool` | [`checkResponse`](#checkresponse) `virtual` | Checks a potential response candidate and returns true on successful match. |
 | `void` | [`onResponse`](#onresponse) `virtual` `inline` | Called when a successful response is received. |
 | `void` | [`onTimeout`](#ontimeout) `virtual` `inline` | Called by the timer when the transaction timeout elapses. Retransmits if retries remain, otherwise transitions to `Failed`. |
 
@@ -22435,11 +25482,13 @@ bool _disposed = false
 
 #### onStateChange
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void onStateChange(TransactionState & state, const TransactionState &)
+virtual inline void onStateChange(TransactionState & state, const TransactionState &) override
 ```
+
+Defined in src/base/include/icy/packettransaction.h:174
 
 Post state change hook. Calls [dispose()](#classicy_1_1PacketTransaction_1a59df328cafacdcea30f86ea38c4718ec) on terminal states to stop the timer, but does not delete the object; [IntrusivePtr](#intrusiveptr) handles that.
 
@@ -22455,6 +25504,8 @@ Post state change hook. Calls [dispose()](#classicy_1_1PacketTransaction_1a59df3
 virtual inline bool handlePotentialResponse(const PacketT & packet)
 ```
 
+Defined in src/base/include/icy/packettransaction.h:185
+
 Processes a potential response candidate and updates the state accordingly.
 
 ---
@@ -22463,9 +25514,13 @@ Processes a potential response candidate and updates the state accordingly.
 
 #### checkResponse
 
+`virtual`
+
 ```cpp
-bool checkResponse(const PacketT & packet)
+virtual bool checkResponse(const PacketT & packet)
 ```
+
+Defined in src/base/include/icy/packettransaction.h:198
 
 Checks a potential response candidate and returns true on successful match.
 
@@ -22481,6 +25536,8 @@ Checks a potential response candidate and returns true on successful match.
 virtual inline void onResponse()
 ```
 
+Defined in src/base/include/icy/packettransaction.h:201
+
 Called when a successful response is received.
 
 ---
@@ -22494,6 +25551,8 @@ Called when a successful response is received.
 ```cpp
 virtual inline void onTimeout()
 ```
+
+Defined in src/base/include/icy/packettransaction.h:208
 
 Called by the timer when the transaction timeout elapses. Retransmits if retries remain, otherwise transitions to `Failed`.
 
@@ -22510,8 +25569,10 @@ Called by the timer when the transaction timeout elapses. Retransmits if retries
 #### Ptr
 
 ```cpp
-IntrusivePtr< PacketTransaction< PacketT > > Ptr()
+using Ptr = IntrusivePtr< PacketTransaction< PacketT > >
 ```
+
+Defined in src/base/include/icy/packettransaction.h:75
 
 {#task}
 
@@ -22521,6 +25582,12 @@ IntrusivePtr< PacketTransaction< PacketT > > Ptr()
 #include <icy/task.h>
 ```
 
+```cpp
+class Task
+```
+
+Defined in src/base/include/icy/task.h:32
+
 > **Inherits:** [`Runnable`](#runnable)
 > **Subclassed by:** [`Task`](sched.md#task-1)
 
@@ -22528,11 +25595,31 @@ Abstract base class for implementing asynchronous tasks.
 
 Tasks are designed to be run by a [TaskRunner](#taskrunner).
 
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`TaskRunner`](#taskrunner)  | Tasks belong to a [TaskRunner](#taskrunner) instance. |
+
+---
+
+{#taskrunner}
+
+#### TaskRunner
+
+```cpp
+friend class TaskRunner
+```
+
+Defined in src/base/include/icy/task.h:77
+
+Tasks belong to a [TaskRunner](#taskrunner) instance.
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Task`](#task)  | #### Parameters |
+|  | [`Task`](#task)  |  |
 | `void` | [`destroy`](#destroy) `virtual` | Sets the task to destroyed state. |
 | `bool` | [`destroyed`](#destroyed) `virtual` `const` | Signals that the task should be disposed of. |
 | `bool` | [`repeating`](#repeating) `virtual` `const` | Signals that the task should be called repeatedly by the [TaskRunner](#taskrunner). If this returns false the task will be cancelled. |
@@ -22547,8 +25634,10 @@ Tasks are designed to be run by a [TaskRunner](#taskrunner).
 #### Task
 
 ```cpp
-Task(bool repeat)
+Task(bool repeat = false)
 ```
+
+Defined in src/base/include/icy/task.h:37
 
 #### Parameters
 * `repeat` If true, the `[TaskRunner](#taskrunner)` will call `[run()](#classicy_1_1Task_1a27c42c43ba0ce7ea66f3210fdd27f3de)` repeatedly; if false, the task is cancelled after one execution.
@@ -22565,6 +25654,8 @@ Task(bool repeat)
 virtual void destroy()
 ```
 
+Defined in src/base/include/icy/task.h:40
+
 Sets the task to destroyed state.
 
 ---
@@ -22578,6 +25669,8 @@ Sets the task to destroyed state.
 ```cpp
 virtual bool destroyed() const
 ```
+
+Defined in src/base/include/icy/task.h:43
 
 Signals that the task should be disposed of.
 
@@ -22593,6 +25686,8 @@ Signals that the task should be disposed of.
 virtual bool repeating() const
 ```
 
+Defined in src/base/include/icy/task.h:48
+
 Signals that the task should be called repeatedly by the [TaskRunner](#taskrunner). If this returns false the task will be cancelled.
 
 ---
@@ -22607,6 +25702,8 @@ Signals that the task should be called repeatedly by the [TaskRunner](#taskrunne
 virtual uint32_t id() const
 ```
 
+Defined in src/base/include/icy/task.h:51
+
 Unique task ID.
 
 ---
@@ -22619,6 +25716,8 @@ Unique task ID.
 Task(const Task & task) = delete
 ```
 
+Defined in src/base/include/icy/task.h:61
+
 Deleted constructor.
 
 ---
@@ -22630,6 +25729,8 @@ Deleted constructor.
 ```cpp
 Task(Task &&) = delete
 ```
+
+Defined in src/base/include/icy/task.h:63
 
 Deleted constructor.
 
@@ -22651,6 +25752,8 @@ Deleted constructor.
 uint32_t _id
 ```
 
+Defined in src/base/include/icy/task.h:79
+
 ---
 
 {#_repeating}
@@ -22660,6 +25763,8 @@ uint32_t _id
 ```cpp
 bool _repeating
 ```
+
+Defined in src/base/include/icy/task.h:80
 
 ---
 
@@ -22671,11 +25776,13 @@ bool _repeating
 bool _destroyed
 ```
 
+Defined in src/base/include/icy/task.h:81
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run)  | Called by the [TaskRunner](#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration. |
+| `void` | [`run`](#run) `virtual` `override` | Called by the [TaskRunner](#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration. |
 
 ---
 
@@ -22683,9 +25790,13 @@ bool _destroyed
 
 #### run
 
+`virtual` `override`
+
 ```cpp
-void run()
+virtual void run() override
 ```
+
+Defined in src/base/include/icy/task.h:74
 
 Called by the [TaskRunner](#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration.
 
@@ -22696,6 +25807,12 @@ Called by the [TaskRunner](#taskrunner) to run the task. Override this method to
 ```cpp
 #include <icy/task.h>
 ```
+
+```cpp
+class TaskRunner
+```
+
+Defined in src/base/include/icy/task.h:93
 
 > **Inherits:** [`Runnable`](#runnable)
 > **Subclassed by:** [`Scheduler`](sched.md#scheduler)
@@ -22723,6 +25840,8 @@ The `[TaskRunner](#taskrunner)` is powered by an abstract `[Runner](#runner)` in
 NullSignal Idle
 ```
 
+Defined in src/base/include/icy/task.h:138
+
 Fires after completing an iteration of all tasks.
 
 ---
@@ -22735,13 +25854,15 @@ Fires after completing an iteration of all tasks.
 NullSignal Shutdown
 ```
 
+Defined in src/base/include/icy/task.h:141
+
 Signals when the `[TaskRunner](#taskrunner)` is shutting down.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`TaskRunner`](#taskrunner)  | #### Parameters |
+|  | [`TaskRunner`](#taskrunner)  |  |
 |  | [`TaskRunner`](#taskrunner)  | Deleted constructor. |
 |  | [`TaskRunner`](#taskrunner)  | Deleted constructor. |
 | `bool` | [`start`](#start) `virtual` | Starts a task, adding it if it doesn't exist. |
@@ -22751,6 +25872,7 @@ Signals when the `[TaskRunner](#taskrunner)` is shutting down.
 | `Task *` | [`get`](#get) `virtual` `const` | Returns the task pointer matching the given ID, or nullptr if no task exists. |
 | `void` | [`setRunner`](#setrunner) `virtual` | Set the asynchronous context for packet processing. This may be a [Thread](#thread) or another derivative of Async. Must be set before the stream is activated. |
 | `const char *` | [`className`](#classname) `virtual` `const` `inline` |  |
+| `void` | [`cancel`](#cancel) `virtual` `inline` | Cancel the current task. The [run()](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) method should return ASAP. |
 
 ---
 
@@ -22759,8 +25881,10 @@ Signals when the `[TaskRunner](#taskrunner)` is shutting down.
 #### TaskRunner
 
 ```cpp
-TaskRunner(std::shared_ptr< Runner > runner)
+TaskRunner(std::shared_ptr< Runner > runner = nullptr)
 ```
+
+Defined in src/base/include/icy/task.h:97
 
 #### Parameters
 * `runner` Async runner to drive task execution; defaults to a new `[Thread](#thread)`.
@@ -22775,6 +25899,8 @@ TaskRunner(std::shared_ptr< Runner > runner)
 TaskRunner(const TaskRunner &) = delete
 ```
 
+Defined in src/base/include/icy/task.h:100
+
 Deleted constructor.
 
 ---
@@ -22786,6 +25912,8 @@ Deleted constructor.
 ```cpp
 TaskRunner(TaskRunner &&) = delete
 ```
+
+Defined in src/base/include/icy/task.h:102
 
 Deleted constructor.
 
@@ -22801,6 +25929,8 @@ Deleted constructor.
 virtual bool start(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:106
+
 Starts a task, adding it if it doesn't exist.
 
 ---
@@ -22814,6 +25944,8 @@ Starts a task, adding it if it doesn't exist.
 ```cpp
 virtual bool cancel(Task * task)
 ```
+
+Defined in src/base/include/icy/task.h:114
 
 Cancels a task.
 
@@ -22831,6 +25963,8 @@ The task reference will be managed by the [TaskRunner](#taskrunner) until the ta
 virtual bool destroy(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:117
+
 Queues a task for destruction.
 
 ---
@@ -22844,6 +25978,8 @@ Queues a task for destruction.
 ```cpp
 virtual bool exists(Task * task) const
 ```
+
+Defined in src/base/include/icy/task.h:120
 
 Returns whether a task exists.
 
@@ -22859,6 +25995,8 @@ Returns whether a task exists.
 virtual Task * get(uint32_t id) const
 ```
 
+Defined in src/base/include/icy/task.h:124
+
 Returns the task pointer matching the given ID, or nullptr if no task exists.
 
 ---
@@ -22873,6 +26011,8 @@ Returns the task pointer matching the given ID, or nullptr if no task exists.
 virtual void setRunner(std::shared_ptr< Runner > runner)
 ```
 
+Defined in src/base/include/icy/task.h:129
+
 Set the asynchronous context for packet processing. This may be a [Thread](#thread) or another derivative of Async. Must be set before the stream is activated.
 
 ---
@@ -22886,6 +26026,24 @@ Set the asynchronous context for packet processing. This may be a [Thread](#thre
 ```cpp
 virtual inline const char * className() const
 ```
+
+Defined in src/base/include/icy/task.h:143
+
+---
+
+{#cancel}
+
+#### cancel
+
+`virtual` `inline`
+
+```cpp
+virtual inline void cancel(bool flag = true)
+```
+
+Defined in src/base/include/icy/task.h:108
+
+Cancel the current task. The [run()](#classicy_1_1TaskRunner_1a99cef8fc7be815ddd9c151dd4d6985d2) method should return ASAP.
 
 ### Public Static Methods
 
@@ -22904,6 +26062,8 @@ virtual inline const char * className() const
 ```cpp
 static TaskRunner & getDefault()
 ```
+
+Defined in src/base/include/icy/task.h:135
 
 Returns the default `[TaskRunner](#taskrunner)` singleton, although [TaskRunner](#taskrunner) instances may be initialized individually. The default runner should be kept for short running tasks such as timers in order to maintain performance.
 
@@ -22925,6 +26085,8 @@ Returns the default `[TaskRunner](#taskrunner)` singleton, although [TaskRunner]
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/task.h:179
+
 ---
 
 {#_runner}
@@ -22934,6 +26096,8 @@ std::mutex _mutex
 ```cpp
 std::shared_ptr< Runner > _runner
 ```
+
+Defined in src/base/include/icy/task.h:180
 
 ---
 
@@ -22945,11 +26109,13 @@ std::shared_ptr< Runner > _runner
 TaskList _tasks
 ```
 
+Defined in src/base/include/icy/task.h:181
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run) `virtual` | Called by the async context to run the next task. |
+| `void` | [`run`](#run) `virtual` `override` | Called by the async context to run the next task. |
 | `bool` | [`add`](#add) `virtual` | Adds a task to the runner. |
 | `bool` | [`remove`](#remove) `virtual` | Removes a task from the runner. |
 | `Task *` | [`next`](#next) `virtual` `const` | Returns the next task to be run. |
@@ -22966,11 +26132,13 @@ TaskList _tasks
 
 #### run
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void run()
+virtual void run() override
 ```
+
+Defined in src/base/include/icy/task.h:147
 
 Called by the async context to run the next task.
 
@@ -22986,6 +26154,8 @@ Called by the async context to run the next task.
 virtual bool add(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:150
+
 Adds a task to the runner.
 
 ---
@@ -22999,6 +26169,8 @@ Adds a task to the runner.
 ```cpp
 virtual bool remove(Task * task)
 ```
+
+Defined in src/base/include/icy/task.h:153
 
 Removes a task from the runner.
 
@@ -23014,6 +26186,8 @@ Removes a task from the runner.
 virtual Task * next() const
 ```
 
+Defined in src/base/include/icy/task.h:156
+
 Returns the next task to be run.
 
 ---
@@ -23027,6 +26201,8 @@ Returns the next task to be run.
 ```cpp
 virtual void clear()
 ```
+
+Defined in src/base/include/icy/task.h:159
 
 Destroys and clears all manages tasks.
 
@@ -23042,6 +26218,8 @@ Destroys and clears all manages tasks.
 virtual void onAdd(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:162
+
 Called after a task is added.
 
 ---
@@ -23055,6 +26233,8 @@ Called after a task is added.
 ```cpp
 virtual void onStart(Task * task)
 ```
+
+Defined in src/base/include/icy/task.h:165
 
 Called after a task is started.
 
@@ -23070,6 +26250,8 @@ Called after a task is started.
 virtual void onCancel(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:168
+
 Called after a task is cancelled.
 
 ---
@@ -23083,6 +26265,8 @@ Called after a task is cancelled.
 ```cpp
 virtual void onRemove(Task * task)
 ```
+
+Defined in src/base/include/icy/task.h:171
 
 Called after a task is removed.
 
@@ -23098,6 +26282,8 @@ Called after a task is removed.
 virtual void onRun(Task * task)
 ```
 
+Defined in src/base/include/icy/task.h:174
+
 Called after a task has run.
 
 {#ipacket}
@@ -23108,9 +26294,44 @@ Called after a task has run.
 #include <icy/packet.h>
 ```
 
+```cpp
+class IPacket
+```
+
+Defined in src/base/include/icy/packet.h:47
+
 > **Subclassed by:** [`FlagPacket`](#flagpacket), [`RawPacket`](#rawpacket), [`Message`](symple.md#message-10), [`Message`](stun.md#message-5)
 
 The basic packet type which is passed around the icey system. [IPacket](#ipacket) can be extended for each protocol to enable polymorphic processing and callbacks using [PacketStream](#packetstream) and friends.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator) `inline` | [Stream](#stream) insertion operator; delegates to [print()](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). |
+
+---
+
+{#operator}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const IPacket & p)
+```
+
+Defined in src/base/include/icy/packet.h:137
+
+[Stream](#stream) insertion operator; delegates to [print()](#classicy_1_1IPacket_1acc8685ec343b3e9ed81687b8e8fa1acc). 
+#### Parameters
+* `stream` Output stream. 
+
+* `p` Packet to print. 
+
+#### Returns
+Reference to the stream.
 
 ### Public Attributes
 
@@ -23130,6 +26351,8 @@ The basic packet type which is passed around the icey system. [IPacket](#ipacket
 std::any opaque
 ```
 
+Defined in src/base/include/icy/packet.h:86
+
 Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the stored value is tied to the packet's lifetime.
 
 ---
@@ -23141,6 +26364,8 @@ Optional type-safe context data. Use std::any_cast to retrieve. Lifetime of the 
 ```cpp
 std::unique_ptr< IPacketInfo > info
 ```
+
+Defined in src/base/include/icy/packet.h:89
 
 Optional extra information about the packet.
 
@@ -23154,23 +26379,25 @@ Optional extra information about the packet.
 Bitwise flags
 ```
 
+Defined in src/base/include/icy/packet.h:92
+
 Provides basic information about the packet.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`IPacket`](#ipacket) `inline` | #### Parameters |
+|  | [`IPacket`](#ipacket) `inline` |  |
 |  | [`IPacket`](#ipacket) `inline` | Copy constructor; clones the info object if present. |
 | `IPacket &` | [`operator=`](#operator) `inline` | Copy assignment; clones the info object if present. |
-| `std::unique_ptr< IPacket >` | [`clone`](#clone) `const` | Returns a heap-allocated deep copy of this packet. |
-| `ssize_t` | [`read`](#read)  | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
-| `void` | [`write`](#write) `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
+| `std::unique_ptr< IPacket >` | [`clone`](#clone) `virtual` `const` | Returns a heap-allocated deep copy of this packet. |
+| `ssize_t` | [`read`](#read) `virtual` | Read/parse to the packet from the given input buffer. The number of bytes read is returned. |
+| `void` | [`write`](#write) `virtual` `const` | Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer. |
 | `size_t` | [`size`](#size) `virtual` `const` `inline` | The size of the packet in bytes. |
 | `bool` | [`hasData`](#hasdata) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
 | `char *` | [`data`](#data) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
 | `const void *` | [`constData`](#constdata) `virtual` `const` `inline` | The const packet data pointer for buffered packets. |
-| `const char *` | [`className`](#classname) `const` | Returns the class name of this packet type for logging and diagnostics. |
+| `const char *` | [`className`](#classname) `virtual` `const` | Returns the class name of this packet type for logging and diagnostics. |
 | `void` | [`print`](#print) `virtual` `const` `inline` | Prints a human-readable representation to the given stream. |
 
 ---
@@ -23182,8 +26409,10 @@ Provides basic information about the packet.
 `inline`
 
 ```cpp
-inline IPacket(std::unique_ptr< IPacketInfo > info, unsigned flags)
+inline IPacket(std::unique_ptr< IPacketInfo > info = nullptr, unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packet.h:52
 
 #### Parameters
 * `info` Optional packet info; ownership transferred. 
@@ -23202,6 +26431,8 @@ inline IPacket(std::unique_ptr< IPacketInfo > info, unsigned flags)
 inline IPacket(const IPacket & r)
 ```
 
+Defined in src/base/include/icy/packet.h:60
+
 Copy constructor; clones the info object if present. 
 #### Parameters
 * `r` Source packet.
@@ -23218,6 +26449,8 @@ Copy constructor; clones the info object if present.
 inline IPacket & operator=(const IPacket & r)
 ```
 
+Defined in src/base/include/icy/packet.h:70
+
 Copy assignment; clones the info object if present. 
 #### Parameters
 * `r` Source packet. 
@@ -23231,11 +26464,13 @@ Reference to this packet.
 
 #### clone
 
-`const`
+`virtual` `const`
 
 ```cpp
-std::unique_ptr< IPacket > clone() const
+virtual std::unique_ptr< IPacket > clone() const
 ```
+
+Defined in src/base/include/icy/packet.h:80
 
 Returns a heap-allocated deep copy of this packet. 
 #### Returns
@@ -23247,9 +26482,13 @@ Owning pointer to the cloned packet.
 
 #### read
 
+`virtual`
+
 ```cpp
-ssize_t read(const ConstBuffer &)
+virtual ssize_t read(const ConstBuffer &)
 ```
+
+Defined in src/base/include/icy/packet.h:96
 
 Read/parse to the packet from the given input buffer. The number of bytes read is returned.
 
@@ -23259,11 +26498,13 @@ Read/parse to the packet from the given input buffer. The number of bytes read i
 
 #### write
 
-`const`
+`virtual` `const`
 
 ```cpp
-void write(Buffer &) const
+virtual void write(Buffer &) const
 ```
+
+Defined in src/base/include/icy/packet.h:105
 
 Copy/generate to the packet given output buffer. The number of bytes written can be obtained from the buffer.
 
@@ -23281,6 +26522,8 @@ Todo: It may be preferable to use our pod types here instead of buffer input, bu
 virtual inline size_t size() const
 ```
 
+Defined in src/base/include/icy/packet.h:112
+
 The size of the packet in bytes.
 
 This is the number of bytes that will be written on a call to [write()](#classicy_1_1IPacket_1a87b978fc87c58eb05e1c01ad1ca60f4c), but may not be the number of bytes that will be consumed by [read()](#classicy_1_1IPacket_1ad42e0c52a5092acb3dd1488928902c5b).
@@ -23297,6 +26540,8 @@ This is the number of bytes that will be written on a call to [write()](#classic
 virtual inline bool hasData() const
 ```
 
+Defined in src/base/include/icy/packet.h:115
+
 Returns true if the packet has a non-null data pointer.
 
 ---
@@ -23310,6 +26555,8 @@ Returns true if the packet has a non-null data pointer.
 ```cpp
 virtual inline char * data() const
 ```
+
+Defined in src/base/include/icy/packet.h:118
 
 The packet data pointer for buffered packets.
 
@@ -23325,6 +26572,8 @@ The packet data pointer for buffered packets.
 virtual inline const void * constData() const
 ```
 
+Defined in src/base/include/icy/packet.h:121
+
 The const packet data pointer for buffered packets.
 
 ---
@@ -23333,11 +26582,13 @@ The const packet data pointer for buffered packets.
 
 #### className
 
-`const`
+`virtual` `const`
 
 ```cpp
-const char * className() const
+virtual const char * className() const
 ```
+
+Defined in src/base/include/icy/packet.h:124
 
 Returns the class name of this packet type for logging and diagnostics.
 
@@ -23353,6 +26604,8 @@ Returns the class name of this packet type for logging and diagnostics.
 virtual inline void print(std::ostream & os) const
 ```
 
+Defined in src/base/include/icy/packet.h:128
+
 Prints a human-readable representation to the given stream. 
 #### Parameters
 * `os` Output stream.
@@ -23365,6 +26618,12 @@ Prints a human-readable representation to the given stream.
 #include <icy/packet.h>
 ```
 
+```cpp
+class FlagPacket
+```
+
+Defined in src/base/include/icy/packet.h:146
+
 > **Inherits:** [`IPacket`](#ipacket)
 
 Packet for sending bitwise flags along the packet stream.
@@ -23373,12 +26632,12 @@ Packet for sending bitwise flags along the packet stream.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`FlagPacket`](#flagpacket) `inline` | #### Parameters |
-| `std::unique_ptr< IPacket >` | [`clone`](#clone) `virtual` `const` `inline` | #### Returns |
-|  | [`FlagPacket`](#flagpacket) `inline` | #### Parameters |
-| `ssize_t` | [`read`](#read) `virtual` `inline` | No-op read; [FlagPacket](#flagpacket) carries no payload data. |
-| `void` | [`write`](#write) `virtual` `const` `inline` | No-op write; [FlagPacket](#flagpacket) carries no payload data. |
-| `const char *` | [`className`](#classname) `virtual` `const` `inline` | Returns the class name of this packet type for logging and diagnostics. |
+|  | [`FlagPacket`](#flagpacket) `inline` |  |
+| `std::unique_ptr< IPacket >` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
+|  | [`FlagPacket`](#flagpacket) `inline` |  |
+| `ssize_t` | [`read`](#read) `virtual` `inline` `override` | No-op read; [FlagPacket](#flagpacket) carries no payload data. |
+| `void` | [`write`](#write) `virtual` `const` `inline` `override` | No-op write; [FlagPacket](#flagpacket) carries no payload data. |
+| `const char *` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
 
 ---
 
@@ -23389,8 +26648,10 @@ Packet for sending bitwise flags along the packet stream.
 `inline`
 
 ```cpp
-inline FlagPacket(unsigned flags)
+inline FlagPacket(unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/packet.h:150
 
 #### Parameters
 * `flags` [Bitwise](#bitwise) flags to carry in this packet.
@@ -23401,11 +26662,13 @@ inline FlagPacket(unsigned flags)
 
 #### clone
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline std::unique_ptr< IPacket > clone() const
+virtual inline std::unique_ptr< IPacket > clone() const override
 ```
+
+Defined in src/base/include/icy/packet.h:156
 
 #### Returns
 Owning pointer to a deep copy of this packet.
@@ -23422,6 +26685,8 @@ Owning pointer to a deep copy of this packet.
 inline FlagPacket(const FlagPacket & that)
 ```
 
+Defined in src/base/include/icy/packet.h:162
+
 #### Parameters
 * `that` Source packet to copy from.
 
@@ -23431,11 +26696,13 @@ inline FlagPacket(const FlagPacket & that)
 
 #### read
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline ssize_t read(const ConstBuffer &)
+virtual inline ssize_t read(const ConstBuffer &) override
 ```
+
+Defined in src/base/include/icy/packet.h:171
 
 No-op read; [FlagPacket](#flagpacket) carries no payload data. 
 #### Returns
@@ -23447,11 +26714,13 @@ Always returns true (1).
 
 #### write
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline void write(Buffer &) const
+virtual inline void write(Buffer &) const override
 ```
+
+Defined in src/base/include/icy/packet.h:174
 
 No-op write; [FlagPacket](#flagpacket) carries no payload data.
 
@@ -23461,11 +26730,13 @@ No-op write; [FlagPacket](#flagpacket) carries no payload data.
 
 #### className
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline const char * className() const
+virtual inline const char * className() const override
 ```
+
+Defined in src/base/include/icy/packet.h:176
 
 Returns the class name of this packet type for logging and diagnostics.
 
@@ -23476,6 +26747,12 @@ Returns the class name of this packet type for logging and diagnostics.
 ```cpp
 #include <icy/packet.h>
 ```
+
+```cpp
+class RawPacket
+```
+
+Defined in src/base/include/icy/packet.h:182
 
 > **Inherits:** [`IPacket`](#ipacket)
 > **Subclassed by:** [`MediaPacket`](av.md#mediapacket), [`SocketPacket`](net.md#socketpacket)
@@ -23489,14 +26766,14 @@ Returns the class name of this packet type for logging and diagnostics.
 |  | [`RawPacket`](#rawpacket) `inline` | Construct with borrowed (non-owning) buffer. |
 |  | [`RawPacket`](#rawpacket) `inline` | Construct with const data (copied, owning). |
 |  | [`RawPacket`](#rawpacket) `inline` | Copy constructor (always copies data). |
-| `std::unique_ptr< IPacket >` | [`clone`](#clone) `virtual` `const` `inline` | #### Returns |
+| `std::unique_ptr< IPacket >` | [`clone`](#clone) `virtual` `const` `inline` `override` |  |
 | `void` | [`copyData`](#copydata) `virtual` `inline` | Copies data into an internally owned buffer, replacing any prior content. |
-| `ssize_t` | [`read`](#read) `virtual` `inline` | Reads from the buffer by copying its contents into an owned buffer. |
-| `void` | [`write`](#write) `virtual` `const` `inline` | Appends the packet data to the given output buffer. |
-| `char *` | [`data`](#data) `virtual` `const` `inline` | #### Returns |
-| `size_t` | [`size`](#size) `virtual` `const` `inline` | #### Returns |
-| `const char *` | [`className`](#classname) `virtual` `const` `inline` | Returns the class name of this packet type for logging and diagnostics. |
-| `bool` | [`ownsBuffer`](#ownsbuffer) `const` `inline` | #### Returns |
+| `ssize_t` | [`read`](#read) `virtual` `inline` `override` | Reads from the buffer by copying its contents into an owned buffer. |
+| `void` | [`write`](#write) `virtual` `const` `inline` `override` | Appends the packet data to the given output buffer. |
+| `char *` | [`data`](#data) `virtual` `const` `inline` `override` |  |
+| `size_t` | [`size`](#size) `virtual` `const` `inline` `override` |  |
+| `const char *` | [`className`](#classname) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
+| `bool` | [`ownsBuffer`](#ownsbuffer) `const` `inline` |  |
 
 ---
 
@@ -23507,8 +26784,10 @@ Returns the class name of this packet type for logging and diagnostics.
 `inline`
 
 ```cpp
-inline RawPacket(char * data, size_t size, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket(char * data = nullptr, size_t size = 0, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
+
+Defined in src/base/include/icy/packet.h:186
 
 Construct with borrowed (non-owning) buffer.
 
@@ -23521,8 +26800,10 @@ Construct with borrowed (non-owning) buffer.
 `inline`
 
 ```cpp
-inline RawPacket(const char * data, size_t size, unsigned flags, std::unique_ptr< IPacketInfo > info)
+inline RawPacket(const char * data, size_t size = 0, unsigned flags = 0, std::unique_ptr< IPacketInfo > info = nullptr)
 ```
+
+Defined in src/base/include/icy/packet.h:195
 
 Construct with const data (copied, owning).
 
@@ -23538,6 +26819,8 @@ Construct with const data (copied, owning).
 inline RawPacket(const RawPacket & that)
 ```
 
+Defined in src/base/include/icy/packet.h:205
+
 Copy constructor (always copies data).
 
 ---
@@ -23546,11 +26829,13 @@ Copy constructor (always copies data).
 
 #### clone
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline std::unique_ptr< IPacket > clone() const
+virtual inline std::unique_ptr< IPacket > clone() const override
 ```
+
+Defined in src/base/include/icy/packet.h:216
 
 #### Returns
 Owning pointer to a deep copy of this packet (always copies data).
@@ -23567,6 +26852,8 @@ Owning pointer to a deep copy of this packet (always copies data).
 virtual inline void copyData(const void * data, size_t size)
 ```
 
+Defined in src/base/include/icy/packet.h:224
+
 Copies data into an internally owned buffer, replacing any prior content. 
 #### Parameters
 * `data` Source data pointer. 
@@ -23579,11 +26866,13 @@ Copies data into an internally owned buffer, replacing any prior content.
 
 #### read
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline ssize_t read(const ConstBuffer & buf)
+virtual inline ssize_t read(const ConstBuffer & buf) override
 ```
+
+Defined in src/base/include/icy/packet.h:237
 
 Reads from the buffer by copying its contents into an owned buffer. 
 #### Parameters
@@ -23598,15 +26887,17 @@ Number of bytes consumed (equal to buf.size()).
 
 #### write
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline void write(Buffer & buf) const
+virtual inline void write(Buffer & buf) const override
 ```
+
+Defined in src/base/include/icy/packet.h:245
 
 Appends the packet data to the given output buffer. 
 #### Parameters
-* `buf` Buffer to write into.
+* `buf` [Buffer](#buffer-2) to write into.
 
 ---
 
@@ -23614,11 +26905,13 @@ Appends the packet data to the given output buffer.
 
 #### data
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline char * data() const
+virtual inline char * data() const override
 ```
+
+Defined in src/base/include/icy/packet.h:251
 
 #### Returns
 Mutable pointer to the raw packet data, or nullptr if empty.
@@ -23629,11 +26922,13 @@ Mutable pointer to the raw packet data, or nullptr if empty.
 
 #### size
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline size_t size() const
+virtual inline size_t size() const override
 ```
+
+Defined in src/base/include/icy/packet.h:254
 
 #### Returns
 Size of the packet data in bytes.
@@ -23644,11 +26939,13 @@ Size of the packet data in bytes.
 
 #### className
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline const char * className() const
+virtual inline const char * className() const override
 ```
+
+Defined in src/base/include/icy/packet.h:256
 
 Returns the class name of this packet type for logging and diagnostics.
 
@@ -23663,6 +26960,8 @@ Returns the class name of this packet type for logging and diagnostics.
 ```cpp
 inline bool ownsBuffer() const
 ```
+
+Defined in src/base/include/icy/packet.h:259
 
 #### Returns
 True if this packet owns (manages) its data buffer.
@@ -23685,6 +26984,8 @@ True if this packet owns (manages) its data buffer.
 char * _data
 ```
 
+Defined in src/base/include/icy/packet.h:262
+
 ---
 
 {#_size}
@@ -23694,6 +26995,8 @@ char * _data
 ```cpp
 size_t _size
 ```
+
+Defined in src/base/include/icy/packet.h:263
 
 ---
 
@@ -23705,6 +27008,8 @@ size_t _size
 std::unique_ptr< char[]> _owned
 ```
 
+Defined in src/base/include/icy/packet.h:264
+
 {#configuration}
 
 ## Configuration
@@ -23712,6 +27017,12 @@ std::unique_ptr< char[]> _owned
 ```cpp
 #include <icy/configuration.h>
 ```
+
+```cpp
+class Configuration
+```
+
+Defined in src/base/include/icy/configuration.h:31
 
 > **Subclassed by:** [`Configuration`](json.md#configuration-1)
 
@@ -23736,6 +27047,8 @@ This class is safe for multithreaded use.
 ```cpp
 ThreadSignal< void(const std::string &, const std::string &)> PropertyChanged
 ```
+
+Defined in src/base/include/icy/configuration.h:138
 
 The Key and Value of the changed configuration property.
 
@@ -23774,6 +27087,8 @@ The Key and Value of the changed configuration property.
 Configuration()
 ```
 
+Defined in src/base/include/icy/configuration.h:35
+
 Creates the [Configuration](#configuration).
 
 ---
@@ -23787,6 +27102,8 @@ Creates the [Configuration](#configuration).
 ```cpp
 virtual ~Configuration()
 ```
+
+Defined in src/base/include/icy/configuration.h:38
 
 Destroys the [Configuration](#configuration).
 
@@ -23802,6 +27119,8 @@ Destroys the [Configuration](#configuration).
 bool exists(const std::string & key) const
 ```
 
+Defined in src/base/include/icy/configuration.h:41
+
 Returns true if the property with the given key exists.
 
 ---
@@ -23815,6 +27134,8 @@ Returns true if the property with the given key exists.
 ```cpp
 std::string getString(const std::string & key) const
 ```
+
+Defined in src/base/include/icy/configuration.h:45
 
 Returns the string value of the property with the given name. Throws a NotFoundException if the key does not exist.
 
@@ -23830,6 +27151,8 @@ Returns the string value of the property with the given name. Throws a NotFoundE
 std::string getString(const std::string & key, const std::string & defaultValue) const
 ```
 
+Defined in src/base/include/icy/configuration.h:49
+
 If a property with the given key exists, returns the property's string value, otherwise returns the given default value.
 
 ---
@@ -23843,6 +27166,8 @@ If a property with the given key exists, returns the property's string value, ot
 ```cpp
 std::string getRawString(const std::string & key) const
 ```
+
+Defined in src/base/include/icy/configuration.h:54
 
 Returns the raw string value of the property with the given name. Throws a NotFoundException if the key does not exist. References to other properties are not expanded.
 
@@ -23858,6 +27183,8 @@ Returns the raw string value of the property with the given name. Throws a NotFo
 std::string getRawString(const std::string & key, const std::string & defaultValue) const
 ```
 
+Defined in src/base/include/icy/configuration.h:59
+
 If a property with the given key exists, returns the property's raw string value, otherwise returns the given default value. References to other properties are not expanded.
 
 ---
@@ -23871,6 +27198,8 @@ If a property with the given key exists, returns the property's raw string value
 ```cpp
 int getInt(const std::string & key) const
 ```
+
+Defined in src/base/include/icy/configuration.h:66
 
 Returns the int value of the property with the given name. Throws a NotFoundException if the key does not exist. Throws a SyntaxException if the property can not be converted to an int. Numbers starting with 0x are treated as hexadecimal.
 
@@ -23886,6 +27215,8 @@ Returns the int value of the property with the given name. Throws a NotFoundExce
 int getInt(const std::string & key, int defaultValue) const
 ```
 
+Defined in src/base/include/icy/configuration.h:73
+
 If a property with the given key exists, returns the property's int value, otherwise returns the given default value. Throws a SyntaxException if the property can not be converted to an int. Numbers starting with 0x are treated as hexadecimal.
 
 ---
@@ -23899,6 +27230,8 @@ If a property with the given key exists, returns the property's int value, other
 ```cpp
 std::int64_t getLargeInt(const std::string & key) const
 ```
+
+Defined in src/base/include/icy/configuration.h:80
 
 Returns the int value of the property with the given name. Throws a NotFoundException if the key does not exist. Throws a SyntaxException if the property can not be converted to an int. Numbers starting with 0x are treated as hexadecimal.
 
@@ -23914,6 +27247,8 @@ Returns the int value of the property with the given name. Throws a NotFoundExce
 std::int64_t getLargeInt(const std::string & key, std::int64_t defaultValue) const
 ```
 
+Defined in src/base/include/icy/configuration.h:88
+
 If a property with the given key exists, returns the property's int value, otherwise returns the given default value. Throws a SyntaxException if the property can not be converted to an int. Numbers starting with 0x are treated as hexadecimal.
 
 ---
@@ -23927,6 +27262,8 @@ If a property with the given key exists, returns the property's int value, other
 ```cpp
 double getDouble(const std::string & key) const
 ```
+
+Defined in src/base/include/icy/configuration.h:94
 
 Returns the double value of the property with the given name. Throws a NotFoundException if the key does not exist. Throws a SyntaxException if the property can not be converted to a double.
 
@@ -23942,6 +27279,8 @@ Returns the double value of the property with the given name. Throws a NotFoundE
 double getDouble(const std::string & key, double defaultValue) const
 ```
 
+Defined in src/base/include/icy/configuration.h:100
+
 If a property with the given key exists, returns the property's double value, otherwise returns the given default value. Throws a SyntaxException if the property can not be converted to an double.
 
 ---
@@ -23956,6 +27295,8 @@ If a property with the given key exists, returns the property's double value, ot
 bool getBool(const std::string & key) const
 ```
 
+Defined in src/base/include/icy/configuration.h:106
+
 Returns the double value of the property with the given name. Throws a NotFoundException if the key does not exist. Throws a SyntaxException if the property can not be converted to a double.
 
 ---
@@ -23969,6 +27310,8 @@ Returns the double value of the property with the given name. Throws a NotFoundE
 ```cpp
 bool getBool(const std::string & key, bool defaultValue) const
 ```
+
+Defined in src/base/include/icy/configuration.h:115
 
 If a property with the given key exists, returns the property's bool value, otherwise returns the given default value. Throws a SyntaxException if the property can not be converted to a boolean. The following string values can be converted into a boolean:
 
@@ -23986,6 +27329,8 @@ If a property with the given key exists, returns the property's bool value, othe
 void setString(const std::string & key, const std::string & value)
 ```
 
+Defined in src/base/include/icy/configuration.h:119
+
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
 ---
@@ -23997,6 +27342,8 @@ Sets the property with the given key to the given value. An already existing val
 ```cpp
 void setInt(const std::string & key, int value)
 ```
+
+Defined in src/base/include/icy/configuration.h:123
 
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
@@ -24010,6 +27357,8 @@ Sets the property with the given key to the given value. An already existing val
 void setLargeInt(const std::string & key, std::int64_t value)
 ```
 
+Defined in src/base/include/icy/configuration.h:127
+
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
 ---
@@ -24021,6 +27370,8 @@ Sets the property with the given key to the given value. An already existing val
 ```cpp
 void setDouble(const std::string & key, double value)
 ```
+
+Defined in src/base/include/icy/configuration.h:131
 
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
@@ -24034,14 +27385,16 @@ Sets the property with the given key to the given value. An already existing val
 void setBool(const std::string & key, bool value)
 ```
 
+Defined in src/base/include/icy/configuration.h:135
+
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`getRaw`](#getraw) `const` | If the property with the given key exists, stores the property's value in value and returns true. Otherwise, returns false. |
-| `void` | [`setRaw`](#setraw)  | Sets the property with the given key to the given value. An already existing value for the key is overwritten. |
+| `bool` | [`getRaw`](#getraw) `virtual` `const` | If the property with the given key exists, stores the property's value in value and returns true. Otherwise, returns false. |
+| `void` | [`setRaw`](#setraw) `virtual` | Sets the property with the given key to the given value. An already existing value for the key is overwritten. |
 |  | [`Configuration`](#configuration)  | Deleted constructor. |
 |  | [`Configuration`](#configuration)  | Deleted constructor. |
 
@@ -24051,11 +27404,13 @@ Sets the property with the given key to the given value. An already existing val
 
 #### getRaw
 
-`const`
+`virtual` `const`
 
 ```cpp
-bool getRaw(const std::string & key, std::string & value) const
+virtual bool getRaw(const std::string & key, std::string & value) const
 ```
+
+Defined in src/base/include/icy/configuration.h:145
 
 If the property with the given key exists, stores the property's value in value and returns true. Otherwise, returns false.
 
@@ -24067,9 +27422,13 @@ Must be overridden by subclasses.
 
 #### setRaw
 
+`virtual`
+
 ```cpp
-void setRaw(const std::string & key, const std::string & value)
+virtual void setRaw(const std::string & key, const std::string & value)
 ```
+
+Defined in src/base/include/icy/configuration.h:151
 
 Sets the property with the given key to the given value. An already existing value for the key is overwritten.
 
@@ -24085,6 +27444,8 @@ The implementation is responsible for emitting the PropertyChanged signal.
 Configuration(const Configuration &) = delete
 ```
 
+Defined in src/base/include/icy/configuration.h:170
+
 Deleted constructor.
 
 ---
@@ -24096,6 +27457,8 @@ Deleted constructor.
 ```cpp
 Configuration(Configuration &&) = delete
 ```
+
+Defined in src/base/include/icy/configuration.h:172
 
 Deleted constructor.
 
@@ -24115,6 +27478,8 @@ Deleted constructor.
 std::mutex _mutex
 ```
 
+Defined in src/base/include/icy/configuration.h:176
+
 {#scopedconfiguration}
 
 ## ScopedConfiguration
@@ -24122,6 +27487,12 @@ std::mutex _mutex
 ```cpp
 #include <icy/configuration.h>
 ```
+
+```cpp
+class ScopedConfiguration
+```
+
+Defined in src/base/include/icy/configuration.h:195
 
 [ScopedConfiguration](#scopedconfiguration) provides multiple levels of configuration for a module. Multiple levels means that there is a module level scope, and a default scope. When a property is accessed, the module scope value will be used if available, otherwise the default scope value will be used.
 
@@ -24145,6 +27516,8 @@ Example scoping: Module: channels.[name].modes.[name].[value] Default: modes.[na
 Configuration & config
 ```
 
+Defined in src/base/include/icy/configuration.h:278
+
 ---
 
 {#currentscope}
@@ -24154,6 +27527,8 @@ Configuration & config
 ```cpp
 std::string currentScope
 ```
+
+Defined in src/base/include/icy/configuration.h:279
 
 ---
 
@@ -24165,23 +27540,25 @@ std::string currentScope
 std::string defaultScope
 ```
 
+Defined in src/base/include/icy/configuration.h:280
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ScopedConfiguration`](#scopedconfiguration)  | #### Parameters |
 |  | [`ScopedConfiguration`](#scopedconfiguration)  |  |
-| `std::string` | [`getString`](#getstring) `const` | Returns the string value, trying `currentScope` first then `defaultScope`. |
-| `int` | [`getInt`](#getint) `const` | Returns the int value, trying `currentScope` first then `defaultScope`. |
-| `double` | [`getDouble`](#getdouble) `const` | Returns the double value, trying `currentScope` first then `defaultScope`. |
-| `bool` | [`getBool`](#getbool) `const` | Returns the bool value, trying `currentScope` first then `defaultScope`. |
+|  | [`ScopedConfiguration`](#scopedconfiguration)  |  |
+| `std::string` | [`getString`](#getstring) `const` | Returns the string value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. |
+| `int` | [`getInt`](#getint) `const` | Returns the int value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. |
+| `double` | [`getDouble`](#getdouble) `const` | Returns the double value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. |
+| `bool` | [`getBool`](#getbool) `const` | Returns the bool value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. |
 | `void` | [`setString`](#setstring)  | Writes a string value under the scoped key. |
 | `void` | [`setInt`](#setint)  | Writes an int value under the scoped key. |
 | `void` | [`setDouble`](#setdouble)  | Writes a double value under the scoped key. |
 | `void` | [`setBool`](#setbool)  | Writes a bool value under the scoped key. |
-| `std::string` | [`getCurrentScope`](#getcurrentscope) `const` | #### Parameters |
-| `std::string` | [`getDafaultKey`](#getdafaultkey) `const` | #### Parameters |
-| `std::string` | [`getScopedKey`](#getscopedkey) `const` | #### Parameters |
+| `std::string` | [`getCurrentScope`](#getcurrentscope) `const` |  |
+| `std::string` | [`getDafaultKey`](#getdafaultkey) `const` |  |
+| `std::string` | [`getScopedKey`](#getscopedkey) `const` |  |
 
 ---
 
@@ -24192,6 +27569,8 @@ std::string defaultScope
 ```cpp
 ScopedConfiguration(Configuration & config, const std::string & currentScope, const std::string & defaultScope)
 ```
+
+Defined in src/base/include/icy/configuration.h:201
 
 #### Parameters
 * `config` Backing configuration store. 
@@ -24210,6 +27589,8 @@ ScopedConfiguration(Configuration & config, const std::string & currentScope, co
 ScopedConfiguration(const ScopedConfiguration & that)
 ```
 
+Defined in src/base/include/icy/configuration.h:203
+
 ---
 
 {#getstring}
@@ -24219,16 +27600,18 @@ ScopedConfiguration(const ScopedConfiguration & that)
 `const`
 
 ```cpp
-std::string getString(const std::string & key, const std::string & defaultValue, bool forceDefaultScope) const
+std::string getString(const std::string & key, const std::string & defaultValue, bool forceDefaultScope = false) const
 ```
 
-Returns the string value, trying `currentScope` first then `defaultScope`. 
+Defined in src/base/include/icy/configuration.h:210
+
+Returns the string value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. 
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 * `defaultValue` Fallback when neither scope has the key. 
 
-* `forceDefaultScope` If true, skips `currentScope` and reads from `defaultScope` only. 
+* `forceDefaultScope` If true, skips `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` and reads from `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)` only. 
 
 #### Returns
 Property value or `defaultValue`.
@@ -24242,16 +27625,18 @@ Property value or `defaultValue`.
 `const`
 
 ```cpp
-int getInt(const std::string & key, int defaultValue, bool forceDefaultScope) const
+int getInt(const std::string & key, int defaultValue, bool forceDefaultScope = false) const
 ```
 
-Returns the int value, trying `currentScope` first then `defaultScope`. 
+Defined in src/base/include/icy/configuration.h:219
+
+Returns the int value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. 
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 * `defaultValue` Fallback when neither scope has the key. 
 
-* `forceDefaultScope` If true, reads from `defaultScope` only. 
+* `forceDefaultScope` If true, reads from `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)` only. 
 
 #### Returns
 Property value or `defaultValue`.
@@ -24265,16 +27650,18 @@ Property value or `defaultValue`.
 `const`
 
 ```cpp
-double getDouble(const std::string & key, double defaultValue, bool forceDefaultScope) const
+double getDouble(const std::string & key, double defaultValue, bool forceDefaultScope = false) const
 ```
 
-Returns the double value, trying `currentScope` first then `defaultScope`. 
+Defined in src/base/include/icy/configuration.h:227
+
+Returns the double value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. 
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 * `defaultValue` Fallback when neither scope has the key. 
 
-* `forceDefaultScope` If true, reads from `defaultScope` only. 
+* `forceDefaultScope` If true, reads from `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)` only. 
 
 #### Returns
 Property value or `defaultValue`.
@@ -24288,16 +27675,18 @@ Property value or `defaultValue`.
 `const`
 
 ```cpp
-bool getBool(const std::string & key, bool defaultValue, bool forceDefaultScope) const
+bool getBool(const std::string & key, bool defaultValue, bool forceDefaultScope = false) const
 ```
 
-Returns the bool value, trying `currentScope` first then `defaultScope`. 
+Defined in src/base/include/icy/configuration.h:235
+
+Returns the bool value, trying `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` first then `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`. 
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 * `defaultValue` Fallback when neither scope has the key. 
 
-* `forceDefaultScope` If true, reads from `defaultScope` only. 
+* `forceDefaultScope` If true, reads from `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)` only. 
 
 #### Returns
 Property value or `defaultValue`.
@@ -24309,8 +27698,10 @@ Property value or `defaultValue`.
 #### setString
 
 ```cpp
-void setString(const std::string & key, const std::string & value, bool defaultScope)
+void setString(const std::string & key, const std::string & value, bool defaultScope = false)
 ```
+
+Defined in src/base/include/icy/configuration.h:242
 
 Writes a string value under the scoped key. 
 #### Parameters
@@ -24318,7 +27709,7 @@ Writes a string value under the scoped key.
 
 * `value` Value to store. 
 
-* `defaultScope` If true, writes to `defaultScope`; otherwise to `currentScope`.
+* `defaultScope` If true, writes to `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`; otherwise to `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)`.
 
 ---
 
@@ -24327,8 +27718,10 @@ Writes a string value under the scoped key.
 #### setInt
 
 ```cpp
-void setInt(const std::string & key, int value, bool defaultScope)
+void setInt(const std::string & key, int value, bool defaultScope = false)
 ```
+
+Defined in src/base/include/icy/configuration.h:249
 
 Writes an int value under the scoped key. 
 #### Parameters
@@ -24336,7 +27729,7 @@ Writes an int value under the scoped key.
 
 * `value` Value to store. 
 
-* `defaultScope` If true, writes to `defaultScope`; otherwise to `currentScope`.
+* `defaultScope` If true, writes to `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`; otherwise to `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)`.
 
 ---
 
@@ -24345,8 +27738,10 @@ Writes an int value under the scoped key.
 #### setDouble
 
 ```cpp
-void setDouble(const std::string & key, double value, bool defaultScope)
+void setDouble(const std::string & key, double value, bool defaultScope = false)
 ```
+
+Defined in src/base/include/icy/configuration.h:255
 
 Writes a double value under the scoped key. 
 #### Parameters
@@ -24354,7 +27749,7 @@ Writes a double value under the scoped key.
 
 * `value` Value to store. 
 
-* `defaultScope` If true, writes to `defaultScope`; otherwise to `currentScope`.
+* `defaultScope` If true, writes to `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`; otherwise to `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)`.
 
 ---
 
@@ -24363,8 +27758,10 @@ Writes a double value under the scoped key.
 #### setBool
 
 ```cpp
-void setBool(const std::string & key, bool value, bool defaultScope)
+void setBool(const std::string & key, bool value, bool defaultScope = false)
 ```
+
+Defined in src/base/include/icy/configuration.h:262
 
 Writes a bool value under the scoped key. 
 #### Parameters
@@ -24372,7 +27769,7 @@ Writes a bool value under the scoped key.
 
 * `value` Value to store. 
 
-* `defaultScope` If true, writes to `defaultScope`; otherwise to `currentScope`.
+* `defaultScope` If true, writes to `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`; otherwise to `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)`.
 
 ---
 
@@ -24386,11 +27783,13 @@ Writes a bool value under the scoped key.
 std::string getCurrentScope(const std::string & key) const
 ```
 
+Defined in src/base/include/icy/configuration.h:266
+
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 #### Returns
-Fully qualified key in `currentScope`.
+Fully qualified key in `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)`.
 
 ---
 
@@ -24404,11 +27803,13 @@ Fully qualified key in `currentScope`.
 std::string getDafaultKey(const std::string & key) const
 ```
 
+Defined in src/base/include/icy/configuration.h:270
+
 #### Parameters
 * `key` Property key (without scope prefix). 
 
 #### Returns
-Fully qualified key in `defaultScope`.
+Fully qualified key in `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)`.
 
 ---
 
@@ -24419,13 +27820,15 @@ Fully qualified key in `defaultScope`.
 `const`
 
 ```cpp
-std::string getScopedKey(const std::string & key, bool defaultScope) const
+std::string getScopedKey(const std::string & key, bool defaultScope = false) const
 ```
+
+Defined in src/base/include/icy/configuration.h:275
 
 #### Parameters
 * `key` Property key (without scope prefix). 
 
-* `defaultScope` If true, returns the `defaultScope` key; otherwise `currentScope` key. 
+* `defaultScope` If true, returns the `[defaultScope](#classicy_1_1ScopedConfiguration_1a15e6f20291047fb072404269feffae68)` key; otherwise `[currentScope](#classicy_1_1ScopedConfiguration_1a3d8d7c8052515af4617962e0a790d703)` key. 
 
 #### Returns
 Fully qualified scoped key string.
@@ -24438,9 +27841,35 @@ Fully qualified scoped key string.
 #include <icy/error.h>
 ```
 
+```cpp
+struct Error
+```
+
+Defined in src/base/include/icy/error.h:32
+
 Basic error type.
 
 Errors contain an error code, message, and exception pointer.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator) `inline` |  |
+
+---
+
+{#operator}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const Error & err)
+```
+
+Defined in src/base/include/icy/error.h:80
 
 ### Public Attributes
 
@@ -24460,6 +27889,8 @@ Errors contain an error code, message, and exception pointer.
 int err
 ```
 
+Defined in src/base/include/icy/error.h:34
+
 ---
 
 {#message}
@@ -24469,6 +27900,8 @@ int err
 ```cpp
 std::string message
 ```
+
+Defined in src/base/include/icy/error.h:35
 
 ---
 
@@ -24480,6 +27913,8 @@ std::string message
 std::exception_ptr exception
 ```
 
+Defined in src/base/include/icy/error.h:36
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -24489,7 +27924,7 @@ std::exception_ptr exception
 |  | [`Error`](#error) `inline` | Constructs an error with the given C string message. |
 | `bool` | [`any`](#any) `const` `inline` | Returns true if any error condition is set (non-zero code, non-empty message, or exception). |
 | `void` | [`reset`](#reset) `inline` | Clears all error fields, resetting to a no-error state. |
-| `void` | [`rethrow`](#rethrow) `inline` | Re-throws the stored exception pointer if one is set. Has no effect if `exception` is null. |
+| `void` | [`rethrow`](#rethrow) `inline` | Re-throws the stored exception pointer if one is set. Has no effect if `[exception](#structicy_1_1Error_1a77a10c10703b1ad91bcd52ee5e05accf)` is null. |
 
 ---
 
@@ -24502,6 +27937,8 @@ std::exception_ptr exception
 ```cpp
 inline Error()
 ```
+
+Defined in src/base/include/icy/error.h:39
 
 Default constructor; initializes all fields to a no-error state.
 
@@ -24516,6 +27953,8 @@ Default constructor; initializes all fields to a no-error state.
 ```cpp
 inline Error(const std::string & msg)
 ```
+
+Defined in src/base/include/icy/error.h:43
 
 Constructs an error with the given message string. 
 #### Parameters
@@ -24533,6 +27972,8 @@ Constructs an error with the given message string.
 inline Error(const char * msg)
 ```
 
+Defined in src/base/include/icy/error.h:51
+
 Constructs an error with the given C string message. 
 #### Parameters
 * `msg` Human-readable error description.
@@ -24548,6 +27989,8 @@ Constructs an error with the given C string message.
 ```cpp
 inline bool any() const
 ```
+
+Defined in src/base/include/icy/error.h:59
 
 Returns true if any error condition is set (non-zero code, non-empty message, or exception). 
 #### Returns
@@ -24565,6 +28008,8 @@ True if an error is present.
 inline void reset()
 ```
 
+Defined in src/base/include/icy/error.h:65
+
 Clears all error fields, resetting to a no-error state.
 
 ---
@@ -24579,7 +28024,9 @@ Clears all error fields, resetting to a no-error state.
 inline void rethrow()
 ```
 
-Re-throws the stored exception pointer if one is set. Has no effect if `exception` is null.
+Defined in src/base/include/icy/error.h:74
+
+Re-throws the stored exception pointer if one is set. Has no effect if `[exception](#structicy_1_1Error_1a77a10c10703b1ad91bcd52ee5e05accf)` is null.
 
 {#logstream}
 
@@ -24588,6 +28035,12 @@ Re-throws the stored exception pointer if one is set. Has no effect if `exceptio
 ```cpp
 #include <icy/logger.h>
 ```
+
+```cpp
+struct LogStream
+```
+
+Defined in src/base/include/icy/logger.h:314
 
 No-op log record used when logging is compiled out.
 
@@ -24610,8 +28063,10 @@ No-op log record used when logging is compiled out.
 `inline`
 
 ```cpp
-inline LogStream(Level level, std::string realm, int line, const char * channel)
+inline LogStream(Level level, std::string realm, int line, const char * channel = nullptr)
 ```
+
+Defined in src/base/include/icy/logger.h:316
 
 ---
 
@@ -24625,6 +28080,8 @@ inline LogStream(Level level, std::string realm, int line, const char * channel)
 inline LogStream(const LogStream & that)
 ```
 
+Defined in src/base/include/icy/logger.h:317
+
 ---
 
 {#write}
@@ -24636,6 +28093,8 @@ inline LogStream(const LogStream & that)
 ```cpp
 template<typename... Args> inline void write(Args... args)
 ```
+
+Defined in src/base/include/icy/logger.h:321
 
 ---
 
@@ -24649,6 +28108,8 @@ template<typename... Args> inline void write(Args... args)
 template<typename T> inline LogStream & operator<<(const T &)
 ```
 
+Defined in src/base/include/icy/logger.h:326
+
 ---
 
 {#operator}
@@ -24661,6 +28122,8 @@ template<typename T> inline LogStream & operator<<(const T &)
 inline LogStream & operator<<(std::ostream &(*)(std::ostream &) f)
 ```
 
+Defined in src/base/include/icy/logger.h:331
+
 {#nullsharedmutex}
 
 ## NullSharedMutex
@@ -24668,6 +28131,12 @@ inline LogStream & operator<<(std::ostream &(*)(std::ostream &) f)
 ```cpp
 #include <icy/signal.h>
 ```
+
+```cpp
+struct NullSharedMutex
+```
+
+Defined in src/base/include/icy/signal.h:30
 
 No-op mutex for single-threaded signal usage. When all signal operations occur on a single libuv event loop thread, the shared_mutex is unnecessary overhead.
 
@@ -24692,6 +28161,8 @@ No-op mutex for single-threaded signal usage. When all signal operations occur o
 inline void lock()
 ```
 
+Defined in src/base/include/icy/signal.h:32
+
 ---
 
 {#unlock}
@@ -24703,6 +28174,8 @@ inline void lock()
 ```cpp
 inline void unlock()
 ```
+
+Defined in src/base/include/icy/signal.h:33
 
 ---
 
@@ -24716,6 +28189,8 @@ inline void unlock()
 inline void lock_shared()
 ```
 
+Defined in src/base/include/icy/signal.h:34
+
 ---
 
 {#unlock_shared}
@@ -24728,6 +28203,8 @@ inline void lock_shared()
 inline void unlock_shared()
 ```
 
+Defined in src/base/include/icy/signal.h:35
+
 {#bitwise}
 
 ## Bitwise
@@ -24735,6 +28212,12 @@ inline void unlock_shared()
 ```cpp
 #include <icy/bitwise.h>
 ```
+
+```cpp
+struct Bitwise
+```
+
+Defined in src/base/include/icy/bitwise.h:22
 
 Container for smart management of bitwise integer flags.
 
@@ -24753,6 +28236,8 @@ Container for smart management of bitwise integer flags.
 ```cpp
 unsigned data
 ```
+
+Defined in src/base/include/icy/bitwise.h:24
 
 Backing storage for the flag bits.
 
@@ -24777,8 +28262,10 @@ Backing storage for the flag bits.
 `inline`
 
 ```cpp
-inline Bitwise(unsigned flags)
+inline Bitwise(unsigned flags = 0)
 ```
+
+Defined in src/base/include/icy/bitwise.h:28
 
 Constructs a [Bitwise](#bitwise) with optional initial flags. 
 #### Parameters
@@ -24796,6 +28283,8 @@ Constructs a [Bitwise](#bitwise) with optional initial flags.
 virtual inline void reset()
 ```
 
+Defined in src/base/include/icy/bitwise.h:34
+
 Clears all flags (sets data to 0).
 
 ---
@@ -24809,6 +28298,8 @@ Clears all flags (sets data to 0).
 ```cpp
 virtual inline void set(unsigned flag)
 ```
+
+Defined in src/base/include/icy/bitwise.h:38
 
 Sets the given flag only if it is not already set. 
 #### Parameters
@@ -24826,6 +28317,8 @@ Sets the given flag only if it is not already set.
 virtual inline void add(unsigned flag)
 ```
 
+Defined in src/base/include/icy/bitwise.h:46
+
 Unconditionally sets (OR) the given flag bits. 
 #### Parameters
 * `flag` The flag bit(s) to add.
@@ -24841,6 +28334,8 @@ Unconditionally sets (OR) the given flag bits.
 ```cpp
 virtual inline void remove(unsigned flag)
 ```
+
+Defined in src/base/include/icy/bitwise.h:50
 
 Clears the given flag bits. 
 #### Parameters
@@ -24858,6 +28353,8 @@ Clears the given flag bits.
 virtual inline void toggle(unsigned flag)
 ```
 
+Defined in src/base/include/icy/bitwise.h:54
+
 Toggles (XOR) the given flag bits. 
 #### Parameters
 * `flag` The flag bit(s) to toggle.
@@ -24874,6 +28371,8 @@ Toggles (XOR) the given flag bits.
 virtual inline bool has(unsigned flag) const
 ```
 
+Defined in src/base/include/icy/bitwise.h:59
+
 Returns true if all bits in flag are set. 
 #### Parameters
 * `flag` The flag bit(s) to test. 
@@ -24889,6 +28388,13 @@ true if every bit in flag is present in data.
 #include <icy/delegate.h>
 ```
 
+```cpp
+template<typename RT, typename... Args>
+struct AbstractDelegate
+```
+
+Defined in src/base/include/icy/delegate.h:29
+
 Abstract delegate interface.
 
 The `Delegate` class contains a pointer to a function. This wrapper class is used instead of `std::function` since it is interchangable with fast delegates and also provides an equality operator for comparing the underlying function where supported.
@@ -24897,8 +28403,8 @@ The `Delegate` class contains a pointer to a function. This wrapper class is use
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `RT` | [`operator()`](#operator) `const` | Invokes the underlying callable with the supplied arguments. |
-| `bool` | [`operator==`](#operator) `const` | Compares two delegates for equality (same target function and instance). |
+| `RT` | [`operator()`](#operator) `virtual` `const` | Invokes the underlying callable with the supplied arguments. |
+| `bool` | [`operator==`](#operator) `virtual` `const` | Compares two delegates for equality (same target function and instance). |
 
 ---
 
@@ -24906,11 +28412,13 @@ The `Delegate` class contains a pointer to a function. This wrapper class is use
 
 #### operator()
 
-`const`
+`virtual` `const`
 
 ```cpp
-RT operator()(Args... args) const
+virtual RT operator()(Args... args) const
 ```
+
+Defined in src/base/include/icy/delegate.h:36
 
 Invokes the underlying callable with the supplied arguments. 
 #### Parameters
@@ -24925,11 +28433,13 @@ Result of the wrapped function call.
 
 #### operator==
 
-`const`
+`virtual` `const`
 
 ```cpp
-bool operator==(const AbstractDelegate< RT, Args... > & that) const
+virtual bool operator==(const AbstractDelegate< RT, Args... > & that) const
 ```
+
+Defined in src/base/include/icy/delegate.h:41
 
 Compares two delegates for equality (same target function and instance). 
 #### Parameters
@@ -24945,6 +28455,13 @@ True if both delegates refer to the same callable target.
 ```cpp
 #include <icy/delegate.h>
 ```
+
+```cpp
+template<typename RT, typename... Args>
+struct FunctionDelegate
+```
+
+Defined in src/base/include/icy/delegate.h:48
 
 > **Inherits:** [`AbstractDelegate< RT, Args... >`](#abstractdelegate)
 
@@ -24966,13 +28483,15 @@ The `[FunctionDelegate](#functiondelegate)` contains a `std::function`.
 std::function< RT(Args...)> func
 ```
 
+Defined in src/base/include/icy/delegate.h:50
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`FunctionDelegate`](#functiondelegate) `inline` | #### Parameters |
-| `RT` | [`operator()`](#operator) `virtual` `const` `inline` | Calls the wrapped `std::function`. |
-| `bool` | [`operator==`](#operator) `virtual` `const` `inline` | Always returns false; `std::function` targets cannot be compared for equality. |
+|  | [`FunctionDelegate`](#functiondelegate) `inline` |  |
+| `RT` | [`operator()`](#operator) `virtual` `const` `inline` `override` | Calls the wrapped `std::function`. |
+| `bool` | [`operator==`](#operator) `virtual` `const` `inline` `override` | Always returns false; `std::function` targets cannot be compared for equality. |
 
 ---
 
@@ -24986,6 +28505,8 @@ std::function< RT(Args...)> func
 inline FunctionDelegate(std::function< RT(Args...)> func)
 ```
 
+Defined in src/base/include/icy/delegate.h:53
+
 #### Parameters
 * `func` `std::function` to wrap.
 
@@ -24995,11 +28516,13 @@ inline FunctionDelegate(std::function< RT(Args...)> func)
 
 #### operator()
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline RT operator()(Args... args) const
+virtual inline RT operator()(Args... args) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:61
 
 Calls the wrapped `std::function`. 
 #### Parameters
@@ -25014,11 +28537,13 @@ Function result.
 
 #### operator==
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline bool operator==(const AbstractDelegate< RT, Args... > &) const
+virtual inline bool operator==(const AbstractDelegate< RT, Args... > &) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:67
 
 Always returns false; `std::function` targets cannot be compared for equality.
 
@@ -25029,6 +28554,13 @@ Always returns false; `std::function` targets cannot be compared for equality.
 ```cpp
 #include <icy/delegate.h>
 ```
+
+```cpp
+template<class Class, typename RT, typename... Args>
+struct ClassDelegate
+```
+
+Defined in src/base/include/icy/delegate.h:79
 
 > **Inherits:** [`AbstractDelegate< RT, Args... >`](#abstractdelegate)
 
@@ -25053,6 +28585,8 @@ This class implements fast delegates and function comparison.
 Class * instance
 ```
 
+Defined in src/base/include/icy/delegate.h:81
+
 ---
 
 {#method}
@@ -25063,13 +28597,15 @@ Class * instance
 RT(Class::* method
 ```
 
+Defined in src/base/include/icy/delegate.h:82
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ClassDelegate`](#classdelegate) `inline` | #### Parameters |
-| `RT` | [`operator()`](#operator) `virtual` `const` `inline` | Calls the member function on `instance`. |
-| `bool` | [`operator==`](#operator) `virtual` `const` `inline` | #### Parameters |
+|  | [`ClassDelegate`](#classdelegate) `inline` |  |
+| `RT` | [`operator()`](#operator) `virtual` `const` `inline` `override` | Calls the member function on `[instance](#structicy_1_1ClassDelegate_1a1412fc98659c1148559e2cf42a2af610)`. |
+| `bool` | [`operator==`](#operator) `virtual` `const` `inline` `override` |  |
 
 ---
 
@@ -25083,6 +28619,8 @@ RT(Class::* method
 inline ClassDelegate(Class * instance, RT(Class::*)(Args...) method)
 ```
 
+Defined in src/base/include/icy/delegate.h:86
+
 #### Parameters
 * `instance` Object on which to invoke the member function. 
 
@@ -25094,13 +28632,15 @@ inline ClassDelegate(Class * instance, RT(Class::*)(Args...) method)
 
 #### operator()
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline RT operator()(Args... args) const
+virtual inline RT operator()(Args... args) const override
 ```
 
-Calls the member function on `instance`. 
+Defined in src/base/include/icy/delegate.h:95
+
+Calls the member function on `[instance](#structicy_1_1ClassDelegate_1a1412fc98659c1148559e2cf42a2af610)`. 
 #### Parameters
 * `args` Arguments forwarded to the method. 
 
@@ -25113,11 +28653,13 @@ Method result.
 
 #### operator==
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline bool operator==(const AbstractDelegate< RT, Args... > & that) const
+virtual inline bool operator==(const AbstractDelegate< RT, Args... > & that) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:102
 
 #### Parameters
 * `that` Other delegate to compare. 
@@ -25132,6 +28674,13 @@ True if both delegates wrap the same instance/method pair.
 ```cpp
 #include <icy/delegate.h>
 ```
+
+```cpp
+template<class Class, typename RT, typename... Args>
+struct ConstClassDelegate
+```
+
+Defined in src/base/include/icy/delegate.h:116
 
 > **Inherits:** [`AbstractDelegate< RT, Args... >`](#abstractdelegate)
 
@@ -25156,6 +28705,8 @@ This class implements fast delegates and function comparison.
 Class * instance
 ```
 
+Defined in src/base/include/icy/delegate.h:118
+
 ---
 
 {#method}
@@ -25166,13 +28717,15 @@ Class * instance
 RT(Class::* method
 ```
 
+Defined in src/base/include/icy/delegate.h:119
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ConstClassDelegate`](#constclassdelegate) `inline` | #### Parameters |
-| `RT` | [`operator()`](#operator) `virtual` `const` `inline` | Calls the const member function on `instance`. |
-| `bool` | [`operator==`](#operator) `virtual` `const` `inline` | #### Parameters |
+|  | [`ConstClassDelegate`](#constclassdelegate) `inline` |  |
+| `RT` | [`operator()`](#operator) `virtual` `const` `inline` `override` | Calls the const member function on `[instance](#structicy_1_1ConstClassDelegate_1a5385d947b50390c33d9e7d6157b23c69)`. |
+| `bool` | [`operator==`](#operator) `virtual` `const` `inline` `override` |  |
 
 ---
 
@@ -25186,6 +28739,8 @@ RT(Class::* method
 inline ConstClassDelegate(Class * instance, RT(Class::*)(Args...) const method)
 ```
 
+Defined in src/base/include/icy/delegate.h:123
+
 #### Parameters
 * `instance` Object on which to invoke the const member function. 
 
@@ -25197,13 +28752,15 @@ inline ConstClassDelegate(Class * instance, RT(Class::*)(Args...) const method)
 
 #### operator()
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline RT operator()(Args... args) const
+virtual inline RT operator()(Args... args) const override
 ```
 
-Calls the const member function on `instance`. 
+Defined in src/base/include/icy/delegate.h:132
+
+Calls the const member function on `[instance](#structicy_1_1ConstClassDelegate_1a5385d947b50390c33d9e7d6157b23c69)`. 
 #### Parameters
 * `args` Arguments forwarded to the method. 
 
@@ -25216,11 +28773,13 @@ Method result.
 
 #### operator==
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline bool operator==(const AbstractDelegate< RT, Args... > & that) const
+virtual inline bool operator==(const AbstractDelegate< RT, Args... > & that) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:139
 
 #### Parameters
 * `that` Other delegate to compare. 
@@ -25235,6 +28794,13 @@ True if both delegates wrap the same instance/method pair.
 ```cpp
 #include <icy/delegate.h>
 ```
+
+```cpp
+template<class Class, typename RT, class PT, class IT>
+struct PolymorphicDelegate
+```
+
+Defined in src/base/include/icy/delegate.h:154
 
 > **Inherits:** [`AbstractDelegate< RT, IT & >`](#abstractdelegate)
 
@@ -25259,6 +28825,8 @@ Theis class contains a pointer to a class member that receices a derived subclas
 Class * instance
 ```
 
+Defined in src/base/include/icy/delegate.h:156
+
 ---
 
 {#method}
@@ -25269,13 +28837,15 @@ Class * instance
 RT(Class::* method
 ```
 
+Defined in src/base/include/icy/delegate.h:157
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`PolymorphicDelegate`](#polymorphicdelegate) `inline` | #### Parameters |
-| `RT` | [`operator()`](#operator) `virtual` `const` `inline` | Attempts to cast `object` to `PT`; invokes the method if successful. Returns a default-constructed `RT` if the cast fails (packet type mismatch). |
-| `bool` | [`operator==`](#operator) `virtual` `const` `inline` | #### Parameters |
+|  | [`PolymorphicDelegate`](#polymorphicdelegate) `inline` |  |
+| `RT` | [`operator()`](#operator) `virtual` `const` `inline` `override` | Attempts to cast `object` to `PT`; invokes the method if successful. Returns a default-constructed `RT` if the cast fails (packet type mismatch). |
+| `bool` | [`operator==`](#operator) `virtual` `const` `inline` `override` |  |
 
 ---
 
@@ -25289,6 +28859,8 @@ RT(Class::* method
 inline PolymorphicDelegate(Class * instance, RT(Class::*)(PT &) method)
 ```
 
+Defined in src/base/include/icy/delegate.h:161
+
 #### Parameters
 * `instance` Object on which to invoke the member function. 
 
@@ -25300,11 +28872,13 @@ inline PolymorphicDelegate(Class * instance, RT(Class::*)(PT &) method)
 
 #### operator()
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline RT operator()(IT & object) const
+virtual inline RT operator()(IT & object) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:171
 
 Attempts to cast `object` to `PT`; invokes the method if successful. Returns a default-constructed `RT` if the cast fails (packet type mismatch). 
 #### Parameters
@@ -25319,11 +28893,13 @@ Method result, or default `RT` on cast failure.
 
 #### operator==
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline bool operator==(const AbstractDelegate< RT, IT & > & that) const
+virtual inline bool operator==(const AbstractDelegate< RT, IT & > & that) const override
 ```
+
+Defined in src/base/include/icy/delegate.h:181
 
 #### Parameters
 * `that` Other delegate to compare. 
@@ -25338,6 +28914,12 @@ True if both delegates wrap the same instance/method pair.
 ```cpp
 #include <icy/application.h>
 ```
+
+```cpp
+struct OptionParser
+```
+
+Defined in src/base/include/icy/application.h:100
 
 Command-line option parser.
 
@@ -25358,6 +28940,8 @@ Command-line option parser.
 std::string exepath
 ```
 
+Defined in src/base/include/icy/application.h:102
+
 ---
 
 {#args}
@@ -25367,6 +28951,8 @@ std::string exepath
 ```cpp
 OptionMap args
 ```
+
+Defined in src/base/include/icy/application.h:103
 
 ### Public Methods
 
@@ -25386,6 +28972,8 @@ OptionMap args
 ```cpp
 OptionParser(int argc, char * argv, const char * delim)
 ```
+
+Defined in src/base/include/icy/application.h:109
 
 Parses command-line arguments from `argc`/`argv`. 
 #### Parameters
@@ -25407,6 +28995,8 @@ Parses command-line arguments from `argc`/`argv`.
 inline bool has(const char * key)
 ```
 
+Defined in src/base/include/icy/application.h:114
+
 Returns true if the given option key was present on the command line. 
 #### Parameters
 * `key` Option key to look up (without delimiter prefix). 
@@ -25425,6 +29015,8 @@ True if the key exists in the parsed argument map.
 ```cpp
 inline std::string get(const char * key)
 ```
+
+Defined in src/base/include/icy/application.h:120
 
 Returns the string value associated with the given option key. Returns an empty string if the key was not found. 
 #### Parameters
@@ -25445,6 +29037,8 @@ Value string, or empty string if not present.
 template<typename NumericType> inline NumericType get(const char * key)
 ```
 
+Defined in src/base/include/icy/application.h:133
+
 Returns the value associated with the given option key, converted to a numeric type. 
 #### Parameters
 * `NumericType` Integral or floating-point type to convert the value to. 
@@ -25462,6 +29056,12 @@ Converted numeric value.
 ```cpp
 #include <icy/application.h>
 ```
+
+```cpp
+struct ShutdownCmd
+```
+
+Defined in src/base/include/icy/application.h:148
 
 Shutdown command packet for signalling process termination.
 
@@ -25482,6 +29082,8 @@ Shutdown command packet for signalling process termination.
 void * opaque
 ```
 
+Defined in src/base/include/icy/application.h:150
+
 ---
 
 {#callback}
@@ -25492,6 +29094,8 @@ void * opaque
 std::function< void(void *)> callback
 ```
 
+Defined in src/base/include/icy/application.h:151
+
 {#packetadapterreference}
 
 ## PacketAdapterReference
@@ -25499,6 +29103,12 @@ std::function< void(void *)> callback
 ```cpp
 #include <icy/packetstream.h>
 ```
+
+```cpp
+struct PacketAdapterReference
+```
+
+Defined in src/base/include/icy/packetstream.h:148
 
 Provides a reference to a [PacketStreamAdapter](#packetstreamadapter) with optional ownership.
 
@@ -25521,6 +29131,8 @@ Provides a reference to a [PacketStreamAdapter](#packetstreamadapter) with optio
 PacketStreamAdapter * ptr
 ```
 
+Defined in src/base/include/icy/packetstream.h:152
+
 ---
 
 {#_prevent_deletion}
@@ -25530,6 +29142,8 @@ PacketStreamAdapter * ptr
 ```cpp
 std::shared_ptr< void > _prevent_deletion
 ```
+
+Defined in src/base/include/icy/packetstream.h:153
 
 ---
 
@@ -25541,6 +29155,8 @@ std::shared_ptr< void > _prevent_deletion
 int order
 ```
 
+Defined in src/base/include/icy/packetstream.h:154
+
 ---
 
 {#syncstate}
@@ -25550,6 +29166,8 @@ int order
 ```cpp
 bool syncState
 ```
+
+Defined in src/base/include/icy/packetstream.h:155
 
 ### Public Methods
 
@@ -25567,8 +29185,10 @@ bool syncState
 `inline`
 
 ```cpp
-inline PacketAdapterReference(PacketStreamAdapter * ptr, int order, bool syncState)
+inline PacketAdapterReference(PacketStreamAdapter * ptr = nullptr, int order = 0, bool syncState = false)
 ```
+
+Defined in src/base/include/icy/packetstream.h:158
 
 Construct with raw pointer (non-owning).
 
@@ -25581,8 +29201,10 @@ Construct with raw pointer (non-owning).
 `inline`
 
 ```cpp
-template<class C> inline PacketAdapterReference(std::shared_ptr< C > owned, int order, bool syncState)
+template<class C> inline PacketAdapterReference(std::shared_ptr< C > owned, int order = 0, bool syncState = false)
 ```
+
+Defined in src/base/include/icy/packetstream.h:168
 
 Construct with shared_ptr ownership.
 
@@ -25603,6 +29225,8 @@ Construct with shared_ptr ownership.
 ```cpp
 static inline bool compareOrder(const PacketAdapterReference::Ptr & l, const PacketAdapterReference::Ptr & r)
 ```
+
+Defined in src/base/include/icy/packetstream.h:181
 
 Comparator for sorting references by ascending order value. 
 #### Parameters
@@ -25626,8 +29250,10 @@ true if `l` should appear before `r` in the processor chain.
 #### Ptr
 
 ```cpp
-std::shared_ptr< PacketAdapterReference > Ptr()
+using Ptr = std::shared_ptr< PacketAdapterReference >
 ```
+
+Defined in src/base/include/icy/packetstream.h:150
 
 {#packetstreamstate}
 
@@ -25637,6 +29263,12 @@ std::shared_ptr< PacketAdapterReference > Ptr()
 #include <icy/packetstream.h>
 ```
 
+```cpp
+struct PacketStreamState
+```
+
+Defined in src/base/include/icy/packetstream.h:228
+
 > **Inherits:** [`State`](#state)
 
 [State](#state) machine states for [PacketStream](#packetstream).
@@ -25645,7 +29277,7 @@ std::shared_ptr< PacketAdapterReference > Ptr()
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`str`](#str) `const` `inline` |  |
+| `std::string` | [`str`](#str) `const` `inline` `override` |  |
 
 ---
 
@@ -25653,24 +29285,26 @@ std::shared_ptr< PacketAdapterReference > Ptr()
 
 #### str
 
-`const` `inline`
+`const` `inline` `override`
 
 ```cpp
-inline std::string str(unsigned int id) const
+inline std::string str(unsigned int id) const override
 ```
+
+Defined in src/base/include/icy/packetstream.h:254
 
 ### Public Static Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr unsigned int` | [`None`](#none) `static` |  |
-| `constexpr unsigned int` | [`Locked`](#locked) `static` |  |
-| `constexpr unsigned int` | [`Active`](#active) `static` |  |
-| `constexpr unsigned int` | [`Paused`](#paused) `static` |  |
-| `constexpr unsigned int` | [`Stopping`](#stopping) `static` |  |
-| `constexpr unsigned int` | [`Stopped`](#stopped) `static` |  |
-| `constexpr unsigned int` | [`Closed`](#closed) `static` |  |
-| `constexpr unsigned int` | [`Error`](#error) `static` |  |
+| `unsigned int` | [`None`](#none) `static` `constexpr` |  |
+| `unsigned int` | [`Locked`](#locked) `static` `constexpr` |  |
+| `unsigned int` | [`Active`](#active) `static` `constexpr` |  |
+| `unsigned int` | [`Paused`](#paused) `static` `constexpr` |  |
+| `unsigned int` | [`Stopping`](#stopping) `static` `constexpr` |  |
+| `unsigned int` | [`Stopped`](#stopped) `static` `constexpr` |  |
+| `unsigned int` | [`Closed`](#closed) `static` `constexpr` |  |
+| `unsigned int` | [`Error`](#error) `static` `constexpr` |  |
 
 ---
 
@@ -25678,11 +29312,13 @@ inline std::string str(unsigned int id) const
 
 #### None
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int None = static_cast<unsigned int>(Type::None)
+unsigned int None = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:245
 
 ---
 
@@ -25690,11 +29326,13 @@ constexpr unsigned int None = static_cast<unsigned int>(Type::None)
 
 #### Locked
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Locked = static_cast<unsigned int>(Type::Locked)
+unsigned int Locked = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:246
 
 ---
 
@@ -25702,11 +29340,13 @@ constexpr unsigned int Locked = static_cast<unsigned int>(Type::Locked)
 
 #### Active
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Active = static_cast<unsigned int>(Type::Active)
+unsigned int Active = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:247
 
 ---
 
@@ -25714,11 +29354,13 @@ constexpr unsigned int Active = static_cast<unsigned int>(Type::Active)
 
 #### Paused
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Paused = static_cast<unsigned int>(Type::Paused)
+unsigned int Paused = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:248
 
 ---
 
@@ -25726,11 +29368,13 @@ constexpr unsigned int Paused = static_cast<unsigned int>(Type::Paused)
 
 #### Stopping
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Stopping = static_cast<unsigned int>(Type::Stopping)
+unsigned int Stopping = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:249
 
 ---
 
@@ -25738,11 +29382,13 @@ constexpr unsigned int Stopping = static_cast<unsigned int>(Type::Stopping)
 
 #### Stopped
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Stopped = static_cast<unsigned int>(Type::Stopped)
+unsigned int Stopped = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:250
 
 ---
 
@@ -25750,11 +29396,13 @@ constexpr unsigned int Stopped = static_cast<unsigned int>(Type::Stopped)
 
 #### Closed
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Closed = static_cast<unsigned int>(Type::Closed)
+unsigned int Closed = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:251
 
 ---
 
@@ -25762,11 +29410,13 @@ constexpr unsigned int Closed = static_cast<unsigned int>(Type::Closed)
 
 #### Error
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr unsigned int Error = static_cast<unsigned int>(Type::Error)
+unsigned int Error = static_cast<unsigned int>()
 ```
+
+Defined in src/base/include/icy/packetstream.h:252
 
 ### Public Types
 
@@ -25783,6 +29433,8 @@ constexpr unsigned int Error = static_cast<unsigned int>(Type::Error)
 ```cpp
 enum Type
 ```
+
+Defined in src/base/include/icy/packetstream.h:230
 
 | Value | Description |
 |-------|-------------|
@@ -25803,6 +29455,13 @@ enum Type
 #include <icy/packetfactory.h>
 ```
 
+```cpp
+template<class PacketT>
+struct PacketCreationStrategy
+```
+
+Defined in src/base/include/icy/packetfactory.h:55
+
 > **Inherits:** [`IPacketCreationStrategy`](#ipacketcreationstrategy)
 
 This template class implements an adapter that sits between an SignalBase and an object receiving notifications from it.
@@ -25811,9 +29470,9 @@ This template class implements an adapter that sits between an SignalBase and an
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`PacketCreationStrategy`](#packetcreationstrategy) `inline` | #### Parameters |
-| `IPacket *` | [`create`](#create) `virtual` `const` `inline` | Attempts to default-construct a `PacketT`, calling its `read()` method. |
-| `int` | [`priority`](#priority) `virtual` `const` `inline` | #### Returns |
+|  | [`PacketCreationStrategy`](#packetcreationstrategy) `inline` |  |
+| `IPacket *` | [`create`](#create) `virtual` `const` `inline` `override` | Attempts to default-construct a `PacketT`, calling its `read()` method. |
+| `int` | [`priority`](#priority) `virtual` `const` `inline` `override` |  |
 
 ---
 
@@ -25824,8 +29483,10 @@ This template class implements an adapter that sits between an SignalBase and an
 `inline`
 
 ```cpp
-inline PacketCreationStrategy(int priority)
+inline PacketCreationStrategy(int priority = 0)
 ```
+
+Defined in src/base/include/icy/packetfactory.h:59
 
 #### Parameters
 * `priority` Dispatch priority in the range 0–100. 
@@ -25839,11 +29500,13 @@ inline PacketCreationStrategy(int priority)
 
 #### create
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline IPacket * create(const ConstBuffer & buffer, size_t & nread) const
+virtual inline IPacket * create(const ConstBuffer & buffer, size_t & nread) const override
 ```
+
+Defined in src/base/include/icy/packetfactory.h:70
 
 Attempts to default-construct a `PacketT`, calling its `read()` method. 
 #### Parameters
@@ -25860,11 +29523,13 @@ Newly allocated `PacketT` on success, nullptr if read() returns 0.
 
 #### priority
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline int priority() const
+virtual inline int priority() const override
 ```
+
+Defined in src/base/include/icy/packetfactory.h:79
 
 #### Returns
 The priority value assigned at construction.
@@ -25885,6 +29550,8 @@ The priority value assigned at construction.
 int _priority
 ```
 
+Defined in src/base/include/icy/packetfactory.h:85
+
 {#sharedlibrary}
 
 ## SharedLibrary
@@ -25892,6 +29559,12 @@ int _priority
 ```cpp
 #include <icy/sharedlibrary.h>
 ```
+
+```cpp
+struct SharedLibrary
+```
+
+Defined in src/base/include/icy/sharedlibrary.h:24
 
 Loads a shared library at runtime and resolves exported symbols.
 
@@ -25917,6 +29590,8 @@ Loads a shared library at runtime and resolves exported symbols.
 inline bool open(const std::string & path)
 ```
 
+Defined in src/base/include/icy/sharedlibrary.h:29
+
 Opens a shared library. The filename is in utf-8. Returns true on success and false on error. Call `[SharedLibrary::error()](#structicy_1_1SharedLibrary_1a884ec111fdba82e16e31feaaf65bd4fd)` to get the error message.
 
 ---
@@ -25930,6 +29605,8 @@ Opens a shared library. The filename is in utf-8. Returns true on success and fa
 ```cpp
 inline void close()
 ```
+
+Defined in src/base/include/icy/sharedlibrary.h:39
 
 Closes the shared library.
 
@@ -25945,6 +29622,8 @@ Closes the shared library.
 inline bool sym(const char * name, void ** ptr)
 ```
 
+Defined in src/base/include/icy/sharedlibrary.h:47
+
 Retrieves a data pointer from a dynamic library. It is legal for a symbol to map to nullptr. Returns 0 on success and -1 if the symbol was not found.
 
 ---
@@ -25958,6 +29637,8 @@ Retrieves a data pointer from a dynamic library. It is legal for a symbol to map
 ```cpp
 inline void setError(const std::string & prefix)
 ```
+
+Defined in src/base/include/icy/sharedlibrary.h:60
 
 Reads the last libuv dynamic-linker error, stores it in _error, and throws a std::runtime_error with the combined prefix and error message. 
 #### Parameters
@@ -25977,6 +29658,8 @@ Reads the last libuv dynamic-linker error, stores it in _error, and throws a std
 ```cpp
 inline std::string error() const
 ```
+
+Defined in src/base/include/icy/sharedlibrary.h:72
 
 Returns the last error message recorded by [setError()](#structicy_1_1SharedLibrary_1a6ac5f2cc9cb2883df675da47cf844fbf). Empty if no error has occurred. 
 #### Returns
@@ -25999,6 +29682,8 @@ Last error string.
 uv_lib_t _lib
 ```
 
+Defined in src/base/include/icy/sharedlibrary.h:75
+
 ---
 
 {#_error}
@@ -26009,6 +29694,8 @@ uv_lib_t _lib
 std::string _error
 ```
 
+Defined in src/base/include/icy/sharedlibrary.h:76
+
 {#diagnosticstate}
 
 ## DiagnosticState
@@ -26016,6 +29703,12 @@ std::string _error
 ```cpp
 #include <icy/diagnosticmanager.h>
 ```
+
+```cpp
+struct DiagnosticState
+```
+
+Defined in src/base/include/icy/diagnosticmanager.h:26
 
 > **Inherits:** [`State`](#state)
 
@@ -26025,7 +29718,7 @@ std::string _error
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`str`](#str) `const` `inline` | Returns a human-readable string for the given state ID. |
+| `std::string` | [`str`](#str) `const` `inline` `override` | Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). |
 
 ---
 
@@ -26033,13 +29726,15 @@ std::string _error
 
 #### str
 
-`const` `inline`
+`const` `inline` `override`
 
 ```cpp
-inline std::string str(unsigned int id) const
+inline std::string str(unsigned int id) const override
 ```
 
-Returns a human-readable string for the given state ID. 
+Defined in src/base/include/icy/diagnosticmanager.h:40
+
+Returns a human-readable string for the given state [ID](#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3). 
 #### Parameters
 * `id` A [DiagnosticState::Type](#structicy_1_1DiagnosticState_1ad709e58b6422f1c15b4278b86b8de065) value. 
 
@@ -26065,6 +29760,8 @@ Returns a human-readable string for the given state ID.
 enum Type
 ```
 
+Defined in src/base/include/icy/diagnosticmanager.h:28
+
 | Value | Description |
 |-------|-------------|
 | `None` |  |
@@ -26080,6 +29777,12 @@ enum Type
 #include <icy/packettransaction.h>
 ```
 
+```cpp
+struct TransactionState
+```
+
+Defined in src/base/include/icy/packettransaction.h:27
+
 > **Inherits:** [`State`](#state)
 
 [State](#state) machine states for [PacketTransaction](#packettransaction).
@@ -26088,7 +29791,7 @@ enum Type
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`str`](#str) `const` `inline` | #### Parameters |
+| `std::string` | [`str`](#str) `const` `inline` |  |
 
 ---
 
@@ -26101,6 +29804,8 @@ enum Type
 ```cpp
 inline std::string str(unsigned int id) const
 ```
+
+Defined in src/base/include/icy/packettransaction.h:40
 
 #### Parameters
 * `id` A `[TransactionState::Type](#structicy_1_1TransactionState_1a3389dd308d8acd3cab977d1826298434)` value. 
@@ -26124,6 +29829,8 @@ Human-readable name of the state.
 enum Type
 ```
 
+Defined in src/base/include/icy/packettransaction.h:29
+
 | Value | Description |
 |-------|-------------|
 | `Waiting` |  |
@@ -26140,6 +29847,12 @@ enum Type
 #include <icy/packet.h>
 ```
 
+```cpp
+struct IPacketInfo
+```
+
+Defined in src/base/include/icy/packet.h:33
+
 > **Subclassed by:** [`PacketInfo`](net.md#packetinfo)
 
 An abstract interface for packet sources to provide extra information about packets.
@@ -26149,7 +29862,7 @@ An abstract interface for packet sources to provide extra information about pack
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`IPacketInfo`](#ipacketinfo)  | Defaulted constructor. |
-| `std::unique_ptr< IPacketInfo >` | [`clone`](#clone) `const` | Returns a heap-allocated deep copy of this info object. |
+| `std::unique_ptr< IPacketInfo >` | [`clone`](#clone) `virtual` `const` | Returns a heap-allocated deep copy of this info object. |
 
 ---
 
@@ -26161,6 +29874,8 @@ An abstract interface for packet sources to provide extra information about pack
 IPacketInfo() = default
 ```
 
+Defined in src/base/include/icy/packet.h:35
+
 Defaulted constructor.
 
 ---
@@ -26169,12 +29884,15 @@ Defaulted constructor.
 
 #### clone
 
-`const`
+`virtual` `const`
 
 ```cpp
-std::unique_ptr< IPacketInfo > clone() const
+virtual std::unique_ptr< IPacketInfo > clone() const
 ```
+
+Defined in src/base/include/icy/packet.h:40
 
 Returns a heap-allocated deep copy of this info object. 
 #### Returns
 Owning pointer to the cloned instance.
+

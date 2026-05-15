@@ -41,7 +41,7 @@ Cryptographic primitives, key helpers, and certificate utilities backed by OpenS
 #### EvpCipherCtxPtr
 
 ```cpp
-std::unique_ptr< EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)> EvpCipherCtxPtr()
+using EvpCipherCtxPtr = std::unique_ptr< EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>
 ```
 
 Owning OpenSSL cipher context handle with automatic `EVP_CIPHER_CTX_free`.
@@ -53,7 +53,7 @@ Owning OpenSSL cipher context handle with automatic `EVP_CIPHER_CTX_free`.
 #### ByteVec
 
 ```cpp
-std::vector< unsigned char > ByteVec()
+using ByteVec = std::vector< unsigned char >
 ```
 
 Generic storage container for storing cryptographic binary data.
@@ -65,7 +65,7 @@ Generic storage container for storing cryptographic binary data.
 #### EvpMdCtxPtr
 
 ```cpp
-std::unique_ptr< EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> EvpMdCtxPtr()
+using EvpMdCtxPtr = std::unique_ptr< EVP_MD_CTX, decltype(&EVP_MD_CTX_free)>
 ```
 
 Owning OpenSSL digest context handle with automatic `EVP_MD_CTX_free`.
@@ -77,12 +77,12 @@ Owning OpenSSL digest context handle with automatic `EVP_MD_CTX_free`.
 #### RSAKey
 
 ```cpp
-::RSA RSAKey()
+using RSAKey = ::RSA
 ```
 
 Alias for the OpenSSL RSA key type, brought into the [icy::crypto](#crypto) namespace.
 
-Currently a transparent alias for the OpenSSL RSA struct. Use OpenSSL RSA_* functions directly to create, populate, and free RSAKey objects. This alias exists as a stable forward-declaration point; a higher-level RAII wrapper may replace it in a future version.
+Currently a transparent alias for the OpenSSL RSA struct. Use OpenSSL RSA_* functions directly to create, populate, and free [RSAKey](#rsakey) objects. This alias exists as a stable forward-declaration point; a higher-level RAII wrapper may replace it in a future version.
 
 ---
 
@@ -91,7 +91,7 @@ Currently a transparent alias for the OpenSSL RSA struct. Use OpenSSL RSA_* func
 #### X509Ptr
 
 ```cpp
-std::unique_ptr< X509, decltype(&X509_free)> X509Ptr()
+using X509Ptr = std::unique_ptr< X509, decltype(&X509_free)>
 ```
 
 RAII pointer alias for OpenSSL `X509*` values.
@@ -107,7 +107,7 @@ RAII pointer alias for OpenSSL `X509*` values.
 | `std::string` | [`hash`](#hash-1) `inline` | Computes a hex-encoded digest of a string in a single call. |
 | `std::string` | [`hash`](#hash-2) `inline` | Computes a hex-encoded digest of a raw buffer in a single call. |
 | `std::string` | [`checksum`](#checksum-1) `inline` | Computes the hex-encoded checksum of a file using the given algorithm. |
-| `std::string` | [`computeHMAC`](#computehmac)  | Computes an HMAC-SHA1 message authentication code. |
+| `std::string` | [`computeHMAC`](#computehmac) `nodiscard` | Computes an HMAC-SHA1 message authentication code. |
 
 ---
 
@@ -116,7 +116,7 @@ RAII pointer alias for OpenSSL `X509*` values.
 #### encryptString
 
 ```cpp
-template<typename K, typename I> std::string encryptString(const std::string & algorithm, const std::string & data, const K & key, const I & iv, Cipher::Encoding encoding)
+template<typename K, typename I> std::string encryptString(const std::string & algorithm, const std::string & data, const K & key, const I & iv, Cipher::Encoding encoding = Cipher::Binary)
 ```
 
 Encrypts a string using the specified cipher, key, and IV in a single call.
@@ -149,7 +149,7 @@ Encrypted (and optionally encoded) result as a std::string.
 #### decryptString
 
 ```cpp
-template<typename K, typename I> std::string decryptString(const std::string & algorithm, const std::string & data, const K & key, const I & iv, Cipher::Encoding encoding)
+template<typename K, typename I> std::string decryptString(const std::string & algorithm, const std::string & data, const K & key, const I & iv, Cipher::Encoding encoding = Cipher::Binary)
 ```
 
 Decrypts a string using the specified cipher, key, and IV in a single call.
@@ -282,8 +282,10 @@ Lowercase hex-encoded digest string.
 
 #### computeHMAC
 
+`nodiscard`
+
 ```cpp
-std::string computeHMAC(std::string_view input, std::string_view key)
+[[nodiscard]] std::string computeHMAC(std::string_view input, std::string_view key)
 ```
 
 Computes an HMAC-SHA1 message authentication code.
@@ -309,6 +311,12 @@ Uses OpenSSL HMAC with SHA-1 as the underlying digest. The output is a 20-byte r
 #include <icy/crypto/cipher.h>
 ```
 
+```cpp
+class Cipher
+```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:40
+
 Provides symmetric algorithms for encryption and decryption. The algorithms that are available depend on the particular version of OpenSSL that is installed.
 
 ### Public Methods
@@ -327,8 +335,8 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 | `ssize_t` | [`final`](#final-1) `inline` | Finalizes the cipher operation using a generic output buffer type. |
 | `ssize_t` | [`encrypt`](#encrypt)  | Encrypts a buffer and writes the result with optional transport encoding. |
 | `ssize_t` | [`encrypt`](#encrypt-1) `inline` | Encrypts data using generic input/output buffer types. |
-| `std::string` | [`encryptString`](#encryptstring-1) `virtual` | Encrypts a string and returns the result with optional transport encoding. |
-| `std::string` | [`decryptString`](#decryptstring-1) `virtual` | Decrypts a string that was previously encrypted with optional encoding. |
+| `std::string` | [`encryptString`](#encryptstring-1) `virtual` `nodiscard` | Encrypts a string and returns the result with optional transport encoding. |
+| `std::string` | [`decryptString`](#decryptstring-1) `virtual` `nodiscard` | Decrypts a string that was previously encrypted with optional encoding. |
 | `void` | [`encryptStream`](#encryptstream) `virtual` | Encrypts all data from `source` and writes the result to `sink`. |
 | `void` | [`decryptStream`](#decryptstream) `virtual` | Decrypts all data from `source` and writes the result to `sink`. |
 | `void` | [`setKey`](#setkey-1) `inline` | Sets the encryption key. |
@@ -352,6 +360,8 @@ Provides symmetric algorithms for encryption and decryption. The algorithms that
 Cipher(const std::string & name)
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:47
+
 Constructs a [Cipher](#cipher) with a randomly generated key and IV.
 
 #### Parameters
@@ -369,6 +379,8 @@ Constructs a [Cipher](#cipher) with a randomly generated key and IV.
 ```cpp
 Cipher(const std::string & name, const ByteVec & key, const ByteVec & iv)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:55
 
 Constructs a [Cipher](#cipher) with an explicit key and initialization vector.
 
@@ -391,6 +403,8 @@ Constructs a [Cipher](#cipher) with an explicit key and initialization vector.
 ```cpp
 Cipher(const std::string & name, std::string_view passphrase, std::string_view salt, int iterationCount)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:67
 
 Constructs a [Cipher](#cipher) and derives a key and IV from a passphrase.
 
@@ -418,6 +432,8 @@ Uses EVP_BytesToKey with SHA-256 to derive the key material.
 ~Cipher()
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:71
+
 Destroys the [Cipher](#cipher) and resets the OpenSSL context.
 
 ---
@@ -429,6 +445,8 @@ Destroys the [Cipher](#cipher) and resets the OpenSSL context.
 ```cpp
 void initEncryptor()
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:77
 
 Initializes the cipher context for encryption.
 
@@ -444,6 +462,8 @@ Must be called before using [update()](#update-7) and [final()](#final) in encry
 void initDecryptor()
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:83
+
 Initializes the cipher context for decryption.
 
 Must be called before using [update()](#update-7) and [final()](#final) in decrypt mode. Calling this resets any prior context state.
@@ -457,6 +477,8 @@ Must be called before using [update()](#update-7) and [final()](#final) in decry
 ```cpp
 ssize_t update(const unsigned char * input, size_t inputLength, unsigned char * output, size_t outputLength)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:98
 
 Processes a block of data through the cipher (encrypt or decrypt).
 
@@ -489,13 +511,15 @@ Number of bytes written to `output`.
 template<typename I, typename O> inline ssize_t update(const I & input, O & output)
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:110
+
 Processes a block of data through the cipher using generic buffer types.
 
 Convenience wrapper around [update(const unsigned char*, size_t,
 unsigned char*, size_t)](#update-7). Accepts any type supported by internal::Raw.
 
 #### Parameters
-* `input` Input buffer (std::string, ByteVec, etc.). 
+* `input` Input buffer (std::string, [ByteVec](#bytevec), etc.). 
 
 * `output` Output buffer; must be large enough for the result. 
 
@@ -511,6 +535,8 @@ Number of bytes written to `output`.
 ```cpp
 ssize_t final(unsigned char * output, size_t length)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:130
 
 Finalizes the cipher operation and flushes any remaining buffered data.
 
@@ -541,6 +567,8 @@ Number of bytes written to `output`.
 template<typename O> inline ssize_t final(O & output)
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:140
+
 Finalizes the cipher operation using a generic output buffer type.
 
 Convenience wrapper around [final(unsigned char*, size_t)](#final). Accepts any type supported by internal::Raw.
@@ -558,8 +586,10 @@ Number of bytes written to `output`.
 #### encrypt
 
 ```cpp
-ssize_t encrypt(const unsigned char * inbuf, size_t inlen, unsigned char * outbuf, size_t outlen, Encoding encoding)
+ssize_t encrypt(const unsigned char * inbuf, size_t inlen, unsigned char * outbuf, size_t outlen, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:168
 
 Encrypts a buffer and writes the result with optional transport encoding.
 
@@ -588,8 +618,10 @@ Total number of bytes written to `outbuf`.
 `inline`
 
 ```cpp
-template<typename I, typename O> inline ssize_t encrypt(const I & input, O & output, Encoding encoding)
+template<typename I, typename O> inline ssize_t encrypt(const I & input, O & output, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:183
 
 Encrypts data using generic input/output buffer types.
 
@@ -612,11 +644,13 @@ Total number of bytes written to `output`.
 
 #### encryptString
 
-`virtual`
+`virtual` `nodiscard`
 
 ```cpp
-virtual std::string encryptString(const std::string & str, Encoding encoding)
+[[nodiscard]] virtual std::string encryptString(const std::string & str, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:198
 
 Encrypts a string and returns the result with optional transport encoding.
 
@@ -636,11 +670,13 @@ Encrypted (and optionally encoded) result as a std::string.
 
 #### decryptString
 
-`virtual`
+`virtual` `nodiscard`
 
 ```cpp
-virtual std::string decryptString(const std::string & str, Encoding encoding)
+[[nodiscard]] virtual std::string decryptString(const std::string & str, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:208
 
 Decrypts a string that was previously encrypted with optional encoding.
 
@@ -663,8 +699,10 @@ Decrypted plaintext as a std::string.
 `virtual`
 
 ```cpp
-virtual void encryptStream(std::istream & source, std::ostream & sink, Encoding encoding)
+virtual void encryptStream(std::istream & source, std::ostream & sink, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:218
 
 Encrypts all data from `source` and writes the result to `sink`.
 
@@ -686,8 +724,10 @@ Reads in chunks of `[blockSize()](#blocksize) * 128` bytes. Calls [initEncryptor
 `virtual`
 
 ```cpp
-virtual void decryptStream(std::istream & source, std::ostream & sink, Encoding encoding)
+virtual void decryptStream(std::istream & source, std::ostream & sink, Encoding encoding = Binary)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:228
 
 Decrypts all data from `source` and writes the result to `sink`.
 
@@ -712,6 +752,8 @@ Reads in chunks of `[blockSize()](#blocksize) * 128` bytes. Calls [initDecryptor
 template<typename T> inline void setKey(const T & key)
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:235
+
 Sets the encryption key.
 
 #### Parameters
@@ -732,6 +774,8 @@ Sets the encryption key.
 template<typename T> inline void setIV(const T & iv)
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:250
+
 Sets the initialization vector (IV).
 
 #### Parameters
@@ -749,6 +793,8 @@ Sets the initialization vector (IV).
 ```cpp
 int setPadding(int padding)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:271
 
 Enables or disables PKCS block padding.
 
@@ -774,6 +820,8 @@ The return value from EVP_CIPHER_CTX_set_padding.
 const ByteVec & getKey() const
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:276
+
 Returns the raw encryption key bytes.
 
 #### Returns
@@ -790,6 +838,8 @@ Reference to the internal key byte vector.
 ```cpp
 const ByteVec & getIV() const
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:281
 
 Returns the raw initialization vector bytes.
 
@@ -808,6 +858,8 @@ Reference to the internal IV byte vector.
 const std::string & name() const
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:286
+
 Returns the OpenSSL cipher name this object was constructed with.
 
 #### Returns
@@ -824,6 +876,8 @@ Returns the OpenSSL cipher name this object was constructed with.
 ```cpp
 int blockSize() const
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:291
 
 Returns the cipher block size in bytes.
 
@@ -842,6 +896,8 @@ Block size as reported by EVP_CIPHER_block_size.
 int keySize() const
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:296
+
 Returns the required key length in bytes for this cipher.
 
 #### Returns
@@ -859,6 +915,8 @@ Key length as reported by EVP_CIPHER_key_length.
 int ivSize() const
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:301
+
 Returns the required initialization vector length in bytes.
 
 #### Returns
@@ -873,6 +931,8 @@ IV length as reported by EVP_CIPHER_iv_length.
 ```cpp
 const EVP_CIPHER * cipher()
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:307
 
 Returns the underlying OpenSSL EVP_CIPHER object.
 
@@ -901,6 +961,8 @@ Pointer to the OpenSSL cipher descriptor; valid for the lifetime of this [Cipher
 bool _initialized
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:337
+
 ---
 
 {#_encrypt}
@@ -910,6 +972,8 @@ bool _initialized
 ```cpp
 bool _encrypt
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:338
 
 ---
 
@@ -921,6 +985,8 @@ bool _encrypt
 const EVP_CIPHER * _cipher
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:339
+
 ---
 
 {#_ctx}
@@ -930,6 +996,8 @@ const EVP_CIPHER * _cipher
 ```cpp
 EvpCipherCtxPtr _ctx
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:340
 
 ---
 
@@ -941,6 +1009,8 @@ EvpCipherCtxPtr _ctx
 std::string _name
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:341
+
 ---
 
 {#_key-2}
@@ -951,6 +1021,8 @@ std::string _name
 ByteVec _key
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:342
+
 ---
 
 {#_iv}
@@ -960,6 +1032,8 @@ ByteVec _key
 ```cpp
 ByteVec _iv
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:343
 
 ### Protected Methods
 
@@ -983,6 +1057,8 @@ ByteVec _iv
 Cipher() = delete
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:310
+
 Deleted constructor.
 
 ---
@@ -994,6 +1070,8 @@ Deleted constructor.
 ```cpp
 Cipher(const Cipher &) = delete
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:311
 
 Deleted constructor.
 
@@ -1007,6 +1085,8 @@ Deleted constructor.
 Cipher(Cipher &&) = delete
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:313
+
 Deleted constructor.
 
 ---
@@ -1018,6 +1098,8 @@ Deleted constructor.
 ```cpp
 void generateKey(std::string_view passphrase, std::string_view salt, int iterationCount)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:324
 
 Derives and sets the key and IV from a passphrase using EVP_BytesToKey.
 
@@ -1040,6 +1122,8 @@ Uses SHA-256 as the digest. Salt values longer than 8 bytes are folded by XOR in
 void setRandomKey()
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:327
+
 Fills the key buffer with cryptographically random bytes.
 
 ---
@@ -1052,6 +1136,8 @@ Fills the key buffer with cryptographically random bytes.
 void setRandomIV()
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:330
+
 Fills the IV buffer with cryptographically random bytes.
 
 ---
@@ -1063,6 +1149,8 @@ Fills the IV buffer with cryptographically random bytes.
 ```cpp
 void init(bool encrypt)
 ```
+
+Defined in src/crypto/include/icy/crypto/cipher.h:335
 
 Initializes or resets the OpenSSL cipher context for the given direction.
 
@@ -1085,6 +1173,8 @@ Initializes or resets the OpenSSL cipher context for the given direction.
 enum Encoding
 ```
 
+Defined in src/crypto/include/icy/crypto/cipher.h:147
+
 Transport encoding to use for [encrypt()](#encrypt) and decrypt().
 
 | Value | Description |
@@ -1103,6 +1193,12 @@ Transport encoding to use for [encrypt()](#encrypt) and decrypt().
 #include <icy/crypto/hash.h>
 ```
 
+```cpp
+class Hash
+```
+
+Defined in src/crypto/include/icy/crypto/hash.h:38
+
 Incremental cryptographic hash engine wrapping OpenSSL EVP digest functions.
 
 Construct with an algorithm name recognized by OpenSSL (e.g. "sha256", "md5"). Feed data with one or more calls to [update()](#update-9), then call [digest()](#digest) or [digestStr()](#digeststr) to finalize and retrieve the result. Call [reset()](#reset-13) to reuse the engine for a new computation without reallocating the context.
@@ -1116,8 +1212,8 @@ Construct with an algorithm name recognized by OpenSSL (e.g. "sha256", "md5"). F
 | `void` | [`update`](#update-9)  | Feeds a single character into the digest computation. |
 | `void` | [`update`](#update-10)  | Feeds a string view into the digest computation. |
 | `void` | [`update`](#update-11)  | Feeds a raw memory buffer into the digest computation. |
-| `const ByteVec &` | [`digest`](#digest)  | Finalizes the digest computation and returns the raw binary result. |
-| `std::string` | [`digestStr`](#digeststr)  | Finalizes the digest computation and returns the result as a raw binary string (not hex-encoded). Use [icy::hex::encode()](base.md#encode-14) on [digest()](#digest) if you need a printable representation. |
+| `const ByteVec &` | [`digest`](#digest) `nodiscard` | Finalizes the digest computation and returns the raw binary result. |
+| `std::string` | [`digestStr`](#digeststr) `nodiscard` | Finalizes the digest computation and returns the result as a raw binary string (not hex-encoded). Use [icy::hex::encode()](base.md#encode-14) on [digest()](#digest) if you need a printable representation. |
 | `void` | [`reset`](#reset-13)  | Resets the digest context and clears the cached result, allowing the engine to be reused for a new computation with the same algorithm. |
 | `const std::string &` | [`algorithm`](#algorithm) `const` | Returns the algorithm name this engine was constructed with. |
 
@@ -1130,6 +1226,8 @@ Construct with an algorithm name recognized by OpenSSL (e.g. "sha256", "md5"). F
 ```cpp
 Hash(const std::string & algorithm)
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:45
 
 Constructs a [Hash](#hash-3) engine for the given algorithm.
 
@@ -1149,6 +1247,8 @@ Constructs a [Hash](#hash-3) engine for the given algorithm.
 ~Hash()
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:48
+
 Destroys the [Hash](#hash-3) engine and releases OpenSSL resources.
 
 ---
@@ -1160,6 +1260,8 @@ Destroys the [Hash](#hash-3) engine and releases OpenSSL resources.
 ```cpp
 void update(char data)
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:53
 
 Feeds a single character into the digest computation.
 
@@ -1176,6 +1278,8 @@ Feeds a single character into the digest computation.
 void update(std::string_view data)
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:58
+
 Feeds a string view into the digest computation.
 
 #### Parameters
@@ -1190,6 +1294,8 @@ Feeds a string view into the digest computation.
 ```cpp
 void update(const void * data, size_t length)
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:66
 
 Feeds a raw memory buffer into the digest computation.
 
@@ -1206,9 +1312,13 @@ This method may be called multiple times for streaming large inputs.
 
 #### digest
 
+`nodiscard`
+
 ```cpp
-const ByteVec & digest()
+[[nodiscard]] const ByteVec & digest()
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:75
 
 Finalizes the digest computation and returns the raw binary result.
 
@@ -1223,9 +1333,13 @@ Reference to the internal byte vector containing the digest.
 
 #### digestStr
 
+`nodiscard`
+
 ```cpp
-std::string digestStr()
+[[nodiscard]] std::string digestStr()
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:82
 
 Finalizes the digest computation and returns the result as a raw binary string (not hex-encoded). Use [icy::hex::encode()](base.md#encode-14) on [digest()](#digest) if you need a printable representation.
 
@@ -1242,6 +1356,8 @@ Binary digest as a std::string.
 void reset()
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:86
+
 Resets the digest context and clears the cached result, allowing the engine to be reused for a new computation with the same algorithm.
 
 ---
@@ -1255,6 +1371,8 @@ Resets the digest context and clears the cached result, allowing the engine to b
 ```cpp
 const std::string & algorithm() const
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:91
 
 Returns the algorithm name this engine was constructed with.
 
@@ -1280,6 +1398,8 @@ OpenSSL digest name string (e.g. "sha256").
 EvpMdCtxPtr _ctx
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:96
+
 ---
 
 {#_md}
@@ -1289,6 +1409,8 @@ EvpMdCtxPtr _ctx
 ```cpp
 const EVP_MD * _md
 ```
+
+Defined in src/crypto/include/icy/crypto/hash.h:97
 
 ---
 
@@ -1300,6 +1422,8 @@ const EVP_MD * _md
 crypto::ByteVec _digest
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:98
+
 ---
 
 {#_algorithm}
@@ -1310,6 +1434,8 @@ crypto::ByteVec _digest
 std::string _algorithm
 ```
 
+Defined in src/crypto/include/icy/crypto/hash.h:99
+
 {#x509certificate}
 
 ## X509Certificate
@@ -1317,6 +1443,12 @@ std::string _algorithm
 ```cpp
 #include <icy/crypto/x509certificate.h>
 ```
+
+```cpp
+class X509Certificate
+```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:33
 
 RAII wrapper for an OpenSSL X509 certificate with PEM loading and inspection.
 
@@ -1329,9 +1461,9 @@ RAII wrapper for an OpenSSL X509 certificate with PEM loading and inspection.
 |  | [`X509Certificate`](#x509certificate-3) `explicit` | Constructs an [X509Certificate](#x509certificate) taking ownership of an existing OpenSSL X509 object. |
 |  | [`X509Certificate`](#x509certificate-4)  | Constructs an [X509Certificate](#x509certificate) from an existing OpenSSL X509 object, optionally sharing ownership via reference count increment. |
 |  | [`X509Certificate`](#x509certificate-5)  | Copy-constructs an [X509Certificate](#x509certificate) by duplicating the underlying X509 object. |
-|  | [`X509Certificate`](#x509certificate-6)  | Move-constructs an [X509Certificate](#x509certificate), transferring ownership from `cert`. |
-| `X509Certificate &` | [`operator=`](#operator-25)  | Copy-assigns a certificate, duplicating the underlying X509 object. |
-| `X509Certificate &` | [`operator=`](#operator-26)  | Move-assigns a certificate, transferring ownership from `cert`. |
+|  | [`X509Certificate`](#x509certificate-6) `noexcept` | Move-constructs an [X509Certificate](#x509certificate), transferring ownership from `cert`. |
+| `X509Certificate &` | [`operator=`](#operator-32)  | Copy-assigns a certificate, duplicating the underlying X509 object. |
+| `X509Certificate &` | [`operator=`](#operator-33) `noexcept` | Move-assigns a certificate, transferring ownership from `cert`. |
 | `void` | [`swap`](#swap-6)  | Swaps this certificate with `cert`. |
 |  | [`~X509Certificate`](#x509certificate-7)  | Destroys the [X509Certificate](#x509certificate) and releases the underlying OpenSSL X509 object. |
 | `const std::string &` | [`issuerName`](#issuername) `const` | Returns the full distinguished name of the certificate issuer. |
@@ -1360,6 +1492,8 @@ RAII wrapper for an OpenSSL X509 certificate with PEM loading and inspection.
 explicit X509Certificate(const char * data, size_t length)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:55
+
 Constructs an [X509Certificate](#x509certificate) by parsing a PEM-encoded certificate from memory.
 
 #### Parameters
@@ -1382,6 +1516,8 @@ Constructs an [X509Certificate](#x509certificate) by parsing a PEM-encoded certi
 explicit X509Certificate(const std::string & path)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:61
+
 Constructs an [X509Certificate](#x509certificate) by reading a PEM-encoded certificate from a file.
 
 #### Parameters
@@ -1402,6 +1538,8 @@ Constructs an [X509Certificate](#x509certificate) by reading a PEM-encoded certi
 explicit X509Certificate(X509 * pCert)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:68
+
 Constructs an [X509Certificate](#x509certificate) taking ownership of an existing OpenSSL X509 object.
 
 #### Parameters
@@ -1419,6 +1557,8 @@ Constructs an [X509Certificate](#x509certificate) taking ownership of an existin
 ```cpp
 X509Certificate(X509 * pCert, bool shared)
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:79
 
 Constructs an [X509Certificate](#x509certificate) from an existing OpenSSL X509 object, optionally sharing ownership via reference count increment.
 
@@ -1440,6 +1580,8 @@ Constructs an [X509Certificate](#x509certificate) from an existing OpenSSL X509 
 X509Certificate(const X509Certificate & cert)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:84
+
 Copy-constructs an [X509Certificate](#x509certificate) by duplicating the underlying X509 object.
 
 #### Parameters
@@ -1451,9 +1593,13 @@ Copy-constructs an [X509Certificate](#x509certificate) by duplicating the underl
 
 #### X509Certificate
 
+`noexcept`
+
 ```cpp
 X509Certificate(X509Certificate && cert) noexcept
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:89
 
 Move-constructs an [X509Certificate](#x509certificate), transferring ownership from `cert`.
 
@@ -1462,13 +1608,15 @@ Move-constructs an [X509Certificate](#x509certificate), transferring ownership f
 
 ---
 
-{#operator-25}
+{#operator-32}
 
 #### operator=
 
 ```cpp
 X509Certificate & operator=(const X509Certificate & cert)
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:95
 
 Copy-assigns a certificate, duplicating the underlying X509 object.
 
@@ -1480,13 +1628,17 @@ Reference to this object.
 
 ---
 
-{#operator-26}
+{#operator-33}
 
 #### operator=
+
+`noexcept`
 
 ```cpp
 X509Certificate & operator=(X509Certificate && cert) noexcept
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:101
 
 Move-assigns a certificate, transferring ownership from `cert`.
 
@@ -1506,6 +1658,8 @@ Reference to this object.
 void swap(X509Certificate & cert)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:106
+
 Swaps this certificate with `cert`.
 
 #### Parameters
@@ -1521,6 +1675,8 @@ Swaps this certificate with `cert`.
 ~X509Certificate()
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:109
+
 Destroys the [X509Certificate](#x509certificate) and releases the underlying OpenSSL X509 object.
 
 ---
@@ -1534,6 +1690,8 @@ Destroys the [X509Certificate](#x509certificate) and releases the underlying Ope
 ```cpp
 const std::string & issuerName() const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:114
 
 Returns the full distinguished name of the certificate issuer.
 
@@ -1551,6 +1709,8 @@ One-line string representation produced by X509_NAME_oneline.
 ```cpp
 std::string issuerName(NID nid) const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:120
 
 Extracts a single field from the certificate issuer's distinguished name.
 
@@ -1572,6 +1732,8 @@ Field value, or an empty string if the field is absent.
 const std::string & subjectName() const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:125
+
 Returns the full distinguished name of the certificate subject.
 
 #### Returns
@@ -1588,6 +1750,8 @@ One-line string representation produced by X509_NAME_oneline.
 ```cpp
 std::string subjectName(NID nid) const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:131
 
 Extracts a single field from the certificate subject's distinguished name.
 
@@ -1609,6 +1773,8 @@ Field value, or an empty string if the field is absent.
 std::string commonName() const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:138
+
 Returns the common name (CN) from the certificate subject.
 
 Convenience wrapper for subjectName(NID_COMMON_NAME).
@@ -1627,6 +1793,8 @@ Common name string, or empty if absent.
 ```cpp
 void extractNames(std::string & commonName, std::set< std::string > & domainNames) const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:148
 
 Extracts the common name and the set of Subject Alternative Name (SAN) DNS entries from the certificate.
 
@@ -1649,6 +1817,8 @@ If no SAN DNS entries are present and the common name is non-empty, the common n
 DateTime validFrom() const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:156
+
 Returns the date and time from which the certificate is valid.
 
 Parsed from the X509 notBefore field.
@@ -1668,6 +1838,8 @@ UTC [DateTime](base.md#datetime) representing the start of the validity period.
 DateTime expiresOn() const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:163
+
 Returns the date and time at which the certificate expires.
 
 Parsed from the X509 notAfter field.
@@ -1686,6 +1858,8 @@ UTC [DateTime](base.md#datetime) representing the end of the validity period.
 ```cpp
 void save(std::ostream & stream) const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:169
 
 Writes the certificate in PEM format to an output stream.
 
@@ -1707,6 +1881,8 @@ Writes the certificate in PEM format to an output stream.
 void save(const std::string & path) const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:175
+
 Writes the certificate in PEM format to a file.
 
 #### Parameters
@@ -1726,6 +1902,8 @@ Writes the certificate in PEM format to a file.
 ```cpp
 bool issuedBy(const X509Certificate & issuerCertificate) const
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:186
 
 Verifies whether this certificate was signed by the given issuer.
 
@@ -1752,6 +1930,8 @@ true if this certificate's signature verifies against the issuer's public key, f
 const X509 * certificate() const
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:191
+
 Returns a const pointer to the underlying OpenSSL X509 object.
 
 #### Returns
@@ -1766,6 +1946,8 @@ Pointer valid for the lifetime of this [X509Certificate](#x509certificate).
 ```cpp
 X509 * certificate()
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:196
 
 Returns a mutable pointer to the underlying OpenSSL X509 object.
 
@@ -1790,6 +1972,8 @@ Pointer valid for the lifetime of this [X509Certificate](#x509certificate).
 void load(const char * data, size_t length)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:205
+
 Parses a PEM-encoded certificate from a memory buffer and stores it.
 
 #### Parameters
@@ -1812,6 +1996,8 @@ Parses a PEM-encoded certificate from a memory buffer and stores it.
 void load(const std::string & path)
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:212
+
 Reads a PEM-encoded certificate from a file and stores it.
 
 #### Parameters
@@ -1831,6 +2017,8 @@ Reads a PEM-encoded certificate from a file and stores it.
 ```cpp
 void init()
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:217
 
 Populates _issuerName and _subjectName from the loaded certificate.
 
@@ -1852,9 +2040,11 @@ Called after each successful load or construction from an X509 pointer.
 enum NID
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:40
+
 Name identifier for extracting fields from a certificate's distinguished name.
 
-Values correspond to OpenSSL NID constants used with X509_NAME_get_text_by_NID.
+Values correspond to OpenSSL [NID](#nid) constants used with X509_NAME_get_text_by_NID.
 
 | Value | Description |
 |-------|-------------|
@@ -1883,6 +2073,8 @@ Values correspond to OpenSSL NID constants used with X509_NAME_get_text_by_NID.
 std::string _issuerName
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:225
+
 ---
 
 {#_subjectname}
@@ -1893,6 +2085,8 @@ std::string _issuerName
 std::string _subjectName
 ```
 
+Defined in src/crypto/include/icy/crypto/x509certificate.h:226
+
 ---
 
 {#_certificate}
@@ -1902,4 +2096,6 @@ std::string _subjectName
 ```cpp
 X509Ptr _certificate
 ```
+
+Defined in src/crypto/include/icy/crypto/x509certificate.h:227
 

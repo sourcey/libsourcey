@@ -22,7 +22,7 @@ Package manager for distributing and installing packaged extensions and assets.
 |------|-------------|
 | [`InstallMonitor`](#installmonitor) | Aggregates multiple install tasks and reports overall progress. |
 | [`InstallTask`](#installtask) | Downloads, extracts, and finalizes a single package installation. |
-| [`PackageManager`](#packagemanager) | Loads package manifests and coordinates install, update, and uninstall workflows. |
+| [`PackageManager`](#packagemanager-1) | Loads package manifests and coordinates install, update, and uninstall workflows. |
 | [`InstallationState`](#installationstate) | [State](base.md#state) machine states for package installation. |
 | [`InstallOptions`](#installoptions) | [Package](#package) installation options. |
 | [`LocalPackage`](#localpackage) | [Package](#package) metadata for an installed package on the local filesystem. |
@@ -48,7 +48,7 @@ Package manager for distributing and installing packaged extensions and assets.
 #### LocalPackageVec
 
 ```cpp
-std::vector< LocalPackage * > LocalPackageVec()
+using LocalPackageVec = std::vector< LocalPackage * >
 ```
 
 Vector of local package pointers used by install monitor progress snapshots.
@@ -60,7 +60,7 @@ Vector of local package pointers used by install monitor progress snapshots.
 #### InstallTaskVec
 
 ```cpp
-std::vector< InstallTask * > InstallTaskVec()
+using InstallTaskVec = std::vector< InstallTask * >
 ```
 
 Vector of raw install task pointers used for transient iteration.
@@ -72,7 +72,7 @@ Vector of raw install task pointers used for transient iteration.
 #### InstallTaskPtrVec
 
 ```cpp
-std::vector< InstallTask::Ptr > InstallTaskPtrVec()
+using InstallTaskPtrVec = std::vector< InstallTask::Ptr >
 ```
 
 Vector of shared install task handles retained across async workflows.
@@ -84,7 +84,7 @@ Vector of shared install task handles retained across async workflows.
 #### PackagePairVec
 
 ```cpp
-std::vector< PackagePair > PackagePairVec()
+using PackagePairVec = std::vector< PackagePair >
 ```
 
 Vector of local/remote package pairs used for reconciliation and update checks.
@@ -96,7 +96,7 @@ Vector of local/remote package pairs used for reconciliation and update checks.
 #### LocalPackageStore
 
 ```cpp
-KeyedStore< std::string, LocalPackage > LocalPackageStore()
+using LocalPackageStore = KeyedStore< std::string, LocalPackage >
 ```
 
 Keyed store of installed packages indexed by package ID.
@@ -108,7 +108,7 @@ Keyed store of installed packages indexed by package ID.
 #### RemotePackageStore
 
 ```cpp
-KeyedStore< std::string, RemotePackage > RemotePackageStore()
+using RemotePackageStore = KeyedStore< std::string, RemotePackage >
 ```
 
 Keyed store of remote package metadata indexed by package ID.
@@ -168,6 +168,12 @@ Validates that a string is safe to use as a path component. Rejects path travers
 #include <icy/pacm/installmonitor.h>
 ```
 
+```cpp
+class InstallMonitor
+```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:27
+
 Aggregates multiple install tasks and reports overall progress.
 
 ### Public Attributes
@@ -189,6 +195,8 @@ Aggregates multiple install tasks and reports overall progress.
 ThreadSignal< void(InstallTask &, const InstallationState &, const InstallationState &)> InstallStateChange
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:60
+
 Proxies state change events from managed packages.
 
 ---
@@ -200,6 +208,8 @@ Proxies state change events from managed packages.
 ```cpp
 ThreadSignal< void(LocalPackage &)> InstallComplete
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:63
 
 Signals when a managed install task completes.
 
@@ -213,6 +223,8 @@ Signals when a managed install task completes.
 ThreadSignal< void(int &)> Progress
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:66
+
 Signals on overall progress update [0-100].
 
 ---
@@ -224,6 +236,8 @@ Signals on overall progress update [0-100].
 ```cpp
 ThreadSignal< void(LocalPackageVec &)> Complete
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:69
 
 Signals on all tasks complete.
 
@@ -251,6 +265,8 @@ Signals on all tasks complete.
 InstallMonitor()
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:30
+
 ---
 
 {#installmonitor-2}
@@ -260,6 +276,8 @@ InstallMonitor()
 ```cpp
 InstallMonitor(const InstallMonitor &) = delete
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:33
 
 Deleted constructor.
 
@@ -272,6 +290,8 @@ Deleted constructor.
 ```cpp
 InstallMonitor(InstallMonitor &&) = delete
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:35
 
 Deleted constructor.
 
@@ -287,6 +307,8 @@ Deleted constructor.
 virtual void addTask(InstallTask::Ptr task)
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:39
+
 Adds a task to monitor.
 
 ---
@@ -300,6 +322,8 @@ Adds a task to monitor.
 ```cpp
 virtual void startAll()
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:42
 
 Starts all monitored tasks.
 
@@ -315,6 +339,8 @@ Starts all monitored tasks.
 virtual void cancelAll()
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:45
+
 Cancels all monitored tasks.
 
 ---
@@ -328,6 +354,8 @@ Cancels all monitored tasks.
 ```cpp
 virtual bool isComplete() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:49
 
 Returns true if all install tasks have completed, either successfully or unsuccessfully.
 
@@ -343,6 +371,8 @@ Returns true if all install tasks have completed, either successfully or unsucce
 virtual InstallTaskPtrVec tasks() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:52
+
 Returns the list of monitored package tasks.
 
 ---
@@ -356,6 +386,8 @@ Returns the list of monitored package tasks.
 ```cpp
 virtual LocalPackageVec packages() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:55
 
 Returns the list of monitored packages.
 
@@ -378,6 +410,8 @@ Returns the list of monitored packages.
 std::mutex _mutex
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:81
+
 ---
 
 {#_tasks}
@@ -387,6 +421,8 @@ std::mutex _mutex
 ```cpp
 InstallTaskPtrVec _tasks
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:82
 
 ---
 
@@ -398,6 +434,8 @@ InstallTaskPtrVec _tasks
 LocalPackageVec _packages
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:83
+
 ---
 
 {#_progress}
@@ -407,6 +445,8 @@ LocalPackageVec _packages
 ```cpp
 int _progress
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:84
 
 ### Protected Methods
 
@@ -428,6 +468,8 @@ int _progress
 virtual void onInstallStateChange(void * sender, InstallationState & state, const InstallationState & oldState)
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:72
+
 ---
 
 {#oninstallcomplete}
@@ -439,6 +481,8 @@ virtual void onInstallStateChange(void * sender, InstallationState & state, cons
 ```cpp
 virtual void onInstallComplete(InstallTask & task)
 ```
+
+Defined in src/pacm/include/icy/pacm/installmonitor.h:76
 
 ---
 
@@ -452,6 +496,8 @@ virtual void onInstallComplete(InstallTask & task)
 virtual void setProgress(int value)
 ```
 
+Defined in src/pacm/include/icy/pacm/installmonitor.h:78
+
 {#installtask}
 
 ## InstallTask
@@ -460,9 +506,46 @@ virtual void setProgress(int value)
 #include <icy/pacm/installtask.h>
 ```
 
+```cpp
+class InstallTask
+```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:89
+
 > **Inherits:** [`Runnable`](base.md#runnable), [`Stateful< InstallationState >`](base.md#stateful)
 
 Downloads, extracts, and finalizes a single package installation.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`PackageManager`](#packagemanager)  |  |
+| [`InstallMonitor`](#installmonitor-4)  |  |
+
+---
+
+{#packagemanager}
+
+#### PackageManager
+
+```cpp
+friend class PackageManager
+```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:202
+
+---
+
+{#installmonitor-4}
+
+#### InstallMonitor
+
+```cpp
+friend class InstallMonitor
+```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:203
 
 ### Public Attributes
 
@@ -481,6 +564,8 @@ Downloads, extracts, and finalizes a single package installation.
 Signal< void(InstallTask &, int &)> Progress
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:171
+
 Signals on progress update [0-100].
 
 ---
@@ -493,17 +578,19 @@ Signals on progress update [0-100].
 Signal< void(InstallTask &)> Complete
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:175
+
 Signals on task completion for both success and failure cases.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`InstallTask`](#installtask-1)  | #### Parameters |
+|  | [`InstallTask`](#installtask-1)  |  |
 |  | [`InstallTask`](#installtask-2)  | Deleted constructor. |
 |  | [`InstallTask`](#installtask-3)  | Deleted constructor. |
 | `void` | [`start`](#start-12) `virtual` | Validates options, resolves the install directory, and launches the background runner. |
-| `void` | [`cancel`](#cancel-3) `virtual` | Transitions the task to the Cancelled state. |
+| `void` | [`cancel`](#cancel-3) `virtual` `override` | Transitions the task to the Cancelled state. |
 | `void` | [`doDownload`](#dodownload) `virtual` | Downloads the package archive from the server. |
 | `void` | [`doExtract`](#doextract) `virtual` | Extracts the downloaded package files to the intermediate directory. |
 | `void` | [`doFinalize`](#dofinalize) `virtual` | Moves extracted files from the intermediate directory to the installation directory. |
@@ -511,10 +598,10 @@ Signals on task completion for both success and failure cases.
 | `Package::Asset` | [`getRemoteAsset`](#getremoteasset) `virtual` `const` | Returns the remote asset selected by the current [InstallOptions](#installoptions). Respects version and sdkVersion overrides; falls back to latestAsset(). |
 | `LocalPackage *` | [`local`](#local) `virtual` `const` | Returns a pointer to the local package record. |
 | `RemotePackage *` | [`remote`](#remote) `virtual` `const` | Returns a pointer to the remote package record. |
-| `const InstallOptions &` | [`options`](#options-4) `virtual` `const` | Returns a read-only view of the installation options for this task. |
+| `const InstallOptions &` | [`options`](#options-4) `virtual` `const` `nodiscard` | Returns a read-only view of the installation options for this task. |
 | `uv::Loop *` | [`loop`](#loop-7) `virtual` `const` | Returns the libuv event loop used for async operations. |
 | `bool` | [`valid`](#valid-2) `virtual` `const` | Returns true if the task is not in a Failed state and both local and remote (if set) packages are valid. |
-| `bool` | [`cancelled`](#cancelled-2) `virtual` `const` | Returns true if the task is in the Cancelled state. |
+| `bool` | [`cancelled`](#cancelled-2) `virtual` `const` `override` | Returns true if the task is in the Cancelled state. |
 | `bool` | [`failed`](#failed) `virtual` `const` | Returns true if the task is in the Failed state. |
 | `bool` | [`success`](#success-1) `virtual` `const` | Returns true if the task is in the Installed (success) state. |
 | `bool` | [`complete`](#complete-5) `virtual` `const` | Returns true if the task has reached a terminal state (Installed, Cancelled, or Failed). |
@@ -527,11 +614,13 @@ Signals on task completion for both success and failure cases.
 #### InstallTask
 
 ```cpp
-InstallTask(PackageManager & manager, LocalPackage * local, RemotePackage * remote, const InstallOptions & options, uv::Loop * loop)
+InstallTask(PackageManager & manager, LocalPackage * local, RemotePackage * remote, const InstallOptions & options = InstallOptions(), uv::Loop * loop = uv::defaultLoop())
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:101
+
 #### Parameters
-* `manager` Owning [PackageManager](#packagemanager) instance. 
+* `manager` Owning [PackageManager](#packagemanager-1) instance. 
 
 * `local` Local package record (must not be null). 
 
@@ -554,6 +643,8 @@ InstallTask(PackageManager & manager, LocalPackage * local, RemotePackage * remo
 InstallTask(const InstallTask &) = delete
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:106
+
 Deleted constructor.
 
 ---
@@ -565,6 +656,8 @@ Deleted constructor.
 ```cpp
 InstallTask(InstallTask &&) = delete
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:108
 
 Deleted constructor.
 
@@ -580,6 +673,8 @@ Deleted constructor.
 virtual void start()
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:113
+
 Validates options, resolves the install directory, and launches the background runner. 
 #### Exceptions
 * `std::runtime_error` if the requested version or SDK version asset is unavailable.
@@ -590,11 +685,13 @@ Validates options, resolves the install directory, and launches the background r
 
 #### cancel
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void cancel(bool flag)
+virtual void cancel(bool flag = true) override
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:116
 
 Transitions the task to the Cancelled state.
 
@@ -610,6 +707,8 @@ Transitions the task to the Cancelled state.
 virtual void doDownload()
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:119
+
 Downloads the package archive from the server.
 
 ---
@@ -623,6 +722,8 @@ Downloads the package archive from the server.
 ```cpp
 virtual void doExtract()
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:123
 
 Extracts the downloaded package files to the intermediate directory.
 
@@ -638,6 +739,8 @@ Extracts the downloaded package files to the intermediate directory.
 virtual void doFinalize()
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:127
+
 Moves extracted files from the intermediate directory to the installation directory.
 
 ---
@@ -651,6 +754,8 @@ Moves extracted files from the intermediate directory to the installation direct
 ```cpp
 virtual void setComplete()
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:132
 
 Called when the task completes either successfully or in error. This will trigger destruction.
 
@@ -666,6 +771,8 @@ Called when the task completes either successfully or in error. This will trigge
 virtual Package::Asset getRemoteAsset() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:136
+
 Returns the remote asset selected by the current [InstallOptions](#installoptions). Respects version and sdkVersion overrides; falls back to latestAsset().
 
 ---
@@ -679,6 +786,8 @@ Returns the remote asset selected by the current [InstallOptions](#installoption
 ```cpp
 virtual LocalPackage * local() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:139
 
 Returns a pointer to the local package record.
 
@@ -694,6 +803,8 @@ Returns a pointer to the local package record.
 virtual RemotePackage * remote() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:142
+
 Returns a pointer to the remote package record.
 
 ---
@@ -702,11 +813,13 @@ Returns a pointer to the remote package record.
 
 #### options
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual const InstallOptions & options() const
+[[nodiscard]] virtual const InstallOptions & options() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:145
 
 Returns a read-only view of the installation options for this task.
 
@@ -722,6 +835,8 @@ Returns a read-only view of the installation options for this task.
 virtual uv::Loop * loop() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:148
+
 Returns the libuv event loop used for async operations.
 
 ---
@@ -736,6 +851,8 @@ Returns the libuv event loop used for async operations.
 virtual bool valid() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:152
+
 Returns true if the task is not in a Failed state and both local and remote (if set) packages are valid.
 
 ---
@@ -744,11 +861,13 @@ Returns true if the task is not in a Failed state and both local and remote (if 
 
 #### cancelled
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool cancelled() const
+virtual bool cancelled() const override
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:155
 
 Returns true if the task is in the Cancelled state.
 
@@ -764,6 +883,8 @@ Returns true if the task is in the Cancelled state.
 virtual bool failed() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:158
+
 Returns true if the task is in the Failed state.
 
 ---
@@ -777,6 +898,8 @@ Returns true if the task is in the Failed state.
 ```cpp
 virtual bool success() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:161
 
 Returns true if the task is in the Installed (success) state.
 
@@ -792,6 +915,8 @@ Returns true if the task is in the Installed (success) state.
 virtual bool complete() const
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:165
+
 Returns true if the task has reached a terminal state (Installed, Cancelled, or Failed).
 
 ---
@@ -805,6 +930,8 @@ Returns true if the task has reached a terminal state (Installed, Cancelled, or 
 ```cpp
 virtual int progress() const
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:168
 
 Returns the current progress value in the range [0, 100].
 
@@ -834,6 +961,8 @@ Returns the current progress value in the range [0, 100].
 std::mutex _mutex
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:189
+
 ---
 
 {#_runner-1}
@@ -843,6 +972,8 @@ std::mutex _mutex
 ```cpp
 Idler _runner
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:191
 
 ---
 
@@ -854,6 +985,8 @@ Idler _runner
 icy::Error _error
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:192
+
 ---
 
 {#_manager-3}
@@ -863,6 +996,8 @@ icy::Error _error
 ```cpp
 PackageManager & _manager
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:193
 
 ---
 
@@ -874,6 +1009,8 @@ PackageManager & _manager
 LocalPackage * _local
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:194
+
 ---
 
 {#_remote}
@@ -883,6 +1020,8 @@ LocalPackage * _local
 ```cpp
 RemotePackage * _remote
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:195
 
 ---
 
@@ -894,6 +1033,8 @@ RemotePackage * _remote
 InstallOptions _options
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:196
+
 ---
 
 {#_progress-1}
@@ -903,6 +1044,8 @@ InstallOptions _options
 ```cpp
 int _progress
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:197
 
 ---
 
@@ -914,6 +1057,8 @@ int _progress
 bool _downloading
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:198
+
 ---
 
 {#_dlconn}
@@ -923,6 +1068,8 @@ bool _downloading
 ```cpp
 http::ClientConnection::Ptr _dlconn
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:199
 
 ---
 
@@ -934,12 +1081,14 @@ http::ClientConnection::Ptr _dlconn
 uv::Loop * _loop
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:200
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run-5) `virtual` | Called asynchronously by the thread to do the work. |
-| `void` | [`onStateChange`](#onstatechange)  |  |
+| `void` | [`run`](#run-5) `virtual` `override` | Called asynchronously by the thread to do the work. |
+| `void` | [`onStateChange`](#onstatechange) `override` |  |
 | `void` | [`onDownloadProgress`](#ondownloadprogress) `virtual` |  |
 | `void` | [`onDownloadComplete`](#ondownloadcomplete) `virtual` |  |
 | `void` | [`setProgress`](#setprogress-1) `virtual` |  |
@@ -950,11 +1099,13 @@ uv::Loop * _loop
 
 #### run
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void run()
+virtual void run() override
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:179
 
 Called asynchronously by the thread to do the work.
 
@@ -964,9 +1115,13 @@ Called asynchronously by the thread to do the work.
 
 #### onStateChange
 
+`override`
+
 ```cpp
-void onStateChange(InstallationState & state, const InstallationState & oldState)
+void onStateChange(InstallationState & state, const InstallationState & oldState) override
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:181
 
 ---
 
@@ -980,6 +1135,8 @@ void onStateChange(InstallationState & state, const InstallationState & oldState
 virtual void onDownloadProgress(const double & progress)
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:183
+
 ---
 
 {#ondownloadcomplete}
@@ -992,6 +1149,8 @@ virtual void onDownloadProgress(const double & progress)
 virtual void onDownloadComplete(const http::Response & response)
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:184
+
 ---
 
 {#setprogress-1}
@@ -1003,6 +1162,8 @@ virtual void onDownloadComplete(const http::Response & response)
 ```cpp
 virtual void setProgress(int value)
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:186
 
 ### Public Types
 
@@ -1017,16 +1178,24 @@ virtual void setProgress(int value)
 #### Ptr
 
 ```cpp
-std::shared_ptr< InstallTask > Ptr()
+using Ptr = std::shared_ptr< InstallTask >
 ```
 
-{#packagemanager}
+Defined in src/pacm/include/icy/pacm/installtask.h:93
+
+{#packagemanager-1}
 
 ## PackageManager
 
 ```cpp
 #include <icy/pacm/packagemanager.h>
 ```
+
+```cpp
+class PackageManager
+```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:62
 
 Loads package manifests and coordinates install, update, and uninstall workflows.
 
@@ -1049,6 +1218,8 @@ Loads package manifests and coordinates install, update, and uninstall workflows
 Signal< void(const http::Response &)> RemotePackageResponse
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:311
+
 Events.
 
 Signals when the remote package list have been downloaded from the server.
@@ -1063,6 +1234,8 @@ Signals when the remote package list have been downloaded from the server.
 Signal< void(LocalPackage &)> PackageUninstalled
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:314
+
 Signals when a package is uninstalled.
 
 ---
@@ -1074,6 +1247,8 @@ Signals when a package is uninstalled.
 ```cpp
 Signal< void(InstallTask &)> InstallTaskCreated
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:318
 
 Signals when an installation task is created, before it is started.
 
@@ -1087,15 +1262,17 @@ Signals when an installation task is created, before it is started.
 Signal< void(const InstallTask &)> InstallTaskComplete
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:322
+
 Signals when a package installation tasks completes, either successfully or in error.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`PackageManager`](#packagemanager-1)  | #### Parameters |
-|  | [`PackageManager`](#packagemanager-2)  | Deleted constructor. |
+|  | [`PackageManager`](#packagemanager-2)  |  |
 |  | [`PackageManager`](#packagemanager-3)  | Deleted constructor. |
+|  | [`PackageManager`](#packagemanager-4)  | Deleted constructor. |
 | `void` | [`initialize`](#initialize) `virtual` | Initialization Methods. |
 | `void` | [`uninitialize`](#uninitialize) `virtual` | Releases resources and cancels any in-progress tasks. |
 | `bool` | [`initialized`](#initialized-3) `virtual` `const` | Returns true if [initialize()](#initialize) has been called successfully. |
@@ -1107,9 +1284,9 @@ Signals when a package installation tasks completes, either successfully or in e
 | `bool` | [`saveLocalPackage`](#savelocalpackage) `virtual` | Saves the local package manifest to the file system. |
 | `void` | [`parseRemotePackages`](#parseremotepackages) `virtual` | Parse the remote packages from the given JSON data string. |
 | `InstallTask::Ptr` | [`installPackage`](#installpackage) `virtual` | [Package](#package) Installation Methods. |
-| `bool` | [`installPackages`](#installpackages) `virtual` | Installs multiple packages. The same options will be passed to each task. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager) does not take ownership of the [InstallMonitor](#installmonitor). |
+| `bool` | [`installPackages`](#installpackages) `virtual` | Installs multiple packages. The same options will be passed to each task. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager-1) does not take ownership of the [InstallMonitor](#installmonitor). |
 | `InstallTask::Ptr` | [`updatePackage`](#updatepackage) `virtual` | Updates a single package. Throws an exception if the package does not exist. The returned [InstallTask](#installtask) must be started. |
-| `bool` | [`updatePackages`](#updatepackages) `virtual` | Updates multiple packages. Throws an exception if the package does not exist. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager) does not take ownership of the [InstallMonitor](#installmonitor). |
+| `bool` | [`updatePackages`](#updatepackages) `virtual` | Updates multiple packages. Throws an exception if the package does not exist. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager-1) does not take ownership of the [InstallMonitor](#installmonitor). |
 | `bool` | [`updateAllPackages`](#updateallpackages) `virtual` | Updates all installed packages. |
 | `bool` | [`uninstallPackages`](#uninstallpackages) `virtual` | Uninstalls multiple packages. |
 | `bool` | [`uninstallPackage`](#uninstallpackage) `virtual` | Uninstalls a single package. |
@@ -1134,22 +1311,9 @@ Signals when a package installation tasks completes, either successfully or in e
 | `std::string` | [`getCacheFilePath`](#getcachefilepath)  | Returns the full path of the cached file if it exists, or an empty path if the file doesn't exist. |
 | `std::string` | [`getPackageDataDir`](#getpackagedatadir)  | Returns the package data directory for the given package ID. |
 | `Options &` | [`mutableOptions`](#mutableoptions) `virtual` | Accessors. |
-| `const Options &` | [`options`](#options-5) `virtual` `const` | Returns a read-only view of the current options. |
+| `const Options &` | [`options`](#options-5) `virtual` `const` `nodiscard` | Returns a read-only view of the current options. |
 | `RemotePackageStore &` | [`remotePackages`](#remotepackages) `virtual` | Returns a reference to the in-memory remote package store. |
 | `LocalPackageStore &` | [`localPackages`](#localpackages) `virtual` | Returns a reference to the in-memory local package store. |
-
----
-
-{#packagemanager-1}
-
-#### PackageManager
-
-```cpp
-PackageManager(const Options & options)
-```
-
-#### Parameters
-* `options` [Configuration](base.md#configuration) for directories, endpoints, and credentials.
 
 ---
 
@@ -1158,10 +1322,13 @@ PackageManager(const Options & options)
 #### PackageManager
 
 ```cpp
-PackageManager(const PackageManager &) = delete
+PackageManager(const Options & options = Options())
 ```
 
-Deleted constructor.
+Defined in src/pacm/include/icy/pacm/packagemanager.h:99
+
+#### Parameters
+* `options` [Configuration](base.md#configuration) for directories, endpoints, and credentials.
 
 ---
 
@@ -1170,8 +1337,24 @@ Deleted constructor.
 #### PackageManager
 
 ```cpp
+PackageManager(const PackageManager &) = delete
+```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:102
+
+Deleted constructor.
+
+---
+
+{#packagemanager-4}
+
+#### PackageManager
+
+```cpp
 PackageManager(PackageManager &&) = delete
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:104
 
 Deleted constructor.
 
@@ -1186,6 +1369,8 @@ Deleted constructor.
 ```cpp
 virtual void initialize()
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:112
 
 Initialization Methods.
 
@@ -1203,6 +1388,8 @@ Initializes the package manager: creates directories, loads local manifests, and
 virtual void uninitialize()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:115
+
 Releases resources and cancels any in-progress tasks.
 
 ---
@@ -1216,6 +1403,8 @@ Releases resources and cancels any in-progress tasks.
 ```cpp
 virtual bool initialized() const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:118
 
 Returns true if [initialize()](#initialize) has been called successfully.
 
@@ -1231,6 +1420,8 @@ Returns true if [initialize()](#initialize) has been called successfully.
 virtual void createDirectories()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:122
+
 Creates the package manager directory structure if it does not already exist.
 
 ---
@@ -1244,6 +1435,8 @@ Creates the package manager directory structure if it does not already exist.
 ```cpp
 virtual void queryRemotePackages()
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:125
 
 Queries the server for a list of available packages.
 
@@ -1259,6 +1452,8 @@ Queries the server for a list of available packages.
 virtual void loadLocalPackages()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:129
+
 Loads all local package manifests from file system. Clears all in memory package manifests.
 
 ---
@@ -1273,6 +1468,8 @@ Loads all local package manifests from file system. Clears all in memory package
 virtual void loadLocalPackages(const std::string & dir)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:135
+
 Loads all local package manifests residing the the given directory. This method may be called multiple times for different paths because it does not clear in memory package manifests.
 
 ---
@@ -1284,8 +1481,10 @@ Loads all local package manifests residing the the given directory. This method 
 `virtual`
 
 ```cpp
-virtual bool saveLocalPackages(bool whiny)
+virtual bool saveLocalPackages(bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:140
 
 Saves all local package manifests to the data directory. 
 #### Parameters
@@ -1303,8 +1502,10 @@ true on success.
 `virtual`
 
 ```cpp
-virtual bool saveLocalPackage(LocalPackage & package, bool whiny)
+virtual bool saveLocalPackage(LocalPackage & package, bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:143
 
 Saves the local package manifest to the file system.
 
@@ -1320,6 +1521,8 @@ Saves the local package manifest to the file system.
 virtual void parseRemotePackages(const std::string & data)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:146
+
 Parse the remote packages from the given JSON data string.
 
 ---
@@ -1331,8 +1534,10 @@ Parse the remote packages from the given JSON data string.
 `virtual`
 
 ```cpp
-virtual InstallTask::Ptr installPackage(const std::string & name, const InstallOptions & options)
+virtual InstallTask::Ptr installPackage(const std::string & name, const InstallOptions & options = InstallOptions())
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:156
 
 [Package](#package) Installation Methods.
 
@@ -1347,10 +1552,12 @@ Installs a single package. The returned [InstallTask](#installtask) must be star
 `virtual`
 
 ```cpp
-virtual bool installPackages(const StringVec & ids, const InstallOptions & options, InstallMonitor * monitor, bool whiny)
+virtual bool installPackages(const StringVec & ids, const InstallOptions & options = InstallOptions(), InstallMonitor * monitor = nullptr, bool whiny = false)
 ```
 
-Installs multiple packages. The same options will be passed to each task. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager) does not take ownership of the [InstallMonitor](#installmonitor).
+Defined in src/pacm/include/icy/pacm/packagemanager.h:165
+
+Installs multiple packages. The same options will be passed to each task. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager-1) does not take ownership of the [InstallMonitor](#installmonitor).
 
 ---
 
@@ -1361,8 +1568,10 @@ Installs multiple packages. The same options will be passed to each task. If a [
 `virtual`
 
 ```cpp
-virtual InstallTask::Ptr updatePackage(const std::string & name, const InstallOptions & options)
+virtual InstallTask::Ptr updatePackage(const std::string & name, const InstallOptions & options = InstallOptions())
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:173
 
 Updates a single package. Throws an exception if the package does not exist. The returned [InstallTask](#installtask) must be started.
 
@@ -1375,10 +1584,12 @@ Updates a single package. Throws an exception if the package does not exist. The
 `virtual`
 
 ```cpp
-virtual bool updatePackages(const StringVec & ids, const InstallOptions & options, InstallMonitor * monitor, bool whiny)
+virtual bool updatePackages(const StringVec & ids, const InstallOptions & options = InstallOptions(), InstallMonitor * monitor = nullptr, bool whiny = false)
 ```
 
-Updates multiple packages. Throws an exception if the package does not exist. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager) does not take ownership of the [InstallMonitor](#installmonitor).
+Defined in src/pacm/include/icy/pacm/packagemanager.h:182
+
+Updates multiple packages. Throws an exception if the package does not exist. If a [InstallMonitor](#installmonitor) instance was passed in the tasks will need to be started, otherwise they will be auto-started. The [PackageManager](#packagemanager-1) does not take ownership of the [InstallMonitor](#installmonitor).
 
 ---
 
@@ -1389,8 +1600,10 @@ Updates multiple packages. Throws an exception if the package does not exist. If
 `virtual`
 
 ```cpp
-virtual bool updateAllPackages(bool whiny)
+virtual bool updateAllPackages(bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:187
 
 Updates all installed packages.
 
@@ -1403,8 +1616,10 @@ Updates all installed packages.
 `virtual`
 
 ```cpp
-virtual bool uninstallPackages(const StringVec & ids, bool whiny)
+virtual bool uninstallPackages(const StringVec & ids, bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:190
 
 Uninstalls multiple packages.
 
@@ -1417,8 +1632,10 @@ Uninstalls multiple packages.
 `virtual`
 
 ```cpp
-virtual bool uninstallPackage(const std::string & id, bool whiny)
+virtual bool uninstallPackage(const std::string & id, bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:193
 
 Uninstalls a single package.
 
@@ -1434,6 +1651,8 @@ Uninstalls a single package.
 virtual bool hasUnfinalizedPackages()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:198
+
 Returns true if there are updates available that have not yet been finalized. Packages may be unfinalized if there were files in use at the time of installation.
 
 ---
@@ -1445,8 +1664,10 @@ Returns true if there are updates available that have not yet been finalized. Pa
 `virtual`
 
 ```cpp
-virtual bool finalizeInstallations(bool whiny)
+virtual bool finalizeInstallations(bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:204
 
 Finalizes active installations by moving all package files to their target destination. If files are to be overwritten they must not be in use or finalization will fail.
 
@@ -1461,6 +1682,8 @@ Finalizes active installations by moving all package files to their target desti
 ```cpp
 virtual InstallTask::Ptr getInstallTask(const std::string & id) const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:210
 
 [Task](base.md#task) Helper Methods.
 
@@ -1478,6 +1701,8 @@ Gets the install task for the given package ID.
 virtual InstallTaskPtrVec tasks() const
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:213
+
 Returns a list of all tasks.
 
 ---
@@ -1492,6 +1717,8 @@ Returns a list of all tasks.
 virtual void cancelAllTasks()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:217
+
 Aborts all package installation tasks. All tasks must be aborted before clearing local or remote manifests.
 
 ---
@@ -1505,6 +1732,8 @@ Aborts all package installation tasks. All tasks must be aborted before clearing
 ```cpp
 virtual PackagePairVec getPackagePairs() const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:224
 
 [Package](#package) Helper Methods.
 
@@ -1522,6 +1751,8 @@ Returns all package pairs, valid or invalid. Some pairs may not have both local 
 virtual PackagePairVec getUpdatablePackagePairs() const
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:229
+
 Returns a list of package pairs which may be updated. All pairs will have both local and remote package pointers, and the remote version will be newer than the local version.
 
 ---
@@ -1533,8 +1764,10 @@ Returns a list of package pairs which may be updated. All pairs will have both l
 `virtual` `const`
 
 ```cpp
-virtual PackagePair getPackagePair(const std::string & id, bool whiny) const
+virtual PackagePair getPackagePair(const std::string & id, bool whiny = false) const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:234
 
 Returns a local and remote package pair. An exception will be thrown if either the local or remote packages aren't available or are invalid.
 
@@ -1550,6 +1783,8 @@ Returns a local and remote package pair. An exception will be thrown if either t
 virtual PackagePair getOrCreatePackagePair(const std::string & id)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:242
+
 Returns a local and remote package pair. If the local package doesn't exist it will be created from the remote package. If the remote package doesn't exist a NotFoundException will be thrown.
 
 ---
@@ -1561,8 +1796,10 @@ Returns a local and remote package pair. If the local package doesn't exist it w
 `virtual`
 
 ```cpp
-virtual InstallTask::Ptr createInstallTask(PackagePair & pair, const InstallOptions & options)
+virtual InstallTask::Ptr createInstallTask(PackagePair & pair, const InstallOptions & options = InstallOptions())
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:245
 
 Creates a package installation task for the given pair.
 
@@ -1578,6 +1815,8 @@ Creates a package installation task for the given pair.
 virtual std::string installedPackageVersion(const std::string & id) const
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:251
+
 Returns the version number of an installed package. Exceptions will be thrown if the package does not exist, or is not fully installed.
 
 ---
@@ -1589,8 +1828,10 @@ Returns the version number of an installed package. Exceptions will be thrown if
 `virtual` `const`
 
 ```cpp
-virtual Package::Asset getLatestInstallableAsset(const PackagePair & pair, const InstallOptions & options) const
+virtual Package::Asset getLatestInstallableAsset(const PackagePair & pair, const InstallOptions & options = InstallOptions()) const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:256
 
 Returns the best asset to install, or throws a descriptive exception if no updates are available, or if the package is already up-to-date. This method takes version and SDK locks into consideration.
 
@@ -1606,6 +1847,8 @@ Returns the best asset to install, or throws a descriptive exception if no updat
 virtual bool hasAvailableUpdates(const PackagePair & pair) const
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:262
+
 Returns true if there are updates available for this package, false otherwise.
 
 ---
@@ -1617,6 +1860,8 @@ Returns true if there are updates available for this package, false otherwise.
 ```cpp
 void clearCache()
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:268
 
 File Helper Methods.
 
@@ -1632,6 +1877,8 @@ Clears all files in the cache directory.
 bool clearPackageCache(LocalPackage & package)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:271
+
 Clears a package archive from the local cache.
 
 ---
@@ -1641,8 +1888,10 @@ Clears a package archive from the local cache.
 #### clearCacheFile
 
 ```cpp
-bool clearCacheFile(std::string_view fileName, bool whiny)
+bool clearCacheFile(std::string_view fileName, bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:274
 
 Clears a file from the local cache.
 
@@ -1656,6 +1905,8 @@ Clears a file from the local cache.
 bool hasCachedFile(Package::Asset & asset)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:277
+
 Checks if a package archive exists in the local cache.
 
 ---
@@ -1667,6 +1918,8 @@ Checks if a package archive exists in the local cache.
 ```cpp
 bool isSupportedFileType(std::string_view fileName)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:280
 
 Checks if the file type is a supported package archive.
 
@@ -1680,6 +1933,8 @@ Checks if the file type is a supported package archive.
 std::string getCacheFilePath(std::string_view fileName)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:284
+
 Returns the full path of the cached file if it exists, or an empty path if the file doesn't exist.
 
 ---
@@ -1691,6 +1946,8 @@ Returns the full path of the cached file if it exists, or an empty path if the f
 ```cpp
 std::string getPackageDataDir(std::string_view id)
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:288
 
 Returns the package data directory for the given package ID.
 
@@ -1706,6 +1963,8 @@ Returns the package data directory for the given package ID.
 virtual Options & mutableOptions()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:295
+
 Accessors.
 
 Returns the mutable startup configuration for this manager. Callers should finish edits before [initialize()](#initialize).
@@ -1716,11 +1975,13 @@ Returns the mutable startup configuration for this manager. Callers should finis
 
 #### options
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual const Options & options() const
+[[nodiscard]] virtual const Options & options() const
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:298
 
 Returns a read-only view of the current options.
 
@@ -1736,6 +1997,8 @@ Returns a read-only view of the current options.
 virtual RemotePackageStore & remotePackages()
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:301
+
 Returns a reference to the in-memory remote package store.
 
 ---
@@ -1749,6 +2012,8 @@ Returns a reference to the in-memory remote package store.
 ```cpp
 virtual LocalPackageStore & localPackages()
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:304
 
 Returns a reference to the in-memory local package store.
 
@@ -1772,6 +2037,8 @@ Returns a reference to the in-memory local package store.
 std::mutex _mutex
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:331
+
 ---
 
 {#_localpackages}
@@ -1781,6 +2048,8 @@ std::mutex _mutex
 ```cpp
 LocalPackageStore _localPackages
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:332
 
 ---
 
@@ -1792,6 +2061,8 @@ LocalPackageStore _localPackages
 RemotePackageStore _remotePackages
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:333
+
 ---
 
 {#_tasks-1}
@@ -1802,6 +2073,8 @@ RemotePackageStore _remotePackages
 InstallTaskPtrVec _tasks
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:334
+
 ---
 
 {#_options-2}
@@ -1811,6 +2084,8 @@ InstallTaskPtrVec _tasks
 ```cpp
 Options _options
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:335
 
 ### Protected Methods
 
@@ -1828,6 +2103,8 @@ Options _options
 void onPackageInstallComplete(InstallTask & task)
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:328
+
 Callbacks.
 
 {#options-6}
@@ -1837,6 +2114,12 @@ Callbacks.
 ```cpp
 #include <icy/pacm/packagemanager.h>
 ```
+
+```cpp
+struct Options
+```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:66
 
 Startup configuration for repository endpoints, credentials, and directories.
 
@@ -1852,8 +2135,8 @@ Startup configuration for repository endpoints, credentials, and directories.
 | `std::string` | [`tempDir`](#tempdir)  | Directory where package files will be downloaded and extracted. |
 | `std::string` | [`dataDir`](#datadir)  | Directory where package manifests will be kept. |
 | `std::string` | [`installDir`](#installdir-2)  | Directory where packages will be installed. |
-| `std::string` | [`platform`](#platform)  | Platform (win32, linux, mac) |
-| `std::string` | [`checksumAlgorithm`](#checksumalgorithm)  | Checksum algorithm (MDS/SHA1) |
+| `std::string` | [`platform`](#platform)  | Platform (win32, linux, mac). |
+| `std::string` | [`checksumAlgorithm`](#checksumalgorithm)  | Checksum algorithm (MDS/SHA1). |
 | `bool` | [`clearFailedCache`](#clearfailedcache)  | This flag tells the package manager weather or not to clear the package cache if installation fails. |
 
 ---
@@ -1865,6 +2148,8 @@ Startup configuration for repository endpoints, credentials, and directories.
 ```cpp
 std::string endpoint
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:68
 
 The HTTP server endpoint.
 
@@ -1878,6 +2163,8 @@ The HTTP server endpoint.
 std::string indexURI
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:69
+
 The HTTP server URI for querying packages JSON.
 
 ---
@@ -1889,6 +2176,8 @@ The HTTP server URI for querying packages JSON.
 ```cpp
 std::string httpUsername
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:70
 
 Username for HTTP basic auth.
 
@@ -1902,6 +2191,8 @@ Username for HTTP basic auth.
 std::string httpPassword
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:71
+
 PAssword for HTTP basic auth.
 
 ---
@@ -1913,6 +2204,8 @@ PAssword for HTTP basic auth.
 ```cpp
 std::string httpOAuthToken
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:72
 
 Will be used instead of HTTP basic if provided.
 
@@ -1926,6 +2219,8 @@ Will be used instead of HTTP basic if provided.
 std::string tempDir
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:74
+
 Directory where package files will be downloaded and extracted.
 
 ---
@@ -1937,6 +2232,8 @@ Directory where package files will be downloaded and extracted.
 ```cpp
 std::string dataDir
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:75
 
 Directory where package manifests will be kept.
 
@@ -1950,6 +2247,8 @@ Directory where package manifests will be kept.
 std::string installDir
 ```
 
+Defined in src/pacm/include/icy/pacm/packagemanager.h:76
+
 Directory where packages will be installed.
 
 ---
@@ -1962,7 +2261,9 @@ Directory where packages will be installed.
 std::string platform
 ```
 
-Platform (win32, linux, mac)
+Defined in src/pacm/include/icy/pacm/packagemanager.h:78
+
+Platform (win32, linux, mac).
 
 ---
 
@@ -1974,7 +2275,9 @@ Platform (win32, linux, mac)
 std::string checksumAlgorithm
 ```
 
-Checksum algorithm (MDS/SHA1)
+Defined in src/pacm/include/icy/pacm/packagemanager.h:79
+
+Checksum algorithm (MDS/SHA1).
 
 ---
 
@@ -1985,6 +2288,8 @@ Checksum algorithm (MDS/SHA1)
 ```cpp
 bool clearFailedCache
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:81
 
 This flag tells the package manager weather or not to clear the package cache if installation fails.
 
@@ -2003,8 +2308,10 @@ This flag tells the package manager weather or not to clear the package cache if
 `inline`
 
 ```cpp
-inline Options(const std::string & root)
+inline Options(const std::string & root = getCwd())
 ```
+
+Defined in src/pacm/include/icy/pacm/packagemanager.h:84
 
 {#installationstate}
 
@@ -2014,6 +2321,12 @@ inline Options(const std::string & root)
 #include <icy/pacm/installtask.h>
 ```
 
+```cpp
+struct InstallationState
+```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:31
+
 > **Inherits:** [`State`](base.md#state)
 
 [State](base.md#state) machine states for package installation.
@@ -2022,7 +2335,7 @@ inline Options(const std::string & root)
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`str`](#str-2) `const` `inline` | Converts a state ID to its string representation. |
+| `std::string` | [`str`](#str-2) `const` `inline` | Converts a state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) to its string representation. |
 
 ---
 
@@ -2036,9 +2349,11 @@ inline Options(const std::string & root)
 inline std::string str(unsigned int id) const
 ```
 
-Converts a state ID to its string representation. 
+Defined in src/pacm/include/icy/pacm/installtask.h:47
+
+Converts a state [ID](base.md#classicy_1_1State_1af5e8f0a00984df441608f8bedaaecea3) to its string representation. 
 #### Parameters
-* `id` One of the Type enum values. 
+* `id` One of the [Type](#type-10) enum values. 
 
 #### Returns
 Human-readable state name, or "undefined" for unknown values.
@@ -2059,6 +2374,8 @@ Human-readable state name, or "undefined" for unknown values.
 enum Type
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:33
+
 | Value | Description |
 |-------|-------------|
 | `None` |  |
@@ -2077,6 +2394,12 @@ enum Type
 #include <icy/pacm/installtask.h>
 ```
 
+```cpp
+struct InstallOptions
+```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:71
+
 [Package](#package) installation options.
 
 ### Public Attributes
@@ -2085,7 +2408,7 @@ enum Type
 |--------|------|-------------|
 | `std::string` | [`version`](#version-3)  | If set then the given package version will be installed. |
 | `std::string` | [`sdkVersion`](#sdkversion)  | If set then the latest package version for given SDK version will be installed. |
-| `std::string` | [`installDir`](#installdir)  | Install to the given location, otherwise the manager default `installDir` will be used. |
+| `std::string` | [`installDir`](#installdir)  | Install to the given location, otherwise the manager default `[installDir](#installdir)` will be used. |
 
 ---
 
@@ -2096,6 +2419,8 @@ enum Type
 ```cpp
 std::string version
 ```
+
+Defined in src/pacm/include/icy/pacm/installtask.h:73
 
 If set then the given package version will be installed.
 
@@ -2109,6 +2434,8 @@ If set then the given package version will be installed.
 std::string sdkVersion
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:74
+
 If set then the latest package version for given SDK version will be installed.
 
 ---
@@ -2121,7 +2448,9 @@ If set then the latest package version for given SDK version will be installed.
 std::string installDir
 ```
 
-Install to the given location, otherwise the manager default `installDir` will be used.
+Defined in src/pacm/include/icy/pacm/installtask.h:76
+
+Install to the given location, otherwise the manager default `[installDir](#installdir)` will be used.
 
 ### Public Methods
 
@@ -2141,6 +2470,8 @@ Install to the given location, otherwise the manager default `installDir` will b
 inline InstallOptions()
 ```
 
+Defined in src/pacm/include/icy/pacm/installtask.h:79
+
 {#localpackage}
 
 ## LocalPackage
@@ -2148,6 +2479,12 @@ inline InstallOptions()
 ```cpp
 #include <icy/pacm/package.h>
 ```
+
+```cpp
+struct LocalPackage
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:189
 
 > **Inherits:** [`Package`](#package)
 
@@ -2196,6 +2533,8 @@ inline InstallOptions()
 LocalPackage()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:213
+
 Constructs an empty local package.
 
 ---
@@ -2207,6 +2546,8 @@ Constructs an empty local package.
 ```cpp
 LocalPackage(const json::Value & src)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:217
 
 Constructs a local package from an existing JSON value. 
 #### Parameters
@@ -2222,6 +2563,8 @@ Constructs a local package from an existing JSON value.
 LocalPackage(const RemotePackage & src)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:223
+
 Create the local package from the remote package reference with the following manipulations. 1) Add a local manifest element. 2) Remove asset mirror elements.
 
 ---
@@ -2235,6 +2578,8 @@ Create the local package from the remote package reference with the following ma
 ```cpp
 virtual void setState(const std::string & state)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:232
 
 Set's the overall package state. Possible values are: Installing, Installed, Failed, Uninstalled. If the packages completes while still Installing, this means the package has yet to be finalized.
 
@@ -2250,6 +2595,8 @@ Set's the overall package state. Possible values are: Installing, Installed, Fai
 virtual void setInstallState(const std::string & state)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:236
+
 Set's the package installation state. See [InstallationState](#installationstate) for possible values.
 
 ---
@@ -2263,6 +2610,8 @@ Set's the package installation state. See [InstallationState](#installationstate
 ```cpp
 virtual void setInstallDir(const std::string & dir)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:239
 
 Set's the installation directory for this package.
 
@@ -2278,6 +2627,8 @@ Set's the installation directory for this package.
 virtual void setInstalledAsset(const Package::Asset & installedRemoteAsset)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:243
+
 Sets the installed asset, once installed. This method also sets the version.
 
 ---
@@ -2291,6 +2642,8 @@ Sets the installed asset, once installed. This method also sets the version.
 ```cpp
 virtual void setVersion(const std::string & version)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:247
 
 Sets the current version of the local package. Installation must be complete.
 
@@ -2306,6 +2659,8 @@ Sets the current version of the local package. Installation must be complete.
 virtual void setVersionLock(const std::string & version)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:253
+
 Locks the package at the given version. Once set this package will not be updated past the given version. Pass an empty string to remove the lock.
 
 ---
@@ -2319,6 +2674,8 @@ Locks the package at the given version. Once set this package will not be update
 ```cpp
 virtual void setSDKVersionLock(const std::string & version)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:259
 
 Locks the package at the given SDK version. Once set this package will only update to the most recent version with given SDK version. Pass an empty string to remove the lock.
 
@@ -2334,6 +2691,8 @@ Locks the package at the given SDK version. Once set this package will only upda
 virtual std::string version() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:262
+
 Returns the installed package version.
 
 ---
@@ -2347,6 +2706,8 @@ Returns the installed package version.
 ```cpp
 virtual std::string state() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:265
 
 Returns the current state of this package.
 
@@ -2362,6 +2723,8 @@ Returns the current state of this package.
 virtual std::string installState() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:268
+
 Returns the installation state of this package.
 
 ---
@@ -2375,6 +2738,8 @@ Returns the installation state of this package.
 ```cpp
 virtual std::string installDir() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:271
 
 Returns the installation directory for this package.
 
@@ -2390,6 +2755,8 @@ Returns the installation directory for this package.
 virtual std::string versionLock() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:275
+
 Returns the pinned version string, or empty if no lock is set.
 
 ---
@@ -2403,6 +2770,8 @@ Returns the pinned version string, or empty if no lock is set.
 ```cpp
 virtual std::string sdkLockedVersion() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:278
 
 Returns the pinned SDK version string, or empty if no lock is set.
 
@@ -2418,6 +2787,8 @@ Returns the pinned SDK version string, or empty if no lock is set.
 virtual Asset asset()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:282
+
 Returns the currently installed asset, if any. If none, the returned asset will be empty().
 
 ---
@@ -2431,6 +2802,8 @@ Returns the currently installed asset, if any. If none, the returned asset will 
 ```cpp
 virtual bool isInstalled() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:287
 
 Returns true or false depending on weather or not the package is installed successfully. False if package is in Failed state.
 
@@ -2446,6 +2819,8 @@ Returns true or false depending on weather or not the package is installed succe
 virtual bool isFailed() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:290
+
 Returns true if the package state is "Failed".
 
 ---
@@ -2460,6 +2835,8 @@ Returns true if the package state is "Failed".
 virtual Manifest manifest()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:293
+
 Returns the installation manifest.
 
 ---
@@ -2471,8 +2848,10 @@ Returns the installation manifest.
 `virtual`
 
 ```cpp
-virtual bool verifyInstallManifest(bool allowEmpty)
+virtual bool verifyInstallManifest(bool allowEmpty = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:295
 
 ---
 
@@ -2483,8 +2862,10 @@ virtual bool verifyInstallManifest(bool allowEmpty)
 `virtual`
 
 ```cpp
-virtual std::string getInstalledFilePath(const std::string & fileName, bool whiny)
+virtual std::string getInstalledFilePath(const std::string & fileName, bool whiny = false)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:299
 
 Returns the full full path of the installed file. Thrown an exception if the install directory is unset.
 
@@ -2497,8 +2878,10 @@ Returns the full full path of the installed file. Thrown an exception if the ins
 `virtual` `const`
 
 ```cpp
-virtual std::string extensionEntryPointPath(bool whiny) const
+virtual std::string extensionEntryPointPath(bool whiny = false) const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:304
 
 Returns the install-relative extension entrypoint resolved against [installDir()](#installdir-1). Returns an empty string when no extension metadata is present.
 
@@ -2514,6 +2897,8 @@ Returns the install-relative extension entrypoint resolved against [installDir()
 virtual json::Value & errors()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:307
+
 Returns a reference to the JSON array of accumulated error messages.
 
 ---
@@ -2527,6 +2912,8 @@ Returns a reference to the JSON array of accumulated error messages.
 ```cpp
 virtual void addError(const std::string & message)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:311
 
 Appends `message` to the errors array. 
 #### Parameters
@@ -2544,6 +2931,8 @@ Appends `message` to the errors array.
 virtual std::string lastError() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:314
+
 Returns the most recently added error message, or empty if none.
 
 ---
@@ -2557,6 +2946,8 @@ Returns the most recently added error message, or empty if none.
 ```cpp
 virtual void clearErrors()
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:317
 
 Clears all recorded error messages.
 
@@ -2572,6 +2963,8 @@ Clears all recorded error messages.
 virtual bool valid() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:319
+
 Returns true if id, name and type are all non-empty.
 
 {#manifest-1}
@@ -2581,6 +2974,12 @@ Returns true if id, name and type are all non-empty.
 ```cpp
 #include <icy/pacm/package.h>
 ```
+
+```cpp
+struct Manifest
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:192
 
 [Manifest](#manifest-1) of installed files recorded for a local package.
 
@@ -2600,11 +2999,13 @@ Returns true if id, name and type are all non-empty.
 json::Value & root
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:206
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Manifest`](#manifest-2)  | #### Parameters |
+|  | [`Manifest`](#manifest-2)  |  |
 | `bool` | [`empty`](#empty-1) `virtual` `const` | Returns true if the manifest contains no file entries. |
 | `void` | [`addFile`](#addfile) `virtual` | Appends `path` to the manifest file list. |
 
@@ -2617,6 +3018,8 @@ json::Value & root
 ```cpp
 Manifest(json::Value & src)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:195
 
 #### Parameters
 * `src` JSON array node that backs this manifest.
@@ -2633,6 +3036,8 @@ Manifest(json::Value & src)
 virtual bool empty() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:199
+
 Returns true if the manifest contains no file entries.
 
 ---
@@ -2647,6 +3052,8 @@ Returns true if the manifest contains no file entries.
 virtual void addFile(const std::string & path)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:204
+
 Appends `path` to the manifest file list. 
 #### Parameters
 * `path` Relative path of an installed file.
@@ -2658,6 +3065,12 @@ Appends `path` to the manifest file list.
 ```cpp
 #include <icy/pacm/package.h>
 ```
+
+```cpp
+struct Package
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:26
 
 > **Inherits:** `Value`
 > **Subclassed by:** [`LocalPackage`](#localpackage), [`RemotePackage`](#remotepackage)
@@ -2678,7 +3091,7 @@ JSON-backed package metadata shared by local and remote package records.
 | `bool` | [`hasExtension`](#hasextension) `virtual` `const` | Returns true when the package has an "extension" object. |
 | `Extension` | [`extension`](#extension) `virtual` `const` | Returns a read-only view of the extension metadata. Throws if no extension object is present. |
 | `bool` | [`valid`](#valid-4) `virtual` `const` | Returns true if id, name and type are all non-empty. |
-| `json::Value` | [`toJson`](#tojson) `virtual` `const` | Returns a plain JSON copy of this package object. |
+| `json::Value` | [`toJson`](#tojson) `virtual` `const` `nodiscard` | Returns a plain JSON copy of this package object. |
 | `void` | [`print`](#print-9) `virtual` `const` | Dumps the JSON representation of this package to `ost`. |
 
 ---
@@ -2691,6 +3104,8 @@ JSON-backed package metadata shared by local and remote package records.
 Package()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:105
+
 Constructs an empty package.
 
 ---
@@ -2702,6 +3117,8 @@ Constructs an empty package.
 ```cpp
 Package(const json::Value & src)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:109
 
 Constructs a package from an existing JSON value. 
 #### Parameters
@@ -2719,6 +3136,8 @@ Constructs a package from an existing JSON value.
 virtual std::string id() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:113
+
 Returns the package unique identifier.
 
 ---
@@ -2732,6 +3151,8 @@ Returns the package unique identifier.
 ```cpp
 virtual std::string name() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:116
 
 Returns the package display name.
 
@@ -2747,6 +3168,8 @@ Returns the package display name.
 virtual std::string type() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:119
+
 Returns the package type (e.g. "plugin", "asset").
 
 ---
@@ -2760,6 +3183,8 @@ Returns the package type (e.g. "plugin", "asset").
 ```cpp
 virtual std::string author() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:122
 
 Returns the package author string.
 
@@ -2775,6 +3200,8 @@ Returns the package author string.
 virtual std::string description() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:125
+
 Returns the package description string.
 
 ---
@@ -2788,6 +3215,8 @@ Returns the package description string.
 ```cpp
 virtual bool hasExtension() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:128
 
 Returns true when the package has an "extension" object.
 
@@ -2803,6 +3232,8 @@ Returns true when the package has an "extension" object.
 virtual Extension extension() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:132
+
 Returns a read-only view of the extension metadata. Throws if no extension object is present.
 
 ---
@@ -2817,6 +3248,8 @@ Returns a read-only view of the extension metadata. Throws if no extension objec
 virtual bool valid() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:135
+
 Returns true if id, name and type are all non-empty.
 
 ---
@@ -2825,11 +3258,13 @@ Returns true if id, name and type are all non-empty.
 
 #### toJson
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual json::Value toJson() const
+[[nodiscard]] virtual json::Value toJson() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:138
 
 Returns a plain JSON copy of this package object.
 
@@ -2845,9 +3280,185 @@ Returns a plain JSON copy of this package object.
 virtual void print(std::ostream & ost) const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:142
+
 Dumps the JSON representation of this package to `ost`. 
 #### Parameters
 * `ost` Output stream.
+
+{#extension-1}
+
+## Extension
+
+```cpp
+#include <icy/pacm/package.h>
+```
+
+```cpp
+struct Extension
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:29
+
+Optional extension metadata that describes how a packaged runtime unit is loaded.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `const json::Value &` | [`root`](#root-2)  |  |
+
+---
+
+{#root-2}
+
+#### root
+
+```cpp
+const json::Value & root
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:56
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Extension`](#extension-2)  |  |
+| `std::string` | [`loader`](#loader) `virtual` `const` | Returns the loader/runtime contract name (for example "graft"). |
+| `std::string` | [`runtime`](#runtime) `virtual` `const` | Returns the runtime kind (for example "native" or "worker"). |
+| `std::string` | [`entryPoint`](#entrypoint) `virtual` `const` | Returns the install-relative entrypoint path. |
+| `int` | [`abiVersion`](#abiversion) `virtual` `const` | Returns the extension ABI version, or 0 if not specified. |
+| `std::vector< std::string >` | [`capabilities`](#capabilities) `virtual` `const` | Returns the declared capabilities. |
+| `bool` | [`valid`](#valid-5) `virtual` `const` | Returns true when the metadata is internally consistent. |
+| `bool` | [`hasCapability`](#hascapability) `virtual` `const` | Returns true when `capability` is declared. |
+
+---
+
+{#extension-2}
+
+#### Extension
+
+```cpp
+Extension(const json::Value & src)
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:32
+
+#### Parameters
+* `src` JSON object node that backs this extension metadata.
+
+---
+
+{#loader}
+
+#### loader
+
+`virtual` `const`
+
+```cpp
+virtual std::string loader() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:36
+
+Returns the loader/runtime contract name (for example "graft").
+
+---
+
+{#runtime}
+
+#### runtime
+
+`virtual` `const`
+
+```cpp
+virtual std::string runtime() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:39
+
+Returns the runtime kind (for example "native" or "worker").
+
+---
+
+{#entrypoint}
+
+#### entryPoint
+
+`virtual` `const`
+
+```cpp
+virtual std::string entryPoint() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:42
+
+Returns the install-relative entrypoint path.
+
+---
+
+{#abiversion}
+
+#### abiVersion
+
+`virtual` `const`
+
+```cpp
+virtual int abiVersion() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:45
+
+Returns the extension ABI version, or 0 if not specified.
+
+---
+
+{#capabilities}
+
+#### capabilities
+
+`virtual` `const`
+
+```cpp
+virtual std::vector< std::string > capabilities() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:48
+
+Returns the declared capabilities.
+
+---
+
+{#valid-5}
+
+#### valid
+
+`virtual` `const`
+
+```cpp
+virtual bool valid() const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:51
+
+Returns true when the metadata is internally consistent.
+
+---
+
+{#hascapability}
+
+#### hasCapability
+
+`virtual` `const`
+
+```cpp
+virtual bool hasCapability(std::string_view capability) const
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:54
+
+Returns true when `capability` is declared.
 
 {#asset-1}
 
@@ -2857,17 +3468,23 @@ Dumps the JSON representation of this package to `ost`.
 #include <icy/pacm/package.h>
 ```
 
+```cpp
+struct Asset
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:60
+
 Archive asset metadata for a specific package build.
 
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `json::Value &` | [`root`](#root-2)  |  |
+| `json::Value &` | [`root`](#root-3)  |  |
 
 ---
 
-{#root-2}
+{#root-3}
 
 #### root
 
@@ -2875,11 +3492,13 @@ Archive asset metadata for a specific package build.
 json::Value & root
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:101
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Asset`](#asset-2)  | #### Parameters |
+|  | [`Asset`](#asset-2)  |  |
 |  | [`Asset`](#asset-3)  | Defaulted constructor. |
 | `std::string` | [`fileName`](#filename-2) `virtual` `const` | Returns the archive file name (e.g. "my-plugin-1.0.0.zip"). |
 | `std::string` | [`version`](#version-5) `virtual` `const` | Returns the package version string (e.g. "1.0.0"). |
@@ -2887,10 +3506,10 @@ json::Value & root
 | `std::string` | [`checksum`](#checksum) `virtual` `const` | Returns the asset checksum string, or empty if none is set. |
 | `std::string` | [`url`](#url-8) `virtual` `const` | Returns the download URL from the mirror list at `index`. |
 | `int` | [`fileSize`](#filesize-1) `virtual` `const` | Returns the uncompressed file size in bytes, or 0 if not set. |
-| `bool` | [`valid`](#valid-5) `virtual` `const` | Returns true if the asset has the minimum required fields (file-name, version, mirrors). |
+| `bool` | [`valid`](#valid-6) `virtual` `const` | Returns true if the asset has the minimum required fields (file-name, version, mirrors). |
 | `void` | [`print`](#print-10) `virtual` `const` | Writes the raw JSON of this asset to `ost`. |
-| `Asset &` | [`operator=`](#operator-18) `virtual` | Copies the backing JSON node from `r`. |
-| `bool` | [`operator==`](#operator-19) `virtual` `const` | Returns true if file name, version and checksum all match `r`. |
+| `Asset &` | [`operator=`](#operator-23) `virtual` | Copies the backing JSON node from `r`. |
+| `bool` | [`operator==`](#operator-24) `virtual` `const` | Returns true if file name, version and checksum all match `r`. |
 
 ---
 
@@ -2901,6 +3520,8 @@ json::Value & root
 ```cpp
 Asset(json::Value & src)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:63
 
 #### Parameters
 * `src` JSON object node that backs this asset.
@@ -2914,6 +3535,8 @@ Asset(json::Value & src)
 ```cpp
 Asset(const Asset &) = default
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:64
 
 Defaulted constructor.
 
@@ -2929,6 +3552,8 @@ Defaulted constructor.
 virtual std::string fileName() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:68
+
 Returns the archive file name (e.g. "my-plugin-1.0.0.zip").
 
 ---
@@ -2942,6 +3567,8 @@ Returns the archive file name (e.g. "my-plugin-1.0.0.zip").
 ```cpp
 virtual std::string version() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:71
 
 Returns the package version string (e.g. "1.0.0").
 
@@ -2957,6 +3584,8 @@ Returns the package version string (e.g. "1.0.0").
 virtual std::string sdkVersion() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:74
+
 Returns the SDK version this asset was built against (e.g. "2.0.0").
 
 ---
@@ -2971,6 +3600,8 @@ Returns the SDK version this asset was built against (e.g. "2.0.0").
 virtual std::string checksum() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:77
+
 Returns the asset checksum string, or empty if none is set.
 
 ---
@@ -2982,8 +3613,10 @@ Returns the asset checksum string, or empty if none is set.
 `virtual` `const`
 
 ```cpp
-virtual std::string url(int index) const
+virtual std::string url(int index = 0) const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:81
 
 Returns the download URL from the mirror list at `index`. 
 #### Parameters
@@ -3001,11 +3634,13 @@ Returns the download URL from the mirror list at `index`.
 virtual int fileSize() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:84
+
 Returns the uncompressed file size in bytes, or 0 if not set.
 
 ---
 
-{#valid-5}
+{#valid-6}
 
 #### valid
 
@@ -3014,6 +3649,8 @@ Returns the uncompressed file size in bytes, or 0 if not set.
 ```cpp
 virtual bool valid() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:88
 
 Returns true if the asset has the minimum required fields (file-name, version, mirrors).
 
@@ -3029,13 +3666,15 @@ Returns true if the asset has the minimum required fields (file-name, version, m
 virtual void print(std::ostream & ost) const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:92
+
 Writes the raw JSON of this asset to `ost`. 
 #### Parameters
 * `ost` Output stream.
 
 ---
 
-{#operator-18}
+{#operator-23}
 
 #### operator=
 
@@ -3045,13 +3684,15 @@ Writes the raw JSON of this asset to `ost`.
 virtual Asset & operator=(const Asset & r)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:96
+
 Copies the backing JSON node from `r`. 
 #### Parameters
 * `r` Source asset to copy from.
 
 ---
 
-{#operator-19}
+{#operator-24}
 
 #### operator==
 
@@ -3061,157 +3702,9 @@ Copies the backing JSON node from `r`.
 virtual bool operator==(const Asset & r) const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:99
+
 Returns true if file name, version and checksum all match `r`.
-
-{#extension-1}
-
-## Extension
-
-```cpp
-#include <icy/pacm/package.h>
-```
-
-Optional extension metadata that describes how a packaged runtime unit is loaded.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `const json::Value &` | [`root`](#root-3)  |  |
-
----
-
-{#root-3}
-
-#### root
-
-```cpp
-const json::Value & root
-```
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Extension`](#extension-2)  | #### Parameters |
-| `std::string` | [`loader`](#loader) `virtual` `const` | Returns the loader/runtime contract name (for example "graft"). |
-| `std::string` | [`runtime`](#runtime) `virtual` `const` | Returns the runtime kind (for example "native" or "worker"). |
-| `std::string` | [`entryPoint`](#entrypoint) `virtual` `const` | Returns the install-relative entrypoint path. |
-| `int` | [`abiVersion`](#abiversion) `virtual` `const` | Returns the extension ABI version, or 0 if not specified. |
-| `std::vector< std::string >` | [`capabilities`](#capabilities) `virtual` `const` | Returns the declared capabilities. |
-| `bool` | [`valid`](#valid-6) `virtual` `const` | Returns true when the metadata is internally consistent. |
-| `bool` | [`hasCapability`](#hascapability) `virtual` `const` | Returns true when `capability` is declared. |
-
----
-
-{#extension-2}
-
-#### Extension
-
-```cpp
-Extension(const json::Value & src)
-```
-
-#### Parameters
-* `src` JSON object node that backs this extension metadata.
-
----
-
-{#loader}
-
-#### loader
-
-`virtual` `const`
-
-```cpp
-virtual std::string loader() const
-```
-
-Returns the loader/runtime contract name (for example "graft").
-
----
-
-{#runtime}
-
-#### runtime
-
-`virtual` `const`
-
-```cpp
-virtual std::string runtime() const
-```
-
-Returns the runtime kind (for example "native" or "worker").
-
----
-
-{#entrypoint}
-
-#### entryPoint
-
-`virtual` `const`
-
-```cpp
-virtual std::string entryPoint() const
-```
-
-Returns the install-relative entrypoint path.
-
----
-
-{#abiversion}
-
-#### abiVersion
-
-`virtual` `const`
-
-```cpp
-virtual int abiVersion() const
-```
-
-Returns the extension ABI version, or 0 if not specified.
-
----
-
-{#capabilities}
-
-#### capabilities
-
-`virtual` `const`
-
-```cpp
-virtual std::vector< std::string > capabilities() const
-```
-
-Returns the declared capabilities.
-
----
-
-{#valid-6}
-
-#### valid
-
-`virtual` `const`
-
-```cpp
-virtual bool valid() const
-```
-
-Returns true when the metadata is internally consistent.
-
----
-
-{#hascapability}
-
-#### hasCapability
-
-`virtual` `const`
-
-```cpp
-virtual bool hasCapability(std::string_view capability) const
-```
-
-Returns true when `capability` is declared.
 
 {#packagepair}
 
@@ -3220,6 +3713,12 @@ Returns true when `capability` is declared.
 ```cpp
 #include <icy/pacm/package.h>
 ```
+
+```cpp
+struct PackagePair
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:328
 
 Pairing of the installed and remote metadata for the same package ID.
 
@@ -3240,6 +3739,8 @@ Pairing of the installed and remote metadata for the same package ID.
 LocalPackage * local
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:357
+
 Returns true if there are no possible updates for this package, false otherwise.
 
 ---
@@ -3252,11 +3753,13 @@ Returns true if there are no possible updates for this package, false otherwise.
 RemotePackage * remote
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:358
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`PackagePair`](#packagepair-1)  | #### Parameters |
+|  | [`PackagePair`](#packagepair-1)  |  |
 | `bool` | [`valid`](#valid-7) `virtual` `const` | Returns true if at least one of local/remote is set and that pointer is itself [valid()](#valid-7). |
 | `std::string` | [`id`](#id-3) `const` | Returns the package ID, preferring the local package if available. |
 | `std::string` | [`name`](#name-7) `const` | Returns the package display name, preferring the local package if available. |
@@ -3271,8 +3774,10 @@ RemotePackage * remote
 #### PackagePair
 
 ```cpp
-PackagePair(LocalPackage * local, RemotePackage * remote)
+PackagePair(LocalPackage * local = nullptr, RemotePackage * remote = nullptr)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:332
 
 #### Parameters
 * `local` Pointer to the locally installed package, or nullptr if not installed. 
@@ -3291,6 +3796,8 @@ PackagePair(LocalPackage * local, RemotePackage * remote)
 virtual bool valid() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:336
+
 Returns true if at least one of local/remote is set and that pointer is itself [valid()](#valid-7).
 
 ---
@@ -3304,6 +3811,8 @@ Returns true if at least one of local/remote is set and that pointer is itself [
 ```cpp
 std::string id() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:339
 
 Returns the package ID, preferring the local package if available.
 
@@ -3319,6 +3828,8 @@ Returns the package ID, preferring the local package if available.
 std::string name() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:342
+
 Returns the package display name, preferring the local package if available.
 
 ---
@@ -3332,6 +3843,8 @@ Returns the package display name, preferring the local package if available.
 ```cpp
 std::string type() const
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:345
 
 Returns the package type, preferring the local package if available.
 
@@ -3347,6 +3860,8 @@ Returns the package type, preferring the local package if available.
 std::string author() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:348
+
 Returns the package author, preferring the local package if available.
 
 ---
@@ -3361,6 +3876,8 @@ Returns the package author, preferring the local package if available.
 bool hasExtension() const
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:351
+
 Returns true when either side carries extension metadata.
 
 {#remotepackage}
@@ -3370,6 +3887,12 @@ Returns true when either side carries extension metadata.
 ```cpp
 #include <icy/pacm/package.h>
 ```
+
+```cpp
+struct RemotePackage
+```
+
+Defined in src/pacm/include/icy/pacm/package.h:151
 
 > **Inherits:** [`Package`](#package)
 
@@ -3396,6 +3919,8 @@ Returns true when either side carries extension metadata.
 RemotePackage()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:154
+
 Constructs an empty remote package.
 
 ---
@@ -3407,6 +3932,8 @@ Constructs an empty remote package.
 ```cpp
 RemotePackage(const json::Value & src)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:158
 
 Constructs a remote package from an existing JSON value. 
 #### Parameters
@@ -3424,6 +3951,8 @@ Constructs a remote package from an existing JSON value.
 virtual json::Value & assets()
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:162
+
 Returns a reference to the "assets" JSON array node.
 
 ---
@@ -3437,6 +3966,8 @@ Returns a reference to the "assets" JSON array node.
 ```cpp
 virtual Asset latestAsset()
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:168
 
 Returns the latest asset for this package. For local packages this is the currently installed version. For remote packages this is the latest available version. Throws an exception if no asset exists.
 
@@ -3452,6 +3983,8 @@ Returns the latest asset for this package. For local packages this is the curren
 virtual Asset assetVersion(const std::string & version)
 ```
 
+Defined in src/pacm/include/icy/pacm/package.h:172
+
 Returns the latest asset for the given package version. Throws an exception if no asset exists.
 
 ---
@@ -3465,6 +3998,8 @@ Returns the latest asset for the given package version. Throws an exception if n
 ```cpp
 virtual Asset latestSDKAsset(const std::string & version)
 ```
+
+Defined in src/pacm/include/icy/pacm/package.h:180
 
 Returns the latest asset for the given SDK version. This method is for safely installing plug-ins which must be compiled against a specific SDK version. The package JSON must have a "sdk-version" member for this function to work as intended. Throws an exception if no asset exists.
 

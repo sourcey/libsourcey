@@ -36,7 +36,7 @@ JSON value aliases, serialization helpers, and file utilities built on nlohmann/
 #### Value
 
 ```cpp
-nlohmann::json Value()
+using Value = nlohmann::json
 ```
 
 Primary JSON value type used throughout the library.
@@ -119,7 +119,7 @@ Load a JSON file into a value. Throws on missing file or parse error.
 `inline`
 
 ```cpp
-inline void saveFile(const std::string & path, const json::Value & root, int indent)
+inline void saveFile(const std::string & path, const json::Value & root, int indent = 4)
 ```
 
 Save a JSON value to a file. Throws on write error.
@@ -175,7 +175,7 @@ Return true if any nested object contains the given key.
 `inline`
 
 ```cpp
-inline bool findNestedObjectWithProperty(json::Value & root, json::Value *& result, std::string_view key, std::string_view value, bool partial, int index)
+inline bool findNestedObjectWithProperty(json::Value & root, json::Value *& result, std::string_view key, std::string_view value, bool partial = true, int index = 0)
 ```
 
 Find a nested object whose property matches the given key/value.
@@ -191,6 +191,12 @@ Returns true if found, with result pointing to the matching object.
 ```cpp
 #include <icy/json/configuration.h>
 ```
+
+```cpp
+class Configuration
+```
+
+Defined in src/json/include/icy/json/configuration.h:28
 
 > **Inherits:** [`Configuration`](base.md#configuration)
 
@@ -213,6 +219,8 @@ See base [Configuration](#configuration-1) for all accessors
 ```cpp
 json::Value root
 ```
+
+Defined in src/json/include/icy/json/configuration.h:80
 
 ### Public Methods
 
@@ -241,6 +249,8 @@ json::Value root
 Configuration()
 ```
 
+Defined in src/json/include/icy/json/configuration.h:31
+
 ---
 
 {#configuration-3}
@@ -253,6 +263,8 @@ Configuration()
 virtual ~Configuration()
 ```
 
+Defined in src/json/include/icy/json/configuration.h:32
+
 Destroys the [Configuration](#configuration-1).
 
 ---
@@ -264,8 +276,10 @@ Destroys the [Configuration](#configuration-1).
 `virtual`
 
 ```cpp
-virtual void load(const std::string & path, bool create)
+virtual void load(const std::string & path, bool create = false)
 ```
+
+Defined in src/json/include/icy/json/configuration.h:38
 
 Sets the file path and loads the configuration. 
 #### Parameters
@@ -285,8 +299,10 @@ Sets the file path and loads the configuration.
 `virtual`
 
 ```cpp
-virtual void load(bool create)
+virtual void load(bool create = false)
 ```
+
+Defined in src/json/include/icy/json/configuration.h:44
 
 Reloads the configuration from the previously set path. Silently ignores parse errors (e.g. empty file). 
 #### Parameters
@@ -307,6 +323,8 @@ Reloads the configuration from the previously set path. Silently ignores parse e
 virtual void save()
 ```
 
+Defined in src/json/include/icy/json/configuration.h:48
+
 Writes the current JSON root to the file at the stored path. 
 #### Exceptions
 * `std::runtime_error` if the path is empty or the file cannot be written.
@@ -322,6 +340,8 @@ Writes the current JSON root to the file at the stored path.
 ```cpp
 virtual bool remove(const std::string & key)
 ```
+
+Defined in src/json/include/icy/json/configuration.h:53
 
 Removes the top-level key `key` from the JSON root. 
 #### Parameters
@@ -342,6 +362,8 @@ true if the key existed and was removed.
 virtual void removeAll(const std::string & baseKey)
 ```
 
+Defined in src/json/include/icy/json/configuration.h:57
+
 Removes all top-level keys whose names contain `baseKey` as a substring. 
 #### Parameters
 * `baseKey` Substring to match against key names.
@@ -358,6 +380,8 @@ Removes all top-level keys whose names contain `baseKey` as a substring.
 virtual void replace(const std::string & from, const std::string & to)
 ```
 
+Defined in src/json/include/icy/json/configuration.h:63
+
 Performs a global string substitution on the serialized JSON, replacing all occurrences of `from` with `to`, then re-parses. 
 #### Parameters
 * `from` Substring to find. 
@@ -373,8 +397,10 @@ Performs a global string substitution on the serialized JSON, replacing all occu
 `virtual`
 
 ```cpp
-virtual void keys(std::vector< std::string > & keys, const std::string & baseKey)
+virtual void keys(std::vector< std::string > & keys, const std::string & baseKey = "")
 ```
+
+Defined in src/json/include/icy/json/configuration.h:68
 
 Populates `keys` with all top-level key names containing `baseKey` as a substring. 
 #### Parameters
@@ -394,6 +420,8 @@ Populates `keys` with all top-level key names containing `baseKey` as a substrin
 virtual void print(std::ostream & ost)
 ```
 
+Defined in src/json/include/icy/json/configuration.h:72
+
 Writes the pretty-printed JSON to `ost` with 4-space indentation. 
 #### Parameters
 * `ost` Output stream.
@@ -410,6 +438,8 @@ Writes the pretty-printed JSON to `ost` with 4-space indentation.
 virtual std::string path()
 ```
 
+Defined in src/json/include/icy/json/configuration.h:75
+
 Returns the file path that was passed to [load()](#load).
 
 ---
@@ -423,6 +453,8 @@ Returns the file path that was passed to [load()](#load).
 ```cpp
 virtual bool loaded()
 ```
+
+Defined in src/json/include/icy/json/configuration.h:78
 
 Returns true if [load()](#load) has been called at least once.
 
@@ -444,6 +476,8 @@ Returns true if [load()](#load) has been called at least once.
 bool _loaded
 ```
 
+Defined in src/json/include/icy/json/configuration.h:94
+
 ---
 
 {#_path-3}
@@ -453,6 +487,8 @@ bool _loaded
 ```cpp
 std::string _path
 ```
+
+Defined in src/json/include/icy/json/configuration.h:95
 
 ---
 
@@ -464,12 +500,14 @@ std::string _path
 std::mutex _mutex
 ```
 
+Defined in src/json/include/icy/json/configuration.h:96
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`getRaw`](#getraw) `virtual` `const` | Retrieves the string value for `key` from the JSON root. |
-| `void` | [`setRaw`](#setraw) `virtual` | Stores `value` under `key` in the JSON root and emits PropertyChanged. |
+| `bool` | [`getRaw`](#getraw) `virtual` `const` `override` | Retrieves the string value for `key` from the JSON root. |
+| `void` | [`setRaw`](#setraw) `virtual` `override` | Stores `value` under `key` in the JSON root and emits PropertyChanged. |
 
 ---
 
@@ -477,11 +515,13 @@ std::mutex _mutex
 
 #### getRaw
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual bool getRaw(const std::string & key, std::string & value) const
+virtual bool getRaw(const std::string & key, std::string & value) const override
 ```
+
+Defined in src/json/include/icy/json/configuration.h:87
 
 Retrieves the string value for `key` from the JSON root. 
 #### Parameters
@@ -498,11 +538,13 @@ true if the key was found, false otherwise.
 
 #### setRaw
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void setRaw(const std::string & key, const std::string & value)
+virtual void setRaw(const std::string & key, const std::string & value) override
 ```
+
+Defined in src/json/include/icy/json/configuration.h:92
 
 Stores `value` under `key` in the JSON root and emits PropertyChanged. 
 #### Parameters
@@ -518,6 +560,12 @@ Stores `value` under `key` in the JSON root and emits PropertyChanged.
 #include <icy/json/iserializable.h>
 ```
 
+```cpp
+class ISerializable
+```
+
+Defined in src/json/include/icy/json/iserializable.h:24
+
 > **Subclassed by:** [`Scheduler`](sched.md#scheduler), [`Task`](sched.md#task-1), [`Trigger`](sched.md#trigger-1)
 
 Abstract interface for JSON-serializable objects.
@@ -526,8 +574,8 @@ Abstract interface for JSON-serializable objects.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`serialize`](#serialize-1)  | Serializes this object's state into `root`. |
-| `void` | [`deserialize`](#deserialize-1)  | Populates this object's state from `root`. |
+| `void` | [`serialize`](#serialize-1) `virtual` | Serializes this object's state into `root`. |
+| `void` | [`deserialize`](#deserialize-1) `virtual` | Populates this object's state from `root`. |
 
 ---
 
@@ -535,9 +583,13 @@ Abstract interface for JSON-serializable objects.
 
 #### serialize
 
+`virtual`
+
 ```cpp
-void serialize(json::Value & root)
+virtual void serialize(json::Value & root)
 ```
+
+Defined in src/json/include/icy/json/iserializable.h:31
 
 Serializes this object's state into `root`. 
 #### Parameters
@@ -549,9 +601,13 @@ Serializes this object's state into `root`.
 
 #### deserialize
 
+`virtual`
+
 ```cpp
-void deserialize(json::Value & root)
+virtual void deserialize(json::Value & root)
 ```
+
+Defined in src/json/include/icy/json/iserializable.h:35
 
 Populates this object's state from `root`. 
 #### Parameters

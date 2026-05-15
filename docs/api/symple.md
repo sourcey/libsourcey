@@ -30,7 +30,7 @@ Symple protocol messages, peers, client, and server helpers.
 | [`Peer`](#peer-1) | Symple peer record containing identity, presence, and custom fields. |
 | [`Presence`](#presence) | Symple presence message indicating a peer's online status. |
 | [`Roster`](#roster-2) | The [Roster](#roster-2) provides a registry for active network peers indexed by session ID. |
-| [`Server`](#server-9) | Symple v4 server. |
+| [`Server`](#server-10) | Symple v4 server. |
 | [`ServerPeer`](#serverpeer) | Per-connection state for a connected Symple peer. |
 | [`Address`](#address-13) | The [Address](#address-13) structure is an endpoint identifier for a peer on the network. The format is like so: user\|id |
 | [`ClientState`](#clientstate-1) | [Client](#client-5) connection states. |
@@ -43,6 +43,12 @@ Symple protocol messages, peers, client, and server helpers.
 #include <icy/symple/client.h>
 ```
 
+```cpp
+class Client
+```
+
+Defined in src/symple/include/icy/symple/client.h:88
+
 > **Inherits:** [`Stateful< ClientState >`](base.md#stateful), [`Signal< void(IPacket &)>`](base.md#signal)
 
 Symple v4 client.
@@ -53,7 +59,7 @@ Usage: [smpl::Client](#client-5) client({ .host = "localhost", .port = 4500, .us
 
 client += packetSlot(&handler, &Handler::onMessage); client.Announce += slot(&handler, &Handler::onAnnounce);
 
-Messages are emitted as polymorphic [IPacket](base.md#ipacket) via PacketSignal:
+Messages are emitted as polymorphic [IPacket](base.md#ipacket) via [PacketSignal](base.md#packetsignal):
 
 * [smpl::Message](#message-10) (type "message")
 
@@ -84,6 +90,8 @@ Use [packetSlot()](base.md#packetslot) with the specific type to filter.
 Signal< void(const int &)> Announce
 ```
 
+Defined in src/symple/include/icy/symple/client.h:174
+
 Authentication response status (200 = success, 401 = failed).
 
 ---
@@ -95,6 +103,8 @@ Authentication response status (200 = success, 401 = failed).
 ```cpp
 Signal< void(Peer &)> PeerConnected
 ```
+
+Defined in src/symple/include/icy/symple/client.h:177
 
 A peer has come online.
 
@@ -108,6 +118,8 @@ A peer has come online.
 Signal< void(Peer &)> PeerDisconnected
 ```
 
+Defined in src/symple/include/icy/symple/client.h:180
+
 A peer has gone offline.
 
 ---
@@ -120,6 +132,8 @@ A peer has gone offline.
 Signal< void(Peer &)> CreatePresence
 ```
 
+Defined in src/symple/include/icy/symple/client.h:183
+
 Modify the outgoing peer object before presence broadcast.
 
 ### Public Methods
@@ -127,7 +141,7 @@ Modify the outgoing peer object before presence broadcast.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Client`](#client-6)  |  |
-|  | [`Client`](#client-7)  | Default constructor with default [Options](#options-14). |
+|  | [`Client`](#client-7)  | Default constructor with default [Options](#options-13). |
 | `void` | [`start`](#start-16)  | Start the Symple client. |
 | `void` | [`stop`](#stop-13)  | Stop the Symple client. |
 | `ssize_t` | [`send`](#send-17) `virtual` | Send a Symple message. Sets the `from` field automatically. |
@@ -137,12 +151,12 @@ Modify the outgoing peer object before presence broadcast.
 | `ssize_t` | [`sendPresence`](#sendpresence-1) `virtual` | Send directed presence to a specific peer. |
 | `int` | [`joinRoom`](#joinroom) `virtual` | Join a room on the server. |
 | `int` | [`leaveRoom`](#leaveroom) `virtual` | Leave a room on the server. |
-| `bool` | [`isOnline`](#isonline) `const` | Return true if in Online state. |
-| `std::string` | [`ourID`](#ourid) `const` | Return the session ID assigned by the server. |
-| `Peer *` | [`ourPeer`](#ourpeer)  | Return the local peer object (null if offline). |
-| `StringVec` | [`rooms`](#rooms) `const` | Return joined rooms. |
-| `Roster &` | [`roster`](#roster)  | Return the roster of online peers. |
-| `const Options &` | [`options`](#options-12) `const` | Return the current client options. |
+| `bool` | [`isOnline`](#isonline) `const` `nodiscard` | Return true if in Online state. |
+| `std::string` | [`ourID`](#ourid) `const` `nodiscard` | Return the session ID assigned by the server. |
+| `Peer *` | [`ourPeer`](#ourpeer) `nodiscard` | Return the local peer object (null if offline). |
+| `StringVec` | [`rooms`](#rooms) `const` `nodiscard` | Return joined rooms. |
+| `Roster &` | [`roster`](#roster) `nodiscard` | Return the roster of online peers. |
+| `const Options &` | [`options`](#options-12) `const` `nodiscard` | Return the current client options. |
 | `void` | [`setOptions`](#setoptions)  | Replace the client options while the client is closed. This is the only supported way to reconfigure a default-constructed client. |
 | `void` | [`setError`](#seterror-6)  | Set an error and transition to [Error](base.md#error) state. |
 
@@ -153,8 +167,10 @@ Modify the outgoing peer object before presence broadcast.
 #### Client
 
 ```cpp
-Client(const Options & options, uv::Loop * loop)
+Client(const Options & options, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/symple/include/icy/symple/client.h:110
 
 ---
 
@@ -166,7 +182,9 @@ Client(const Options & options, uv::Loop * loop)
 Client()
 ```
 
-Default constructor with default [Options](#options-14).
+Defined in src/symple/include/icy/symple/client.h:112
+
+Default constructor with default [Options](#options-13).
 
 ---
 
@@ -177,6 +195,8 @@ Default constructor with default [Options](#options-14).
 ```cpp
 void start()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:116
 
 Start the Symple client.
 
@@ -189,6 +209,8 @@ Start the Symple client.
 ```cpp
 void stop()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:119
 
 Stop the Symple client.
 
@@ -204,6 +226,8 @@ Stop the Symple client.
 virtual ssize_t send(Message & message)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:123
+
 Send a Symple message. Sets the `from` field automatically.
 
 ---
@@ -217,6 +241,8 @@ Send a Symple message. Sets the `from` field automatically.
 ```cpp
 virtual ssize_t send(const std::string & message)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:126
 
 Send a string message (parsed as JSON).
 
@@ -232,6 +258,8 @@ Send a string message (parsed as JSON).
 virtual ssize_t respond(Message & message)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:129
+
 Swap to/from and send.
 
 ---
@@ -243,8 +271,10 @@ Swap to/from and send.
 `virtual`
 
 ```cpp
-virtual ssize_t sendPresence(bool probe)
+virtual ssize_t sendPresence(bool probe = false)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:132
 
 Broadcast presence to joined rooms.
 
@@ -257,8 +287,10 @@ Broadcast presence to joined rooms.
 `virtual`
 
 ```cpp
-virtual ssize_t sendPresence(const Address & to, bool probe)
+virtual ssize_t sendPresence(const Address & to, bool probe = false)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:135
 
 Send directed presence to a specific peer.
 
@@ -274,6 +306,8 @@ Send directed presence to a specific peer.
 virtual int joinRoom(const std::string & room)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:138
+
 Join a room on the server.
 
 ---
@@ -288,6 +322,8 @@ Join a room on the server.
 virtual int leaveRoom(const std::string & room)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:141
+
 Leave a room on the server.
 
 ---
@@ -296,11 +332,13 @@ Leave a room on the server.
 
 #### isOnline
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool isOnline() const
+[[nodiscard]] bool isOnline() const
 ```
+
+Defined in src/symple/include/icy/symple/client.h:144
 
 Return true if in Online state.
 
@@ -310,11 +348,13 @@ Return true if in Online state.
 
 #### ourID
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string ourID() const
+[[nodiscard]] std::string ourID() const
 ```
+
+Defined in src/symple/include/icy/symple/client.h:147
 
 Return the session ID assigned by the server.
 
@@ -324,9 +364,13 @@ Return the session ID assigned by the server.
 
 #### ourPeer
 
+`nodiscard`
+
 ```cpp
-Peer * ourPeer()
+[[nodiscard]] Peer * ourPeer()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:150
 
 Return the local peer object (null if offline).
 
@@ -336,11 +380,13 @@ Return the local peer object (null if offline).
 
 #### rooms
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-StringVec rooms() const
+[[nodiscard]] StringVec rooms() const
 ```
+
+Defined in src/symple/include/icy/symple/client.h:153
 
 Return joined rooms.
 
@@ -350,9 +396,13 @@ Return joined rooms.
 
 #### roster
 
+`nodiscard`
+
 ```cpp
-Roster & roster()
+[[nodiscard]] Roster & roster()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:156
 
 Return the roster of online peers.
 
@@ -362,11 +412,13 @@ Return the roster of online peers.
 
 #### options
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const Options & options() const
+[[nodiscard]] const Options & options() const
 ```
+
+Defined in src/symple/include/icy/symple/client.h:159
 
 Return the current client options.
 
@@ -379,6 +431,8 @@ Return the current client options.
 ```cpp
 void setOptions(Options options)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:164
 
 Replace the client options while the client is closed. This is the only supported way to reconfigure a default-constructed client. 
 #### Exceptions
@@ -393,6 +447,8 @@ Replace the client options while the client is closed. This is the only supporte
 ```cpp
 void setError(const std::string & error)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:167
 
 Set an error and transition to [Error](base.md#error) state.
 
@@ -415,6 +471,8 @@ Set an error and transition to [Error](base.md#error) state.
 virtual void createPresence(Presence & p)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:189
+
 Underlying connection state changed. Inherits StateChange from [Stateful<ClientState>](base.md#stateful).
 
 ---
@@ -426,8 +484,10 @@ Underlying connection state changed. Inherits StateChange from [Stateful<ClientS
 `virtual`
 
 ```cpp
-virtual void onPresenceData(const json::Value & data, bool whiny)
+virtual void onPresenceData(const json::Value & data, bool whiny = false)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:190
 
 ### Private Attributes
 
@@ -444,6 +504,8 @@ virtual void onPresenceData(const json::Value & data, bool whiny)
 ```cpp
 std::unique_ptr< ClientData > _data
 ```
+
+Defined in src/symple/include/icy/symple/client.h:209
 
 ### Private Methods
 
@@ -472,6 +534,8 @@ std::unique_ptr< ClientData > _data
 void doConnect()
 ```
 
+Defined in src/symple/include/icy/symple/client.h:195
+
 ---
 
 {#ontransporterror}
@@ -481,6 +545,8 @@ void doConnect()
 ```cpp
 void onTransportError(const icy::Error & error)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:196
 
 ---
 
@@ -492,6 +558,8 @@ void onTransportError(const icy::Error & error)
 void onSocketRecv(const std::string & data)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:197
+
 ---
 
 {#onsocketclose-6}
@@ -501,6 +569,8 @@ void onSocketRecv(const std::string & data)
 ```cpp
 void onSocketClose()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:198
 
 ---
 
@@ -512,6 +582,8 @@ void onSocketClose()
 void onSocketError(const std::string & error)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:199
+
 ---
 
 {#onwelcome}
@@ -521,6 +593,8 @@ void onSocketError(const std::string & error)
 ```cpp
 void onWelcome(const json::Value & msg)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:200
 
 ---
 
@@ -532,6 +606,8 @@ void onWelcome(const json::Value & msg)
 void onServerMessage(const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/client.h:201
+
 ---
 
 {#startreconnect}
@@ -541,6 +617,8 @@ void onServerMessage(const json::Value & msg)
 ```cpp
 void startReconnect()
 ```
+
+Defined in src/symple/include/icy/symple/client.h:202
 
 ---
 
@@ -552,6 +630,8 @@ void startReconnect()
 void reset()
 ```
 
+Defined in src/symple/include/icy/symple/client.h:203
+
 ---
 
 {#syncdesiredrooms}
@@ -562,6 +642,8 @@ void reset()
 void syncDesiredRooms()
 ```
 
+Defined in src/symple/include/icy/symple/client.h:204
+
 ---
 
 {#sendjson}
@@ -571,6 +653,8 @@ void syncDesiredRooms()
 ```cpp
 ssize_t sendJson(const json::Value & msg)
 ```
+
+Defined in src/symple/include/icy/symple/client.h:206
 
 ---
 
@@ -584,6 +668,195 @@ ssize_t sendJson(const json::Value & msg)
 std::string buildUrl() const
 ```
 
+Defined in src/symple/include/icy/symple/client.h:207
+
+{#options-13}
+
+## Options
+
+```cpp
+#include <icy/symple/client.h>
+```
+
+```cpp
+struct Options
+```
+
+Defined in src/symple/include/icy/symple/client.h:93
+
+Connection and authentication options for the Symple client.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `std::string` | [`host`](#host-2)  |  |
+| `uint16_t` | [`port`](#port-2)  |  |
+| `bool` | [`secure`](#secure-1)  | Use wss:// instead of ws://. |
+| `bool` | [`reconnection`](#reconnection)  | Auto-reconnect on disconnect. |
+| `int` | [`reconnectAttempts`](#reconnectattempts)  | 0 = unlimited |
+| `int` | [`reconnectDelay`](#reconnectdelay)  | Milliseconds between retries. |
+| `std::string` | [`user`](#user-1)  | User identifier (required). |
+| `std::string` | [`name`](#name-12)  | Display name. |
+| `std::string` | [`type`](#type-19)  | [Peer](#peer-1) type. |
+| `std::string` | [`token`](#token)  | Auth token (optional). |
+
+---
+
+{#host-2}
+
+#### host
+
+```cpp
+std::string host = "127.0.0.1"
+```
+
+Defined in src/symple/include/icy/symple/client.h:95
+
+---
+
+{#port-2}
+
+#### port
+
+```cpp
+uint16_t port = 4500
+```
+
+Defined in src/symple/include/icy/symple/client.h:96
+
+---
+
+{#secure-1}
+
+#### secure
+
+```cpp
+bool secure = false
+```
+
+Defined in src/symple/include/icy/symple/client.h:97
+
+Use wss:// instead of ws://.
+
+---
+
+{#reconnection}
+
+#### reconnection
+
+```cpp
+bool reconnection = true
+```
+
+Defined in src/symple/include/icy/symple/client.h:98
+
+Auto-reconnect on disconnect.
+
+---
+
+{#reconnectattempts}
+
+#### reconnectAttempts
+
+```cpp
+int reconnectAttempts = 0
+```
+
+Defined in src/symple/include/icy/symple/client.h:99
+
+0 = unlimited
+
+---
+
+{#reconnectdelay}
+
+#### reconnectDelay
+
+```cpp
+int reconnectDelay = 3000
+```
+
+Defined in src/symple/include/icy/symple/client.h:100
+
+Milliseconds between retries.
+
+---
+
+{#user-1}
+
+#### user
+
+```cpp
+std::string user
+```
+
+Defined in src/symple/include/icy/symple/client.h:102
+
+User identifier (required).
+
+---
+
+{#name-12}
+
+#### name
+
+```cpp
+std::string name
+```
+
+Defined in src/symple/include/icy/symple/client.h:103
+
+Display name.
+
+---
+
+{#type-19}
+
+#### type
+
+```cpp
+std::string type
+```
+
+Defined in src/symple/include/icy/symple/client.h:104
+
+[Peer](#peer-1) type.
+
+---
+
+{#token}
+
+#### token
+
+```cpp
+std::string token
+```
+
+Defined in src/symple/include/icy/symple/client.h:105
+
+Auth token (optional).
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`Options`](#options-14)  | Defaulted constructor. |
+
+---
+
+{#options-14}
+
+#### Options
+
+```cpp
+Options() = default
+```
+
+Defined in src/symple/include/icy/symple/client.h:107
+
+Defaulted constructor.
+
 {#clientdata}
 
 ## ClientData
@@ -592,11 +865,17 @@ std::string buildUrl() const
 #include <src/symple/src/client/detail.h>
 ```
 
+```cpp
+struct ClientData
+```
+
+Defined in src/symple/src/client/detail.h:13
+
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `Options` | [`options`](#options-13)  |  |
+| `Options` | [`options`](#options-15)  |  |
 | `uv::Loop *` | [`loop`](#loop-8)  |  |
 | `http::ClientConnection::Ptr` | [`ws`](#ws-1)  |  |
 | `Roster` | [`roster`](#roster-1)  |  |
@@ -610,16 +889,19 @@ std::string buildUrl() const
 | `int` | [`reconnectCount`](#reconnectcount)  |  |
 | `bool` | [`wasOnline`](#wasonline)  |  |
 | `bool` | [`closing`](#closing-2)  |  |
+| `bool` | [`remoteShutdown`](#remoteshutdown)  |  |
 
 ---
 
-{#options-13}
+{#options-15}
 
 #### options
 
 ```cpp
 Options options
 ```
+
+Defined in src/symple/src/client/detail.h:22
 
 ---
 
@@ -631,6 +913,8 @@ Options options
 uv::Loop * loop
 ```
 
+Defined in src/symple/src/client/detail.h:23
+
 ---
 
 {#ws-1}
@@ -640,6 +924,8 @@ uv::Loop * loop
 ```cpp
 http::ClientConnection::Ptr ws
 ```
+
+Defined in src/symple/src/client/detail.h:24
 
 ---
 
@@ -651,6 +937,8 @@ http::ClientConnection::Ptr ws
 Roster roster
 ```
 
+Defined in src/symple/src/client/detail.h:25
+
 ---
 
 {#ourid-1}
@@ -661,6 +949,8 @@ Roster roster
 std::string ourID
 ```
 
+Defined in src/symple/src/client/detail.h:26
+
 ---
 
 {#currentrooms}
@@ -670,6 +960,8 @@ std::string ourID
 ```cpp
 std::unordered_set< std::string > currentRooms
 ```
+
+Defined in src/symple/src/client/detail.h:27
 
 Authoritative rooms from welcome / acks.
 
@@ -683,6 +975,8 @@ Authoritative rooms from welcome / acks.
 std::unordered_set< std::string > desiredRooms
 ```
 
+Defined in src/symple/src/client/detail.h:28
+
 Rooms the client wants persisted across reconnects.
 
 ---
@@ -694,6 +988,8 @@ Rooms the client wants persisted across reconnects.
 ```cpp
 std::unordered_set< std::string > pendingJoins
 ```
+
+Defined in src/symple/src/client/detail.h:29
 
 Join requests sent but not yet acknowledged.
 
@@ -707,6 +1003,8 @@ Join requests sent but not yet acknowledged.
 std::unordered_set< std::string > pendingLeaves
 ```
 
+Defined in src/symple/src/client/detail.h:30
+
 Leave requests sent but not yet acknowledged.
 
 ---
@@ -719,6 +1017,8 @@ Leave requests sent but not yet acknowledged.
 int announceStatus = 0
 ```
 
+Defined in src/symple/src/client/detail.h:31
+
 ---
 
 {#reconnecttimer}
@@ -728,6 +1028,8 @@ int announceStatus = 0
 ```cpp
 Timer reconnectTimer
 ```
+
+Defined in src/symple/src/client/detail.h:32
 
 ---
 
@@ -739,6 +1041,8 @@ Timer reconnectTimer
 int reconnectCount = 0
 ```
 
+Defined in src/symple/src/client/detail.h:33
+
 ---
 
 {#wasonline}
@@ -749,6 +1053,8 @@ int reconnectCount = 0
 bool wasOnline = false
 ```
 
+Defined in src/symple/src/client/detail.h:34
+
 ---
 
 {#closing-2}
@@ -758,6 +1064,20 @@ bool wasOnline = false
 ```cpp
 bool closing = false
 ```
+
+Defined in src/symple/src/client/detail.h:35
+
+---
+
+{#remoteshutdown}
+
+#### remoteShutdown
+
+```cpp
+bool remoteShutdown = false
+```
+
+Defined in src/symple/src/client/detail.h:36
 
 ### Public Methods
 
@@ -777,164 +1097,7 @@ bool closing = false
 inline explicit ClientData(Options opts, uv::Loop * targetLoop)
 ```
 
-{#options-14}
-
-## Options
-
-```cpp
-#include <icy/symple/client.h>
-```
-
-Connection and authentication options for the Symple client.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `std::string` | [`host`](#host-2)  |  |
-| `uint16_t` | [`port`](#port-2)  |  |
-| `bool` | [`secure`](#secure-1)  | Use wss:// instead of ws://. |
-| `bool` | [`reconnection`](#reconnection)  | Auto-reconnect on disconnect. |
-| `int` | [`reconnectAttempts`](#reconnectattempts)  | 0 = unlimited |
-| `int` | [`reconnectDelay`](#reconnectdelay)  | Milliseconds between retries. |
-| `std::string` | [`user`](#user-1)  | User identifier (required) |
-| `std::string` | [`name`](#name-12)  | Display name. |
-| `std::string` | [`type`](#type-19)  | [Peer](#peer-1) type. |
-| `std::string` | [`token`](#token)  | Auth token (optional) |
-
----
-
-{#host-2}
-
-#### host
-
-```cpp
-std::string host = "127.0.0.1"
-```
-
----
-
-{#port-2}
-
-#### port
-
-```cpp
-uint16_t port = 4500
-```
-
----
-
-{#secure-1}
-
-#### secure
-
-```cpp
-bool secure = false
-```
-
-Use wss:// instead of ws://.
-
----
-
-{#reconnection}
-
-#### reconnection
-
-```cpp
-bool reconnection = true
-```
-
-Auto-reconnect on disconnect.
-
----
-
-{#reconnectattempts}
-
-#### reconnectAttempts
-
-```cpp
-int reconnectAttempts = 0
-```
-
-0 = unlimited
-
----
-
-{#reconnectdelay}
-
-#### reconnectDelay
-
-```cpp
-int reconnectDelay = 3000
-```
-
-Milliseconds between retries.
-
----
-
-{#user-1}
-
-#### user
-
-```cpp
-std::string user
-```
-
-User identifier (required)
-
----
-
-{#name-12}
-
-#### name
-
-```cpp
-std::string name
-```
-
-Display name.
-
----
-
-{#type-19}
-
-#### type
-
-```cpp
-std::string type
-```
-
-[Peer](#peer-1) type.
-
----
-
-{#token}
-
-#### token
-
-```cpp
-std::string token
-```
-
-Auth token (optional)
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`Options`](#options-15)  | Defaulted constructor. |
-
----
-
-{#options-15}
-
-#### Options
-
-```cpp
-Options() = default
-```
-
-Defaulted constructor.
+Defined in src/symple/src/client/detail.h:15
 
 {#command}
 
@@ -944,11 +1107,17 @@ Defaulted constructor.
 #include <icy/symple/command.h>
 ```
 
+```cpp
+class Command
+```
+
+Defined in src/symple/include/icy/symple/command.h:28
+
 > **Inherits:** [`Message`](#message-10)
 
 Symple command message with a node path and action verb.
 
-The `node` field is a colon-delimited path (e.g. "camera:zoom:in"). Individual path segments can be retrieved with [param()](#param).
+The `[node](#node)` field is a colon-delimited path (e.g. "camera:zoom:in"). Individual path segments can be retrieved with [param()](#param).
 
 ### Public Methods
 
@@ -957,14 +1126,14 @@ The `node` field is a colon-delimited path (e.g. "camera:zoom:in"). Individual p
 |  | [`Command`](#command-1)  | Constructs an empty command with type set to "command". |
 |  | [`Command`](#command-2)  | Constructs a command from a JSON value. |
 |  | [`Command`](#command-3)  | Copy constructor. |
-| `std::string` | [`node`](#node) `const` | Returns the colon-delimited node path (e.g. "camera:zoom"). |
-| `std::string` | [`action`](#action-2) `const` | Returns the action verb (defaults to "execute"). |
+| `std::string` | [`node`](#node) `const` `nodiscard` | Returns the colon-delimited node path (e.g. "camera:zoom"). |
+| `std::string` | [`action`](#action-2) `const` `nodiscard` | Returns the action verb (defaults to "execute"). |
 | `void` | [`setNode`](#setnode)  | Sets the node path field. |
 | `void` | [`setAction`](#setaction)  | Sets the action verb field. |
-| `bool` | [`valid`](#valid-11) `virtual` `const` | Returns true if the base message is valid and the `node` field is set. |
-| `std::string` | [`param`](#param) `const` | Returns the nth colon-separated segment of the node path (1-based). Throws std::out_of_range if n exceeds the number of segments. |
+| `bool` | [`valid`](#valid-11) `virtual` `const` | Returns true if the base message is valid and the `[node](#node)` field is set. |
+| `std::string` | [`param`](#param) `const` `nodiscard` | Returns the nth colon-separated segment of the node path (1-based). Throws std::out_of_range if n exceeds the number of segments. |
 | `std::vector< std::string >` | [`params`](#params)  | Returns all colon-separated segments of the node path. |
-| `bool` | [`matches`](#matches-3) `const` | Returns true if the node path matches the given pattern. Uses wildcard node matching via [util::matchNodes](base.md#matchnodes). |
+| `bool` | [`matches`](#matches-3) `const` `nodiscard` | Returns true if the node path matches the given pattern. Uses wildcard node matching via [util::matchNodes](base.md#matchnodes). |
 
 ---
 
@@ -975,6 +1144,8 @@ The `node` field is a colon-delimited path (e.g. "camera:zoom:in"). Individual p
 ```cpp
 Command()
 ```
+
+Defined in src/symple/include/icy/symple/command.h:32
 
 Constructs an empty command with type set to "command".
 
@@ -987,6 +1158,8 @@ Constructs an empty command with type set to "command".
 ```cpp
 Command(const json::Value & root)
 ```
+
+Defined in src/symple/include/icy/symple/command.h:36
 
 Constructs a command from a JSON value. 
 #### Parameters
@@ -1002,6 +1175,8 @@ Constructs a command from a JSON value.
 Command(const Command & root)
 ```
 
+Defined in src/symple/include/icy/symple/command.h:40
+
 Copy constructor. 
 #### Parameters
 * `root` Source command.
@@ -1012,11 +1187,13 @@ Copy constructor.
 
 #### node
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string node() const
+[[nodiscard]] std::string node() const
 ```
+
+Defined in src/symple/include/icy/symple/command.h:45
 
 Returns the colon-delimited node path (e.g. "camera:zoom").
 
@@ -1026,11 +1203,13 @@ Returns the colon-delimited node path (e.g. "camera:zoom").
 
 #### action
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string action() const
+[[nodiscard]] std::string action() const
 ```
+
+Defined in src/symple/include/icy/symple/command.h:48
 
 Returns the action verb (defaults to "execute").
 
@@ -1043,6 +1222,8 @@ Returns the action verb (defaults to "execute").
 ```cpp
 void setNode(std::string_view node)
 ```
+
+Defined in src/symple/include/icy/symple/command.h:52
 
 Sets the node path field. 
 #### Parameters
@@ -1057,6 +1238,8 @@ Sets the node path field.
 ```cpp
 void setAction(std::string_view action)
 ```
+
+Defined in src/symple/include/icy/symple/command.h:56
 
 Sets the action verb field. 
 #### Parameters
@@ -1074,7 +1257,9 @@ Sets the action verb field.
 virtual bool valid() const
 ```
 
-Returns true if the base message is valid and the `node` field is set.
+Defined in src/symple/include/icy/symple/command.h:59
+
+Returns true if the base message is valid and the `[node](#node)` field is set.
 
 ---
 
@@ -1082,11 +1267,13 @@ Returns true if the base message is valid and the `node` field is set.
 
 #### param
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string param(int n) const
+[[nodiscard]] std::string param(int n) const
 ```
+
+Defined in src/symple/include/icy/symple/command.h:65
 
 Returns the nth colon-separated segment of the node path (1-based). Throws std::out_of_range if n exceeds the number of segments. 
 #### Parameters
@@ -1105,6 +1292,8 @@ The nth path segment.
 std::vector< std::string > params()
 ```
 
+Defined in src/symple/include/icy/symple/command.h:69
+
 Returns all colon-separated segments of the node path. 
 #### Returns
 Vector of path segment strings.
@@ -1115,11 +1304,13 @@ Vector of path segment strings.
 
 #### matches
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool matches(std::string_view xnode) const
+[[nodiscard]] bool matches(std::string_view xnode) const
 ```
+
+Defined in src/symple/include/icy/symple/command.h:74
 
 Returns true if the node path matches the given pattern. Uses wildcard node matching via [util::matchNodes](base.md#matchnodes). 
 #### Parameters
@@ -1133,11 +1324,17 @@ Returns true if the node path matches the given pattern. Uses wildcard node matc
 #include <icy/symple/event.h>
 ```
 
+```cpp
+class Event
+```
+
+Defined in src/symple/include/icy/symple/event.h:29
+
 > **Inherits:** [`Message`](#message-10)
 
 Symple event message carrying a named occurrence with a timestamp.
 
-The `name` field identifies the event. The `time` field is stored as a Unix timestamp (seconds since epoch).
+The `[name](#name-13)` field identifies the event. The `[time](base.md#time-3)` field is stored as a Unix timestamp (seconds since epoch).
 
 ### Public Methods
 
@@ -1146,9 +1343,9 @@ The `name` field identifies the event. The `time` field is stored as a Unix time
 |  | [`Event`](#event-3)  | Constructs an event with type "event" and time set to now. |
 |  | [`Event`](#event-4)  | Constructs an event from a JSON value; sets missing time to now. |
 |  | [`Event`](#event-5)  | Copy constructor; preserves or sets missing time to now. |
-| `bool` | [`valid`](#valid-12) `virtual` `const` | Returns true if the base message is valid and the `name` field is set. |
-| `std::string` | [`name`](#name-13) `const` | Returns the event name string. |
-| `std::time_t` | [`time`](#time-4) `const` | Returns the event timestamp as a Unix time_t value. |
+| `bool` | [`valid`](#valid-12) `virtual` `const` `nodiscard` | Returns true if the base message is valid and the `[name](#name-13)` field is set. |
+| `std::string` | [`name`](#name-13) `const` `nodiscard` | Returns the event name string. |
+| `std::time_t` | [`time`](#time-4) `const` `nodiscard` | Returns the event timestamp as a Unix time_t value. |
 | `void` | [`setName`](#setname-2)  | Sets the event name field. |
 | `void` | [`setTime`](#settime)  | Sets the event timestamp. |
 
@@ -1162,6 +1359,8 @@ The `name` field identifies the event. The `time` field is stored as a Unix time
 Event()
 ```
 
+Defined in src/symple/include/icy/symple/event.h:33
+
 Constructs an event with type "event" and time set to now.
 
 ---
@@ -1173,6 +1372,8 @@ Constructs an event with type "event" and time set to now.
 ```cpp
 Event(const json::Value & root)
 ```
+
+Defined in src/symple/include/icy/symple/event.h:37
 
 Constructs an event from a JSON value; sets missing time to now. 
 #### Parameters
@@ -1188,6 +1389,8 @@ Constructs an event from a JSON value; sets missing time to now.
 Event(const Event & root)
 ```
 
+Defined in src/symple/include/icy/symple/event.h:41
+
 Copy constructor; preserves or sets missing time to now. 
 #### Parameters
 * `root` Source event.
@@ -1198,13 +1401,15 @@ Copy constructor; preserves or sets missing time to now.
 
 #### valid
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual bool valid() const
+[[nodiscard]] virtual bool valid() const
 ```
 
-Returns true if the base message is valid and the `name` field is set.
+Defined in src/symple/include/icy/symple/event.h:46
+
+Returns true if the base message is valid and the `[name](#name-13)` field is set.
 
 ---
 
@@ -1212,11 +1417,13 @@ Returns true if the base message is valid and the `name` field is set.
 
 #### name
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string name() const
+[[nodiscard]] std::string name() const
 ```
+
+Defined in src/symple/include/icy/symple/event.h:49
 
 Returns the event name string.
 
@@ -1226,11 +1433,13 @@ Returns the event name string.
 
 #### time
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::time_t time() const
+[[nodiscard]] std::time_t time() const
 ```
+
+Defined in src/symple/include/icy/symple/event.h:53
 
 Returns the event timestamp as a Unix time_t value.
 
@@ -1243,6 +1452,8 @@ Returns the event timestamp as a Unix time_t value.
 ```cpp
 void setName(std::string_view name)
 ```
+
+Defined in src/symple/include/icy/symple/event.h:57
 
 Sets the event name field. 
 #### Parameters
@@ -1258,6 +1469,8 @@ Sets the event name field.
 void setTime(std::time_t time)
 ```
 
+Defined in src/symple/include/icy/symple/event.h:62
+
 Sets the event timestamp. 
 #### Parameters
 * `time` Unix timestamp (seconds since epoch).
@@ -1270,22 +1483,28 @@ Sets the event timestamp.
 #include <icy/symple/form.h>
 ```
 
+```cpp
+class Form
+```
+
+Defined in src/symple/include/icy/symple/form.h:178
+
 > **Inherits:** [`FormElement`](#formelement)
 
 Interactive form with pages, sections, and fields for command data exchange.
 
-Attach a [Form](#form) to a [Command](#command) message to carry structured input/output. The `action` field governs the exchange direction; `partial` enables live/auto-complete field submission.
+Attach a [Form](#form) to a [Command](#command) message to carry structured input/output. The `[action](#action-3)` field governs the exchange direction; `[partial](#partial)` enables live/auto-complete field submission.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Form`](#form-1)  | Constructs an unbound form (root pointer is null). |
-|  | [`Form`](#form-2)  | Constructs a form bound to the given JSON node. Sets the `type` field to "form". |
-|  | [`Form`](#form-3)  | Constructs a form from a [Command](#command), binding to `command["form"]`. Sets the `type` field to "form". |
+|  | [`Form`](#form-2)  | Constructs a form bound to the given JSON node. Sets the `[type](#type-21)` field to "form". |
+|  | [`Form`](#form-3)  | Constructs a form from a [Command](#command), binding to `command["form"]`. Sets the `[type](#type-21)` field to "form". |
 | `bool` | [`valid`](#valid-13)  | Returns true if the element is valid, non-empty, and has no errors. |
-| `std::string` | [`action`](#action-3) `const` | Returns the form action string (defaults to "form"). |
-| `bool` | [`partial`](#partial) `const` | Returns true if this is a partial form submission. |
+| `std::string` | [`action`](#action-3) `const` `nodiscard` | Returns the form action string (defaults to "form"). |
+| `bool` | [`partial`](#partial) `const` `nodiscard` | Returns true if this is a partial form submission. |
 | `void` | [`setAction`](#setaction-1)  | Sets the form action field. Throws std::invalid_argument for unrecognised values. Possible values: `form` - Form-processing entity requests form completion. `submit` - Form-submitting entity is sending data. `cancel` - Form-submitting entity cancelled submission. `result` - Form-processing entity is returning data. |
 | `void` | [`setPartial`](#setpartial)  | Marks the form as a partial section for live/auto-complete updates. Partial forms transmit only the changed fields rather than the entire form payload. |
 
@@ -1299,6 +1518,8 @@ Attach a [Form](#form) to a [Command](#command) message to carry structured inpu
 Form()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:182
+
 Constructs an unbound form (root pointer is null).
 
 ---
@@ -1311,7 +1532,9 @@ Constructs an unbound form (root pointer is null).
 Form(json::Value & root)
 ```
 
-Constructs a form bound to the given JSON node. Sets the `type` field to "form". 
+Defined in src/symple/include/icy/symple/form.h:187
+
+Constructs a form bound to the given JSON node. Sets the `[type](#type-21)` field to "form". 
 #### Parameters
 * `root` JSON node to bind to.
 
@@ -1325,7 +1548,9 @@ Constructs a form bound to the given JSON node. Sets the `type` field to "form".
 Form(Command & root)
 ```
 
-Constructs a form from a [Command](#command), binding to `command["form"]`. Sets the `type` field to "form". 
+Defined in src/symple/include/icy/symple/form.h:192
+
+Constructs a form from a [Command](#command), binding to `command["form"]`. Sets the `[type](#type-21)` field to "form". 
 #### Parameters
 * `root` Parent command message.
 
@@ -1339,6 +1564,8 @@ Constructs a form from a [Command](#command), binding to `command["form"]`. Sets
 bool valid()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:197
+
 Returns true if the element is valid, non-empty, and has no errors.
 
 ---
@@ -1347,11 +1574,13 @@ Returns true if the element is valid, non-empty, and has no errors.
 
 #### action
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string action() const
+[[nodiscard]] std::string action() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:200
 
 Returns the form action string (defaults to "form").
 
@@ -1361,11 +1590,13 @@ Returns the form action string (defaults to "form").
 
 #### partial
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool partial() const
+[[nodiscard]] bool partial() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:203
 
 Returns true if this is a partial form submission.
 
@@ -1378,6 +1609,8 @@ Returns true if this is a partial form submission.
 ```cpp
 void setAction(std::string_view action)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:213
 
 Sets the form action field. Throws std::invalid_argument for unrecognised values. Possible values: `form` - Form-processing entity requests form completion. `submit` - Form-submitting entity is sending data. `cancel` - Form-submitting entity cancelled submission. `result` - Form-processing entity is returning data. 
 #### Parameters
@@ -1393,6 +1626,8 @@ Sets the form action field. Throws std::invalid_argument for unrecognised values
 void setPartial(bool flag)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:219
+
 Marks the form as a partial section for live/auto-complete updates. Partial forms transmit only the changed fields rather than the entire form payload. 
 #### Parameters
 * `flag` True to mark as partial.
@@ -1405,11 +1640,17 @@ Marks the form as a partial section for live/auto-complete updates. Partial form
 #include <icy/symple/form.h>
 ```
 
+```cpp
+class FormElement
+```
+
+Defined in src/symple/include/icy/symple/form.h:33
+
 > **Subclassed by:** [`Form`](#form), [`FormField`](#formfield)
 
 Base element within a Symple form.
 
-[FormElement](#formelement) wraps a reference to an external JSON node and provides typed accessors for the common `type`, `id`, `label`, and `elements` fields. Pages, sections, and fields all derive from this base.
+[FormElement](#formelement) wraps a reference to an external JSON node and provides typed accessors for the common `[type](#type-21)`, `[id](#id-6)`, `[label](#label)`, and `elements` fields. Pages, sections, and fields all derive from this base.
 
 ### Public Methods
 
@@ -1418,10 +1659,10 @@ Base element within a Symple form.
 |  | [`FormElement`](#formelement-1)  | Constructs an unbound element (root pointer is null). |
 |  | [`FormElement`](#formelement-2)  | Constructs an element bound to the given JSON node. |
 |  | [`FormElement`](#formelement-3)  | Copy constructor; copies the root pointer reference (shallow). |
-| `FormElement &` | [`operator=`](#operator-29)  | Copy-assigns the root pointer reference. |
-| `std::string` | [`type`](#type-21) `const` | Returns the element type string. |
-| `std::string` | [`id`](#id-6) `const` | Returns the element ID string. |
-| `std::string` | [`label`](#label) `const` | Returns the display label string. |
+| `FormElement &` | [`operator=`](#operator-37)  | Copy-assigns the root pointer reference. |
+| `std::string` | [`type`](#type-21) `const` `nodiscard` | Returns the element type string. |
+| `std::string` | [`id`](#id-6) `const` `nodiscard` | Returns the element ID string. |
+| `std::string` | [`label`](#label) `const` `nodiscard` | Returns the display label string. |
 | `void` | [`setType`](#settype-1)  | Sets the element type. Possible values: page, section, text, text-multi, list, list-multi, checkbox, media, custom |
 | `void` | [`setId`](#setid)  | Sets the element ID field. |
 | `void` | [`setLabel`](#setlabel)  | Sets the display label field. |
@@ -1434,14 +1675,14 @@ Base element within a Symple form.
 | `bool` | [`getField`](#getfield-1)  | Populates a [FormField](#formfield) by searching child elements for the given ID. |
 | `bool` | [`hasField`](#hasfield)  | Returns true if any child element has an ID matching the given value. |
 | `void` | [`setLive`](#setlive)  | Sets the live flag on this element. Live elements are used to submit partial form sections (e.g. for auto-complete) without sending the entire form. |
-| `bool` | [`live`](#live) `const` | Returns true if this field is live, meaning the form-processing entity should auto-update this field's value whenever it changes. |
+| `bool` | [`live`](#live) `const` `nodiscard` | Returns true if this field is live, meaning the form-processing entity should auto-update this field's value whenever it changes. |
 | `bool` | [`clearElements`](#clearelements)  | Removes all child elements whose ID matches the given value. |
 | `void` | [`clear`](#clear-3)  | Clears all fields from the underlying JSON node. |
-| `bool` | [`valid`](#valid-14) `const` | Returns true if the form element is valid. |
+| `bool` | [`valid`](#valid-14) `const` `nodiscard` | Returns true if the form element is valid. |
 | `int` | [`numElements`](#numelements)  | Returns the number of child elements. |
 | `bool` | [`hasErrors`](#haserrors)  | Returns true if any fields have errors. |
 | `bool` | [`hasPages`](#haspages)  | Returns true if the form has multiple pages. |
-| `json::Value &` | [`root`](#root-4) `const` | Returns a reference to the underlying JSON node. Throws std::runtime_error if the root pointer is null. |
+| `json::Value &` | [`root`](#root-4) `const` `nodiscard` | Returns a reference to the underlying JSON node. Throws std::runtime_error if the root pointer is null. |
 
 ---
 
@@ -1453,6 +1694,8 @@ Base element within a Symple form.
 FormElement()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:37
+
 Constructs an unbound element (root pointer is null).
 
 ---
@@ -1462,8 +1705,10 @@ Constructs an unbound element (root pointer is null).
 #### FormElement
 
 ```cpp
-FormElement(json::Value & root, std::string_view type, std::string_view id, std::string_view label)
+FormElement(json::Value & root, std::string_view type = "", std::string_view id = "", std::string_view label = "")
 ```
+
+Defined in src/symple/include/icy/symple/form.h:44
 
 Constructs an element bound to the given JSON node. 
 #### Parameters
@@ -1485,19 +1730,23 @@ Constructs an element bound to the given JSON node.
 FormElement(const FormElement & r)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:49
+
 Copy constructor; copies the root pointer reference (shallow). 
 #### Parameters
 * `r` Source element.
 
 ---
 
-{#operator-29}
+{#operator-37}
 
 #### operator=
 
 ```cpp
 FormElement & operator=(const FormElement & r)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:53
 
 Copy-assigns the root pointer reference. 
 #### Parameters
@@ -1509,11 +1758,13 @@ Copy-assigns the root pointer reference.
 
 #### type
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string type() const
+[[nodiscard]] std::string type() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:58
 
 Returns the element type string.
 
@@ -1523,11 +1774,13 @@ Returns the element type string.
 
 #### id
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string id() const
+[[nodiscard]] std::string id() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:61
 
 Returns the element ID string.
 
@@ -1537,11 +1790,13 @@ Returns the element ID string.
 
 #### label
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string label() const
+[[nodiscard]] std::string label() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:64
 
 Returns the display label string.
 
@@ -1554,6 +1809,8 @@ Returns the display label string.
 ```cpp
 void setType(std::string_view type)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:70
 
 Sets the element type. Possible values: page, section, text, text-multi, list, list-multi, checkbox, media, custom 
 #### Parameters
@@ -1569,6 +1826,8 @@ Sets the element type. Possible values: page, section, text, text-multi, list, l
 void setId(std::string_view id)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:74
+
 Sets the element ID field. 
 #### Parameters
 * `id` Element ID string.
@@ -1582,6 +1841,8 @@ Sets the element ID field.
 ```cpp
 void setLabel(std::string_view text)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:78
 
 Sets the display label field. 
 #### Parameters
@@ -1597,6 +1858,8 @@ Sets the display label field.
 void setHint(std::string_view text)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:82
+
 Sets the hint/description field shown below the element. 
 #### Parameters
 * `text` Hint text.
@@ -1611,6 +1874,8 @@ Sets the hint/description field shown below the element.
 void setError(std::string_view error)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:86
+
 Sets an optional validation error message. 
 #### Parameters
 * `error` [Error](base.md#error) text to display.
@@ -1622,8 +1887,10 @@ Sets an optional validation error message.
 #### addPage
 
 ```cpp
-FormElement addPage(std::string_view id, std::string_view label)
+FormElement addPage(std::string_view id = "", std::string_view label = "")
 ```
+
+Defined in src/symple/include/icy/symple/form.h:92
 
 Appends a page child element and returns a handle to it. 
 #### Parameters
@@ -1641,8 +1908,10 @@ Appends a page child element and returns a handle to it.
 #### addSection
 
 ```cpp
-FormElement addSection(std::string_view id, std::string_view label)
+FormElement addSection(std::string_view id = "", std::string_view label = "")
 ```
+
+Defined in src/symple/include/icy/symple/form.h:99
 
 Appends a section child element and returns a handle to it. 
 #### Parameters
@@ -1660,8 +1929,10 @@ Appends a section child element and returns a handle to it.
 #### addField
 
 ```cpp
-FormField addField(std::string_view type, std::string_view id, std::string_view label)
+FormField addField(std::string_view type, std::string_view id = "", std::string_view label = "")
 ```
+
+Defined in src/symple/include/icy/symple/form.h:108
 
 Appends a typed field child element and returns a handle to it. Throws std::invalid_argument if type is not a recognised field type. 
 #### Parameters
@@ -1681,8 +1952,10 @@ Appends a typed field child element and returns a handle to it. Throws std::inva
 #### getField
 
 ```cpp
-FormField getField(std::string_view id, bool partial)
+FormField getField(std::string_view id, bool partial = false)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:115
 
 Searches child elements for the field with the given ID. 
 #### Parameters
@@ -1700,8 +1973,10 @@ Searches child elements for the field with the given ID.
 #### getField
 
 ```cpp
-bool getField(std::string_view id, FormField & field, bool partial)
+bool getField(std::string_view id, FormField & field, bool partial = false)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:122
 
 Populates a [FormField](#formfield) by searching child elements for the given ID. 
 #### Parameters
@@ -1721,8 +1996,10 @@ True if the field was found.
 #### hasField
 
 ```cpp
-bool hasField(std::string_view id, bool partial)
+bool hasField(std::string_view id, bool partial = false)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:128
 
 Returns true if any child element has an ID matching the given value. 
 #### Parameters
@@ -1740,6 +2017,8 @@ Returns true if any child element has an ID matching the given value.
 void setLive(bool flag)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:134
+
 Sets the live flag on this element. Live elements are used to submit partial form sections (e.g. for auto-complete) without sending the entire form. 
 #### Parameters
 * `flag` True to enable live updates.
@@ -1750,11 +2029,13 @@ Sets the live flag on this element. Live elements are used to submit partial for
 
 #### live
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool live() const
+[[nodiscard]] bool live() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:139
 
 Returns true if this field is live, meaning the form-processing entity should auto-update this field's value whenever it changes.
 
@@ -1765,8 +2046,10 @@ Returns true if this field is live, meaning the form-processing entity should au
 #### clearElements
 
 ```cpp
-bool clearElements(std::string_view id, bool partial)
+bool clearElements(std::string_view id, bool partial = false)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:145
 
 Removes all child elements whose ID matches the given value. 
 #### Parameters
@@ -1787,6 +2070,8 @@ True if at least one element was removed.
 void clear()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:148
+
 Clears all fields from the underlying JSON node.
 
 ---
@@ -1795,11 +2080,13 @@ Clears all fields from the underlying JSON node.
 
 #### valid
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool valid() const
+[[nodiscard]] bool valid() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:151
 
 Returns true if the form element is valid.
 
@@ -1813,6 +2100,8 @@ Returns true if the form element is valid.
 int numElements()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:154
+
 Returns the number of child elements.
 
 ---
@@ -1824,6 +2113,8 @@ Returns the number of child elements.
 ```cpp
 bool hasErrors()
 ```
+
+Defined in src/symple/include/icy/symple/form.h:157
 
 Returns true if any fields have errors.
 
@@ -1837,6 +2128,8 @@ Returns true if any fields have errors.
 bool hasPages()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:160
+
 Returns true if the form has multiple pages.
 
 ---
@@ -1845,11 +2138,13 @@ Returns true if the form has multiple pages.
 
 #### root
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-json::Value & root() const
+[[nodiscard]] json::Value & root() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:164
 
 Returns a reference to the underlying JSON node. Throws std::runtime_error if the root pointer is null.
 
@@ -1869,6 +2164,8 @@ Returns a reference to the underlying JSON node. Throws std::runtime_error if th
 json::Value * _root
 ```
 
+Defined in src/symple/include/icy/symple/form.h:169
+
 The root pointer is just a reference to the externally managed JSON value memory.
 
 {#formfield}
@@ -1878,6 +2175,12 @@ The root pointer is just a reference to the externally managed JSON value memory
 ```cpp
 #include <icy/symple/form.h>
 ```
+
+```cpp
+class FormField
+```
+
+Defined in src/symple/include/icy/symple/form.h:227
 
 > **Inherits:** [`FormElement`](#formelement)
 
@@ -1902,10 +2205,10 @@ Values are stored as strings in a JSON array. Typed accessors (intValue, doubleV
 | `void` | [`addValue`](#addvalue-2)  | Appends a double value to the values array. |
 | `void` | [`addValue`](#addvalue-3)  | Appends a boolean value to the values array. |
 | `json::Value &` | [`values`](#values)  | Returns a reference to the JSON array of all values. |
-| `std::string` | [`value`](#value-4) `const` | Returns the first value as a string. Most field types (except multi-value) only use a single value. |
-| `int` | [`intValue`](#intvalue) `const` | Returns the first value parsed as an integer. |
-| `double` | [`doubleValue`](#doublevalue) `const` | Returns the first value parsed as a double. |
-| `bool` | [`boolValue`](#boolvalue) `const` | Returns the first value parsed as a boolean. Treats "1", "true", and "on" as true; all other strings as false. |
+| `std::string` | [`value`](#value-4) `const` `nodiscard` | Returns the first value as a string. Most field types (except multi-value) only use a single value. |
+| `int` | [`intValue`](#intvalue) `const` `nodiscard` | Returns the first value parsed as an integer. |
+| `double` | [`doubleValue`](#doublevalue) `const` `nodiscard` | Returns the first value parsed as a double. |
+| `bool` | [`boolValue`](#boolvalue) `const` `nodiscard` | Returns the first value parsed as a boolean. Treats "1", "true", and "on" as true; all other strings as false. |
 
 ---
 
@@ -1917,6 +2220,8 @@ Values are stored as strings in a JSON array. Typed accessors (intValue, doubleV
 FormField()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:231
+
 Constructs an unbound field (root pointer is null).
 
 ---
@@ -1926,8 +2231,10 @@ Constructs an unbound field (root pointer is null).
 #### FormField
 
 ```cpp
-FormField(json::Value & root, std::string_view type, std::string_view id, std::string_view label)
+FormField(json::Value & root, std::string_view type = "", std::string_view id = "", std::string_view label = "")
 ```
+
+Defined in src/symple/include/icy/symple/form.h:238
 
 Constructs a field bound to the given JSON node. 
 #### Parameters
@@ -1949,6 +2256,8 @@ Constructs a field bound to the given JSON node.
 void addOption(std::string_view key, std::string_view value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:245
+
 Adds a labelled option for list-based fields. 
 #### Parameters
 * `key` Option key sent on submit. 
@@ -1965,6 +2274,8 @@ Adds a labelled option for list-based fields.
 void addOption(std::string_view value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:249
+
 Adds an option whose key and display value are identical. 
 #### Parameters
 * `value` Option string.
@@ -1978,6 +2289,8 @@ Adds an option whose key and display value are identical.
 ```cpp
 void setValue(std::string_view value)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:253
 
 Replaces all current values with a single string value. 
 #### Parameters
@@ -1993,6 +2306,8 @@ Replaces all current values with a single string value.
 void setValue(int value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:257
+
 Replaces all current values with a single integer value. 
 #### Parameters
 * `value` Integer value to set.
@@ -2006,6 +2321,8 @@ Replaces all current values with a single integer value.
 ```cpp
 void setValue(double value)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:261
 
 Replaces all current values with a single double value. 
 #### Parameters
@@ -2021,6 +2338,8 @@ Replaces all current values with a single double value.
 void setValue(bool value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:265
+
 Replaces all current values with a single boolean value. 
 #### Parameters
 * `value` Boolean value to set.
@@ -2034,6 +2353,8 @@ Replaces all current values with a single boolean value.
 ```cpp
 void addValue(std::string_view value)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:269
 
 Appends a string value to the values array. 
 #### Parameters
@@ -2049,6 +2370,8 @@ Appends a string value to the values array.
 void addValue(int value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:273
+
 Appends an integer value to the values array. 
 #### Parameters
 * `value` Integer value to append.
@@ -2062,6 +2385,8 @@ Appends an integer value to the values array.
 ```cpp
 void addValue(double value)
 ```
+
+Defined in src/symple/include/icy/symple/form.h:277
 
 Appends a double value to the values array. 
 #### Parameters
@@ -2077,6 +2402,8 @@ Appends a double value to the values array.
 void addValue(bool value)
 ```
 
+Defined in src/symple/include/icy/symple/form.h:281
+
 Appends a boolean value to the values array. 
 #### Parameters
 * `value` Boolean value to append.
@@ -2091,6 +2418,8 @@ Appends a boolean value to the values array.
 json::Value & values()
 ```
 
+Defined in src/symple/include/icy/symple/form.h:284
+
 Returns a reference to the JSON array of all values.
 
 ---
@@ -2099,11 +2428,13 @@ Returns a reference to the JSON array of all values.
 
 #### value
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string value() const
+[[nodiscard]] std::string value() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:288
 
 Returns the first value as a string. Most field types (except multi-value) only use a single value.
 
@@ -2113,11 +2444,13 @@ Returns the first value as a string. Most field types (except multi-value) only 
 
 #### intValue
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-int intValue() const
+[[nodiscard]] int intValue() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:291
 
 Returns the first value parsed as an integer.
 
@@ -2127,11 +2460,13 @@ Returns the first value parsed as an integer.
 
 #### doubleValue
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-double doubleValue() const
+[[nodiscard]] double doubleValue() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:294
 
 Returns the first value parsed as a double.
 
@@ -2141,11 +2476,13 @@ Returns the first value parsed as a double.
 
 #### boolValue
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool boolValue() const
+[[nodiscard]] bool boolValue() const
 ```
+
+Defined in src/symple/include/icy/symple/form.h:298
 
 Returns the first value parsed as a boolean. Treats "1", "true", and "on" as true; all other strings as false.
 
@@ -2156,6 +2493,12 @@ Returns the first value parsed as a boolean. Treats "1", "true", and "on" as tru
 ```cpp
 #include <icy/symple/message.h>
 ```
+
+```cpp
+class Message
+```
+
+Defined in src/symple/include/icy/symple/message.h:27
 
 > **Inherits:** `Value`, [`IPacket`](base.md#ipacket)
 > **Subclassed by:** [`Command`](#command), [`Event`](#event-2), [`Presence`](#presence)
@@ -2169,31 +2512,31 @@ Base Symple protocol message with addressing, status, data, and notes.
 |  | [`Message`](#message-11)  | Constructs a new message with a random ID and type set to "message". |
 |  | [`Message`](#message-12)  | Constructs a message from a JSON value; sets missing id/type fields. |
 |  | [`Message`](#message-13)  | Copy constructor; preserves or generates id/type fields. |
-| `std::unique_ptr< IPacket >` | [`clone`](#clone-18) `virtual` `const` | Returns a heap-allocated copy of this message. |
-| `bool` | [`valid`](#valid-15) `virtual` `const` | Returns true if the message has both `type` and `id` fields. |
+| `std::unique_ptr< IPacket >` | [`clone`](#clone-18) `virtual` `const` `override` | Returns a heap-allocated copy of this message. |
+| `bool` | [`valid`](#valid-15) `virtual` `const` | Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields. |
 | `void` | [`clear`](#clear-4) `virtual` | Clears all JSON fields from this message. |
-| `void` | [`clearData`](#cleardata) `virtual` | Clears the `data` sub-object. |
-| `void` | [`clearNotes`](#clearnotes) `virtual` | Clears the `notes` array. |
-| `std::string` | [`type`](#type-22) `const` | Returns the message type string (defaults to "message"). |
-| `std::string` | [`id`](#id-7) `const` | Returns the message ID string. |
-| `Address` | [`to`](#to) `const` | Returns the recipient address parsed from the `to` field. |
-| `Address` | [`from`](#from) `const` | Returns the sender address parsed from the `from` field. |
-| `std::string` | [`toUser`](#touser) `const` | Returns the user component of the `to` address without constructing an [Address](#address-13). |
-| `std::string` | [`toId`](#toid) `const` | Returns the id component of the `to` address without constructing an [Address](#address-13). |
-| `std::string` | [`fromUser`](#fromuser) `const` | Returns the user component of the `from` address without constructing an [Address](#address-13). |
-| `std::string` | [`fromId`](#fromid) `const` | Returns the id component of the `from` address without constructing an [Address](#address-13). |
-| `int` | [`status`](#status-3) `const` | Returns the HTTP status code, or -1 if not set. |
+| `void` | [`clearData`](#cleardata) `virtual` | Clears the `[data](#data-4)` sub-object. |
+| `void` | [`clearNotes`](#clearnotes) `virtual` | Clears the `[notes](#notes)` array. |
+| `std::string` | [`type`](#type-22) `const` `nodiscard` | Returns the message type string (defaults to "message"). |
+| `std::string` | [`id`](#id-7) `const` `nodiscard` | Returns the message ID string. |
+| `Address` | [`to`](#to) `const` `nodiscard` | Returns the recipient address parsed from the `[to](#to)` field. |
+| `Address` | [`from`](#from) `const` `nodiscard` | Returns the sender address parsed from the `[from](#from)` field. |
+| `std::string` | [`toUser`](#touser) `const` `nodiscard` | Returns the user component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `std::string` | [`toId`](#toid) `const` `nodiscard` | Returns the id component of the `[to](#to)` address without constructing an [Address](#address-13). |
+| `std::string` | [`fromUser`](#fromuser) `const` `nodiscard` | Returns the user component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `std::string` | [`fromId`](#fromid) `const` `nodiscard` | Returns the id component of the `[from](#from)` address without constructing an [Address](#address-13). |
+| `int` | [`status`](#status-3) `const` `nodiscard` | Returns the HTTP status code, or -1 if not set. |
 | `void` | [`setType`](#settype-2)  | Sets the message type field. |
-| `void` | [`setTo`](#setto)  | Sets the `to` field from a peer's address. |
-| `void` | [`setTo`](#setto-1)  | Sets the `to` field from an address object. |
-| `void` | [`setTo`](#setto-2)  | Sets the `to` field from an address string. |
-| `void` | [`setFrom`](#setfrom)  | Sets the `from` field from a peer's address. |
-| `void` | [`setFrom`](#setfrom-1)  | Sets the `from` field from an address object. |
-| `void` | [`setFrom`](#setfrom-2)  | Sets the `from` field from an address string. |
+| `void` | [`setTo`](#setto)  | Sets the `[to](#to)` field from a peer's address. |
+| `void` | [`setTo`](#setto-1)  | Sets the `[to](#to)` field from an address object. |
+| `void` | [`setTo`](#setto-2)  | Sets the `[to](#to)` field from an address string. |
+| `void` | [`setFrom`](#setfrom)  | Sets the `[from](#from)` field from a peer's address. |
+| `void` | [`setFrom`](#setfrom-1)  | Sets the `[from](#from)` field from an address object. |
+| `void` | [`setFrom`](#setfrom-2)  | Sets the `[from](#from)` field from an address string. |
 | `void` | [`setStatus`](#setstatus-1)  | HTTP status codes are used to describe the message response. Throws std::invalid_argument if code is outside [101, 504]. |
-| `json::Value &` | [`notes`](#notes)  | Returns a reference to the `notes` JSON array. |
+| `json::Value &` | [`notes`](#notes)  | Returns a reference to the `[notes](#notes)` JSON array. |
 | `void` | [`setNote`](#setnote)  | Replaces all notes with a single note. |
-| `void` | [`addNote`](#addnote)  | Appends a note to the `notes` array. |
+| `void` | [`addNote`](#addnote)  | Appends a note to the `[notes](#notes)` array. |
 | `json::Value` | [`data`](#data-4) `const` | Returns a copy of the named data field. |
 | `json::Value &` | [`data`](#data-5)  | Returns a reference to the named data field (creates it if absent). |
 | `json::Value &` | [`setData`](#setdata)  | Creates or replaces a named data field; returns a reference to it. |
@@ -2201,15 +2544,15 @@ Base Symple protocol message with addressing, status, data, and notes.
 | `void` | [`setData`](#setdata-2)  | Sets a named data field to a string value. |
 | `void` | [`setData`](#setdata-3)  | Sets a named data field to a JSON value. |
 | `void` | [`setData`](#setdata-4)  | Sets a named data field to an integer value. |
-| `void` | [`removeData`](#removedata)  | Removes a named field from the `data` sub-object. |
-| `bool` | [`hasData`](#hasdata)  | Returns true if the named field exists in the `data` sub-object. |
-| `ssize_t` | [`read`](#read-13) `virtual` | Deserialises the message from a raw buffer. |
+| `void` | [`removeData`](#removedata)  | Removes a named field from the `[data](#data-4)` sub-object. |
+| `bool` | [`hasData`](#hasdata)  | Returns true if the named field exists in the `[data](#data-4)` sub-object. |
+| `ssize_t` | [`read`](#read-13) `virtual` `override` | Deserialises the message from a raw buffer. |
 | `ssize_t` | [`read`](#read-14) `virtual` | Deserialises the message from a JSON string. |
-| `void` | [`write`](#write-28) `virtual` `const` | Serialises the message as JSON into a buffer. |
-| `bool` | [`isRequest`](#isrequest) `const` | Returns true if no status code has been set (i.e. [status()](#status-3) == -1). |
-| `size_t` | [`size`](#size-11) `virtual` `const` | Returns the serialised JSON size in bytes. |
-| `void` | [`print`](#print-16) `virtual` `const` | Pretty-prints the message JSON to the given stream. |
-| `const char *` | [`className`](#classname-8) `virtual` `const` `inline` | Returns the class name of this packet type for logging and diagnostics. |
+| `void` | [`write`](#write-28) `virtual` `const` `override` | Serialises the message as JSON into a buffer. |
+| `bool` | [`isRequest`](#isrequest) `const` `nodiscard` | Returns true if no status code has been set (i.e. [status()](#status-3) == -1). |
+| `size_t` | [`size`](#size-12) `virtual` `const` `override` | Returns the serialised JSON size in bytes. |
+| `void` | [`print`](#print-16) `virtual` `const` `override` | Pretty-prints the message JSON to the given stream. |
+| `const char *` | [`className`](#classname-8) `virtual` `const` `inline` `override` | Returns the class name of this packet type for logging and diagnostics. |
 | `char *` | [`data`](#data-6) `virtual` `const` `inline` | The packet data pointer for buffered packets. |
 | `bool` | [`hasData`](#hasdata-1) `virtual` `const` `inline` | Returns true if the packet has a non-null data pointer. |
 
@@ -2223,6 +2566,8 @@ Base Symple protocol message with addressing, status, data, and notes.
 Message()
 ```
 
+Defined in src/symple/include/icy/symple/message.h:35
+
 Constructs a new message with a random ID and type set to "message".
 
 ---
@@ -2234,6 +2579,8 @@ Constructs a new message with a random ID and type set to "message".
 ```cpp
 Message(const json::Value & root)
 ```
+
+Defined in src/symple/include/icy/symple/message.h:39
 
 Constructs a message from a JSON value; sets missing id/type fields. 
 #### Parameters
@@ -2249,6 +2596,8 @@ Constructs a message from a JSON value; sets missing id/type fields.
 Message(const Message & root)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:43
+
 Copy constructor; preserves or generates id/type fields. 
 #### Parameters
 * `root` Source message.
@@ -2259,11 +2608,13 @@ Copy constructor; preserves or generates id/type fields.
 
 #### clone
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual std::unique_ptr< IPacket > clone() const
+virtual std::unique_ptr< IPacket > clone() const override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:49
 
 Returns a heap-allocated copy of this message.
 
@@ -2279,7 +2630,9 @@ Returns a heap-allocated copy of this message.
 virtual bool valid() const
 ```
 
-Returns true if the message has both `type` and `id` fields.
+Defined in src/symple/include/icy/symple/message.h:52
+
+Returns true if the message has both `[type](#type-22)` and `[id](#id-7)` fields.
 
 ---
 
@@ -2292,6 +2645,8 @@ Returns true if the message has both `type` and `id` fields.
 ```cpp
 virtual void clear()
 ```
+
+Defined in src/symple/include/icy/symple/message.h:55
 
 Clears all JSON fields from this message.
 
@@ -2307,7 +2662,9 @@ Clears all JSON fields from this message.
 virtual void clearData()
 ```
 
-Clears the `data` sub-object.
+Defined in src/symple/include/icy/symple/message.h:58
+
+Clears the `[data](#data-4)` sub-object.
 
 ---
 
@@ -2321,7 +2678,9 @@ Clears the `data` sub-object.
 virtual void clearNotes()
 ```
 
-Clears the `notes` array.
+Defined in src/symple/include/icy/symple/message.h:61
+
+Clears the `[notes](#notes)` array.
 
 ---
 
@@ -2329,11 +2688,13 @@ Clears the `notes` array.
 
 #### type
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string type() const
+[[nodiscard]] std::string type() const
 ```
+
+Defined in src/symple/include/icy/symple/message.h:64
 
 Returns the message type string (defaults to "message").
 
@@ -2343,11 +2704,13 @@ Returns the message type string (defaults to "message").
 
 #### id
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string id() const
+[[nodiscard]] std::string id() const
 ```
+
+Defined in src/symple/include/icy/symple/message.h:67
 
 Returns the message ID string.
 
@@ -2357,13 +2720,15 @@ Returns the message ID string.
 
 #### to
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Address to() const
+[[nodiscard]] Address to() const
 ```
 
-Returns the recipient address parsed from the `to` field.
+Defined in src/symple/include/icy/symple/message.h:70
+
+Returns the recipient address parsed from the `[to](#to)` field.
 
 ---
 
@@ -2371,13 +2736,15 @@ Returns the recipient address parsed from the `to` field.
 
 #### from
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Address from() const
+[[nodiscard]] Address from() const
 ```
 
-Returns the sender address parsed from the `from` field.
+Defined in src/symple/include/icy/symple/message.h:73
+
+Returns the sender address parsed from the `[from](#from)` field.
 
 ---
 
@@ -2385,13 +2752,15 @@ Returns the sender address parsed from the `from` field.
 
 #### toUser
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string toUser() const
+[[nodiscard]] std::string toUser() const
 ```
 
-Returns the user component of the `to` address without constructing an [Address](#address-13).
+Defined in src/symple/include/icy/symple/message.h:76
+
+Returns the user component of the `[to](#to)` address without constructing an [Address](#address-13).
 
 ---
 
@@ -2399,13 +2768,15 @@ Returns the user component of the `to` address without constructing an [Address]
 
 #### toId
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string toId() const
+[[nodiscard]] std::string toId() const
 ```
 
-Returns the id component of the `to` address without constructing an [Address](#address-13).
+Defined in src/symple/include/icy/symple/message.h:79
+
+Returns the id component of the `[to](#to)` address without constructing an [Address](#address-13).
 
 ---
 
@@ -2413,13 +2784,15 @@ Returns the id component of the `to` address without constructing an [Address](#
 
 #### fromUser
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string fromUser() const
+[[nodiscard]] std::string fromUser() const
 ```
 
-Returns the user component of the `from` address without constructing an [Address](#address-13).
+Defined in src/symple/include/icy/symple/message.h:82
+
+Returns the user component of the `[from](#from)` address without constructing an [Address](#address-13).
 
 ---
 
@@ -2427,13 +2800,15 @@ Returns the user component of the `from` address without constructing an [Addres
 
 #### fromId
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string fromId() const
+[[nodiscard]] std::string fromId() const
 ```
 
-Returns the id component of the `from` address without constructing an [Address](#address-13).
+Defined in src/symple/include/icy/symple/message.h:85
+
+Returns the id component of the `[from](#from)` address without constructing an [Address](#address-13).
 
 ---
 
@@ -2441,11 +2816,13 @@ Returns the id component of the `from` address without constructing an [Address]
 
 #### status
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-int status() const
+[[nodiscard]] int status() const
 ```
+
+Defined in src/symple/include/icy/symple/message.h:88
 
 Returns the HTTP status code, or -1 if not set.
 
@@ -2458,6 +2835,8 @@ Returns the HTTP status code, or -1 if not set.
 ```cpp
 void setType(std::string_view type)
 ```
+
+Defined in src/symple/include/icy/symple/message.h:92
 
 Sets the message type field. 
 #### Parameters
@@ -2473,7 +2852,9 @@ Sets the message type field.
 void setTo(const Peer & to)
 ```
 
-Sets the `to` field from a peer's address. 
+Defined in src/symple/include/icy/symple/message.h:96
+
+Sets the `[to](#to)` field from a peer's address. 
 #### Parameters
 * `to` Destination peer.
 
@@ -2487,7 +2868,9 @@ Sets the `to` field from a peer's address.
 void setTo(const Address & to)
 ```
 
-Sets the `to` field from an address object. 
+Defined in src/symple/include/icy/symple/message.h:100
+
+Sets the `[to](#to)` field from an address object. 
 #### Parameters
 * `to` Destination address.
 
@@ -2501,7 +2884,9 @@ Sets the `to` field from an address object.
 void setTo(std::string_view to)
 ```
 
-Sets the `to` field from an address string. 
+Defined in src/symple/include/icy/symple/message.h:104
+
+Sets the `[to](#to)` field from an address string. 
 #### Parameters
 * `to` Destination address string.
 
@@ -2515,7 +2900,9 @@ Sets the `to` field from an address string.
 void setFrom(const Peer & from)
 ```
 
-Sets the `from` field from a peer's address. 
+Defined in src/symple/include/icy/symple/message.h:108
+
+Sets the `[from](#from)` field from a peer's address. 
 #### Parameters
 * `from` Sender peer.
 
@@ -2529,7 +2916,9 @@ Sets the `from` field from a peer's address.
 void setFrom(const Address & from)
 ```
 
-Sets the `from` field from an address object. 
+Defined in src/symple/include/icy/symple/message.h:112
+
+Sets the `[from](#from)` field from an address object. 
 #### Parameters
 * `from` Sender address.
 
@@ -2543,7 +2932,9 @@ Sets the `from` field from an address object.
 void setFrom(std::string_view from)
 ```
 
-Sets the `from` field from an address string. 
+Defined in src/symple/include/icy/symple/message.h:116
+
+Sets the `[from](#from)` field from an address string. 
 #### Parameters
 * `from` Sender address string.
 
@@ -2556,6 +2947,8 @@ Sets the `from` field from an address string.
 ```cpp
 void setStatus(int code)
 ```
+
+Defined in src/symple/include/icy/symple/message.h:122
 
 HTTP status codes are used to describe the message response. Throws std::invalid_argument if code is outside [101, 504]. 
 #### Parameters
@@ -2573,7 +2966,9 @@ HTTP status codes are used to describe the message response. Throws std::invalid
 json::Value & notes()
 ```
 
-Returns a reference to the `notes` JSON array.
+Defined in src/symple/include/icy/symple/message.h:125
+
+Returns a reference to the `[notes](#notes)` JSON array.
 
 ---
 
@@ -2585,9 +2980,11 @@ Returns a reference to the `notes` JSON array.
 void setNote(std::string_view type, std::string_view text)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:130
+
 Replaces all notes with a single note. 
 #### Parameters
-* `type` Note severity: `info`, `warn`, or `error`. 
+* `type` Note severity: `[info](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)`, `warn`, or `error`. 
 
 * `text` Note message text.
 
@@ -2601,9 +2998,11 @@ Replaces all notes with a single note.
 void addNote(std::string_view type, std::string_view text)
 ```
 
-Appends a note to the `notes` array. 
+Defined in src/symple/include/icy/symple/message.h:135
+
+Appends a note to the `[notes](#notes)` array. 
 #### Parameters
-* `type` Note severity: `info`, `warn`, or `error`. 
+* `type` Note severity: `[info](base.md#classicy_1_1IPacket_1ac2231c52e60bf60b402bc95cc9d6607d)`, `warn`, or `error`. 
 
 * `text` Note message text.
 
@@ -2619,9 +3018,11 @@ Appends a note to the `notes` array.
 json::Value data(std::string_view name) const
 ```
 
+Defined in src/symple/include/icy/symple/message.h:139
+
 Returns a copy of the named data field. 
 #### Parameters
-* `name` Field name within `data`.
+* `name` Field name within `[data](#data-4)`.
 
 ---
 
@@ -2633,9 +3034,11 @@ Returns a copy of the named data field.
 json::Value & data(std::string_view name)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:143
+
 Returns a reference to the named data field (creates it if absent). 
 #### Parameters
-* `name` Field name within `data`.
+* `name` Field name within `[data](#data-4)`.
 
 ---
 
@@ -2647,9 +3050,11 @@ Returns a reference to the named data field (creates it if absent).
 json::Value & setData(std::string_view name)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:147
+
 Creates or replaces a named data field; returns a reference to it. 
 #### Parameters
-* `name` Field name within `data`.
+* `name` Field name within `[data](#data-4)`.
 
 ---
 
@@ -2661,9 +3066,11 @@ Creates or replaces a named data field; returns a reference to it.
 void setData(std::string_view name, const char * data)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:152
+
 Sets a named data field to a C-string value. 
 #### Parameters
-* `name` Field name within `data`. 
+* `name` Field name within `[data](#data-4)`. 
 
 * `data` String value to assign.
 
@@ -2677,9 +3084,11 @@ Sets a named data field to a C-string value.
 void setData(std::string_view name, std::string_view data)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:157
+
 Sets a named data field to a string value. 
 #### Parameters
-* `name` Field name within `data`. 
+* `name` Field name within `[data](#data-4)`. 
 
 * `data` String value to assign.
 
@@ -2693,9 +3102,11 @@ Sets a named data field to a string value.
 void setData(std::string_view name, const json::Value & data)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:162
+
 Sets a named data field to a JSON value. 
 #### Parameters
-* `name` Field name within `data`. 
+* `name` Field name within `[data](#data-4)`. 
 
 * `data` JSON value to assign.
 
@@ -2709,9 +3120,11 @@ Sets a named data field to a JSON value.
 void setData(std::string_view name, int data)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:167
+
 Sets a named data field to an integer value. 
 #### Parameters
-* `name` Field name within `data`. 
+* `name` Field name within `[data](#data-4)`. 
 
 * `data` Integer value to assign.
 
@@ -2725,7 +3138,9 @@ Sets a named data field to an integer value.
 void removeData(std::string_view name)
 ```
 
-Removes a named field from the `data` sub-object. 
+Defined in src/symple/include/icy/symple/message.h:171
+
+Removes a named field from the `[data](#data-4)` sub-object. 
 #### Parameters
 * `name` Field name to remove.
 
@@ -2739,7 +3154,9 @@ Removes a named field from the `data` sub-object.
 bool hasData(std::string_view name)
 ```
 
-Returns true if the named field exists in the `data` sub-object. 
+Defined in src/symple/include/icy/symple/message.h:175
+
+Returns true if the named field exists in the `[data](#data-4)` sub-object. 
 #### Parameters
 * `name` Field name to look up.
 
@@ -2749,15 +3166,17 @@ Returns true if the named field exists in the `data` sub-object.
 
 #### read
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t read(const ConstBuffer & buf)
+virtual ssize_t read(const ConstBuffer & buf) override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:180
 
 Deserialises the message from a raw buffer. 
 #### Parameters
-* `buf` Buffer containing the JSON payload. 
+* `buf` [Buffer](base.md#buffer-2) containing the JSON payload. 
 
 #### Returns
 Number of bytes consumed.
@@ -2774,6 +3193,8 @@ Number of bytes consumed.
 virtual ssize_t read(const std::string & root)
 ```
 
+Defined in src/symple/include/icy/symple/message.h:185
+
 Deserialises the message from a JSON string. 
 #### Parameters
 * `root` JSON string to parse. 
@@ -2787,15 +3208,17 @@ Number of characters consumed.
 
 #### write
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual void write(Buffer & buf) const
+virtual void write(Buffer & buf) const override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:189
 
 Serialises the message as JSON into a buffer. 
 #### Parameters
-* `buf` Buffer to append to.
+* `buf` [Buffer](base.md#buffer-2) to append to.
 
 ---
 
@@ -2803,25 +3226,29 @@ Serialises the message as JSON into a buffer.
 
 #### isRequest
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool isRequest() const
+[[nodiscard]] bool isRequest() const
 ```
+
+Defined in src/symple/include/icy/symple/message.h:192
 
 Returns true if no status code has been set (i.e. [status()](#status-3) == -1).
 
 ---
 
-{#size-11}
+{#size-12}
 
 #### size
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual size_t size() const
+virtual size_t size() const override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:195
 
 Returns the serialised JSON size in bytes.
 
@@ -2831,11 +3258,13 @@ Returns the serialised JSON size in bytes.
 
 #### print
 
-`virtual` `const`
+`virtual` `const` `override`
 
 ```cpp
-virtual void print(std::ostream & os) const
+virtual void print(std::ostream & os) const override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:199
 
 Pretty-prints the message JSON to the given stream. 
 #### Parameters
@@ -2847,11 +3276,13 @@ Pretty-prints the message JSON to the given stream.
 
 #### className
 
-`virtual` `const` `inline`
+`virtual` `const` `inline` `override`
 
 ```cpp
-virtual inline const char * className() const
+virtual inline const char * className() const override
 ```
+
+Defined in src/symple/include/icy/symple/message.h:201
 
 Returns the class name of this packet type for logging and diagnostics.
 
@@ -2867,6 +3298,8 @@ Returns the class name of this packet type for logging and diagnostics.
 virtual inline char * data() const
 ```
 
+Defined in src/symple/include/icy/symple/message.h:31
+
 The packet data pointer for buffered packets.
 
 ---
@@ -2881,6 +3314,8 @@ The packet data pointer for buffered packets.
 virtual inline bool hasData() const
 ```
 
+Defined in src/symple/include/icy/symple/message.h:32
+
 Returns true if the packet has a non-null data pointer.
 
 {#peer-1}
@@ -2891,11 +3326,37 @@ Returns true if the packet has a non-null data pointer.
 #include <icy/symple/peer.h>
 ```
 
+```cpp
+class Peer
+```
+
+Defined in src/symple/include/icy/symple/peer.h:30
+
 > **Inherits:** `Value`
 
 Symple peer record containing identity, presence, and custom fields.
 
 A [Peer](#peer-1) object may also contain arbitrary application data set by the client to share with other peers on the network. **See also**: [Address](#address-13) for further methods and [basic](base.md#basic) accessors.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-38) `inline` |  |
+
+---
+
+{#operator-38}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & os, const Peer & peer)
+```
+
+Defined in src/symple/include/icy/symple/peer.h:101
 
 ### Public Methods
 
@@ -2903,14 +3364,14 @@ A [Peer](#peer-1) object may also contain arbitrary application data set by the 
 |--------|------|-------------|
 |  | [`Peer`](#peer-2)  | Constructs an empty peer with type set to "Peer". |
 |  | [`Peer`](#peer-3)  | Copy constructor; preserves type field. |
-| `Peer &` | [`operator=`](#operator-30)  | Copy-assigns peer data from another peer. |
+| `Peer &` | [`operator=`](#operator-39)  | Copy-assigns peer data from another peer. |
 |  | [`Peer`](#peer-4)  | Constructs a peer from a raw JSON value. |
-| `Address` | [`address`](#address-17) `const` | Returns the peer's address (user + session ID). |
-| `std::string` | [`id`](#id-8) `const` | Returns the session ID assigned by the server. |
-| `std::string` | [`user`](#user-2) `const` | Returns the user identifier. |
-| `std::string` | [`name`](#name-14) `const` | Returns the display name. |
-| `std::string` | [`type`](#type-23) `const` | Returns the peer type string (e.g. "Peer", "bot"). |
-| `std::string` | [`host`](#host-3) `const` | Returns the host address associated with this peer. |
+| `Address` | [`address`](#address-17) `const` `nodiscard` | Returns the peer's address (user + session ID). |
+| `std::string` | [`id`](#id-8) `const` `nodiscard` | Returns the session ID assigned by the server. |
+| `std::string` | [`user`](#user-2) `const` `nodiscard` | Returns the user identifier. |
+| `std::string` | [`name`](#name-14) `const` `nodiscard` | Returns the display name. |
+| `std::string` | [`type`](#type-23) `const` `nodiscard` | Returns the peer type string (e.g. "Peer", "bot"). |
+| `std::string` | [`host`](#host-3) `const` `nodiscard` | Returns the host address associated with this peer. |
 | `void` | [`setID`](#setid-1)  | Sets the session ID field. |
 | `void` | [`setUser`](#setuser)  | Sets the user identifier field. |
 | `void` | [`setName`](#setname-3)  | Sets the display name field. |
@@ -2930,6 +3391,8 @@ A [Peer](#peer-1) object may also contain arbitrary application data set by the 
 Peer()
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:34
+
 Constructs an empty peer with type set to "Peer".
 
 ---
@@ -2942,19 +3405,23 @@ Constructs an empty peer with type set to "Peer".
 Peer(const Peer & r)
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:38
+
 Copy constructor; preserves type field. 
 #### Parameters
 * `r` Source peer.
 
 ---
 
-{#operator-30}
+{#operator-39}
 
 #### operator=
 
 ```cpp
 Peer & operator=(const Peer & r)
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:42
 
 Copy-assigns peer data from another peer. 
 #### Parameters
@@ -2970,6 +3437,8 @@ Copy-assigns peer data from another peer.
 Peer(const json::Value & r)
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:46
+
 Constructs a peer from a raw JSON value. 
 #### Parameters
 * `r` JSON object containing peer fields.
@@ -2980,15 +3449,17 @@ Constructs a peer from a raw JSON value.
 
 #### address
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Address address() const
+[[nodiscard]] Address address() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:52
 
 Returns the peer's address (user + session ID). 
 #### Returns
-[Address](#address-13) constructed from the `user` and `id` fields.
+[Address](#address-13) constructed from the `[user](#user-2)` and `[id](#id-8)` fields.
 
 ---
 
@@ -2996,11 +3467,13 @@ Returns the peer's address (user + session ID).
 
 #### id
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string id() const
+[[nodiscard]] std::string id() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:55
 
 Returns the session ID assigned by the server.
 
@@ -3010,11 +3483,13 @@ Returns the session ID assigned by the server.
 
 #### user
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string user() const
+[[nodiscard]] std::string user() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:58
 
 Returns the user identifier.
 
@@ -3024,11 +3499,13 @@ Returns the user identifier.
 
 #### name
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string name() const
+[[nodiscard]] std::string name() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:61
 
 Returns the display name.
 
@@ -3038,11 +3515,13 @@ Returns the display name.
 
 #### type
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string type() const
+[[nodiscard]] std::string type() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:65
 
 Returns the peer type string (e.g. "Peer", "bot").
 
@@ -3052,11 +3531,13 @@ Returns the peer type string (e.g. "Peer", "bot").
 
 #### host
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string host() const
+[[nodiscard]] std::string host() const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:68
 
 Returns the host address associated with this peer.
 
@@ -3069,6 +3550,8 @@ Returns the host address associated with this peer.
 ```cpp
 void setID(std::string_view id)
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:72
 
 Sets the session ID field. 
 #### Parameters
@@ -3084,6 +3567,8 @@ Sets the session ID field.
 void setUser(std::string_view user)
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:76
+
 Sets the user identifier field. 
 #### Parameters
 * `user` User identifier string.
@@ -3097,6 +3582,8 @@ Sets the user identifier field.
 ```cpp
 void setName(std::string_view name)
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:80
 
 Sets the display name field. 
 #### Parameters
@@ -3112,6 +3599,8 @@ Sets the display name field.
 void setType(std::string_view type)
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:85
+
 Sets the peer type field. 
 #### Parameters
 * `type` Type string.
@@ -3125,6 +3614,8 @@ Sets the peer type field.
 ```cpp
 void setHost(std::string_view host)
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:89
 
 Sets the host address field. 
 #### Parameters
@@ -3142,9 +3633,11 @@ Sets the host address field.
 virtual bool valid()
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:95
+
 Updates the peer from the given data object.
 
-Returns true if the peer has `id`, `user`, and `type` fields.
+Returns true if the peer has `[id](#id-8)`, `[user](#user-2)`, and `[type](#type-23)` fields.
 
 ---
 
@@ -3157,6 +3650,8 @@ Returns true if the peer has `id`, `user`, and `type` fields.
 ```cpp
 void print(std::ostream & os) const
 ```
+
+Defined in src/symple/include/icy/symple/peer.h:99
 
 Writes the peer's JSON representation to the given stream. 
 #### Parameters
@@ -3174,6 +3669,8 @@ Writes the peer's JSON representation to the given stream.
 virtual inline const char * className() const
 ```
 
+Defined in src/symple/include/icy/symple/peer.h:107
+
 {#presence}
 
 ## Presence
@@ -3182,11 +3679,17 @@ virtual inline const char * className() const
 #include <icy/symple/presence.h>
 ```
 
+```cpp
+class Presence
+```
+
+Defined in src/symple/include/icy/symple/presence.h:27
+
 > **Inherits:** [`Message`](#message-10)
 
 Symple presence message indicating a peer's online status.
 
-[Presence](#presence) messages carry peer data in the `data` field. When `probe` is true the recipient should respond with their own presence.
+[Presence](#presence) messages carry peer data in the `[data](#data-4)` field. When `probe` is true the recipient should respond with their own presence.
 
 ### Public Methods
 
@@ -3208,6 +3711,8 @@ Symple presence message indicating a peer's online status.
 Presence()
 ```
 
+Defined in src/symple/include/icy/symple/presence.h:31
+
 Constructs a presence message with type set to "presence".
 
 ---
@@ -3219,6 +3724,8 @@ Constructs a presence message with type set to "presence".
 ```cpp
 Presence(const json::Value & root)
 ```
+
+Defined in src/symple/include/icy/symple/presence.h:35
 
 Constructs a presence message from a JSON value. 
 #### Parameters
@@ -3234,6 +3741,8 @@ Constructs a presence message from a JSON value.
 Presence(const Presence & root)
 ```
 
+Defined in src/symple/include/icy/symple/presence.h:39
+
 Copy constructor. 
 #### Parameters
 * `root` Source presence message.
@@ -3248,6 +3757,8 @@ Copy constructor.
 bool isProbe()
 ```
 
+Defined in src/symple/include/icy/symple/presence.h:45
+
 Returns true if this is a presence probe request. Recipients of a probe should send back their own presence.
 
 ---
@@ -3259,6 +3770,8 @@ Returns true if this is a presence probe request. Recipients of a probe should s
 ```cpp
 void setProbe(bool flag)
 ```
+
+Defined in src/symple/include/icy/symple/presence.h:49
 
 Sets or clears the probe flag on this presence message. 
 #### Parameters
@@ -3272,6 +3785,12 @@ Sets or clears the probe flag on this presence message.
 #include <icy/symple/roster.h>
 ```
 
+```cpp
+class Roster
+```
+
+Defined in src/symple/include/icy/symple/roster.h:29
+
 > **Inherits:** [`string, Peer >`](base.md#keyedstore)
 
 The [Roster](#roster-2) provides a registry for active network peers indexed by session ID.
@@ -3281,7 +3800,7 @@ The [Roster](#roster-2) provides a registry for active network peers indexed by 
 | Return | Name | Description |
 |--------|------|-------------|
 | `Signal< void(Peer &)>` | [`PeerAdded`](#peeradded)  | Lifecycle signals for external observers (samples, UI). |
-| `Signal< void(constPeer &)>` | [`PeerRemoved`](#peerremoved)  |  |
+| `Signal< void(const Peer &)>` | [`PeerRemoved`](#peerremoved)  |  |
 
 ---
 
@@ -3293,6 +3812,8 @@ The [Roster](#roster-2) provides a registry for active network peers indexed by 
 Signal< void(Peer &)> PeerAdded
 ```
 
+Defined in src/symple/include/icy/symple/roster.h:46
+
 Lifecycle signals for external observers (samples, UI).
 
 ---
@@ -3302,8 +3823,10 @@ Lifecycle signals for external observers (samples, UI).
 #### PeerRemoved
 
 ```cpp
-Signal< void(constPeer &)> PeerRemoved
+Signal< void(const Peer &)> PeerRemoved
 ```
+
+Defined in src/symple/include/icy/symple/roster.h:47
 
 ### Public Methods
 
@@ -3311,9 +3834,9 @@ Signal< void(constPeer &)> PeerRemoved
 |--------|------|-------------|
 |  | [`Roster`](#roster-3)  |  |
 | `Peer *` | [`getByHost`](#getbyhost)  | Returns the first peer which matches the given host address. |
-| `Map` | [`peers`](#peers) `const` | Returns a deep copy of the peer map. |
+| `Map` | [`peers`](#peers) `const` `nodiscard` | Returns a deep copy of the peer map. |
 | `void` | [`print`](#print-18) `const` |  |
-| `constchar *` | [`className`](#classname-10) `virtual` `const` `inline` |  |
+| `const char *` | [`className`](#classname-10) `virtual` `const` `inline` |  |
 
 ---
 
@@ -3325,6 +3848,8 @@ Signal< void(constPeer &)> PeerRemoved
 Roster()
 ```
 
+Defined in src/symple/include/icy/symple/roster.h:32
+
 ---
 
 {#getbyhost}
@@ -3335,6 +3860,8 @@ Roster()
 Peer * getByHost(std::string_view host)
 ```
 
+Defined in src/symple/include/icy/symple/roster.h:36
+
 Returns the first peer which matches the given host address.
 
 ---
@@ -3343,11 +3870,13 @@ Returns the first peer which matches the given host address.
 
 #### peers
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Map peers() const
+[[nodiscard]] Map peers() const
 ```
+
+Defined in src/symple/include/icy/symple/roster.h:39
 
 Returns a deep copy of the peer map.
 
@@ -3363,6 +3892,8 @@ Returns a deep copy of the peer map.
 void print(std::ostream & os) const
 ```
 
+Defined in src/symple/include/icy/symple/roster.h:41
+
 ---
 
 {#classname-10}
@@ -3372,15 +3903,17 @@ void print(std::ostream & os) const
 `virtual` `const` `inline`
 
 ```cpp
-virtual inline constchar * className() const
+virtual inline const char * className() const
 ```
+
+Defined in src/symple/include/icy/symple/roster.h:43
 
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onAdd`](#onadd) `inline` |  |
-| `void` | [`onRemove`](#onremove) `inline` |  |
+| `void` | [`onAdd`](#onadd) `inline` `override` |  |
+| `void` | [`onRemove`](#onremove) `inline` `override` |  |
 
 ---
 
@@ -3388,11 +3921,13 @@ virtual inline constchar * className() const
 
 #### onAdd
 
-`inline`
+`inline` `override`
 
 ```cpp
-inline void onAdd(const std::string &, Peer * peer)
+inline void onAdd(const std::string &, Peer * peer) override
 ```
+
+Defined in src/symple/include/icy/symple/roster.h:50
 
 ---
 
@@ -3400,13 +3935,15 @@ inline void onAdd(const std::string &, Peer * peer)
 
 #### onRemove
 
-`inline`
+`inline` `override`
 
 ```cpp
-inline void onRemove(const std::string &, Peer * peer)
+inline void onRemove(const std::string &, Peer * peer) override
 ```
 
-{#server-9}
+Defined in src/symple/include/icy/symple/roster.h:51
+
+{#server-10}
 
 ## Server
 
@@ -3414,15 +3951,39 @@ inline void onRemove(const std::string &, Peer * peer)
 #include <icy/symple/server.h>
 ```
 
+```cpp
+class Server
+```
+
+Defined in src/symple/include/icy/symple/server.h:136
+
 Symple v4 server.
 
 Accepts WebSocket connections, authenticates peers, manages rooms, and routes messages. Implements the Symple v4 protocol over native WebSocket.
 
-Usage: [smpl::Server](#server-9) server; server.start({.port = 4500});
+Usage: [smpl::Server](#server-10) server; server.start({.port = 4500});
 
 // Optional: custom authentication server.Authenticate += []([ServerPeer](#serverpeer)& peer, const [json::Value](json.md#value)& auth, bool& allowed, std::vector<std::string>& rooms) { allowed = (auth.value("token", "") == "secret"); rooms.push_back("team-a"); };
 
 The server also serves as an HTTP server, so you can serve static files (e.g. a web UI) on the same port.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`Factory`](#factory-2)  |  |
+
+---
+
+{#factory-2}
+
+#### Factory
+
+```cpp
+friend class Factory
+```
+
+Defined in src/symple/include/icy/symple/server.h:279
 
 ### Public Attributes
 
@@ -3442,6 +4003,8 @@ The server also serves as an HTTP server, so you can serve static files (e.g. a 
 Signal< void(ServerPeer &, const json::Value &auth, bool &allowed, std::vector< std::string > &rooms)> Authenticate
 ```
 
+Defined in src/symple/include/icy/symple/server.h:213
+
 Custom authentication hook. Set `allowed` to false to reject the peer. Append to `rooms` to assign team/group memberships. If not connected, all peers with a valid `user` field are accepted.
 
 ---
@@ -3453,6 +4016,8 @@ Custom authentication hook. Set `allowed` to false to reject the peer. Append to
 ```cpp
 Signal< void(ServerPeer &)> PeerConnected
 ```
+
+Defined in src/symple/include/icy/symple/server.h:216
 
 [Peer](#peer-1) authenticated and online.
 
@@ -3466,14 +4031,16 @@ Signal< void(ServerPeer &)> PeerConnected
 Signal< void(ServerPeer &)> PeerDisconnected
 ```
 
+Defined in src/symple/include/icy/symple/server.h:219
+
 [Peer](#peer-1) disconnected.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Server`](#server-10)  | Constructs a server using the given event loop. |
-|  | [`Server`](#server-11)  | Deleted constructor. |
+|  | [`Server`](#server-11)  | Constructs a server using the given event loop. |
+|  | [`Server`](#server-12)  | Deleted constructor. |
 | `void` | [`start`](#start-17)  | Starts the server with the given options. Begins accepting WebSocket connections on opts.host:opts.port. |
 | `void` | [`start`](#start-18)  | Starts the server with a custom HTTP factory for non-WebSocket requests. The Symple server handles WebSocket upgrades internally; any other HTTP request (e.g. static files, REST API) is delegated to this factory. |
 | `void` | [`stop`](#stop-14)  | Broadcasts a shutdown notice to all peers, closes the listen socket, and releases all internal state. Safe to call more than once. |
@@ -3481,27 +4048,13 @@ Signal< void(ServerPeer &)> PeerDisconnected
 | `void` | [`broadcastRooms`](#broadcastrooms)  | Broadcast to multiple rooms with per-recipient dedup. |
 | `bool` | [`sendTo`](#sendto)  | Send a message to a specific peer by session ID. |
 | `bool` | [`sendToUser`](#sendtouser)  | Send a message to any peer with the given user name. |
-| `ServerPeer *` | [`getPeer`](#getpeer)  | Get a connected peer by session ID. |
-| `std::vector< ServerPeer * >` | [`getPeersInRoom`](#getpeersinroom)  | Get all peers in a room. |
-| `size_t` | [`peerCount`](#peercount) `const` | Number of connected, authenticated peers. |
+| `ServerPeer *` | [`getPeer`](#getpeer) `nodiscard` | Get a connected peer by session ID. |
+| `std::vector< ServerPeer * >` | [`getPeersInRoom`](#getpeersinroom) `nodiscard` | Get all peers in a room. |
+| `size_t` | [`peerCount`](#peercount) `const` `nodiscard` | Number of connected, authenticated peers. |
 | `void` | [`addVirtualPeer`](#addvirtualpeer)  | Register a virtual peer that receives messages via callback. |
 | `void` | [`removeVirtualPeer`](#removevirtualpeer)  | Remove a virtual peer by session ID. |
-| `http::Server &` | [`httpServer`](#httpserver) `inline` | Access the underlying HTTP server (e.g. to serve static files). |
-| `uv::Loop *` | [`loop`](#loop-9) `const` `inline` | [Event](#event-2) loop that owns the Symple server and all peer connections. |
-
----
-
-{#server-10}
-
-#### Server
-
-```cpp
-Server(uv::Loop * loop)
-```
-
-Constructs a server using the given event loop. 
-#### Parameters
-* `loop` libuv event loop; defaults to [uv::defaultLoop()](uv.md#defaultloop).
+| `http::Server &` | [`httpServer`](#httpserver) `inline` `nodiscard` | Access the underlying HTTP server (e.g. to serve static files). |
+| `uv::Loop *` | [`loop`](#loop-9) `const` `inline` `nodiscard` | [Event](#event-2) loop that owns the Symple server and all peer connections. |
 
 ---
 
@@ -3510,8 +4063,26 @@ Constructs a server using the given event loop.
 #### Server
 
 ```cpp
+Server(uv::Loop * loop = uv::defaultLoop())
+```
+
+Defined in src/symple/include/icy/symple/server.h:157
+
+Constructs a server using the given event loop. 
+#### Parameters
+* `loop` libuv event loop; defaults to [uv::defaultLoop()](uv.md#defaultloop).
+
+---
+
+{#server-12}
+
+#### Server
+
+```cpp
 Server(const Server &) = delete
 ```
+
+Defined in src/symple/include/icy/symple/server.h:160
 
 Deleted constructor.
 
@@ -3525,9 +4096,11 @@ Deleted constructor.
 void start(const Options & opts)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:166
+
 Starts the server with the given options. Begins accepting WebSocket connections on opts.host:opts.port. 
 #### Parameters
-* `opts` [Server](#server-9) configuration options.
+* `opts` [Server](#server-10) configuration options.
 
 ---
 
@@ -3539,9 +4112,11 @@ Starts the server with the given options. Begins accepting WebSocket connections
 void start(const Options & opts, std::unique_ptr< http::ServerConnectionFactory > httpFactory)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:173
+
 Starts the server with a custom HTTP factory for non-WebSocket requests. The Symple server handles WebSocket upgrades internally; any other HTTP request (e.g. static files, REST API) is delegated to this factory. 
 #### Parameters
-* `opts` [Server](#server-9) configuration options. 
+* `opts` [Server](#server-10) configuration options. 
 
 * `httpFactory` Factory for HTTP responders; may be nullptr.
 
@@ -3555,6 +4130,8 @@ Starts the server with a custom HTTP factory for non-WebSocket requests. The Sym
 void stop()
 ```
 
+Defined in src/symple/include/icy/symple/server.h:178
+
 Broadcasts a shutdown notice to all peers, closes the listen socket, and releases all internal state. Safe to call more than once.
 
 ---
@@ -3564,8 +4141,10 @@ Broadcasts a shutdown notice to all peers, closes the listen socket, and release
 #### broadcast
 
 ```cpp
-void broadcast(const std::string & room, const json::Value & msg, const std::string & excludeId)
+void broadcast(const std::string & room, const json::Value & msg, const std::string & excludeId = {})
 ```
+
+Defined in src/symple/include/icy/symple/server.h:182
 
 Broadcast a message to all peers in a room (excluding sender).
 
@@ -3576,8 +4155,10 @@ Broadcast a message to all peers in a room (excluding sender).
 #### broadcastRooms
 
 ```cpp
-void broadcastRooms(const std::unordered_set< std::string > & rooms, const json::Value & msg, const std::string & excludeId)
+void broadcastRooms(const std::unordered_set< std::string > & rooms, const json::Value & msg, const std::string & excludeId = {})
 ```
+
+Defined in src/symple/include/icy/symple/server.h:186
 
 Broadcast to multiple rooms with per-recipient dedup.
 
@@ -3591,6 +4172,8 @@ Broadcast to multiple rooms with per-recipient dedup.
 bool sendTo(const std::string & peerId, const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:191
+
 Send a message to a specific peer by session ID.
 
 ---
@@ -3603,6 +4186,8 @@ Send a message to a specific peer by session ID.
 bool sendToUser(const std::string & user, const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:194
+
 Send a message to any peer with the given user name.
 
 ---
@@ -3611,9 +4196,13 @@ Send a message to any peer with the given user name.
 
 #### getPeer
 
+`nodiscard`
+
 ```cpp
-ServerPeer * getPeer(const std::string & id)
+[[nodiscard]] ServerPeer * getPeer(const std::string & id)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:197
 
 Get a connected peer by session ID.
 
@@ -3623,9 +4212,13 @@ Get a connected peer by session ID.
 
 #### getPeersInRoom
 
+`nodiscard`
+
 ```cpp
-std::vector< ServerPeer * > getPeersInRoom(const std::string & room)
+[[nodiscard]] std::vector< ServerPeer * > getPeersInRoom(const std::string & room)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:200
 
 Get all peers in a room.
 
@@ -3635,11 +4228,13 @@ Get all peers in a room.
 
 #### peerCount
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t peerCount() const
+[[nodiscard]] size_t peerCount() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:203
 
 Number of connected, authenticated peers.
 
@@ -3652,6 +4247,8 @@ Number of connected, authenticated peers.
 ```cpp
 void addVirtualPeer(const Peer & peer, const std::vector< std::string > & rooms, std::function< void(const json::Value &)> handler)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:230
 
 Register a virtual peer that receives messages via callback.
 
@@ -3674,6 +4271,8 @@ The virtual peer appears in presence broadcasts and is routable like any WebSock
 void removeVirtualPeer(const std::string & peerId)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:235
+
 Remove a virtual peer by session ID.
 
 ---
@@ -3682,11 +4281,13 @@ Remove a virtual peer by session ID.
 
 #### httpServer
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline http::Server & httpServer()
+[[nodiscard]] inline http::Server & httpServer()
 ```
+
+Defined in src/symple/include/icy/symple/server.h:238
 
 Access the underlying HTTP server (e.g. to serve static files).
 
@@ -3696,11 +4297,13 @@ Access the underlying HTTP server (e.g. to serve static files).
 
 #### loop
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline uv::Loop * loop() const
+[[nodiscard]] inline uv::Loop * loop() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:241
 
 [Event](#event-2) loop that owns the Symple server and all peer connections.
 
@@ -3727,6 +4330,8 @@ inline uv::Loop * loop() const
 Options _opts
 ```
 
+Defined in src/symple/include/icy/symple/server.h:267
+
 ---
 
 {#_loop-3}
@@ -3736,6 +4341,8 @@ Options _opts
 ```cpp
 uv::Loop * _loop = nullptr
 ```
+
+Defined in src/symple/include/icy/symple/server.h:268
 
 ---
 
@@ -3747,6 +4354,8 @@ uv::Loop * _loop = nullptr
 std::unique_ptr< http::Server > _http
 ```
 
+Defined in src/symple/include/icy/symple/server.h:269
+
 ---
 
 {#_peerregistry}
@@ -3756,6 +4365,8 @@ std::unique_ptr< http::Server > _http
 ```cpp
 std::unique_ptr< PeerRegistry > _peerRegistry
 ```
+
+Defined in src/symple/include/icy/symple/server.h:270
 
 ---
 
@@ -3767,6 +4378,8 @@ std::unique_ptr< PeerRegistry > _peerRegistry
 std::unique_ptr< RoomIndex > _roomIndex
 ```
 
+Defined in src/symple/include/icy/symple/server.h:271
+
 ---
 
 {#_mutex-16}
@@ -3776,6 +4389,8 @@ std::unique_ptr< RoomIndex > _roomIndex
 ```cpp
 std::mutex _mutex
 ```
+
+Defined in src/symple/include/icy/symple/server.h:273
 
 ---
 
@@ -3787,6 +4402,8 @@ std::mutex _mutex
 std::atomic< bool > _shuttingDown {false}
 ```
 
+Defined in src/symple/include/icy/symple/server.h:274
+
 ---
 
 {#_httpfallback}
@@ -3796,6 +4413,8 @@ std::atomic< bool > _shuttingDown {false}
 ```cpp
 std::unique_ptr< http::ServerConnectionFactory > _httpFallback
 ```
+
+Defined in src/symple/include/icy/symple/server.h:277
 
 Fallback factory for non-WebSocket HTTP requests.
 
@@ -3823,6 +4442,8 @@ Fallback factory for non-WebSocket HTTP requests.
 void onAuth(ServerPeer & peer, const json::Value & msg, std::unique_lock< std::mutex > & lock)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:252
+
 ---
 
 {#onmessage}
@@ -3832,6 +4453,8 @@ void onAuth(ServerPeer & peer, const json::Value & msg, std::unique_lock< std::m
 ```cpp
 void onMessage(ServerPeer & peer, json::Value msg)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:253
 
 ---
 
@@ -3843,6 +4466,8 @@ void onMessage(ServerPeer & peer, json::Value msg)
 void onJoin(ServerPeer & peer, const std::string & room)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:254
+
 ---
 
 {#onleave}
@@ -3852,6 +4477,8 @@ void onJoin(ServerPeer & peer, const std::string & room)
 ```cpp
 void onLeave(ServerPeer & peer, const std::string & room)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:255
 
 ---
 
@@ -3863,6 +4490,8 @@ void onLeave(ServerPeer & peer, const std::string & room)
 void onDisconnect(ServerPeer & peer, std::unique_lock< std::mutex > & lock)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:256
+
 ---
 
 {#route}
@@ -3872,6 +4501,8 @@ void onDisconnect(ServerPeer & peer, std::unique_lock< std::mutex > & lock)
 ```cpp
 void route(ServerPeer & sender, const json::Value & msg)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:257
 
 ---
 
@@ -3883,6 +4514,8 @@ void route(ServerPeer & sender, const json::Value & msg)
 bool deliver(const std::string & peerId, const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:258
+
 ---
 
 {#deliverserialized}
@@ -3893,6 +4526,8 @@ bool deliver(const std::string & peerId, const json::Value & msg)
 bool deliverSerialized(const std::string & peerId, const char * data, size_t len, const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:259
+
 ---
 
 {#sendpresencesnapshot}
@@ -3900,8 +4535,10 @@ bool deliverSerialized(const std::string & peerId, const char * data, size_t len
 #### sendPresenceSnapshot
 
 ```cpp
-void sendPresenceSnapshot(ServerPeer & recipient, const std::unordered_set< std::string > & rooms, std::string_view excludeId)
+void sendPresenceSnapshot(ServerPeer & recipient, const std::unordered_set< std::string > & rooms, std::string_view excludeId = {})
 ```
+
+Defined in src/symple/include/icy/symple/server.h:263
 
 {#peerregistry}
 
@@ -3910,6 +4547,12 @@ void sendPresenceSnapshot(ServerPeer & recipient, const std::unordered_set< std:
 ```cpp
 #include <src/symple/src/server/detail.h>
 ```
+
+```cpp
+class PeerRegistry
+```
+
+Defined in src/symple/src/server/detail.h:27
 
 ### Public Methods
 
@@ -3922,14 +4565,14 @@ void sendPresenceSnapshot(ServerPeer & recipient, const std::unordered_set< std:
 | `void` | [`erase`](#erase)  |  |
 | `void` | [`eraseVirtual`](#erasevirtual)  |  |
 | `void` | [`clear`](#clear-5)  |  |
-| `ServerPeer *` | [`find`](#find)  |  |
-| `const ServerPeer *` | [`find`](#find-1) `const` |  |
-| `VirtualPeer *` | [`findVirtual`](#findvirtual)  |  |
-| `const VirtualPeer *` | [`findVirtual`](#findvirtual-1) `const` |  |
-| `ServerPeer *` | [`findByConnection`](#findbyconnection)  |  |
-| `const ServerPeer *` | [`findByConnection`](#findbyconnection-1) `const` |  |
-| `size_t` | [`size`](#size-12) `const` |  |
-| `const std::unordered_map< std::string, std::unique_ptr< ServerPeer > > &` | [`peers`](#peers-1) `const` `inline` |  |
+| `ServerPeer *` | [`find`](#find) `nodiscard` |  |
+| `const ServerPeer *` | [`find`](#find-1) `const` `nodiscard` |  |
+| `VirtualPeer *` | [`findVirtual`](#findvirtual) `nodiscard` |  |
+| `const VirtualPeer *` | [`findVirtual`](#findvirtual-1) `const` `nodiscard` |  |
+| `ServerPeer *` | [`findByConnection`](#findbyconnection) `nodiscard` |  |
+| `const ServerPeer *` | [`findByConnection`](#findbyconnection-1) `const` `nodiscard` |  |
+| `size_t` | [`size`](#size-13) `const` `nodiscard` |  |
+| `const std::unordered_map< std::string, std::unique_ptr< ServerPeer > > &` | [`peers`](#peers-1) `const` `inline` `nodiscard` |  |
 
 ---
 
@@ -3941,6 +4584,8 @@ void sendPresenceSnapshot(ServerPeer & recipient, const std::unordered_set< std:
 void add(std::string id, std::unique_ptr< ServerPeer > peer)
 ```
 
+Defined in src/symple/src/server/detail.h:30
+
 ---
 
 {#addvirtual}
@@ -3950,6 +4595,8 @@ void add(std::string id, std::unique_ptr< ServerPeer > peer)
 ```cpp
 void addVirtual(std::string id, VirtualPeer peer)
 ```
+
+Defined in src/symple/src/server/detail.h:31
 
 ---
 
@@ -3961,6 +4608,8 @@ void addVirtual(std::string id, VirtualPeer peer)
 void bind(http::ServerConnection & conn, const std::string & id)
 ```
 
+Defined in src/symple/src/server/detail.h:32
+
 ---
 
 {#unbind}
@@ -3970,6 +4619,8 @@ void bind(http::ServerConnection & conn, const std::string & id)
 ```cpp
 void unbind(http::ServerConnection & conn)
 ```
+
+Defined in src/symple/src/server/detail.h:33
 
 ---
 
@@ -3981,6 +4632,8 @@ void unbind(http::ServerConnection & conn)
 void erase(const std::string & id)
 ```
 
+Defined in src/symple/src/server/detail.h:34
+
 ---
 
 {#erasevirtual}
@@ -3990,6 +4643,8 @@ void erase(const std::string & id)
 ```cpp
 void eraseVirtual(const std::string & id)
 ```
+
+Defined in src/symple/src/server/detail.h:35
 
 ---
 
@@ -4001,15 +4656,21 @@ void eraseVirtual(const std::string & id)
 void clear()
 ```
 
+Defined in src/symple/src/server/detail.h:36
+
 ---
 
 {#find}
 
 #### find
 
+`nodiscard`
+
 ```cpp
-ServerPeer * find(const std::string & id)
+[[nodiscard]] ServerPeer * find(const std::string & id)
 ```
+
+Defined in src/symple/src/server/detail.h:38
 
 ---
 
@@ -4017,11 +4678,13 @@ ServerPeer * find(const std::string & id)
 
 #### find
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const ServerPeer * find(const std::string & id) const
+[[nodiscard]] const ServerPeer * find(const std::string & id) const
 ```
+
+Defined in src/symple/src/server/detail.h:39
 
 ---
 
@@ -4029,9 +4692,13 @@ const ServerPeer * find(const std::string & id) const
 
 #### findVirtual
 
+`nodiscard`
+
 ```cpp
-VirtualPeer * findVirtual(const std::string & id)
+[[nodiscard]] VirtualPeer * findVirtual(const std::string & id)
 ```
+
+Defined in src/symple/src/server/detail.h:40
 
 ---
 
@@ -4039,11 +4706,13 @@ VirtualPeer * findVirtual(const std::string & id)
 
 #### findVirtual
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const VirtualPeer * findVirtual(const std::string & id) const
+[[nodiscard]] const VirtualPeer * findVirtual(const std::string & id) const
 ```
+
+Defined in src/symple/src/server/detail.h:41
 
 ---
 
@@ -4051,9 +4720,13 @@ const VirtualPeer * findVirtual(const std::string & id) const
 
 #### findByConnection
 
+`nodiscard`
+
 ```cpp
-ServerPeer * findByConnection(http::ServerConnection & conn)
+[[nodiscard]] ServerPeer * findByConnection(http::ServerConnection & conn)
 ```
+
+Defined in src/symple/src/server/detail.h:42
 
 ---
 
@@ -4061,23 +4734,27 @@ ServerPeer * findByConnection(http::ServerConnection & conn)
 
 #### findByConnection
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const ServerPeer * findByConnection(http::ServerConnection & conn) const
+[[nodiscard]] const ServerPeer * findByConnection(http::ServerConnection & conn) const
 ```
+
+Defined in src/symple/src/server/detail.h:43
 
 ---
 
-{#size-12}
+{#size-13}
 
 #### size
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-size_t size() const
+[[nodiscard]] size_t size() const
 ```
+
+Defined in src/symple/src/server/detail.h:44
 
 ---
 
@@ -4085,11 +4762,13 @@ size_t size() const
 
 #### peers
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::unordered_map< std::string, std::unique_ptr< ServerPeer > > & peers() const
+[[nodiscard]] inline const std::unordered_map< std::string, std::unique_ptr< ServerPeer > > & peers() const
 ```
+
+Defined in src/symple/src/server/detail.h:46
 
 ### Private Attributes
 
@@ -4109,6 +4788,8 @@ inline const std::unordered_map< std::string, std::unique_ptr< ServerPeer > > & 
 std::unordered_map< std::string, std::unique_ptr< ServerPeer > > _peers
 ```
 
+Defined in src/symple/src/server/detail.h:52
+
 ---
 
 {#_virtualpeers}
@@ -4118,6 +4799,8 @@ std::unordered_map< std::string, std::unique_ptr< ServerPeer > > _peers
 ```cpp
 std::unordered_map< std::string, VirtualPeer > _virtualPeers
 ```
+
+Defined in src/symple/src/server/detail.h:53
 
 ---
 
@@ -4129,6 +4812,8 @@ std::unordered_map< std::string, VirtualPeer > _virtualPeers
 std::unordered_map< http::ServerConnection *, std::string > _connToPeer
 ```
 
+Defined in src/symple/src/server/detail.h:54
+
 {#roomindex}
 
 ## RoomIndex
@@ -4136,6 +4821,12 @@ std::unordered_map< http::ServerConnection *, std::string > _connToPeer
 ```cpp
 #include <src/symple/src/server/detail.h>
 ```
+
+```cpp
+class RoomIndex
+```
+
+Defined in src/symple/src/server/detail.h:58
 
 ### Public Methods
 
@@ -4145,8 +4836,8 @@ std::unordered_map< http::ServerConnection *, std::string > _connToPeer
 | `void` | [`leave`](#leave)  |  |
 | `void` | [`leaveAll`](#leaveall)  |  |
 | `void` | [`clear`](#clear-6)  |  |
-| `const MemberSet *` | [`members`](#members) `const` |  |
-| `std::unordered_set< std::string >` | [`collectRecipients`](#collectrecipients) `const` |  |
+| `const MemberSet *` | [`members`](#members) `const` `nodiscard` |  |
+| `std::unordered_set< std::string >` | [`collectRecipients`](#collectrecipients) `const` `nodiscard` |  |
 
 ---
 
@@ -4158,6 +4849,8 @@ std::unordered_map< http::ServerConnection *, std::string > _connToPeer
 void join(const std::string & room, const std::string & peerId)
 ```
 
+Defined in src/symple/src/server/detail.h:63
+
 ---
 
 {#leave}
@@ -4167,6 +4860,8 @@ void join(const std::string & room, const std::string & peerId)
 ```cpp
 void leave(const std::string & room, const std::string & peerId)
 ```
+
+Defined in src/symple/src/server/detail.h:64
 
 ---
 
@@ -4178,6 +4873,8 @@ void leave(const std::string & room, const std::string & peerId)
 void leaveAll(const std::string & peerId)
 ```
 
+Defined in src/symple/src/server/detail.h:65
+
 ---
 
 {#clear-6}
@@ -4188,17 +4885,21 @@ void leaveAll(const std::string & peerId)
 void clear()
 ```
 
+Defined in src/symple/src/server/detail.h:66
+
 ---
 
 {#members}
 
 #### members
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const MemberSet * members(const std::string & room) const
+[[nodiscard]] const MemberSet * members(const std::string & room) const
 ```
+
+Defined in src/symple/src/server/detail.h:68
 
 ---
 
@@ -4206,11 +4907,13 @@ const MemberSet * members(const std::string & room) const
 
 #### collectRecipients
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::unordered_set< std::string > collectRecipients(const std::unordered_set< std::string > & rooms, std::string_view excludeId) const
+[[nodiscard]] std::unordered_set< std::string > collectRecipients(const std::unordered_set< std::string > & rooms, std::string_view excludeId = {}) const
 ```
+
+Defined in src/symple/src/server/detail.h:69
 
 ### Public Types
 
@@ -4225,8 +4928,10 @@ std::unordered_set< std::string > collectRecipients(const std::unordered_set< st
 #### MemberSet
 
 ```cpp
-std::unordered_set< std::string > MemberSet()
+using MemberSet = std::unordered_set< std::string >
 ```
+
+Defined in src/symple/src/server/detail.h:61
 
 ### Private Attributes
 
@@ -4244,6 +4949,8 @@ std::unordered_set< std::string > MemberSet()
 std::unordered_map< std::string, MemberSet > _rooms
 ```
 
+Defined in src/symple/src/server/detail.h:74
+
 {#options-16}
 
 ## Options
@@ -4251,6 +4958,12 @@ std::unordered_map< std::string, MemberSet > _rooms
 ```cpp
 #include <icy/symple/server.h>
 ```
+
+```cpp
+struct Options
+```
+
+Defined in src/symple/include/icy/symple/server.h:140
 
 [Configuration](base.md#configuration) options for the Symple server.
 
@@ -4263,8 +4976,8 @@ std::unordered_map< std::string, MemberSet > _rooms
 | `net::TCPSocket::Ptr` | [`socket`](#socket-7)  | Optional pre-created listen socket (e.g. SSLSocket for HTTPS/WSS). |
 | `bool` | [`authentication`](#authentication)  | Require token in auth message. |
 | `bool` | [`dynamicRooms`](#dynamicrooms)  | Allow clients to join/leave rooms. |
-| `size_t` | [`maxConnections`](#maxconnections)  | Max WebSocket connections (0 = unlimited) |
-| `size_t` | [`maxMessageSize`](#maxmessagesize)  | Max message payload in bytes (64KB default) |
+| `size_t` | [`maxConnections`](#maxconnections)  | Max WebSocket connections (0 = unlimited). |
+| `size_t` | [`maxMessageSize`](#maxmessagesize)  | Max message payload in bytes (64KB default). |
 | `double` | [`rateLimit`](#ratelimit)  | Messages per rate window. |
 | `double` | [`rateSeconds`](#rateseconds)  | Rate window in seconds. |
 
@@ -4278,6 +4991,8 @@ std::unordered_map< std::string, MemberSet > _rooms
 std::string host = "0.0.0.0"
 ```
 
+Defined in src/symple/include/icy/symple/server.h:142
+
 ---
 
 {#port-3}
@@ -4288,6 +5003,8 @@ std::string host = "0.0.0.0"
 uint16_t port = 4500
 ```
 
+Defined in src/symple/include/icy/symple/server.h:143
+
 ---
 
 {#socket-7}
@@ -4297,6 +5014,8 @@ uint16_t port = 4500
 ```cpp
 net::TCPSocket::Ptr socket
 ```
+
+Defined in src/symple/include/icy/symple/server.h:144
 
 Optional pre-created listen socket (e.g. SSLSocket for HTTPS/WSS).
 
@@ -4310,6 +5029,8 @@ Optional pre-created listen socket (e.g. SSLSocket for HTTPS/WSS).
 bool authentication = false
 ```
 
+Defined in src/symple/include/icy/symple/server.h:145
+
 Require token in auth message.
 
 ---
@@ -4321,6 +5042,8 @@ Require token in auth message.
 ```cpp
 bool dynamicRooms = true
 ```
+
+Defined in src/symple/include/icy/symple/server.h:146
 
 Allow clients to join/leave rooms.
 
@@ -4334,7 +5057,9 @@ Allow clients to join/leave rooms.
 size_t maxConnections = 0
 ```
 
-Max WebSocket connections (0 = unlimited)
+Defined in src/symple/include/icy/symple/server.h:149
+
+Max WebSocket connections (0 = unlimited).
 
 ---
 
@@ -4346,7 +5071,9 @@ Max WebSocket connections (0 = unlimited)
 size_t maxMessageSize = 64 * 1024
 ```
 
-Max message payload in bytes (64KB default)
+Defined in src/symple/include/icy/symple/server.h:150
+
+Max message payload in bytes (64KB default).
 
 ---
 
@@ -4357,6 +5084,8 @@ Max message payload in bytes (64KB default)
 ```cpp
 double rateLimit = 100.0
 ```
+
+Defined in src/symple/include/icy/symple/server.h:151
 
 Messages per rate window.
 
@@ -4370,72 +5099,9 @@ Messages per rate window.
 double rateSeconds = 10.0
 ```
 
+Defined in src/symple/include/icy/symple/server.h:152
+
 Rate window in seconds.
-
-{#routingpolicy}
-
-## RoutingPolicy
-
-```cpp
-#include <src/symple/src/server/detail.h>
-```
-
-### Public Static Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `bool` | [`sharesAnyRoom`](#sharesanyroom) `static` |  |
-| `bool` | [`canDirectMessage`](#candirectmessage) `static` |  |
-| `bool` | [`canDirectMessage`](#candirectmessage-1) `static` |  |
-| `bool` | [`canBroadcastToRoom`](#canbroadcasttoroom) `static` |  |
-
----
-
-{#sharesanyroom}
-
-#### sharesAnyRoom
-
-`static`
-
-```cpp
-static bool sharesAnyRoom(const std::unordered_set< std::string > & a, const std::unordered_set< std::string > & b)
-```
-
----
-
-{#candirectmessage}
-
-#### canDirectMessage
-
-`static`
-
-```cpp
-static bool canDirectMessage(const ServerPeer & sender, const ServerPeer & recipient)
-```
-
----
-
-{#candirectmessage-1}
-
-#### canDirectMessage
-
-`static`
-
-```cpp
-static bool canDirectMessage(const ServerPeer & sender, const VirtualPeer & recipient)
-```
-
----
-
-{#canbroadcasttoroom}
-
-#### canBroadcastToRoom
-
-`static`
-
-```cpp
-static bool canBroadcastToRoom(const ServerPeer & sender, const std::string & room)
-```
 
 {#virtualpeer}
 
@@ -4444,6 +5110,12 @@ static bool canBroadcastToRoom(const ServerPeer & sender, const std::string & ro
 ```cpp
 #include <src/symple/src/server/detail.h>
 ```
+
+```cpp
+struct VirtualPeer
+```
+
+Defined in src/symple/src/server/detail.h:19
 
 ### Public Attributes
 
@@ -4463,6 +5135,8 @@ static bool canBroadcastToRoom(const ServerPeer & sender, const std::string & ro
 Peer peer
 ```
 
+Defined in src/symple/src/server/detail.h:21
+
 ---
 
 {#rooms-1}
@@ -4472,6 +5146,8 @@ Peer peer
 ```cpp
 std::unordered_set< std::string > rooms
 ```
+
+Defined in src/symple/src/server/detail.h:22
 
 ---
 
@@ -4483,6 +5159,87 @@ std::unordered_set< std::string > rooms
 std::function< void(const json::Value &)> handler
 ```
 
+Defined in src/symple/src/server/detail.h:23
+
+{#routingpolicy}
+
+## RoutingPolicy
+
+```cpp
+#include <src/symple/src/server/detail.h>
+```
+
+```cpp
+struct RoutingPolicy
+```
+
+Defined in src/symple/src/server/detail.h:78
+
+### Public Static Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `bool` | [`sharesAnyRoom`](#sharesanyroom) `static` `nodiscard` |  |
+| `bool` | [`canDirectMessage`](#candirectmessage) `static` `nodiscard` |  |
+| `bool` | [`canDirectMessage`](#candirectmessage-1) `static` `nodiscard` |  |
+| `bool` | [`canBroadcastToRoom`](#canbroadcasttoroom) `static` `nodiscard` |  |
+
+---
+
+{#sharesanyroom}
+
+#### sharesAnyRoom
+
+`static` `nodiscard`
+
+```cpp
+[[nodiscard]] static bool sharesAnyRoom(const std::unordered_set< std::string > & a, const std::unordered_set< std::string > & b)
+```
+
+Defined in src/symple/src/server/detail.h:80
+
+---
+
+{#candirectmessage}
+
+#### canDirectMessage
+
+`static` `nodiscard`
+
+```cpp
+[[nodiscard]] static bool canDirectMessage(const ServerPeer & sender, const ServerPeer & recipient)
+```
+
+Defined in src/symple/src/server/detail.h:82
+
+---
+
+{#candirectmessage-1}
+
+#### canDirectMessage
+
+`static` `nodiscard`
+
+```cpp
+[[nodiscard]] static bool canDirectMessage(const ServerPeer & sender, const VirtualPeer & recipient)
+```
+
+Defined in src/symple/src/server/detail.h:84
+
+---
+
+{#canbroadcasttoroom}
+
+#### canBroadcastToRoom
+
+`static` `nodiscard`
+
+```cpp
+[[nodiscard]] static bool canBroadcastToRoom(const ServerPeer & sender, const std::string & room)
+```
+
+Defined in src/symple/src/server/detail.h:86
+
 {#serverpeer}
 
 ## ServerPeer
@@ -4490,6 +5247,12 @@ std::function< void(const json::Value &)> handler
 ```cpp
 #include <icy/symple/server.h>
 ```
+
+```cpp
+class ServerPeer
+```
+
+Defined in src/symple/include/icy/symple/server.h:43
 
 Per-connection state for a connected Symple peer.
 
@@ -4505,15 +5268,15 @@ Created by the server after successful authentication. Holds the peer data, room
 | `void` | [`join`](#join-1)  | Adds this peer to the named room (local tracking only). |
 | `void` | [`leave`](#leave-1)  | Removes this peer from the named room (local tracking only). |
 | `void` | [`leaveAll`](#leaveall-1)  | Removes this peer from all rooms (local tracking only). |
-| `Peer &` | [`peer`](#peer-6) `inline` | Returns a mutable reference to the peer data object. |
-| `const Peer &` | [`peer`](#peer-7) `const` `inline` | Returns a const reference to the peer data object. |
-| `std::string` | [`id`](#id-9) `const` | Returns the session ID assigned to this peer. |
-| `const std::unordered_set< std::string > &` | [`rooms`](#rooms-2) `const` `inline` | Returns the set of room names this peer is currently joined to. |
-| `bool` | [`authenticated`](#authenticated) `const` `inline` | Returns true if the peer has completed authentication. |
+| `Peer &` | [`peer`](#peer-6) `inline` `nodiscard` | Returns a mutable reference to the peer data object. |
+| `const Peer &` | [`peer`](#peer-7) `const` `inline` `nodiscard` | Returns a const reference to the peer data object. |
+| `std::string` | [`id`](#id-9) `const` `nodiscard` | Returns the session ID assigned to this peer. |
+| `const std::unordered_set< std::string > &` | [`rooms`](#rooms-2) `const` `inline` `nodiscard` | Returns the set of room names this peer is currently joined to. |
+| `bool` | [`authenticated`](#authenticated) `const` `inline` `nodiscard` | Returns true if the peer has completed authentication. |
 | `void` | [`setAuthenticated`](#setauthenticated) `inline` | Marks the peer as authenticated or unauthenticated. |
 | `void` | [`setPeer`](#setpeer) `inline` | Replaces the peer's data object. |
 | `http::ServerConnection &` | [`connection`](#connection-10) `inline` | Returns a reference to the underlying server connection. |
-| `bool` | [`checkRate`](#checkrate) `inline` | Per-peer rate limiter. Returns false if message should be dropped. |
+| `bool` | [`checkRate`](#checkrate) `inline` `nodiscard` | Per-peer rate limiter. Returns false if message should be dropped. |
 | `void` | [`setRateLimit`](#setratelimit) `inline` | Configures the per-peer rate limit. |
 
 ---
@@ -4525,6 +5288,8 @@ Created by the server after successful authentication. Holds the peer data, room
 ```cpp
 ServerPeer(http::ServerConnection & conn)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:48
 
 Constructs a peer bound to the given server-side connection. 
 #### Parameters
@@ -4540,6 +5305,8 @@ Constructs a peer bound to the given server-side connection.
 void send(const json::Value & msg)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:53
+
 Serialises and sends a JSON message over the WebSocket connection. Logs a warning if the send fails; does not throw. 
 #### Parameters
 * `msg` JSON value to send.
@@ -4554,6 +5321,8 @@ Serialises and sends a JSON message over the WebSocket connection. Logs a warnin
 void sendSerialized(const char * data, size_t len)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:57
+
 Sends a pre-serialized JSON payload over the WebSocket connection. Use this on fanout paths that already serialized once.
 
 ---
@@ -4565,6 +5334,8 @@ Sends a pre-serialized JSON payload over the WebSocket connection. Use this on f
 ```cpp
 void join(const std::string & room)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:61
 
 Adds this peer to the named room (local tracking only). 
 #### Parameters
@@ -4580,6 +5351,8 @@ Adds this peer to the named room (local tracking only).
 void leave(const std::string & room)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:65
+
 Removes this peer from the named room (local tracking only). 
 #### Parameters
 * `room` Room name to leave.
@@ -4594,6 +5367,8 @@ Removes this peer from the named room (local tracking only).
 void leaveAll()
 ```
 
+Defined in src/symple/include/icy/symple/server.h:68
+
 Removes this peer from all rooms (local tracking only).
 
 ---
@@ -4602,11 +5377,13 @@ Removes this peer from all rooms (local tracking only).
 
 #### peer
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline Peer & peer()
+[[nodiscard]] inline Peer & peer()
 ```
+
+Defined in src/symple/include/icy/symple/server.h:71
 
 Returns a mutable reference to the peer data object.
 
@@ -4616,11 +5393,13 @@ Returns a mutable reference to the peer data object.
 
 #### peer
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const Peer & peer() const
+[[nodiscard]] inline const Peer & peer() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:74
 
 Returns a const reference to the peer data object.
 
@@ -4630,11 +5409,13 @@ Returns a const reference to the peer data object.
 
 #### id
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string id() const
+[[nodiscard]] std::string id() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:77
 
 Returns the session ID assigned to this peer.
 
@@ -4644,11 +5425,13 @@ Returns the session ID assigned to this peer.
 
 #### rooms
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::unordered_set< std::string > & rooms() const
+[[nodiscard]] inline const std::unordered_set< std::string > & rooms() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:80
 
 Returns the set of room names this peer is currently joined to.
 
@@ -4658,11 +5441,13 @@ Returns the set of room names this peer is currently joined to.
 
 #### authenticated
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool authenticated() const
+[[nodiscard]] inline bool authenticated() const
 ```
+
+Defined in src/symple/include/icy/symple/server.h:83
 
 Returns true if the peer has completed authentication.
 
@@ -4677,6 +5462,8 @@ Returns true if the peer has completed authentication.
 ```cpp
 inline void setAuthenticated(bool v)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:87
 
 Marks the peer as authenticated or unauthenticated. 
 #### Parameters
@@ -4694,6 +5481,8 @@ Marks the peer as authenticated or unauthenticated.
 inline void setPeer(const Peer & p)
 ```
 
+Defined in src/symple/include/icy/symple/server.h:91
+
 Replaces the peer's data object. 
 #### Parameters
 * `p` New peer data.
@@ -4710,6 +5499,8 @@ Replaces the peer's data object.
 inline http::ServerConnection & connection()
 ```
 
+Defined in src/symple/include/icy/symple/server.h:94
+
 Returns a reference to the underlying server connection.
 
 ---
@@ -4718,11 +5509,13 @@ Returns a reference to the underlying server connection.
 
 #### checkRate
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline bool checkRate()
+[[nodiscard]] inline bool checkRate()
 ```
+
+Defined in src/symple/include/icy/symple/server.h:97
 
 Per-peer rate limiter. Returns false if message should be dropped.
 
@@ -4737,6 +5530,8 @@ Per-peer rate limiter. Returns false if message should be dropped.
 ```cpp
 inline void setRateLimit(double rate, double seconds)
 ```
+
+Defined in src/symple/include/icy/symple/server.h:102
 
 Configures the per-peer rate limit. 
 #### Parameters
@@ -4764,6 +5559,8 @@ Configures the per-peer rate limit.
 http::ServerConnection & _conn
 ```
 
+Defined in src/symple/include/icy/symple/server.h:109
+
 ---
 
 {#_peer-1}
@@ -4773,6 +5570,8 @@ http::ServerConnection & _conn
 ```cpp
 Peer _peer
 ```
+
+Defined in src/symple/include/icy/symple/server.h:110
 
 ---
 
@@ -4784,6 +5583,8 @@ Peer _peer
 std::unordered_set< std::string > _rooms
 ```
 
+Defined in src/symple/include/icy/symple/server.h:111
+
 ---
 
 {#_ratelimiter}
@@ -4793,6 +5594,8 @@ std::unordered_set< std::string > _rooms
 ```cpp
 RateLimiter _rateLimiter {100.0, 10.0}
 ```
+
+Defined in src/symple/include/icy/symple/server.h:112
 
 100 messages per 10 seconds default
 
@@ -4806,6 +5609,8 @@ RateLimiter _rateLimiter {100.0, 10.0}
 bool _authenticated = false
 ```
 
+Defined in src/symple/include/icy/symple/server.h:113
+
 {#address-13}
 
 ## Address
@@ -4814,7 +5619,33 @@ bool _authenticated = false
 #include <icy/symple/address.h>
 ```
 
+```cpp
+struct Address
+```
+
+Defined in src/symple/include/icy/symple/address.h:28
+
 The [Address](#address-13) structure is an endpoint identifier for a peer on the network. The format is like so: user|id
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-34) `inline` |  |
+
+---
+
+{#operator-34}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & os, const Address & addr)
+```
+
+Defined in src/symple/include/icy/symple/address.h:71
 
 ### Public Attributes
 
@@ -4833,6 +5664,8 @@ The [Address](#address-13) structure is an endpoint identifier for a peer on the
 std::string user
 ```
 
+Defined in src/symple/include/icy/symple/address.h:77
+
 ---
 
 {#id-5}
@@ -4843,6 +5676,8 @@ std::string user
 std::string id
 ```
 
+Defined in src/symple/include/icy/symple/address.h:79
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -4850,12 +5685,12 @@ std::string id
 |  | [`Address`](#address-14)  | Constructs an empty (invalid) address. |
 |  | [`Address`](#address-15)  | Parses an address string of the form `user\|id`. |
 |  | [`Address`](#address-16)  | Constructs an address from explicit user and session ID components. |
-| `bool` | [`parse`](#parse-2)  | Parses an address string of the form `user\|id`. Populates the `user` and `id` fields. |
-| `bool` | [`valid`](#valid-10) `const` | Returns true if at least one of `user` or `id` is non-empty. |
+| `bool` | [`parse`](#parse-2)  | Parses an address string of the form `user\|id`. Populates the `[user](#user)` and `[id](#id-5)` fields. |
+| `bool` | [`valid`](#valid-10) `const` `nodiscard` | Returns true if at least one of `[user](#user)` or `[id](#id-5)` is non-empty. |
 | `void` | [`print`](#print-15) `const` | Writes the address in `user\|id` format to the given stream. |
-| `std::string` | [`toString`](#tostring-9) `const` | Returns the address as a string in `user\|id` format. |
-| `bool` | [`operator==`](#operator-27) `const` | Compares two addresses for equality (both user and id must match). |
-| `bool` | [`operator==`](#operator-28) `const` | Compares this address against a string in `user\|id` format without allocating. |
+| `std::string` | [`toString`](#tostring-9) `const` `nodiscard` | Returns the address as a string in `user\|id` format. |
+| `bool` | [`operator==`](#operator-35) `const` | Compares two addresses for equality (both user and id must match). |
+| `bool` | [`operator==`](#operator-36) `const` | Compares this address against a string in `user\|id` format without allocating. |
 
 ---
 
@@ -4866,6 +5701,8 @@ std::string id
 ```cpp
 Address()
 ```
+
+Defined in src/symple/include/icy/symple/address.h:32
 
 Constructs an empty (invalid) address.
 
@@ -4878,6 +5715,8 @@ Constructs an empty (invalid) address.
 ```cpp
 Address(std::string_view addr)
 ```
+
+Defined in src/symple/include/icy/symple/address.h:36
 
 Parses an address string of the form `user|id`. 
 #### Parameters
@@ -4892,6 +5731,8 @@ Parses an address string of the form `user|id`.
 ```cpp
 Address(const std::string & user, const std::string & id)
 ```
+
+Defined in src/symple/include/icy/symple/address.h:41
 
 Constructs an address from explicit user and session ID components. 
 #### Parameters
@@ -4909,7 +5750,9 @@ Constructs an address from explicit user and session ID components.
 bool parse(std::string_view addr)
 ```
 
-Parses an address string of the form `user|id`. Populates the `user` and `id` fields. 
+Defined in src/symple/include/icy/symple/address.h:50
+
+Parses an address string of the form `user|id`. Populates the `[user](#user)` and `[id](#id-5)` fields. 
 #### Parameters
 * `addr` [Address](#address-13) string to parse. 
 
@@ -4922,13 +5765,15 @@ True if the result is a valid address.
 
 #### valid
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool valid() const
+[[nodiscard]] bool valid() const
 ```
 
-Returns true if at least one of `user` or `id` is non-empty.
+Defined in src/symple/include/icy/symple/address.h:53
+
+Returns true if at least one of `[user](#user)` or `[id](#id-5)` is non-empty.
 
 ---
 
@@ -4942,6 +5787,8 @@ Returns true if at least one of `user` or `id` is non-empty.
 void print(std::ostream & os) const
 ```
 
+Defined in src/symple/include/icy/symple/address.h:57
+
 Writes the address in `user|id` format to the given stream. 
 #### Parameters
 * `os` Output stream.
@@ -4952,11 +5799,13 @@ Writes the address in `user|id` format to the given stream.
 
 #### toString
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string toString() const
+[[nodiscard]] std::string toString() const
 ```
+
+Defined in src/symple/include/icy/symple/address.h:61
 
 Returns the address as a string in `user|id` format. 
 #### Returns
@@ -4964,7 +5813,7 @@ Serialised address string.
 
 ---
 
-{#operator-27}
+{#operator-35}
 
 #### operator==
 
@@ -4974,13 +5823,15 @@ Serialised address string.
 bool operator==(const Address & r) const
 ```
 
+Defined in src/symple/include/icy/symple/address.h:65
+
 Compares two addresses for equality (both user and id must match). 
 #### Parameters
 * `r` [Address](#address-13) to compare against.
 
 ---
 
-{#operator-28}
+{#operator-36}
 
 #### operator==
 
@@ -4989,6 +5840,8 @@ Compares two addresses for equality (both user and id must match).
 ```cpp
 bool operator==(const std::string & r) const
 ```
+
+Defined in src/symple/include/icy/symple/address.h:69
 
 Compares this address against a string in `user|id` format without allocating. 
 #### Parameters
@@ -5002,6 +5855,12 @@ Compares this address against a string in `user|id` format without allocating.
 #include <icy/symple/client.h>
 ```
 
+```cpp
+struct ClientState
+```
+
+Defined in src/symple/include/icy/symple/client.h:38
+
 > **Inherits:** [`State`](base.md#state)
 
 [Client](#client-5) connection states.
@@ -5010,7 +5869,7 @@ Compares this address against a string in `user|id` format without allocating.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`str`](#str-3) `const` `inline` |  |
+| `std::string` | [`str`](#str-3) `const` `inline` `override` |  |
 
 ---
 
@@ -5018,11 +5877,13 @@ Compares this address against a string in `user|id` format without allocating.
 
 #### str
 
-`const` `inline`
+`const` `inline` `override`
 
 ```cpp
-inline std::string str(unsigned int id) const
+inline std::string str(unsigned int id) const override
 ```
+
+Defined in src/symple/include/icy/symple/client.h:49
 
 ### Public Types
 
@@ -5039,6 +5900,8 @@ inline std::string str(unsigned int id) const
 ```cpp
 enum Type
 ```
+
+Defined in src/symple/include/icy/symple/client.h:40
 
 | Value | Description |
 |-------|-------------|

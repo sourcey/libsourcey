@@ -48,6 +48,12 @@ ZIP archive handling utilities and related helpers.
 #include <icy/archo/zipfile.h>
 ```
 
+```cpp
+struct ZipFile
+```
+
+Defined in src/archo/include/icy/archo/zipfile.h:35
+
 ZIP archive reader and writer.
 
 ### Public Attributes
@@ -67,6 +73,8 @@ ZIP archive reader and writer.
 std::vector< FileInfo > info
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:104
+
 ---
 
 {#fp}
@@ -77,6 +85,8 @@ std::vector< FileInfo > info
 unzFile fp
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:105
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -86,16 +96,16 @@ unzFile fp
 |  | [`~ZipFile`](#zipfile-3)  | Closes the archive if still open. |
 |  | [`ZipFile`](#zipfile-4)  | Deleted constructor. |
 |  | [`ZipFile`](#zipfile-5)  | Deleted constructor. |
-| `void` | [`open`](#open-5)  | Opens the archive at `file`, closing any previously opened archive. Populates the `info` vector with metadata for every entry. |
-| `bool` | [`opened`](#opened) `const` | Returns true if the archive is currently open. |
+| `void` | [`open`](#open-5)  | Opens the archive at `file`, closing any previously opened archive. Populates the `[info](#info)` vector with metadata for every entry. |
+| `bool` | [`opened`](#opened) `const` `nodiscard` | Returns true if the archive is currently open. |
 | `void` | [`close`](#close-23)  | Closes the archive and releases the underlying file handle. |
 | `void` | [`extract`](#extract)  | Extracts the archive contents to the given directory path. |
-| `bool` | [`extractCurrentFile`](#extractcurrentfile)  | Extracts the current file entry to `path`. Validates each entry against path-traversal attacks before writing. |
-| `bool` | [`goToFirstFile`](#gotofirstfile)  | Moves the internal cursor to the first file entry in the archive. |
-| `bool` | [`goToNextFile`](#gotonextfile)  | Advances the internal cursor to the next file entry. |
+| `bool` | [`extractCurrentFile`](#extractcurrentfile) `nodiscard` | Extracts the current file entry to `path`. Validates each entry against path-traversal attacks before writing. |
+| `bool` | [`goToFirstFile`](#gotofirstfile) `nodiscard` | Moves the internal cursor to the first file entry in the archive. |
+| `bool` | [`goToNextFile`](#gotonextfile) `nodiscard` | Advances the internal cursor to the next file entry. |
 | `void` | [`openCurrentFile`](#opencurrentfile)  | Opens the current file entry for reading. |
 | `void` | [`closeCurrentFile`](#closecurrentfile)  | Closes the current file entry. |
-| `std::string` | [`currentFileName`](#currentfilename)  | Returns the name (relative path) of the current file entry. |
+| `std::string` | [`currentFileName`](#currentfilename) `nodiscard` | Returns the name (relative path) of the current file entry. |
 
 ---
 
@@ -106,6 +116,8 @@ unzFile fp
 ```cpp
 ZipFile()
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:38
 
 Constructs an unopened [ZipFile](#zipfile). Call [open()](#open-5) before use.
 
@@ -121,6 +133,8 @@ Constructs an unopened [ZipFile](#zipfile). Call [open()](#open-5) before use.
 explicit ZipFile(const std::filesystem::path & file)
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:42
+
 Constructs a [ZipFile](#zipfile) and immediately opens the archive at `file`. 
 #### Parameters
 * `file` Path to the ZIP archive to open.
@@ -135,6 +149,8 @@ Constructs a [ZipFile](#zipfile) and immediately opens the archive at `file`.
 ~ZipFile()
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:45
+
 Closes the archive if still open.
 
 ---
@@ -146,6 +162,8 @@ Closes the archive if still open.
 ```cpp
 ZipFile(const ZipFile &) = delete
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:47
 
 Deleted constructor.
 
@@ -159,6 +177,8 @@ Deleted constructor.
 ZipFile(ZipFile &&) = delete
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:49
+
 Deleted constructor.
 
 ---
@@ -171,7 +191,9 @@ Deleted constructor.
 void open(const std::filesystem::path & file)
 ```
 
-Opens the archive at `file`, closing any previously opened archive. Populates the `info` vector with metadata for every entry. 
+Defined in src/archo/include/icy/archo/zipfile.h:56
+
+Opens the archive at `file`, closing any previously opened archive. Populates the `[info](#info)` vector with metadata for every entry. 
 #### Parameters
 * `file` Path to the ZIP archive. 
 
@@ -184,11 +206,13 @@ Opens the archive at `file`, closing any previously opened archive. Populates th
 
 #### opened
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool opened() const
+[[nodiscard]] bool opened() const
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:59
 
 Returns true if the archive is currently open.
 
@@ -202,6 +226,8 @@ Returns true if the archive is currently open.
 void close()
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:62
+
 Closes the archive and releases the underlying file handle.
 
 ---
@@ -213,6 +239,8 @@ Closes the archive and releases the underlying file handle.
 ```cpp
 void extract(const std::filesystem::path & path)
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:67
 
 Extracts the archive contents to the given directory path. 
 #### Parameters
@@ -227,9 +255,13 @@ Extracts the archive contents to the given directory path.
 
 #### extractCurrentFile
 
+`nodiscard`
+
 ```cpp
-bool extractCurrentFile(const std::filesystem::path & path, bool whiny)
+[[nodiscard]] bool extractCurrentFile(const std::filesystem::path & path, bool whiny = true)
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:74
 
 Extracts the current file entry to `path`. Validates each entry against path-traversal attacks before writing. 
 #### Parameters
@@ -246,9 +278,13 @@ true on success, false if `whiny` is false and an error occurred.
 
 #### goToFirstFile
 
+`nodiscard`
+
 ```cpp
-bool goToFirstFile()
+[[nodiscard]] bool goToFirstFile()
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:78
 
 Moves the internal cursor to the first file entry in the archive. 
 #### Returns
@@ -260,9 +296,13 @@ true on success, false if the archive is empty or an error occurred.
 
 #### goToNextFile
 
+`nodiscard`
+
 ```cpp
-bool goToNextFile()
+[[nodiscard]] bool goToNextFile()
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:82
 
 Advances the internal cursor to the next file entry. 
 #### Returns
@@ -278,6 +318,8 @@ true if another entry exists, false at end-of-list.
 void openCurrentFile()
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:86
+
 Opens the current file entry for reading. 
 #### Exceptions
 * `std::runtime_error` on failure.
@@ -292,6 +334,8 @@ Opens the current file entry for reading.
 void closeCurrentFile()
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:90
+
 Closes the current file entry. 
 #### Exceptions
 * `std::runtime_error` on failure.
@@ -302,9 +346,13 @@ Closes the current file entry.
 
 #### currentFileName
 
+`nodiscard`
+
 ```cpp
-std::string currentFileName()
+[[nodiscard]] std::string currentFileName()
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:94
 
 Returns the name (relative path) of the current file entry. 
 #### Returns
@@ -317,6 +365,12 @@ Entry name as reported by the ZIP directory.
 ```cpp
 #include <icy/archo/zipfile.h>
 ```
+
+```cpp
+struct FileInfo
+```
+
+Defined in src/archo/include/icy/archo/zipfile.h:97
 
 Metadata for a file entry within a ZIP archive.
 
@@ -338,6 +392,8 @@ Metadata for a file entry within a ZIP archive.
 std::string path
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:99
+
 Relative path of the entry within the archive.
 
 ---
@@ -350,6 +406,8 @@ Relative path of the entry within the archive.
 size_t compressedSize
 ```
 
+Defined in src/archo/include/icy/archo/zipfile.h:100
+
 Compressed size in bytes.
 
 ---
@@ -361,6 +419,8 @@ Compressed size in bytes.
 ```cpp
 size_t uncompressedSize
 ```
+
+Defined in src/archo/include/icy/archo/zipfile.h:101
 
 Uncompressed size in bytes.
 

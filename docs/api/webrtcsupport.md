@@ -20,6 +20,12 @@ Shared signalling helpers and sample/app adapters layered on top of the core Web
 #include <icy/webrtc/support/wssignaller.h>
 ```
 
+```cpp
+class WebSocketSignaller
+```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:29
+
 > **Inherits:** [`SignallingInterface`](webrtc.md#signallinginterface)
 
 [SignallingInterface](webrtc.md#signallinginterface) implementation using plain JSON over WebSocket.
@@ -40,18 +46,20 @@ Shared signalling helpers and sample/app adapters layered on top of the core Web
 Signal< void(const std::string &)> SendMessage
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:52
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`WebSocketSignaller`](#websocketsignaller-1) `explicit` |  |
 |  | [`WebSocketSignaller`](#websocketsignaller-2)  | Deleted constructor. |
-| `void` | [`sendSdp`](#sendsdp-1) `virtual` | Send an SDP offer or answer to the remote peer. |
-| `void` | [`sendCandidate`](#sendcandidate-1) `virtual` | Send an ICE candidate to the remote peer. |
-| `void` | [`sendControl`](#sendcontrol-1) `virtual` | Send a control message to the remote peer. |
+| `void` | [`sendSdp`](#sendsdp-1) `virtual` `override` | Send an SDP offer or answer to the remote peer. |
+| `void` | [`sendCandidate`](#sendcandidate-1) `virtual` `override` | Send an ICE candidate to the remote peer. |
+| `void` | [`sendControl`](#sendcontrol-1) `virtual` `override` | Send a control message to the remote peer. |
 | `void` | [`receive`](#receive)  |  |
 | `void` | [`setLocalPeerId`](#setlocalpeerid) `inline` |  |
-| `const std::string &` | [`localPeerId`](#localpeerid) `const` `inline` |  |
+| `const std::string &` | [`localPeerId`](#localpeerid) `const` `inline` `nodiscard` |  |
 
 ---
 
@@ -62,8 +70,10 @@ Signal< void(const std::string &)> SendMessage
 `explicit`
 
 ```cpp
-explicit WebSocketSignaller(const std::string & localPeerId)
+explicit WebSocketSignaller(const std::string & localPeerId = {})
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:32
 
 ---
 
@@ -75,6 +85,8 @@ explicit WebSocketSignaller(const std::string & localPeerId)
 WebSocketSignaller(const WebSocketSignaller &) = delete
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:35
+
 Deleted constructor.
 
 ---
@@ -83,11 +95,13 @@ Deleted constructor.
 
 #### sendSdp
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp)
+virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:38
 
 Send an SDP offer or answer to the remote peer. 
 #### Parameters
@@ -103,11 +117,13 @@ Send an SDP offer or answer to the remote peer.
 
 #### sendCandidate
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid)
+virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:42
 
 Send an ICE candidate to the remote peer. 
 #### Parameters
@@ -123,11 +139,13 @@ Send an ICE candidate to the remote peer.
 
 #### sendControl
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason)
+virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason = {}) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:46
 
 Send a control message to the remote peer. 
 #### Parameters
@@ -147,6 +165,8 @@ Send a control message to the remote peer.
 void receive(const std::string & json)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:50
+
 ---
 
 {#setlocalpeerid}
@@ -159,17 +179,21 @@ void receive(const std::string & json)
 inline void setLocalPeerId(const std::string & id)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:54
+
 ---
 
 {#localpeerid}
 
 #### localPeerId
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & localPeerId() const
+[[nodiscard]] inline const std::string & localPeerId() const
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:55
 
 ### Private Attributes
 
@@ -188,6 +212,8 @@ inline const std::string & localPeerId() const
 std::string _localPeerId
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:60
+
 ---
 
 {#_mutex-21}
@@ -197,6 +223,8 @@ std::string _localPeerId
 ```cpp
 std::mutex _mutex
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:61
 
 ### Private Methods
 
@@ -214,6 +242,8 @@ std::mutex _mutex
 void sendJson(const json::Value & msg)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/wssignaller.h:58
+
 {#symplesignaller}
 
 ## SympleSignaller
@@ -221,6 +251,12 @@ void sendJson(const json::Value & msg)
 ```cpp
 #include <icy/webrtc/support/symplesignaller.h>
 ```
+
+```cpp
+class SympleSignaller
+```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:34
 
 > **Inherits:** [`SignallingInterface`](webrtc.md#signallinginterface)
 
@@ -236,9 +272,9 @@ The remote peer identifier on this signalling boundary is the full Symple addres
 |--------|------|-------------|
 |  | [`SympleSignaller`](#symplesignaller-1) `explicit` |  |
 |  | [`SympleSignaller`](#symplesignaller-2)  | Deleted constructor. |
-| `void` | [`sendSdp`](#sendsdp-2) `virtual` | Send an SDP offer or answer to the remote peer. |
-| `void` | [`sendCandidate`](#sendcandidate-2) `virtual` | Send an ICE candidate to the remote peer. |
-| `void` | [`sendControl`](#sendcontrol-2) `virtual` | Send a control message to the remote peer. |
+| `void` | [`sendSdp`](#sendsdp-2) `virtual` `override` | Send an SDP offer or answer to the remote peer. |
+| `void` | [`sendCandidate`](#sendcandidate-2) `virtual` `override` | Send an ICE candidate to the remote peer. |
+| `void` | [`sendControl`](#sendcontrol-2) `virtual` `override` | Send a control message to the remote peer. |
 
 ---
 
@@ -252,6 +288,8 @@ The remote peer identifier on this signalling boundary is the full Symple addres
 explicit SympleSignaller(smpl::Client & client)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:37
+
 ---
 
 {#symplesignaller-2}
@@ -262,6 +300,8 @@ explicit SympleSignaller(smpl::Client & client)
 SympleSignaller(const SympleSignaller &) = delete
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:40
+
 Deleted constructor.
 
 ---
@@ -270,11 +310,13 @@ Deleted constructor.
 
 #### sendSdp
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp)
+virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:43
 
 Send an SDP offer or answer to the remote peer. 
 #### Parameters
@@ -290,11 +332,13 @@ Send an SDP offer or answer to the remote peer.
 
 #### sendCandidate
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid)
+virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:47
 
 Send an ICE candidate to the remote peer. 
 #### Parameters
@@ -310,11 +354,13 @@ Send an ICE candidate to the remote peer.
 
 #### sendControl
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason)
+virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason = {}) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:51
 
 Send a control message to the remote peer. 
 #### Parameters
@@ -340,6 +386,8 @@ Send a control message to the remote peer.
 smpl::Client & _client
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:61
+
 ### Private Methods
 
 | Return | Name | Description |
@@ -357,6 +405,8 @@ smpl::Client & _client
 void onMessage(smpl::Message & msg)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:56
+
 ---
 
 {#send-20}
@@ -364,8 +414,10 @@ void onMessage(smpl::Message & msg)
 #### send
 
 ```cpp
-void send(const std::string & action, const std::string & to, const json::Value & data)
+void send(const std::string & action, const std::string & to, const json::Value & data = {})
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/symplesignaller.h:57
 
 {#sympleserversignaller}
 
@@ -375,11 +427,17 @@ void send(const std::string & action, const std::string & to, const json::Value 
 #include <icy/webrtc/support/sympleserversignaller.h>
 ```
 
+```cpp
+class SympleServerSignaller
+```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:39
+
 > **Inherits:** [`SignallingInterface`](webrtc.md#signallinginterface)
 
 Server-side Symple signaller for virtual peers and embedded apps.
 
-This adapter sends signalling messages through a `[smpl::Server](symple.md#server-9)` on behalf of a local virtual peer address, and accepts inbound Symple call messages through `[onMessage()](#onmessage-2)`.
+This adapter sends signalling messages through a `[smpl::Server](symple.md#server-10)` on behalf of a local virtual peer address, and accepts inbound Symple call messages through `[onMessage()](#onmessage-2)`.
 
 The remote peer identifier on this signalling boundary is the full Symple address string (`user|id`).
 
@@ -389,13 +447,13 @@ The remote peer identifier on this signalling boundary is the full Symple addres
 |--------|------|-------------|
 |  | [`SympleServerSignaller`](#sympleserversignaller-1)  |  |
 |  | [`SympleServerSignaller`](#sympleserversignaller-2)  | Deleted constructor. |
-| `void` | [`sendSdp`](#sendsdp-3) `virtual` | Send an SDP offer or answer to the remote peer. |
-| `void` | [`sendCandidate`](#sendcandidate-3) `virtual` | Send an ICE candidate to the remote peer. |
-| `void` | [`sendControl`](#sendcontrol-3) `virtual` | Send a control message to the remote peer. |
+| `void` | [`sendSdp`](#sendsdp-3) `virtual` `override` | Send an SDP offer or answer to the remote peer. |
+| `void` | [`sendCandidate`](#sendcandidate-3) `virtual` `override` | Send an ICE candidate to the remote peer. |
+| `void` | [`sendControl`](#sendcontrol-3) `virtual` `override` | Send a control message to the remote peer. |
 | `void` | [`onMessage`](#onmessage-2)  |  |
 | `void` | [`setRemoteAddress`](#setremoteaddress)  |  |
-| `const std::string &` | [`localAddress`](#localaddress-1) `const` `inline` |  |
-| `const std::string &` | [`remoteAddress`](#remoteaddress-1) `const` `inline` |  |
+| `const std::string &` | [`localAddress`](#localaddress-1) `const` `inline` `nodiscard` |  |
+| `const std::string &` | [`remoteAddress`](#remoteaddress-1) `const` `inline` `nodiscard` |  |
 
 ---
 
@@ -404,8 +462,10 @@ The remote peer identifier on this signalling boundary is the full Symple addres
 #### SympleServerSignaller
 
 ```cpp
-SympleServerSignaller(smpl::Server & server, std::string localAddress, std::string remoteAddress)
+SympleServerSignaller(smpl::Server & server, std::string localAddress, std::string remoteAddress = {})
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:42
 
 ---
 
@@ -417,6 +477,8 @@ SympleServerSignaller(smpl::Server & server, std::string localAddress, std::stri
 SympleServerSignaller(const SympleServerSignaller &) = delete
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:47
+
 Deleted constructor.
 
 ---
@@ -425,11 +487,13 @@ Deleted constructor.
 
 #### sendSdp
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp)
+virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:50
 
 Send an SDP offer or answer to the remote peer. 
 #### Parameters
@@ -445,11 +509,13 @@ Send an SDP offer or answer to the remote peer.
 
 #### sendCandidate
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid)
+virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:54
 
 Send an ICE candidate to the remote peer. 
 #### Parameters
@@ -465,11 +531,13 @@ Send an ICE candidate to the remote peer.
 
 #### sendControl
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason)
+virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason = {}) override
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:58
 
 Send a control message to the remote peer. 
 #### Parameters
@@ -489,6 +557,8 @@ Send a control message to the remote peer.
 void onMessage(const json::Value & msg)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:62
+
 ---
 
 {#setremoteaddress}
@@ -499,17 +569,21 @@ void onMessage(const json::Value & msg)
 void setRemoteAddress(std::string remoteAddress)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:64
+
 ---
 
 {#localaddress-1}
 
 #### localAddress
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & localAddress() const
+[[nodiscard]] inline const std::string & localAddress() const
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:65
 
 ---
 
@@ -517,11 +591,13 @@ inline const std::string & localAddress() const
 
 #### remoteAddress
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & remoteAddress() const
+[[nodiscard]] inline const std::string & remoteAddress() const
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:66
 
 ### Private Attributes
 
@@ -545,6 +621,8 @@ inline const std::string & remoteAddress() const
 smpl::Server & _server
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:81
+
 ---
 
 {#_localaddress}
@@ -554,6 +632,8 @@ smpl::Server & _server
 ```cpp
 std::string _localAddress
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:82
 
 ---
 
@@ -565,6 +645,8 @@ std::string _localAddress
 std::string _remoteAddress
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:83
+
 ---
 
 {#_dispatch-1}
@@ -574,6 +656,8 @@ std::string _remoteAddress
 ```cpp
 Synchronizer _dispatch
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:84
 
 ---
 
@@ -585,6 +669,8 @@ Synchronizer _dispatch
 std::mutex _mutex
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:85
+
 ---
 
 {#_pending-1}
@@ -595,6 +681,8 @@ std::mutex _mutex
 std::deque< OutboundMessage > _pending
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:86
+
 ---
 
 {#_closing}
@@ -604,6 +692,8 @@ std::deque< OutboundMessage > _pending
 ```cpp
 bool _closing = false
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:87
 
 ### Private Methods
 
@@ -620,8 +710,10 @@ bool _closing = false
 #### send
 
 ```cpp
-void send(const std::string & action, const std::string & to, const json::Value & data)
+void send(const std::string & action, const std::string & to, const json::Value & data = {})
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:75
 
 ---
 
@@ -633,6 +725,8 @@ void send(const std::string & action, const std::string & to, const json::Value 
 bool sendNow(const std::string & to, const json::Value & msg)
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:78
+
 ---
 
 {#flushpending-1}
@@ -643,9 +737,17 @@ bool sendNow(const std::string & to, const json::Value & msg)
 void flushPending()
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:79
+
 {#outboundmessage}
 
 ## OutboundMessage
+
+```cpp
+struct OutboundMessage
+```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:69
 
 ### Public Attributes
 
@@ -664,6 +766,8 @@ void flushPending()
 std::string peerAddress
 ```
 
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:71
+
 ---
 
 {#msg}
@@ -673,4 +777,6 @@ std::string peerAddress
 ```cpp
 json::Value msg
 ```
+
+Defined in src/webrtc/support/include/icy/webrtc/support/sympleserversignaller.h:72
 

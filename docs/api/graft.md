@@ -20,14 +20,14 @@ Shared-library plugin contracts and runtime loading helpers.
 
 | Name | Description |
 |------|-------------|
-| [`Library`](#library) |  |
-| [`Manifest`](#manifest-4) |  |
+| [`Library`](#library) | Loads a native plugin library and resolves its typed entrypoint. |
+| [`Manifest`](#manifest-3) | Metadata exported by a plugin under `icy_graft_manifest`. |
 
 ### Enumerations
 
 | Name | Description |
 |------|-------------|
-| [`RuntimeKind`](#runtimekind)  |  |
+| [`RuntimeKind`](#runtimekind)  | Runtime contract declared by a plugin manifest. |
 
 ---
 
@@ -39,19 +39,21 @@ Shared-library plugin contracts and runtime loading helpers.
 enum RuntimeKind
 ```
 
+Runtime contract declared by a plugin manifest.
+
 | Value | Description |
 |-------|-------------|
-| `Unknown` |  |
-| `Native` |  |
-| `Worker` |  |
+| `Unknown` | Runtime string is missing or not recognized. |
+| `Native` | Plugin is loaded directly into the host process. |
+| `Worker` | Plugin is intended for a worker runtime. |
 
 ### Functions
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `Graft_APIRuntimeKind` | [`parseRuntimeKind`](#parseruntimekind)  |  |
-| `Graft_API const char *` | [`runtimeKindName`](#runtimekindname)  |  |
-| `Graft_API void` | [`validateManifest`](#validatemanifest)  |  |
+| `Graft_APIRuntimeKind` | [`parseRuntimeKind`](#parseruntimekind) `nodiscard` `noexcept` | Converts a manifest runtime string to a `[RuntimeKind](#runtimekind)`. |
+| `Graft_API const char *` | [`runtimeKindName`](#runtimekindname) `nodiscard` `noexcept` | Returns the manifest runtime string for a `[RuntimeKind](#runtimekind)`. |
+| `Graft_API void` | [`validateManifest`](#validatemanifest)  | Throws when a manifest is incompatible or missing required fields. |
 
 ---
 
@@ -59,9 +61,13 @@ enum RuntimeKind
 
 #### parseRuntimeKind
 
+`nodiscard` `noexcept`
+
 ```cpp
-Graft_APIRuntimeKind parseRuntimeKind(std::string_view runtime) noexcept
+[[nodiscard]] Graft_APIRuntimeKind parseRuntimeKind(std::string_view runtime) noexcept
 ```
+
+Converts a manifest runtime string to a `[RuntimeKind](#runtimekind)`.
 
 ---
 
@@ -69,9 +75,13 @@ Graft_APIRuntimeKind parseRuntimeKind(std::string_view runtime) noexcept
 
 #### runtimeKindName
 
+`nodiscard` `noexcept`
+
 ```cpp
-Graft_API const char * runtimeKindName(RuntimeKind runtime) noexcept
+[[nodiscard]] Graft_API const char * runtimeKindName(RuntimeKind runtime) noexcept
 ```
+
+Returns the manifest runtime string for a `[RuntimeKind](#runtimekind)`.
 
 ---
 
@@ -83,14 +93,16 @@ Graft_API const char * runtimeKindName(RuntimeKind runtime) noexcept
 Graft_API void validateManifest(const Manifest & manifest, std::string_view path)
 ```
 
+Throws when a manifest is incompatible or missing required fields.
+
 ### Variables
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr std::uint32_t` | [`ABI_VERSION`](#abi_version)  |  |
-| `constexpr const char *` | [`MANIFEST_SYMBOL`](#manifest_symbol)  |  |
-| `constexpr const char *` | [`RUNTIME_NATIVE`](#runtime_native)  |  |
-| `constexpr const char *` | [`RUNTIME_WORKER`](#runtime_worker)  |  |
+| `std::uint32_t` | [`ABI_VERSION`](#abi_version) `constexpr` | Current binary manifest ABI version required by the loader. |
+| `const char *` | [`MANIFEST_SYMBOL`](#manifest_symbol) `constexpr` | Exported symbol name that plugins use for their manifest. |
+| `const char *` | [`RUNTIME_NATIVE`](#runtime_native) `constexpr` | Runtime string for plugins loaded directly into the current process. |
+| `const char *` | [`RUNTIME_WORKER`](#runtime_worker) `constexpr` | Runtime string for plugins intended to execute in a worker runtime. |
 
 ---
 
@@ -98,9 +110,13 @@ Graft_API void validateManifest(const Manifest & manifest, std::string_view path
 
 #### ABI_VERSION
 
+`constexpr`
+
 ```cpp
-constexpr std::uint32_t ABI_VERSION = 1
+std::uint32_t ABI_VERSION = 1
 ```
+
+Current binary manifest ABI version required by the loader.
 
 ---
 
@@ -108,9 +124,13 @@ constexpr std::uint32_t ABI_VERSION = 1
 
 #### MANIFEST_SYMBOL
 
+`constexpr`
+
 ```cpp
-constexpr const char * MANIFEST_SYMBOL = "icy_graft_manifest"
+const char * MANIFEST_SYMBOL = "icy_graft_manifest"
 ```
+
+Exported symbol name that plugins use for their manifest.
 
 ---
 
@@ -118,9 +138,13 @@ constexpr const char * MANIFEST_SYMBOL = "icy_graft_manifest"
 
 #### RUNTIME_NATIVE
 
+`constexpr`
+
 ```cpp
-constexpr const char * RUNTIME_NATIVE = "native"
+const char * RUNTIME_NATIVE = "native"
 ```
+
+Runtime string for plugins loaded directly into the current process.
 
 ---
 
@@ -128,9 +152,13 @@ constexpr const char * RUNTIME_NATIVE = "native"
 
 #### RUNTIME_WORKER
 
+`constexpr`
+
 ```cpp
-constexpr const char * RUNTIME_WORKER = "worker"
+const char * RUNTIME_WORKER = "worker"
 ```
+
+Runtime string for plugins intended to execute in a worker runtime.
 
 {#library}
 
@@ -140,6 +168,14 @@ constexpr const char * RUNTIME_WORKER = "worker"
 #include <icy/graft/graft.h>
 ```
 
+```cpp
+class Library
+```
+
+Defined in src/graft/include/icy/graft/graft.h:90
+
+Loads a native plugin library and resolves its typed entrypoint.
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -148,13 +184,13 @@ constexpr const char * RUNTIME_WORKER = "worker"
 |  | [`Library`](#library-2)  | Deleted constructor. |
 |  | [`Library`](#library-3)  | Deleted constructor. |
 | `void` | [`open`](#open-6)  |  |
-| `void` | [`close`](#close-24)  |  |
-| `bool` | [`isOpen`](#isopen) `const` |  |
-| `const std::string &` | [`path`](#path-3) `const` |  |
-| `const Manifest &` | [`manifest`](#manifest-3) `const` |  |
-| `void *` | [`requireSymbolAddress`](#requiresymboladdress) `const` |  |
-| `T` | [`requireSymbol`](#requiresymbol) `const` `inline` |  |
-| `T` | [`entrypoint`](#entrypoint-1) `const` `inline` |  |
+| `void` | [`close`](#close-24) `noexcept` |  |
+| `bool` | [`isOpen`](#isopen) `const` `nodiscard` `noexcept` |  |
+| `const std::string &` | [`path`](#path-3) `const` `nodiscard` `noexcept` |  |
+| `const Manifest &` | [`manifest`](#manifest-4) `const` `nodiscard` |  |
+| `void *` | [`requireSymbolAddress`](#requiresymboladdress) `const` `nodiscard` |  |
+| `T` | [`requireSymbol`](#requiresymbol) `const` `inline` `nodiscard` |  |
+| `T` | [`entrypoint`](#entrypoint-2) `const` `inline` `nodiscard` |  |
 
 ---
 
@@ -165,6 +201,8 @@ constexpr const char * RUNTIME_WORKER = "worker"
 ```cpp
 Library() = default
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:93
 
 Defaulted constructor.
 
@@ -178,6 +216,8 @@ Defaulted constructor.
 Library(const Library &) = delete
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:96
+
 Deleted constructor.
 
 ---
@@ -189,6 +229,8 @@ Deleted constructor.
 ```cpp
 Library(Library &&) = delete
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:98
 
 Deleted constructor.
 
@@ -202,15 +244,21 @@ Deleted constructor.
 void open(const std::string & path)
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:101
+
 ---
 
 {#close-24}
 
 #### close
 
+`noexcept`
+
 ```cpp
 void close() noexcept
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:102
 
 ---
 
@@ -218,11 +266,13 @@ void close() noexcept
 
 #### isOpen
 
-`const`
+`const` `nodiscard` `noexcept`
 
 ```cpp
-bool isOpen() const noexcept
+[[nodiscard]] bool isOpen() const noexcept
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:104
 
 ---
 
@@ -230,23 +280,27 @@ bool isOpen() const noexcept
 
 #### path
 
-`const`
+`const` `nodiscard` `noexcept`
 
 ```cpp
-const std::string & path() const noexcept
+[[nodiscard]] const std::string & path() const noexcept
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:105
 
 ---
 
-{#manifest-3}
+{#manifest-4}
 
 #### manifest
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const Manifest & manifest() const
+[[nodiscard]] const Manifest & manifest() const
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:106
 
 ---
 
@@ -254,11 +308,13 @@ const Manifest & manifest() const
 
 #### requireSymbolAddress
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-void * requireSymbolAddress(const char * name) const
+[[nodiscard]] void * requireSymbolAddress(const char * name) const
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:108
 
 ---
 
@@ -266,23 +322,27 @@ void * requireSymbolAddress(const char * name) const
 
 #### requireSymbol
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-template<typename T> inline T requireSymbol(const char * name) const
+template<typename T> [[nodiscard]] inline T requireSymbol(const char * name) const
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:111
 
 ---
 
-{#entrypoint-1}
+{#entrypoint-2}
 
 #### entrypoint
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-template<typename T> inline T entrypoint() const
+template<typename T> [[nodiscard]] inline T entrypoint() const
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:117
 
 ### Private Attributes
 
@@ -303,6 +363,8 @@ template<typename T> inline T entrypoint() const
 SharedLibrary _library
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:125
+
 ---
 
 {#_path-4}
@@ -312,6 +374,8 @@ SharedLibrary _library
 ```cpp
 std::string _path
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:126
 
 ---
 
@@ -323,6 +387,8 @@ std::string _path
 const Manifest * _manifest = nullptr
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:127
+
 ---
 
 {#_open}
@@ -332,6 +398,8 @@ const Manifest * _manifest = nullptr
 ```cpp
 bool _open = false
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:128
 
 ### Private Methods
 
@@ -349,7 +417,9 @@ bool _open = false
 void loadManifest()
 ```
 
-{#manifest-4}
+Defined in src/graft/include/icy/graft/graft.h:123
+
+{#manifest-3}
 
 ## Manifest
 
@@ -357,17 +427,25 @@ void loadManifest()
 #include <icy/graft/graft.h>
 ```
 
+```cpp
+struct Manifest
+```
+
+Defined in src/graft/include/icy/graft/graft.h:70
+
+Metadata exported by a plugin under `icy_graft_manifest`.
+
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::uint32_t` | [`abiVersion`](#abiversion-1)  |  |
-| `const char *` | [`fileName`](#filename-3)  |  |
-| `const char *` | [`id`](#id-4)  |  |
-| `const char *` | [`name`](#name-8)  |  |
-| `const char *` | [`version`](#version-6)  |  |
-| `const char *` | [`runtime`](#runtime-1)  |  |
-| `const char *` | [`entrypoint`](#entrypoint-2)  |  |
+| `std::uint32_t` | [`abiVersion`](#abiversion-1)  | ABI version expected to match `[ABI_VERSION](#abi_version)`. |
+| `const char *` | [`fileName`](#filename-3)  | Source file that declared the manifest. |
+| `const char *` | [`id`](#id-4)  | Stable plugin identifier. |
+| `const char *` | [`name`](#name-8)  | Human-readable plugin name. |
+| `const char *` | [`version`](#version-6)  | Plugin version string. |
+| `const char *` | [`runtime`](#runtime-1)  | Runtime contract string, such as `native` or `worker`. |
+| `const char *` | [`entrypoint`](#entrypoint-1)  | Exported symbol name for the plugin entrypoint. |
 
 ---
 
@@ -379,6 +457,10 @@ void loadManifest()
 std::uint32_t abiVersion
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:73
+
+ABI version expected to match `[ABI_VERSION](#abi_version)`.
+
 ---
 
 {#filename-3}
@@ -388,6 +470,10 @@ std::uint32_t abiVersion
 ```cpp
 const char * fileName
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:75
+
+Source file that declared the manifest.
 
 ---
 
@@ -399,6 +485,10 @@ const char * fileName
 const char * id
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:77
+
+Stable plugin identifier.
+
 ---
 
 {#name-8}
@@ -408,6 +498,10 @@ const char * id
 ```cpp
 const char * name
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:79
+
+Human-readable plugin name.
 
 ---
 
@@ -419,6 +513,10 @@ const char * name
 const char * version
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:81
+
+Plugin version string.
+
 ---
 
 {#runtime-1}
@@ -429,13 +527,21 @@ const char * version
 const char * runtime
 ```
 
+Defined in src/graft/include/icy/graft/graft.h:83
+
+Runtime contract string, such as `native` or `worker`.
+
 ---
 
-{#entrypoint-2}
+{#entrypoint-1}
 
 #### entrypoint
 
 ```cpp
 const char * entrypoint
 ```
+
+Defined in src/graft/include/icy/graft/graft.h:85
+
+Exported symbol name for the plugin entrypoint.
 

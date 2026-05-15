@@ -25,11 +25,11 @@ HTTP request/response types, parsers, and server/client helpers.
 | [`BasicAuthenticator`](#basicauthenticator) | Encodes and decodes HTTP Basic authentication credentials. |
 | [`ChunkedAdapter`](#chunkedadapter) | HTTP chunked transfer encoding adapter for streaming responses. |
 | [`Client`](#client) | HTTP client for creating and managing outgoing connections. |
-| [`ClientConnection`](#clientconnection) | HTTP client connection for managing request/response lifecycle. |
+| [`ClientConnection`](#clientconnection-1) | HTTP client connection for managing request/response lifecycle. |
 | [`Connection`](#connection-1) | Base HTTP connection managing socket I/O and message lifecycle |
-| [`ConnectionAdapter`](#connectionadapter) | Default HTTP socket adapter for reading and writing HTTP messages |
-| [`ConnectionPool`](#connectionpool) | LIFO connection pool for reusing [ServerConnection](#serverconnection) objects. Avoids per-request heap allocation by resetting and reusing connections instead of destroying and recreating them. |
-| [`ConnectionStream`](#connectionstream) | Packet stream wrapper for an HTTP connection. |
+| [`ConnectionAdapter`](#connectionadapter-1) | Default HTTP socket adapter for reading and writing HTTP messages |
+| [`ConnectionPool`](#connectionpool) | LIFO connection pool for reusing [ServerConnection](#serverconnection-1) objects. Avoids per-request heap allocation by resetting and reusing connections instead of destroying and recreating them. |
+| [`ConnectionStream`](#connectionstream-1) | Packet stream wrapper for an HTTP connection. |
 | [`Cookie`](#cookie) | HTTP cookie value plus its response/header attributes. |
 | [`FilePart`](#filepart) | Form part backed by a file on disk. |
 | [`FormPart`](#formpart) | An implementation of [FormPart](#formpart). |
@@ -42,13 +42,14 @@ HTTP request/response types, parsers, and server/client helpers.
 | [`Request`](#request-4) | HTTP request message with method, URI, headers, and optional body. |
 | [`Response`](#response-1) | HTTP response message with status, reason phrase, headers, and body metadata. |
 | [`Server`](#server) | HTTP server implementation. |
-| [`ServerConnection`](#serverconnection) | HTTP server connection. |
-| [`ServerConnectionFactory`](#serverconnectionfactory) | Factory for creating per-socket `[ServerConnection](#serverconnection)` and per-request `[ServerResponder](#serverresponder)` objects. |
+| [`ServerConnection`](#serverconnection-1) | HTTP server connection. |
+| [`ServerConnectionFactory`](#serverconnectionfactory) | Factory for creating per-socket `[ServerConnection](#serverconnection-1)` and per-request `[ServerResponder](#serverresponder)` objects. |
 | [`ServerResponder`](#serverresponder) | Base responder interface for handling one HTTP request on a server connection. Derived classes typically override `[onRequest()](#onrequest)` and optionally the streaming hooks. |
-| [`StringPart`](#stringpart) | Form part backed by an in-memory string payload. |
+| [`StringPart`](#stringpart-1) | Form part backed by an in-memory string payload. |
 | [`URL`](#url) | An RFC 3986 based [URL](#url) parser. Constructors and assignment operators will throw a SyntaxException if the [URL](#url) is invalid. |
 | [`DateCache`](#datecache) | Caches the formatted Date header, updated once per second. Avoids per-request time formatting and string allocation. |
 | [`Method`](#method) | HTTP request methods. |
+| [`StaticFileInfo`](#staticfileinfo) | Metadata needed to serve a static file with HTTP validators. |
 
 ### Enumerations
 
@@ -167,7 +168,7 @@ Transport mode for server connections before and after protocol upgrade.
 #### ClientConnectionPtrVec
 
 ```cpp
-std::vector< ClientConnection::Ptr > ClientConnectionPtrVec()
+using ClientConnectionPtrVec = std::vector< ClientConnection::Ptr >
 ```
 
 List of owned client connections tracked by an HTTP client.
@@ -176,18 +177,20 @@ List of owned client connections tracked by an HTTP client.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`isBasicCredentials`](#isbasiccredentials)  | Returns true if the given Authorization header value uses HTTP Basic authentication. |
-| `bool` | [`isDigestCredentials`](#isdigestcredentials)  | Returns true if the given Authorization header value uses HTTP Digest authentication. |
-| `bool` | [`hasBasicCredentials`](#hasbasiccredentials)  | Returns true if the request contains a Basic Authorization header. |
-| `bool` | [`hasDigestCredentials`](#hasdigestcredentials)  | Returns true if the request contains a Digest Authorization header. |
-| `bool` | [`hasProxyBasicCredentials`](#hasproxybasiccredentials)  | Returns true if the request contains a Basic Proxy-Authorization header. |
-| `bool` | [`hasProxyDigestCredentials`](#hasproxydigestcredentials)  | Returns true if the request contains a Digest Proxy-Authorization header. |
+| `bool` | [`isBasicCredentials`](#isbasiccredentials) `nodiscard` | Returns true if the given Authorization header value uses HTTP Basic authentication. |
+| `bool` | [`isDigestCredentials`](#isdigestcredentials) `nodiscard` | Returns true if the given Authorization header value uses HTTP Digest authentication. |
+| `bool` | [`hasBasicCredentials`](#hasbasiccredentials) `nodiscard` | Returns true if the request contains a Basic Authorization header. |
+| `bool` | [`hasDigestCredentials`](#hasdigestcredentials) `nodiscard` | Returns true if the request contains a Digest Authorization header. |
+| `bool` | [`hasProxyBasicCredentials`](#hasproxybasiccredentials) `nodiscard` | Returns true if the request contains a Basic Proxy-Authorization header. |
+| `bool` | [`hasProxyDigestCredentials`](#hasproxydigestcredentials) `nodiscard` | Returns true if the request contains a Digest Proxy-Authorization header. |
 | `void` | [`extractCredentials`](#extractcredentials)  | Splits a "user:password" user-info string into separate username and password strings. If no ':' is present, the entire string is treated as the username and password is empty. |
 | `void` | [`extractCredentials`](#extractcredentials-1)  | Extracts username and password from the user-info component of a [URL](#url). Does nothing if the [URL](#url) has no user-info part. |
-| `ClientConnection::Ptr` | [`createConnectionT`](#createconnectiont) `inline` | Creates a [ClientConnection](#clientconnection) (or subtype) for the given [URL](#url) without registering it with a [Client](#client) instance. The socket and adapter are chosen based on the [URL](#url) scheme: |
-| `ClientConnection::Ptr` | [`createConnection`](#createconnection) `inline` | Creates a [ClientConnection](#clientconnection) for the given [URL](#url) and optionally registers it with a [Client](#client). Equivalent to calling [Client::createConnection()](#createconnection-1) when `client` is non-null. |
-| `const char *` | [`getStatusCodeReason`](#getstatuscodereason)  | Returns the standard reason phrase for the given HTTP status code (e.g. "OK" for [StatusCode::OK](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4ae0aa021e21dddbd6d8cecec71e9cf564), "Not Found" for [StatusCode::NotFound](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4a38c300f4fc9ce8a77aad4a30de05cad8)). |
-| `const char *` | [`getStatusCodeString`](#getstatuscodestring)  | Returns a combined "NNN Reason" string for the given HTTP status code (e.g. "200 OK"). |
+| `ClientConnection::Ptr` | [`createConnectionT`](#createconnectiont) `inline` | Creates a [ClientConnection](#clientconnection-1) (or subtype) for the given [URL](#url) without registering it with a [Client](#client) instance. The socket and adapter are chosen based on the [URL](#url) scheme: |
+| `ClientConnection::Ptr` | [`createConnection`](#createconnection) `inline` | Creates a [ClientConnection](#clientconnection-1) for the given [URL](#url) and optionally registers it with a [Client](#client). Equivalent to calling [Client::createConnection()](#createconnection-1) when `client` is non-null. |
+| `const char *` | [`getStatusCodeReason`](#getstatuscodereason) `nodiscard` | Returns the standard reason phrase for the given HTTP status code (e.g. "OK" for [StatusCode::OK](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4ae0aa021e21dddbd6d8cecec71e9cf564), "Not Found" for [StatusCode::NotFound](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4a38c300f4fc9ce8a77aad4a30de05cad8)). |
+| `const char *` | [`getStatusCodeString`](#getstatuscodestring) `nodiscard` | Returns a combined "NNN Reason" string for the given HTTP status code (e.g. "200 OK"). |
+| `bool` | [`statStaticFile`](#statstaticfile)  | Read static-file metadata from disk. |
+| `bool` | [`prepareStaticFileResponse`](#preparestaticfileresponse)  | Apply static-file headers and request conditionals to the response. |
 | `std::string` | [`parseURI`](#parseuri)  | Extracts the URI (path and query) from a raw HTTP request line. |
 | `bool` | [`matchURL`](#matchurl)  | Tests whether a URI matches a glob-style expression. |
 | `std::string` | [`parseCookieItem`](#parsecookieitem)  | Extracts a named attribute from a [Cookie](#cookie) header value. |
@@ -201,8 +204,10 @@ List of owned client connections tracked by an HTTP client.
 
 #### isBasicCredentials
 
+`nodiscard`
+
 ```cpp
-bool isBasicCredentials(std::string_view header)
+[[nodiscard]] bool isBasicCredentials(std::string_view header)
 ```
 
 Returns true if the given Authorization header value uses HTTP Basic authentication. 
@@ -215,8 +220,10 @@ Returns true if the given Authorization header value uses HTTP Basic authenticat
 
 #### isDigestCredentials
 
+`nodiscard`
+
 ```cpp
-bool isDigestCredentials(std::string_view header)
+[[nodiscard]] bool isDigestCredentials(std::string_view header)
 ```
 
 Returns true if the given Authorization header value uses HTTP Digest authentication. 
@@ -229,8 +236,10 @@ Returns true if the given Authorization header value uses HTTP Digest authentica
 
 #### hasBasicCredentials
 
+`nodiscard`
+
 ```cpp
-bool hasBasicCredentials(const http::Request & request)
+[[nodiscard]] bool hasBasicCredentials(const http::Request & request)
 ```
 
 Returns true if the request contains a Basic Authorization header. 
@@ -243,8 +252,10 @@ Returns true if the request contains a Basic Authorization header.
 
 #### hasDigestCredentials
 
+`nodiscard`
+
 ```cpp
-bool hasDigestCredentials(const http::Request & request)
+[[nodiscard]] bool hasDigestCredentials(const http::Request & request)
 ```
 
 Returns true if the request contains a Digest Authorization header. 
@@ -257,8 +268,10 @@ Returns true if the request contains a Digest Authorization header.
 
 #### hasProxyBasicCredentials
 
+`nodiscard`
+
 ```cpp
-bool hasProxyBasicCredentials(const http::Request & request)
+[[nodiscard]] bool hasProxyBasicCredentials(const http::Request & request)
 ```
 
 Returns true if the request contains a Basic Proxy-Authorization header. 
@@ -271,8 +284,10 @@ Returns true if the request contains a Basic Proxy-Authorization header.
 
 #### hasProxyDigestCredentials
 
+`nodiscard`
+
 ```cpp
-bool hasProxyDigestCredentials(const http::Request & request)
+[[nodiscard]] bool hasProxyDigestCredentials(const http::Request & request)
 ```
 
 Returns true if the request contains a Digest Proxy-Authorization header. 
@@ -324,10 +339,10 @@ Extracts username and password from the user-info component of a [URL](#url). Do
 `inline`
 
 ```cpp
-template<class ConnectionT> inline ClientConnection::Ptr createConnectionT(const URL & url, uv::Loop * loop)
+template<class ConnectionT> inline ClientConnection::Ptr createConnectionT(const URL & url, uv::Loop * loop = uv::defaultLoop())
 ```
 
-Creates a [ClientConnection](#clientconnection) (or subtype) for the given [URL](#url) without registering it with a [Client](#client) instance. The socket and adapter are chosen based on the [URL](#url) scheme:
+Creates a [ClientConnection](#clientconnection-1) (or subtype) for the given [URL](#url) without registering it with a [Client](#client) instance. The socket and adapter are chosen based on the [URL](#url) scheme:
 
 * "http" -> TCPSocket
 
@@ -338,7 +353,7 @@ Creates a [ClientConnection](#clientconnection) (or subtype) for the given [URL]
 * "wss" -> SSLSocket + WebSocket adapter
 
 #### Parameters
-* `ConnectionT` Concrete connection type derived from [ClientConnection](#clientconnection). 
+* `ConnectionT` Concrete connection type derived from [ClientConnection](#clientconnection-1). 
 
 #### Parameters
 * `url` Target [URL](#url). Must have a recognised scheme. 
@@ -360,10 +375,10 @@ Shared pointer to the created connection.
 `inline`
 
 ```cpp
-inline ClientConnection::Ptr createConnection(const URL & url, http::Client * client, uv::Loop * loop)
+inline ClientConnection::Ptr createConnection(const URL & url, http::Client * client = nullptr, uv::Loop * loop = uv::defaultLoop())
 ```
 
-Creates a [ClientConnection](#clientconnection) for the given [URL](#url) and optionally registers it with a [Client](#client). Equivalent to calling [Client::createConnection()](#createconnection-1) when `client` is non-null. 
+Creates a [ClientConnection](#clientconnection-1) for the given [URL](#url) and optionally registers it with a [Client](#client). Equivalent to calling [Client::createConnection()](#createconnection-1) when `client` is non-null. 
 #### Parameters
 * `url` Target [URL](#url). The scheme determines the socket and adapter type. 
 
@@ -380,8 +395,10 @@ Shared pointer to the created connection.
 
 #### getStatusCodeReason
 
+`nodiscard`
+
 ```cpp
-const char * getStatusCodeReason(StatusCode status)
+[[nodiscard]] const char * getStatusCodeReason(StatusCode status)
 ```
 
 Returns the standard reason phrase for the given HTTP status code (e.g. "OK" for [StatusCode::OK](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4ae0aa021e21dddbd6d8cecec71e9cf564), "Not Found" for [StatusCode::NotFound](#namespaceicy_1_1http_1aa73f8ae30b4882be20ce0a7e16adc1a4a38c300f4fc9ce8a77aad4a30de05cad8)). 
@@ -397,8 +414,10 @@ Null-terminated reason phrase string.
 
 #### getStatusCodeString
 
+`nodiscard`
+
 ```cpp
-const char * getStatusCodeString(StatusCode status)
+[[nodiscard]] const char * getStatusCodeString(StatusCode status)
 ```
 
 Returns a combined "NNN Reason" string for the given HTTP status code (e.g. "200 OK"). 
@@ -407,6 +426,49 @@ Returns a combined "NNN Reason" string for the given HTTP status code (e.g. "200
 
 #### Returns
 Null-terminated status code string.
+
+---
+
+{#statstaticfile}
+
+#### statStaticFile
+
+```cpp
+bool statStaticFile(std::string_view path, StaticFileInfo & info)
+```
+
+Read static-file metadata from disk. 
+#### Parameters
+* `path` File path on disk. 
+
+* `info` Receives the file size, weak ETag, and HTTP-normalized last-modified time. 
+
+#### Returns
+True if the path exists and is a regular file.
+
+---
+
+{#preparestaticfileresponse}
+
+#### prepareStaticFileResponse
+
+```cpp
+bool prepareStaticFileResponse(const Request & request, Response & response, const StaticFileInfo & info)
+```
+
+Apply static-file headers and request conditionals to the response.
+
+Sets `Content-Length`, `ETag`, and `Last-Modified` from `info`, then evaluates `If-None-Match` and `If-Modified-Since` for the current request.
+
+#### Parameters
+* `request` Incoming HTTP request. 
+
+* `response` Outgoing HTTP response to update. 
+
+* `info` Precomputed static-file metadata. 
+
+#### Returns
+True if the response should not send a body (`304` or `412`).
 
 ---
 
@@ -529,6 +591,12 @@ Splits a substring (defined by iterators) into named attributes. Attributes are 
 #include <icy/http/authenticator.h>
 ```
 
+```cpp
+class Authenticator
+```
+
+Defined in src/http/include/icy/http/authenticator.h:32
+
 Maintains HTTP Basic or Digest authentication state for outbound requests.
 
 Note: Do not forget to read the entire response stream from the 401 response before sending the authenticated request, otherwise there may be problems if a persistent connection is used.
@@ -543,12 +611,12 @@ Note: Do not forget to read the entire response stream from the 401 response bef
 | `void` | [`fromUserInfo`](#fromuserinfo)  | Parses username:password std::string and sets username and password of the credentials object. Throws SyntaxException on invalid user information. |
 | `void` | [`fromURI`](#fromuri)  | Extracts username and password from the given URI and sets username and password of the credentials object. Does nothing if URI has no user info part. |
 | `void` | [`setUsername`](#setusername)  | Sets the username. |
-| `const std::string &` | [`username`](#username) `const` | Returns the username. |
+| `const std::string &` | [`username`](#username) `const` `nodiscard` | Returns the username. |
 | `void` | [`setPassword`](#setpassword)  | Sets the password. |
-| `const std::string &` | [`password`](#password) `const` | Returns the password. |
-| `void` | [`authenticate`](#authenticate)  | Inspects WWW-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given [http::Request](http::Request). |
+| `const std::string &` | [`password`](#password) `const` `nodiscard` | Returns the password. |
+| `void` | [`authenticate`](#authenticate)  | Inspects WWW-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given http::Request. |
 | `void` | [`updateAuthInfo`](#updateauthinfo)  | Updates internal state (in case of digest authentication) and replaces authentication information in the request accordingly. |
-| `void` | [`proxyAuthenticate`](#proxyauthenticate)  | Inspects Proxy-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given [http::Request](http::Request). |
+| `void` | [`proxyAuthenticate`](#proxyauthenticate)  | Inspects Proxy-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given http::Request. |
 | `void` | [`updateProxyAuthInfo`](#updateproxyauthinfo)  | Updates internal state (in case of digest authentication) and replaces proxy authentication information in the request accordingly. |
 
 ---
@@ -560,6 +628,8 @@ Note: Do not forget to read the entire response stream from the 401 response bef
 ```cpp
 Authenticator()
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:36
 
 Creates an empty authenticator.
 
@@ -573,6 +643,8 @@ Creates an empty authenticator.
 Authenticator(const std::string & username, const std::string & password)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:39
+
 Creates an authenticator with the given username and password.
 
 ---
@@ -584,6 +656,8 @@ Creates an authenticator with the given username and password.
 ```cpp
 ~Authenticator()
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:42
 
 Destroys the authenticator.
 
@@ -597,6 +671,8 @@ Destroys the authenticator.
 void fromUserInfo(std::string_view userInfo)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:47
+
 Parses username:password std::string and sets username and password of the credentials object. Throws SyntaxException on invalid user information.
 
 ---
@@ -608,6 +684,8 @@ Parses username:password std::string and sets username and password of the crede
 ```cpp
 void fromURI(const http::URL & uri)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:52
 
 Extracts username and password from the given URI and sets username and password of the credentials object. Does nothing if URI has no user info part.
 
@@ -621,6 +699,8 @@ Extracts username and password from the given URI and sets username and password
 void setUsername(const std::string & username)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:55
+
 Sets the username.
 
 ---
@@ -629,11 +709,13 @@ Sets the username.
 
 #### username
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & username() const
+[[nodiscard]] const std::string & username() const
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:58
 
 Returns the username.
 
@@ -647,6 +729,8 @@ Returns the username.
 void setPassword(const std::string & password)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:61
+
 Sets the password.
 
 ---
@@ -655,11 +739,13 @@ Sets the password.
 
 #### password
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & password() const
+[[nodiscard]] const std::string & password() const
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:64
 
 Returns the password.
 
@@ -673,7 +759,9 @@ Returns the password.
 void authenticate(http::Request & request, const http::Response & response)
 ```
 
-Inspects WWW-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given [http::Request](http::Request).
+Defined in src/http/include/icy/http/authenticator.h:69
+
+Inspects WWW-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given http::Request.
 
 ---
 
@@ -684,6 +772,8 @@ Inspects WWW-Authenticate header of the response, initializes the internal state
 ```cpp
 void updateAuthInfo(http::Request & request)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:73
 
 Updates internal state (in case of digest authentication) and replaces authentication information in the request accordingly.
 
@@ -697,7 +787,9 @@ Updates internal state (in case of digest authentication) and replaces authentic
 void proxyAuthenticate(http::Request & request, const http::Response & response)
 ```
 
-Inspects Proxy-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given [http::Request](http::Request).
+Defined in src/http/include/icy/http/authenticator.h:78
+
+Inspects Proxy-Authenticate header of the response, initializes the internal state (in case of digest authentication) and adds required information to the given http::Request.
 
 ---
 
@@ -708,6 +800,8 @@ Inspects Proxy-Authenticate header of the response, initializes the internal sta
 ```cpp
 void updateProxyAuthInfo(http::Request & request)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:83
 
 Updates internal state (in case of digest authentication) and replaces proxy authentication information in the request accordingly.
 
@@ -728,6 +822,8 @@ Updates internal state (in case of digest authentication) and replaces proxy aut
 std::string _username
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:89
+
 ---
 
 {#_password}
@@ -737,6 +833,8 @@ std::string _username
 ```cpp
 std::string _password
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:90
 
 ### Private Methods
 
@@ -754,6 +852,8 @@ std::string _password
 Authenticator(const Authenticator &) = delete
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:86
+
 Deleted constructor.
 
 {#basicauthenticator}
@@ -763,6 +863,12 @@ Deleted constructor.
 ```cpp
 #include <icy/http/authenticator.h>
 ```
+
+```cpp
+class BasicAuthenticator
+```
+
+Defined in src/http/include/icy/http/authenticator.h:99
 
 Encodes and decodes HTTP Basic authentication credentials.
 
@@ -776,11 +882,11 @@ Encodes and decodes HTTP Basic authentication credentials.
 |  | [`BasicAuthenticator`](#basicauthenticator-4) `explicit` | Parses a raw Basic authentication payload string. The value can be extracted from a request via `[Request::getCredentials()](#getcredentials)`. |
 |  | [`~BasicAuthenticator`](#basicauthenticator-5)  | Destroys the basic authenticator. |
 | `void` | [`setUsername`](#setusername-1)  | Sets the username. |
-| `const std::string &` | [`username`](#username-1) `const` | Returns the username. |
+| `const std::string &` | [`username`](#username-1) `const` `nodiscard` | Returns the username. |
 | `void` | [`setPassword`](#setpassword-1)  | Sets the password. |
-| `const std::string &` | [`password`](#password-1) `const` | Returns the password. |
-| `void` | [`authenticate`](#authenticate-1) `const` | Adds authentication information to the given [http::Request](http::Request). |
-| `void` | [`proxyAuthenticate`](#proxyauthenticate-1) `const` | Adds proxy authentication information to the given [http::Request](http::Request). |
+| `const std::string &` | [`password`](#password-1) `const` `nodiscard` | Returns the password. |
+| `void` | [`authenticate`](#authenticate-1) `const` | Adds authentication information to the given http::Request. |
+| `void` | [`proxyAuthenticate`](#proxyauthenticate-1) `const` | Adds proxy authentication information to the given http::Request. |
 
 ---
 
@@ -791,6 +897,8 @@ Encodes and decodes HTTP Basic authentication credentials.
 ```cpp
 BasicAuthenticator()
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:103
 
 Creates an empty basic authenticator.
 
@@ -803,6 +911,8 @@ Creates an empty basic authenticator.
 ```cpp
 BasicAuthenticator(const std::string & username, const std::string & password)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:106
 
 Creates a basic authenticator with the given username and password.
 
@@ -817,6 +927,8 @@ Creates a basic authenticator with the given username and password.
 ```cpp
 explicit BasicAuthenticator(const http::Request & request)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:113
 
 Extracts basic authentication credentials from the given request.
 
@@ -834,6 +946,8 @@ Throws a NotAuthenticatedException if the request does not contain basic authent
 explicit BasicAuthenticator(const std::string & authInfo)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:117
+
 Parses a raw Basic authentication payload string. The value can be extracted from a request via `[Request::getCredentials()](#getcredentials)`.
 
 ---
@@ -845,6 +959,8 @@ Parses a raw Basic authentication payload string. The value can be extracted fro
 ```cpp
 ~BasicAuthenticator()
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:120
 
 Destroys the basic authenticator.
 
@@ -858,6 +974,8 @@ Destroys the basic authenticator.
 void setUsername(const std::string & username)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:123
+
 Sets the username.
 
 ---
@@ -866,11 +984,13 @@ Sets the username.
 
 #### username
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & username() const
+[[nodiscard]] const std::string & username() const
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:126
 
 Returns the username.
 
@@ -884,6 +1004,8 @@ Returns the username.
 void setPassword(const std::string & password)
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:129
+
 Sets the password.
 
 ---
@@ -892,11 +1014,13 @@ Sets the password.
 
 #### password
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & password() const
+[[nodiscard]] const std::string & password() const
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:132
 
 Returns the password.
 
@@ -912,7 +1036,9 @@ Returns the password.
 void authenticate(http::Request & request) const
 ```
 
-Adds authentication information to the given [http::Request](http::Request).
+Defined in src/http/include/icy/http/authenticator.h:135
+
+Adds authentication information to the given http::Request.
 
 ---
 
@@ -926,7 +1052,9 @@ Adds authentication information to the given [http::Request](http::Request).
 void proxyAuthenticate(http::Request & request) const
 ```
 
-Adds proxy authentication information to the given [http::Request](http::Request).
+Defined in src/http/include/icy/http/authenticator.h:138
+
+Adds proxy authentication information to the given http::Request.
 
 ### Protected Methods
 
@@ -943,6 +1071,8 @@ Adds proxy authentication information to the given [http::Request](http::Request
 ```cpp
 void parseAuthInfo(std::string_view authInfo)
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:144
 
 Extracts username and password from Basic authentication info by base64-decoding authInfo and splitting the resulting std::string at the ':' delimiter.
 
@@ -963,6 +1093,8 @@ Extracts username and password from Basic authentication info by base64-decoding
 std::string _username
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:150
+
 ---
 
 {#_password-1}
@@ -972,6 +1104,8 @@ std::string _username
 ```cpp
 std::string _password
 ```
+
+Defined in src/http/include/icy/http/authenticator.h:151
 
 ### Private Methods
 
@@ -989,6 +1123,8 @@ std::string _password
 BasicAuthenticator(const BasicAuthenticator &) = delete
 ```
 
+Defined in src/http/include/icy/http/authenticator.h:147
+
 Deleted constructor.
 
 {#chunkedadapter}
@@ -998,6 +1134,12 @@ Deleted constructor.
 ```cpp
 #include <icy/http/packetizers.h>
 ```
+
+```cpp
+class ChunkedAdapter
+```
+
+Defined in src/http/include/icy/http/packetizers.h:29
 
 > **Inherits:** [`PacketProcessor`](base.md#packetprocessor)
 
@@ -1024,6 +1166,8 @@ HTTP chunked transfer encoding adapter for streaming responses.
 Connection::Ptr connection
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:32
+
 HTTP connection to send the initial response header through.
 
 ---
@@ -1035,6 +1179,8 @@ HTTP connection to send the initial response header through.
 ```cpp
 std::string contentType
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:33
 
 Content-Type value for the chunked response.
 
@@ -1048,6 +1194,8 @@ Content-Type value for the chunked response.
 std::string frameSeparator
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:34
+
 Optional separator written before each chunk payload.
 
 ---
@@ -1059,6 +1207,8 @@ Optional separator written before each chunk payload.
 ```cpp
 bool initial
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:35
 
 True until the first chunk is processed and the header emitted.
 
@@ -1072,6 +1222,8 @@ True until the first chunk is processed and the header emitted.
 bool nocopy
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:36
+
 If true, header/data/footer are emitted as separate packets.
 
 ---
@@ -1084,6 +1236,8 @@ If true, header/data/footer are emitted as separate packets.
 PacketSignal emitter
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:148
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1091,7 +1245,7 @@ PacketSignal emitter
 |  | [`ChunkedAdapter`](#chunkedadapter-1) `inline` | Creates a [ChunkedAdapter](#chunkedadapter) that sends its initial response header through the given connection. The content type is read from the connection's outgoing header. |
 |  | [`ChunkedAdapter`](#chunkedadapter-2) `inline` | Creates a [ChunkedAdapter](#chunkedadapter) that emits its own raw HTTP/1.1 200 response header. Use this when no [Connection](#connection-1) object is available. |
 | `void` | [`emitHeader`](#emitheader) `virtual` `inline` | Emits the initial HTTP/1.1 200 OK response headers with chunked transfer encoding. If a connection is set, headers are written through it; otherwise a raw response string is emitted via the packet signal. |
-| `void` | [`process`](#process-5) `virtual` `inline` | Encodes an incoming packet as a chunked transfer encoding chunk and emits it. Emits the HTTP response headers on the first call. |
+| `void` | [`process`](#process-5) `virtual` `inline` `override` | Encodes an incoming packet as a chunked transfer encoding chunk and emits it. Emits the HTTP response headers on the first call. |
 
 ---
 
@@ -1102,8 +1256,10 @@ PacketSignal emitter
 `inline`
 
 ```cpp
-inline ChunkedAdapter(Connection::Ptr connection, const std::string & frameSeparator, bool nocopy)
+inline ChunkedAdapter(Connection::Ptr connection = nullptr, const std::string & frameSeparator = "", bool nocopy = true)
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:43
 
 Creates a [ChunkedAdapter](#chunkedadapter) that sends its initial response header through the given connection. The content type is read from the connection's outgoing header. 
 #### Parameters
@@ -1122,8 +1278,10 @@ Creates a [ChunkedAdapter](#chunkedadapter) that sends its initial response head
 `inline`
 
 ```cpp
-inline ChunkedAdapter(const std::string & contentType, const std::string & frameSeparator, bool nocopy)
+inline ChunkedAdapter(const std::string & contentType, const std::string & frameSeparator = "", bool nocopy = true)
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:56
 
 Creates a [ChunkedAdapter](#chunkedadapter) that emits its own raw HTTP/1.1 200 response header. Use this when no [Connection](#connection-1) object is available. 
 #### Parameters
@@ -1145,6 +1303,8 @@ Creates a [ChunkedAdapter](#chunkedadapter) that emits its own raw HTTP/1.1 200 
 virtual inline void emitHeader()
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:71
+
 Emits the initial HTTP/1.1 200 OK response headers with chunked transfer encoding. If a connection is set, headers are written through it; otherwise a raw response string is emitted via the packet signal.
 
 ---
@@ -1153,11 +1313,13 @@ Emits the initial HTTP/1.1 200 OK response headers with chunked transfer encodin
 
 #### process
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void process(IPacket & packet)
+virtual inline void process(IPacket & packet) override
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:110
 
 Encodes an incoming packet as a chunked transfer encoding chunk and emits it. Emits the HTTP response headers on the first call. 
 #### Parameters
@@ -1174,7 +1336,31 @@ Encodes an incoming packet as a chunked transfer encoding chunk and emits it. Em
 #include <icy/http/client.h>
 ```
 
+```cpp
+class Client
+```
+
+Defined in src/http/include/icy/http/client.h:192
+
 HTTP client for creating and managing outgoing connections.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`ClientConnection`](#clientconnection)  |  |
+
+---
+
+{#clientconnection}
+
+#### ClientConnection
+
+```cpp
+friend class ClientConnection
+```
+
+Defined in src/http/include/icy/http/client.h:252
 
 ### Public Attributes
 
@@ -1192,6 +1378,8 @@ HTTP client for creating and managing outgoing connections.
 NullSignal Shutdown
 ```
 
+Defined in src/http/include/icy/http/client.h:247
+
 ### Public Methods
 
 | Return | Name | Description |
@@ -1199,7 +1387,7 @@ NullSignal Shutdown
 |  | [`Client`](#client-1)  |  |
 | `void` | [`stop`](#stop-7)  | Stop the [Client](#client) and close all connections. |
 | `ClientConnection::Ptr` | [`createConnectionT`](#createconnectiont-1) `inline` | Creates and registers a typed client connection for the given [URL](#url). The connection type is inferred from the [URL](#url) scheme (http, https, ws, wss). |
-| `ClientConnection::Ptr` | [`createConnection`](#createconnection-1) `inline` | Creates and registers a [ClientConnection](#clientconnection) for the given [URL](#url). The socket type is chosen based on the [URL](#url) scheme (http/https/ws/wss). |
+| `ClientConnection::Ptr` | [`createConnection`](#createconnection-1) `inline` | Creates and registers a [ClientConnection](#clientconnection-1) for the given [URL](#url). The socket type is chosen based on the [URL](#url) scheme (http/https/ws/wss). |
 | `void` | [`addConnection`](#addconnection) `virtual` | Registers a connection with this client so it is tracked and cleaned up on [stop()](#stop-7). |
 | `void` | [`removeConnection`](#removeconnection) `virtual` | Removes a previously registered connection from the client. |
 
@@ -1213,6 +1401,8 @@ NullSignal Shutdown
 Client()
 ```
 
+Defined in src/http/include/icy/http/client.h:195
+
 ---
 
 {#stop-7}
@@ -1222,6 +1412,8 @@ Client()
 ```cpp
 void stop()
 ```
+
+Defined in src/http/include/icy/http/client.h:205
 
 Stop the [Client](#client) and close all connections.
 
@@ -1234,12 +1426,14 @@ Stop the [Client](#client) and close all connections.
 `inline`
 
 ```cpp
-template<class ConnectionT> inline ClientConnection::Ptr createConnectionT(const URL & url, uv::Loop * loop)
+template<class ConnectionT> inline ClientConnection::Ptr createConnectionT(const URL & url, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/http/include/icy/http/client.h:215
 
 Creates and registers a typed client connection for the given [URL](#url). The connection type is inferred from the [URL](#url) scheme (http, https, ws, wss). 
 #### Parameters
-* `ConnectionT` Concrete connection type derived from [ClientConnection](#clientconnection). 
+* `ConnectionT` Concrete connection type derived from [ClientConnection](#clientconnection-1). 
 
 #### Parameters
 * `url` Target [URL](#url). The scheme determines the socket and adapter type. 
@@ -1258,10 +1452,12 @@ Shared pointer to the created connection.
 `inline`
 
 ```cpp
-inline ClientConnection::Ptr createConnection(const URL & url, uv::Loop * loop)
+inline ClientConnection::Ptr createConnection(const URL & url, uv::Loop * loop = uv::defaultLoop())
 ```
 
-Creates and registers a [ClientConnection](#clientconnection) for the given [URL](#url). The socket type is chosen based on the [URL](#url) scheme (http/https/ws/wss). 
+Defined in src/http/include/icy/http/client.h:229
+
+Creates and registers a [ClientConnection](#clientconnection-1) for the given [URL](#url). The socket type is chosen based on the [URL](#url) scheme (http/https/ws/wss). 
 #### Parameters
 * `url` Target [URL](#url). 
 
@@ -1282,6 +1478,8 @@ Shared pointer to the created connection.
 virtual void addConnection(ClientConnection::Ptr conn)
 ```
 
+Defined in src/http/include/icy/http/client.h:240
+
 Registers a connection with this client so it is tracked and cleaned up on [stop()](#stop-7). 
 #### Parameters
 * `conn` The connection to add.
@@ -1297,6 +1495,8 @@ Registers a connection with this client so it is tracked and cleaned up on [stop
 ```cpp
 virtual void removeConnection(ClientConnection * conn)
 ```
+
+Defined in src/http/include/icy/http/client.h:245
 
 Removes a previously registered connection from the client. 
 #### Parameters
@@ -1324,6 +1524,8 @@ Removes a previously registered connection from the client.
 static Client & instance()
 ```
 
+Defined in src/http/include/icy/http/client.h:199
+
 Return the default HTTP [Client](#client) singleton.
 
 ---
@@ -1337,6 +1539,8 @@ Return the default HTTP [Client](#client) singleton.
 ```cpp
 static void destroy()
 ```
+
+Defined in src/http/include/icy/http/client.h:202
 
 Destroys the default HTTP [Client](#client) singleton.
 
@@ -1356,6 +1560,8 @@ Destroys the default HTTP [Client](#client) singleton.
 ClientConnectionPtrVec _connections
 ```
 
+Defined in src/http/include/icy/http/client.h:254
+
 ### Protected Methods
 
 | Return | Name | Description |
@@ -1372,13 +1578,21 @@ ClientConnectionPtrVec _connections
 void onConnectionClose(Connection & conn)
 ```
 
-{#clientconnection}
+Defined in src/http/include/icy/http/client.h:250
+
+{#clientconnection-1}
 
 ## ClientConnection
 
 ```cpp
 #include <icy/http/client.h>
 ```
+
+```cpp
+class ClientConnection
+```
+
+Defined in src/http/include/icy/http/client.h:33
 
 > **Inherits:** [`Connection`](#connection-1)
 
@@ -1395,7 +1609,7 @@ HTTP client connection for managing request/response lifecycle.
 | `Signal< void(const Response &)>` | [`Complete`](#complete)  | Signals when the HTTP transaction is complete. |
 | `Signal< void(const icy::Error &)>` | [`Error`](#error-9)  | Signals when the underlying transport reports an error. |
 | `Signal< void(Connection &)>` | [`Close`](#close-19)  | Signals when the connection is closed. |
-| `ProgressSignal` | [`IncomingProgress`](#incomingprogress)  | Signals download progress (0-100%) |
+| `ProgressSignal` | [`IncomingProgress`](#incomingprogress)  | Signals download progress (0-100%). |
 
 ---
 
@@ -1406,6 +1620,8 @@ HTTP client connection for managing request/response lifecycle.
 ```cpp
 void * opaque
 ```
+
+Defined in src/http/include/icy/http/client.h:91
 
 Optional unmanaged client data pointer. Not used by the connection internally.
 
@@ -1418,6 +1634,8 @@ Optional unmanaged client data pointer. Not used by the connection internally.
 ```cpp
 NullSignal Connect
 ```
+
+Defined in src/http/include/icy/http/client.h:110
 
 Status signals.
 
@@ -1433,6 +1651,8 @@ Signals when the client socket is connected and data can flow
 Signal< void(Response &)> Headers
 ```
 
+Defined in src/http/include/icy/http/client.h:111
+
 Signals when the response HTTP header has been received.
 
 ---
@@ -1444,6 +1664,8 @@ Signals when the response HTTP header has been received.
 ```cpp
 Signal< void(const MutableBuffer &)> Payload
 ```
+
+Defined in src/http/include/icy/http/client.h:112
 
 Signals when raw data is received.
 
@@ -1457,6 +1679,8 @@ Signals when raw data is received.
 Signal< void(const Response &)> Complete
 ```
 
+Defined in src/http/include/icy/http/client.h:113
+
 Signals when the HTTP transaction is complete.
 
 ---
@@ -1468,6 +1692,8 @@ Signals when the HTTP transaction is complete.
 ```cpp
 Signal< void(const icy::Error &)> Error
 ```
+
+Defined in src/http/include/icy/http/client.h:114
 
 Signals when the underlying transport reports an error.
 
@@ -1481,6 +1707,8 @@ Signals when the underlying transport reports an error.
 Signal< void(Connection &)> Close
 ```
 
+Defined in src/http/include/icy/http/client.h:115
+
 Signals when the connection is closed.
 
 ---
@@ -1493,30 +1721,34 @@ Signals when the connection is closed.
 ProgressSignal IncomingProgress
 ```
 
-Signals download progress (0-100%)
+Defined in src/http/include/icy/http/client.h:116
+
+Signals download progress (0-100%).
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ClientConnection`](#clientconnection-1)  | Creates a [ClientConnection](#clientconnection) to the given [URL](#url), pre-populating the request URI and Host header. The response status is initialised to 502 Bad Gateway until a real response is received. |
+|  | [`ClientConnection`](#clientconnection-2)  | Creates a [ClientConnection](#clientconnection-1) to the given [URL](#url), pre-populating the request URI and Host header. The response status is initialised to 502 Bad Gateway until a real response is received. |
 | `void` | [`start`](#start-8) `virtual` | Starts the internal HTTP request. |
 | `void` | [`start`](#start-9) `virtual` | Starts the given HTTP request, replacing the internal request object. |
-| `ssize_t` | [`send`](#send-10) `virtual` | Sends raw data to the peer, initiating a connection first if needed. Data is buffered internally until the connection is established. |
+| `ssize_t` | [`send`](#send-10) `virtual` `override` | Sends raw data to the peer, initiating a connection first if needed. Data is buffered internally until the connection is established. |
 | `void` | [`setReadStream`](#setreadstream) `virtual` | Sets the output stream to which incoming response body data is written. The stream pointer is owned by the connection and freed with it. Must be called before [start()](#start-8). |
 | `StreamT &` | [`readStream`](#readstream) `inline` | Returns a reference to the read stream cast to the specified type. |
 
 ---
 
-{#clientconnection-1}
+{#clientconnection-2}
 
 #### ClientConnection
 
 ```cpp
-ClientConnection(const URL & url, const net::TCPSocket::Ptr & socket)
+ClientConnection(const URL & url, const net::TCPSocket::Ptr & socket = std::make_shared< net::TCPSocket >())
 ```
 
-Creates a [ClientConnection](#clientconnection) to the given [URL](#url), pre-populating the request URI and Host header. The response status is initialised to 502 Bad Gateway until a real response is received. 
+Defined in src/http/include/icy/http/client.h:42
+
+Creates a [ClientConnection](#clientconnection-1) to the given [URL](#url), pre-populating the request URI and Host header. The response status is initialised to 502 Bad Gateway until a real response is received. 
 #### Parameters
 * `url` Target [URL](#url). Scheme, host, port and path are extracted automatically. 
 
@@ -1533,6 +1765,8 @@ Creates a [ClientConnection](#clientconnection) to the given [URL](#url), pre-po
 ```cpp
 virtual void start()
 ```
+
+Defined in src/http/include/icy/http/client.h:51
 
 Starts the internal HTTP request.
 
@@ -1552,6 +1786,8 @@ Calls [connect()](#connect-12) internally if the socket is not already connectin
 virtual void start(http::Request & req)
 ```
 
+Defined in src/http/include/icy/http/client.h:59
+
 Starts the given HTTP request, replacing the internal request object.
 
 Calls [connect()](#connect-12) internally if the socket is not already connecting or connected. The actual request will be sent when the socket is connected. 
@@ -1567,11 +1803,13 @@ Calls [connect()](#connect-12) internally if the socket is not already connectin
 
 #### send
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t send(const char * data, size_t len, int flags)
+virtual ssize_t send(const char * data, size_t len, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/client.h:67
 
 Sends raw data to the peer, initiating a connection first if needed. Data is buffered internally until the connection is established. 
 #### Parameters
@@ -1596,6 +1834,8 @@ Number of bytes sent or buffered.
 virtual void setReadStream(std::ostream * os)
 ```
 
+Defined in src/http/include/icy/http/client.h:74
+
 Sets the output stream to which incoming response body data is written. The stream pointer is owned by the connection and freed with it. Must be called before [start()](#start-8). 
 #### Parameters
 * `os` Pointer to the output stream. Takes ownership. 
@@ -1614,6 +1854,8 @@ Sets the output stream to which incoming response body data is written. The stre
 ```cpp
 template<class StreamT> inline StreamT & readStream()
 ```
+
+Defined in src/http/include/icy/http/client.h:82
 
 Returns a reference to the read stream cast to the specified type. 
 #### Parameters
@@ -1648,6 +1890,8 @@ Reference to the stream.
 URL _url
 ```
 
+Defined in src/http/include/icy/http/client.h:135
+
 ---
 
 {#_connect}
@@ -1657,6 +1901,8 @@ URL _url
 ```cpp
 bool _connect
 ```
+
+Defined in src/http/include/icy/http/client.h:136
 
 ---
 
@@ -1668,6 +1914,8 @@ bool _connect
 bool _active
 ```
 
+Defined in src/http/include/icy/http/client.h:137
+
 ---
 
 {#_complete}
@@ -1677,6 +1925,8 @@ bool _active
 ```cpp
 bool _complete
 ```
+
+Defined in src/http/include/icy/http/client.h:138
 
 ---
 
@@ -1688,6 +1938,8 @@ bool _complete
 std::vector< PendingWrite > _outgoingBuffer
 ```
 
+Defined in src/http/include/icy/http/client.h:139
+
 ---
 
 {#_readstream}
@@ -1698,14 +1950,16 @@ std::vector< PendingWrite > _outgoingBuffer
 std::unique_ptr< std::ostream > _readStream
 ```
 
+Defined in src/http/include/icy/http/client.h:140
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `void` | [`connect`](#connect-12) `virtual` | Connects to the server endpoint. All sent data is buffered until the connection is made. |
-| `http::Message *` | [`incomingHeader`](#incomingheader) `virtual` | Returns the incoming HTTP message header (request or response depending on role). |
-| `http::Message *` | [`outgoingHeader`](#outgoingheader) `virtual` | Returns the outgoing HTTP message header (request or response depending on role). |
-| `bool` | [`onSocketConnect`](#onsocketconnect-2) `virtual` | [net::SocketAdapter](net.md#socketadapter) interface |
+| `http::Message *` | [`incomingHeader`](#incomingheader) `virtual` `override` | Returns the incoming HTTP message header (request or response depending on role). |
+| `http::Message *` | [`outgoingHeader`](#outgoingheader) `virtual` `override` | Returns the outgoing HTTP message header (request or response depending on role). |
+| `bool` | [`onSocketConnect`](#onsocketconnect-2) `virtual` `override` | [net::SocketAdapter](net.md#socketadapter) interface |
 
 ---
 
@@ -1719,6 +1973,8 @@ std::unique_ptr< std::ostream > _readStream
 virtual void connect()
 ```
 
+Defined in src/http/include/icy/http/client.h:121
+
 Connects to the server endpoint. All sent data is buffered until the connection is made.
 
 ---
@@ -1727,11 +1983,13 @@ Connects to the server endpoint. All sent data is buffered until the connection 
 
 #### incomingHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual http::Message * incomingHeader()
+virtual http::Message * incomingHeader() override
 ```
+
+Defined in src/http/include/icy/http/client.h:123
 
 Returns the incoming HTTP message header (request or response depending on role).
 
@@ -1741,11 +1999,13 @@ Returns the incoming HTTP message header (request or response depending on role)
 
 #### outgoingHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual http::Message * outgoingHeader()
+virtual http::Message * outgoingHeader() override
 ```
+
+Defined in src/http/include/icy/http/client.h:124
 
 Returns the outgoing HTTP message header (request or response depending on role).
 
@@ -1755,11 +2015,13 @@ Returns the outgoing HTTP message header (request or response depending on role)
 
 #### onSocketConnect
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketConnect(net::Socket & socket)
+virtual bool onSocketConnect(net::Socket & socket) override
 ```
+
+Defined in src/http/include/icy/http/client.h:126
 
 [net::SocketAdapter](net.md#socketadapter) interface
 
@@ -1776,18 +2038,20 @@ virtual bool onSocketConnect(net::Socket & socket)
 #### Ptr
 
 ```cpp
-std::shared_ptr< ClientConnection > Ptr()
+using Ptr = std::shared_ptr< ClientConnection >
 ```
+
+Defined in src/http/include/icy/http/client.h:36
 
 ### Private Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onHeaders`](#onheaders) `virtual` | [Connection](#connection-1) interface. |
-| `void` | [`onPayload`](#onpayload) `virtual` | Called for each chunk of incoming response body data. |
-| `void` | [`onComplete`](#oncomplete) `virtual` | Called when the full HTTP response has been received. |
-| `void` | [`onClose`](#onclose-3) `virtual` | Called when the connection is closed. |
-| `bool` | [`onSocketError`](#onsocketerror-2) `virtual` | Called when the underlying transport encounters an error. |
+| `void` | [`onHeaders`](#onheaders) `virtual` `override` | [Connection](#connection-1) interface. |
+| `void` | [`onPayload`](#onpayload) `virtual` `override` | Called for each chunk of incoming response body data. |
+| `void` | [`onComplete`](#oncomplete) `virtual` `override` | Called when the full HTTP response has been received. |
+| `void` | [`onClose`](#onclose-3) `virtual` `override` | Called when the connection is closed. |
+| `bool` | [`onSocketError`](#onsocketerror-2) `virtual` `override` | Called when the underlying transport encounters an error. |
 
 ---
 
@@ -1795,11 +2059,13 @@ std::shared_ptr< ClientConnection > Ptr()
 
 #### onHeaders
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onHeaders()
+virtual void onHeaders() override
 ```
+
+Defined in src/http/include/icy/http/client.h:97
 
 [Connection](#connection-1) interface.
 
@@ -1811,11 +2077,13 @@ Called when the response headers have been parsed.
 
 #### onPayload
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onPayload(const MutableBuffer & buffer)
+virtual void onPayload(const MutableBuffer & buffer) override
 ```
+
+Defined in src/http/include/icy/http/client.h:99
 
 Called for each chunk of incoming response body data.
 
@@ -1825,11 +2093,13 @@ Called for each chunk of incoming response body data.
 
 #### onComplete
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onComplete()
+virtual void onComplete() override
 ```
+
+Defined in src/http/include/icy/http/client.h:101
 
 Called when the full HTTP response has been received.
 
@@ -1839,11 +2109,13 @@ Called when the full HTTP response has been received.
 
 #### onClose
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onClose()
+virtual void onClose() override
 ```
+
+Defined in src/http/include/icy/http/client.h:103
 
 Called when the connection is closed.
 
@@ -1853,11 +2125,13 @@ Called when the connection is closed.
 
 #### onSocketError
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketError(net::Socket & socket, const icy::Error & error)
+virtual bool onSocketError(net::Socket & socket, const icy::Error & error) override
 ```
+
+Defined in src/http/include/icy/http/client.h:105
 
 Called when the underlying transport encounters an error.
 
@@ -1868,6 +2142,12 @@ Called when the underlying transport encounters an error.
 ```cpp
 #include <icy/http/client.h>
 ```
+
+```cpp
+struct PendingWrite
+```
+
+Defined in src/http/include/icy/http/client.h:129
 
 ### Public Attributes
 
@@ -1886,6 +2166,8 @@ Called when the underlying transport encounters an error.
 Buffer data
 ```
 
+Defined in src/http/include/icy/http/client.h:131
+
 ---
 
 {#flags}
@@ -1896,6 +2178,8 @@ Buffer data
 int flags = 0
 ```
 
+Defined in src/http/include/icy/http/client.h:132
+
 {#connection-1}
 
 ## Connection
@@ -1904,40 +2188,77 @@ int flags = 0
 #include <icy/http/connection.h>
 ```
 
+```cpp
+class Connection
+```
+
+Defined in src/http/include/icy/http/connection.h:34
+
 > **Inherits:** [`SocketAdapter`](net.md#socketadapter)
-> **Subclassed by:** [`ClientConnection`](#clientconnection), [`ServerConnection`](#serverconnection)
+> **Subclassed by:** [`ClientConnection`](#clientconnection-1), [`ServerConnection`](#serverconnection-1)
 
 Base HTTP connection managing socket I/O and message lifecycle
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`ConnectionStream`](#connectionstream)  |  |
+| [`ConnectionAdapter`](#connectionadapter)  |  |
+
+---
+
+{#connectionstream}
+
+#### ConnectionStream
+
+```cpp
+friend class ConnectionStream
+```
+
+Defined in src/http/include/icy/http/connection.h:148
+
+---
+
+{#connectionadapter}
+
+#### ConnectionAdapter
+
+```cpp
+friend class ConnectionAdapter
+```
+
+Defined in src/http/include/icy/http/connection.h:149
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Connection`](#connection-2)  | Creates a [Connection](#connection-1) using the given TCP socket. |
-| `void` | [`onHeaders`](#onheaders-1)  | Called when the incoming HTTP headers have been fully parsed. |
-| `void` | [`onPayload`](#onpayload-1)  | Called for each chunk of incoming body data after headers are complete. |
-| `void` | [`onComplete`](#oncomplete-1)  | Called when the incoming HTTP message is fully received. |
-| `void` | [`onClose`](#onclose-4)  | Called when the connection is closed. |
-| `ssize_t` | [`send`](#send-11) `virtual` | Send raw data to the peer. |
-| `ssize_t` | [`sendOwned`](#sendowned-10) `virtual` | Send an owned payload buffer to the peer. |
+| `void` | [`onHeaders`](#onheaders-1) `virtual` | Called when the incoming HTTP headers have been fully parsed. |
+| `void` | [`onPayload`](#onpayload-1) `virtual` | Called for each chunk of incoming body data after headers are complete. |
+| `void` | [`onComplete`](#oncomplete-1) `virtual` | Called when the incoming HTTP message is fully received. |
+| `void` | [`onClose`](#onclose-4) `virtual` | Called when the connection is closed. |
+| `ssize_t` | [`send`](#send-11) `virtual` `override` | Send raw data to the peer. |
+| `ssize_t` | [`sendOwned`](#sendowned-10) `virtual` `override` | Send an owned payload buffer to the peer. |
 | `ssize_t` | [`sendHeader`](#sendheader) `virtual` | Send the outdoing HTTP header. |
 | `void` | [`close`](#close-20) `virtual` | Close the connection and schedule the object for deferred deletion. |
 | `void` | [`markActive`](#markactive) `virtual` `inline` | Marks the connection as active. [Server](#server) connections override this to refresh the idle timer. |
 | `void` | [`beginStreaming`](#beginstreaming) `virtual` `inline` | Explicitly enter long-lived streaming mode. Base connections ignore this; server connections use it to disable keep-alive idle reaping while a response stream is active. |
 | `void` | [`endStreaming`](#endstreaming) `virtual` `inline` | Exit long-lived streaming mode. |
-| `bool` | [`closed`](#closed-4) `const` | Return true if the connection is closed. |
-| `icy::Error` | [`error`](#error-10) `const` | Return the error object if any. |
-| `bool` | [`headerAutoSendEnabled`](#headerautosendenabled) `const` | Return true if headers should be automatically sent. |
+| `bool` | [`closed`](#closed-4) `const` `nodiscard` | Return true if the connection is closed. |
+| `icy::Error` | [`error`](#error-10) `const` `nodiscard` | Return the error object if any. |
+| `bool` | [`headerAutoSendEnabled`](#headerautosendenabled) `const` `nodiscard` | Return true if headers should be automatically sent. |
 | `void` | [`setHeaderAutoSendEnabled`](#setheaderautosendenabled)  | Enable or disable automatic header emission for the next outgoing send path. |
-| `void` | [`replaceAdapter`](#replaceadapter) `virtual` | Assign the new [ConnectionAdapter](#connectionadapter) and setup the chain. The flow is: [Connection](#connection-1) <-> [ConnectionAdapter](#connectionadapter) <-> Socket. Takes ownership of the adapter (deferred deletion via uv loop). |
+| `void` | [`replaceAdapter`](#replaceadapter) `virtual` | Assign the new [ConnectionAdapter](#connectionadapter-1) and setup the chain. The flow is: [Connection](#connection-1) <-> [ConnectionAdapter](#connectionadapter-1) <-> Socket. Takes ownership of the adapter (deferred deletion via uv loop). |
 | `void` | [`replaceAdapter`](#replaceadapter-1) `virtual` | Overload for nullptr (used in destructor to clear adapter). |
-| `bool` | [`secure`](#secure) `const` | Return true if the connection uses TLS/SSL. |
-| `net::TCPSocket::Ptr &` | [`socket`](#socket-5)  | Return the underlying socket pointer. |
-| `net::SocketAdapter *` | [`adapter`](#adapter) `const` | Return the underlying adapter pointer. |
-| `Request &` | [`request`](#request-3)  | The HTTP request headers. |
-| `Response &` | [`response`](#response)  | The HTTP response headers. |
-| `http::Message *` | [`incomingHeader`](#incomingheader-1)  | Returns the incoming HTTP message header (request or response depending on role). |
-| `http::Message *` | [`outgoingHeader`](#outgoingheader-1)  | Returns the outgoing HTTP message header (request or response depending on role). |
+| `bool` | [`secure`](#secure) `const` `nodiscard` | Return true if the connection uses TLS/SSL. |
+| `net::TCPSocket::Ptr &` | [`socket`](#socket-5) `nodiscard` | Return the underlying socket pointer. |
+| `net::SocketAdapter *` | [`adapter`](#adapter) `const` `nodiscard` | Return the underlying adapter pointer. |
+| `Request &` | [`request`](#request-3) `nodiscard` | The HTTP request headers. |
+| `Response &` | [`response`](#response) `nodiscard` | The HTTP response headers. |
+| `http::Message *` | [`incomingHeader`](#incomingheader-1) `virtual` | Returns the incoming HTTP message header (request or response depending on role). |
+| `http::Message *` | [`outgoingHeader`](#outgoingheader-1) `virtual` | Returns the outgoing HTTP message header (request or response depending on role). |
 
 ---
 
@@ -1946,8 +2267,10 @@ Base HTTP connection managing socket I/O and message lifecycle
 #### Connection
 
 ```cpp
-Connection(const net::TCPSocket::Ptr & socket)
+Connection(const net::TCPSocket::Ptr & socket = std::make_shared< net::TCPSocket >())
 ```
+
+Defined in src/http/include/icy/http/connection.h:41
 
 Creates a [Connection](#connection-1) using the given TCP socket. 
 #### Parameters
@@ -1959,9 +2282,13 @@ Creates a [Connection](#connection-1) using the given TCP socket.
 
 #### onHeaders
 
+`virtual`
+
 ```cpp
-void onHeaders()
+virtual void onHeaders()
 ```
+
+Defined in src/http/include/icy/http/connection.h:45
 
 Called when the incoming HTTP headers have been fully parsed.
 
@@ -1971,13 +2298,17 @@ Called when the incoming HTTP headers have been fully parsed.
 
 #### onPayload
 
+`virtual`
+
 ```cpp
-void onPayload(const MutableBuffer & buffer)
+virtual void onPayload(const MutableBuffer & buffer)
 ```
+
+Defined in src/http/include/icy/http/connection.h:49
 
 Called for each chunk of incoming body data after headers are complete. 
 #### Parameters
-* `buffer` Buffer containing the received data chunk.
+* `buffer` [Buffer](base.md#buffer-2) containing the received data chunk.
 
 ---
 
@@ -1985,9 +2316,13 @@ Called for each chunk of incoming body data after headers are complete.
 
 #### onComplete
 
+`virtual`
+
 ```cpp
-void onComplete()
+virtual void onComplete()
 ```
+
+Defined in src/http/include/icy/http/connection.h:52
 
 Called when the incoming HTTP message is fully received.
 
@@ -1997,9 +2332,13 @@ Called when the incoming HTTP message is fully received.
 
 #### onClose
 
+`virtual`
+
 ```cpp
-void onClose()
+virtual void onClose()
 ```
+
+Defined in src/http/include/icy/http/connection.h:55
 
 Called when the connection is closed.
 
@@ -2009,11 +2348,13 @@ Called when the connection is closed.
 
 #### send
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t send(const char * data, size_t len, int flags)
+virtual ssize_t send(const char * data, size_t len, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:61
 
 Send raw data to the peer.
 
@@ -2025,11 +2366,13 @@ This is the zero-copy fast path. The caller retains ownership of the payload unt
 
 #### sendOwned
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t sendOwned(Buffer && buffer, int flags)
+virtual ssize_t sendOwned(Buffer && buffer, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:66
 
 Send an owned payload buffer to the peer.
 
@@ -2047,6 +2390,8 @@ Use this when the payload does not naturally outlive the current scope.
 virtual ssize_t sendHeader()
 ```
 
+Defined in src/http/include/icy/http/connection.h:69
+
 Send the outdoing HTTP header.
 
 ---
@@ -2060,6 +2405,8 @@ Send the outdoing HTTP header.
 ```cpp
 virtual void close()
 ```
+
+Defined in src/http/include/icy/http/connection.h:73
 
 Close the connection and schedule the object for deferred deletion.
 
@@ -2075,6 +2422,8 @@ Close the connection and schedule the object for deferred deletion.
 virtual inline void markActive()
 ```
 
+Defined in src/http/include/icy/http/connection.h:77
+
 Marks the connection as active. [Server](#server) connections override this to refresh the idle timer.
 
 ---
@@ -2088,6 +2437,8 @@ Marks the connection as active. [Server](#server) connections override this to r
 ```cpp
 virtual inline void beginStreaming()
 ```
+
+Defined in src/http/include/icy/http/connection.h:82
 
 Explicitly enter long-lived streaming mode. Base connections ignore this; server connections use it to disable keep-alive idle reaping while a response stream is active.
 
@@ -2103,6 +2454,8 @@ Explicitly enter long-lived streaming mode. Base connections ignore this; server
 virtual inline void endStreaming()
 ```
 
+Defined in src/http/include/icy/http/connection.h:85
+
 Exit long-lived streaming mode.
 
 ---
@@ -2111,11 +2464,13 @@ Exit long-lived streaming mode.
 
 #### closed
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool closed() const
+[[nodiscard]] bool closed() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:88
 
 Return true if the connection is closed.
 
@@ -2125,11 +2480,13 @@ Return true if the connection is closed.
 
 #### error
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-icy::Error error() const
+[[nodiscard]] icy::Error error() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:91
 
 Return the error object if any.
 
@@ -2139,11 +2496,13 @@ Return the error object if any.
 
 #### headerAutoSendEnabled
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool headerAutoSendEnabled() const
+[[nodiscard]] bool headerAutoSendEnabled() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:94
 
 Return true if headers should be automatically sent.
 
@@ -2156,6 +2515,8 @@ Return true if headers should be automatically sent.
 ```cpp
 void setHeaderAutoSendEnabled(bool enabled)
 ```
+
+Defined in src/http/include/icy/http/connection.h:97
 
 Enable or disable automatic header emission for the next outgoing send path.
 
@@ -2171,7 +2532,9 @@ Enable or disable automatic header emission for the next outgoing send path.
 virtual void replaceAdapter(std::unique_ptr< net::SocketAdapter > adapter)
 ```
 
-Assign the new [ConnectionAdapter](#connectionadapter) and setup the chain. The flow is: [Connection](#connection-1) <-> [ConnectionAdapter](#connectionadapter) <-> Socket. Takes ownership of the adapter (deferred deletion via uv loop).
+Defined in src/http/include/icy/http/connection.h:102
+
+Assign the new [ConnectionAdapter](#connectionadapter-1) and setup the chain. The flow is: [Connection](#connection-1) <-> [ConnectionAdapter](#connectionadapter-1) <-> Socket. Takes ownership of the adapter (deferred deletion via uv loop).
 
 ---
 
@@ -2185,6 +2548,8 @@ Assign the new [ConnectionAdapter](#connectionadapter) and setup the chain. The 
 virtual void replaceAdapter(std::nullptr_t)
 ```
 
+Defined in src/http/include/icy/http/connection.h:105
+
 Overload for nullptr (used in destructor to clear adapter).
 
 ---
@@ -2193,11 +2558,13 @@ Overload for nullptr (used in destructor to clear adapter).
 
 #### secure
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool secure() const
+[[nodiscard]] bool secure() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:108
 
 Return true if the connection uses TLS/SSL.
 
@@ -2207,9 +2574,13 @@ Return true if the connection uses TLS/SSL.
 
 #### socket
 
+`nodiscard`
+
 ```cpp
-net::TCPSocket::Ptr & socket()
+[[nodiscard]] net::TCPSocket::Ptr & socket()
 ```
+
+Defined in src/http/include/icy/http/connection.h:111
 
 Return the underlying socket pointer.
 
@@ -2219,11 +2590,13 @@ Return the underlying socket pointer.
 
 #### adapter
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-net::SocketAdapter * adapter() const
+[[nodiscard]] net::SocketAdapter * adapter() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:114
 
 Return the underlying adapter pointer.
 
@@ -2233,9 +2606,13 @@ Return the underlying adapter pointer.
 
 #### request
 
+`nodiscard`
+
 ```cpp
-Request & request()
+[[nodiscard]] Request & request()
 ```
+
+Defined in src/http/include/icy/http/connection.h:117
 
 The HTTP request headers.
 
@@ -2245,9 +2622,13 @@ The HTTP request headers.
 
 #### response
 
+`nodiscard`
+
 ```cpp
-Response & response()
+[[nodiscard]] Response & response()
 ```
+
+Defined in src/http/include/icy/http/connection.h:120
 
 The HTTP response headers.
 
@@ -2257,9 +2638,13 @@ The HTTP response headers.
 
 #### incomingHeader
 
+`virtual`
+
 ```cpp
-http::Message * incomingHeader()
+virtual http::Message * incomingHeader()
 ```
+
+Defined in src/http/include/icy/http/connection.h:123
 
 Returns the incoming HTTP message header (request or response depending on role).
 
@@ -2269,9 +2654,13 @@ Returns the incoming HTTP message header (request or response depending on role)
 
 #### outgoingHeader
 
+`virtual`
+
 ```cpp
-http::Message * outgoingHeader()
+virtual http::Message * outgoingHeader()
 ```
+
+Defined in src/http/include/icy/http/connection.h:126
 
 Returns the outgoing HTTP message header (request or response depending on role).
 
@@ -2297,6 +2686,8 @@ Returns the outgoing HTTP message header (request or response depending on role)
 net::TCPSocket::Ptr _socket
 ```
 
+Defined in src/http/include/icy/http/connection.h:140
+
 ---
 
 {#_adapter}
@@ -2306,6 +2697,8 @@ net::TCPSocket::Ptr _socket
 ```cpp
 net::SocketAdapter * _adapter
 ```
+
+Defined in src/http/include/icy/http/connection.h:141
 
 ---
 
@@ -2317,6 +2710,8 @@ net::SocketAdapter * _adapter
 Request _request
 ```
 
+Defined in src/http/include/icy/http/connection.h:142
+
 ---
 
 {#_response}
@@ -2326,6 +2721,8 @@ Request _request
 ```cpp
 Response _response
 ```
+
+Defined in src/http/include/icy/http/connection.h:143
 
 ---
 
@@ -2337,6 +2734,8 @@ Response _response
 icy::Error _error
 ```
 
+Defined in src/http/include/icy/http/connection.h:144
+
 ---
 
 {#_closed}
@@ -2346,6 +2745,8 @@ icy::Error _error
 ```cpp
 bool _closed
 ```
+
+Defined in src/http/include/icy/http/connection.h:145
 
 ---
 
@@ -2357,15 +2758,17 @@ bool _closed
 bool _shouldSendHeader
 ```
 
+Defined in src/http/include/icy/http/connection.h:146
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `void` | [`setError`](#seterror-4) `virtual` | Set the internal error. Note: Setting the error does not `[close()](#close-20)` the connection. |
-| `bool` | [`onSocketConnect`](#onsocketconnect-3) `virtual` | [net::SocketAdapter](net.md#socketadapter) interface |
-| `bool` | [`onSocketRecv`](#onsocketrecv-3) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
-| `bool` | [`onSocketError`](#onsocketerror-3) `virtual` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
-| `bool` | [`onSocketClose`](#onsocketclose-2) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
+| `bool` | [`onSocketConnect`](#onsocketconnect-3) `virtual` `override` | [net::SocketAdapter](net.md#socketadapter) interface |
+| `bool` | [`onSocketRecv`](#onsocketrecv-3) `virtual` `override` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `bool` | [`onSocketError`](#onsocketerror-3) `virtual` `override` | Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. |
+| `bool` | [`onSocketClose`](#onsocketclose-2) `virtual` `override` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
 
 ---
 
@@ -2379,6 +2782,8 @@ bool _shouldSendHeader
 virtual void setError(const icy::Error & err)
 ```
 
+Defined in src/http/include/icy/http/connection.h:131
+
 Set the internal error. Note: Setting the error does not `[close()](#close-20)` the connection.
 
 ---
@@ -2387,11 +2792,13 @@ Set the internal error. Note: Setting the error does not `[close()](#close-20)` 
 
 #### onSocketConnect
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketConnect(net::Socket & socket)
+virtual bool onSocketConnect(net::Socket & socket) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:134
 
 [net::SocketAdapter](net.md#socketadapter) interface
 
@@ -2401,11 +2808,13 @@ virtual bool onSocketConnect(net::Socket & socket)
 
 #### onSocketRecv
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress)
+virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:135
 
 Called when data is received from the socket. Forwards the event to all registered receivers in priority order. 
 #### Parameters
@@ -2424,11 +2833,13 @@ true to stop propagation to subsequent receivers.
 
 #### onSocketError
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketError(net::Socket & socket, const icy::Error & error)
+virtual bool onSocketError(net::Socket & socket, const icy::Error & error) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:136
 
 Called when the socket encounters an error. Forwards the event to all registered receivers in priority order. 
 #### Parameters
@@ -2445,11 +2856,13 @@ true to stop propagation to subsequent receivers.
 
 #### onSocketClose
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketClose(net::Socket & socket)
+virtual bool onSocketClose(net::Socket & socket) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:137
 
 Called when the socket is closed. Forwards the event to all registered receivers in priority order. 
 #### Parameters
@@ -2471,16 +2884,24 @@ true to stop propagation to subsequent receivers.
 #### Ptr
 
 ```cpp
-std::shared_ptr< Connection > Ptr()
+using Ptr = std::shared_ptr< Connection >
 ```
 
-{#connectionadapter}
+Defined in src/http/include/icy/http/connection.h:37
+
+{#connectionadapter-1}
 
 ## ConnectionAdapter
 
 ```cpp
 #include <icy/http/connection.h>
 ```
+
+```cpp
+class ConnectionAdapter
+```
+
+Defined in src/http/include/icy/http/connection.h:160
 
 > **Inherits:** [`ParserObserver`](#parserobserver), [`SocketAdapter`](net.md#socketadapter)
 
@@ -2490,17 +2911,17 @@ Default HTTP socket adapter for reading and writing HTTP messages
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ConnectionAdapter`](#connectionadapter-1)  | Creates a [ConnectionAdapter](#connectionadapter) for the given connection. |
-| `ssize_t` | [`send`](#send-12) `virtual` | Sends data to the peer, flushing the outgoing HTTP header first if needed. |
-| `ssize_t` | [`sendOwned`](#sendowned-11) `virtual` | Sends an owned payload buffer to the connected peer. |
-| `void` | [`removeReceiver`](#removereceiver-2)  | Remove the given receiver. |
-| `Parser &` | [`parser`](#parser)  | Returns the HTTP parser instance. |
-| `Connection *` | [`connection`](#connection-3)  | Returns the owning [Connection](#connection-1) pointer, or nullptr if detached. |
+|  | [`ConnectionAdapter`](#connectionadapter-2)  | Creates a [ConnectionAdapter](#connectionadapter-1) for the given connection. |
+| `ssize_t` | [`send`](#send-12) `virtual` `override` | Sends data to the peer, flushing the outgoing HTTP header first if needed. |
+| `ssize_t` | [`sendOwned`](#sendowned-11) `virtual` `override` | Sends an owned payload buffer to the connected peer. |
+| `void` | [`removeReceiver`](#removereceiver-2) `override` | Remove the given receiver. |
+| `Parser &` | [`parser`](#parser) `nodiscard` | Returns the HTTP parser instance. |
+| `Connection *` | [`connection`](#connection-3) `nodiscard` | Returns the owning [Connection](#connection-1) pointer, or nullptr if detached. |
 | `void` | [`reset`](#reset-7)  | Resets the adapter for reuse with a new socket and request. Clears the parser state and re-wires the sender without reallocating. Used by the connection pool to avoid destroying/recreating adapters. |
 
 ---
 
-{#connectionadapter-1}
+{#connectionadapter-2}
 
 #### ConnectionAdapter
 
@@ -2508,7 +2929,9 @@ Default HTTP socket adapter for reading and writing HTTP messages
 ConnectionAdapter(Connection * connection, llhttp_type_t type)
 ```
 
-Creates a [ConnectionAdapter](#connectionadapter) for the given connection. 
+Defined in src/http/include/icy/http/connection.h:167
+
+Creates a [ConnectionAdapter](#connectionadapter-1) for the given connection. 
 #### Parameters
 * `connection` Owning HTTP connection. 
 
@@ -2520,11 +2943,13 @@ Creates a [ConnectionAdapter](#connectionadapter) for the given connection.
 
 #### send
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t send(const char * data, size_t len, int flags)
+virtual ssize_t send(const char * data, size_t len, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:175
 
 Sends data to the peer, flushing the outgoing HTTP header first if needed. 
 #### Parameters
@@ -2543,11 +2968,13 @@ Number of bytes sent, or -1 on error.
 
 #### sendOwned
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t sendOwned(Buffer && buffer, int flags)
+virtual ssize_t sendOwned(Buffer && buffer, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:176
 
 Sends an owned payload buffer to the connected peer.
 
@@ -2559,9 +2986,13 @@ The buffer is moved through the adapter chain and retained by the transport laye
 
 #### removeReceiver
 
+`override`
+
 ```cpp
-void removeReceiver(SocketAdapter * adapter)
+void removeReceiver(SocketAdapter * adapter) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:182
 
 Remove the given receiver.
 
@@ -2573,9 +3004,13 @@ By default this function does nothing unless the given receiver matches the curr
 
 #### parser
 
+`nodiscard`
+
 ```cpp
-Parser & parser()
+[[nodiscard]] Parser & parser()
 ```
+
+Defined in src/http/include/icy/http/connection.h:185
 
 Returns the HTTP parser instance.
 
@@ -2585,9 +3020,13 @@ Returns the HTTP parser instance.
 
 #### connection
 
+`nodiscard`
+
 ```cpp
-Connection * connection()
+[[nodiscard]] Connection * connection()
 ```
+
+Defined in src/http/include/icy/http/connection.h:188
 
 Returns the owning [Connection](#connection-1) pointer, or nullptr if detached.
 
@@ -2600,6 +3039,8 @@ Returns the owning [Connection](#connection-1) pointer, or nullptr if detached.
 ```cpp
 void reset(net::SocketAdapter * sender, http::Request * request)
 ```
+
+Defined in src/http/include/icy/http/connection.h:195
 
 Resets the adapter for reuse with a new socket and request. Clears the parser state and re-wires the sender without reallocating. Used by the connection pool to avoid destroying/recreating adapters. 
 #### Parameters
@@ -2624,6 +3065,8 @@ Resets the adapter for reuse with a new socket and request. Clears the parser st
 Connection * _connection
 ```
 
+Defined in src/http/include/icy/http/connection.h:208
+
 ---
 
 {#_parser}
@@ -2634,16 +3077,18 @@ Connection * _connection
 Parser _parser
 ```
 
+Defined in src/http/include/icy/http/connection.h:209
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`onSocketRecv`](#onsocketrecv-4) `virtual` | SocketAdapter interface. |
-| `void` | [`onParserHeader`](#onparserheader) `virtual` | HTTP [Parser](#parser-1) interface. |
-| `void` | [`onParserHeadersEnd`](#onparserheadersend) `virtual` | Called when all HTTP headers have been parsed. |
-| `void` | [`onParserChunk`](#onparserchunk) `virtual` | Called for each chunk of body data received. |
-| `void` | [`onParserError`](#onparsererror) `virtual` | Called when a parse error occurs. |
-| `void` | [`onParserEnd`](#onparserend) `virtual` | Called when the HTTP message is fully parsed. |
+| `bool` | [`onSocketRecv`](#onsocketrecv-4) `virtual` `override` | SocketAdapter interface. |
+| `void` | [`onParserHeader`](#onparserheader) `virtual` `override` | HTTP [Parser](#parser-1) interface. |
+| `void` | [`onParserHeadersEnd`](#onparserheadersend) `virtual` `override` | Called when all HTTP headers have been parsed. |
+| `void` | [`onParserChunk`](#onparserchunk) `virtual` `override` | Called for each chunk of body data received. |
+| `void` | [`onParserError`](#onparsererror) `virtual` `override` | Called when a parse error occurs. |
+| `void` | [`onParserEnd`](#onparserend) `virtual` `override` | Called when the HTTP message is fully parsed. |
 
 ---
 
@@ -2651,11 +3096,13 @@ Parser _parser
 
 #### onSocketRecv
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress)
+virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:199
 
 SocketAdapter interface.
 
@@ -2665,11 +3112,13 @@ SocketAdapter interface.
 
 #### onParserHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onParserHeader(const std::string & name, const std::string & value)
+virtual void onParserHeader(const std::string & name, const std::string & value) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:202
 
 HTTP [Parser](#parser-1) interface.
 
@@ -2679,11 +3128,13 @@ HTTP [Parser](#parser-1) interface.
 
 #### onParserHeadersEnd
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onParserHeadersEnd(bool upgrade)
+virtual void onParserHeadersEnd(bool upgrade) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:203
 
 Called when all HTTP headers have been parsed. 
 #### Parameters
@@ -2695,11 +3146,13 @@ Called when all HTTP headers have been parsed.
 
 #### onParserChunk
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onParserChunk(const char * data, size_t len)
+virtual void onParserChunk(const char * data, size_t len) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:204
 
 Called for each chunk of body data received. 
 #### Parameters
@@ -2713,11 +3166,13 @@ Called for each chunk of body data received.
 
 #### onParserError
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onParserError(const icy::Error & err)
+virtual void onParserError(const icy::Error & err) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:205
 
 Called when a parse error occurs. 
 #### Parameters
@@ -2729,11 +3184,13 @@ Called when a parse error occurs.
 
 #### onParserEnd
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onParserEnd()
+virtual void onParserEnd() override
 ```
+
+Defined in src/http/include/icy/http/connection.h:206
 
 Called when the HTTP message is fully parsed.
 
@@ -2745,7 +3202,13 @@ Called when the HTTP message is fully parsed.
 #include <icy/http/server.h>
 ```
 
-LIFO connection pool for reusing [ServerConnection](#serverconnection) objects. Avoids per-request heap allocation by resetting and reusing connections instead of destroying and recreating them.
+```cpp
+class ConnectionPool
+```
+
+Defined in src/http/include/icy/http/server.h:291
+
+LIFO connection pool for reusing [ServerConnection](#serverconnection-1) objects. Avoids per-request heap allocation by resetting and reusing connections instead of destroying and recreating them.
 
 ### Public Methods
 
@@ -2754,7 +3217,7 @@ LIFO connection pool for reusing [ServerConnection](#serverconnection) objects. 
 | `ServerConnection::Ptr` | [`acquire`](#acquire) `inline` | Takes a connection from the pool for reuse. |
 | `bool` | [`release`](#release) `inline` | Returns a connection to the pool after use. |
 | `void` | [`setMaxSize`](#setmaxsize) `inline` | Sets the maximum number of connections the pool will hold. |
-| `size_t` | [`size`](#size) `const` `inline` | Returns the current number of connections held in the pool. |
+| `size_t` | [`size`](#size) `const` `inline` `nodiscard` | Returns the current number of connections held in the pool. |
 
 ---
 
@@ -2767,6 +3230,8 @@ LIFO connection pool for reusing [ServerConnection](#serverconnection) objects. 
 ```cpp
 inline ServerConnection::Ptr acquire()
 ```
+
+Defined in src/http/include/icy/http/server.h:296
 
 Takes a connection from the pool for reuse. 
 #### Returns
@@ -2783,6 +3248,8 @@ A pooled connection, or nullptr if the pool is empty.
 ```cpp
 inline bool release(ServerConnection::Ptr & conn)
 ```
+
+Defined in src/http/include/icy/http/server.h:307
 
 Returns a connection to the pool after use. 
 #### Parameters
@@ -2803,6 +3270,8 @@ true if accepted into the pool; false if the pool is full.
 inline void setMaxSize(size_t n)
 ```
 
+Defined in src/http/include/icy/http/server.h:316
+
 Sets the maximum number of connections the pool will hold. 
 #### Parameters
 * `n` Maximum pool capacity.
@@ -2813,11 +3282,13 @@ Sets the maximum number of connections the pool will hold.
 
 #### size
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t size() const
+[[nodiscard]] inline size_t size() const
 ```
+
+Defined in src/http/include/icy/http/server.h:319
 
 Returns the current number of connections held in the pool.
 
@@ -2838,6 +3309,8 @@ Returns the current number of connections held in the pool.
 std::vector< ServerConnection::Ptr > _pool
 ```
 
+Defined in src/http/include/icy/http/server.h:322
+
 ---
 
 {#_maxsize}
@@ -2848,13 +3321,21 @@ std::vector< ServerConnection::Ptr > _pool
 size_t _maxSize = 128
 ```
 
-{#connectionstream}
+Defined in src/http/include/icy/http/server.h:323
+
+{#connectionstream-1}
 
 ## ConnectionStream
 
 ```cpp
 #include <icy/http/connection.h>
 ```
+
+```cpp
+class ConnectionStream
+```
+
+Defined in src/http/include/icy/http/connection.h:261
 
 > **Inherits:** [`SocketAdapter`](net.md#socketadapter)
 
@@ -2879,6 +3360,8 @@ Packet stream wrapper for an HTTP connection.
 PacketStream Outgoing
 ```
 
+Defined in src/http/include/icy/http/connection.h:280
+
 The Outgoing stream is responsible for packetizing raw application data into the agreed upon HTTP format and sending it to the peer.
 
 ---
@@ -2890,6 +3373,8 @@ The Outgoing stream is responsible for packetizing raw application data into the
 ```cpp
 PacketStream Incoming
 ```
+
+Defined in src/http/include/icy/http/connection.h:286
 
 The Incoming stream emits incoming HTTP packets for processing by the application.
 
@@ -2905,6 +3390,8 @@ This is useful for example when writing incoming data to a file.
 ProgressSignal IncomingProgress
 ```
 
+Defined in src/http/include/icy/http/connection.h:288
+
 Fired on download progress.
 
 ---
@@ -2917,19 +3404,21 @@ Fired on download progress.
 ProgressSignal OutgoingProgress
 ```
 
+Defined in src/http/include/icy/http/connection.h:289
+
 Fired on upload progress.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ConnectionStream`](#connectionstream-1)  | Creates a [ConnectionStream](#connectionstream) wrapping the given HTTP connection. Wires the Outgoing stream emitter to the connection adapter and registers this stream to receive incoming data from the adapter. |
-| `ssize_t` | [`send`](#send-13) `virtual` | Send data via the Outgoing stream. |
-| `Connection::Ptr` | [`connection`](#connection-4)  | Return a reference to the underlying connection. |
+|  | [`ConnectionStream`](#connectionstream-2)  | Creates a [ConnectionStream](#connectionstream-1) wrapping the given HTTP connection. Wires the Outgoing stream emitter to the connection adapter and registers this stream to receive incoming data from the adapter. |
+| `ssize_t` | [`send`](#send-13) `virtual` `override` | Send data via the Outgoing stream. |
+| `Connection::Ptr` | [`connection`](#connection-4) `nodiscard` | Return a reference to the underlying connection. |
 
 ---
 
-{#connectionstream-1}
+{#connectionstream-2}
 
 #### ConnectionStream
 
@@ -2937,7 +3426,9 @@ Fired on upload progress.
 ConnectionStream(Connection::Ptr connection)
 ```
 
-Creates a [ConnectionStream](#connectionstream) wrapping the given HTTP connection. Wires the Outgoing stream emitter to the connection adapter and registers this stream to receive incoming data from the adapter. 
+Defined in src/http/include/icy/http/connection.h:268
+
+Creates a [ConnectionStream](#connectionstream-1) wrapping the given HTTP connection. Wires the Outgoing stream emitter to the connection adapter and registers this stream to receive incoming data from the adapter. 
 #### Parameters
 * `connection` The HTTP connection to wrap.
 
@@ -2947,11 +3438,13 @@ Creates a [ConnectionStream](#connectionstream) wrapping the given HTTP connecti
 
 #### send
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t send(const char * data, size_t len, int flags)
+virtual ssize_t send(const char * data, size_t len, int flags = 0) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:272
 
 Send data via the Outgoing stream.
 
@@ -2961,9 +3454,13 @@ Send data via the Outgoing stream.
 
 #### connection
 
+`nodiscard`
+
 ```cpp
-Connection::Ptr connection()
+[[nodiscard]] Connection::Ptr connection()
 ```
+
+Defined in src/http/include/icy/http/connection.h:275
 
 Return a reference to the underlying connection.
 
@@ -2983,11 +3480,13 @@ Return a reference to the underlying connection.
 Connection::Ptr _connection
 ```
 
+Defined in src/http/include/icy/http/connection.h:294
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`onSocketRecv`](#onsocketrecv-5) `virtual` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
+| `bool` | [`onSocketRecv`](#onsocketrecv-5) `virtual` `override` | Called when data is received from the socket. Forwards the event to all registered receivers in priority order. |
 
 ---
 
@@ -2995,11 +3494,13 @@ Connection::Ptr _connection
 
 #### onSocketRecv
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress)
+virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress) override
 ```
+
+Defined in src/http/include/icy/http/connection.h:292
 
 Called when data is received from the socket. Forwards the event to all registered receivers in priority order. 
 #### Parameters
@@ -3020,6 +3521,12 @@ true to stop propagation to subsequent receivers.
 #include <icy/http/cookie.h>
 ```
 
+```cpp
+class Cookie
+```
+
+Defined in src/http/include/icy/http/cookie.h:39
+
 HTTP cookie value plus its response/header attributes.
 
 A cookie is a small amount of information sent by a Web server to a Web browser, saved by the browser, and later sent back to the server. A cookie's value can uniquely identify a client, so cookies are commonly used for session management.
@@ -3038,26 +3545,26 @@ This class supports both the Version 0 (by Netscape) and Version 1 (by RFC 2109)
 |  | [`Cookie`](#cookie-4)  | Creates a cookie with the given name and value. The cookie never expires. |
 |  | [`Cookie`](#cookie-5)  | Creates the [Cookie](#cookie) by copying another one. |
 |  | [`~Cookie`](#cookie-6)  | Destroys the [Cookie](#cookie). |
-| `Cookie &` | [`operator=`](#operator-14)  | Assigns a cookie. |
+| `Cookie &` | [`operator=`](#operator-16)  | Assigns a cookie. |
 | `void` | [`setVersion`](#setversion)  | Sets the version of the cookie. |
-| `int` | [`getVersion`](#getversion) `const` `inline` | Returns the version of the cookie, which is either 0 or 1. |
+| `int` | [`getVersion`](#getversion) `const` `inline` `nodiscard` | Returns the version of the cookie, which is either 0 or 1. |
 | `void` | [`setName`](#setname)  | Sets the name of the cookie. |
-| `const std::string &` | [`getName`](#getname) `const` `inline` | Returns the name of the cookie. |
+| `const std::string &` | [`getName`](#getname) `const` `inline` `nodiscard` | Returns the name of the cookie. |
 | `void` | [`setValue`](#setvalue)  | Sets the value of the cookie. |
-| `const std::string &` | [`getValue`](#getvalue) `const` `inline` | Returns the value of the cookie. |
+| `const std::string &` | [`getValue`](#getvalue) `const` `inline` `nodiscard` | Returns the value of the cookie. |
 | `void` | [`setComment`](#setcomment)  | Sets the comment for the cookie. |
-| `const std::string &` | [`getComment`](#getcomment) `const` `inline` | Returns the comment for the cookie. |
+| `const std::string &` | [`getComment`](#getcomment) `const` `inline` `nodiscard` | Returns the comment for the cookie. |
 | `void` | [`setDomain`](#setdomain)  | Sets the domain for the cookie. |
-| `const std::string &` | [`getDomain`](#getdomain) `const` `inline` | Returns the domain for the cookie. |
+| `const std::string &` | [`getDomain`](#getdomain) `const` `inline` `nodiscard` | Returns the domain for the cookie. |
 | `void` | [`setPath`](#setpath)  | Sets the path for the cookie. |
-| `const std::string &` | [`getPath`](#getpath) `const` `inline` | Returns the path for the cookie. |
+| `const std::string &` | [`getPath`](#getpath) `const` `inline` `nodiscard` | Returns the path for the cookie. |
 | `void` | [`setSecure`](#setsecure)  | Sets the value of the secure flag for the cookie. |
-| `bool` | [`getSecure`](#getsecure) `const` `inline` | Returns the value of the secure flag for the cookie. |
+| `bool` | [`getSecure`](#getsecure) `const` `inline` `nodiscard` | Returns the value of the secure flag for the cookie. |
 | `void` | [`setMaxAge`](#setmaxage)  | Sets the maximum age in seconds for the cookie. |
-| `int` | [`getMaxAge`](#getmaxage) `const` `inline` | Returns the maximum age in seconds for the cookie. |
+| `int` | [`getMaxAge`](#getmaxage) `const` `inline` `nodiscard` | Returns the maximum age in seconds for the cookie. |
 | `void` | [`setHttpOnly`](#sethttponly)  | Sets the HttpOnly flag for the cookie. |
-| `bool` | [`getHttpOnly`](#gethttponly) `const` `inline` | Returns true if the cookie's HttpOnly flag is set. |
-| `std::string` | [`toString`](#tostring-5) `const` | Returns a std::string representation of the cookie, suitable for use in a Set-Cookie header. |
+| `bool` | [`getHttpOnly`](#gethttponly) `const` `inline` `nodiscard` | Returns true if the cookie's HttpOnly flag is set. |
+| `std::string` | [`toString`](#tostring-5) `const` `nodiscard` | Returns a std::string representation of the cookie, suitable for use in a Set-Cookie header. |
 
 ---
 
@@ -3068,6 +3575,8 @@ This class supports both the Version 0 (by Netscape) and Version 1 (by RFC 2109)
 ```cpp
 Cookie()
 ```
+
+Defined in src/http/include/icy/http/cookie.h:43
 
 Creates an empty [Cookie](#cookie).
 
@@ -3083,6 +3592,8 @@ Creates an empty [Cookie](#cookie).
 explicit Cookie(const std::string & name)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:47
+
 Creates a cookie with the given name. The cookie never expires.
 
 ---
@@ -3097,6 +3608,8 @@ Creates a cookie with the given name. The cookie never expires.
 explicit Cookie(const NVCollection & nvc)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:50
+
 Creates a cookie from the given [NVCollection](base.md#nvcollection).
 
 ---
@@ -3108,6 +3621,8 @@ Creates a cookie from the given [NVCollection](base.md#nvcollection).
 ```cpp
 Cookie(const std::string & name, const std::string & value)
 ```
+
+Defined in src/http/include/icy/http/cookie.h:58
 
 Creates a cookie with the given name and value. The cookie never expires.
 
@@ -3123,6 +3638,8 @@ Note: If value contains whitespace or non-alphanumeric characters, the value sho
 Cookie(const Cookie & cookie)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:61
+
 Creates the [Cookie](#cookie) by copying another one.
 
 ---
@@ -3135,17 +3652,21 @@ Creates the [Cookie](#cookie) by copying another one.
 ~Cookie()
 ```
 
+Defined in src/http/include/icy/http/cookie.h:64
+
 Destroys the [Cookie](#cookie).
 
 ---
 
-{#operator-14}
+{#operator-16}
 
 #### operator=
 
 ```cpp
 Cookie & operator=(const Cookie & cookie)
 ```
+
+Defined in src/http/include/icy/http/cookie.h:67
 
 Assigns a cookie.
 
@@ -3159,6 +3680,8 @@ Assigns a cookie.
 void setVersion(int version)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:73
+
 Sets the version of the cookie.
 
 Version must be either 0 (denoting a Netscape cookie) or 1 (denoting a RFC 2109 cookie).
@@ -3169,11 +3692,13 @@ Version must be either 0 (denoting a Netscape cookie) or 1 (denoting a RFC 2109 
 
 #### getVersion
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline int getVersion() const
+[[nodiscard]] inline int getVersion() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:77
 
 Returns the version of the cookie, which is either 0 or 1.
 
@@ -3187,6 +3712,8 @@ Returns the version of the cookie, which is either 0 or 1.
 void setName(const std::string & name)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:80
+
 Sets the name of the cookie.
 
 ---
@@ -3195,11 +3722,13 @@ Sets the name of the cookie.
 
 #### getName
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & getName() const
+[[nodiscard]] inline const std::string & getName() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:83
 
 Returns the name of the cookie.
 
@@ -3213,6 +3742,8 @@ Returns the name of the cookie.
 void setValue(const std::string & value)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:93
+
 Sets the value of the cookie.
 
 According to the cookie specification, the size of the value should not exceed 4 Kbytes.
@@ -3225,11 +3756,13 @@ Note: If value contains whitespace or non-alphanumeric characters, the value sho
 
 #### getValue
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & getValue() const
+[[nodiscard]] inline const std::string & getValue() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:96
 
 Returns the value of the cookie.
 
@@ -3243,6 +3776,8 @@ Returns the value of the cookie.
 void setComment(const std::string & comment)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:101
+
 Sets the comment for the cookie.
 
 Comments are only supported for version 1 cookies.
@@ -3253,11 +3788,13 @@ Comments are only supported for version 1 cookies.
 
 #### getComment
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & getComment() const
+[[nodiscard]] inline const std::string & getComment() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:104
 
 Returns the comment for the cookie.
 
@@ -3271,6 +3808,8 @@ Returns the comment for the cookie.
 void setDomain(const std::string & domain)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:107
+
 Sets the domain for the cookie.
 
 ---
@@ -3279,11 +3818,13 @@ Sets the domain for the cookie.
 
 #### getDomain
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & getDomain() const
+[[nodiscard]] inline const std::string & getDomain() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:110
 
 Returns the domain for the cookie.
 
@@ -3297,6 +3838,8 @@ Returns the domain for the cookie.
 void setPath(const std::string & path)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:113
+
 Sets the path for the cookie.
 
 ---
@@ -3305,11 +3848,13 @@ Sets the path for the cookie.
 
 #### getPath
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const std::string & getPath() const
+[[nodiscard]] inline const std::string & getPath() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:116
 
 Returns the path for the cookie.
 
@@ -3323,6 +3868,8 @@ Returns the path for the cookie.
 void setSecure(bool secure)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:120
+
 Sets the value of the secure flag for the cookie.
 
 ---
@@ -3331,11 +3878,13 @@ Sets the value of the secure flag for the cookie.
 
 #### getSecure
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool getSecure() const
+[[nodiscard]] inline bool getSecure() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:124
 
 Returns the value of the secure flag for the cookie.
 
@@ -3349,6 +3898,8 @@ Returns the value of the secure flag for the cookie.
 void setMaxAge(int maxAge)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:134
+
 Sets the maximum age in seconds for the cookie.
 
 A value of -1 causes the cookie to never expire on the client.
@@ -3361,11 +3912,13 @@ A value of 0 deletes the cookie on the client.
 
 #### getMaxAge
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline int getMaxAge() const
+[[nodiscard]] inline int getMaxAge() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:138
 
 Returns the maximum age in seconds for the cookie.
 
@@ -3376,8 +3929,10 @@ Returns the maximum age in seconds for the cookie.
 #### setHttpOnly
 
 ```cpp
-void setHttpOnly(bool flag)
+void setHttpOnly(bool flag = true)
 ```
+
+Defined in src/http/include/icy/http/cookie.h:141
 
 Sets the HttpOnly flag for the cookie.
 
@@ -3387,11 +3942,13 @@ Sets the HttpOnly flag for the cookie.
 
 #### getHttpOnly
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool getHttpOnly() const
+[[nodiscard]] inline bool getHttpOnly() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:144
 
 Returns true if the cookie's HttpOnly flag is set.
 
@@ -3401,11 +3958,13 @@ Returns true if the cookie's HttpOnly flag is set.
 
 #### toString
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string toString() const
+[[nodiscard]] std::string toString() const
 ```
+
+Defined in src/http/include/icy/http/cookie.h:148
 
 Returns a std::string representation of the cookie, suitable for use in a Set-Cookie header.
 
@@ -3428,6 +3987,8 @@ Returns a std::string representation of the cookie, suitable for use in a Set-Co
 static std::string escape(std::string_view str)
 ```
 
+Defined in src/http/include/icy/http/cookie.h:154
+
 Escapes the given std::string by replacing all non-alphanumeric characters with escape sequences in the form xx, where xx is the hexadecimal character code.
 
 ---
@@ -3441,6 +4002,8 @@ Escapes the given std::string by replacing all non-alphanumeric characters with 
 ```cpp
 static std::string unescape(std::string_view str)
 ```
+
+Defined in src/http/include/icy/http/cookie.h:159
 
 Unescapes the given std::string by replacing all escape sequences in the form xx with the respective characters.
 
@@ -3468,6 +4031,8 @@ Unescapes the given std::string by replacing all escape sequences in the form xx
 int _version
 ```
 
+Defined in src/http/include/icy/http/cookie.h:162
+
 ---
 
 {#_name}
@@ -3477,6 +4042,8 @@ int _version
 ```cpp
 std::string _name
 ```
+
+Defined in src/http/include/icy/http/cookie.h:163
 
 ---
 
@@ -3488,6 +4055,8 @@ std::string _name
 std::string _value
 ```
 
+Defined in src/http/include/icy/http/cookie.h:164
+
 ---
 
 {#_comment}
@@ -3497,6 +4066,8 @@ std::string _value
 ```cpp
 std::string _comment
 ```
+
+Defined in src/http/include/icy/http/cookie.h:165
 
 ---
 
@@ -3508,6 +4079,8 @@ std::string _comment
 std::string _domain
 ```
 
+Defined in src/http/include/icy/http/cookie.h:166
+
 ---
 
 {#_path}
@@ -3517,6 +4090,8 @@ std::string _domain
 ```cpp
 std::string _path
 ```
+
+Defined in src/http/include/icy/http/cookie.h:167
 
 ---
 
@@ -3528,6 +4103,8 @@ std::string _path
 bool _secure
 ```
 
+Defined in src/http/include/icy/http/cookie.h:168
+
 ---
 
 {#_maxage}
@@ -3537,6 +4114,8 @@ bool _secure
 ```cpp
 int _maxAge
 ```
+
+Defined in src/http/include/icy/http/cookie.h:169
 
 ---
 
@@ -3548,6 +4127,8 @@ int _maxAge
 bool _httpOnly
 ```
 
+Defined in src/http/include/icy/http/cookie.h:170
+
 {#filepart}
 
 ## FilePart
@@ -3555,6 +4136,12 @@ bool _httpOnly
 ```cpp
 #include <icy/http/form.h>
 ```
+
+```cpp
+class FilePart
+```
+
+Defined in src/http/include/icy/http/form.h:236
 
 > **Inherits:** [`FormPart`](#formpart)
 
@@ -3569,13 +4156,13 @@ Form part backed by a file on disk.
 |  | [`FilePart`](#filepart-3)  | Creates the [FilePart](#filepart) for the given path and MIME type. The given filename is used as part filename (see [filename()](#filename-1)) only. |
 |  | [`~FilePart`](#filepart-4) `virtual` | Destroys the [FilePart](#filepart). |
 | `void` | [`open`](#open-4) `virtual` | Opens the file for reading. |
-| `void` | [`reset`](#reset-8) `virtual` | Resets the file stream to the beginning and clears initial-write state. |
-| `bool` | [`writeChunk`](#writechunk) `virtual` | Writes the next chunk of the file to the [FormWriter](#formwriter). |
-| `void` | [`write`](#write-2) `virtual` | Writes the entire file content to the [FormWriter](#formwriter). |
-| `void` | [`write`](#write-3) `virtual` | Writes the entire file content to an output stream (used for content-length calculation). |
-| `const std::string &` | [`filename`](#filename-1) `const` | Returns the filename component of the file path (not the full path). |
-| `std::ifstream &` | [`stream`](#stream-3)  | Returns a reference to the underlying file input stream. |
-| `uint64_t` | [`length`](#length-1) `virtual` `const` | Returns the total file size in bytes. |
+| `void` | [`reset`](#reset-8) `virtual` `override` | Resets the file stream to the beginning and clears initial-write state. |
+| `bool` | [`writeChunk`](#writechunk) `virtual` `override` | Writes the next chunk of the file to the [FormWriter](#formwriter). |
+| `void` | [`write`](#write-2) `virtual` `override` | Writes the entire file content to the [FormWriter](#formwriter). |
+| `void` | [`write`](#write-3) `virtual` `override` | Writes the entire file content to an output stream (used for content-length calculation). |
+| `const std::string &` | [`filename`](#filename-1) `const` `nodiscard` | Returns the filename component of the file path (not the full path). |
+| `std::ifstream &` | [`stream`](#stream-3) `nodiscard` | Returns a reference to the underlying file input stream. |
+| `uint64_t` | [`length`](#length-1) `virtual` `const` `nodiscard` `override` | Returns the total file size in bytes. |
 
 ---
 
@@ -3586,6 +4173,8 @@ Form part backed by a file on disk.
 ```cpp
 FilePart(const std::string & path)
 ```
+
+Defined in src/http/include/icy/http/form.h:244
 
 Creates the [FilePart](#filepart) for the given path.
 
@@ -3603,6 +4192,8 @@ Throws an FileException if the file cannot be opened.
 FilePart(const std::string & path, const std::string & contentType)
 ```
 
+Defined in src/http/include/icy/http/form.h:250
+
 Creates the [FilePart](#filepart) for the given path and MIME type.
 
 Throws an FileException if the file cannot be opened.
@@ -3616,6 +4207,8 @@ Throws an FileException if the file cannot be opened.
 ```cpp
 FilePart(const std::string & path, const std::string & filename, const std::string & contentType)
 ```
+
+Defined in src/http/include/icy/http/form.h:257
 
 Creates the [FilePart](#filepart) for the given path and MIME type. The given filename is used as part filename (see [filename()](#filename-1)) only.
 
@@ -3633,6 +4226,8 @@ Throws an FileException if the file cannot be opened.
 virtual ~FilePart()
 ```
 
+Defined in src/http/include/icy/http/form.h:261
+
 Destroys the [FilePart](#filepart).
 
 ---
@@ -3647,6 +4242,8 @@ Destroys the [FilePart](#filepart).
 virtual void open()
 ```
 
+Defined in src/http/include/icy/http/form.h:265
+
 Opens the file for reading. 
 #### Exceptions
 * `std::runtime_error` if the file cannot be opened.
@@ -3657,11 +4254,13 @@ Opens the file for reading.
 
 #### reset
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void reset()
+virtual void reset() override
 ```
+
+Defined in src/http/include/icy/http/form.h:268
 
 Resets the file stream to the beginning and clears initial-write state.
 
@@ -3671,11 +4270,13 @@ Resets the file stream to the beginning and clears initial-write state.
 
 #### writeChunk
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool writeChunk(FormWriter & writer)
+virtual bool writeChunk(FormWriter & writer) override
 ```
+
+Defined in src/http/include/icy/http/form.h:273
 
 Writes the next chunk of the file to the [FormWriter](#formwriter). 
 #### Parameters
@@ -3690,11 +4291,13 @@ true if more data remains; false when the file is fully sent.
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(FormWriter & writer)
+virtual void write(FormWriter & writer) override
 ```
+
+Defined in src/http/include/icy/http/form.h:277
 
 Writes the entire file content to the [FormWriter](#formwriter). 
 #### Parameters
@@ -3706,11 +4309,13 @@ Writes the entire file content to the [FormWriter](#formwriter).
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(std::ostream & ostr)
+virtual void write(std::ostream & ostr) override
 ```
+
+Defined in src/http/include/icy/http/form.h:281
 
 Writes the entire file content to an output stream (used for content-length calculation). 
 #### Parameters
@@ -3722,11 +4327,13 @@ Writes the entire file content to an output stream (used for content-length calc
 
 #### filename
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & filename() const
+[[nodiscard]] const std::string & filename() const
 ```
+
+Defined in src/http/include/icy/http/form.h:284
 
 Returns the filename component of the file path (not the full path).
 
@@ -3736,9 +4343,13 @@ Returns the filename component of the file path (not the full path).
 
 #### stream
 
+`nodiscard`
+
 ```cpp
-std::ifstream & stream()
+[[nodiscard]] std::ifstream & stream()
 ```
+
+Defined in src/http/include/icy/http/form.h:287
 
 Returns a reference to the underlying file input stream.
 
@@ -3748,11 +4359,13 @@ Returns a reference to the underlying file input stream.
 
 #### length
 
-`virtual` `const`
+`virtual` `const` `nodiscard` `override`
 
 ```cpp
-virtual uint64_t length() const
+[[nodiscard]] virtual uint64_t length() const override
 ```
+
+Defined in src/http/include/icy/http/form.h:290
 
 Returns the total file size in bytes.
 
@@ -3775,6 +4388,8 @@ Returns the total file size in bytes.
 std::string _path
 ```
 
+Defined in src/http/include/icy/http/form.h:293
+
 ---
 
 {#_filename-1}
@@ -3784,6 +4399,8 @@ std::string _path
 ```cpp
 std::string _filename
 ```
+
+Defined in src/http/include/icy/http/form.h:294
 
 ---
 
@@ -3795,6 +4412,8 @@ std::string _filename
 std::ifstream _istr
 ```
 
+Defined in src/http/include/icy/http/form.h:295
+
 ---
 
 {#_filesize}
@@ -3805,6 +4424,8 @@ std::ifstream _istr
 uint64_t _fileSize
 ```
 
+Defined in src/http/include/icy/http/form.h:296
+
 {#formpart}
 
 ## FormPart
@@ -3813,7 +4434,13 @@ uint64_t _fileSize
 #include <icy/http/form.h>
 ```
 
-> **Subclassed by:** [`FilePart`](#filepart), [`StringPart`](#stringpart)
+```cpp
+class FormPart
+```
+
+Defined in src/http/include/icy/http/form.h:183
+
+> **Subclassed by:** [`FilePart`](#filepart), [`StringPart`](#stringpart-1)
 
 An implementation of [FormPart](#formpart).
 
@@ -3824,13 +4451,13 @@ An implementation of [FormPart](#formpart).
 |  | [`FormPart`](#formpart-1)  | Creates the [FormPart](#formpart) with the given MIME content type. |
 |  | [`~FormPart`](#formpart-2) `virtual` | Destroys the [FormPart](#formpart). |
 | `void` | [`reset`](#reset-9) `virtual` | Resets the internal state and write position to the beginning. Called by [FormWriter](#formwriter) when retrying or recalculating content length. |
-| `bool` | [`writeChunk`](#writechunk-1)  | Writes the next chunk of data to the [FormWriter](#formwriter). |
-| `void` | [`write`](#write-4)  | Writes the entire part data to the [FormWriter](#formwriter) in one call. |
-| `void` | [`write`](#write-5)  | Writes the entire part data to an output stream (used for content-length calculation). |
-| `NVCollection &` | [`headers`](#headers-1)  | Returns the extra MIME headers for this part (e.g. Content-Disposition). |
-| `bool` | [`initialWrite`](#initialwrite) `virtual` `const` | Returns true if this is the first write call since construction or [reset()](#reset-9). |
-| `const std::string &` | [`contentType`](#contenttype-1) `const` | Returns the MIME content type for this part. |
-| `uint64_t` | [`length`](#length-2) `const` | Returns the total byte length of the part data. |
+| `bool` | [`writeChunk`](#writechunk-1) `virtual` | Writes the next chunk of data to the [FormWriter](#formwriter). |
+| `void` | [`write`](#write-4) `virtual` | Writes the entire part data to the [FormWriter](#formwriter) in one call. |
+| `void` | [`write`](#write-5) `virtual` | Writes the entire part data to an output stream (used for content-length calculation). |
+| `NVCollection &` | [`headers`](#headers-1) `nodiscard` | Returns the extra MIME headers for this part (e.g. Content-Disposition). |
+| `bool` | [`initialWrite`](#initialwrite) `virtual` `const` `nodiscard` | Returns true if this is the first write call since construction or [reset()](#reset-9). |
+| `const std::string &` | [`contentType`](#contenttype-1) `const` `nodiscard` | Returns the MIME content type for this part. |
+| `uint64_t` | [`length`](#length-2) `virtual` `const` `nodiscard` | Returns the total byte length of the part data. |
 
 ---
 
@@ -3839,8 +4466,10 @@ An implementation of [FormPart](#formpart).
 #### FormPart
 
 ```cpp
-FormPart(const std::string & contentType)
+FormPart(const std::string & contentType = "application/octet-stream")
 ```
+
+Defined in src/http/include/icy/http/form.h:188
 
 Creates the [FormPart](#formpart) with the given MIME content type. 
 #### Parameters
@@ -3858,6 +4487,8 @@ Creates the [FormPart](#formpart) with the given MIME content type.
 virtual ~FormPart()
 ```
 
+Defined in src/http/include/icy/http/form.h:191
+
 Destroys the [FormPart](#formpart).
 
 ---
@@ -3872,6 +4503,8 @@ Destroys the [FormPart](#formpart).
 virtual void reset()
 ```
 
+Defined in src/http/include/icy/http/form.h:195
+
 Resets the internal state and write position to the beginning. Called by [FormWriter](#formwriter) when retrying or recalculating content length.
 
 ---
@@ -3880,9 +4513,13 @@ Resets the internal state and write position to the beginning. Called by [FormWr
 
 #### writeChunk
 
+`virtual`
+
 ```cpp
-bool writeChunk(FormWriter & writer)
+virtual bool writeChunk(FormWriter & writer)
 ```
+
+Defined in src/http/include/icy/http/form.h:200
 
 Writes the next chunk of data to the [FormWriter](#formwriter). 
 #### Parameters
@@ -3897,9 +4534,13 @@ true if more data remains to be written; false when complete.
 
 #### write
 
+`virtual`
+
 ```cpp
-void write(FormWriter & writer)
+virtual void write(FormWriter & writer)
 ```
+
+Defined in src/http/include/icy/http/form.h:204
 
 Writes the entire part data to the [FormWriter](#formwriter) in one call. 
 #### Parameters
@@ -3911,9 +4552,13 @@ Writes the entire part data to the [FormWriter](#formwriter) in one call.
 
 #### write
 
+`virtual`
+
 ```cpp
-void write(std::ostream & ostr)
+virtual void write(std::ostream & ostr)
 ```
+
+Defined in src/http/include/icy/http/form.h:208
 
 Writes the entire part data to an output stream (used for content-length calculation). 
 #### Parameters
@@ -3925,9 +4570,13 @@ Writes the entire part data to an output stream (used for content-length calcula
 
 #### headers
 
+`nodiscard`
+
 ```cpp
-NVCollection & headers()
+[[nodiscard]] NVCollection & headers()
 ```
+
+Defined in src/http/include/icy/http/form.h:211
 
 Returns the extra MIME headers for this part (e.g. Content-Disposition).
 
@@ -3937,11 +4586,13 @@ Returns the extra MIME headers for this part (e.g. Content-Disposition).
 
 #### initialWrite
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual bool initialWrite() const
+[[nodiscard]] virtual bool initialWrite() const
 ```
+
+Defined in src/http/include/icy/http/form.h:214
 
 Returns true if this is the first write call since construction or [reset()](#reset-9).
 
@@ -3951,11 +4602,13 @@ Returns true if this is the first write call since construction or [reset()](#re
 
 #### contentType
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & contentType() const
+[[nodiscard]] const std::string & contentType() const
 ```
+
+Defined in src/http/include/icy/http/form.h:217
 
 Returns the MIME content type for this part.
 
@@ -3965,11 +4618,13 @@ Returns the MIME content type for this part.
 
 #### length
 
-`const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-uint64_t length() const
+[[nodiscard]] virtual uint64_t length() const
 ```
+
+Defined in src/http/include/icy/http/form.h:220
 
 Returns the total byte length of the part data.
 
@@ -3992,6 +4647,8 @@ Returns the total byte length of the part data.
 std::string _contentType
 ```
 
+Defined in src/http/include/icy/http/form.h:223
+
 ---
 
 {#_length}
@@ -4001,6 +4658,8 @@ std::string _contentType
 ```cpp
 uint64_t _length
 ```
+
+Defined in src/http/include/icy/http/form.h:224
 
 ---
 
@@ -4012,6 +4671,8 @@ uint64_t _length
 NVCollection _headers
 ```
 
+Defined in src/http/include/icy/http/form.h:225
+
 ---
 
 {#_initialwrite}
@@ -4022,6 +4683,8 @@ NVCollection _headers
 bool _initialWrite
 ```
 
+Defined in src/http/include/icy/http/form.h:226
+
 {#formwriter}
 
 ## FormWriter
@@ -4030,11 +4693,61 @@ bool _initialWrite
 #include <icy/http/form.h>
 ```
 
+```cpp
+class FormWriter
+```
+
+Defined in src/http/include/icy/http/form.h:42
+
 > **Inherits:** [`NVCollection`](base.md#nvcollection), [`PacketStreamAdapter`](base.md#packetstreamadapter), [`Startable`](base.md#startable)
 
 [FormWriter](#formwriter) is an HTTP client connection adapter for writing HTML forms.
 
 This class runs in its own thread so as not to block the event loop while uploading big files. Class members are not synchronized hence they should not be accessed while the form is sending, not that there would be any reason to do so.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`FormPart`](#formpart-3)  |  |
+| [`FilePart`](#filepart-5)  |  |
+| [`StringPart`](#stringpart)  |  |
+
+---
+
+{#formpart-3}
+
+#### FormPart
+
+```cpp
+friend class FormPart
+```
+
+Defined in src/http/include/icy/http/form.h:152
+
+---
+
+{#filepart-5}
+
+#### FilePart
+
+```cpp
+friend class FilePart
+```
+
+Defined in src/http/include/icy/http/form.h:153
+
+---
+
+{#stringpart}
+
+#### StringPart
+
+```cpp
+friend class StringPart
+```
+
+Defined in src/http/include/icy/http/form.h:154
 
 ### Public Attributes
 
@@ -4052,6 +4765,8 @@ This class runs in its own thread so as not to block the event loop while upload
 PacketSignal emitter
 ```
 
+Defined in src/http/include/icy/http/form.h:122
+
 The outgoing packet emitter.
 
 ### Public Methods
@@ -4062,18 +4777,18 @@ The outgoing packet emitter.
 | `void` | [`addPart`](#addpart)  | Adds a part or file attachment to the multipart form. |
 | `void` | [`start`](#start-10) `virtual` | Starts the sending thread. |
 | `void` | [`stop`](#stop-8) `virtual` | Stops the sending thread. |
-| `bool` | [`complete`](#complete-1) `const` | Returns true if the request is complete. |
-| `bool` | [`cancelled`](#cancelled-1) `const` | Returns true if the request is cancelled. |
+| `bool` | [`complete`](#complete-1) `const` `nodiscard` | Returns true if the request is complete. |
+| `bool` | [`cancelled`](#cancelled-1) `const` `nodiscard` | Returns true if the request is cancelled. |
 | `void` | [`prepareSubmit`](#preparesubmit)  | Prepares the outgoing HTTP request object for submitting the form. |
 | `uint64_t` | [`calculateMultipartContentLength`](#calculatemultipartcontentlength)  | Processes the entire form body and computes its total byte length. Only meaningful for multipart/form-data when not using chunked encoding. |
 | `void` | [`writeUrl`](#writeurl)  | Writes the complete "application/x-www-form-urlencoded" encoded body to `ostr`. All key-value pairs from the [NVCollection](base.md#nvcollection) base are percent-encoded and joined with '&'. |
 | `void` | [`writeMultipartChunk`](#writemultipartchunk)  | Writes the next pending multipart chunk to the connection. Non-blocking; intended to be called repeatedly from the event loop until all parts have been sent. |
 | `void` | [`writeAsync`](#writeasync)  | Writes the next message chunk from the background runner thread. Called by the [Runner](base.md#runner); do not call directly. |
 | `void` | [`setEncoding`](#setencoding)  | Sets the MIME encoding used for submitting the form. Must be set before [prepareSubmit()](#preparesubmit) is called. |
-| `const std::string &` | [`encoding`](#encoding) `const` | Returns the encoding used for posting the form. |
+| `const std::string &` | [`encoding`](#encoding) `const` `nodiscard` | Returns the encoding used for posting the form. |
 | `void` | [`setBoundary`](#setboundary)  | Sets the MIME boundary string used to delimit multipart form parts. If not set, a random boundary is generated by [prepareSubmit()](#preparesubmit). Must be set before [prepareSubmit()](#preparesubmit) is called. |
-| `const std::string &` | [`boundary`](#boundary) `const` | Returns the MIME boundary used for writing multipart form data. |
-| `ConnectionStream &` | [`connection`](#connection-5)  | The associated HTTP client connection. |
+| `const std::string &` | [`boundary`](#boundary) `const` `nodiscard` | Returns the MIME boundary used for writing multipart form data. |
+| `ConnectionStream &` | [`connection`](#connection-5) `nodiscard` | The associated HTTP client connection. |
 
 ---
 
@@ -4087,6 +4802,8 @@ The outgoing packet emitter.
 virtual ~FormWriter()
 ```
 
+Defined in src/http/include/icy/http/form.h:57
+
 Destroys the [FormWriter](#formwriter).
 
 ---
@@ -4098,6 +4815,8 @@ Destroys the [FormWriter](#formwriter).
 ```cpp
 void addPart(const std::string & name, FormPart * part)
 ```
+
+Defined in src/http/include/icy/http/form.h:65
 
 Adds a part or file attachment to the multipart form.
 
@@ -4119,6 +4838,8 @@ The [FormWriter](#formwriter) takes ownership of `part` and deletes it when done
 virtual void start()
 ```
 
+Defined in src/http/include/icy/http/form.h:68
+
 Starts the sending thread.
 
 ---
@@ -4133,6 +4854,8 @@ Starts the sending thread.
 virtual void stop()
 ```
 
+Defined in src/http/include/icy/http/form.h:71
+
 Stops the sending thread.
 
 ---
@@ -4141,11 +4864,13 @@ Stops the sending thread.
 
 #### complete
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool complete() const
+[[nodiscard]] bool complete() const
 ```
+
+Defined in src/http/include/icy/http/form.h:74
 
 Returns true if the request is complete.
 
@@ -4155,11 +4880,13 @@ Returns true if the request is complete.
 
 #### cancelled
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool cancelled() const
+[[nodiscard]] bool cancelled() const
 ```
+
+Defined in src/http/include/icy/http/form.h:77
 
 Returns true if the request is cancelled.
 
@@ -4173,6 +4900,8 @@ Returns true if the request is cancelled.
 void prepareSubmit()
 ```
 
+Defined in src/http/include/icy/http/form.h:80
+
 Prepares the outgoing HTTP request object for submitting the form.
 
 ---
@@ -4184,6 +4913,8 @@ Prepares the outgoing HTTP request object for submitting the form.
 ```cpp
 uint64_t calculateMultipartContentLength()
 ```
+
+Defined in src/http/include/icy/http/form.h:85
 
 Processes the entire form body and computes its total byte length. Only meaningful for multipart/form-data when not using chunked encoding. 
 #### Returns
@@ -4199,6 +4930,8 @@ Total content length in bytes.
 void writeUrl(std::ostream & ostr)
 ```
 
+Defined in src/http/include/icy/http/form.h:90
+
 Writes the complete "application/x-www-form-urlencoded" encoded body to `ostr`. All key-value pairs from the [NVCollection](base.md#nvcollection) base are percent-encoded and joined with '&'. 
 #### Parameters
 * `ostr` Output stream to write to.
@@ -4213,6 +4946,8 @@ Writes the complete "application/x-www-form-urlencoded" encoded body to `ostr`. 
 void writeMultipartChunk()
 ```
 
+Defined in src/http/include/icy/http/form.h:95
+
 Writes the next pending multipart chunk to the connection. Non-blocking; intended to be called repeatedly from the event loop until all parts have been sent.
 
 ---
@@ -4224,6 +4959,8 @@ Writes the next pending multipart chunk to the connection. Non-blocking; intende
 ```cpp
 void writeAsync()
 ```
+
+Defined in src/http/include/icy/http/form.h:99
 
 Writes the next message chunk from the background runner thread. Called by the [Runner](base.md#runner); do not call directly.
 
@@ -4237,6 +4974,8 @@ Writes the next message chunk from the background runner thread. Called by the [
 void setEncoding(const std::string & encoding)
 ```
 
+Defined in src/http/include/icy/http/form.h:104
+
 Sets the MIME encoding used for submitting the form. Must be set before [prepareSubmit()](#preparesubmit) is called. 
 #### Parameters
 * `encoding` MIME type: ENCODING_URL or ENCODING_MULTIPART_FORM.
@@ -4247,11 +4986,13 @@ Sets the MIME encoding used for submitting the form. Must be set before [prepare
 
 #### encoding
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & encoding() const
+[[nodiscard]] const std::string & encoding() const
 ```
+
+Defined in src/http/include/icy/http/form.h:107
 
 Returns the encoding used for posting the form.
 
@@ -4265,6 +5006,8 @@ Returns the encoding used for posting the form.
 void setBoundary(const std::string & boundary)
 ```
 
+Defined in src/http/include/icy/http/form.h:113
+
 Sets the MIME boundary string used to delimit multipart form parts. If not set, a random boundary is generated by [prepareSubmit()](#preparesubmit). Must be set before [prepareSubmit()](#preparesubmit) is called. 
 #### Parameters
 * `boundary` Boundary string (without leading "--").
@@ -4275,11 +5018,13 @@ Sets the MIME boundary string used to delimit multipart form parts. If not set, 
 
 #### boundary
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & boundary() const
+[[nodiscard]] const std::string & boundary() const
 ```
+
+Defined in src/http/include/icy/http/form.h:116
 
 Returns the MIME boundary used for writing multipart form data.
 
@@ -4289,9 +5034,13 @@ Returns the MIME boundary used for writing multipart form data.
 
 #### connection
 
+`nodiscard`
+
 ```cpp
-ConnectionStream & connection()
+[[nodiscard]] ConnectionStream & connection()
 ```
+
+Defined in src/http/include/icy/http/form.h:119
 
 The associated HTTP client connection.
 
@@ -4315,6 +5064,8 @@ The associated HTTP client connection.
 const char * ENCODING_URL
 ```
 
+Defined in src/http/include/icy/http/form.h:124
+
 "application/x-www-form-urlencoded"
 
 ---
@@ -4329,6 +5080,8 @@ const char * ENCODING_URL
 const char * ENCODING_MULTIPART_FORM
 ```
 
+Defined in src/http/include/icy/http/form.h:125
+
 "multipart/form-data"
 
 ---
@@ -4342,6 +5095,8 @@ const char * ENCODING_MULTIPART_FORM
 ```cpp
 const char * ENCODING_MULTIPART_RELATED
 ```
+
+Defined in src/http/include/icy/http/form.h:126
 
 "multipart/related" [http://tools.ietf.org/html/rfc2387](http://tools.ietf.org/html/rfc2387)
 
@@ -4360,8 +5115,10 @@ const char * ENCODING_MULTIPART_RELATED
 `static`
 
 ```cpp
-static FormWriter * create(ConnectionStream & conn, const std::string & encoding)
+static FormWriter * create(ConnectionStream & conn, const std::string & encoding = FormWriter::ENCODING_URL)
 ```
+
+Defined in src/http/include/icy/http/form.h:54
 
 Creates a [FormWriter](#formwriter) for the given connection and encoding.
 
@@ -4398,6 +5155,8 @@ Heap-allocated [FormWriter](#formwriter). The caller owns the returned pointer.
 ConnectionStream & _stream
 ```
 
+Defined in src/http/include/icy/http/form.h:165
+
 ---
 
 {#_runner}
@@ -4407,6 +5166,8 @@ ConnectionStream & _stream
 ```cpp
 std::shared_ptr< Runner > _runner
 ```
+
+Defined in src/http/include/icy/http/form.h:166
 
 ---
 
@@ -4418,6 +5179,8 @@ std::shared_ptr< Runner > _runner
 std::string _encoding
 ```
 
+Defined in src/http/include/icy/http/form.h:167
+
 ---
 
 {#_boundary}
@@ -4427,6 +5190,8 @@ std::string _encoding
 ```cpp
 std::string _boundary
 ```
+
+Defined in src/http/include/icy/http/form.h:168
 
 ---
 
@@ -4438,6 +5203,8 @@ std::string _boundary
 PartQueue _parts
 ```
 
+Defined in src/http/include/icy/http/form.h:169
+
 ---
 
 {#_fileslength}
@@ -4447,6 +5214,8 @@ PartQueue _parts
 ```cpp
 uint64_t _filesLength
 ```
+
+Defined in src/http/include/icy/http/form.h:170
 
 ---
 
@@ -4458,6 +5227,8 @@ uint64_t _filesLength
 int _writeState
 ```
 
+Defined in src/http/include/icy/http/form.h:171
+
 ---
 
 {#_initial}
@@ -4467,6 +5238,8 @@ int _writeState
 ```cpp
 bool _initial
 ```
+
+Defined in src/http/include/icy/http/form.h:172
 
 ---
 
@@ -4478,6 +5251,8 @@ bool _initial
 bool _complete
 ```
 
+Defined in src/http/include/icy/http/form.h:173
+
 ### Protected Methods
 
 | Return | Name | Description |
@@ -4487,7 +5262,7 @@ bool _complete
 |  | [`FormWriter`](#formwriter-4)  | Deleted constructor. |
 | `void` | [`writePartHeader`](#writepartheader)  | Writes the message boundary std::string, followed by the message header to the output stream. |
 | `void` | [`writeEnd`](#writeend)  | Writes the final boundary std::string to the output stream. |
-| `void` | [`updateProgress`](#updateprogress) `virtual` | Updates the upload progress via the associated [ConnectionStream](#connectionstream) object. |
+| `void` | [`updateProgress`](#updateprogress) `virtual` | Updates the upload progress via the associated [ConnectionStream](#connectionstream-1) object. |
 
 ---
 
@@ -4496,8 +5271,10 @@ bool _complete
 #### FormWriter
 
 ```cpp
-FormWriter(ConnectionStream & conn, std::shared_ptr< Runner > runner, const std::string & encoding)
+FormWriter(ConnectionStream & conn, std::shared_ptr< Runner > runner, const std::string & encoding = FormWriter::ENCODING_URL)
 ```
+
+Defined in src/http/include/icy/http/form.h:130
 
 Creates the [FormWriter](#formwriter) that uses the given encoding.
 
@@ -4511,6 +5288,8 @@ Creates the [FormWriter](#formwriter) that uses the given encoding.
 FormWriter(const FormWriter &) = delete
 ```
 
+Defined in src/http/include/icy/http/form.h:133
+
 Deleted constructor.
 
 ---
@@ -4522,6 +5301,8 @@ Deleted constructor.
 ```cpp
 FormWriter(FormWriter &&) = delete
 ```
+
+Defined in src/http/include/icy/http/form.h:135
 
 Deleted constructor.
 
@@ -4535,6 +5316,8 @@ Deleted constructor.
 void writePartHeader(const NVCollection & header, std::ostream & ostr)
 ```
 
+Defined in src/http/include/icy/http/form.h:140
+
 Writes the message boundary std::string, followed by the message header to the output stream.
 
 ---
@@ -4546,6 +5329,8 @@ Writes the message boundary std::string, followed by the message header to the o
 ```cpp
 void writeEnd(std::ostream & ostr)
 ```
+
+Defined in src/http/include/icy/http/form.h:143
 
 Writes the final boundary std::string to the output stream.
 
@@ -4561,7 +5346,9 @@ Writes the final boundary std::string to the output stream.
 virtual void updateProgress(int nread)
 ```
 
-Updates the upload progress via the associated [ConnectionStream](#connectionstream) object.
+Defined in src/http/include/icy/http/form.h:150
+
+Updates the upload progress via the associated [ConnectionStream](#connectionstream-1) object.
 
 {#part}
 
@@ -4570,6 +5357,12 @@ Updates the upload progress via the associated [ConnectionStream](#connectionstr
 ```cpp
 #include <icy/http/form.h>
 ```
+
+```cpp
+struct Part
+```
+
+Defined in src/http/include/icy/http/form.h:157
 
 Individual part within a multipart form submission.
 
@@ -4590,6 +5383,8 @@ Individual part within a multipart form submission.
 std::string name
 ```
 
+Defined in src/http/include/icy/http/form.h:159
+
 ---
 
 {#part-1}
@@ -4600,6 +5395,8 @@ std::string name
 std::unique_ptr< FormPart > part
 ```
 
+Defined in src/http/include/icy/http/form.h:160
+
 {#message}
 
 ## Message
@@ -4607,6 +5404,12 @@ std::unique_ptr< FormPart > part
 ```cpp
 #include <icy/http/message.h>
 ```
+
+```cpp
+class Message
+```
+
+Defined in src/http/include/icy/http/message.h:28
 
 > **Inherits:** [`NVCollection`](base.md#nvcollection)
 > **Subclassed by:** [`Request`](#request-4), [`Response`](#response-1)
@@ -4620,18 +5423,18 @@ Defines the common properties of all HTTP messages. These are version, content l
 | Return | Name | Description |
 |--------|------|-------------|
 | `void` | [`setVersion`](#setversion-1)  | Sets the HTTP version for this message. |
-| `const std::string &` | [`getVersion`](#getversion-1) `const` | Returns the HTTP version for this message. |
+| `const std::string &` | [`getVersion`](#getversion-1) `const` `nodiscard` | Returns the HTTP version for this message. |
 | `void` | [`setContentLength`](#setcontentlength)  | Sets the Content-Length header. |
-| `uint64_t` | [`getContentLength`](#getcontentlength) `const` | Returns the content length for this message, which may be UNKNOWN_CONTENT_LENGTH if no Content-Length header is present. |
-| `bool` | [`hasContentLength`](#hascontentlength) `const` | Returns true if a Content-Length header is present. |
+| `uint64_t` | [`getContentLength`](#getcontentlength) `const` `nodiscard` | Returns the content length for this message, which may be UNKNOWN_CONTENT_LENGTH if no Content-Length header is present. |
+| `bool` | [`hasContentLength`](#hascontentlength) `const` `nodiscard` | Returns true if a Content-Length header is present. |
 | `void` | [`setTransferEncoding`](#settransferencoding)  | Sets the transfer encoding for this message. |
-| `const std::string &` | [`getTransferEncoding`](#gettransferencoding) `const` | Returns the transfer encoding used for this message. |
+| `const std::string &` | [`getTransferEncoding`](#gettransferencoding) `const` `nodiscard` | Returns the transfer encoding used for this message. |
 | `void` | [`setChunkedTransferEncoding`](#setchunkedtransferencoding)  | If flag is true, sets the Transfer-Encoding header to chunked. Otherwise, removes the Transfer-Encoding header. |
-| `bool` | [`isChunkedTransferEncoding`](#ischunkedtransferencoding) `const` | Returns true if the Transfer-Encoding header is set and its value is chunked. |
+| `bool` | [`isChunkedTransferEncoding`](#ischunkedtransferencoding) `const` `nodiscard` | Returns true if the Transfer-Encoding header is set and its value is chunked. |
 | `void` | [`setContentType`](#setcontenttype)  | Sets the content type for this message. |
-| `const std::string &` | [`getContentType`](#getcontenttype) `const` | Returns the content type for this message. |
+| `const std::string &` | [`getContentType`](#getcontenttype) `const` `nodiscard` | Returns the content type for this message. |
 | `void` | [`setKeepAlive`](#setkeepalive-1)  | Sets the value of the [Connection](#connection-1) header field. |
-| `bool` | [`getKeepAlive`](#getkeepalive) `const` | Returns true if |
+| `bool` | [`getKeepAlive`](#getkeepalive) `const` `nodiscard` | Returns true if |
 | `void` | [`write`](#write-6) `virtual` `const` | Writes the message header to the given output stream. |
 | `void` | [`write`](#write-7) `virtual` `const` | Writes the message header to the given output string. |
 | `void` | [`write`](#write-8) `virtual` `const` | Writes the message header directly into a byte buffer. |
@@ -4646,6 +5449,8 @@ Defines the common properties of all HTTP messages. These are version, content l
 void setVersion(const std::string & version)
 ```
 
+Defined in src/http/include/icy/http/message.h:32
+
 Sets the HTTP version for this message.
 
 ---
@@ -4654,11 +5459,13 @@ Sets the HTTP version for this message.
 
 #### getVersion
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getVersion() const
+[[nodiscard]] const std::string & getVersion() const
 ```
+
+Defined in src/http/include/icy/http/message.h:35
 
 Returns the HTTP version for this message.
 
@@ -4672,6 +5479,8 @@ Returns the HTTP version for this message.
 void setContentLength(uint64_t length)
 ```
 
+Defined in src/http/include/icy/http/message.h:41
+
 Sets the Content-Length header.
 
 If length is UNKNOWN_CONTENT_LENGTH, removes the Content-Length header.
@@ -4682,11 +5491,13 @@ If length is UNKNOWN_CONTENT_LENGTH, removes the Content-Length header.
 
 #### getContentLength
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-uint64_t getContentLength() const
+[[nodiscard]] uint64_t getContentLength() const
 ```
+
+Defined in src/http/include/icy/http/message.h:46
 
 Returns the content length for this message, which may be UNKNOWN_CONTENT_LENGTH if no Content-Length header is present.
 
@@ -4696,11 +5507,13 @@ Returns the content length for this message, which may be UNKNOWN_CONTENT_LENGTH
 
 #### hasContentLength
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasContentLength() const
+[[nodiscard]] bool hasContentLength() const
 ```
+
+Defined in src/http/include/icy/http/message.h:49
 
 Returns true if a Content-Length header is present.
 
@@ -4714,6 +5527,8 @@ Returns true if a Content-Length header is present.
 void setTransferEncoding(const std::string & transferEncoding)
 ```
 
+Defined in src/http/include/icy/http/message.h:55
+
 Sets the transfer encoding for this message.
 
 The value should be either IDENTITY_TRANSFER_CODING or CHUNKED_TRANSFER_CODING.
@@ -4724,11 +5539,13 @@ The value should be either IDENTITY_TRANSFER_CODING or CHUNKED_TRANSFER_CODING.
 
 #### getTransferEncoding
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getTransferEncoding() const
+[[nodiscard]] const std::string & getTransferEncoding() const
 ```
+
+Defined in src/http/include/icy/http/message.h:62
 
 Returns the transfer encoding used for this message.
 
@@ -4744,6 +5561,8 @@ Normally, this is the value of the Transfer-Encoding header field. If no such fi
 void setChunkedTransferEncoding(bool flag)
 ```
 
+Defined in src/http/include/icy/http/message.h:66
+
 If flag is true, sets the Transfer-Encoding header to chunked. Otherwise, removes the Transfer-Encoding header.
 
 ---
@@ -4752,11 +5571,13 @@ If flag is true, sets the Transfer-Encoding header to chunked. Otherwise, remove
 
 #### isChunkedTransferEncoding
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool isChunkedTransferEncoding() const
+[[nodiscard]] bool isChunkedTransferEncoding() const
 ```
+
+Defined in src/http/include/icy/http/message.h:70
 
 Returns true if the Transfer-Encoding header is set and its value is chunked.
 
@@ -4770,6 +5591,8 @@ Returns true if the Transfer-Encoding header is set and its value is chunked.
 void setContentType(const std::string & contentType)
 ```
 
+Defined in src/http/include/icy/http/message.h:76
+
 Sets the content type for this message.
 
 Specify NO_CONTENT_TYPE to remove the Content-Type header.
@@ -4780,11 +5603,13 @@ Specify NO_CONTENT_TYPE to remove the Content-Type header.
 
 #### getContentType
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getContentType() const
+[[nodiscard]] const std::string & getContentType() const
 ```
+
+Defined in src/http/include/icy/http/message.h:82
 
 Returns the content type for this message.
 
@@ -4800,6 +5625,8 @@ If no Content-Type header is present, returns UNKNOWN_CONTENT_TYPE.
 void setKeepAlive(bool keepAlive)
 ```
 
+Defined in src/http/include/icy/http/message.h:88
+
 Sets the value of the [Connection](#connection-1) header field.
 
 The value is set to "Keep-Alive" if keepAlive is true, or to "Close" otherwise.
@@ -4810,11 +5637,13 @@ The value is set to "Keep-Alive" if keepAlive is true, or to "Close" otherwise.
 
 #### getKeepAlive
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool getKeepAlive() const
+[[nodiscard]] bool getKeepAlive() const
 ```
+
+Defined in src/http/include/icy/http/message.h:94
 
 Returns true if
 
@@ -4834,6 +5663,8 @@ Returns true if
 virtual void write(std::ostream & ostr) const
 ```
 
+Defined in src/http/include/icy/http/message.h:102
+
 Writes the message header to the given output stream.
 
 The format is one name-value pair per line, with name and value separated by a colon and lines delimited by a carriage return and a linefeed character. See RFC 2822 for details.
@@ -4850,6 +5681,8 @@ The format is one name-value pair per line, with name and value separated by a c
 virtual void write(std::string & str) const
 ```
 
+Defined in src/http/include/icy/http/message.h:105
+
 Writes the message header to the given output string.
 
 ---
@@ -4863,6 +5696,8 @@ Writes the message header to the given output string.
 ```cpp
 virtual void write(Buffer & buf) const
 ```
+
+Defined in src/http/include/icy/http/message.h:108
 
 Writes the message header directly into a byte buffer.
 
@@ -4896,6 +5731,8 @@ Writes the message header directly into a byte buffer.
 const std::string HTTP_1_0
 ```
 
+Defined in src/http/include/icy/http/message.h:110
+
 ---
 
 {#http_1_1}
@@ -4907,6 +5744,8 @@ const std::string HTTP_1_0
 ```cpp
 const std::string HTTP_1_1
 ```
+
+Defined in src/http/include/icy/http/message.h:111
 
 ---
 
@@ -4920,6 +5759,8 @@ const std::string HTTP_1_1
 const std::string IDENTITY_TRANSFER_ENCODING
 ```
 
+Defined in src/http/include/icy/http/message.h:113
+
 ---
 
 {#chunked_transfer_encoding}
@@ -4931,6 +5772,8 @@ const std::string IDENTITY_TRANSFER_ENCODING
 ```cpp
 const std::string CHUNKED_TRANSFER_ENCODING
 ```
+
+Defined in src/http/include/icy/http/message.h:114
 
 ---
 
@@ -4944,6 +5787,8 @@ const std::string CHUNKED_TRANSFER_ENCODING
 const int UNKNOWN_CONTENT_LENGTH
 ```
 
+Defined in src/http/include/icy/http/message.h:116
+
 ---
 
 {#unknown_content_type}
@@ -4955,6 +5800,8 @@ const int UNKNOWN_CONTENT_LENGTH
 ```cpp
 const std::string UNKNOWN_CONTENT_TYPE
 ```
+
+Defined in src/http/include/icy/http/message.h:117
 
 ---
 
@@ -4968,6 +5815,8 @@ const std::string UNKNOWN_CONTENT_TYPE
 const std::string CONTENT_LENGTH
 ```
 
+Defined in src/http/include/icy/http/message.h:119
+
 ---
 
 {#content_type}
@@ -4979,6 +5828,8 @@ const std::string CONTENT_LENGTH
 ```cpp
 const std::string CONTENT_TYPE
 ```
+
+Defined in src/http/include/icy/http/message.h:120
 
 ---
 
@@ -4992,6 +5843,8 @@ const std::string CONTENT_TYPE
 const std::string TRANSFER_ENCODING
 ```
 
+Defined in src/http/include/icy/http/message.h:121
+
 ---
 
 {#connection-6}
@@ -5003,6 +5856,8 @@ const std::string TRANSFER_ENCODING
 ```cpp
 const std::string CONNECTION
 ```
+
+Defined in src/http/include/icy/http/message.h:122
 
 ---
 
@@ -5016,6 +5871,8 @@ const std::string CONNECTION
 const std::string CONNECTION_KEEP_ALIVE
 ```
 
+Defined in src/http/include/icy/http/message.h:124
+
 ---
 
 {#connection_close}
@@ -5028,6 +5885,8 @@ const std::string CONNECTION_KEEP_ALIVE
 const std::string CONNECTION_CLOSE
 ```
 
+Defined in src/http/include/icy/http/message.h:125
+
 ---
 
 {#empty}
@@ -5039,6 +5898,8 @@ const std::string CONNECTION_CLOSE
 ```cpp
 const std::string EMPTY
 ```
+
+Defined in src/http/include/icy/http/message.h:127
 
 ### Protected Attributes
 
@@ -5055,6 +5916,8 @@ const std::string EMPTY
 ```cpp
 std::string _version
 ```
+
+Defined in src/http/include/icy/http/message.h:130
 
 ### Protected Methods
 
@@ -5074,6 +5937,8 @@ std::string _version
 Message()
 ```
 
+Defined in src/http/include/icy/http/message.h:133
+
 Creates the [Message](#message) with version HTTP/1.0.
 
 ---
@@ -5085,6 +5950,8 @@ Creates the [Message](#message) with version HTTP/1.0.
 ```cpp
 Message(const std::string & version)
 ```
+
+Defined in src/http/include/icy/http/message.h:137
 
 Creates the [Message](#message) and sets the version.
 
@@ -5100,6 +5967,8 @@ Creates the [Message](#message) and sets the version.
 virtual ~Message()
 ```
 
+Defined in src/http/include/icy/http/message.h:140
+
 Destroys the [Message](#message).
 
 {#multipartadapter}
@@ -5109,6 +5978,12 @@ Destroys the [Message](#message).
 ```cpp
 #include <icy/http/packetizers.h>
 ```
+
+```cpp
+class MultipartAdapter
+```
+
+Defined in src/http/include/icy/http/packetizers.h:159
 
 > **Inherits:** [`PacketProcessor`](base.md#packetprocessor)
 
@@ -5134,6 +6009,8 @@ HTTP multipart encoding adapter for multipart/x-mixed-replace streaming.
 Connection::Ptr connection
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:162
+
 HTTP connection for sending the initial response header.
 
 ---
@@ -5145,6 +6022,8 @@ HTTP connection for sending the initial response header.
 ```cpp
 std::string contentType
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:163
 
 Content-Type of each part (e.g. "image/jpeg").
 
@@ -5158,6 +6037,8 @@ Content-Type of each part (e.g. "image/jpeg").
 bool isBase64
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:164
+
 If true, adds "Content-Transfer-Encoding: base64" to each part.
 
 ---
@@ -5170,6 +6051,8 @@ If true, adds "Content-Transfer-Encoding: base64" to each part.
 bool initial
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:165
+
 True until the first chunk is processed and the boundary header emitted.
 
 ---
@@ -5181,6 +6064,8 @@ True until the first chunk is processed and the boundary header emitted.
 ```cpp
 PacketSignal emitter
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:264
 
 ### Public Methods
 
@@ -5201,14 +6086,16 @@ PacketSignal emitter
 `inline`
 
 ```cpp
-inline MultipartAdapter(Connection::Ptr connection, bool base64)
+inline MultipartAdapter(Connection::Ptr connection, bool base64 = false)
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:171
 
 Creates a [MultipartAdapter](#multipartadapter) that sends headers through the given connection. The per-part content type is read from the connection's outgoing header. 
 #### Parameters
 * `connection` HTTP connection to use for sending the initial multipart header. 
 
-* `[base64](base.md#base64)` If true, indicates parts are base64-encoded.
+* `base64` If true, indicates parts are base64-encoded.
 
 ---
 
@@ -5219,14 +6106,16 @@ Creates a [MultipartAdapter](#multipartadapter) that sends headers through the g
 `inline`
 
 ```cpp
-inline MultipartAdapter(const std::string & contentType, bool base64)
+inline MultipartAdapter(const std::string & contentType, bool base64 = false)
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:184
 
 Creates a [MultipartAdapter](#multipartadapter) that emits its own raw HTTP/1.1 200 response header. Use this when no [Connection](#connection-1) object is available. 
 #### Parameters
 * `contentType` Content-Type for each multipart part. 
 
-* `[base64](base.md#base64)` If true, indicates parts are base64-encoded.
+* `base64` If true, indicates parts are base64-encoded.
 
 ---
 
@@ -5239,6 +6128,8 @@ Creates a [MultipartAdapter](#multipartadapter) that emits its own raw HTTP/1.1 
 ```cpp
 virtual inline void emitHeader()
 ```
+
+Defined in src/http/include/icy/http/packetizers.h:197
 
 Emits the initial HTTP/1.1 200 OK response with Content-Type multipart/x-mixed-replace. If a connection is set, headers are written through it; otherwise a raw response string is emitted.
 
@@ -5254,6 +6145,8 @@ Emits the initial HTTP/1.1 200 OK response with Content-Type multipart/x-mixed-r
 virtual inline void emitChunkHeader()
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:231
+
 Emits the MIME boundary and per-part headers (Content-Type, optionally Content-Transfer-Encoding) for the next multipart chunk.
 
 ---
@@ -5268,6 +6161,8 @@ Emits the MIME boundary and per-part headers (Content-Type, optionally Content-T
 virtual inline void process(IPacket & packet)
 ```
 
+Defined in src/http/include/icy/http/packetizers.h:248
+
 Wraps the incoming packet as a multipart chunk and emits it downstream. Emits the multipart HTTP response headers on the first call. 
 #### Parameters
 * `packet` Packet containing the raw payload data.
@@ -5279,6 +6174,12 @@ Wraps the incoming packet as a multipart chunk and emits it downstream. Emits th
 ```cpp
 #include <icy/http/parser.h>
 ```
+
+```cpp
+class Parser
+```
+
+Defined in src/http/include/icy/http/parser.h:55
 
 HTTP request/response parser using the llhttp library.
 
@@ -5294,15 +6195,15 @@ HTTP request/response parser using the llhttp library.
 | `ParseResult` | [`parse`](#parse)  | Feeds a buffer of raw HTTP data into the parser. |
 | `void` | [`reset`](#reset-10)  | Reset the internal state (reinitialises llhttp). Safe to call externally, NOT from inside llhttp callbacks. |
 | `void` | [`resetState`](#resetstate)  | Reset internal flags without reinitialising llhttp. Safe to call from inside llhttp callbacks (e.g. on_message_begin). |
-| `bool` | [`complete`](#complete-2) `const` | Returns true if parsing is complete, either in success or error. |
-| `bool` | [`upgrade`](#upgrade) `const` | Returns true if the connection should be upgraded. |
-| `llhttp_type_t` | [`type`](#type-9) `const` `inline` | Returns the parser type (HTTP_REQUEST or HTTP_RESPONSE). |
+| `bool` | [`complete`](#complete-2) `const` `nodiscard` | Returns true if parsing is complete, either in success or error. |
+| `bool` | [`upgrade`](#upgrade) `const` `nodiscard` | Returns true if the connection should be upgraded. |
+| `llhttp_type_t` | [`type`](#type-9) `const` `inline` `nodiscard` | Returns the parser type (HTTP_REQUEST or HTTP_RESPONSE). |
 | `void` | [`setRequest`](#setrequest)  | Binds an HTTP request object to populate during parsing. Must only be called when no message is currently set and type is HTTP_REQUEST. |
 | `void` | [`setResponse`](#setresponse)  | Binds an HTTP response object to populate during parsing. Must only be called when no message is currently set and type is HTTP_RESPONSE. |
 | `void` | [`setObserver`](#setobserver)  | Sets the observer that receives parser events. |
 | `void` | [`clearMessage`](#clearmessage)  | Clear request/response pointers so they can be re-set. Used when resetting a pooled connection for reuse. |
-| `http::Message *` | [`message`](#message-4)  | Returns the currently bound message (request or response), or nullptr. |
-| `ParserObserver *` | [`observer`](#observer) `const` | Returns the current parser observer, or nullptr if none is set. |
+| `http::Message *` | [`message`](#message-4) `nodiscard` | Returns the currently bound message (request or response), or nullptr. |
+| `ParserObserver *` | [`observer`](#observer) `const` `nodiscard` | Returns the current parser observer, or nullptr if none is set. |
 
 ---
 
@@ -5313,6 +6214,8 @@ HTTP request/response parser using the llhttp library.
 ```cpp
 Parser(http::Response * response)
 ```
+
+Defined in src/http/include/icy/http/parser.h:70
 
 Creates a response parser. The response object is populated as data is parsed. 
 #### Parameters
@@ -5328,6 +6231,8 @@ Creates a response parser. The response object is populated as data is parsed.
 Parser(http::Request * request)
 ```
 
+Defined in src/http/include/icy/http/parser.h:74
+
 Creates a request parser. The request object is populated as data is parsed. 
 #### Parameters
 * `request` HTTP request object to populate.
@@ -5341,6 +6246,8 @@ Creates a request parser. The request object is populated as data is parsed.
 ```cpp
 Parser(llhttp_type_t type)
 ```
+
+Defined in src/http/include/icy/http/parser.h:78
 
 Creates a parser of the given type without binding a message object. 
 #### Parameters
@@ -5356,6 +6263,8 @@ Creates a parser of the given type without binding a message object.
 Parser(const Parser &) = delete
 ```
 
+Defined in src/http/include/icy/http/parser.h:81
+
 Deleted constructor.
 
 ---
@@ -5368,6 +6277,8 @@ Deleted constructor.
 Parser(Parser &&) = delete
 ```
 
+Defined in src/http/include/icy/http/parser.h:83
+
 Deleted constructor.
 
 ---
@@ -5379,6 +6290,8 @@ Deleted constructor.
 ```cpp
 ParseResult parse(const char * data, size_t length)
 ```
+
+Defined in src/http/include/icy/http/parser.h:93
 
 Feeds a buffer of raw HTTP data into the parser.
 
@@ -5401,6 +6314,8 @@ Structured parse result including bytes consumed and terminal state.
 void reset()
 ```
 
+Defined in src/http/include/icy/http/parser.h:97
+
 Reset the internal state (reinitialises llhttp). Safe to call externally, NOT from inside llhttp callbacks.
 
 ---
@@ -5413,6 +6328,8 @@ Reset the internal state (reinitialises llhttp). Safe to call externally, NOT fr
 void resetState()
 ```
 
+Defined in src/http/include/icy/http/parser.h:101
+
 Reset internal flags without reinitialising llhttp. Safe to call from inside llhttp callbacks (e.g. on_message_begin).
 
 ---
@@ -5421,11 +6338,13 @@ Reset internal flags without reinitialising llhttp. Safe to call from inside llh
 
 #### complete
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool complete() const
+[[nodiscard]] bool complete() const
 ```
+
+Defined in src/http/include/icy/http/parser.h:105
 
 Returns true if parsing is complete, either in success or error.
 
@@ -5435,11 +6354,13 @@ Returns true if parsing is complete, either in success or error.
 
 #### upgrade
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool upgrade() const
+[[nodiscard]] bool upgrade() const
 ```
+
+Defined in src/http/include/icy/http/parser.h:108
 
 Returns true if the connection should be upgraded.
 
@@ -5449,11 +6370,13 @@ Returns true if the connection should be upgraded.
 
 #### type
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline llhttp_type_t type() const
+[[nodiscard]] inline llhttp_type_t type() const
 ```
+
+Defined in src/http/include/icy/http/parser.h:111
 
 Returns the parser type (HTTP_REQUEST or HTTP_RESPONSE).
 
@@ -5466,6 +6389,8 @@ Returns the parser type (HTTP_REQUEST or HTTP_RESPONSE).
 ```cpp
 void setRequest(http::Request * request)
 ```
+
+Defined in src/http/include/icy/http/parser.h:116
 
 Binds an HTTP request object to populate during parsing. Must only be called when no message is currently set and type is HTTP_REQUEST. 
 #### Parameters
@@ -5481,6 +6406,8 @@ Binds an HTTP request object to populate during parsing. Must only be called whe
 void setResponse(http::Response * response)
 ```
 
+Defined in src/http/include/icy/http/parser.h:121
+
 Binds an HTTP response object to populate during parsing. Must only be called when no message is currently set and type is HTTP_RESPONSE. 
 #### Parameters
 * `response` The response object to populate.
@@ -5494,6 +6421,8 @@ Binds an HTTP response object to populate during parsing. Must only be called wh
 ```cpp
 void setObserver(ParserObserver * observer)
 ```
+
+Defined in src/http/include/icy/http/parser.h:125
 
 Sets the observer that receives parser events. 
 #### Parameters
@@ -5509,6 +6438,8 @@ Sets the observer that receives parser events.
 void clearMessage()
 ```
 
+Defined in src/http/include/icy/http/parser.h:129
+
 Clear request/response pointers so they can be re-set. Used when resetting a pooled connection for reuse.
 
 ---
@@ -5517,9 +6448,13 @@ Clear request/response pointers so they can be re-set. Used when resetting a poo
 
 #### message
 
+`nodiscard`
+
 ```cpp
-http::Message * message()
+[[nodiscard]] http::Message * message()
 ```
+
+Defined in src/http/include/icy/http/parser.h:132
 
 Returns the currently bound message (request or response), or nullptr.
 
@@ -5529,11 +6464,13 @@ Returns the currently bound message (request or response), or nullptr.
 
 #### observer
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-ParserObserver * observer() const
+[[nodiscard]] ParserObserver * observer() const
 ```
+
+Defined in src/http/include/icy/http/parser.h:135
 
 Returns the current parser observer, or nullptr if none is set.
 
@@ -5567,6 +6504,8 @@ Returns the current parser observer, or nullptr if none is set.
 ParserObserver * _observer
 ```
 
+Defined in src/http/include/icy/http/parser.h:181
+
 ---
 
 {#_request-1}
@@ -5576,6 +6515,8 @@ ParserObserver * _observer
 ```cpp
 http::Request * _request
 ```
+
+Defined in src/http/include/icy/http/parser.h:182
 
 ---
 
@@ -5587,6 +6528,8 @@ http::Request * _request
 http::Response * _response
 ```
 
+Defined in src/http/include/icy/http/parser.h:183
+
 ---
 
 {#_message}
@@ -5596,6 +6539,8 @@ http::Response * _response
 ```cpp
 http::Message * _message
 ```
+
+Defined in src/http/include/icy/http/parser.h:184
 
 ---
 
@@ -5607,6 +6552,8 @@ http::Message * _message
 llhttp_t _parser
 ```
 
+Defined in src/http/include/icy/http/parser.h:186
+
 ---
 
 {#_settings}
@@ -5616,6 +6563,8 @@ llhttp_t _parser
 ```cpp
 llhttp_settings_t _settings
 ```
+
+Defined in src/http/include/icy/http/parser.h:187
 
 ---
 
@@ -5627,6 +6576,8 @@ llhttp_settings_t _settings
 llhttp_type_t _type
 ```
 
+Defined in src/http/include/icy/http/parser.h:188
+
 ---
 
 {#_washeadervalue}
@@ -5636,6 +6587,8 @@ llhttp_type_t _type
 ```cpp
 bool _wasHeaderValue
 ```
+
+Defined in src/http/include/icy/http/parser.h:190
 
 ---
 
@@ -5647,6 +6600,8 @@ bool _wasHeaderValue
 std::string _lastHeaderField
 ```
 
+Defined in src/http/include/icy/http/parser.h:191
+
 ---
 
 {#_lastheadervalue}
@@ -5656,6 +6611,8 @@ std::string _lastHeaderField
 ```cpp
 std::string _lastHeaderValue
 ```
+
+Defined in src/http/include/icy/http/parser.h:192
 
 ---
 
@@ -5667,6 +6624,8 @@ std::string _lastHeaderValue
 bool _complete
 ```
 
+Defined in src/http/include/icy/http/parser.h:194
+
 ---
 
 {#_upgrade}
@@ -5676,6 +6635,8 @@ bool _complete
 ```cpp
 bool _upgrade
 ```
+
+Defined in src/http/include/icy/http/parser.h:195
 
 ---
 
@@ -5687,6 +6648,8 @@ bool _upgrade
 Error _error
 ```
 
+Defined in src/http/include/icy/http/parser.h:197
+
 ---
 
 {#_lastresult}
@@ -5697,6 +6660,8 @@ Error _error
 ParseResult _lastResult
 ```
 
+Defined in src/http/include/icy/http/parser.h:198
+
 ---
 
 {#_scratch}
@@ -5706,6 +6671,8 @@ ParseResult _lastResult
 ```cpp
 MessageScratch _scratch
 ```
+
+Defined in src/http/include/icy/http/parser.h:199
 
 ### Protected Methods
 
@@ -5731,6 +6698,8 @@ MessageScratch _scratch
 void init()
 ```
 
+Defined in src/http/include/icy/http/parser.h:158
+
 ---
 
 {#clearboundmessage}
@@ -5740,6 +6709,8 @@ void init()
 ```cpp
 void clearBoundMessage()
 ```
+
+Defined in src/http/include/icy/http/parser.h:159
 
 ---
 
@@ -5751,6 +6722,8 @@ void clearBoundMessage()
 void storeHeader(std::string name, std::string value)
 ```
 
+Defined in src/http/include/icy/http/parser.h:160
+
 ---
 
 {#applyscratchtoboundmessage}
@@ -5761,6 +6734,8 @@ void storeHeader(std::string name, std::string value)
 void applyScratchToBoundMessage()
 ```
 
+Defined in src/http/include/icy/http/parser.h:161
+
 ---
 
 {#onheader}
@@ -5770,6 +6745,8 @@ void applyScratchToBoundMessage()
 ```cpp
 void onHeader(std::string name, std::string value)
 ```
+
+Defined in src/http/include/icy/http/parser.h:164
 
 Callbacks.
 
@@ -5783,6 +6760,8 @@ Callbacks.
 void onHeadersEnd()
 ```
 
+Defined in src/http/include/icy/http/parser.h:165
+
 ---
 
 {#onbody}
@@ -5792,6 +6771,8 @@ void onHeadersEnd()
 ```cpp
 void onBody(const char * buf, size_t len)
 ```
+
+Defined in src/http/include/icy/http/parser.h:166
 
 ---
 
@@ -5803,6 +6784,8 @@ void onBody(const char * buf, size_t len)
 void onMessageEnd()
 ```
 
+Defined in src/http/include/icy/http/parser.h:167
+
 ---
 
 {#onerror-3}
@@ -5810,8 +6793,101 @@ void onMessageEnd()
 #### onError
 
 ```cpp
-void onError(llhttp_errno_t errnum, const std::string & message)
+void onError(llhttp_errno_t errnum, const std::string & message = "")
 ```
+
+Defined in src/http/include/icy/http/parser.h:168
+
+{#parseresult}
+
+## ParseResult
+
+```cpp
+#include <icy/http/parser.h>
+```
+
+```cpp
+struct ParseResult
+```
+
+Defined in src/http/include/icy/http/parser.h:58
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `size_t` | [`bytesConsumed`](#bytesconsumed)  |  |
+| `bool` | [`messageComplete`](#messagecomplete)  |  |
+| `bool` | [`upgrade`](#upgrade-1)  |  |
+| `Error` | [`error`](#error-11)  |  |
+
+---
+
+{#bytesconsumed}
+
+#### bytesConsumed
+
+```cpp
+size_t bytesConsumed = 0
+```
+
+Defined in src/http/include/icy/http/parser.h:60
+
+---
+
+{#messagecomplete}
+
+#### messageComplete
+
+```cpp
+bool messageComplete = false
+```
+
+Defined in src/http/include/icy/http/parser.h:61
+
+---
+
+{#upgrade-1}
+
+#### upgrade
+
+```cpp
+bool upgrade = false
+```
+
+Defined in src/http/include/icy/http/parser.h:62
+
+---
+
+{#error-11}
+
+#### error
+
+```cpp
+Error error
+```
+
+Defined in src/http/include/icy/http/parser.h:63
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `bool` | [`ok`](#ok) `const` `inline` `nodiscard` |  |
+
+---
+
+{#ok}
+
+#### ok
+
+`const` `inline` `nodiscard`
+
+```cpp
+[[nodiscard]] inline bool ok() const
+```
+
+Defined in src/http/include/icy/http/parser.h:65
 
 {#messagescratch}
 
@@ -5820,6 +6896,12 @@ void onError(llhttp_errno_t errnum, const std::string & message)
 ```cpp
 #include <icy/http/parser.h>
 ```
+
+```cpp
+struct MessageScratch
+```
+
+Defined in src/http/include/icy/http/parser.h:138
 
 ### Public Attributes
 
@@ -5842,6 +6924,8 @@ void onError(llhttp_errno_t errnum, const std::string & message)
 std::string version
 ```
 
+Defined in src/http/include/icy/http/parser.h:140
+
 ---
 
 {#method-1}
@@ -5851,6 +6935,8 @@ std::string version
 ```cpp
 std::string method
 ```
+
+Defined in src/http/include/icy/http/parser.h:141
 
 ---
 
@@ -5862,6 +6948,8 @@ std::string method
 std::string uri
 ```
 
+Defined in src/http/include/icy/http/parser.h:142
+
 ---
 
 {#reason}
@@ -5871,6 +6959,8 @@ std::string uri
 ```cpp
 std::string reason
 ```
+
+Defined in src/http/include/icy/http/parser.h:143
 
 ---
 
@@ -5882,6 +6972,8 @@ std::string reason
 http::StatusCode status = 
 ```
 
+Defined in src/http/include/icy/http/parser.h:144
+
 ---
 
 {#headers-2}
@@ -5891,6 +6983,8 @@ http::StatusCode status =
 ```cpp
 std::vector< std::pair< std::string, std::string > > headers
 ```
+
+Defined in src/http/include/icy/http/parser.h:145
 
 ### Public Methods
 
@@ -5910,80 +7004,7 @@ std::vector< std::pair< std::string, std::string > > headers
 inline void reset()
 ```
 
-{#parseresult}
-
-## ParseResult
-
-```cpp
-#include <icy/http/parser.h>
-```
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `size_t` | [`bytesConsumed`](#bytesconsumed)  |  |
-| `bool` | [`messageComplete`](#messagecomplete)  |  |
-| `bool` | [`upgrade`](#upgrade-1)  |  |
-| `Error` | [`error`](#error-11)  |  |
-
----
-
-{#bytesconsumed}
-
-#### bytesConsumed
-
-```cpp
-size_t bytesConsumed = 0
-```
-
----
-
-{#messagecomplete}
-
-#### messageComplete
-
-```cpp
-bool messageComplete = false
-```
-
----
-
-{#upgrade-1}
-
-#### upgrade
-
-```cpp
-bool upgrade = false
-```
-
----
-
-{#error-11}
-
-#### error
-
-```cpp
-Error error
-```
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `bool` | [`ok`](#ok) `const` `inline` |  |
-
----
-
-{#ok}
-
-#### ok
-
-`const` `inline`
-
-```cpp
-inline bool ok() const
-```
+Defined in src/http/include/icy/http/parser.h:147
 
 {#parserobserver}
 
@@ -5993,7 +7014,13 @@ inline bool ok() const
 #include <icy/http/parser.h>
 ```
 
-> **Subclassed by:** [`ConnectionAdapter`](#connectionadapter)
+```cpp
+class ParserObserver
+```
+
+Defined in src/http/include/icy/http/parser.h:27
+
+> **Subclassed by:** [`ConnectionAdapter`](#connectionadapter-1)
 
 Abstract observer interface for HTTP parser events.
 
@@ -6001,11 +7028,11 @@ Abstract observer interface for HTTP parser events.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onParserHeader`](#onparserheader-1)  | Called for each parsed HTTP header name/value pair. |
-| `void` | [`onParserHeadersEnd`](#onparserheadersend-1)  | Called when all HTTP headers have been parsed. |
-| `void` | [`onParserChunk`](#onparserchunk-1)  | Called for each chunk of body data received. |
-| `void` | [`onParserEnd`](#onparserend-1)  | Called when the HTTP message is fully parsed. |
-| `void` | [`onParserError`](#onparsererror-1)  | Called when a parse error occurs. |
+| `void` | [`onParserHeader`](#onparserheader-1) `virtual` | Called for each parsed HTTP header name/value pair. |
+| `void` | [`onParserHeadersEnd`](#onparserheadersend-1) `virtual` | Called when all HTTP headers have been parsed. |
+| `void` | [`onParserChunk`](#onparserchunk-1) `virtual` | Called for each chunk of body data received. |
+| `void` | [`onParserEnd`](#onparserend-1) `virtual` | Called when the HTTP message is fully parsed. |
+| `void` | [`onParserError`](#onparsererror-1) `virtual` | Called when a parse error occurs. |
 
 ---
 
@@ -6013,9 +7040,13 @@ Abstract observer interface for HTTP parser events.
 
 #### onParserHeader
 
+`virtual`
+
 ```cpp
-void onParserHeader(const std::string & name, const std::string & value)
+virtual void onParserHeader(const std::string & name, const std::string & value)
 ```
+
+Defined in src/http/include/icy/http/parser.h:33
 
 Called for each parsed HTTP header name/value pair. 
 #### Parameters
@@ -6029,9 +7060,13 @@ Called for each parsed HTTP header name/value pair.
 
 #### onParserHeadersEnd
 
+`virtual`
+
 ```cpp
-void onParserHeadersEnd(bool upgrade)
+virtual void onParserHeadersEnd(bool upgrade)
 ```
+
+Defined in src/http/include/icy/http/parser.h:37
 
 Called when all HTTP headers have been parsed. 
 #### Parameters
@@ -6043,9 +7078,13 @@ Called when all HTTP headers have been parsed.
 
 #### onParserChunk
 
+`virtual`
+
 ```cpp
-void onParserChunk(const char * data, size_t len)
+virtual void onParserChunk(const char * data, size_t len)
 ```
+
+Defined in src/http/include/icy/http/parser.h:42
 
 Called for each chunk of body data received. 
 #### Parameters
@@ -6059,9 +7098,13 @@ Called for each chunk of body data received.
 
 #### onParserEnd
 
+`virtual`
+
 ```cpp
-void onParserEnd()
+virtual void onParserEnd()
 ```
+
+Defined in src/http/include/icy/http/parser.h:45
 
 Called when the HTTP message is fully parsed.
 
@@ -6071,9 +7114,13 @@ Called when the HTTP message is fully parsed.
 
 #### onParserError
 
+`virtual`
+
 ```cpp
-void onParserError(const Error & err)
+virtual void onParserError(const Error & err)
 ```
+
+Defined in src/http/include/icy/http/parser.h:49
 
 Called when a parse error occurs. 
 #### Parameters
@@ -6087,11 +7134,17 @@ Called when a parse error occurs.
 #include <icy/http/connection.h>
 ```
 
+```cpp
+class ProgressSignal
+```
+
+Defined in src/http/include/icy/http/connection.h:223
+
 > **Inherits:** [`Signal< void(const double &)>`](base.md#signal)
 
 HTTP progress signal for upload and download progress notifications.
 
-Emits a double in the range [0, 100] as data is transferred. Set `total` to the expected byte count before calling `[update()](#update-1)`.
+Emits a double in the range [0, 100] as data is transferred. Set `[total](#total-1)` to the expected byte count before calling `[update()](#update-1)`.
 
 ### Public Attributes
 
@@ -6111,6 +7164,8 @@ Emits a double in the range [0, 100] as data is transferred. Set `total` to the 
 void * sender
 ```
 
+Defined in src/http/include/icy/http/connection.h:226
+
 Optional context pointer identifying the sender.
 
 ---
@@ -6122,6 +7177,8 @@ Optional context pointer identifying the sender.
 ```cpp
 uint64_t current
 ```
+
+Defined in src/http/include/icy/http/connection.h:227
 
 Bytes transferred so far.
 
@@ -6135,6 +7192,8 @@ Bytes transferred so far.
 uint64_t total
 ```
 
+Defined in src/http/include/icy/http/connection.h:228
+
 Total expected bytes (from Content-Length).
 
 ### Public Methods
@@ -6142,7 +7201,7 @@ Total expected bytes (from Content-Length).
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`ProgressSignal`](#progresssignal-1) `inline` |  |
-| `double` | [`progress`](#progress) `const` `inline` | Returns the current transfer progress as a percentage (0-100). |
+| `double` | [`progress`](#progress) `const` `inline` `nodiscard` | Returns the current transfer progress as a percentage (0-100). |
 | `void` | [`update`](#update-1) `inline` | Advances the progress counter by `nread` bytes and emits the updated percentage. |
 
 ---
@@ -6157,17 +7216,21 @@ Total expected bytes (from Content-Length).
 inline ProgressSignal()
 ```
 
+Defined in src/http/include/icy/http/connection.h:230
+
 ---
 
 {#progress}
 
 #### progress
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline double progress() const
+[[nodiscard]] inline double progress() const
 ```
+
+Defined in src/http/include/icy/http/connection.h:238
 
 Returns the current transfer progress as a percentage (0-100).
 
@@ -6182,6 +7245,8 @@ Returns the current transfer progress as a percentage (0-100).
 ```cpp
 inline void update(int nread)
 ```
+
+Defined in src/http/include/icy/http/connection.h:243
 
 Advances the progress counter by `nread` bytes and emits the updated percentage. 
 #### Parameters
@@ -6198,11 +7263,37 @@ Advances the progress counter by `nread` bytes and emits the updated percentage.
 #include <icy/http/request.h>
 ```
 
+```cpp
+class Request
+```
+
+Defined in src/http/include/icy/http/request.h:44
+
 > **Inherits:** [`Message`](#message)
 
 HTTP request message with method, URI, headers, and optional body.
 
 In addition to the properties common to all HTTP messages, an HTTP request has a method (e.g. GET, HEAD, POST, etc.) and a request URI.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-17) `inline` |  |
+
+---
+
+{#operator-17}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const Request & req)
+```
+
+Defined in src/http/include/icy/http/request.h:146
 
 ### Public Methods
 
@@ -6214,20 +7305,20 @@ In addition to the properties common to all HTTP messages, an HTTP request has a
 |  | [`Request`](#request-8)  | Creates an HTTP request with the given method, URI and version. |
 |  | [`~Request`](#request-9) `virtual` | Destroys the [Request](#request-4). |
 | `void` | [`setMethod`](#setmethod)  | Sets the method. |
-| `const std::string &` | [`getMethod`](#getmethod) `const` | Returns the method. |
+| `const std::string &` | [`getMethod`](#getmethod) `const` `nodiscard` | Returns the method. |
 | `void` | [`setURI`](#seturi)  | Sets the request URI. |
 | `void` | [`appendURI`](#appenduri)  | Appends a fragment to the request URI. Used by the parser when llhttp splits the [URL](#url) across callbacks. |
-| `const std::string &` | [`getURI`](#geturi) `const` | Returns the request URI. |
+| `const std::string &` | [`getURI`](#geturi) `const` `nodiscard` | Returns the request URI. |
 | `void` | [`setHost`](#sethost)  | Sets the value of the Host header field. |
 | `void` | [`setHost`](#sethost-1)  | Sets the value of the Host header field. |
-| `const std::string &` | [`getHost`](#gethost) `const` | Returns the value of the Host header field. |
+| `const std::string &` | [`getHost`](#gethost) `const` `nodiscard` | Returns the value of the Host header field. |
 | `void` | [`setCookies`](#setcookies)  | Adds a [Cookie](#cookie) header with the names and values from cookies. |
 | `void` | [`getCookies`](#getcookies) `const` | Fills cookies with the cookies extracted from the [Cookie](#cookie) headers in the request. |
 | `void` | [`getURIParameters`](#geturiparameters) `const` | Returns the request URI parameters. |
-| `bool` | [`hasCredentials`](#hascredentials) `const` | Returns true if the request contains authentication information in the form of an Authorization header. |
+| `bool` | [`hasCredentials`](#hascredentials) `const` `nodiscard` | Returns true if the request contains authentication information in the form of an Authorization header. |
 | `void` | [`getCredentials`](#getcredentials) `const` | Returns the authentication scheme and additional authentication information contained in this request. |
 | `void` | [`setCredentials`](#setcredentials)  | Sets the authentication scheme and information for this request. |
-| `bool` | [`hasProxyCredentials`](#hasproxycredentials) `const` | Returns true if the request contains proxy authentication information in the form of an Proxy-Authorization header. |
+| `bool` | [`hasProxyCredentials`](#hasproxycredentials) `const` `nodiscard` | Returns true if the request contains proxy authentication information in the form of an Proxy-Authorization header. |
 | `void` | [`getProxyCredentials`](#getproxycredentials) `const` | Returns the proxy authentication scheme and additional proxy authentication information contained in this request. |
 | `void` | [`setProxyCredentials`](#setproxycredentials)  | Sets the proxy authentication scheme and information for this request. |
 | `void` | [`write`](#write-9) `virtual` `const` | Writes the HTTP request to the given output stream. |
@@ -6244,6 +7335,8 @@ In addition to the properties common to all HTTP messages, an HTTP request has a
 Request()
 ```
 
+Defined in src/http/include/icy/http/request.h:48
+
 Creates a GET / HTTP/1.1 HTTP request.
 
 ---
@@ -6255,6 +7348,8 @@ Creates a GET / HTTP/1.1 HTTP request.
 ```cpp
 Request(const std::string & version)
 ```
+
+Defined in src/http/include/icy/http/request.h:52
 
 Creates a GET / HTTP/1.x request with the given version (HTTP/1.0 or HTTP/1.1).
 
@@ -6268,6 +7363,8 @@ Creates a GET / HTTP/1.x request with the given version (HTTP/1.0 or HTTP/1.1).
 Request(const std::string & method, const std::string & uri)
 ```
 
+Defined in src/http/include/icy/http/request.h:55
+
 Creates an HTTP/1.0 request with the given method and URI.
 
 ---
@@ -6279,6 +7376,8 @@ Creates an HTTP/1.0 request with the given method and URI.
 ```cpp
 Request(const std::string & method, const std::string & uri, const std::string & version)
 ```
+
+Defined in src/http/include/icy/http/request.h:58
 
 Creates an HTTP request with the given method, URI and version.
 
@@ -6294,6 +7393,8 @@ Creates an HTTP request with the given method, URI and version.
 virtual ~Request()
 ```
 
+Defined in src/http/include/icy/http/request.h:61
+
 Destroys the [Request](#request-4).
 
 ---
@@ -6306,6 +7407,8 @@ Destroys the [Request](#request-4).
 void setMethod(const std::string & method)
 ```
 
+Defined in src/http/include/icy/http/request.h:64
+
 Sets the method.
 
 ---
@@ -6314,11 +7417,13 @@ Sets the method.
 
 #### getMethod
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getMethod() const
+[[nodiscard]] const std::string & getMethod() const
 ```
+
+Defined in src/http/include/icy/http/request.h:67
 
 Returns the method.
 
@@ -6332,6 +7437,8 @@ Returns the method.
 void setURI(std::string uri)
 ```
 
+Defined in src/http/include/icy/http/request.h:70
+
 Sets the request URI.
 
 ---
@@ -6344,6 +7451,8 @@ Sets the request URI.
 void appendURI(std::string_view uri)
 ```
 
+Defined in src/http/include/icy/http/request.h:74
+
 Appends a fragment to the request URI. Used by the parser when llhttp splits the [URL](#url) across callbacks.
 
 ---
@@ -6352,11 +7461,13 @@ Appends a fragment to the request URI. Used by the parser when llhttp splits the
 
 #### getURI
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getURI() const
+[[nodiscard]] const std::string & getURI() const
 ```
+
+Defined in src/http/include/icy/http/request.h:77
 
 Returns the request URI.
 
@@ -6370,6 +7481,8 @@ Returns the request URI.
 void setHost(const std::string & host)
 ```
 
+Defined in src/http/include/icy/http/request.h:80
+
 Sets the value of the Host header field.
 
 ---
@@ -6382,6 +7495,8 @@ Sets the value of the Host header field.
 void setHost(const std::string & host, uint16_t port)
 ```
 
+Defined in src/http/include/icy/http/request.h:87
+
 Sets the value of the Host header field.
 
 If the given port number is a non-standard port number (other than 80 or 443), it is included in the Host header field.
@@ -6392,11 +7507,13 @@ If the given port number is a non-standard port number (other than 80 or 443), i
 
 #### getHost
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getHost() const
+[[nodiscard]] const std::string & getHost() const
 ```
+
+Defined in src/http/include/icy/http/request.h:93
 
 Returns the value of the Host header field.
 
@@ -6412,6 +7529,8 @@ Throws a NotFoundException if the request does not have a Host header field.
 void setCookies(const NVCollection & cookies)
 ```
 
+Defined in src/http/include/icy/http/request.h:97
+
 Adds a [Cookie](#cookie) header with the names and values from cookies.
 
 ---
@@ -6425,6 +7544,8 @@ Adds a [Cookie](#cookie) header with the names and values from cookies.
 ```cpp
 void getCookies(NVCollection & cookies) const
 ```
+
+Defined in src/http/include/icy/http/request.h:101
 
 Fills cookies with the cookies extracted from the [Cookie](#cookie) headers in the request.
 
@@ -6440,6 +7561,8 @@ Fills cookies with the cookies extracted from the [Cookie](#cookie) headers in t
 void getURIParameters(NVCollection & params) const
 ```
 
+Defined in src/http/include/icy/http/request.h:104
+
 Returns the request URI parameters.
 
 ---
@@ -6448,11 +7571,13 @@ Returns the request URI parameters.
 
 #### hasCredentials
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasCredentials() const
+[[nodiscard]] bool hasCredentials() const
 ```
+
+Defined in src/http/include/icy/http/request.h:108
 
 Returns true if the request contains authentication information in the form of an Authorization header.
 
@@ -6468,6 +7593,8 @@ Returns true if the request contains authentication information in the form of a
 void getCredentials(std::string & scheme, std::string & authInfo) const
 ```
 
+Defined in src/http/include/icy/http/request.h:115
+
 Returns the authentication scheme and additional authentication information contained in this request.
 
 Throws a std::exception if no authentication information is contained in the request.
@@ -6482,6 +7609,8 @@ Throws a std::exception if no authentication information is contained in the req
 void setCredentials(std::string_view scheme, std::string_view authInfo)
 ```
 
+Defined in src/http/include/icy/http/request.h:119
+
 Sets the authentication scheme and information for this request.
 
 ---
@@ -6490,11 +7619,13 @@ Sets the authentication scheme and information for this request.
 
 #### hasProxyCredentials
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasProxyCredentials() const
+[[nodiscard]] bool hasProxyCredentials() const
 ```
+
+Defined in src/http/include/icy/http/request.h:123
 
 Returns true if the request contains proxy authentication information in the form of an Proxy-Authorization header.
 
@@ -6510,6 +7641,8 @@ Returns true if the request contains proxy authentication information in the for
 void getProxyCredentials(std::string & scheme, std::string & authInfo) const
 ```
 
+Defined in src/http/include/icy/http/request.h:131
+
 Returns the proxy authentication scheme and additional proxy authentication information contained in this request.
 
 Throws a std::exception if no proxy authentication information is contained in the request.
@@ -6523,6 +7656,8 @@ Throws a std::exception if no proxy authentication information is contained in t
 ```cpp
 void setProxyCredentials(std::string_view scheme, std::string_view authInfo)
 ```
+
+Defined in src/http/include/icy/http/request.h:134
 
 Sets the proxy authentication scheme and information for this request.
 
@@ -6538,6 +7673,8 @@ Sets the proxy authentication scheme and information for this request.
 virtual void write(std::ostream & ostr) const
 ```
 
+Defined in src/http/include/icy/http/request.h:138
+
 Writes the HTTP request to the given output stream.
 
 ---
@@ -6552,6 +7689,8 @@ Writes the HTTP request to the given output stream.
 virtual void write(std::string & str) const
 ```
 
+Defined in src/http/include/icy/http/request.h:141
+
 Writes the HTTP request to the given output string.
 
 ---
@@ -6565,6 +7704,8 @@ Writes the HTTP request to the given output string.
 ```cpp
 virtual void write(Buffer & buf) const
 ```
+
+Defined in src/http/include/icy/http/request.h:144
 
 Writes the HTTP request directly into a byte buffer.
 
@@ -6587,6 +7728,8 @@ Writes the HTTP request directly into a byte buffer.
 void getCredentials(const std::string & header, std::string & scheme, std::string & authInfo) const
 ```
 
+Defined in src/http/include/icy/http/request.h:158
+
 Returns the authentication scheme and additional authentication information contained in the given header of request.
 
 Throws a NotAuthenticatedException if no authentication information is contained in the request.
@@ -6600,6 +7743,8 @@ Throws a NotAuthenticatedException if no authentication information is contained
 ```cpp
 void setCredentials(const std::string & header, std::string_view scheme, std::string_view authInfo)
 ```
+
+Defined in src/http/include/icy/http/request.h:162
 
 Writes the authentication scheme and information for this request to the given header.
 
@@ -6620,6 +7765,8 @@ Writes the authentication scheme and information for this request to the given h
 std::string _method
 ```
 
+Defined in src/http/include/icy/http/request.h:165
+
 ---
 
 {#_uri}
@@ -6630,6 +7777,8 @@ std::string _method
 std::string _uri
 ```
 
+Defined in src/http/include/icy/http/request.h:166
+
 {#response-1}
 
 ## Response
@@ -6638,9 +7787,35 @@ std::string _uri
 #include <icy/http/response.h>
 ```
 
+```cpp
+class Response
+```
+
+Defined in src/http/include/icy/http/response.h:78
+
 > **Inherits:** [`Message`](#message)
 
 HTTP response message with status, reason phrase, headers, and body metadata.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-18) `inline` |  |
+
+---
+
+{#operator-18}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const Response & res)
+```
+
+Defined in src/http/include/icy/http/response.h:145
 
 ### Public Methods
 
@@ -6653,18 +7828,18 @@ HTTP response message with status, reason phrase, headers, and body metadata.
 |  | [`Response`](#response-6)  | Creates the [Response](#response-1) with the given version, status and an appropriate reason phrase. |
 |  | [`~Response`](#response-7) `virtual` | Destroys the [Response](#response-1). |
 | `void` | [`setStatus`](#setstatus)  | Sets the HTTP status code. |
-| `StatusCode` | [`getStatus`](#getstatus) `const` | Returns the HTTP status code. |
+| `StatusCode` | [`getStatus`](#getstatus) `const` `nodiscard` | Returns the HTTP status code. |
 | `void` | [`setReason`](#setreason)  | Sets the HTTP reason phrase. |
-| `const std::string &` | [`getReason`](#getreason) `const` | Returns the HTTP reason phrase. |
+| `const std::string &` | [`getReason`](#getreason) `const` `nodiscard` | Returns the HTTP reason phrase. |
 | `void` | [`setStatusAndReason`](#setstatusandreason)  | Sets the HTTP status code and reason phrase. |
 | `void` | [`setDate`](#setdate)  | Sets the Date header to the given date/time value. |
-| `Timestamp` | [`getDate`](#getdate) `const` | Returns the value of the Date header. |
+| `Timestamp` | [`getDate`](#getdate) `const` `nodiscard` | Returns the value of the Date header. |
 | `void` | [`addCookie`](#addcookie)  | Adds the cookie to the response by adding a Set-Cookie header. |
 | `void` | [`getCookies`](#getcookies-1) `const` | Returns a vector with all the cookies set in the response header. |
 | `void` | [`write`](#write-12) `virtual` `const` | Writes the HTTP response headers to the given output stream. |
 | `void` | [`write`](#write-13) `virtual` `const` | Writes the HTTP response headers to the given output string. |
 | `void` | [`write`](#write-14) `virtual` `const` | Writes the HTTP response headers directly into a byte buffer. |
-| `bool` | [`success`](#success) `virtual` `const` | Returns true if the HTTP response code was successful (< 400). |
+| `bool` | [`success`](#success) `virtual` `const` `nodiscard` | Returns true if the HTTP response code was successful (< 400). |
 
 ---
 
@@ -6675,6 +7850,8 @@ HTTP response message with status, reason phrase, headers, and body metadata.
 ```cpp
 Response()
 ```
+
+Defined in src/http/include/icy/http/response.h:82
 
 Creates the [Response](#response-1) with OK status.
 
@@ -6688,6 +7865,8 @@ Creates the [Response](#response-1) with OK status.
 Response(StatusCode status, const std::string & reason)
 ```
 
+Defined in src/http/include/icy/http/response.h:85
+
 Creates the [Response](#response-1) with the given status and reason phrase.
 
 ---
@@ -6699,6 +7878,8 @@ Creates the [Response](#response-1) with the given status and reason phrase.
 ```cpp
 Response(const std::string & version, StatusCode status, const std::string & reason)
 ```
+
+Defined in src/http/include/icy/http/response.h:88
 
 Creates the [Response](#response-1) with the given version, status and reason phrase.
 
@@ -6712,6 +7893,8 @@ Creates the [Response](#response-1) with the given version, status and reason ph
 Response(StatusCode status)
 ```
 
+Defined in src/http/include/icy/http/response.h:92
+
 Creates the [Response](#response-1) with the given status and an appropriate reason phrase.
 
 ---
@@ -6723,6 +7906,8 @@ Creates the [Response](#response-1) with the given status and an appropriate rea
 ```cpp
 Response(const std::string & version, StatusCode status)
 ```
+
+Defined in src/http/include/icy/http/response.h:96
 
 Creates the [Response](#response-1) with the given version, status and an appropriate reason phrase.
 
@@ -6738,6 +7923,8 @@ Creates the [Response](#response-1) with the given version, status and an approp
 virtual ~Response()
 ```
 
+Defined in src/http/include/icy/http/response.h:99
+
 Destroys the [Response](#response-1).
 
 ---
@@ -6750,6 +7937,8 @@ Destroys the [Response](#response-1).
 void setStatus(StatusCode status)
 ```
 
+Defined in src/http/include/icy/http/response.h:104
+
 Sets the HTTP status code.
 
 The reason phrase is set according to the status code.
@@ -6760,11 +7949,13 @@ The reason phrase is set according to the status code.
 
 #### getStatus
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-StatusCode getStatus() const
+[[nodiscard]] StatusCode getStatus() const
 ```
+
+Defined in src/http/include/icy/http/response.h:107
 
 Returns the HTTP status code.
 
@@ -6778,6 +7969,8 @@ Returns the HTTP status code.
 void setReason(const std::string & reason)
 ```
 
+Defined in src/http/include/icy/http/response.h:110
+
 Sets the HTTP reason phrase.
 
 ---
@@ -6786,11 +7979,13 @@ Sets the HTTP reason phrase.
 
 #### getReason
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const std::string & getReason() const
+[[nodiscard]] const std::string & getReason() const
 ```
+
+Defined in src/http/include/icy/http/response.h:113
 
 Returns the HTTP reason phrase.
 
@@ -6804,6 +7999,8 @@ Returns the HTTP reason phrase.
 void setStatusAndReason(StatusCode status, const std::string & reason)
 ```
 
+Defined in src/http/include/icy/http/response.h:116
+
 Sets the HTTP status code and reason phrase.
 
 ---
@@ -6816,6 +8013,8 @@ Sets the HTTP status code and reason phrase.
 void setDate(const Timestamp & dateTime)
 ```
 
+Defined in src/http/include/icy/http/response.h:119
+
 Sets the Date header to the given date/time value.
 
 ---
@@ -6824,11 +8023,13 @@ Sets the Date header to the given date/time value.
 
 #### getDate
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Timestamp getDate() const
+[[nodiscard]] Timestamp getDate() const
 ```
+
+Defined in src/http/include/icy/http/response.h:122
 
 Returns the value of the Date header.
 
@@ -6841,6 +8042,8 @@ Returns the value of the Date header.
 ```cpp
 void addCookie(const Cookie & cookie)
 ```
+
+Defined in src/http/include/icy/http/response.h:126
 
 Adds the cookie to the response by adding a Set-Cookie header.
 
@@ -6855,6 +8058,8 @@ Adds the cookie to the response by adding a Set-Cookie header.
 ```cpp
 void getCookies(std::vector< Cookie > & cookies) const
 ```
+
+Defined in src/http/include/icy/http/response.h:131
 
 Returns a vector with all the cookies set in the response header.
 
@@ -6872,6 +8077,8 @@ May throw an exception in case of a malformed Set-Cookie header.
 virtual void write(std::ostream & ostr) const
 ```
 
+Defined in src/http/include/icy/http/response.h:134
+
 Writes the HTTP response headers to the given output stream.
 
 ---
@@ -6885,6 +8092,8 @@ Writes the HTTP response headers to the given output stream.
 ```cpp
 virtual void write(std::string & str) const
 ```
+
+Defined in src/http/include/icy/http/response.h:137
 
 Writes the HTTP response headers to the given output string.
 
@@ -6900,6 +8109,8 @@ Writes the HTTP response headers to the given output string.
 virtual void write(Buffer & buf) const
 ```
 
+Defined in src/http/include/icy/http/response.h:140
+
 Writes the HTTP response headers directly into a byte buffer.
 
 ---
@@ -6908,11 +8119,13 @@ Writes the HTTP response headers directly into a byte buffer.
 
 #### success
 
-`virtual` `const`
+`virtual` `const` `nodiscard`
 
 ```cpp
-virtual bool success() const
+[[nodiscard]] virtual bool success() const
 ```
+
+Defined in src/http/include/icy/http/response.h:143
 
 Returns true if the HTTP response code was successful (< 400).
 
@@ -6933,6 +8146,8 @@ Returns true if the HTTP response code was successful (< 400).
 StatusCode _status
 ```
 
+Defined in src/http/include/icy/http/response.h:152
+
 ---
 
 {#_reason}
@@ -6943,6 +8158,8 @@ StatusCode _status
 std::string _reason
 ```
 
+Defined in src/http/include/icy/http/response.h:153
+
 {#server}
 
 ## Server
@@ -6951,11 +8168,35 @@ std::string _reason
 #include <icy/http/server.h>
 ```
 
+```cpp
+class Server
+```
+
+Defined in src/http/include/icy/http/server.h:332
+
 > **Inherits:** [`SocketAdapter`](net.md#socketadapter)
 
 HTTP server implementation.
 
 This HTTP server is not strictly standards compliant. It was created to be a fast (nocopy where possible) solution for streaming media to web browsers.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`ServerConnection`](#serverconnection)  |  |
+
+---
+
+{#serverconnection}
+
+#### ServerConnection
+
+```cpp
+friend class ServerConnection
+```
+
+Defined in src/http/include/icy/http/server.h:435
 
 ### Public Attributes
 
@@ -6974,6 +8215,8 @@ This HTTP server is not strictly standards compliant. It was created to be a fas
 LocalSignal< void(ServerConnection::Ptr)> Connection
 ```
 
+Defined in src/http/include/icy/http/server.h:406
+
 Signals when a new connection has been created. A reference to the new connection object is provided.
 
 ---
@@ -6985,6 +8228,8 @@ Signals when a new connection has been created. A reference to the new connectio
 ```cpp
 LocalSignal< void()> Shutdown
 ```
+
+Defined in src/http/include/icy/http/server.h:409
 
 Signals when the server is shutting down.
 
@@ -7001,9 +8246,9 @@ Signals when the server is shutting down.
 | `void` | [`setReusePort`](#setreuseport-1) `inline` | Enable SO_REUSEPORT for multicore server instances. Must be called before [start()](#start-11). Allows multiple server instances to bind the same address:port with kernel-level load balancing (Linux 3.9+). |
 | `void` | [`setMaxPooledConnections`](#setmaxpooledconnections) `inline` | Set the maximum number of pooled connections (default 128). Set to 0 to disable connection pooling entirely. |
 | `void` | [`setKeepAliveTimeout`](#setkeepalivetimeout) `inline` | Set the keep-alive idle timeout in seconds (default 30). Connections idle longer than this are closed by the timer. Set to 0 to disable idle timeout. |
-| `size_t` | [`connectionCount`](#connectioncount) `const` `inline` | Return the number of active connections (all states). |
-| `net::Address &` | [`address`](#address-11)  | Return the server bind address. |
-| `const DateCache &` | [`dateCache`](#datecache-1) `const` `inline` | Return the cached Date header for use in responses. |
+| `size_t` | [`connectionCount`](#connectioncount) `const` `inline` `nodiscard` | Return the number of active connections (all states). |
+| `net::Address &` | [`address`](#address-11) `nodiscard` | Return the server bind address. |
+| `const DateCache &` | [`dateCache`](#datecache-1) `const` `inline` `nodiscard` | Return the cached Date header for use in responses. |
 
 ---
 
@@ -7012,8 +8257,10 @@ Signals when the server is shutting down.
 #### Server
 
 ```cpp
-Server(const std::string & host, short port, uv::Loop * loop, std::unique_ptr< ServerConnectionFactory > factory)
+Server(const std::string & host, short port, uv::Loop * loop = uv::defaultLoop(), std::unique_ptr< ServerConnectionFactory > factory = std::make_unique< ServerConnectionFactory >())
 ```
+
+Defined in src/http/include/icy/http/server.h:340
 
 Constructs an HTTP server on the given host and port using an internally created TCP socket. 
 #### Parameters
@@ -7032,8 +8279,10 @@ Constructs an HTTP server on the given host and port using an internally created
 #### Server
 
 ```cpp
-Server(const net::Address & address, uv::Loop * loop, std::unique_ptr< ServerConnectionFactory > factory)
+Server(const net::Address & address, uv::Loop * loop = uv::defaultLoop(), std::unique_ptr< ServerConnectionFactory > factory = std::make_unique< ServerConnectionFactory >())
 ```
+
+Defined in src/http/include/icy/http/server.h:348
 
 Constructs an HTTP server on the given address using an internally created TCP socket. 
 #### Parameters
@@ -7050,8 +8299,10 @@ Constructs an HTTP server on the given address using an internally created TCP s
 #### Server
 
 ```cpp
-Server(const std::string & host, short port, net::TCPSocket::Ptr socket, std::unique_ptr< ServerConnectionFactory > factory)
+Server(const std::string & host, short port, net::TCPSocket::Ptr socket, std::unique_ptr< ServerConnectionFactory > factory = std::make_unique< ServerConnectionFactory >())
 ```
+
+Defined in src/http/include/icy/http/server.h:358
 
 Constructs an HTTP server on the given host and port using a caller-supplied socket. Useful for HTTPS by passing an SSLSocket. The event loop is derived from the socket. 
 #### Parameters
@@ -7070,8 +8321,10 @@ Constructs an HTTP server on the given host and port using a caller-supplied soc
 #### Server
 
 ```cpp
-Server(const net::Address & address, net::TCPSocket::Ptr socket, std::unique_ptr< ServerConnectionFactory > factory)
+Server(const net::Address & address, net::TCPSocket::Ptr socket, std::unique_ptr< ServerConnectionFactory > factory = std::make_unique< ServerConnectionFactory >())
 ```
+
+Defined in src/http/include/icy/http/server.h:367
 
 Constructs an HTTP server on the given address using a caller-supplied socket. The event loop is derived from the socket. 
 #### Parameters
@@ -7091,6 +8344,8 @@ Constructs an HTTP server on the given address using a caller-supplied socket. T
 void start()
 ```
 
+Defined in src/http/include/icy/http/server.h:374
+
 Start the HTTP server.
 
 ---
@@ -7103,6 +8358,8 @@ Start the HTTP server.
 void stop()
 ```
 
+Defined in src/http/include/icy/http/server.h:377
+
 Stop the HTTP server.
 
 ---
@@ -7114,8 +8371,10 @@ Stop the HTTP server.
 `inline`
 
 ```cpp
-inline void setReusePort(bool enable)
+inline void setReusePort(bool enable = true)
 ```
+
+Defined in src/http/include/icy/http/server.h:384
 
 Enable SO_REUSEPORT for multicore server instances. Must be called before [start()](#start-11). Allows multiple server instances to bind the same address:port with kernel-level load balancing (Linux 3.9+).
 
@@ -7131,6 +8390,8 @@ Enable SO_REUSEPORT for multicore server instances. Must be called before [start
 inline void setMaxPooledConnections(size_t n)
 ```
 
+Defined in src/http/include/icy/http/server.h:388
+
 Set the maximum number of pooled connections (default 128). Set to 0 to disable connection pooling entirely.
 
 ---
@@ -7145,6 +8406,8 @@ Set the maximum number of pooled connections (default 128). Set to 0 to disable 
 inline void setKeepAliveTimeout(int seconds)
 ```
 
+Defined in src/http/include/icy/http/server.h:393
+
 Set the keep-alive idle timeout in seconds (default 30). Connections idle longer than this are closed by the timer. Set to 0 to disable idle timeout.
 
 ---
@@ -7153,11 +8416,13 @@ Set the keep-alive idle timeout in seconds (default 30). Connections idle longer
 
 #### connectionCount
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t connectionCount() const
+[[nodiscard]] inline size_t connectionCount() const
 ```
+
+Defined in src/http/include/icy/http/server.h:396
 
 Return the number of active connections (all states).
 
@@ -7167,9 +8432,13 @@ Return the number of active connections (all states).
 
 #### address
 
+`nodiscard`
+
 ```cpp
-net::Address & address()
+[[nodiscard]] net::Address & address()
 ```
+
+Defined in src/http/include/icy/http/server.h:399
 
 Return the server bind address.
 
@@ -7179,11 +8448,13 @@ Return the server bind address.
 
 #### dateCache
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const DateCache & dateCache() const
+[[nodiscard]] inline const DateCache & dateCache() const
 ```
+
+Defined in src/http/include/icy/http/server.h:402
 
 Return the cached Date header for use in responses.
 
@@ -7212,6 +8483,8 @@ Return the cached Date header for use in responses.
 uv::Loop * _loop
 ```
 
+Defined in src/http/include/icy/http/server.h:424
+
 ---
 
 {#_address}
@@ -7221,6 +8494,8 @@ uv::Loop * _loop
 ```cpp
 net::Address _address
 ```
+
+Defined in src/http/include/icy/http/server.h:425
 
 ---
 
@@ -7232,6 +8507,8 @@ net::Address _address
 net::TCPSocket::Ptr _socket
 ```
 
+Defined in src/http/include/icy/http/server.h:426
+
 ---
 
 {#_timer}
@@ -7241,6 +8518,8 @@ net::TCPSocket::Ptr _socket
 ```cpp
 Timer _timer
 ```
+
+Defined in src/http/include/icy/http/server.h:427
 
 ---
 
@@ -7252,6 +8531,8 @@ Timer _timer
 std::unique_ptr< ServerConnectionFactory > _factory
 ```
 
+Defined in src/http/include/icy/http/server.h:428
+
 ---
 
 {#_connections-1}
@@ -7261,6 +8542,8 @@ std::unique_ptr< ServerConnectionFactory > _factory
 ```cpp
 std::unordered_map< ServerConnection *, ServerConnection::Ptr > _connections
 ```
+
+Defined in src/http/include/icy/http/server.h:429
 
 ---
 
@@ -7272,6 +8555,8 @@ std::unordered_map< ServerConnection *, ServerConnection::Ptr > _connections
 ConnectionPool _pool
 ```
 
+Defined in src/http/include/icy/http/server.h:430
+
 ---
 
 {#_datecache}
@@ -7281,6 +8566,8 @@ ConnectionPool _pool
 ```cpp
 DateCache _dateCache
 ```
+
+Defined in src/http/include/icy/http/server.h:431
 
 ---
 
@@ -7292,6 +8579,8 @@ DateCache _dateCache
 int _keepAliveTimeout {30}
 ```
 
+Defined in src/http/include/icy/http/server.h:432
+
 ---
 
 {#_reuseport}
@@ -7301,6 +8590,8 @@ int _keepAliveTimeout {30}
 ```cpp
 bool _reusePort {false}
 ```
+
+Defined in src/http/include/icy/http/server.h:433
 
 ### Protected Methods
 
@@ -7312,7 +8603,7 @@ bool _reusePort {false}
 | `void` | [`onConnectionClose`](#onconnectionclose-1)  |  |
 | `bool` | [`onSocketClose`](#onsocketclose-3) `virtual` | Called when the socket is closed. Forwards the event to all registered receivers in priority order. |
 | `void` | [`onTimer`](#ontimer)  |  |
-| `uv::Loop *` | [`loop`](#loop-6) `const` `inline` | Return the event loop this server runs on. |
+| `uv::Loop *` | [`loop`](#loop-6) `const` `inline` `nodiscard` | Return the event loop this server runs on. |
 
 ---
 
@@ -7324,6 +8615,8 @@ bool _reusePort {false}
 std::unique_ptr< ServerResponder > createResponder(ServerConnection & conn)
 ```
 
+Defined in src/http/include/icy/http/server.h:412
+
 ---
 
 {#onclientsocketaccept}
@@ -7333,6 +8626,8 @@ std::unique_ptr< ServerResponder > createResponder(ServerConnection & conn)
 ```cpp
 void onClientSocketAccept(const net::TCPSocket::Ptr & socket)
 ```
+
+Defined in src/http/include/icy/http/server.h:414
 
 ---
 
@@ -7344,6 +8639,8 @@ void onClientSocketAccept(const net::TCPSocket::Ptr & socket)
 void onConnectionReady(ServerConnection & conn)
 ```
 
+Defined in src/http/include/icy/http/server.h:415
+
 ---
 
 {#onconnectionclose-1}
@@ -7353,6 +8650,8 @@ void onConnectionReady(ServerConnection & conn)
 ```cpp
 void onConnectionClose(ServerConnection & conn)
 ```
+
+Defined in src/http/include/icy/http/server.h:416
 
 ---
 
@@ -7365,6 +8664,8 @@ void onConnectionClose(ServerConnection & conn)
 ```cpp
 virtual bool onSocketClose(net::Socket & socket)
 ```
+
+Defined in src/http/include/icy/http/server.h:417
 
 Called when the socket is closed. Forwards the event to all registered receivers in priority order. 
 #### Parameters
@@ -7383,27 +8684,37 @@ true to stop propagation to subsequent receivers.
 void onTimer()
 ```
 
+Defined in src/http/include/icy/http/server.h:418
+
 ---
 
 {#loop-6}
 
 #### loop
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline uv::Loop * loop() const
+[[nodiscard]] inline uv::Loop * loop() const
 ```
+
+Defined in src/http/include/icy/http/server.h:421
 
 Return the event loop this server runs on.
 
-{#serverconnection}
+{#serverconnection-1}
 
 ## ServerConnection
 
 ```cpp
 #include <icy/http/server.h>
 ```
+
+```cpp
+class ServerConnection
+```
+
+Defined in src/http/include/icy/http/server.h:59
 
 > **Inherits:** [`Connection`](#connection-1)
 
@@ -7426,6 +8737,8 @@ HTTP server connection.
 LocalSignal< void(ServerConnection &, const MutableBuffer &)> Payload
 ```
 
+Defined in src/http/include/icy/http/server.h:118
+
 Signals when raw data is received.
 
 ---
@@ -7438,33 +8751,35 @@ Signals when raw data is received.
 LocalSignal< void(ServerConnection &)> Close
 ```
 
+Defined in src/http/include/icy/http/server.h:119
+
 Signals when the connection is closed.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`ServerConnection`](#serverconnection-1)  | Creates a [ServerConnection](#serverconnection) attached to the given server and socket. |
-| `Server &` | [`server`](#server-5)  | Returns the owning [Server](#server) instance. |
-| `ServerConnectionState` | [`state`](#state-1) `const` `inline` | Returns the current server-side connection state. |
-| `ServerConnectionMode` | [`mode`](#mode-1) `const` `inline` | Returns the current transport mode. |
-| `bool` | [`upgraded`](#upgraded) `const` `inline` | Returns true if the connection has been upgraded (e.g. to WebSocket). |
-| `bool` | [`streaming`](#streaming) `const` `inline` | Returns true if the connection is in long-lived streaming mode. |
-| `bool` | [`idleTimeoutEnabled`](#idletimeoutenabled) `const` | Returns true if the server idle timer is allowed to reap this connection. |
-| `bool` | [`reusableForPool`](#reusableforpool) `const` | Returns true if the closed connection can be returned to the reuse pool. |
-| `void` | [`markActive`](#markactive-1) `virtual` `inline` | Refresh the idle timer. |
-| `void` | [`reset`](#reset-12)  | Reset this connection for reuse with a new socket. Called by the connection pool to avoid allocating a new [ServerConnection](#serverconnection). |
+|  | [`ServerConnection`](#serverconnection-2)  | Creates a [ServerConnection](#serverconnection-1) attached to the given server and socket. |
+| `Server &` | [`server`](#server-5) `nodiscard` | Returns the owning [Server](#server) instance. |
+| `ServerConnectionState` | [`state`](#state-1) `const` `inline` `nodiscard` | Returns the current server-side connection state. |
+| `ServerConnectionMode` | [`mode`](#mode-1) `const` `inline` `nodiscard` | Returns the current transport mode. |
+| `bool` | [`upgraded`](#upgraded) `const` `inline` `nodiscard` | Returns true if the connection has been upgraded (e.g. to WebSocket). |
+| `bool` | [`streaming`](#streaming) `const` `inline` `nodiscard` | Returns true if the connection is in long-lived streaming mode. |
+| `bool` | [`idleTimeoutEnabled`](#idletimeoutenabled) `const` `nodiscard` | Returns true if the server idle timer is allowed to reap this connection. |
+| `bool` | [`reusableForPool`](#reusableforpool) `const` `nodiscard` | Returns true if the closed connection can be returned to the reuse pool. |
+| `void` | [`markActive`](#markactive-1) `virtual` `inline` `override` | Refresh the idle timer. |
+| `void` | [`reset`](#reset-12)  | Reset this connection for reuse with a new socket. Called by the connection pool to avoid allocating a new [ServerConnection](#serverconnection-1). |
 | `void` | [`touch`](#touch) `inline` | Update the last activity timestamp. |
-| `double` | [`idleSeconds`](#idleseconds) `const` `inline` | Return seconds since last activity. |
-| `void` | [`beginStreaming`](#beginstreaming-1) `virtual` | Explicitly mark the response as long-lived streaming. Streaming connections are excluded from the keep-alive idle reaper. |
-| `void` | [`endStreaming`](#endstreaming-1) `virtual` | Exit streaming mode and return to the given HTTP state. |
+| `double` | [`idleSeconds`](#idleseconds) `const` `inline` `nodiscard` | Return seconds since last activity. |
+| `void` | [`beginStreaming`](#beginstreaming-1) `virtual` `override` | Explicitly mark the response as long-lived streaming. Streaming connections are excluded from the keep-alive idle reaper. |
+| `void` | [`endStreaming`](#endstreaming-1) `virtual` `override` | Exit streaming mode and return to the given HTTP state. |
 | `void` | [`endStreaming`](#endstreaming-2)  |  |
-| `ssize_t` | [`sendHeader`](#sendheader-1) `virtual` | Send the outgoing HTTP header. |
-| `void` | [`close`](#close-22) `virtual` | Close the connection with an explicit terminal state transition. |
+| `ssize_t` | [`sendHeader`](#sendheader-1) `virtual` `override` | Send the outgoing HTTP header. |
+| `void` | [`close`](#close-22) `virtual` `override` | Close the connection with an explicit terminal state transition. |
 
 ---
 
-{#serverconnection-1}
+{#serverconnection-2}
 
 #### ServerConnection
 
@@ -7472,7 +8787,9 @@ Signals when the connection is closed.
 ServerConnection(Server & server, net::TCPSocket::Ptr socket)
 ```
 
-Creates a [ServerConnection](#serverconnection) attached to the given server and socket. 
+Defined in src/http/include/icy/http/server.h:67
+
+Creates a [ServerConnection](#serverconnection-1) attached to the given server and socket. 
 #### Parameters
 * `server` The owning HTTP server instance. 
 
@@ -7484,9 +8801,13 @@ Creates a [ServerConnection](#serverconnection) attached to the given server and
 
 #### server
 
+`nodiscard`
+
 ```cpp
-Server & server()
+[[nodiscard]] Server & server()
 ```
+
+Defined in src/http/include/icy/http/server.h:71
 
 Returns the owning [Server](#server) instance.
 
@@ -7496,11 +8817,13 @@ Returns the owning [Server](#server) instance.
 
 #### state
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline ServerConnectionState state() const
+[[nodiscard]] inline ServerConnectionState state() const
 ```
+
+Defined in src/http/include/icy/http/server.h:74
 
 Returns the current server-side connection state.
 
@@ -7510,11 +8833,13 @@ Returns the current server-side connection state.
 
 #### mode
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline ServerConnectionMode mode() const
+[[nodiscard]] inline ServerConnectionMode mode() const
 ```
+
+Defined in src/http/include/icy/http/server.h:77
 
 Returns the current transport mode.
 
@@ -7524,11 +8849,13 @@ Returns the current transport mode.
 
 #### upgraded
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool upgraded() const
+[[nodiscard]] inline bool upgraded() const
 ```
+
+Defined in src/http/include/icy/http/server.h:80
 
 Returns true if the connection has been upgraded (e.g. to WebSocket).
 
@@ -7538,11 +8865,13 @@ Returns true if the connection has been upgraded (e.g. to WebSocket).
 
 #### streaming
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool streaming() const
+[[nodiscard]] inline bool streaming() const
 ```
+
+Defined in src/http/include/icy/http/server.h:83
 
 Returns true if the connection is in long-lived streaming mode.
 
@@ -7552,11 +8881,13 @@ Returns true if the connection is in long-lived streaming mode.
 
 #### idleTimeoutEnabled
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool idleTimeoutEnabled() const
+[[nodiscard]] bool idleTimeoutEnabled() const
 ```
+
+Defined in src/http/include/icy/http/server.h:86
 
 Returns true if the server idle timer is allowed to reap this connection.
 
@@ -7566,11 +8897,13 @@ Returns true if the server idle timer is allowed to reap this connection.
 
 #### reusableForPool
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool reusableForPool() const
+[[nodiscard]] bool reusableForPool() const
 ```
+
+Defined in src/http/include/icy/http/server.h:89
 
 Returns true if the closed connection can be returned to the reuse pool.
 
@@ -7580,11 +8913,13 @@ Returns true if the closed connection can be returned to the reuse pool.
 
 #### markActive
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void markActive()
+virtual inline void markActive() override
 ```
+
+Defined in src/http/include/icy/http/server.h:92
 
 Refresh the idle timer.
 
@@ -7598,7 +8933,9 @@ Refresh the idle timer.
 void reset(net::TCPSocket::Ptr socket)
 ```
 
-Reset this connection for reuse with a new socket. Called by the connection pool to avoid allocating a new [ServerConnection](#serverconnection).
+Defined in src/http/include/icy/http/server.h:96
+
+Reset this connection for reuse with a new socket. Called by the connection pool to avoid allocating a new [ServerConnection](#serverconnection-1).
 
 ---
 
@@ -7612,6 +8949,8 @@ Reset this connection for reuse with a new socket. Called by the connection pool
 inline void touch()
 ```
 
+Defined in src/http/include/icy/http/server.h:99
+
 Update the last activity timestamp.
 
 ---
@@ -7620,11 +8959,13 @@ Update the last activity timestamp.
 
 #### idleSeconds
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline double idleSeconds() const
+[[nodiscard]] inline double idleSeconds() const
 ```
+
+Defined in src/http/include/icy/http/server.h:102
 
 Return seconds since last activity.
 
@@ -7634,11 +8975,13 @@ Return seconds since last activity.
 
 #### beginStreaming
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void beginStreaming()
+virtual void beginStreaming() override
 ```
+
+Defined in src/http/include/icy/http/server.h:106
 
 Explicitly mark the response as long-lived streaming. Streaming connections are excluded from the keep-alive idle reaper.
 
@@ -7648,11 +8991,13 @@ Explicitly mark the response as long-lived streaming. Streaming connections are 
 
 #### endStreaming
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void endStreaming()
+virtual void endStreaming() override
 ```
+
+Defined in src/http/include/icy/http/server.h:109
 
 Exit streaming mode and return to the given HTTP state.
 
@@ -7666,17 +9011,21 @@ Exit streaming mode and return to the given HTTP state.
 void endStreaming(ServerConnectionState nextState)
 ```
 
+Defined in src/http/include/icy/http/server.h:110
+
 ---
 
 {#sendheader-1}
 
 #### sendHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual ssize_t sendHeader()
+virtual ssize_t sendHeader() override
 ```
+
+Defined in src/http/include/icy/http/server.h:113
 
 Send the outgoing HTTP header.
 
@@ -7686,11 +9035,13 @@ Send the outgoing HTTP header.
 
 #### close
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void close()
+virtual void close() override
 ```
+
+Defined in src/http/include/icy/http/server.h:116
 
 Close the connection with an explicit terminal state transition.
 
@@ -7714,6 +9065,8 @@ Close the connection with an explicit terminal state transition.
 Server & _server
 ```
 
+Defined in src/http/include/icy/http/server.h:135
+
 ---
 
 {#_responder}
@@ -7723,6 +9076,8 @@ Server & _server
 ```cpp
 std::unique_ptr< ServerResponder > _responder
 ```
+
+Defined in src/http/include/icy/http/server.h:136
 
 ---
 
@@ -7734,6 +9089,8 @@ std::unique_ptr< ServerResponder > _responder
 std::time_t _lastActivity {0}
 ```
 
+Defined in src/http/include/icy/http/server.h:137
+
 ---
 
 {#_state-2}
@@ -7743,6 +9100,8 @@ std::time_t _lastActivity {0}
 ```cpp
 ServerConnectionState _state {}
 ```
+
+Defined in src/http/include/icy/http/server.h:138
 
 ---
 
@@ -7754,19 +9113,21 @@ ServerConnectionState _state {}
 ServerConnectionMode _mode {}
 ```
 
+Defined in src/http/include/icy/http/server.h:139
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`onHeaders`](#onheaders-2) `virtual` | Called when the incoming HTTP headers have been fully parsed. |
-| `void` | [`onPayload`](#onpayload-2) `virtual` | Called for each chunk of incoming body data after headers are complete. |
-| `void` | [`onComplete`](#oncomplete-2) `virtual` | Called when the incoming HTTP message is fully received. |
-| `void` | [`onClose`](#onclose-5) `virtual` | Called when the connection is closed. |
-| `http::Message *` | [`incomingHeader`](#incomingheader-2) `virtual` | Returns the incoming HTTP message header (request or response depending on role). |
-| `http::Message *` | [`outgoingHeader`](#outgoingheader-2) `virtual` | Returns the outgoing HTTP message header (request or response depending on role). |
+| `void` | [`onHeaders`](#onheaders-2) `virtual` `override` | Called when the incoming HTTP headers have been fully parsed. |
+| `void` | [`onPayload`](#onpayload-2) `virtual` `override` | Called for each chunk of incoming body data after headers are complete. |
+| `void` | [`onComplete`](#oncomplete-2) `virtual` `override` | Called when the incoming HTTP message is fully received. |
+| `void` | [`onClose`](#onclose-5) `virtual` `override` | Called when the connection is closed. |
+| `http::Message *` | [`incomingHeader`](#incomingheader-2) `virtual` `override` | Returns the incoming HTTP message header (request or response depending on role). |
+| `http::Message *` | [`outgoingHeader`](#outgoingheader-2) `virtual` `override` | Returns the outgoing HTTP message header (request or response depending on role). |
 | `void` | [`setState`](#setstate)  |  |
-| `bool` | [`requestHasBody`](#requesthasbody) `const` |  |
-| `bool` | [`responseLooksStreaming`](#responselooksstreaming) `const` |  |
+| `bool` | [`requestHasBody`](#requesthasbody) `const` `nodiscard` |  |
+| `bool` | [`responseLooksStreaming`](#responselooksstreaming) `const` `nodiscard` |  |
 
 ---
 
@@ -7774,11 +9135,13 @@ ServerConnectionMode _mode {}
 
 #### onHeaders
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onHeaders()
+virtual void onHeaders() override
 ```
+
+Defined in src/http/include/icy/http/server.h:122
 
 Called when the incoming HTTP headers have been fully parsed.
 
@@ -7788,15 +9151,17 @@ Called when the incoming HTTP headers have been fully parsed.
 
 #### onPayload
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onPayload(const MutableBuffer & buffer)
+virtual void onPayload(const MutableBuffer & buffer) override
 ```
+
+Defined in src/http/include/icy/http/server.h:123
 
 Called for each chunk of incoming body data after headers are complete. 
 #### Parameters
-* `buffer` Buffer containing the received data chunk.
+* `buffer` [Buffer](base.md#buffer-2) containing the received data chunk.
 
 ---
 
@@ -7804,11 +9169,13 @@ Called for each chunk of incoming body data after headers are complete.
 
 #### onComplete
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onComplete()
+virtual void onComplete() override
 ```
+
+Defined in src/http/include/icy/http/server.h:124
 
 Called when the incoming HTTP message is fully received.
 
@@ -7818,11 +9185,13 @@ Called when the incoming HTTP message is fully received.
 
 #### onClose
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onClose()
+virtual void onClose() override
 ```
+
+Defined in src/http/include/icy/http/server.h:125
 
 Called when the connection is closed.
 
@@ -7832,11 +9201,13 @@ Called when the connection is closed.
 
 #### incomingHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual http::Message * incomingHeader()
+virtual http::Message * incomingHeader() override
 ```
+
+Defined in src/http/include/icy/http/server.h:127
 
 Returns the incoming HTTP message header (request or response depending on role).
 
@@ -7846,11 +9217,13 @@ Returns the incoming HTTP message header (request or response depending on role)
 
 #### outgoingHeader
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual http::Message * outgoingHeader()
+virtual http::Message * outgoingHeader() override
 ```
+
+Defined in src/http/include/icy/http/server.h:128
 
 Returns the outgoing HTTP message header (request or response depending on role).
 
@@ -7864,17 +9237,21 @@ Returns the outgoing HTTP message header (request or response depending on role)
 void setState(ServerConnectionState state)
 ```
 
+Defined in src/http/include/icy/http/server.h:130
+
 ---
 
 {#requesthasbody}
 
 #### requestHasBody
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool requestHasBody() const
+[[nodiscard]] bool requestHasBody() const
 ```
+
+Defined in src/http/include/icy/http/server.h:131
 
 ---
 
@@ -7882,11 +9259,13 @@ bool requestHasBody() const
 
 #### responseLooksStreaming
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool responseLooksStreaming() const
+[[nodiscard]] bool responseLooksStreaming() const
 ```
+
+Defined in src/http/include/icy/http/server.h:132
 
 ### Public Types
 
@@ -7901,8 +9280,10 @@ bool responseLooksStreaming() const
 #### Ptr
 
 ```cpp
-std::shared_ptr< ServerConnection > Ptr()
+using Ptr = std::shared_ptr< ServerConnection >
 ```
+
+Defined in src/http/include/icy/http/server.h:62
 
 {#serverconnectionfactory}
 
@@ -7912,14 +9293,20 @@ std::shared_ptr< ServerConnection > Ptr()
 #include <icy/http/server.h>
 ```
 
-Factory for creating per-socket `[ServerConnection](#serverconnection)` and per-request `[ServerResponder](#serverresponder)` objects.
+```cpp
+class ServerConnectionFactory
+```
+
+Defined in src/http/include/icy/http/server.h:206
+
+Factory for creating per-socket `[ServerConnection](#serverconnection-1)` and per-request `[ServerResponder](#serverresponder)` objects.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`ServerConnectionFactory`](#serverconnectionfactory-1)  | Defaulted constructor. |
-| `ServerConnection::Ptr` | [`createConnection`](#createconnection-2) `virtual` `inline` | Creates the `[ServerConnection](#serverconnection)` wrapper for an accepted TCP socket. |
+| `ServerConnection::Ptr` | [`createConnection`](#createconnection-2) `virtual` `inline` | Creates the `[ServerConnection](#serverconnection-1)` wrapper for an accepted TCP socket. |
 | `std::unique_ptr< ServerResponder >` | [`createResponder`](#createresponder-1) `virtual` `inline` | Creates the responder for the current request on `connection`. |
 
 ---
@@ -7931,6 +9318,8 @@ Factory for creating per-socket `[ServerConnection](#serverconnection)` and per-
 ```cpp
 ServerConnectionFactory() = default
 ```
+
+Defined in src/http/include/icy/http/server.h:209
 
 Defaulted constructor.
 
@@ -7946,7 +9335,9 @@ Defaulted constructor.
 virtual inline ServerConnection::Ptr createConnection(Server & server, const net::TCPSocket::Ptr & socket)
 ```
 
-Creates the `[ServerConnection](#serverconnection)` wrapper for an accepted TCP socket.
+Defined in src/http/include/icy/http/server.h:213
+
+Creates the `[ServerConnection](#serverconnection-1)` wrapper for an accepted TCP socket.
 
 ---
 
@@ -7960,6 +9351,8 @@ Creates the `[ServerConnection](#serverconnection)` wrapper for an accepted TCP 
 virtual inline std::unique_ptr< ServerResponder > createResponder(ServerConnection & connection)
 ```
 
+Defined in src/http/include/icy/http/server.h:219
+
 Creates the responder for the current request on `connection`.
 
 {#serverresponder}
@@ -7969,6 +9362,12 @@ Creates the responder for the current request on `connection`.
 ```cpp
 #include <icy/http/server.h>
 ```
+
+```cpp
+class ServerResponder
+```
+
+Defined in src/http/include/icy/http/server.h:145
 
 Base responder interface for handling one HTTP request on a server connection. Derived classes typically override `[onRequest()](#onrequest)` and optionally the streaming hooks.
 
@@ -7981,9 +9380,9 @@ Base responder interface for handling one HTTP request on a server connection. D
 | `void` | [`onPayload`](#onpayload-3) `virtual` `inline` | Called for each chunk of incoming request body data. |
 | `void` | [`onRequest`](#onrequest) `virtual` `inline` | Called when the complete HTTP request has been received. Derived classes should write their response here. |
 | `void` | [`onClose`](#onclose-6) `virtual` `inline` | Called when the connection is closed. |
-| `ServerConnection &` | [`connection`](#connection-9) `inline` | Returns the underlying server connection. |
-| `Request &` | [`request`](#request-10) `inline` | Returns the current HTTP request from the underlying connection. |
-| `Response &` | [`response`](#response-8) `inline` | Returns the current HTTP response from the underlying connection. |
+| `ServerConnection &` | [`connection`](#connection-9) `inline` `nodiscard` | Returns the underlying server connection. |
+| `Request &` | [`request`](#request-10) `inline` `nodiscard` | Returns the current HTTP request from the underlying connection. |
+| `Response &` | [`response`](#response-8) `inline` `nodiscard` | Returns the current HTTP response from the underlying connection. |
 
 ---
 
@@ -7996,6 +9395,8 @@ Base responder interface for handling one HTTP request on a server connection. D
 ```cpp
 inline ServerResponder(ServerConnection & connection)
 ```
+
+Defined in src/http/include/icy/http/server.h:150
 
 Creates a [ServerResponder](#serverresponder) for the given connection. 
 #### Parameters
@@ -8013,6 +9414,8 @@ Creates a [ServerResponder](#serverresponder) for the given connection.
 virtual inline void onHeaders(Request & request)
 ```
 
+Defined in src/http/include/icy/http/server.h:159
+
 Called when the incoming request headers have been parsed. 
 #### Parameters
 * `request` The parsed HTTP request with headers populated.
@@ -8029,9 +9432,11 @@ Called when the incoming request headers have been parsed.
 virtual inline void onPayload(const MutableBuffer & body)
 ```
 
+Defined in src/http/include/icy/http/server.h:163
+
 Called for each chunk of incoming request body data. 
 #### Parameters
-* `body` Buffer containing a chunk of the request body.
+* `body` [Buffer](base.md#buffer-2) containing a chunk of the request body.
 
 ---
 
@@ -8044,6 +9449,8 @@ Called for each chunk of incoming request body data.
 ```cpp
 virtual inline void onRequest(Request & request, Response & response)
 ```
+
+Defined in src/http/include/icy/http/server.h:169
 
 Called when the complete HTTP request has been received. Derived classes should write their response here. 
 #### Parameters
@@ -8063,6 +9470,8 @@ Called when the complete HTTP request has been received. Derived classes should 
 virtual inline void onClose()
 ```
 
+Defined in src/http/include/icy/http/server.h:176
+
 Called when the connection is closed.
 
 ---
@@ -8071,11 +9480,13 @@ Called when the connection is closed.
 
 #### connection
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline ServerConnection & connection()
+[[nodiscard]] inline ServerConnection & connection()
 ```
+
+Defined in src/http/include/icy/http/server.h:179
 
 Returns the underlying server connection.
 
@@ -8085,11 +9496,13 @@ Returns the underlying server connection.
 
 #### request
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline Request & request()
+[[nodiscard]] inline Request & request()
 ```
+
+Defined in src/http/include/icy/http/server.h:185
 
 Returns the current HTTP request from the underlying connection.
 
@@ -8099,11 +9512,13 @@ Returns the current HTTP request from the underlying connection.
 
 #### response
 
-`inline`
+`inline` `nodiscard`
 
 ```cpp
-inline Response & response()
+[[nodiscard]] inline Response & response()
 ```
+
+Defined in src/http/include/icy/http/server.h:191
 
 Returns the current HTTP response from the underlying connection.
 
@@ -8123,6 +9538,8 @@ Returns the current HTTP response from the underlying connection.
 ServerConnection & _connection
 ```
 
+Defined in src/http/include/icy/http/server.h:197
+
 ### Private Methods
 
 | Return | Name | Description |
@@ -8139,15 +9556,23 @@ ServerConnection & _connection
 ServerResponder(const ServerResponder &) = delete
 ```
 
+Defined in src/http/include/icy/http/server.h:200
+
 Deleted constructor.
 
-{#stringpart}
+{#stringpart-1}
 
 ## StringPart
 
 ```cpp
 #include <icy/http/form.h>
 ```
+
+```cpp
+class StringPart
+```
+
+Defined in src/http/include/icy/http/form.h:306
 
 > **Inherits:** [`FormPart`](#formpart)
 
@@ -8157,27 +9582,13 @@ Form part backed by an in-memory string payload.
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`StringPart`](#stringpart-1)  | Creates a [StringPart](#stringpart) with the given data and default content type "application/octet-stream". |
-|  | [`StringPart`](#stringpart-2)  | Creates a [StringPart](#stringpart) with the given data and MIME content type. |
-|  | [`~StringPart`](#stringpart-3) `virtual` | Destroys the [StringPart](#stringpart). |
-| `bool` | [`writeChunk`](#writechunk-2) `virtual` | Writes the string data as a single chunk to the [FormWriter](#formwriter). |
-| `void` | [`write`](#write-15) `virtual` | Writes the string data to the [FormWriter](#formwriter). |
-| `void` | [`write`](#write-16) `virtual` | Writes the string data to an output stream. |
-| `uint64_t` | [`length`](#length-3) `virtual` `const` | Returns the byte length of the string data. |
-
----
-
-{#stringpart-1}
-
-#### StringPart
-
-```cpp
-StringPart(const std::string & data)
-```
-
-Creates a [StringPart](#stringpart) with the given data and default content type "application/octet-stream". 
-#### Parameters
-* `data` String data to send as this part.
+|  | [`StringPart`](#stringpart-2)  | Creates a [StringPart](#stringpart-1) with the given data and default content type "application/octet-stream". |
+|  | [`StringPart`](#stringpart-3)  | Creates a [StringPart](#stringpart-1) with the given data and MIME content type. |
+|  | [`~StringPart`](#stringpart-4) `virtual` | Destroys the [StringPart](#stringpart-1). |
+| `bool` | [`writeChunk`](#writechunk-2) `virtual` `override` | Writes the string data as a single chunk to the [FormWriter](#formwriter). |
+| `void` | [`write`](#write-15) `virtual` `override` | Writes the string data to the [FormWriter](#formwriter). |
+| `void` | [`write`](#write-16) `virtual` `override` | Writes the string data to an output stream. |
+| `uint64_t` | [`length`](#length-3) `virtual` `const` `nodiscard` `override` | Returns the byte length of the string data. |
 
 ---
 
@@ -8186,10 +9597,28 @@ Creates a [StringPart](#stringpart) with the given data and default content type
 #### StringPart
 
 ```cpp
+StringPart(const std::string & data)
+```
+
+Defined in src/http/include/icy/http/form.h:311
+
+Creates a [StringPart](#stringpart-1) with the given data and default content type "application/octet-stream". 
+#### Parameters
+* `data` String data to send as this part.
+
+---
+
+{#stringpart-3}
+
+#### StringPart
+
+```cpp
 StringPart(const std::string & data, const std::string & contentType)
 ```
 
-Creates a [StringPart](#stringpart) with the given data and MIME content type. 
+Defined in src/http/include/icy/http/form.h:316
+
+Creates a [StringPart](#stringpart-1) with the given data and MIME content type. 
 #### Parameters
 * `data` String data to send as this part. 
 
@@ -8197,7 +9626,7 @@ Creates a [StringPart](#stringpart) with the given data and MIME content type.
 
 ---
 
-{#stringpart-3}
+{#stringpart-4}
 
 #### ~StringPart
 
@@ -8207,7 +9636,9 @@ Creates a [StringPart](#stringpart) with the given data and MIME content type.
 virtual ~StringPart()
 ```
 
-Destroys the [StringPart](#stringpart).
+Defined in src/http/include/icy/http/form.h:319
+
+Destroys the [StringPart](#stringpart-1).
 
 ---
 
@@ -8215,11 +9646,13 @@ Destroys the [StringPart](#stringpart).
 
 #### writeChunk
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool writeChunk(FormWriter & writer)
+virtual bool writeChunk(FormWriter & writer) override
 ```
+
+Defined in src/http/include/icy/http/form.h:324
 
 Writes the string data as a single chunk to the [FormWriter](#formwriter). 
 #### Parameters
@@ -8234,11 +9667,13 @@ false always (string data is sent in a single chunk).
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(FormWriter & writer)
+virtual void write(FormWriter & writer) override
 ```
+
+Defined in src/http/include/icy/http/form.h:328
 
 Writes the string data to the [FormWriter](#formwriter). 
 #### Parameters
@@ -8250,11 +9685,13 @@ Writes the string data to the [FormWriter](#formwriter).
 
 #### write
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void write(std::ostream & ostr)
+virtual void write(std::ostream & ostr) override
 ```
+
+Defined in src/http/include/icy/http/form.h:332
 
 Writes the string data to an output stream. 
 #### Parameters
@@ -8266,11 +9703,13 @@ Writes the string data to an output stream.
 
 #### length
 
-`virtual` `const`
+`virtual` `const` `nodiscard` `override`
 
 ```cpp
-virtual uint64_t length() const
+[[nodiscard]] virtual uint64_t length() const override
 ```
+
+Defined in src/http/include/icy/http/form.h:335
 
 Returns the byte length of the string data.
 
@@ -8290,6 +9729,8 @@ Returns the byte length of the string data.
 std::string _data
 ```
 
+Defined in src/http/include/icy/http/form.h:338
+
 {#url}
 
 ## URL
@@ -8298,7 +9739,33 @@ std::string _data
 #include <icy/http/url.h>
 ```
 
+```cpp
+class URL
+```
+
+Defined in src/http/include/icy/http/url.h:28
+
 An RFC 3986 based [URL](#url) parser. Constructors and assignment operators will throw a SyntaxException if the [URL](#url) is invalid.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`operator<<`](#operator-19) `inline` |  |
+
+---
+
+{#operator-19}
+
+#### operator<<
+
+`inline`
+
+```cpp
+friend inline std::ostream & operator<<(std::ostream & stream, const URL & url)
+```
+
+Defined in src/http/include/icy/http/url.h:163
 
 ### Public Methods
 
@@ -8311,28 +9778,28 @@ An RFC 3986 based [URL](#url) parser. Constructors and assignment operators will
 |  | [`URL`](#url-5)  | Constructs a [URL](#url) from scheme, authority, and path+query+fragment. |
 |  | [`URL`](#url-6)  | Constructs a [URL](#url) from individual components. |
 |  | [`URL`](#url-7)  | Defaulted constructor. |
-| `URL &` | [`operator=`](#operator-15)  | Assigns a [URL](#url) from another [URL](#url) instance. |
-| `URL &` | [`operator=`](#operator-16)  | Assigns a [URL](#url) from a null-terminated string. |
-| `URL &` | [`operator=`](#operator-17)  | Assigns a [URL](#url) from a std::string. |
+| `URL &` | [`operator=`](#operator-20)  | Assigns a [URL](#url) from another [URL](#url) instance. |
+| `URL &` | [`operator=`](#operator-21)  | Assigns a [URL](#url) from a null-terminated string. |
+| `URL &` | [`operator=`](#operator-22)  | Assigns a [URL](#url) from a std::string. |
 | `bool` | [`parse`](#parse-1)  | Parses and assigns a [URL](#url) from the given string view, resetting all components first. |
-| `std::string` | [`scheme`](#scheme) `const` | Returns the [URL](#url) scheme (e.g. "http", "https", "ws"). Always lowercase. |
-| `std::string` | [`userInfo`](#userinfo) `const` | Returns the user info component (e.g. "user:pass" from "http://user:pass@host/"). Returns an empty string if not present. |
-| `std::string` | [`host`](#host-1) `const` | Returns the host component (e.g. "example.com"). Returns an empty string if not present. |
-| `uint16_t` | [`port`](#port-1) `const` | Returns the port number. If no explicit port was in the [URL](#url), returns the default port for the scheme (80 for http, 443 for https), or 0 if the scheme is unknown. |
-| `std::string` | [`authority`](#authority) `const` | Returns the authority component (`userinfo@host:port`). Only includes components that are present. |
-| `std::string` | [`path`](#path) `const` | Returns the path component (e.g. "/index.html"). Returns an empty string if not present. |
-| `std::string` | [`pathEtc`](#pathetc) `const` | Returns the path, query and fragment combined (e.g. "/path?q=1#frag"). |
-| `std::string` | [`query`](#query) `const` | Returns the query string without the leading '?' (e.g. "key=value&foo=bar"). Returns an empty string if not present. |
-| `std::string` | [`fragment`](#fragment) `const` | Returns the fragment identifier without the leading '#'. Returns an empty string if not present. |
-| `bool` | [`hasSchema`](#hasschema) `const` | Returns true if the [URL](#url) has a scheme component. |
-| `bool` | [`hasUserInfo`](#hasuserinfo) `const` | Returns true if the [URL](#url) has a user info component. |
-| `bool` | [`hasHost`](#hashost) `const` | Returns true if the [URL](#url) has a host component. |
-| `bool` | [`hasPort`](#hasport) `const` | Returns true if an explicit port was specified in the [URL](#url). |
-| `bool` | [`hasPath`](#haspath) `const` | Returns true if the [URL](#url) has a path component. |
-| `bool` | [`hasQuery`](#hasquery) `const` | Returns true if the [URL](#url) has a query component. |
-| `bool` | [`hasFragment`](#hasfragment) `const` | Returns true if the [URL](#url) has a fragment component. |
-| `bool` | [`valid`](#valid-1) `const` | Returns true if the [URL](#url) is non-empty and was successfully parsed. |
-| `std::string` | [`str`](#str-1) `const` | Returns the original [URL](#url) string as parsed. |
+| `std::string` | [`scheme`](#scheme) `const` `nodiscard` | Returns the [URL](#url) scheme (e.g. "http", "https", "ws"). Always lowercase. |
+| `std::string` | [`userInfo`](#userinfo) `const` `nodiscard` | Returns the user info component (e.g. "user:pass" from "http://user:pass@host/"). Returns an empty string if not present. |
+| `std::string` | [`host`](#host-1) `const` `nodiscard` | Returns the host component (e.g. "example.com"). Returns an empty string if not present. |
+| `uint16_t` | [`port`](#port-1) `const` `nodiscard` | Returns the port number. If no explicit port was in the [URL](#url), returns the default port for the scheme (80 for http, 443 for https), or 0 if the scheme is unknown. |
+| `std::string` | [`authority`](#authority) `const` `nodiscard` | Returns the authority component (`userinfo@[host](#host-1):[port](#port-1)`). Only includes components that are present. |
+| `std::string` | [`path`](#path) `const` `nodiscard` | Returns the path component (e.g. "/index.html"). Returns an empty string if not present. |
+| `std::string` | [`pathEtc`](#pathetc) `const` `nodiscard` | Returns the path, query and fragment combined (e.g. "/path?q=1#frag"). |
+| `std::string` | [`query`](#query) `const` `nodiscard` | Returns the query string without the leading '?' (e.g. "key=value&foo=bar"). Returns an empty string if not present. |
+| `std::string` | [`fragment`](#fragment) `const` `nodiscard` | Returns the fragment identifier without the leading '#'. Returns an empty string if not present. |
+| `bool` | [`hasSchema`](#hasschema) `const` `nodiscard` | Returns true if the [URL](#url) has a scheme component. |
+| `bool` | [`hasUserInfo`](#hasuserinfo) `const` `nodiscard` | Returns true if the [URL](#url) has a user info component. |
+| `bool` | [`hasHost`](#hashost) `const` `nodiscard` | Returns true if the [URL](#url) has a host component. |
+| `bool` | [`hasPort`](#hasport) `const` `nodiscard` | Returns true if an explicit port was specified in the [URL](#url). |
+| `bool` | [`hasPath`](#haspath) `const` `nodiscard` | Returns true if the [URL](#url) has a path component. |
+| `bool` | [`hasQuery`](#hasquery) `const` `nodiscard` | Returns true if the [URL](#url) has a query component. |
+| `bool` | [`hasFragment`](#hasfragment) `const` `nodiscard` | Returns true if the [URL](#url) has a fragment component. |
+| `bool` | [`valid`](#valid-1) `const` `nodiscard` | Returns true if the [URL](#url) is non-empty and was successfully parsed. |
+| `std::string` | [`str`](#str-1) `const` `nodiscard` | Returns the original [URL](#url) string as parsed. |
 
 ---
 
@@ -8343,6 +9810,8 @@ An RFC 3986 based [URL](#url) parser. Constructors and assignment operators will
 ```cpp
 URL()
 ```
+
+Defined in src/http/include/icy/http/url.h:32
 
 Creates an empty [URL](#url).
 
@@ -8355,6 +9824,8 @@ Creates an empty [URL](#url).
 ```cpp
 URL(const char * url)
 ```
+
+Defined in src/http/include/icy/http/url.h:36
 
 Parses the [URL](#url) from a null-terminated string. 
 #### Parameters
@@ -8370,6 +9841,8 @@ Parses the [URL](#url) from a null-terminated string.
 URL(const std::string & url)
 ```
 
+Defined in src/http/include/icy/http/url.h:40
+
 Parses the [URL](#url) from a std::string. 
 #### Parameters
 * `url` [URL](#url) string to parse.
@@ -8383,6 +9856,8 @@ Parses the [URL](#url) from a std::string.
 ```cpp
 URL(const std::string & scheme, const std::string & authority)
 ```
+
+Defined in src/http/include/icy/http/url.h:45
 
 Constructs a [URL](#url) from scheme and authority components. 
 #### Parameters
@@ -8400,6 +9875,8 @@ Constructs a [URL](#url) from scheme and authority components.
 URL(const std::string & scheme, const std::string & authority, const std::string & pathEtc)
 ```
 
+Defined in src/http/include/icy/http/url.h:51
+
 Constructs a [URL](#url) from scheme, authority, and path+query+fragment. 
 #### Parameters
 * `scheme` [URL](#url) scheme (e.g. "http"). 
@@ -8415,8 +9892,10 @@ Constructs a [URL](#url) from scheme, authority, and path+query+fragment.
 #### URL
 
 ```cpp
-URL(const std::string & scheme, const std::string & authority, const std::string & path, const std::string & query, const std::string & fragment)
+URL(const std::string & scheme, const std::string & authority, const std::string & path, const std::string & query, const std::string & fragment = "")
 ```
+
+Defined in src/http/include/icy/http/url.h:60
 
 Constructs a [URL](#url) from individual components. 
 #### Parameters
@@ -8440,17 +9919,21 @@ Constructs a [URL](#url) from individual components.
 URL(const URL &) = default
 ```
 
+Defined in src/http/include/icy/http/url.h:64
+
 Defaulted constructor.
 
 ---
 
-{#operator-15}
+{#operator-20}
 
 #### operator=
 
 ```cpp
 URL & operator=(const URL & uri)
 ```
+
+Defined in src/http/include/icy/http/url.h:70
 
 Assigns a [URL](#url) from another [URL](#url) instance. 
 #### Parameters
@@ -8461,13 +9944,15 @@ Reference to this [URL](#url).
 
 ---
 
-{#operator-16}
+{#operator-21}
 
 #### operator=
 
 ```cpp
 URL & operator=(const char * uri)
 ```
+
+Defined in src/http/include/icy/http/url.h:75
 
 Assigns a [URL](#url) from a null-terminated string. 
 #### Parameters
@@ -8478,13 +9963,15 @@ Reference to this [URL](#url).
 
 ---
 
-{#operator-17}
+{#operator-22}
 
 #### operator=
 
 ```cpp
 URL & operator=(const std::string & uri)
 ```
+
+Defined in src/http/include/icy/http/url.h:80
 
 Assigns a [URL](#url) from a std::string. 
 #### Parameters
@@ -8500,8 +9987,10 @@ Reference to this [URL](#url).
 #### parse
 
 ```cpp
-bool parse(std::string_view url, bool whiny)
+bool parse(std::string_view url, bool whiny = true)
 ```
+
+Defined in src/http/include/icy/http/url.h:86
 
 Parses and assigns a [URL](#url) from the given string view, resetting all components first. 
 #### Parameters
@@ -8518,11 +10007,13 @@ true if the [URL](#url) was parsed successfully; false if invalid and whiny is f
 
 #### scheme
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string scheme() const
+[[nodiscard]] std::string scheme() const
 ```
+
+Defined in src/http/include/icy/http/url.h:102
 
 Returns the [URL](#url) scheme (e.g. "http", "https", "ws"). Always lowercase.
 
@@ -8532,11 +10023,13 @@ Returns the [URL](#url) scheme (e.g. "http", "https", "ws"). Always lowercase.
 
 #### userInfo
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string userInfo() const
+[[nodiscard]] std::string userInfo() const
 ```
+
+Defined in src/http/include/icy/http/url.h:106
 
 Returns the user info component (e.g. "user:pass" from "http://user:pass@host/"). Returns an empty string if not present.
 
@@ -8546,11 +10039,13 @@ Returns the user info component (e.g. "user:pass" from "http://user:pass@host/")
 
 #### host
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string host() const
+[[nodiscard]] std::string host() const
 ```
+
+Defined in src/http/include/icy/http/url.h:110
 
 Returns the host component (e.g. "example.com"). Returns an empty string if not present.
 
@@ -8560,11 +10055,13 @@ Returns the host component (e.g. "example.com"). Returns an empty string if not 
 
 #### port
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-uint16_t port() const
+[[nodiscard]] uint16_t port() const
 ```
+
+Defined in src/http/include/icy/http/url.h:115
 
 Returns the port number. If no explicit port was in the [URL](#url), returns the default port for the scheme (80 for http, 443 for https), or 0 if the scheme is unknown.
 
@@ -8574,13 +10071,15 @@ Returns the port number. If no explicit port was in the [URL](#url), returns the
 
 #### authority
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string authority() const
+[[nodiscard]] std::string authority() const
 ```
 
-Returns the authority component (`userinfo@host:port`). Only includes components that are present.
+Defined in src/http/include/icy/http/url.h:119
+
+Returns the authority component (`userinfo@[host](#host-1):[port](#port-1)`). Only includes components that are present.
 
 ---
 
@@ -8588,11 +10087,13 @@ Returns the authority component (`userinfo@host:port`). Only includes components
 
 #### path
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string path() const
+[[nodiscard]] std::string path() const
 ```
+
+Defined in src/http/include/icy/http/url.h:123
 
 Returns the path component (e.g. "/index.html"). Returns an empty string if not present.
 
@@ -8602,11 +10103,13 @@ Returns the path component (e.g. "/index.html"). Returns an empty string if not 
 
 #### pathEtc
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string pathEtc() const
+[[nodiscard]] std::string pathEtc() const
 ```
+
+Defined in src/http/include/icy/http/url.h:126
 
 Returns the path, query and fragment combined (e.g. "/path?q=1#frag").
 
@@ -8616,11 +10119,13 @@ Returns the path, query and fragment combined (e.g. "/path?q=1#frag").
 
 #### query
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string query() const
+[[nodiscard]] std::string query() const
 ```
+
+Defined in src/http/include/icy/http/url.h:130
 
 Returns the query string without the leading '?' (e.g. "key=value&foo=bar"). Returns an empty string if not present.
 
@@ -8630,11 +10135,13 @@ Returns the query string without the leading '?' (e.g. "key=value&foo=bar"). Ret
 
 #### fragment
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string fragment() const
+[[nodiscard]] std::string fragment() const
 ```
+
+Defined in src/http/include/icy/http/url.h:134
 
 Returns the fragment identifier without the leading '#'. Returns an empty string if not present.
 
@@ -8644,11 +10151,13 @@ Returns the fragment identifier without the leading '#'. Returns an empty string
 
 #### hasSchema
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasSchema() const
+[[nodiscard]] bool hasSchema() const
 ```
+
+Defined in src/http/include/icy/http/url.h:137
 
 Returns true if the [URL](#url) has a scheme component.
 
@@ -8658,11 +10167,13 @@ Returns true if the [URL](#url) has a scheme component.
 
 #### hasUserInfo
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasUserInfo() const
+[[nodiscard]] bool hasUserInfo() const
 ```
+
+Defined in src/http/include/icy/http/url.h:140
 
 Returns true if the [URL](#url) has a user info component.
 
@@ -8672,11 +10183,13 @@ Returns true if the [URL](#url) has a user info component.
 
 #### hasHost
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasHost() const
+[[nodiscard]] bool hasHost() const
 ```
+
+Defined in src/http/include/icy/http/url.h:143
 
 Returns true if the [URL](#url) has a host component.
 
@@ -8686,11 +10199,13 @@ Returns true if the [URL](#url) has a host component.
 
 #### hasPort
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasPort() const
+[[nodiscard]] bool hasPort() const
 ```
+
+Defined in src/http/include/icy/http/url.h:146
 
 Returns true if an explicit port was specified in the [URL](#url).
 
@@ -8700,11 +10215,13 @@ Returns true if an explicit port was specified in the [URL](#url).
 
 #### hasPath
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasPath() const
+[[nodiscard]] bool hasPath() const
 ```
+
+Defined in src/http/include/icy/http/url.h:149
 
 Returns true if the [URL](#url) has a path component.
 
@@ -8714,11 +10231,13 @@ Returns true if the [URL](#url) has a path component.
 
 #### hasQuery
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasQuery() const
+[[nodiscard]] bool hasQuery() const
 ```
+
+Defined in src/http/include/icy/http/url.h:152
 
 Returns true if the [URL](#url) has a query component.
 
@@ -8728,11 +10247,13 @@ Returns true if the [URL](#url) has a query component.
 
 #### hasFragment
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasFragment() const
+[[nodiscard]] bool hasFragment() const
 ```
+
+Defined in src/http/include/icy/http/url.h:155
 
 Returns true if the [URL](#url) has a fragment component.
 
@@ -8742,11 +10263,13 @@ Returns true if the [URL](#url) has a fragment component.
 
 #### valid
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool valid() const
+[[nodiscard]] bool valid() const
 ```
+
+Defined in src/http/include/icy/http/url.h:158
 
 Returns true if the [URL](#url) is non-empty and was successfully parsed.
 
@@ -8756,11 +10279,13 @@ Returns true if the [URL](#url) is non-empty and was successfully parsed.
 
 #### str
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string str() const
+[[nodiscard]] std::string str() const
 ```
+
+Defined in src/http/include/icy/http/url.h:161
 
 Returns the original [URL](#url) string as parsed.
 
@@ -8783,6 +10308,8 @@ Returns the original [URL](#url) string as parsed.
 static std::string encode(std::string_view str)
 ```
 
+Defined in src/http/include/icy/http/url.h:92
+
 Percent-encodes a string per RFC 3986, preserving unreserved characters (A-Z, a-z, 0-9, '-', '_', '.', '~'). Equivalent to JavaScript's encodeURIComponent(). 
 #### Parameters
 * `str` Input string to encode. 
@@ -8801,6 +10328,8 @@ Percent-encoded string.
 ```cpp
 static std::string decode(std::string_view str)
 ```
+
+Defined in src/http/include/icy/http/url.h:98
 
 Decodes a percent-encoded string per RFC 3986. Equivalent to JavaScript's decodeURIComponent(). 
 #### Parameters
@@ -8833,6 +10362,8 @@ Decoded string.
 std::string _buf
 ```
 
+Defined in src/http/include/icy/http/url.h:170
+
 ---
 
 {#_scheme}
@@ -8842,6 +10373,8 @@ std::string _buf
 ```cpp
 std::string _scheme
 ```
+
+Defined in src/http/include/icy/http/url.h:171
 
 ---
 
@@ -8853,6 +10386,8 @@ std::string _scheme
 std::string _userInfo
 ```
 
+Defined in src/http/include/icy/http/url.h:172
+
 ---
 
 {#_host}
@@ -8862,6 +10397,8 @@ std::string _userInfo
 ```cpp
 std::string _host
 ```
+
+Defined in src/http/include/icy/http/url.h:173
 
 ---
 
@@ -8873,6 +10410,8 @@ std::string _host
 uint16_t _port
 ```
 
+Defined in src/http/include/icy/http/url.h:174
+
 ---
 
 {#_path-2}
@@ -8882,6 +10421,8 @@ uint16_t _port
 ```cpp
 std::string _path
 ```
+
+Defined in src/http/include/icy/http/url.h:175
 
 ---
 
@@ -8893,6 +10434,8 @@ std::string _path
 std::string _query
 ```
 
+Defined in src/http/include/icy/http/url.h:176
+
 ---
 
 {#_fragment}
@@ -8902,6 +10445,8 @@ std::string _query
 ```cpp
 std::string _fragment
 ```
+
+Defined in src/http/include/icy/http/url.h:177
 
 ---
 
@@ -8913,6 +10458,8 @@ std::string _fragment
 bool _hasPort
 ```
 
+Defined in src/http/include/icy/http/url.h:178
+
 {#datecache}
 
 ## DateCache
@@ -8920,6 +10467,12 @@ bool _hasPort
 ```cpp
 #include <icy/http/server.h>
 ```
+
+```cpp
+struct DateCache
+```
+
+Defined in src/http/include/icy/http/server.h:228
 
 Caches the formatted Date header, updated once per second. Avoids per-request time formatting and string allocation.
 
@@ -8941,6 +10494,8 @@ Caches the formatted Date header, updated once per second. Avoids per-request ti
 char buf {}
 ```
 
+Defined in src/http/include/icy/http/server.h:230
+
 ---
 
 {#len}
@@ -8950,6 +10505,8 @@ char buf {}
 ```cpp
 size_t len = 0
 ```
+
+Defined in src/http/include/icy/http/server.h:231
 
 ---
 
@@ -8961,13 +10518,15 @@ size_t len = 0
 std::time_t lastSecond = 0
 ```
 
+Defined in src/http/include/icy/http/server.h:232
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `void` | [`update`](#update) `inline` | Refreshes the cached Date header string if the current second has changed. No-op if called multiple times within the same second. |
-| `const char *` | [`data`](#data-2) `const` `inline` | Returns a pointer to the formatted "Date: ...\r\n" header string. |
-| `size_t` | [`size`](#size-1) `const` `inline` | Returns the byte length of the formatted Date header string. |
+| `const char *` | [`data`](#data-2) `const` `inline` `nodiscard` | Returns a pointer to the formatted "Date: ...\r\n" header string. |
+| `size_t` | [`size`](#size-1) `const` `inline` `nodiscard` | Returns the byte length of the formatted Date header string. |
 
 ---
 
@@ -8981,6 +10540,8 @@ std::time_t lastSecond = 0
 inline void update()
 ```
 
+Defined in src/http/include/icy/http/server.h:236
+
 Refreshes the cached Date header string if the current second has changed. No-op if called multiple times within the same second.
 
 ---
@@ -8989,11 +10550,13 @@ Refreshes the cached Date header string if the current second has changed. No-op
 
 #### data
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline const char * data() const
+[[nodiscard]] inline const char * data() const
 ```
+
+Defined in src/http/include/icy/http/server.h:253
 
 Returns a pointer to the formatted "Date: ...\r\n" header string.
 
@@ -9003,11 +10566,13 @@ Returns a pointer to the formatted "Date: ...\r\n" header string.
 
 #### size
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline size_t size() const
+[[nodiscard]] inline size_t size() const
 ```
+
+Defined in src/http/include/icy/http/server.h:256
 
 Returns the byte length of the formatted Date header string.
 
@@ -9018,6 +10583,12 @@ Returns the byte length of the formatted Date header string.
 ```cpp
 #include <icy/http/request.h>
 ```
+
+```cpp
+struct Method
+```
+
+Defined in src/http/include/icy/http/request.h:26
 
 HTTP request methods.
 
@@ -9046,6 +10617,8 @@ HTTP request methods.
 const std::string Get
 ```
 
+Defined in src/http/include/icy/http/request.h:28
+
 ---
 
 {#head}
@@ -9057,6 +10630,8 @@ const std::string Get
 ```cpp
 const std::string Head
 ```
+
+Defined in src/http/include/icy/http/request.h:29
 
 ---
 
@@ -9070,6 +10645,8 @@ const std::string Head
 const std::string Put
 ```
 
+Defined in src/http/include/icy/http/request.h:30
+
 ---
 
 {#post-2}
@@ -9081,6 +10658,8 @@ const std::string Put
 ```cpp
 const std::string Post
 ```
+
+Defined in src/http/include/icy/http/request.h:31
 
 ---
 
@@ -9094,6 +10673,8 @@ const std::string Post
 const std::string Options
 ```
 
+Defined in src/http/include/icy/http/request.h:32
+
 ---
 
 {#delete}
@@ -9105,6 +10686,8 @@ const std::string Options
 ```cpp
 const std::string Delete
 ```
+
+Defined in src/http/include/icy/http/request.h:33
 
 ---
 
@@ -9118,6 +10701,8 @@ const std::string Delete
 const std::string Trace
 ```
 
+Defined in src/http/include/icy/http/request.h:34
+
 ---
 
 {#connect-13}
@@ -9130,6 +10715,74 @@ const std::string Trace
 const std::string Connect
 ```
 
+Defined in src/http/include/icy/http/request.h:35
+
+{#staticfileinfo}
+
+## StaticFileInfo
+
+```cpp
+#include <icy/http/server.h>
+```
+
+```cpp
+struct StaticFileInfo
+```
+
+Defined in src/http/include/icy/http/server.h:261
+
+Metadata needed to serve a static file with HTTP validators.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `uint64_t` | [`size`](#size-2)  | File size in bytes. |
+| `Timestamp` | [`lastModified`](#lastmodified)  | Last modification time, normalized to HTTP-second precision. |
+| `std::string` | [`etag`](#etag)  | Weak validator suitable for ETag/If-None-Match. |
+
+---
+
+{#size-2}
+
+#### size
+
+```cpp
+uint64_t size = 0
+```
+
+Defined in src/http/include/icy/http/server.h:263
+
+File size in bytes.
+
+---
+
+{#lastmodified}
+
+#### lastModified
+
+```cpp
+Timestamp lastModified
+```
+
+Defined in src/http/include/icy/http/server.h:264
+
+Last modification time, normalized to HTTP-second precision.
+
+---
+
+{#etag}
+
+#### etag
+
+```cpp
+std::string etag
+```
+
+Defined in src/http/include/icy/http/server.h:265
+
+Weak validator suitable for ETag/If-None-Match.
+
 {#ws}
 
 # ws
@@ -9140,11 +10793,11 @@ const std::string Connect
 
 | Name | Description |
 |------|-------------|
-| [`ConnectionAdapter`](#connectionadapter-2) | [WebSocket](#websocket) class which belongs to an HTTP connection. |
-| [`WebSocket`](#websocket) | Standalone [WebSocket](#websocket) class. |
-| [`WebSocketAdapter`](#websocketadapter) | [WebSocket](#websocket) protocol adapter for both client and server endpoints. |
 | [`WebSocketException`](#websocketexception) |  |
 | [`WebSocketFramer`](#websocketframer) | [WebSocket](#websocket) frame encoder/decoder and handshake validator for RFC 6455. |
+| [`WebSocketAdapter`](#websocketadapter-1) | [WebSocket](#websocket) protocol adapter for both client and server endpoints. |
+| [`WebSocket`](#websocket) | Standalone [WebSocket](#websocket) class. |
+| [`ConnectionAdapter`](#connectionadapter-3) | [WebSocket](#websocket) class which belongs to an HTTP connection. |
 
 ### Enumerations
 
@@ -9309,10 +10962,10 @@ enum CloseState
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `constexpr auto` | [`ServerSide`](#serverside) `static` |  |
-| `constexpr auto` | [`ClientSide`](#clientside) `static` |  |
-| `constexpr char` | [`ProtocolGuid`](#protocolguid)  |  |
-| `constexpr char` | [`ProtocolVersion`](#protocolversion)  | The [WebSocket](#websocket) protocol version supported (13). |
+| `auto` | [`ServerSide`](#serverside) `static` `constexpr` |  |
+| `auto` | [`ClientSide`](#clientside) `static` `constexpr` |  |
+| `char` | [`ProtocolGuid`](#protocolguid) `constexpr` |  |
+| `char` | [`ProtocolVersion`](#protocolversion) `constexpr` | The [WebSocket](#websocket) protocol version supported (13). |
 
 ---
 
@@ -9320,10 +10973,10 @@ enum CloseState
 
 #### ServerSide
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr auto ServerSide = Mode::ServerSide
+auto ServerSide = 
 ```
 
 ---
@@ -9332,10 +10985,10 @@ constexpr auto ServerSide = Mode::ServerSide
 
 #### ClientSide
 
-`static`
+`static` `constexpr`
 
 ```cpp
-constexpr auto ClientSide = Mode::ClientSide
+auto ClientSide = 
 ```
 
 ---
@@ -9344,8 +10997,10 @@ constexpr auto ClientSide = Mode::ClientSide
 
 #### ProtocolGuid
 
+`constexpr`
+
 ```cpp
-constexpr char ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+char ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 ```
 
 ---
@@ -9354,532 +11009,13 @@ constexpr char ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 #### ProtocolVersion
 
+`constexpr`
+
 ```cpp
-constexpr char ProtocolVersion = "13"
+char ProtocolVersion = "13"
 ```
 
 The [WebSocket](#websocket) protocol version supported (13).
-
-{#connectionadapter-2}
-
-## ConnectionAdapter
-
-```cpp
-#include <icy/http/websocket.h>
-```
-
-> **Inherits:** [`WebSocketAdapter`](#websocketadapter)
-
-[WebSocket](#websocket) class which belongs to an HTTP connection.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`ConnectionAdapter`](#connectionadapter-3)  | Creates a [ConnectionAdapter](#connectionadapter-2) for upgrading an existing HTTP connection to [WebSocket](#websocket). Disables automatic header sending on the underlying connection. |
-| `void` | [`onHandshakeComplete`](#onhandshakecomplete) `virtual` | Called when the [WebSocket](#websocket) handshake completes. Emits the connect event via the socket emitter chain. |
-
----
-
-{#connectionadapter-3}
-
-#### ConnectionAdapter
-
-```cpp
-ConnectionAdapter(Connection * connection, ws::Mode mode)
-```
-
-Creates a [ConnectionAdapter](#connectionadapter-2) for upgrading an existing HTTP connection to [WebSocket](#websocket). Disables automatic header sending on the underlying connection. 
-#### Parameters
-* `connection` The HTTP connection to upgrade. 
-
-* `mode` ServerSide or ClientSide.
-
----
-
-{#onhandshakecomplete}
-
-#### onHandshakeComplete
-
-`virtual`
-
-```cpp
-virtual void onHandshakeComplete()
-```
-
-Called when the [WebSocket](#websocket) handshake completes. Emits the connect event via the socket emitter chain.
-
-### Protected Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `Connection *` | [`_connection`](#_connection-3)  |  |
-
----
-
-{#_connection-3}
-
-#### _connection
-
-```cpp
-Connection * _connection
-```
-
-{#websocket}
-
-## WebSocket
-
-```cpp
-#include <icy/http/websocket.h>
-```
-
-> **Inherits:** [`WebSocketAdapter`](#websocketadapter)
-
-Standalone [WebSocket](#websocket) class.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`WebSocket`](#websocket-1)  | Creates the [WebSocket](#websocket) with the given Socket. The Socket should be a TCPSocket or a SSLSocket, depending on the protocol used (ws or wss). |
-| `http::Request &` | [`request`](#request-11)  | Returns the HTTP request used during the [WebSocket](#websocket) handshake. |
-| `http::Response &` | [`response`](#response-9)  | Returns the HTTP response received during the [WebSocket](#websocket) handshake. |
-
----
-
-{#websocket-1}
-
-#### WebSocket
-
-```cpp
-WebSocket(const net::Socket::Ptr & socket)
-```
-
-Creates the [WebSocket](#websocket) with the given Socket. The Socket should be a TCPSocket or a SSLSocket, depending on the protocol used (ws or wss).
-
----
-
-{#request-11}
-
-#### request
-
-```cpp
-http::Request & request()
-```
-
-Returns the HTTP request used during the [WebSocket](#websocket) handshake.
-
----
-
-{#response-9}
-
-#### response
-
-```cpp
-http::Response & response()
-```
-
-Returns the HTTP response received during the [WebSocket](#websocket) handshake.
-
-### Protected Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `http::Request` | [`_request`](#_request-2)  |  |
-| `http::Response` | [`_response`](#_response-2)  |  |
-
----
-
-{#_request-2}
-
-#### _request
-
-```cpp
-http::Request _request
-```
-
----
-
-{#_response-2}
-
-#### _response
-
-```cpp
-http::Response _response
-```
-
-### Public Types
-
-| Name | Description |
-|------|-------------|
-| [`Vec`](#vec-4)  |  |
-
----
-
-{#vec-4}
-
-#### Vec
-
-```cpp
-std::vector< WebSocket > Vec()
-```
-
-{#websocketadapter}
-
-## WebSocketAdapter
-
-```cpp
-#include <icy/http/websocket.h>
-```
-
-> **Inherits:** [`SocketEmitter`](net.md#socketemitter)
-> **Subclassed by:** [`ConnectionAdapter`](#connectionadapter-2), [`WebSocket`](#websocket)
-
-[WebSocket](#websocket) protocol adapter for both client and server endpoints.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `net::Socket::Ptr` | [`socket`](#socket-6)  | Pointer to the underlying socket. Sent data will be proxied to this socket. |
-
----
-
-{#socket-6}
-
-#### socket
-
-```cpp
-net::Socket::Ptr socket
-```
-
-Pointer to the underlying socket. Sent data will be proxied to this socket.
-
-### Public Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-|  | [`WebSocketAdapter`](#websocketadapter-1)  | Creates a [WebSocketAdapter](#websocketadapter) using the given socket, mode and HTTP message objects. |
-| `ssize_t` | [`send`](#send-14) `virtual` | Frames and sends data to the peer's address. |
-| `ssize_t` | [`send`](#send-15) `virtual` | Frames and sends data to a specific peer address (for UDP-backed sockets). |
-| `ssize_t` | [`sendOwned`](#sendowned-12) `virtual` | Sends an owned payload buffer to the connected peer. |
-| `ssize_t` | [`sendOwned`](#sendowned-13) `virtual` |  |
-| `bool` | [`shutdown`](#shutdown-8) `virtual` | Sends a [WebSocket](#websocket) CLOSE frame with the given status code and message, then closes the underlying socket. |
-| `void` | [`sendClientRequest`](#sendclientrequest) `virtual` | [Client](#client) side. |
-| `void` | [`handleClientResponse`](#handleclientresponse) `virtual` | Parses the server's HTTP upgrade response and completes the handshake. Any data remaining in the buffer after the HTTP response is re-fed as [WebSocket](#websocket) frames. |
-| `void` | [`handleServerRequest`](#handleserverrequest) `virtual` | [Server](#server) side. |
-| `void` | [`onHandshakeComplete`](#onhandshakecomplete-1) `virtual` | Called when the [WebSocket](#websocket) handshake completes. Emits the connect event to downstream handlers. |
-
----
-
-{#websocketadapter-1}
-
-#### WebSocketAdapter
-
-```cpp
-WebSocketAdapter(const net::Socket::Ptr & socket, ws::Mode mode, http::Request & request, http::Response & response)
-```
-
-Creates a [WebSocketAdapter](#websocketadapter) using the given socket, mode and HTTP message objects. 
-#### Parameters
-* `socket` The underlying TCP or SSL socket. 
-
-* `mode` ServerSide or ClientSide. 
-
-* `request` HTTP request used for the handshake. 
-
-* `response` HTTP response used for the handshake.
-
----
-
-{#send-14}
-
-#### send
-
-`virtual`
-
-```cpp
-virtual ssize_t send(const char * data, size_t len, int flags)
-```
-
-Frames and sends data to the peer's address. 
-#### Parameters
-* `data` Pointer to the payload. 
-
-* `len` Payload length in bytes. 
-
-* `flags` [ws::SendFlags::Text](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2afdf2a2c6b74320a613fe71490a96e2ae) or [ws::SendFlags::Binary](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2a0ca55f2c2a2e576e0aa1c08a4e845ed7). 
-
-#### Returns
-Number of bytes sent, or -1 on error.
-
----
-
-{#send-15}
-
-#### send
-
-`virtual`
-
-```cpp
-virtual ssize_t send(const char * data, size_t len, const net::Address & peerAddr, int flags)
-```
-
-Frames and sends data to a specific peer address (for UDP-backed sockets). 
-#### Parameters
-* `data` Pointer to the payload. 
-
-* `len` Payload length in bytes. 
-
-* `peerAddr` Destination address. 
-
-* `flags` [ws::SendFlags::Text](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2afdf2a2c6b74320a613fe71490a96e2ae) or [ws::SendFlags::Binary](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2a0ca55f2c2a2e576e0aa1c08a4e845ed7). 
-
-#### Returns
-Number of bytes sent, or -1 on error.
-
----
-
-{#sendowned-12}
-
-#### sendOwned
-
-`virtual`
-
-```cpp
-virtual ssize_t sendOwned(Buffer && buffer, int flags)
-```
-
-Sends an owned payload buffer to the connected peer.
-
-The buffer is moved through the adapter chain and retained by the transport layer until async write completion.
-
----
-
-{#sendowned-13}
-
-#### sendOwned
-
-`virtual`
-
-```cpp
-virtual ssize_t sendOwned(Buffer && buffer, const net::Address & peerAddr, int flags)
-```
-
----
-
-{#shutdown-8}
-
-#### shutdown
-
-`virtual`
-
-```cpp
-virtual bool shutdown(uint16_t statusCode, const std::string & statusMessage)
-```
-
-Sends a [WebSocket](#websocket) CLOSE frame with the given status code and message, then closes the underlying socket. 
-#### Parameters
-* `statusCode` [WebSocket](#websocket) close status code (e.g. 1000 for normal close). 
-
-* `statusMessage` Human-readable reason for closing. 
-
-#### Returns
-true if the close frame was sent successfully.
-
----
-
-{#sendclientrequest}
-
-#### sendClientRequest
-
-`virtual`
-
-```cpp
-virtual void sendClientRequest()
-```
-
-[Client](#client) side.
-
-Sends the [WebSocket](#websocket) HTTP upgrade request to initiate the handshake. Called automatically on socket connect.
-
----
-
-{#handleclientresponse}
-
-#### handleClientResponse
-
-`virtual`
-
-```cpp
-virtual void handleClientResponse(const MutableBuffer & buffer, const net::Address & peerAddr)
-```
-
-Parses the server's HTTP upgrade response and completes the handshake. Any data remaining in the buffer after the HTTP response is re-fed as [WebSocket](#websocket) frames. 
-#### Parameters
-* `buffer` Buffer containing the server's HTTP response. 
-
-* `peerAddr` Address of the peer.
-
----
-
-{#handleserverrequest}
-
-#### handleServerRequest
-
-`virtual`
-
-```cpp
-virtual void handleServerRequest(const MutableBuffer & buffer, const net::Address & peerAddr)
-```
-
-[Server](#server) side.
-
-Parses the client's HTTP upgrade request and sends the 101 response. 
-#### Parameters
-* `buffer` Buffer containing the client's HTTP upgrade request. 
-
-* `peerAddr` Address of the peer.
-
----
-
-{#onhandshakecomplete-1}
-
-#### onHandshakeComplete
-
-`virtual`
-
-```cpp
-virtual void onHandshakeComplete()
-```
-
-Called when the [WebSocket](#websocket) handshake completes. Emits the connect event to downstream handlers.
-
-### Protected Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `WebSocketFramer` | [`framer`](#framer)  |  |
-| `http::Request &` | [`_request`](#_request-3)  |  |
-| `http::Response &` | [`_response`](#_response-3)  |  |
-| `ws::CloseState` | [`_closeState`](#_closestate)  |  |
-
----
-
-{#framer}
-
-#### framer
-
-```cpp
-WebSocketFramer framer
-```
-
----
-
-{#_request-3}
-
-#### _request
-
-```cpp
-http::Request & _request
-```
-
----
-
-{#_response-3}
-
-#### _response
-
-```cpp
-http::Response & _response
-```
-
----
-
-{#_closestate}
-
-#### _closeState
-
-```cpp
-ws::CloseState _closeState {}
-```
-
-### Protected Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `bool` | [`sendControlFrame`](#sendcontrolframe)  |  |
-| `void` | [`resetFrameState`](#resetframestate)  |  |
-
----
-
-{#sendcontrolframe}
-
-#### sendControlFrame
-
-```cpp
-bool sendControlFrame(ws::Opcode opcode, const char * payload, size_t payloadLen, const net::Address & peerAddr)
-```
-
----
-
-{#resetframestate}
-
-#### resetFrameState
-
-```cpp
-void resetFrameState()
-```
-
-### Private Methods
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `bool` | [`onSocketConnect`](#onsocketconnect-4) `virtual` | Called by the socket on connect; initiates the client handshake. |
-| `bool` | [`onSocketRecv`](#onsocketrecv-6) `virtual` | Called by the socket on each received buffer; handles handshake or frame parsing depending on state. |
-| `bool` | [`onSocketClose`](#onsocketclose-4) `virtual` | Called by the socket on close; resets framer state. |
-
----
-
-{#onsocketconnect-4}
-
-#### onSocketConnect
-
-`virtual`
-
-```cpp
-virtual bool onSocketConnect(net::Socket & socket)
-```
-
-Called by the socket on connect; initiates the client handshake.
-
----
-
-{#onsocketrecv-6}
-
-#### onSocketRecv
-
-`virtual`
-
-```cpp
-virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress)
-```
-
-Called by the socket on each received buffer; handles handshake or frame parsing depending on state.
-
----
-
-{#onsocketclose-4}
-
-#### onSocketClose
-
-`virtual`
-
-```cpp
-virtual bool onSocketClose(net::Socket & socket)
-```
-
-Called by the socket on close; resets framer state.
 
 {#websocketexception}
 
@@ -9889,6 +11025,12 @@ Called by the socket on close; resets framer state.
 #include <icy/http/websocket.h>
 ```
 
+```cpp
+class WebSocketException
+```
+
+Defined in src/http/include/icy/http/websocket.h:121
+
 > **Inherits:** `runtime_error`
 
 ### Public Methods
@@ -9896,9 +11038,9 @@ Called by the socket on close; resets framer state.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`WebSocketException`](#websocketexception-1) `inline` |  |
-| `ErrorCode` | [`code`](#code) `const` `inline` |  |
-| `bool` | [`hasCloseStatus`](#hasclosestatus) `const` `inline` |  |
-| `uint16_t` | [`closeStatus`](#closestatus) `const` `inline` |  |
+| `ErrorCode` | [`code`](#code) `const` `inline` `nodiscard` |  |
+| `bool` | [`hasCloseStatus`](#hasclosestatus) `const` `inline` `nodiscard` |  |
+| `uint16_t` | [`closeStatus`](#closestatus) `const` `inline` `nodiscard` |  |
 
 ---
 
@@ -9909,8 +11051,10 @@ Called by the socket on close; resets framer state.
 `inline`
 
 ```cpp
-inline WebSocketException(ErrorCode code, std::string message, uint16_t closeStatus)
+inline WebSocketException(ErrorCode code, std::string message, uint16_t closeStatus = 0)
 ```
+
+Defined in src/http/include/icy/http/websocket.h:124
 
 ---
 
@@ -9918,11 +11062,13 @@ inline WebSocketException(ErrorCode code, std::string message, uint16_t closeSta
 
 #### code
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline ErrorCode code() const
+[[nodiscard]] inline ErrorCode code() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:131
 
 ---
 
@@ -9930,11 +11076,13 @@ inline ErrorCode code() const
 
 #### hasCloseStatus
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool hasCloseStatus() const
+[[nodiscard]] inline bool hasCloseStatus() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:132
 
 ---
 
@@ -9942,11 +11090,13 @@ inline bool hasCloseStatus() const
 
 #### closeStatus
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline uint16_t closeStatus() const
+[[nodiscard]] inline uint16_t closeStatus() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:133
 
 ### Private Attributes
 
@@ -9965,6 +11115,8 @@ inline uint16_t closeStatus() const
 ErrorCode _code
 ```
 
+Defined in src/http/include/icy/http/websocket.h:136
+
 ---
 
 {#_closestatus}
@@ -9975,6 +11127,8 @@ ErrorCode _code
 uint16_t _closeStatus
 ```
 
+Defined in src/http/include/icy/http/websocket.h:137
+
 {#websocketframer}
 
 ## WebSocketFramer
@@ -9983,7 +11137,57 @@ uint16_t _closeStatus
 #include <icy/http/websocket.h>
 ```
 
+```cpp
+class WebSocketFramer
+```
+
+Defined in src/http/include/icy/http/websocket.h:156
+
 [WebSocket](#websocket) frame encoder/decoder and handshake validator for RFC 6455.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`WebSocketAdapter`](#websocketadapter)  |  |
+| [`wsFramerTestAccess`](#wsframertestaccess)  |  |
+| [`wsFramerGetFlags`](#wsframergetflags)  |  |
+
+---
+
+{#websocketadapter}
+
+#### WebSocketAdapter
+
+```cpp
+friend class WebSocketAdapter
+```
+
+Defined in src/http/include/icy/http/websocket.h:253
+
+---
+
+{#wsframertestaccess}
+
+#### wsFramerTestAccess
+
+```cpp
+friend void wsFramerTestAccess(WebSocketFramer & f, int state)
+```
+
+Defined in src/http/include/icy/http/websocket.h:256
+
+---
+
+{#wsframergetflags}
+
+#### wsFramerGetFlags
+
+```cpp
+friend int wsFramerGetFlags(const WebSocketFramer & f)
+```
+
+Defined in src/http/include/icy/http/websocket.h:257
 
 ### Public Methods
 
@@ -9992,7 +11196,7 @@ uint16_t _closeStatus
 |  | [`WebSocketFramer`](#websocketframer-1)  | Creates a [WebSocketFramer](#websocketframer) operating in the given endpoint mode. Client-side framers mask outgoing payloads; server-side framers do not. |
 | `size_t` | [`writeFrame`](#writeframe) `virtual` | Encodes `data` into a [WebSocket](#websocket) frame and writes it to `frame`. |
 | `uint64_t` | [`readFrame`](#readframe) `virtual` | Decodes a single [WebSocket](#websocket) frame from `frame`. |
-| `bool` | [`handshakeComplete`](#handshakecomplete) `const` | Returns true if the [WebSocket](#websocket) handshake has completed successfully. |
+| `bool` | [`handshakeComplete`](#handshakecomplete) `const` `nodiscard` | Returns true if the [WebSocket](#websocket) handshake has completed successfully. |
 | `void` | [`acceptServerRequest`](#acceptserverrequest)  | [Server](#server) side. |
 | `void` | [`createClientHandshakeRequest`](#createclienthandshakerequest)  | [Client](#client) side. |
 | `bool` | [`checkClientHandshakeResponse`](#checkclienthandshakeresponse)  | Validates the server's 101 Switching Protocols response. |
@@ -10007,6 +11211,8 @@ uint16_t _closeStatus
 ```cpp
 WebSocketFramer(ws::Mode mode)
 ```
+
+Defined in src/http/include/icy/http/websocket.h:162
 
 Creates a [WebSocketFramer](#websocketframer) operating in the given endpoint mode. Client-side framers mask outgoing payloads; server-side framers do not. 
 #### Parameters
@@ -10023,6 +11229,8 @@ Creates a [WebSocketFramer](#websocketframer) operating in the given endpoint mo
 ```cpp
 virtual size_t writeFrame(const char * data, size_t len, int flags, BitWriter & frame)
 ```
+
+Defined in src/http/include/icy/http/websocket.h:173
 
 Encodes `data` into a [WebSocket](#websocket) frame and writes it to `frame`. 
 #### Parameters
@@ -10049,6 +11257,8 @@ Total number of bytes written to the frame buffer (header + payload).
 virtual uint64_t readFrame(BitReader & frame, char *& payload)
 ```
 
+Defined in src/http/include/icy/http/websocket.h:184
+
 Decodes a single [WebSocket](#websocket) frame from `frame`.
 
 The payload is unmasked in-place in the source buffer; no copy is made. `payload` is set to point at the start of the payload within `frame`'s buffer.
@@ -10070,11 +11280,13 @@ Payload length in bytes.
 
 #### handshakeComplete
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool handshakeComplete() const
+[[nodiscard]] bool handshakeComplete() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:187
 
 Returns true if the [WebSocket](#websocket) handshake has completed successfully.
 
@@ -10087,6 +11299,8 @@ Returns true if the [WebSocket](#websocket) handshake has completed successfully
 ```cpp
 void acceptServerRequest(http::Request & request, http::Response & response)
 ```
+
+Defined in src/http/include/icy/http/websocket.h:197
 
 [Server](#server) side.
 
@@ -10109,6 +11323,8 @@ Validates the client upgrade request and writes a 101 Switching Protocols respon
 void createClientHandshakeRequest(http::Request & request)
 ```
 
+Defined in src/http/include/icy/http/websocket.h:205
+
 [Client](#client) side.
 
 Populates `request` with the [WebSocket](#websocket) upgrade headers ([Connection](#connection-1), Upgrade, Sec-WebSocket-Key, Sec-WebSocket-Version) to initiate the handshake. 
@@ -10124,6 +11340,8 @@ Populates `request` with the [WebSocket](#websocket) upgrade headers ([Connectio
 ```cpp
 bool checkClientHandshakeResponse(http::Response & response)
 ```
+
+Defined in src/http/include/icy/http/websocket.h:211
 
 Validates the server's 101 Switching Protocols response. 
 #### Parameters
@@ -10145,6 +11363,8 @@ true if the handshake succeeded and data can flow.
 void completeClientHandshake(http::Response & response)
 ```
 
+Defined in src/http/include/icy/http/websocket.h:217
+
 Completes the client-side handshake by verifying [Connection](#connection-1), Upgrade and Sec-WebSocket-Accept headers. Advances internal state to "complete". 
 #### Parameters
 * `response` The 101 Switching Protocols response from the server. 
@@ -10156,9 +11376,9 @@ Completes the client-side handshake by verifying [Connection](#connection-1), Up
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `int` | [`frameFlags`](#frameflags-1) `const` | Returns the frame flags of the most recently received frame. Set by [readFrame()](#readframe) |
-| `bool` | [`mustMaskPayload`](#mustmaskpayload) `const` | Returns true if the payload must be masked. Used by [writeFrame()](#writeframe) |
-| `ws::Mode` | [`mode`](#mode-3) `const` |  |
+| `int` | [`frameFlags`](#frameflags-1) `const` `nodiscard` | Returns the frame flags of the most recently received frame. Set by [readFrame()](#readframe) |
+| `bool` | [`mustMaskPayload`](#mustmaskpayload) `const` `nodiscard` | Returns true if the payload must be masked. Used by [writeFrame()](#writeframe) |
+| `ws::Mode` | [`mode`](#mode-3) `const` `nodiscard` |  |
 
 ---
 
@@ -10166,11 +11386,13 @@ Completes the client-side handshake by verifying [Connection](#connection-1), Up
 
 #### frameFlags
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-int frameFlags() const
+[[nodiscard]] int frameFlags() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:222
 
 Returns the frame flags of the most recently received frame. Set by [readFrame()](#readframe)
 
@@ -10180,11 +11402,13 @@ Returns the frame flags of the most recently received frame. Set by [readFrame()
 
 #### mustMaskPayload
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool mustMaskPayload() const
+[[nodiscard]] bool mustMaskPayload() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:226
 
 Returns true if the payload must be masked. Used by [writeFrame()](#writeframe)
 
@@ -10194,11 +11418,13 @@ Returns true if the payload must be masked. Used by [writeFrame()](#writeframe)
 
 #### mode
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-ws::Mode mode() const
+[[nodiscard]] ws::Mode mode() const
 ```
+
+Defined in src/http/include/icy/http/websocket.h:228
 
 ### Private Attributes
 
@@ -10211,9 +11437,9 @@ ws::Mode mode() const
 | `Random` | [`_rnd`](#_rnd)  |  |
 | `std::string` | [`_key`](#_key)  |  |
 | `bool` | [`_fragmented`](#_fragmented)  | Currently receiving a fragmented message. |
-| `int` | [`_fragmentOpcode`](#_fragmentopcode)  | Opcode of the first frame in the fragment sequence. |
+| `int` | [`_fragmentOpcode`](#_fragmentopcode)  | [Opcode](#opcode) of the first frame in the fragment sequence. |
 | `Buffer` | [`_fragmentBuffer`](#_fragmentbuffer)  | Accumulated payload from continuation frames. |
-| `Buffer` | [`_incompleteFrame`](#_incompleteframe)  | Buffer for incomplete frame data across TCP segments. |
+| `Buffer` | [`_incompleteFrame`](#_incompleteframe)  | [Buffer](base.md#buffer-2) for incomplete frame data across TCP segments. |
 
 ---
 
@@ -10225,6 +11451,8 @@ ws::Mode mode() const
 ws::Mode _mode
 ```
 
+Defined in src/http/include/icy/http/websocket.h:238
+
 ---
 
 {#_frameflags}
@@ -10234,6 +11462,8 @@ ws::Mode _mode
 ```cpp
 int _frameFlags
 ```
+
+Defined in src/http/include/icy/http/websocket.h:239
 
 ---
 
@@ -10245,6 +11475,8 @@ int _frameFlags
 int _headerState
 ```
 
+Defined in src/http/include/icy/http/websocket.h:240
+
 ---
 
 {#_maskpayload}
@@ -10254,6 +11486,8 @@ int _headerState
 ```cpp
 bool _maskPayload
 ```
+
+Defined in src/http/include/icy/http/websocket.h:241
 
 ---
 
@@ -10265,6 +11499,8 @@ bool _maskPayload
 Random _rnd
 ```
 
+Defined in src/http/include/icy/http/websocket.h:242
+
 ---
 
 {#_key}
@@ -10275,6 +11511,8 @@ Random _rnd
 std::string _key
 ```
 
+Defined in src/http/include/icy/http/websocket.h:243
+
 ---
 
 {#_fragmented}
@@ -10284,6 +11522,8 @@ std::string _key
 ```cpp
 bool _fragmented {false}
 ```
+
+Defined in src/http/include/icy/http/websocket.h:246
 
 Currently receiving a fragmented message.
 
@@ -10297,7 +11537,9 @@ Currently receiving a fragmented message.
 int _fragmentOpcode {0}
 ```
 
-Opcode of the first frame in the fragment sequence.
+Defined in src/http/include/icy/http/websocket.h:247
+
+[Opcode](#opcode) of the first frame in the fragment sequence.
 
 ---
 
@@ -10308,6 +11550,8 @@ Opcode of the first frame in the fragment sequence.
 ```cpp
 Buffer _fragmentBuffer
 ```
+
+Defined in src/http/include/icy/http/websocket.h:248
 
 Accumulated payload from continuation frames.
 
@@ -10321,5 +11565,626 @@ Accumulated payload from continuation frames.
 Buffer _incompleteFrame
 ```
 
-Buffer for incomplete frame data across TCP segments.
+Defined in src/http/include/icy/http/websocket.h:251
+
+[Buffer](base.md#buffer-2) for incomplete frame data across TCP segments.
+
+{#websocketadapter-1}
+
+## WebSocketAdapter
+
+```cpp
+#include <icy/http/websocket.h>
+```
+
+```cpp
+class WebSocketAdapter
+```
+
+Defined in src/http/include/icy/http/websocket.h:267
+
+> **Inherits:** [`SocketEmitter`](net.md#socketemitter)
+> **Subclassed by:** [`ConnectionAdapter`](#connectionadapter-3), [`WebSocket`](#websocket)
+
+[WebSocket](#websocket) protocol adapter for both client and server endpoints.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`WebSocketFramer`](#websocketframer-2)  |  |
+
+---
+
+{#websocketframer-2}
+
+#### WebSocketFramer
+
+```cpp
+friend class WebSocketFramer
+```
+
+Defined in src/http/include/icy/http/websocket.h:350
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `net::Socket::Ptr` | [`socket`](#socket-6)  | Pointer to the underlying socket. Sent data will be proxied to this socket. |
+
+---
+
+{#socket-6}
+
+#### socket
+
+```cpp
+net::Socket::Ptr socket
+```
+
+Defined in src/http/include/icy/http/websocket.h:304
+
+Pointer to the underlying socket. Sent data will be proxied to this socket.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`WebSocketAdapter`](#websocketadapter-2)  | Creates a [WebSocketAdapter](#websocketadapter-1) using the given socket, mode and HTTP message objects. |
+| `ssize_t` | [`send`](#send-14) `virtual` `override` | Frames and sends data to the peer's address. |
+| `ssize_t` | [`send`](#send-15) `virtual` `override` | Frames and sends data to a specific peer address (for UDP-backed sockets). |
+| `ssize_t` | [`sendOwned`](#sendowned-12) `virtual` `override` | Sends an owned payload buffer to the connected peer. |
+| `ssize_t` | [`sendOwned`](#sendowned-13) `virtual` `override` |  |
+| `bool` | [`shutdown`](#shutdown-8) `virtual` | Sends a [WebSocket](#websocket) CLOSE frame with the given status code and message, then closes the underlying socket. |
+| `void` | [`sendClientRequest`](#sendclientrequest) `virtual` | [Client](#client) side. |
+| `void` | [`handleClientResponse`](#handleclientresponse) `virtual` | Parses the server's HTTP upgrade response and completes the handshake. Any data remaining in the buffer after the HTTP response is re-fed as [WebSocket](#websocket) frames. |
+| `void` | [`handleServerRequest`](#handleserverrequest) `virtual` | [Server](#server) side. |
+| `void` | [`onHandshakeComplete`](#onhandshakecomplete) `virtual` | Called when the [WebSocket](#websocket) handshake completes. Emits the connect event to downstream handlers. |
+
+---
+
+{#websocketadapter-2}
+
+#### WebSocketAdapter
+
+```cpp
+WebSocketAdapter(const net::Socket::Ptr & socket, ws::Mode mode, http::Request & request, http::Response & response)
+```
+
+Defined in src/http/include/icy/http/websocket.h:275
+
+Creates a [WebSocketAdapter](#websocketadapter-1) using the given socket, mode and HTTP message objects. 
+#### Parameters
+* `socket` The underlying TCP or SSL socket. 
+
+* `mode` ServerSide or ClientSide. 
+
+* `request` HTTP request used for the handshake. 
+
+* `response` HTTP response used for the handshake.
+
+---
+
+{#send-14}
+
+#### send
+
+`virtual` `override`
+
+```cpp
+virtual ssize_t send(const char * data, size_t len, int flags = 0) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:283
+
+Frames and sends data to the peer's address. 
+#### Parameters
+* `data` Pointer to the payload. 
+
+* `len` Payload length in bytes. 
+
+* `flags` [ws::SendFlags::Text](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2afdf2a2c6b74320a613fe71490a96e2ae) or [ws::SendFlags::Binary](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2a0ca55f2c2a2e576e0aa1c08a4e845ed7). 
+
+#### Returns
+Number of bytes sent, or -1 on error.
+
+---
+
+{#send-15}
+
+#### send
+
+`virtual` `override`
+
+```cpp
+virtual ssize_t send(const char * data, size_t len, const net::Address & peerAddr, int flags = 0) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:291
+
+Frames and sends data to a specific peer address (for UDP-backed sockets). 
+#### Parameters
+* `data` Pointer to the payload. 
+
+* `len` Payload length in bytes. 
+
+* `peerAddr` Destination address. 
+
+* `flags` [ws::SendFlags::Text](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2afdf2a2c6b74320a613fe71490a96e2ae) or [ws::SendFlags::Binary](#namespaceicy_1_1http_1_1ws_1a366b9e6ee51be48df27ea06f8d20e7a2a0ca55f2c2a2e576e0aa1c08a4e845ed7). 
+
+#### Returns
+Number of bytes sent, or -1 on error.
+
+---
+
+{#sendowned-12}
+
+#### sendOwned
+
+`virtual` `override`
+
+```cpp
+virtual ssize_t sendOwned(Buffer && buffer, int flags = 0) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:292
+
+Sends an owned payload buffer to the connected peer.
+
+The buffer is moved through the adapter chain and retained by the transport layer until async write completion.
+
+---
+
+{#sendowned-13}
+
+#### sendOwned
+
+`virtual` `override`
+
+```cpp
+virtual ssize_t sendOwned(Buffer && buffer, const net::Address & peerAddr, int flags = 0) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:293
+
+---
+
+{#shutdown-8}
+
+#### shutdown
+
+`virtual`
+
+```cpp
+virtual bool shutdown(uint16_t statusCode, const std::string & statusMessage)
+```
+
+Defined in src/http/include/icy/http/websocket.h:300
+
+Sends a [WebSocket](#websocket) CLOSE frame with the given status code and message, then closes the underlying socket. 
+#### Parameters
+* `statusCode` [WebSocket](#websocket) close status code (e.g. 1000 for normal close). 
+
+* `statusMessage` Human-readable reason for closing. 
+
+#### Returns
+true if the close frame was sent successfully.
+
+---
+
+{#sendclientrequest}
+
+#### sendClientRequest
+
+`virtual`
+
+```cpp
+virtual void sendClientRequest()
+```
+
+Defined in src/http/include/icy/http/websocket.h:311
+
+[Client](#client) side.
+
+Sends the [WebSocket](#websocket) HTTP upgrade request to initiate the handshake. Called automatically on socket connect.
+
+---
+
+{#handleclientresponse}
+
+#### handleClientResponse
+
+`virtual`
+
+```cpp
+virtual void handleClientResponse(const MutableBuffer & buffer, const net::Address & peerAddr)
+```
+
+Defined in src/http/include/icy/http/websocket.h:317
+
+Parses the server's HTTP upgrade response and completes the handshake. Any data remaining in the buffer after the HTTP response is re-fed as [WebSocket](#websocket) frames. 
+#### Parameters
+* `buffer` [Buffer](base.md#buffer-2) containing the server's HTTP response. 
+
+* `peerAddr` Address of the peer.
+
+---
+
+{#handleserverrequest}
+
+#### handleServerRequest
+
+`virtual`
+
+```cpp
+virtual void handleServerRequest(const MutableBuffer & buffer, const net::Address & peerAddr)
+```
+
+Defined in src/http/include/icy/http/websocket.h:325
+
+[Server](#server) side.
+
+Parses the client's HTTP upgrade request and sends the 101 response. 
+#### Parameters
+* `buffer` [Buffer](base.md#buffer-2) containing the client's HTTP upgrade request. 
+
+* `peerAddr` Address of the peer.
+
+---
+
+{#onhandshakecomplete}
+
+#### onHandshakeComplete
+
+`virtual`
+
+```cpp
+virtual void onHandshakeComplete()
+```
+
+Defined in src/http/include/icy/http/websocket.h:339
+
+Called when the [WebSocket](#websocket) handshake completes. Emits the connect event to downstream handlers.
+
+### Protected Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `WebSocketFramer` | [`framer`](#framer)  |  |
+| `http::Request &` | [`_request`](#_request-2)  |  |
+| `http::Response &` | [`_response`](#_response-2)  |  |
+| `ws::CloseState` | [`_closeState`](#_closestate)  |  |
+
+---
+
+{#framer}
+
+#### framer
+
+```cpp
+WebSocketFramer framer
+```
+
+Defined in src/http/include/icy/http/websocket.h:352
+
+---
+
+{#_request-2}
+
+#### _request
+
+```cpp
+http::Request & _request
+```
+
+Defined in src/http/include/icy/http/websocket.h:353
+
+---
+
+{#_response-2}
+
+#### _response
+
+```cpp
+http::Response & _response
+```
+
+Defined in src/http/include/icy/http/websocket.h:354
+
+---
+
+{#_closestate}
+
+#### _closeState
+
+```cpp
+ws::CloseState _closeState {}
+```
+
+Defined in src/http/include/icy/http/websocket.h:355
+
+### Protected Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `bool` | [`sendControlFrame`](#sendcontrolframe)  |  |
+| `void` | [`resetFrameState`](#resetframestate)  |  |
+
+---
+
+{#sendcontrolframe}
+
+#### sendControlFrame
+
+```cpp
+bool sendControlFrame(ws::Opcode opcode, const char * payload, size_t payloadLen, const net::Address & peerAddr)
+```
+
+Defined in src/http/include/icy/http/websocket.h:344
+
+---
+
+{#resetframestate}
+
+#### resetFrameState
+
+```cpp
+void resetFrameState()
+```
+
+Defined in src/http/include/icy/http/websocket.h:348
+
+### Private Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `bool` | [`onSocketConnect`](#onsocketconnect-4) `virtual` `override` | Called by the socket on connect; initiates the client handshake. |
+| `bool` | [`onSocketRecv`](#onsocketrecv-6) `virtual` `override` | Called by the socket on each received buffer; handles handshake or frame parsing depending on state. |
+| `bool` | [`onSocketClose`](#onsocketclose-4) `virtual` `override` | Called by the socket on close; resets framer state. |
+
+---
+
+{#onsocketconnect-4}
+
+#### onSocketConnect
+
+`virtual` `override`
+
+```cpp
+virtual bool onSocketConnect(net::Socket & socket) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:328
+
+Called by the socket on connect; initiates the client handshake.
+
+---
+
+{#onsocketrecv-6}
+
+#### onSocketRecv
+
+`virtual` `override`
+
+```cpp
+virtual bool onSocketRecv(net::Socket & socket, const MutableBuffer & buffer, const net::Address & peerAddress) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:332
+
+Called by the socket on each received buffer; handles handshake or frame parsing depending on state.
+
+---
+
+{#onsocketclose-4}
+
+#### onSocketClose
+
+`virtual` `override`
+
+```cpp
+virtual bool onSocketClose(net::Socket & socket) override
+```
+
+Defined in src/http/include/icy/http/websocket.h:335
+
+Called by the socket on close; resets framer state.
+
+{#websocket}
+
+## WebSocket
+
+```cpp
+#include <icy/http/websocket.h>
+```
+
+```cpp
+class WebSocket
+```
+
+Defined in src/http/include/icy/http/websocket.h:365
+
+> **Inherits:** [`WebSocketAdapter`](#websocketadapter-1)
+
+Standalone [WebSocket](#websocket) class.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`WebSocket`](#websocket-1)  | Creates the [WebSocket](#websocket) with the given Socket. The Socket should be a TCPSocket or a SSLSocket, depending on the protocol used (ws or wss). |
+| `http::Request &` | [`request`](#request-11) `nodiscard` | Returns the HTTP request used during the [WebSocket](#websocket) handshake. |
+| `http::Response &` | [`response`](#response-9) `nodiscard` | Returns the HTTP response received during the [WebSocket](#websocket) handshake. |
+
+---
+
+{#websocket-1}
+
+#### WebSocket
+
+```cpp
+WebSocket(const net::Socket::Ptr & socket)
+```
+
+Defined in src/http/include/icy/http/websocket.h:373
+
+Creates the [WebSocket](#websocket) with the given Socket. The Socket should be a TCPSocket or a SSLSocket, depending on the protocol used (ws or wss).
+
+---
+
+{#request-11}
+
+#### request
+
+`nodiscard`
+
+```cpp
+[[nodiscard]] http::Request & request()
+```
+
+Defined in src/http/include/icy/http/websocket.h:378
+
+Returns the HTTP request used during the [WebSocket](#websocket) handshake.
+
+---
+
+{#response-9}
+
+#### response
+
+`nodiscard`
+
+```cpp
+[[nodiscard]] http::Response & response()
+```
+
+Defined in src/http/include/icy/http/websocket.h:381
+
+Returns the HTTP response received during the [WebSocket](#websocket) handshake.
+
+### Protected Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `http::Request` | [`_request`](#_request-3)  |  |
+| `http::Response` | [`_response`](#_response-3)  |  |
+
+---
+
+{#_request-3}
+
+#### _request
+
+```cpp
+http::Request _request
+```
+
+Defined in src/http/include/icy/http/websocket.h:384
+
+---
+
+{#_response-3}
+
+#### _response
+
+```cpp
+http::Response _response
+```
+
+Defined in src/http/include/icy/http/websocket.h:385
+
+### Public Types
+
+| Name | Description |
+|------|-------------|
+| [`Vec`](#vec-4)  |  |
+
+---
+
+{#vec-4}
+
+#### Vec
+
+```cpp
+using Vec = std::vector< WebSocket >
+```
+
+Defined in src/http/include/icy/http/websocket.h:368
+
+{#connectionadapter-3}
+
+## ConnectionAdapter
+
+```cpp
+#include <icy/http/websocket.h>
+```
+
+```cpp
+class ConnectionAdapter
+```
+
+Defined in src/http/include/icy/http/websocket.h:395
+
+> **Inherits:** [`WebSocketAdapter`](#websocketadapter-1)
+
+[WebSocket](#websocket) class which belongs to an HTTP connection.
+
+### Public Methods
+
+| Return | Name | Description |
+|--------|------|-------------|
+|  | [`ConnectionAdapter`](#connectionadapter-4)  | Creates a [ConnectionAdapter](#connectionadapter-3) for upgrading an existing HTTP connection to [WebSocket](#websocket). Disables automatic header sending on the underlying connection. |
+| `void` | [`onHandshakeComplete`](#onhandshakecomplete-1) `virtual` | Called when the [WebSocket](#websocket) handshake completes. Emits the connect event via the socket emitter chain. |
+
+---
+
+{#connectionadapter-4}
+
+#### ConnectionAdapter
+
+```cpp
+ConnectionAdapter(Connection * connection, ws::Mode mode)
+```
+
+Defined in src/http/include/icy/http/websocket.h:402
+
+Creates a [ConnectionAdapter](#connectionadapter-3) for upgrading an existing HTTP connection to [WebSocket](#websocket). Disables automatic header sending on the underlying connection. 
+#### Parameters
+* `connection` The HTTP connection to upgrade. 
+
+* `mode` ServerSide or ClientSide.
+
+---
+
+{#onhandshakecomplete-1}
+
+#### onHandshakeComplete
+
+`virtual`
+
+```cpp
+virtual void onHandshakeComplete()
+```
+
+Defined in src/http/include/icy/http/websocket.h:407
+
+Called when the [WebSocket](#websocket) handshake completes. Emits the connect event via the socket emitter chain.
+
+### Protected Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `Connection *` | [`_connection`](#_connection-3)  |  |
+
+---
+
+{#_connection-3}
+
+#### _connection
+
+```cpp
+Connection * _connection
+```
+
+Defined in src/http/include/icy/http/websocket.h:410
 

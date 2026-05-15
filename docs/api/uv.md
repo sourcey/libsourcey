@@ -2,7 +2,7 @@
 
 # uv
 
-The `uv` module contains C++ wrappers for `libuv`.
+The `[UV module](#uvmodule)` module contains C++ wrappers for `libuv`.
 
 ### Classes
 
@@ -31,7 +31,7 @@ The `uv` module contains C++ wrappers for `libuv`.
 #### Loop
 
 ```cpp
-uv_loop_t Loop()
+using Loop = uv_loop_t
 ```
 
 Alias for a `libuv` event loop instance.
@@ -77,7 +77,7 @@ Pointer to the default `uv_loop_t`.
 `inline`
 
 ```cpp
-inline void runLoop(Loop * loop, uv_run_mode mode) = default
+inline void runLoop(Loop * loop = defaultLoop(), uv_run_mode mode = UV_RUN_DEFAULT) = default
 ```
 
 Runs the given event loop using the specified run mode. Blocks until the loop exits (when using `UV_RUN_DEFAULT`). 
@@ -95,7 +95,7 @@ Runs the given event loop using the specified run mode. Blocks until the loop ex
 `inline`
 
 ```cpp
-inline void stopLoop(Loop * loop) = default
+inline void stopLoop(Loop * loop = defaultLoop()) = default
 ```
 
 Stops the given event loop, causing `uv_run` to return after the current iteration. 
@@ -271,7 +271,14 @@ Reference to the newly allocated request.
 #include <icy/handle.h>
 ```
 
-> **Subclassed by:** [`Stream< uv_pipe_t >`](base.md#stream), [`Stream< uv_tcp_t >`](base.md#stream), [`Stream< T >`](base.md#stream)
+```cpp
+template<typename T>
+class Handle
+```
+
+Defined in src/base/include/icy/handle.h:133
+
+> **Subclassed by:** [`Stream< T >`](base.md#stream)
 
 Wrapper class for managing `uv_handle_t` variants.
 
@@ -315,8 +322,10 @@ This class manages the handle during its lifecycle and safely handles the asynch
 `inline`
 
 ```cpp
-inline Handle(uv::Loop * loop)
+inline Handle(uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/handle.h:140
 
 Construct the handle bound to the given event loop.
 
@@ -334,6 +343,8 @@ Construct the handle bound to the given event loop.
 ```cpp
 template<typename F, typename... Args> inline bool init(F && f, Args &&... args)
 ```
+
+Defined in src/base/include/icy/handle.h:161
 
 Initialize the underlying libuv handle by calling `f` with the loop, the raw handle pointer, and any additional `args`.
 
@@ -359,6 +370,8 @@ Must be called exactly once before any other operations. Throws `std::logic_erro
 template<typename F, typename... Args> inline bool invoke(F && f, Args &&... args)
 ```
 
+Defined in src/base/include/icy/handle.h:183
+
 Invoke a libuv function `f` with `args` on the initialized handle.
 
 Throws `std::logic_error` if the handle is not yet initialized. Sets the error state and returns `false` if `f` returns a libuv error code.
@@ -383,6 +396,8 @@ Throws `std::logic_error` if the handle is not yet initialized. Sets the error s
 template<typename F, typename... Args> inline void invokeOrThrow(const std::string & message, F && f, Args &&... args)
 ```
 
+Defined in src/base/include/icy/handle.h:204
+
 Invoke a libuv function `f` with `args`, throwing on failure.
 
 Identical to `[invoke()](#invoke)` but throws a `std::runtime_error` with `message` prepended if `f` returns a libuv error code. Must not be called from inside a libuv callback.
@@ -406,6 +421,8 @@ Identical to `[invoke()](#invoke)` but throws a `std::runtime_error` with `messa
 virtual inline void close()
 ```
 
+Defined in src/base/include/icy/handle.h:218
+
 Close and destroy the handle.
 
 Releases the `[Context](#context-1)` (which schedules the async `uv_close`) and then fires `[onClose()](#onclose)`. Safe to call more than once; subsequent calls are no-ops.
@@ -421,6 +438,8 @@ Releases the `[Context](#context-1)` (which schedules the async `uv_close`) and 
 ```cpp
 inline void ref()
 ```
+
+Defined in src/base/include/icy/handle.h:235
 
 Re-reference the handle with the event loop after a previous `[unref()](#unref)`.
 
@@ -438,6 +457,8 @@ When all handles are unref'd the loop exits automatically. This call reverses th
 inline void unref()
 ```
 
+Defined in src/base/include/icy/handle.h:245
+
 Unreference the handle from the event loop.
 
 The loop will exit when all active handles are unref'd, even if this handle is still alive. Has no effect if the handle is not initialized.
@@ -454,6 +475,8 @@ The loop will exit when all active handles are unref'd, even if this handle is s
 inline bool initialized() const
 ```
 
+Defined in src/base/include/icy/handle.h:252
+
 Return `true` if the handle has been successfully initialized via `[init()](#init-2)`.
 
 ---
@@ -467,6 +490,8 @@ Return `true` if the handle has been successfully initialized via `[init()](#ini
 ```cpp
 virtual inline bool active() const
 ```
+
+Defined in src/base/include/icy/handle.h:261
 
 Return `true` when the handle is active (libuv `uv_is_active`).
 
@@ -484,6 +509,8 @@ Return `true` when the handle is active (libuv `uv_is_active`).
 virtual inline bool closing() const
 ```
 
+Defined in src/base/include/icy/handle.h:268
+
 Return `true` if `uv_close` has been called and the handle is awaiting its close callback (libuv `uv_is_closing`).
 
 ---
@@ -497,6 +524,8 @@ Return `true` if `uv_close` has been called and the handle is awaiting its close
 ```cpp
 virtual inline bool closed() const
 ```
+
+Defined in src/base/include/icy/handle.h:274
 
 Return `true` if the handle has been fully closed (context released).
 
@@ -512,6 +541,8 @@ Return `true` if the handle has been fully closed (context released).
 inline const icy::Error & error() const
 ```
 
+Defined in src/base/include/icy/handle.h:281
+
 Return the last error set on this handle, or a default-constructed `[Error](base.md#error)` if no error has occurred.
 
 ---
@@ -525,6 +556,8 @@ Return the last error set on this handle, or a default-constructed `[Error](base
 ```cpp
 virtual inline void setError(const Error & error)
 ```
+
+Defined in src/base/include/icy/handle.h:289
 
 Set the error state and invoke `[onError()](#onerror)`.
 
@@ -540,8 +573,10 @@ Set the error state and invoke `[onError()](#onerror)`.
 `inline`
 
 ```cpp
-inline void setUVError(int err, std::string prefix)
+inline void setUVError(int err, std::string prefix = "UV Error")
 ```
+
+Defined in src/base/include/icy/handle.h:303
 
 Translate a libuv error code into an `[Error](base.md#error)` and call `[setError()](#seterror)`.
 
@@ -561,8 +596,10 @@ Safe to call from inside libuv callbacks.
 `inline`
 
 ```cpp
-inline void setAndThrowError(int err, std::string prefix)
+inline void setAndThrowError(int err, std::string prefix = "UV Error")
 ```
+
+Defined in src/base/include/icy/handle.h:317
 
 Set the error state from a libuv error code and throw a `std::runtime_error`.
 
@@ -582,8 +619,10 @@ Must not be called from inside libuv callbacks; use `[setUVError()](#setuverror)
 `inline`
 
 ```cpp
-inline void throwLastError(std::string prefix)
+inline void throwLastError(std::string prefix = "UV Error")
 ```
+
+Defined in src/base/include/icy/handle.h:329
 
 Throw a `std::runtime_error` if the handle currently holds an error.
 
@@ -604,6 +643,8 @@ The stored error's message is re-formatted with `prefix` before throwing. No-op 
 inline uv::Loop * loop() const
 ```
 
+Defined in src/base/include/icy/handle.h:340
+
 Return the event loop this handle is bound to.
 
 Asserts that the caller is on the owning thread.
@@ -623,6 +664,8 @@ Pointer to the associated `[uv::Loop](#loop)`.
 inline void reset()
 ```
 
+Defined in src/base/include/icy/handle.h:348
+
 Close the current handle (if open) and allocate a fresh `[Context](#context-1)`, leaving the handle ready to be re-initialized via `[init()](#init-2)`.
 
 ---
@@ -634,15 +677,17 @@ Close the current handle (if open) and allocate a fresh `[Context](#context-1)`,
 `const` `inline`
 
 ```cpp
-template<typename Handle> inline Handle * get() const
+template<typename Handle = T> inline Handle * get() const
 ```
+
+Defined in src/base/include/icy/handle.h:363
 
 Return the raw libuv handle pointer cast to `[Handle](#handle-2)`.
 
 Returns `nullptr` if the context has been released (handle closed). Asserts that the caller is on the owning thread.
 
 #### Parameters
-* `[Handle](#handle-2)` Target type; defaults to the native handle type `T`. 
+* `Handle` Target type; defaults to the native handle type `T`. 
 
 #### Returns
 Pointer to the underlying libuv handle, or `nullptr`.
@@ -658,6 +703,8 @@ Pointer to the underlying libuv handle, or `nullptr`.
 ```cpp
 inline std::thread::id tid() const
 ```
+
+Defined in src/base/include/icy/handle.h:374
 
 Return the ID of the thread that constructed this handle.
 
@@ -678,6 +725,8 @@ All handle operations must be performed on this thread.
 inline IntrusivePtr< Context< T > > context() const
 ```
 
+Defined in src/base/include/icy/handle.h:385
+
 Return the raw `[Context](#context-1)` that owns the libuv handle memory.
 
 Primarily for use by subclasses and libuv callbacks that need to access the underlying libuv handle memory.
@@ -697,6 +746,8 @@ A retained reference to the `[Context](#context-1)`, or an empty reference if cl
 template<typename U> inline void setCloseCleanup(U * data)
 ```
 
+Defined in src/base/include/icy/handle.h:391
+
 ---
 
 {#clearclosecleanup}
@@ -709,6 +760,8 @@ template<typename U> inline void setCloseCleanup(U * data)
 inline void clearCloseCleanup()
 ```
 
+Defined in src/base/include/icy/handle.h:400
+
 ---
 
 {#assertthread}
@@ -720,6 +773,8 @@ inline void clearCloseCleanup()
 ```cpp
 inline void assertThread() const
 ```
+
+Defined in src/base/include/icy/handle.h:408
 
 Throw `std::logic_error` if called from any thread other than the thread that constructed this handle.
 
@@ -742,6 +797,8 @@ Throw `std::logic_error` if called from any thread other than the thread that co
 uv::Loop * _loop
 ```
 
+Defined in src/base/include/icy/handle.h:443
+
 ---
 
 {#_context}
@@ -751,6 +808,8 @@ uv::Loop * _loop
 ```cpp
 IntrusivePtr< Context< T > > _context
 ```
+
+Defined in src/base/include/icy/handle.h:444
 
 ---
 
@@ -762,6 +821,8 @@ IntrusivePtr< Context< T > > _context
 std::thread::id _tid = std::this_thread::get_id()
 ```
 
+Defined in src/base/include/icy/handle.h:445
+
 ---
 
 {#_error-1}
@@ -771,6 +832,8 @@ std::thread::id _tid = std::this_thread::get_id()
 ```cpp
 Error _error
 ```
+
+Defined in src/base/include/icy/handle.h:446
 
 ### Protected Methods
 
@@ -793,6 +856,8 @@ Error _error
 virtual inline void onError(const Error & error)
 ```
 
+Defined in src/base/include/icy/handle.h:424
+
 Called by `[setError()](#seterror)` after the error state has been updated.
 
 Override to react to errors. The default implementation is a no-op.
@@ -812,6 +877,8 @@ Override to react to errors. The default implementation is a no-op.
 virtual inline void onClose()
 ```
 
+Defined in src/base/include/icy/handle.h:432
+
 Called by `[close()](#close-11)` after the context has been released.
 
 Override to perform cleanup on handle closure. The default implementation is a no-op.
@@ -826,6 +893,8 @@ Override to perform cleanup on handle closure. The default implementation is a n
 Handle(const Handle &) = delete
 ```
 
+Defined in src/base/include/icy/handle.h:438
+
 NonCopyable and NonMovable.
 
 ---
@@ -837,6 +906,8 @@ NonCopyable and NonMovable.
 ```cpp
 Handle(Handle &&) = delete
 ```
+
+Defined in src/base/include/icy/handle.h:440
 
 Deleted constructor.
 
@@ -853,8 +924,10 @@ Deleted constructor.
 #### Type
 
 ```cpp
-T Type()
+using Type = T
 ```
+
+Defined in src/base/include/icy/handle.h:416
 
 Define the native handle type.
 
@@ -865,6 +938,12 @@ Define the native handle type.
 ```cpp
 #include <icy/loop.h>
 ```
+
+```cpp
+struct ScopedLoop
+```
+
+Defined in src/base/include/icy/loop.h:77
 
 RAII wrapper for a libuv event loop. Automatically closes and deletes the loop on destruction.
 
@@ -883,6 +962,8 @@ RAII wrapper for a libuv event loop. Automatically closes and deletes the loop o
 ```cpp
 Loop * loop
 ```
+
+Defined in src/base/include/icy/loop.h:79
 
 ### Public Methods
 
@@ -906,6 +987,8 @@ Loop * loop
 inline ScopedLoop()
 ```
 
+Defined in src/base/include/icy/loop.h:81
+
 ---
 
 {#operatorloop}
@@ -917,6 +1000,8 @@ inline ScopedLoop()
 ```cpp
 inline operator Loop *() const
 ```
+
+Defined in src/base/include/icy/loop.h:95
 
 Implicit conversion to `Loop*` for use with libuv APIs.
 
@@ -932,6 +1017,8 @@ Implicit conversion to `Loop*` for use with libuv APIs.
 inline Loop * get() const
 ```
 
+Defined in src/base/include/icy/loop.h:99
+
 Returns the raw event loop pointer. 
 #### Returns
 Pointer to the underlying `uv_loop_t`.
@@ -946,6 +1033,8 @@ Pointer to the underlying `uv_loop_t`.
 ScopedLoop(const ScopedLoop &) = delete
 ```
 
+Defined in src/base/include/icy/loop.h:101
+
 Deleted constructor.
 
 ---
@@ -958,6 +1047,8 @@ Deleted constructor.
 ScopedLoop(ScopedLoop &&) = delete
 ```
 
+Defined in src/base/include/icy/loop.h:103
+
 Deleted constructor.
 
 {#handlestorage-1}
@@ -968,6 +1059,13 @@ Deleted constructor.
 #include <icy/handle.h>
 ```
 
+```cpp
+template<typename T>
+struct HandleStorage
+```
+
+Defined in src/base/include/icy/handle.h:42
+
 Extra storage placed around a raw `libuv` handle for close-time cleanup hooks.
 
 ### Public Attributes
@@ -976,7 +1074,7 @@ Extra storage placed around a raw `libuv` handle for close-time cleanup hooks.
 |--------|------|-------------|
 | `T` | [`handle`](#handle)  | Embedded raw `libuv` handle object. |
 | `void *` | [`closeData`](#closedata)  | Opaque cleanup payload invoked on close. |
-| `void(*` | [`closeCleanup`](#closecleanup)  | Cleanup function for `closeData`. |
+| `void(*` | [`closeCleanup`](#closecleanup)  | Cleanup function for `[closeData](#closedata)`. |
 
 ---
 
@@ -987,6 +1085,8 @@ Extra storage placed around a raw `libuv` handle for close-time cleanup hooks.
 ```cpp
 T handle {}
 ```
+
+Defined in src/base/include/icy/handle.h:44
 
 Embedded raw `libuv` handle object.
 
@@ -1000,6 +1100,8 @@ Embedded raw `libuv` handle object.
 void * closeData = nullptr
 ```
 
+Defined in src/base/include/icy/handle.h:45
+
 Opaque cleanup payload invoked on close.
 
 ---
@@ -1012,7 +1114,9 @@ Opaque cleanup payload invoked on close.
 void(* closeCleanup = nullptr
 ```
 
-Cleanup function for `closeData`.
+Defined in src/base/include/icy/handle.h:46
+
+Cleanup function for `[closeData](#closedata)`.
 
 {#context-1}
 
@@ -1021,6 +1125,13 @@ Cleanup function for `closeData`.
 ```cpp
 #include <icy/handle.h>
 ```
+
+```cpp
+template<typename T>
+struct Context
+```
+
+Defined in src/base/include/icy/handle.h:85
 
 > **Inherits:** [`RefCounted< Context< T > >`](base.md#refcounted)
 
@@ -1046,6 +1157,8 @@ Shared `libuv` handle context.
 Handle< T > * handle = nullptr
 ```
 
+Defined in src/base/include/icy/handle.h:87
+
 ---
 
 {#storage}
@@ -1055,6 +1168,8 @@ Handle< T > * handle = nullptr
 ```cpp
 HandleStorage< T > * storage = new <T>
 ```
+
+Defined in src/base/include/icy/handle.h:88
 
 ---
 
@@ -1066,6 +1181,8 @@ HandleStorage< T > * storage = new <T>
 T * ptr = &->
 ```
 
+Defined in src/base/include/icy/handle.h:89
+
 ---
 
 {#initialized}
@@ -1076,6 +1193,8 @@ T * ptr = &->
 bool initialized = false
 ```
 
+Defined in src/base/include/icy/handle.h:90
+
 ---
 
 {#deleted}
@@ -1085,6 +1204,8 @@ bool initialized = false
 ```cpp
 bool deleted = false
 ```
+
+Defined in src/base/include/icy/handle.h:91
 
 ### Public Methods
 
@@ -1105,6 +1226,8 @@ bool deleted = false
 inline Context(Handle< T > * h)
 ```
 
+Defined in src/base/include/icy/handle.h:93
+
 ---
 
 {#owner}
@@ -1117,6 +1240,8 @@ inline Context(Handle< T > * h)
 template<typename Owner> inline Owner * owner() const
 ```
 
+Defined in src/base/include/icy/handle.h:99
+
 {#basicevent}
 
 ## BasicEvent
@@ -1124,6 +1249,12 @@ template<typename Owner> inline Owner * owner() const
 ```cpp
 #include <icy/request.h>
 ```
+
+```cpp
+struct BasicEvent
+```
+
+Defined in src/base/include/icy/request.h:33
 
 Default request callback event carrying a libuv status code.
 
@@ -1143,6 +1274,8 @@ Default request callback event carrying a libuv status code.
 int status
 ```
 
+Defined in src/base/include/icy/request.h:35
+
 libuv result: 0 on success, negative on error.
 
 {#request}
@@ -1152,6 +1285,13 @@ libuv result: 0 on success, negative on error.
 ```cpp
 #include <icy/request.h>
 ```
+
+```cpp
+template<typename T, typename E = BasicEvent>
+struct Request
+```
+
+Defined in src/base/include/icy/request.h:45
 
 Wrapper class for managing `uv_req_t` variants.
 
@@ -1174,6 +1314,8 @@ This class provides safe access to the parent handle in case the handle gets des
 T req
 ```
 
+Defined in src/base/include/icy/request.h:50
+
 The underlying libuv request object.
 
 ---
@@ -1186,6 +1328,8 @@ The underlying libuv request object.
 std::function< void(const E &)> callback
 ```
 
+Defined in src/base/include/icy/request.h:51
+
 Called when the request completes.
 
 ### Public Methods
@@ -1193,8 +1337,8 @@ Called when the request completes.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`Request`](#request-1) `inline` | Construct the request and set `req.data` to `this` so callbacks can recover the wrapper pointer. |
-| `auto` | [`invoke`](#invoke-1) `inline` | Call `f` with `args`. If `f` returns a non-zero libuv error code, the `callback` is invoked immediately with that status. |
-| `auto` | [`invoke`](#invoke-2) `inline` | Call `f` with `args`. Overload for void-returning functions; no error checking is performed. |
+| `std::enable_if_t<!std::is_void< std::invoke_result_t< F, Args... > >::value, int >` | [`invoke`](#invoke-1) `inline` | Call `f` with `args`. If `f` returns a non-zero libuv error code, the `[callback](#callback)` is invoked immediately with that status. |
+| `std::enable_if_t< std::is_void< std::invoke_result_t< F, Args... > >::value >` | [`invoke`](#invoke-2) `inline` | Call `f` with `args`. Overload for void-returning functions; no error checking is performed. |
 
 ---
 
@@ -1208,6 +1352,8 @@ Called when the request completes.
 inline Request()
 ```
 
+Defined in src/base/include/icy/request.h:55
+
 Construct the request and set `req.data` to `this` so callbacks can recover the wrapper pointer.
 
 ---
@@ -1219,10 +1365,12 @@ Construct the request and set `req.data` to `this` so callbacks can recover the 
 `inline`
 
 ```cpp
-template<typename F, typename... Args> inline auto invoke(F && f, Args &&... args)
+template<typename F, typename... Args> inline std::enable_if_t<!std::is_void< std::invoke_result_t< F, Args... > >::value, int > invoke(F && f, Args &&... args)
 ```
 
-Call `f` with `args`. If `f` returns a non-zero libuv error code, the `callback` is invoked immediately with that status.
+Defined in src/base/include/icy/request.h:82
+
+Call `f` with `args`. If `f` returns a non-zero libuv error code, the `[callback](#callback)` is invoked immediately with that status.
 
 Enabled only when `f` returns a non-void type (i.e. an error code).
 
@@ -1243,8 +1391,10 @@ Enabled only when `f` returns a non-void type (i.e. an error code).
 `inline`
 
 ```cpp
-template<typename F, typename... Args> inline auto invoke(F && f, Args &&... args)
+template<typename F, typename... Args> inline std::enable_if_t< std::is_void< std::invoke_result_t< F, Args... > >::value > invoke(F && f, Args &&... args)
 ```
+
+Defined in src/base/include/icy/request.h:97
 
 Call `f` with `args`. Overload for void-returning functions; no error checking is performed.
 
@@ -1257,7 +1407,7 @@ Call `f` with `args`. Overload for void-returning functions; no error checking i
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`defaultCallback`](#defaultcallback) `static` `inline` | Standard libuv completion callback. Invokes `callback` with the status event and then deletes the `[Request](#request)` wrapper. |
+| `void` | [`defaultCallback`](#defaultcallback) `static` `inline` | Standard libuv completion callback. Invokes `[callback](#callback)` with the status event and then deletes the `[Request](#request)` wrapper. |
 
 ---
 
@@ -1271,7 +1421,9 @@ Call `f` with `args`. Overload for void-returning functions; no error checking i
 static inline void defaultCallback(T * req, int status)
 ```
 
-Standard libuv completion callback. Invokes `callback` with the status event and then deletes the `[Request](#request)` wrapper.
+Defined in src/base/include/icy/request.h:65
+
+Standard libuv completion callback. Invokes `[callback](#callback)` with the status event and then deletes the `[Request](#request)` wrapper.
 
 #### Parameters
 * `req` The completed libuv request. 
@@ -1292,8 +1444,10 @@ Standard libuv completion callback. Invokes `callback` with the status event and
 #### Type
 
 ```cpp
-T Type()
+using Type = T
 ```
+
+Defined in src/base/include/icy/request.h:47
 
 ---
 
@@ -1302,8 +1456,10 @@ T Type()
 #### Event
 
 ```cpp
-E Event()
+using Event = E
 ```
+
+Defined in src/base/include/icy/request.h:48
 
 {#connectreq}
 
@@ -1312,6 +1468,12 @@ E Event()
 ```cpp
 #include <icy/request.h>
 ```
+
+```cpp
+struct ConnectReq
+```
+
+Defined in src/base/include/icy/request.h:149
 
 > **Inherits:** [`Request< uv_connect_t >`](#request)
 
@@ -1337,6 +1499,8 @@ Asynchronous connection request for TCP sockets and named pipes.
 inline ConnectReq()
 ```
 
+Defined in src/base/include/icy/request.h:152
+
 Construct and set `req.data` to `this`.
 
 ---
@@ -1350,6 +1514,8 @@ Construct and set `req.data` to `this`.
 ```cpp
 inline auto connect(uv_tcp_t * handle, const struct sockaddr * addr)
 ```
+
+Defined in src/base/include/icy/request.h:162
 
 Initiate a TCP connection to `addr` on `handle`.
 
@@ -1373,6 +1539,8 @@ Initiate a TCP connection to `addr` on `handle`.
 inline auto connect(uv_pipe_t * handle, const char * name)
 ```
 
+Defined in src/base/include/icy/request.h:172
+
 Initiate a named-pipe connection to `name` on `handle`.
 
 #### Parameters
@@ -1390,6 +1558,12 @@ Initiate a named-pipe connection to `name` on `handle`.
 ```cpp
 #include <icy/request.h>
 ```
+
+```cpp
+struct GetAddrInfoEvent
+```
+
+Defined in src/base/include/icy/request.h:180
 
 Callback event delivered when a `[GetAddrInfoReq](#getaddrinforeq)` resolves.
 
@@ -1410,6 +1584,8 @@ Callback event delivered when a `[GetAddrInfoReq](#getaddrinforeq)` resolves.
 int status
 ```
 
+Defined in src/base/include/icy/request.h:182
+
 libuv status: 0 on success, negative on error.
 
 ---
@@ -1422,6 +1598,8 @@ libuv status: 0 on success, negative on error.
 struct addrinfo * addr = nullptr
 ```
 
+Defined in src/base/include/icy/request.h:183
+
 Resolved address list; freed after the callback returns.
 
 {#getaddrinforeq}
@@ -1431,6 +1609,12 @@ Resolved address list; freed after the callback returns.
 ```cpp
 #include <icy/request.h>
 ```
+
+```cpp
+struct GetAddrInfoReq
+```
+
+Defined in src/base/include/icy/request.h:188
 
 > **Inherits:** [`Request< uv_getaddrinfo_t, GetAddrInfoEvent >`](#request)
 
@@ -1455,6 +1639,8 @@ DNS resolver request to get the IP address of a hostname.
 inline GetAddrInfoReq()
 ```
 
+Defined in src/base/include/icy/request.h:193
+
 Construct and set `req.data` to `this`.
 
 ---
@@ -1466,19 +1652,21 @@ Construct and set `req.data` to `this`.
 `inline`
 
 ```cpp
-inline auto resolve(const std::string & host, int port, uv::Loop * loop)
+inline auto resolve(const std::string & host, int port, uv::Loop * loop = uv::defaultLoop())
 ```
+
+Defined in src/base/include/icy/request.h:225
 
 Begin asynchronous DNS resolution of `host` at `port`.
 
-The result is delivered to `callback` as a `[GetAddrInfoEvent](#getaddrinfoevent)`. The `addrinfo` pointer in the event is freed immediately after the callback returns; do not retain it.
+The result is delivered to `[callback](#callback)` as a `[GetAddrInfoEvent](#getaddrinfoevent)`. The `addrinfo` pointer in the event is freed immediately after the callback returns; do not retain it.
 
 #### Parameters
 * `host` Hostname or numeric IP address string to resolve. 
 
 * `port` Port number; converted to a service string for `getaddrinfo`. 
 
-* `loop` Event loop on which to run the resolution. 
+* `loop` [Event](#event) loop on which to run the resolution. 
 
 #### Returns
 `true` if the request was submitted successfully.
@@ -1500,6 +1688,8 @@ The result is delivered to `callback` as a `[GetAddrInfoEvent](#getaddrinfoevent
 ```cpp
 static inline void getAddrInfoCallback(Request::Type * req, int status, struct addrinfo * res)
 ```
+
+Defined in src/base/include/icy/request.h:206
 
 libuv completion callback for `uv_getaddrinfo`.
 
@@ -1525,6 +1715,8 @@ Invokes the stored callback with the resolved address list, then frees the `addr
 #### Request
 
 ```cpp
-uv::Request< uv_getaddrinfo_t, GetAddrInfoEvent > Request()
+using Request = uv::Request< uv_getaddrinfo_t, GetAddrInfoEvent >
 ```
+
+Defined in src/base/include/icy/request.h:190
 

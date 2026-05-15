@@ -73,13 +73,13 @@ Stable codec identifiers used across negotiation and track setup.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `TrackHandle` | [`createVideoTrack`](#createvideotrack)  | Create a video send track on a PeerConnection. |
-| `TrackHandle` | [`createAudioTrack`](#createaudiotrack)  | Create an audio send track on a PeerConnection. |
-| `std::shared_ptr< rtc::Track >` | [`createVideoReceiveTrack`](#createvideoreceivetrack)  | Create a pure receive-side video track on a PeerConnection. |
-| `std::shared_ptr< rtc::Track >` | [`createAudioReceiveTrack`](#createaudioreceivetrack)  | Create a pure receive-side audio track on a PeerConnection. |
-| `bool` | [`setupReceiveTrack`](#setupreceivetrack)  | Set up the receive-side media handler chain on a remote track. |
-| `uint32_t` | [`generateSsrc`](#generatessrc)  | Generate a random SSRC. |
-| `const char *` | [`stateToString`](#statetostring)  | Convert a [PeerSession::State](#state-4) to a lowercase C string for logging. |
+| `TrackHandle` | [`createVideoTrack`](#createvideotrack) `nodiscard` | Create a video send track on a PeerConnection. |
+| `TrackHandle` | [`createAudioTrack`](#createaudiotrack) `nodiscard` | Create an audio send track on a PeerConnection. |
+| `std::shared_ptr< rtc::Track >` | [`createVideoReceiveTrack`](#createvideoreceivetrack) `nodiscard` | Create a pure receive-side video track on a PeerConnection. |
+| `std::shared_ptr< rtc::Track >` | [`createAudioReceiveTrack`](#createaudioreceivetrack) `nodiscard` | Create a pure receive-side audio track on a PeerConnection. |
+| `bool` | [`setupReceiveTrack`](#setupreceivetrack) `nodiscard` | Set up the receive-side media handler chain on a remote track. |
+| `uint32_t` | [`generateSsrc`](#generatessrc) `nodiscard` | Generate a random SSRC. |
+| `const char *` | [`stateToString`](#statetostring) `nodiscard` | Convert a [PeerSession::State](#state-4) to a lowercase C string for logging. |
 
 ---
 
@@ -87,8 +87,10 @@ Stable codec identifiers used across negotiation and track setup.
 
 #### createVideoTrack
 
+`nodiscard`
+
 ```cpp
-TrackHandle createVideoTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::VideoCodec & codec, uint32_t ssrc, const std::string & cname, const std::string & mid, rtc::Description::Direction direction, unsigned nackBuffer, std::function< void()> onPli, std::function< void(unsigned int)> onRemb, int payloadType)
+[[nodiscard]] TrackHandle createVideoTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::VideoCodec & codec, uint32_t ssrc = 0, const std::string & cname = {}, const std::string & mid = {}, rtc::Description::Direction direction = rtc::Description::Direction::SendRecv, unsigned nackBuffer = 512, std::function< void()> onPli = nullptr, std::function< void(unsigned int)> onRemb = nullptr, int payloadType = -1)
 ```
 
 Create a video send track on a PeerConnection.
@@ -127,8 +129,10 @@ The packetizer is selected based on the codec: H264 → H264RtpPacketizer (Annex
 
 #### createAudioTrack
 
+`nodiscard`
+
 ```cpp
-TrackHandle createAudioTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::AudioCodec & codec, uint32_t ssrc, const std::string & cname, const std::string & mid, rtc::Description::Direction direction, int payloadType)
+[[nodiscard]] TrackHandle createAudioTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::AudioCodec & codec, uint32_t ssrc = 0, const std::string & cname = {}, const std::string & mid = {}, rtc::Description::Direction direction = rtc::Description::Direction::SendRecv, int payloadType = -1)
 ```
 
 Create an audio send track on a PeerConnection.
@@ -161,8 +165,10 @@ The packetizer clock rate is selected based on codec: opus → 48kHz, PCMU/PCMA 
 
 #### createVideoReceiveTrack
 
+`nodiscard`
+
 ```cpp
-std::shared_ptr< rtc::Track > createVideoReceiveTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::VideoCodec & codec, const std::string & mid, rtc::Description::Direction direction, int payloadType)
+[[nodiscard]] std::shared_ptr< rtc::Track > createVideoReceiveTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::VideoCodec & codec, const std::string & mid = {}, rtc::Description::Direction direction = rtc::Description::Direction::RecvOnly, int payloadType = -1)
 ```
 
 Create a pure receive-side video track on a PeerConnection.
@@ -175,8 +181,10 @@ Unlike [createVideoTrack()](#createvideotrack), this does not add a local SSRC o
 
 #### createAudioReceiveTrack
 
+`nodiscard`
+
 ```cpp
-std::shared_ptr< rtc::Track > createAudioReceiveTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::AudioCodec & codec, const std::string & mid, rtc::Description::Direction direction, int payloadType)
+[[nodiscard]] std::shared_ptr< rtc::Track > createAudioReceiveTrack(std::shared_ptr< rtc::PeerConnection > pc, const av::AudioCodec & codec, const std::string & mid = {}, rtc::Description::Direction direction = rtc::Description::Direction::RecvOnly, int payloadType = -1)
 ```
 
 Create a pure receive-side audio track on a PeerConnection.
@@ -189,8 +197,10 @@ Unlike [createAudioTrack()](#createaudiotrack), this does not add a local SSRC o
 
 #### setupReceiveTrack
 
+`nodiscard`
+
 ```cpp
-bool setupReceiveTrack(std::shared_ptr< rtc::Track > track)
+[[nodiscard]] bool setupReceiveTrack(std::shared_ptr< rtc::Track > track)
 ```
 
 Set up the receive-side media handler chain on a remote track.
@@ -213,8 +223,10 @@ True when a supported depacketizer was installed.
 
 #### generateSsrc
 
+`nodiscard`
+
 ```cpp
-uint32_t generateSsrc()
+[[nodiscard]] uint32_t generateSsrc()
 ```
 
 Generate a random SSRC.
@@ -225,8 +237,10 @@ Generate a random SSRC.
 
 #### stateToString
 
+`nodiscard`
+
 ```cpp
-const char * stateToString(PeerSession::State state)
+[[nodiscard]] const char * stateToString(PeerSession::State state)
 ```
 
 Convert a [PeerSession::State](#state-4) to a lowercase C string for logging. 
@@ -243,6 +257,12 @@ One of: "idle", "outgoing-init", "incoming-init", "negotiating", "active", "endi
 ```cpp
 #include <icy/webrtc/signalling.h>
 ```
+
+```cpp
+class SignallingInterface
+```
+
+Defined in src/webrtc/include/icy/webrtc/signalling.h:38
 
 > **Subclassed by:** [`SympleServerSignaller`](webrtcsupport.md#sympleserversignaller), [`SympleSignaller`](webrtcsupport.md#symplesignaller), [`WebSocketSignaller`](webrtcsupport.md#websocketsignaller)
 
@@ -278,6 +298,8 @@ The three message categories:
 ThreadSignal< void(const std::string &, const std::string &, const std::string &)> SdpReceived
 ```
 
+Defined in src/webrtc/include/icy/webrtc/signalling.h:77
+
 Fires when an SDP offer or answer arrives from a remote peer. Parameters: peerId, type ("offer"/"answer"), sdp.
 
 ---
@@ -289,6 +311,8 @@ Fires when an SDP offer or answer arrives from a remote peer. Parameters: peerId
 ```cpp
 ThreadSignal< void(const std::string &, const std::string &, const std::string &)> CandidateReceived
 ```
+
+Defined in src/webrtc/include/icy/webrtc/signalling.h:81
 
 Fires when an ICE candidate arrives from a remote peer. Parameters: peerId, candidate, mid.
 
@@ -302,15 +326,17 @@ Fires when an ICE candidate arrives from a remote peer. Parameters: peerId, cand
 ThreadSignal< void(const std::string &, const std::string &, const std::string &)> ControlReceived
 ```
 
+Defined in src/webrtc/include/icy/webrtc/signalling.h:85
+
 Fires when a control message arrives from a remote peer. Parameters: peerId, type ("init"/"accept"/"reject"/"hangup"), reason.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`sendSdp`](#sendsdp)  | Send an SDP offer or answer to the remote peer. |
-| `void` | [`sendCandidate`](#sendcandidate)  | Send an ICE candidate to the remote peer. |
-| `void` | [`sendControl`](#sendcontrol)  | Send a control message to the remote peer. |
+| `void` | [`sendSdp`](#sendsdp) `virtual` | Send an SDP offer or answer to the remote peer. |
+| `void` | [`sendCandidate`](#sendcandidate) `virtual` | Send an ICE candidate to the remote peer. |
+| `void` | [`sendControl`](#sendcontrol) `virtual` | Send a control message to the remote peer. |
 
 ---
 
@@ -318,9 +344,13 @@ Fires when a control message arrives from a remote peer. Parameters: peerId, typ
 
 #### sendSdp
 
+`virtual`
+
 ```cpp
-void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp)
+virtual void sendSdp(const std::string & peerId, const std::string & type, const std::string & sdp)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/signalling.h:51
 
 Send an SDP offer or answer to the remote peer. 
 #### Parameters
@@ -336,9 +366,13 @@ Send an SDP offer or answer to the remote peer.
 
 #### sendCandidate
 
+`virtual`
+
 ```cpp
-void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid)
+virtual void sendCandidate(const std::string & peerId, const std::string & candidate, const std::string & mid)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/signalling.h:59
 
 Send an ICE candidate to the remote peer. 
 #### Parameters
@@ -354,9 +388,13 @@ Send an ICE candidate to the remote peer.
 
 #### sendControl
 
+`virtual`
+
 ```cpp
-void sendControl(const std::string & peerId, const std::string & type, const std::string & reason)
+virtual void sendControl(const std::string & peerId, const std::string & type, const std::string & reason = {})
 ```
+
+Defined in src/webrtc/include/icy/webrtc/signalling.h:67
 
 Send a control message to the remote peer. 
 #### Parameters
@@ -373,6 +411,12 @@ Send a control message to the remote peer.
 ```cpp
 #include <icy/webrtc/mediabridge.h>
 ```
+
+```cpp
+class MediaBridge
+```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:69
 
 Convenience wrapper that creates WebRTC tracks on a PeerConnection and exposes per-track sender/receiver adapters for [PacketStream](base.md#packetstream) integration.
 
@@ -411,6 +455,8 @@ The receiver emits owning encoded packets. Feed those into a decoder or recorder
 ThreadSignal< void()> KeyframeRequested
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:149
+
 Remote peer requests a keyframe. Connect to encoder to force IDR.
 
 ---
@@ -422,6 +468,8 @@ Remote peer requests a keyframe. Connect to encoder to force IDR.
 ```cpp
 ThreadSignal< void(unsigned int)> BitrateEstimate
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:152
 
 Remote peer reports estimated bandwidth (bits/sec).
 
@@ -436,15 +484,15 @@ Remote peer reports estimated bandwidth (bits/sec).
 | `void` | [`detach`](#detach)  | Detach all tracks and adapters. |
 | `void` | [`requestKeyframe`](#requestkeyframe)  | Request an immediate keyframe (IDR) from the remote sender. Sends a PLI (Picture Loss Indication) RTCP message on the video track. No-op if no video track is attached. |
 | `void` | [`requestBitrate`](#requestbitrate)  | Request that the remote sender reduce to a target bitrate. Sends a TMMBR RTCP message on the video track. |
-| `WebRtcTrackSender &` | [`videoSender`](#videosender)  | Video send processor. Attach to a [PacketStream](base.md#packetstream) after a VideoEncoder. Throws if no video track was created. |
-| `WebRtcTrackSender &` | [`audioSender`](#audiosender)  | Audio send processor. Attach to a [PacketStream](base.md#packetstream) after an AudioEncoder. Throws if no audio track was created. |
-| `WebRtcTrackReceiver &` | [`videoReceiver`](#videoreceiver)  | Video receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote video track arrives. |
-| `WebRtcTrackReceiver &` | [`audioReceiver`](#audioreceiver)  | Audio receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote audio track arrives. |
-| `std::shared_ptr< rtc::Track >` | [`videoTrack`](#videotrack) `const` | The underlying libdatachannel video track, or nullptr if none was created. |
-| `std::shared_ptr< rtc::Track >` | [`audioTrack`](#audiotrack) `const` | The underlying libdatachannel audio track, or nullptr if none was created. |
-| `bool` | [`hasVideo`](#hasvideo) `const` | True if a video track was created at [attach()](#attach). |
-| `bool` | [`hasAudio`](#hasaudio) `const` | True if an audio track was created at [attach()](#attach). |
-| `bool` | [`attached`](#attached) `const` | True if [attach()](#attach) has been called and a PeerConnection is held. |
+| `WebRtcTrackSender &` | [`videoSender`](#videosender) `nodiscard` | Video send processor. Attach to a [PacketStream](base.md#packetstream) after a VideoEncoder. Throws if no video track was created. |
+| `WebRtcTrackSender &` | [`audioSender`](#audiosender) `nodiscard` | Audio send processor. Attach to a [PacketStream](base.md#packetstream) after an AudioEncoder. Throws if no audio track was created. |
+| `WebRtcTrackReceiver &` | [`videoReceiver`](#videoreceiver) `nodiscard` | Video receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote video track arrives. |
+| `WebRtcTrackReceiver &` | [`audioReceiver`](#audioreceiver) `nodiscard` | Audio receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote audio track arrives. |
+| `std::shared_ptr< rtc::Track >` | [`videoTrack`](#videotrack) `const` `nodiscard` | The underlying libdatachannel video track, or nullptr if none was created. |
+| `std::shared_ptr< rtc::Track >` | [`audioTrack`](#audiotrack) `const` `nodiscard` | The underlying libdatachannel audio track, or nullptr if none was created. |
+| `bool` | [`hasVideo`](#hasvideo) `const` `nodiscard` | True if a video track was created at [attach()](#attach). |
+| `bool` | [`hasAudio`](#hasaudio) `const` `nodiscard` | True if an audio track was created at [attach()](#attach). |
+| `bool` | [`attached`](#attached) `const` `nodiscard` | True if [attach()](#attach) has been called and a PeerConnection is held. |
 
 ---
 
@@ -455,6 +503,8 @@ Remote peer reports estimated bandwidth (bits/sec).
 ```cpp
 MediaBridge()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:98
 
 Construct a detached bridge with stable sender and receiver adapters.
 
@@ -468,6 +518,8 @@ Construct a detached bridge with stable sender and receiver adapters.
 ~MediaBridge()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:100
+
 Destroy the bridge and release any attached PeerConnection state.
 
 ---
@@ -479,6 +531,8 @@ Destroy the bridge and release any attached PeerConnection state.
 ```cpp
 MediaBridge(const MediaBridge &) = delete
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:103
 
 Deleted copy constructor; [MediaBridge](#mediabridge) owns live track and adapter state.
 
@@ -492,6 +546,8 @@ Deleted copy constructor; [MediaBridge](#mediabridge) owns live track and adapte
 void attach(std::shared_ptr< rtc::PeerConnection > pc, const Options & opts)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:108
+
 Create tracks on the PeerConnection and set up handler chains. Only creates tracks for codecs with a non-empty encoder name.
 
 ---
@@ -503,6 +559,8 @@ Create tracks on the PeerConnection and set up handler chains. Only creates trac
 ```cpp
 void detach()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:112
 
 Detach all tracks and adapters.
 
@@ -516,6 +574,8 @@ Detach all tracks and adapters.
 void requestKeyframe()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:117
+
 Request an immediate keyframe (IDR) from the remote sender. Sends a PLI (Picture Loss Indication) RTCP message on the video track. No-op if no video track is attached.
 
 ---
@@ -528,6 +588,8 @@ Request an immediate keyframe (IDR) from the remote sender. Sends a PLI (Picture
 void requestBitrate(unsigned int bitrate)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:122
+
 Request that the remote sender reduce to a target bitrate. Sends a TMMBR RTCP message on the video track. 
 #### Parameters
 * `bitrate` Target bitrate in bits per second.
@@ -538,9 +600,13 @@ Request that the remote sender reduce to a target bitrate. Sends a TMMBR RTCP me
 
 #### videoSender
 
+`nodiscard`
+
 ```cpp
-WebRtcTrackSender & videoSender()
+[[nodiscard]] WebRtcTrackSender & videoSender()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:130
 
 Video send processor. Attach to a [PacketStream](base.md#packetstream) after a VideoEncoder. Throws if no video track was created.
 
@@ -550,9 +616,13 @@ Video send processor. Attach to a [PacketStream](base.md#packetstream) after a V
 
 #### audioSender
 
+`nodiscard`
+
 ```cpp
-WebRtcTrackSender & audioSender()
+[[nodiscard]] WebRtcTrackSender & audioSender()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:134
 
 Audio send processor. Attach to a [PacketStream](base.md#packetstream) after an AudioEncoder. Throws if no audio track was created.
 
@@ -562,9 +632,13 @@ Audio send processor. Attach to a [PacketStream](base.md#packetstream) after an 
 
 #### videoReceiver
 
+`nodiscard`
+
 ```cpp
-WebRtcTrackReceiver & videoReceiver()
+[[nodiscard]] WebRtcTrackReceiver & videoReceiver()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:138
 
 Video receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote video track arrives.
 
@@ -574,9 +648,13 @@ Video receive adapter. Attach as a [PacketStream](base.md#packetstream) source. 
 
 #### audioReceiver
 
+`nodiscard`
+
 ```cpp
-WebRtcTrackReceiver & audioReceiver()
+[[nodiscard]] WebRtcTrackReceiver & audioReceiver()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:142
 
 Audio receive adapter. Attach as a [PacketStream](base.md#packetstream) source. Only valid after a remote audio track arrives.
 
@@ -586,11 +664,13 @@ Audio receive adapter. Attach as a [PacketStream](base.md#packetstream) source. 
 
 #### videoTrack
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::shared_ptr< rtc::Track > videoTrack() const
+[[nodiscard]] std::shared_ptr< rtc::Track > videoTrack() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:159
 
 The underlying libdatachannel video track, or nullptr if none was created.
 
@@ -600,11 +680,13 @@ The underlying libdatachannel video track, or nullptr if none was created.
 
 #### audioTrack
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::shared_ptr< rtc::Track > audioTrack() const
+[[nodiscard]] std::shared_ptr< rtc::Track > audioTrack() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:162
 
 The underlying libdatachannel audio track, or nullptr if none was created.
 
@@ -614,11 +696,13 @@ The underlying libdatachannel audio track, or nullptr if none was created.
 
 #### hasVideo
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasVideo() const
+[[nodiscard]] bool hasVideo() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:165
 
 True if a video track was created at [attach()](#attach).
 
@@ -628,11 +712,13 @@ True if a video track was created at [attach()](#attach).
 
 #### hasAudio
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool hasAudio() const
+[[nodiscard]] bool hasAudio() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:168
 
 True if an audio track was created at [attach()](#attach).
 
@@ -642,11 +728,13 @@ True if an audio track was created at [attach()](#attach).
 
 #### attached
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool attached() const
+[[nodiscard]] bool attached() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:171
 
 True if [attach()](#attach) has been called and a PeerConnection is held.
 
@@ -675,6 +763,8 @@ True if [attach()](#attach) has been called and a PeerConnection is held.
 std::shared_ptr< rtc::PeerConnection > _pc
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:174
+
 ---
 
 {#_videosender}
@@ -684,6 +774,8 @@ std::shared_ptr< rtc::PeerConnection > _pc
 ```cpp
 WebRtcTrackSender _videoSender
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:178
 
 ---
 
@@ -695,6 +787,8 @@ WebRtcTrackSender _videoSender
 WebRtcTrackSender _audioSender
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:179
+
 ---
 
 {#_videohandle}
@@ -704,6 +798,8 @@ WebRtcTrackSender _audioSender
 ```cpp
 TrackHandle _videoHandle
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:180
 
 ---
 
@@ -715,6 +811,8 @@ TrackHandle _videoHandle
 TrackHandle _audioHandle
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:181
+
 ---
 
 {#_videoreceiver}
@@ -724,6 +822,8 @@ TrackHandle _audioHandle
 ```cpp
 WebRtcTrackReceiver _videoReceiver
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:184
 
 ---
 
@@ -735,6 +835,8 @@ WebRtcTrackReceiver _videoReceiver
 WebRtcTrackReceiver _audioReceiver
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:185
+
 ---
 
 {#_videoreceivetrack}
@@ -744,6 +846,8 @@ WebRtcTrackReceiver _audioReceiver
 ```cpp
 std::shared_ptr< rtc::Track > _videoReceiveTrack
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:186
 
 ---
 
@@ -755,6 +859,8 @@ std::shared_ptr< rtc::Track > _videoReceiveTrack
 std::shared_ptr< rtc::Track > _audioReceiveTrack
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:187
+
 ---
 
 {#_mutex-17}
@@ -765,6 +871,8 @@ std::shared_ptr< rtc::Track > _audioReceiveTrack
 std::mutex _mutex
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:189
+
 {#options-17}
 
 ## Options
@@ -772,6 +880,12 @@ std::mutex _mutex
 ```cpp
 #include <icy/webrtc/mediabridge.h>
 ```
+
+```cpp
+struct Options
+```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:73
 
 [Configuration](base.md#configuration) options for the WebRTC media bridge.
 
@@ -785,7 +899,7 @@ std::mutex _mutex
 | `uint32_t` | [`audioSsrc`](#audiossrc)  | 0 = auto-generate |
 | `int` | [`videoPayloadType`](#videopayloadtype)  | Reuse negotiated offer payload type when answering, -1 = default. |
 | `int` | [`audioPayloadType`](#audiopayloadtype)  | Reuse negotiated offer payload type when answering, -1 = default. |
-| `std::string` | [`cname`](#cname)  | CNAME for RTCP (auto if empty) |
+| `std::string` | [`cname`](#cname)  | CNAME for RTCP (auto if empty). |
 | `std::string` | [`videoMid`](#videomid)  | Explicit MID for the negotiated video m-line when answering an offer. |
 | `std::string` | [`audioMid`](#audiomid)  | Explicit MID for the negotiated audio m-line when answering an offer. |
 | `rtc::Description::Direction` | [`videoDirection`](#videodirection)  |  |
@@ -804,6 +918,8 @@ std::mutex _mutex
 av::VideoCodec videoCodec
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:77
+
 Video codec for the send track. Leave both name and encoder empty to skip creating a video track.
 
 ---
@@ -815,6 +931,8 @@ Video codec for the send track. Leave both name and encoder empty to skip creati
 ```cpp
 av::AudioCodec audioCodec
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:81
 
 Audio codec for the send track. Leave both name and encoder empty to skip creating an audio track.
 
@@ -828,6 +946,8 @@ Audio codec for the send track. Leave both name and encoder empty to skip creati
 uint32_t videoSsrc = 0
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:83
+
 0 = auto-generate
 
 ---
@@ -839,6 +959,8 @@ uint32_t videoSsrc = 0
 ```cpp
 uint32_t audioSsrc = 0
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:84
 
 0 = auto-generate
 
@@ -852,6 +974,8 @@ uint32_t audioSsrc = 0
 int videoPayloadType = -1
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:85
+
 Reuse negotiated offer payload type when answering, -1 = default.
 
 ---
@@ -863,6 +987,8 @@ Reuse negotiated offer payload type when answering, -1 = default.
 ```cpp
 int audioPayloadType = -1
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:86
 
 Reuse negotiated offer payload type when answering, -1 = default.
 
@@ -876,7 +1002,9 @@ Reuse negotiated offer payload type when answering, -1 = default.
 std::string cname
 ```
 
-CNAME for RTCP (auto if empty)
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:87
+
+CNAME for RTCP (auto if empty).
 
 ---
 
@@ -887,6 +1015,8 @@ CNAME for RTCP (auto if empty)
 ```cpp
 std::string videoMid
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:88
 
 Explicit MID for the negotiated video m-line when answering an offer.
 
@@ -900,6 +1030,8 @@ Explicit MID for the negotiated video m-line when answering an offer.
 std::string audioMid
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:89
+
 Explicit MID for the negotiated audio m-line when answering an offer.
 
 ---
@@ -912,6 +1044,8 @@ Explicit MID for the negotiated audio m-line when answering an offer.
 rtc::Description::Direction videoDirection = rtc::Description::Direction::SendRecv
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:90
+
 ---
 
 {#audiodirection}
@@ -922,6 +1056,8 @@ rtc::Description::Direction videoDirection = rtc::Description::Direction::SendRe
 rtc::Description::Direction audioDirection = rtc::Description::Direction::SendRecv
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:91
+
 ---
 
 {#nackbuffersize}
@@ -931,6 +1067,8 @@ rtc::Description::Direction audioDirection = rtc::Description::Direction::SendRe
 ```cpp
 unsigned nackBufferSize = 512
 ```
+
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:92
 
 Max RTP packets retained for video NACK retransmission.
 
@@ -944,6 +1082,8 @@ Max RTP packets retained for video NACK retransmission.
 JitterBufferConfig videoJitterBuffer
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:93
+
 Receive-side playout buffering for depacketized video frames.
 
 ---
@@ -956,6 +1096,8 @@ Receive-side playout buffering for depacketized video frames.
 JitterBufferConfig audioJitterBuffer
 ```
 
+Defined in src/webrtc/include/icy/webrtc/mediabridge.h:94
+
 Receive-side playout buffering for depacketized audio frames.
 
 {#peersession}
@@ -965,6 +1107,12 @@ Receive-side playout buffering for depacketized audio frames.
 ```cpp
 #include <icy/webrtc/peersession.h>
 ```
+
+```cpp
+class PeerSession
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:45
 
 Manages a WebRTC peer connection lifecycle over any signalling transport that implements [SignallingInterface](#signallinginterface).
 
@@ -990,6 +1138,8 @@ Media is optional. Set `[Config::media](#media-2)` codecs to enable tracks. Leav
 ThreadSignal< void(State)> StateChanged
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:125
+
 Emitted whenever the session state changes. Parameter: new [State](base.md#state) value.
 
 ---
@@ -1002,6 +1152,8 @@ Emitted whenever the session state changes. Parameter: new [State](base.md#state
 ThreadSignal< void(const std::string &)> IncomingCall
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:129
+
 Emitted when a remote peer initiates a call (state transitions to IncomingInit). Parameter: remote peer identifier.
 
 ---
@@ -1013,6 +1165,8 @@ Emitted when a remote peer initiates a call (state transitions to IncomingInit).
 ```cpp
 ThreadSignal< void(rtc::message_variant)> DataReceived
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:133
 
 Emitted when a message arrives on the data channel. Parameter: rtc::message_variant (string or binary).
 
@@ -1028,12 +1182,12 @@ Emitted when a message arrives on the data channel. Parameter: rtc::message_vari
 | `void` | [`hangup`](#hangup)  | Terminate any non-idle call phase. Sends a "hangup" control message, closes the PeerConnection, and transitions to Ended. Safe to call from any non-Idle/Ended state. |
 | `void` | [`sendData`](#senddata-2)  | Send a UTF-8 string message over the data channel. Silently dropped if the data channel is not open. |
 | `void` | [`sendData`](#senddata-3)  | Send raw binary data over the data channel. Silently dropped if the data channel is not open. |
-| `State` | [`state`](#state-3) `const` | Current session state. Thread-safe. |
-| `std::string` | [`remotePeerId`](#remotepeerid) `const` | Identifier of the remote peer for the current or most recent call. Empty when Idle. |
-| `MediaBridge &` | [`media`](#media)  | Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession). |
-| `const MediaBridge &` | [`media`](#media-1) `const` | Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession). |
-| `std::shared_ptr< rtc::PeerConnection >` | [`peerConnection`](#peerconnection)  | The underlying PeerConnection, or nullptr when Idle/Ended. |
-| `std::shared_ptr< rtc::DataChannel >` | [`dataChannel`](#datachannel)  | The data channel, or nullptr if none is open. |
+| `State` | [`state`](#state-3) `const` `nodiscard` | Current session state. Thread-safe. |
+| `std::string` | [`remotePeerId`](#remotepeerid) `const` `nodiscard` | Identifier of the remote peer for the current or most recent call. Empty when Idle. |
+| `MediaBridge &` | [`media`](#media) `nodiscard` | Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession). |
+| `const MediaBridge &` | [`media`](#media-1) `const` `nodiscard` | Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession). |
+| `std::shared_ptr< rtc::PeerConnection >` | [`peerConnection`](#peerconnection) `nodiscard` | The underlying PeerConnection, or nullptr when Idle/Ended. |
+| `std::shared_ptr< rtc::DataChannel >` | [`dataChannel`](#datachannel) `nodiscard` | The data channel, or nullptr if none is open. |
 
 ---
 
@@ -1044,6 +1198,8 @@ Emitted when a message arrives on the data channel. Parameter: rtc::message_vari
 ```cpp
 PeerSession(SignallingInterface & signaller, const Config & config)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:82
 
 Construct with any signalling implementation. The signaller must outlive this [PeerSession](#peersession).
 
@@ -1057,6 +1213,8 @@ Construct with any signalling implementation. The signaller must outlive this [P
 PeerSession(const PeerSession &) = delete
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:86
+
 Deleted copy constructor; [PeerSession](#peersession) owns live signalling and RTC callbacks.
 
 ---
@@ -1068,6 +1226,8 @@ Deleted copy constructor; [PeerSession](#peersession) owns live signalling and R
 ```cpp
 void call(const std::string & peerId)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:93
 
 Initiate an outgoing call to a remote peer. Sends a "init" control message and transitions to OutgoingInit. 
 #### Parameters
@@ -1086,6 +1246,8 @@ Initiate an outgoing call to a remote peer. Sends a "init" control message and t
 void accept()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:98
+
 Accept an incoming call. Creates the PeerConnection, sends "accept", and transitions to Negotiating. 
 #### Exceptions
 * `std::logic_error` if not currently in the IncomingInit state.
@@ -1097,8 +1259,10 @@ Accept an incoming call. Creates the PeerConnection, sends "accept", and transit
 #### reject
 
 ```cpp
-void reject(const std::string & reason)
+void reject(const std::string & reason = "declined")
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:104
 
 Reject an incoming call. Sends a "reject" control message and transitions to Ended. 
 #### Parameters
@@ -1114,8 +1278,10 @@ Reject an incoming call. Sends a "reject" control message and transitions to End
 #### hangup
 
 ```cpp
-void hangup(const std::string & reason)
+void hangup(const std::string & reason = "hangup")
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:110
 
 Terminate any non-idle call phase. Sends a "hangup" control message, closes the PeerConnection, and transitions to Ended. Safe to call from any non-Idle/Ended state. 
 #### Parameters
@@ -1131,6 +1297,8 @@ Terminate any non-idle call phase. Sends a "hangup" control message, closes the 
 void sendData(const std::string & message)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:115
+
 Send a UTF-8 string message over the data channel. Silently dropped if the data channel is not open. 
 #### Parameters
 * `message` String to send.
@@ -1145,6 +1313,8 @@ Send a UTF-8 string message over the data channel. Silently dropped if the data 
 void sendData(const std::byte * data, size_t size)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:121
+
 Send raw binary data over the data channel. Silently dropped if the data channel is not open. 
 #### Parameters
 * `data` Pointer to the byte buffer. 
@@ -1157,11 +1327,13 @@ Send raw binary data over the data channel. Silently dropped if the data channel
 
 #### state
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-State state() const
+[[nodiscard]] State state() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:136
 
 Current session state. Thread-safe.
 
@@ -1171,11 +1343,13 @@ Current session state. Thread-safe.
 
 #### remotePeerId
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-std::string remotePeerId() const
+[[nodiscard]] std::string remotePeerId() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:140
 
 Identifier of the remote peer for the current or most recent call. Empty when Idle.
 
@@ -1185,9 +1359,13 @@ Identifier of the remote peer for the current or most recent call. Empty when Id
 
 #### media
 
+`nodiscard`
+
 ```cpp
-MediaBridge & media()
+[[nodiscard]] MediaBridge & media()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:143
 
 Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession).
 
@@ -1197,11 +1375,13 @@ Media bridge for this session. Valid for the lifetime of the [PeerSession](#peer
 
 #### media
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-const MediaBridge & media() const
+[[nodiscard]] const MediaBridge & media() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:145
 
 Media bridge for this session. Valid for the lifetime of the [PeerSession](#peersession).
 
@@ -1211,9 +1391,13 @@ Media bridge for this session. Valid for the lifetime of the [PeerSession](#peer
 
 #### peerConnection
 
+`nodiscard`
+
 ```cpp
-std::shared_ptr< rtc::PeerConnection > peerConnection()
+[[nodiscard]] std::shared_ptr< rtc::PeerConnection > peerConnection()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:148
 
 The underlying PeerConnection, or nullptr when Idle/Ended.
 
@@ -1223,9 +1407,13 @@ The underlying PeerConnection, or nullptr when Idle/Ended.
 
 #### dataChannel
 
+`nodiscard`
+
 ```cpp
-std::shared_ptr< rtc::DataChannel > dataChannel()
+[[nodiscard]] std::shared_ptr< rtc::DataChannel > dataChannel()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:151
 
 The data channel, or nullptr if none is open.
 
@@ -1245,6 +1433,8 @@ The data channel, or nullptr if none is open.
 enum State
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:49
+
 High-level lifecycle phases for a single peer-to-peer call session.
 
 | Value | Description |
@@ -1255,16 +1445,16 @@ High-level lifecycle phases for a single peer-to-peer call session.
 | `Negotiating` | PeerConnection exists and SDP/ICE negotiation is in progress. |
 | `Active` | Media or data is flowing. |
 | `Ending` | Local teardown is in progress. |
-| `Ended` | Call ended (transient; auto-resets to Idle) |
+| `Ended` | Call ended (transient; auto-resets to Idle). |
 
 ### Private Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `SignallingInterface &` | [`_signaller`](#_signaller)  |  |
-| `Config` | [`_config`](#_config-3)  |  |
+| `Config` | [`_config`](#_config-4)  |  |
 | `MediaBridge` | [`_media`](#_media)  |  |
-| `State` | [`_state`](#_state-3)  |  |
+| `State` | [`_state`](#_state-4)  |  |
 | `std::string` | [`_remotePeerId`](#_remotepeerid)  |  |
 | `std::shared_ptr< rtc::PeerConnection >` | [`_pc`](#_pc-1)  |  |
 | `std::shared_ptr< rtc::DataChannel >` | [`_dc`](#_dc)  |  |
@@ -1286,15 +1476,19 @@ High-level lifecycle phases for a single peer-to-peer call session.
 SignallingInterface & _signaller
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:181
+
 ---
 
-{#_config-3}
+{#_config-4}
 
 #### _config
 
 ```cpp
 Config _config
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:182
 
 ---
 
@@ -1306,15 +1500,19 @@ Config _config
 MediaBridge _media
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:183
+
 ---
 
-{#_state-3}
+{#_state-4}
 
 #### _state
 
 ```cpp
 State _state = 
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:184
 
 ---
 
@@ -1326,6 +1524,8 @@ State _state =
 std::string _remotePeerId
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:185
+
 ---
 
 {#_pc-1}
@@ -1335,6 +1535,8 @@ std::string _remotePeerId
 ```cpp
 std::shared_ptr< rtc::PeerConnection > _pc
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:186
 
 ---
 
@@ -1346,6 +1548,8 @@ std::shared_ptr< rtc::PeerConnection > _pc
 std::shared_ptr< rtc::DataChannel > _dc
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:187
+
 ---
 
 {#_callbackguard}
@@ -1355,6 +1559,8 @@ std::shared_ptr< rtc::DataChannel > _dc
 ```cpp
 std::shared_ptr< CallbackGuard > _callbackGuard = std::make_shared<CallbackGuard>()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:188
 
 ---
 
@@ -1366,6 +1572,8 @@ std::shared_ptr< CallbackGuard > _callbackGuard = std::make_shared<CallbackGuard
 bool _remoteDescriptionSet = false
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:189
+
 ---
 
 {#_pendingremotecandidates}
@@ -1375,6 +1583,8 @@ bool _remoteDescriptionSet = false
 ```cpp
 std::vector< PendingCandidate > _pendingRemoteCandidates
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:190
 
 ---
 
@@ -1386,6 +1596,8 @@ std::vector< PendingCandidate > _pendingRemoteCandidates
 Synchronizer _callbackSync
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:191
+
 ---
 
 {#_pendingcallbacks}
@@ -1395,6 +1607,8 @@ Synchronizer _callbackSync
 ```cpp
 std::deque< std::function< void()> > _pendingCallbacks
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:192
 
 ---
 
@@ -1406,6 +1620,8 @@ std::deque< std::function< void()> > _pendingCallbacks
 std::mutex _callbackMutex
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:193
+
 ---
 
 {#_mutex-18}
@@ -1415,6 +1631,8 @@ std::mutex _callbackMutex
 ```cpp
 std::mutex _mutex
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:194
 
 ### Private Methods
 
@@ -1441,6 +1659,8 @@ std::mutex _mutex
 void onSdpReceived(const std::string & peerId, const std::string & type, const std::string & sdp)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:165
+
 ---
 
 {#oncandidatereceived}
@@ -1450,6 +1670,8 @@ void onSdpReceived(const std::string & peerId, const std::string & type, const s
 ```cpp
 void onCandidateReceived(const std::string & peerId, const std::string & candidate, const std::string & mid)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:166
 
 ---
 
@@ -1461,6 +1683,8 @@ void onCandidateReceived(const std::string & peerId, const std::string & candida
 void onControlReceived(const std::string & peerId, const std::string & type, const std::string & reason)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:167
+
 ---
 
 {#createpeerconnection}
@@ -1468,8 +1692,10 @@ void onControlReceived(const std::string & peerId, const std::string & type, con
 #### createPeerConnection
 
 ```cpp
-std::shared_ptr< rtc::PeerConnection > createPeerConnection(bool createDataChannel, const MediaBridge::Options * mediaOpts)
+std::shared_ptr< rtc::PeerConnection > createPeerConnection(bool createDataChannel, const MediaBridge::Options * mediaOpts = nullptr)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:169
 
 ---
 
@@ -1481,6 +1707,8 @@ std::shared_ptr< rtc::PeerConnection > createPeerConnection(bool createDataChann
 void setupPeerConnectionCallbacks(const std::shared_ptr< rtc::PeerConnection > & pc)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:172
+
 ---
 
 {#beginendcall}
@@ -1490,6 +1718,8 @@ void setupPeerConnectionCallbacks(const std::shared_ptr< rtc::PeerConnection > &
 ```cpp
 void beginEndCall(const std::string & reason, std::shared_ptr< rtc::PeerConnection > & pc, std::shared_ptr< rtc::DataChannel > & dc)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:173
 
 ---
 
@@ -1501,6 +1731,8 @@ void beginEndCall(const std::string & reason, std::shared_ptr< rtc::PeerConnecti
 void finishEndCall()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:176
+
 ---
 
 {#transitionendedtoidle}
@@ -1510,6 +1742,8 @@ void finishEndCall()
 ```cpp
 void transitionEndedToIdle()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:177
 
 ---
 
@@ -1521,6 +1755,8 @@ void transitionEndedToIdle()
 void enqueueCallback(std::function< void()> callback)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:178
+
 ---
 
 {#draincallbacks}
@@ -1531,92 +1767,7 @@ void enqueueCallback(std::function< void()> callback)
 void drainCallbacks()
 ```
 
-{#callbackguard}
-
-## CallbackGuard
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `std::atomic< bool >` | [`alive`](#alive-1)  |  |
-
----
-
-{#alive-1}
-
-#### alive
-
-```cpp
-std::atomic< bool > alive {true}
-```
-
-{#config-3}
-
-## Config
-
-```cpp
-#include <icy/webrtc/peersession.h>
-```
-
-[Configuration](base.md#configuration) for WebRTC peer session establishment.
-
-### Public Attributes
-
-| Return | Name | Description |
-|--------|------|-------------|
-| `rtc::Configuration` | [`rtcConfig`](#rtcconfig)  | libdatachannel connection options, ICE servers, and transport settings. |
-| `MediaConfig` | [`media`](#media-2)  | Desired media codecs and directions for the session. |
-| `bool` | [`enableDataChannel`](#enabledatachannel)  | True to create a data channel on outgoing calls and accept one on incoming calls. |
-| `std::string` | [`dataChannelLabel`](#datachannellabel)  | Label to use for the application data channel. |
-
----
-
-{#rtcconfig}
-
-#### rtcConfig
-
-```cpp
-rtc::Configuration rtcConfig
-```
-
-libdatachannel connection options, ICE servers, and transport settings.
-
----
-
-{#media-2}
-
-#### media
-
-```cpp
-MediaConfig media
-```
-
-Desired media codecs and directions for the session.
-
----
-
-{#enabledatachannel}
-
-#### enableDataChannel
-
-```cpp
-bool enableDataChannel = true
-```
-
-True to create a data channel on outgoing calls and accept one on incoming calls.
-
----
-
-{#datachannellabel}
-
-#### dataChannelLabel
-
-```cpp
-std::string dataChannelLabel = "data"
-```
-
-Label to use for the application data channel.
+Defined in src/webrtc/include/icy/webrtc/peersession.h:179
 
 {#mediaconfig}
 
@@ -1625,6 +1776,12 @@ Label to use for the application data channel.
 ```cpp
 #include <icy/webrtc/peersession.h>
 ```
+
+```cpp
+struct MediaConfig
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:61
 
 [Configuration](base.md#configuration) for WebRTC peer session establishment.
 
@@ -1649,6 +1806,8 @@ Label to use for the application data channel.
 av::VideoCodec videoCodec
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:63
+
 Desired video codec for send/receive negotiation.
 
 ---
@@ -1660,6 +1819,8 @@ Desired video codec for send/receive negotiation.
 ```cpp
 av::AudioCodec audioCodec
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:64
 
 Desired audio codec for send/receive negotiation.
 
@@ -1673,6 +1834,8 @@ Desired audio codec for send/receive negotiation.
 rtc::Description::Direction videoDirection = rtc::Description::Direction::SendRecv
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:65
+
 ---
 
 {#audiodirection-1}
@@ -1683,6 +1846,8 @@ rtc::Description::Direction videoDirection = rtc::Description::Direction::SendRe
 rtc::Description::Direction audioDirection = rtc::Description::Direction::SendRecv
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:66
+
 ---
 
 {#videojitterbuffer-1}
@@ -1692,6 +1857,8 @@ rtc::Description::Direction audioDirection = rtc::Description::Direction::SendRe
 ```cpp
 JitterBufferConfig videoJitterBuffer
 ```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:67
 
 Receive-side buffering for depacketized remote video frames.
 
@@ -1705,11 +1872,128 @@ Receive-side buffering for depacketized remote video frames.
 JitterBufferConfig audioJitterBuffer
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:68
+
 Receive-side buffering for depacketized remote audio frames.
+
+{#config-4}
+
+## Config
+
+```cpp
+#include <icy/webrtc/peersession.h>
+```
+
+```cpp
+struct Config
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:72
+
+[Configuration](base.md#configuration) for WebRTC peer session establishment.
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `rtc::Configuration` | [`rtcConfig`](#rtcconfig)  | libdatachannel connection options, ICE servers, and transport settings. |
+| `MediaConfig` | [`media`](#media-2)  | Desired media codecs and directions for the session. |
+| `bool` | [`enableDataChannel`](#enabledatachannel)  | True to create a data channel on outgoing calls and accept one on incoming calls. |
+| `std::string` | [`dataChannelLabel`](#datachannellabel)  | Label to use for the application data channel. |
+
+---
+
+{#rtcconfig}
+
+#### rtcConfig
+
+```cpp
+rtc::Configuration rtcConfig
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:74
+
+libdatachannel connection options, ICE servers, and transport settings.
+
+---
+
+{#media-2}
+
+#### media
+
+```cpp
+MediaConfig media
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:75
+
+Desired media codecs and directions for the session.
+
+---
+
+{#enabledatachannel}
+
+#### enableDataChannel
+
+```cpp
+bool enableDataChannel = true
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:76
+
+True to create a data channel on outgoing calls and accept one on incoming calls.
+
+---
+
+{#datachannellabel}
+
+#### dataChannelLabel
+
+```cpp
+std::string dataChannelLabel = "data"
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:77
+
+Label to use for the application data channel.
+
+{#callbackguard}
+
+## CallbackGuard
+
+```cpp
+struct CallbackGuard
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:154
+
+### Public Attributes
+
+| Return | Name | Description |
+|--------|------|-------------|
+| `std::atomic< bool >` | [`alive`](#alive-1)  |  |
+
+---
+
+{#alive-1}
+
+#### alive
+
+```cpp
+std::atomic< bool > alive {true}
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:156
 
 {#pendingcandidate}
 
 ## PendingCandidate
+
+```cpp
+struct PendingCandidate
+```
+
+Defined in src/webrtc/include/icy/webrtc/peersession.h:159
 
 ### Public Attributes
 
@@ -1728,6 +2012,8 @@ Receive-side buffering for depacketized remote audio frames.
 std::string candidate
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:161
+
 ---
 
 {#mid}
@@ -1738,6 +2024,8 @@ std::string candidate
 std::string mid
 ```
 
+Defined in src/webrtc/include/icy/webrtc/peersession.h:162
+
 {#webrtctracksender}
 
 ## WebRtcTrackSender
@@ -1745,6 +2033,12 @@ std::string mid
 ```cpp
 #include <icy/webrtc/tracksender.h>
 ```
+
+```cpp
+class WebRtcTrackSender
+```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:56
 
 > **Inherits:** [`PacketProcessor`](base.md#packetprocessor)
 
@@ -1764,17 +2058,19 @@ Accepts only the packet type that matches the bound track. Non-matching packets 
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `PacketSignal` | [`emitter`](#emitter-9)  |  |
+| `PacketSignal` | [`emitter`](#emitter-10)  |  |
 
 ---
 
-{#emitter-9}
+{#emitter-10}
 
 #### emitter
 
 ```cpp
 PacketSignal emitter
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:96
 
 ### Public Methods
 
@@ -1784,11 +2080,11 @@ PacketSignal emitter
 |  | [`WebRtcTrackSender`](#webrtctracksender-2) `explicit` | Construct bound to a track handle from [createVideoTrack()](#createvideotrack) or [createAudioTrack()](#createaudiotrack). |
 | `void` | [`bind`](#bind-5)  | Bind to a track. Can be called to rebind to a different track. |
 | `void` | [`unbind`](#unbind-1)  | Unbind from the current track. |
-| `void` | [`process`](#process-10) `virtual` | Send an encoded media frame to the bound WebRTC track. Converts the FFmpeg microsecond timestamp to an RTP timestamp using the track's clock rate, then calls rtc::Track::sendFrame(). Only forwards the packet downstream on a successful send. |
-| `bool` | [`accepts`](#accepts-4) `virtual` | Return true only for the packet type that matches the bound track. |
-| `void` | [`onStreamStateChange`](#onstreamstatechange-6) `virtual` | Called by the [PacketStream](base.md#packetstream) when stream state changes. Logs when the stream is stopping; no other action is taken. |
-| `bool` | [`isVideo`](#isvideo) `const` | True if this sender is bound to a video track. |
-| `bool` | [`bound`](#bound) `const` | True if bound to any track. |
+| `void` | [`process`](#process-12) `virtual` `override` | Send an encoded media frame to the bound WebRTC track. Converts the FFmpeg microsecond timestamp to an RTP timestamp using the track's clock rate, then calls rtc::Track::sendFrame(). Only forwards the packet downstream on a successful send. |
+| `bool` | [`accepts`](#accepts-5) `virtual` `override` | Return true only for the packet type that matches the bound track. |
+| `void` | [`onStreamStateChange`](#onstreamstatechange-6) `virtual` `override` | Called by the [PacketStream](base.md#packetstream) when stream state changes. Logs when the stream is stopping; no other action is taken. |
+| `bool` | [`isVideo`](#isvideo) `const` `nodiscard` | True if this sender is bound to a video track. |
+| `bool` | [`bound`](#bound) `const` `nodiscard` | True if bound to any track. |
 
 ---
 
@@ -1799,6 +2095,8 @@ PacketSignal emitter
 ```cpp
 WebRtcTrackSender()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:60
 
 Construct an unbound sender. Call [bind()](#bind-5) before use.
 
@@ -1814,6 +2112,8 @@ Construct an unbound sender. Call [bind()](#bind-5) before use.
 explicit WebRtcTrackSender(const TrackHandle & handle)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:64
+
 Construct bound to a track handle from [createVideoTrack()](#createvideotrack) or [createAudioTrack()](#createaudiotrack).
 
 ---
@@ -1825,6 +2125,8 @@ Construct bound to a track handle from [createVideoTrack()](#createvideotrack) o
 ```cpp
 void bind(const TrackHandle & handle)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:67
 
 Bind to a track. Can be called to rebind to a different track.
 
@@ -1838,19 +2140,23 @@ Bind to a track. Can be called to rebind to a different track.
 void unbind()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:70
+
 Unbind from the current track.
 
 ---
 
-{#process-10}
+{#process-12}
 
 #### process
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void process(IPacket & packet)
+virtual void process(IPacket & packet) override
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:78
 
 Send an encoded media frame to the bound WebRTC track. Converts the FFmpeg microsecond timestamp to an RTP timestamp using the track's clock rate, then calls rtc::Track::sendFrame(). Only forwards the packet downstream on a successful send. 
 #### Parameters
@@ -1858,15 +2164,17 @@ Send an encoded media frame to the bound WebRTC track. Converts the FFmpeg micro
 
 ---
 
-{#accepts-4}
+{#accepts-5}
 
 #### accepts
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool accepts(IPacket * packet)
+virtual bool accepts(IPacket * packet) override
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:83
 
 Return true only for the packet type that matches the bound track. 
 #### Parameters
@@ -1881,11 +2189,13 @@ True if the packet can be processed by this sender.
 
 #### onStreamStateChange
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void onStreamStateChange(const PacketStreamState & state)
+virtual void onStreamStateChange(const PacketStreamState & state) override
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:88
 
 Called by the [PacketStream](base.md#packetstream) when stream state changes. Logs when the stream is stopping; no other action is taken. 
 #### Parameters
@@ -1897,11 +2207,13 @@ Called by the [PacketStream](base.md#packetstream) when stream state changes. Lo
 
 #### isVideo
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool isVideo() const
+[[nodiscard]] bool isVideo() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:91
 
 True if this sender is bound to a video track.
 
@@ -1911,11 +2223,13 @@ True if this sender is bound to a video track.
 
 #### bound
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool bound() const
+[[nodiscard]] bool bound() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:94
 
 True if bound to any track.
 
@@ -1938,6 +2252,8 @@ True if bound to any track.
 std::shared_ptr< rtc::Track > _track
 ```
 
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:106
+
 ---
 
 {#_rtpconfig}
@@ -1947,6 +2263,8 @@ std::shared_ptr< rtc::Track > _track
 ```cpp
 std::shared_ptr< rtc::RtpPacketizationConfig > _rtpConfig
 ```
+
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:107
 
 ---
 
@@ -1958,6 +2276,8 @@ std::shared_ptr< rtc::RtpPacketizationConfig > _rtpConfig
 std::atomic< TrackKind > _kind {TrackKind::Unbound}
 ```
 
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:108
+
 ---
 
 {#_mutex-19}
@@ -1968,6 +2288,8 @@ std::atomic< TrackKind > _kind {TrackKind::Unbound}
 std::mutex _mutex
 ```
 
+Defined in src/webrtc/include/icy/webrtc/tracksender.h:109
+
 {#webrtctrackreceiver}
 
 ## WebRtcTrackReceiver
@@ -1975,6 +2297,12 @@ std::mutex _mutex
 ```cpp
 #include <icy/webrtc/trackreceiver.h>
 ```
+
+```cpp
+class WebRtcTrackReceiver
+```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:61
 
 > **Inherits:** [`PacketStreamAdapter`](base.md#packetstreamadapter)
 
@@ -1994,17 +2322,19 @@ Emits VideoPacket for video tracks, AudioPacket for audio tracks. Use those pack
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `PacketSignal` | [`emitter`](#emitter-10)  |  |
+| `PacketSignal` | [`emitter`](#emitter-11)  |  |
 
 ---
 
-{#emitter-10}
+{#emitter-11}
 
 #### emitter
 
 ```cpp
 PacketSignal emitter
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:87
 
 ### Public Methods
 
@@ -2013,8 +2343,8 @@ PacketSignal emitter
 |  | [`WebRtcTrackReceiver`](#webrtctrackreceiver-1)  | Construct an unbound receiver. Call [bind()](#bind-6) to attach a remote track. |
 | `void` | [`bind`](#bind-6)  | Bind to a remote track. Must be called after [setupReceiveTrack()](#setupreceivetrack) returned true. Installs an onFrame callback that converts each depacketized frame to a VideoPacket or AudioPacket and emits it on the [PacketStream](base.md#packetstream). The track type (video/audio) is detected from the SDP description. |
 | `void` | [`configureJitterBuffer`](#configurejitterbuffer)  | Replace the receive-side jitter-buffer settings. |
-| `JitterBufferConfig` | [`jitterBufferConfig`](#jitterbufferconfig-1) `const` | Current jitter-buffer settings for this receiver. |
-| `bool` | [`jitterBufferEnabled`](#jitterbufferenabled) `const` | True when depacketized receive frames are buffered before emission. |
+| `JitterBufferConfig` | [`jitterBufferConfig`](#jitterbufferconfig-1) `const` `nodiscard` | Current jitter-buffer settings for this receiver. |
+| `bool` | [`jitterBufferEnabled`](#jitterbufferenabled) `const` `nodiscard` | True when depacketized receive frames are buffered before emission. |
 
 ---
 
@@ -2025,6 +2355,8 @@ PacketSignal emitter
 ```cpp
 WebRtcTrackReceiver()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:65
 
 Construct an unbound receiver. Call [bind()](#bind-6) to attach a remote track.
 
@@ -2037,6 +2369,8 @@ Construct an unbound receiver. Call [bind()](#bind-6) to attach a remote track.
 ```cpp
 void bind(std::shared_ptr< rtc::Track > track)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:74
 
 Bind to a remote track. Must be called after [setupReceiveTrack()](#setupreceivetrack) returned true. Installs an onFrame callback that converts each depacketized frame to a VideoPacket or AudioPacket and emits it on the [PacketStream](base.md#packetstream). The track type (video/audio) is detected from the SDP description. 
 #### Parameters
@@ -2052,6 +2386,8 @@ Bind to a remote track. Must be called after [setupReceiveTrack()](#setupreceive
 void configureJitterBuffer(const JitterBufferConfig & config)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:79
+
 Replace the receive-side jitter-buffer settings.
 
 Reconfiguring resets any buffered media still waiting for release.
@@ -2062,11 +2398,13 @@ Reconfiguring resets any buffered media still waiting for release.
 
 #### jitterBufferConfig
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-JitterBufferConfig jitterBufferConfig() const
+[[nodiscard]] JitterBufferConfig jitterBufferConfig() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:82
 
 Current jitter-buffer settings for this receiver.
 
@@ -2076,11 +2414,13 @@ Current jitter-buffer settings for this receiver.
 
 #### jitterBufferEnabled
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-bool jitterBufferEnabled() const
+[[nodiscard]] bool jitterBufferEnabled() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:85
 
 True when depacketized receive frames are buffered before emission.
 
@@ -2096,7 +2436,7 @@ True when depacketized receive frames are buffered before emission.
 | `JitterBufferConfig` | [`_jitterConfig`](#_jitterconfig)  |  |
 | `std::int64_t` | [`_timerTickMs`](#_timertickms)  |  |
 | `bool` | [`_timerNeedsUpdate`](#_timerneedsupdate)  |  |
-| `std::shared_ptr< DispatchState >` | [`_state`](#_state-4)  |  |
+| `std::shared_ptr< DispatchState >` | [`_state`](#_state-5)  |  |
 | `uint64_t` | [`_generation`](#_generation)  |  |
 
 ---
@@ -2109,6 +2449,8 @@ True when depacketized receive frames are buffered before emission.
 Synchronizer _dispatch
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:99
+
 ---
 
 {#_timer-3}
@@ -2118,6 +2460,8 @@ Synchronizer _dispatch
 ```cpp
 Timer _timer
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:100
 
 ---
 
@@ -2129,6 +2473,8 @@ Timer _timer
 std::mutex _mutex
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:101
+
 ---
 
 {#_pending}
@@ -2138,6 +2484,8 @@ std::mutex _mutex
 ```cpp
 std::deque< std::unique_ptr< IPacket > > _pending
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:102
 
 ---
 
@@ -2149,6 +2497,8 @@ std::deque< std::unique_ptr< IPacket > > _pending
 std::unique_ptr< detail::ReceiverJitterBuffer > _jitterBuffer
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:103
+
 ---
 
 {#_jitterconfig}
@@ -2158,6 +2508,8 @@ std::unique_ptr< detail::ReceiverJitterBuffer > _jitterBuffer
 ```cpp
 JitterBufferConfig _jitterConfig
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:104
 
 ---
 
@@ -2169,6 +2521,8 @@ JitterBufferConfig _jitterConfig
 std::int64_t _timerTickMs = 5
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:105
+
 ---
 
 {#_timerneedsupdate}
@@ -2179,15 +2533,19 @@ std::int64_t _timerTickMs = 5
 bool _timerNeedsUpdate = false
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:106
+
 ---
 
-{#_state-4}
+{#_state-5}
 
 #### _state
 
 ```cpp
 std::shared_ptr< DispatchState > _state = std::make_shared<DispatchState>()
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:107
 
 ---
 
@@ -2198,6 +2556,8 @@ std::shared_ptr< DispatchState > _state = std::make_shared<DispatchState>()
 ```cpp
 uint64_t _generation = 0
 ```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:108
 
 ### Private Methods
 
@@ -2216,6 +2576,8 @@ uint64_t _generation = 0
 void enqueue(std::unique_ptr< IPacket > packet)
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:96
+
 ---
 
 {#flushpending}
@@ -2226,9 +2588,17 @@ void enqueue(std::unique_ptr< IPacket > packet)
 void flushPending()
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:97
+
 {#dispatchstate}
 
 ## DispatchState
+
+```cpp
+struct DispatchState
+```
+
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:90
 
 ### Public Attributes
 
@@ -2247,6 +2617,8 @@ void flushPending()
 std::atomic< bool > alive {true}
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:92
+
 ---
 
 {#generation}
@@ -2257,6 +2629,8 @@ std::atomic< bool > alive {true}
 std::atomic< uint64_t > generation {0}
 ```
 
+Defined in src/webrtc/include/icy/webrtc/trackreceiver.h:93
+
 {#codecnegotiator}
 
 ## CodecNegotiator
@@ -2264,6 +2638,12 @@ std::atomic< uint64_t > generation {0}
 ```cpp
 #include <icy/webrtc/codecnegotiator.h>
 ```
+
+```cpp
+class CodecNegotiator
+```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:118
 
 Maps RTP codec names to FFmpeg encoders and queries FFmpeg at runtime to determine what codecs are available.
 
@@ -2273,24 +2653,24 @@ This is stateless - all methods are static. Call negotiate*() with a list of RTP
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::optional< NegotiatedCodec >` | [`negotiateVideo`](#negotiatevideo) `static` | Negotiate the best video codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: H264 > VP8 > VP9 > AV1 > H265 |
-| `std::optional< NegotiatedCodec >` | [`negotiateAudio`](#negotiateaudio) `static` | Negotiate the best audio codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: opus > PCMU > PCMA |
-| `bool` | [`hasEncoder`](#hasencoder) `static` | Check if FFmpeg has an encoder for the given codec name. Accepts both FFmpeg names ("libx264") and RTP names ("H264"). |
-| `std::string` | [`rtpToFfmpeg`](#rtptoffmpeg) `static` | Map an RTP codec name to the preferred FFmpeg encoder name. Returns empty string if no mapping exists. |
-| `std::string` | [`ffmpegToRtp`](#ffmpegtortp) `static` | Map an FFmpeg encoder name to the RTP codec name. Returns empty string if no mapping exists. |
-| `uint32_t` | [`clockRate`](#clockrate-2) `static` | Get the standard RTP clock rate for a codec. |
-| `int` | [`defaultPayloadType`](#defaultpayloadtype) `static` | Get the default RTP payload type for a codec. Returns 0 for dynamic payload types (caller should assign). |
-| `std::optional< CodecSpec >` | [`specFromRtp`](#specfromrtp) `static` | Return the canonical codec spec for an RTP name, if known. |
-| `std::optional< CodecSpec >` | [`specFromFfmpeg`](#specfromffmpeg) `static` | Return the canonical codec spec for an FFmpeg encoder name, if known. |
-| `std::optional< CodecSpec >` | [`specFromVideoCodec`](#specfromvideocodec) `static` | Resolve the canonical codec spec from an explicit video codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name. |
-| `std::optional< CodecSpec >` | [`specFromAudioCodec`](#specfromaudiocodec) `static` | Resolve the canonical codec spec from an explicit audio codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name. |
-| `CodecSpec` | [`requireVideoSpec`](#requirevideospec) `static` | Resolve a strict canonical video codec spec or throw. |
-| `CodecSpec` | [`requireAudioSpec`](#requireaudiospec) `static` | Resolve a strict canonical audio codec spec or throw. |
-| `av::VideoCodec` | [`resolveWebRtcVideoCodec`](#resolvewebrtcvideocodec) `static` | Resolve a browser-safe WebRTC video codec config from an explicit codec. |
-| `av::AudioCodec` | [`resolveWebRtcAudioCodec`](#resolvewebrtcaudiocodec) `static` | Resolve a browser-safe WebRTC audio codec config from an explicit codec. |
-| `std::optional< CodecSpec >` | [`detectCodec`](#detectcodec) `static` | Detect the first known codec present in an SDP snippet for the given media type. |
-| `std::optional< CodecSpec >` | [`detectCodecInMedia`](#detectcodecinmedia) `static` | Detect the first known codec from a structured rtc::Description::Media object for the given media type. |
-| `AVCodecID` | [`decoderCodecId`](#decodercodecid) `static` | Return the FFmpeg decoder codec ID for a given codec spec. Returns AV_CODEC_ID_NONE if no mapping is known. |
+| `std::optional< NegotiatedCodec >` | [`negotiateVideo`](#negotiatevideo) `static` `nodiscard` | Negotiate the best video codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: H264 > VP8 > VP9 > AV1 > H265 |
+| `std::optional< NegotiatedCodec >` | [`negotiateAudio`](#negotiateaudio) `static` `nodiscard` | Negotiate the best audio codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: opus > PCMU > PCMA |
+| `bool` | [`hasEncoder`](#hasencoder) `static` `nodiscard` | Check if FFmpeg has an encoder for the given codec name. Accepts both FFmpeg names ("libx264") and RTP names ("H264"). |
+| `std::string` | [`rtpToFfmpeg`](#rtptoffmpeg) `static` `nodiscard` | Map an RTP codec name to the preferred FFmpeg encoder name. Returns empty string if no mapping exists. |
+| `std::string` | [`ffmpegToRtp`](#ffmpegtortp) `static` `nodiscard` | Map an FFmpeg encoder name to the RTP codec name. Returns empty string if no mapping exists. |
+| `uint32_t` | [`clockRate`](#clockrate-2) `static` `nodiscard` | Get the standard RTP clock rate for a codec. |
+| `int` | [`defaultPayloadType`](#defaultpayloadtype) `static` `nodiscard` | Get the default RTP payload type for a codec. Returns 0 for dynamic payload types (caller should assign). |
+| `std::optional< CodecSpec >` | [`specFromRtp`](#specfromrtp) `static` `nodiscard` | Return the canonical codec spec for an RTP name, if known. |
+| `std::optional< CodecSpec >` | [`specFromFfmpeg`](#specfromffmpeg) `static` `nodiscard` | Return the canonical codec spec for an FFmpeg encoder name, if known. |
+| `std::optional< CodecSpec >` | [`specFromVideoCodec`](#specfromvideocodec) `static` `nodiscard` | Resolve the canonical codec spec from an explicit video codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name. |
+| `std::optional< CodecSpec >` | [`specFromAudioCodec`](#specfromaudiocodec) `static` `nodiscard` | Resolve the canonical codec spec from an explicit audio codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name. |
+| `CodecSpec` | [`requireVideoSpec`](#requirevideospec) `static` `nodiscard` | Resolve a strict canonical video codec spec or throw. |
+| `CodecSpec` | [`requireAudioSpec`](#requireaudiospec) `static` `nodiscard` | Resolve a strict canonical audio codec spec or throw. |
+| `av::VideoCodec` | [`resolveWebRtcVideoCodec`](#resolvewebrtcvideocodec) `static` `nodiscard` | Resolve a browser-safe WebRTC video codec config from an explicit codec. |
+| `av::AudioCodec` | [`resolveWebRtcAudioCodec`](#resolvewebrtcaudiocodec) `static` `nodiscard` | Resolve a browser-safe WebRTC audio codec config from an explicit codec. |
+| `std::optional< CodecSpec >` | [`detectCodec`](#detectcodec) `static` `nodiscard` | Detect the first known codec present in an SDP snippet for the given media type. |
+| `std::optional< CodecSpec >` | [`detectCodecInMedia`](#detectcodecinmedia) `static` `nodiscard` | Detect the first known codec from a structured rtc::Description::Media object for the given media type. |
+| `AVCodecID` | [`decoderCodecId`](#decodercodecid) `static` `nodiscard` | Return the FFmpeg decoder codec ID for a given codec spec. Returns AV_CODEC_ID_NONE if no mapping is known. |
 
 ---
 
@@ -2298,11 +2678,13 @@ This is stateless - all methods are static. Call negotiate*() with a list of RTP
 
 #### negotiateVideo
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< NegotiatedCodec > negotiateVideo(const std::vector< std::string > & offeredCodecs)
+[[nodiscard]] static std::optional< NegotiatedCodec > negotiateVideo(const std::vector< std::string > & offeredCodecs)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:125
 
 Negotiate the best video codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: H264 > VP8 > VP9 > AV1 > H265
 
@@ -2312,11 +2694,13 @@ Negotiate the best video codec from a list of offered RTP codec names. Returns t
 
 #### negotiateAudio
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< NegotiatedCodec > negotiateAudio(const std::vector< std::string > & offeredCodecs)
+[[nodiscard]] static std::optional< NegotiatedCodec > negotiateAudio(const std::vector< std::string > & offeredCodecs)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:131
 
 Negotiate the best audio codec from a list of offered RTP codec names. Returns the first match that FFmpeg can encode, in preference order: opus > PCMU > PCMA
 
@@ -2326,11 +2710,13 @@ Negotiate the best audio codec from a list of offered RTP codec names. Returns t
 
 #### hasEncoder
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static bool hasEncoder(const std::string & name)
+[[nodiscard]] static bool hasEncoder(const std::string & name)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:135
 
 Check if FFmpeg has an encoder for the given codec name. Accepts both FFmpeg names ("libx264") and RTP names ("H264").
 
@@ -2340,11 +2726,13 @@ Check if FFmpeg has an encoder for the given codec name. Accepts both FFmpeg nam
 
 #### rtpToFfmpeg
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::string rtpToFfmpeg(const std::string & rtpName)
+[[nodiscard]] static std::string rtpToFfmpeg(const std::string & rtpName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:139
 
 Map an RTP codec name to the preferred FFmpeg encoder name. Returns empty string if no mapping exists.
 
@@ -2354,11 +2742,13 @@ Map an RTP codec name to the preferred FFmpeg encoder name. Returns empty string
 
 #### ffmpegToRtp
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::string ffmpegToRtp(const std::string & ffmpegName)
+[[nodiscard]] static std::string ffmpegToRtp(const std::string & ffmpegName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:143
 
 Map an FFmpeg encoder name to the RTP codec name. Returns empty string if no mapping exists.
 
@@ -2368,11 +2758,13 @@ Map an FFmpeg encoder name to the RTP codec name. Returns empty string if no map
 
 #### clockRate
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static uint32_t clockRate(const std::string & rtpName)
+[[nodiscard]] static uint32_t clockRate(const std::string & rtpName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:146
 
 Get the standard RTP clock rate for a codec.
 
@@ -2382,11 +2774,13 @@ Get the standard RTP clock rate for a codec.
 
 #### defaultPayloadType
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static int defaultPayloadType(const std::string & rtpName)
+[[nodiscard]] static int defaultPayloadType(const std::string & rtpName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:150
 
 Get the default RTP payload type for a codec. Returns 0 for dynamic payload types (caller should assign).
 
@@ -2396,11 +2790,13 @@ Get the default RTP payload type for a codec. Returns 0 for dynamic payload type
 
 #### specFromRtp
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > specFromRtp(const std::string & rtpName)
+[[nodiscard]] static std::optional< CodecSpec > specFromRtp(const std::string & rtpName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:154
 
 Return the canonical codec spec for an RTP name, if known.
 
@@ -2410,11 +2806,13 @@ Return the canonical codec spec for an RTP name, if known.
 
 #### specFromFfmpeg
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > specFromFfmpeg(const std::string & ffmpegName)
+[[nodiscard]] static std::optional< CodecSpec > specFromFfmpeg(const std::string & ffmpegName)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:158
 
 Return the canonical codec spec for an FFmpeg encoder name, if known.
 
@@ -2424,11 +2822,13 @@ Return the canonical codec spec for an FFmpeg encoder name, if known.
 
 #### specFromVideoCodec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > specFromVideoCodec(const av::VideoCodec & codec)
+[[nodiscard]] static std::optional< CodecSpec > specFromVideoCodec(const av::VideoCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:163
 
 Resolve the canonical codec spec from an explicit video codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name.
 
@@ -2438,11 +2838,13 @@ Resolve the canonical codec spec from an explicit video codec config. Prefers th
 
 #### specFromAudioCodec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > specFromAudioCodec(const av::AudioCodec & codec)
+[[nodiscard]] static std::optional< CodecSpec > specFromAudioCodec(const av::AudioCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:168
 
 Resolve the canonical codec spec from an explicit audio codec config. Prefers the FFmpeg encoder when present, otherwise falls back to RTP name.
 
@@ -2452,11 +2854,13 @@ Resolve the canonical codec spec from an explicit audio codec config. Prefers th
 
 #### requireVideoSpec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static CodecSpec requireVideoSpec(const av::VideoCodec & codec)
+[[nodiscard]] static CodecSpec requireVideoSpec(const av::VideoCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:171
 
 Resolve a strict canonical video codec spec or throw.
 
@@ -2466,11 +2870,13 @@ Resolve a strict canonical video codec spec or throw.
 
 #### requireAudioSpec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static CodecSpec requireAudioSpec(const av::AudioCodec & codec)
+[[nodiscard]] static CodecSpec requireAudioSpec(const av::AudioCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:174
 
 Resolve a strict canonical audio codec spec or throw.
 
@@ -2480,11 +2886,13 @@ Resolve a strict canonical audio codec spec or throw.
 
 #### resolveWebRtcVideoCodec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static av::VideoCodec resolveWebRtcVideoCodec(const av::VideoCodec & codec)
+[[nodiscard]] static av::VideoCodec resolveWebRtcVideoCodec(const av::VideoCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:178
 
 Resolve a browser-safe WebRTC video codec config from an explicit codec.
 
@@ -2494,11 +2902,13 @@ Resolve a browser-safe WebRTC video codec config from an explicit codec.
 
 #### resolveWebRtcAudioCodec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static av::AudioCodec resolveWebRtcAudioCodec(const av::AudioCodec & codec)
+[[nodiscard]] static av::AudioCodec resolveWebRtcAudioCodec(const av::AudioCodec & codec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:182
 
 Resolve a browser-safe WebRTC audio codec config from an explicit codec.
 
@@ -2508,11 +2918,13 @@ Resolve a browser-safe WebRTC audio codec config from an explicit codec.
 
 #### detectCodec
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > detectCodec(std::string_view sdp, CodecMediaType mediaType)
+[[nodiscard]] static std::optional< CodecSpec > detectCodec(std::string_view sdp, CodecMediaType mediaType)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:187
 
 Detect the first known codec present in an SDP snippet for the given media type.
 
@@ -2522,11 +2934,13 @@ Detect the first known codec present in an SDP snippet for the given media type.
 
 #### detectCodecInMedia
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static std::optional< CodecSpec > detectCodecInMedia(const rtc::Description::Media & media, CodecMediaType mediaType)
+[[nodiscard]] static std::optional< CodecSpec > detectCodecInMedia(const rtc::Description::Media & media, CodecMediaType mediaType)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:192
 
 Detect the first known codec from a structured rtc::Description::Media object for the given media type.
 
@@ -2536,11 +2950,13 @@ Detect the first known codec from a structured rtc::Description::Media object fo
 
 #### decoderCodecId
 
-`static`
+`static` `nodiscard`
 
 ```cpp
-static AVCodecID decoderCodecId(const CodecSpec & spec)
+[[nodiscard]] static AVCodecID decoderCodecId(const CodecSpec & spec)
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:197
 
 Return the FFmpeg decoder codec ID for a given codec spec. Returns AV_CODEC_ID_NONE if no mapping is known.
 
@@ -2552,24 +2968,32 @@ Return the FFmpeg decoder codec ID for a given codec spec. Returns AV_CODEC_ID_N
 #include <icy/webrtc/track.h>
 ```
 
+```cpp
+struct TrackHandle
+```
+
+Defined in src/webrtc/include/icy/webrtc/track.h:31
+
 Result of creating a track: the track itself plus its RTP config. Keep the config around - you need it for [WebRtcTrackSender](#webrtctracksender).
 
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::shared_ptr< rtc::Track >` | [`track`](#track)  | The libdatachannel track added to the PeerConnection. |
+| `std::shared_ptr< rtc::Track >` | [`track`](#track-1)  | The libdatachannel track added to the PeerConnection. |
 | `std::shared_ptr< rtc::RtpPacketizationConfig >` | [`rtpConfig`](#rtpconfig)  | RTP packetization state required by [WebRtcTrackSender](#webrtctracksender). |
 
 ---
 
-{#track}
+{#track-1}
 
 #### track
 
 ```cpp
 std::shared_ptr< rtc::Track > track
 ```
+
+Defined in src/webrtc/include/icy/webrtc/track.h:33
 
 The libdatachannel track added to the PeerConnection.
 
@@ -2583,6 +3007,8 @@ The libdatachannel track added to the PeerConnection.
 std::shared_ptr< rtc::RtpPacketizationConfig > rtpConfig
 ```
 
+Defined in src/webrtc/include/icy/webrtc/track.h:34
+
 RTP packetization state required by [WebRtcTrackSender](#webrtctracksender).
 
 {#jitterbufferconfig}
@@ -2592,6 +3018,12 @@ RTP packetization state required by [WebRtcTrackSender](#webrtctracksender).
 ```cpp
 #include <icy/webrtc/jitterbuffer.h>
 ```
+
+```cpp
+struct JitterBufferConfig
+```
+
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:30
 
 Receive-side jitter buffer behaviour for depacketized WebRTC media frames.
 
@@ -2617,6 +3049,8 @@ The jitter buffer sits after libdatachannel depacketization and before icey emit
 bool enabled = false
 ```
 
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:32
+
 False keeps the current zero-buffer receive path.
 
 ---
@@ -2628,6 +3062,8 @@ False keeps the current zero-buffer receive path.
 ```cpp
 std::int64_t minDelayMs = 20
 ```
+
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:33
 
 Base playout delay in milliseconds.
 
@@ -2641,6 +3077,8 @@ Base playout delay in milliseconds.
 std::int64_t maxDelayMs = 120
 ```
 
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:34
+
 Upper bound for the adaptive playout delay.
 
 ---
@@ -2652,6 +3090,8 @@ Upper bound for the adaptive playout delay.
 ```cpp
 double adaptiveFactor = 1.5
 ```
+
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:35
 
 Extra delay multiplier applied to observed inter-arrival variance.
 
@@ -2665,6 +3105,8 @@ Extra delay multiplier applied to observed inter-arrival variance.
 std::int64_t tickIntervalMs = 5
 ```
 
+Defined in src/webrtc/include/icy/webrtc/jitterbuffer.h:36
+
 Poll interval for releasing buffered frames.
 
 {#codecspec}
@@ -2674,6 +3116,12 @@ Poll interval for releasing buffered frames.
 ```cpp
 #include <icy/webrtc/codecnegotiator.h>
 ```
+
+```cpp
+struct CodecSpec
+```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:65
 
 Canonical description of a codec supported by icey's WebRTC helpers.
 
@@ -2699,6 +3147,8 @@ Canonical description of a codec supported by icey's WebRTC helpers.
 CodecId id = 
 ```
 
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:67
+
 Stable codec identifier.
 
 ---
@@ -2710,6 +3160,8 @@ Stable codec identifier.
 ```cpp
 CodecMediaType mediaType = 
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:68
 
 Audio or video media kind.
 
@@ -2723,6 +3175,8 @@ Audio or video media kind.
 std::string rtpName
 ```
 
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:69
+
 Canonical RTP codec name.
 
 ---
@@ -2734,6 +3188,8 @@ Canonical RTP codec name.
 ```cpp
 std::string ffmpegName
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:70
 
 Preferred FFmpeg encoder name.
 
@@ -2747,6 +3203,8 @@ Preferred FFmpeg encoder name.
 uint32_t clockRate = 0
 ```
 
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:71
+
 RTP clock rate in Hz.
 
 ---
@@ -2758,6 +3216,8 @@ RTP clock rate in Hz.
 ```cpp
 int payloadType = 0
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:72
 
 Default static or preferred dynamic payload type.
 
@@ -2771,25 +3231,29 @@ Default static or preferred dynamic payload type.
 std::string fmtp
 ```
 
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:73
+
 Canonical fmtp line for SDP generation.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `bool` | [`valid`](#valid-17) `const` `inline` |  |
+| `bool` | [`valid`](#valid-18) `const` `inline` `nodiscard` |  |
 
 ---
 
-{#valid-17}
+{#valid-18}
 
 #### valid
 
-`const` `inline`
+`const` `inline` `nodiscard`
 
 ```cpp
-inline bool valid() const
+[[nodiscard]] inline bool valid() const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:75
 
 {#negotiatedcodec}
 
@@ -2799,17 +3263,23 @@ inline bool valid() const
 #include <icy/webrtc/codecnegotiator.h>
 ```
 
+```cpp
+struct NegotiatedCodec
+```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:81
+
 Result of codec negotiation between a remote SDP offer and the local FFmpeg codec inventory.
 
 ### Public Attributes
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `std::string` | [`rtpName`](#rtpname-1)  | RTP codec name (e.g. "H264", "VP8", "opus") |
-| `std::string` | [`ffmpegName`](#ffmpegname-1)  | FFmpeg encoder name (e.g. "libx264", "libvpx", "libopus") |
+| `std::string` | [`rtpName`](#rtpname-1)  | RTP codec name (e.g. "H264", "VP8", "opus"). |
+| `std::string` | [`ffmpegName`](#ffmpegname-1)  | FFmpeg encoder name (e.g. "libx264", "libvpx", "libopus"). |
 | `int` | [`payloadType`](#payloadtype-1)  | RTP payload type from SDP. |
-| `uint32_t` | [`clockRate`](#clockrate-1)  | RTP clock rate (90000 for video, 48000 for opus) |
-| `std::string` | [`fmtp`](#fmtp-1)  | Format parameters (e.g. "profile-level-id=42e01f") |
+| `uint32_t` | [`clockRate`](#clockrate-1)  | RTP clock rate (90000 for video, 48000 for opus). |
+| `std::string` | [`fmtp`](#fmtp-1)  | Format parameters (e.g. "profile-level-id=42e01f"). |
 
 ---
 
@@ -2821,7 +3291,9 @@ Result of codec negotiation between a remote SDP offer and the local FFmpeg code
 std::string rtpName
 ```
 
-RTP codec name (e.g. "H264", "VP8", "opus")
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:83
+
+RTP codec name (e.g. "H264", "VP8", "opus").
 
 ---
 
@@ -2833,7 +3305,9 @@ RTP codec name (e.g. "H264", "VP8", "opus")
 std::string ffmpegName
 ```
 
-FFmpeg encoder name (e.g. "libx264", "libvpx", "libopus")
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:84
+
+FFmpeg encoder name (e.g. "libx264", "libvpx", "libopus").
 
 ---
 
@@ -2844,6 +3318,8 @@ FFmpeg encoder name (e.g. "libx264", "libvpx", "libopus")
 ```cpp
 int payloadType = 0
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:85
 
 RTP payload type from SDP.
 
@@ -2857,7 +3333,9 @@ RTP payload type from SDP.
 uint32_t clockRate = 0
 ```
 
-RTP clock rate (90000 for video, 48000 for opus)
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:86
+
+RTP clock rate (90000 for video, 48000 for opus).
 
 ---
 
@@ -2869,16 +3347,18 @@ RTP clock rate (90000 for video, 48000 for opus)
 std::string fmtp
 ```
 
-Format parameters (e.g. "profile-level-id=42e01f")
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:87
+
+Format parameters (e.g. "profile-level-id=42e01f").
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `av::VideoCodec` | [`toVideoCodec`](#tovideocodec) `const` | Create an [av::VideoCodec](av.md#videocodec) from this negotiation result. Width, height, fps default to 0 (caller should set these). |
-| `av::VideoCodec` | [`toWebRtcVideoCodec`](#towebrtcvideocodec) `const` | Create an [av::VideoCodec](av.md#videocodec) configured for WebRTC browser playback. Sets low-latency options: ultrafast preset, zerolatency tune, constrained baseline profile for H.264, and appropriate defaults for VP8/VP9/AV1. |
-| `av::AudioCodec` | [`toAudioCodec`](#toaudiocodec) `const` | Create an [av::AudioCodec](av.md#audiocodec) from this negotiation result. Channels default to 2, sampleRate to the RTP clock rate. |
-| `av::AudioCodec` | [`toWebRtcAudioCodec`](#towebrtcaudiocodec) `const` | Create an [av::AudioCodec](av.md#audiocodec) configured for WebRTC browser playback. Forces 48000 Hz for Opus, sets appropriate options. |
+| `av::VideoCodec` | [`toVideoCodec`](#tovideocodec) `const` `nodiscard` | Create an [av::VideoCodec](av.md#videocodec) from this negotiation result. Width, height, fps default to 0 (caller should set these). |
+| `av::VideoCodec` | [`toWebRtcVideoCodec`](#towebrtcvideocodec) `const` `nodiscard` | Create an [av::VideoCodec](av.md#videocodec) configured for WebRTC browser playback. Sets low-latency options: ultrafast preset, zerolatency tune, constrained baseline profile for H.264, and appropriate defaults for VP8/VP9/AV1. |
+| `av::AudioCodec` | [`toAudioCodec`](#toaudiocodec) `const` `nodiscard` | Create an [av::AudioCodec](av.md#audiocodec) from this negotiation result. Channels default to 2, sampleRate to the RTP clock rate. |
+| `av::AudioCodec` | [`toWebRtcAudioCodec`](#towebrtcaudiocodec) `const` `nodiscard` | Create an [av::AudioCodec](av.md#audiocodec) configured for WebRTC browser playback. Forces 48000 Hz for Opus, sets appropriate options. |
 
 ---
 
@@ -2886,11 +3366,13 @@ Format parameters (e.g. "profile-level-id=42e01f")
 
 #### toVideoCodec
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-av::VideoCodec toVideoCodec(int width, int height, double fps) const
+[[nodiscard]] av::VideoCodec toVideoCodec(int width = 0, int height = 0, double fps = 0.0) const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:91
 
 Create an [av::VideoCodec](av.md#videocodec) from this negotiation result. Width, height, fps default to 0 (caller should set these).
 
@@ -2900,11 +3382,13 @@ Create an [av::VideoCodec](av.md#videocodec) from this negotiation result. Width
 
 #### toWebRtcVideoCodec
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-av::VideoCodec toWebRtcVideoCodec(int width, int height, double fps) const
+[[nodiscard]] av::VideoCodec toWebRtcVideoCodec(int width = 0, int height = 0, double fps = 0.0) const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:98
 
 Create an [av::VideoCodec](av.md#videocodec) configured for WebRTC browser playback. Sets low-latency options: ultrafast preset, zerolatency tune, constrained baseline profile for H.264, and appropriate defaults for VP8/VP9/AV1.
 
@@ -2914,11 +3398,13 @@ Create an [av::VideoCodec](av.md#videocodec) configured for WebRTC browser playb
 
 #### toAudioCodec
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-av::AudioCodec toAudioCodec(int channels, int sampleRate) const
+[[nodiscard]] av::AudioCodec toAudioCodec(int channels = 2, int sampleRate = 0) const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:103
 
 Create an [av::AudioCodec](av.md#audiocodec) from this negotiation result. Channels default to 2, sampleRate to the RTP clock rate.
 
@@ -2928,11 +3414,13 @@ Create an [av::AudioCodec](av.md#audiocodec) from this negotiation result. Chann
 
 #### toWebRtcAudioCodec
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-av::AudioCodec toWebRtcAudioCodec(int channels) const
+[[nodiscard]] av::AudioCodec toWebRtcAudioCodec(int channels = 2) const
 ```
+
+Defined in src/webrtc/include/icy/webrtc/codecnegotiator.h:108
 
 Create an [av::AudioCodec](av.md#audiocodec) configured for WebRTC browser playback. Forces 48000 Hz for Opus, sets appropriate options.
 

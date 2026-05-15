@@ -29,9 +29,9 @@ Audio intelligence primitives for decoded media streams.
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `Speech_APIAudioRef` | [`makeAudioRef`](#makeaudioref)  |  |
-| `Speech_APIjson::Value` | [`toJson`](#tojson-1)  |  |
-| `Speech_APIjson::Value` | [`toJson`](#tojson-2)  |  |
+| `Speech_APIAudioRef` | [`makeAudioRef`](#makeaudioref) `nodiscard` |  |
+| `Speech_APIjson::Value` | [`toJson`](#tojson-1) `nodiscard` |  |
+| `Speech_APIjson::Value` | [`toJson`](#tojson-2) `nodiscard` |  |
 
 ---
 
@@ -39,8 +39,10 @@ Audio intelligence primitives for decoded media streams.
 
 #### makeAudioRef
 
+`nodiscard`
+
 ```cpp
-Speech_APIAudioRef makeAudioRef(const av::PlanarAudioPacket & packet, uint64_t sequence, int sampleRateHint)
+[[nodiscard]] Speech_APIAudioRef makeAudioRef(const av::PlanarAudioPacket & packet, uint64_t sequence = 0, int sampleRateHint = 0)
 ```
 
 ---
@@ -49,8 +51,10 @@ Speech_APIAudioRef makeAudioRef(const av::PlanarAudioPacket & packet, uint64_t s
 
 #### toJson
 
+`nodiscard`
+
 ```cpp
-Speech_APIjson::Value toJson(const AudioRef & audio)
+[[nodiscard]] Speech_APIjson::Value toJson(const AudioRef & audio)
 ```
 
 ---
@@ -59,8 +63,10 @@ Speech_APIjson::Value toJson(const AudioRef & audio)
 
 #### toJson
 
+`nodiscard`
+
 ```cpp
-Speech_APIjson::Value toJson(const SpeechEvent & event)
+[[nodiscard]] Speech_APIjson::Value toJson(const SpeechEvent & event)
 ```
 
 {#speechqueue}
@@ -70,6 +76,12 @@ Speech_APIjson::Value toJson(const SpeechEvent & event)
 ```cpp
 #include <icy/speech/speechqueue.h>
 ```
+
+```cpp
+class SpeechQueue
+```
+
+Defined in src/speech/include/icy/speech/speechqueue.h:28
 
 > **Inherits:** [`PlanarAudioPacket >`](base.md#asyncpacketqueue)
 
@@ -92,8 +104,10 @@ This is the explicit clone boundary for speech processing. Upstream stages can s
 `inline` `explicit`
 
 ```cpp
-inline explicit SpeechQueue(int maxPackets)
+inline explicit SpeechQueue(int maxPackets = 64)
 ```
+
+Defined in src/speech/include/icy/speech/speechqueue.h:31
 
 {#voiceactivitydetector}
 
@@ -102,6 +116,12 @@ inline explicit SpeechQueue(int maxPackets)
 ```cpp
 #include <icy/speech/voiceactivitydetector.h>
 ```
+
+```cpp
+class VoiceActivityDetector
+```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:50
 
 ### Public Attributes
 
@@ -119,14 +139,16 @@ inline explicit SpeechQueue(int maxPackets)
 Signal< void(const SpeechEvent &)> Event
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:60
+
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`VoiceActivityDetector`](#voiceactivitydetector-1) `explicit` |  |
 | `void` | [`setConfig`](#setconfig)  |  |
-| `VoiceActivityDetectorConfig` | [`config`](#config) `const` |  |
-| `VoiceActivityDetectorStats` | [`stats`](#stats) `const` |  |
+| `VoiceActivityDetectorConfig` | [`config`](#config) `const` `nodiscard` |  |
+| `VoiceActivityDetectorStats` | [`stats`](#stats) `const` `nodiscard` |  |
 | `void` | [`reset`](#reset-14)  |  |
 | `void` | [`process`](#process-7)  |  |
 
@@ -139,8 +161,10 @@ Signal< void(const SpeechEvent &)> Event
 `explicit`
 
 ```cpp
-explicit VoiceActivityDetector(VoiceActivityDetectorConfig config)
+explicit VoiceActivityDetector(VoiceActivityDetectorConfig config = {})
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:62
 
 ---
 
@@ -152,17 +176,21 @@ explicit VoiceActivityDetector(VoiceActivityDetectorConfig config)
 void setConfig(VoiceActivityDetectorConfig config)
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:64
+
 ---
 
 {#config}
 
 #### config
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-VoiceActivityDetectorConfig config() const
+[[nodiscard]] VoiceActivityDetectorConfig config() const
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:65
 
 ---
 
@@ -170,11 +198,13 @@ VoiceActivityDetectorConfig config() const
 
 #### stats
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-VoiceActivityDetectorStats stats() const
+[[nodiscard]] VoiceActivityDetectorStats stats() const
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:66
 
 ---
 
@@ -186,6 +216,8 @@ VoiceActivityDetectorStats stats() const
 void reset()
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:67
+
 ---
 
 {#process-7}
@@ -195,6 +227,8 @@ void reset()
 ```cpp
 void process(const av::PlanarAudioPacket & packet)
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:69
 
 ### Private Attributes
 
@@ -220,6 +254,8 @@ void process(const av::PlanarAudioPacket & packet)
 VoiceActivityDetectorConfig _config
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:79
+
 ---
 
 {#_sequence}
@@ -229,6 +265,8 @@ VoiceActivityDetectorConfig _config
 ```cpp
 uint64_t _sequence = 0
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:80
 
 ---
 
@@ -240,6 +278,8 @@ uint64_t _sequence = 0
 uint64_t _seen = 0
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:81
+
 ---
 
 {#_emitted}
@@ -249,6 +289,8 @@ uint64_t _seen = 0
 ```cpp
 uint64_t _emitted = 0
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:82
 
 ---
 
@@ -260,6 +302,8 @@ uint64_t _emitted = 0
 int64_t _lastUpdateUsec = 0
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:83
+
 ---
 
 {#_lastbelowthresholdusec}
@@ -269,6 +313,8 @@ int64_t _lastUpdateUsec = 0
 ```cpp
 int64_t _lastBelowThresholdUsec = 0
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:84
 
 ---
 
@@ -280,6 +326,8 @@ int64_t _lastBelowThresholdUsec = 0
 bool _active = false
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:85
+
 ---
 
 {#_lastlevel}
@@ -289,6 +337,8 @@ bool _active = false
 ```cpp
 float _lastLevel = 0.0f
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:86
 
 ---
 
@@ -300,11 +350,13 @@ float _lastLevel = 0.0f
 float _lastPeak = 0.0f
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:87
+
 ### Private Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `Levels` | [`measure`](#measure) `const` |  |
+| `Levels` | [`measure`](#measure) `const` `nodiscard` |  |
 | `void` | [`emitEvent`](#emitevent)  |  |
 
 ---
@@ -313,11 +365,13 @@ float _lastPeak = 0.0f
 
 #### measure
 
-`const`
+`const` `nodiscard`
 
 ```cpp
-Levels measure(const av::PlanarAudioPacket & packet) const
+[[nodiscard]] Levels measure(const av::PlanarAudioPacket & packet) const
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:73
 
 ---
 
@@ -328,6 +382,8 @@ Levels measure(const av::PlanarAudioPacket & packet) const
 ```cpp
 void emitEvent(const char * type, const av::PlanarAudioPacket & packet, const Levels & levels, bool active)
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:74
 
 ### Private Static Methods
 
@@ -347,6 +403,8 @@ void emitEvent(const char * type, const av::PlanarAudioPacket & packet, const Le
 static VoiceActivityDetectorConfig sanitize(VoiceActivityDetectorConfig config)
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:72
+
 {#levels}
 
 ## Levels
@@ -354,6 +412,12 @@ static VoiceActivityDetectorConfig sanitize(VoiceActivityDetectorConfig config)
 ```cpp
 #include <icy/speech/voiceactivitydetector.h>
 ```
+
+```cpp
+struct Levels
+```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:53
 
 ### Public Attributes
 
@@ -373,6 +437,8 @@ static VoiceActivityDetectorConfig sanitize(VoiceActivityDetectorConfig config)
 float level = 0.0f
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:55
+
 ---
 
 {#peak-1}
@@ -382,6 +448,8 @@ float level = 0.0f
 ```cpp
 float peak = 0.0f
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:56
 
 ---
 
@@ -393,6 +461,8 @@ float peak = 0.0f
 bool valid = false
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:57
+
 {#audioref}
 
 ## AudioRef
@@ -400,6 +470,12 @@ bool valid = false
 ```cpp
 #include <icy/speech/event.h>
 ```
+
+```cpp
+struct AudioRef
+```
+
+Defined in src/speech/include/icy/speech/event.h:28
 
 ### Public Attributes
 
@@ -423,6 +499,8 @@ bool valid = false
 uint64_t sequence = 0
 ```
 
+Defined in src/speech/include/icy/speech/event.h:30
+
 ---
 
 {#timeusec}
@@ -432,6 +510,8 @@ uint64_t sequence = 0
 ```cpp
 int64_t timeUsec = 0
 ```
+
+Defined in src/speech/include/icy/speech/event.h:31
 
 ---
 
@@ -443,6 +523,8 @@ int64_t timeUsec = 0
 int64_t durationUsec = 0
 ```
 
+Defined in src/speech/include/icy/speech/event.h:32
+
 ---
 
 {#samplerate-2}
@@ -452,6 +534,8 @@ int64_t durationUsec = 0
 ```cpp
 int sampleRate = 0
 ```
+
+Defined in src/speech/include/icy/speech/event.h:33
 
 ---
 
@@ -463,6 +547,8 @@ int sampleRate = 0
 int channels = 0
 ```
 
+Defined in src/speech/include/icy/speech/event.h:34
+
 ---
 
 {#numsamples-1}
@@ -472,6 +558,8 @@ int channels = 0
 ```cpp
 size_t numSamples = 0
 ```
+
+Defined in src/speech/include/icy/speech/event.h:35
 
 ---
 
@@ -483,6 +571,8 @@ size_t numSamples = 0
 std::string sampleFmt
 ```
 
+Defined in src/speech/include/icy/speech/event.h:36
+
 {#speechevent}
 
 ## SpeechEvent
@@ -490,6 +580,12 @@ std::string sampleFmt
 ```cpp
 #include <icy/speech/event.h>
 ```
+
+```cpp
+struct SpeechEvent
+```
+
+Defined in src/speech/include/icy/speech/event.h:40
 
 ### Public Attributes
 
@@ -515,6 +611,8 @@ std::string sampleFmt
 std::string type = "speech:update"
 ```
 
+Defined in src/speech/include/icy/speech/event.h:42
+
 ---
 
 {#source}
@@ -524,6 +622,8 @@ std::string type = "speech:update"
 ```cpp
 std::string source
 ```
+
+Defined in src/speech/include/icy/speech/event.h:43
 
 ---
 
@@ -535,6 +635,8 @@ std::string source
 std::string detector
 ```
 
+Defined in src/speech/include/icy/speech/event.h:44
+
 ---
 
 {#emittedatusec}
@@ -544,6 +646,8 @@ std::string detector
 ```cpp
 int64_t emittedAtUsec = 0
 ```
+
+Defined in src/speech/include/icy/speech/event.h:45
 
 ---
 
@@ -555,6 +659,8 @@ int64_t emittedAtUsec = 0
 AudioRef audio
 ```
 
+Defined in src/speech/include/icy/speech/event.h:46
+
 ---
 
 {#active-1}
@@ -564,6 +670,8 @@ AudioRef audio
 ```cpp
 bool active = false
 ```
+
+Defined in src/speech/include/icy/speech/event.h:47
 
 ---
 
@@ -575,6 +683,8 @@ bool active = false
 float level = 0.0f
 ```
 
+Defined in src/speech/include/icy/speech/event.h:48
+
 ---
 
 {#peak}
@@ -584,6 +694,8 @@ float level = 0.0f
 ```cpp
 float peak = 0.0f
 ```
+
+Defined in src/speech/include/icy/speech/event.h:49
 
 ---
 
@@ -595,6 +707,8 @@ float peak = 0.0f
 json::Value data = json::Value::object()
 ```
 
+Defined in src/speech/include/icy/speech/event.h:50
+
 {#voiceactivitydetectorconfig}
 
 ## VoiceActivityDetectorConfig
@@ -602,6 +716,12 @@ json::Value data = json::Value::object()
 ```cpp
 #include <icy/speech/voiceactivitydetector.h>
 ```
+
+```cpp
+struct VoiceActivityDetectorConfig
+```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:28
 
 ### Public Attributes
 
@@ -625,6 +745,8 @@ json::Value data = json::Value::object()
 std::string source
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:30
+
 ---
 
 {#detectorname}
@@ -634,6 +756,8 @@ std::string source
 ```cpp
 std::string detectorName = "energy_vad"
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:31
 
 ---
 
@@ -645,6 +769,8 @@ std::string detectorName = "energy_vad"
 int sampleRateHint = 0
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:32
+
 ---
 
 {#startthreshold}
@@ -654,6 +780,8 @@ int sampleRateHint = 0
 ```cpp
 float startThreshold = 0.045f
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:33
 
 ---
 
@@ -665,6 +793,8 @@ float startThreshold = 0.045f
 float stopThreshold = 0.020f
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:34
+
 ---
 
 {#minsilenceusec}
@@ -674,6 +804,8 @@ float stopThreshold = 0.020f
 ```cpp
 int64_t minSilenceUsec = 250000
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:35
 
 ---
 
@@ -685,6 +817,8 @@ int64_t minSilenceUsec = 250000
 int64_t updateIntervalUsec = 250000
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:36
+
 {#voiceactivitydetectorstats}
 
 ## VoiceActivityDetectorStats
@@ -692,6 +826,12 @@ int64_t updateIntervalUsec = 250000
 ```cpp
 #include <icy/speech/voiceactivitydetector.h>
 ```
+
+```cpp
+struct VoiceActivityDetectorStats
+```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:40
 
 ### Public Attributes
 
@@ -713,6 +853,8 @@ int64_t updateIntervalUsec = 250000
 uint64_t seen = 0
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:42
+
 ---
 
 {#emitted}
@@ -722,6 +864,8 @@ uint64_t seen = 0
 ```cpp
 uint64_t emitted = 0
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:43
 
 ---
 
@@ -733,6 +877,8 @@ uint64_t emitted = 0
 bool active = false
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:44
+
 ---
 
 {#lastlevel}
@@ -743,6 +889,8 @@ bool active = false
 float lastLevel = 0.0f
 ```
 
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:45
+
 ---
 
 {#lastpeak}
@@ -752,4 +900,6 @@ float lastLevel = 0.0f
 ```cpp
 float lastPeak = 0.0f
 ```
+
+Defined in src/speech/include/icy/speech/voiceactivitydetector.h:46
 

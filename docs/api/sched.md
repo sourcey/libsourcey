@@ -97,7 +97,7 @@ Months of the year.
 #### TaskList
 
 ```cpp
-std::vector< sched::Task * > TaskList()
+using TaskList = std::vector< sched::Task * >
 ```
 
 Ordered list of task pointers used by the scheduler.
@@ -141,6 +141,12 @@ Instantiate a registered [Trigger](#trigger-1) subtype using its default constru
 #include <icy/sched/scheduler.h>
 ```
 
+```cpp
+class Scheduler
+```
+
+Defined in src/sched/include/icy/sched/scheduler.h:31
+
 > **Inherits:** [`TaskRunner`](base.md#taskrunner), [`ISerializable`](json.md#iserializable)
 
 The [Scheduler](#scheduler) manages and runs tasks that need to be executed at specific times.
@@ -152,11 +158,12 @@ The [Scheduler](#scheduler) manages and runs tasks that need to be executed at s
 |  | [`Scheduler`](#scheduler-1)  |  |
 | `void` | [`schedule`](#schedule) `virtual` | Adds `task` to the scheduler and starts running it on its configured trigger. The scheduler takes ownership of the task. |
 | `void` | [`cancel`](#cancel-4) `virtual` | Removes `task` from the scheduler and cancels any pending execution. |
-| `void` | [`clear`](#clear-2) `virtual` | Removes all scheduled tasks. |
-| `void` | [`serialize`](#serialize-3) `virtual` | Serializes all scheduled tasks and their triggers to `root`. |
-| `void` | [`deserialize`](#deserialize-3) `virtual` | Reconstructs the task list from `root` using the [TaskFactory](#taskfactory). Skips entries that fail to deserialize and logs the error. |
+| `void` | [`clear`](#clear-2) `virtual` `override` | Removes all scheduled tasks. |
+| `void` | [`serialize`](#serialize-3) `virtual` `override` | Serializes all scheduled tasks and their triggers to `root`. |
+| `void` | [`deserialize`](#deserialize-3) `virtual` `override` | Reconstructs the task list from `root` using the [TaskFactory](#taskfactory). Skips entries that fail to deserialize and logs the error. |
 | `void` | [`print`](#print-14) `virtual` | Writes a pretty-printed JSON representation of all tasks to `ost`. |
-| `bool` | [`cancel`](#cancel-5)  | Cancels a task. |
+| `bool` | [`cancel`](#cancel-5) `virtual` | Cancels a task. |
+| `void` | [`cancel`](#cancel-6) `virtual` `inline` | Cancel the current task. The [run()](#run-6) method should return ASAP. |
 
 ---
 
@@ -167,6 +174,8 @@ The [Scheduler](#scheduler) manages and runs tasks that need to be executed at s
 ```cpp
 Scheduler()
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:35
 
 ---
 
@@ -179,6 +188,8 @@ Scheduler()
 ```cpp
 virtual void schedule(sched::Task * task)
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:41
 
 Adds `task` to the scheduler and starts running it on its configured trigger. The scheduler takes ownership of the task. 
 #### Parameters
@@ -196,6 +207,8 @@ Adds `task` to the scheduler and starts running it on its configured trigger. Th
 virtual void cancel(sched::Task * task)
 ```
 
+Defined in src/sched/include/icy/sched/scheduler.h:47
+
 Removes `task` from the scheduler and cancels any pending execution. 
 #### Parameters
 * `task` [Task](#task-1) to cancel.
@@ -206,11 +219,13 @@ Removes `task` from the scheduler and cancels any pending execution.
 
 #### clear
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void clear()
+virtual void clear() override
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:50
 
 Removes all scheduled tasks.
 
@@ -220,11 +235,13 @@ Removes all scheduled tasks.
 
 #### serialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void serialize(json::Value & root)
+virtual void serialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:54
 
 Serializes all scheduled tasks and their triggers to `root`. 
 #### Parameters
@@ -236,11 +253,13 @@ Serializes all scheduled tasks and their triggers to `root`.
 
 #### deserialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void deserialize(json::Value & root)
+virtual void deserialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:59
 
 Reconstructs the task list from `root` using the [TaskFactory](#taskfactory). Skips entries that fail to deserialize and logs the error. 
 #### Parameters
@@ -258,6 +277,8 @@ Reconstructs the task list from `root` using the [TaskFactory](#taskfactory). Sk
 virtual void print(std::ostream & ost)
 ```
 
+Defined in src/sched/include/icy/sched/scheduler.h:63
+
 Writes a pretty-printed JSON representation of all tasks to `ost`. 
 #### Parameters
 * `ost` Output stream to write to.
@@ -268,13 +289,33 @@ Writes a pretty-printed JSON representation of all tasks to `ost`.
 
 #### cancel
 
+`virtual`
+
 ```cpp
-bool cancel(Task * task)
+virtual bool cancel(Task * task)
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:43
 
 Cancels a task.
 
 The task reference will be managed by the [TaskRunner](base.md#taskrunner) until the task is destroyed.
+
+---
+
+{#cancel-6}
+
+#### cancel
+
+`virtual` `inline`
+
+```cpp
+virtual inline void cancel(bool flag = true)
+```
+
+Defined in src/sched/include/icy/sched/scheduler.h:43
+
+Cancel the current task. The [run()](#run-6) method should return ASAP.
 
 ### Public Static Methods
 
@@ -295,6 +336,8 @@ The task reference will be managed by the [TaskRunner](base.md#taskrunner) until
 static Scheduler & getDefault()
 ```
 
+Defined in src/sched/include/icy/sched/scheduler.h:68
+
 Returns the default [Scheduler](#scheduler) singleton, although [Scheduler](#scheduler) instances may also be initialized individually.
 
 ---
@@ -309,13 +352,15 @@ Returns the default [Scheduler](#scheduler) singleton, although [Scheduler](#sch
 static sched::TaskFactory & factory()
 ```
 
+Defined in src/sched/include/icy/sched/scheduler.h:71
+
 Returns the [TaskFactory](#taskfactory) singleton.
 
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-| `void` | [`run`](#run-6) `virtual` | The run method will be called by the asynchronous context. |
+| `void` | [`run`](#run-6) `virtual` `override` | The run method will be called by the asynchronous context. |
 | `void` | [`update`](#update-5) `virtual` |  |
 
 ---
@@ -324,11 +369,13 @@ Returns the [TaskFactory](#taskfactory) singleton.
 
 #### run
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void run()
+virtual void run() override
 ```
+
+Defined in src/sched/include/icy/sched/scheduler.h:74
 
 The run method will be called by the asynchronous context.
 
@@ -344,6 +391,8 @@ The run method will be called by the asynchronous context.
 virtual void update()
 ```
 
+Defined in src/sched/include/icy/sched/scheduler.h:75
+
 {#task-1}
 
 ## Task
@@ -352,9 +401,33 @@ virtual void update()
 #include <icy/sched/task.h>
 ```
 
+```cpp
+class Task
+```
+
+Defined in src/sched/include/icy/sched/task.h:32
+
 > **Inherits:** [`Task`](base.md#task), [`ISerializable`](json.md#iserializable)
 
 Scheduled task with an attached trigger and scheduler association.
+
+### Friends
+
+| Name | Description |
+|------|-------------|
+| [`Scheduler`](#scheduler-2)  |  |
+
+---
+
+{#scheduler-2}
+
+#### Scheduler
+
+```cpp
+friend class Scheduler
+```
+
+Defined in src/sched/include/icy/sched/task.h:111
 
 ### Public Methods
 
@@ -362,12 +435,12 @@ Scheduled task with an attached trigger and scheduler association.
 |--------|------|-------------|
 |  | [`Task`](#task-2)  | Constructs a detached task without an associated scheduler. A trigger must be set before scheduling. |
 |  | [`Task`](#task-3)  | Constructs a task associated with the given scheduler. |
-| `void` | [`serialize`](#serialize-4) `virtual` | Serializes the task to JSON. |
-| `void` | [`deserialize`](#deserialize-4) `virtual` | Deserializes the task from JSON. |
+| `void` | [`serialize`](#serialize-4) `virtual` `override` | Serializes the task to JSON. |
+| `void` | [`deserialize`](#deserialize-4) `virtual` `override` | Deserializes the task from JSON. |
 | `T *` | [`createTrigger`](#createtrigger) `inline` | Creates a trigger of type T, attaches it to this task, and returns a raw pointer to it. Ownership of the trigger is transferred to this task. |
 | `void` | [`setTrigger`](#settrigger)  | Replaces the current trigger with `trigger`. |
 | `sched::Trigger &` | [`trigger`](#trigger)  | Returns a reference to the associated [sched::Trigger](#trigger-1) or throws an exception. |
-| `Scheduler &` | [`scheduler`](#scheduler-2)  | Returns a reference to the associated [Scheduler](#scheduler) or throws an exception. |
+| `Scheduler &` | [`scheduler`](#scheduler-3)  | Returns a reference to the associated [Scheduler](#scheduler) or throws an exception. |
 | `std::int64_t` | [`remaining`](#remaining) `const` | Returns the milliseconds remaining until the next scheduled timeout. An [sched::Trigger](#trigger-1) must be associated or an exception will be thrown. |
 | `std::string` | [`type`](#type-16) `const` | Returns the registered type string for this task. |
 | `std::string` | [`name`](#name-9) `const` | Returns the human-readable display name of this task. |
@@ -380,8 +453,10 @@ Scheduled task with an attached trigger and scheduler association.
 #### Task
 
 ```cpp
-Task(const std::string & type, const std::string & name)
+Task(const std::string & type = "", const std::string & name = "")
 ```
+
+Defined in src/sched/include/icy/sched/task.h:40
 
 Constructs a detached task without an associated scheduler. A trigger must be set before scheduling. 
 #### Parameters
@@ -396,8 +471,10 @@ Constructs a detached task without an associated scheduler. A trigger must be se
 #### Task
 
 ```cpp
-Task(Scheduler & scheduler, const std::string & type, const std::string & name)
+Task(Scheduler & scheduler, const std::string & type, const std::string & name = "")
 ```
+
+Defined in src/sched/include/icy/sched/task.h:46
 
 Constructs a task associated with the given scheduler. 
 #### Parameters
@@ -413,11 +490,13 @@ Constructs a task associated with the given scheduler.
 
 #### serialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void serialize(json::Value & root)
+virtual void serialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/task.h:51
 
 Serializes the task to JSON.
 
@@ -427,11 +506,13 @@ Serializes the task to JSON.
 
 #### deserialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void deserialize(json::Value & root)
+virtual void deserialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/task.h:54
 
 Deserializes the task from JSON.
 
@@ -446,6 +527,8 @@ Deserializes the task from JSON.
 ```cpp
 template<typename T> inline T * createTrigger()
 ```
+
+Defined in src/sched/include/icy/sched/task.h:61
 
 Creates a trigger of type T, attaches it to this task, and returns a raw pointer to it. Ownership of the trigger is transferred to this task. 
 #### Parameters
@@ -464,6 +547,8 @@ Raw pointer to the newly created trigger (still owned by this task).
 void setTrigger(std::unique_ptr< sched::Trigger > trigger)
 ```
 
+Defined in src/sched/include/icy/sched/task.h:71
+
 Replaces the current trigger with `trigger`. 
 #### Parameters
 * `trigger` Owning pointer to the new trigger; must not be null before calling.
@@ -478,17 +563,21 @@ Replaces the current trigger with `trigger`.
 sched::Trigger & trigger()
 ```
 
+Defined in src/sched/include/icy/sched/task.h:75
+
 Returns a reference to the associated [sched::Trigger](#trigger-1) or throws an exception.
 
 ---
 
-{#scheduler-2}
+{#scheduler-3}
 
 #### scheduler
 
 ```cpp
 Scheduler & scheduler()
 ```
+
+Defined in src/sched/include/icy/sched/task.h:79
 
 Returns a reference to the associated [Scheduler](#scheduler) or throws an exception.
 
@@ -504,6 +593,8 @@ Returns a reference to the associated [Scheduler](#scheduler) or throws an excep
 std::int64_t remaining() const
 ```
 
+Defined in src/sched/include/icy/sched/task.h:85
+
 Returns the milliseconds remaining until the next scheduled timeout. An [sched::Trigger](#trigger-1) must be associated or an exception will be thrown.
 
 ---
@@ -517,6 +608,8 @@ Returns the milliseconds remaining until the next scheduled timeout. An [sched::
 ```cpp
 std::string type() const
 ```
+
+Defined in src/sched/include/icy/sched/task.h:88
 
 Returns the registered type string for this task.
 
@@ -532,6 +625,8 @@ Returns the registered type string for this task.
 std::string name() const
 ```
 
+Defined in src/sched/include/icy/sched/task.h:91
+
 Returns the human-readable display name of this task.
 
 ---
@@ -543,6 +638,8 @@ Returns the human-readable display name of this task.
 ```cpp
 void setName(const std::string & name)
 ```
+
+Defined in src/sched/include/icy/sched/task.h:95
 
 Sets the human-readable display name. 
 #### Parameters
@@ -568,6 +665,8 @@ Sets the human-readable display name.
 std::string _type
 ```
 
+Defined in src/sched/include/icy/sched/task.h:113
+
 ---
 
 {#_name-1}
@@ -577,6 +676,8 @@ std::string _type
 ```cpp
 std::string _name
 ```
+
+Defined in src/sched/include/icy/sched/task.h:114
 
 ---
 
@@ -588,6 +689,8 @@ std::string _name
 sched::Scheduler * _scheduler
 ```
 
+Defined in src/sched/include/icy/sched/task.h:115
+
 ---
 
 {#_trigger}
@@ -597,6 +700,8 @@ sched::Scheduler * _scheduler
 ```cpp
 std::unique_ptr< sched::Trigger > _trigger
 ```
+
+Defined in src/sched/include/icy/sched/task.h:116
 
 ---
 
@@ -608,12 +713,14 @@ std::unique_ptr< sched::Trigger > _trigger
 std::mutex _mutex
 ```
 
+Defined in src/sched/include/icy/sched/task.h:117
+
 ### Protected Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `bool` | [`beforeRun`](#beforerun) `virtual` |  |
-| `void` | [`run`](#run-7)  | Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration. |
+| `void` | [`run`](#run-7) `virtual` `override` | Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration. |
 | `bool` | [`afterRun`](#afterrun) `virtual` |  |
 
 ---
@@ -628,15 +735,21 @@ std::mutex _mutex
 virtual bool beforeRun()
 ```
 
+Defined in src/sched/include/icy/sched/task.h:100
+
 ---
 
 {#run-7}
 
 #### run
 
+`virtual` `override`
+
 ```cpp
-void run()
+virtual void run() override
 ```
+
+Defined in src/sched/include/icy/sched/task.h:101
 
 Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this method to implement task action. Returning true means the task should be called again, and false will cause the task to be destroyed. The task will similarly be destroyed if [destroy()](base.md#classicy_1_1Task_1a639abe7ed51fd9294d6210e1d8264814) was called during the current task iteration.
 
@@ -652,6 +765,8 @@ Called by the [TaskRunner](base.md#taskrunner) to run the task. Override this me
 virtual bool afterRun()
 ```
 
+Defined in src/sched/include/icy/sched/task.h:102
+
 {#taskfactory}
 
 ## TaskFactory
@@ -659,6 +774,12 @@ virtual bool afterRun()
 ```cpp
 #include <icy/sched/taskfactory.h>
 ```
+
+```cpp
+class TaskFactory
+```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:49
 
 The [TaskFactory](#taskfactory) can dynamically instantiate registered [sched::Task](#task-1) and [sched::Trigger](#trigger-1) classes from named strings.
 
@@ -687,6 +808,8 @@ The [TaskFactory](#taskfactory) can dynamically instantiate registered [sched::T
 inline std::unique_ptr< sched::Task > createTask(const std::string & type)
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:67
+
 Instantiates and returns a registered task by type name. 
 #### Parameters
 * `type` Registered type name. 
@@ -709,6 +832,8 @@ Owning pointer to the new task instance.
 template<typename T> inline void registerTask(const std::string & type)
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:81
+
 Registers a task type T under the given name. Subsequent calls to [createTask()](#createtask) with this `type` will return a T instance. 
 #### Parameters
 * `T` Concrete subclass of [sched::Task](#task-1) with a default constructor. 
@@ -728,6 +853,8 @@ Registers a task type T under the given name. Subsequent calls to [createTask()]
 inline void unregisterTask(const std::string & type)
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:89
+
 Removes the task registration for `type`. No-op if not registered. 
 #### Parameters
 * `type` Type name to deregister.
@@ -744,6 +871,8 @@ Removes the task registration for `type`. No-op if not registered.
 inline TaskMap tasks() const
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:99
+
 Returns a snapshot copy of the registered task map.
 
 ---
@@ -757,6 +886,8 @@ Returns a snapshot copy of the registered task map.
 ```cpp
 inline std::unique_ptr< sched::Trigger > createTrigger(const std::string & type)
 ```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:114
 
 Instantiates and returns a registered trigger by type name. 
 #### Parameters
@@ -780,6 +911,8 @@ Owning pointer to the new trigger instance.
 template<typename T> inline void registerTrigger(const std::string & type)
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:127
+
 Registers a trigger type T under the given name. 
 #### Parameters
 * `T` Concrete subclass of [sched::Trigger](#trigger-1) with a default constructor. 
@@ -799,6 +932,8 @@ Registers a trigger type T under the given name.
 inline void unregisterTrigger(const std::string & type)
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:135
+
 Removes the trigger registration for `type`. No-op if not registered. 
 #### Parameters
 * `type` Type name to deregister.
@@ -814,6 +949,8 @@ Removes the trigger registration for `type`. No-op if not registered.
 ```cpp
 inline TriggerMap triggers() const
 ```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:145
 
 Returns a snapshot copy of the registered trigger map.
 
@@ -835,6 +972,8 @@ Returns a snapshot copy of the registered trigger map.
 static inline TaskFactory & getDefault()
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:53
+
 Returns the default [TaskFactory](#taskfactory) singleton.
 
 ### Protected Attributes
@@ -855,6 +994,8 @@ Returns the default [TaskFactory](#taskfactory) singleton.
 std::mutex _mutex
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:152
+
 ---
 
 {#_tasks-2}
@@ -865,6 +1006,8 @@ std::mutex _mutex
 TaskMap _tasks
 ```
 
+Defined in src/sched/include/icy/sched/taskfactory.h:154
+
 ---
 
 {#_triggers}
@@ -874,6 +1017,8 @@ TaskMap _tasks
 ```cpp
 TriggerMap _triggers
 ```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:155
 
 ### Public Types
 
@@ -889,8 +1034,10 @@ TriggerMap _triggers
 #### TaskMap
 
 ```cpp
-std::map< std::string, std::unique_ptr< sched::Task >(*)()> TaskMap()
+using TaskMap = std::map< std::string, std::unique_ptr< sched::Task >(*)()>
 ```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:61
 
 Scheduled Tasks.
 
@@ -901,8 +1048,10 @@ Scheduled Tasks.
 #### TriggerMap
 
 ```cpp
-std::map< std::string, std::unique_ptr< sched::Trigger >(*)()> TriggerMap()
+using TriggerMap = std::map< std::string, std::unique_ptr< sched::Trigger >(*)()>
 ```
+
+Defined in src/sched/include/icy/sched/taskfactory.h:108
 
 Schedule Triggers.
 
@@ -913,6 +1062,12 @@ Schedule Triggers.
 ```cpp
 #include <icy/sched/trigger.h>
 ```
+
+```cpp
+struct DailyTrigger
+```
+
+Defined in src/sched/include/icy/sched/trigger.h:167
 
 > **Inherits:** [`Trigger`](#trigger-1)
 
@@ -935,6 +1090,8 @@ Schedule Triggers.
 DateTime timeOfDay
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:179
+
 This value represents the time of day the task will trigger. The date part of the timestamp is redundant.
 
 ---
@@ -947,6 +1104,8 @@ This value represents the time of day the task will trigger. The date part of th
 std::vector< DaysOfTheWeek > daysExcluded
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:183
+
 Days of the week can be excluded by adding the appropriate bit flag here.
 
 ### Public Methods
@@ -954,7 +1113,7 @@ Days of the week can be excluded by adding the appropriate bit flag here.
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`DailyTrigger`](#dailytrigger-1)  | Constructs the trigger with type "DailyTrigger". |
-| `void` | [`update`](#update-2) `virtual` | Computes the next scheduleAt value by advancing to the next non-excluded weekday at the configured timeOfDay. |
+| `void` | [`update`](#update-2) `virtual` `override` | Computes the next scheduleAt value by advancing to the next non-excluded weekday at the configured timeOfDay. |
 
 ---
 
@@ -966,6 +1125,8 @@ Days of the week can be excluded by adding the appropriate bit flag here.
 DailyTrigger()
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:170
+
 Constructs the trigger with type "DailyTrigger".
 
 ---
@@ -974,11 +1135,13 @@ Constructs the trigger with type "DailyTrigger".
 
 #### update
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void update()
+virtual void update() override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:174
 
 Computes the next scheduleAt value by advancing to the next non-excluded weekday at the configured timeOfDay.
 
@@ -989,6 +1152,12 @@ Computes the next scheduleAt value by advancing to the next non-excluded weekday
 ```cpp
 #include <icy/sched/trigger.h>
 ```
+
+```cpp
+struct IntervalTrigger
+```
+
+Defined in src/sched/include/icy/sched/trigger.h:133
 
 > **Inherits:** [`Trigger`](#trigger-1)
 
@@ -1011,6 +1180,8 @@ Computes the next scheduleAt value by advancing to the next non-excluded weekday
 Timespan interval
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:155
+
 This value represents the interval to wait before running the task.
 
 ---
@@ -1023,6 +1194,8 @@ This value represents the interval to wait before running the task.
 int maxTimes
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:160
+
 The maximum number of times the task will be run before it is destroyed. 0 for no effect.
 
 ### Public Methods
@@ -1030,10 +1203,10 @@ The maximum number of times the task will be run before it is destroyed. 0 for n
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`IntervalTrigger`](#intervaltrigger-1)  | Constructs the trigger with type "IntervalTrigger" and maxTimes = 0 (unlimited). |
-| `void` | [`update`](#update-3) `virtual` | Advances scheduleAt by one `interval` period. |
-| `bool` | [`expired`](#expired-2) `virtual` | Returns true when maxTimes > 0 and timesRun >= maxTimes. |
-| `void` | [`serialize`](#serialize-2) `virtual` | Serializes interval fields (days, hours, minutes, seconds) in addition to base fields. |
-| `void` | [`deserialize`](#deserialize-2) `virtual` | Deserializes interval fields from `root`. Throws if the resulting interval is zero. |
+| `void` | [`update`](#update-3) `virtual` `override` | Advances scheduleAt by one `[interval](#interval)` period. |
+| `bool` | [`expired`](#expired-2) `virtual` `override` | Returns true when maxTimes > 0 and timesRun >= maxTimes. |
+| `void` | [`serialize`](#serialize-2) `virtual` `override` | Serializes interval fields (days, hours, minutes, seconds) in addition to base fields. |
+| `void` | [`deserialize`](#deserialize-2) `virtual` `override` | Deserializes interval fields from `root`. Throws if the resulting interval is zero. |
 
 ---
 
@@ -1045,6 +1218,8 @@ The maximum number of times the task will be run before it is destroyed. 0 for n
 IntervalTrigger()
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:136
+
 Constructs the trigger with type "IntervalTrigger" and maxTimes = 0 (unlimited).
 
 ---
@@ -1053,13 +1228,15 @@ Constructs the trigger with type "IntervalTrigger" and maxTimes = 0 (unlimited).
 
 #### update
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void update()
+virtual void update() override
 ```
 
-Advances scheduleAt by one `interval` period.
+Defined in src/sched/include/icy/sched/trigger.h:139
+
+Advances scheduleAt by one `[interval](#interval)` period.
 
 ---
 
@@ -1067,11 +1244,13 @@ Advances scheduleAt by one `interval` period.
 
 #### expired
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool expired()
+virtual bool expired() override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:142
 
 Returns true when maxTimes > 0 and timesRun >= maxTimes.
 
@@ -1081,11 +1260,13 @@ Returns true when maxTimes > 0 and timesRun >= maxTimes.
 
 #### serialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void serialize(json::Value & root)
+virtual void serialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:146
 
 Serializes interval fields (days, hours, minutes, seconds) in addition to base fields. 
 #### Parameters
@@ -1097,11 +1278,13 @@ Serializes interval fields (days, hours, minutes, seconds) in addition to base f
 
 #### deserialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void deserialize(json::Value & root)
+virtual void deserialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:151
 
 Deserializes interval fields from `root`. Throws if the resulting interval is zero. 
 #### Parameters
@@ -1115,6 +1298,12 @@ Deserializes interval fields from `root`. Throws if the resulting interval is ze
 #include <icy/sched/trigger.h>
 ```
 
+```cpp
+struct OnceOnlyTrigger
+```
+
+Defined in src/sched/include/icy/sched/trigger.h:113
+
 > **Inherits:** [`Trigger`](#trigger-1)
 
 [Trigger](#trigger-1) that fires exactly once at the scheduled time and then expires.
@@ -1124,8 +1313,8 @@ Deserializes interval fields from `root`. Throws if the resulting interval is ze
 | Return | Name | Description |
 |--------|------|-------------|
 |  | [`OnceOnlyTrigger`](#onceonlytrigger-1)  | Constructs the trigger with type "OnceOnlyTrigger". |
-| `void` | [`update`](#update-4) `virtual` `inline` | No-op; scheduleAt is set once at construction and never advanced. |
-| `bool` | [`expired`](#expired-3) `virtual` | Returns true after the task has run at least once. |
+| `void` | [`update`](#update-4) `virtual` `inline` `override` | No-op; scheduleAt is set once at construction and never advanced. |
+| `bool` | [`expired`](#expired-3) `virtual` `override` | Returns true after the task has run at least once. |
 
 ---
 
@@ -1137,6 +1326,8 @@ Deserializes interval fields from `root`. Throws if the resulting interval is ze
 OnceOnlyTrigger()
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:116
+
 Constructs the trigger with type "OnceOnlyTrigger".
 
 ---
@@ -1145,11 +1336,13 @@ Constructs the trigger with type "OnceOnlyTrigger".
 
 #### update
 
-`virtual` `inline`
+`virtual` `inline` `override`
 
 ```cpp
-virtual inline void update()
+virtual inline void update() override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:119
 
 No-op; scheduleAt is set once at construction and never advanced.
 
@@ -1159,11 +1352,13 @@ No-op; scheduleAt is set once at construction and never advanced.
 
 #### expired
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual bool expired()
+virtual bool expired() override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:126
 
 Returns true after the task has run at least once.
 
@@ -1174,6 +1369,12 @@ Returns true after the task has run at least once.
 ```cpp
 #include <icy/sched/trigger.h>
 ```
+
+```cpp
+struct Trigger
+```
+
+Defined in src/sched/include/icy/sched/trigger.h:58
 
 > **Inherits:** [`ISerializable`](json.md#iserializable)
 > **Subclassed by:** [`DailyTrigger`](#dailytrigger), [`IntervalTrigger`](#intervaltrigger), [`OnceOnlyTrigger`](#onceonlytrigger)
@@ -1201,6 +1402,8 @@ Base class for scheduled task triggers that determine when a task should run.
 std::string type
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:90
+
 The type of this trigger class.
 
 ---
@@ -1212,6 +1415,8 @@ The type of this trigger class.
 ```cpp
 std::string name
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:93
 
 The display name of this trigger class.
 
@@ -1225,6 +1430,8 @@ The display name of this trigger class.
 int timesRun
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:97
+
 The number of times the task has run since creation;
 
 ---
@@ -1236,6 +1443,8 @@ The number of times the task has run since creation;
 ```cpp
 DateTime createdAt
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:100
 
 The time the task was created.
 
@@ -1249,6 +1458,8 @@ The time the task was created.
 DateTime scheduleAt
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:103
+
 The time the task is scheduled to run.
 
 ---
@@ -1261,19 +1472,21 @@ The time the task is scheduled to run.
 DateTime lastRunAt
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:106
+
 The time the task was last run.
 
 ### Public Methods
 
 | Return | Name | Description |
 |--------|------|-------------|
-|  | [`Trigger`](#trigger-2)  | #### Parameters |
-| `void` | [`update`](#update-6)  | Updates the scheduleAt value to the next scheduled time. |
+|  | [`Trigger`](#trigger-2)  |  |
+| `void` | [`update`](#update-6) `virtual` | Updates the scheduleAt value to the next scheduled time. |
 | `std::int64_t` | [`remaining`](#remaining-1) `virtual` | Returns the milliseconds remaining until the next scheduled timeout. |
 | `bool` | [`timeout`](#timeout-4) `virtual` | Returns true if the task is ready to be run, false otherwise. |
 | `bool` | [`expired`](#expired-4) `virtual` | Returns true if the task is expired and should be destroyed. Returns false by default. |
-| `void` | [`serialize`](#serialize-5) `virtual` | Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. |
-| `void` | [`deserialize`](#deserialize-5) `virtual` | Deserializes timing state from `root`. |
+| `void` | [`serialize`](#serialize-5) `virtual` `override` | Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. |
+| `void` | [`deserialize`](#deserialize-5) `virtual` `override` | Deserializes timing state from `root`. |
 
 ---
 
@@ -1282,8 +1495,10 @@ The time the task was last run.
 #### Trigger
 
 ```cpp
-Trigger(const std::string & type, const std::string & name)
+Trigger(const std::string & type = "", const std::string & name = "")
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:62
 
 #### Parameters
 * `type` Registered type name used by [TaskFactory](#taskfactory). 
@@ -1296,9 +1511,13 @@ Trigger(const std::string & type, const std::string & name)
 
 #### update
 
+`virtual`
+
 ```cpp
-void update()
+virtual void update()
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:66
 
 Updates the scheduleAt value to the next scheduled time.
 
@@ -1314,6 +1533,8 @@ Updates the scheduleAt value to the next scheduled time.
 virtual std::int64_t remaining()
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:70
+
 Returns the milliseconds remaining until the next scheduled timeout.
 
 ---
@@ -1327,6 +1548,8 @@ Returns the milliseconds remaining until the next scheduled timeout.
 ```cpp
 virtual bool timeout()
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:74
 
 Returns true if the task is ready to be run, false otherwise.
 
@@ -1342,6 +1565,8 @@ Returns true if the task is ready to be run, false otherwise.
 virtual bool expired()
 ```
 
+Defined in src/sched/include/icy/sched/trigger.h:79
+
 Returns true if the task is expired and should be destroyed. Returns false by default.
 
 ---
@@ -1350,11 +1575,13 @@ Returns true if the task is expired and should be destroyed. Returns false by de
 
 #### serialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void serialize(json::Value & root)
+virtual void serialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:83
 
 Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun) to `root`. 
 #### Parameters
@@ -1366,11 +1593,13 @@ Serializes timing state (type, name, createdAt, scheduleAt, lastRunAt, timesRun)
 
 #### deserialize
 
-`virtual`
+`virtual` `override`
 
 ```cpp
-virtual void deserialize(json::Value & root)
+virtual void deserialize(json::Value & root) override
 ```
+
+Defined in src/sched/include/icy/sched/trigger.h:87
 
 Deserializes timing state from `root`. 
 #### Parameters
