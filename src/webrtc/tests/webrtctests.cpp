@@ -11,11 +11,14 @@
 #include "../src/codecregistry.h"
 #include "../src/remotemediaplan.h"
 #include "../support/src/callprotocol.h"
+#include "icy/graft/host/pipeline.h"
 #include "icy/webrtc/detail/receiverjitterbuffer.h"
 #include "icy/webrtc/support/sympleserversignaller.h"
 #include "icy/webrtc/support/wssignaller.h"
 
 #include <cmath>
+#include <cstddef>
+#include <cstring>
 
 
 using namespace std;
@@ -426,6 +429,62 @@ int main(int argc, char** argv)
     Logger::instance().add(std::make_unique<ConsoleChannel>("debug", Level::Debug));
     test::init();
 
+    describe("pipeline C API: manifest and table", []() {
+        expect(icy_pipeline_api_manifest.abiVersion == ICY_GRAFT_ABI_VERSION);
+        expect(std::strcmp(icy_pipeline_api_manifest.runtime, ICY_GRAFT_RUNTIME_HOST) == 0);
+        expect(std::strcmp(icy_pipeline_api_manifest.entrypoint,
+                           ICY_PIPELINE_API_ENTRYPOINT)
+               == 0);
+
+        const auto* api = icy_pipeline_api();
+        expect(api != nullptr);
+        expect(api->abi_version == ICY_PIPELINE_API_ABI_VERSION);
+        expect(api->struct_size >= sizeof(icy_pipeline_api_t));
+        expect(api->create != nullptr);
+        expect(api->destroy != nullptr);
+        expect(api->attach_rtsp_source != nullptr);
+        expect(api->attach_webrtc_sender != nullptr);
+        expect(api->start != nullptr);
+        expect(api->stop != nullptr);
+        expect(api->last_error != nullptr);
+    });
+
+    describe("pipeline C API: create and invalid states", []() {
+        const auto* api = icy_pipeline_api();
+        icy_pipeline_t* pipeline = nullptr;
+        icy_pipeline_options_t options{};
+        options.struct_size = static_cast<uint32_t>(sizeof(options));
+        options.name = "test-pipeline";
+        options.signalling_token = "token";
+        options.room = "test-room";
+        options.ice_server = "stun:127.0.0.1:3478";
+
+        expect(api->create(&options, &pipeline) == ICY_GRAFT_STATUS_OK);
+        expect(pipeline != nullptr);
+        expect(api->start(pipeline) == ICY_GRAFT_STATUS_INVALID_STATE);
+        expect(api->last_error(pipeline) != nullptr);
+        expect(api->attach_rtsp_source(pipeline, nullptr)
+               == ICY_GRAFT_STATUS_INVALID_ARGUMENT);
+        expect(api->attach_webrtc_sender(pipeline, "ws://127.0.0.1:notaport", "peer")
+               == ICY_GRAFT_STATUS_INVALID_ARGUMENT);
+        expect(api->attach_webrtc_sender(pipeline, "ws://127.0.0.1:4500", "peer")
+               == ICY_GRAFT_STATUS_OK);
+        expect(api->stop(pipeline) == ICY_GRAFT_STATUS_OK);
+        api->destroy(pipeline);
+    });
+
+    describe("pipeline C API: accepts prefix-sized options", []() {
+        const auto* api = icy_pipeline_api();
+        icy_pipeline_t* pipeline = nullptr;
+        icy_pipeline_options_t options{};
+        options.struct_size = static_cast<uint32_t>(
+            offsetof(icy_pipeline_options_t, signalling_token));
+        options.name = "prefix-sized-pipeline";
+
+        expect(api->create(&options, &pipeline) == ICY_GRAFT_STATUS_OK);
+        expect(pipeline != nullptr);
+        api->destroy(pipeline);
+    });
 
     // =========================================================================
     // Layer 0: CodecNegotiator

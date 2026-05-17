@@ -2,32 +2,32 @@
 
 # graft
 
-Native plugin ABI contract and runtime loading helpers.
+Native ABI contracts and runtime loading helpers.
 
 ### Namespaces
 
 | Name | Description |
 |------|-------------|
-| [`graft`](#graft) | Shared-library plugin contracts and runtime loading helpers. |
+| [`graft`](#graft) | Shared-library ABI contracts and runtime loading helpers. |
 
 {#graft}
 
 # graft
 
-Shared-library plugin contracts and runtime loading helpers.
+Shared-library ABI contracts and runtime loading helpers.
 
 ### Classes
 
 | Name | Description |
 |------|-------------|
 | [`Library`](#library) | Loads a native plugin library and resolves its typed entrypoint. |
-| [`Manifest`](#manifest-3) | Metadata exported by a plugin under `icy_graft_manifest`. |
+| [`Manifest`](#manifest-3) | Metadata exported by a plugin or host surface. |
 
 ### Enumerations
 
 | Name | Description |
 |------|-------------|
-| [`RuntimeKind`](#runtimekind)  | Runtime contract declared by a plugin manifest. |
+| [`RuntimeKind`](#runtimekind)  | Runtime contract declared by a graft manifest. |
 
 ---
 
@@ -39,13 +39,14 @@ Shared-library plugin contracts and runtime loading helpers.
 enum RuntimeKind
 ```
 
-Runtime contract declared by a plugin manifest.
+Runtime contract declared by a graft manifest.
 
 | Value | Description |
 |-------|-------------|
 | `Unknown` | Runtime string is missing or not recognized. |
 | `Native` | Plugin is loaded directly into the host process. |
 | `Worker` | Plugin is intended for a worker runtime. |
+| `Host` | Manifest describes a host-exported C ABI surface, not a plugin. |
 
 ### Functions
 
@@ -54,6 +55,8 @@ Runtime contract declared by a plugin manifest.
 | `Graft_APIRuntimeKind` | [`parseRuntimeKind`](#parseruntimekind) `nodiscard` `noexcept` | Converts a manifest runtime string to a `[RuntimeKind](#runtimekind)`. |
 | `Graft_API const char *` | [`runtimeKindName`](#runtimekindname) `nodiscard` `noexcept` | Returns the manifest runtime string for a `[RuntimeKind](#runtimekind)`. |
 | `Graft_API void` | [`validateManifest`](#validatemanifest)  | Throws when a manifest is incompatible or missing required fields. |
+| `Graft_API void` | [`validatePluginManifest`](#validatepluginmanifest)  | Throws when a manifest is not a plugin-loadable manifest. |
+| `Graft_API void` | [`validateHostSurfaceManifest`](#validatehostsurfacemanifest)  | Throws when a manifest is not a host-exported surface manifest. |
 
 ---
 
@@ -95,14 +98,40 @@ Graft_API void validateManifest(const Manifest & manifest, std::string_view path
 
 Throws when a manifest is incompatible or missing required fields.
 
+---
+
+{#validatepluginmanifest}
+
+#### validatePluginManifest
+
+```cpp
+Graft_API void validatePluginManifest(const Manifest & manifest, std::string_view path)
+```
+
+Throws when a manifest is not a plugin-loadable manifest.
+
+---
+
+{#validatehostsurfacemanifest}
+
+#### validateHostSurfaceManifest
+
+```cpp
+Graft_API void validateHostSurfaceManifest(const Manifest & manifest, std::string_view path)
+```
+
+Throws when a manifest is not a host-exported surface manifest.
+
 ### Variables
 
 | Return | Name | Description |
 |--------|------|-------------|
 | `std::uint32_t` | [`ABI_VERSION`](#abi_version) `constexpr` | Current binary manifest ABI version required by the loader. |
-| `const char *` | [`MANIFEST_SYMBOL`](#manifest_symbol) `constexpr` | Exported symbol name that plugins use for their manifest. |
+| `const char *` | [`PLUGIN_MANIFEST_SYMBOL`](#plugin_manifest_symbol) `constexpr` | Exported symbol name that plugin libraries use for their manifest. |
+| `const char *` | [`MANIFEST_SYMBOL`](#manifest_symbol) `constexpr` | Backwards-compatible name for `PLUGIN_MANIFEST_SYMBOL`. |
 | `const char *` | [`RUNTIME_NATIVE`](#runtime_native) `constexpr` | Runtime string for plugins loaded directly into the current process. |
 | `const char *` | [`RUNTIME_WORKER`](#runtime_worker) `constexpr` | Runtime string for plugins intended to execute in a worker runtime. |
+| `const char *` | [`RUNTIME_HOST`](#runtime_host) `constexpr` | Runtime string for host-exported C ABI surfaces. |
 
 ---
 
@@ -120,6 +149,20 @@ Current binary manifest ABI version required by the loader.
 
 ---
 
+{#plugin_manifest_symbol}
+
+#### PLUGIN_MANIFEST_SYMBOL
+
+`constexpr`
+
+```cpp
+const char * PLUGIN_MANIFEST_SYMBOL = "icy_graft_manifest"
+```
+
+Exported symbol name that plugin libraries use for their manifest.
+
+---
+
 {#manifest_symbol}
 
 #### MANIFEST_SYMBOL
@@ -130,7 +173,7 @@ Current binary manifest ABI version required by the loader.
 const char * MANIFEST_SYMBOL = "icy_graft_manifest"
 ```
 
-Exported symbol name that plugins use for their manifest.
+Backwards-compatible name for `PLUGIN_MANIFEST_SYMBOL`.
 
 ---
 
@@ -159,6 +202,22 @@ const char * RUNTIME_WORKER = "worker"
 ```
 
 Runtime string for plugins intended to execute in a worker runtime.
+
+---
+
+{#runtime_host}
+
+#### RUNTIME_HOST
+
+`constexpr`
+
+```cpp
+const char * RUNTIME_HOST = "host"
+```
+
+Runtime string for host-exported C ABI surfaces.
+
+---
 
 {#library}
 
@@ -454,7 +513,7 @@ struct Manifest
 
 Defined in src/graft/include/icy/graft/graft.h:70
 
-Metadata exported by a plugin under `icy_graft_manifest`.
+Metadata exported by a plugin or host surface.
 
 ### List of all members
 
@@ -474,11 +533,11 @@ Metadata exported by a plugin under `icy_graft_manifest`.
 |--------|------|-------------|
 | `std::uint32_t` | [`abiVersion`](#abiversion-1)  | ABI version expected to match `[ABI_VERSION](#abi_version)`. |
 | `const char *` | [`fileName`](#filename-3)  | Source file that declared the manifest. |
-| `const char *` | [`id`](#id-4)  | Stable plugin identifier. |
-| `const char *` | [`name`](#name-8)  | Human-readable plugin name. |
-| `const char *` | [`version`](#version-6)  | Plugin version string. |
-| `const char *` | [`runtime`](#runtime-1)  | Runtime contract string, such as `native` or `worker`. |
-| `const char *` | [`entrypoint`](#entrypoint-1)  | Exported symbol name for the plugin entrypoint. |
+| `const char *` | [`id`](#id-4)  | Stable plugin or surface identifier. |
+| `const char *` | [`name`](#name-8)  | Human-readable plugin or surface name. |
+| `const char *` | [`version`](#version-6)  | Plugin or surface version string. |
+| `const char *` | [`runtime`](#runtime-1)  | Runtime contract string, such as `native`, `worker`, or `host`. |
+| `const char *` | [`entrypoint`](#entrypoint-1)  | Exported symbol name for the typed entrypoint. |
 
 ---
 
@@ -520,7 +579,7 @@ const char * id
 
 Defined in src/graft/include/icy/graft/graft.h:77
 
-Stable plugin identifier.
+Stable plugin or surface identifier.
 
 ---
 
@@ -534,7 +593,7 @@ const char * name
 
 Defined in src/graft/include/icy/graft/graft.h:79
 
-Human-readable plugin name.
+Human-readable plugin or surface name.
 
 ---
 
@@ -548,7 +607,7 @@ const char * version
 
 Defined in src/graft/include/icy/graft/graft.h:81
 
-Plugin version string.
+Plugin or surface version string.
 
 ---
 
@@ -562,7 +621,7 @@ const char * runtime
 
 Defined in src/graft/include/icy/graft/graft.h:83
 
-Runtime contract string, such as `native` or `worker`.
+Runtime contract string, such as `native`, `worker`, or `host`.
 
 ---
 
@@ -576,5 +635,4 @@ const char * entrypoint
 
 Defined in src/graft/include/icy/graft/graft.h:85
 
-Exported symbol name for the plugin entrypoint.
-
+Exported symbol name for the typed entrypoint.

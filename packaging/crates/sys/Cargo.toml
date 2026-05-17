@@ -1,0 +1,20 @@
+[package]
+name = "icey-sys"
+version = "0.1.1"
+edition = "2021"
+license = "LGPL-2.1-or-later"
+description = "Raw Rust FFI bindings for icey."
+repository = "https://github.com/nilstate/icey"
+homepage = "https://0state.com/icey"
+documentation = "https://0state.com/icey/docs"
+readme = "README.md"
+links = "icey_pipeline_capi"
+build = "build.rs"
+keywords = ["webrtc", "rtsp", "ffmpeg", "streaming", "media"]
+categories = ["external-ffi-bindings", "multimedia"]
+
+[lib]
+path = "src/lib.rs"
+
+[build-dependencies]
+bindgen = "0.71"

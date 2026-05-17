@@ -7,9 +7,16 @@ icey pulls those layers into one runtime. WebRTC, signalling, TURN relay, and me
 A small `PacketStream` graph is the core shape:
 
 ```cpp
+// HEVC + AAC, captured through encoder to network in one zero-copy pipeline
+av::EncoderOptions opts;
+opts.oformat = {"mpegts", "mpegts",
+    {"H265", "hevc_videotoolbox", 1920, 1080, 60},
+    {"AAC",  "aac", 2, 48000}};
+
 PacketStream stream;
-stream.attachSource(capture.get());
-stream.attach(&session->media().videoSender(), 5);
+stream.attachSource(&capture);
+stream.attach(new av::MultiplexPacketEncoder(opts), 5);
+stream.attach(&socket, 10);
 stream.start();
 ```
 
@@ -76,6 +83,7 @@ Deploy to production. Config reference, TLS, TURN, health endpoints, monitoring,
 | Build icey into my own C++ project | [HTTP Server recipe](recipes/http-server) |
 | Understand the runtime rules | [Runtime Contracts](concepts/runtime-contracts) |
 | Understand the module layout | [Module Map](modules) |
+| Use icey from Rust | [`icey` crate](https://crates.io/crates/icey) |
 | Build a fast HTTP service | [HTTP Server](recipes/http-server) |
 | Stream a webcam to a browser | [Webcam To Browser](recipes/webrtc-webcam-to-browser) |
 | Record browser media on the server | [Browser To Recorder](recipes/webrtc-browser-to-recorder) |
@@ -93,4 +101,6 @@ The pages here explain architecture, runtime contracts, workflows, and operation
 - [Contributing](contributing.md)
 - [Repository Conventions](conventions.md)
 - [Releasing](releasing.md)
+- [Rust crate](https://crates.io/crates/icey)
+- [Raw Rust FFI crate](https://crates.io/crates/icey-sys)
 - [Changelog](https://github.com/nilstate/icey/blob/main/CHANGELOG.md)

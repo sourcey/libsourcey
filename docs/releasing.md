@@ -184,6 +184,46 @@ What gets updated:
 - `make package-debian-source` stages a full source package under `build/package/debian/`
 - that staging flow vendors the pinned source tarballs needed for a WebRTC-enabled build where distro packages do not exist yet
 
+## Rust Crates
+
+The Rust package surface lives under [`packaging/crates`](../packaging/crates).
+It publishes two crates:
+
+- `icey-sys`: raw bindgen output and the native `links = "icey_pipeline_capi"`
+  contract
+- `icey`: the safe wrapper and examples that most Rust users should consume
+
+Publish `icey-sys` first, then `icey`. The top-level crate depends on the sys
+crate through a normal versioned crates.io dependency, so Cargo cannot verify or
+publish `icey` until the matching `icey-sys` version exists in the registry.
+
+```bash
+cd packaging/crates
+cargo publish -p icey-sys
+# wait for crates.io index propagation
+cargo publish -p icey
+```
+
+Before publishing, verify the first publish unit:
+
+```bash
+cd packaging/crates
+cargo check -p icey
+cargo publish -p icey-sys --dry-run
+```
+
+The `icey` package verification is expected to fail before the matching
+`icey-sys` release exists on crates.io. After `icey-sys` is live, run:
+
+```bash
+cargo publish -p icey --dry-run
+```
+
+The Cargo `homepage` field for both crates should remain
+`https://0state.com/icey`, and the Cargo `documentation` field should remain
+`https://0state.com/icey/docs`; those fields are the package-manager backlinks
+consumed by crates.io and downstream crate indexes.
+
 ## Release Checklist
 
 - update [`CHANGELOG.md`](https://github.com/nilstate/icey/blob/main/CHANGELOG.md) and [`ROADMAP.md`](https://github.com/nilstate/icey/blob/main/ROADMAP.md)
@@ -193,6 +233,7 @@ What gets updated:
 - run `make release-finalize VERSION=x.y.z`
 - commit the pinned package-manager archive hashes and successful final check
 - verify the package-manager entry points you intend to publish
+- if you are publishing Rust bindings, publish `icey-sys` before `icey`
 - if you are targeting apt or Launchpad, run `make package-debian-source` after the version sync
 
 ## Related Pages

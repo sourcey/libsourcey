@@ -8,16 +8,36 @@
 WebRTC, FFmpeg, and async networking in one toolkit. No Google monolith. No dependency hell. No fighting three build systems to get a frame on screen.
 
 ```cpp
-// The core of a WebRTC media server
+// HEVC + AAC, captured through encoder to network in one zero-copy pipeline
+av::EncoderOptions opts;
+opts.oformat = {"mpegts", "mpegts",
+    {"H265", "hevc_videotoolbox", 1920, 1080, 60},
+    {"AAC",  "aac", 2, 48000}};
+
 PacketStream stream;
-stream.attachSource(capture.get());
-stream.attach(&session->media().videoSender(), 5);
+stream.attachSource(&capture);
+stream.attach(new av::MultiplexPacketEncoder(opts), 5);
+stream.attach(&socket, 10);
 stream.start();
 ```
 
 icey is the connective tissue: a modular C++20 toolkit that pulls FFmpeg, libuv, OpenSSL, llhttp, libdatachannel, Symple, STUN, and TURN into one runtime model. Capture, encode, transport, signalling, and relay. Core third-party code is pulled in by CMake; system TLS and media dependencies are auto-detected. Builds in minutes.
 
 **[Documentation](docs/index.md)** | **[Changelog](CHANGELOG.md)** | **[Contributing](docs/contributing.md)** | **[LGPL-2.1+](LICENSE.md)**
+
+## Rust Bindings
+
+Rust bindings are split into two crates:
+
+- [`icey`](https://crates.io/crates/icey) is the safe Rust wrapper most users
+  should depend on.
+- [`icey-sys`](https://crates.io/crates/icey-sys) is the raw `bindgen` layer
+  over icey's graft C ABI.
+
+Both crates use `https://0state.com/icey` as their Cargo homepage and
+`https://0state.com/icey/docs` as their Cargo documentation URL so crates.io,
+docs.rs, lib.rs, Libraries.io, and other registry crawlers resolve the Rust
+package listings back to the product and docs surfaces.
 
 ## Fastest Path
 

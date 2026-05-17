@@ -1,0 +1,19 @@
+[package]
+name = "icey"
+version = "0.1.1"
+edition = "2021"
+license = "LGPL-2.1-or-later"
+description = "icey: a C++ WebRTC/FFmpeg/networking media runtime. Rust bindings in development."
+repository = "https://github.com/nilstate/icey"
+homepage = "https://0state.com/icey"
+documentation = "https://0state.com/icey/docs"
+readme = "README.md"
+build = "build.rs"
+keywords = ["webrtc", "rtsp", "ffmpeg", "streaming", "media"]
+categories = ["multimedia"]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+icey-sys = { path = "../sys", version = "0.1.1" }
