@@ -27,7 +27,8 @@ MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options)
     : _options(options)
     , _formatCtx(nullptr)
     , _ioCtx(nullptr)
-    , _pts(0)
+    , _videoPts(AV_NOPTS_VALUE)
+    , _audioPts(AV_NOPTS_VALUE)
 {
     LTrace("Create");
     initializeFFmpeg();
@@ -78,6 +79,8 @@ void MultiplexEncoder::init()
            << "\n\tDuration: " << _options.duration;
 
     try {
+        _videoPts = AV_NOPTS_VALUE;
+        _audioPts = AV_NOPTS_VALUE;
         _options.oformat.video.enabled = _options.iformat.video.enabled;
         _options.oformat.audio.enabled = _options.iformat.audio.enabled;
         if (!_options.oformat.video.enabled && !_options.oformat.audio.enabled)
@@ -273,7 +276,15 @@ bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    LTrace("Update PTS: last=", _pts, ", input=", *pts);
+    int64_t* lastPts = nullptr;
+    if (_video && stream == _video->stream)
+        lastPts = &_videoPts;
+    else if (_audio && stream == _audio->stream)
+        lastPts = &_audioPts;
+    else
+        throw std::runtime_error("Unknown stream for PTS update");
+
+    LTrace("Update PTS: last=", *lastPts, ", input=", *pts);
 
     int64_t next;
     if (*pts == AV_NOPTS_VALUE) {
@@ -285,15 +296,15 @@ bool MultiplexEncoder::updateStreamPts(AVStream* stream, int64_t* pts)
         next = *pts * static_cast<double>(stream->time_base.den) / static_cast<double>(stream->time_base.num) / AV_TIME_BASE;
     }
 
-    if (next < _pts) {
-        LWarn("Invalid pts (", next, ") <= last (", _pts, ")");
+    if (*lastPts != AV_NOPTS_VALUE && next < *lastPts) {
+        LWarn("Invalid pts (", next, ") <= last (", *lastPts, ")");
         return false;
-    } else if (next == _pts) {
+    } else if (*lastPts != AV_NOPTS_VALUE && next == *lastPts) {
         LWarn("Dropping frame at duplicate PTS: ", next);
         return false;
     }
 
-    _pts = *pts = next;
+    *lastPts = *pts = next;
     return true;
 }
 
@@ -444,7 +455,9 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer, int numSamples, int64_t time
     if (!_audio)
         throw std::runtime_error("No audio context");
 
-    updateStreamPts(_audio->stream, &time);
+    if (!updateStreamPts(_audio->stream, &time)) {
+        return false;
+    }
 
     return _audio->encode(buffer, numSamples, time);
 }
@@ -463,7 +476,9 @@ bool MultiplexEncoder::encodeAudio(uint8_t* buffer[4], int numSamples, int64_t t
     if (!_audio)
         throw std::runtime_error("No audio context");
 
-    updateStreamPts(_audio->stream, &time);
+    if (!updateStreamPts(_audio->stream, &time)) {
+        return false;
+    }
 
     return _audio->encode(buffer, numSamples, time);
 }

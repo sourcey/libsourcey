@@ -200,11 +200,11 @@ int flushBuffer(AudioEncoder* enc)
     int num = 0;
     while (enc->fifo.read((void**)enc->frame->data, enc->frame->nb_samples)) {
         enc->frame->pts = enc->nextOutputPts;
-        if (!enc->encode(enc->frame))
-            break;
         if (enc->nextOutputPts != AV_NOPTS_VALUE)
             enc->nextOutputPts += enc->frame->nb_samples;
         num++;
+        if (!enc->encode(enc->frame))
+            break;
     }
 
     return num;

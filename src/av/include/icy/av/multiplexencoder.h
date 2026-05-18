@@ -147,7 +147,8 @@ protected:
     std::unique_ptr<AudioEncoder> _audio;
     AVIOContext* _ioCtx;
     std::unique_ptr<uint8_t[]> _ioBuffer;
-    int64_t _pts;
+    int64_t _videoPts;
+    int64_t _audioPts;
     mutable std::mutex _mutex;
 };
 

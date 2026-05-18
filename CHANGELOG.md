@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- Added a `webrtc/samples/whip-receiver` sample that accepts WHIP publishers over HTTP or HTTPS, supports optional bearer-token auth and client ICE `PATCH`, records H.264/Opus sessions to MP4, and includes FFmpeg/OBS usage docs plus a local certificate helper.
+
+### Fixed
+
+- `MultiplexEncoder` now tracks audio and video PTS independently, preventing muxed audio/video output from dropping valid interleaved packets as duplicate or backward timestamps.
+- `AudioEncoder` now advances its buffered output PTS when frames are submitted to delayed encoders such as AAC, avoiding duplicate DTS packets during MP4 recording.
+
 ### Removed
 
 - Removed the unused `Base64PacketEncoder` packet-stream adapter and its public header. Use the `icy::base64` namespace helpers directly for Base64 encoding and decoding.

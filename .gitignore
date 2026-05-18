@@ -44,6 +44,10 @@ LibSourceyConfigVersion.cmake
 *.raw
 .plans
 
+# Local development certificates
+cert.pem
+key.pem
+
 # Local Python environments
 .venv
 .venv*/
