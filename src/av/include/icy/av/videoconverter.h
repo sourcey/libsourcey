@@ -29,7 +29,7 @@ namespace av {
 
 
 /// Converts video frames between pixel formats and resolutions
-struct VideoConverter
+struct AV_API VideoConverter
 {
     VideoConverter();
     virtual ~VideoConverter() noexcept;
