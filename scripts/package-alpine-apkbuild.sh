@@ -67,7 +67,7 @@ docker run --rm \
     "$alpine_image" \
     sh -lc '
         set -euo pipefail
-        apk add --no-cache alpine-sdk cmake ninja ffmpeg-dev libuv-dev llhttp-dev linux-headers minizip-dev openssl-dev pkgconf zlib-dev git sudo >/dev/null
+        apk add --no-cache alpine-sdk cmake ninja ffmpeg-dev libuv-dev llhttp-dev linux-headers minizip-dev nlohmann-json openssl-dev pkgconf zlib-dev git sudo >/dev/null
 
         group_name=$(awk -F: -v gid="$HOST_GID" "\$3 == gid { print \$1; exit }" /etc/group)
         if [ -z "$group_name" ]; then

@@ -6,14 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.4.11] - 2026-05-28
+
 ### Added
 
 - Added a `webrtc/samples/whip-receiver` sample that accepts WHIP publishers over HTTP or HTTPS, supports optional bearer-token auth and client ICE `PATCH`, records H.264/Opus sessions to MP4, and includes FFmpeg/OBS usage docs plus a local certificate helper.
+- Added the `icey-sys` and `icey` Rust crates, including safe Rust wrappers for the initial RTSP-to-browser pipeline surface and a crate-level example.
+- Added the `icey::pipeline_capi` host C API surface for creating, configuring, starting, stopping, and destroying an opaque WebRTC pipeline from foreign-language bindings.
+- Extended `graft` with host-surface ABI support, including the `host` runtime kind, host manifest validation, and documented conventions for exported C function tables.
 
 ### Fixed
 
+- Windows shared-library builds now export the `icy::av` media packet hierarchy and `VideoConverter` with `AV_API`, fixing MSVC DLL link failures when downstream `vision` code uses `av` types across module boundaries. This lets Conan Center consume a clean post-2.4.10 source release without its Windows shared-build patch.
+- Alpine packaging and its container validation helper now install `nlohmann-json`, matching the system-dependency CMake package exported by icey.
 - `MultiplexEncoder` now tracks audio and video PTS independently, preventing muxed audio/video output from dropping valid interleaved packets as duplicate or backward timestamps.
 - `AudioEncoder` now advances its buffered output PTS when frames are submitted to delayed encoders such as AAC, avoiding duplicate DTS packets during MP4 recording.
+
+### Changed
+
+- API docs and module guides were regenerated and expanded for the new graft host-surface and pipeline API work.
+- The docs toolchain now uses the published Sourcey package and includes the Sourcey C++ quality gate used by CI.
+- Package-manager publishing now targets the shared Homebrew tap configuration used by the install docs.
 
 ### Removed
 
