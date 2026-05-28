@@ -25,7 +25,7 @@ namespace av {
 
 
 /// Timestamped media packet carrying raw audio or video data
-struct MediaPacket : public RawPacket
+struct AV_API MediaPacket : public RawPacket
 {
     int64_t time; ///< Presentation timestamp in microseconds.
 
@@ -66,7 +66,7 @@ struct MediaPacket : public RawPacket
 
 
 /// Video packet for interleaved formats
-struct VideoPacket : public MediaPacket
+struct AV_API VideoPacket : public MediaPacket
 {
     int width;    ///< Frame width in pixels.
     int height;   ///< Frame height in pixels.
@@ -118,7 +118,7 @@ struct VideoPacket : public MediaPacket
 /// @param width     The frame width in pixels.
 /// @param height    The frame height in pixels.
 /// @param time      The timestamp in microseconds.
-struct PlanarVideoPacket : public VideoPacket
+struct AV_API PlanarVideoPacket : public VideoPacket
 {
     uint8_t* buffer[4] = {nullptr};
     int linesize[4] = {0};
@@ -151,7 +151,7 @@ struct PlanarVideoPacket : public VideoPacket
 
 
 /// Audio packet for interleaved formats
-struct AudioPacket : public MediaPacket
+struct AV_API AudioPacket : public MediaPacket
 {
     size_t numSamples; ///< Number of audio samples per channel.
 
@@ -194,7 +194,7 @@ struct AudioPacket : public MediaPacket
 /// @param numSamples  The number of samples per channel.
 /// @param sampleFmt   The sample format name (e.g. "fltp").
 /// @param time        The timestamp in microseconds.
-struct PlanarAudioPacket : public AudioPacket
+struct AV_API PlanarAudioPacket : public AudioPacket
 {
     uint8_t* buffer[4] = {nullptr};
     int linesize = 0;
