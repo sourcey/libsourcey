@@ -97,9 +97,14 @@ public:
 
     /// Set demuxer options applied at the next openFile() call.
     /// Keys map to libavformat AVOption entries (e.g. "rtsp_transport",
-    /// "fflags", "analyzeduration", "probesize"). Useful for live network
-    /// sources that need low-latency hints. Pass an empty map to clear.
+    /// "fflags", "analyzeduration", "probesize"). Network opens also
+    /// receive a default protocol allowlist and I/O timeout unless callers
+    /// override the corresponding options. Pass an empty map to clear.
     void setOpenOptions(const std::map<std::string, std::string>& options);
+
+    /// Set FFmpeg blocking I/O timeout in microseconds. Values <= 0 disable
+    /// the interrupt timeout but stop() still interrupts blocking calls.
+    void setOpenTimeoutUsec(int64_t timeoutUsec);
 
     /// Skip the video decoder. Encoded video AVPackets from the input stream
     /// are emitted directly as @c av::VideoPacket without decoding. The
@@ -141,6 +146,9 @@ protected:
     void openStream(const std::string& filename, const AVInputFormat* inputFormat, AVDictionary** formatParams) override;
 
     void emit(IPacket& packet) override;
+    static int interruptCallback(void* opaque);
+    void markIoStart();
+    void clearIoStart();
 
 protected:
     mutable std::mutex _mutex;
@@ -154,6 +162,8 @@ protected:
     std::atomic<bool> _realtime;
     std::atomic<bool> _ratelimit;
     std::atomic<bool> _passthroughVideo{false};
+    std::atomic<int64_t> _ioStartedUsec{0};
+    std::atomic<int64_t> _ioTimeoutUsec{15000000};
     std::map<std::string, std::string> _openOptions;
     // Non-owning pointer to the input video stream, populated whether or
     // not a decoder was constructed. Used by the passthrough path so the

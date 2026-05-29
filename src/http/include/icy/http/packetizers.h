@@ -77,7 +77,6 @@ public:
             connection->response().setChunkedTransferEncoding(true);
             connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
             connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
-            connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Content-Type", contentType);
             connection->response().set("Connection", "keep-alive");
@@ -92,7 +91,6 @@ public:
                 << "Cache-Control: no-store, no-cache, max-age=0, "
                    "must-revalidate\r\n"
                 << "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
-                << "Access-Control-Allow-Origin: *\r\n"
                 << "Connection: keep-alive\r\n"
                 << "Pragma: no-cache\r\n"
                 << "Expires: 0\r\n"
@@ -203,7 +201,6 @@ public:
             connection->response().set("Content-Type", "multipart/x-mixed-replace; boundary=end");
             connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
             connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
-            connection->response().set("Access-Control-Allow-Origin", "*");
             connection->response().set("Transfer-Encoding", "chunked");
             connection->response().set("Connection", "keep-alive");
             connection->response().set("Pragma", "no-cache");
@@ -218,7 +215,6 @@ public:
                 << "Cache-Control: no-store, no-cache, max-age=0, "
                    "must-revalidate\r\n"
                 << "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
-                << "Access-Control-Allow-Origin: *\r\n"
                 << "Pragma: no-cache\r\n"
                 << "Expires: 0\r\n"
                 << "\r\n";

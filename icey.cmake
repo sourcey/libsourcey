@@ -126,8 +126,7 @@ if(NOT USE_SYSTEM_DEPS)
   # libuv - event loop
   FetchContent_Declare(libuv
     GIT_REPOSITORY https://github.com/libuv/libuv.git
-    GIT_TAG        v1.50.0
-    GIT_SHALLOW    TRUE)
+    GIT_TAG        8fb9cb919489a48880680a56efecff6a7dfb4504)
   set(LIBUV_BUILD_SHARED OFF CACHE BOOL "" FORCE)
   set(LIBUV_BUILD_TESTS OFF CACHE BOOL "" FORCE)
   set(LIBUV_BUILD_BENCH OFF CACHE BOOL "" FORCE)
@@ -140,7 +139,8 @@ if(NOT USE_SYSTEM_DEPS)
   # llhttp - HTTP parser (replaces http_parser)
   FetchContent_Declare(llhttp
     URL      https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.2.1.tar.gz
-    URL_HASH SHA256=3c163891446e529604b590f9ad097b2e98b5ef7e4d3ddcf1cf98b62ca668f23e)
+    URL_HASH SHA256=3c163891446e529604b590f9ad097b2e98b5ef7e4d3ddcf1cf98b62ca668f23e
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
   set(ICEY_BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
   set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
@@ -150,8 +150,7 @@ if(NOT USE_SYSTEM_DEPS)
   # zlib
   FetchContent_Declare(zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git
-    GIT_TAG        v1.3.1
-    GIT_SHALLOW    TRUE)
+    GIT_TAG        51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf)
   set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(zlib)
@@ -355,8 +354,7 @@ if(WITH_LIBDATACHANNEL AND HAVE_OPENSSL AND HAVE_FFMPEG)
     include(FetchContent)
     FetchContent_Declare(libdatachannel
       GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
-      GIT_TAG        v0.24.2
-      GIT_SHALLOW    TRUE)
+      GIT_TAG        4e4f4892dccb2a57fe3a490d0c9d958de4244e74)
     set(NO_MEDIA OFF CACHE BOOL "" FORCE)
     set(NO_WEBSOCKET ON CACHE BOOL "" FORCE)
     set(NO_EXAMPLES ON CACHE BOOL "" FORCE)

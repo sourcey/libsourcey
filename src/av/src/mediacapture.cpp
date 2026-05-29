@@ -17,9 +17,12 @@
 #include "icy/logger.h"
 #include "icy/platform.h"
 
+#include <cctype>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/time.h>
 }
 
 
@@ -27,6 +30,34 @@ extern "C" {
 
 namespace icy {
 namespace av {
+
+namespace {
+
+constexpr const char* kDefaultProtocolWhitelist =
+    "file,pipe,crypto,data,http,https,tls,tcp,udp,rtp,rtsp,rtmp,rtmps,srt";
+
+bool hasUrlScheme(const std::string& value)
+{
+    const auto pos = value.find(':');
+    if (pos == std::string::npos)
+        return false;
+    for (size_t i = 0; i < pos; ++i) {
+        const unsigned char ch = static_cast<unsigned char>(value[i]);
+        if (!std::isalnum(ch) && ch != '+' && ch != '-' && ch != '.')
+            return false;
+    }
+    return pos > 0;
+}
+
+void setDefaultOption(std::map<std::string, std::string>& options,
+                      const char* key,
+                      const char* value)
+{
+    if (options.find(key) == options.end())
+        options.emplace(key, value);
+}
+
+} // namespace
 
 
 MediaCapture::MediaCapture()
@@ -86,12 +117,19 @@ void MediaCapture::openFile(const std::string& file)
         filename = std::move(parsed->second);
     }
 
-    if (_openOptions.empty()) {
+    std::map<std::string, std::string> openOptions = _openOptions;
+    if (hasUrlScheme(filename) && !iformat) {
+        setDefaultOption(openOptions, "protocol_whitelist", kDefaultProtocolWhitelist);
+        setDefaultOption(openOptions, "rw_timeout", "15000000");
+        setDefaultOption(openOptions, "stimeout", "15000000");
+        setDefaultOption(openOptions, "timeout", "15000000");
+    }
+    if (openOptions.empty()) {
         openStream(filename, iformat, nullptr);
         return;
     }
     AVDictionary* opts = nullptr;
-    for (const auto& [key, value] : _openOptions)
+    for (const auto& [key, value] : openOptions)
         av_dict_set(&opts, key.c_str(), value.c_str(), 0);
     openStream(filename, iformat, &opts);
     av_dict_free(&opts);
@@ -105,10 +143,26 @@ void MediaCapture::openStream(const std::string& filename, const AVInputFormat* 
     if (_formatCtx)
         throw std::runtime_error("Capture has already been initialized");
 
-    if (avformat_open_input(&_formatCtx, filename.c_str(), inputFormat, formatParams) < 0)
-        throw std::runtime_error("Cannot open the media source: " + filename);
+    _formatCtx = avformat_alloc_context();
+    if (!_formatCtx)
+        throw std::runtime_error("Cannot allocate media source context: " + filename);
+    _formatCtx->interrupt_callback.callback = &MediaCapture::interruptCallback;
+    _formatCtx->interrupt_callback.opaque = this;
 
-    if (avformat_find_stream_info(_formatCtx, nullptr) < 0)
+    markIoStart();
+    const int openResult = avformat_open_input(
+        &_formatCtx, filename.c_str(), inputFormat, formatParams);
+    clearIoStart();
+    if (openResult < 0) {
+        if (_formatCtx)
+            avformat_close_input(&_formatCtx);
+        throw std::runtime_error("Cannot open the media source: " + filename);
+    }
+
+    markIoStart();
+    const int streamInfoResult = avformat_find_stream_info(_formatCtx, nullptr);
+    clearIoStart();
+    if (streamInfoResult < 0)
         throw std::runtime_error("Cannot find stream information: " + filename);
 
     av_dump_format(_formatCtx, 0, filename.c_str(), 0);
@@ -217,8 +271,13 @@ void MediaCapture::run()
         // breaking the loop on it would tear the capture down at the
         // first hiccup. The next av_read_frame call blocks until a
         // frame arrives, so a tight retry loop is safe.
-        while ((res = av_read_frame(_formatCtx, ipacket)) >= 0 ||
-               res == AVERROR(EAGAIN)) {
+        while (true) {
+            markIoStart();
+            res = av_read_frame(_formatCtx, ipacket);
+            clearIoStart();
+            if (res < 0 && res != AVERROR(EAGAIN))
+                break;
+
             if (res == AVERROR(EAGAIN)) {
                 if (_stopping)
                     break;
@@ -403,6 +462,12 @@ void MediaCapture::setOpenOptions(const std::map<std::string, std::string>& opti
 }
 
 
+void MediaCapture::setOpenTimeoutUsec(int64_t timeoutUsec)
+{
+    _ioTimeoutUsec = timeoutUsec;
+}
+
+
 void MediaCapture::setPassthroughVideo(bool flag)
 {
     _passthroughVideo = flag;
@@ -420,6 +485,34 @@ std::string MediaCapture::error() const
 {
     std::lock_guard<std::mutex> guard(_mutex);
     return _error;
+}
+
+
+int MediaCapture::interruptCallback(void* opaque)
+{
+    auto* self = static_cast<MediaCapture*>(opaque);
+    if (!self)
+        return 0;
+    if (self->_stopping)
+        return 1;
+
+    const int64_t started = self->_ioStartedUsec.load();
+    const int64_t timeout = self->_ioTimeoutUsec.load();
+    if (started <= 0 || timeout <= 0)
+        return 0;
+    return av_gettime_relative() - started > timeout ? 1 : 0;
+}
+
+
+void MediaCapture::markIoStart()
+{
+    _ioStartedUsec = av_gettime_relative();
+}
+
+
+void MediaCapture::clearIoStart()
+{
+    _ioStartedUsec = 0;
 }
 
 

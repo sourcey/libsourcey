@@ -144,9 +144,13 @@ public:
         net::TCPSocket::Ptr socket;   ///< Optional pre-created listen socket (e.g. SSLSocket for HTTPS/WSS).
         bool authentication = false;  ///< Require token in auth message
         bool dynamicRooms = true;     ///< Allow clients to join/leave rooms
+        bool enforceOrigin = false;   ///< Enforce WebSocket Origin checks before accepting browser upgrades.
+        bool allowSameOrigin = true;  ///< Allow Origin matching the request Host and originScheme.
+        std::string originScheme = "http"; ///< Scheme used for same-origin checks ("http" or "https").
+        std::vector<std::string> allowedOrigins; ///< Additional exact Origin values to allow.
 
         // Production hardening
-        size_t maxConnections = 0;    ///< Max WebSocket connections (0 = unlimited)
+        size_t maxConnections = 1024; ///< Max WebSocket connections (0 = unlimited)
         size_t maxMessageSize = 64 * 1024; ///< Max message payload in bytes (64KB default)
         double rateLimit = 100.0;     ///< Messages per rate window
         double rateSeconds = 10.0;    ///< Rate window in seconds

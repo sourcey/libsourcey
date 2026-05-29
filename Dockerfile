@@ -29,6 +29,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libssl3t64 \
   && rm -rf /var/lib/apt/lists/*
 
+RUN useradd --system --create-home --home-dir /home/icey --shell /usr/sbin/nologin icey
+
 COPY --from=builder /icey/install /usr/local
 
 WORKDIR /usr/local
+
+USER icey

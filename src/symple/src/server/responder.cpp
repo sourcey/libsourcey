@@ -11,10 +11,38 @@
 #include "detail.h"
 #include "../protocol.h"
 #include "icy/logger.h"
+#include "icy/util.h"
 
 
 namespace icy {
 namespace smpl {
+
+namespace {
+
+bool isAllowedOrigin(const http::Request& request,
+                     const Server::Options& opts)
+{
+    const std::string origin = request.get("Origin", std::string());
+    if (origin.empty())
+        return true;
+
+    if (opts.allowSameOrigin) {
+        const std::string host = request.get("Host", std::string());
+        if (!host.empty() &&
+            util::icompare(origin, opts.originScheme + "://" + host) == 0) {
+            return true;
+        }
+    }
+
+    for (const auto& allowed : opts.allowedOrigins) {
+        if (util::icompare(origin, allowed) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+} // namespace
 
 
 class Server::Responder : public http::ServerResponder
@@ -198,6 +226,13 @@ void Server::start(const Options& opts,
             opts.host, opts.port,
             _loop,
             std::make_unique<Factory>(*this));
+    }
+
+    if (opts.enforceOrigin) {
+        _http->setWebSocketOriginValidator(
+            [opts](const http::Request& request) {
+                return isAllowedOrigin(request, opts);
+            });
     }
 
     _http->start();

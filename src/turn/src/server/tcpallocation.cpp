@@ -133,6 +133,12 @@ void TCPAllocation::handleConnectRequest(Request& request)
         return;
     }
 
+    if (!hasPermission(peerAttr->address())) {
+        LTrace("No Permission for TCP peer: ", peerAttr->address().host());
+        server().respondError(request, kErrorForbidden, "Forbidden");
+        return;
+    }
+
     auto pair = makeIntrusive<TCPConnectionPair>(*this);
     pair->transactionID = request.transactionID();
     _pairs[pair->connectionID] = pair;

@@ -226,6 +226,12 @@ Server::~Server()
 }
 
 
+void Server::setWebSocketOriginValidator(WebSocketOriginValidator validator)
+{
+    _webSocketOriginValidator = std::move(validator);
+}
+
+
 void Server::start()
 {
     _socket->addReceiver(this);
@@ -369,6 +375,14 @@ void Server::onConnectionClose(ServerConnection& conn)
 bool Server::onSocketClose(net::Socket& socket)
 {
     return false;
+}
+
+
+bool Server::isWebSocketOriginAllowed(const Request& request) const
+{
+    if (!_webSocketOriginValidator)
+        return true;
+    return _webSocketOriginValidator(request);
 }
 
 
@@ -573,6 +587,16 @@ void ServerConnection::onHeaders()
     bool isUpgrade = dynamic_cast<ConnectionAdapter*>(adapter())->parser().upgrade() &&
                      util::icompare(request().get("Upgrade", ""), "websocket") == 0;
     if (isUpgrade) {
+        if (!_server.isWebSocketOriginAllowed(request())) {
+            response().setStatus(StatusCode::Forbidden);
+            response().setContentLength(0);
+            response().setKeepAlive(false);
+            setState(ServerConnectionState::DispatchingOrSending);
+            sendHeader();
+            close();
+            return;
+        }
+
         _mode = ServerConnectionMode::Upgraded;
         setState(ServerConnectionState::Upgraded);
 

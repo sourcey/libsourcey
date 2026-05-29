@@ -21,6 +21,7 @@
 #include "icy/timer.h"
 #include <ctime>
 #include <cstring>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 
@@ -332,6 +333,8 @@ private:
 class HTTP_API Server : public net::SocketAdapter
 {
 public:
+    using WebSocketOriginValidator = std::function<bool(const Request&)>;
+
     /// Constructs an HTTP server on the given host and port using an internally created TCP socket.
     /// @param host Bind address (e.g. "0.0.0.0" or "127.0.0.1").
     /// @param port TCP port to listen on.
@@ -392,6 +395,10 @@ public:
     /// Set to 0 to disable idle timeout.
     void setKeepAliveTimeout(int seconds) { _keepAliveTimeout = seconds; }
 
+    /// Set an optional WebSocket Origin validator. When set, upgrade
+    /// requests rejected by the validator receive 403 before the 101 handshake.
+    void setWebSocketOriginValidator(WebSocketOriginValidator validator);
+
     /// Return the number of active connections (all states).
     [[nodiscard]] size_t connectionCount() const { return _connections.size(); }
 
@@ -416,6 +423,7 @@ protected:
     void onConnectionClose(ServerConnection& conn);
     bool onSocketClose(net::Socket& socket);
     void onTimer();
+    [[nodiscard]] bool isWebSocketOriginAllowed(const Request& request) const;
 
     /// Return the event loop this server runs on.
     [[nodiscard]] uv::Loop* loop() const { return _loop; }
@@ -426,6 +434,7 @@ protected:
     net::TCPSocket::Ptr _socket;
     Timer _timer;
     std::unique_ptr<ServerConnectionFactory> _factory;
+    WebSocketOriginValidator _webSocketOriginValidator;
     std::unordered_map<ServerConnection*, ServerConnection::Ptr> _connections;
     ConnectionPool _pool;
     DateCache _dateCache;
