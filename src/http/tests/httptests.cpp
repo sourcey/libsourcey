@@ -289,6 +289,11 @@ int main(int argc, char** argv)
         // Already-safe characters should remain unchanged
         std::string safe = "abcABC123-_.~";
         expect(http::URL::encode(safe) == safe);
+
+        expect(http::URL::decode("%") == "%");
+        expect(http::URL::decode("%A") == "%A");
+        expect(http::URL::decode("%ZZ") == "%ZZ");
+        expect(http::URL::decode("%41") == "A");
     });
 
     //
@@ -1870,6 +1875,29 @@ int main(int argc, char** argv)
         } catch (const http::ws::WebSocketException& e) {
             threw = true;
             expect(e.code() == http::ws::ErrorCode::IncompleteFrame);
+        }
+        expect(threw);
+    });
+
+    describe("websocket: oversized single frame rejected before buffering", []() {
+        http::ws::WebSocketFramer serverFramer(http::ws::ServerSide);
+        wsFramerTestAccess(serverFramer, 2);
+
+        char raw[14] = {};
+        raw[0] = static_cast<char>(0x81); // FIN + Text
+        raw[1] = static_cast<char>(0xFF); // MASK + 64-bit length
+        uint64_t length = 64ULL * 1024 * 1024 + 1;
+        for (int i = 0; i < 8; ++i)
+            raw[2 + i] = static_cast<char>((length >> ((7 - i) * 8)) & 0xFF);
+
+        BitReader reader(mutableBuffer(raw, sizeof(raw)));
+        char* payload = nullptr;
+        bool threw = false;
+        try {
+            serverFramer.readFrame(reader, payload);
+        } catch (const http::ws::WebSocketException& e) {
+            threw = true;
+            expect(e.code() == http::ws::ErrorCode::PayloadTooBig);
         }
         expect(threw);
     });

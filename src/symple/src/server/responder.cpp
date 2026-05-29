@@ -63,38 +63,46 @@ public:
         }
 
         if (!shouldClose) {
-            std::unique_lock<std::mutex> lock(_server._mutex);
-            auto* peer = _server._peerRegistry->findByConnection(connection());
+            try {
+                std::unique_lock<std::mutex> lock(_server._mutex);
+                auto* peer = _server._peerRegistry->findByConnection(connection());
 
-            if (!peer) {
-                if (type == "auth") {
-                    _server.onAuth(_tempPeer, msg, lock);
-                    if (_tempPeer.authenticated()) {
-                        _authenticated = true;
-                        _authTimer.stop();
+                if (!peer) {
+                    if (type == "auth") {
+                        _server.onAuth(_tempPeer, msg, lock);
+                        if (_tempPeer.authenticated()) {
+                            _authenticated = true;
+                            _authTimer.stop();
+                        }
+                    }
+                    else {
+                        sendError(401, "Not authenticated");
+                        shouldClose = true;
                     }
                 }
-                else {
-                    sendError(401, "Not authenticated");
+                else if (!peer->checkRate()) {
+                    LWarn("Rate limit exceeded for peer ", peer->id());
+                    sendError(429, "Rate limit exceeded");
                     shouldClose = true;
                 }
-            }
-            else if (!peer->checkRate()) {
-                LWarn("Rate limit exceeded for peer ", peer->id());
-                sendError(429, "Rate limit exceeded");
+                else if (type == "message" || type == "presence" ||
+                         type == "command" || type == "event") {
+                    _server.onMessage(*peer, std::move(msg));
+                }
+                else if (type == "join") {
+                    _server.onJoin(*peer, msg.value("room", ""));
+                }
+                else if (type == "leave") {
+                    _server.onLeave(*peer, msg.value("room", ""));
+                }
+                else if (type == "close") {
+                    shouldClose = true;
+                }
+            } catch (const std::exception& exc) {
+                LError("Symple dispatch error: ", exc.what());
                 shouldClose = true;
-            }
-            else if (type == "message" || type == "presence" ||
-                     type == "command" || type == "event") {
-                _server.onMessage(*peer, std::move(msg));
-            }
-            else if (type == "join") {
-                _server.onJoin(*peer, msg.value("room", ""));
-            }
-            else if (type == "leave") {
-                _server.onLeave(*peer, msg.value("room", ""));
-            }
-            else if (type == "close") {
+            } catch (...) {
+                LError("Symple dispatch error");
                 shouldClose = true;
             }
         }

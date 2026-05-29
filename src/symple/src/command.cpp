@@ -79,9 +79,9 @@ void Command::setAction(std::string_view action)
 std::string Command::param(int n) const
 {
     std::vector<std::string> params = util::split(node(), ':');
-    if (int(params.size()) < n)
+    if (n < 1 || static_cast<size_t>(n) > params.size())
         throw std::out_of_range("Command param index out of range: " + std::to_string(n));
-    return params[n - 1].c_str();
+    return params[n - 1];
 }
 
 

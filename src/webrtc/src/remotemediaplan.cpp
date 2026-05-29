@@ -11,7 +11,9 @@
 #include "icy/webrtc/codecnegotiator.h"
 #include "icy/logger.h"
 
+#include <charconv>
 #include <cctype>
+#include <cerrno>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
@@ -112,8 +114,17 @@ std::optional<int> findPayloadTypeForCodec(const std::string& sdp,
             if (space != std::string_view::npos && slash != std::string_view::npos) {
                 auto ptText = line.substr(prefix.size(), space - prefix.size());
                 auto name = line.substr(space + 1, slash - space - 1);
-                if (iequalsAscii(name, codecName))
-                    return std::stoi(std::string(ptText));
+                if (iequalsAscii(name, codecName)) {
+                    int pt = 0;
+                    auto [p, ec] = std::from_chars(
+                        ptText.data(), ptText.data() + ptText.size(), pt);
+                    if (ec != std::errc{} ||
+                        p != ptText.data() + ptText.size() ||
+                        pt < 0 || pt > 127) {
+                        return std::nullopt;
+                    }
+                    return pt;
+                }
             }
         }
 

@@ -36,14 +36,25 @@ protected:
             return nullptr;
 
         auto first = *buffer.begin();
+        if (first->size() < sizeof(rtc::RtpHeader))
+            return nullptr;
         auto firstHeader = reinterpret_cast<const rtc::RtpHeader*>(first->data());
         const auto payloadType = firstHeader->payloadType();
         const auto timestamp = firstHeader->timestamp();
 
         rtc::binary frame;
         for (const auto& packet : buffer) {
+            if (packet->size() < sizeof(rtc::RtpHeader))
+                continue;
             auto rtpHeader = reinterpret_cast<const rtc::RtpHeader*>(packet->data());
-            auto rtpHeaderSize = rtpHeader->getSize() + rtpHeader->getExtensionHeaderSize();
+            auto baseHeaderSize = rtpHeader->getSize();
+            if (packet->size() < baseHeaderSize)
+                continue;
+            if (rtpHeader->extension() &&
+                packet->size() < baseHeaderSize + sizeof(rtc::RtpExtensionHeader)) {
+                continue;
+            }
+            auto rtpHeaderSize = baseHeaderSize + rtpHeader->getExtensionHeaderSize();
             size_t paddingSize = rtpHeader->padding()
                 ? std::to_integer<uint8_t>(packet->back())
                 : 0;

@@ -13,6 +13,7 @@
 
 
 #include "icy/archo/archo.h"
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -103,6 +104,8 @@ struct Archo_API ZipFile
 
     std::vector<FileInfo> info;
     unzFile fp;
+    uint64_t _totalWritten = 0;
+    uint64_t _entriesExtracted = 0;
 };
 
 

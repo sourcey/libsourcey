@@ -338,8 +338,11 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf,
         return;
     }
 
+    const auto addrLen = addr->sa_family == AF_INET6
+        ? sizeof(struct sockaddr_in6)
+        : sizeof(struct sockaddr_in);
     socket->onRecv(mutableBuffer(buf->base, nread),
-                   net::Address(addr, sizeof(*addr)));
+                   net::Address(addr, addrLen));
 }
 
 

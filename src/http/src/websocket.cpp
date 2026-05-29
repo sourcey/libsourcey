@@ -395,6 +395,18 @@ bool WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
         const char* data;
         size_t dataLen;
         if (!framer._incompleteFrame.empty()) {
+            if (buffer.size() > WebSocketFramer::MAX_MESSAGE_SIZE ||
+                framer._incompleteFrame.size() >
+                    WebSocketFramer::MAX_MESSAGE_SIZE - buffer.size()) {
+                LError("WebSocket incomplete frame exceeded maximum size");
+                try {
+                    shutdown(uint16_t(ws::CloseStatusCode::PayloadTooBig),
+                             closeReasonFor(uint16_t(ws::CloseStatusCode::PayloadTooBig)));
+                } catch (...) {
+                }
+                socket->setError("WebSocket error: Frame payload too large");
+                return false;
+            }
             workBuf.reserve(framer._incompleteFrame.size() + buffer.size());
             workBuf.insert(workBuf.end(),
                            framer._incompleteFrame.begin(), framer._incompleteFrame.end());
@@ -532,6 +544,16 @@ bool WebSocketAdapter::onSocketRecv(net::Socket&, const MutableBuffer& buffer, c
             } catch (const ws::WebSocketException& exc) {
                 if (exc.code() == ws::ErrorCode::IncompleteFrame) {
                     size_t remaining = total - posBeforeRead;
+                    if (remaining > WebSocketFramer::MAX_MESSAGE_SIZE) {
+                        LError("WebSocket incomplete frame exceeded maximum size");
+                        try {
+                            shutdown(uint16_t(ws::CloseStatusCode::PayloadTooBig),
+                                     closeReasonFor(uint16_t(ws::CloseStatusCode::PayloadTooBig)));
+                        } catch (...) {
+                        }
+                        socket->setError("WebSocket error: Frame payload too large");
+                        return false;
+                    }
                     framer._incompleteFrame.clear();
                     framer._incompleteFrame.reserve(remaining);
                     framer._incompleteFrame.insert(
@@ -868,6 +890,12 @@ uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     }
     if (hasMask) {
         headerReader.get(mask, 4);
+    }
+
+    if (payloadLength > WebSocketFramer::MAX_MESSAGE_SIZE) {
+        throwWsError(ws::ErrorCode::PayloadTooBig,
+            "WebSocket error: Frame payload too large (close 1009)",
+            uint16_t(ws::CloseStatusCode::PayloadTooBig));
     }
 
     // Check that header + payload fit within the available buffer

@@ -15,6 +15,7 @@
 
 extern "C" {
 #include <libavformat/avformat.h>
+#include <libavutil/frame.h>
 #include <libavutil/imgutils.h>
 }
 
@@ -36,7 +37,10 @@ PlanarVideoPacket::PlanarVideoPacket(uint8_t* data[4], const int linesize[4], co
     , pixelFmt(pixelFmt)
 {
     auto pixfmt = av_get_pix_fmt(pixelFmt.c_str());
-    _size = av_image_get_buffer_size(pixfmt, width, height, 1);
+    int ret = av_image_get_buffer_size(pixfmt, width, height, 1);
+    if (ret < 0)
+        throw std::runtime_error("PlanarVideoPacket: av_image_get_buffer_size failed");
+    _size = static_cast<size_t>(ret);
 
     // The constructor does no copy any frame data.
     // The actual frame will not be copied unless this packet is cloned.
@@ -85,19 +89,27 @@ PlanarVideoPacket::~PlanarVideoPacket() noexcept
 //
 
 
-PlanarAudioPacket::PlanarAudioPacket(uint8_t* data[4], int channels, size_t numSamples,
+PlanarAudioPacket::PlanarAudioPacket(uint8_t** data, int channels, size_t numSamples,
                                      const std::string& sampleFmt, int64_t time)
-    : AudioPacket(data[0], 0, numSamples, time)
+    : AudioPacket(data ? data[0] : nullptr, 0, numSamples, time)
     , channels(channels)
     , sampleFmt(sampleFmt)
 {
+    static_assert(kMaxPlanarAudioPlanes == AV_NUM_DATA_POINTERS,
+                  "PlanarAudioPacket plane count must match FFmpeg");
+    if (channels < 1 || channels > AV_NUM_DATA_POINTERS)
+        throw std::runtime_error("PlanarAudioPacket: invalid channel count");
+
     auto fmt = av_get_sample_fmt(sampleFmt.c_str());
-    _size = av_samples_get_buffer_size(&linesize, channels, static_cast<int>(numSamples), fmt, 0);
+    int ret = av_samples_get_buffer_size(&linesize, channels, static_cast<int>(numSamples), fmt, 0);
+    if (ret < 0)
+        throw std::runtime_error("PlanarAudioPacket: av_samples_get_buffer_size failed");
+    _size = static_cast<size_t>(ret);
 
     // The constructor does no copy any frame data.
     // The actual frame will not be copied unless this packet is cloned.
-    for (int i = 0; i < 4; ++i) {
-        this->buffer[i] = data[i];
+    for (int i = 0; i < channels; ++i) {
+        this->buffer[i] = data ? data[i] : nullptr;
     }
 }
 
@@ -108,6 +120,8 @@ PlanarAudioPacket::PlanarAudioPacket(const PlanarAudioPacket& r)
     , sampleFmt(r.sampleFmt)
     , owns_buffer(true)
 {
+    if (channels < 1 || channels > AV_NUM_DATA_POINTERS)
+        throw std::runtime_error("PlanarAudioPacket: invalid channel count");
     if (sampleFmt.empty())
         throw std::runtime_error("PlanarAudioPacket: sample format required to copy");
     auto fmt = av_get_sample_fmt(sampleFmt.c_str());
@@ -170,13 +184,15 @@ PlanarVideoPacket::PlanarVideoPacket(const PlanarVideoPacket& r)
 PlanarVideoPacket::~PlanarVideoPacket() noexcept = default;
 
 
-PlanarAudioPacket::PlanarAudioPacket(uint8_t* data[4], int channels, size_t numSamples,
+PlanarAudioPacket::PlanarAudioPacket(uint8_t** data, int channels, size_t numSamples,
                                      const std::string& sampleFmt, int64_t time)
     : AudioPacket(data ? data[0] : nullptr, 0, numSamples, time)
     , channels(channels)
     , sampleFmt(sampleFmt)
 {
-    for (int i = 0; i < 4; ++i) {
+    if (channels < 1 || channels > kMaxPlanarAudioPlanes)
+        throw std::runtime_error("PlanarAudioPacket: invalid channel count");
+    for (int i = 0; i < channels; ++i) {
         buffer[i] = data ? data[i] : nullptr;
     }
 }
@@ -189,7 +205,9 @@ PlanarAudioPacket::PlanarAudioPacket(const PlanarAudioPacket& r)
     , sampleFmt(r.sampleFmt)
     , owns_buffer(false)
 {
-    for (int i = 0; i < 4; ++i) {
+    if (channels < 1 || channels > kMaxPlanarAudioPlanes)
+        throw std::runtime_error("PlanarAudioPacket: invalid channel count");
+    for (int i = 0; i < channels; ++i) {
         buffer[i] = r.buffer[i];
     }
 }

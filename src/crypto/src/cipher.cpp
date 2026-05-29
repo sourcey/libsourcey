@@ -15,10 +15,12 @@
 #include "icy/hex.h"
 
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
+#include <openssl/rand.h>
 
 
 
@@ -116,8 +118,9 @@ void Cipher::init(bool encrypt)
     if (_initialized)
         EVP_CIPHER_CTX_reset(_ctx.get());
 
-    EVP_CipherInit_ex(_ctx.get(), _cipher, nullptr, &_key[0],
-                      _iv.empty() ? nullptr : &_iv[0], encrypt ? 1 : 0);
+    internal::api(EVP_CipherInit_ex(_ctx.get(), _cipher, nullptr, &_key[0],
+                                    _iv.empty() ? nullptr : &_iv[0],
+                                    encrypt ? 1 : 0));
 
     _encrypt = encrypt;
     _initialized = true;
@@ -379,14 +382,14 @@ int Cipher::ivSize() const
 
 inline void getRandomBytes(ByteVec& vec, size_t count)
 {
-    Random rnd;
-    rnd.seed();
+    if (count > static_cast<size_t>(std::numeric_limits<int>::max()))
+        throw std::length_error("Cipher random byte request is too large");
 
-    vec.clear();
-    vec.reserve(count);
-
-    for (unsigned i = 0; i < count; ++i)
-        vec.push_back(rnd.nextChar());
+    vec.resize(count);
+    if (count > 0 &&
+        RAND_bytes(vec.data(), static_cast<int>(count)) != 1) {
+        internal::throwError();
+    }
 }
 
 

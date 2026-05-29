@@ -66,7 +66,7 @@ public:
     /// @return Pseudo random double value.
     double nextDouble();
 
-    /// Fills the buffer with cryptographically random bytes from std::random_device.
+    /// Fills the buffer with entropy bytes from std::random_device.
     /// @param seed   Buffer to fill.
     /// @param length Number of bytes to write into seed.
     static void getSeed(char* seed, unsigned length);

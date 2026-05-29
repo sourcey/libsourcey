@@ -206,11 +206,16 @@ void X509Certificate::save(const std::string& path) const
 
 void X509Certificate::init()
 {
-    char buffer[NAME_BUFFER_SIZE];
-    X509_NAME_oneline(X509_get_issuer_name(_certificate.get()), buffer, sizeof(buffer));
-    _issuerName = buffer;
-    X509_NAME_oneline(X509_get_subject_name(_certificate.get()), buffer, sizeof(buffer));
-    _subjectName = buffer;
+    char buffer[NAME_BUFFER_SIZE] = {};
+    if (X509_NAME* issuer = X509_get_issuer_name(_certificate.get())) {
+        if (X509_NAME_oneline(issuer, buffer, sizeof(buffer)))
+            _issuerName = buffer;
+    }
+    buffer[0] = '\0';
+    if (X509_NAME* subject = X509_get_subject_name(_certificate.get())) {
+        if (X509_NAME_oneline(subject, buffer, sizeof(buffer)))
+            _subjectName = buffer;
+    }
 }
 
 
@@ -223,9 +228,11 @@ std::string X509Certificate::commonName() const
 std::string X509Certificate::issuerName(NID nid) const
 {
     if (X509_NAME* issuer = X509_get_issuer_name(_certificate.get())) {
-        char buffer[NAME_BUFFER_SIZE];
-        X509_NAME_get_text_by_NID(issuer, nid, buffer, sizeof(buffer));
-        return std::string(buffer);
+        char buffer[NAME_BUFFER_SIZE] = {};
+        int n = X509_NAME_get_text_by_NID(issuer, nid, buffer, sizeof(buffer));
+        if (n < 0)
+            return std::string();
+        return std::string(buffer, static_cast<size_t>(n));
     } else
         return std::string();
 }
@@ -234,9 +241,11 @@ std::string X509Certificate::issuerName(NID nid) const
 std::string X509Certificate::subjectName(NID nid) const
 {
     if (X509_NAME* subj = X509_get_subject_name(_certificate.get())) {
-        char buffer[NAME_BUFFER_SIZE];
-        X509_NAME_get_text_by_NID(subj, nid, buffer, sizeof(buffer));
-        return std::string(buffer);
+        char buffer[NAME_BUFFER_SIZE] = {};
+        int n = X509_NAME_get_text_by_NID(subj, nid, buffer, sizeof(buffer));
+        if (n < 0)
+            return std::string();
+        return std::string(buffer, static_cast<size_t>(n));
     } else
         return std::string();
 }

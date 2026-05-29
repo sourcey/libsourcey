@@ -306,8 +306,10 @@ public:
 
     const char* lastError() const
     {
+        thread_local std::string errorCopy;
         std::lock_guard<std::mutex> guard(_mutex);
-        return _lastError.empty() ? nullptr : _lastError.c_str();
+        errorCopy = _lastError;
+        return errorCopy.empty() ? nullptr : errorCopy.c_str();
     }
 
 private:

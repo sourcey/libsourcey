@@ -13,6 +13,7 @@
 #include "icy/logger.h"
 #include "icy/util.h"
 
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -132,9 +133,12 @@ void Message::add(std::unique_ptr<Attribute> attr)
 
 uint16_t Message::computeBodySize() const
 {
-    uint16_t size = 0;
-    for (const auto& attr : _attrs)
-        size += static_cast<uint16_t>(attr->paddedBytes() + kAttributeHeaderSize);
+    size_t size = 0;
+    for (const auto& attr : _attrs) {
+        size += static_cast<size_t>(attr->paddedBytes()) + kAttributeHeaderSize;
+        if (size > std::numeric_limits<uint16_t>::max())
+            throw std::runtime_error("STUN message body is too large");
+    }
     return size;
 }
 

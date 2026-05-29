@@ -313,6 +313,9 @@ struct Decoder : public basic::Decoder
 template <typename T>
 inline std::string decode(const T& bytes)
 {
+    if (bytes.empty())
+        return {};
+
     std::string res;
     res.reserve(bytes.size() * 2);
     auto encbuf = std::make_unique<char[]>(bytes.size() * 2);
@@ -320,7 +323,7 @@ inline std::string decode(const T& bytes)
     internal::decodestate state;
     internal::init_decodestate(&state);
 
-    size_t enclen = internal::decode_block(reinterpret_cast<const char*>(&bytes[0]),
+    size_t enclen = internal::decode_block(reinterpret_cast<const char*>(bytes.data()),
                                            bytes.size(), encbuf.get(), &state);
     res.append(encbuf.get(), enclen);
 

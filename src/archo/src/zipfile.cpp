@@ -12,9 +12,11 @@
 #include "icy/archo/zipfile.h"
 #include "icy/logger.h"
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 
 
 
@@ -24,6 +26,10 @@ namespace archo {
 
 
 namespace internal {
+
+constexpr uint64_t kPerFileMax = 2ULL * 1024 * 1024 * 1024;
+constexpr uint64_t kArchiveMax = 4ULL * 1024 * 1024 * 1024;
+constexpr uint64_t kEntryMax = 100000;
 
 std::string errmsg(int code)
 {
@@ -104,10 +110,11 @@ void ZipFile::open(const std::filesystem::path& file)
     for (int ret = unzGoToFirstFile(this->fp); ret == UNZ_OK;
          ret = unzGoToNextFile(this->fp)) {
         unz_file_info fileInfo;
-        char fileName[1024];
+        char fileName[1025] = {0};
         internal::api("unzGetCurrentFileInfo",
                       unzGetCurrentFileInfo(this->fp, &fileInfo, fileName, 1024,
                                             nullptr, 0, nullptr, 0));
+        fileName[1024] = '\0';
 
         FileInfo finfo;
         finfo.path = fileName;
@@ -141,6 +148,9 @@ void ZipFile::extract(const std::filesystem::path& path)
     if (!goToFirstFile())
         throw std::runtime_error("Cannot read the source archive.");
 
+    _totalWritten = 0;
+    _entriesExtracted = 0;
+
     while (true) {
         (void)extractCurrentFile(path, true);
         if (!goToNextFile())
@@ -153,19 +163,25 @@ bool ZipFile::extractCurrentFile(const std::filesystem::path& path, bool whiny)
 {
     int ret;
     unz_file_info finfo;
-    char fname[1024];
+    char fname[1025] = {0};
 
     try {
         internal::api("unzGetCurrentFileInfo",
                       unzGetCurrentFileInfo(this->fp, &finfo, fname, 1024,
                                             nullptr, 0, nullptr, 0));
+        fname[1024] = '\0';
+        if (++_entriesExtracted > internal::kEntryMax)
+            throw std::runtime_error("zip bomb: entry limit exceeded");
 
         auto outPath = path / fname;
 
         // Validate against path traversal attacks (e.g. "../../../etc/passwd")
         auto canonical = std::filesystem::weakly_canonical(outPath);
         auto canonicalBase = std::filesystem::weakly_canonical(path);
-        auto [rootEnd, nothing] = std::mismatch(canonicalBase.begin(), canonicalBase.end(), canonical.begin());
+        auto [rootEnd, canonEnd] = std::mismatch(
+            canonicalBase.begin(), canonicalBase.end(),
+            canonical.begin(), canonical.end());
+        (void)canonEnd;
         if (rootEnd != canonicalBase.end())
             throw std::runtime_error("Zip entry attempts path traversal: " + std::string(fname));
 
@@ -175,8 +191,9 @@ bool ZipFile::extractCurrentFile(const std::filesystem::path& path, bool whiny)
 #if !WIN32
         const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
 #endif
+        const size_t nameLen = strlen(fname);
         if (finfo.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
-            fname[strlen(fname) - 1] == '/') {
+            (nameLen > 0 && fname[nameLen - 1] == '/')) {
             LTrace("Create directory: ", outPath.string());
             std::filesystem::create_directories(outPath);
         }
@@ -203,8 +220,16 @@ bool ZipFile::extractCurrentFile(const std::filesystem::path& path, bool whiny)
                 throw std::runtime_error("Cannot open zip output file: " + outPath.string());
 
             char buffer[16384];
-            while ((ret = unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
+            uint64_t written = 0;
+            while ((ret = unzReadCurrentFile(this->fp, buffer, sizeof(buffer))) > 0) {
+                written += static_cast<uint64_t>(ret);
+                _totalWritten += static_cast<uint64_t>(ret);
+                if (written > internal::kPerFileMax ||
+                    _totalWritten > internal::kArchiveMax) {
+                    throw std::runtime_error("zip bomb: size limit exceeded");
+                }
                 ofs.write(buffer, ret);
+            }
 
             ofs.close();
 
@@ -214,7 +239,7 @@ bool ZipFile::extractCurrentFile(const std::filesystem::path& path, bool whiny)
     } catch (std::exception& exc) {
         LError("Cannot unzip file: ", exc.what());
         if (whiny)
-            throw exc;
+            throw;
         return false;
     }
     return true;
@@ -247,10 +272,11 @@ void ZipFile::closeCurrentFile()
 
 std::string ZipFile::currentFileName()
 {
-    char buf[1024];
+    char buf[1025] = {0};
     internal::api("unzGetCurrentFileInfo",
-                  unzGetCurrentFileInfo(this->fp, nullptr, buf, sizeof(buf),
+                  unzGetCurrentFileInfo(this->fp, nullptr, buf, 1024,
                                         nullptr, 0, nullptr, 0));
+    buf[1024] = '\0';
     return buf;
 }
 

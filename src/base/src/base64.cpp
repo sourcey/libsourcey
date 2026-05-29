@@ -159,6 +159,9 @@ void init_decodestate(decodestate* state_in)
 
 ssize_t decode_block(const char* code_in, const size_t length_in, char* plaintext_out, decodestate* state_in)
 {
+    if (length_in == 0)
+        return 0;
+
     const char* codechar = code_in;
     char* plainchar = plaintext_out;
     char fragment;

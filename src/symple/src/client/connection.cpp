@@ -82,8 +82,16 @@ void Client::doConnect()
     };
 
     data.ws->Payload += [this](const MutableBuffer& buf) {
-        std::string data(bufferCast<const char*>(buf), buf.size());
-        onSocketRecv(data);
+        auto& state = *_data;
+        if (state.options.maxMessageSize > 0 &&
+            buf.size() > state.options.maxMessageSize) {
+            LWarn("Message too large (", buf.size(), " bytes), closing");
+            if (state.ws)
+                state.ws->close();
+            return;
+        }
+        std::string payload(bufferCast<const char*>(buf), buf.size());
+        onSocketRecv(payload);
     };
 
     data.ws->Error += slot(this, &Client::onTransportError);

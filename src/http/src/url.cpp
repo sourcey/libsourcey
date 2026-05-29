@@ -366,14 +366,18 @@ std::string URL::decode(std::string_view str)
 {
     std::string clean;
     for (size_t i = 0; i < str.length(); i++) {
-        if (str[i] == '%') {
+        if (str[i] == '%' && i + 2 < str.length()) {
             const std::string_view digits = "0123456789ABCDEF";
-            clean +=
-                static_cast<char>(digits.find(str[i + 1]) * 16 + digits.find(str[i + 2]));
-            i += 2;
-        } else {
-            clean += str[i];
+            auto hi = digits.find(str[i + 1]);
+            auto lo = digits.find(str[i + 2]);
+            if (hi != std::string_view::npos &&
+                lo != std::string_view::npos) {
+                clean += static_cast<char>(hi * 16 + lo);
+                i += 2;
+                continue;
+            }
         }
+        clean += str[i];
     }
     return clean;
 }

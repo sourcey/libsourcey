@@ -21,6 +21,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <limits>
 
 
 
@@ -107,11 +108,16 @@ std::string memAddress(const void* ptr)
 
 std::string randomBinaryString(int size, bool doBase64)
 {
+    if (size < 0)
+        throw std::invalid_argument("randomBinaryString size must not be negative");
+
     std::string res;
-    Random rnd;
-    rnd.seed();
-    for (int i = 0; i < size; ++i)
-        res.push_back(rnd.nextChar());
+    res.resize(static_cast<size_t>(size));
+    if (!res.empty()) {
+        if (res.size() > std::numeric_limits<unsigned>::max())
+            throw std::length_error("randomBinaryString size is too large");
+        Random::getSeed(res.data(), static_cast<unsigned>(res.size()));
+    }
 
     if (doBase64) {
         std::string out;
@@ -131,9 +137,9 @@ std::string randomString(int size)
 
 uint32_t randomNumber()
 {
-    Random rnd;
-    rnd.seed();
-    return rnd.next();
+    uint32_t value = 0;
+    Random::getSeed(reinterpret_cast<char*>(&value), sizeof(value));
+    return value;
 }
 
 

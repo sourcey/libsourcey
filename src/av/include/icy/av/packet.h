@@ -23,6 +23,8 @@ struct AVFrame;
 namespace icy {
 namespace av {
 
+static constexpr int kMaxPlanarAudioPlanes = 8;
+
 
 /// Timestamped media packet carrying raw audio or video data
 struct AV_API MediaPacket : public RawPacket
@@ -196,19 +198,19 @@ struct AV_API AudioPacket : public MediaPacket
 /// @param time        The timestamp in microseconds.
 struct AV_API PlanarAudioPacket : public AudioPacket
 {
-    uint8_t* buffer[4] = {nullptr};
+    uint8_t* buffer[kMaxPlanarAudioPlanes] = {nullptr};
     int linesize = 0;
     int channels = 0;
     std::string sampleFmt;
     bool owns_buffer = false;
 
     /// Construct a planar audio packet, copying the plane pointers (not the sample data).
-    /// @param data        Array of up to 4 per-channel sample buffers.
+    /// @param data        Array of per-channel sample buffers.
     /// @param channels    Number of audio channels.
     /// @param numSamples  Number of samples per channel.
     /// @param sampleFmt   The sample format string (e.g. "fltp").
     /// @param time        Presentation timestamp in microseconds.
-    PlanarAudioPacket(uint8_t* data[4], int channels = 0, size_t numSamples = 0, //, size_t size = 0
+    PlanarAudioPacket(uint8_t** data, int channels = 0, size_t numSamples = 0, //, size_t size = 0
                       const std::string& sampleFmt = "", int64_t time = 0);
 
     /// Copy constructor. Performs a deep copy of the owned buffer if owns_buffer is set.

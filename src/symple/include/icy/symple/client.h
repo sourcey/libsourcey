@@ -103,6 +103,7 @@ public:
         std::string name;              ///< Display name
         std::string type;              ///< Peer type
         std::string token;             ///< Auth token (optional)
+        size_t maxMessageSize = 256 * 1024; ///< Maximum inbound message size.
 
         Options() = default;
     };

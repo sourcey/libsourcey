@@ -24,6 +24,7 @@
 #include <limits>
 #include <stdexcept>
 
+#include <openssl/crypto.h>
 
 namespace icy {
 namespace stun {
@@ -799,7 +800,8 @@ bool MessageIntegrity::verifyHmac(std::string_view key) const
     if (hmac.size() != MessageIntegrity::Size)
         throw std::runtime_error("MessageIntegrity::verifyHmac: unexpected HMAC size");
 
-    return _hmac == hmac;
+    return _hmac.size() == hmac.size() &&
+        CRYPTO_memcmp(_hmac.data(), hmac.data(), MessageIntegrity::Size) == 0;
 }
 
 

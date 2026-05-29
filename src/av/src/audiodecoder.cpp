@@ -79,6 +79,11 @@ void AudioDecoder::close()
 
 bool emitPacket(AudioDecoder* dec)
 {
+    if (dec->oparams.channels < 1 ||
+        dec->oparams.channels > kMaxPlanarAudioPlanes) {
+        throw std::runtime_error("AudioDecoder: unsupported channel count");
+    }
+
     // Set the decoder time in microseconds
     int64_t pts = dec->frame->pts;
     dec->time = pts > 0 ? static_cast<int64_t>(pts *
@@ -103,7 +108,7 @@ bool emitPacket(AudioDecoder* dec)
         dec->outputFrameSize = dec->resampler->outNumSamples;
         dec->emitter.emit(audio);
     } else {
-        PlanarAudioPacket audio(dec->frame->data,
+        PlanarAudioPacket audio(dec->frame->extended_data,
                                 dec->oparams.channels, dec->frame->nb_samples,
                                 dec->oparams.sampleFmt, dec->time);
         dec->outputFrameSize = dec->frame->nb_samples;
