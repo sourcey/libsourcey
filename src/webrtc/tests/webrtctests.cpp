@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstring>
+#include <initializer_list>
 
 
 using namespace std;
@@ -154,6 +155,23 @@ int64_t mediaTimeOf(const std::unique_ptr<IPacket>& packet)
 {
     auto* media = dynamic_cast<av::MediaPacket*>(packet.get());
     return media ? media->time : -1;
+}
+
+
+void expectStateSequence(
+    const std::vector<PeerSession::State>& states,
+    std::initializer_list<PeerSession::State> expected)
+{
+    expect(icy::test::waitFor([&] {
+        return states.size() >= expected.size();
+    }, 1000));
+    expect(states.size() == expected.size());
+
+    auto expectedState = expected.begin();
+    for (size_t i = 0; i < expected.size(); ++i, ++expectedState) {
+        if (i < states.size())
+            expect(states[i] == *expectedState);
+    }
 }
 
 
@@ -1444,11 +1462,12 @@ int main(int argc, char** argv)
 
         signaller.ControlReceived.emit("peer", "reject", "busy");
 
-        expect(states.size() == 4);
-        expect(states[0] == PeerSession::State::OutgoingInit);
-        expect(states[1] == PeerSession::State::Ending);
-        expect(states[2] == PeerSession::State::Ended);
-        expect(states[3] == PeerSession::State::Idle);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+            PeerSession::State::Ending,
+            PeerSession::State::Ended,
+            PeerSession::State::Idle,
+        });
         expect(session.state() == PeerSession::State::Idle);
         expect(session.remotePeerId().empty());
 
@@ -1473,8 +1492,9 @@ int main(int argc, char** argv)
         session.call("peer");
         signaller.ControlReceived.emit("peer", "init", "");
 
-        expect(states.size() == 1);
-        expect(states[0] == PeerSession::State::OutgoingInit);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+        });
         expect(session.state() == PeerSession::State::OutgoingInit);
         expect(session.remotePeerId() == "peer");
         expect(signaller.controls.size() == 2);
@@ -1495,8 +1515,9 @@ int main(int argc, char** argv)
         signaller.ControlReceived.emit("peer", "init", "");
         signaller.ControlReceived.emit("peer", "init", "");
 
-        expect(states.size() == 1);
-        expect(states[0] == PeerSession::State::IncomingInit);
+        expectStateSequence(states, {
+            PeerSession::State::IncomingInit,
+        });
         expect(session.state() == PeerSession::State::IncomingInit);
         expect(session.remotePeerId() == "peer");
         expect(signaller.controls.size() == 1);
@@ -1519,11 +1540,12 @@ int main(int argc, char** argv)
         expect(signaller.controls.size() == 2);
         expect(signaller.controls[0].type == "init");
         expect(signaller.controls[1].type == "hangup");
-        expect(states.size() == 4);
-        expect(states[0] == PeerSession::State::OutgoingInit);
-        expect(states[1] == PeerSession::State::Ending);
-        expect(states[2] == PeerSession::State::Ended);
-        expect(states[3] == PeerSession::State::Idle);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+            PeerSession::State::Ending,
+            PeerSession::State::Ended,
+            PeerSession::State::Idle,
+        });
         expect(session.state() == PeerSession::State::Idle);
     });
 
@@ -1590,9 +1612,10 @@ int main(int argc, char** argv)
 
         signaller.ControlReceived.emit("peer", "accept", "");
 
-        expect(states.size() == 2);
-        expect(states[0] == PeerSession::State::OutgoingInit);
-        expect(states[1] == PeerSession::State::Negotiating);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+            PeerSession::State::Negotiating,
+        });
         expect(session.state() == PeerSession::State::Negotiating);
         expect(session.peerConnection() == pc);
         expect(session.dataChannel() == dc);
@@ -1736,11 +1759,12 @@ int main(int argc, char** argv)
         signaller.ControlReceived.emit("peer", "hangup", "done");
         signaller.ControlReceived.emit("peer", "hangup", "again");
 
-        expect(states.size() == 4);
-        expect(states[0] == PeerSession::State::OutgoingInit);
-        expect(states[1] == PeerSession::State::Ending);
-        expect(states[2] == PeerSession::State::Ended);
-        expect(states[3] == PeerSession::State::Idle);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+            PeerSession::State::Ending,
+            PeerSession::State::Ended,
+            PeerSession::State::Idle,
+        });
         expect(session.state() == PeerSession::State::Idle);
         expect(session.remotePeerId().empty());
     });
@@ -1755,11 +1779,12 @@ int main(int argc, char** argv)
 
         session.call("peer");
 
-        expect(states.size() == 4);
-        expect(states[0] == PeerSession::State::OutgoingInit);
-        expect(states[1] == PeerSession::State::Ending);
-        expect(states[2] == PeerSession::State::Ended);
-        expect(states[3] == PeerSession::State::Idle);
+        expectStateSequence(states, {
+            PeerSession::State::OutgoingInit,
+            PeerSession::State::Ending,
+            PeerSession::State::Ended,
+            PeerSession::State::Idle,
+        });
         expect(session.state() == PeerSession::State::Idle);
         expect(session.remotePeerId().empty());
         expect(signaller.controls.size() == 1);
@@ -1997,7 +2022,9 @@ int main(int argc, char** argv)
             return publisher.state() == PeerSession::State::Active &&
                    recorder.state() == PeerSession::State::Active;
         }, 8000));
-        expect(receiverAttached.load());
+        expect(icy::test::waitFor([&] {
+            return receiverAttached.load();
+        }, 1000));
 
         expect(publisher.media().hasVideo());
         expect(recorder.media().hasVideo());
@@ -2079,9 +2106,9 @@ int main(int argc, char** argv)
         }, 8000));
 
         PacketSignal source;
-        PacketStream stream;
         av::VideoPacketEncoder videoEncoder;
         av::AudioPacketEncoder audioEncoder;
+        PacketStream stream;
 
         videoEncoder.iparams.width = 160;
         videoEncoder.iparams.height = 120;
@@ -2132,7 +2159,8 @@ int main(int argc, char** argv)
             return receivedAudio.load() > 0 && receivedVideo.load() > 0;
         }, 5000));
 
-        stream.stop();
+        stream.close();
+        stream.reset();
         alice.hangup("done");
         expect(icy::test::waitFor([&] {
             return alice.state() == PeerSession::State::Idle &&
@@ -2192,7 +2220,8 @@ int main(int argc, char** argv)
         };
 
         relayIngress.media().videoReceiver().emitter += [&](IPacket& packet) {
-            relayEgress.media().videoSender().process(packet);
+            if (relayEgress.state() == PeerSession::State::Active)
+                relayEgress.media().videoSender().process(packet);
         };
 
         std::atomic<int> receivedPackets{0};
@@ -2316,7 +2345,8 @@ int main(int argc, char** argv)
         };
 
         relayIngress.media().audioReceiver().emitter += [&](IPacket& packet) {
-            relayEgress.media().audioSender().process(packet);
+            if (relayEgress.state() == PeerSession::State::Active)
+                relayEgress.media().audioSender().process(packet);
         };
 
         std::atomic<int> receivedPackets{0};
@@ -2436,11 +2466,13 @@ int main(int argc, char** argv)
 
         std::atomic<int> activeSource{1};
         relayIngressA.media().audioReceiver().emitter += [&](IPacket& packet) {
-            if (activeSource.load(std::memory_order_relaxed) == 1)
+            if (activeSource.load(std::memory_order_relaxed) == 1 &&
+                relayEgress.state() == PeerSession::State::Active)
                 relayEgress.media().audioSender().process(packet);
         };
         relayIngressB.media().audioReceiver().emitter += [&](IPacket& packet) {
-            if (activeSource.load(std::memory_order_relaxed) == 2)
+            if (activeSource.load(std::memory_order_relaxed) == 2 &&
+                relayEgress.state() == PeerSession::State::Active)
                 relayEgress.media().audioSender().process(packet);
         };
 
