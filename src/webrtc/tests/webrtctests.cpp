@@ -199,6 +199,8 @@ struct LoopbackSignaller : SignallingInterface
                  const std::string& type,
                  const std::string& sdp) override
     {
+        if (std::this_thread::get_id() != loopThread)
+            offLoopSend.store(true);
         if (!peer || peer->selfId != peerId)
             throw std::logic_error("LoopbackSignaller SDP peer mismatch");
         bus->post([target = peer, guard = peer->alive, peerId = selfId, type, sdp] {
@@ -212,6 +214,8 @@ struct LoopbackSignaller : SignallingInterface
                        const std::string& candidate,
                        const std::string& mid) override
     {
+        if (std::this_thread::get_id() != loopThread)
+            offLoopSend.store(true);
         if (!peer || peer->selfId != peerId)
             throw std::logic_error("LoopbackSignaller candidate peer mismatch");
         bus->post([target = peer, guard = peer->alive, peerId = selfId, candidate, mid] {
@@ -234,6 +238,8 @@ struct LoopbackSignaller : SignallingInterface
         });
     }
 
+    const std::thread::id loopThread = std::this_thread::get_id();
+    std::atomic<bool> offLoopSend{false};
     std::string selfId;
     LoopbackSignaller* peer = nullptr;
     std::shared_ptr<LoopbackBus> bus;
@@ -1828,6 +1834,8 @@ int main(int argc, char** argv)
 
         alice.sendData("hello");
         expect(icy::test::waitFor([&] { return received == "hello"; }, 3000));
+        expect(!aliceSig.offLoopSend.load());
+        expect(!bobSig.offLoopSend.load());
 
         alice.hangup("done");
         expect(icy::test::waitFor([&] {

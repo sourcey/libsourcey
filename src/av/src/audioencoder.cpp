@@ -154,6 +154,8 @@ void AudioEncoder::create()
 
     // Update parameters that may have changed
     initAudioCodecFromContext(ctx, oparams);
+    // Keep the selected implementation (e.g. libopus), not just its codec family.
+    oparams.encoder = codec->name;
 
     // Output PTS counter is unanchored until the first input packet arrives.
     nextOutputPts = AV_NOPTS_VALUE;
@@ -165,6 +167,7 @@ void AudioEncoder::close()
     LTrace("Closing");
 
     AudioContext::close();
+    fifo.close();
 }
 
 void emitPacket(AudioEncoder* enc, AVPacket* opacket)

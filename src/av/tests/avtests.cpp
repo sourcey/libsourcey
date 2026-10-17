@@ -16,6 +16,19 @@ int main(int argc, char** argv)
     // Define class based tests
 #ifdef HAVE_FFMPEG
     describe("audio encoder", new AudioEncoderTest);
+    describe("named audio encoder survives reopen", []() {
+        if (!avcodec_find_encoder_by_name("libopus"))
+            return;
+        av::AudioEncoder encoder;
+        encoder.iparams = av::AudioCodec("Opus", "libopus", 2, 48000, 64000, "flt");
+        encoder.oparams = encoder.iparams;
+        for (int run = 0; run < 2; ++run) {
+            encoder.create();
+            encoder.open();
+            expect(encoder.oparams.encoder == "libopus");
+            encoder.close();
+        }
+    });
     describe("audio resampler", new AudioResamplerTest);
     describe("audio fifo buffer", new AudioBufferTest);
     describe("video encoder", new VideoEncoderTest);

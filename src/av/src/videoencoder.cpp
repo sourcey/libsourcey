@@ -132,6 +132,8 @@ void VideoEncoder::create()
 
     // Update any output parameters that might have changed
     initVideoCodecFromContext(stream, ctx, oparams);
+    // Keep the selected implementation (e.g. libx264), not just its codec family.
+    oparams.encoder = codec->name;
 }
 
 

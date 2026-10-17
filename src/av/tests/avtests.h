@@ -2059,29 +2059,35 @@ class VideoPacketEncoderTimestampTest : public Test
         encoder.oparams.options["profile"] = "baseline";
 
         encoder.emitter += packetSlot(this, &VideoPacketEncoderTimestampTest::onVideoEncoded);
-        encoder.create();
-        encoder.open();
+        PacketSignal source;
+        PacketStream stream;
+        stream.attachSource(source);
+        stream.attach(&encoder, 1, false);
+        for (int run = 0; run < 2; ++run) {
+            encodedTimes.clear();
+            stream.start();
+            expect(encoder.oparams.encoder == "libx264");
 
-        for (int i = 0; i < 8; ++i) {
-            av::AVFrameHolder frame{av::createVideoFrame(AV_PIX_FMT_YUV420P, 160, 120)};
-            expect(static_cast<bool>(frame));
-            fillTestFrame(frame.get(), i);
+            for (int i = 0; i < 8; ++i) {
+                av::AVFrameHolder frame{av::createVideoFrame(AV_PIX_FMT_YUV420P, 160, 120)};
+                expect(static_cast<bool>(frame));
+                fillTestFrame(frame.get(), i);
 
-            av::PlanarVideoPacket packet(frame->data, frame->linesize,
-                                         "yuv420p", 160, 120,
-                                         static_cast<int64_t>(i) * 33333);
-            encoder.process(packet);
+                av::PlanarVideoPacket packet(frame->data, frame->linesize,
+                                             "yuv420p", 160, 120,
+                                             static_cast<int64_t>(i) * 33333);
+                source.emit(packet);
+            }
+
+            stream.stop();
+
+            expect(!encodedTimes.empty());
+            expect(encodedTimes.front() == 0);
+            expect(encodedTimes.back() > 0);
+            expect(encodedTimes.back() < 500000);
+            for (size_t i = 1; i < encodedTimes.size(); ++i)
+                expect(encodedTimes[i] >= encodedTimes[i - 1]);
         }
-
-        encoder.flush();
-        encoder.close();
-
-        expect(!encodedTimes.empty());
-        expect(encodedTimes.front() == 0);
-        expect(encodedTimes.back() > 0);
-        expect(encodedTimes.back() < 500000);
-        for (size_t i = 1; i < encodedTimes.size(); ++i)
-            expect(encodedTimes[i] >= encodedTimes[i - 1]);
     }
 
     void onVideoEncoded(av::VideoPacket& packet)
