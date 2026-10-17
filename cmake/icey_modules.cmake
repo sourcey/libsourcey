@@ -311,7 +311,7 @@ function(icy_add_test name)
 
   # Config header access
   target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR})
-  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_SOURCE_DIR}/data")
+  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_DIR}/data")
 
   if(NOT TEST_EXCLUDE_CTEST)
     add_test(NAME ${name} COMMAND ${name})
@@ -348,7 +348,7 @@ function(icy_add_sample name)
   endif()
 
   target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR})
-  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_SOURCE_DIR}/data")
+  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_DIR}/data")
 
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "samples")
@@ -424,7 +424,7 @@ function(icy_add_fuzzer name)
   endif()
 
   target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR})
-  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_SOURCE_DIR}/data")
+  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_DIR}/data")
 
   if(FUZZING_ENGINE)
     separate_arguments(_fuzz_engine_flags NATIVE_COMMAND "${FUZZING_ENGINE}")
@@ -472,7 +472,7 @@ function(icy_add_benchmark name)
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/bench
   )
-  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_SOURCE_DIR}/data")
+  target_compile_definitions(${name} PRIVATE ICY_DATA_DIR="${icey_DIR}/data")
 
   # GCC's -O3 + tree-vectorizer miscompiles the hot member-function-pointer
   # call inside `icy::Signal::emit` on the GitHub-hosted ubuntu-24.04

@@ -98,32 +98,37 @@ void PeerSession::setupPeerConnectionCallbacks(const std::shared_ptr<rtc::PeerCo
         if (!callbackGuard->alive.load(std::memory_order_acquire))
             return;
 
-        LDebug("Local SDP ready: ", desc.typeString());
-        std::string peerId;
-        {
-            std::lock_guard lock(_mutex);
-            if (_pc != pc)
-                return;
-            peerId = _remotePeerId;
-        }
-        if (!peerId.empty())
-            _signaller.sendSdp(peerId, desc.typeString(), std::string(desc));
+        // Signalling transports belong to the session's event loop.
+        enqueueCallback([this, pc, desc = std::move(desc)]() {
+            LDebug("Local SDP ready: ", desc.typeString());
+            std::string peerId;
+            {
+                std::lock_guard lock(_mutex);
+                if (_pc != pc)
+                    return;
+                peerId = _remotePeerId;
+            }
+            if (!peerId.empty())
+                _signaller.sendSdp(peerId, desc.typeString(), std::string(desc));
+        });
     });
 
     pc->onLocalCandidate([this, pc, callbackGuard](rtc::Candidate candidate) {
         if (!callbackGuard->alive.load(std::memory_order_acquire))
             return;
 
-        LDebug("Local ICE candidate");
-        std::string peerId;
-        {
-            std::lock_guard lock(_mutex);
-            if (_pc != pc)
-                return;
-            peerId = _remotePeerId;
-        }
-        if (!peerId.empty())
-            _signaller.sendCandidate(peerId, std::string(candidate), candidate.mid());
+        enqueueCallback([this, pc, candidate = std::move(candidate)]() {
+            LDebug("Local ICE candidate");
+            std::string peerId;
+            {
+                std::lock_guard lock(_mutex);
+                if (_pc != pc)
+                    return;
+                peerId = _remotePeerId;
+            }
+            if (!peerId.empty())
+                _signaller.sendCandidate(peerId, std::string(candidate), candidate.mid());
+        });
     });
 
     pc->onStateChange([this, pc, callbackGuard](rtc::PeerConnection::State rtcState) {

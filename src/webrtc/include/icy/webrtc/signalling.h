@@ -31,6 +31,10 @@ namespace wrtc {
 /// PeerSession takes a reference to this interface. Implement it
 /// to plug in your own signalling backend.
 ///
+/// PeerSession dispatches outbound SDP and ICE candidates on its event loop.
+/// Call its public control methods on that same loop when using a loop-affine
+/// signalling transport.
+///
 /// The three message categories:
 ///   - SDP: offer/answer exchange (the session description)
 ///   - Candidate: trickle ICE candidates

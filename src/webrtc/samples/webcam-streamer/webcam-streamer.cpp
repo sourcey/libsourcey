@@ -1,34 +1,11 @@
-///
-//
-// icey
-// Copyright (c) 2005, icey <https://0state.com>
-//
+// icey — Copyright (c) 2005, icey <https://0state.com>
 // SPDX-License-Identifier: LGPL-2.1+
-//
-// Webcam Streamer
-//
-// Captures video from a camera (or test file), encodes to H.264,
-// and streams to a browser peer via WebRTC.
-//
-// Pipeline:
-//   MediaCapture → VideoPacketEncoder → WebRtcTrackSender → [browser]
-//
-// The browser connects via symple-player's CallManager,
-// which handles the call:init/accept/offer/answer/candidate protocol.
-//
-// Usage:
-//   webcam-streamer -host <symple-server> -port <port> -user <id>
-//
-// Set USE_CAMERA to 1 to stream from a camera, or leave at 0 to
-// stream from the bundled test file.
-//
-/// @addtogroup webrtc
-/// @{
-
+// Camera or test file → H.264 → WebRTC → browser.
+// Usage: webcam-streamer -host localhost -port 4500 -camera 1
 
 #include "icy/application.h"
 #include "icy/av/devicemanager.h"
-#include "icy/av/mediacapture.h"
+#include "icy/av/videocapture.h"
 #include "icy/av/videopacketencoder.h"
 #include "icy/logger.h"
 #include "icy/packetstream.h"
@@ -37,71 +14,74 @@
 #include "icy/webrtc/peersession.h"
 #include "icy/webrtc/support/symplesignaller.h"
 
-#include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
-
 
 using namespace icy;
 
-#define USE_CAMERA 0
-
-
 class WebcamStreamer
 {
-public:
     smpl::Client client;
-    std::unique_ptr<wrtc::SympleSignaller> signaller;
+    wrtc::SympleSignaller signaller;
     std::unique_ptr<wrtc::PeerSession> session;
-    std::shared_ptr<av::MediaCapture> capture;
+    av::VideoCapture capture;
     std::shared_ptr<av::VideoPacketEncoder> encoder;
-    PacketStream stream;
-    av::Device::VideoCapability videoCap;
-    wrtc::WebRtcTrackSender* videoSender = nullptr;
+    PacketStream stream{"webcam-stream"};
     bool pipelineReady = false;
 
-    WebcamStreamer(const smpl::Client::Options& opts)
-        : client(opts)
-        , stream("webcam-stream")
+public:
+    explicit WebcamStreamer(const smpl::Client::Options& opts)
+        : client(opts), signaller(client)
     {
     }
 
-    void start()
+    void start(bool useCamera)
     {
-        // Set up video capture.
-#if USE_CAMERA
-        // Use DeviceManager to find the best camera parameters
-        av::DeviceManager devman;
-        auto camResult = devman.negotiateVideoCapture("", 1280, 720, 30.0);
-
-        capture = std::make_shared<av::MediaCapture>();
-        if (camResult) {
-            auto& [camera, cap] = *camResult;
-            videoCap = cap;
-            std::cout << "Using camera: " << camera.name
-                      << " at " << cap.width << "x" << cap.height
-                      << " @ " << cap.maxFps << " fps" << '\n';
-            capture->openVideo(camera.id, cap.width, cap.height,
-                               cap.maxFps, cap.pixelFormat);
+        auto camera = useCamera
+            ? av::DeviceManager().negotiateVideoCapture("", 1280, 720, 30.0)
+            : std::nullopt;
+        if (camera) {
+            const auto& [device, cap] = *camera;
+            capture.openVideo(device.id, cap.width, cap.height, cap.maxFps, cap.pixelFormat);
         } else {
-            std::cerr << "No camera found, falling back to test file" << '\n';
-            capture->openFile(ICY_DATA_DIR "/test.mp4");
-            capture->setLoopInput(true);
-            capture->setLimitFramerate(true);
-            videoCap = {640, 480, 30, 30, "yuv420p"};
+            if (useCamera)
+                LWarn("No camera found, falling back to test file");
+            capture.openFile(ICY_DATA_DIR "/test.mp4");
+            capture.setLoopInput(true);
+            capture.setLimitFramerate(true);
         }
-#else
-        capture = std::make_shared<av::MediaCapture>();
-        capture->openFile(ICY_DATA_DIR "/test.mp4");
-        capture->setLoopInput(true);
-        capture->setLimitFramerate(true);
-        videoCap = {640, 480, 30, 30, "yuv420p"};
-#endif
 
-        client.Announce += slot(this, &WebcamStreamer::onAnnounce);
-        client.StateChange += slot(this, &WebcamStreamer::onStateChange);
-        client.CreatePresence += slot(this, &WebcamStreamer::onCreatePresence);
+        encoder = std::make_shared<av::VideoPacketEncoder>();
+        capture.getEncoderVideoCodec(encoder->iparams);
+        const auto& input = encoder->iparams;
+        encoder->oparams = wrtc::CodecNegotiator::resolveWebRtcVideoCodec(
+            av::VideoCodec("H264", "libx264", input.width, input.height, input.fps));
 
+        wrtc::PeerSession::Config config;
+        config.rtcConfig.iceServers.emplace_back("stun:stun.l.google.com:19302");
+        config.media.videoCodec = encoder->oparams;
+        config.media.videoDirection = rtc::Description::Direction::SendOnly;
+        config.enableDataChannel = false;
+        session = std::make_unique<wrtc::PeerSession>(signaller, config);
+        session->IncomingCall += [this](const std::string&) { session->accept(); };
+        session->StateChanged += [this](wrtc::PeerSession::State state) {
+            if (state == wrtc::PeerSession::State::Active)
+                startStreaming();
+            else if (state == wrtc::PeerSession::State::Ended)
+                stopStreaming();
+        };
+        client.Announce += [](const int& status) {
+            if (status != 200)
+                LError("Auth failed: ", status);
+        };
+        client.StateChange += [this](void*, smpl::ClientState& state, const smpl::ClientState&) {
+            if (state.id() == smpl::ClientState::Online) {
+                LInfo("Online as ", client.ourID());
+                client.joinRoom("public");
+            }
+        };
+        client.CreatePresence += [](smpl::Peer& peer) { peer["agent"] = "icey"; };
         client.start();
     }
 
@@ -109,127 +89,41 @@ public:
     {
         stopStreaming();
         stream.close();
-        if (session)
-            session->hangup("shutdown");
+        session->hangup("shutdown");
         session.reset();
-        encoder.reset();
-        capture.reset();
         client.stop();
     }
 
 private:
-    void createSession()
-    {
-        // Configure the video codec for WebRTC browser playback.
-        av::VideoCodec videoCodec = wrtc::CodecNegotiator::resolveWebRtcVideoCodec(
-            av::VideoCodec("H264", "libx264",
-                videoCap.width, videoCap.height, videoCap.maxFps));
-
-        wrtc::PeerSession::Config config;
-        config.rtcConfig.iceServers.emplace_back("stun:stun.l.google.com:19302");
-        config.media.videoCodec = videoCodec;
-        // Audio left empty - video only.
-        config.enableDataChannel = false;
-
-        signaller = std::make_unique<wrtc::SympleSignaller>(client);
-        session = std::make_unique<wrtc::PeerSession>(*signaller, config);
-
-        session->IncomingCall += [this](const std::string& peerId) {
-            std::cout << "Incoming call from " << peerId << '\n';
-            session->accept();
-        };
-
-        session->StateChanged += [this](wrtc::PeerSession::State state) {
-            std::cout << "Call state: " << wrtc::stateToString(state) << '\n';
-
-            if (state == wrtc::PeerSession::State::Active) {
-                // Connection established - start the pipeline.
-                startStreaming();
-            }
-            else if (state == wrtc::PeerSession::State::Ended) {
-                stopStreaming();
-            }
-        };
-
-        // Adaptive bitrate: adjust encoder when REMB arrives.
-        session->media().BitrateEstimate += [](unsigned int bps) {
-            std::cout << "REMB: " << bps / 1000 << " kbps" << '\n';
-        };
-
-        session->media().KeyframeRequested += []() {
-            std::cout << "PLI: keyframe requested" << '\n';
-        };
-    }
-
     void startStreaming()
     {
-        if (!session || !session->media().hasVideo())
+        if (!session->media().hasVideo())
             return;
-
         if (!pipelineReady) {
-            encoder = std::make_shared<av::VideoPacketEncoder>();
-
-            // Input params: the decoded format from the capture source
-            capture->getEncoderVideoCodec(encoder->iparams);
-
-            // Output params: H.264 for WebRTC with browser-safe settings
-            encoder->oparams = wrtc::CodecNegotiator::resolveWebRtcVideoCodec(
-                av::VideoCodec("H264", "libx264",
-                    videoCap.width, videoCap.height, videoCap.maxFps));
-
-            videoSender = &session->media().videoSender();
-
-            // Pipeline: capture → encoder → WebRTC sender
-            stream.attachSource(capture.get(), false, true);
+            stream.attachSource(&capture, false, true);
             stream.attach(encoder, 1, true);
-            stream.attach(videoSender, 5, false);
+            stream.attach(&session->media().videoSender(), 5, false);
             pipelineReady = true;
         }
-
         stream.start();
-
-        capture->start();
-        std::cout << "Streaming started" << '\n';
     }
 
     void stopStreaming()
     {
-        if (capture)
-            capture->stop();
+        // Join capture before stream teardown takes the processing lock.
+        capture.stop();
         stream.stop();
-    }
-
-    void onAnnounce(const int& status)
-    {
-        if (status != 200)
-            std::cerr << "Auth failed: " << status << '\n';
-    }
-
-    void onStateChange(void*, smpl::ClientState& state, const smpl::ClientState&)
-    {
-        std::cout << "Client: " << state.toString() << '\n';
-        if (state.id() == smpl::ClientState::Online) {
-            std::cout << "Online as " << client.ourID() << '\n';
-            client.joinRoom("public");
-            createSession();
-        }
-    }
-
-    void onCreatePresence(smpl::Peer& peer)
-    {
-        peer["agent"] = "icey";
-        peer["type"] = "streamer";
     }
 };
 
-
 int main(int argc, char** argv)
 {
-    Logger::instance().add(std::make_unique<ConsoleChannel>("debug", Level::Debug));
-
+    Logger::instance().add(std::make_unique<ConsoleChannel>("console", Level::Info));
     smpl::Client::Options opts;
-    opts.host = "127.0.0.1";
-    opts.port = 4500;
+    opts.user = "webcam-streamer";
+    opts.name = "Webcam Streamer";
+    opts.type = "streamer";
+    bool useCamera = false;
 
     for (int i = 1; i + 1 < argc; i += 2) {
         std::string key = argv[i];
@@ -239,22 +133,13 @@ int main(int argc, char** argv)
         else if (key == "-token") opts.token = val;
         else if (key == "-user") opts.user = val;
         else if (key == "-name") opts.name = val;
-    }
-
-    if (opts.user.empty()) {
-        opts.user = "webcam-streamer";
-        opts.name = "Webcam Streamer";
+        else if (key == "-camera") useCamera = val == "1";
     }
 
     WebcamStreamer app(opts);
-    app.start();
-
+    app.start(useCamera);
     waitForShutdown([](void* opaque) {
-        reinterpret_cast<WebcamStreamer*>(opaque)->shutdown();
+        static_cast<WebcamStreamer*>(opaque)->shutdown();
     }, &app);
-
-    Logger::destroy();
     return 0;
 }
-
-/// @}

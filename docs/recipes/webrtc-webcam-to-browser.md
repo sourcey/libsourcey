@@ -27,9 +27,9 @@ The current `webcam-streamer` sample does this:
 
 :::steps
 
-1. Connect the Symple client and join a room
+1. Open the input and configure the encoder and `PeerSession`
 
-2. Create a `SympleSignaller` and `PeerSession`
+2. Connect the Symple client and join a room
 
 3. Auto-accept incoming calls
 
@@ -67,7 +67,7 @@ Then the media side:
 
 ```cpp
 PacketStream stream;
-stream.attachSource(capture.get(), false, true);
+stream.attachSource(&capture, false, true);
 stream.attach(encoder, 1, true);
 stream.attach(&session.media().videoSender(), 5, false);
 ```
@@ -91,6 +91,8 @@ The sample can use:
 
 - a real camera
 - or the bundled test file
+
+The bundled test file is the default. Add `-camera 1` to select a camera at runtime; if none is found, the sample falls back to the file. The encoder uses the opened source's dimensions and frame rate.
 
 That makes it useful both for real demos and for deterministic local bring-up when you do not want device negotiation in the loop.
 
