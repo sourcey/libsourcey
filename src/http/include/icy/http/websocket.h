@@ -118,6 +118,7 @@ enum class CloseState : uint8_t
 };
 
 
+/// A WebSocket error, carrying its error code and, where one applies, the close status code.
 class HTTP_API WebSocketException : public std::runtime_error
 {
 public:

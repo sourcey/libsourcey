@@ -20,9 +20,13 @@
 
 
 namespace icy {
+/// Video analysis for decoded frames: sampling, normalising and detecting, with
+/// results reported as vision events.
 namespace vision {
 
 
+/// The frame a result refers to: its source and stream, frame ID, timing, size,
+/// pixel format and whether it is a keyframe.
 struct Vision_API VisionFrameContext
 {
     std::string sourceId;
@@ -40,6 +44,7 @@ struct Vision_API VisionFrameContext
 using FrameRef = VisionFrameContext;
 
 
+/// A rectangle within a frame, in coordinates normalised from 0 to 1.
 struct Vision_API Region
 {
     float x = 0.0f;
@@ -49,6 +54,8 @@ struct Vision_API Region
 };
 
 
+/// Something a detector found in one frame: its label, confidence and region, and
+/// the track it belongs to when one is known.
 struct Vision_API Detection
 {
     std::string label;
@@ -59,6 +66,7 @@ struct Vision_API Detection
 };
 
 
+/// An object followed across frames: its track ID, label, confidence and region.
 struct Vision_API Track
 {
     int64_t trackId = -1;

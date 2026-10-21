@@ -27,6 +27,8 @@ struct PlanarVideoPacket;
 namespace vision {
 
 
+/// A detector's report on one frame, with its detections and tracks, in the
+/// vision.event.v1 schema.
 struct Vision_API VisionEvent
 {
     std::string schema = "vision.event.v1";

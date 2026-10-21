@@ -10,6 +10,8 @@ namespace icy {
 namespace smpl {
 
 
+/// The client's private state: its options, loop, WebSocket connection, roster,
+/// rooms and reconnect timer.
 struct Client::ClientData
 {
     explicit ClientData(Options opts, uv::Loop* targetLoop)

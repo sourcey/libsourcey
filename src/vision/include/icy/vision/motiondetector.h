@@ -25,6 +25,9 @@ namespace icy {
 namespace vision {
 
 
+/// Settings for a MotionDetector: the grid each frame is reduced to, the frames it
+/// learns from before reporting, the change that counts as motion, and the least
+/// time between events.
 struct Vision_API MotionDetectorConfig
 {
     std::string source;
@@ -38,6 +41,7 @@ struct Vision_API MotionDetectorConfig
 };
 
 
+/// Counts of frames seen and events emitted, and the last motion score.
 struct Vision_API MotionDetectorStats
 {
     uint64_t seen = 0;
@@ -46,6 +50,8 @@ struct Vision_API MotionDetectorStats
 };
 
 
+/// Detects motion by comparing each frame with the previous one on a coarse grid,
+/// and emits a detect event when the change reaches the threshold.
 class Vision_API MotionDetector : public Detector
 {
 public:

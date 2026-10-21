@@ -26,6 +26,8 @@ namespace icy {
 namespace vision {
 
 
+/// The frames a FrameNormalizer produces: their source and stream IDs, size and pixel
+/// format. A zero size or empty format keeps the decoded frame's own.
 struct Vision_API FrameNormalizerConfig
 {
     std::string sourceId;
@@ -36,6 +38,7 @@ struct Vision_API FrameNormalizerConfig
 };
 
 
+/// Counts of frames seen, emitted, dropped and converted.
 struct Vision_API FrameNormalizerStats
 {
     uint64_t seen = 0;

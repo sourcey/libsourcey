@@ -16,6 +16,8 @@ namespace icy {
 namespace smpl {
 
 
+/// A peer added with addVirtualPeer: present in its rooms like any peer, with
+/// messages delivered to its handler instead of a WebSocket connection.
 struct Server::VirtualPeer
 {
     Peer peer;
@@ -24,6 +26,7 @@ struct Server::VirtualPeer
 };
 
 
+/// The server's connected and virtual peers, found by peer ID or by connection.
 class Server::PeerRegistry
 {
 public:
@@ -55,6 +58,7 @@ private:
 };
 
 
+/// Room membership by peer ID, and the recipients of a message sent to a set of rooms.
 class Server::RoomIndex
 {
 public:
@@ -75,6 +79,8 @@ private:
 };
 
 
+/// Who may message whom: a direct message needs a room the sender and recipient
+/// share, and a room broadcast needs the sender to be in that room.
 struct Server::RoutingPolicy
 {
     [[nodiscard]] static bool sharesAnyRoom(const std::unordered_set<std::string>& a,

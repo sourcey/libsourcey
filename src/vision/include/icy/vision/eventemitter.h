@@ -26,6 +26,7 @@ struct VisionEvent;
 using VisionEventSignal = Signal<void(const VisionEvent&)>;
 
 
+/// Emits vision events to the listeners on its Event signal.
 class Vision_API VisionEventEmitter
 {
 public:

@@ -151,11 +151,15 @@ public:
     [[nodiscard]] std::shared_ptr<rtc::DataChannel> dataChannel();
 
 private:
+    /// Shared with queued callbacks, so one that runs after the session is destroyed
+    /// does nothing.
     struct CallbackGuard
     {
         std::atomic<bool> alive{true};
     };
 
+    /// A remote ICE candidate that arrived before the remote description, applied once
+    /// that description is set.
     struct PendingCandidate
     {
         std::string candidate;

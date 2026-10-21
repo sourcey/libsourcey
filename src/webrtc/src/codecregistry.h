@@ -23,6 +23,8 @@ namespace icy {
 namespace wrtc::codec_registry {
 
 
+/// A codec the registry knows: its RTP codec spec and, in FFmpeg builds, the decoder
+/// that reads it.
 struct Entry
 {
     CodecSpec spec;

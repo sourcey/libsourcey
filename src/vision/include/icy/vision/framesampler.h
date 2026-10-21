@@ -25,6 +25,8 @@ namespace icy {
 namespace vision {
 
 
+/// Which frames a FrameSampler forwards: every Nth frame, and no two closer together
+/// than the minimum interval.
 struct Vision_API FrameSamplerConfig
 {
     uint32_t everyNthFrame = 1;
@@ -32,6 +34,7 @@ struct Vision_API FrameSamplerConfig
 };
 
 
+/// Counts of frames seen, forwarded and dropped.
 struct Vision_API FrameSamplerStats
 {
     uint64_t seen = 0;

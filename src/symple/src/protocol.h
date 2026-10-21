@@ -14,6 +14,8 @@ namespace icy {
 namespace smpl::proto {
 
 
+/// The server's welcome on connect: its status and message, the client's own peer
+/// record and the rooms it is in.
 struct Welcome
 {
     int status = 200;

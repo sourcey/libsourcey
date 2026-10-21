@@ -66,6 +66,8 @@ public:
     [[nodiscard]] const std::string& remoteAddress() const { return _remoteAddress; }
 
 private:
+    /// A message sent from another thread, queued with its peer address and sent on
+    /// the server's loop.
     struct OutboundMessage
     {
         std::string peerAddress;

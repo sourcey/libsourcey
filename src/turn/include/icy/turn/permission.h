@@ -36,6 +36,8 @@ static constexpr int PERMISSION_LIFETIME = 5 * 60 * 1000;
 /// via a new CreatePermission request before they expire.
 struct Permission
 {
+    /// The peer IP address a permission covers, as its address family and raw bytes.
+    /// A permission ignores the port.
     struct Key
     {
         int af = AF_UNSPEC;

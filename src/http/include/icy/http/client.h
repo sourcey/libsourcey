@@ -126,6 +126,7 @@ protected:
     bool onSocketConnect(net::Socket& socket) override;
 
 protected:
+    /// Data written before the socket connects, kept with its write flags and sent on connect.
     struct PendingWrite
     {
         Buffer data;

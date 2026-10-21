@@ -29,6 +29,8 @@ enum class Kind
 };
 
 
+/// A call signalling message read from a Symple message: its kind, peer address and
+/// action, with the SDP, ICE candidate or control reason it carries.
 struct ParsedMessage
 {
     Kind kind = Kind::Control;

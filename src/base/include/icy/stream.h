@@ -33,6 +33,7 @@ public:
     using Handle = uv::Handle<T>;
 
 protected:
+    /// A libuv write request that owns the bytes it writes until the write completes.
     struct OwnedWriteReq
     {
         uv_write_t req{};

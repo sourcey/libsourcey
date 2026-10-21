@@ -25,6 +25,9 @@ namespace icy {
 namespace speech {
 
 
+/// Settings for a VoiceActivityDetector: the source it reports for, the levels that
+/// start and stop speech, how long silence lasts before speech ends, and how often
+/// it reports while speech continues.
 struct Speech_API VoiceActivityDetectorConfig
 {
     std::string source;
@@ -37,6 +40,8 @@ struct Speech_API VoiceActivityDetectorConfig
 };
 
 
+/// Counts of packets seen and events emitted, whether speech is active, and the last
+/// measured levels.
 struct Speech_API VoiceActivityDetectorStats
 {
     uint64_t seen = 0;
@@ -47,9 +52,12 @@ struct Speech_API VoiceActivityDetectorStats
 };
 
 
+/// Detects speech in decoded audio by its energy and emits speech:start,
+/// speech:update and speech:end events.
 class Speech_API VoiceActivityDetector
 {
 public:
+    /// The mean absolute level and the peak measured from one packet.
     struct Levels
     {
         float level = 0.0f;

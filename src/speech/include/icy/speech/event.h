@@ -22,9 +22,11 @@
 
 
 namespace icy {
+/// Voice activity detection over decoded audio, reported as speech events.
 namespace speech {
 
 
+/// The audio packet an event refers to: its sequence, timing and sample format.
 struct Speech_API AudioRef
 {
     uint64_t sequence = 0;
@@ -37,6 +39,8 @@ struct Speech_API AudioRef
 };
 
 
+/// A speech:start, speech:update or speech:end event, with the source, detector,
+/// audio and signal levels that produced it.
 struct Speech_API SpeechEvent
 {
     std::string type = "speech:update";

@@ -55,6 +55,8 @@ public:
 class HTTP_API Parser
 {
 public:
+    /// The outcome of one parse call: the bytes consumed, whether a message completed
+    /// or upgraded the connection, and any error.
     struct ParseResult
     {
         size_t bytesConsumed = 0;
@@ -135,6 +137,8 @@ public:
     [[nodiscard]] ParserObserver* observer() const;
 
 protected:
+    /// The start line and headers of the message being parsed, applied to the request
+    /// or response once its headers are complete.
     struct MessageScratch
     {
         std::string version;
