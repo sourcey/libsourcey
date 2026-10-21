@@ -33,7 +33,9 @@ function collectFiles(dir, predicate, out = []) {
 }
 
 const apiDir = join(distDir, "api-reference");
-const searchPath = join(distDir, "search-index.json");
+const searchDir = join(distDir, "_search");
+// Search is sharded: each context's manifest names the file that holds its entries.
+const searchContexts = collectFiles(searchDir, (_full, name) => /^context-.+\.json$/.test(name));
 const apiPages = collectFiles(apiDir, (_full, name) => name.endsWith(".html"));
 
 if (apiPages.length < 400) {
@@ -47,10 +49,12 @@ for (const file of apiPages) {
   }
 }
 
-if (!existsSync(searchPath)) {
-  fail("Missing dist/search-index.json");
+if (!searchContexts.length) {
+  fail("Missing dist/_search search contexts");
 } else {
-  const entries = JSON.parse(readText(searchPath));
+  const entries = searchContexts.flatMap((context) =>
+    JSON.parse(readText(join(searchDir, JSON.parse(readText(context)).index))).rows
+  );
   if (entries.length < 7500) {
     fail(`Expected at least 7500 search entries, found ${entries.length}`);
   }

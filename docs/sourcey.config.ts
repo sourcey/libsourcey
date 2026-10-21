@@ -5,7 +5,7 @@ export default defineConfig({
   siteUrl: "https://0state.com",
   baseUrl: "/icey/docs",
   prettyUrls: "strip",
-  logo: "./icey.png",
+  logo: { light: "./icey.png", mark: true },
   repo: "https://github.com/nilstate/icey",
   editBranch: "main",
   editBasePath: "docs",
