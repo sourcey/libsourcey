@@ -34,8 +34,26 @@ function collectFiles(dir, predicate, out = []) {
 
 const apiDir = join(distDir, "api-reference");
 const searchDir = join(distDir, "_search");
-// Search is sharded: each context's manifest names the file that holds its entries.
+// Search is published per language and version. Each context's entry names the directory of its
+// result fragments, eight results each, written as [title, address, category, tab, method, path,
+// qualified name, owner], the category and tab by their place in the entry's lists. An address
+// that starts with "#" is on the page of the result before it in its fragment.
 const searchContexts = collectFiles(searchDir, (_full, name) => /^context-.+\.json$/.test(name));
+const fragmentNumber = (file) => Number(file.match(/f(\d+)\.json$/)[1]);
+
+function searchRows(contextFile) {
+  const entry = JSON.parse(readText(contextFile));
+  const fragments = collectFiles(join(searchDir, entry.files), (_full, name) => /^f\d+\.json$/.test(name))
+    .sort((a, b) => fragmentNumber(a) - fragmentNumber(b));
+  return fragments.flatMap((file) => {
+    let page = "";
+    return JSON.parse(readText(file)).map(([title, url, category, tab, method, path, qualifiedName, owner]) => {
+      const address = url.startsWith("#") ? `${page}${url}` : url;
+      page = address.split("#")[0];
+      return { title, url: address, category: entry.categories[category], tab: entry.tabs[tab], method, path, qualifiedName, owner };
+    });
+  });
+}
 const apiPages = collectFiles(apiDir, (_full, name) => name.endsWith(".html"));
 
 if (apiPages.length < 400) {
@@ -52,9 +70,7 @@ for (const file of apiPages) {
 if (!searchContexts.length) {
   fail("Missing dist/_search search contexts");
 } else {
-  const entries = searchContexts.flatMap((context) =>
-    JSON.parse(readText(join(searchDir, JSON.parse(readText(context)).index))).rows
-  );
+  const entries = searchContexts.flatMap(searchRows);
   if (entries.length < 7500) {
     fail(`Expected at least 7500 search entries, found ${entries.length}`);
   }
@@ -75,7 +91,7 @@ if (!searchContexts.length) {
     fail("requireSymbol search hit resolves as a page, not a member");
   }
 
-  const exactMember = entries.find((entry) => entry.qualifiedName && entry.symbolKind && entry.url?.includes("#"));
+  const exactMember = entries.find((entry) => entry.qualifiedName && entry.url?.includes("#"));
   if (!exactMember) {
     fail("Search index has no qualified member metadata");
   }
